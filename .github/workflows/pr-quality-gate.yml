@@ -1,0 +1,308 @@
+name: PR Quality Gate
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: quality-gate-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  complexity-check:
+    name: Code Complexity Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run complexity lint
+        run: |
+          echo "Running ESLint complexity rules..."
+          pnpm exec eslint --config .eslintrc.complexity.cjs \
+            --format stylish \
+            --max-warnings 0 \
+            'server/src/**/*.ts' \
+            'client/src/**/*.{ts,tsx}' \
+            'packages/**/src/**/*.ts' || {
+              echo "::error::Code complexity thresholds exceeded. Please refactor complex code."
+              exit 1
+            }
+
+      - name: Check for TODO/FIXME count
+        run: |
+          TODO_COUNT=$(grep -rn "TODO\|FIXME\|XXX\|HACK" --include="*.ts" --include="*.tsx" server/ client/ packages/ 2>/dev/null | wc -l || echo "0")
+          echo "Found $TODO_COUNT TODO/FIXME comments"
+          if [ "$TODO_COUNT" -gt 200 ]; then
+            echo "::warning::High number of TODO/FIXME comments ($TODO_COUNT). Consider addressing technical debt."
+          fi
+
+  coverage-gate:
+    name: Coverage Quality Gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: intelgraph_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup test environment
+        run: |
+          cp .env.example .env.test || true
+          echo "NODE_ENV=test" >> .env.test
+
+      - name: Run tests with coverage
+        run: pnpm run test:coverage
+        env:
+          NODE_ENV: test
+          CI: true
+
+      - name: Enforce coverage thresholds
+        run: |
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const coverage = require('./coverage/coverage-summary.json');
+              const total = coverage.total;
+              const thresholds = {
+                lines: 80,
+                statements: 80,
+                functions: 80,
+                branches: 80
+              };
+
+              const failed = [];
+
+              if (total.lines.pct < thresholds.lines)
+                failed.push('Lines: ' + total.lines.pct + '% < ' + thresholds.lines + '%');
+              if (total.statements.pct < thresholds.statements)
+                failed.push('Statements: ' + total.statements.pct + '% < ' + thresholds.statements + '%');
+              if (total.functions.pct < thresholds.functions)
+                failed.push('Functions: ' + total.functions.pct + '% < ' + thresholds.functions + '%');
+              if (total.branches.pct < thresholds.branches)
+                failed.push('Branches: ' + total.branches.pct + '% < ' + thresholds.branches + '%');
+
+              if (failed.length > 0) {
+                console.error('Coverage thresholds not met:');
+                failed.forEach(f => console.error('  - ' + f));
+                process.exit(1);
+              }
+
+              console.log('All coverage thresholds met!');
+              console.log('  Lines: ' + total.lines.pct + '%');
+              console.log('  Statements: ' + total.statements.pct + '%');
+              console.log('  Functions: ' + total.functions.pct + '%');
+              console.log('  Branches: ' + total.branches.pct + '%');
+            "
+          else
+            echo "Coverage summary not found"
+            exit 1
+          fi
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          fail_ci_if_error: true
+          verbose: true
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Check critical path coverage
+        run: |
+          echo "Checking critical path coverage (85% threshold)..."
+          if [ -f coverage/coverage-summary.json ]; then
+            node -e "
+              const fs = require('fs');
+              const coverage = require('./coverage/coverage-summary.json');
+
+              const criticalPaths = [
+                'server/src/middleware',
+                'server/src/services',
+                'server/src/graphql/resolvers'
+              ];
+
+              let criticalTotal = { lines: 0, covered: 0 };
+
+              for (const [file, data] of Object.entries(coverage)) {
+                if (file === 'total') continue;
+                const isCritical = criticalPaths.some(p => file.includes(p));
+                if (isCritical) {
+                  criticalTotal.lines += data.lines.total;
+                  criticalTotal.covered += data.lines.covered;
+                }
+              }
+
+              if (criticalTotal.lines > 0) {
+                const pct = ((criticalTotal.covered / criticalTotal.lines) * 100).toFixed(2);
+                console.log('Critical path coverage: ' + pct + '%');
+                if (pct < 85) {
+                  console.error('Critical paths require 85% coverage, currently at ' + pct + '%');
+                  // Warning only for now, will enforce after baseline established
+                  console.log('::warning::Critical path coverage below 85% threshold');
+                }
+              }
+            "
+          fi
+
+  pr-size-check:
+    name: PR Size Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check PR size
+        run: |
+          # Get diff stats
+          ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum+=$1} END {print sum}')
+          DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum+=$2} END {print sum}')
+          FILES_CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+
+          echo "PR Statistics:"
+          echo "  Files changed: $FILES_CHANGED"
+          echo "  Lines added: $ADDITIONS"
+          echo "  Lines deleted: $DELETIONS"
+
+          TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+          if [ "$TOTAL_CHANGES" -gt 1000 ]; then
+            echo "::warning::Large PR detected ($TOTAL_CHANGES lines changed). Consider breaking into smaller PRs."
+          fi
+
+          if [ "$FILES_CHANGED" -gt 50 ]; then
+            echo "::warning::Many files changed ($FILES_CHANGED). Consider breaking into smaller PRs."
+          fi
+
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run TypeScript check
+        run: pnpm run typecheck || pnpm exec tsc -b tsconfig.build.json --noEmit
