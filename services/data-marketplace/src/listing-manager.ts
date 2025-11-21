@@ -3,7 +3,28 @@
  */
 
 import crypto from 'crypto';
-import type { Listing } from './index.js';
+
+export interface Listing {
+  poolId: string;
+  sellerId: string;
+  price: {
+    amount: number;
+    currency: string;
+    model: 'per_query' | 'per_record' | 'subscription' | 'one_time';
+  };
+  terms: {
+    usageRights: string[];
+    restrictions?: string[];
+    attribution: boolean;
+    exclusivity?: boolean;
+  };
+  metadata: {
+    title: string;
+    description: string;
+    tags: string[];
+    sampleAvailable: boolean;
+  };
+}
 
 interface StoredListing extends Listing {
   id: string;
