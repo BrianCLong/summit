@@ -44,14 +44,21 @@
     "deploy:prod": "scripts/deploy.sh prod",
     "backup": "scripts/backup.sh",
     "lint": "turbo run lint --cache-dir=.turbo --continue",
+    "lint:fix": "eslint . --fix",
+    "lint:check": "eslint .",
     "lint:tests": "node scripts/guard-tests.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
+    "lint:py": "ruff check .",
+    "lint:py:fix": "ruff check --fix .",
     "typecheck": "tsc -b tsconfig.build.json",
     "typecheck:legacy": "turbo run typecheck --cache-dir=.turbo --continue",
     "typecheck:server": "cd server && tsc --noEmit",
     "typecheck:client": "cd client && tsc --noEmit",
-    "format": "prettier -w . && ruff format",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:py": "ruff format",
+    "format:py:check": "ruff format --check",
     "pr:risk": "node scripts/pr-risk-score.js",
     "db:migrate": "cd server && npm run db:migrate",
     "db:seed": "cd server && npm run db:seed",
@@ -88,6 +95,8 @@
     "extract": "npm run --workspace=packages/influence-mining extract --",
     "preinstall": "corepack enable || true",
     "build:all": "pnpm -w -r run build",
+    "style:check": "pnpm run format:check && pnpm run lint:check",
+    "style:fix": "pnpm run format && pnpm run lint:fix",
     "ci": "pnpm run lint && pnpm run typecheck && pnpm run test",
     "ci:prod-guard": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ci/prod-config-check.ts",
     "smoke": "node scripts/smoke-test.js",
@@ -190,18 +199,24 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier -w"
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
     ],
     "*.py": [
-      "ruff --fix",
-      "black"
+      "ruff check --fix",
+      "ruff format"
     ],
     "*.graphql": [
-      "graphql-schema-linter"
+      "prettier --write"
     ],
     "*.{md,css,scss,json,yml,yaml}": [
-      "prettier -w"
+      "prettier --write"
+    ],
+    "*.{html,xml}": [
+      "prettier --write"
+    ],
+    "package.json": [
+      "prettier --write"
     ]
   },
   "release": {
