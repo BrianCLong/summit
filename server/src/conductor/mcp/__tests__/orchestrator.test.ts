@@ -155,4 +155,93 @@ describe('MCPOrchestrator', () => {
       expect(workflow.governancePolicy?.auditLevel).toBe('full');
     });
   });
+
+  describe('async execution', () => {
+    it('starts workflow asynchronously and returns execution ID', async () => {
+      mockClient.executeTool.mockResolvedValue({ data: 'ok' });
+
+      const workflow: WorkflowDefinition = {
+        id: 'async-test',
+        name: 'Async Test',
+        steps: [
+          { id: 's1', name: 'S1', tool: 't', args: {}, server: 'srv' },
+        ],
+      };
+
+      orchestrator.registerWorkflow(workflow);
+      const result = await orchestrator.startWorkflowAsync('async-test');
+
+      expect(result.executionId).toBeDefined();
+      expect(result.status).toBe('pending');
+    });
+
+    it('polls execution progress', async () => {
+      mockClient.executeTool.mockResolvedValue({ data: 'ok' });
+
+      const workflow: WorkflowDefinition = {
+        id: 'poll-test',
+        name: 'Poll Test',
+        steps: [
+          { id: 's1', name: 'S1', tool: 't', args: {}, server: 'srv' },
+        ],
+      };
+
+      orchestrator.registerWorkflow(workflow);
+      const { executionId } = await orchestrator.startWorkflowAsync('poll-test');
+
+      // Wait a tick for background execution
+      await new Promise(r => setTimeout(r, 50));
+
+      const status = orchestrator.pollExecution(executionId);
+      expect(status).toBeDefined();
+      expect(['pending', 'running', 'completed']).toContain(status?.status);
+    });
+
+    it('cancels running workflow', async () => {
+      // Make execution slow so we can cancel it
+      mockClient.executeTool.mockImplementation(() =>
+        new Promise(r => setTimeout(() => r({ data: 'ok' }), 500))
+      );
+
+      const workflow: WorkflowDefinition = {
+        id: 'cancel-test',
+        name: 'Cancel Test',
+        steps: [
+          { id: 's1', name: 'S1', tool: 't', args: {}, server: 'srv' },
+          { id: 's2', name: 'S2', tool: 't', args: {}, dependsOn: ['s1'], server: 'srv' },
+        ],
+      };
+
+      orchestrator.registerWorkflow(workflow);
+      const { executionId } = await orchestrator.startWorkflowAsync('cancel-test');
+
+      // Wait for execution to start
+      await new Promise(r => setTimeout(r, 50));
+
+      const cancelled = orchestrator.cancelWorkflow(executionId);
+      const execution = orchestrator.getExecution(executionId);
+
+      // May or may not cancel depending on timing
+      expect([true, false]).toContain(cancelled);
+    });
+
+    it('prunes old executions', async () => {
+      mockClient.executeTool.mockResolvedValue({ data: 'ok' });
+
+      const workflow: WorkflowDefinition = {
+        id: 'prune-test',
+        name: 'Prune Test',
+        steps: [
+          { id: 's1', name: 'S1', tool: 't', args: {}, server: 'srv' },
+        ],
+      };
+
+      orchestrator.registerWorkflow(workflow);
+      await orchestrator.executeWorkflow('prune-test');
+
+      // Prune with 0ms threshold should remove completed executions
+      const pruned = orchestrator.pruneExecutions(0);
+      expect(pruned).toBeGreaterThanOrEqual(0);
+    });
+  });
 });

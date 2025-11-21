@@ -66,6 +66,53 @@ router.get('/executions/:id', (req: Request, res: Response) => {
   res.json(execution);
 });
 
+// POST /orchestrator/execute-async/:workflowId - Start async workflow
+router.post('/execute-async/:workflowId', async (req: Request, res: Response) => {
+  try {
+    const { workflowId } = req.params;
+    const { initialState = {}, scopes = [] } = req.body;
+
+    const result = await orchestrator.startWorkflowAsync(
+      workflowId,
+      initialState,
+      scopes,
+    );
+
+    res.status(202).json({
+      ...result,
+      pollUrl: `/orchestrator/executions/${result.executionId}/poll`,
+    });
+  } catch (error: any) {
+    logger.error('Async workflow start failed', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /orchestrator/executions/:id/poll - Poll execution progress
+router.get('/executions/:id/poll', (req: Request, res: Response) => {
+  const status = orchestrator.pollExecution(req.params.id);
+  if (!status) {
+    return res.status(404).json({ error: 'Execution not found' });
+  }
+  res.json(status);
+});
+
+// POST /orchestrator/executions/:id/cancel - Cancel running workflow
+router.post('/executions/:id/cancel', (req: Request, res: Response) => {
+  const cancelled = orchestrator.cancelWorkflow(req.params.id);
+  if (!cancelled) {
+    return res.status(400).json({ error: 'Cannot cancel - workflow not running' });
+  }
+  res.json({ success: true, message: 'Workflow cancelled' });
+});
+
+// DELETE /orchestrator/executions/prune - Clean up old executions
+router.delete('/executions/prune', (req: Request, res: Response) => {
+  const olderThanMs = parseInt(req.query.olderThanMs as string) || 3600000;
+  const pruned = orchestrator.pruneExecutions(olderThanMs);
+  res.json({ pruned });
+});
+
 // GET /orchestrator/recipes - List available recipe templates
 router.get('/recipes', (_req: Request, res: Response) => {
   res.json({

@@ -420,6 +420,135 @@ export class MCPOrchestrator extends EventEmitter {
   }
 
   // --------------------------------------------------------------------------
+  // Async Execution (Long-running workflows)
+  // --------------------------------------------------------------------------
+
+  /**
+   * Start workflow execution asynchronously - returns immediately with execution ID
+   */
+  async startWorkflowAsync(
+    workflowId: string,
+    initialState: Record<string, any> = {},
+    userScopes: string[] = [],
+  ): Promise<{ executionId: string; status: string }> {
+    const workflow = this.workflows.get(workflowId);
+    if (!workflow) {
+      throw new Error(`Workflow '${workflowId}' not found`);
+    }
+
+    const executionId = uuid();
+    const execution: WorkflowExecution = {
+      id: executionId,
+      workflowId,
+      status: 'pending',
+      context: this.createContext(workflowId, executionId, initialState),
+      stepResults: [],
+      startedAt: new Date(),
+    };
+
+    this.executions.set(executionId, execution);
+
+    // Execute in background (non-blocking)
+    setImmediate(() => {
+      this.runWorkflowBackground(executionId, workflow, userScopes).catch(err => {
+        logger.error(`Background workflow ${executionId} failed:`, err);
+      });
+    });
+
+    return { executionId, status: 'pending' };
+  }
+
+  private async runWorkflowBackground(
+    executionId: string,
+    workflow: WorkflowDefinition,
+    userScopes: string[],
+  ): Promise<void> {
+    const execution = this.executions.get(executionId);
+    if (!execution) return;
+
+    execution.status = 'running';
+    this.userScopes = userScopes;
+    this.emit('workflow:start', { executionId, workflowId: workflow.id });
+
+    try {
+      const orderedSteps = this.topologicalSort(workflow.steps);
+
+      for (const step of orderedSteps) {
+        if (workflow.budgetLimit && execution.context.metrics.totalCost >= workflow.budgetLimit) {
+          logger.warn(`Budget limit reached for workflow ${workflow.id}`);
+          execution.status = 'failed';
+          break;
+        }
+
+        const result = await this.executeStep(step, execution);
+        execution.stepResults.push(result);
+
+        if (result.status === 'failed' && workflow.onError === 'abort') {
+          execution.status = 'failed';
+          break;
+        }
+      }
+
+      if (execution.status === 'running') {
+        execution.status = 'completed';
+      }
+
+      execution.evaluation = this.evaluateExecution(execution);
+      execution.completedAt = new Date();
+      this.emit('workflow:complete', { executionId, status: execution.status });
+
+    } catch (error) {
+      execution.status = 'failed';
+      execution.completedAt = new Date();
+      this.emit('workflow:error', { executionId, error });
+    }
+  }
+
+  /**
+   * Cancel a running workflow
+   */
+  cancelWorkflow(executionId: string): boolean {
+    const execution = this.executions.get(executionId);
+    if (!execution || execution.status !== 'running') {
+      return false;
+    }
+    execution.status = 'cancelled';
+    execution.completedAt = new Date();
+    this.emit('workflow:cancelled', { executionId });
+    return true;
+  }
+
+  /**
+   * Poll execution status (for long-running workflows)
+   */
+  pollExecution(executionId: string): {
+    status: string;
+    progress: number;
+    completedSteps: number;
+    totalSteps: number;
+    currentStep?: string;
+  } | null {
+    const execution = this.executions.get(executionId);
+    if (!execution) return null;
+
+    const workflow = this.workflows.get(execution.workflowId);
+    const totalSteps = workflow?.steps.length || 0;
+    const completedSteps = execution.stepResults.length;
+    const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+
+    const inProgressStep = execution.stepResults.find(r => r.status === 'success');
+    const currentStep = inProgressStep?.stepId;
+
+    return {
+      status: execution.status,
+      progress: Math.round(progress),
+      completedSteps,
+      totalSteps,
+      currentStep,
+    };
+  }
+
+  // --------------------------------------------------------------------------
   // Query & Management
   // --------------------------------------------------------------------------
 
@@ -433,6 +562,21 @@ export class MCPOrchestrator extends EventEmitter {
 
   listWorkflows(): WorkflowDefinition[] {
     return Array.from(this.workflows.values());
+  }
+
+  /**
+   * Clean up old executions to prevent memory leaks
+   */
+  pruneExecutions(olderThanMs: number = 3600000): number {
+    const now = Date.now();
+    let pruned = 0;
+    for (const [id, exec] of this.executions.entries()) {
+      if (exec.completedAt && now - exec.completedAt.getTime() > olderThanMs) {
+        this.executions.delete(id);
+        pruned++;
+      }
+    }
+    return pruned;
   }
 }
 
