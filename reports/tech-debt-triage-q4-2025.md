@@ -179,5 +179,139 @@ This plan balances **immediate risk mitigation** (security), **strategic enablem
 
 ---
 
-_Report generated: November 20, 2025_
+## Operational Appendix: Runnable Commands
+
+### TD-003: Branch Cleanup Commands
+
+```bash
+# List all remote branches (sorted by last commit date)
+git for-each-ref --sort=-committerdate refs/remotes/origin --format='%(committerdate:short) %(refname:short)'
+
+# List merged branches (safe to delete)
+git branch -r --merged main | grep -v main | grep -v HEAD
+
+# List stale branches (no commits in 30+ days)
+git for-each-ref --sort=committerdate refs/remotes/origin \
+  --format='%(committerdate:relative) %(refname:short)' | grep -E "(months|weeks) ago"
+
+# Archive a branch before deletion (creates tag for recovery)
+# git tag archive/<branch-name> origin/<branch-name>
+# git push origin --delete <branch-name>
+```
+
+### TD-007: Security Audit Commands
+
+```bash
+# NPM/PNPM vulnerability audit
+pnpm audit --audit-level=critical
+pnpm audit --json > reports/audit-$(date +%Y%m%d).json
+
+# Trivy container scan
+trivy fs --severity CRITICAL,HIGH --format table .
+
+# Check for known vulnerable packages
+pnpm outdated --format json | jq '.[] | select(.current != .latest)'
+```
+
+### TD-002: Dependency Update Commands
+
+```bash
+# Update patch/minor versions only (safe)
+pnpm update --no-save --recursive
+
+# Interactive update with review
+pnpm update --interactive --recursive
+
+# Check what would change
+pnpm outdated
+```
+
+### TD-005: Test Coverage Commands
+
+```bash
+# Run tests with coverage (Jest)
+pnpm test -- --coverage --coverageReporters=lcov,text-summary
+
+# Generate combined coverage report
+pnpm exec nyc report --reporter=html --reporter=text-summary
+```
+
+### TD-009: SBOM Generation Commands
+
+```bash
+# Generate CycloneDX SBOM
+pnpm exec @cyclonedx/cyclonedx-npm --output-file sbom.json
+
+# Validate SBOM
+pnpm exec @cyclonedx/cyclonedx-npm --validate
+```
+
+---
+
+## Execution Checklist
+
+### Sprint 1 Checklist (TD-007 + TD-002 + TD-003)
+
+- [ ] **Security Audit (TD-007)**
+  - [ ] Run `pnpm audit` and export report
+  - [ ] Run Trivy scan on codebase
+  - [ ] Triage: Critical (fix immediately), High (fix this sprint), Medium/Low (backlog)
+  - [ ] Create issues for each critical/high vulnerability
+  - [ ] Remediate critical vulnerabilities
+  - [ ] Re-run audit to verify zero criticals
+
+- [ ] **Dependency Updates (TD-002)**
+  - [ ] Run `pnpm outdated` to identify update candidates
+  - [ ] Update patch versions first (`pnpm update --recursive`)
+  - [ ] Run full test suite to validate
+  - [ ] Update minor versions in batches
+  - [ ] Validate each batch with tests
+  - [ ] Commit updates with clear changelog
+
+- [ ] **Branch Cleanup (TD-003)**
+  - [ ] Export current branch inventory
+  - [ ] Identify merged branches (safe to delete)
+  - [ ] Identify stale branches (>30 days inactive)
+  - [ ] Notify team of planned deletions
+  - [ ] Archive branches to tags before deletion
+  - [ ] Delete stale remote branches
+  - [ ] Document branch lifecycle policy
+
+### Sprint 2 Checklist (TD-005 + TD-009 + TD-008)
+
+- [ ] **Test Standardization (TD-005)**
+  - [ ] Audit existing test configurations
+  - [ ] Create unified Jest config (jest.config.base.js)
+  - [ ] Set up coverage thresholds (80% minimum)
+  - [ ] Integrate coverage reporting in CI
+  - [ ] Add coverage badge to README
+  - [ ] Document testing standards
+
+- [ ] **SBOM/Supply Chain (TD-009)**
+  - [ ] Add CycloneDX to dependencies
+  - [ ] Create SBOM generation script
+  - [ ] Add SBOM generation to CI pipeline
+  - [ ] Set up container signing (cosign)
+  - [ ] Document supply chain security process
+
+- [ ] **Monorepo Documentation (TD-008)**
+  - [ ] Document service boundaries
+  - [ ] Create architecture diagram
+  - [ ] Add service mapping to README
+  - [ ] Document build/deploy workflows
+
+---
+
+## Validation Gates
+
+| Milestone | Success Criteria | Validation Command |
+|---|---|---|
+| Security Clear | 0 critical vulns | `pnpm audit --audit-level=critical` returns 0 |
+| Coverage Baseline | >80% coverage | `pnpm test --coverage` shows >80% |
+| Branch Hygiene | <30 branches | `git branch -r \| wc -l` returns <30 |
+| SBOM Generated | Valid CycloneDX | `sbom.json` exists and validates |
+
+---
+
+_Report generated: November 21, 2025_
 _Next review: Post-Sprint 4 (Dec 2025)_
