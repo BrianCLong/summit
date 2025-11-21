@@ -1,0 +1,17 @@
+{
+  "name": "@intelgraph/attack-simulation",
+  "version": "1.0.0",
+  "description": "Network attack simulation and security testing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}
