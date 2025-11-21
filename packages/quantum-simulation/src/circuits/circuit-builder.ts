@@ -6,64 +6,99 @@
 import { QuantumCircuit, QuantumGate, GateType } from '../types';
 
 export class CircuitBuilder {
-  private circuit: QuantumCircuit;
+  private _circuit: QuantumCircuit;
 
   constructor(numQubits: number) {
-    this.circuit = {
+    this._circuit = {
       numQubits,
       gates: [],
     };
   }
 
+  /** Get the underlying circuit (read-only access for advanced use cases) */
+  get circuit(): QuantumCircuit {
+    return this._circuit;
+  }
+
+  /** Get number of qubits in the circuit */
+  get numQubits(): number {
+    return this._circuit.numQubits;
+  }
+
+  /** Get current gate count */
+  get gateCount(): number {
+    return this._circuit.gates.length;
+  }
+
+  /** Add a gate directly to the circuit */
+  addGate(gate: QuantumGate): this {
+    this._circuit.gates.push(gate);
+    return this;
+  }
+
   // Single-qubit gates
   x(qubit: number): this {
-    this.circuit.gates.push({ type: GateType.PAULI_X, qubits: [qubit] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.PAULI_X, qubits: [qubit] });
     return this;
   }
 
   y(qubit: number): this {
-    this.circuit.gates.push({ type: GateType.PAULI_Y, qubits: [qubit] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.PAULI_Y, qubits: [qubit] });
     return this;
   }
 
   z(qubit: number): this {
-    this.circuit.gates.push({ type: GateType.PAULI_Z, qubits: [qubit] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.PAULI_Z, qubits: [qubit] });
     return this;
   }
 
   h(qubit: number): this {
-    this.circuit.gates.push({ type: GateType.HADAMARD, qubits: [qubit] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.HADAMARD, qubits: [qubit] });
     return this;
   }
 
   s(qubit: number): this {
-    this.circuit.gates.push({ type: GateType.PHASE, qubits: [qubit] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.PHASE, qubits: [qubit] });
     return this;
   }
 
   t(qubit: number): this {
-    this.circuit.gates.push({ type: GateType.T_GATE, qubits: [qubit] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.T_GATE, qubits: [qubit] });
     return this;
   }
 
   rx(qubit: number, theta: number): this {
-    this.circuit.gates.push({ type: GateType.RX, qubits: [qubit], parameters: [theta] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.RX, qubits: [qubit], parameters: [theta] });
     return this;
   }
 
   ry(qubit: number, theta: number): this {
-    this.circuit.gates.push({ type: GateType.RY, qubits: [qubit], parameters: [theta] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.RY, qubits: [qubit], parameters: [theta] });
     return this;
   }
 
   rz(qubit: number, theta: number): this {
-    this.circuit.gates.push({ type: GateType.RZ, qubits: [qubit], parameters: [theta] });
+    this.validateQubit(qubit);
+    this._circuit.gates.push({ type: GateType.RZ, qubits: [qubit], parameters: [theta] });
     return this;
   }
 
   // Two-qubit gates
   cnot(control: number, target: number): this {
-    this.circuit.gates.push({ type: GateType.CNOT, qubits: [control, target] });
+    this.validateQubit(control);
+    this.validateQubit(target);
+    if (control === target) {
+      throw new Error('Control and target qubits must be different');
+    }
+    this._circuit.gates.push({ type: GateType.CNOT, qubits: [control, target] });
     return this;
   }
 
@@ -72,24 +107,44 @@ export class CircuitBuilder {
   }
 
   cz(control: number, target: number): this {
-    this.circuit.gates.push({ type: GateType.CZ, qubits: [control, target] });
+    this.validateQubit(control);
+    this.validateQubit(target);
+    if (control === target) {
+      throw new Error('Control and target qubits must be different');
+    }
+    this._circuit.gates.push({ type: GateType.CZ, qubits: [control, target] });
     return this;
   }
 
   swap(qubit1: number, qubit2: number): this {
-    this.circuit.gates.push({ type: GateType.SWAP, qubits: [qubit1, qubit2] });
+    this.validateQubit(qubit1);
+    this.validateQubit(qubit2);
+    if (qubit1 === qubit2) {
+      throw new Error('Cannot swap a qubit with itself');
+    }
+    this._circuit.gates.push({ type: GateType.SWAP, qubits: [qubit1, qubit2] });
     return this;
   }
 
   // Measurements
   measure(qubits?: number[]): this {
-    this.circuit.measurements = qubits || Array.from({ length: this.circuit.numQubits }, (_, i) => i);
+    if (qubits) {
+      qubits.forEach(q => this.validateQubit(q));
+    }
+    this._circuit.measurements = qubits || Array.from({ length: this._circuit.numQubits }, (_, i) => i);
     return this;
   }
 
   // Build final circuit
   build(): QuantumCircuit {
-    return this.circuit;
+    return { ...this._circuit, gates: [...this._circuit.gates] };
+  }
+
+  // Validation helper
+  private validateQubit(qubit: number): void {
+    if (qubit < 0 || qubit >= this._circuit.numQubits) {
+      throw new Error(`Qubit index ${qubit} out of range [0, ${this._circuit.numQubits - 1}]`);
+    }
   }
 
   // Helper methods
@@ -100,7 +155,7 @@ export class CircuitBuilder {
 
   // Apply gate to all qubits
   applyToAll(gate: 'x' | 'y' | 'z' | 'h' | 's' | 't'): this {
-    for (let i = 0; i < this.circuit.numQubits; i++) {
+    for (let i = 0; i < this._circuit.numQubits; i++) {
       this[gate](i);
     }
     return this;

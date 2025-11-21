@@ -3,7 +3,68 @@
  * Implements quantum feature maps and kernel estimation
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@summit/quantum-simulation';
+// Types for quantum simulation
+export interface QuantumGate {
+  type: string;
+  qubits: number[];
+  parameters?: number[];
+}
+
+export interface QuantumCircuit {
+  numQubits: number;
+  gates: QuantumGate[];
+  measurements?: number[];
+}
+
+export interface Complex {
+  real: number;
+  imag: number;
+}
+
+export interface QuantumSimulator {
+  simulate(circuit: QuantumCircuit, shots?: number): Promise<{ counts: Record<string, number> }>;
+  getStatevector(circuit: QuantumCircuit): Promise<Complex[]>;
+}
+
+// Simple circuit builder for kernel computation
+class CircuitBuilder {
+  private _circuit: QuantumCircuit;
+
+  constructor(numQubits: number) {
+    this._circuit = { numQubits, gates: [] };
+  }
+
+  applyToAll(gate: 'h'): this {
+    for (let i = 0; i < this._circuit.numQubits; i++) {
+      this.h(i);
+    }
+    return this;
+  }
+
+  h(qubit: number): this {
+    this._circuit.gates.push({ type: 'H', qubits: [qubit] });
+    return this;
+  }
+
+  rx(qubit: number, theta: number): this {
+    this._circuit.gates.push({ type: 'RX', qubits: [qubit], parameters: [theta] });
+    return this;
+  }
+
+  rz(qubit: number, theta: number): this {
+    this._circuit.gates.push({ type: 'RZ', qubits: [qubit], parameters: [theta] });
+    return this;
+  }
+
+  cnot(control: number, target: number): this {
+    this._circuit.gates.push({ type: 'CNOT', qubits: [control, target] });
+    return this;
+  }
+
+  build(): QuantumCircuit {
+    return { ...this._circuit, gates: [...this._circuit.gates] };
+  }
+}
 
 export interface QuantumKernelParams {
   numQubits: number;

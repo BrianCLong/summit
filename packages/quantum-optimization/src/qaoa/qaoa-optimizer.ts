@@ -3,8 +3,80 @@
  * Solves combinatorial optimization problems using quantum circuits
  */
 
-import { QuantumCircuit, QuantumSimulator } from '@summit/quantum-simulation';
-import { CircuitBuilder } from '@summit/quantum-simulation';
+// Types for quantum simulation
+export interface QuantumGate {
+  type: string;
+  qubits: number[];
+  parameters?: number[];
+}
+
+export interface QuantumCircuit {
+  numQubits: number;
+  gates: QuantumGate[];
+  measurements?: number[];
+}
+
+export interface SimulationResult {
+  counts: Record<string, number>;
+  statevector?: unknown;
+  executionTime: number;
+  shots: number;
+}
+
+export interface QuantumSimulator {
+  simulate(circuit: QuantumCircuit, shots?: number): Promise<SimulationResult>;
+  getStatevector(circuit: QuantumCircuit): Promise<unknown>;
+}
+
+// Simple circuit builder for QAOA use
+class CircuitBuilder {
+  private _circuit: QuantumCircuit;
+
+  constructor(numQubits: number) {
+    this._circuit = { numQubits, gates: [] };
+  }
+
+  applyToAll(gate: 'h'): this {
+    for (let i = 0; i < this._circuit.numQubits; i++) {
+      this.h(i);
+    }
+    return this;
+  }
+
+  h(qubit: number): this {
+    this._circuit.gates.push({ type: 'H', qubits: [qubit] });
+    return this;
+  }
+
+  rx(qubit: number, theta: number): this {
+    this._circuit.gates.push({ type: 'RX', qubits: [qubit], parameters: [theta] });
+    return this;
+  }
+
+  ry(qubit: number, theta: number): this {
+    this._circuit.gates.push({ type: 'RY', qubits: [qubit], parameters: [theta] });
+    return this;
+  }
+
+  rz(qubit: number, theta: number): this {
+    this._circuit.gates.push({ type: 'RZ', qubits: [qubit], parameters: [theta] });
+    return this;
+  }
+
+  cnot(control: number, target: number): this {
+    this._circuit.gates.push({ type: 'CNOT', qubits: [control, target] });
+    return this;
+  }
+
+  measure(): this {
+    this._circuit.measurements = Array.from({ length: this._circuit.numQubits }, (_, i) => i);
+    return this;
+  }
+
+  build(): QuantumCircuit {
+    return { ...this._circuit, gates: [...this._circuit.gates] };
+  }
+}
 
 export interface QAOAParams {
   numQubits: number;

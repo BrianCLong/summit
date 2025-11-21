@@ -3,7 +3,76 @@
  * Finds ground state energy of quantum systems
  */
 
-import { QuantumCircuit, QuantumSimulator, CircuitBuilder } from '@summit/quantum-simulation';
+// Types from quantum-simulation package
+export interface QuantumGate {
+  type: string;
+  qubits: number[];
+  parameters?: number[];
+  controlQubits?: number[];
+  targetQubit?: number;
+}
+
+export interface QuantumCircuit {
+  numQubits: number;
+  gates: QuantumGate[];
+  measurements?: number[];
+}
+
+export interface SimulationResult {
+  counts: Record<string, number>;
+  statevector?: unknown;
+  executionTime: number;
+  shots: number;
+}
+
+export interface QuantumSimulator {
+  simulate(circuit: QuantumCircuit, shots?: number): Promise<SimulationResult>;
+  getStatevector(circuit: QuantumCircuit): Promise<unknown>;
+  applyGate(state: unknown, gate: QuantumGate): unknown;
+}
+
+// Simple circuit builder for VQE use
+class CircuitBuilder {
+  private _circuit: QuantumCircuit;
+
+  constructor(numQubits: number) {
+    this._circuit = { numQubits, gates: [] };
+  }
+
+  addGate(gate: QuantumGate): this {
+    this._circuit.gates.push(gate);
+    return this;
+  }
+
+  ry(qubit: number, theta: number): this {
+    this._circuit.gates.push({ type: 'RY', qubits: [qubit], parameters: [theta] });
+    return this;
+  }
+
+  rz(qubit: number, theta: number): this {
+    this._circuit.gates.push({ type: 'RZ', qubits: [qubit], parameters: [theta] });
+    return this;
+  }
+
+  h(qubit: number): this {
+    this._circuit.gates.push({ type: 'H', qubits: [qubit] });
+    return this;
+  }
+
+  cnot(control: number, target: number): this {
+    this._circuit.gates.push({ type: 'CNOT', qubits: [control, target] });
+    return this;
+  }
+
+  measure(): this {
+    this._circuit.measurements = Array.from({ length: this._circuit.numQubits }, (_, i) => i);
+    return this;
+  }
+
+  build(): QuantumCircuit {
+    return { ...this._circuit, gates: [...this._circuit.gates] };
+  }
+}
 
 export interface VQEParams {
   numQubits: number;
@@ -138,14 +207,14 @@ export class VQESolver {
     // Build measurement circuit
     const builder = new CircuitBuilder(this.params.numQubits);
 
-    // Apply circuit gates
+    // Apply circuit gates using the addGate method
     for (const gate of circuit.gates) {
-      // Re-apply gates (simplified - would need proper gate application)
-      builder.circuit.gates.push(gate);
+      builder.addGate(gate);
     }
 
     // Rotate to measurement basis for each Pauli operator
-    for (let i = 0; i < pauliString.length; i++) {
+    const pauliLength = Math.min(pauliString.length, this.params.numQubits);
+    for (let i = 0; i < pauliLength; i++) {
       const pauli = pauliString[i];
       if (pauli === 'X') {
         builder.h(i);
@@ -154,6 +223,7 @@ export class VQESolver {
         builder.h(i);
       }
       // Z basis is computational basis, no rotation needed
+      // I (identity) also needs no rotation
     }
 
     builder.measure();
