@@ -3,7 +3,7 @@
  * Fact-checking, source credibility, and truthfulness assessment
  */
 
-export * from './blockchain/provenance-chain';
+export { BlockchainProvenanceVerifier } from './blockchain/provenance-chain';
 
 export interface ContentVerificationResult {
   isAuthentic: boolean;

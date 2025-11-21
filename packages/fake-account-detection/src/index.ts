@@ -3,8 +3,8 @@
  * Bot detection, sockpuppet identification, and profile authenticity scoring
  */
 
-export * from './psycholinguistics';
-export * from './graph-neural/gnn-analyzer';
+export { PsycholinguisticAnalyzer } from './psycholinguistics';
+export { GraphNeuralNetworkAnalyzer } from './graph-neural/gnn-analyzer';
 
 export interface FakeAccountAnalysis {
   isFake: boolean;
@@ -408,7 +408,7 @@ export class FakeAccountDetector {
 
     const authenticity =
       imageAnalysis.uniqueness * 0.3 +
-      (1 - biographyAnalysis.isGeneric ? 1 : 0) * 0.3 +
+      (biographyAnalysis.isGeneric ? 0 : 1) * 0.3 +
       completeness * 0.2 +
       consistency * 0.2;
 

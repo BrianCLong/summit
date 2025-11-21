@@ -2,7 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "declaration": true,
+    "sourceMap": true,
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "skipLibCheck": true
   },
-  "include": ["src/**/*"]
+  "include": ["src"]
 }

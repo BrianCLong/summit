@@ -3,8 +3,8 @@
  * Detect coordinated inauthentic behavior, bot networks, and influence campaigns
  */
 
-export * from './cross-platform/correlation-engine';
-export * from './temporal/network-evolution';
+export { CrossPlatformCorrelationEngine } from './cross-platform/correlation-engine';
+export { TemporalNetworkEvolutionAnalyzer } from './temporal/network-evolution';
 
 // Types
 export interface DisinformationAnalysisResult {

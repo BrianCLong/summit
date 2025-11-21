@@ -3,29 +3,36 @@
  * Comprehensive deepfake detection across facial, voice, video, and audio modalities
  */
 
+// Core types
 export * from './types';
-export * from './facial/facial-detector';
-export * from './voice/voice-detector';
-export * from './video/video-analyzer';
-export * from './neural/fingerprinting-engine';
-export * from './adversarial/adversarial-detector';
-export * from './streaming/streaming-engine';
-export * from './explainable/explainable-ai';
-export * from './ensemble/meta-learner';
-export * from './multimodal/fusion-engine';
-export * from './zero-shot/zero-shot-detector';
-export * from './active-learning/active-learner';
-export * from './federated/federated-learning';
+
+// Detectors
+export { FacialDeepfakeDetector } from './facial/facial-detector';
+export { VoiceDeepfakeDetector } from './voice/voice-detector';
+export { VideoDeepfakeAnalyzer } from './video/video-analyzer';
+
+// Advanced detection
+export { NeuralFingerprintingEngine } from './neural/fingerprinting-engine';
+export { AdversarialDetector } from './adversarial/adversarial-detector';
+export { StreamingAnalysisEngine } from './streaming/streaming-engine';
+export { ExplainableAI } from './explainable/explainable-ai';
+export { EnsembleMetaLearner } from './ensemble/meta-learner';
+export { MultimodalFusionEngine } from './multimodal/fusion-engine';
+export { ZeroShotDeepfakeDetector } from './zero-shot/zero-shot-detector';
+export { ActiveLearningPipeline } from './active-learning/active-learner';
+export { FederatedLearningOrchestrator } from './federated/federated-learning';
 
 import { FacialDeepfakeDetector } from './facial/facial-detector';
 import { VoiceDeepfakeDetector } from './voice/voice-detector';
 import { VideoDeepfakeAnalyzer } from './video/video-analyzer';
+import {
+  DetectionMethod,
+  BiometricType,
+} from './types';
 import type {
   DeepfakeDetectionResult,
-  DetectionMethod,
   DetectedArtifact,
   BiometricAnalysis,
-  BiometricType,
   GANDetectionResult,
 } from './types';
 
