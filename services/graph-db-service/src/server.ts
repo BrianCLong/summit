@@ -3,7 +3,7 @@
  * REST API for graph operations
  */
 
-import express from 'express';
+import express, { type Application } from 'express';
 import cors from 'cors';
 import { GraphStorage } from '@intelgraph/graph-database';
 import { QueryEngine } from '@intelgraph/graph-query';
@@ -11,7 +11,7 @@ import { ShortestPathAlgorithms, CentralityMeasures, CommunityDetection, GraphCl
 import { PatternMining } from '@intelgraph/relationship-mining';
 import { LinkPredictor } from '@intelgraph/link-prediction';
 
-const app = express();
+const app: Application = express();
 const port = process.env.GRAPH_DB_PORT || 3100;
 
 // Initialize graph storage
