@@ -9,6 +9,5 @@
     "types": []
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "test"],
-  "references": [{ "path": "../dag-engine" }]
+  "exclude": ["node_modules", "dist", "test"]
 }

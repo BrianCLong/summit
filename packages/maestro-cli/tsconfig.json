@@ -14,12 +14,3 @@
   "include": [
     "src"
   ],
-  "references": [
-    {
-      "path": "../types"
-    },
-    {
-      "path": "../maestro-core"
-    }
-  ]
-}

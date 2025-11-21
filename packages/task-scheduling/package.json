@@ -18,16 +18,10 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "dependencies": {
-    "@summit/dag-engine": "workspace:*",
-    "cron-parser": "^4.9.0",
-    "node-cron": "^3.0.3",
-    "eventemitter3": "^5.0.1",
-    "uuid": "^11.0.3"
+    "@summit/dag-engine": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@types/node-cron": "^3.0.11",
-    "@types/uuid": "^10.0.0",
     "rimraf": "^6.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.3"

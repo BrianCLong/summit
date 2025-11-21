@@ -3,7 +3,7 @@
  */
 
 import express from 'express';
-import { DAG } from '@summit/dag-engine';
+import { DAG } from '../types/dag-types.js';
 import { OrchestrationController } from '../controllers/OrchestrationController.js';
 
 export function createWorkflowRouter(controller: OrchestrationController) {

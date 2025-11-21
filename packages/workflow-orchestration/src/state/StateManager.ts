@@ -7,12 +7,12 @@ import {
   TaskExecution,
   TaskState,
   DAGConfig,
-} from '@summit/dag-engine';
-import EventEmitter from 'eventemitter3';
+} from '../types/dag-types.js';
+import { EventEmitter } from '../utils/EventEmitter.js';
 
 export interface StateSnapshot {
   workflowExecutions: WorkflowExecution[];
-  taskExecutions: Map<string, TaskExecution[]>;
+  taskExecutions: Map<string, Map<string, TaskExecution>>;
   timestamp: Date;
 }
 

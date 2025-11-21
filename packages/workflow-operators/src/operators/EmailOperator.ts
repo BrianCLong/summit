@@ -2,7 +2,7 @@
  * Email operator for sending email notifications
  */
 
-import { Operator, ExecutionContext } from '@summit/dag-engine';
+import { Operator, ExecutionContext } from '../types/dag-types.js';
 
 export interface EmailOperatorConfig {
   to: string | string[];

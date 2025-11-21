@@ -2,7 +2,7 @@
  * Dummy operator for testing and placeholder tasks
  */
 
-import { Operator, ExecutionContext } from '@summit/dag-engine';
+import { Operator, ExecutionContext } from '../types/dag-types.js';
 
 export class DummyOperator implements Operator {
   async execute(context: ExecutionContext): Promise<any> {

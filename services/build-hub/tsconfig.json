@@ -25,9 +25,3 @@
     "**/*.test.ts",
     "**/*.spec.ts"
   ],
-  "references": [
-    {
-      "path": "../../packages/types"
-    }
-  ]
-}

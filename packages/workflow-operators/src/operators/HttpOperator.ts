@@ -3,7 +3,7 @@
  */
 
 import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
-import { Operator, ExecutionContext } from '@summit/dag-engine';
+import { Operator, ExecutionContext } from '../types/dag-types.js';
 
 export interface HttpOperatorConfig {
   url: string;

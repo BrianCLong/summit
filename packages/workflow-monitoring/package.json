@@ -18,8 +18,7 @@
     "prepublishOnly": "npm run clean && npm run build && npm test"
   },
   "dependencies": {
-    "@summit/dag-engine": "workspace:*",
-    "eventemitter3": "^5.0.1"
+    "@summit/dag-engine": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

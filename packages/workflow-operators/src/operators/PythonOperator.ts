@@ -7,7 +7,7 @@ import { promisify } from 'util';
 import { writeFile, unlink } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';
-import { Operator, ExecutionContext } from '@summit/dag-engine';
+import { Operator, ExecutionContext } from '../types/dag-types.js';
 
 const execAsync = promisify(exec);
 

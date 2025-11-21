@@ -2,10 +2,14 @@
  * Cron-based scheduler for workflow orchestration
  */
 
-import cron from 'node-cron';
-import cronParser from 'cron-parser';
-import EventEmitter from 'eventemitter3';
-import { DAG } from '@summit/dag-engine';
+import { EventEmitter } from '../utils/EventEmitter.js';
+import {
+  parseCronExpression,
+  getNextCronDate,
+  getPrevCronDate,
+  isValidCronExpression,
+  ParsedCron,
+} from '../utils/cron.js';
 
 export interface ScheduleConfig {
   dagId: string;
@@ -32,9 +36,15 @@ interface SchedulerEvents {
   'schedule:removed': (dagId: string) => void;
 }
 
+interface ScheduledTask {
+  cron: ParsedCron;
+  timer: ReturnType<typeof setTimeout> | null;
+  running: boolean;
+}
+
 export class CronScheduler extends EventEmitter<SchedulerEvents> {
   private schedules: Map<string, ScheduleConfig>;
-  private tasks: Map<string, cron.ScheduledTask>;
+  private tasks: Map<string, ScheduledTask>;
   private activeRuns: Map<string, number>;
 
   constructor() {
@@ -49,11 +59,7 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
    */
   addSchedule(config: ScheduleConfig): void {
     // Validate cron expression
-    try {
-      cronParser.parseExpression(config.schedule, {
-        tz: config.timezone,
-      });
-    } catch (error) {
+    if (!isValidCronExpression(config.schedule)) {
       throw new Error(`Invalid cron expression: ${config.schedule}`);
     }
 
@@ -65,20 +71,16 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
     this.schedules.set(config.dagId, config);
     this.activeRuns.set(config.dagId, 0);
 
-    // Create cron task
-    const task = cron.schedule(
-      config.schedule,
-      () => {
-        this.triggerExecution(config);
-      },
-      {
-        scheduled: false,
-        timezone: config.timezone,
-      }
-    );
+    // Create and start scheduled task
+    const cron = parseCronExpression(config.schedule);
+    const task: ScheduledTask = {
+      cron,
+      timer: null,
+      running: true,
+    };
 
     this.tasks.set(config.dagId, task);
-    task.start();
+    this.scheduleNextRun(config.dagId);
 
     this.emit('schedule:added', config.dagId, config.schedule);
 
@@ -89,12 +91,32 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
   }
 
   /**
+   * Schedule the next run
+   */
+  private scheduleNextRun(dagId: string): void {
+    const task = this.tasks.get(dagId);
+    const config = this.schedules.get(dagId);
+
+    if (!task || !config || !task.running) return;
+
+    const now = new Date();
+    const nextRun = getNextCronDate(task.cron, now);
+    const delay = nextRun.getTime() - now.getTime();
+
+    task.timer = setTimeout(() => {
+      this.triggerExecution(config);
+      this.scheduleNextRun(dagId);
+    }, delay);
+  }
+
+  /**
    * Remove a schedule
    */
   removeSchedule(dagId: string): void {
     const task = this.tasks.get(dagId);
     if (task) {
-      task.stop();
+      if (task.timer) clearTimeout(task.timer);
+      task.running = false;
       this.tasks.delete(dagId);
     }
 
@@ -123,7 +145,9 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
   pauseSchedule(dagId: string): void {
     const task = this.tasks.get(dagId);
     if (task) {
-      task.stop();
+      if (task.timer) clearTimeout(task.timer);
+      task.timer = null;
+      task.running = false;
     }
   }
 
@@ -133,7 +157,8 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
   resumeSchedule(dagId: string): void {
     const task = this.tasks.get(dagId);
     if (task) {
-      task.start();
+      task.running = true;
+      this.scheduleNextRun(dagId);
     }
   }
 
@@ -165,10 +190,11 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
       }
 
       // Create scheduled execution
+      const task = this.tasks.get(config.dagId);
       const execution: ScheduledExecution = {
         dagId: config.dagId,
         scheduledTime: now,
-        executionDate: this.getExecutionDate(config.schedule, config.timezone),
+        executionDate: task ? getPrevCronDate(task.cron, now) : now,
         params: config.params,
       };
 
@@ -180,39 +206,26 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
   }
 
   /**
-   * Get execution date based on schedule
-   */
-  private getExecutionDate(schedule: string, timezone?: string): Date {
-    const interval = cronParser.parseExpression(schedule, {
-      tz: timezone,
-      currentDate: new Date(),
-    });
-    const prev = interval.prev();
-    return prev.toDate();
-  }
-
-  /**
    * Perform catchup for missed runs
    */
-  private async performCatchup(config: ScheduleConfig): Promise<void> {
+  private performCatchup(config: ScheduleConfig): void {
     if (!config.startDate) return;
 
     const now = new Date();
-    const interval = cronParser.parseExpression(config.schedule, {
-      tz: config.timezone,
-      currentDate: config.startDate,
-      endDate: now,
-    });
+    const task = this.tasks.get(config.dagId);
+    if (!task) return;
 
     const missedExecutions: Date[] = [];
+    let current = new Date(config.startDate);
+
     try {
-      while (true) {
-        const next = interval.next();
-        const nextDate = next.toDate();
-        if (nextDate > now) break;
-        missedExecutions.push(nextDate);
+      while (current < now) {
+        const next = getNextCronDate(task.cron, current);
+        if (next >= now) break;
+        missedExecutions.push(next);
+        current = new Date(next.getTime() + 60000); // Move forward 1 minute
       }
-    } catch (error) {
+    } catch {
       // End of iteration
     }
 
@@ -232,16 +245,12 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
    * Get next run time
    */
   getNextRunTime(dagId: string): Date | null {
-    const config = this.schedules.get(dagId);
-    if (!config) return null;
+    const task = this.tasks.get(dagId);
+    if (!task) return null;
 
     try {
-      const interval = cronParser.parseExpression(config.schedule, {
-        tz: config.timezone,
-        currentDate: new Date(),
-      });
-      return interval.next().toDate();
-    } catch (error) {
+      return getNextCronDate(task.cron, new Date());
+    } catch {
       return null;
     }
   }
@@ -250,16 +259,12 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
    * Get previous run time
    */
   getPreviousRunTime(dagId: string): Date | null {
-    const config = this.schedules.get(dagId);
-    if (!config) return null;
+    const task = this.tasks.get(dagId);
+    if (!task) return null;
 
     try {
-      const interval = cronParser.parseExpression(config.schedule, {
-        tz: config.timezone,
-        currentDate: new Date(),
-      });
-      return interval.prev().toDate();
-    } catch (error) {
+      return getPrevCronDate(task.cron, new Date());
+    } catch {
       return null;
     }
   }
@@ -291,7 +296,10 @@ export class CronScheduler extends EventEmitter<SchedulerEvents> {
    * Stop all schedules
    */
   stopAll(): void {
-    this.tasks.forEach(task => task.stop());
+    this.tasks.forEach(task => {
+      if (task.timer) clearTimeout(task.timer);
+      task.running = false;
+    });
     this.tasks.clear();
     this.schedules.clear();
     this.activeRuns.clear();

@@ -2,8 +2,8 @@
  * Metrics Collector for workflow orchestration
  */
 
-import EventEmitter from 'eventemitter3';
-import { TaskState, WorkflowExecution, TaskExecution } from '@summit/dag-engine';
+import { EventEmitter } from '../utils/EventEmitter.js';
+import { TaskState, WorkflowExecution, TaskExecution } from '../types/dag-types.js';
 
 export interface Metric {
   name: string;

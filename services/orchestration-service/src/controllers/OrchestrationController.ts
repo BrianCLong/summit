@@ -2,9 +2,11 @@
  * Orchestration Controller - Main controller for workflow orchestration
  */
 
-import { DAG, ExecutionEngine, DAGConfig } from '@summit/dag-engine';
-import { CronScheduler, TriggerManager } from '@summit/task-scheduling';
 import {
+  DAG,
+  ExecutionEngine,
+  CronScheduler,
+  TriggerManager,
   BashOperator,
   PythonOperator,
   HttpOperator,
@@ -12,9 +14,12 @@ import {
   TransferOperator,
   BranchOperator,
   DummyOperator,
-} from '@summit/workflow-operators';
-import { StateManager, WorkerPool, TemplateEngine } from '@summit/workflow-orchestration';
-import { MetricsCollector, AlertManager } from '@summit/workflow-monitoring';
+  StateManager,
+  WorkerPool,
+  TemplateEngine,
+  MetricsCollector,
+  AlertManager,
+} from '../types/dag-types.js';
 
 export class OrchestrationController {
   public executionEngine: ExecutionEngine;

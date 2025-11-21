@@ -6,5 +6,3 @@
     "rootDir": "./src"
   },
   "include": ["src"],
-  "references": []
-}

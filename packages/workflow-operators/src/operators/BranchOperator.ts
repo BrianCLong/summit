@@ -2,7 +2,7 @@
  * Branch operator for conditional workflow execution
  */
 
-import { Operator, ExecutionContext } from '@summit/dag-engine';
+import { Operator, ExecutionContext } from '../types/dag-types.js';
 
 export interface BranchOperatorConfig {
   condition: (context: ExecutionContext) => Promise<string | string[]>;

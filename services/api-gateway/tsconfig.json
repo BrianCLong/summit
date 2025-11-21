@@ -23,9 +23,3 @@
     "dist",
     "**/*.test.ts"
   ],
-  "references": [
-    {
-      "path": "../../packages/types"
-    }
-  ]
-}

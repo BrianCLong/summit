@@ -12,9 +12,3 @@
   "include": [
     "src"
   ],
-  "references": [
-    {
-      "path": "../types"
-    }
-  ]
-}

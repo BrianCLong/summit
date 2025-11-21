@@ -2,7 +2,7 @@
  * Alert Manager for workflow monitoring
  */
 
-import EventEmitter from 'eventemitter3';
+import { EventEmitter } from '../utils/EventEmitter.js';
 
 export type AlertSeverity = 'info' | 'warning' | 'error' | 'critical';
 

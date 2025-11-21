@@ -36,7 +36,7 @@ app.use('/api/schedules', createScheduleRouter(orchestrationController));
 app.use('/api/monitoring', createMonitoringRouter(orchestrationController));
 
 // Error handler
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, req: any, res: any, next: any) => {
   console.error('Error:', err);
   res.status(err.status || 500).json({
     error: {

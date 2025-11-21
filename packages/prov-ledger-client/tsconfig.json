@@ -6,9 +6,3 @@
     "rootDir": "./src"
   },
   "include": ["src"],
-  "references": [
-    {
-      "path": "./../../services/prov-ledger"
-    }
-  ]
-}

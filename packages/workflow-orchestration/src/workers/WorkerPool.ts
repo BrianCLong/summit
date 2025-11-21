@@ -2,9 +2,9 @@
  * Worker Pool for distributed task execution
  */
 
-import EventEmitter from 'eventemitter3';
-import PQueue from 'p-queue';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from '../utils/EventEmitter.js';
+import { AsyncQueue } from '../utils/AsyncQueue.js';
+import { generateId } from '../utils/uuid.js';
 
 export interface WorkerConfig {
   workerId: string;
@@ -37,7 +37,7 @@ export interface Worker {
   currentTasks: Set<string>;
   totalTasksExecuted: number;
   lastHeartbeat: Date;
-  queue: PQueue;
+  queue: AsyncQueue;
 }
 
 interface WorkerPoolEvents {
@@ -51,7 +51,7 @@ interface WorkerPoolEvents {
 export class WorkerPool extends EventEmitter<WorkerPoolEvents> {
   private workers: Map<string, Worker>;
   private taskQueues: Map<string, WorkerTask[]>;
-  private heartbeatInterval: NodeJS.Timeout | null;
+  private heartbeatInterval: ReturnType<typeof setInterval> | null;
   private heartbeatTimeout: number;
 
   constructor(config: { heartbeatTimeout?: number } = {}) {
@@ -73,7 +73,7 @@ export class WorkerPool extends EventEmitter<WorkerPoolEvents> {
       currentTasks: new Set(),
       totalTasksExecuted: 0,
       lastHeartbeat: new Date(),
-      queue: new PQueue({ concurrency: config.concurrency }),
+      queue: new AsyncQueue({ concurrency: config.concurrency }),
     };
 
     this.workers.set(config.workerId, worker);

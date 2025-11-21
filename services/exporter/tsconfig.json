@@ -16,9 +16,3 @@
   "include": [
     "src"
   ],
-  "references": [
-    {
-      "path": "../../packages/types"
-    }
-  ]
-}

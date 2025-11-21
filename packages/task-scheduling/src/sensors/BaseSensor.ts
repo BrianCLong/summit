@@ -2,7 +2,7 @@
  * Base sensor implementation for condition-based task triggering
  */
 
-import { Sensor, ExecutionContext } from '@summit/dag-engine';
+import { Sensor, ExecutionContext } from '../types/dag-types.js';
 
 export interface SensorConfig {
   pokeInterval?: number;

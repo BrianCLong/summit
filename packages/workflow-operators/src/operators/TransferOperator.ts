@@ -2,7 +2,7 @@
  * Transfer operator for moving data between tasks
  */
 
-import { Operator, ExecutionContext } from '@summit/dag-engine';
+import { Operator, ExecutionContext } from '../types/dag-types.js';
 
 export interface TransferOperatorConfig {
   sourceTask: string;

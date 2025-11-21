@@ -2,8 +2,8 @@
  * Trigger Manager for event-driven and manual triggers
  */
 
-import EventEmitter from 'eventemitter3';
-import { v4 as uuidv4 } from 'uuid';
+import { EventEmitter } from '../utils/EventEmitter.js';
+import { generateId } from '../utils/uuid.js';
 
 export type TriggerType = 'manual' | 'event' | 'external' | 'data' | 'time';
 
@@ -113,7 +113,7 @@ export class TriggerManager extends EventEmitter<TriggerManagerEvents> {
     }
 
     const event: TriggerEvent = {
-      eventId: uuidv4(),
+      eventId: generateId(),
       triggerId,
       type: 'manual',
       data,
@@ -128,7 +128,7 @@ export class TriggerManager extends EventEmitter<TriggerManagerEvents> {
    */
   handleEvent(eventType: string, data: any, source?: string): void {
     const event: TriggerEvent = {
-      eventId: uuidv4(),
+      eventId: generateId(),
       triggerId: '',
       type: eventType,
       data,
@@ -156,7 +156,7 @@ export class TriggerManager extends EventEmitter<TriggerManagerEvents> {
    */
   private processTrigger(trigger: TriggerConfig, event: TriggerEvent): void {
     const execution: TriggerExecution = {
-      executionId: uuidv4(),
+      executionId: generateId(),
       triggerId: trigger.triggerId,
       dagId: trigger.dagId,
       event,

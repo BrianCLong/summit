@@ -2,8 +2,7 @@
  * DAG (Directed Acyclic Graph) class for workflow definition
  */
 
-import { Graph, alg } from 'graphlib';
-import { v4 as uuidv4 } from 'uuid';
+import { Graph, alg } from '../utils/Graph.js';
 import { DAGConfig, TaskConfig, DAGNode, TriggerRule } from './types.js';
 
 export class DAG {
@@ -136,7 +135,7 @@ export class DAG {
     });
 
     // Check for orphaned nodes
-    const nodes = this.graph.nodes();
+    const nodes = this.graph.nodeList();
     nodes.forEach(nodeId => {
       if (!this.tasks.has(nodeId)) {
         errors.push(`Node ${nodeId} in graph but not in tasks`);
@@ -179,7 +178,7 @@ export class DAG {
       return false;
     };
 
-    this.graph.nodes().forEach(node => {
+    this.graph.nodeList().forEach(node => {
       if (!visited.has(node)) {
         detectCycle(node, []);
       }
@@ -202,7 +201,7 @@ export class DAG {
    * Get root tasks (tasks with no upstream dependencies)
    */
   getRootTasks(): string[] {
-    return this.graph.nodes().filter(nodeId => {
+    return this.graph.nodeList().filter(nodeId => {
       const inEdges = this.graph.inEdges(nodeId);
       return !inEdges || inEdges.length === 0;
     });
@@ -212,7 +211,7 @@ export class DAG {
    * Get leaf tasks (tasks with no downstream dependencies)
    */
   getLeafTasks(): string[] {
-    return this.graph.nodes().filter(nodeId => {
+    return this.graph.nodeList().filter(nodeId => {
       const outEdges = this.graph.outEdges(nodeId);
       return !outEdges || outEdges.length === 0;
     });

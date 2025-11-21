@@ -2,9 +2,9 @@
  * Execution Engine for running DAG workflows
  */
 
-import EventEmitter from 'eventemitter3';
-import { v4 as uuidv4 } from 'uuid';
-import PQueue from 'p-queue';
+import { EventEmitter } from '../utils/EventEmitter.js';
+import { generateId } from '../utils/uuid.js';
+import { AsyncQueue } from '../utils/AsyncQueue.js';
 import { DAG } from '../core/DAG.js';
 import {
   TaskState,
@@ -33,7 +33,7 @@ interface ExecutionEvents {
 
 export class ExecutionEngine extends EventEmitter<ExecutionEvents> {
   private config: ExecutionEngineConfig;
-  private queue: PQueue;
+  private queue: AsyncQueue;
   private operators: Map<string, Operator>;
   private executions: Map<string, WorkflowExecution>;
   private taskExecutions: Map<string, Map<string, TaskExecution>>;
@@ -45,7 +45,7 @@ export class ExecutionEngine extends EventEmitter<ExecutionEvents> {
       concurrency: config.concurrency || 10,
       defaultTimeout: config.defaultTimeout || 3600000, // 1 hour
     };
-    this.queue = new PQueue({ concurrency: this.config.concurrency });
+    this.queue = new AsyncQueue({ concurrency: this.config.concurrency });
     this.operators = new Map();
     this.executions = new Map();
     this.taskExecutions = new Map();
@@ -72,7 +72,7 @@ export class ExecutionEngine extends EventEmitter<ExecutionEvents> {
       throw new Error(`DAG validation failed: ${validation.errors.join(', ')}`);
     }
 
-    const executionId = uuidv4();
+    const executionId = generateId();
     const execution: WorkflowExecution = {
       executionId,
       dagId: dag.dagId,
@@ -263,7 +263,7 @@ export class ExecutionEngine extends EventEmitter<ExecutionEvents> {
     let lastError: Error | undefined;
 
     const taskExecution: TaskExecution = {
-      executionId: uuidv4(),
+      executionId: generateId(),
       taskId: task.taskId,
       dagId: dag.dagId,
       workflowExecutionId: workflowExecution.executionId,
