@@ -1,0 +1,111 @@
+version: '3.8'
+
+services:
+  # Streaming Service - Message Broker
+  streaming-service:
+    build:
+      context: .
+      dockerfile: services/streaming-service/Dockerfile
+    ports:
+      - "3000:3000"   # REST API
+      - "9092:9092"   # Broker port
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - BROKER_HOST=0.0.0.0
+      - BROKER_PORT=9092
+      - DATA_DIR=/data
+      - LOG_DIR=/logs
+    volumes:
+      - streaming-data:/data
+      - streaming-logs:/logs
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - streaming-network
+    restart: unless-stopped
+
+  # Event Correlation Service
+  event-correlation-service:
+    build:
+      context: .
+      dockerfile: services/event-correlation-service/Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - BOOTSTRAP_SERVERS=streaming-service:9092
+    depends_on:
+      streaming-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - streaming-network
+    restart: unless-stopped
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - streaming-network
+    restart: unless-stopped
+
+  # Prometheus for metrics
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.enable-lifecycle'
+    networks:
+      - streaming-network
+    restart: unless-stopped
+
+  # Grafana for dashboards
+  grafana:
+    image: grafana/grafana:10.2.2
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - streaming-network
+    restart: unless-stopped
+
+networks:
+  streaming-network:
+    driver: bridge
+
+volumes:
+  streaming-data:
+  streaming-logs:
+  redis-data:
+  prometheus-data:
+  grafana-data:
