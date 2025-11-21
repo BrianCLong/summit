@@ -19,6 +19,8 @@ import express, { Request, Response, NextFunction, Express } from 'express';
 import { CitizenDataControl } from './citizen-data-control.js';
 import { EthicalAIRegistry } from './ethical-ai-registry.js';
 import { TransparencyService } from './transparency-service.js';
+import { rateLimiter, requestId, securityHeaders, errorHandler } from './middleware.js';
+import { consentCache, modelCache } from './cache.js';
 import {
   CitizenConsentSchema,
   DataAccessRequestSchema,
@@ -30,18 +32,75 @@ export * from './types.js';
 export { CitizenDataControl } from './citizen-data-control.js';
 export { EthicalAIRegistry } from './ethical-ai-registry.js';
 export { TransparencyService } from './transparency-service.js';
+export * from './cache.js';
+export * from './middleware.js';
+export * from './audit-integration.js';
+export * from './policy-integration.js';
 
 const app: Express = express();
-app.use(express.json());
+
+// Middleware
+app.use(express.json({ limit: '1mb' }));
+app.use(requestId());
+app.use(securityHeaders());
+app.use(rateLimiter({ windowMs: 60_000, maxRequests: 100 }));
 
 // Initialize services
 const citizenDataControl = new CitizenDataControl();
 const ethicalRegistry = new EthicalAIRegistry();
-const transparencyService = new TransparencyService({ agency: process.env.AGENCY_NAME ?? 'Government Agency' });
+const transparencyService = new TransparencyService({
+  agency: process.env.AGENCY_NAME ?? 'Government Agency',
+});
 
-// Health check
+const startTime = Date.now();
+
+// ============================================================================
+// Health & Readiness Endpoints
+// ============================================================================
+
 app.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'healthy', service: 'gov-ai-governance', version: '1.0.0' });
+  res.json({
+    status: 'healthy',
+    service: 'gov-ai-governance',
+    version: '1.0.0',
+    uptime: Math.floor((Date.now() - startTime) / 1000),
+  });
+});
+
+app.get('/health/ready', async (_req: Request, res: Response) => {
+  try {
+    // Verify services are operational
+    const auditIntegrity = await transparencyService.verifyAuditIntegrity();
+
+    res.json({
+      status: 'ready',
+      checks: {
+        auditChain: auditIntegrity.valid ? 'ok' : 'degraded',
+        citizenDataControl: 'ok',
+        ethicalRegistry: 'ok',
+        transparencyService: 'ok',
+      },
+    });
+  } catch (error) {
+    res.status(503).json({ status: 'not_ready', error: (error as Error).message });
+  }
+});
+
+app.get('/health/live', (_req: Request, res: Response) => {
+  res.json({ status: 'alive' });
+});
+
+app.get('/metrics', (_req: Request, res: Response) => {
+  const cacheStats = {
+    consent: consentCache.getStats(),
+    model: modelCache.getStats(),
+  };
+
+  res.json({
+    uptime: Math.floor((Date.now() - startTime) / 1000),
+    cache: cacheStats,
+    standards: ethicalRegistry.getStandards().length,
+  });
 });
 
 // ============================================================================
@@ -52,6 +111,7 @@ app.post('/citizen/consent', async (req: Request, res: Response, next: NextFunct
   try {
     const consent = CitizenConsentSchema.omit({ consentTimestamp: true }).parse(req.body);
     const result = await citizenDataControl.grantConsent(consent);
+    consentCache.delete(consent.citizenId); // Invalidate cache
     res.status(201).json(result);
   } catch (error) {
     next(error);
@@ -63,6 +123,7 @@ app.delete('/citizen/:citizenId/consent', async (req: Request, res: Response, ne
     const { citizenId } = req.params;
     const { dataCategories, purposes } = req.body;
     const success = await citizenDataControl.withdrawConsent(citizenId, dataCategories, purposes);
+    consentCache.delete(citizenId); // Invalidate cache
     res.json({ success });
   } catch (error) {
     next(error);
@@ -71,7 +132,17 @@ app.delete('/citizen/:citizenId/consent', async (req: Request, res: Response, ne
 
 app.get('/citizen/:citizenId/consents', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const consents = await citizenDataControl.getConsents(req.params.citizenId);
+    const { citizenId } = req.params;
+
+    // Check cache first
+    const cached = consentCache.get(citizenId);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
+
+    const consents = await citizenDataControl.getConsents(citizenId);
+    consentCache.set(citizenId, consents);
     res.json(consents);
   } catch (error) {
     next(error);
@@ -132,12 +203,50 @@ app.get('/models', async (req: Request, res: Response, next: NextFunction) => {
 
 app.get('/models/:modelId', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const model = await ethicalRegistry.getModel(req.params.modelId);
+    const { modelId } = req.params;
+
+    // Check cache first
+    const cached = modelCache.get(modelId);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
+
+    const model = await ethicalRegistry.getModel(modelId);
     if (!model) {
       res.status(404).json({ error: 'Model not found' });
       return;
     }
+
+    modelCache.set(modelId, model);
     res.json(model);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/models/:modelId/compliance', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { modelId } = req.params;
+    const { standardId, assessorId, results } = req.body;
+    const assessment = await ethicalRegistry.assessCompliance(modelId, standardId, assessorId, results);
+    modelCache.delete(modelId); // Invalidate cache
+    res.status(201).json(assessment);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/models/:modelId/bias-assessment', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { modelId } = req.params;
+    const result = await ethicalRegistry.updateBiasAssessment(modelId, req.body);
+    if (!result) {
+      res.status(404).json({ error: 'Model not found' });
+      return;
+    }
+    modelCache.delete(modelId); // Invalidate cache
+    res.json(result);
   } catch (error) {
     next(error);
   }
@@ -255,17 +364,16 @@ app.get('/audit/verify', async (_req: Request, res: Response, next: NextFunction
   }
 });
 
-// Error handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
-  console.error(err);
-  res.status(400).json({ error: err.message });
-});
+// Error handler (must be last)
+app.use(errorHandler());
 
 const PORT = process.env.PORT ?? 3100;
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Gov AI Governance Service running on port ${PORT}`);
+    console.log(`Health: http://localhost:${PORT}/health`);
+    console.log(`Docs: http://localhost:${PORT}/compliance/standards`);
   });
 }
 
