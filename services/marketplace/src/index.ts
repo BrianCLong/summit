@@ -11,6 +11,7 @@ import { healthRoutes } from './routes/health.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authMiddleware } from './middleware/auth.js';
 import { rateLimiters } from './middleware/rateLimit.js';
+import { metricsMiddleware, MetricNames, metrics } from './utils/metrics.js';
 
 const app = express();
 const PORT = process.env.PORT || 4100;
@@ -39,7 +40,8 @@ app.use(cors({
 
 app.use(express.json({ limit: '10mb' }));
 
-// Request logging
+// Metrics and request logging
+app.use(metricsMiddleware());
 app.use((req, res, next) => {
   const start = Date.now();
   res.on('finish', () => {
