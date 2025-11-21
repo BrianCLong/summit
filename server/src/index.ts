@@ -18,9 +18,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const startServer = async () => {
-  // Initialize error tracking (Sentry)
+  // Initialize logging and error tracking (Sentry)
   initErrorTracking();
-
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;

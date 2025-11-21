@@ -1,7 +1,5 @@
 import express from 'express';
 import request from 'supertest';
-import pino from 'pino';
-import { Writable } from 'stream';
 import { context } from '../../src/logging/context';
 import { logger, pinoOptions } from '../../src/logging/logger';
 import { loggingMiddleware } from '../../src/logging/middleware';
@@ -46,7 +44,6 @@ describe('Logging & Context', () => {
       });
     });
   });
-
 
   describe('Error Tracking', () => {
     const originalEnv = process.env;

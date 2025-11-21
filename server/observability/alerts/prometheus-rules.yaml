@@ -1,0 +1,44 @@
+groups:
+  - name: summit-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(http_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP error rate detected"
+          description: "HTTP 5xx error rate is above 5% for the last 5 minutes."
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 2.0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API Latency"
+          description: "95th percentile latency is above 2 seconds."
+
+      - alert: GraphQLErrorsHigh
+        expr: |
+          sum(rate(graphql_errors_total[5m]))
+          /
+          sum(rate(graphql_requests_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High GraphQL error rate"
+          description: "GraphQL error rate is above 5%."
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."

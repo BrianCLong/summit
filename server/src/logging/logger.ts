@@ -2,7 +2,7 @@ import pino from 'pino';
 import { context } from './context';
 
 const isDev = process.env.NODE_ENV === 'development';
-const isTest = process.env.NODE_ENV === 'test';
+// Jest sets NODE_ENV to 'test'
 
 const transport = isDev
   ? {

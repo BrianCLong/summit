@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="6" failures="0" errors="0" time="11.655">
-  <testsuite name="Logging &amp; Context" errors="0" failures="0" skipped="0" timestamp="2025-11-20T09:49:11" time="11.583" tests="6">
-    <testcase classname="Logging &amp; Context › Context Storage" name="should store and retrieve values within a run block" time="0.005">
+<testsuites name="jest tests" tests="7" failures="0" errors="0" time="14.536">
+  <testsuite name="Sentry Integration" errors="0" failures="0" skipped="0" timestamp="2025-11-20T22:43:18" time="12.665" tests="1">
+    <testcase classname="Sentry Integration" name="should export error middleware" time="0.013">
     </testcase>
-    <testcase classname="Logging &amp; Context › Context Storage" name="should handle nested contexts correctly" time="0.001">
+  </testsuite>
+  <testsuite name="Logging &amp; Context" errors="0" failures="0" skipped="0" timestamp="2025-11-20T22:43:18" time="13.815" tests="6">
+    <testcase classname="Logging &amp; Context › Context Storage" name="should store and retrieve values within a run block" time="0.018">
     </testcase>
-    <testcase classname="Logging &amp; Context › Error Tracking" name="should return LocalErrorTracker when SENTRY_DSN is not set" time="0.002">
+    <testcase classname="Logging &amp; Context › Context Storage" name="should handle nested contexts correctly" time="0.003">
     </testcase>
-    <testcase classname="Logging &amp; Context › Error Tracking" name="should return SentryErrorTracker when SENTRY_DSN is set" time="0.002">
+    <testcase classname="Logging &amp; Context › Error Tracking" name="should return LocalErrorTracker when SENTRY_DSN is not set" time="0.003">
     </testcase>
-    <testcase classname="Logging &amp; Context › Logging Middleware" name="should initialize context and set headers" time="0.059">
+    <testcase classname="Logging &amp; Context › Error Tracking" name="should return SentryErrorTracker when SENTRY_DSN is set" time="0.003">
     </testcase>
-    <testcase classname="Logging &amp; Context › Logging Middleware" name="should generate IDs if not provided" time="0.009">
+    <testcase classname="Logging &amp; Context › Logging Middleware" name="should initialize context and set headers" time="0.093">
+    </testcase>
+    <testcase classname="Logging &amp; Context › Logging Middleware" name="should generate IDs if not provided" time="0.017">
     </testcase>
   </testsuite>
 </testsuites>

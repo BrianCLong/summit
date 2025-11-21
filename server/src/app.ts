@@ -7,7 +7,12 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { auditLogger } from './middleware/audit-logger.js';
-import { logger, loggingMiddleware, httpLogger } from './logging/index.js';
+import {
+  logger,
+  loggingMiddleware,
+  httpLogger,
+  sentryErrorMiddleware,
+} from './logging/index.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
@@ -30,6 +35,7 @@ export const createApp = async () => {
   const __dirname = path.dirname(__filename);
 
   const app = express();
+
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
@@ -221,6 +227,9 @@ export const createApp = async () => {
   startTrustWorker();
   // Start retention worker if enabled
   startRetentionWorker();
+
+  // Sentry Error Handler must be before any other error middleware and after all controllers
+  app.use(sentryErrorMiddleware);
 
   return app;
 };

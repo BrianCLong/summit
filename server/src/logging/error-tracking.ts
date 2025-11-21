@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { logger } from './logger';
+import { RequestHandler, ErrorRequestHandler } from 'express';
 
 export interface ErrorTracker {
   captureException(error: Error, context?: Record<string, any>): void;
@@ -47,6 +48,7 @@ export const initErrorTracking = () => {
       dsn: process.env.SENTRY_DSN,
       integrations: [
         nodeProfilingIntegration(),
+        Sentry.expressIntegration(),
       ],
       // Performance Monitoring
       tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || '1.0'),
@@ -55,6 +57,8 @@ export const initErrorTracking = () => {
       environment: process.env.NODE_ENV || 'development',
     });
     logger.info('Sentry initialized');
+  } else {
+    logger.info('Sentry DSN not found, using local error tracking');
   }
 };
 
@@ -67,3 +71,12 @@ export const getErrorTracker = (): ErrorTracker => {
 };
 
 export const errorTracker = getErrorTracker();
+
+// Express Middleware
+export const sentryErrorMiddleware: ErrorRequestHandler = (err, req, res, next) => {
+  if (process.env.SENTRY_DSN) {
+    // @ts-ignore - Types for expressErrorHandler might be tricky depending on version
+    return Sentry.expressErrorHandler()(err, req, res, next);
+  }
+  next(err);
+};
