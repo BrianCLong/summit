@@ -4,6 +4,7 @@ import { DataProfiler } from './profiler/DataProfiler.js';
 import { FusionEngine } from './fusion/FusionEngine.js';
 import { ConfidenceScorer } from './confidence/ConfidenceScorer.js';
 import { ContextPersistence } from './context/ContextPersistence.js';
+import { EventPublisher } from './events/EventPublisher.js';
 import {
   DiscoveredSource,
   DataProfile,
@@ -21,6 +22,8 @@ interface EngineConfig {
   autoIngestThreshold: number;
   enableAutoDiscovery: boolean;
   enableLearning: boolean;
+  enableEventPublishing: boolean;
+  redisUrl?: string;
 }
 
 interface AutomationRecipe {
@@ -45,6 +48,7 @@ export class DataDiscoveryFusionEngine extends EventEmitter {
   private fusion: FusionEngine;
   private confidence: ConfidenceScorer;
   private context: ContextPersistence;
+  private eventPublisher: EventPublisher;
 
   private sources: Map<string, DiscoveredSource> = new Map();
   private profiles: Map<string, DataProfile> = new Map();
@@ -62,6 +66,8 @@ export class DataDiscoveryFusionEngine extends EventEmitter {
       autoIngestThreshold: config.autoIngestThreshold ?? 0.8,
       enableAutoDiscovery: config.enableAutoDiscovery ?? true,
       enableLearning: config.enableLearning ?? true,
+      enableEventPublishing: config.enableEventPublishing ?? true,
+      redisUrl: config.redisUrl,
     };
 
     // Initialize components
@@ -86,6 +92,7 @@ export class DataDiscoveryFusionEngine extends EventEmitter {
 
     this.confidence = new ConfidenceScorer();
     this.context = new ContextPersistence();
+    this.eventPublisher = new EventPublisher({ redisUrl: this.config.redisUrl });
 
     this.startTime = new Date();
 
@@ -103,7 +110,12 @@ export class DataDiscoveryFusionEngine extends EventEmitter {
   /**
    * Start the engine (automated discovery)
    */
-  start(): void {
+  async start(): Promise<void> {
+    // Connect event publisher
+    if (this.config.enableEventPublishing) {
+      await this.eventPublisher.connect();
+    }
+
     if (this.config.enableAutoDiscovery) {
       this.scanner.start();
       logger.info('Automated discovery started');
@@ -113,8 +125,9 @@ export class DataDiscoveryFusionEngine extends EventEmitter {
   /**
    * Stop the engine
    */
-  stop(): void {
+  async stop(): Promise<void> {
     this.scanner.stop();
+    await this.eventPublisher.disconnect();
     logger.info('Engine stopped');
   }
 

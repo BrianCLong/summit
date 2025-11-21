@@ -12,6 +12,8 @@ async function main() {
     autoIngestThreshold: parseFloat(process.env.AUTO_INGEST_THRESHOLD || '0.8'),
     enableAutoDiscovery: process.env.AUTO_DISCOVERY !== 'false',
     enableLearning: process.env.ENABLE_LEARNING !== 'false',
+    enableEventPublishing: process.env.ENABLE_EVENTS !== 'false',
+    redisUrl: process.env.REDIS_URL,
   });
 
   // Create Express app
@@ -22,7 +24,7 @@ async function main() {
   app.use('/api/v1', createRoutes(engine));
 
   // Start engine
-  engine.start();
+  await engine.start();
 
   // Start server
   app.listen(PORT, () => {
@@ -30,9 +32,9 @@ async function main() {
   });
 
   // Graceful shutdown
-  process.on('SIGTERM', () => {
+  process.on('SIGTERM', async () => {
     logger.info('Shutting down...');
-    engine.stop();
+    await engine.stop();
     process.exit(0);
   });
 }
