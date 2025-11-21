@@ -5,9 +5,10 @@
  * predictive analytics, scenario planning, and strategic recommendations.
  */
 
-import { trace, SpanStatusCode } from '@opentelemetry/api';
+import fetch from 'node-fetch';
+import { getTracer } from '../otel';
 
-const tracer = trace.getTracer('strategic-foresight-client');
+const tracer = getTracer('strategic-foresight-client');
 
 export interface TrendPrediction {
   trendId: string;
@@ -152,11 +153,17 @@ export class StrategicForesightClient {
   private timeout: number;
 
   constructor(options?: { baseUrl?: string; timeout?: number }) {
-    this.baseUrl = options?.baseUrl || process.env.STRATEGIC_FORESIGHT_URL || 'http://strategic-foresight:8003';
+    this.baseUrl =
+      options?.baseUrl ||
+      process.env.STRATEGIC_FORESIGHT_URL ||
+      'http://strategic-foresight:8003';
     this.timeout = options?.timeout || 30000;
   }
 
-  private async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+  private async fetchWithTimeout<T>(
+    endpoint: string,
+    options: Record<string, unknown> = {},
+  ): Promise<T> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
@@ -166,15 +173,17 @@ export class StrategicForesightClient {
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
-          ...options.headers,
+          ...(options.headers as Record<string, string>),
         },
-      });
+      } as any);
 
       if (!response.ok) {
-        throw new Error(`Strategic Foresight API error: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Strategic Foresight API error: ${response.status} ${response.statusText}`,
+        );
       }
 
-      return response.json();
+      return response.json() as Promise<T>;
     } finally {
       clearTimeout(timeoutId);
     }
@@ -188,7 +197,9 @@ export class StrategicForesightClient {
       description: trend.description,
       confidence: trend.confidence,
       impactScore: trend.impact_score,
-      timeHorizon: reverseTimeHorizonMap[trend.time_horizon] as TrendPrediction['timeHorizon'],
+      timeHorizon: reverseTimeHorizonMap[
+        trend.time_horizon
+      ] as TrendPrediction['timeHorizon'],
       keyDrivers: trend.key_drivers,
       affectedSectors: trend.affected_sectors,
       recommendedActions: trend.recommended_actions,
@@ -274,160 +285,149 @@ export class StrategicForesightClient {
   }
 
   async analyze(input: ForesightAnalysisInput): Promise<ForesightAnalysis> {
-    return tracer.startActiveSpan('strategicForesight.analyze', async (span) => {
-      try {
-        span.setAttribute('foresight.domain', input.domain);
+    const span = tracer.startSpan('strategicForesight.analyze');
+    try {
+      const response = await this.fetchWithTimeout<any>('/analyze', {
+        method: 'POST',
+        body: JSON.stringify({
+          domain: input.domain,
+          focus_areas: input.focusAreas || [],
+          competitors: input.competitors || [],
+          time_horizon: timeHorizonMap[input.timeHorizon || 'MEDIUM_TERM'],
+          scenario_count: input.scenarioCount || 3,
+          include_partnerships: input.includePartnerships !== false,
+        }),
+      });
 
-        const response = await this.fetch<any>('/analyze', {
-          method: 'POST',
-          body: JSON.stringify({
-            domain: input.domain,
-            focus_areas: input.focusAreas || [],
-            competitors: input.competitors || [],
-            time_horizon: timeHorizonMap[input.timeHorizon || 'MEDIUM_TERM'],
-            scenario_count: input.scenarioCount || 3,
-            include_partnerships: input.includePartnerships !== false,
-          }),
-        });
-
-        span.setStatus({ code: SpanStatusCode.OK });
-
-        return {
-          analysisId: response.analysis_id,
-          generatedAt: response.generated_at,
-          domain: response.domain,
-          trends: response.trends.map((t: any) => this.transformTrend(t)),
-          threats: response.threats.map((t: any) => this.transformThreat(t)),
-          partnerships: response.partnerships.map((p: any) => this.transformPartnership(p)),
-          scenarios: response.scenarios.map((s: any) => this.transformScenario(s)),
-          recommendations: response.recommendations.map((r: any) => this.transformRecommendation(r)),
-          executiveSummary: response.executive_summary,
-          processingTimeMs: response.processing_time_ms,
-        };
-      } catch (error) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      return {
+        analysisId: response.analysis_id,
+        generatedAt: response.generated_at,
+        domain: response.domain,
+        trends: response.trends.map((t: any) => this.transformTrend(t)),
+        threats: response.threats.map((t: any) => this.transformThreat(t)),
+        partnerships: response.partnerships.map((p: any) =>
+          this.transformPartnership(p),
+        ),
+        scenarios: response.scenarios.map((s: any) =>
+          this.transformScenario(s),
+        ),
+        recommendations: response.recommendations.map((r: any) =>
+          this.transformRecommendation(r),
+        ),
+        executiveSummary: response.executive_summary,
+        processingTimeMs: response.processing_time_ms,
+      };
+    } finally {
+      span.end();
+    }
   }
 
   async getMarketTrends(input: MarketSignalInput): Promise<TrendPrediction[]> {
-    return tracer.startActiveSpan('strategicForesight.getMarketTrends', async (span) => {
-      try {
-        const response = await this.fetch<any[]>('/trends', {
-          method: 'POST',
-          body: JSON.stringify({
-            domain: input.domain,
-            indicators: input.indicators || [],
-            entities: input.entities || [],
-            time_horizon: timeHorizonMap[input.timeHorizon || 'MEDIUM_TERM'],
-          }),
-        });
+    const span = tracer.startSpan('strategicForesight.getMarketTrends');
+    try {
+      const response = await this.fetchWithTimeout<any[]>('/trends', {
+        method: 'POST',
+        body: JSON.stringify({
+          domain: input.domain,
+          indicators: input.indicators || [],
+          entities: input.entities || [],
+          time_horizon: timeHorizonMap[input.timeHorizon || 'MEDIUM_TERM'],
+        }),
+      });
 
-        span.setStatus({ code: SpanStatusCode.OK });
-        return response.map((t) => this.transformTrend(t));
-      } catch (error) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      return response.map((t) => this.transformTrend(t));
+    } finally {
+      span.end();
+    }
   }
 
-  async getCompetitiveThreats(competitors: string[], domain: string): Promise<CompetitiveThreat[]> {
-    return tracer.startActiveSpan('strategicForesight.getCompetitiveThreats', async (span) => {
-      try {
-        const response = await this.fetch<any[]>(`/threats?domain=${encodeURIComponent(domain)}`, {
+  async getCompetitiveThreats(
+    competitors: string[],
+    domain: string,
+  ): Promise<CompetitiveThreat[]> {
+    const span = tracer.startSpan('strategicForesight.getCompetitiveThreats');
+    try {
+      const response = await this.fetchWithTimeout<any[]>(
+        `/threats?domain=${encodeURIComponent(domain)}`,
+        {
           method: 'POST',
           body: JSON.stringify(competitors),
-        });
+        },
+      );
 
-        span.setStatus({ code: SpanStatusCode.OK });
-        return response.map((t) => this.transformThreat(t));
-      } catch (error) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      return response.map((t) => this.transformThreat(t));
+    } finally {
+      span.end();
+    }
   }
 
-  async getPartnershipOpportunities(domain: string, capabilities: string[] = []): Promise<PartnershipOpportunity[]> {
-    return tracer.startActiveSpan('strategicForesight.getPartnershipOpportunities', async (span) => {
-      try {
-        const params = new URLSearchParams({ domain });
-        capabilities.forEach((c) => params.append('capabilities', c));
+  async getPartnershipOpportunities(
+    domain: string,
+    capabilities: string[] = [],
+  ): Promise<PartnershipOpportunity[]> {
+    const span = tracer.startSpan(
+      'strategicForesight.getPartnershipOpportunities',
+    );
+    try {
+      const params = new URLSearchParams({ domain });
+      capabilities.forEach((c) => params.append('capabilities', c));
 
-        const response = await this.fetch<any[]>(`/partnerships?${params.toString()}`, {
+      const response = await this.fetchWithTimeout<any[]>(
+        `/partnerships?${params.toString()}`,
+        {
           method: 'POST',
-        });
+        },
+      );
 
-        span.setStatus({ code: SpanStatusCode.OK });
-        return response.map((p) => this.transformPartnership(p));
-      } catch (error) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      return response.map((p) => this.transformPartnership(p));
+    } finally {
+      span.end();
+    }
   }
 
   async getScenarios(input: ScenarioInput): Promise<Scenario[]> {
-    return tracer.startActiveSpan('strategicForesight.getScenarios', async (span) => {
-      try {
-        const response = await this.fetch<any[]>('/scenarios', {
-          method: 'POST',
-          body: JSON.stringify({
-            base_conditions: JSON.parse(input.baseConditions),
-            variables: input.variables,
-            constraints: input.constraints || [],
-            time_horizon: timeHorizonMap[input.timeHorizon || 'MEDIUM_TERM'],
-            scenario_count: input.scenarioCount || 3,
-          }),
-        });
+    const span = tracer.startSpan('strategicForesight.getScenarios');
+    try {
+      const response = await this.fetchWithTimeout<any[]>('/scenarios', {
+        method: 'POST',
+        body: JSON.stringify({
+          base_conditions: JSON.parse(input.baseConditions),
+          variables: input.variables,
+          constraints: input.constraints || [],
+          time_horizon: timeHorizonMap[input.timeHorizon || 'MEDIUM_TERM'],
+          scenario_count: input.scenarioCount || 3,
+        }),
+      });
 
-        span.setStatus({ code: SpanStatusCode.OK });
-        return response.map((s) => this.transformScenario(s));
-      } catch (error) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      return response.map((s) => this.transformScenario(s));
+    } finally {
+      span.end();
+    }
   }
 
-  async getPivotOpportunities(input: PivotAnalysisInput): Promise<PivotOpportunity[]> {
-    return tracer.startActiveSpan('strategicForesight.getPivotOpportunities', async (span) => {
-      try {
-        const response = await this.fetch<any[]>('/pivots', {
-          method: 'POST',
-          body: JSON.stringify({
-            current_position: input.currentPosition,
-            capabilities: input.capabilities,
-            market_signals: input.marketSignals,
-            constraints: input.constraints || [],
-          }),
-        });
+  async getPivotOpportunities(
+    input: PivotAnalysisInput,
+  ): Promise<PivotOpportunity[]> {
+    const span = tracer.startSpan('strategicForesight.getPivotOpportunities');
+    try {
+      const response = await this.fetchWithTimeout<any[]>('/pivots', {
+        method: 'POST',
+        body: JSON.stringify({
+          current_position: input.currentPosition,
+          capabilities: input.capabilities,
+          market_signals: input.marketSignals,
+          constraints: input.constraints || [],
+        }),
+      });
 
-        span.setStatus({ code: SpanStatusCode.OK });
-        return response.map((p) => this.transformPivot(p));
-      } catch (error) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+      return response.map((p) => this.transformPivot(p));
+    } finally {
+      span.end();
+    }
   }
 
   async health(): Promise<{ status: string; service: string; timestamp: string }> {
-    return this.fetch('/health');
+    return this.fetchWithTimeout('/health');
   }
 }
 
