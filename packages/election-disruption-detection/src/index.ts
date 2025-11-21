@@ -8,152 +8,36 @@
  * - Real-time anomaly correlation across electoral phases
  */
 
+// Re-export types
+export * from './types.js';
+
+// Export base classes
+export { ThreatDetector } from './base/index.js';
+
+// Export sub-modules
 export * from './detectors/index.js';
 export * from './models/index.js';
 export * from './fusion/index.js';
 export * from './attribution/index.js';
 
-// Core Types
-export interface ElectionThreatSignal {
-  id: string;
-  type: ThreatType;
-  confidence: number;
-  severity: SeverityLevel;
-  vectors: ThreatVector[];
-  temporalContext: TemporalContext;
-  geospatialContext: GeospatialContext;
-  attribution: AttributionAssessment;
-  evidence: Evidence[];
-  mitigationRecommendations: Mitigation[];
-}
+// Import types for use in this file
+import type {
+  ElectionThreatSignal,
+  ThreatType,
+  SeverityLevel,
+  RawSignal,
+  ElectionContext,
+  ElectionThreatAssessment,
+  RiskAssessment,
+  Mitigation,
+  EngineConfig,
+  FusionConfig,
+  AttributionConfig,
+  AdversarialConfig,
+  AttributionAssessment,
+} from './types.js';
 
-export type ThreatType =
-  | 'VOTER_SUPPRESSION'
-  | 'INFRASTRUCTURE_ATTACK'
-  | 'DISINFORMATION_CAMPAIGN'
-  | 'FOREIGN_INTERFERENCE'
-  | 'COORDINATED_HARASSMENT'
-  | 'DEEPFAKE_INJECTION'
-  | 'POLL_WORKER_INTIMIDATION'
-  | 'BALLOT_MANIPULATION'
-  | 'REGISTRATION_ATTACK'
-  | 'RESULTS_MANIPULATION'
-  | 'PERCEPTION_HACK'
-  | 'LEGITIMACY_ATTACK';
-
-export type ThreatVector =
-  | 'SOCIAL_MEDIA'
-  | 'CYBER_INFRASTRUCTURE'
-  | 'PHYSICAL'
-  | 'LEGAL_PROCEDURAL'
-  | 'MEDIA_NARRATIVE'
-  | 'GRASSROOTS_ASTROTURF';
-
-export type SeverityLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' | 'INFORMATIONAL';
-
-export interface TemporalContext {
-  phase: ElectionPhase;
-  daysToElection: number;
-  timeWindow: TimeWindow;
-  trendDirection: 'ESCALATING' | 'STABLE' | 'DECLINING';
-  velocity: number;
-}
-
-export type ElectionPhase =
-  | 'PRE_REGISTRATION'
-  | 'REGISTRATION'
-  | 'EARLY_VOTING'
-  | 'CAMPAIGN'
-  | 'ELECTION_DAY'
-  | 'COUNTING'
-  | 'CERTIFICATION'
-  | 'POST_CERTIFICATION';
-
-export interface GeospatialContext {
-  jurisdictions: string[];
-  precincts: string[];
-  swingIndicator: number;
-  demographicOverlays: DemographicOverlay[];
-  infrastructureDependencies: string[];
-}
-
-export interface DemographicOverlay {
-  group: string;
-  vulnerabilityScore: number;
-  historicalTargeting: boolean;
-}
-
-export interface AttributionAssessment {
-  primaryActor: ActorProfile | null;
-  confidence: number;
-  methodology: AttributionMethod;
-  indicators: AttributionIndicator[];
-  alternativeHypotheses: AlternativeHypothesis[];
-}
-
-export interface ActorProfile {
-  id: string;
-  type: 'STATE' | 'NON_STATE' | 'DOMESTIC' | 'HYBRID' | 'UNKNOWN';
-  name?: string;
-  capabilities: string[];
-  historicalTTPs: string[];
-  motivation: string[];
-}
-
-export type AttributionMethod =
-  | 'TECHNICAL_FORENSICS'
-  | 'BEHAVIORAL_ANALYSIS'
-  | 'LINGUISTIC_FINGERPRINT'
-  | 'INFRASTRUCTURE_CORRELATION'
-  | 'OPERATIONAL_PATTERN'
-  | 'MULTI_INT_FUSION';
-
-export interface AttributionIndicator {
-  type: string;
-  value: string;
-  confidence: number;
-  source: string;
-}
-
-export interface AlternativeHypothesis {
-  actor: ActorProfile;
-  probability: number;
-  supportingEvidence: string[];
-  contradictingEvidence: string[];
-}
-
-export interface Evidence {
-  id: string;
-  type: EvidenceType;
-  source: string;
-  content: unknown;
-  timestamp: Date;
-  reliability: number;
-  chainOfCustody: string[];
-}
-
-export type EvidenceType =
-  | 'SOCIAL_POST'
-  | 'NETWORK_TRAFFIC'
-  | 'INFRASTRUCTURE_LOG'
-  | 'WITNESS_REPORT'
-  | 'DOCUMENT'
-  | 'MEDIA_ARTIFACT'
-  | 'TECHNICAL_INDICATOR';
-
-export interface Mitigation {
-  action: string;
-  priority: number;
-  timeframe: string;
-  stakeholders: string[];
-  effectivenessEstimate: number;
-  riskOfEscalation: number;
-}
-
-export interface TimeWindow {
-  start: Date;
-  end: Date;
-}
+import { ThreatDetector } from './base/index.js';
 
 /**
  * Main Election Disruption Detection Engine
@@ -219,7 +103,6 @@ export class ElectionDisruptionEngine {
     threats: ElectionThreatSignal[],
     context: ElectionContext
   ): ElectionThreatSignal[] {
-    // Identify coordinated temporal patterns
     return threats.map((threat) => ({
       ...threat,
       temporalContext: {
@@ -231,7 +114,7 @@ export class ElectionDisruptionEngine {
   }
 
   private calculateOverallRisk(threats: ElectionThreatSignal[]): RiskAssessment {
-    const severityWeights = {
+    const severityWeights: Record<SeverityLevel, number> = {
       CRITICAL: 1.0,
       HIGH: 0.7,
       MEDIUM: 0.4,
@@ -288,15 +171,12 @@ export class ElectionDisruptionEngine {
     context: ElectionContext
   ): Mitigation[] {
     const recommendations: Mitigation[] = [];
-
-    // Phase-specific recommendations
     const criticalThreats = threats.filter((t) => t.severity === 'CRITICAL');
 
     for (const threat of criticalThreats) {
       recommendations.push(...threat.mitigationRecommendations);
     }
 
-    // Deduplicate and prioritize
     return this.prioritizeMitigations(recommendations, context);
   }
 
@@ -306,7 +186,6 @@ export class ElectionDisruptionEngine {
   ): Mitigation[] {
     return mitigations
       .sort((a, b) => {
-        // Prioritize by urgency based on election proximity
         const urgencyA = a.priority * (1 + 1 / (context.daysToElection + 1));
         const urgencyB = b.priority * (1 + 1 / (context.daysToElection + 1));
         return urgencyB - urgencyA;
@@ -320,74 +199,11 @@ export class ElectionDisruptionEngine {
   }
 }
 
-// Supporting interfaces
-export interface EngineConfig {
-  fusion: FusionConfig;
-  attribution: AttributionConfig;
-  adversarial: AdversarialConfig;
-}
-
-export interface FusionConfig {
-  weights: Record<string, number>;
-  correlationThreshold: number;
-}
-
-export interface AttributionConfig {
-  minConfidence: number;
-  methods: AttributionMethod[];
-}
-
-export interface AdversarialConfig {
-  enabled: boolean;
-  detectionThreshold: number;
-}
-
-export interface RawSignal {
-  id: string;
-  source: string;
-  type: string;
-  data: unknown;
-  timestamp: Date;
-}
-
-export interface ElectionContext {
-  electionId: string;
-  jurisdiction: string;
-  currentPhase: ElectionPhase;
-  daysToElection: number;
-  historicalBaseline: unknown;
-}
-
-export interface ElectionThreatAssessment {
-  timestamp: Date;
-  context: ElectionContext;
-  threats: ElectionThreatSignal[];
-  overallRiskLevel: RiskAssessment;
-  recommendations: Mitigation[];
-  confidence: number;
-}
-
-export interface RiskAssessment {
-  level: SeverityLevel;
-  score: number;
-  trend: string;
-  keyDrivers: string[];
-}
-
-// Abstract base classes for detectors
-export abstract class ThreatDetector {
-  abstract analyze(
-    signals: RawSignal[],
-    context: ElectionContext
-  ): Promise<ElectionThreatSignal[]>;
-}
-
 export class MultiModalFusionEngine {
   constructor(private config: FusionConfig) {}
 
   async fuse(results: ElectionThreatSignal[][]): Promise<ElectionThreatSignal[]> {
     const allThreats = results.flat();
-    // Correlation and deduplication logic
     return this.correlateAndDeduplicate(allThreats);
   }
 
@@ -404,7 +220,7 @@ export class MultiModalFusionEngine {
   }
 
   private mergeThreats(threats: ElectionThreatSignal[]): ElectionThreatSignal {
-    const merged = threats[0];
+    const merged = { ...threats[0] };
     merged.confidence = Math.max(...threats.map((t) => t.confidence));
     merged.evidence = threats.flatMap((t) => t.evidence);
     return merged;
@@ -423,8 +239,7 @@ export class CausalAttributionEngine {
     );
   }
 
-  private async performAttribution(threat: ElectionThreatSignal): Promise<AttributionAssessment> {
-    // Multi-method attribution
+  private async performAttribution(_threat: ElectionThreatSignal): Promise<AttributionAssessment> {
     return {
       primaryActor: null,
       confidence: 0,
@@ -440,69 +255,67 @@ export class AdversarialDefenseLayer {
 
   async filterAdversarialInputs(signals: RawSignal[]): Promise<RawSignal[]> {
     if (!this.config.enabled) return signals;
-    // Filter out adversarial/poisoned inputs
     return signals.filter((s) => this.isClean(s));
   }
 
-  private isClean(signal: RawSignal): boolean {
-    // Adversarial detection logic
+  private isClean(_signal: RawSignal): boolean {
     return true;
   }
 }
 
-// Placeholder detector implementations
+// Internal detector implementations (used by engine)
 class VoterSuppressionDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }
 
 class DisinformationCampaignDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }
 
 class InfrastructureAttackDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }
 
 class ForeignInterferenceDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }
 
 class DeepfakeInjectionDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }
 
 class CoordinatedHarassmentDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }
 
 class PerceptionHackDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }
 
 class LegitimacyAttackDetector extends ThreatDetector {
   constructor(private config: EngineConfig) { super(); }
-  async analyze(signals: RawSignal[], context: ElectionContext): Promise<ElectionThreatSignal[]> {
+  async analyze(_signals: RawSignal[], _context: ElectionContext): Promise<ElectionThreatSignal[]> {
     return [];
   }
 }

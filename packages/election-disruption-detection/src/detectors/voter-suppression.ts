@@ -9,13 +9,13 @@
  * - Technical attacks on registration systems
  */
 
-import {
-  ThreatDetector,
+import { ThreatDetector } from '../base/index.js';
+import type {
   RawSignal,
   ElectionContext,
   ElectionThreatSignal,
   SeverityLevel,
-} from '../index.js';
+} from '../types.js';
 
 export interface SuppressionIndicator {
   type: SuppressionType;

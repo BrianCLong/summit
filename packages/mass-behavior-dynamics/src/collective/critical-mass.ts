@@ -48,7 +48,7 @@ export class CriticalMassAnalyzer {
   analyzeCriticalMass(
     currentAdoption: number,
     networkMetrics: NetworkMetrics,
-    thresholdDistribution: ThresholdDistribution
+    thresholdDistribution: CriticalMassThresholdConfig
   ): CriticalMassAnalysis {
     // Estimate critical threshold
     const meanThreshold =
@@ -125,7 +125,7 @@ export class CriticalMassAnalyzer {
     return seeds;
   }
 
-  private estimateMeanThreshold(dist: ThresholdDistribution): number {
+  private estimateMeanThreshold(dist: CriticalMassThresholdConfig): number {
     return dist.mean || 0.25;
   }
 
@@ -149,7 +149,7 @@ export class CriticalMassAnalyzer {
     return metrics.topCentralityNodes?.slice(0, 5) || [];
   }
 
-  private identifyVulnerableSegments(dist: ThresholdDistribution): string[] {
+  private identifyVulnerableSegments(dist: CriticalMassThresholdConfig): string[] {
     return dist.lowThresholdSegments || [];
   }
 
@@ -234,7 +234,7 @@ export interface NetworkMetrics {
   adoptionVelocity?: number;
 }
 
-export interface ThresholdDistribution {
+export interface CriticalMassThresholdConfig {
   type: 'SIMPLE' | 'COMPLEX';
   mean?: number;
   variance?: number;

@@ -6,12 +6,12 @@
  * democratic trust rather than vote counts.
  */
 
-import {
-  ThreatDetector,
+import { ThreatDetector } from '../base/index.js';
+import type {
   RawSignal,
   ElectionContext,
   ElectionThreatSignal,
-} from '../index.js';
+} from '../types.js';
 
 export type LegitimacyAttackType =
   | 'INSTITUTIONAL_DELEGITIMIZATION'

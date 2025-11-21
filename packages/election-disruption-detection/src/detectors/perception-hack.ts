@@ -12,12 +12,12 @@
  * - Coordinated "liar's dividend" exploitation
  */
 
-import {
-  ThreatDetector,
+import { ThreatDetector } from '../base/index.js';
+import type {
   RawSignal,
   ElectionContext,
   ElectionThreatSignal,
-} from '../index.js';
+} from '../types.js';
 
 export interface PerceptionHackIndicator {
   narrative: string;

@@ -529,7 +529,7 @@ export class MassBehaviorEngine {
 
   private identifyInterventions(indicators: PhaseTransitionIndicator[]): InterventionOpportunity[] {
     return indicators
-      .filter((i) => i.preventedOutcome?.preventionWindow)
+      .filter((i) => i.predictedOutcome?.preventionWindow)
       .map((i) => ({
         targetTransition: i.type,
         timeWindow: i.timeToTransition,
