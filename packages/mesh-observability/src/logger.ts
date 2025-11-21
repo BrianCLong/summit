@@ -172,9 +172,14 @@ export class Logger {
  * Create a logger for a service.
  */
 export function createLogger(service: string, level: LogLevel = 'info'): Logger {
+  // Check if running in browser or Node
+  const isPretty = typeof globalThis !== 'undefined' &&
+    typeof (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV === 'string' &&
+    (globalThis as { process?: { env?: { NODE_ENV?: string } } }).process?.env?.NODE_ENV !== 'production';
+
   return new Logger({
     service,
     level,
-    pretty: process.env.NODE_ENV !== 'production',
+    pretty: isPretty,
   });
 }

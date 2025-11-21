@@ -171,10 +171,10 @@ export abstract class BaseAgent {
    * @param services - Mesh services available for task execution
    * @returns Task output with results or error
    */
-  abstract onTaskReceived<TIn, TOut>(
-    input: TaskInput<TIn>,
+  abstract onTaskReceived(
+    input: TaskInput<unknown>,
     services: AgentServices
-  ): Promise<TaskOutput<TOut>>;
+  ): Promise<TaskOutput<unknown>>;
 
   // ---------------------------------------------------------------------------
   // LIFECYCLE HOOKS (optional, override as needed)
@@ -302,7 +302,7 @@ export abstract class BaseAgent {
   /**
    * Helper to create a failed task output.
    */
-  protected failure(taskId: UUID, error: TaskError, metadata?: Partial<TaskOutput['metadata']>): TaskOutput {
+  protected failure<T = unknown>(taskId: UUID, error: TaskError, metadata?: Partial<TaskOutput['metadata']>): TaskOutput<T> {
     return {
       taskId,
       status: 'failed',

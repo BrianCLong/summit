@@ -32,3 +32,20 @@ export { CriticAgent } from './agents/CriticAgent.js';
 export { ResearchAgent } from './agents/ResearchAgent.js';
 export { PolicyGuardianAgent } from './agents/PolicyGuardianAgent.js';
 export { ProvenanceAuditorAgent } from './agents/ProvenanceAuditorAgent.js';
+export { RedTeamAgent } from './agents/RedTeamAgent.js';
+export { JudgeAgent } from './agents/JudgeAgent.js';
+
+// Tools
+export {
+  ToolRegistry,
+  ToolBuilder,
+  GitTool,
+  FileReadTool,
+  FileWriteTool,
+  HttpFetchTool,
+  GraphQueryTool,
+  SearchTool,
+  ShellTool,
+  createDefaultToolRegistry,
+  defineTool,
+} from './tools.js';

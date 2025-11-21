@@ -8,3 +8,5 @@ export { CriticAgent } from './CriticAgent.js';
 export { ResearchAgent } from './ResearchAgent.js';
 export { PolicyGuardianAgent } from './PolicyGuardianAgent.js';
 export { ProvenanceAuditorAgent } from './ProvenanceAuditorAgent.js';
+export { RedTeamAgent } from './RedTeamAgent.js';
+export { JudgeAgent } from './JudgeAgent.js';
