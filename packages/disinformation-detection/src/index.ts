@@ -4,6 +4,7 @@
  */
 
 export * from './cross-platform/correlation-engine';
+export * from './temporal/network-evolution';
 
 // Types
 export interface DisinformationAnalysisResult {

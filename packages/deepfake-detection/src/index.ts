@@ -11,6 +11,8 @@ export * from './neural/fingerprinting-engine';
 export * from './adversarial/adversarial-detector';
 export * from './streaming/streaming-engine';
 export * from './explainable/explainable-ai';
+export * from './ensemble/meta-learner';
+export * from './multimodal/fusion-engine';
 
 import { FacialDeepfakeDetector } from './facial/facial-detector';
 import { VoiceDeepfakeDetector } from './voice/voice-detector';
