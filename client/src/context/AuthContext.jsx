@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo, useCallback } from 'react';
 import { useQuery } from '@apollo/client';
 import { CURRENT_USER } from '../graphql/user.gql.js';
 
@@ -40,17 +40,29 @@ export function AuthProvider({ children }) {
     fetchPolicy: 'cache-first',
   });
   const user = data?.me;
-  const permissions = user ? ROLE_PERMISSIONS[user.role] || [] : [];
 
-  const hasRole = (role) => user?.role === role;
-  const hasPermission = (perm) =>
-    permissions.includes('*') || permissions.includes(perm);
-
-  return (
-    <AuthContext.Provider value={{ user, loading, hasRole, hasPermission }}>
-      {children}
-    </AuthContext.Provider>
+  // Memoize permissions calculation to avoid recomputation on every render
+  const permissions = useMemo(
+    () => (user ? ROLE_PERMISSIONS[user.role] || [] : []),
+    [user]
   );
+
+  // Memoize hasRole function to prevent recreation on every render
+  const hasRole = useCallback((role) => user?.role === role, [user]);
+
+  // Memoize hasPermission function to prevent recreation on every render
+  const hasPermission = useCallback(
+    (perm) => permissions.includes('*') || permissions.includes(perm),
+    [permissions]
+  );
+
+  // Memoize the context value to prevent unnecessary re-renders of consumers
+  const value = useMemo(
+    () => ({ user, loading, hasRole, hasPermission }),
+    [user, loading, hasRole, hasPermission]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
