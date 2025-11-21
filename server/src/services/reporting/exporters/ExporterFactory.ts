@@ -8,6 +8,10 @@ import { HTMLExporter } from './HTMLExporter.js';
 import { JSONExporter } from './JSONExporter.js';
 import { CSVExporter } from './CSVExporter.js';
 import { PDFExporter } from './PDFExporter.js';
+import { DOCXExporter } from './DOCXExporter.js';
+import { ExcelExporter } from './ExcelExporter.js';
+import { PowerPointExporter } from './PowerPointExporter.js';
+import { GephiExporter } from './GephiExporter.js';
 
 export class ExporterFactory {
   private exporters: Map<string, IReportExporter> = new Map();
@@ -24,6 +28,10 @@ export class ExporterFactory {
     this.registerExporter(new JSONExporter());
     this.registerExporter(new CSVExporter());
     this.registerExporter(new PDFExporter());
+    this.registerExporter(new DOCXExporter());
+    this.registerExporter(new ExcelExporter());
+    this.registerExporter(new PowerPointExporter());
+    this.registerExporter(new GephiExporter());
   }
 
   /**
