@@ -71,21 +71,24 @@ describe('Neo4jQueryCache', () => {
       expect(cache.get(cypher, undefined)).toEqual(result);
     });
 
-    it('should return null for expired entries', async () => {
+    it('should return null for expired entries', () => {
+      jest.useFakeTimers();
       const shortTTLCache = new Neo4jQueryCache(100, 100); // 100ms TTL
       const cypher = 'MATCH (n:Entity) RETURN n';
       const result = { records: [] };
 
       shortTTLCache.set(cypher, {}, result);
 
-      // Wait for expiration
-      await new Promise(resolve => setTimeout(resolve, 150));
+      // Advance time past expiration using fake timers
+      jest.advanceTimersByTime(150);
 
       const cached = shortTTLCache.get(cypher, {});
       expect(cached).toBeNull();
+      jest.useRealTimers();
     });
 
-    it('should handle custom TTL', async () => {
+    it('should handle custom TTL', () => {
+      jest.useFakeTimers();
       const cypher = 'MATCH (n:Entity) RETURN n';
       const result = { records: [] };
 
@@ -95,11 +98,12 @@ describe('Neo4jQueryCache', () => {
       // Should be available immediately
       expect(cache.get(cypher, {})).toEqual(result);
 
-      // Wait for expiration
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Advance time past expiration using fake timers
+      jest.advanceTimersByTime(100);
 
       // Should be expired
       expect(cache.get(cypher, {})).toBeNull();
+      jest.useRealTimers();
     });
 
     it('should handle errors gracefully when caching', () => {

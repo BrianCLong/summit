@@ -69,15 +69,16 @@ describe('Federal Pack Integration Tests', () => {
       expect(health.status).toMatch(/healthy|degraded|unhealthy/);
     });
 
-    // Test would use actual HSM in production environment
-    it.skip('should notarize Merkle root with HSM signature', async () => {
+    // Test uses mock HSM in CI environment (HSM_ENABLED=false in beforeAll)
+    it('should notarize Merkle root with HSM signature (mock)', async () => {
       const testRoot = crypto.randomBytes(32).toString('hex');
       const notarized = await dualNotary.notarizeRoot(testRoot);
 
       expect(notarized.rootHex).toBe(testRoot);
-      expect(notarized.hsmSignature).toBeTruthy();
-      expect(notarized.notarizedBy).toContain('HSM');
-      expect(notarized.verification.hsmValid).toBe(true);
+      // When using mock (hsmEnabled: false), verify mock behavior
+      expect(notarized).toHaveProperty('notarizedBy');
+      // Mock should indicate it's not using real HSM
+      expect(notarized.notarizedBy).toMatch(/MOCK|mock|software/i);
     });
   });
 

@@ -59,25 +59,40 @@ describe('Activity Feed', () => {
       }
     `;
 
-    // Allow some time for async recording (fire-and-forget in Repo)
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Poll for activity with exponential backoff instead of fixed timeout
+    // This is more reliable than waiting a fixed 1000ms
+    const maxAttempts = 10;
+    const baseDelay = 100; // Start with 100ms
+    let activities = [];
+    let myActivity: any = null;
+    let attempt = 0;
 
-    const activityRes = await request(app)
-      .post('/graphql')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ query: activitiesQuery });
+    while (attempt < maxAttempts) {
+      const activityRes = await request(app)
+        .post('/graphql')
+        .set('Authorization', `Bearer ${token}`)
+        .send({ query: activitiesQuery });
 
-    if (activityRes.body.errors) {
-      console.error('Activity Query Errors:', JSON.stringify(activityRes.body.errors, null, 2));
+      if (activityRes.body.errors) {
+        console.error('Activity Query Errors:', JSON.stringify(activityRes.body.errors, null, 2));
+      }
+
+      expect(activityRes.status).toBe(200);
+      expect(activityRes.body.errors).toBeUndefined();
+
+      activities = activityRes.body.data.activities;
+      myActivity = activities.find((a: any) => a.resourceId === investigationId);
+
+      if (myActivity) {
+        break;
+      }
+
+      // Exponential backoff: 100ms, 150ms, 225ms, 337ms, etc.
+      await new Promise(resolve => setTimeout(resolve, baseDelay * Math.pow(1.5, attempt)));
+      attempt++;
     }
 
-    expect(activityRes.status).toBe(200);
-    expect(activityRes.body.errors).toBeUndefined();
-
-    const activities = activityRes.body.data.activities;
     expect(activities.length).toBeGreaterThan(0);
-
-    const myActivity = activities.find((a: any) => a.resourceId === investigationId);
     expect(myActivity).toBeDefined();
     expect(myActivity.actionType).toBe('INVESTIGATION_CREATED');
     expect(myActivity.resourceType).toBe('investigation');
