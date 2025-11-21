@@ -9,8 +9,8 @@
  * - Verification testing
  */
 
-import { createHash, randomUUID } from 'crypto';
-import { readFile, writeFile } from 'fs/promises';
+import { createHash, randomUUID } from 'node:crypto';
+import { readFile, writeFile } from 'node:fs/promises';
 import type {
   Vulnerability,
   CodeChange,

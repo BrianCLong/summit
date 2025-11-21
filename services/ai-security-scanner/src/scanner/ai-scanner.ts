@@ -2,9 +2,9 @@
  * AI Security Scanner - Core scanning engine with AI-powered analysis
  */
 
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { glob } from 'glob';
-import { readFile } from 'fs/promises';
+import { readFile } from 'node:fs/promises';
 import type {
   ScanConfig,
   ScanResult,
