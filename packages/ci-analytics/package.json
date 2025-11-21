@@ -1,0 +1,21 @@
+{
+  "name": "@intelgraph/ci-analytics",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "Advanced ML analytics, graph correlation, and predictive modeling for counterintelligence",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/insider-threat": "workspace:*",
+    "@intelgraph/cyber-counterintel": "workspace:*",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
