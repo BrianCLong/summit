@@ -1,0 +1,87 @@
+{
+  "name": "@intelgraph/graphql-governance",
+  "version": "1.0.0",
+  "description": "GraphQL Schema Governance and Validation for IntelGraph",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./schema-registry": {
+      "import": "./dist/schema-registry.js",
+      "types": "./dist/schema-registry.d.ts"
+    },
+    "./validation-rules": {
+      "import": "./dist/validation-rules.js",
+      "types": "./dist/validation-rules.d.ts"
+    },
+    "./directives/auth": {
+      "import": "./dist/directives/auth.js",
+      "types": "./dist/directives/auth.d.ts"
+    },
+    "./complexity-calculator": {
+      "import": "./dist/complexity-calculator.js",
+      "types": "./dist/complexity-calculator.d.ts"
+    },
+    "./performance-monitor": {
+      "import": "./dist/performance-monitor.js",
+      "types": "./dist/performance-monitor.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "lint": "eslint . --ext .ts",
+    "validate": "tsx scripts/validate-schema.ts",
+    "register": "tsx scripts/register-schema.ts",
+    "docs": "tsx scripts/generate-docs.ts"
+  },
+  "dependencies": {
+    "@graphql-inspector/core": "^5.0.0",
+    "@graphql-tools/utils": "^10.0.0",
+    "graphql": "^16.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/jest": "^29.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.3.0"
+  },
+  "peerDependencies": {
+    "@apollo/server": "^4.0.0",
+    "@apollo/gateway": "^2.0.0",
+    "@apollo/subgraph": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@apollo/server": {
+      "optional": true
+    },
+    "@apollo/gateway": {
+      "optional": true
+    },
+    "@apollo/subgraph": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "graphql",
+    "schema",
+    "governance",
+    "validation",
+    "federation",
+    "apollo"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}
