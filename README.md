@@ -45,6 +45,16 @@ make smoke              # golden path automation against seeded data
 - `docs/ONBOARDING.md` – day-one onboarding.
 - `docs/README.md` – documentation index, policies, and archived plans.
 
+### Master Planning Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [MASTER_PLANNING.md](MASTER_PLANNING.md) | Comprehensive planning hub - strategy, architecture, sprints, roadmap |
+| [SPRINT_INDEX.md](SPRINT_INDEX.md) | Catalog of 100+ sprint plans organized by type and timeline |
+| [DOCUMENTATION_MAP.md](DOCUMENTATION_MAP.md) | Navigation guide to all 100+ documentation files |
+| [EXECUTIVE_SUMMARY.md](EXECUTIVE_SUMMARY.md) | High-level stakeholder brief with business metrics |
+| [QUICK_REFERENCE.md](QUICK_REFERENCE.md) | Quick reference card for common commands and URLs |
+
 ### Production Secrets & Guardrails
 
 - `.env.example` is **DEV-ONLY** and documents every credential. `.env.production.sample` contains empty placeholders for production charts and pipelines.
