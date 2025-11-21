@@ -18,6 +18,23 @@ export { RevOpsAgent } from './revops/RevOpsAgent';
 // Re-export registry for convenience
 export { AgentRegistry, getAgentRegistry } from './base/AgentRegistry';
 
+// UI Integration
+export {
+  agentCommands,
+  commandCategories,
+  searchCommands,
+  getCommandById,
+  getCommandsForAgent,
+  createCommandPaletteProvider,
+  formatAgentResult,
+} from './ui/AgentCommands';
+export type {
+  AgentCommand,
+  CommandCategory,
+  CommandPaletteProvider,
+  FormattedResult,
+} from './ui/AgentCommands';
+
 /**
  * Initialize all agent archetypes and register them
  */

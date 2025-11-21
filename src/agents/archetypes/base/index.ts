@@ -5,3 +5,4 @@
 export * from './types';
 export * from './BaseAgentArchetype';
 export * from './AgentRegistry';
+export * from './AgentLogger';

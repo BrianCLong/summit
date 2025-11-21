@@ -376,3 +376,15 @@ export {
   ReflectiveLoop,
   StrategicCounterAntifragileOrchestrationNetwork,
 };
+
+// Agent Archetypes - Named, opinionated AI agents
+export * from './archetypes';
+export {
+  ChiefOfStaffAgent,
+  COOAgent,
+  RevOpsAgent,
+  AgentRegistry,
+  getAgentRegistry,
+  initializeAgentArchetypes,
+  shutdownAgentArchetypes,
+} from './archetypes';
