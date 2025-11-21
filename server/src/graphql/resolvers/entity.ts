@@ -78,21 +78,31 @@ const entityResolvers = {
       const session = driver.session();
       try {
         const tenantId = requireTenant(context);
-        let query = 'MATCH (n:Entity) WHERE n.tenantId = $tenantId';
+        let query = '';
         const params: any = { tenantId };
 
-        if (type) {
-          query += ' AND n.type = $type';
-          params.type = type;
-        }
-
         if (q) {
-          // Simple full-text search on properties
-          // For better performance, consider using a full-text search index.
-          // See: https://neo4j.com/docs/cypher-manual/current/indexes-for-full-text-search/
-          query +=
-            ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
-          params.q = q;
+          // Use optimized full-text search
+          // This relies on the 'entity_smart_search' index covering common text fields
+          query = `
+            CALL db.index.fulltext.queryNodes("entity_smart_search", $q) YIELD node AS n, score
+            WHERE n.tenantId = $tenantId
+          `;
+
+          // Simple prefix match for better UX
+          const sanitized = q.replace(/[\"\':\(\)\[\]\{\}\*\?]/g, '');
+          params.q = sanitized ? `${sanitized}*` : '*';
+
+          if (type) {
+            query += ' AND n.type = $type';
+            params.type = type;
+          }
+        } else {
+          query = 'MATCH (n:Entity) WHERE n.tenantId = $tenantId';
+          if (type) {
+            query += ' AND n.type = $type';
+            params.type = type;
+          }
         }
 
         query += ' RETURN n SKIP $offset LIMIT $limit';

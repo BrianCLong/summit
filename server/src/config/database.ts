@@ -111,6 +111,7 @@ async function createNeo4jConstraints(): Promise<void> {
       'CREATE INDEX user_username IF NOT EXISTS FOR (u:User) ON (u.username)',
       'CREATE FULLTEXT INDEX entity_search IF NOT EXISTS FOR (e:Entity) ON EACH [e.label, e.description]',
       'CREATE FULLTEXT INDEX investigation_search IF NOT EXISTS FOR (i:Investigation) ON EACH [i.title, i.description]',
+      "CREATE FULLTEXT INDEX entity_smart_search IF NOT EXISTS FOR (n:Entity) ON EACH [n.name, n.title, n.description, n.label, n.text, n.summary, n.content, n.props]",
     ];
 
     for (const index of indexes) {
