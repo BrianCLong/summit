@@ -22,4 +22,12 @@ export type {
   Transaction,
 } from './PaymentReconciliation';
 
+export { InvoiceService } from './InvoiceService';
+export type {
+  Invoice,
+  InvoiceLineItem,
+  InvoiceStatus,
+  TaxConfig,
+} from './InvoiceService';
+
 export { verifyStripeSig, handleWebhook } from './StripeWebhook';
