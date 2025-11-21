@@ -1,8 +1,10 @@
 # ADR-0002: Attribute-Based Access Control Gateway with Step-Up Authentication
 
-## Status
-
-Accepted
+**Date:** 2024-06-15
+**Status:** Accepted
+**Area:** Auth/Security
+**Owner:** Security Guild
+**Tags:** abac, opa, webauthn, policy, authorization
 
 ## Context
 
