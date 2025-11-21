@@ -3,8 +3,8 @@
  * Additional metrics for database connection pools, cache performance, and service health
  */
 
-import { Counter, Gauge, Histogram, Registry } from 'prom-client';
-import { registry } from '../monitoring/metrics.js';
+import { Counter, Gauge, Histogram } from 'prom-client';
+import { register } from '../monitoring/metrics.js';
 
 // ============================================================================
 // DATABASE CONNECTION POOL METRICS
@@ -14,28 +14,28 @@ export const dbConnectionPoolActive = new Gauge({
   name: 'db_connection_pool_active',
   help: 'Number of active database connections in the pool',
   labelNames: ['database', 'pool'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const dbConnectionPoolIdle = new Gauge({
   name: 'db_connection_pool_idle',
   help: 'Number of idle database connections in the pool',
   labelNames: ['database', 'pool'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const dbConnectionPoolWaiting = new Gauge({
   name: 'db_connection_pool_waiting',
   help: 'Number of queued requests waiting for a database connection',
   labelNames: ['database', 'pool'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const dbConnectionPoolSize = new Gauge({
   name: 'db_connection_pool_size',
   help: 'Total size of the database connection pool',
   labelNames: ['database', 'pool'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const dbConnectionAcquisitionDuration = new Histogram({
@@ -43,14 +43,14 @@ export const dbConnectionAcquisitionDuration = new Histogram({
   help: 'Time taken to acquire a database connection from the pool',
   labelNames: ['database', 'pool'] as const,
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
-  registers: [registry],
+  registers: [register],
 });
 
 export const dbConnectionErrors = new Counter({
   name: 'db_connection_errors_total',
   help: 'Total number of database connection errors',
   labelNames: ['database', 'pool', 'error_type'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 // ============================================================================
@@ -61,21 +61,21 @@ export const redisCacheHits = new Counter({
   name: 'redis_cache_hits_total',
   help: 'Total number of Redis cache hits',
   labelNames: ['operation', 'cache_name'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const redisCacheMisses = new Counter({
   name: 'redis_cache_misses_total',
   help: 'Total number of Redis cache misses',
   labelNames: ['operation', 'cache_name'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const redisCacheHitRatio = new Gauge({
   name: 'redis_cache_hit_ratio',
   help: 'Redis cache hit ratio (hits / (hits + misses))',
   labelNames: ['cache_name'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const redisOperationDuration = new Histogram({
@@ -83,21 +83,21 @@ export const redisOperationDuration = new Histogram({
   help: 'Duration of Redis operations in seconds',
   labelNames: ['operation', 'status'] as const,
   buckets: [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1, 0.5, 1],
-  registers: [registry],
+  registers: [register],
 });
 
 export const redisConnectionsActive = new Gauge({
   name: 'redis_connections_active',
   help: 'Number of active Redis connections',
   labelNames: ['client_type'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const redisCommandsTotal = new Counter({
   name: 'redis_commands_total',
   help: 'Total number of Redis commands executed',
   labelNames: ['command', 'status'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const redisKeySize = new Histogram({
@@ -105,7 +105,7 @@ export const redisKeySize = new Histogram({
   help: 'Size of Redis keys in bytes',
   labelNames: ['key_pattern'] as const,
   buckets: [100, 500, 1000, 5000, 10000, 50000, 100000, 500000],
-  registers: [registry],
+  registers: [register],
 });
 
 // ============================================================================
@@ -115,7 +115,7 @@ export const redisKeySize = new Histogram({
 export const neo4jSessionsActive = new Gauge({
   name: 'neo4j_sessions_active',
   help: 'Number of active Neo4j sessions',
-  registers: [registry],
+  registers: [register],
 });
 
 export const neo4jTransactionDuration = new Histogram({
@@ -123,7 +123,7 @@ export const neo4jTransactionDuration = new Histogram({
   help: 'Duration of Neo4j transactions',
   labelNames: ['mode'] as const, // 'read' or 'write'
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10, 30],
-  registers: [registry],
+  registers: [register],
 });
 
 export const neo4jResultSize = new Histogram({
@@ -131,7 +131,7 @@ export const neo4jResultSize = new Histogram({
   help: 'Number of records returned by Neo4j queries',
   labelNames: ['operation'] as const,
   buckets: [1, 10, 50, 100, 500, 1000, 5000, 10000, 50000],
-  registers: [registry],
+  registers: [register],
 });
 
 // ============================================================================
@@ -142,7 +142,7 @@ export const serviceErrors = new Counter({
   name: 'service_errors_total',
   help: 'Total number of service-level errors',
   labelNames: ['service', 'error_type', 'severity'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const serviceResponseTime = new Histogram({
@@ -150,7 +150,7 @@ export const serviceResponseTime = new Histogram({
   help: 'Service method response time in seconds',
   labelNames: ['service', 'method', 'status'] as const,
   buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 2, 5],
-  registers: [registry],
+  registers: [register],
 });
 
 // ============================================================================
@@ -162,21 +162,21 @@ export const graphqlOperationComplexity = new Histogram({
   help: 'Complexity score of GraphQL operations',
   labelNames: ['operation', 'operation_type'] as const,
   buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000],
-  registers: [registry],
+  registers: [register],
 });
 
 export const graphqlFieldResolutionCount = new Counter({
   name: 'graphql_field_resolution_count_total',
   help: 'Total number of fields resolved in GraphQL operations',
   labelNames: ['operation'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const graphqlCacheUtilization = new Counter({
   name: 'graphql_cache_utilization_total',
   help: 'GraphQL data loader cache utilization',
   labelNames: ['loader', 'cached'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 // ============================================================================
@@ -188,7 +188,7 @@ export const websocketMessageSize = new Histogram({
   help: 'Size of WebSocket messages in bytes',
   labelNames: ['direction', 'event_type'] as const,
   buckets: [100, 500, 1000, 5000, 10000, 50000, 100000],
-  registers: [registry],
+  registers: [register],
 });
 
 export const websocketLatency = new Histogram({
@@ -196,14 +196,14 @@ export const websocketLatency = new Histogram({
   help: 'WebSocket message round-trip latency',
   labelNames: ['event_type'] as const,
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
-  registers: [registry],
+  registers: [register],
 });
 
 export const websocketConnectionDuration = new Histogram({
   name: 'websocket_connection_duration_seconds',
   help: 'Duration of WebSocket connections',
   buckets: [10, 30, 60, 300, 600, 1800, 3600, 7200],
-  registers: [registry],
+  registers: [register],
 });
 
 // ============================================================================
@@ -214,28 +214,28 @@ export const queueJobsWaiting = new Gauge({
   name: 'queue_jobs_waiting',
   help: 'Number of jobs waiting in queue',
   labelNames: ['queue'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const queueJobsActive = new Gauge({
   name: 'queue_jobs_active',
   help: 'Number of jobs currently being processed',
   labelNames: ['queue'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const queueJobsCompleted = new Counter({
   name: 'queue_jobs_completed_total',
   help: 'Total number of completed jobs',
   labelNames: ['queue'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const queueJobsFailed = new Counter({
   name: 'queue_jobs_failed_total',
   help: 'Total number of failed jobs',
   labelNames: ['queue', 'error_type'] as const,
-  registers: [registry],
+  registers: [register],
 });
 
 export const queueJobDuration = new Histogram({
@@ -243,7 +243,7 @@ export const queueJobDuration = new Histogram({
   help: 'Job processing duration in seconds',
   labelNames: ['queue', 'job_type'] as const,
   buckets: [0.1, 0.5, 1, 5, 10, 30, 60, 300, 600],
-  registers: [registry],
+  registers: [register],
 });
 
 export const queueJobWaitTime = new Histogram({
@@ -251,7 +251,7 @@ export const queueJobWaitTime = new Histogram({
   help: 'Time jobs spend waiting in queue before processing',
   labelNames: ['queue'] as const,
   buckets: [0.1, 1, 5, 10, 30, 60, 300, 600, 1800],
-  registers: [registry],
+  registers: [register],
 });
 
 // ============================================================================
@@ -261,13 +261,13 @@ export const queueJobWaitTime = new Histogram({
 export const heapFragmentation = new Gauge({
   name: 'nodejs_heap_fragmentation_ratio',
   help: 'Heap fragmentation ratio (external / heap_used)',
-  registers: [registry],
+  registers: [register],
 });
 
 export const eventLoopUtilization = new Gauge({
   name: 'nodejs_eventloop_utilization',
   help: 'Event loop utilization percentage',
-  registers: [registry],
+  registers: [register],
 });
 
 // Update heap fragmentation periodically

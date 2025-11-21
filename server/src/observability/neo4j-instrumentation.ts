@@ -14,8 +14,7 @@ import {
   neo4jQueryErrorsTotal,
   neo4jQueryLatencyMs,
 } from '../metrics/neo4jMetrics.js';
-import { getTracer } from './tracer.js';
-import { SpanKind } from './tracer.js';
+import { getTracer, SpanKind } from './tracer.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'neo4j-instrumentation' });

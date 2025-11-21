@@ -3,24 +3,28 @@
  * Provides end-to-end visibility across all service operations
  */
 
-import { NodeSDK } from '@opentelemetry/sdk-node';
-import { Resource } from '@opentelemetry/resources';
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
-import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import {
-  trace,
-  context,
-  propagation,
-  SpanStatusCode,
-  SpanKind,
-  Span,
-  Context,
-} from '@opentelemetry/api';
 import { cfg } from '../config.js';
 import pino from 'pino';
 
+// Use dynamic imports to avoid ESM/CJS type issues
+let opentelemetryApi: any = null;
+
 const logger = pino({ name: 'otel-tracer' });
+
+// Re-export commonly used constants (populated after init)
+export let SpanKind: any = {
+  INTERNAL: 0,
+  SERVER: 1,
+  CLIENT: 2,
+  PRODUCER: 3,
+  CONSUMER: 4,
+};
+
+export let SpanStatusCode: any = {
+  UNSET: 0,
+  OK: 1,
+  ERROR: 2,
+};
 
 export interface TracingConfig {
   serviceName: string;
@@ -32,15 +36,29 @@ export interface TracingConfig {
 }
 
 export class IntelGraphTracer {
-  private sdk: NodeSDK | null = null;
-  private tracer: any;
+  private sdk: any = null;
+  private tracer: any = null;
   private initialized = false;
+  private apiLoaded = false;
 
-  constructor(private config: TracingConfig) {
-    this.tracer = trace.getTracer(
-      this.config.serviceName,
-      this.config.serviceVersion,
-    );
+  constructor(private config: TracingConfig) {}
+
+  private async loadApi(): Promise<void> {
+    if (this.apiLoaded) return;
+
+    try {
+      opentelemetryApi = await import('@opentelemetry/api');
+      SpanKind = opentelemetryApi.SpanKind;
+      SpanStatusCode = opentelemetryApi.SpanStatusCode;
+
+      this.tracer = opentelemetryApi.trace.getTracer(
+        this.config.serviceName,
+        this.config.serviceVersion,
+      );
+      this.apiLoaded = true;
+    } catch (error) {
+      logger.warn({ error: (error as Error).message }, 'Failed to load OpenTelemetry API');
+    }
   }
 
   async initialize(): Promise<void> {
@@ -49,61 +67,85 @@ export class IntelGraphTracer {
       return;
     }
 
+    await this.loadApi();
+
     try {
+      // Dynamic imports for SDK components to avoid ESM/CJS issues
+      const [sdkModule, resourceModule, semconvModule, jaegerModule, autoInstModule] =
+        await Promise.all([
+          import('@opentelemetry/sdk-node').catch(() => null),
+          import('@opentelemetry/resources').catch(() => null),
+          import('@opentelemetry/semantic-conventions').catch(() => null),
+          import('@opentelemetry/exporter-jaeger').catch(() => null),
+          import('@opentelemetry/auto-instrumentations-node').catch(() => null),
+        ]);
+
+      if (!sdkModule || !resourceModule || !semconvModule) {
+        logger.warn('OpenTelemetry SDK modules not available, tracing disabled');
+        return;
+      }
+
+      const { NodeSDK } = sdkModule;
+      const { Resource } = resourceModule;
+
+      // Get semantic attribute names (handle different versions)
+      const serviceName =
+        (semconvModule as any).SEMRESATTRS_SERVICE_NAME ||
+        (semconvModule as any).SemanticResourceAttributes?.SERVICE_NAME ||
+        'service.name';
+      const serviceVersion =
+        (semconvModule as any).SEMRESATTRS_SERVICE_VERSION ||
+        (semconvModule as any).SemanticResourceAttributes?.SERVICE_VERSION ||
+        'service.version';
+      const deploymentEnv =
+        (semconvModule as any).SEMRESATTRS_DEPLOYMENT_ENVIRONMENT ||
+        (semconvModule as any).SemanticResourceAttributes?.DEPLOYMENT_ENVIRONMENT ||
+        'deployment.environment';
+
       // Create resource with service metadata
       const resource = new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-        [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-        [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
-          this.config.environment,
-        [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'intelgraph',
+        [serviceName]: this.config.serviceName,
+        [serviceVersion]: this.config.serviceVersion,
+        [deploymentEnv]: this.config.environment,
+        'service.namespace': 'intelgraph',
       });
 
       // Configure Jaeger exporter if endpoint provided
-      const exporters: any[] = [];
-      if (this.config.jaegerEndpoint) {
-        exporters.push(
-          new JaegerExporter({
-            endpoint: this.config.jaegerEndpoint,
+      let traceExporter: any = undefined;
+      if (this.config.jaegerEndpoint && jaegerModule) {
+        const { JaegerExporter } = jaegerModule;
+        traceExporter = new JaegerExporter({
+          endpoint: this.config.jaegerEndpoint,
+        });
+        logger.info(`Jaeger exporter configured: ${this.config.jaegerEndpoint}`);
+      }
+
+      // Get auto instrumentations if available
+      const instrumentations: any[] = [];
+      if (this.config.enableAutoInstrumentation !== false && autoInstModule) {
+        const { getNodeAutoInstrumentations } = autoInstModule;
+        instrumentations.push(
+          getNodeAutoInstrumentations({
+            '@opentelemetry/instrumentation-fs': { enabled: false },
+            '@opentelemetry/instrumentation-http': { enabled: true },
+            '@opentelemetry/instrumentation-express': { enabled: true },
+            '@opentelemetry/instrumentation-graphql': { enabled: true },
           }),
         );
-        logger.info(`Jaeger exporter configured: ${this.config.jaegerEndpoint}`);
       }
 
       // Initialize OpenTelemetry SDK
       this.sdk = new NodeSDK({
         resource,
-        traceExporter: exporters.length > 0 ? exporters[0] : undefined,
-        instrumentations:
-          this.config.enableAutoInstrumentation !== false
-            ? [
-                getNodeAutoInstrumentations({
-                  '@opentelemetry/instrumentation-fs': {
-                    enabled: false, // Disable fs instrumentation (too noisy)
-                  },
-                  '@opentelemetry/instrumentation-http': {
-                    enabled: true,
-                    requestHook: (span, request) => {
-                      // Add custom HTTP span attributes
-                      span.setAttribute('http.client_ip', request.socket.remoteAddress || 'unknown');
-                    },
-                  },
-                  '@opentelemetry/instrumentation-express': {
-                    enabled: true,
-                  },
-                  '@opentelemetry/instrumentation-graphql': {
-                    enabled: true,
-                  },
-                }),
-              ]
-            : [],
+        traceExporter,
+        instrumentations,
       });
 
       await this.sdk.start();
       this.initialized = true;
       logger.info('OpenTelemetry tracing initialized successfully');
     } catch (error) {
-      logger.error('Failed to initialize tracing:', error);
+      logger.error({ error: (error as Error).message }, 'Failed to initialize tracing');
       // Don't throw - allow service to start without tracing
     }
   }
@@ -117,27 +159,22 @@ export class IntelGraphTracer {
   }
 
   // Start a new span
-  startSpan(
-    name: string,
-    options?: {
-      kind?: SpanKind;
-      attributes?: Record<string, any>;
-      parent?: Span | Context;
-    },
-  ): Span {
+  startSpan(name: string, options?: { kind?: any; attributes?: Record<string, any>; parent?: any }): any {
+    if (!this.tracer || !opentelemetryApi) {
+      return createNoopSpan();
+    }
+
     const spanOptions: any = {
-      kind: options?.kind || SpanKind.INTERNAL,
+      kind: options?.kind ?? SpanKind.INTERNAL,
       attributes: options?.attributes || {},
     };
 
     if (options?.parent) {
-      return this.tracer.startSpan(
-        name,
-        spanOptions,
-        typeof options.parent === 'object' && 'spanContext' in options.parent
-          ? trace.setSpan(context.active(), options.parent)
-          : options.parent,
-      );
+      const parentContext =
+        typeof options.parent?.spanContext === 'function'
+          ? opentelemetryApi.trace.setSpan(opentelemetryApi.context.active(), options.parent)
+          : options.parent;
+      return this.tracer.startSpan(name, spanOptions, parentContext);
     }
 
     return this.tracer.startSpan(name, spanOptions);
@@ -146,23 +183,27 @@ export class IntelGraphTracer {
   // Execute function within a span context
   async withSpan<T>(
     name: string,
-    fn: (span: Span) => Promise<T>,
-    options?: {
-      kind?: SpanKind;
-      attributes?: Record<string, any>;
-    },
+    fn: (span: any) => Promise<T>,
+    options?: { kind?: any; attributes?: Record<string, any> },
   ): Promise<T> {
     const span = this.startSpan(name, options);
 
     try {
-      const result = await context.with(
-        trace.setSpan(context.active(), span),
-        () => fn(span),
-      );
+      let result: T;
+      if (opentelemetryApi) {
+        result = await opentelemetryApi.context.with(
+          opentelemetryApi.trace.setSpan(opentelemetryApi.context.active(), span),
+          () => fn(span),
+        );
+      } else {
+        result = await fn(span);
+      }
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
     } catch (error) {
-      span.recordException(error as Error);
+      if (typeof span.recordException === 'function') {
+        span.recordException(error as Error);
+      }
       span.setStatus({
         code: SpanStatusCode.ERROR,
         message: (error as Error).message,
@@ -174,14 +215,15 @@ export class IntelGraphTracer {
   }
 
   // Get current active span
-  getCurrentSpan(): Span | undefined {
-    return trace.getActiveSpan();
+  getCurrentSpan(): any {
+    if (!opentelemetryApi) return undefined;
+    return opentelemetryApi.trace.getActiveSpan();
   }
 
   // Add event to current span
   addEvent(name: string, attributes?: Record<string, any>): void {
     const span = this.getCurrentSpan();
-    if (span) {
+    if (span?.addEvent) {
       span.addEvent(name, attributes);
     }
   }
@@ -189,7 +231,7 @@ export class IntelGraphTracer {
   // Set attribute on current span
   setAttribute(key: string, value: any): void {
     const span = this.getCurrentSpan();
-    if (span) {
+    if (span?.setAttribute) {
       span.setAttribute(key, value);
     }
   }
@@ -198,8 +240,8 @@ export class IntelGraphTracer {
   recordException(error: Error): void {
     const span = this.getCurrentSpan();
     if (span) {
-      span.recordException(error);
-      span.setStatus({
+      if (span.recordException) span.recordException(error);
+      span.setStatus?.({
         code: SpanStatusCode.ERROR,
         message: error.message,
       });
@@ -207,20 +249,22 @@ export class IntelGraphTracer {
   }
 
   // Extract trace context from headers
-  extractContext(headers: Record<string, any>): Context {
-    return propagation.extract(context.active(), headers);
+  extractContext(headers: Record<string, any>): any {
+    if (!opentelemetryApi) return {};
+    return opentelemetryApi.propagation.extract(opentelemetryApi.context.active(), headers);
   }
 
   // Inject trace context into headers
   injectContext(headers: Record<string, any>): void {
-    propagation.inject(context.active(), headers);
+    if (!opentelemetryApi) return;
+    opentelemetryApi.propagation.inject(opentelemetryApi.context.active(), headers);
   }
 
   // Get trace ID for logging correlation
   getTraceId(): string {
     const span = this.getCurrentSpan();
-    if (span) {
-      return span.spanContext().traceId;
+    if (span?.spanContext) {
+      return span.spanContext().traceId || '';
     }
     return '';
   }
@@ -228,8 +272,8 @@ export class IntelGraphTracer {
   // Get span ID for logging correlation
   getSpanId(): string {
     const span = this.getCurrentSpan();
-    if (span) {
-      return span.spanContext().spanId;
+    if (span?.spanContext) {
+      return span.spanContext().spanId || '';
     }
     return '';
   }
@@ -244,7 +288,7 @@ export class IntelGraphTracer {
     return this.withSpan(
       `db.${database}.${operation}`,
       async (span) => {
-        span.setAttributes({
+        span.setAttributes?.({
           'db.system': database,
           'db.operation': operation,
           'db.statement': query.length > 500 ? query.substring(0, 500) + '...' : query,
@@ -256,20 +300,16 @@ export class IntelGraphTracer {
   }
 
   // Cache operation tracing helper
-  async traceCacheOperation<T>(
-    operation: string,
-    key: string,
-    fn: () => Promise<T>,
-  ): Promise<T> {
+  async traceCacheOperation<T>(operation: string, key: string, fn: () => Promise<T>): Promise<T> {
     return this.withSpan(
       `cache.${operation}`,
       async (span) => {
-        span.setAttributes({
+        span.setAttributes?.({
           'cache.operation': operation,
           'cache.key': key,
         });
         const result = await fn();
-        span.setAttribute('cache.hit', result !== null && result !== undefined);
+        span.setAttribute?.('cache.hit', result !== null && result !== undefined);
         return result;
       },
       { kind: SpanKind.CLIENT },
@@ -286,7 +326,7 @@ export class IntelGraphTracer {
     return this.withSpan(
       `${serviceName}.${methodName}`,
       async (span) => {
-        span.setAttributes({
+        span.setAttributes?.({
           'service.name': serviceName,
           'service.method': methodName,
           ...(parameters && { 'service.parameters': JSON.stringify(parameters) }),
@@ -302,6 +342,20 @@ export class IntelGraphTracer {
   }
 }
 
+// Create a no-op span for when tracing is disabled
+function createNoopSpan(): any {
+  return {
+    setAttribute: () => {},
+    setAttributes: () => {},
+    addEvent: () => {},
+    setStatus: () => {},
+    recordException: () => {},
+    end: () => {},
+    spanContext: () => ({ traceId: '', spanId: '' }),
+    isRecording: () => false,
+  };
+}
+
 // Singleton instance
 let tracerInstance: IntelGraphTracer | null = null;
 
@@ -312,7 +366,7 @@ export function initializeTracing(config?: Partial<TracingConfig>): IntelGraphTr
 
   const defaultConfig: TracingConfig = {
     serviceName: 'intelgraph-server',
-    serviceVersion: cfg.APP_VERSION || '1.0.0',
+    serviceVersion: (cfg as any).APP_VERSION || '1.0.0',
     environment: cfg.NODE_ENV || 'development',
     jaegerEndpoint: process.env.JAEGER_ENDPOINT,
     enableAutoInstrumentation: process.env.OTEL_AUTO_INSTRUMENT !== 'false',
@@ -325,7 +379,6 @@ export function initializeTracing(config?: Partial<TracingConfig>): IntelGraphTr
 
 export function getTracer(): IntelGraphTracer {
   if (!tracerInstance) {
-    // Auto-initialize with defaults if not initialized
     return initializeTracing();
   }
   return tracerInstance;
@@ -333,11 +386,7 @@ export function getTracer(): IntelGraphTracer {
 
 // Decorator for automatic method tracing
 export function traced(operationName?: string) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
+  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
     const traceName = operationName || `${target.constructor.name}.${propertyKey}`;
 
@@ -351,5 +400,3 @@ export function traced(operationName?: string) {
     return descriptor;
   };
 }
-
-export { SpanKind, SpanStatusCode };

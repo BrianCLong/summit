@@ -14,8 +14,7 @@ import {
   recordDbPoolStats,
 } from './enhanced-metrics.js';
 import { dbQueryDuration, dbQueriesTotal } from '../monitoring/metrics.js';
-import { getTracer } from './tracer.js';
-import { SpanKind } from './tracer.js';
+import { getTracer, SpanKind } from './tracer.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'postgres-instrumentation' });
