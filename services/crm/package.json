@@ -1,0 +1,59 @@
+{
+  "name": "@intelgraph/crm",
+  "version": "1.0.0",
+  "description": "Comprehensive CRM system for Summit - contact management, sales pipeline, email tracking, and automation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "crm",
+    "sales",
+    "contacts",
+    "deals",
+    "pipeline",
+    "automation",
+    "lead-scoring"
+  ],
+  "author": "Summit Team",
+  "license": "MIT",
+  "dependencies": {
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "@intelgraph/types": "*"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./services/*": {
+      "import": "./dist/services/*.js",
+      "types": "./dist/services/*.d.ts"
+    },
+    "./models/*": {
+      "import": "./dist/models/*.js",
+      "types": "./dist/models/*.d.ts"
+    }
+  }
+}
