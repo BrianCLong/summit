@@ -18,5 +18,7 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'json'],
   verbose: true,
-  testTimeout: 30000, // 30 seconds for integration tests
+  testTimeout: 30000,
+  forceExit: true,
+  detectOpenHandles: false,
 };

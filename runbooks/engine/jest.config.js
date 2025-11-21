@@ -18,4 +18,6 @@ module.exports = {
   },
   moduleFileExtensions: ['ts', 'js', 'json'],
   verbose: true,
+  forceExit: true,
+  detectOpenHandles: false,
 };

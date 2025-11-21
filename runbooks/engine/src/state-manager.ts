@@ -210,8 +210,11 @@ export class MemoryStorage implements StateStorage {
    * Hash input for idempotency checks
    */
   private hashInput(input: Record<string, any>): string {
-    // Simple JSON stringify for now - in production, use proper hashing
-    return JSON.stringify(this.sortObject(input));
+    // Use crypto hash for consistent hashing
+    const crypto = require('crypto');
+    const sorted = this.sortObject(input);
+    const json = JSON.stringify(sorted);
+    return crypto.createHash('sha256').update(json).digest('hex');
   }
 
   private sortObject(obj: any): any {
