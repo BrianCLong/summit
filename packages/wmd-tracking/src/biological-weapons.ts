@@ -2,10 +2,10 @@
  * Biological Weapons and Pathogen Tracking
  */
 
-import type {
-  BiologicalThreat,
-  BioLabFacility,
-  PathogenType,
+import {
+  type BiologicalThreat,
+  type BioLabFacility,
+  type PathogenType,
   WeaponizationLevel,
   ThreatLevel,
   SecurityLevel
