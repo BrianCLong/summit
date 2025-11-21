@@ -81,3 +81,5 @@ export {
   instrumentRedisClient,
   InstrumentedRedisCache,
 } from './redis-instrumentation.js';
+
+// GraphQL observability plugin is exported from graphql/plugins/observabilityPlugin.ts

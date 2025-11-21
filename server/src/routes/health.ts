@@ -105,4 +105,52 @@ router.get('/health/live', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'alive' });
 });
 
+/**
+ * Observability health check
+ * Returns status of tracing, metrics, and logging infrastructure
+ */
+router.get('/health/observability', async (_req: Request, res: Response) => {
+  const observabilityHealth = {
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    tracing: {
+      enabled: false,
+      initialized: false,
+      endpoint: process.env.JAEGER_ENDPOINT || 'not configured',
+    },
+    metrics: {
+      enabled: true,
+      endpoint: '/metrics',
+      defaultMetrics: true,
+    },
+    logging: {
+      level: process.env.LOG_LEVEL || 'info',
+      format: 'json',
+      correlationIdEnabled: true,
+    },
+  };
+
+  try {
+    const { getTracer } = await import('../observability/tracer.js');
+    const tracer = getTracer();
+    observabilityHealth.tracing.enabled = true;
+    observabilityHealth.tracing.initialized = tracer.isInitialized();
+  } catch {
+    observabilityHealth.tracing.enabled = false;
+  }
+
+  // Check if metrics are accessible
+  try {
+    const { register } = await import('../monitoring/metrics.js');
+    const metricsCount = (await register.getMetricsAsJSON()).length;
+    observabilityHealth.metrics.enabled = metricsCount > 0;
+  } catch {
+    observabilityHealth.metrics.enabled = false;
+    observabilityHealth.status = 'degraded';
+  }
+
+  const statusCode = observabilityHealth.status === 'ok' ? 200 : 503;
+  res.status(statusCode).json(observabilityHealth);
+});
+
 export default router;
