@@ -1,0 +1,128 @@
+<mjml>
+  <mj-head>
+    <mj-title>Your Weekly Summary</mj-title>
+    <mj-preview>Here's what happened in your investigations this week</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-all>
+      <mj-text font-size="14px" color="#555" line-height="1.6"></mj-text>
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#0066cc" padding="30px">
+      <mj-column>
+        <mj-image src="{{logoUrl}}" alt="IntelGraph Logo" width="120px" />
+        <mj-spacer height="15px" />
+        <mj-text color="#ffffff" font-size="24px" font-weight="bold" align="center">
+          Your Weekly Summary
+        </mj-text>
+        <mj-text color="#ffffff" align="center">
+          {{weekStart}} - {{weekEnd}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="30px 40px">
+      <mj-column>
+        <mj-text font-size="18px" font-weight="bold" color="#333">
+          Hi {{firstName}},
+        </mj-text>
+        <mj-text>
+          Here's a summary of activity in your investigations this week:
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0 40px 20px">
+      <mj-column width="33%">
+        <mj-text align="center" font-size="32px" font-weight="bold" color="#0066cc">
+          {{newEntities}}
+        </mj-text>
+        <mj-text align="center" color="#666">
+          New Entities
+        </mj-text>
+      </mj-column>
+      <mj-column width="33%">
+        <mj-text align="center" font-size="32px" font-weight="bold" color="#0066cc">
+          {{newRelationships}}
+        </mj-text>
+        <mj-text align="center" color="#666">
+          Relationships
+        </mj-text>
+      </mj-column>
+      <mj-column width="33%">
+        <mj-text align="center" font-size="32px" font-weight="bold" color="#0066cc">
+          {{newInsights}}
+        </mj-text>
+        <mj-text align="center" color="#666">
+          AI Insights
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f8f9fa" padding="30px 40px">
+      <mj-column>
+        <mj-text font-size="18px" font-weight="bold" color="#333">
+          Active Investigations
+        </mj-text>
+        <!-- Repeat for each investigation -->
+        <mj-spacer height="15px" />
+        <mj-text font-weight="bold" color="#0066cc">
+          {{investigation1.name}}
+        </mj-text>
+        <mj-text>
+          {{investigation1.updatesCount}} updates | {{investigation1.collaborators}} collaborators
+        </mj-text>
+        <mj-button background-color="#0066cc" href="{{investigation1.url}}" padding="10px 20px" font-size="12px">
+          View Investigation
+        </mj-button>
+        <!-- End repeat -->
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="30px 40px">
+      <mj-column>
+        <mj-text font-size="18px" font-weight="bold" color="#333">
+          Top Insights This Week
+        </mj-text>
+        <mj-text>
+          • {{insight1}}<br/>
+          • {{insight2}}<br/>
+          • {{insight3}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f8f9fa" padding="30px 40px">
+      <mj-column>
+        <mj-text font-size="16px" font-weight="bold" color="#333">
+          Upcoming Deadlines
+        </mj-text>
+        <mj-text>
+          {{upcomingDeadlines}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="30px 40px">
+      <mj-column>
+        <mj-button background-color="#0066cc" href="{{dashboardUrl}}">
+          Go to Dashboard
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="20px 40px">
+      <mj-column>
+        <mj-text color="#999" font-size="12px" align="center">
+          You're receiving this weekly digest based on your email preferences.
+        </mj-text>
+        <mj-text color="#999" font-size="12px" align="center">
+          <a href="{{unsubscribeUrl}}" style="color: #999;">Unsubscribe</a> | <a href="{{preferencesUrl}}" style="color: #999;">Change Frequency</a>
+        </mj-text>
+        <mj-text color="#999" font-size="12px" align="center">
+          {{companyName}} | {{companyAddress}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

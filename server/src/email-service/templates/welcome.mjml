@@ -1,0 +1,125 @@
+<mjml>
+  <mj-head>
+    <mj-title>Welcome to IntelGraph</mj-title>
+    <mj-preview>Get started with intelligence analysis</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-all>
+      <mj-text font-size="14px" color="#555" line-height="1.6"></mj-text>
+    </mj-attributes>
+    <mj-style>
+      .brand-color { color: #0066cc; }
+      .button { background-color: #0066cc; }
+    </mj-style>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#ffffff" padding="40px">
+      <mj-column>
+        <mj-image src="{{logoUrl}}" alt="IntelGraph Logo" width="150px" />
+        <mj-spacer height="30px" />
+        <mj-text font-size="24px" font-weight="bold" color="#333">
+          Welcome to IntelGraph, {{firstName}}!
+        </mj-text>
+        <mj-text>
+          We're excited to have you join our intelligence analysis platform. IntelGraph helps teams uncover insights and make data-driven decisions faster.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="0 40px 40px">
+      <mj-column>
+        <mj-text font-size="18px" font-weight="bold" color="#333">
+          Get Started in 3 Steps:
+        </mj-text>
+
+        <mj-wrapper padding="20px" border="1px solid #e0e0e0" border-radius="8px">
+          <mj-section>
+            <mj-column width="60px">
+              <mj-text font-size="24px" font-weight="bold" class="brand-color">
+                1
+              </mj-text>
+            </mj-column>
+            <mj-column>
+              <mj-text font-weight="bold">
+                Create Your First Investigation
+              </mj-text>
+              <mj-text>
+                Start by creating an investigation and adding entities to your graph.
+              </mj-text>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+
+        <mj-spacer height="15px" />
+
+        <mj-wrapper padding="20px" border="1px solid #e0e0e0" border-radius="8px">
+          <mj-section>
+            <mj-column width="60px">
+              <mj-text font-size="24px" font-weight="bold" class="brand-color">
+                2
+              </mj-text>
+            </mj-column>
+            <mj-column>
+              <mj-text font-weight="bold">
+                Connect Relationships
+              </mj-text>
+              <mj-text>
+                Link entities together to build your intelligence network.
+              </mj:text>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+
+        <mj-spacer height="15px" />
+
+        <mj-wrapper padding="20px" border="1px solid #e0e0e0" border-radius="8px">
+          <mj-section>
+            <mj-column width="60px">
+              <mj-text font-size="24px" font-weight="bold" class="brand-color">
+                3
+              </mj-text>
+            </mj-column>
+            <mj-column>
+              <mj-text font-weight="bold">
+                Use AI Copilot
+              </mj-text>
+              <mj-text>
+                Let our AI assistant help you discover patterns and insights.
+              </mj-text>
+            </mj-column>
+          </mj-section>
+        </mj-wrapper>
+
+        <mj-spacer height="30px" />
+
+        <mj-button class="button" href="{{appUrl}}/dashboard">
+          Go to Dashboard
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f8f9fa" padding="30px">
+      <mj-column>
+        <mj-text font-size="16px" font-weight="bold" color="#333">
+          Need Help?
+        </mj-text>
+        <mj-text>
+          Check out our <a href="{{docsUrl}}" class="brand-color">documentation</a> or reach out to our support team at <a href="mailto:{{supportEmail}}" class="brand-color">{{supportEmail}}</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="20px 40px">
+      <mj-column>
+        <mj-text color="#999" font-size="12px" align="center">
+          You're receiving this email because you created an account at IntelGraph.
+        </mj-text>
+        <mj-text color="#999" font-size="12px" align="center">
+          <a href="{{unsubscribeUrl}}" style="color: #999;">Unsubscribe</a> | <a href="{{preferencesUrl}}" style="color: #999;">Email Preferences</a>
+        </mj-text>
+        <mj-text color="#999" font-size="12px" align="center">
+          {{companyName}} | {{companyAddress}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

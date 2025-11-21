@@ -106,7 +106,13 @@
     "uuid": "13.0.0",
     "winston": "3.18.3",
     "ws": "8.18.3",
-    "zod": "4.1.12"
+    "zod": "4.1.12",
+    "mjml": "^4.15.3",
+    "@react-email/components": "^0.0.25",
+    "@react-email/render": "^1.0.1",
+    "nodemailer": "^6.9.16",
+    "html-to-text": "^9.0.5",
+    "juice": "^11.0.1"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
@@ -120,6 +126,7 @@
     "@types/express-rate-limit": "6.0.2",
     "@types/jest": "30.0.0",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/nodemailer": "^6.4.16",
     "@types/node": "24.10.1",
     "@types/pg": "8.15.6",
     "@types/pino-http": "6.1.0",
