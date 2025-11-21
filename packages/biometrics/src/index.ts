@@ -9,3 +9,5 @@
 export * from './types.js';
 export * from './quality-engine.js';
 export * from './connectors.js';
+export * from './template-protection.js';
+export * from './monitoring.js';
