@@ -1,0 +1,23 @@
+{
+  "name": "@summit/plugin-analytics",
+  "version": "1.0.0",
+  "description": "Analytics and telemetry system for plugins",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/sdk-node": "^0.48.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.48.0",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}

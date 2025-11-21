@@ -1,0 +1,47 @@
+{
+  "id": "sentiment-analyzer",
+  "name": "Sentiment Analyzer",
+  "version": "1.0.0",
+  "description": "Analyzes text sentiment, extracts entities, and identifies keywords",
+  "author": {
+    "name": "Summit Team",
+    "email": "team@summit.dev"
+  },
+  "license": "MIT",
+  "category": "analyzer",
+  "main": "./dist/index.js",
+  "engineVersion": ">=1.0.0",
+  "permissions": [
+    "read:data"
+  ],
+  "resources": {
+    "maxMemoryMB": 128,
+    "maxCpuPercent": 30,
+    "maxStorageMB": 50,
+    "maxNetworkMbps": 5
+  },
+  "extensionPoints": [
+    {
+      "id": "sentiment-analyzer",
+      "type": "analyzer",
+      "config": {
+        "supportedDataTypes": ["text", "document", "message"]
+      }
+    }
+  ],
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "language": {
+        "type": "string",
+        "default": "en",
+        "description": "Analysis language"
+      },
+      "minConfidence": {
+        "type": "number",
+        "default": 0.5,
+        "description": "Minimum confidence threshold"
+      }
+    }
+  }
+}

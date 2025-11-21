@@ -8,3 +8,7 @@ export * from './extensions/VisualizationExtension.js';
 export * from './extensions/ExportExtension.js';
 export * from './extensions/AuthProviderExtension.js';
 export * from './extensions/WorkflowExtension.js';
+export * from './extensions/MLModelExtension.js';
+export * from './extensions/SearchExtension.js';
+export * from './extensions/ThemeExtension.js';
+export * from './extensions/NotificationExtension.js';
