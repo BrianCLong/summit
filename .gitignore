@@ -189,3 +189,13 @@ neo4j/backups/
 *.pem
 *.key
 *.signed.json
+
+# Backup files (but keep directory)
+backups/summit-backup-*
+backups/*.tar.gz
+
+# DR Drill artifacts (but keep directory)
+dr-drills/baseline-*
+dr-drills/drill-*
+dr-drills/*.json
+dr-drills/*.tar.gz
