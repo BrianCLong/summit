@@ -1,0 +1,30 @@
+{
+  "name": "@intelgraph/battle-ingest-service",
+  "version": "1.0.0",
+  "description": "Data ingestion service for multidomain battle management",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/battle-types": "workspace:*",
+    "@intelgraph/battle-fusion": "workspace:*",
+    "express": "^4.18.2",
+    "kafkajs": "^2.2.4",
+    "pino": "^8.17.0",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.3"
+  }
+}

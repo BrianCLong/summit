@@ -1,0 +1,616 @@
+# Battle Management GraphQL Schema
+# Multidomain Data Fusion and Battle Management API
+
+scalar DateTime
+scalar JSON
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+
+enum DataDomain {
+  SENSOR_GRID
+  SATELLITE
+  COMMS
+  CYBER
+  HUMINT
+  SIGINT
+  IMINT
+  GEOINT
+  OSINT
+  ELINT
+  MASINT
+  EXTERNAL
+}
+
+enum ForceType {
+  BLUE
+  RED
+  NEUTRAL
+  UNKNOWN
+}
+
+enum UnitType {
+  INFANTRY
+  ARMOR
+  ARTILLERY
+  AIR
+  NAVAL
+  CYBER
+  LOGISTICS
+  COMMAND
+  RECON
+  SPECIAL_OPS
+}
+
+enum ThreatLevel {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  MINIMAL
+}
+
+enum OperationalStatus {
+  ACTIVE
+  STANDBY
+  ENGAGED
+  RETREATING
+  DESTROYED
+  UNKNOWN
+}
+
+enum CommandPriority {
+  IMMEDIATE
+  PRIORITY
+  ROUTINE
+}
+
+enum CommandStatus {
+  PENDING
+  ACKNOWLEDGED
+  EXECUTING
+  COMPLETED
+  FAILED
+}
+
+enum PlanStatus {
+  DRAFT
+  APPROVED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ScenarioStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum SupplyLineStatus {
+  OPEN
+  CONTESTED
+  BLOCKED
+  DAMAGED
+}
+
+# =============================================================================
+# GEOGRAPHIC TYPES
+# =============================================================================
+
+type GeoLocation {
+  latitude: Float!
+  longitude: Float!
+  altitude: Float
+  accuracy: Float
+  coordinateSystem: String
+}
+
+input GeoLocationInput {
+  latitude: Float!
+  longitude: Float!
+  altitude: Float
+  accuracy: Float
+}
+
+type BoundingBox {
+  northWest: GeoLocation!
+  southEast: GeoLocation!
+}
+
+# =============================================================================
+# BATTLEFIELD ENTITIES
+# =============================================================================
+
+type BattlefieldEntity {
+  id: ID!
+  name: String!
+  designation: String
+  forceType: ForceType!
+  unitType: UnitType!
+  status: OperationalStatus!
+  location: GeoLocation!
+  heading: Float
+  speed: Float
+  strength: Float
+  confidence: Float!
+  lastUpdated: DateTime!
+  sources: [String!]!
+  metadata: JSON
+}
+
+type FusedEntity {
+  id: ID!
+  canonicalId: String!
+  entity: BattlefieldEntity!
+  fusionScore: Float!
+  contributingSources: [SourceContribution!]!
+  conflicts: [DataConflict!]
+  lastFused: DateTime!
+}
+
+type SourceContribution {
+  sourceId: String!
+  domain: DataDomain!
+  weight: Float!
+  confidence: Float!
+  timestamp: DateTime!
+}
+
+type DataConflict {
+  field: String!
+  values: [ConflictValue!]!
+  resolution: ConflictResolution
+}
+
+type ConflictValue {
+  value: JSON!
+  sourceId: String!
+  confidence: Float!
+}
+
+type ConflictResolution {
+  selectedValue: JSON!
+  method: String!
+}
+
+# =============================================================================
+# THREAT ASSESSMENT
+# =============================================================================
+
+type ThreatAssessment {
+  id: ID!
+  entityId: String!
+  threatLevel: ThreatLevel!
+  threatType: String!
+  capabilities: [String!]!
+  intent: String
+  targetAssets: [String!]
+  timeToImpact: Int
+  confidence: Float!
+  mitigations: [String!]
+}
+
+# =============================================================================
+# SITUATIONAL PICTURE
+# =============================================================================
+
+type SituationalPicture {
+  timestamp: DateTime!
+  areaOfInterest: BoundingBox!
+  blueForces: [BattlefieldEntity!]!
+  redForces: [BattlefieldEntity!]!
+  neutralForces: [BattlefieldEntity!]!
+  unknownContacts: [BattlefieldEntity!]!
+  threats: [ThreatAssessment!]!
+  logisticsStatus: LogisticsSnapshot!
+}
+
+type FusionResult {
+  fusionId: ID!
+  timestamp: DateTime!
+  entities: [FusedEntity!]!
+  correlations: [EntityCorrelation!]!
+  situationalPicture: SituationalPicture!
+  confidence: Float!
+  sourceCount: Int!
+  domainCoverage: [DataDomain!]!
+}
+
+type EntityCorrelation {
+  entityId1: String!
+  entityId2: String!
+  correlationType: String!
+  confidence: Float!
+  evidence: [String!]!
+}
+
+# =============================================================================
+# LOGISTICS
+# =============================================================================
+
+type LogisticsSnapshot {
+  timestamp: DateTime!
+  supplyLines: [SupplyLine!]!
+  depots: [LogisticsDepot!]!
+  convoys: [Convoy!]!
+  overallReadiness: Float!
+}
+
+type SupplyLine {
+  id: ID!
+  startPoint: GeoLocation!
+  endPoint: GeoLocation!
+  status: SupplyLineStatus!
+  capacity: Float!
+  currentLoad: Float!
+  threats: [String!]
+}
+
+type LogisticsDepot {
+  id: ID!
+  name: String!
+  location: GeoLocation!
+  type: String!
+  stockLevel: Float!
+  resupplyEta: DateTime
+}
+
+type Convoy {
+  id: ID!
+  origin: String!
+  destination: String!
+  currentLocation: GeoLocation!
+  eta: DateTime!
+  cargo: [String!]!
+  escortStrength: Float!
+  status: OperationalStatus!
+}
+
+# =============================================================================
+# COMMANDS
+# =============================================================================
+
+type Command {
+  id: ID!
+  issuedAt: DateTime!
+  issuedBy: String!
+  targetUnitId: String!
+  commandType: String!
+  parameters: JSON!
+  priority: CommandPriority!
+  status: CommandStatus!
+  acknowledgedAt: DateTime
+  completedAt: DateTime
+  result: CommandResult
+}
+
+type CommandResult {
+  success: Boolean!
+  message: String
+  metrics: JSON
+  sideEffects: [String!]
+}
+
+input IssueCommandInput {
+  targetUnitId: String!
+  commandType: String!
+  parameters: JSON!
+  priority: CommandPriority!
+}
+
+# =============================================================================
+# OPERATIONAL PLANS
+# =============================================================================
+
+type OperationalPlan {
+  id: ID!
+  name: String!
+  classification: String!
+  status: PlanStatus!
+  commander: String!
+  createdAt: DateTime!
+  approvedAt: DateTime
+  objective: String!
+  phases: [PlanPhase!]!
+  resources: [ResourceAllocation!]!
+  constraints: [String!]!
+  contingencies: [Contingency!]!
+}
+
+type PlanPhase {
+  id: ID!
+  name: String!
+  order: Int!
+  startCondition: String!
+  endCondition: String!
+  objectives: [String!]!
+  assignedUnits: [String!]!
+}
+
+type ResourceAllocation {
+  resourceType: String!
+  quantity: Float!
+  unit: String!
+  assignedTo: String!
+  priority: Int!
+}
+
+type Contingency {
+  trigger: String!
+  response: String!
+  priority: Int!
+}
+
+input CreatePlanInput {
+  name: String!
+  classification: String!
+  objective: String!
+  phases: [PlanPhaseInput!]!
+  resources: [ResourceAllocationInput!]!
+  constraints: [String!]!
+  contingencies: [ContingencyInput!]!
+}
+
+input PlanPhaseInput {
+  name: String!
+  order: Int!
+  startCondition: String!
+  endCondition: String!
+  objectives: [String!]!
+  assignedUnits: [String!]!
+}
+
+input ResourceAllocationInput {
+  resourceType: String!
+  quantity: Float!
+  unit: String!
+  assignedTo: String!
+  priority: Int!
+}
+
+input ContingencyInput {
+  trigger: String!
+  response: String!
+  priority: Int!
+}
+
+# =============================================================================
+# SCENARIOS
+# =============================================================================
+
+type Scenario {
+  id: ID!
+  name: String!
+  description: String
+  createdAt: DateTime!
+  createdBy: String!
+  status: ScenarioStatus!
+  timeScale: Float!
+  startTime: DateTime!
+  currentTime: DateTime!
+  events: [ScenarioEvent!]!
+  outcomes: [ScenarioOutcome!]
+}
+
+type ScenarioEvent {
+  id: ID!
+  scheduledTime: DateTime!
+  eventType: String!
+  parameters: JSON!
+  executed: Boolean!
+  result: JSON
+}
+
+type ScenarioOutcome {
+  metric: String!
+  value: Float!
+  comparison: String
+  notes: String
+}
+
+input CreateScenarioInput {
+  name: String!
+  description: String
+  timeScale: Float!
+}
+
+input AddScenarioEventInput {
+  scheduledTime: DateTime!
+  eventType: String!
+  parameters: JSON!
+}
+
+# =============================================================================
+# DECISIONS
+# =============================================================================
+
+type DecisionLog {
+  id: ID!
+  timestamp: DateTime!
+  decisionMaker: String!
+  decisionType: String!
+  context: JSON!
+  options: [DecisionOption!]!
+  selectedOption: String!
+  rationale: String!
+  outcome: String
+}
+
+type DecisionOption {
+  id: ID!
+  description: String!
+  pros: [String!]!
+  cons: [String!]!
+  riskLevel: ThreatLevel!
+  resourceCost: Float
+}
+
+input LogDecisionInput {
+  decisionType: String!
+  context: JSON!
+  options: [DecisionOptionInput!]!
+  selectedOption: String!
+  rationale: String!
+}
+
+input DecisionOptionInput {
+  id: String!
+  description: String!
+  pros: [String!]!
+  cons: [String!]!
+  riskLevel: ThreatLevel!
+  resourceCost: Float
+}
+
+# =============================================================================
+# DATA SOURCES
+# =============================================================================
+
+type DataSource {
+  id: ID!
+  name: String!
+  domain: DataDomain!
+  reliability: String!
+  credibility: Int!
+  lastContact: DateTime!
+  metadata: JSON
+}
+
+input RegisterSourceInput {
+  id: String!
+  name: String!
+  domain: DataDomain!
+  reliability: String!
+  credibility: Int!
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+type Query {
+  # Situational Awareness
+  situationalPicture: SituationalPicture
+  fusedEntities(forceType: ForceType, unitType: UnitType): [FusedEntity!]!
+  entity(id: ID!): FusedEntity
+  threats(minLevel: ThreatLevel): [ThreatAssessment!]!
+
+  # Commands
+  commands(status: CommandStatus): [Command!]!
+  command(id: ID!): Command
+
+  # Plans
+  operationalPlans(status: PlanStatus): [OperationalPlan!]!
+  operationalPlan(id: ID!): OperationalPlan
+
+  # Scenarios
+  scenarios(status: ScenarioStatus): [Scenario!]!
+  scenario(id: ID!): Scenario
+
+  # Logistics
+  logistics: LogisticsSnapshot!
+  supplyLines(status: SupplyLineStatus): [SupplyLine!]!
+  depots: [LogisticsDepot!]!
+  convoys: [Convoy!]!
+
+  # Decisions
+  decisions(decisionMaker: String): [DecisionLog!]!
+  decision(id: ID!): DecisionLog
+
+  # Data Sources
+  dataSources(domain: DataDomain): [DataSource!]!
+  dataSource(id: ID!): DataSource
+
+  # Metrics
+  fusionMetrics: FusionMetrics!
+}
+
+type FusionMetrics {
+  entityCount: Int!
+  activeScenarios: Int!
+  domainCoverage: [DomainCoverage!]!
+  averageConfidence: Float!
+  lastFusionTime: DateTime
+}
+
+type DomainCoverage {
+  domain: DataDomain!
+  sourceCount: Int!
+  lastUpdate: DateTime
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+type Mutation {
+  # Commands
+  issueCommand(input: IssueCommandInput!): Command!
+  acknowledgeCommand(id: ID!): Command!
+  completeCommand(id: ID!, success: Boolean!, message: String): Command!
+
+  # Plans
+  createPlan(input: CreatePlanInput!): OperationalPlan!
+  approvePlan(id: ID!): OperationalPlan!
+  activatePlan(id: ID!): OperationalPlan!
+  cancelPlan(id: ID!): OperationalPlan!
+
+  # Scenarios
+  createScenario(input: CreateScenarioInput!): Scenario!
+  addScenarioEvent(scenarioId: ID!, input: AddScenarioEventInput!): ScenarioEvent!
+  startScenario(id: ID!): Scenario!
+  pauseScenario(id: ID!): Scenario!
+  completeScenario(id: ID!): Scenario!
+
+  # Logistics
+  updateSupplyLine(id: ID!, status: SupplyLineStatus!): SupplyLine!
+  updateDepotStock(id: ID!, stockLevel: Float!): LogisticsDepot!
+  dispatchConvoy(depotId: ID!, destination: String!, cargo: [String!]!): Convoy!
+
+  # Decisions
+  logDecision(input: LogDecisionInput!): DecisionLog!
+  updateDecisionOutcome(id: ID!, outcome: String!): DecisionLog!
+
+  # Data Sources
+  registerDataSource(input: RegisterSourceInput!): DataSource!
+  updateSourceStatus(id: ID!, reliability: String, credibility: Int): DataSource!
+}
+
+# =============================================================================
+# SUBSCRIPTIONS
+# =============================================================================
+
+type Subscription {
+  # Real-time updates
+  situationalPictureUpdated: SituationalPicture!
+  entityUpdated(forceType: ForceType): FusedEntity!
+  entityDetected: FusedEntity!
+  entityLost(entityId: ID!): String!
+
+  # Alerts
+  threatAlert(minLevel: ThreatLevel): ThreatAssessment!
+  criticalAlert: Alert!
+
+  # Commands
+  commandStatusChanged(commandId: ID): Command!
+
+  # Scenarios
+  scenarioUpdated(scenarioId: ID!): Scenario!
+  scenarioEventExecuted(scenarioId: ID!): ScenarioEvent!
+
+  # Fusion
+  fusionCompleted: FusionResult!
+}
+
+type Alert {
+  id: ID!
+  timestamp: DateTime!
+  alertType: String!
+  severity: ThreatLevel!
+  message: String!
+  entityId: String
+  location: GeoLocation
+}
