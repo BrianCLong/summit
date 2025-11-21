@@ -8,9 +8,9 @@ import { getPostgresPool } from '../db/postgres.js';
 import { CaseService } from '../cases/CaseService.js';
 import { CaseInput, CaseUpdateInput } from '../repos/CaseRepo.js';
 import { LegalBasis } from '../repos/AuditAccessLogRepo.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
-const routeLogger = logger.child({ name: 'CaseRoutes' });
+const routeLogger = logger.child({ service: 'CaseRoutes' });
 
 export const caseRouter = Router();
 

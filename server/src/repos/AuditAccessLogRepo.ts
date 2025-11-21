@@ -6,9 +6,9 @@
 // @ts-ignore - pg type imports
 import { Pool } from 'pg';
 import { randomUUID as uuidv4, createHash } from 'crypto';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
-const repoLogger = logger.child({ name: 'AuditAccessLogRepo' });
+const repoLogger = logger.child({ service: 'AuditAccessLogRepo' });
 
 export type LegalBasis =
   | 'investigation'

@@ -6,9 +6,9 @@
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
-const repoLogger = logger.child({ name: 'CaseRepo' });
+const repoLogger = logger.child({ service: 'CaseRepo' });
 
 export type CaseStatus = 'open' | 'active' | 'closed' | 'archived';
 

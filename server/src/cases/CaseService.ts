@@ -9,9 +9,9 @@ import {
   AuditAccessLogRepo,
   AuditAccessLogInput,
 } from '../repos/AuditAccessLogRepo.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
-const serviceLogger = logger.child({ name: 'CaseService' });
+const serviceLogger = logger.child({ service: 'CaseService' });
 
 export class CaseService {
   private caseRepo: CaseRepo;

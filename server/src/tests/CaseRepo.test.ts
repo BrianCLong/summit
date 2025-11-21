@@ -3,6 +3,9 @@
  * Tests CRUD operations for Case Spaces
  */
 
+// Mock the logger before importing modules that use it
+jest.mock('../utils/logger.js');
+
 import { Pool } from 'pg';
 import { CaseRepo, CaseInput } from '../repos/CaseRepo';
 

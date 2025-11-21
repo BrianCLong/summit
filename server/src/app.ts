@@ -15,6 +15,8 @@ import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import rbacRouter from './routes/rbacRoutes.js';
+import { caseRouter } from './routes/cases.js';
+import { auditAccessRouter } from './routes/audit-access.js';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
@@ -64,6 +66,8 @@ export const createApp = async () => {
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
+  app.use('/api/cases', caseRouter);
+  app.use('/api/audit-access', auditAccessRouter);
   app.get('/metrics', metricsRoute);
   app.use(
     rateLimit({

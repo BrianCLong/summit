@@ -6,9 +6,9 @@
 import { Router } from 'express';
 import { getPostgresPool } from '../db/postgres.js';
 import { AuditAccessLogRepo, AuditQuery, LegalBasis } from '../repos/AuditAccessLogRepo.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
-const routeLogger = logger.child({ name: 'AuditAccessRoutes' });
+const routeLogger = logger.child({ service: 'AuditAccessRoutes' });
 
 export const auditAccessRouter = Router();
 

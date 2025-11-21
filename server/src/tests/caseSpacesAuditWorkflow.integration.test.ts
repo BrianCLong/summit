@@ -4,6 +4,9 @@
  * Demonstrates cross-service audit logging capability
  */
 
+// Mock the logger before importing modules that use it
+jest.mock('../utils/logger.js');
+
 import { Pool } from 'pg';
 import { CaseRepo } from '../repos/CaseRepo';
 import { AuditAccessLogRepo } from '../repos/AuditAccessLogRepo';

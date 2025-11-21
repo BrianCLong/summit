@@ -3,6 +3,9 @@
  * Tests immutable audit logging with reason-for-access and legal basis
  */
 
+// Mock the logger before importing modules that use it
+jest.mock('../utils/logger.js');
+
 import { Pool } from 'pg';
 import { AuditAccessLogRepo, AuditAccessLogInput } from '../repos/AuditAccessLogRepo';
 
