@@ -8,10 +8,7 @@
  * @module algorithms/link-prediction
  */
 
-export interface GraphData {
-  nodes: string[];
-  edges: { source: string; target: string; weight?: number }[];
-}
+import type { GraphData } from '../types';
 
 export interface LinkPredictionResult {
   /**

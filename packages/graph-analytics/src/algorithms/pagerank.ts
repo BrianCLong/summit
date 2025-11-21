@@ -69,10 +69,8 @@ export interface PageRankResult {
   executionTime: number;
 }
 
-export interface GraphData {
-  nodes: string[];
-  edges: { source: string; target: string; weight?: number }[];
-}
+import type { GraphData } from '../types';
+export type { GraphData };
 
 /**
  * Computes PageRank scores for all nodes in a graph

@@ -7,22 +7,10 @@
  * @module export/export-formats
  */
 
-export interface GraphData {
-  nodes: Array<{ id: string; label?: string; properties?: Record<string, any> }>;
-  edges: Array<{
-    source: string;
-    target: string;
-    label?: string;
-    weight?: number;
-    properties?: Record<string, any>;
-  }>;
-  metadata?: {
-    title?: string;
-    description?: string;
-    creator?: string;
-    directed?: boolean;
-  };
-}
+import type { ExportableGraph } from '../types';
+
+// Use ExportableGraph as the main export type
+export type GraphData = ExportableGraph;
 
 /**
  * Exports graph to GEXF format (Graph Exchange XML Format)

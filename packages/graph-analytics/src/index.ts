@@ -12,24 +12,87 @@
  * - Graph export to multiple formats
  */
 
+// Core types
+export * from './types';
+
 // Core algorithms
-export * from './algorithms/pagerank';
-export * from './algorithms/betweenness';
-export * from './algorithms/centrality';
-export * from './algorithms/community-detection';
-export * from './algorithms/link-prediction';
+export {
+  calculatePageRank,
+  calculatePersonalizedPageRank,
+  getTopKNodes,
+  calculateNodeImportance,
+  type PageRankOptions,
+  type PageRankResult,
+} from './algorithms/pagerank';
+
+export {
+  calculateBetweenness,
+  findBridgeNodes,
+  calculateNetworkVulnerability,
+  type BetweennessOptions,
+  type BetweennessResult,
+} from './algorithms/betweenness';
+
+export {
+  calculateClosenessCentrality,
+  calculateEigenvectorCentrality,
+  calculateCompositeCentrality,
+  findMostCentralNodes,
+  type ClosenessCentralityOptions,
+  type ClosenessCentralityResult,
+  type EigenvectorCentralityOptions,
+  type EigenvectorCentralityResult,
+} from './algorithms/centrality';
+
+export {
+  detectCommunitiesLouvain,
+  detectCommunitiesLabelPropagation,
+  analyzeCommunityStructure,
+  type CommunityDetectionResult,
+  type LouvainOptions,
+  type LabelPropagationOptions,
+} from './algorithms/community-detection';
+
+export {
+  predictLinks,
+  calculateCosineSimilarity,
+  findSimilarNodes,
+  calculateStructuralEquivalence,
+  identifyRoleEquivalence,
+  type LinkPredictionResult,
+  type SimilarityResult,
+  type LinkPredictionOptions,
+} from './algorithms/link-prediction';
 
 // Temporal analysis
-export * from './temporal/temporal-analysis';
+export {
+  analyzeTemporalEvolution,
+  analyzeTemporalCentrality,
+  analyzeEventSequences,
+  type TemporalGraph,
+  type TimeWindow,
+  type GraphSnapshot,
+  type TemporalEvolutionResult,
+  type TemporalCentralityResult,
+  type EventSequenceResult,
+} from './temporal/temporal-analysis';
 
 // Pattern matching
-export * from './pattern-matching/subgraph-matching';
+export {
+  findSubgraphMatches,
+  discoverMotifs,
+  detectAnomalousSubgraphs,
+  type PatternGraphData,
+  type Pattern,
+  type MatchResult,
+  type MotifResult,
+} from './pattern-matching/subgraph-matching';
 
 // Export formats
-export * from './export/export-formats';
-
-// Re-export common types
-export interface GraphData {
-  nodes: string[];
-  edges: { source: string; target: string; weight?: number }[];
-}
+export {
+  exportToGEXF,
+  exportToGraphML,
+  exportToDOT,
+  exportToJSON,
+  exportToCSV,
+} from './export/export-formats';

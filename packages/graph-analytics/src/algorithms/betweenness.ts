@@ -66,10 +66,7 @@ export interface BetweennessResult {
   approximate: boolean;
 }
 
-interface GraphData {
-  nodes: string[];
-  edges: { source: string; target: string; weight?: number }[];
-}
+import type { GraphData } from '../types';
 
 /**
  * Calculates betweenness centrality using Brandes' algorithm

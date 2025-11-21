@@ -8,10 +8,13 @@
  * @module pattern-matching/subgraph-matching
  */
 
-export interface GraphData {
+export interface PatternGraphData {
   nodes: string[];
   edges: { source: string; target: string; type?: string; weight?: number }[];
 }
+
+// Alias for backward compatibility
+export type GraphData = PatternGraphData;
 
 export interface Pattern {
   nodes: string[];
