@@ -1,13 +1,2425 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="4" failures="0" errors="0" time="16.006">
-  <testsuite name="Webhook API" errors="0" failures="0" skipped="0" timestamp="2025-11-20T09:50:33" time="15.834" tests="4">
-    <testcase classname="Webhook API › POST /api/webhooks" name="should create a webhook" time="0.075">
+<testsuites name="jest tests" tests="372" failures="97" errors="0" time="69.554">
+  <testsuite name="realtime collaboration basics" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:34:26" time="36.782" tests="1">
+    <testcase classname="realtime collaboration basics" name="shares presence and cursor updates" time="30.006">
+      <failure>Error: thrown: &quot;Exceeded timeout of 30000 ms for a test while waiting for `done()` to be called.
+Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
+    at /app/server/tests/realtime-collab.test.ts:27:3
+    at _dispatchDescribe (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:604:26)
+    at describe (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:572:44)
+    at Object.&lt;anonymous&gt; (/app/server/tests/realtime-collab.test.ts:5:1)
+    at Runtime._execModule (/app/server/node_modules/jest-runtime/build/index.js:1268:24)
+    at Runtime._loadModule (/app/server/node_modules/jest-runtime/build/index.js:944:12)
+    at Runtime.requireModule (/app/server/node_modules/jest-runtime/build/index.js:832:12)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:95:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+      <failure>MaxRetriesPerRequestError: Reached the max retries per request limit (which is 20). Refer to &quot;maxRetriesPerRequest&quot; option for details.
+    at Socket.&lt;anonymous&gt; (/app/server/node_modules/ioredis/built/redis/event_handler.js:207:37)
+    at Object.onceWrapper (node:events:634:26)
+    at Socket.emit (node:events:519:28)
+    at TCP.&lt;anonymous&gt; (node:net:346:12)
+    at TCP.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
+      <failure>MaxRetriesPerRequestError: Reached the max retries per request limit (which is 20). Refer to &quot;maxRetriesPerRequest&quot; option for details.
+    at Socket.&lt;anonymous&gt; (/app/server/node_modules/ioredis/built/redis/event_handler.js:207:37)
+    at Object.onceWrapper (node:events:634:26)
+    at Socket.emit (node:events:519:28)
+    at TCP.&lt;anonymous&gt; (node:net:346:12)
+    at TCP.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
+      <failure>MaxRetriesPerRequestError: Reached the max retries per request limit (which is 20). Refer to &quot;maxRetriesPerRequest&quot; option for details.
+    at Socket.&lt;anonymous&gt; (/app/server/node_modules/ioredis/built/redis/event_handler.js:207:37)
+    at Object.onceWrapper (node:events:634:26)
+    at Socket.emit (node:events:519:28)
+    at TCP.&lt;anonymous&gt; (node:net:346:12)
+    at TCP.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
+      <failure>MaxRetriesPerRequestError: Reached the max retries per request limit (which is 20). Refer to &quot;maxRetriesPerRequest&quot; option for details.
+    at Socket.&lt;anonymous&gt; (/app/server/node_modules/ioredis/built/redis/event_handler.js:207:37)
+    at Object.onceWrapper (node:events:634:26)
+    at Socket.emit (node:events:519:28)
+    at TCP.&lt;anonymous&gt; (node:net:346:12)
+    at TCP.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
     </testcase>
-    <testcase classname="Webhook API › POST /api/webhooks" name="should fail with invalid input" time="0.011">
+  </testsuite>
+  <testsuite name="WebSocket JWT auth with RBAC" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:34:26" time="37.082" tests="2">
+    <testcase classname="WebSocket JWT auth with RBAC" name="rejects unauthorized sockets" time="0.076">
     </testcase>
-    <testcase classname="Webhook API › GET /api/webhooks" name="should list webhooks" time="0.009">
+    <testcase classname="WebSocket JWT auth with RBAC" name="enforces RBAC for edit events" time="30.003">
+      <failure>Error: thrown: &quot;Exceeded timeout of 30000 ms for a test while waiting for `done()` to be called.
+Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout.&quot;
+    at /app/server/tests/socket-auth-rbac.test.ts:62:3
+    at _dispatchDescribe (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:604:26)
+    at describe (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:572:44)
+    at Object.&lt;anonymous&gt; (/app/server/tests/socket-auth-rbac.test.ts:8:1)
+    at Runtime._execModule (/app/server/node_modules/jest-runtime/build/index.js:1268:24)
+    at Runtime._loadModule (/app/server/node_modules/jest-runtime/build/index.js:944:12)
+    at Runtime.requireModule (/app/server/node_modules/jest-runtime/build/index.js:832:12)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:95:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+      <failure>MaxRetriesPerRequestError: Reached the max retries per request limit (which is 20). Refer to &quot;maxRetriesPerRequest&quot; option for details.
+    at Socket.&lt;anonymous&gt; (/app/server/node_modules/ioredis/built/redis/event_handler.js:207:37)
+    at Object.onceWrapper (node:events:634:26)
+    at Socket.emit (node:events:519:28)
+    at TCP.&lt;anonymous&gt; (node:net:346:12)
+    at TCP.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
+      <failure>MaxRetriesPerRequestError: Reached the max retries per request limit (which is 20). Refer to &quot;maxRetriesPerRequest&quot; option for details.
+    at Socket.&lt;anonymous&gt; (/app/server/node_modules/ioredis/built/redis/event_handler.js:207:37)
+    at Object.onceWrapper (node:events:634:26)
+    at Socket.emit (node:events:519:28)
+    at TCP.&lt;anonymous&gt; (node:net:346:12)
+    at TCP.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
     </testcase>
-    <testcase classname="Webhook API › POST /api/webhooks/trigger-test" name="should trigger a webhook event" time="0.009">
+  </testsuite>
+  <testsuite name="NlGraphQueryService" errors="0" failures="4" skipped="0" timestamp="2025-11-20T23:35:03" time="0.331" tests="32">
+    <testcase classname="NlGraphQueryService › Basic Query Patterns" name="should compile &quot;show all nodes&quot; query" time="0.027">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Basic Query Patterns" name="should compile &quot;count nodes&quot; query" time="0.005">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Basic Query Patterns" name="should compile &quot;show relationships&quot; query" time="0.006">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Basic Query Patterns" name="should compile &quot;find neighbors&quot; query" time="0.007">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Time-Travel Query Patterns" name="should compile time-travel snapshot query" time="0.009">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+    at Object.&lt;anonymous&gt; (/app/server/tests/nl-graph-query.test.ts:122:34)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="NlGraphQueryService › Time-Travel Query Patterns" name="should compile time-travel changes query" time="0.003">
+      <failure>Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: &quot;changes&quot;
+Received string:    &quot;Retrieves up to 100 matching entities&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/nl-graph-query.test.ts:150:38)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="NlGraphQueryService › Policy-Aware Query Patterns" name="should compile policy-filtered entity query" time="0.002">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Policy-Aware Query Patterns" name="should apply tenant filtering when tenantId is present" time="0.002">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Geo-Temporal Query Patterns" name="should compile geo-temporal entity query" time="0.004">
+      <failure>Error: expect(received).toMatch(expected)
+
+Expected pattern: /high|very-high/
+Received string:  &quot;medium&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/nl-graph-query.test.ts:216:50)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="NlGraphQueryService › Narrative/Timeline Query Patterns" name="should compile timeline query" time="0.004">
+      <failure>Error: expect(received).toContain(expected) // indexOf
+
+Expected substring: &quot;chronological&quot;
+Received string:    &quot;Finds patterns matching multiple graph structures&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/nl-graph-query.test.ts:241:38)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="NlGraphQueryService › Course of Action (COA) Query Patterns" name="should compile shortest path COA query" time="0.04">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Course of Action (COA) Query Patterns" name="should compile path analysis query" time="0.008">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Course of Action (COA) Query Patterns" name="should compile constrained path query" time="0.002">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Cost Estimation" name="should estimate low cost for simple queries" time="0.002">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Cost Estimation" name="should estimate high cost for variable-length paths" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Cost Estimation" name="should provide cost drivers in explanation" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Validation and Security" name="should reject mutation queries" time="0.002">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Validation and Security" name="should detect dangerous operations" time="0">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Validation and Security" name="should require parameters for parameterized queries" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Validation and Security" name="should validate balanced syntax" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Explanation Generation" name="should provide concise explanation by default" time="0.002">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Explanation Generation" name="should provide detailed explanation in verbose mode" time="0.004">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Error Handling" name="should return error for empty prompt" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Error Handling" name="should return error for prompt that is too long" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Error Handling" name="should return error with suggestions for unrecognized pattern" time="0.004">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Caching" name="should cache compilation results" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Caching" name="should clear cache on demand" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Service Information" name="should return available patterns" time="0.002">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Service Information" name="should provide cache statistics" time="0.001">
+    </testcase>
+    <testcase classname="NlGraphQueryService › Integration: Investigation Workflow" name="should support complete investigation query workflow" time="0.002">
+    </testcase>
+    <testcase classname="No Side Effects" name="should not have database client imported" time="0.001">
+    </testcase>
+    <testcase classname="No Side Effects" name="should not execute queries during compilation" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="copilotQuery resolver" errors="0" failures="2" skipped="0" timestamp="2025-11-20T23:35:04" time="0.091" tests="2">
+    <testcase classname="copilotQuery resolver" name="executes query when allowed" time="0.002">
+      <failure>TypeError: resolvers_copilot_js_1.copilotResolvers.Query.copilotQuery is not a function
+    at Object.&lt;anonymous&gt; (/app/server/tests/copilotQuery.resolver.test.ts:27:46)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="copilotQuery resolver" name="returns policy denial without executing" time="0">
+      <failure>TypeError: resolvers_copilot_js_1.copilotResolvers.Query.copilotQuery is not a function
+    at Object.&lt;anonymous&gt; (/app/server/tests/copilotQuery.resolver.test.ts:42:46)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Provenance Ledger Beta - End-to-End" errors="0" failures="4" skipped="0" timestamp="2025-11-20T23:35:04" time="0.214" tests="5">
+    <testcase classname="Provenance Ledger Beta - End-to-End" name="should complete full provenance flow from document ingestion to verified export" time="0">
+      <failure>Error: License creation failed
+    at ProvenanceLedgerBetaService.createLicense (/app/server/src/services/provenance-ledger-beta.ts:104:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/app/server/src/__tests__/provenance-ledger-beta.e2e.test.ts:32:19)</failure>
+    </testcase>
+    <testcase classname="Provenance Ledger Beta - End-to-End" name="should handle claim contradictions and corroborations" time="0">
+      <failure>Error: License creation failed
+    at ProvenanceLedgerBetaService.createLicense (/app/server/src/services/provenance-ledger-beta.ts:104:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/app/server/src/__tests__/provenance-ledger-beta.e2e.test.ts:32:19)</failure>
+    </testcase>
+    <testcase classname="Provenance Ledger Beta - End-to-End" name="should track license requirements across chains" time="0">
+      <failure>Error: License creation failed
+    at ProvenanceLedgerBetaService.createLicense (/app/server/src/services/provenance-ledger-beta.ts:104:13)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/app/server/src/__tests__/provenance-ledger-beta.e2e.test.ts:32:19)</failure>
+    </testcase>
+    <testcase classname="Merkle Tree Utilities" name="should build and verify Merkle tree correctly" time="0.004">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+    at Object.&lt;anonymous&gt; (/app/server/src/__tests__/provenance-ledger-beta.e2e.test.ts:336:21)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="Merkle Tree Utilities" name="should detect tampered items" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Recipes REST API" errors="0" failures="12" skipped="0" timestamp="2025-11-20T23:35:04" time="0.467" tests="12">
+    <testcase classname="Recipes REST API › GET /recipes" name="should return list of recipe files" time="0.036">
+      <failure>Error: expected 200 &quot;OK&quot;, got 500 &quot;Internal Server Error&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:35:59)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › GET /recipes" name="should return empty list when recipes directory does not exist" time="0.006">
+      <failure>Error: expected 200 &quot;OK&quot;, got 500 &quot;Internal Server Error&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:45:59)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › GET /recipes" name="should handle errors gracefully" time="0.011">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 3
++ Received  + 1
+
+- Object {
+-   &quot;error&quot;: &quot;failed to list recipes&quot;,
+- }
++ Object {}
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:57:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should validate required name parameter" time="0.043">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 3
++ Received  + 1
+
+- Object {
+-   &quot;error&quot;: &quot;name required&quot;,
+- }
++ Object {}
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:81:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should return error for non-existent recipe" time="0.01">
+      <failure>Error: expect(received).toContain(expected) // indexOf
+
+Matcher error: received value must not be null nor undefined
+
+Received has value: undefined
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:93:35)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should successfully run recipe with valid name" time="0.007">
+      <failure>Error: expected 200 &quot;OK&quot;, got 500 &quot;Internal Server Error&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:104:10)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should handle recipe with .yml extension" time="0.008">
+      <failure>Error: expected 200 &quot;OK&quot;, got 500 &quot;Internal Server Error&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:123:10)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should handle recipe loading errors" time="0.009">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 3
++ Received  + 1
+
+- Object {
+-   &quot;error&quot;: &quot;Recipe loading error: YAML parsing failed&quot;,
+- }
++ Object {}
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:136:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should validate required inputs" time="0.009">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 3
++ Received  + 1
+
+- Object {
+-   &quot;error&quot;: &quot;Required input &apos;requiredParam&apos; is missing&quot;,
+- }
++ Object {}
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:158:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should handle budget plugin requirement" time="0.008">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 3
++ Received  + 1
+
+- Object {
+-   &quot;error&quot;: &quot;Budget plugin is required but not available&quot;,
+- }
++ Object {}
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:171:29)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should accept user context from request" time="0.014">
+      <failure>Error: expected 200 &quot;OK&quot;, got 402 &quot;Payment Required&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:189:10)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+    <testcase classname="Recipes REST API › POST /recipes/run" name="should handle unexpected errors gracefully" time="0.007">
+      <failure>Error: expected 500 &quot;Internal Server Error&quot;, got 400 &quot;Bad Request&quot;
+    at Object.&lt;anonymous&gt; (/app/server/tests/recipes.test.ts:200:10)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="HybridEntityResolutionService" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:04" time="0.365" tests="1">
+    <testcase classname="HybridEntityResolutionService" name="returns deterministic results" time="0.295">
+      <failure>Error: /home/jules/.pyenv/versions/3.12.12/bin/python3: can&apos;t open file &apos;/app/server/ml/er/api.py&apos;: [Errno 2] No such file or directory
+
+    at PythonShell.parseError (/app/server/node_modules/python-shell/index.ts:383:21)
+    at terminateIfNeeded (/app/server/node_modules/python-shell/index.ts:239:32)
+    at ChildProcess.&lt;anonymous&gt; (/app/server/node_modules/python-shell/index.ts:230:13)
+    at ChildProcess.emit (node:events:519:28)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:293:12)
+    at Process.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:04" time="0.096" tests="1">
+    <testcase classname="" name="similarEntities by text" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;address&apos;)
+    at Test.serverAddress (/app/server/node_modules/supertest/lib/test.js:61:22)
+    at new Test (/app/server/node_modules/supertest/lib/test.js:49:14)
+    at Object.obj.&lt;computed&gt; [as post] (/app/server/node_modules/supertest/index.js:39:18)
+    at Object.&lt;anonymous&gt; (/app/server/tests/similarity.text.test.ts:5:6)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Bitemporal Functionality" errors="0" failures="10" skipped="0" timestamp="2025-11-20T23:35:04" time="0.108" tests="10">
+    <testcase classname="Bitemporal Functionality › Valid Time Dimension" name="should track when facts were true in reality" time="0.001">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Valid Time Dimension" name="should support querying entities in a time range" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Transaction Time Dimension" name="should track when facts were recorded in the system" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Transaction Time Dimension" name="should support retroactive corrections" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Entity History" name="should track all versions of an entity" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Entity History" name="should calculate temporal distance between versions" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Soft Delete" name="should soft delete entities without removing history" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Helper Functions" name="should check if entity is valid at a specific time" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Helper Functions" name="should check if entity was known at a specific time" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="Bitemporal Functionality › Helper Functions" name="should filter entities by temporal constraints" time="0">
+      <failure>AggregateError:
+    at /app/server/node_modules/pg-pool/index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at migrate (/app/server/src/migrations/021_canonical_entities_bitemporal.ts:19:3)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:34:5)</failure>
+    </testcase>
+    <testcase classname="" name="Test execution failure: could be caused by test hooks like &apos;afterAll&apos;." time="0">
+      <failure>{&quot;message&quot;:&quot;&quot;,&quot;stack&quot;:&quot;AggregateError: \n    at /app/server/node_modules/pg-pool/index.js:45:11\n    at processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at Object.&lt;anonymous&gt; (/app/server/src/tests/canonical/bitemporal.test.ts:39:5)&quot;}</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="JWTSecurityManager" errors="0" failures="31" skipped="0" timestamp="2025-11-20T23:35:04" time="0.466" tests="31">
+    <testcase classname="JWTSecurityManager › Initialization" name="should initialize successfully with default config" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Initialization" name="should generate new key if none exists in Redis" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Initialization" name="should load existing key from Redis" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Initialization" name="should rotate expired key on initialization" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Signing" name="should sign a token with required claims" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Signing" name="should include kid in JWT header" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Signing" name="should include jti for replay protection" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Signing" name="should throw error if no current key available" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should verify a valid token" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should throw error for token without kid header" time="0.003">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should throw error for invalid signature" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should throw error for unknown kid" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should detect replay attacks using JTI" time="0.003">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should record JTI with TTL for replay protection" time="0.007">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should reject token with wrong issuer" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Token Verification" name="should reject token with wrong audience" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Key Rotation" name="should store old key when rotating" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Key Rotation" name="should be able to verify tokens signed with old keys" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Key Rotation" name="should cleanup expired keys" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › JWKS Endpoint" name="should return public keys in JWKS format" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › JWKS Endpoint" name="should only include valid (non-expired) keys" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Health Check" name="should return healthy status when everything is ok" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Health Check" name="should return degraded status when Redis is down" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Health Check" name="should return unhealthy status on error" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Shutdown" name="should gracefully shutdown and close Redis connection" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Shutdown" name="should handle shutdown errors gracefully" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Edge Cases" name="should handle malformed token gracefully" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Edge Cases" name="should handle empty token" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Edge Cases" name="should handle token with tampered payload" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Edge Cases" name="should handle concurrent token signing" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="JWTSecurityManager › Edge Cases" name="should handle concurrent token verification" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;connect&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/security/__tests__/jwt-security.test.ts:38:15)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Case Spaces and Audit Workflow Integration" errors="0" failures="2" skipped="0" timestamp="2025-11-20T23:35:04" time="0.416" tests="8">
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should create a case and log the creation in audit trail" time="0.023">
+    </testcase>
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should enforce reason-for-access when viewing a case" time="0.013">
+    </testcase>
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should track export operations with legal basis" time="0.014">
+    </testcase>
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should support cross-service audit logging with correlation ID" time="0.009">
+      <failure>Error: expect(received).toHaveLength(expected)
+
+Expected length: 3
+Received length: 0
+Received array:  []
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/caseSpacesAuditWorkflow.integration.test.ts:281:28)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should verify audit trail integrity" time="0.004">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: 3
+Received: 0
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/caseSpacesAuditWorkflow.integration.test.ts:313:33)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should retrieve audit logs for ombudsman review" time="0.002">
+    </testcase>
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should fail when attempting to access without reason" time="0.011">
+    </testcase>
+    <testcase classname="Case Spaces and Audit Workflow Integration" name="should fail when attempting to access without legal basis" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="AuditAccessLogRepo" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:05" time="0.62" tests="11">
+    <testcase classname="AuditAccessLogRepo › logAccess" name="should log access with required fields" time="0.135">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledTimes(expected)
+
+Expected number of calls: 1
+Received number of calls: 2
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/AuditAccessLogRepo.test.ts:65:30)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › logAccess" name="should fail without reason - policy-by-default" time="0.23">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › logAccess" name="should fail without legal basis - policy-by-default" time="0.049">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › logAccess" name="should include warrant information when provided" time="0.002">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › logAccess" name="should track correlation ID for related operations" time="0.001">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › query" name="should query audit logs with filters" time="0.001">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › query" name="should filter by date range" time="0.001">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › query" name="should filter by legal basis" time="0.001">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › getLogsForCase" name="should retrieve all logs for a specific case" time="0.001">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › verifyIntegrity" name="should verify audit trail integrity" time="0.002">
+    </testcase>
+    <testcase classname="AuditAccessLogRepo › count" name="should count audit logs with filters" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="WargameResolver" errors="0" failures="10" skipped="0" timestamp="2025-11-20T23:35:05" time="0.232" tests="10">
+    <testcase classname="WargameResolver › Query Resolvers" name="should fetch all crisis scenarios" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Query Resolvers" name="should fetch a single crisis scenario by ID" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Query Resolvers" name="should return undefined if crisis scenario not found" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Query Resolvers" name="should fetch crisis telemetry" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Query Resolvers" name="should fetch adversary intent estimates" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Query Resolvers" name="should fetch narrative heatmap data" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Query Resolvers" name="should fetch strategic response playbooks" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Mutation Resolvers" name="should run a war-game simulation and store data" time="0.001">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Mutation Resolvers" name="should update a crisis scenario" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="WargameResolver › Mutation Resolvers" name="should delete a crisis scenario" time="0">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;session&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/resolvers/__tests__/WargameResolver.test.ts:31:47)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusHook (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:976:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:941:5)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Bulk mutations" errors="0" failures="2" skipped="0" timestamp="2025-11-20T23:35:05" time="1.169" tests="2">
+    <testcase classname="Bulk mutations" name="createEntities returns array" time="0.004">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;records&apos;)
+    at Object.createEntities (/app/server/src/graphql/resolvers/crudResolvers.ts:779:33)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/app/server/tests/bulk-create.test.ts:47:17)</failure>
+    </testcase>
+    <testcase classname="Bulk mutations" name="createRelationships returns array" time="0.002">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;records&apos;)
+    at Object.createRelationships (/app/server/src/graphql/resolvers/crudResolvers.ts:1113:22)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at Object.&lt;anonymous&gt; (/app/server/tests/bulk-create.test.ts:65:17)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="report cli" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:06" time="0.252" tests="1">
+    <testcase classname="report cli" name="verifies hash correctly" time="0.003">
+      <failure>Error: ENOENT: no such file or directory, open &apos;/app/server/templates/reports/sample.handlebars&apos;
+    at Object.openSync (node:fs:561:18)
+    at Object.readFileSync (node:fs:445:35)
+    at Object.&lt;anonymous&gt; (/app/server/tests/report-cli.test.ts:14:21)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="engagementCascade" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:06" time="0.299" tests="3">
+    <testcase classname="engagementCascade" name="reduces latency compared to the baseline plan" time="0.003">
+    </testcase>
+    <testcase classname="engagementCascade" name="improves hit rate and speedup with higher amplification" time="0.001">
+      <failure>Error: expect(received).toBeGreaterThan(expected)
+
+Expected: &gt; 0.97
+Received:   0.97
+    at Object.&lt;anonymous&gt; (/app/server/tests/engagementCascade.test.ts:23:61)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="engagementCascade" name="keeps guardrail and tier metrics within sensible ranges" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="GraphRAGService" errors="0" failures="2" skipped="0" timestamp="2025-11-20T23:35:06" time="0.23" tests="2">
+    <testcase classname="GraphRAGService" name="returns valid response and uses cache" time="0.02">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;0&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/graphragService.test.ts:97:46)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+    <testcase classname="GraphRAGService" name="throws user-facing error with trace id on invalid output" time="0.008">
+      <failure>TypeError: Cannot read properties of undefined (reading &apos;0&apos;)
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/graphragService.test.ts:110:52)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Narrative simulation routes" errors="0" failures="2" skipped="0" timestamp="2025-11-20T23:35:06" time="0.604" tests="2">
+    <testcase classname="Narrative simulation routes" name="creates simulations, accepts events, and advances time" time="0.051">
+      <failure>Error: expected 201 &quot;Created&quot;, got 400 &quot;Bad Request&quot;
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/narrative/narrative-routes.test.ts:45:8)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+    <testcase classname="Narrative simulation routes" name="supports LLM-driven configuration via API" time="0.006">
+      <failure>Error: expected 201 &quot;Created&quot;, got 400 &quot;Bad Request&quot;
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/narrative/narrative-routes.test.ts:92:8)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)
+----
+    at Test._assertStatus (/app/server/node_modules/supertest/lib/test.js:309:14)
+    at /app/server/node_modules/supertest/lib/test.js:365:13
+    at Test._assertFunction (/app/server/node_modules/supertest/lib/test.js:342:13)
+    at Test.assert (/app/server/node_modules/supertest/lib/test.js:195:23)
+    at localAssert (/app/server/node_modules/supertest/lib/test.js:138:14)
+    at Server.&lt;anonymous&gt; (/app/server/node_modules/supertest/lib/test.js:152:11)
+    at Object.onceWrapper (node:events:633:28)
+    at Server.emit (node:events:519:28)
+    at emitCloseNT (node:net:2419:8)
+    at processTicksAndRejections (node:internal/process/task_queues:89:21)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="stats caching" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:07" time="0.104" tests="1">
+    <testcase classname="stats caching" name="caseCounts and summaryStats are cached via local/redis cache" time="0.001">
+      <failure>TypeError: (0 , database_js_1.getRedisClient) is not a function
+    at cached (/app/server/src/cache/responseCache.ts:23:54)
+    at Object.caseCounts (/app/server/src/graphql/resolvers/stats.ts:12:34)
+    at Object.&lt;anonymous&gt; (/app/server/tests/stats.cache.test.ts:30:32)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="Ticket Linking Service" errors="0" failures="2" skipped="0" timestamp="2025-11-20T23:35:07" time="0.092" tests="14">
+    <testcase classname="Ticket Linking Service › addTicketRunLink" name="should create a link between ticket and run" time="0.002">
+    </testcase>
+    <testcase classname="Ticket Linking Service › addTicketRunLink" name="should throw error if run does not exist" time="0.002">
+      <failure>Error: expect(received).rejects.toThrow()
+
+Received promise resolved instead of rejected
+Resolved to value: null
+    at expect (/app/server/node_modules/expect/build/index.js:2116:15)
+    at Object.&lt;anonymous&gt; (/app/server/tests/ticket-links.test.ts:75:19)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="Ticket Linking Service › addTicketRunLink" name="should handle idempotent calls" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromPR" name="should extract GitHub issue number from PR URL" time="0.002">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+Expected: {&quot;externalId&quot;: &quot;123&quot;, &quot;provider&quot;: &quot;github&quot;}
+Received: null
+    at Object.&lt;anonymous&gt; (/app/server/tests/ticket-links.test.ts:107:22)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromPR" name="should extract GitHub issue from PR body" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromPR" name="should extract Jira ticket from PR body" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromPR" name="should return null if no ticket found" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromPR" name="should handle multiple patterns and return first match" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromMetadata" name="should extract direct ticket reference" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromMetadata" name="should extract from PR URL in metadata" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromMetadata" name="should extract from commit message" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › extractTicketFromMetadata" name="should return null if no ticket information found" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › addTicketDeploymentLink" name="should create a link between ticket and deployment" time="0.001">
+    </testcase>
+    <testcase classname="Ticket Linking Service › addTicketDeploymentLink" name="should throw error if deployment does not exist" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:07" time="0.072" tests="1">
+    <testcase classname="" name="similarEntities by text (integration)" time="0.003">
+      <failure>AggregateError:
+    at internalConnectMultiple (node:net:1134:18)
+    at afterConnectMultiple (node:net:1715:7)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="report templates" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:07" time="0.053" tests="1">
+    <testcase classname="report templates" name="matches snapshot" time="0">
+      <failure>Error: ENOENT: no such file or directory, open &apos;/app/server/templates/reports/sample-v1.json&apos;
+    at Object.readFileSync (node:fs:441:20)
+    at Object.&lt;anonymous&gt; (/app/server/tests/report-templates.test.ts:12:36)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="StripeWebhook" errors="0" failures="1" skipped="0" timestamp="2025-11-20T23:35:07" time="0.053" tests="2">
+    <testcase classname="StripeWebhook" name="verifies signature" time="0.001">
+    </testcase>
+    <testcase classname="StripeWebhook" name="handles idempotent payment and refund" time="0.002">
+      <failure>Error: expect(received).toEqual(expected) // deep equality
+
+- Expected  - 1
++ Received  + 1
+
+  Array [
+    &quot;paid:order123&quot;,
+    &quot;issue:order123-ent&quot;,
+-   &quot;revoke:order123-ent&quot;,
+    &quot;revoked:order123-ent&quot;,
++   &quot;revoke:order123-ent&quot;,
+  ]
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/payments_webhook.test.ts:50:19)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="EntityResolutionService normalization" errors="0" failures="3" skipped="0" timestamp="2025-11-20T23:35:06" time="0.51" tests="3">
+    <testcase classname="EntityResolutionService normalization" name="normalizes emails and aliases" time="0.003">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: &quot;username@gmail.com&quot;
+Received: &quot;user.name+spam@gmail.com&quot;
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/entityResolution.normalization.test.ts:12:25)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="EntityResolutionService normalization" name="normalizes urls" time="0.001">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: &quot;example.com/path&quot;
+Received: &quot;example.com/path/&quot;
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/entityResolution.normalization.test.ts:17:23)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+    <testcase classname="EntityResolutionService normalization" name="creates same key for equivalent values" time="0.002">
+      <failure>Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: &quot;email:user@example.com|name:josé  angel&quot;
+Received: &quot;email:user@example.com|name:josé ángel&quot;
+    at Object.&lt;anonymous&gt; (/app/server/src/tests/entityResolution.normalization.test.ts:23:16)
+    at Promise.finally.completed (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1557:28)
+    at new Promise (&lt;anonymous&gt;)
+    at callAsyncCircusFn (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1497:10)
+    at _callCircusTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1007:40)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at _runTest (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:947:3)
+    at /app/server/node_modules/jest-circus/build/jestAdapterInit.js:849:7
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:862:11)
+    at _runTestsForDescribeBlock (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:857:11)
+    at run (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:761:3)
+    at runAndTransformResultsToJestFormat (/app/server/node_modules/jest-circus/build/jestAdapterInit.js:1918:21)
+    at jestAdapter (/app/server/node_modules/jest-circus/build/runner.js:101:19)
+    at runTestInternal (/app/server/node_modules/jest-runner/build/testWorker.js:275:16)
+    at runTest (/app/server/node_modules/jest-runner/build/testWorker.js:343:7)
+    at Object.worker (/app/server/node_modules/jest-runner/build/testWorker.js:497:12)</failure>
+    </testcase>
+  </testsuite>
+  <testsuite name="GraphQL API Integration Tests" errors="0" failures="0" skipped="16" timestamp="2025-11-20T23:35:07" time="0.104" tests="16">
+    <testcase classname="GraphQL API Integration Tests › Authentication &amp; Authorization" name="should reject requests without authentication" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Authentication &amp; Authorization" name="should allow authenticated requests" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Authentication &amp; Authorization" name="should enforce role-based access control" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Case Management" name="should create a new case" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Case Management" name="should retrieve case list with pagination" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Case Management" name="should update case status" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Entity Management" name="should create entity with validation" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Entity Management" name="should reject invalid entity data" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Graph Analytics" name="should find shortest path between entities" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Graph Analytics" name="should calculate centrality metrics" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Real-time Subscriptions" name="should handle case updates subscription" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Search Integration" name="should perform full-text search" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Audit Trail" name="should create audit log for mutations" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Error Handling" name="should handle database connection errors gracefully" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Error Handling" name="should handle malformed GraphQL queries" time="0">
+      <skipped/>
+    </testcase>
+    <testcase classname="GraphQL API Integration Tests › Performance" name="should handle concurrent requests efficiently" time="0">
+      <skipped/>
+    </testcase>
+  </testsuite>
+  <testsuite name="VideoFrameExtractor" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:07" time="0.096" tests="6">
+    <testcase classname="VideoFrameExtractor" name="should extract frames with default options" time="0.005">
+    </testcase>
+    <testcase classname="VideoFrameExtractor" name="should extract frames with specified frameRate" time="0.001">
+    </testcase>
+    <testcase classname="VideoFrameExtractor" name="should extract frames with specified interval" time="0.001">
+    </testcase>
+    <testcase classname="VideoFrameExtractor" name="should extract audio when extractAudio is true" time="0.003">
+    </testcase>
+    <testcase classname="VideoFrameExtractor" name="should clean up temporary directory" time="0.001">
+    </testcase>
+    <testcase classname="VideoFrameExtractor" name="should handle ffmpeg errors during frame extraction" time="0.011">
+    </testcase>
+  </testsuite>
+  <testsuite name="LLMAnalystService" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:07" time="0.54" tests="1">
+    <testcase classname="LLMAnalystService" name="creates products pending approval and allows approval" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="nlq compile" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:08" time="0.272" tests="2">
+    <testcase classname="nlq compile" name="matches golden fixtures" time="0.002">
+    </testcase>
+    <testcase classname="nlq compile" name="rejects write operations" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="Webhook API" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:08" time="0.533" tests="4">
+    <testcase classname="Webhook API › POST /api/webhooks" name="should create a webhook" time="0.036">
+    </testcase>
+    <testcase classname="Webhook API › POST /api/webhooks" name="should fail with invalid input" time="0.008">
+    </testcase>
+    <testcase classname="Webhook API › GET /api/webhooks" name="should list webhooks" time="0.006">
+    </testcase>
+    <testcase classname="Webhook API › POST /api/webhooks/trigger-test" name="should trigger a webhook event" time="0.018">
+    </testcase>
+  </testsuite>
+  <testsuite name="FederatedAttributionEngine" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:08" time="0.093" tests="5">
+    <testcase classname="FederatedAttributionEngine" name="enforces consent before recording events" time="0.003">
+    </testcase>
+    <testcase classname="FederatedAttributionEngine" name="computes multi-touch attribution models" time="0.004">
+    </testcase>
+    <testcase classname="FederatedAttributionEngine" name="provides conversion path analysis without including the conversion touchpoint" time="0.003">
+    </testcase>
+    <testcase classname="FederatedAttributionEngine" name="generates privacy-safe cohort metrics" time="0.002">
+    </testcase>
+    <testcase classname="FederatedAttributionEngine" name="dispatches real-time attribution results to registered connectors" time="0.012">
+    </testcase>
+  </testsuite>
+  <testsuite name="DataSubjectFulfillmentEngine" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:09" time="0.352" tests="3">
+    <testcase classname="DataSubjectFulfillmentEngine" name="produces deterministic export packs with offline-verifiable signatures" time="0.152">
+    </testcase>
+    <testcase classname="DataSubjectFulfillmentEngine" name="rectifies records and emits validating proofs" time="0.045">
+    </testcase>
+    <testcase classname="DataSubjectFulfillmentEngine" name="deletes records and produces inclusion-failure proofs" time="0.063">
+    </testcase>
+  </testsuite>
+  <testsuite name="graph analytics GraphQL resolvers" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:09" time="0.252" tests="4">
+    <testcase classname="graph analytics GraphQL resolvers" name="delegates to the service for PageRank" time="0.003">
+    </testcase>
+    <testcase classname="graph analytics GraphQL resolvers" name="delegates to the service for community detection" time="0.002">
+    </testcase>
+    <testcase classname="graph analytics GraphQL resolvers" name="throws when the user is missing" time="0.01">
+    </testcase>
+    <testcase classname="graph analytics GraphQL resolvers" name="throws when the user lacks the required role" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="hypothesis updates" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:09" time="0.061" tests="2">
+    <testcase classname="hypothesis updates" name="updates probability with evidence" time="0.002">
+    </testcase>
+    <testcase classname="hypothesis updates" name="records dissent" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="KmsSigner" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:09" time="0.064" tests="1">
+    <testcase classname="KmsSigner" name="signs and verifies using client" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="graphData filtering" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:09" time="0.236" tests="1">
+    <testcase classname="graphData filtering" name="applies confidence, tag, and time filters" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:10" time="0.519" tests="1">
+    <testcase classname="" name="apollo metrics record totals, errors, durations" time="0.138">
+    </testcase>
+  </testsuite>
+  <testsuite name="Disclosures routes" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:10" time="0.838" tests="6">
+    <testcase classname="Disclosures routes › POST /disclosures/export" name="creates a disclosure export job when tenant matches header" time="0.042">
+    </testcase>
+    <testcase classname="Disclosures routes › POST /disclosures/export" name="rejects mismatched tenant headers" time="0.014">
+    </testcase>
+    <testcase classname="Disclosures routes › GET /disclosures/export/:jobId" name="returns job status when tenant is authorized" time="0.107">
+    </testcase>
+    <testcase classname="Disclosures routes › GET /disclosures/export/:jobId" name="returns 404 when job is missing" time="0.088">
+    </testcase>
+    <testcase classname="Disclosures routes › GET /disclosures/export/:jobId/download" name="streams the zip when export completed" time="0.143">
+    </testcase>
+    <testcase classname="Disclosures routes › POST /disclosures/analytics" name="records analytics events when payload valid" time="0.06">
+    </testcase>
+  </testsuite>
+  <testsuite name="MultimodalFusionLayer" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:11" time="0.089" tests="3">
+    <testcase classname="MultimodalFusionLayer" name="generates multimodal embeddings with fused confidence" time="0.007">
+    </testcase>
+    <testcase classname="MultimodalFusionLayer" name="infers correlations when embeddings align" time="0.005">
+    </testcase>
+    <testcase classname="MultimodalFusionLayer" name="builds timeline events with deterministic ordering" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="deepfake triage" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:11" time="0.068" tests="1">
+    <testcase classname="deepfake triage" name="returns score, facets, and latency" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="LegalHoldOrchestrator" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:11" time="0.314" tests="5">
+    <testcase classname="LegalHoldOrchestrator" name="initiates legal hold across connectors with notifications and audit trail" time="0.012">
+    </testcase>
+    <testcase classname="LegalHoldOrchestrator" name="verifies preservation state for connectors supporting verification" time="0.005">
+    </testcase>
+    <testcase classname="LegalHoldOrchestrator" name="tracks custodian acknowledgement and compliance checkpoints" time="0.006">
+    </testcase>
+    <testcase classname="LegalHoldOrchestrator" name="collects e-discovery exports from connectors that support exports" time="0.017">
+    </testcase>
+    <testcase classname="LegalHoldOrchestrator" name="releases legal hold and updates statuses" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="findUnhandledAwaitExpressions" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:12" time="0.465" tests="3">
+    <testcase classname="findUnhandledAwaitExpressions" name="detects await expressions outside try/catch" time="0.382">
+    </testcase>
+    <testcase classname="findUnhandledAwaitExpressions" name="allows await within try/catch" time="0.004">
+    </testcase>
+    <testcase classname="findUnhandledAwaitExpressions" name="treats chained catch handlers as safe" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="CrystalSessionOrchestrator" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:12" time="0.157" tests="3">
+    <testcase classname="CrystalSessionOrchestrator" name="creates a session with isolated worktree and default panels" time="0.023">
+    </testcase>
+    <testcase classname="CrystalSessionOrchestrator" name="streams run logs via subscription" time="0.012">
+    </testcase>
+    <testcase classname="CrystalSessionOrchestrator" name="records assistant responses via adapter registry" time="0.008">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:12" time="0.378" tests="1">
+    <testcase classname="" name="/metrics exposes apollo_* and cache_*" time="0.103">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:13" time="0.161" tests="1">
+    <testcase classname="" name="graphRagAnswer validates JSON schema" time="0.009">
+    </testcase>
+  </testsuite>
+  <testsuite name="DataRetentionEngine" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:13" time="0.217" tests="5">
+    <testcase classname="DataRetentionEngine" name="applies policy templates automatically during registration" time="0.006">
+    </testcase>
+    <testcase classname="DataRetentionEngine" name="prevents purges when a legal hold is active" time="0.005">
+    </testcase>
+    <testcase classname="DataRetentionEngine" name="executes scheduled purges across storage backends" time="0.006">
+    </testcase>
+    <testcase classname="DataRetentionEngine" name="generates compliance reports with legal hold visibility" time="0.005">
+    </testcase>
+    <testcase classname="DataRetentionEngine" name="archives datasets and records audit events" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="SemanticSearchService" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:13" time="0.147" tests="1">
+    <testcase classname="SemanticSearchService" name="performs search with metadata filters" time="0.006">
+    </testcase>
+  </testsuite>
+  <testsuite name="behavioral fingerprint job" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:13" time="0.28" tests="1">
+    <testcase classname="behavioral fingerprint job" name="scores and clusters identities across projects" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="runCommandCheck" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:13" time="0.285" tests="2">
+    <testcase classname="runCommandCheck" name="reports success for passing commands" time="0.151">
+    </testcase>
+    <testcase classname="runCommandCheck" name="captures stderr for failing commands" time="0.069">
+    </testcase>
+  </testsuite>
+  <testsuite name="trace context" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:14" time="0.221" tests="1">
+    <testcase classname="trace context" name="attaches unique requestId to context" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="ReportRequestValidator" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:14" time="0.123" tests="12">
+    <testcase classname="ReportRequestValidator › validate" name="should validate a correct report request" time="0.003">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should throw ValidationError for missing templateId" time="0.014">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should throw ValidationError for missing userId" time="0.002">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should throw ValidationError for missing required parameter" time="0.004">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should throw ValidationError for invalid enum value" time="0.003">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should throw ValidationError for invalid parameter type" time="0.004">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should throw ValidationError for unsupported format" time="0.011">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should accept valid enum values" time="0.002">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should accept valid formats (case insensitive)" time="0.003">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should handle optional parameters correctly" time="0.002">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should validate date range parameters" time="0.002">
+    </testcase>
+    <testcase classname="ReportRequestValidator › validate" name="should throw ValidationError for invalid date range" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="Provenance Functionality" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:14" time="0.125" tests="16">
+    <testcase classname="Provenance Functionality › Hashing" name="should create consistent hashes for sources" time="0.003">
+    </testcase>
+    <testcase classname="Provenance Functionality › Hashing" name="should create different hashes for different sources" time="0.002">
+    </testcase>
+    <testcase classname="Provenance Functionality › Hashing" name="should create consistent hashes for assertions" time="0.002">
+    </testcase>
+    <testcase classname="Provenance Functionality › Hashing" name="should sort evidence arrays before hashing" time="0.001">
+    </testcase>
+    <testcase classname="Provenance Functionality › Hashing" name="should create consistent hashes for transforms" time="0.002">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Chain Creation" name="should create a valid provenance chain" time="0.004">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Chain Creation" name="should create different chain hashes for different content" time="0.002">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Chain Verification" name="should verify a valid provenance chain" time="0.003">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Chain Verification" name="should detect tampering in source hash" time="0.003">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Chain Verification" name="should detect tampering in assertion hash" time="0.003">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Chain Verification" name="should detect tampering in chain hash" time="0.002">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Manifest" name="should create a valid provenance manifest" time="0.003">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Manifest" name="should verify a valid manifest" time="0.003">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Manifest" name="should detect tampering in manifest" time="0.009">
+    </testcase>
+    <testcase classname="Provenance Functionality › Provenance Manifest" name="should detect tampering in contained chains" time="0.002">
+    </testcase>
+    <testcase classname="Provenance Functionality › End-to-End Provenance Flow" name="should create and verify a complete provenance chain" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="performance benchmark" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:14" time="0.151" tests="1">
+    <testcase classname="performance benchmark" name="all operations complete within the configured budgets" time="0.087">
+    </testcase>
+  </testsuite>
+  <testsuite name="TemplateValidator" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:14" time="0.161" tests="13">
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should validate a correct custom template" time="0.004">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should throw ValidationError for missing name" time="0.017">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should throw ValidationError for name exceeding max length" time="0.003">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should throw ValidationError for empty sections array" time="0.004">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should throw ValidationError for non-array sections" time="0.003">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should throw ValidationError for invalid section names" time="0.004">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should throw ValidationError for invalid export format" time="0.004">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should accept all valid export formats" time="0.004">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should throw ValidationError for description exceeding max length" time="0.004">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should accept template without exportFormats" time="0.002">
+    </testcase>
+    <testcase classname="TemplateValidator › validateCustomTemplate" name="should accept template without description" time="0.002">
+    </testcase>
+    <testcase classname="TemplateValidator › isValidSectionName" name="should accept valid section names" time="0.003">
+    </testcase>
+    <testcase classname="TemplateValidator › isValidSectionName" name="should reject invalid section names" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="Fuzz Targets" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:07" time="7.498" tests="6">
+    <testcase classname="Fuzz Targets › NarrativeSimulationEngine Properties" name="State consistency: tick should behave monotonically and bound values" time="4.669">
+    </testcase>
+    <testcase classname="Fuzz Targets › NarrativeSimulationEngine Properties" name="No crash on random event injection (with valid and invalid actors)" time="0.652">
+    </testcase>
+    <testcase classname="Fuzz Targets › nl2cypher Properties" name="Should not throw unexpected errors on random strings" time="0.254">
+    </testcase>
+    <testcase classname="Fuzz Targets › nl2cypher Properties" name="Valid count queries should always parse" time="0.742">
+    </testcase>
+    <testcase classname="Fuzz Targets › dedupeAlerts Properties" name="Idempotency: deduping twice should yield same result" time="0.778">
+    </testcase>
+    <testcase classname="Fuzz Targets › dedupeAlerts Properties" name="Should not add duplicate if within window" time="0.24">
+    </testcase>
+  </testsuite>
+  <testsuite name="WebSocketConnectionPool" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.129" tests="3">
+    <testcase classname="WebSocketConnectionPool" name="queues messages during network interruptions and replays after reconnection" time="0.013">
+    </testcase>
+    <testcase classname="WebSocketConnectionPool" name="marks connections as degraded and notifies clients on server restart" time="0.013">
+    </testcase>
+    <testcase classname="WebSocketConnectionPool" name="applies rate limiting and backpressure handling under load" time="0.01">
+    </testcase>
+  </testsuite>
+  <testsuite name="PiiOntologyEngine" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.116" tests="2">
+    <testcase classname="PiiOntologyEngine" name="classifies and enriches PII entities with regulatory mappings" time="0.03">
+    </testcase>
+    <testcase classname="PiiOntologyEngine" name="produces regulatory summaries across frameworks" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="MoERouter" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.164" tests="20">
+    <testcase classname="MoERouter › route" name="routes graph tasks to GRAPH_TOOL" time="0.005">
+    </testcase>
+    <testcase classname="MoERouter › route" name="routes file operations to FILES_TOOL" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › route" name="routes OSINT tasks to OSINT_TOOL" time="0.009">
+    </testcase>
+    <testcase classname="MoERouter › route" name="routes export requests to EXPORT_TOOL" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › route" name="routes simple queries to LLM_LIGHT for speed" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › route" name="routes complex queries to LLM_HEAVY" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › route" name="routes investigation context queries to RAG_TOOL" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › route" name="falls back to LLM_LIGHT when no specific tool matches" time="0.002">
+    </testcase>
+    <testcase classname="MoERouter › feature extraction" name="detects graph keywords correctly" time="0.004">
+    </testcase>
+    <testcase classname="MoERouter › feature extraction" name="detects file keywords correctly" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › feature extraction" name="detects OSINT keywords correctly" time="0.004">
+    </testcase>
+    <testcase classname="MoERouter › feature extraction" name="calculates complexity score correctly" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › security constraints" name="respects sensitivity levels in routing" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › security constraints" name="considers user context in routing" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › routing statistics" name="tracks routing decisions" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › routing statistics" name="calculates average confidence correctly" time="0.01">
+    </testcase>
+    <testcase classname="MoERouter › edge cases" name="handles empty task" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › edge cases" name="handles very long tasks" time="0.003">
+    </testcase>
+    <testcase classname="MoERouter › edge cases" name="handles tight latency constraints" time="0.002">
+    </testcase>
+    <testcase classname="MoERouter › edge cases" name="handles multiple keyword matches" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="GraphQL Depth Limit Validation" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.354" tests="4">
+    <testcase classname="GraphQL Depth Limit Validation" name="should allow queries within depth limit" time="0.008">
+    </testcase>
+    <testcase classname="GraphQL Depth Limit Validation" name="should reject queries exceeding depth limit" time="0.005">
+    </testcase>
+    <testcase classname="GraphQL Depth Limit Validation" name="should include operation name in error message" time="0.003">
+    </testcase>
+    <testcase classname="GraphQL Depth Limit Validation" name="should handle custom depth limits" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="ProvenanceRepo" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.087" tests="3">
+    <testcase classname="ProvenanceRepo" name="maps classic audit_events rows" time="0.005">
+    </testcase>
+    <testcase classname="ProvenanceRepo" name="falls back to provenance table and maps fields" time="0.003">
+    </testcase>
+    <testcase classname="" name="includes filters in WHERE (contains + reasonCodeIn)" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="CaseRepo" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.174" tests="13">
+    <testcase classname="CaseRepo › create" name="should create a new case with required fields" time="0.004">
+    </testcase>
+    <testcase classname="CaseRepo › create" name="should create a case with default status if not provided" time="0.008">
+    </testcase>
+    <testcase classname="CaseRepo › findById" name="should find a case by ID" time="0.003">
+    </testcase>
+    <testcase classname="CaseRepo › findById" name="should return null if case not found" time="0.003">
+    </testcase>
+    <testcase classname="CaseRepo › findById" name="should filter by tenantId when provided" time="0.003">
+    </testcase>
+    <testcase classname="CaseRepo › update" name="should update case fields" time="0.004">
+    </testcase>
+    <testcase classname="CaseRepo › update" name="should set closed_at and closed_by when status changes to closed" time="0.004">
+    </testcase>
+    <testcase classname="CaseRepo › list" name="should list cases with filters" time="0.004">
+    </testcase>
+    <testcase classname="CaseRepo › list" name="should filter by policy labels" time="0.004">
+    </testcase>
+    <testcase classname="CaseRepo › delete" name="should prevent deletion if case has audit logs" time="0.037">
+    </testcase>
+    <testcase classname="CaseRepo › delete" name="should delete case if no audit logs exist" time="0.004">
+    </testcase>
+    <testcase classname="CaseRepo › archive" name="should archive a case by updating status" time="0.003">
+    </testcase>
+    <testcase classname="CaseRepo › count" name="should count cases with filters" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="Math Utils 2" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.091" tests="3">
+    <testcase classname="Math Utils 2" name="should subtract two numbers correctly" time="0.003">
+    </testcase>
+    <testcase classname="Math Utils 2" name="should divide two numbers correctly" time="0.002">
+    </testcase>
+    <testcase classname="Math Utils 2" name="should throw error when dividing by zero" time="0.013">
+    </testcase>
+  </testsuite>
+  <testsuite name="MissionControlConflictResolver" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.102" tests="3">
+    <testcase classname="MissionControlConflictResolver" name="assigns highest priority mission to contested slot and negotiates fallback for lower priority mission" time="0.013">
+    </testcase>
+    <testcase classname="MissionControlConflictResolver" name="defers mission without viable fallback when arbitration favors higher priority mission" time="0.005">
+    </testcase>
+    <testcase classname="MissionControlConflictResolver" name="calculates fairness index and concession totals across mixed outcomes" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="Watchlist flow" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.076" tests="1">
+    <testcase classname="Watchlist flow" name="creates and adds entity" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="cost estimator" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.088" tests="1">
+    <testcase classname="cost estimator" name="assigns higher cost for filtered queries" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="GossipAuditor" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.088" tests="1">
+    <testcase classname="GossipAuditor" name="alerts on fork" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="Math Utils" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.08" tests="2">
+    <testcase classname="Math Utils" name="should add two numbers correctly" time="0.003">
+    </testcase>
+    <testcase classname="Math Utils" name="should multiply two numbers correctly" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="WeightsVerifier" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.083" tests="1">
+    <testcase classname="WeightsVerifier" name="verifies checksum" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="RiskEngine" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.078" tests="1">
+    <testcase classname="RiskEngine" name="scores features with bands" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="NlToCypherService" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:15" time="0.097" tests="2">
+    <testcase classname="NlToCypherService" name="translates known prompts" time="0.006">
+    </testcase>
+    <testcase classname="NlToCypherService" name="falls back to model adapter" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="NLQTranslator" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.076" tests="1">
+    <testcase classname="NLQTranslator" name="translates person queries with tenant scoping" time="0.011">
+    </testcase>
+  </testsuite>
+  <testsuite name="String Utils" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.083" tests="2">
+    <testcase classname="String Utils" name="should capitalize the first letter of a string" time="0.004">
+    </testcase>
+    <testcase classname="String Utils" name="should reverse a string" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="FeatureStore" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.076" tests="1">
+    <testcase classname="FeatureStore" name="returns default features" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="chain of custody" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.091" tests="1">
+    <testcase classname="chain of custody" name="builds a hash-linked signed chain" time="0.007">
+    </testcase>
+  </testsuite>
+  <testsuite name="Sample Fast Lane Test" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.085" tests="2">
+    <testcase classname="Sample Fast Lane Test" name="should pass a simple assertion" time="0.003">
+    </testcase>
+    <testcase classname="Sample Fast Lane Test" name="should handle string operations" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="IntelCorroborationService" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.082" tests="1">
+    <testcase classname="IntelCorroborationService" name="computes confidence with evidence and analyst ratings" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="GraphQL contract placeholder" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.068" tests="1">
+    <testcase classname="GraphQL contract placeholder" name="returns a stable version payload" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="computeScore" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.083" tests="5">
+    <testcase classname="computeScore" name="should compute the weighted mean correctly" time="0.003">
+    </testcase>
+    <testcase classname="computeScore" name="should handle cases with no weight (default to 1)" time="0.003">
+    </testcase>
+    <testcase classname="computeScore" name="should return 0 if no values are provided" time="0.003">
+    </testcase>
+    <testcase classname="computeScore" name="should handle zero weights" time="0.002">
+    </testcase>
+    <testcase classname="computeScore" name="should handle mixed weights and no weights" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="BehavioralDnaNetwork" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.073" tests="2">
+    <testcase classname="BehavioralDnaNetwork" name="updates embeddings and detects anomalies" time="0.004">
+    </testcase>
+    <testcase classname="BehavioralDnaNetwork" name="predicts next behavior based on trend" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="NarrativeSimulationEngine" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.088" tests="3">
+    <testcase classname="NarrativeSimulationEngine" name="applies queued events and updates entity sentiment and arcs" time="0.006">
+    </testcase>
+    <testcase classname="NarrativeSimulationEngine" name="adjusts time-variant parameters when events include interventions" time="0.003">
+    </testcase>
+    <testcase classname="NarrativeSimulationEngine" name="supports LLM-driven narratives with automatic fallback" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="legal hold guard" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.076" tests="2">
+    <testcase classname="legal hold guard" name="denies when case has legal hold" time="0.003">
+    </testcase>
+    <testcase classname="legal hold guard" name="passes through when no hold" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="evaluateCoverage" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.073" tests="2">
+    <testcase classname="evaluateCoverage" name="passes when all changed files meet the threshold" time="0.006">
+    </testcase>
+    <testcase classname="evaluateCoverage" name="fails when any metric drops below the threshold" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="nl2cypher corpus" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.109" tests="1">
+    <testcase classname="nl2cypher corpus" name="produces expected cypher and AST for corpus" time="0.041">
+    </testcase>
+  </testsuite>
+  <testsuite name="findConsoleLogViolations" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.072" tests="2">
+    <testcase classname="findConsoleLogViolations" name="flags console.log calls on added lines" time="0.004">
+    </testcase>
+    <testcase classname="findConsoleLogViolations" name="ignores console.log calls outside the diff" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="PathRankingService" errors="0" failures="0" skipped="0" timestamp="2025-11-20T23:35:16" time="0.078" tests="1">
+    <testcase classname="PathRankingService" name="v2 ranking improves top1 path alignment" time="0.004">
     </testcase>
   </testsuite>
 </testsuites>

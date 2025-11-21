@@ -39,7 +39,7 @@ services:
       - summit
 
   neo4j:
-    image: neo4j:5.24.0-community
+    image: neo4j:5.24.0
     container_name: summit-neo4j
     restart: unless-stopped
     environment:

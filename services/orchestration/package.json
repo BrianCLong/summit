@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/orchestration",
+  "name": "@intelgraph/orchestration-service",
   "version": "1.0.0",
   "description": "Pipeline orchestration service with Airflow integration",
   "main": "dist/index.js",

@@ -25,7 +25,7 @@ describe('VideoFrameExtractor', () => {
     (fs.rm as jest.Mock).mockClear();
 
     // Mock ffmpeg chainable methods
-    (ffmpeg as any).mockImplementation(() => ({
+    const mockCommand = {
       seekInput: jest.fn().mockReturnThis(),
       duration: jest.fn().mockReturnThis(),
       fps: jest.fn().mockReturnThis(),
@@ -33,18 +33,20 @@ describe('VideoFrameExtractor', () => {
       output: jest.fn().mockReturnThis(),
       noVideo: jest.fn().mockReturnThis(),
       audioCodec: jest.fn().mockReturnThis(),
-      on: jest.fn((event, callback) => {
-        if (event === 'end') {
-          // Simulate successful end
-          callback();
-        } else if (event === 'filenames') {
-          // Simulate filenames being emitted
-          callback(['frame-0.000.png', 'frame-1.000.png']);
-        }
-        return this;
-      }),
+      on: jest.fn(),
       run: jest.fn(),
-    }));
+    };
+    mockCommand.on.mockImplementation((event, callback) => {
+      if (event === 'end') {
+        // Simulate successful end
+        callback();
+      } else if (event === 'filenames') {
+        // Simulate filenames being emitted
+        callback(['frame-0.000.png', 'frame-1.000.png']);
+      }
+      return mockCommand;
+    });
+    (ffmpeg as any).mockImplementation(() => mockCommand);
 
     // Mock ffprobe
     (ffmpeg.ffprobe as jest.Mock).mockImplementation((_path, callback) => {
@@ -107,20 +109,22 @@ describe('VideoFrameExtractor', () => {
   });
 
   it('should handle ffmpeg errors during frame extraction', async () => {
-    (ffmpeg as any).mockImplementationOnce(() => ({
+    const errorMockCommand = {
       seekInput: jest.fn().mockReturnThis(),
       duration: jest.fn().mockReturnThis(),
       fps: jest.fn().mockReturnThis(),
       addOption: jest.fn().mockReturnThis(),
       output: jest.fn().mockReturnThis(),
-      on: jest.fn((event, callback) => {
-        if (event === 'error') {
-          callback(new Error('ffmpeg test error'));
-        }
-        return this;
-      }),
+      on: jest.fn(),
       run: jest.fn(),
-    }));
+    };
+    errorMockCommand.on.mockImplementation((event, callback) => {
+      if (event === 'error') {
+        callback(new Error('ffmpeg test error'));
+      }
+      return errorMockCommand;
+    });
+    (ffmpeg as any).mockImplementationOnce(() => errorMockCommand);
 
     await expect(extractor.extract(mockVideoPath)).rejects.toThrow(
       'ffmpeg test error',

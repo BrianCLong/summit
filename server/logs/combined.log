@@ -342,3 +342,5 @@
 {"level":"info","message":"Redis connected","service":"intelgraph-api","timestamp":"2025-09-02T19:42:24.597Z"}
 {"level":"error","message":"Redis error:","service":"intelgraph-api","timestamp":"2025-09-02T19:42:24.602Z"}
 {"level":"info","message":"Redis reconnecting...","service":"intelgraph-api","timestamp":"2025-09-02T19:42:24.604Z"}
+{"error":"AggregateError","level":"error","message":"Failed to create license","service":"intelgraph-api","timestamp":"2025-11-20T23:23:21.462Z"}
+{"error":"AggregateError","level":"error","message":"Failed to create license","service":"intelgraph-api","timestamp":"2025-11-20T23:35:04.221Z"}
