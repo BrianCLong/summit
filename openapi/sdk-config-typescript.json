@@ -1,0 +1,18 @@
+{
+  "npmName": "@intelgraph/sdk",
+  "npmVersion": "2.1.0",
+  "projectName": "intelgraph-sdk",
+  "moduleName": "IntelGraphSDK",
+  "projectDescription": "Official TypeScript/JavaScript SDK for IntelGraph Platform API",
+  "projectLicenseName": "MIT",
+  "supportsES6": true,
+  "withInterfaces": true,
+  "useSingleRequestParameter": true,
+  "withSeparateModelsAndApi": true,
+  "modelPropertyNaming": "camelCase",
+  "paramNaming": "camelCase",
+  "enumPropertyNaming": "UPPERCASE",
+  "npmRepository": "https://registry.npmjs.org",
+  "snapshot": false,
+  "stringEnums": false
+}
