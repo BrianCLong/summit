@@ -343,6 +343,50 @@ services:
     networks:
       - summit
 
+  # =============================================================================
+  # LOGISTICS AUTOMATION SERVICES
+  # =============================================================================
+
+  logistics-automation:
+    build:
+      context: ./services/logistics-automation-service
+      dockerfile: Dockerfile
+    container_name: summit-logistics-automation
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4030
+      LOG_LEVEL: debug
+    ports:
+      - '4030:4030'
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:4030/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit
+
+  smart-contracting:
+    build:
+      context: ./services/smart-contracting-service
+      dockerfile: Dockerfile
+    container_name: summit-smart-contracting
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4031
+      LOG_LEVEL: debug
+    ports:
+      - '4031:4031'
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:4031/health || exit 1']
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - summit
+
 volumes:
   postgres_data:
   redis_data:

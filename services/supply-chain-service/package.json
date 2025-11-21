@@ -16,7 +16,7 @@
     "@intelgraph/supply-chain-mapper": "workspace:*",
     "@intelgraph/component-tracker": "workspace:*",
     "@intelgraph/logistics-intel": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^4.21.0",
     "pino": "^10.1.0",
     "pino-http": "^10.3.0",
     "zod": "^3.22.4",

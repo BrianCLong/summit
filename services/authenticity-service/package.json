@@ -12,7 +12,7 @@
   "dependencies": {
     "@intelgraph/content-verification": "workspace:*",
     "@intelgraph/media-manipulation": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^4.21.0",
     "cors": "^2.8.5"
   },
   "devDependencies": {

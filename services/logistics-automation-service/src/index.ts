@@ -25,7 +25,7 @@ import {
 } from '@intelgraph/logistics-automation-types';
 
 const logger = pino({ level: process.env.LOG_LEVEL || 'info' });
-const app = express();
+const app: express.Application = express();
 const PORT = process.env.PORT || 4030;
 
 app.use(express.json());

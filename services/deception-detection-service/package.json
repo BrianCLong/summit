@@ -17,7 +17,7 @@
     "@intelgraph/fake-account-detection": "workspace:*",
     "@intelgraph/synthetic-media": "workspace:*",
     "@intelgraph/content-verification": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^4.21.0",
     "cors": "^2.8.5",
     "multer": "^1.4.5-lts.1"
   },

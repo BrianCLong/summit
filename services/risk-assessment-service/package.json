@@ -16,7 +16,7 @@
     "@intelgraph/supplier-risk": "workspace:*",
     "@intelgraph/third-party-risk": "workspace:*",
     "@intelgraph/compliance-monitor": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^4.21.0",
     "pino": "^10.1.0",
     "pino-http": "^10.3.0",
     "zod": "^3.22.4",

@@ -10,6 +10,6 @@
     "build": "echo skip"
   },
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^4.21.0"
   }
 }

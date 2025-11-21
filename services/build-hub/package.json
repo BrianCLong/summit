@@ -14,7 +14,7 @@
     "docker:build": "docker build -t maestro-build-hub ."
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^4.21.0",
     "ws": "^8.18.3"
   },
   "devDependencies": {
