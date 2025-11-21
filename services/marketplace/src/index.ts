@@ -8,6 +8,8 @@ import { consentRoutes } from './routes/consent.js';
 import { providerRoutes } from './routes/providers.js';
 import { riskRoutes } from './routes/risk.js';
 import { healthRoutes } from './routes/health.js';
+import { reviewRoutes } from './routes/reviews.js';
+import { accessRoutes } from './routes/access.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authMiddleware } from './middleware/auth.js';
 import { rateLimiters } from './middleware/rateLimit.js';
@@ -65,6 +67,8 @@ app.use('/api/v1/transactions', rateLimiters.transactions, authMiddleware, trans
 app.use('/api/v1/consent', rateLimiters.api, authMiddleware, consentRoutes);
 app.use('/api/v1/providers', rateLimiters.api, authMiddleware, providerRoutes);
 app.use('/api/v1/risk', rateLimiters.api, authMiddleware, riskRoutes);
+app.use('/api/v1/reviews', rateLimiters.api, authMiddleware, reviewRoutes);
+app.use('/api/v1/access', rateLimiters.api, authMiddleware, accessRoutes);
 
 // Error handling
 app.use(errorHandler);
