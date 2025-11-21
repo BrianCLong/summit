@@ -1,0 +1,122 @@
+# =============================================================================
+# Hadolint Configuration - Dockerfile Linting Rules
+# =============================================================================
+# Configuration for hadolint (Dockerfile linter)
+# https://github.com/hadolint/hadolint
+# =============================================================================
+
+# Ignore rules (add rule codes to ignore specific checks)
+ignored:
+  # DL3008: Pin versions in apt-get install
+  # - DL3008
+  # DL3018: Pin versions in apk add
+  # - DL3018
+
+# Trusted registries for base images
+trustedRegistries:
+  - docker.io
+  - ghcr.io
+  - gcr.io
+  - quay.io
+  - registry.access.redhat.com
+  - mcr.microsoft.com
+
+# Override specific rules with custom settings
+override:
+  error:
+    # Security-critical rules (fail build)
+    - DL3001  # Use --no-install-recommends with apt-get
+    - DL3002  # Last USER should not be root
+    - DL3003  # Use WORKDIR for switching directories
+    - DL3007  # Use specific version tags for base images (not 'latest')
+    - DL3008  # Pin versions in apt-get install
+    - DL3009  # Delete apt-get lists after installing
+    - DL3015  # Avoid additional packages in yum install
+    - DL3018  # Pin versions in apk add
+    - DL3028  # Pin versions in gem install
+    - DL3033  # Specify version with zypper install
+    - DL4000  # MAINTAINER is deprecated (use LABEL)
+    - DL4001  # Either use wget or curl but not both
+    - DL4003  # Multiple CMD instructions (only last one will take effect)
+    - DL4004  # Multiple ENTRYPOINT instructions
+    - DL4006  # Set SHELL option -o pipefail before RUN with pipe
+    - SC2046  # Quote to prevent word splitting
+    - SC2086  # Double quote to prevent globbing and word splitting
+
+  warning:
+    # Best practice violations (warn but don't fail)
+    - DL3006  # Always tag image version explicitly
+    - DL3010  # Use ADD for URLs or copying remote files
+    - DL3013  # Pin versions in pip install
+    - DL3016  # Pin versions in npm install
+    - DL3019  # Use --no-cache when installing packages with apk
+    - DL3020  # Use COPY instead of ADD for files/directories
+    - DL3022  # COPY --from should reference a previous build stage
+    - DL3025  # Use JSON notation for CMD and ENTRYPOINT
+    - DL3032  # yum clean all missing after yum command
+    - DL3042  # Avoid cache dir with pip install
+    - DL3043  # ONBUILD not allowed
+    - DL3044  # Use absolute paths for WORKDIR
+    - DL3045  # COPY without --chown flag
+    - DL3046  # useradd without -l flag
+    - DL3047  # wget without --progress flag
+    - DL3048  # Invalid label key format
+    - DL3049  # Label should be in lowercase
+    - DL3050  # Superfluous label(s)
+    - DL3051  # Label is missing value
+    - DL3052  # Label value is empty
+    - DL3053  # Label key should use reverse domain notation
+    - DL3054  # Environment variable key should use only letters, digits and underscores
+    - DL3055  # Label is missing
+    - DL3056  # Use absolute paths for ENTRYPOINT
+    - DL3057  # Multiple HEALTHCHECK instructions
+    - DL3058  # Label should use equals (=) operator
+    - DL3059  # Multiple consecutive RUN instructions (combine for fewer layers)
+    - DL3060  # yarn cache clean missing after yarn install
+
+  info:
+    # Informational (suggestions for optimization)
+    - DL3011  # Valid UNIX ports range from 0 to 65535
+    - DL3014  # Use -y switch with apt-get
+    - DL3029  # Do not use --platform flag with FROM
+
+  style:
+    # Style preferences
+    - DL3021  # COPY with more than 2 arguments requires destination to end with /
+
+# Inline ignore comments
+# Use `# hadolint ignore=DL3006` before the line to ignore specific rule
+
+# Failure threshold (error, warning, info, style)
+failure-threshold: warning
+
+# Label schema
+label-schema:
+  author: "IntelGraph Team"
+  maintainer: "IntelGraph Team"
+  version: "semantic"
+
+# Strict labels (require these labels in Dockerfile)
+strict-labels: false
+
+# Disable specific rules globally (alternative to ignored list)
+# no-fail:
+#   - DL3008
+#   - DL3018
+
+# =============================================================================
+# Usage Examples:
+# =============================================================================
+# Command line:
+#   hadolint Dockerfile
+#   hadolint --config .hadolint.yaml Dockerfile
+#   hadolint --ignore DL3006 Dockerfile
+#
+# In CI/CD:
+#   docker run --rm -i hadolint/hadolint < Dockerfile
+#   docker run --rm -i -v $(pwd)/.hadolint.yaml:/.config/hadolint.yaml hadolint/hadolint < Dockerfile
+#
+# Inline ignore:
+#   # hadolint ignore=DL3006
+#   FROM node:latest
+# =============================================================================
