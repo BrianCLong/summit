@@ -6,7 +6,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID as uuidv4 } from 'node:crypto';
 import type { Report, ReportRequest, ReportFormat, ExportResult } from './types/index.js';
 import type { ReportTemplate } from './types/Template.js';
 import { ReportTemplateRegistry } from './ReportTemplateRegistry.js';
