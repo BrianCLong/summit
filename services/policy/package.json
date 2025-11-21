@@ -1,0 +1,6 @@
+{
+  "name": "@intelgraph/policy-tests",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Tests for policy engine service"
+}

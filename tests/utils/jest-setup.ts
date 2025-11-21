@@ -1,80 +1,96 @@
 /**
- * Jest Global Setup
+ * Test Utilities and Helpers
  *
- * This file is run before each test file.
- * It sets up global test utilities and configuration.
+ * Provides additional test utilities that can be imported in test files.
+ * These are utility functions, not Jest setup hooks.
  */
 
-import { jest } from '@jest/globals';
-
-// Extend Jest timeout for integration tests
-jest.setTimeout(30000);
-
-// Global test utilities
-declare global {
-  var testHelpers: {
-    waitFor: (fn: () => boolean | Promise<boolean>, timeout?: number) => Promise<void>;
-    sleep: (ms: number) => Promise<void>;
-    mockConsole: () => { restore: () => void };
-  };
-}
-
-// Wait for a condition to be true
-globalThis.testHelpers = {
-  waitFor: async (fn: () => boolean | Promise<boolean>, timeout = 5000): Promise<void> => {
-    const start = Date.now();
-    while (Date.now() - start < timeout) {
-      const result = await fn();
-      if (result) return;
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    throw new Error(`waitFor timed out after ${timeout}ms`);
-  },
-
-  sleep: (ms: number): Promise<void> => {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  },
-
-  mockConsole: () => {
-    const originalConsole = { ...console };
-    console.log = jest.fn();
-    console.warn = jest.fn();
-    console.error = jest.fn();
-    console.info = jest.fn();
-    console.debug = jest.fn();
-
-    return {
-      restore: () => {
-        console.log = originalConsole.log;
-        console.warn = originalConsole.warn;
-        console.error = originalConsole.error;
-        console.info = originalConsole.info;
-        console.debug = originalConsole.debug;
-      },
-    };
-  },
-};
-
-// Clean up after each test
-afterEach(() => {
-  jest.clearAllMocks();
-});
-
-// Global error handler for unhandled rejections in tests
-process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection in test:', reason);
-});
-
-// Suppress specific warnings in tests
-const originalWarn = console.warn;
-console.warn = (...args: unknown[]) => {
-  // Suppress known benign warnings
-  const message = args[0];
-  if (typeof message === 'string') {
-    if (message.includes('Warning: ReactDOM.render is no longer supported')) return;
-    if (message.includes('Warning: An update to')) return;
+/**
+ * Wait for a condition to become true
+ */
+export const waitFor = async (
+  fn: () => boolean | Promise<boolean>,
+  timeout = 5000
+): Promise<void> => {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    const result = await fn();
+    if (result) return;
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
-  originalWarn.apply(console, args);
+  throw new Error(`waitFor timed out after ${timeout}ms`);
 };
 
-export {};
+/**
+ * Sleep for specified milliseconds
+ */
+export const sleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+/**
+ * Create a deferred promise for testing async behavior
+ */
+export const createDeferred = <T>() => {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+
+  return { promise, resolve, reject };
+};
+
+/**
+ * Retry a function until it succeeds or max retries reached
+ */
+export const retry = async <T>(
+  fn: () => Promise<T>,
+  maxRetries = 3,
+  delay = 100
+): Promise<T> => {
+  let lastError: Error | undefined;
+
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error as Error;
+      if (i < maxRetries - 1) {
+        await sleep(delay * Math.pow(2, i));
+      }
+    }
+  }
+
+  throw lastError;
+};
+
+/**
+ * Mock a module with automatic cleanup
+ */
+export const mockModule = <T>(moduleName: string, implementation: T) => {
+  jest.mock(moduleName, () => implementation);
+  return () => jest.unmock(moduleName);
+};
+
+/**
+ * Create a spy that tracks all calls
+ */
+export const createCallTracker = <T extends (...args: unknown[]) => unknown>() => {
+  const calls: Parameters<T>[] = [];
+  const fn = ((...args: Parameters<T>) => {
+    calls.push(args);
+  }) as T;
+  return { fn, calls };
+};
+
+export default {
+  waitFor,
+  sleep,
+  createDeferred,
+  retry,
+  mockModule,
+  createCallTracker,
+};

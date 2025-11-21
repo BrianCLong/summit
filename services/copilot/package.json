@@ -1,0 +1,6 @@
+{
+  "name": "@intelgraph/copilot-tests",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Tests for AI copilot service"
+}

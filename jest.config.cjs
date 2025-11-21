@@ -77,6 +77,6 @@ module.exports = {
   },
   // Test timeout
   testTimeout: 30000,
-  // Setup files
-  setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
+  // Setup files - use existing jest.setup.js
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };
