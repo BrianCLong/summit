@@ -1,0 +1,39 @@
+{
+  "name": "@intelgraph/ai-human-collaboration",
+  "version": "1.0.0",
+  "description": "AI-Human Collaboration Service with Commander's Control - AI teammate providing recommendations, human-in-the-loop overrides, feedback-driven learning, and full mission traceability",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/",
+    "test": "jest",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ai",
+    "human-in-the-loop",
+    "collaboration",
+    "recommendations",
+    "commander-control",
+    "audit-trail",
+    "traceability"
+  ],
+  "author": "IntelGraph Team",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
