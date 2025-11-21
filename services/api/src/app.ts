@@ -34,6 +34,8 @@ import { triageRouter } from './routes/triage.js';
 import { swaggerRouter } from './docs/swagger.js';
 import { graphqlDocsRouter } from './docs/graphql-docs.js';
 import { validateRequest } from './middleware/openapi-validator.js';
+import { versionMiddleware } from './versioning/version-middleware.js';
+import { versioningRouter } from './routes/versioning.js';
 
 export async function createApp() {
   const app = express();
@@ -63,6 +65,9 @@ export async function createApp() {
   app.use(compression());
   app.use(json({ limit: '10mb' }));
 
+  // API Version detection and validation
+  app.use(versionMiddleware);
+
   // OpenAPI request validation (optional - only for /api routes)
   if (process.env.ENABLE_API_VALIDATION === 'true') {
     app.use(validateRequest);
@@ -90,6 +95,9 @@ export async function createApp() {
   // API Documentation (Swagger/OpenAPI)
   app.use('/api/docs', swaggerRouter);
   app.use('/api/docs', graphqlDocsRouter);
+
+  // API Versioning endpoints
+  app.use('/api/versioning', versioningRouter);
 
   // Ingest wizard API (scaffold)
   app.use('/api/ingest', ingestRouter);
@@ -155,18 +163,23 @@ export async function createApp() {
   }
 
   // Apply GraphQL middleware with authentication and tenant isolation
-  app.post('/graphql', persistedGuard);
-  app.use(
-    '/graphql',
-    graphGuard,
-    rateLimitMiddleware,
-    authMiddleware,
-    tenantMiddleware,
-    auditMiddleware,
-    expressMiddleware(server, {
-      context: createContext,
-    }),
-  );
+  // Support both versioned and unversioned endpoints
+  const graphqlPaths = ['/graphql', '/v1/graphql', '/v2/graphql'];
+
+  for (const path of graphqlPaths) {
+    app.post(path, persistedGuard);
+    app.use(
+      path,
+      graphGuard,
+      rateLimitMiddleware,
+      authMiddleware,
+      tenantMiddleware,
+      auditMiddleware,
+      expressMiddleware(server, {
+        context: createContext,
+      }),
+    );
+  }
 
   return app;
 }
