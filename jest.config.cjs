@@ -1,10 +1,8 @@
 module.exports = {
-  preset: 'ts-jest/presets/default-esm',
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true,
-    },
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.(ts|tsx)$': ['ts-jest', { useESM: true }],
+    '^.+\\.(js|jsx)$': ['@swc/jest'],
   },
   testEnvironment: 'jsdom',
   roots: ['server', 'client', 'packages'],
@@ -45,11 +43,14 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    '^uuid$': '<rootDir>/__mocks__/uuid.js',
     '^node-fetch$': '<rootDir>/__mocks__/node-fetch.js',
     '^pg$': '<rootDir>/__mocks__/pg.js',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
     '^@server/(.*)$': '<rootDir>/server/src/$1',
   },
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: [
+    '/node_modules/(?!(.pnpm/uuid@|.pnpm/nanoid@|.*\\.mjs$))',
+  ],
 };

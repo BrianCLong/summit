@@ -1,5 +1,8 @@
 const fs = require('fs');
 
+// Add jest-dom matchers
+require('@testing-library/jest-dom');
+
 // Configure JSDOM environment for client tests
 if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
