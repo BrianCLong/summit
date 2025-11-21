@@ -5,25 +5,25 @@
     { "path": "./client" },
     { "path": "./server" },
 
-    // Apps workspace
+    // Apps workspace (excluding WIP apps with missing dependencies)
     { "path": "./apps/analytics-engine" },
     { "path": "./apps/graph-analytics" },
-    { "path": "./apps/intelgraph-api" },
+    // { "path": "./apps/intelgraph-api" }, // WIP: missing express-jwt, @opentelemetry/api
     { "path": "./apps/ml-engine" },
     { "path": "./apps/mobile-interface" },
     { "path": "./apps/search-engine" },
     { "path": "./apps/server" },
     { "path": "./apps/types" },
     { "path": "./apps/web" },
-    { "path": "./apps/webapp" },
+    // { "path": "./apps/webapp" }, // WIP: missing vis-data types
 
-    // Packages workspace
+    // Packages workspace (excluding WIP packages)
     { "path": "./packages/common-types" },
     { "path": "./packages/govbrief" },
     { "path": "./packages/graph-ai-core" },
     { "path": "./packages/ingest-wizard" },
     { "path": "./packages/jira-integration" },
-    { "path": "./packages/maestro-cli" },
+    // { "path": "./packages/maestro-cli" }, // WIP: @maestro/core modules not yet exported
     { "path": "./packages/maestro-core" },
     { "path": "./packages/prov-ledger-sdk" },
     { "path": "./packages/rptc" },

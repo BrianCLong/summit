@@ -106,6 +106,10 @@
     "src/routes/compliance.ts",
     "src/services/AdvancedMLService.ts",
     "src/services/DoclingService.ts",
+    "src/audit/advanced-audit-system.ts",
+    "src/conductor/backfill.ts",
+    "src/routes/backfill.ts",
+    "src/security/jwt-security.ts",
     "src/**/__tests__/**",
     "src/**/tests/**",
     "src/**/__mocks__/**"
