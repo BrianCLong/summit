@@ -86,7 +86,11 @@
     "ci:prod-guard": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ci/prod-config-check.ts",
     "smoke": "node scripts/smoke-test.js",
     "smoke:ci": "NODE_ENV=test node scripts/smoke-test.js",
-    "bootstrap": "make bootstrap"
+    "bootstrap": "make bootstrap",
+    "api:docs:validate": "npx @apidevtools/swagger-cli validate openapi/spec.yaml",
+    "api:docs:lint": "npx @stoplight/spectral-cli lint openapi/spec.yaml --ruleset .spectral.yaml",
+    "api:docs:generate": "npx redoc-cli bundle openapi/spec.yaml -o docs/api/index.html --title 'IntelGraph API Documentation'",
+    "api:changelog": "node scripts/generate-api-changelog.js"
   },
   "keywords": [
     "intelligence-analysis",
@@ -157,7 +161,10 @@
     "ts-node": "^10.9.2",
     "rimraf": "^6.0.1",
     "eslint": "9.39.1",
+    "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.10.1",
+    "supertest": "^6.3.4",
+    "@types/supertest": "^6.0.2",
     "turbo": "^2.3.3"
   },
   "husky": {

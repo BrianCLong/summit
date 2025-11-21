@@ -224,19 +224,20 @@ class OpenAPIValidator {
    * Response validation wrapper
    */
   validateResponse(): RequestHandler {
+    const self = this;
     return (req: Request, res: Response, next: NextFunction) => {
       // Skip validation if spec not loaded or not in development
-      if (!this.spec || process.env.NODE_ENV === 'production') {
+      if (!self.spec || process.env.NODE_ENV === 'production') {
         return next();
       }
 
       const originalJson = res.json.bind(res);
 
-      res.json = function (body: any) {
-        const operationSpec = this.findOperationSpec(req.method, req.path);
+      res.json = (body: unknown) => {
+        const operationSpec = self.findOperationSpec(req.method, req.path);
 
         if (operationSpec) {
-          const errors = this.validateResponseBody(
+          const errors = self.validateResponseBody(
             res.statusCode,
             body,
             operationSpec,
@@ -253,10 +254,25 @@ class OpenAPIValidator {
         }
 
         return originalJson(body);
-      }.bind(this);
+      };
 
       next();
     };
+  }
+
+  /**
+   * Reload the OpenAPI specification (useful for hot reloading)
+   */
+  reload(): void {
+    this.validators.clear();
+    this.loadSpec();
+  }
+
+  /**
+   * Check if the validator has a spec loaded
+   */
+  isLoaded(): boolean {
+    return this.spec !== null;
   }
 }
 
