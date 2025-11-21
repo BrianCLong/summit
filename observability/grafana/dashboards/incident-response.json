@@ -1,0 +1,420 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "incident-response",
+    "title": "Incident Response Dashboard",
+    "description": "Real-time visibility for incident response - Sev-1/Sev-2 triage and monitoring",
+    "tags": ["intelgraph", "incident-response", "sev1", "sev2", "oncall"],
+    "style": "dark",
+    "timezone": "browser",
+    "editable": true,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "enable": true,
+          "iconColor": "blue",
+          "expr": "changes(deployment_timestamp[5m]) > 0"
+        },
+        {
+          "name": "Alerts",
+          "datasource": "-- Grafana --",
+          "enable": true,
+          "iconColor": "red",
+          "type": "alert"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Health Status",
+        "description": "Current health status of all critical services",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+        "targets": [
+          {
+            "expr": "up{job=\"intelgraph-server\"}",
+            "legendFormat": "API Server",
+            "refId": "A"
+          },
+          {
+            "expr": "up{job=\"neo4j\"} or neo4j_database_available",
+            "legendFormat": "Neo4j",
+            "refId": "B"
+          },
+          {
+            "expr": "pg_up",
+            "legendFormat": "PostgreSQL",
+            "refId": "C"
+          },
+          {
+            "expr": "redis_up",
+            "legendFormat": "Redis",
+            "refId": "D"
+          },
+          {
+            "expr": "up{job=\"intelgraph-web\"}",
+            "legendFormat": "Frontend",
+            "refId": "E"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" } } },
+              { "type": "value", "options": { "1": { "text": "UP", "color": "green" } } }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "red", "value": null },
+                { "color": "green", "value": 1 }
+              ]
+            }
+          }
+        },
+        "options": {
+          "reduceOptions": { "calcs": ["lastNotNull"] },
+          "orientation": "horizontal",
+          "colorMode": "background"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Active Alerts",
+        "description": "Currently firing alerts by severity",
+        "type": "stat",
+        "gridPos": { "h": 4, "w": 8, "x": 0, "y": 4 },
+        "targets": [
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\", severity=\"critical\"}) or vector(0)",
+            "legendFormat": "Critical (Sev-1)",
+            "refId": "A"
+          },
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\", severity=\"high\"}) or vector(0)",
+            "legendFormat": "High (Sev-2)",
+            "refId": "B"
+          },
+          {
+            "expr": "count(ALERTS{alertstate=\"firing\", severity=\"warning\"}) or vector(0)",
+            "legendFormat": "Warning",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 1 }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "Critical (Sev-1)" },
+              "properties": [{ "id": "thresholds", "value": { "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] } }]
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "Error Rate (5m)",
+        "description": "Percentage of requests returning 5xx errors",
+        "type": "gauge",
+        "gridPos": { "h": 4, "w": 8, "x": 8, "y": 4 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100",
+            "legendFormat": "Error Rate %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "orange", "value": 2 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "P95 Latency",
+        "description": "95th percentile API response time",
+        "type": "gauge",
+        "gridPos": { "h": 4, "w": 8, "x": 16, "y": 4 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) * 1000",
+            "legendFormat": "P95 Latency",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "min": 0,
+            "max": 5000,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 200 },
+                { "color": "orange", "value": 500 },
+                { "color": "red", "value": 2000 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Request Rate & Errors",
+        "description": "HTTP requests per second with error overlay",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+        "targets": [
+          {
+            "expr": "sum(rate(http_requests_total[1m]))",
+            "legendFormat": "Total RPS",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"5..\"}[1m]))",
+            "legendFormat": "5xx Errors",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(http_requests_total{status=~\"4..\"}[1m]))",
+            "legendFormat": "4xx Errors",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2,
+              "fillOpacity": 10
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "5xx Errors" },
+              "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+            }
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "title": "Latency Distribution",
+        "description": "Response time percentiles over time",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) * 1000",
+            "legendFormat": "P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.90, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) * 1000",
+            "legendFormat": "P90",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) * 1000",
+            "legendFormat": "P95",
+            "refId": "C"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[1m])) by (le)) * 1000",
+            "legendFormat": "P99",
+            "refId": "D"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "drawStyle": "line",
+              "lineWidth": 2
+            }
+          },
+          "overrides": [
+            {
+              "matcher": { "id": "byName", "options": "P99" },
+              "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }]
+            },
+            {
+              "matcher": { "id": "byName", "options": "P95" },
+              "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }]
+            }
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "title": "Database Connections",
+        "description": "Active connections to databases",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 8, "x": 0, "y": 16 },
+        "targets": [
+          {
+            "expr": "neo4j_bolt_connections_in_use",
+            "legendFormat": "Neo4j Active",
+            "refId": "A"
+          },
+          {
+            "expr": "pg_stat_activity_count",
+            "legendFormat": "PostgreSQL Active",
+            "refId": "B"
+          },
+          {
+            "expr": "redis_connected_clients",
+            "legendFormat": "Redis Clients",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20 }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Job Queue Status",
+        "description": "Background job queue depth and processing rate",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 8, "x": 8, "y": 16 },
+        "targets": [
+          {
+            "expr": "sum(maestro_queue_depth) by (queue)",
+            "legendFormat": "Queue: {{ queue }}",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(maestro_jobs_succeeded_total[1m])) * 60",
+            "legendFormat": "Jobs/min (success)",
+            "refId": "B"
+          },
+          {
+            "expr": "sum(rate(maestro_jobs_failed_total[1m])) * 60",
+            "legendFormat": "Jobs/min (failed)",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": { "drawStyle": "line", "lineWidth": 2 }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Resource Usage",
+        "description": "Container CPU and memory utilization",
+        "type": "timeseries",
+        "gridPos": { "h": 6, "w": 8, "x": 16, "y": 16 },
+        "targets": [
+          {
+            "expr": "sum(container_memory_usage_bytes{container=~\"intelgraph.*\"}) / 1024 / 1024 / 1024",
+            "legendFormat": "Memory (GB)",
+            "refId": "A"
+          },
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{container=~\"intelgraph.*\"}[1m])) * 100",
+            "legendFormat": "CPU %",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "custom": { "drawStyle": "line", "lineWidth": 2, "fillOpacity": 20 }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Recent Errors (Logs)",
+        "description": "Last 50 error log entries",
+        "type": "logs",
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+        "targets": [
+          {
+            "expr": "{job=\"intelgraph-server\"} |= \"error\" | json",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "showLabels": true,
+          "showCommonLabels": false,
+          "wrapLogMessage": true,
+          "sortOrder": "Descending",
+          "dedupStrategy": "none"
+        }
+      },
+      {
+        "id": 11,
+        "title": "Incident Response Checklist",
+        "description": "Quick reference for incident response steps",
+        "type": "text",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+        "options": {
+          "mode": "markdown",
+          "content": "## Incident Response Quick Reference\n\n### Sev-1 Response (< 5 min acknowledge)\n1. **Acknowledge** alert in PagerDuty\n2. **Join** incident bridge call\n3. **Assess** using this dashboard\n4. **Communicate** in #incident-YYYY-MM-DD\n5. **Mitigate** - rollback if recent deploy\n\n### Key Commands\n```bash\n# Check health\ncurl -s localhost:4000/health/detailed | jq .\n\n# Service status\ndocker compose ps\n\n# Quick rollback\n./scripts/auto-rollback.sh\n\n# Restart service\ndocker compose restart intelgraph-server\n```\n\n### Runbook\n[Full Playbook](../RUNBOOKS/incident-response-playbook.md)"
+        }
+      },
+      {
+        "id": 12,
+        "title": "Escalation Contacts",
+        "description": "On-call and escalation information",
+        "type": "text",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+        "options": {
+          "mode": "markdown",
+          "content": "## Escalation Matrix\n\n| Severity | Initial Response | Escalate After | Escalate To |\n|----------|-----------------|----------------|-------------|\n| **Sev-1** | On-Call Engineer | 30 min | Eng Manager |\n| **Sev-1** | Eng Manager | 2 hours | Director |\n| **Sev-2** | On-Call Engineer | 2 hours | Eng Manager |\n\n### Communication Channels\n- **Slack**: #incidents (create #incident-YYYY-MM-DD-NNN)\n- **Bridge**: [Zoom/Meet link]\n- **PagerDuty**: [Dashboard link]\n\n### Key Contacts\n- On-Call: Check PagerDuty schedule\n- Platform Lead: @platform-lead\n- Security: @security-team\n- Database: @dba-team\n\n### Status Page\n- Internal: [status.internal.intelgraph.com]\n- Customer: [status.intelgraph.com]"
+        }
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "namespace",
+          "type": "query",
+          "query": "label_values(up, namespace)",
+          "current": { "text": "intelgraph", "value": "intelgraph" },
+          "refresh": 1
+        }
+      ]
+    }
+  },
+  "overwrite": true
+}

@@ -1,0 +1,398 @@
+# Synthetic Monitoring Configuration for Summit IntelGraph
+# Reference: RUNBOOKS/incident-response-playbook.md
+#
+# These checks run continuously to detect issues before users are affected.
+# Configure with Blackbox Exporter or similar synthetic monitoring tool.
+
+version: "1.0"
+
+defaults:
+  timeout: 10s
+  interval: 30s
+  retries: 2
+  headers:
+    User-Agent: "IntelGraph-Synthetic-Monitor/1.0"
+
+# =============================================================================
+# HEALTH CHECK PROBES
+# =============================================================================
+health_checks:
+  # Basic API liveness
+  - name: api-health-basic
+    description: "Basic API server health check"
+    type: http
+    url: "${API_URL:-http://localhost:4000}/health"
+    interval: 15s
+    timeout: 5s
+    assertions:
+      - status == 200
+      - responseTime < 500
+      - body contains "ok"
+    alerts:
+      - severity: critical
+        condition: "consecutiveFailures >= 2"
+
+  # Full health with dependencies
+  - name: api-health-detailed
+    description: "Full API health including all dependencies"
+    type: http
+    url: "${API_URL:-http://localhost:4000}/health/detailed"
+    interval: 30s
+    timeout: 15s
+    assertions:
+      - status == 200
+      - responseTime < 2000
+      - json.status == "healthy"
+      - json.dependencies.neo4j.status == "healthy"
+      - json.dependencies.postgres.status == "healthy"
+      - json.dependencies.redis.status == "healthy"
+    alerts:
+      - severity: critical
+        condition: "json.status != 'healthy'"
+      - severity: high
+        condition: "responseTime > 1000"
+
+  # Kubernetes readiness
+  - name: api-readiness
+    description: "Kubernetes readiness probe simulation"
+    type: http
+    url: "${API_URL:-http://localhost:4000}/health/ready"
+    interval: 15s
+    timeout: 5s
+    assertions:
+      - status == 200
+    alerts:
+      - severity: critical
+        condition: "consecutiveFailures >= 3"
+
+  # Frontend availability
+  - name: frontend-health
+    description: "React frontend availability"
+    type: http
+    url: "${WEB_URL:-http://localhost:3000}"
+    interval: 30s
+    timeout: 10s
+    assertions:
+      - status == 200
+      - body contains "IntelGraph"
+    alerts:
+      - severity: high
+        condition: "consecutiveFailures >= 2"
+
+# =============================================================================
+# GRAPHQL OPERATION CHECKS
+# =============================================================================
+graphql_checks:
+  # Schema introspection (dev only)
+  - name: graphql-schema
+    description: "GraphQL schema availability"
+    type: http
+    url: "${API_URL:-http://localhost:4000}/graphql"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+    body: '{"query": "{ __typename }"}'
+    interval: 60s
+    timeout: 5s
+    assertions:
+      - status == 200
+      - json.data.__typename == "Query"
+    environments:
+      - development
+      - staging
+
+  # Investigation list query
+  - name: graphql-investigations-list
+    description: "List investigations query performance"
+    type: http
+    url: "${API_URL:-http://localhost:4000}/graphql"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer ${SYNTHETIC_AUTH_TOKEN}"
+    body: |
+      {
+        "query": "query SyntheticCheck { investigations(first: 5) { edges { node { id name } } } }"
+      }
+    interval: 60s
+    timeout: 10s
+    assertions:
+      - status == 200
+      - json.errors == null
+      - responseTime < 2000
+    alerts:
+      - severity: high
+        condition: "responseTime > 1500"
+      - severity: critical
+        condition: "json.errors != null"
+
+  # Entity search performance
+  - name: graphql-entity-search
+    description: "Entity search query performance"
+    type: http
+    url: "${API_URL:-http://localhost:4000}/graphql"
+    method: POST
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer ${SYNTHETIC_AUTH_TOKEN}"
+    body: |
+      {
+        "query": "query SyntheticSearch { searchEntities(query: \"test\", first: 10) { totalCount edges { node { id } } } }"
+      }
+    interval: 120s
+    timeout: 15s
+    assertions:
+      - status == 200
+      - json.errors == null
+      - responseTime < 3000
+    alerts:
+      - severity: high
+        condition: "responseTime > 2500"
+
+# =============================================================================
+# END-TO-END WORKFLOW CHECKS
+# =============================================================================
+e2e_checks:
+  # Golden path - Create investigation workflow
+  - name: e2e-create-investigation
+    description: "End-to-end investigation creation flow"
+    type: workflow
+    interval: 300s  # Every 5 minutes
+    timeout: 30s
+    steps:
+      - name: "authenticate"
+        type: http
+        url: "${API_URL:-http://localhost:4000}/graphql"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {
+            "query": "mutation { login(email: \"${SYNTHETIC_USER}\", password: \"${SYNTHETIC_PASSWORD}\") { token } }"
+          }
+        extract:
+          token: "json.data.login.token"
+        assertions:
+          - status == 200
+          - json.data.login.token != null
+
+      - name: "create-investigation"
+        type: http
+        url: "${API_URL:-http://localhost:4000}/graphql"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer ${token}"
+        body: |
+          {
+            "query": "mutation { createInvestigation(input: { name: \"Synthetic Test ${timestamp}\", description: \"Automated health check - safe to delete\" }) { id name } }"
+          }
+        extract:
+          investigationId: "json.data.createInvestigation.id"
+        assertions:
+          - status == 200
+          - json.data.createInvestigation.id != null
+
+      - name: "cleanup-investigation"
+        type: http
+        url: "${API_URL:-http://localhost:4000}/graphql"
+        method: POST
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer ${token}"
+        body: |
+          {
+            "query": "mutation { deleteInvestigation(id: \"${investigationId}\") { success } }"
+          }
+        assertions:
+          - status == 200
+
+    alerts:
+      - severity: critical
+        condition: "workflowFailed"
+      - severity: high
+        condition: "totalDuration > 20000"
+
+# =============================================================================
+# DATABASE CONNECTIVITY CHECKS
+# =============================================================================
+database_checks:
+  # Neo4j connectivity
+  - name: neo4j-connectivity
+    description: "Neo4j database connectivity check"
+    type: tcp
+    host: "${NEO4J_HOST:-localhost}"
+    port: 7687
+    interval: 30s
+    timeout: 5s
+    alerts:
+      - severity: critical
+        condition: "consecutiveFailures >= 2"
+
+  # PostgreSQL connectivity
+  - name: postgres-connectivity
+    description: "PostgreSQL database connectivity check"
+    type: tcp
+    host: "${POSTGRES_HOST:-localhost}"
+    port: 5432
+    interval: 30s
+    timeout: 5s
+    alerts:
+      - severity: critical
+        condition: "consecutiveFailures >= 2"
+
+  # Redis connectivity
+  - name: redis-connectivity
+    description: "Redis cache connectivity check"
+    type: tcp
+    host: "${REDIS_HOST:-localhost}"
+    port: 6379
+    interval: 15s
+    timeout: 3s
+    alerts:
+      - severity: critical
+        condition: "consecutiveFailures >= 2"
+
+  # TimescaleDB connectivity
+  - name: timescale-connectivity
+    description: "TimescaleDB connectivity check"
+    type: tcp
+    host: "${TIMESCALE_HOST:-localhost}"
+    port: 5433
+    interval: 30s
+    timeout: 5s
+    alerts:
+      - severity: high
+        condition: "consecutiveFailures >= 3"
+
+# =============================================================================
+# SSL/TLS CERTIFICATE CHECKS
+# =============================================================================
+certificate_checks:
+  - name: api-ssl-certificate
+    description: "API SSL certificate validity"
+    type: ssl
+    host: "${API_DOMAIN:-api.intelgraph.com}"
+    port: 443
+    interval: 3600s  # Hourly
+    assertions:
+      - daysUntilExpiry > 14
+      - certificateValid == true
+    alerts:
+      - severity: high
+        condition: "daysUntilExpiry <= 14"
+      - severity: critical
+        condition: "daysUntilExpiry <= 7"
+
+  - name: web-ssl-certificate
+    description: "Web frontend SSL certificate validity"
+    type: ssl
+    host: "${WEB_DOMAIN:-app.intelgraph.com}"
+    port: 443
+    interval: 3600s
+    assertions:
+      - daysUntilExpiry > 14
+      - certificateValid == true
+    alerts:
+      - severity: high
+        condition: "daysUntilExpiry <= 14"
+
+# =============================================================================
+# DNS RESOLUTION CHECKS
+# =============================================================================
+dns_checks:
+  - name: api-dns-resolution
+    description: "API domain DNS resolution"
+    type: dns
+    domain: "${API_DOMAIN:-api.intelgraph.com}"
+    interval: 300s
+    timeout: 5s
+    assertions:
+      - resolved == true
+      - responseTime < 100
+    alerts:
+      - severity: critical
+        condition: "resolved == false"
+
+# =============================================================================
+# EXTERNAL DEPENDENCY CHECKS
+# =============================================================================
+external_checks:
+  # AI/ML service availability (if external)
+  - name: ai-service-health
+    description: "AI/ML service availability"
+    type: http
+    url: "${AI_SERVICE_URL:-http://localhost:8080}/health"
+    interval: 60s
+    timeout: 10s
+    enabled: "${AI_SERVICE_ENABLED:-false}"
+    assertions:
+      - status == 200
+    alerts:
+      - severity: high
+        condition: "consecutiveFailures >= 3"
+
+# =============================================================================
+# PROMETHEUS BLACKBOX EXPORTER CONFIG
+# =============================================================================
+# Export configuration for Prometheus Blackbox Exporter
+blackbox_exporter:
+  modules:
+    http_2xx:
+      prober: http
+      timeout: 5s
+      http:
+        valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+        valid_status_codes: [200]
+        method: GET
+        follow_redirects: true
+        preferred_ip_protocol: "ip4"
+
+    http_post_2xx:
+      prober: http
+      timeout: 10s
+      http:
+        valid_status_codes: [200]
+        method: POST
+        headers:
+          Content-Type: application/json
+
+    tcp_connect:
+      prober: tcp
+      timeout: 5s
+
+    icmp:
+      prober: icmp
+      timeout: 5s
+      icmp:
+        preferred_ip_protocol: "ip4"
+
+    dns_resolution:
+      prober: dns
+      timeout: 5s
+      dns:
+        query_name: "intelgraph.com"
+        query_type: "A"
+
+# =============================================================================
+# ALERTING THRESHOLDS
+# =============================================================================
+alerting:
+  # Time-based escalation
+  escalation:
+    - level: 1
+      after: 0s
+      notify: ["oncall"]
+    - level: 2
+      after: 300s  # 5 minutes
+      notify: ["oncall", "platform-lead"]
+    - level: 3
+      after: 900s  # 15 minutes
+      notify: ["oncall", "platform-lead", "eng-manager"]
+
+  # Business hours (adjust for your timezone)
+  business_hours:
+    start: "09:00"
+    end: "18:00"
+    timezone: "America/New_York"
+    weekdays: [1, 2, 3, 4, 5]  # Mon-Fri

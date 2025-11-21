@@ -20,6 +20,14 @@ Quick reference for operational procedures and incident response.
 
 ## Incident Response
 
+### Application Outage Response
+
+- **[Incident Response Playbook](./incident-response-playbook.md)** - Comprehensive Sev-1/Sev-2 incident response (NEW)
+  - Detection, triage, containment, and root cause analysis
+  - RACI matrix for incident roles
+  - Templates for tickets, stakeholder updates, and post-mortems
+  - Observability and alerting recommendations
+
 ### Critical Systems
 
 - [Incident Auto-Reweighter](./incident-auto-reweighter.md) - MC Platform QAM service
@@ -68,4 +76,4 @@ Quick reference for operational procedures and incident response.
 **🚨 For P1 incidents involving MC Platform v0.4.5 IncidentAutoReweighter, go directly to:**
 [incident-auto-reweighter.md](./incident-auto-reweighter.md)
 
-**Last Updated:** $(date -u +%Y-%m-%d) - Added MC Platform v0.4.5 IncidentAutoReweighter runbook
+**Last Updated:** 2025-11-21 - Added comprehensive incident response playbook

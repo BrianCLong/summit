@@ -1,0 +1,389 @@
+# Incident Response Alert Rules for Summit IntelGraph
+# These rules are designed to trigger Sev-1/Sev-2 incident response workflows
+# Reference: RUNBOOKS/incident-response-playbook.md
+
+groups:
+  # =============================================================================
+  # SEV-1 CRITICAL ALERTS - Immediate response required (24/7)
+  # Target: TTD < 2 min, TTA < 5 min, TTM < 30 min
+  # =============================================================================
+  - name: intelgraph-sev1-critical
+    rules:
+      # API Server Completely Down
+      - alert: APIServerDown
+        expr: up{job="intelgraph-server"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#api-server-unresponsive"
+        annotations:
+          summary: "SEV-1: IntelGraph API Server is DOWN"
+          description: "The IntelGraph API server has been unreachable for more than 1 minute. All users are affected."
+          impact: "Complete service outage - no API requests can be processed"
+          action: "1. Check server health 2. Check container/pod status 3. Review recent deployments 4. Consider rollback"
+
+      # Neo4j Database Unavailable
+      - alert: Neo4jDatabaseDown
+        expr: neo4j_database_available == 0 or up{job="neo4j"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#database-connection-issues"
+        annotations:
+          summary: "SEV-1: Neo4j Database is UNAVAILABLE"
+          description: "Neo4j graph database is not responding. All graph queries will fail."
+          impact: "Core functionality unavailable - investigations, entities, relationships broken"
+          action: "1. Check Neo4j container status 2. Verify disk space 3. Check memory usage 4. Review transaction logs"
+
+      # PostgreSQL Database Down
+      - alert: PostgreSQLDown
+        expr: pg_up == 0
+        for: 30s
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#database-connection-issues"
+        annotations:
+          summary: "SEV-1: PostgreSQL Database is DOWN"
+          description: "PostgreSQL database is not responding. User data and audit logs inaccessible."
+          impact: "Authentication, user management, and audit logging unavailable"
+          action: "1. Check PostgreSQL container 2. Verify connections 3. Check disk/memory 4. Review pg_log"
+
+      # High Error Rate (>5% of requests failing)
+      - alert: CriticalErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            / sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#containment-and-mitigation"
+        annotations:
+          summary: "SEV-1: Critical Error Rate - {{ $value | humanizePercentage }}"
+          description: "More than 5% of HTTP requests are failing with 5xx errors for over 2 minutes."
+          impact: "Significant user impact - many requests failing"
+          action: "1. Check application logs 2. Review recent deployments 3. Check dependencies 4. Consider rollback"
+
+      # All Background Job Queues Stalled
+      - alert: AllQueuesStalled
+        expr: |
+          sum(maestro_queue_depth) > 1000
+          and sum(rate(maestro_jobs_succeeded_total[5m])) == 0
+          and sum(rate(maestro_jobs_started_total[5m])) == 0
+        for: 5m
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#background-job-queue-stalled"
+        annotations:
+          summary: "SEV-1: All Background Job Queues STALLED"
+          description: "Job queues have {{ $value }} pending jobs but no jobs are being processed."
+          impact: "Background processing completely stopped - data pipelines halted"
+          action: "1. Check worker processes 2. Verify Redis connectivity 3. Check for stuck jobs 4. Restart workers"
+
+      # Authentication System Failure
+      - alert: AuthenticationFailure
+        expr: |
+          sum(rate(auth_login_failures_total[5m]))
+          / sum(rate(auth_login_attempts_total[5m])) > 0.9
+          and sum(rate(auth_login_attempts_total[5m])) > 10
+        for: 2m
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md"
+        annotations:
+          summary: "SEV-1: Authentication System FAILING"
+          description: "More than 90% of login attempts are failing. Users cannot access the platform."
+          impact: "Complete authentication outage - no users can log in"
+          action: "1. Check auth service 2. Verify JWT secrets 3. Check identity provider 4. Review auth logs"
+
+      # Redis Cache Down
+      - alert: RedisCacheDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#redis-issues"
+        annotations:
+          summary: "SEV-1: Redis Cache is DOWN"
+          description: "Redis cache server is not responding. Session management and caching unavailable."
+          impact: "Session management broken, performance severely degraded"
+          action: "1. Check Redis container 2. Verify memory 3. Check persistence 4. Restart Redis"
+
+  # =============================================================================
+  # SEV-2 HIGH ALERTS - Response within 15 min (business hours)
+  # Target: TTD < 5 min, TTA < 15 min, TTM < 2 hr
+  # =============================================================================
+  - name: intelgraph-sev2-high
+    rules:
+      # High API Latency
+      - alert: HighAPILatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#high-latency"
+        annotations:
+          summary: "SEV-2: High API Latency - P95 at {{ $value | humanizeDuration }}"
+          description: "API P95 latency has exceeded 2 seconds for more than 5 minutes."
+          impact: "Degraded user experience - slow response times"
+          action: "1. Check slow queries 2. Review resource usage 3. Check connection pools 4. Scale if needed"
+
+      # Error Budget Burn Rate
+      - alert: ErrorBudgetBurnRateCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[1h]))
+            / sum(rate(http_requests_total[1h]))
+          ) > (14.4 * 0.001)
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md"
+        annotations:
+          summary: "SEV-2: Error Budget burning at 14.4x normal rate"
+          description: "Current error rate will exhaust monthly error budget in ~2 days."
+          impact: "SLO at risk - continued errors will breach commitments"
+          action: "1. Investigate error sources 2. Review recent changes 3. Consider rollback"
+
+      # Database Connection Pool Exhausted
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          pg_stat_activity_count / pg_settings_max_connections > 0.9
+        for: 2m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#database-connection-issues"
+        annotations:
+          summary: "SEV-2: PostgreSQL Connection Pool 90% Exhausted"
+          description: "PostgreSQL connections at {{ $value | humanizePercentage }} of max. Risk of connection failures."
+          impact: "New database connections may fail"
+          action: "1. Kill idle connections 2. Review connection leaks 3. Increase pool size 4. Check for stuck transactions"
+
+      # Neo4j Connection Pool Exhausted
+      - alert: Neo4jConnectionPoolExhausted
+        expr: |
+          neo4j_bolt_connections_idle == 0
+          and neo4j_bolt_connections_in_use >= neo4j_bolt_connections_max * 0.9
+        for: 2m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#database-connection-issues"
+        annotations:
+          summary: "SEV-2: Neo4j Connection Pool Nearly Exhausted"
+          description: "Neo4j connection pool has no idle connections available."
+          impact: "Graph queries may fail or timeout"
+          action: "1. Check for slow queries 2. Review transaction management 3. Increase pool size"
+
+      # Redis Memory High
+      - alert: RedisMemoryHigh
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.85
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#redis-issues"
+        annotations:
+          summary: "SEV-2: Redis Memory Usage at {{ $value | humanizePercentage }}"
+          description: "Redis memory usage exceeds 85% of maximum. Risk of evictions or OOM."
+          impact: "Cache evictions may cause performance degradation"
+          action: "1. Review memory usage 2. Check for large keys 3. Consider flushing stale data"
+
+      # Job Processing Delayed
+      - alert: JobProcessingDelayed
+        expr: maestro_schedule_latency_ms > 30000
+        for: 10m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#background-job-queue-stalled"
+        annotations:
+          summary: "SEV-2: Background Job Processing Delayed >30s"
+          description: "Job scheduling latency is {{ $value }}ms - jobs are significantly delayed."
+          impact: "Background tasks not completing in expected timeframe"
+          action: "1. Check queue depth 2. Verify worker health 3. Scale workers if needed"
+
+      # Copilot AI Service Unavailable
+      - alert: CopilotServiceUnavailable
+        expr: up{job="copilot-ai"} == 0 or copilot_service_available == 0
+        for: 2m
+        labels:
+          severity: high
+          sev: "2"
+          team: ai-ml
+          runbook: "RUNBOOKS/incident-response-playbook.md"
+        annotations:
+          summary: "SEV-2: Copilot AI Service Unavailable"
+          description: "The Copilot AI analysis service is not responding."
+          impact: "AI-powered analysis features unavailable"
+          action: "1. Check AI service containers 2. Verify model availability 3. Check GPU resources"
+
+      # GraphQL Operation Errors High
+      - alert: GraphQLErrorsHigh
+        expr: |
+          sum(rate(graphql_operations_total{status="error"}[5m]))
+          / sum(rate(graphql_operations_total[5m])) > 0.02
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md"
+        annotations:
+          summary: "SEV-2: GraphQL Error Rate at {{ $value | humanizePercentage }}"
+          description: "More than 2% of GraphQL operations are failing."
+          impact: "Users experiencing errors in API operations"
+          action: "1. Check GraphQL resolver errors 2. Review operation logs 3. Check dependencies"
+
+      # Apdex Score Low
+      - alert: ApdexScoreLow
+        expr: |
+          (
+            sum(rate(http_request_duration_seconds_bucket{le="0.5"}[5m]))
+            + sum(rate(http_request_duration_seconds_bucket{le="2.0"}[5m])) / 2
+          ) / sum(rate(http_request_duration_seconds_count[5m])) < 0.85
+        for: 10m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+          runbook: "RUNBOOKS/incident-response-playbook.md#high-latency"
+        annotations:
+          summary: "SEV-2: Apdex Score Below 0.85"
+          description: "User satisfaction score (Apdex) has dropped below acceptable threshold."
+          impact: "Overall user experience degraded"
+          action: "1. Review latency distribution 2. Identify slow endpoints 3. Optimize bottlenecks"
+
+  # =============================================================================
+  # CAPACITY AND RESOURCE ALERTS
+  # =============================================================================
+  - name: intelgraph-capacity
+    rules:
+      # Memory Pressure
+      - alert: MemoryPressureHigh
+        expr: |
+          (container_memory_usage_bytes{container!=""}
+          / container_spec_memory_limit_bytes{container!=""}) > 0.9
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+        annotations:
+          summary: "Container {{ $labels.container }} Memory at {{ $value | humanizePercentage }}"
+          description: "Container memory usage exceeds 90% of limit."
+          action: "1. Check for memory leaks 2. Review resource limits 3. Scale horizontally"
+
+      # CPU Saturation
+      - alert: CPUSaturationHigh
+        expr: |
+          sum(rate(container_cpu_usage_seconds_total{container!=""}[5m])) by (container)
+          / sum(container_spec_cpu_quota{container!=""} / container_spec_cpu_period{container!=""}) by (container) > 0.9
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+        annotations:
+          summary: "Container {{ $labels.container }} CPU at {{ $value | humanizePercentage }}"
+          description: "Container CPU usage exceeds 90% of limit."
+          action: "1. Review CPU-intensive operations 2. Consider scaling 3. Optimize hot paths"
+
+      # Disk Space Low
+      - alert: DiskSpaceLow
+        expr: |
+          (node_filesystem_avail_bytes{fstype!~"tmpfs|overlay"}
+          / node_filesystem_size_bytes{fstype!~"tmpfs|overlay"}) < 0.15
+        for: 10m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+        annotations:
+          summary: "Disk Space Below 15% on {{ $labels.mountpoint }}"
+          description: "Filesystem {{ $labels.mountpoint }} has less than 15% free space."
+          action: "1. Clean up old logs 2. Remove unused data 3. Expand storage"
+
+      # Pod Restart Loop
+      - alert: PodRestartLoop
+        expr: increase(kube_pod_container_status_restarts_total[1h]) > 5
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+        annotations:
+          summary: "Pod {{ $labels.pod }} in restart loop ({{ $value }} restarts/hr)"
+          description: "Pod has restarted more than 5 times in the last hour."
+          action: "1. Check pod logs 2. Review resource limits 3. Check liveness probes"
+
+  # =============================================================================
+  # SYNTHETIC MONITORING / GOLDEN SIGNALS
+  # =============================================================================
+  - name: intelgraph-synthetic
+    rules:
+      # Health Endpoint Failing
+      - alert: HealthEndpointFailing
+        expr: probe_success{job="blackbox-http"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          sev: "1"
+          team: platform
+        annotations:
+          summary: "SEV-1: Health endpoint {{ $labels.instance }} FAILING"
+          description: "Synthetic health check is failing for {{ $labels.instance }}."
+          action: "1. Check service availability 2. Verify network connectivity 3. Review service logs"
+
+      # SSL Certificate Expiring Soon
+      - alert: SSLCertificateExpiringSoon
+        expr: probe_ssl_earliest_cert_expiry - time() < 86400 * 14
+        for: 1h
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+        annotations:
+          summary: "SSL Certificate expires in {{ $value | humanizeDuration }}"
+          description: "SSL certificate for {{ $labels.instance }} expires in less than 14 days."
+          action: "1. Renew certificate 2. Update deployment 3. Verify renewal automation"
+
+      # External Dependency Slow
+      - alert: ExternalDependencySlow
+        expr: probe_duration_seconds > 5
+        for: 5m
+        labels:
+          severity: high
+          sev: "2"
+          team: platform
+        annotations:
+          summary: "External dependency {{ $labels.instance }} responding slowly"
+          description: "Response time from {{ $labels.instance }} exceeds 5 seconds."
+          action: "1. Check dependency status 2. Enable circuit breaker 3. Contact vendor if persistent"
