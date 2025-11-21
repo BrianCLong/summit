@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { DiscoveryEvent } from '../types.js';
 import { logger } from '../utils/logger.js';
 
