@@ -8,7 +8,7 @@ import {
   Tooltip,
   Paper,
   List,
-  ListItemButton,
+  ListItem,
   ListItemAvatar,
   ListItemText,
   Badge,
@@ -24,6 +24,7 @@ import {
   DialogActions,
   Switch,
   FormControlLabel,
+  ListItemButton,
 } from '@mui/material';
 import {
   Group,

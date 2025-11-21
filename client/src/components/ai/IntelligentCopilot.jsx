@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import DOMPurify from 'dompurify';
 import {
   Box,
   Card,
@@ -35,6 +34,7 @@ import {
 import AdvancedPatternDetection from './AdvancedPatternDetection';
 import { useMutation } from '@apollo/client';
 import { GENERATE_ENTITIES_FROM_TEXT } from '../../graphql/copilot.gql';
+import DOMPurify from 'dompurify';
 
 // Simulated AI responses for demo
 const intelligentResponses = {
@@ -189,9 +189,10 @@ function ChatMessage({ message, isUser, isLoading }) {
                   '& em': { fontStyle: 'italic' },
                 }}
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(
-                    message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
-                  ),
+                  __html: DOMPurify.sanitize(message.replace(
+                    /\*\*(.*?)\*\*/g,
+                    '<strong>$1</strong>',
+                  )),
                 }}
               />
             )}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -27,6 +27,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  ListItemButton,
   IconButton,
   LinearProgress,
   Divider,
@@ -49,18 +50,20 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
-import InteractiveGraphExplorer from './components/graph/InteractiveGraphExplorer';
-import IntelligentCopilot from './components/ai/IntelligentCopilot';
-import LiveCollaborationPanel from './components/collaboration/LiveCollaborationPanel';
-import InvestigationTimeline from './components/timeline/InvestigationTimeline';
-import ThreatAssessmentEngine from './components/threat/ThreatAssessmentEngine';
-import OsintFeedConfig from './components/admin/OSINTFeedConfig';
-import ExecutiveDashboard from './features/wargame/ExecutiveDashboard'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import AccessIntelPage from './features/rbac/AccessIntelPage.jsx';
 import { Security } from '@mui/icons-material';
-import DisclosurePackagerPage from './pages/DisclosurePackagerPage';
-import OrchestratorDashboard from './features/orchestrator/OrchestratorDashboard';
+
+// Lazy Imports
+const InteractiveGraphExplorer = React.lazy(() => import('./components/graph/InteractiveGraphExplorer'));
+const IntelligentCopilot = React.lazy(() => import('./components/ai/IntelligentCopilot'));
+const LiveCollaborationPanel = React.lazy(() => import('./components/collaboration/LiveCollaborationPanel'));
+const InvestigationTimeline = React.lazy(() => import('./components/timeline/InvestigationTimeline'));
+const ThreatAssessmentEngine = React.lazy(() => import('./components/threat/ThreatAssessmentEngine'));
+const OsintFeedConfig = React.lazy(() => import('./components/admin/OSINTFeedConfig'));
+const ExecutiveDashboard = React.lazy(() => import('./features/wargame/ExecutiveDashboard'));
+const AccessIntelPage = React.lazy(() => import('./features/rbac/AccessIntelPage.jsx'));
+const DisclosurePackagerPage = React.lazy(() => import('./pages/DisclosurePackagerPage'));
+const OrchestratorDashboard = React.lazy(() => import('./features/orchestrator/OrchestratorDashboard'));
 
 // Navigation items
 const ADMIN = 'ADMIN';
@@ -158,14 +161,14 @@ function NavigationDrawer({ open, onClose }) {
       <Box sx={{ width: 250, mt: 8 }}>
         <List>
           {items.map((item) => (
-            <ListItem
-              key={item.path}
-              button
-              selected={location.pathname === item.path}
-              onClick={() => handleNavigation(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                selected={location.pathname === item.path}
+                onClick={() => handleNavigation(item.path)}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.label} />
+              </ListItemButton>
             </ListItem>
           ))}
         </List>
@@ -478,7 +481,9 @@ function DashboardPage() {
 
         {/* Live Collaboration Panel */}
         <Grid item xs={12} md={4}>
-          <LiveCollaborationPanel />
+          <Suspense fallback={<LinearProgress />}>
+            <LiveCollaborationPanel />
+          </Suspense>
         </Grid>
 
         {/* Platform Status */}
@@ -615,31 +620,33 @@ function MainLayout() {
       />
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/investigations" element={<InvestigationsPage />} />
-            <Route path="/graph" element={<GraphExplorerPage />} />
-            <Route path="/copilot" element={<CopilotPage />} />
-            <Route path="/orchestrator" element={<OrchestratorPage />} />
-            <Route path="/threats" element={<ThreatsPage />} />
-            <Route path="/disclosures" element={<DisclosurePackagerPage />} />
-            <Route path="/access-intel" element={<AccessIntelPage />} />
-            <Route path="/geoint" element={<InvestigationsPage />} />
-            <Route path="/reports" element={<InvestigationsPage />} />
-            <Route element={<ProtectedRoute roles={['ADMIN']} />}>
-              <Route path="/system" element={<InvestigationsPage />} />
-              <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
-              <Route
-                path="/wargame-dashboard"
-                element={<ExecutiveDashboard />}
-              />
+        <Suspense fallback={<LinearProgress />}>
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/investigations" element={<InvestigationsPage />} />
+              <Route path="/graph" element={<GraphExplorerPage />} />
+              <Route path="/copilot" element={<CopilotPage />} />
+              <Route path="/orchestrator" element={<OrchestratorPage />} />
+              <Route path="/threats" element={<ThreatsPage />} />
+              <Route path="/disclosures" element={<DisclosurePackagerPage />} />
+              <Route path="/access-intel" element={<AccessIntelPage />} />
+              <Route path="/geoint" element={<InvestigationsPage />} />
+              <Route path="/reports" element={<InvestigationsPage />} />
+              <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+                <Route path="/system" element={<InvestigationsPage />} />
+                <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
+                <Route
+                  path="/wargame-dashboard"
+                  element={<ExecutiveDashboard />}
+                />
+              </Route>
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
+          </Routes>
+        </Suspense>
       </Box>
     </Box>
   );

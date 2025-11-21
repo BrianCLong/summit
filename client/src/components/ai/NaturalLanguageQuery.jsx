@@ -11,7 +11,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemButton, // Added import
   Popper,
   ClickAwayListener,
   Fade,
@@ -736,20 +735,22 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             <Paper elevation={3} sx={{ mt: 1 }}>
               <List dense>
                 {suggestions.map((suggestion, index) => (
-                  <ListItem key={index} disablePadding>
-                    <ListItemButton onClick={() => handleSuggestionClick(suggestion)}>
-                      <ListItemIcon>{suggestion.icon}</ListItemIcon>
-                      <ListItemText
-                        primary={suggestion.text}
-                        secondary={
-                          <Chip
-                            label={`${(suggestion.confidence * 100).toFixed(0)}%`}
-                            size="small"
-                            variant="outlined"
-                          />
-                        }
-                      />
-                    </ListItemButton>
+                  <ListItem
+                    key={index}
+                    button
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    <ListItemIcon>{suggestion.icon}</ListItemIcon>
+                    <ListItemText
+                      primary={suggestion.text}
+                      secondary={
+                        <Chip
+                          label={`${(suggestion.confidence * 100).toFixed(0)}%`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      }
+                    />
                   </ListItem>
                 ))}
               </List>
@@ -875,16 +876,18 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
             </Typography>
             <List dense>
               {queryHistory.slice(0, 5).map((item) => (
-                <ListItem key={item.id} disablePadding>
-                  <ListItemButton onClick={() => handleHistoryClick(item)}>
-                    <ListItemIcon>
-                      <History />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.query}
-                      secondary={`${new Date(item.timestamp).toLocaleString()} • ${item.resultCount} results`}
-                    />
-                  </ListItemButton>
+                <ListItem
+                  key={item.id}
+                  button
+                  onClick={() => handleHistoryClick(item)}
+                >
+                  <ListItemIcon>
+                    <History />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.query}
+                    secondary={`${new Date(item.timestamp).toLocaleString()} • ${item.resultCount} results`}
+                  />
                 </ListItem>
               ))}
             </List>
@@ -906,19 +909,19 @@ function NaturalLanguageQuery({ cy, onQueryResult, onQueryExecuted }) {
           </Typography>
           <List>
             {exampleQueries.map((example, index) => (
-              <ListItem key={index} disablePadding>
-                <ListItemButton
-                  onClick={() => {
-                    setQuery(example);
-                    setShowHelp(false);
-                    executeQuery(example);
-                  }}
-                >
-                  <ListItemIcon>
-                    <QuestionMark />
-                  </ListItemIcon>
-                  <ListItemText primary={example} />
-                </ListItemButton>
+              <ListItem
+                key={index}
+                button
+                onClick={() => {
+                  setQuery(example);
+                  setShowHelp(false);
+                  executeQuery(example);
+                }}
+              >
+                <ListItemIcon>
+                  <QuestionMark />
+                </ListItemIcon>
+                <ListItemText primary={example} />
               </ListItem>
             ))}
           </List>

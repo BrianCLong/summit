@@ -1,2 +1,2 @@
 // @ts-nocheck
-export { default } from './store';
+export * from './store/index.js';

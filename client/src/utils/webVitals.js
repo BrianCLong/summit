@@ -1,4 +1,4 @@
-import { onCLS, onFID, onLCP, onFCP, onTTFB } from 'web-vitals';
+import { onCLS, onINP, onLCP, onFCP, onTTFB } from 'web-vitals';
 
 function sendToBackend(metric) {
   try {
@@ -19,7 +19,7 @@ function sendToBackend(metric) {
 
 export function initWebVitals() {
   onCLS(sendToBackend);
-  onFID(sendToBackend);
+  onINP(sendToBackend);
   onLCP(sendToBackend);
   onFCP(sendToBackend);
   onTTFB(sendToBackend);
