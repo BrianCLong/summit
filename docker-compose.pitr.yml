@@ -1,0 +1,123 @@
+version: '3.9'
+
+# PostgreSQL Point-in-Time Recovery Stack
+# Adds PITR capabilities to existing PostgreSQL setup
+
+services:
+  postgres-pitr:
+    build:
+      context: ./services/postgres-pitr
+      dockerfile: Dockerfile
+    container_name: summit-postgres-pitr
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-summit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      # WAL-G Configuration
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:?Set AWS_ACCESS_KEY_ID for WAL archiving}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:?Set AWS_SECRET_ACCESS_KEY for WAL archiving}
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      WALG_S3_PREFIX: ${WALG_S3_PREFIX:-s3://summit-wal-archives/postgres}
+      WALG_COMPRESSION_METHOD: lz4
+      WALG_DELTA_MAX_STEPS: 7
+    command: >
+      postgres
+      -c config_file=/etc/postgresql/postgresql-pitr.conf
+      -c hba_file=/var/lib/postgresql/data/pg_hba.conf
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_pitr_data:/var/lib/postgresql/data
+      - postgres_pitr_wal:/var/lib/postgresql/wal
+      - postgres_pitr_logs:/var/log/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit_dev}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - summit
+    labels:
+      - 'prometheus.scrape=true'
+      - 'prometheus.port=9187'
+      - 'backup.enabled=true'
+      - 'backup.schedule=daily'
+
+  # PostgreSQL Exporter for monitoring
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:latest
+    container_name: summit-postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres-pitr:5432/${POSTGRES_DB:-summit_dev}?sslmode=disable
+    ports:
+      - '9187:9187'
+    depends_on:
+      postgres-pitr:
+        condition: service_healthy
+    networks:
+      - summit
+
+  # Pushgateway for backup metrics
+  pushgateway:
+    image: prom/pushgateway:latest
+    container_name: summit-pushgateway
+    restart: unless-stopped
+    ports:
+      - '9091:9091'
+    networks:
+      - summit
+    command:
+      - '--persistence.file=/data/pushgateway.data'
+      - '--persistence.interval=5m'
+    volumes:
+      - pushgateway_data:/data
+
+  # Base backup scheduler (alternative to CronJob for local dev)
+  backup-scheduler:
+    image: summit/postgres-pitr:latest
+    container_name: summit-backup-scheduler
+    restart: unless-stopped
+    environment:
+      PGHOST: postgres-pitr
+      PGPORT: 5432
+      PGUSER: ${POSTGRES_USER:-summit}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-west-2}
+      WALG_S3_PREFIX: ${WALG_S3_PREFIX:-s3://summit-wal-archives/postgres}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE:-0 2 * * *}  # Daily at 2 AM
+    command: >
+      sh -c '
+      echo "Installing supercronic for cron scheduling..."
+      wget -q https://github.com/aptible/supercronic/releases/download/v0.2.26/supercronic-linux-amd64 -O /usr/local/bin/supercronic
+      chmod +x /usr/local/bin/supercronic
+      echo "$$BACKUP_SCHEDULE /usr/local/bin/base-backup.sh" > /etc/crontab
+      echo "Starting backup scheduler..."
+      supercronic /etc/crontab
+      '
+    depends_on:
+      postgres-pitr:
+        condition: service_healthy
+    networks:
+      - summit
+    volumes:
+      - postgres_pitr_logs:/var/log/postgresql
+
+volumes:
+  postgres_pitr_data:
+    driver: local
+  postgres_pitr_wal:
+    driver: local
+  postgres_pitr_logs:
+    driver: local
+  pushgateway_data:
+    driver: local
+
+networks:
+  summit:
+    external: true
+    name: summit
