@@ -6,10 +6,11 @@
  * the shell with mock data (or real data from a provider).
  */
 
-import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { TriPaneShell } from '@/features/triPane'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import {
+  TriPaneShell,
+  TriPaneErrorBoundary,
+  TriPaneSkeleton,
   generateMockEntities,
   generateMockRelationships,
   generateMockTimelineEvents,
@@ -22,7 +23,15 @@ import type {
   GeospatialEvent,
 } from '@/types'
 import type { TriPaneSyncState } from '@/features/triPane'
-import { Loader2 } from 'lucide-react'
+import { AlertTriangle, RefreshCw } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
+
+interface DataState {
+  entities: Entity[]
+  relationships: Relationship[]
+  timelineEvents: TimelineEvent[]
+  geospatialEvents: GeospatialEvent[]
+}
 
 /**
  * TriPanePage component
@@ -31,111 +40,101 @@ import { Loader2 } from 'lucide-react'
  * Future teams can replace the mock data loading with real API calls.
  */
 export default function TriPanePage() {
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
+  const [data, setData] = useState<DataState | null>(null)
 
-  // Data state
-  const [entities, setEntities] = useState<Entity[]>([])
-  const [relationships, setRelationships] = useState<Relationship[]>([])
-  const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([])
-  const [geospatialEvents, setGeospatialEvents] = useState<GeospatialEvent[]>(
-    []
-  )
+  // Load data function - memoized to prevent unnecessary recreations
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true)
+      setError(null)
 
-  // Load mock data on mount
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true)
+      // Simulate API delay for realistic loading experience
+      await new Promise(resolve => setTimeout(resolve, 300))
 
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500))
+      // Generate mock data with optimized counts
+      const mockEntities = generateMockEntities(25)
+      const mockRelationships = generateMockRelationships(mockEntities, 40)
+      const mockTimelineEvents = generateMockTimelineEvents(mockEntities, 60)
+      const mockGeospatialEvents = generateMockGeospatialEvents(30)
 
-        // Generate mock data
-        const mockEntities = generateMockEntities(25)
-        const mockRelationships = generateMockRelationships(mockEntities, 40)
-        const mockTimelineEvents = generateMockTimelineEvents(mockEntities, 60)
-        const mockGeospatialEvents = generateMockGeospatialEvents(30)
-
-        setEntities(mockEntities)
-        setRelationships(mockRelationships)
-        setTimelineEvents(mockTimelineEvents)
-        setGeospatialEvents(mockGeospatialEvents)
-      } catch (err) {
-        setError(
-          err instanceof Error ? err : new Error('Failed to load data')
-        )
-      } finally {
-        setLoading(false)
-      }
+      setData({
+        entities: mockEntities,
+        relationships: mockRelationships,
+        timelineEvents: mockTimelineEvents,
+        geospatialEvents: mockGeospatialEvents,
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to load data'))
+    } finally {
+      setLoading(false)
     }
-
-    loadData()
   }, [])
 
-  // Handle entity selection
-  const handleEntitySelect = (entity: Entity) => {
-    console.log('Entity selected:', entity)
+  // Load data on mount
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  // Memoized callbacks to prevent unnecessary re-renders
+  const handleEntitySelect = useCallback((entity: Entity) => {
     // Future: Navigate to entity detail page or show drawer
-  }
+    console.debug('[TriPane] Entity selected:', entity.id, entity.name)
+  }, [])
 
-  // Handle timeline event selection
-  const handleEventSelect = (event: TimelineEvent) => {
-    console.log('Event selected:', event)
+  const handleEventSelect = useCallback((event: TimelineEvent) => {
     // Future: Show event details or navigate to related page
-  }
+    console.debug('[TriPane] Event selected:', event.id, event.title)
+  }, [])
 
-  // Handle location selection
-  const handleLocationSelect = (locationId: string) => {
-    console.log('Location selected:', locationId)
+  const handleLocationSelect = useCallback((locationId: string) => {
     // Future: Show location details or filter by location
-  }
+    console.debug('[TriPane] Location selected:', locationId)
+  }, [])
 
-  // Handle sync state changes (for debugging or persistence)
-  const handleSyncStateChange = (state: TriPaneSyncState) => {
-    console.log('Sync state changed:', state)
-    // Future: Persist state to URL or localStorage
-  }
+  const handleSyncStateChange = useCallback((state: TriPaneSyncState) => {
+    // Future: Persist state to URL or localStorage for deep linking
+    console.debug('[TriPane] Sync state updated')
+  }, [])
 
-  // Handle export
-  const handleExport = () => {
-    console.log('Exporting data...')
+  // Memoized export handler
+  const handleExport = useCallback(() => {
+    if (!data) return
 
-    // Create export data
     const exportData = {
-      entities,
-      relationships,
-      timelineEvents,
-      geospatialEvents,
+      ...data,
       exportedAt: new Date().toISOString(),
+      version: '1.0.0',
     }
 
-    // Download as JSON
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: 'application/json',
     })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `tri-pane-export-${Date.now()}.json`
+    a.download = `tri-pane-export-${new Date().toISOString().split('T')[0]}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-  }
+  }, [data])
 
-  // Loading state
+  // Memoized error handler for boundary
+  const handleBoundaryError = useCallback(
+    (error: Error, errorInfo: React.ErrorInfo) => {
+      console.error('[TriPane] Component error:', error, errorInfo)
+      // Future: Send to error monitoring service
+    },
+    []
+  )
+
+  // Loading state with skeleton
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-          <p className="text-lg font-medium">Loading tri-pane analysis...</p>
-          <p className="text-sm text-muted-foreground">
-            Preparing graph, timeline, and map data
-          </p>
-        </div>
+      <div className="h-full p-6">
+        <TriPaneSkeleton className="h-full" />
       </div>
     )
   }
@@ -143,40 +142,58 @@ export default function TriPanePage() {
   // Error state
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center space-y-4 max-w-md">
-          <div className="text-6xl">⚠️</div>
+      <div className="flex items-center justify-center h-full p-6">
+        <div
+          className="text-center space-y-4 max-w-md"
+          role="alert"
+          aria-live="assertive"
+        >
+          <AlertTriangle className="h-16 w-16 mx-auto text-destructive" />
           <h1 className="text-2xl font-bold text-destructive">
             Failed to Load Data
           </h1>
           <p className="text-muted-foreground">{error.message}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-          >
+          <Button onClick={loadData} variant="default" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
             Retry
-          </button>
+          </Button>
         </div>
       </div>
     )
   }
 
-  // Main render
+  // No data state (shouldn't happen, but handle defensively)
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center h-full p-6">
+        <div className="text-center space-y-4">
+          <p className="text-lg text-muted-foreground">No data available</p>
+          <Button onClick={loadData} variant="outline">
+            Load Data
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  // Main render with error boundary
   return (
     <div className="h-full p-6">
-      <TriPaneShell
-        entities={entities}
-        relationships={relationships}
-        timelineEvents={timelineEvents}
-        geospatialEvents={geospatialEvents}
-        onEntitySelect={handleEntitySelect}
-        onEventSelect={handleEventSelect}
-        onLocationSelect={handleLocationSelect}
-        onSyncStateChange={handleSyncStateChange}
-        onExport={handleExport}
-        showProvenanceOverlay={true}
-        className="h-full"
-      />
+      <TriPaneErrorBoundary onError={handleBoundaryError}>
+        <TriPaneShell
+          entities={data.entities}
+          relationships={data.relationships}
+          timelineEvents={data.timelineEvents}
+          geospatialEvents={data.geospatialEvents}
+          onEntitySelect={handleEntitySelect}
+          onEventSelect={handleEventSelect}
+          onLocationSelect={handleLocationSelect}
+          onSyncStateChange={handleSyncStateChange}
+          onExport={handleExport}
+          showProvenanceOverlay={false}
+          className="h-full"
+        />
+      </TriPaneErrorBoundary>
     </div>
   )
 }

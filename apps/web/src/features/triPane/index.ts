@@ -8,6 +8,11 @@
 // Main components
 export { TriPaneShell } from './TriPaneShell'
 export { MapPane } from './MapPane'
+export { TriPaneErrorBoundary } from './ErrorBoundary'
+export { TriPaneSkeleton } from './TriPaneSkeleton'
+
+// Hooks
+export { useTriPaneSync } from './useTriPaneSync'
 
 // Types and interfaces
 export type {
