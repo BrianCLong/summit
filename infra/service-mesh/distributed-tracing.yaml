@@ -1,0 +1,600 @@
+# Distributed Tracing Configuration for Summit
+# Implements OpenTelemetry and Jaeger for end-to-end request tracking
+#
+# Tracing provides:
+# - Request flow visualization across services
+# - Performance bottleneck identification
+# - Error propagation tracking
+# - Service dependency mapping
+
+---
+# Namespace for observability stack
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    name: observability
+    istio-injection: enabled
+
+---
+# OpenTelemetry Collector ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: observability
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+      # Istio/Envoy traces
+      zipkin:
+        endpoint: 0.0.0.0:9411
+
+      # Jaeger native format
+      jaeger:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:14250
+          thrift_binary:
+            endpoint: 0.0.0.0:6832
+          thrift_compact:
+            endpoint: 0.0.0.0:6831
+          thrift_http:
+            endpoint: 0.0.0.0:14268
+
+    processors:
+      # Batch spans for efficiency
+      batch:
+        timeout: 10s
+        send_batch_size: 1024
+        send_batch_max_size: 2048
+
+      # Memory limiter to prevent OOM
+      memory_limiter:
+        check_interval: 1s
+        limit_mib: 512
+        spike_limit_mib: 128
+
+      # Add resource attributes
+      resource:
+        attributes:
+          - key: service.cluster
+            value: summit-production
+            action: insert
+          - key: deployment.environment
+            value: ${ENVIRONMENT}
+            action: insert
+
+      # Sampling for high-volume services
+      probabilistic_sampler:
+        sampling_percentage: 10 # 10% sampling
+
+      # Tail sampling - keep interesting traces
+      tail_sampling:
+        policies:
+          # Always sample errors
+          - name: errors
+            type: status_code
+            status_code:
+              status_codes: [ERROR]
+
+          # Always sample slow requests (>2s)
+          - name: slow-requests
+            type: latency
+            latency:
+              threshold_ms: 2000
+
+          # Sample 1% of successful fast requests
+          - name: probabilistic-policy
+            type: probabilistic
+            probabilistic:
+              sampling_percentage: 1
+
+      # Add service metadata
+      attributes:
+        actions:
+          - key: summit.tenant_id
+            from_attribute: http.request.header.x-tenant-id
+            action: insert
+          - key: summit.user_id
+            from_attribute: http.request.header.x-user-id
+            action: insert
+          - key: summit.correlation_id
+            from_attribute: http.request.header.x-correlation-id
+            action: insert
+
+    exporters:
+      # Export to Jaeger
+      jaeger:
+        endpoint: jaeger-collector.observability.svc.cluster.local:14250
+        tls:
+          insecure: false
+          cert_file: /etc/otel/certs/tls.crt
+          key_file: /etc/otel/certs/tls.key
+          ca_file: /etc/otel/certs/ca.crt
+
+      # Export to Prometheus for metrics
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        namespace: summit
+        const_labels:
+          cluster: production
+
+      # Logging exporter for debugging
+      logging:
+        loglevel: info
+        sampling_initial: 5
+        sampling_thereafter: 200
+
+      # Export to cloud provider (optional)
+      # otlp/cloudprovider:
+      #   endpoint: ${CLOUD_OTLP_ENDPOINT}
+      #   headers:
+      #     api-key: ${CLOUD_API_KEY}
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+
+      pprof:
+        endpoint: 0.0.0.0:1777
+
+      zpages:
+        endpoint: 0.0.0.0:55679
+
+    service:
+      extensions: [health_check, pprof, zpages]
+
+      pipelines:
+        traces:
+          receivers: [otlp, zipkin, jaeger]
+          processors:
+            - memory_limiter
+            - resource
+            - attributes
+            - tail_sampling
+            - batch
+          exporters: [jaeger, logging]
+
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [prometheus, logging]
+
+---
+# OpenTelemetry Collector Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app: otel-collector
+    component: collector
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+        component: collector
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8889"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: otel-collector
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: otel-collector
+        image: otel/opentelemetry-collector-contrib:0.103.0
+        args:
+          - --config=/conf/otel-collector-config.yaml
+        ports:
+        - name: otlp-grpc
+          containerPort: 4317
+          protocol: TCP
+        - name: otlp-http
+          containerPort: 4318
+          protocol: TCP
+        - name: zipkin
+          containerPort: 9411
+          protocol: TCP
+        - name: jaeger-grpc
+          containerPort: 14250
+          protocol: TCP
+        - name: jaeger-thrift
+          containerPort: 14268
+          protocol: TCP
+        - name: metrics
+          containerPort: 8889
+          protocol: TCP
+        - name: healthcheck
+          containerPort: 13133
+          protocol: TCP
+        env:
+        - name: ENVIRONMENT
+          value: production
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 1000m
+            memory: 2Gi
+        volumeMounts:
+        - name: config
+          mountPath: /conf
+        - name: certs
+          mountPath: /etc/otel/certs
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: otel-collector-config
+      - name: certs
+        secret:
+          secretName: otel-collector-tls
+
+---
+# OpenTelemetry Collector Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app: otel-collector
+spec:
+  type: ClusterIP
+  selector:
+    app: otel-collector
+  ports:
+  - name: otlp-grpc
+    port: 4317
+    targetPort: 4317
+    protocol: TCP
+  - name: otlp-http
+    port: 4318
+    targetPort: 4318
+    protocol: TCP
+  - name: zipkin
+    port: 9411
+    targetPort: 9411
+    protocol: TCP
+  - name: jaeger-grpc
+    port: 14250
+    targetPort: 14250
+    protocol: TCP
+  - name: jaeger-thrift
+    port: 14268
+    targetPort: 14268
+    protocol: TCP
+  - name: metrics
+    port: 8889
+    targetPort: 8889
+    protocol: TCP
+
+---
+# ServiceAccount for OpenTelemetry Collector
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: otel-collector
+  namespace: observability
+
+---
+# ClusterRole for OpenTelemetry Collector
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: otel-collector
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+
+---
+# ClusterRoleBinding for OpenTelemetry Collector
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: otel-collector
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: otel-collector
+subjects:
+- kind: ServiceAccount
+  name: otel-collector
+  namespace: observability
+
+---
+# Jaeger All-in-One Deployment (for development)
+# For production, use Jaeger Operator with Elasticsearch backend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jaeger
+  namespace: observability
+  labels:
+    app: jaeger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jaeger
+  template:
+    metadata:
+      labels:
+        app: jaeger
+    spec:
+      containers:
+      - name: jaeger
+        image: jaegertracing/all-in-one:1.57
+        env:
+        - name: COLLECTOR_ZIPKIN_HOST_PORT
+          value: ":9411"
+        - name: COLLECTOR_OTLP_ENABLED
+          value: "true"
+        - name: SPAN_STORAGE_TYPE
+          value: badger
+        - name: BADGER_EPHEMERAL
+          value: "false"
+        - name: BADGER_DIRECTORY_VALUE
+          value: /badger/data
+        - name: BADGER_DIRECTORY_KEY
+          value: /badger/key
+        ports:
+        - containerPort: 5775
+          protocol: UDP
+        - containerPort: 6831
+          protocol: UDP
+        - containerPort: 6832
+          protocol: UDP
+        - containerPort: 5778
+          protocol: TCP
+        - containerPort: 16686
+          protocol: TCP
+        - containerPort: 14250
+          protocol: TCP
+        - containerPort: 14268
+          protocol: TCP
+        - containerPort: 14269
+          protocol: TCP
+        - containerPort: 9411
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
+        volumeMounts:
+        - name: badger-data
+          mountPath: /badger
+      volumes:
+      - name: badger-data
+        emptyDir: {}
+
+---
+# Jaeger Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-collector
+  namespace: observability
+  labels:
+    app: jaeger
+spec:
+  type: ClusterIP
+  selector:
+    app: jaeger
+  ports:
+  - name: jaeger-collector-http
+    port: 14268
+    targetPort: 14268
+    protocol: TCP
+  - name: jaeger-collector-grpc
+    port: 14250
+    targetPort: 14250
+    protocol: TCP
+  - name: zipkin
+    port: 9411
+    targetPort: 9411
+    protocol: TCP
+
+---
+# Jaeger Query Service (UI)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-query
+  namespace: observability
+  labels:
+    app: jaeger
+spec:
+  type: ClusterIP
+  selector:
+    app: jaeger
+  ports:
+  - name: query-http
+    port: 16686
+    targetPort: 16686
+    protocol: TCP
+
+---
+# Jaeger Agent Service (for legacy client support)
+apiVersion: v1
+kind: Service
+metadata:
+  name: jaeger-agent
+  namespace: observability
+  labels:
+    app: jaeger
+spec:
+  type: ClusterIP
+  selector:
+    app: jaeger
+  ports:
+  - name: agent-zipkin-thrift
+    port: 5775
+    targetPort: 5775
+    protocol: UDP
+  - name: agent-compact
+    port: 6831
+    targetPort: 6831
+    protocol: UDP
+  - name: agent-binary
+    port: 6832
+    targetPort: 6832
+    protocol: UDP
+  - name: agent-configs
+    port: 5778
+    targetPort: 5778
+    protocol: TCP
+
+---
+# Istio Telemetry Configuration for Tracing
+apiVersion: telemetry.istio.io/v1alpha1
+kind: Telemetry
+metadata:
+  name: mesh-tracing
+  namespace: istio-system
+spec:
+  tracing:
+  - providers:
+    - name: opentelemetry
+    randomSamplingPercentage: 10.0 # 10% sampling
+    customTags:
+      tenant_id:
+        header:
+          name: x-tenant-id
+      user_id:
+        header:
+          name: x-user-id
+      correlation_id:
+        header:
+          name: x-correlation-id
+      environment:
+        literal:
+          value: production
+
+---
+# Istio Mesh Config for OpenTelemetry
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: istio-mesh-config
+  namespace: istio-system
+data:
+  mesh: |
+    extensionProviders:
+    - name: opentelemetry
+      opentelemetry:
+        service: otel-collector.observability.svc.cluster.local
+        port: 4317
+
+    defaultProviders:
+      tracing:
+      - opentelemetry
+
+    enableTracing: true
+
+    defaultConfig:
+      tracing:
+        sampling: 10.0
+        max_path_tag_length: 256
+        custom_tags:
+          tenant_id:
+            header:
+              name: x-tenant-id
+          user_id:
+            header:
+              name: x-user-id
+          correlation_id:
+            header:
+              name: x-correlation-id
+
+---
+# ServiceMonitor for Prometheus to scrape OTEL metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app: otel-collector
+spec:
+  selector:
+    matchLabels:
+      app: otel-collector
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+
+---
+# Ingress for Jaeger UI
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: jaeger-ui
+  namespace: observability
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - jaeger.summit.example.com
+    secretName: jaeger-ui-tls
+  rules:
+  - host: jaeger.summit.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: jaeger-query
+            port:
+              number: 16686

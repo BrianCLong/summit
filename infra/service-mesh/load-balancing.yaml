@@ -1,0 +1,514 @@
+# Load Balancing Strategies for Summit Microservices
+# Implements intelligent traffic distribution across service instances
+#
+# Load balancing strategies:
+# - ROUND_ROBIN: Simple, fair distribution
+# - LEAST_REQUEST: Optimal for varying request costs
+# - RANDOM: Simple and fast
+# - PASSTHROUGH: Direct connection (no load balancing)
+# - CONSISTENT_HASH: Session affinity based on headers/cookies
+
+---
+# Default load balancing for all services
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: default-load-balancer
+  namespace: istio-system
+spec:
+  host: "*.svc.cluster.local"
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+      localityLbSetting:
+        enabled: true
+        distribute:
+        - from: us-east-1a
+          to:
+            "us-east-1a": 90
+            "us-east-1b": 10
+        - from: us-east-1b
+          to:
+            "us-east-1b": 90
+            "us-east-1a": 10
+        - from: us-west-2a
+          to:
+            "us-west-2a": 90
+            "us-west-2b": 10
+        failover:
+        - from: us-east-1
+          to: us-west-2
+        - from: us-west-2
+          to: us-east-1
+
+---
+# API Gateway - Consistent hashing for session affinity
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: api-gateway-lb
+  namespace: summit
+spec:
+  host: api-gateway.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-user-id"
+        minimumRingSize: 2048
+        httpCookie:
+          name: "summit-session"
+          ttl: 3600s
+      localityLbSetting:
+        enabled: true
+        failover:
+        - from: us-east-1
+          to: us-west-2
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+    trafficPolicy:
+      loadBalancer:
+        simple: LEAST_REQUEST
+  - name: v2
+    labels:
+      version: v2
+    trafficPolicy:
+      loadBalancer:
+        simple: LEAST_REQUEST
+  - name: canary
+    labels:
+      version: canary
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+
+---
+# Graph Core - Tenant-based consistent hashing
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: graph-core-lb
+  namespace: summit
+spec:
+  host: graph-core.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-tenant-id"
+        minimumRingSize: 1024
+      localityLbSetting:
+        enabled: true
+  subsets:
+  - name: stable
+    labels:
+      track: stable
+  - name: canary
+    labels:
+      track: canary
+
+---
+# Neo4j - Primary/Read-Replica topology
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: neo4j-lb
+  namespace: summit
+spec:
+  host: neo4j.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+  subsets:
+  - name: primary
+    labels:
+      role: primary
+    trafficPolicy:
+      loadBalancer:
+        simple: PASSTHROUGH # Direct connection to leader
+  - name: read-replica
+    labels:
+      role: read-replica
+    trafficPolicy:
+      loadBalancer:
+        simple: LEAST_REQUEST # Distribute reads
+
+---
+# VirtualService for Neo4j read/write splitting
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: neo4j-routing
+  namespace: summit
+spec:
+  hosts:
+  - neo4j.summit.svc.cluster.local
+  http:
+  - match:
+    - headers:
+        x-neo4j-mode:
+          exact: write
+    route:
+    - destination:
+        host: neo4j.summit.svc.cluster.local
+        subset: primary
+      weight: 100
+  - match:
+    - headers:
+        x-neo4j-mode:
+          exact: read
+    route:
+    - destination:
+        host: neo4j.summit.svc.cluster.local
+        subset: read-replica
+      weight: 90
+    - destination:
+        host: neo4j.summit.svc.cluster.local
+        subset: primary
+      weight: 10 # Fallback to primary
+  - route: # Default to primary for safety
+    - destination:
+        host: neo4j.summit.svc.cluster.local
+        subset: primary
+
+---
+# PostgreSQL - Connection pooling with PgBouncer
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: postgres-lb
+  namespace: summit
+spec:
+  host: postgres.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+    connectionPool:
+      tcp:
+        maxConnections: 100
+  subsets:
+  - name: primary
+    labels:
+      role: primary
+  - name: replica
+    labels:
+      role: replica
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+
+---
+# Redis - Primary/Replica with sentinel
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: redis-lb
+  namespace: summit
+spec:
+  host: redis.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+  subsets:
+  - name: primary
+    labels:
+      role: master
+    trafficPolicy:
+      loadBalancer:
+        simple: PASSTHROUGH
+  - name: replica
+    labels:
+      role: replica
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+
+---
+# VirtualService for Redis read/write splitting
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: redis-routing
+  namespace: summit
+spec:
+  hosts:
+  - redis.summit.svc.cluster.local
+  tcp:
+  - match:
+    - port: 6379
+    route:
+    - destination:
+        host: redis.summit.svc.cluster.local
+        subset: primary
+      weight: 100
+
+---
+# NLP Service - Least request for optimal distribution
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: nlp-service-lb
+  namespace: summit
+spec:
+  host: nlp-service.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+      warmupDurationSecs: 60 # Warm up new instances
+    connectionPool:
+      http:
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+
+---
+# Analytics Engine - Round robin for batch jobs
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: analytics-engine-lb
+  namespace: summit
+spec:
+  host: analytics-engine.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
+    connectionPool:
+      http:
+        http2MaxRequests: 50
+        idleTimeout: 1800s
+
+---
+# Stream Processor - Partition-aware routing
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: stream-processor-lb
+  namespace: summit
+spec:
+  host: stream-processor.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-partition-key"
+        minimumRingSize: 512
+
+---
+# Authz Gateway - Random for fast failover
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: authz-gateway-lb
+  namespace: summit
+spec:
+  host: authz-gateway.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM # Fast and simple
+      localityLbSetting:
+        enabled: true
+        failover:
+        - from: us-east-1
+          to: us-west-2
+
+---
+# Webhook Services - Session-based routing
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: webhook-service-lb
+  namespace: summit
+spec:
+  host: webhook-service.summit.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-webhook-id"
+        minimumRingSize: 256
+
+---
+# Canary Deployment with Traffic Splitting
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: graph-core-canary
+  namespace: summit
+spec:
+  hosts:
+  - graph-core.summit.svc.cluster.local
+  http:
+  - match:
+    - headers:
+        x-canary:
+          exact: "true"
+    route:
+    - destination:
+        host: graph-core.summit.svc.cluster.local
+        subset: canary
+      weight: 100
+  - route:
+    - destination:
+        host: graph-core.summit.svc.cluster.local
+        subset: stable
+      weight: 95
+    - destination:
+        host: graph-core.summit.svc.cluster.local
+        subset: canary
+      weight: 5 # 5% canary traffic
+
+---
+# Geographic Load Balancing
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: geo-load-balancer
+  namespace: summit
+spec:
+  host: "*.summit.svc.cluster.local"
+  trafficPolicy:
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+        distribute:
+        - from: us-east-1/*
+          to:
+            "us-east-1/*": 80
+            "us-west-2/*": 20
+        - from: us-west-2/*
+          to:
+            "us-west-2/*": 80
+            "us-east-1/*": 20
+        - from: eu-west-1/*
+          to:
+            "eu-west-1/*": 80
+            "us-east-1/*": 20
+        failover:
+        - from: us-east-1
+          to: us-west-2
+        - from: us-west-2
+          to: us-east-1
+        - from: eu-west-1
+          to: us-east-1
+        failoverPriority:
+        - us-east-1
+        - us-west-2
+        - eu-west-1
+
+---
+# Priority-based Load Balancing
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: priority-load-balancer
+  namespace: summit
+spec:
+  host: high-priority.summit.svc.cluster.local
+  subsets:
+  - name: high-performance
+    labels:
+      tier: premium
+      performance: high
+    trafficPolicy:
+      loadBalancer:
+        simple: LEAST_REQUEST
+  - name: standard
+    labels:
+      tier: standard
+    trafficPolicy:
+      loadBalancer:
+        simple: ROUND_ROBIN
+  - name: best-effort
+    labels:
+      tier: best-effort
+    trafficPolicy:
+      loadBalancer:
+        simple: RANDOM
+
+---
+# VirtualService for Priority Routing
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: priority-routing
+  namespace: summit
+spec:
+  hosts:
+  - high-priority.summit.svc.cluster.local
+  http:
+  - match:
+    - headers:
+        x-priority:
+          exact: high
+    route:
+    - destination:
+        host: high-priority.summit.svc.cluster.local
+        subset: high-performance
+  - match:
+    - headers:
+        x-priority:
+          exact: standard
+    route:
+    - destination:
+        host: high-priority.summit.svc.cluster.local
+        subset: standard
+  - route: # Default to best-effort
+    - destination:
+        host: high-priority.summit.svc.cluster.local
+        subset: best-effort
+
+---
+# Health-based Load Balancing
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: health-aware-lb
+  namespace: summit
+spec:
+  host: "*.summit.svc.cluster.local"
+  trafficPolicy:
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+    loadBalancer:
+      simple: LEAST_REQUEST
+      warmupDurationSecs: 30
+
+---
+# Cross-Cluster Load Balancing
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: external-summit-cluster
+  namespace: summit
+spec:
+  hosts:
+  - summit.remote-cluster.example.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+
+---
+# DestinationRule for Cross-Cluster
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: cross-cluster-lb
+  namespace: summit
+spec:
+  host: summit.remote-cluster.example.com
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_REQUEST
+      localityLbSetting:
+        enabled: true
+        failover:
+        - from: primary-cluster
+          to: secondary-cluster
+    tls:
+      mode: ISTIO_MUTUAL
+      sni: summit.remote-cluster.example.com
