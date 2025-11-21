@@ -35,6 +35,12 @@ export type {
   FormattedResult,
 } from './ui/AgentCommands';
 
+// React Components (use dynamic import in React apps)
+// export { AgentDashboard, CommandPalette, AgentStatusTiles } from './ui/AgentDashboard';
+
+// API Router
+export { createAgentRouter, agentRouter } from './api/AgentRouter';
+
 /**
  * Initialize all agent archetypes and register them
  */
