@@ -15,3 +15,6 @@ export * from './circuits/circuit-builder';
 // Backends
 export * from './backends/local-backend';
 export * from './backends/cloud-providers';
+
+// QRNG
+export * from './qrng/quantum-random';

@@ -14,3 +14,6 @@ export * from './inventory/crypto-inventory';
 
 // Migration
 export * from './migration/migration-planner';
+
+// Assessment
+export * from './assessment/quantum-threat';
