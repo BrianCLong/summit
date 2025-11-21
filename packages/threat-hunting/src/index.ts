@@ -720,4 +720,3 @@ export interface DataConnector {
   getDataSources(): string[];
 }
 
-export { ThreatHuntingEngine };

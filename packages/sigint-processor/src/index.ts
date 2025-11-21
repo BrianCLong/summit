@@ -49,7 +49,7 @@ export const InterceptSchema = z.object({
   sourceId: z.string().uuid(),
   timestamp: z.date(),
   duration: z.number(),
-  rawData: z.instanceof(Uint8Array).optional(),
+  rawData: z.any().optional(),
   decodedContent: z.string().optional(),
   metadata: z.object({
     signalStrength: z.number(),
@@ -449,4 +449,3 @@ export class SIGINTProcessor {
   loadEmitterLibrary(library: Map<string, any>): void { this.emitterLibrary = library; }
 }
 
-export { SIGINTProcessor };

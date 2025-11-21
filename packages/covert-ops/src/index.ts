@@ -26,7 +26,7 @@ export const OperationSchema = z.object({
   target: z.object({
     type: z.enum(['INDIVIDUAL', 'ORGANIZATION', 'FACILITY', 'NETWORK', 'COUNTRY']),
     identifier: z.string(),
-    profile: z.record(z.any())
+    profile: z.record(z.string(), z.any())
   }),
   timeline: z.object({
     planned: z.object({ start: z.date(), end: z.date() }),
@@ -415,4 +415,3 @@ export class CovertOpsManager {
   getAuditLog(): typeof this.auditLog { return [...this.auditLog]; }
 }
 
-export { CovertOpsManager };

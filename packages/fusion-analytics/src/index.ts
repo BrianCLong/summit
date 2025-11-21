@@ -22,7 +22,7 @@ export const IntelReportSchema = z.object({
     id: z.string(),
     type: z.string(),
     reliability: z.enum(['A', 'B', 'C', 'D', 'E', 'F']),
-    credibility: z.number().min(1).max(6)
+    credibility: z.number()
   }),
   content: z.object({
     summary: z.string(),
@@ -34,7 +34,7 @@ export const IntelReportSchema = z.object({
     id: z.string(),
     name: z.string(),
     confidence: z.number(),
-    attributes: z.record(z.any())
+    attributes: z.record(z.string(), z.any())
   })),
   relationships: z.array(z.object({
     source: z.string(),
@@ -62,7 +62,7 @@ export const FusedEntitySchema = z.object({
   type: z.enum(['PERSON', 'ORGANIZATION', 'LOCATION', 'DEVICE', 'NETWORK', 'THREAT', 'CAMPAIGN']),
   aliases: z.array(z.string()),
   sources: z.array(z.object({ domain: IntelligenceDomainSchema, reportId: z.string(), confidence: z.number() })),
-  attributes: z.record(z.array(z.object({ value: z.any(), source: z.string(), confidence: z.number(), timestamp: z.date() }))),
+  attributes: z.record(z.string(), z.array(z.object({ value: z.any(), source: z.string(), confidence: z.number(), timestamp: z.date() }))),
   relationships: z.array(z.object({
     targetId: z.string(),
     type: z.string(),
@@ -452,4 +452,3 @@ export class FusionEngine {
   setDomainWeight(domain: IntelligenceDomain, weight: number): void { this.domainWeights.set(domain, weight); }
 }
 
-export { FusionEngine };

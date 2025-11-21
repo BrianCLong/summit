@@ -51,9 +51,9 @@ export const ResponseActionSchema = z.object({
   target: z.object({
     type: z.string(),
     identifier: z.string(),
-    context: z.record(z.any()).optional()
+    context: z.record(z.string(), z.any()).optional()
   }),
-  parameters: z.record(z.any()),
+  parameters: z.record(z.string(), z.any()),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   requiresApproval: z.boolean(),
   reversible: z.boolean(),
@@ -305,7 +305,7 @@ export class AIDecisionEngine {
     const actions: ResponseAction[] = [];
 
     // Generate actions based on threat category
-    const categoryActions: Record<string, ResponseActionSchema['shape']['type']['_output'][]> = {
+    const categoryActions: Record<string, ResponseAction['type'][]> = {
       MALWARE: ['ISOLATE_HOST', 'QUARANTINE_FILE', 'FORENSIC_CAPTURE'],
       INTRUSION: ['BLOCK_IP', 'ISOLATE_HOST', 'ALERT_SOC'],
       EXFILTRATION: ['BLOCK_IP', 'DISABLE_USER', 'FORENSIC_CAPTURE'],
@@ -368,4 +368,3 @@ export class AIDecisionEngine {
   getExecutionHistory(): ResponseAction[] { return [...this.executionHistory]; }
 }
 
-export { AIDecisionEngine };

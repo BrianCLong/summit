@@ -18,7 +18,7 @@ export const DarkWebSourceSchema = z.object({
   url: z.string(),
   accessMethod: z.enum(['TOR', 'I2P', 'CLEARNET', 'VPN_REQUIRED']),
   status: z.enum(['ACTIVE', 'MONITORING', 'INACTIVE', 'SEIZED', 'EXIT_SCAM']),
-  reliability: z.number().min(0).max(100),
+  reliability: z.number(),
   lastAccessed: z.date(),
   intelligence: z.object({
     threatsIdentified: z.number(),
@@ -433,4 +433,3 @@ export class DarkWebIntelEngine {
   getAllLeaks(): DataLeak[] { return Array.from(this.leaks.values()); }
 }
 
-export { DarkWebIntelEngine };

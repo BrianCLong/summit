@@ -37,7 +37,7 @@ export const DecoyAssetSchema = z.object({
     sourceIp: z.string(),
     sourcePort: z.number(),
     action: z.string(),
-    details: z.record(z.any()),
+    details: z.record(z.string(), z.any()),
     threatLevel: z.enum(['INFO', 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
     analyzed: z.boolean()
   })),
@@ -421,4 +421,3 @@ export class DeceptionOrchestrator {
   getAllCampaigns(): DeceptionCampaign[] { return Array.from(this.campaigns.values()); }
 }
 
-export { DeceptionOrchestrator };
