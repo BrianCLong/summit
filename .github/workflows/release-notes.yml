@@ -1,0 +1,396 @@
+name: 📝 Automated Release Notes
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*.*.*'
+  release:
+    types: [created, published]
+  workflow_dispatch:
+    inputs:
+      from_tag:
+        description: 'Start tag (leave empty for last tag)'
+        required: false
+      to_tag:
+        description: 'End tag (leave empty for HEAD)'
+        required: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  generate-release-notes:
+    name: 📝 Generate Release Notes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      - name: Install release-notes tools
+        run: |
+          npm install -g conventional-changelog-cli
+          npm install -g auto-changelog
+
+      - name: Determine tag range
+        id: tags
+        run: |
+          if [[ -n "${{ github.event.inputs.from_tag }}" ]]; then
+            FROM_TAG="${{ github.event.inputs.from_tag }}"
+          else
+            # Get the most recent tag before the current one
+            FROM_TAG=$(git tag --sort=-v:refname | head -2 | tail -1)
+            if [[ -z "$FROM_TAG" ]]; then
+              # If no previous tag, use first commit
+              FROM_TAG=$(git rev-list --max-parents=0 HEAD)
+            fi
+          fi
+
+          if [[ -n "${{ github.event.inputs.to_tag }}" ]]; then
+            TO_TAG="${{ github.event.inputs.to_tag }}"
+          elif [[ "${{ github.ref_type }}" == "tag" ]]; then
+            TO_TAG="${{ github.ref_name }}"
+          else
+            TO_TAG="HEAD"
+          fi
+
+          echo "from_tag=$FROM_TAG" >> $GITHUB_OUTPUT
+          echo "to_tag=$TO_TAG" >> $GITHUB_OUTPUT
+
+          echo "Generating release notes from $FROM_TAG to $TO_TAG"
+
+      - name: Parse conventional commits
+        id: parse_commits
+        run: |
+          FROM_TAG="${{ steps.tags.outputs.from_tag }}"
+          TO_TAG="${{ steps.tags.outputs.to_tag }}"
+
+          echo "📝 Parsing commits from $FROM_TAG to $TO_TAG..."
+
+          # Get commits in range
+          if [[ "$FROM_TAG" =~ ^[0-9a-f]{40}$ ]]; then
+            # FROM_TAG is a commit hash
+            COMMITS=$(git log --pretty=format:"%H|%s|%b|%an|%ae|%ai" $FROM_TAG..$TO_TAG)
+          else
+            COMMITS=$(git log --pretty=format:"%H|%s|%b|%an|%ae|%ai" $FROM_TAG..$TO_TAG 2>/dev/null || git log --pretty=format:"%H|%s|%b|%an|%ae|%ai" $TO_TAG)
+          fi
+
+          # Parse commits by type
+          declare -A FEATURES
+          declare -A FIXES
+          declare -A BREAKING
+          declare -A CHORES
+          declare -A DOCS
+          declare -A PERF
+          declare -A REFACTOR
+          declare -A TESTS
+          declare -A OTHER
+
+          while IFS='|' read -r hash subject body author email date; do
+            # Extract conventional commit type
+            if [[ "$subject" =~ ^([a-z]+)(\(([^)]+)\))?(!)?:\ (.+)$ ]]; then
+              TYPE="${BASH_REMATCH[1]}"
+              SCOPE="${BASH_REMATCH[3]}"
+              BREAKING_FLAG="${BASH_REMATCH[4]}"
+              MESSAGE="${BASH_REMATCH[5]}"
+
+              # Check for breaking change
+              IS_BREAKING=false
+              if [[ -n "$BREAKING_FLAG" ]] || [[ "$body" =~ BREAKING\ CHANGE ]]; then
+                IS_BREAKING=true
+              fi
+
+              # Format commit entry
+              COMMIT_ENTRY="- $MESSAGE"
+              if [[ -n "$SCOPE" ]]; then
+                COMMIT_ENTRY="- **$SCOPE**: $MESSAGE"
+              fi
+              COMMIT_ENTRY="$COMMIT_ENTRY ([${hash:0:7}](https://github.com/${{ github.repository }}/commit/$hash))"
+
+              # Categorize
+              if [[ "$IS_BREAKING" == "true" ]]; then
+                BREAKING["$hash"]="$COMMIT_ENTRY"
+              fi
+
+              case "$TYPE" in
+                feat|feature)
+                  FEATURES["$hash"]="$COMMIT_ENTRY"
+                  ;;
+                fix)
+                  FIXES["$hash"]="$COMMIT_ENTRY"
+                  ;;
+                chore)
+                  CHORES["$hash"]="$COMMIT_ENTRY"
+                  ;;
+                docs)
+                  DOCS["$hash"]="$COMMIT_ENTRY"
+                  ;;
+                perf)
+                  PERF["$hash"]="$COMMIT_ENTRY"
+                  ;;
+                refactor)
+                  REFACTOR["$hash"]="$COMMIT_ENTRY"
+                  ;;
+                test)
+                  TESTS["$hash"]="$COMMIT_ENTRY"
+                  ;;
+                *)
+                  OTHER["$hash"]="$COMMIT_ENTRY"
+                  ;;
+              esac
+            else
+              # Non-conventional commit
+              OTHER["$hash"]="- $subject ([${hash:0:7}](https://github.com/${{ github.repository }}/commit/$hash))"
+            fi
+          done <<< "$COMMITS"
+
+          # Save counts
+          echo "feature_count=${#FEATURES[@]}" >> $GITHUB_OUTPUT
+          echo "fix_count=${#FIXES[@]}" >> $GITHUB_OUTPUT
+          echo "breaking_count=${#BREAKING[@]}" >> $GITHUB_OUTPUT
+          echo "chore_count=${#CHORES[@]}" >> $GITHUB_OUTPUT
+          echo "docs_count=${#DOCS[@]}" >> $GITHUB_OUTPUT
+          echo "perf_count=${#PERF[@]}" >> $GITHUB_OUTPUT
+          echo "refactor_count=${#REFACTOR[@]}" >> $GITHUB_OUTPUT
+          echo "test_count=${#TESTS[@]}" >> $GITHUB_OUTPUT
+          echo "other_count=${#OTHER[@]}" >> $GITHUB_OUTPUT
+
+          # Save to files
+          for hash in "${!BREAKING[@]}"; do
+            echo "${BREAKING[$hash]}" >> /tmp/breaking.txt
+          done
+
+          for hash in "${!FEATURES[@]}"; do
+            echo "${FEATURES[$hash]}" >> /tmp/features.txt
+          done
+
+          for hash in "${!FIXES[@]}"; do
+            echo "${FIXES[$hash]}" >> /tmp/fixes.txt
+          done
+
+          for hash in "${!PERF[@]}"; do
+            echo "${PERF[$hash]}" >> /tmp/perf.txt
+          done
+
+          for hash in "${!REFACTOR[@]}"; do
+            echo "${REFACTOR[$hash]}" >> /tmp/refactor.txt
+          done
+
+          for hash in "${!DOCS[@]}"; do
+            echo "${DOCS[$hash]}" >> /tmp/docs.txt
+          done
+
+          for hash in "${!TESTS[@]}"; do
+            echo "${TESTS[$hash]}" >> /tmp/tests.txt
+          done
+
+          for hash in "${!CHORES[@]}"; do
+            echo "${CHORES[$hash]}" >> /tmp/chores.txt
+          done
+
+          for hash in "${!OTHER[@]}"; do
+            echo "${OTHER[$hash]}" >> /tmp/other.txt
+          done
+
+          echo "✅ Parsed commits"
+
+      - name: Generate release notes
+        id: generate
+        run: |
+          FROM_TAG="${{ steps.tags.outputs.from_tag }}"
+          TO_TAG="${{ steps.tags.outputs.to_tag }}"
+
+          # Determine version
+          if [[ "$TO_TAG" =~ ^v?([0-9]+\.[0-9]+\.[0-9]+.*)$ ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+          else
+            VERSION="Unreleased"
+          fi
+
+          # Start release notes
+          RELEASE_NOTES="# Release Notes"
+          RELEASE_NOTES="$RELEASE_NOTES\n\n## ${VERSION}"
+          RELEASE_NOTES="$RELEASE_NOTES\n\n**Release Date**: $(date '+%Y-%m-%d')"
+          RELEASE_NOTES="$RELEASE_NOTES\n**Range**: ${FROM_TAG}...${TO_TAG}"
+
+          # Summary
+          FEATURE_COUNT="${{ steps.parse_commits.outputs.feature_count }}"
+          FIX_COUNT="${{ steps.parse_commits.outputs.fix_count }}"
+          BREAKING_COUNT="${{ steps.parse_commits.outputs.breaking_count }}"
+
+          RELEASE_NOTES="$RELEASE_NOTES\n\n### 📊 Summary"
+          RELEASE_NOTES="$RELEASE_NOTES\n\n- ✨ **New Features**: $FEATURE_COUNT"
+          RELEASE_NOTES="$RELEASE_NOTES\n- 🐛 **Bug Fixes**: $FIX_COUNT"
+          if [[ "$BREAKING_COUNT" -gt 0 ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n- ⚠️ **Breaking Changes**: $BREAKING_COUNT"
+          fi
+
+          # Breaking Changes (if any)
+          if [[ -f "/tmp/breaking.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### ⚠️ BREAKING CHANGES"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/breaking.txt)"
+          fi
+
+          # Features
+          if [[ -f "/tmp/features.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### ✨ Features"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/features.txt)"
+          fi
+
+          # Bug Fixes
+          if [[ -f "/tmp/fixes.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### 🐛 Bug Fixes"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/fixes.txt)"
+          fi
+
+          # Performance Improvements
+          if [[ -f "/tmp/perf.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### ⚡ Performance"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/perf.txt)"
+          fi
+
+          # Refactoring
+          if [[ -f "/tmp/refactor.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### ♻️ Refactoring"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/refactor.txt)"
+          fi
+
+          # Documentation
+          if [[ -f "/tmp/docs.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### 📚 Documentation"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/docs.txt)"
+          fi
+
+          # Tests
+          if [[ -f "/tmp/tests.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### 🧪 Tests"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/tests.txt)"
+          fi
+
+          # Chores
+          if [[ -f "/tmp/chores.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### 🔧 Chores"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/chores.txt)"
+          fi
+
+          # Other
+          if [[ -f "/tmp/other.txt" ]]; then
+            RELEASE_NOTES="$RELEASE_NOTES\n\n### 📦 Other Changes"
+            RELEASE_NOTES="$RELEASE_NOTES\n\n$(cat /tmp/other.txt)"
+          fi
+
+          # Footer
+          RELEASE_NOTES="$RELEASE_NOTES\n\n---"
+          RELEASE_NOTES="$RELEASE_NOTES\n\n**Full Changelog**: https://github.com/${{ github.repository }}/compare/${FROM_TAG}...${TO_TAG}"
+
+          # Save to file
+          echo -e "$RELEASE_NOTES" > RELEASE_NOTES.md
+
+          echo "✅ Generated release notes"
+
+          # Set output (truncated for GitHub)
+          RELEASE_NOTES_TRUNCATED=$(echo -e "$RELEASE_NOTES" | head -c 60000)
+          echo "release_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES_TRUNCATED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Upload release notes artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-notes
+          path: RELEASE_NOTES.md
+
+      - name: Update or create GitHub release
+        if: github.ref_type == 'tag'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const releaseNotes = fs.readFileSync('RELEASE_NOTES.md', 'utf8');
+            const tag = '${{ github.ref_name }}';
+
+            try {
+              // Try to get existing release
+              const { data: release } = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tag,
+              });
+
+              // Update existing release
+              await github.rest.repos.updateRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                release_id: release.id,
+                body: releaseNotes,
+              });
+
+              console.log(`✅ Updated release notes for ${tag}`);
+            } catch (error) {
+              if (error.status === 404) {
+                // Create new release
+                await github.rest.repos.createRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag_name: tag,
+                  name: tag,
+                  body: releaseNotes,
+                  draft: false,
+                  prerelease: tag.includes('-alpha') || tag.includes('-beta') || tag.includes('-rc'),
+                });
+
+                console.log(`✅ Created release notes for ${tag}`);
+              } else {
+                throw error;
+              }
+            }
+
+      - name: Post release notes to PR (if triggered by PR merge)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Find the PR that was just merged
+            const commits = await github.rest.repos.listCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              per_page: 1,
+            });
+
+            if (commits.data.length === 0) return;
+
+            const commit = commits.data[0];
+            const prMatch = commit.commit.message.match(/\(#(\d+)\)/);
+
+            if (!prMatch) {
+              console.log('No PR number found in commit message');
+              return;
+            }
+
+            const prNumber = parseInt(prMatch[1]);
+
+            // Read release notes excerpt
+            const releaseNotes = fs.readFileSync('RELEASE_NOTES.md', 'utf8');
+            const excerpt = releaseNotes.split('\n').slice(0, 50).join('\n');
+
+            // Post comment on PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 📝 Release Notes Preview\n\nThis PR has been merged! Here's a preview of the release notes:\n\n${excerpt}\n\n---\n\n<sub>Full release notes will be available in the next release.</sub>`,
+            });
+
+            console.log(`✅ Posted release notes preview to PR #${prNumber}`);

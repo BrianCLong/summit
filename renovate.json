@@ -1,14 +1,187 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":preserveSemverRanges"],
+  "extends": [
+    "config:recommended",
+    ":preserveSemverRanges",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    "group:allNonMajor"
+  ],
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "🤖 Dependency Updates Dashboard",
+  "dependencyDashboardHeader": "This dashboard provides an overview of all pending dependency updates. Auto-merge is enabled for patch and minor updates that pass CI.",
+  "dependencyDashboardFooter": "💡 **Tip**: Major updates require manual review before merging.",
   "schedule": ["before 8am on monday"],
+  "timezone": "America/New_York",
   "rangeStrategy": "bump",
+  "semanticCommits": "enabled",
+  "separateMajorMinor": true,
+  "separateMinorPatch": true,
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security", "priority:high"]
+  },
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 2,
   "automerge": false,
+  "automergeType": "pr",
+  "automergeStrategy": "squash",
+  "platformAutomerge": true,
+  "ignoreTests": false,
+  "prCreation": "not-pending",
+  "rebaseWhen": "behind-base-branch",
+  "labels": ["dependencies", "renovate"],
+  "assignees": [],
+  "reviewers": [],
+  "commitMessagePrefix": "chore(deps):",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "from {{currentVersion}} to {{newVersion}}",
+  "prBodyDefinitions": {
+    "Package": "**Package**: `{{depName}}`",
+    "Change": "**Change**: `{{currentVersion}}` → `{{newVersion}}`",
+    "Age": "**Age**: {{#if newVersionAge}}{{newVersionAge}}{{else}}N/A{{/if}}",
+    "Adoption": "**Adoption**: {{#if newVersionAdoption}}{{newVersionAdoption}}%{{else}}N/A{{/if}}",
+    "Passing": "**Passing**: {{#if newVersionPassingTests}}{{newVersionPassingTests}}%{{else}}N/A{{/if}}",
+    "Confidence": "**Confidence**: {{#if newVersionConfidence}}{{newVersionConfidence}}{{else}}N/A{{/if}}"
+  },
+  "prBodyColumns": ["Package", "Change", "Age", "Adoption", "Confidence"],
+  "prBodyTemplate": "{{{header}}}{{{table}}}{{{notes}}}{{{changelogs}}}{{{configDescription}}}{{{controls}}}{{{footer}}}",
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"],
+    "automerge": true,
+    "automergeType": "branch",
+    "commitMessageAction": "Update",
+    "commitMessageTopic": "lock files"
+  },
   "packageRules": [
     {
+      "description": "Auto-merge patch updates for production dependencies",
+      "matchUpdateTypes": ["patch"],
+      "matchDepTypes": ["dependencies"],
+      "automerge": true,
+      "automergeType": "branch",
+      "labels": ["dependencies", "automerge", "patch"]
+    },
+    {
+      "description": "Auto-merge minor updates for dev dependencies",
+      "matchUpdateTypes": ["minor", "patch"],
+      "matchDepTypes": ["devDependencies"],
+      "automerge": true,
+      "automergeType": "branch",
+      "labels": ["dependencies", "automerge", "devDependencies"]
+    },
+    {
+      "description": "Major updates require manual review",
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies", "major-update", "review-required"],
+      "reviewers": []
+    },
+    {
+      "description": "Critical security updates - immediate attention",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["security", "priority:critical", "automerge"],
+      "automerge": true,
+      "automergeType": "branch",
+      "schedule": ["at any time"]
+    },
+    {
+      "description": "Group GitHub Actions updates",
       "matchManagers": ["github-actions"],
-      "groupName": "github-actions",
+      "groupName": "GitHub Actions",
+      "schedule": ["before 8am on monday"],
+      "automerge": true,
+      "automergeType": "branch",
+      "labels": ["dependencies", "github-actions"]
+    },
+    {
+      "description": "Group TypeScript and related packages",
+      "matchPackageNames": ["typescript", "@types/node"],
+      "matchPackagePatterns": ["^@typescript-eslint"],
+      "groupName": "TypeScript and ESLint",
       "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Group React ecosystem updates",
+      "matchPackagePatterns": ["^react", "^@types/react"],
+      "groupName": "React ecosystem",
+      "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Group testing libraries",
+      "matchPackagePatterns": ["^jest", "^@testing-library", "^vitest", "^playwright"],
+      "groupName": "Testing libraries",
+      "schedule": ["before 8am on monday"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Group build tools",
+      "matchPackageNames": ["vite", "webpack", "esbuild", "turbo", "rollup"],
+      "matchPackagePatterns": ["^@vitejs", "^@rollup"],
+      "groupName": "Build tools",
+      "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Group GraphQL packages",
+      "matchPackagePatterns": ["^@apollo", "^graphql", "^@graphql"],
+      "groupName": "GraphQL packages",
+      "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Group database clients",
+      "matchPackageNames": ["neo4j-driver", "pg", "redis", "ioredis"],
+      "matchPackagePatterns": ["^@prisma"],
+      "groupName": "Database clients",
+      "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Pin Docker image digests",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    },
+    {
+      "description": "Group Docker base images",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["node", "postgres", "redis", "neo4j"],
+      "groupName": "Docker base images",
+      "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Auto-merge Dockerfile base image patches",
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["patch", "digest"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "description": "Separate pnpm updates",
+      "matchPackageNames": ["pnpm"],
+      "groupName": "pnpm",
+      "schedule": ["before 8am on monday"]
+    },
+    {
+      "description": "Hold back on eslint v9+ major updates until flat config migration complete",
+      "matchPackageNames": ["eslint"],
+      "matchUpdateTypes": ["major"],
+      "enabled": true,
+      "reviewers": []
     }
+  ],
+  "postUpdateOptions": ["npmDedupe", "pnpmDedupe"],
+  "rangeStrategy": "bump",
+  "bumpVersion": null,
+  "commitBody": "Signed-off-by: Renovate Bot <bot@renovateapp.com>",
+  "prFooter": "---\n\n🤖 This PR was generated by [Renovate](https://renovatebot.com). Please review the changes and merge when ready.",
+  "ignoreDeps": [],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/bower_components/**",
+    "**/vendor/**",
+    "**/archive/**",
+    "**/.archive/**",
+    "**/.disabled/**"
   ]
 }
