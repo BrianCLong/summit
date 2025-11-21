@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/ai-service-platform",
+  "version": "1.0.0",
+  "description": "Instant AI-Powered Service Launch Platform - Deploy AI services in hours, not months",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
+    "bullmq": "^5.4.2",
+    "fastify": "^4.26.2",
+    "ioredis": "^5.3.2",
+    "pg": "^8.11.3",
+    "prom-client": "^15.1.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/pg": "^8.11.0",
+    "@types/uuid": "^9.0.7",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2"
+  }
+}
