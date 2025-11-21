@@ -1,39 +1,36 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 import { TwinService } from '../src/core/TwinService.js';
-import type { TwinRepository } from '../src/core/TwinRepository.js';
-import type { StateEstimator } from '../src/state/StateEstimator.js';
-import type { EventBus } from '../src/core/EventBus.js';
 
 describe('TwinService', () => {
   let service: TwinService;
-  let mockRepository: jest.Mocked<TwinRepository>;
-  let mockStateEstimator: jest.Mocked<StateEstimator>;
-  let mockEventBus: jest.Mocked<EventBus>;
+  let mockRepository: any;
+  let mockStateEstimator: any;
+  let mockEventBus: any;
 
   beforeEach(() => {
     mockRepository = {
-      save: jest.fn(),
-      findById: jest.fn(),
-      findAll: jest.fn(),
-      delete: jest.fn(),
-      createNeo4jNode: jest.fn(),
-      updateNeo4jNode: jest.fn(),
-      deleteNeo4jNode: jest.fn(),
-      createNeo4jRelationship: jest.fn(),
-    } as unknown as jest.Mocked<TwinRepository>;
+      save: jest.fn<any>(),
+      findById: jest.fn<any>(),
+      findAll: jest.fn<any>(),
+      delete: jest.fn<any>(),
+      createNeo4jNode: jest.fn<any>(),
+      updateNeo4jNode: jest.fn<any>(),
+      deleteNeo4jNode: jest.fn<any>(),
+      createNeo4jRelationship: jest.fn<any>(),
+    };
 
     mockStateEstimator = {
-      estimate: jest.fn().mockResolvedValue({
+      estimate: jest.fn<any>().mockResolvedValue({
         properties: {},
         derived: {},
         confidence: 0.9,
       }),
-    } as unknown as jest.Mocked<StateEstimator>;
+    };
 
     mockEventBus = {
-      publish: jest.fn(),
-      subscribe: jest.fn(),
-    } as unknown as jest.Mocked<EventBus>;
+      publish: jest.fn<any>(),
+      subscribe: jest.fn<any>(),
+    };
 
     service = new TwinService(mockRepository, mockStateEstimator, mockEventBus);
   });
