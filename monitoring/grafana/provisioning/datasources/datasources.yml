@@ -1,0 +1,146 @@
+# Grafana Datasource Provisioning
+# This file is automatically loaded by Grafana on startup
+
+apiVersion: 1
+
+datasources:
+  # ===================================
+  # Prometheus - Primary Metrics
+  # ===================================
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+      queryTimeout: "60s"
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: "2.47.0"
+      cacheLevel: "High"
+      incrementalQuerying: true
+      incrementalQueryOverlapWindow: 10m
+    version: 1
+
+  # ===================================
+  # Loki - Logs
+  # ===================================
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    editable: false
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - name: TraceID
+          matcherRegex: '"trace_id":"([a-f0-9]+)"'
+          url: '${__value.raw}'
+          datasourceUid: jaeger
+    version: 1
+
+  # ===================================
+  # Jaeger - Traces
+  # ===================================
+  - name: Jaeger
+    type: jaeger
+    uid: jaeger
+    access: proxy
+    url: http://jaeger:16686
+    editable: false
+    jsonData:
+      tracesToLogs:
+        datasourceUid: loki
+        tags: ['service.name', 'trace_id']
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
+        filterByTraceID: true
+        filterBySpanID: false
+    version: 1
+
+  # ===================================
+  # PostgreSQL - Direct Database Access
+  # ===================================
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: intelgraph
+    user: ${POSTGRES_READONLY_USER}
+    secureJsonData:
+      password: ${POSTGRES_READONLY_PASSWORD}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 5
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1500
+      timescaledb: false
+    editable: false
+    version: 1
+
+  # ===================================
+  # Redis - Cache Metrics (via JSON API)
+  # ===================================
+  - name: Redis
+    type: redis-datasource
+    access: proxy
+    url: redis://redis:6379
+    editable: false
+    jsonData:
+      client: standalone
+      tlsAuth: false
+    version: 1
+
+  # ===================================
+  # Alertmanager
+  # ===================================
+  - name: Alertmanager
+    type: alertmanager
+    access: proxy
+    url: http://alertmanager:9093
+    editable: false
+    jsonData:
+      implementation: prometheus
+      handleGrafanaManagedAlerts: true
+    version: 1
+
+  # ===================================
+  # DataDog (Optional - for hybrid setups)
+  # ===================================
+  # - name: DataDog
+  #   type: grafana-datadog-datasource
+  #   access: proxy
+  #   jsonData:
+  #     region: us
+  #   secureJsonData:
+  #     apiKey: ${DATADOG_API_KEY}
+  #     appKey: ${DATADOG_APP_KEY}
+  #   editable: false
+  #   version: 1
+
+  # ===================================
+  # Infinity (for external APIs)
+  # ===================================
+  - name: Infinity
+    type: yesoreyeram-infinity-datasource
+    access: proxy
+    editable: false
+    jsonData:
+      global_queries:
+        - name: StatusPage
+          id: statuspage
+          query:
+            type: json
+            source: url
+            url: https://status.intelgraph.com/api/v2/summary.json
+            parser: backend
+    version: 1
+
+# Delete datasources not in this config
+deleteDatasources:
+  - name: Old-Prometheus
+    orgId: 1

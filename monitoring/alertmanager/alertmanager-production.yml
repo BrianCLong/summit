@@ -1,0 +1,364 @@
+# Alertmanager Configuration for IntelGraph Production
+# Implements PagerDuty, Opsgenie, and Slack routing with escalation policies
+
+global:
+  # SMTP settings for email notifications
+  smtp_smarthost: 'smtp.sendgrid.net:587'
+  smtp_from: 'alerts@intelgraph.com'
+  smtp_auth_username: '${SMTP_USERNAME}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
+  smtp_require_tls: true
+
+  # Default Slack API URL
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+
+  # PagerDuty API endpoint
+  pagerduty_url: 'https://events.pagerduty.com/v2/enqueue'
+
+  # Opsgenie API endpoint
+  opsgenie_api_url: 'https://api.opsgenie.com/'
+  opsgenie_api_key: '${OPSGENIE_API_KEY}'
+
+  # Resolve timeout - how long to wait before marking alert as resolved
+  resolve_timeout: 5m
+
+# Notification templates
+templates:
+  - '/etc/alertmanager/templates/*.tmpl'
+
+# Inhibition rules to prevent alert storms
+inhibit_rules:
+  # If service is down, suppress related error rate alerts
+  - source_matchers:
+      - alertname = "ServiceDown"
+    target_matchers:
+      - alertname =~ "HighErrorRate.*"
+    equal: ['service', 'instance']
+
+  # If there's a critical alert, suppress warnings for same service
+  - source_matchers:
+      - severity = "critical"
+    target_matchers:
+      - severity = "warning"
+    equal: ['alertname', 'service']
+
+  # If database is down, suppress connection pool alerts
+  - source_matchers:
+      - alertname =~ ".*Down"
+    target_matchers:
+      - alertname =~ ".*Connection.*"
+    equal: ['service']
+
+  # If node is down, suppress all alerts from that node
+  - source_matchers:
+      - alertname = "NodeDown"
+    target_matchers:
+      - severity =~ "warning|critical"
+    equal: ['instance']
+
+# Main routing tree
+route:
+  # Default grouping
+  group_by: ['alertname', 'severity', 'service']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+  # Default receiver
+  receiver: 'default-slack'
+
+  # Child routes for specific alert handling
+  routes:
+    # ==================================
+    # P0 Critical Alerts - Immediate Page
+    # ==================================
+    - matchers:
+        - severity = "critical"
+        - priority = "P0"
+      receiver: 'pagerduty-critical'
+      group_wait: 0s
+      group_interval: 1m
+      repeat_interval: 5m
+      continue: true  # Also send to other matchers
+
+    - matchers:
+        - severity = "critical"
+        - priority = "P0"
+      receiver: 'slack-critical'
+      group_wait: 0s
+
+    # ==================================
+    # P1 High Priority Alerts
+    # ==================================
+    - matchers:
+        - severity = "critical"
+        - priority = "P1"
+      receiver: 'pagerduty-high'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 15m
+      continue: true
+
+    - matchers:
+        - severity = "critical"
+        - priority = "P1"
+      receiver: 'slack-critical'
+
+    # ==================================
+    # Warning Alerts - Slack Only
+    # ==================================
+    - matchers:
+        - severity = "warning"
+      receiver: 'slack-warning'
+      group_wait: 1m
+      group_interval: 10m
+      repeat_interval: 30m
+
+    # ==================================
+    # SLO Alerts - Special Handling
+    # ==================================
+    - matchers:
+        - alertname =~ ".*SLO.*"
+      receiver: 'slo-alerts'
+      group_wait: 30s
+      repeat_interval: 1h
+
+    # ==================================
+    # Database Alerts
+    # ==================================
+    - matchers:
+        - service =~ "postgres|neo4j|redis"
+        - severity = "critical"
+      receiver: 'pagerduty-database'
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # ==================================
+    # Security Alerts - Always Page
+    # ==================================
+    - matchers:
+        - alertname =~ ".*Security.*|.*Breach.*|.*Unauthorized.*"
+      receiver: 'security-alerts'
+      group_wait: 0s
+      repeat_interval: 5m
+
+    # ==================================
+    # Business Hours Only (Low Priority)
+    # ==================================
+    - matchers:
+        - severity = "info"
+      receiver: 'slack-info'
+      group_wait: 5m
+      repeat_interval: 4h
+      mute_time_intervals:
+        - outside-business-hours
+
+# Time intervals for muting
+time_intervals:
+  - name: outside-business-hours
+    time_intervals:
+      - weekdays: ['saturday', 'sunday']
+      - times:
+          - start_time: '00:00'
+            end_time: '09:00'
+          - start_time: '18:00'
+            end_time: '24:00'
+        weekdays: ['monday:friday']
+
+# Receiver configurations
+receivers:
+  # ==================================
+  # Default Slack Receiver
+  # ==================================
+  - name: 'default-slack'
+    slack_configs:
+      - channel: '#monitoring'
+        send_resolved: true
+        title: '{{ template "slack.default.title" . }}'
+        text: '{{ template "slack.default.text" . }}'
+        actions:
+          - type: button
+            text: 'View in Grafana'
+            url: 'https://grafana.intelgraph.com/d/production-health'
+          - type: button
+            text: 'Runbooks'
+            url: 'https://docs.intelgraph.com/runbooks'
+
+  # ==================================
+  # PagerDuty Critical (P0)
+  # ==================================
+  - name: 'pagerduty-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY_CRITICAL}'
+        severity: critical
+        class: 'production-incident'
+        component: '{{ .CommonLabels.service }}'
+        group: '{{ .CommonLabels.alertname }}'
+        description: |
+          {{ range .Alerts }}
+          Alert: {{ .Labels.alertname }}
+          Service: {{ .Labels.service }}
+          Summary: {{ .Annotations.summary }}
+          {{ end }}
+        details:
+          severity: '{{ .CommonLabels.severity }}'
+          service: '{{ .CommonLabels.service }}'
+          instance: '{{ .CommonLabels.instance }}'
+          runbook: '{{ .CommonAnnotations.runbook }}'
+          dashboard: 'https://grafana.intelgraph.com/d/production-health'
+        links:
+          - href: 'https://grafana.intelgraph.com/d/production-health'
+            text: 'Grafana Dashboard'
+          - href: '{{ .CommonAnnotations.runbook }}'
+            text: 'Runbook'
+
+  # ==================================
+  # PagerDuty High Priority (P1)
+  # ==================================
+  - name: 'pagerduty-high'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY_HIGH}'
+        severity: error
+        class: 'production-incident'
+        component: '{{ .CommonLabels.service }}'
+        description: |
+          {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+        details:
+          severity: '{{ .CommonLabels.severity }}'
+          service: '{{ .CommonLabels.service }}'
+
+  # ==================================
+  # PagerDuty Database Alerts
+  # ==================================
+  - name: 'pagerduty-database'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY_DATABASE}'
+        severity: critical
+        class: 'database-incident'
+        component: '{{ .CommonLabels.service }}'
+
+  # ==================================
+  # Slack Critical Channel
+  # ==================================
+  - name: 'slack-critical'
+    slack_configs:
+      - channel: '#alerts-critical'
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+        title: '🚨 CRITICAL: {{ .CommonLabels.alertname }}'
+        title_link: 'https://grafana.intelgraph.com/d/production-health'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Service:* {{ .Labels.service }}
+          *Severity:* {{ .Labels.severity }}
+          *Instance:* {{ .Labels.instance }}
+          *Runbook:* {{ .Annotations.runbook }}
+          {{ end }}
+        fallback: 'CRITICAL Alert: {{ .CommonLabels.alertname }}'
+        actions:
+          - type: button
+            text: '📊 Dashboard'
+            url: 'https://grafana.intelgraph.com/d/production-health'
+            style: 'primary'
+          - type: button
+            text: '📖 Runbook'
+            url: '{{ .CommonAnnotations.runbook }}'
+          - type: button
+            text: '🔍 Logs'
+            url: 'https://app.datadoghq.com/logs'
+
+  # ==================================
+  # Slack Warning Channel
+  # ==================================
+  - name: 'slack-warning'
+    slack_configs:
+      - channel: '#alerts-warning'
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}warning{{ else }}good{{ end }}'
+        title: '⚠️ Warning: {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Service:* {{ .Labels.service }}
+          {{ end }}
+        actions:
+          - type: button
+            text: 'Dashboard'
+            url: 'https://grafana.intelgraph.com/d/production-health'
+
+  # ==================================
+  # Slack Info Channel
+  # ==================================
+  - name: 'slack-info'
+    slack_configs:
+      - channel: '#monitoring'
+        send_resolved: false
+        color: '#439FE0'
+        title: 'ℹ️ Info: {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}{{ .Annotations.summary }}{{ end }}
+
+  # ==================================
+  # SLO Alerts
+  # ==================================
+  - name: 'slo-alerts'
+    slack_configs:
+      - channel: '#slo-alerts'
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+        title: '📉 SLO Alert: {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Error Budget Impact:* Check SLO dashboard for details
+          {{ end }}
+        actions:
+          - type: button
+            text: 'SLO Dashboard'
+            url: 'https://grafana.intelgraph.com/d/slo-dashboard'
+            style: 'primary'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY_SLO}'
+        severity: warning
+
+  # ==================================
+  # Security Alerts
+  # ==================================
+  - name: 'security-alerts'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY_SECURITY}'
+        severity: critical
+        class: 'security-incident'
+    slack_configs:
+      - channel: '#security-alerts'
+        send_resolved: true
+        color: 'danger'
+        title: '🔒 SECURITY ALERT: {{ .CommonLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          {{ end }}
+    email_configs:
+      - to: 'security@intelgraph.com'
+        send_resolved: true
+        headers:
+          Subject: '[SECURITY] {{ .CommonLabels.alertname }}'
+
+  # ==================================
+  # Opsgenie Integration
+  # ==================================
+  - name: 'opsgenie-critical'
+    opsgenie_configs:
+      - api_key: '${OPSGENIE_API_KEY}'
+        message: '{{ .CommonLabels.alertname }}'
+        description: |
+          {{ range .Alerts }}{{ .Annotations.description }}{{ end }}
+        priority: P1
+        tags: 'production,critical,{{ .CommonLabels.service }}'
+        details:
+          service: '{{ .CommonLabels.service }}'
+          severity: '{{ .CommonLabels.severity }}'

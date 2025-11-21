@@ -1,0 +1,99 @@
+# Grafana Dashboard Provisioning
+# Automatically loads dashboards from specified folders
+
+apiVersion: 1
+
+providers:
+  # ===================================
+  # Production Dashboards
+  # ===================================
+  - name: 'Production'
+    orgId: 1
+    folder: 'Production'
+    folderUid: 'production'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/production
+      foldersFromFilesStructure: false
+
+  # ===================================
+  # SLO Dashboards
+  # ===================================
+  - name: 'SLO'
+    orgId: 1
+    folder: 'SLO'
+    folderUid: 'slo'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards/slo
+
+  # ===================================
+  # Infrastructure Dashboards
+  # ===================================
+  - name: 'Infrastructure'
+    orgId: 1
+    folder: 'Infrastructure'
+    folderUid: 'infrastructure'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana/dashboards/infrastructure
+
+  # ===================================
+  # Database Dashboards
+  # ===================================
+  - name: 'Databases'
+    orgId: 1
+    folder: 'Databases'
+    folderUid: 'databases'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana/dashboards/databases
+
+  # ===================================
+  # Application Dashboards
+  # ===================================
+  - name: 'Application'
+    orgId: 1
+    folder: 'Application'
+    folderUid: 'application'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards/application
+
+  # ===================================
+  # Alerts Dashboards
+  # ===================================
+  - name: 'Alerts'
+    orgId: 1
+    folder: 'Alerts'
+    folderUid: 'alerts'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana/dashboards/alerts
+
+  # ===================================
+  # Business Metrics
+  # ===================================
+  - name: 'Business'
+    orgId: 1
+    folder: 'Business Metrics'
+    folderUid: 'business'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 60
+    options:
+      path: /var/lib/grafana/dashboards/business

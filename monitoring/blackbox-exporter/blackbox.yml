@@ -1,0 +1,108 @@
+# Blackbox Exporter Configuration
+# Used for probing endpoints (HTTP, TCP, DNS, ICMP)
+
+modules:
+  # HTTP probe for API endpoints
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2.0"]
+      valid_status_codes: [200, 201, 202, 204]
+      method: GET
+      follow_redirects: true
+      preferred_ip_protocol: "ip4"
+      fail_if_ssl: false
+      fail_if_not_ssl: false
+      tls_config:
+        insecure_skip_verify: false
+
+  # HTTP probe with authentication
+  http_2xx_auth:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200, 201, 202, 204]
+      method: GET
+      headers:
+        Authorization: Bearer ${API_TOKEN}
+      fail_if_body_not_matches_regexp:
+        - "status.*ok"
+
+  # HTTP POST probe for GraphQL
+  http_graphql:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200]
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: '{"query": "{__typename}"}'
+      fail_if_body_matches_regexp:
+        - '"errors":'
+
+  # HTTP probe for health endpoints
+  http_health:
+    prober: http
+    timeout: 5s
+    http:
+      valid_status_codes: [200]
+      method: GET
+      fail_if_body_not_matches_regexp:
+        - '"status":\s*"(ok|healthy|ready)"'
+
+  # TCP probe for database connections
+  tcp_connect:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      preferred_ip_protocol: "ip4"
+
+  # TCP probe for PostgreSQL
+  tcp_postgres:
+    prober: tcp
+    timeout: 10s
+    tcp:
+      preferred_ip_protocol: "ip4"
+      query_response:
+        - expect: ""
+
+  # TCP probe for Redis
+  tcp_redis:
+    prober: tcp
+    timeout: 5s
+    tcp:
+      preferred_ip_protocol: "ip4"
+      query_response:
+        - send: "PING\r\n"
+        - expect: "PONG"
+
+  # DNS probe
+  dns_check:
+    prober: dns
+    timeout: 5s
+    dns:
+      query_name: "api.intelgraph.com"
+      query_type: "A"
+      valid_rcodes:
+        - NOERROR
+
+  # ICMP probe (requires privileged mode)
+  icmp_check:
+    prober: icmp
+    timeout: 5s
+    icmp:
+      preferred_ip_protocol: "ip4"
+
+  # SSL certificate check
+  ssl_expiry:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200, 301, 302, 303, 307, 308]
+      method: GET
+      fail_if_ssl: false
+      fail_if_not_ssl: true
+      tls_config:
+        insecure_skip_verify: false

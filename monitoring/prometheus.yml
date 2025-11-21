@@ -1,67 +1,254 @@
 # Prometheus configuration for IntelGraph monitoring
+# Production-ready configuration with comprehensive monitoring
+
 global:
   scrape_interval: 15s
   evaluation_interval: 15s
+  external_labels:
+    cluster: 'intelgraph-production'
+    env: 'production'
 
+# Rule files for alerting and recording rules
 rule_files:
   - 'alert_rules.yml'
+  - 'alerts-production.yml'
+  - 'prometheus/rules/*.yml'
+  - 'prometheus/error-budget-rules.yml'
 
+# Alertmanager configuration
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
             - alertmanager:9093
+      timeout: 10s
+      api_version: v2
 
 scrape_configs:
-  # IntelGraph Server metrics
-  - job_name: 'intelgraph-server'
+  # ===========================================
+  # Application Services
+  # ===========================================
+
+  # IntelGraph API Server metrics
+  - job_name: 'intelgraph-api'
     static_configs:
       - targets: ['server:4000']
+        labels:
+          service: 'api'
+          tier: 'application'
     metrics_path: '/metrics'
     scrape_interval: 10s
     scrape_timeout: 5s
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+):\d+'
+        replacement: '${1}'
 
   # IntelGraph ML Service metrics
   - job_name: 'intelgraph-ml'
     static_configs:
       - targets: ['ml:8001']
+        labels:
+          service: 'ml'
+          tier: 'application'
     metrics_path: '/metrics'
     scrape_interval: 10s
     scrape_timeout: 5s
+
+  # IntelGraph Worker metrics
+  - job_name: 'intelgraph-worker'
+    static_configs:
+      - targets: ['worker:4100']
+        labels:
+          service: 'worker'
+          tier: 'application'
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+
+  # GraphQL Gateway metrics
+  - job_name: 'graphql-gateway'
+    static_configs:
+      - targets: ['gateway:4200']
+        labels:
+          service: 'gateway'
+          tier: 'application'
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  # ===========================================
+  # Database Services
+  # ===========================================
 
   # PostgreSQL metrics (via postgres_exporter)
   - job_name: 'postgres'
     static_configs:
       - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgres'
+          tier: 'database'
     scrape_interval: 30s
+    scrape_timeout: 10s
 
   # Redis metrics (via redis_exporter)
   - job_name: 'redis'
     static_configs:
       - targets: ['redis-exporter:9121']
-    scrape_interval: 30s
+        labels:
+          service: 'redis'
+          tier: 'cache'
+    scrape_interval: 15s
 
   # Neo4j metrics (via neo4j_exporter)
   - job_name: 'neo4j'
     static_configs:
       - targets: ['neo4j-exporter:9113']
+        labels:
+          service: 'neo4j'
+          tier: 'database'
     scrape_interval: 30s
+
+  # ===========================================
+  # Infrastructure Metrics
+  # ===========================================
 
   # Node Exporter for system metrics
   - job_name: 'node-exporter'
     static_configs:
       - targets: ['node-exporter:9100']
+        labels:
+          service: 'node'
+          tier: 'infrastructure'
     scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # cAdvisor for container metrics
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+        labels:
+          service: 'cadvisor'
+          tier: 'infrastructure'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # ===========================================
+  # Monitoring Stack
+  # ===========================================
 
   # Prometheus itself
   - job_name: 'prometheus'
     static_configs:
       - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+          tier: 'monitoring'
     scrape_interval: 30s
-# Remote write configuration (for long-term storage)
+
+  # Alertmanager
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+        labels:
+          service: 'alertmanager'
+          tier: 'monitoring'
+    scrape_interval: 30s
+
+  # Grafana
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
+        labels:
+          service: 'grafana'
+          tier: 'monitoring'
+    metrics_path: '/metrics'
+    scrape_interval: 60s
+
+  # ===========================================
+  # Synthetic Monitoring
+  # ===========================================
+
+  # Synthetic health checker
+  - job_name: 'synthetic-monitor'
+    static_configs:
+      - targets: ['synthetic-monitor:3000']
+        labels:
+          service: 'synthetic'
+          tier: 'monitoring'
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Blackbox Exporter for probe monitoring
+  - job_name: 'blackbox-http'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - https://api.intelgraph.com/health
+          - https://api.intelgraph.com/health/ready
+          - https://app.intelgraph.com
+        labels:
+          probe_type: 'http'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+  # ===========================================
+  # Kubernetes Service Discovery (when deployed to K8s)
+  # ===========================================
+
+  # Kubernetes pods
+  - job_name: 'kubernetes-pods'
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      # Keep only pods with prometheus.io/scrape annotation
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      # Use custom path if specified
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      # Use custom port if specified
+      - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        action: replace
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+        target_label: __address__
+      # Add pod labels
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+
+# Remote write for long-term storage (Thanos, Cortex, Mimir, etc.)
+# Uncomment and configure for production
 # remote_write:
-#   - url: "http://your-remote-storage:9201/api/v1/write"
+#   - url: "http://thanos-receive:19291/api/v1/receive"
 #     queue_config:
-#       max_samples_per_send: 1000
+#       max_samples_per_send: 5000
 #       max_shards: 200
-#       capacity: 2500
+#       capacity: 10000
+#     write_relabel_configs:
+#       - source_labels: [__name__]
+#         regex: 'go_.*'
+#         action: drop
+
+# Storage configuration
+storage:
+  tsdb:
+    retention:
+      time: 30d
+      size: 50GB
+    wal_compression: true
