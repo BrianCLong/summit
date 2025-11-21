@@ -2,7 +2,7 @@
  * Citizen AI REST API
  */
 
-import express, { Request, Response, NextFunction, Router } from 'express';
+import express, { Request, Response, NextFunction, Router, Application } from 'express';
 import { conversationalAI, ConversationResponse } from './conversational-ai';
 import { nluService, NLUAnalysis } from './nlu-service';
 import { metrics, runHealthChecks } from './metrics';
@@ -223,7 +223,7 @@ router.post('/nlu/sentiment', (req: Request, res: Response) => {
 /**
  * Create Express app
  */
-export function createApp(): express.Application {
+export function createApp(): Application {
   const app = express();
 
   // Middleware
