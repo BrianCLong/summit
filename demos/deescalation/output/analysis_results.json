@@ -1,6 +1,9 @@
 {
   "demo_name": "De-escalation Coaching",
-  "processed_at": "2025-11-20T07:43:57.612924",
+  "processed_at": "2025-11-21T07:29:22.163116",
+  "pipeline_version": "2.0.0",
+  "mode": "mock",
+  "api_url": "http://localhost:8000",
   "total_conversations": 12,
   "risk_distribution": {
     "none": 2,
@@ -32,7 +35,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.611934",
+        "timestamp": "2025-11-21T07:29:22.161490",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.78,
           "sentiment": "very_negative",
@@ -42,18 +46,20 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "I've been trying to get this sorted for 2 weeks. Your company is stealing from me! i want a full refund now or i'm calling my lawyer!"
+          "text": "I've been trying to get this sorted for 2 weeks. Your company is stealing from me. I want a full refund now or i'm calling my lawyer."
         },
         "guidance": [
-          "\u26a0\ufe0f High toxicity detected. Remain calm and professional.",
+          "⚠️ High toxicity detected. Remain calm and professional.",
           "Acknowledge the customer's frustration explicitly.",
           "Review account history before responding",
           "Offer specific timeline for resolution",
           "Consider escalation to billing specialist",
-          "Customer using absolutist language - avoid matching tone."
+          "⚠️ Customer using absolutist language - avoid matching tone.",
+          "Customer is shouting (high caps usage) - respond calmly."
         ],
-        "policy_flags": [],
-        "escalation_risk": "high"
+        "escalation_risk": "high",
+        "processing_time_ms": 0.05602836608886719,
+        "policy_flags": []
       }
     },
     {
@@ -76,7 +82,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.611997",
+        "timestamp": "2025-11-21T07:29:22.161675",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.02,
           "sentiment": "neutral_polite",
@@ -88,9 +95,15 @@
           "version": "v1",
           "text": "Hi, i received my order yesterday and unfortunately the item appears to have a manufacturing defect. Could you help me with a replacement or return? thank you."
         },
-        "guidance": [],
-        "policy_flags": [],
-        "escalation_risk": "low"
+        "guidance": [
+          "✓ Positive interaction. Maintain friendly, helpful tone.",
+          "Apologize for the inconvenience",
+          "Offer replacement or refund options",
+          "Document defect for quality team"
+        ],
+        "escalation_risk": "low",
+        "processing_time_ms": 0.025987625122070312,
+        "policy_flags": []
       }
     },
     {
@@ -114,7 +127,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612045",
+        "timestamp": "2025-11-21T07:29:22.161818",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.64,
           "sentiment": "negative",
@@ -124,17 +138,18 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "This is absolutely unacceptable. I run a business and your service has been down for 6 hours. Do you have any idea how much money i'm losing?? i need compensation and i need it now."
+          "text": "This is absolutely unacceptable. I run a business and your service has been down for 6 hours. Do you have any idea how much money i'm losing? i need compensation and i need it now."
         },
         "guidance": [
           "Moderate frustration detected. Show empathy and understanding.",
           "Acknowledge business impact",
           "Provide concrete ETA for restoration",
           "Offer service credits proactively",
-          "Customer using absolutist language - avoid matching tone."
+          "⚠️ Customer using absolutist language - avoid matching tone."
         ],
-        "policy_flags": [],
-        "escalation_risk": "high"
+        "escalation_risk": "high",
+        "processing_time_ms": 0.025510787963867188,
+        "policy_flags": []
       }
     },
     {
@@ -157,7 +172,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612099",
+        "timestamp": "2025-11-21T07:29:22.161948",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.08,
           "sentiment": "slightly_negative",
@@ -169,9 +185,15 @@
           "version": "v1",
           "text": "I cant log in and ive tried everything. Can someone please help? its been 3 days and i really need to access my account"
         },
-        "guidance": [],
-        "policy_flags": [],
-        "escalation_risk": "low"
+        "guidance": [
+          "✓ Positive interaction. Maintain friendly, helpful tone.",
+          "Verify customer identity securely",
+          "Provide clear recovery steps",
+          "Escalate to security if suspicious"
+        ],
+        "escalation_risk": "low",
+        "processing_time_ms": 0.02002716064453125,
+        "policy_flags": []
       }
     },
     {
@@ -195,7 +217,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612149",
+        "timestamp": "2025-11-21T07:29:22.162066",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.89,
           "sentiment": "very_negative",
@@ -205,18 +228,19 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "You people are crooks! i cancelled my subscription 2 months ago and you're still charging me! this is fraud! i'm reporting you to the ftc and blasting this all over social media!"
+          "text": "I'm frustrated with this situation. I cancelled my subscription 2 months ago and you're still charging me. This appears to be an error. I'm reporting you to the ftc and blasting this all over social media."
         },
         "guidance": [
-          "\u26a0\ufe0f High toxicity detected. Remain calm and professional.",
-          "Acknowledge the customer's frustration explicitly.",
+          "🚨 CRITICAL: Very high toxicity. Consider supervisor involvement.",
+          "Remain calm. Do not match customer's tone.",
           "Verify cancellation status immediately",
           "If error occurred, apologize and fix",
           "Document for fraud prevention team",
-          "Customer using absolutist language - avoid matching tone."
+          "⚠️ Customer using absolutist language - avoid matching tone."
         ],
-        "policy_flags": [],
-        "escalation_risk": "critical"
+        "escalation_risk": "critical",
+        "processing_time_ms": 0.025272369384765625,
+        "policy_flags": []
       }
     },
     {
@@ -239,7 +263,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612188",
+        "timestamp": "2025-11-21T07:29:22.162195",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.01,
           "sentiment": "positive",
@@ -249,11 +274,17 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "Love your product! would it be possible to add dark mode? i know it might take time, just wanted to suggest it. Thanks for all the great work!"
+          "text": "Love your product. Would it be possible to add dark mode? i know it might take time, just wanted to suggest it. Thanks for all the great work."
         },
-        "guidance": [],
-        "policy_flags": [],
-        "escalation_risk": "none"
+        "guidance": [
+          "✓ Positive interaction. Maintain friendly, helpful tone.",
+          "Thank customer for feedback",
+          "Log request in product backlog",
+          "Set expectations on feature roadmap"
+        ],
+        "escalation_risk": "none",
+        "processing_time_ms": 0.024557113647460938,
+        "policy_flags": []
       }
     },
     {
@@ -277,7 +308,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612243",
+        "timestamp": "2025-11-21T07:29:22.162328",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.72,
           "sentiment": "very_negative",
@@ -287,18 +319,20 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "Where is my order? it was supposed to be here yesterday and i needed it for my daughter's birthday today. You've completely ruined everything. I will haven't yet order from you again!"
+          "text": "Where is my order? it was supposed to be here yesterday and i needed it for my daughter's birthday today. You've significantly impacted everything. I will haven't yet order from you again."
         },
         "guidance": [
-          "\u26a0\ufe0f High toxicity detected. Remain calm and professional.",
+          "⚠️ High toxicity detected. Remain calm and professional.",
           "Acknowledge the customer's frustration explicitly.",
           "Express empathy for missed special occasion",
           "Expedite shipping at no charge",
           "Offer discount on future order",
-          "Customer using absolutist language - avoid matching tone."
+          "⚠️ Customer using absolutist language - avoid matching tone.",
+          "Customer is shouting (high caps usage) - respond calmly."
         ],
-        "policy_flags": [],
-        "escalation_risk": "high"
+        "escalation_risk": "high",
+        "processing_time_ms": 0.025272369384765625,
+        "policy_flags": []
       }
     },
     {
@@ -322,7 +356,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612401",
+        "timestamp": "2025-11-21T07:29:22.162460",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.68,
           "sentiment": "negative",
@@ -332,14 +367,18 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "The new update broke everything. Nothing works. Your developers are i'm having technical difficulties. I'm switching to your competitor tomorrow unless you fix this immediately."
+          "text": "The new update broke everything. I'm having difficulties. Your developers are i'm having technical difficulties. I'm switching to your competitor tomorrow unless you fix this immediately."
         },
         "guidance": [
           "Moderate frustration detected. Show empathy and understanding.",
-          "Customer using absolutist language - avoid matching tone."
+          "Gather diagnostic information",
+          "Provide workaround if available",
+          "Set clear expectations for fix timeline",
+          "⚠️ Customer using absolutist language - avoid matching tone."
         ],
-        "policy_flags": [],
-        "escalation_risk": "high"
+        "escalation_risk": "high",
+        "processing_time_ms": 0.030040740966796875,
+        "policy_flags": []
       }
     },
     {
@@ -363,7 +402,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612577",
+        "timestamp": "2025-11-21T07:29:22.162596",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.05,
           "sentiment": "neutral",
@@ -375,9 +415,15 @@
           "version": "v1",
           "text": "I understand prices go up sometimes, but i wanted to check if there are any loyalty discounts available for long-term customers? i've been with you for 5 years."
         },
-        "guidance": [],
-        "policy_flags": [],
-        "escalation_risk": "low"
+        "guidance": [
+          "✓ Positive interaction. Maintain friendly, helpful tone.",
+          "Explain value proposition",
+          "Check for available promotions",
+          "Offer loyalty discounts if applicable"
+        ],
+        "escalation_risk": "low",
+        "processing_time_ms": 0.02193450927734375,
+        "policy_flags": []
       }
     },
     {
@@ -401,7 +447,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612717",
+        "timestamp": "2025-11-21T07:29:22.162720",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.48,
           "sentiment": "negative",
@@ -415,10 +462,14 @@
         },
         "guidance": [
           "Moderate frustration detected. Show empathy and understanding.",
-          "Customer using absolutist language - avoid matching tone."
+          "Take concerns seriously",
+          "Provide clear privacy documentation",
+          "Offer data export/deletion options",
+          "⚠️ Customer using absolutist language - avoid matching tone."
         ],
-        "policy_flags": [],
-        "escalation_risk": "medium"
+        "escalation_risk": "medium",
+        "processing_time_ms": 0.030755996704101562,
+        "policy_flags": []
       }
     },
     {
@@ -442,7 +493,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612836",
+        "timestamp": "2025-11-21T07:29:22.162892",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.85,
           "sentiment": "very_negative",
@@ -452,18 +504,19 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "You said 5-7 business days for my refund. It's been 12 days. This is theft. I want my money back right now or i'm filing a chargeback and leaving reviews everywhere warning people about your scam operation."
+          "text": "You said 5-7 business days for my refund. It's been 12 days. This is theft. I want my money back right now or i'm filing a chargeback and leaving reviews everywhere warning people about your service issue."
         },
         "guidance": [
-          "\u26a0\ufe0f High toxicity detected. Remain calm and professional.",
-          "Acknowledge the customer's frustration explicitly.",
+          "🚨 CRITICAL: Very high toxicity. Consider supervisor involvement.",
+          "Remain calm. Do not match customer's tone.",
           "Investigate refund status immediately",
           "Escalate to finance if delayed",
           "Provide proof of processing if available",
-          "Customer using absolutist language - avoid matching tone."
+          "⚠️ Customer using absolutist language - avoid matching tone."
         ],
-        "policy_flags": [],
-        "escalation_risk": "critical"
+        "escalation_risk": "critical",
+        "processing_time_ms": 0.025272369384765625,
+        "policy_flags": []
       }
     },
     {
@@ -487,7 +540,8 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-20T07:43:57.612885",
+        "timestamp": "2025-11-21T07:29:22.163020",
+        "mode": "mock",
         "diagnostic": {
           "toxicity": 0.0,
           "sentiment": "very_positive",
@@ -497,12 +551,38 @@
         },
         "rewrite": {
           "version": "v1",
-          "text": "I just wanted to say thank you to sarah from your support team. She went above and beyond to help me yesterday. You're lucky to have her!"
+          "text": "I just wanted to say thank you to sarah from your support team. She went above and beyond to help me yesterday. You're lucky to have her."
         },
-        "guidance": [],
-        "policy_flags": [],
-        "escalation_risk": "none"
+        "guidance": [
+          "✓ Positive interaction. Maintain friendly, helpful tone.",
+          "Thank customer sincerely",
+          "Share feedback with team",
+          "Ask for review if appropriate"
+        ],
+        "escalation_risk": "none",
+        "processing_time_ms": 0.023126602172851562,
+        "policy_flags": []
       }
     }
-  ]
+  ],
+  "metrics": {
+    "conversations_processed": 12,
+    "conversations_failed": 0,
+    "api_calls_made": 0,
+    "api_calls_failed": 0,
+    "api_success_rate": 0,
+    "risk_distribution": {
+      "none": 2,
+      "low": 3,
+      "medium": 1,
+      "high": 4,
+      "critical": 2
+    },
+    "total_processing_time_ms": 0.3337860107421875,
+    "avg_processing_time_ms": 0.027815500895182293,
+    "avg_toxicity": 0.4333333333333333,
+    "error_count": 0,
+    "success_rate": 1.0
+  },
+  "pipeline_duration_seconds": 0.0022199153900146484
 }
