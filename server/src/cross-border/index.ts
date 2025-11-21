@@ -10,12 +10,22 @@
  * - Multilingual translation bridge
  * - Secure cross-border data sharing
  * - Comprehensive audit logging
+ * - Circuit breakers and rate limiting for resilience
+ * - Environment-based configuration
  *
  * @module cross-border
  */
 
 // Types
 export * from './types.js';
+
+// Configuration
+export {
+  loadCrossBorderConfig,
+  getCrossBorderConfig,
+  validateConfig,
+  type CrossBorderConfig,
+} from './config.js';
 
 // Services
 export {
@@ -42,3 +52,16 @@ export {
   getCrossBorderGateway,
   type GatewayConfig,
 } from './gateway.js';
+
+// Resilience
+export {
+  CircuitBreaker,
+  CircuitBreakerOpenError,
+  RateLimiter,
+  ResilienceManager,
+  getResilienceManager,
+  retryWithBackoff,
+} from './resilience.js';
+
+// GraphQL
+export { crossBorderTypeDefs, crossBorderResolvers } from './graphql/index.js';
