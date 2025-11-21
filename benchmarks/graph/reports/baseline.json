@@ -1,0 +1,10 @@
+{
+  "description": "Baseline benchmark results for regression detection",
+  "placeholder": true,
+  "note": "This file will be populated with actual results after the first benchmark run on main branch",
+  "metadata": {
+    "createdAt": "2024-01-01T00:00:00Z",
+    "version": "0.1.0"
+  },
+  "benchmarks": []
+}
