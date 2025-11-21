@@ -14,3 +14,5 @@ export * from './collectors/CollectionManager';
 export * from './spectrum/SpectrumMonitor';
 export * from './simulation/SignalGenerator';
 export * from './protocols/ProtocolDecoder';
+export * from './integration/DataSourceAdapter';
+export * from './exercise/ExerciseManager';
