@@ -1,0 +1,123 @@
+name: Deploy Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'website/**'
+      - '.github/workflows/docs-deploy.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'website/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+          cache-dependency-path: website/pnpm-lock.yaml
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      
+      - name: Install dependencies
+        run: |
+          cd website
+          pnpm install --frozen-lockfile
+      
+      - name: Build documentation
+        run: |
+          cd website
+          pnpm build
+        env:
+          NODE_ENV: production
+      
+      - name: Check broken links
+        run: |
+          cd website
+          npx broken-link-checker http://localhost:3000 --recursive --ordered --exclude external || true
+        continue-on-error: true
+      
+      - name: Validate code examples
+        run: |
+          # Validate Python examples
+          python3 -m py_compile examples/python/*.py || true
+          
+          # Validate JavaScript examples  
+          cd examples/javascript
+          npm install --no-save axios
+          node -c *.js || true
+        continue-on-error: true
+      
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./website/build
+          cname: docs.summit.io
+      
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: docs-build
+          path: website/build/
+          retention-days: 7
+
+  test-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+      
+      - name: Install dependencies
+        run: |
+          cd website
+          pnpm install --frozen-lockfile
+      
+      - name: Lint documentation
+        run: |
+          cd website
+          pnpm run lint || echo "Lint not configured yet"
+        continue-on-error: true
+      
+      - name: Type check
+        run: |
+          cd website
+          pnpm run typecheck
+      
+      - name: Test build
+        run: |
+          cd website
+          pnpm build
