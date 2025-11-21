@@ -25,3 +25,14 @@ export type {
 } from './triggers/TriggerManager.js';
 
 export type { SensorConfig } from './sensors/BaseSensor.js';
+
+// Cron utilities
+export {
+  parseCronExpression,
+  matchesCron,
+  getNextCronDate,
+  getPrevCronDate,
+  isValidCronExpression,
+} from './utils/cron.js';
+
+export type { ParsedCron } from './utils/cron.js';
