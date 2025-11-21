@@ -3,6 +3,8 @@
  * Detect coordinated inauthentic behavior, bot networks, and influence campaigns
  */
 
+export * from './cross-platform/correlation-engine';
+
 // Types
 export interface DisinformationAnalysisResult {
   campaignDetected: boolean;
