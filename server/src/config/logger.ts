@@ -1,7 +1,8 @@
 import pino from 'pino';
+import { configService } from './ConfigService.js';
 
 const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
+  level: configService.get('app').logLevel,
   formatters: {
     level: (label) => {
       return { level: label.toUpperCase() };

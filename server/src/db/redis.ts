@@ -1,14 +1,15 @@
 import Redis from 'ioredis';
 import dotenv from 'dotenv';
 import pino from 'pino';
+import { configService } from '../config/ConfigService.js';
 
 dotenv.config();
 
 const logger: pino.Logger = pino();
 
-const REDIS_HOST = process.env.REDIS_HOST || 'redis';
-const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
-const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
+const REDIS_HOST = configService.get('redis').host;
+const REDIS_PORT = configService.get('redis').port;
+const REDIS_PASSWORD = configService.get('redis').password;
 
 let redisClient: Redis;
 
