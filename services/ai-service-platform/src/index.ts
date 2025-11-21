@@ -19,6 +19,8 @@ import { deploymentRoutes } from './routes/deployments.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { templateRoutes } from './routes/templates.js';
 import { setupMetrics } from './metrics/prometheus.js';
+import { setupErrorHandler } from './middleware/error-handler.js';
+import { setupRequestLogger } from './middleware/request-logger.js';
 import { config } from './config.js';
 
 const server = Fastify({
@@ -46,6 +48,10 @@ async function start() {
   // Security middleware
   await server.register(cors, { origin: config.corsOrigins });
   await server.register(helmet);
+
+  // Error handling and logging
+  setupErrorHandler(server);
+  setupRequestLogger(server);
 
   // Decorate with platform components
   server.decorate('serviceRegistry', serviceRegistry);

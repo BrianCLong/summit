@@ -35,17 +35,21 @@ export async function templateRoutes(server: FastifyInstance) {
       return reply.status(404).send({ error: 'Template not found' });
     }
 
-    // Create service from template
+    // Create service from template with defaults
+    const mergedConfig = {
+      maxConcurrency: 10,
+      timeoutMs: 30000,
+      ...template.defaultConfig,
+      ...config,
+    };
+
     const service = await server.serviceRegistry.register({
       name,
       version: '1.0.0',
       description: `${template.name} - ${name}`,
       type: template.category as 'llm' | 'vision' | 'nlp' | 'prediction' | 'embedding' | 'custom',
       templateId: id,
-      config: {
-        ...template.defaultConfig,
-        ...config,
-      },
+      config: mergedConfig as typeof mergedConfig & { maxConcurrency: number; timeoutMs: number },
     });
 
     return reply.status(201).send({
