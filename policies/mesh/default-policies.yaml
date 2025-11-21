@@ -1,0 +1,194 @@
+# Agentic Mesh Default Policies
+# These policies define the default security and compliance rules for the mesh.
+
+policies:
+  # Security Policies
+  - id: SEC-001
+    name: Deny Restricted Data Export
+    description: Prevents export of restricted data to external systems
+    version: "1.0.0"
+    enabled: true
+    priority: 100
+    conditions:
+      - field: action
+        operator: equals
+        value: data_export
+      - field: resource.classification
+        operator: equals
+        value: restricted
+    effect:
+      action: deny
+      reason: Restricted data cannot be exported
+    audit:
+      level: full
+      retentionDays: 365
+
+  - id: SEC-002
+    name: Redact Confidential in External Calls
+    description: Redacts confidential data in external API calls
+    version: "1.0.0"
+    enabled: true
+    priority: 90
+    conditions:
+      - field: action
+        operator: equals
+        value: external_api_call
+      - field: resource.classification
+        operator: in
+        value: [confidential, restricted]
+    effect:
+      action: allow_with_redactions
+      reason: Confidential data must be redacted for external calls
+      redactions:
+        - path: "$.pii"
+          strategy: mask
+        - path: "$.secrets"
+          strategy: remove
+    audit:
+      level: detailed
+      retentionDays: 180
+
+  - id: SEC-003
+    name: Human Review for High-Risk Tasks
+    description: Requires human review for high-risk task assignments
+    version: "1.0.0"
+    enabled: true
+    priority: 80
+    conditions:
+      - field: action
+        operator: equals
+        value: task_assign
+      - field: environment.riskScore
+        operator: greater_than
+        value: 0.8
+    effect:
+      action: escalate_to_human
+      reason: High-risk tasks require human approval
+      escalationTarget: security-team
+    audit:
+      level: full
+      retentionDays: 365
+
+  # Safety Policies
+  - id: SAFE-001
+    name: Block Dangerous Tool Invocations
+    description: Prevents invocation of dangerous tools without proper authorization
+    version: "1.0.0"
+    enabled: true
+    priority: 100
+    conditions:
+      - field: action
+        operator: equals
+        value: tool_invoke
+      - field: resource.attributes.dangerous
+        operator: equals
+        value: true
+      - field: subject.roles
+        operator: not_contains
+        value: admin
+    effect:
+      action: deny
+      reason: Dangerous tool invocation requires admin role
+    audit:
+      level: full
+      retentionDays: 365
+
+  - id: SAFE-002
+    name: Rate Limit Model Calls
+    description: Enforces rate limiting on model calls to prevent abuse
+    version: "1.0.0"
+    enabled: true
+    priority: 70
+    conditions:
+      - field: action
+        operator: equals
+        value: model_call
+      - field: environment.callCountLastMinute
+        operator: greater_than
+        value: 100
+    effect:
+      action: deny
+      reason: Rate limit exceeded for model calls
+    audit:
+      level: basic
+      retentionDays: 30
+
+  # Data Classification Policies
+  - id: DATA-001
+    name: Log All Restricted Data Access
+    description: Ensures all access to restricted data is logged with full detail
+    version: "1.0.0"
+    enabled: true
+    priority: 60
+    conditions:
+      - field: action
+        operator: equals
+        value: data_read
+      - field: resource.classification
+        operator: equals
+        value: restricted
+    effect:
+      action: allow
+      reason: Access allowed with full audit logging
+    audit:
+      level: full
+      retentionDays: 730
+
+  - id: DATA-002
+    name: Internal Data Handling
+    description: Allows internal data to be used within the mesh with basic logging
+    version: "1.0.0"
+    enabled: true
+    priority: 50
+    conditions:
+      - field: resource.classification
+        operator: equals
+        value: internal
+    effect:
+      action: allow
+      reason: Internal data can be processed within the mesh
+    audit:
+      level: basic
+      retentionDays: 90
+
+  # Agent Policies
+  - id: AGENT-001
+    name: Critical Agent Redundancy
+    description: Requires critical agents to have redundant instances
+    version: "1.0.0"
+    enabled: true
+    priority: 75
+    conditions:
+      - field: action
+        operator: equals
+        value: agent_spawn
+      - field: resource.attributes.riskTier
+        operator: equals
+        value: critical
+    effect:
+      action: allow
+      reason: Critical agents must ensure high availability
+    audit:
+      level: detailed
+      retentionDays: 180
+
+  # Model Provider Policies
+  - id: MODEL-001
+    name: Prefer Anthropic for Sensitive Tasks
+    description: Routes sensitive tasks to Anthropic models
+    version: "1.0.0"
+    enabled: true
+    priority: 65
+    conditions:
+      - field: action
+        operator: equals
+        value: model_call
+      - field: resource.classification
+        operator: in
+        value: [confidential, restricted]
+    effect:
+      action: allow
+      reason: Sensitive tasks should use Anthropic models
+    audit:
+      level: detailed
+      retentionDays: 180
