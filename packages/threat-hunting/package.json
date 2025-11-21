@@ -1,0 +1,15 @@
+{
+  "name": "@intelgraph/threat-hunting",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "Advanced threat hunting framework with hypothesis-driven analysis",
+  "scripts": { "build": "tsc -p tsconfig.json" },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/ci-analytics": "workspace:*",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": { "@types/node": "^24.10.1", "typescript": "^5.9.3" }
+}
