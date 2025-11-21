@@ -5,6 +5,7 @@ import {
   CandidateRequestSchema,
   MergeRequestSchema,
   SplitRequestSchema,
+  EntityRecordSchema,
 } from '../types.js';
 import pino from 'pino';
 
@@ -216,6 +217,42 @@ export function createRoutes(engine: EREngine): Router {
   router.get('/health', async (_req: Request, res: Response) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
   });
+
+  /**
+   * POST /entities - Store entity (for testing/demo)
+   */
+  router.post(
+    '/entities',
+    validate(EntityRecordSchema),
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        engine.storeEntity(req.body);
+        logger.info({ entityId: req.body.id }, 'Entity stored');
+        res.status(201).json({ success: true, entityId: req.body.id });
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
+
+  /**
+   * GET /entities/:id - Get entity
+   */
+  router.get(
+    '/entities/:id',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const entity = engine.getEntity(req.params.id);
+        if (!entity) {
+          res.status(404).json({ error: 'Entity not found' });
+          return;
+        }
+        res.json(entity);
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
 
   return router;
 }

@@ -63,12 +63,33 @@ describe('ER Service API', () => {
   });
 
   describe('POST /api/v1/merge', () => {
-    it.skip('should merge entities successfully', async () => {
-      // Note: This test requires entities to be pre-stored via storeEntity()
-      // Skipping for now - covered by unit/integration tests
+    it('should merge entities successfully', async () => {
+      // Pre-store entities first
+      await request(app)
+        .post('/api/v1/entities')
+        .send({
+          id: 'merge-e1',
+          type: 'person',
+          name: 'John Smith',
+          tenantId: 'test-tenant',
+          attributes: { email: 'john@example.com' },
+        })
+        .expect(201);
+
+      await request(app)
+        .post('/api/v1/entities')
+        .send({
+          id: 'merge-e2',
+          type: 'person',
+          name: 'Jon Smith',
+          tenantId: 'test-tenant',
+          attributes: { email: 'john@example.com' },
+        })
+        .expect(201);
+
       const requestBody = {
         tenantId: 'test-tenant',
-        entityIds: ['e1', 'e2'],
+        entityIds: ['merge-e1', 'merge-e2'],
         actor: 'analyst@example.com',
         reason: 'Duplicate detection',
         policyTags: ['er:manual-review'],
@@ -104,15 +125,23 @@ describe('ER Service API', () => {
   });
 
   describe('POST /api/v1/merge/:mergeId/revert', () => {
-    it.skip('should revert merge successfully', async () => {
-      // Note: This test requires entities to be pre-stored
-      // Skipping for now - covered by unit/integration tests
-      // First create a merge
+    it('should revert merge successfully', async () => {
+      // Pre-store entities
+      await request(app)
+        .post('/api/v1/entities')
+        .send({ id: 'revert-e1', type: 'person', name: 'Test User 1', tenantId: 'test-tenant', attributes: {} })
+        .expect(201);
+      await request(app)
+        .post('/api/v1/entities')
+        .send({ id: 'revert-e2', type: 'person', name: 'Test User 2', tenantId: 'test-tenant', attributes: {} })
+        .expect(201);
+
+      // Create a merge
       const mergeResponse = await request(app)
         .post('/api/v1/merge')
         .send({
           tenantId: 'test-tenant',
-          entityIds: ['e1', 'e2'],
+          entityIds: ['revert-e1', 'revert-e2'],
           actor: 'analyst@example.com',
           reason: 'Test merge',
         })
@@ -142,12 +171,16 @@ describe('ER Service API', () => {
   });
 
   describe('POST /api/v1/split', () => {
-    it.skip('should split entity successfully', async () => {
-      // Note: This test requires entities to be pre-stored
-      // Skipping for now - covered by unit/integration tests
+    it('should split entity successfully', async () => {
+      // Pre-store entity
+      await request(app)
+        .post('/api/v1/entities')
+        .send({ id: 'split-e1', type: 'person', name: 'Combined Identity', tenantId: 'test-tenant', attributes: { context: 'mixed' } })
+        .expect(201);
+
       const requestBody = {
         tenantId: 'test-tenant',
-        entityId: 'e1',
+        entityId: 'split-e1',
         splitGroups: [
           { attributes: { context: 'work' } },
           { attributes: { context: 'personal' } },
@@ -186,15 +219,23 @@ describe('ER Service API', () => {
   });
 
   describe('GET /api/v1/explain/:mergeId', () => {
-    it.skip('should explain merge decision', async () => {
-      // Note: This test requires entities to be pre-stored
-      // Skipping for now - covered by unit/integration tests
-      // First create a merge
+    it('should explain merge decision', async () => {
+      // Pre-store entities
+      await request(app)
+        .post('/api/v1/entities')
+        .send({ id: 'explain-e1', type: 'person', name: 'John Doe', tenantId: 'test-tenant', attributes: {} })
+        .expect(201);
+      await request(app)
+        .post('/api/v1/entities')
+        .send({ id: 'explain-e2', type: 'person', name: 'Jon Doe', tenantId: 'test-tenant', attributes: {} })
+        .expect(201);
+
+      // Create a merge
       const mergeResponse = await request(app)
         .post('/api/v1/merge')
         .send({
           tenantId: 'test-tenant',
-          entityIds: ['e1', 'e2'],
+          entityIds: ['explain-e1', 'explain-e2'],
           actor: 'analyst@example.com',
           reason: 'Test merge',
         })
