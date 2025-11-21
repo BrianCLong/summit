@@ -65,3 +65,17 @@ export {
 
 // GraphQL
 export { crossBorderTypeDefs, crossBorderResolvers } from './graphql/index.js';
+
+// HTTP Router
+export { crossBorderRouter } from './router.js';
+
+// Metrics
+export {
+  CrossBorderMetrics,
+  getCrossBorderMetrics,
+  recordHandover,
+  recordTranslation,
+  recordPartnerHealth,
+  updateActiveSessions,
+  updateActivePartners,
+} from './metrics.js';
