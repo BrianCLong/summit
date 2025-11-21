@@ -367,3 +367,9 @@ export function useI18n() {
     })),
   };
 }
+
+// Export LOCALE_CONFIGS for use in other components
+export { LOCALE_CONFIGS };
+
+// Re-export context-based approach
+export { I18nProvider, useI18nContext } from './I18nContext';
