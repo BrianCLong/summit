@@ -1,6 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import cors from 'cors';
-import { NASSearcher, HardwareAwareNAS, SearchSpace } from '@intelgraph/nas';
+import { NASSearcher, HardwareAwareNAS } from '@intelgraph/nas';
 
 const app: Express = express();
 const PORT = process.env.NAS_PORT || 3001;
@@ -127,7 +127,9 @@ app.get('/api/v1/nas/search', (_req: Request, res: Response) => {
 });
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`NAS Service running on port ${PORT}`);
+  // eslint-disable-next-line no-console
   console.log(`Health check: http://localhost:${PORT}/health`);
 });
 

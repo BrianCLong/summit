@@ -117,7 +117,7 @@ export class NASSearcher {
     return params;
   }
 
-  private async evaluate(arch: Architecture): Promise<number> {
+  private async evaluate(_arch: Architecture): Promise<number> {
     // Simulate architecture evaluation
     await new Promise(resolve => setTimeout(resolve, 10));
     return 0.7 + Math.random() * 0.25;

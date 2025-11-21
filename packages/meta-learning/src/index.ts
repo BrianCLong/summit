@@ -8,8 +8,6 @@
  * - Model zoo and registry
  */
 
-import { v4 as uuidv4 } from 'uuid';
-
 export interface MetaFeatures {
   numSamples: number;
   numFeatures: number;

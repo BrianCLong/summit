@@ -289,6 +289,7 @@ app.post('/api/v1/meta-learning/warm-start', (req: Request, res: Response) => {
 
 // Error handling
 app.use((err: Error, _req: Request, res: Response) => {
+  // eslint-disable-next-line no-console
   console.error(err.stack);
   res.status(500).json({
     success: false,
@@ -298,8 +299,11 @@ app.use((err: Error, _req: Request, res: Response) => {
 
 // Start server
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`AutoML Service running on port ${PORT}`);
+  // eslint-disable-next-line no-console
   console.log(`Health check: http://localhost:${PORT}/health`);
+  // eslint-disable-next-line no-console
   console.log(`API Docs: http://localhost:${PORT}/api/v1/docs`);
 });
 
