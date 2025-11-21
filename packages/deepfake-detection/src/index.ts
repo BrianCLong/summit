@@ -15,6 +15,7 @@ export * from './ensemble/meta-learner';
 export * from './multimodal/fusion-engine';
 export * from './zero-shot/zero-shot-detector';
 export * from './active-learning/active-learner';
+export * from './federated/federated-learning';
 
 import { FacialDeepfakeDetector } from './facial/facial-detector';
 import { VoiceDeepfakeDetector } from './voice/voice-detector';
