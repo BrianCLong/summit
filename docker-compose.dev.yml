@@ -148,6 +148,42 @@ services:
       - 'prometheus.job=summit_api'
       - 'prometheus.port=4000'
 
+  marketplace:
+    build:
+      context: ./services/marketplace
+      dockerfile: Dockerfile
+    container_name: summit-marketplace
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4101
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-summit_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-summit}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CORS_ORIGINS: http://localhost:3000
+      LOG_LEVEL: info
+    ports:
+      - '4101:4101'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:4101/health']
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=summit_marketplace'
+      - 'prometheus.port=4101'
+
   gateway:
     build:
       context: ./services/dev-gateway

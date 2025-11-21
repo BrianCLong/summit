@@ -47,14 +47,14 @@ USER marketplace
 
 # Environment
 ENV NODE_ENV=production
-ENV PORT=4100
+ENV PORT=4101
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:4100/health || exit 1
+  CMD wget --no-verbose --tries=1 --spider http://localhost:4101/health || exit 1
 
 # Expose port
-EXPOSE 4100
+EXPOSE 4101
 
 # Start
 CMD ["node", "dist/index.js"]

@@ -6,10 +6,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "4100:4100"
+      - "4101:4101"
     environment:
       - NODE_ENV=development
-      - PORT=4100
+      - PORT=4101
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_DB=intelgraph
@@ -24,7 +24,7 @@ services:
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4100/health"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4101/health"]
       interval: 10s
       timeout: 5s
       retries: 5

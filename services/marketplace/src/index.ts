@@ -13,10 +13,10 @@ import { accessRoutes } from './routes/access.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authMiddleware } from './middleware/auth.js';
 import { rateLimiters } from './middleware/rateLimit.js';
-import { metricsMiddleware, MetricNames, metrics } from './utils/metrics.js';
+import { metricsMiddleware } from './utils/metrics.js';
 
 const app = express();
-const PORT = process.env.PORT || 4100;
+const PORT = process.env.PORT || 4101;
 
 // Security middleware
 app.use(helmet({

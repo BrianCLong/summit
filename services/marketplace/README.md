@@ -51,7 +51,7 @@ pnpm docker:down
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | 4100 | Server port |
+| `PORT` | 4101 | Server port |
 | `NODE_ENV` | development | Environment |
 | `POSTGRES_HOST` | localhost | PostgreSQL host |
 | `POSTGRES_PORT` | 5432 | PostgreSQL port |
