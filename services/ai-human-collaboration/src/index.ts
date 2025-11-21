@@ -14,6 +14,8 @@ export * from './performance.js';
 export * from './events.js';
 export * from './persistence.js';
 export * from './instrumentation.js';
+export * from './health.js';
+export * from './errors.js';
 export * from './integrations/index.js';
 export { RecommendationEngine } from './RecommendationEngine.js';
 export { CommanderControl } from './CommanderControl.js';
