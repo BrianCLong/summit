@@ -12,5 +12,6 @@ export * from './simulators/statevector-simulator';
 // Circuit builders
 export * from './circuits/circuit-builder';
 
-// Backends (would integrate with Qiskit, Cirq, etc.)
+// Backends
 export * from './backends/local-backend';
+export * from './backends/cloud-providers';

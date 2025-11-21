@@ -18,3 +18,4 @@ export * from './key-exchange/hybrid-kem';
 // Utilities
 export * from './utils/benchmark';
 export * from './utils/validation';
+export * from './utils/entropy';

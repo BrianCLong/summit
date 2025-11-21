@@ -1,0 +1,14 @@
+{
+  "name": "@summit/quantum-types",
+  "version": "1.0.0",
+  "description": "Shared type definitions for quantum computing packages",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
