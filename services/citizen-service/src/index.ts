@@ -9,6 +9,7 @@ import {
   securityHeaders,
   requestId,
 } from './middleware/security.js';
+import { corsMiddleware } from './middleware/cors.js';
 import { cacheService } from './services/CacheService.js';
 
 const logger = pino({
@@ -20,6 +21,7 @@ const app = express();
 const PORT = process.env.PORT || 4010;
 
 // Security middleware (before parsing)
+app.use(corsMiddleware);
 app.use(securityHeaders);
 app.use(requestId);
 
