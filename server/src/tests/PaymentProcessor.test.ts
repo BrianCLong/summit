@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { PaymentProcessor } from '../payments/PaymentProcessor.js';
+import { PaymentProcessor } from '../payments/PaymentProcessor';
 
 describe('PaymentProcessor', () => {
   let processor: PaymentProcessor;
