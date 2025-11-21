@@ -3,20 +3,17 @@
  * Comprehensive tabular and time-series data synthesis
  */
 
-export {
-  TabularSynthesizer,
-  type SynthesisConfig,
-  type TabularData,
-  type SynthesisResult,
-  type QualityMetrics,
-  type PrivacyMetrics
-} from './generators/TabularSynthesizer';
+// Export shared types
+export * from './types';
 
-export {
-  TimeSeriesSynthesizer,
-  type TimeSeriesConfig,
-  type TimeSeries
-} from './generators/TimeSeriesSynthesizer';
+// Export generators
+export { TabularSynthesizer } from './generators/TabularSynthesizer';
+export { TimeSeriesSynthesizer } from './generators/TimeSeriesSynthesizer';
 
-export * from './utils/DataProfiler';
-export * from './quality/QualityAssessor';
+// Export utilities
+export { DataProfiler } from './utils/DataProfiler';
+export type { DataProfile, ColumnProfile, NumericalStatistics, CategoricalDistribution, CorrelationMatrix, DataQuality } from './utils/DataProfiler';
+
+// Export quality assessment
+export { QualityAssessor } from './quality/QualityAssessor';
+export type { QualityReport, MetricScore, StatisticalTest } from './quality/QualityAssessor';

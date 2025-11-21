@@ -2,7 +2,7 @@
  * PrivacyValidator - Validate privacy guarantees and assess re-identification risk
  */
 
-import { TabularData } from '@intelgraph/synthetic-data';
+import { TabularData } from '../types';
 
 export interface PrivacyAssessment {
   overallRisk: 'low' | 'medium' | 'high' | 'critical';

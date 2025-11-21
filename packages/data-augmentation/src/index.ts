@@ -3,7 +3,8 @@
  * Comprehensive data augmentation pipelines
  */
 
-import { TabularData } from '@intelgraph/synthetic-data';
+import { TabularData } from './types';
+export { TabularData } from './types';
 
 export interface AugmentationPipeline {
   transforms: Transform[];

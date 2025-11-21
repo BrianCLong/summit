@@ -3,6 +3,10 @@
  * Privacy-preserving data synthesis and validation
  */
 
+// Export shared types
+export * from './types';
+
+// Export differential privacy
 export {
   DifferentialPrivacy,
   PrivacyBudgetManager,
@@ -11,6 +15,7 @@ export {
   type BudgetAllocation
 } from './differential-privacy/DifferentialPrivacy';
 
+// Export k-anonymity
 export {
   KAnonymity,
   type AnonymizationConfig,
@@ -19,6 +24,7 @@ export {
   type EquivalenceClass
 } from './anonymization/KAnonymity';
 
+// Export privacy validation
 export {
   PrivacyValidator,
   type PrivacyAssessment,

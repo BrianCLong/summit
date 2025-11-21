@@ -19,8 +19,6 @@
     "HIPAA"
   ],
   "dependencies": {
-    "@intelgraph/common-types": "workspace:*",
-    "@intelgraph/synthetic-data": "workspace:*",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

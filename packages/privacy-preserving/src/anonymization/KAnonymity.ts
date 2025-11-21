@@ -2,7 +2,7 @@
  * KAnonymity - Implement k-anonymity, l-diversity, and t-closeness
  */
 
-import { TabularData } from '@intelgraph/synthetic-data';
+import { TabularData } from '../types';
 
 export interface AnonymizationConfig {
   k: number; // k-anonymity parameter

@@ -4,11 +4,25 @@
   "description": "Comprehensive data augmentation for all modalities",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "data-augmentation",
+    "autoaugment",
+    "randaugment",
+    "image-augmentation",
+    "text-augmentation",
+    "tabular-augmentation"
+  ],
   "dependencies": {
-    "@intelgraph/common-types": "workspace:*",
-    "@intelgraph/synthetic-data": "workspace:*",
-    "@intelgraph/text-generation": "workspace:*",
-    "@intelgraph/image-synthesis": "workspace:*",
-    "@intelgraph/audio-synthesis": "workspace:*"
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.195",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
   }
 }
