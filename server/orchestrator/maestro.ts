@@ -10,6 +10,9 @@ import Redis from 'ioredis';
 import { logger } from '../utils/logger';
 import { PolicyGuard } from './policyGuard';
 import { Budget } from '../ai/llmBudget';
+import { runsRepo } from '../src/maestro/runs/runs-repo.js';
+import { tasksRepo } from '../src/maestro/runs/tasks-repo.js';
+import { eventsRepo } from '../src/maestro/runs/events-repo.js';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
@@ -38,6 +41,8 @@ export type AgentTask = {
   context: Record<string, any>;
   parentTaskId?: string;
   dependencies?: string[];
+  runId?: string;
+  taskId?: string;
   metadata: {
     actor: string;
     timestamp: string;
@@ -72,8 +77,35 @@ class MaestroOrchestrator {
       throw new Error(`Task blocked by policy: ${policyResult.reason}`);
     }
 
+    const tenantId = task.context.tenantId || 'default';
+
+    // Ensure Run exists
+    let runId = task.runId;
+    if (!runId) {
+      const run = await runsRepo.create({
+        pipeline_id: task.repo, // Use repo as pipeline identifier for now
+        pipeline_name: `Agent Run: ${task.kind}`,
+        input_params: task,
+        executor_id: task.metadata.actor,
+        tenant_id: tenantId,
+      });
+      runId = run.id;
+      task.runId = runId;
+    }
+
+    // Persist Task
+    const dbTask = await tasksRepo.create({
+      run_id: runId,
+      name: `${task.kind} task`,
+      type: task.kind,
+      input_params: task,
+      idempotency_key: `${task.kind}-${task.repo}-${Date.now()}`, // Simple idempotency for now
+      tenant_id: tenantId,
+    });
+    task.taskId = dbTask.id;
+
     const job = await maestroQueue.add(task.kind, task, {
-      jobId: `${task.kind}-${task.repo}-${Date.now()}`,
+      jobId: dbTask.id, // Use DB ID as BullMQ Job ID
     });
 
     logger.info('Task enqueued', {
@@ -81,6 +113,7 @@ class MaestroOrchestrator {
       kind: task.kind,
       repo: task.repo,
       budgetUSD: task.budgetUSD,
+      runId,
     });
 
     return job.id!;
@@ -164,7 +197,14 @@ class MaestroOrchestrator {
       const startTime = Date.now();
       const budget = new Budget(job.data.budgetUSD);
 
+      const tenantId = job.data.context.tenantId || 'default';
+      const taskId = job.data.taskId;
+
       try {
+        if (taskId) {
+          await tasksRepo.update(taskId, { status: 'running' }, tenantId);
+        }
+
         // Policy guard
         const policyResult = await this.policyGuard.checkPolicy(job.data);
         if (!policyResult.allowed) {
@@ -190,6 +230,28 @@ class MaestroOrchestrator {
         const result = await handler(job);
         const duration = Date.now() - startTime;
 
+        if (taskId) {
+          await tasksRepo.update(
+            taskId,
+            {
+              status: 'completed',
+              output_data: result,
+            },
+            tenantId,
+          );
+
+          // Record event
+          if (job.data.runId) {
+            await eventsRepo.create({
+              run_id: job.data.runId,
+              task_id: taskId,
+              type: 'TASK_COMPLETED',
+              payload: result,
+              tenant_id: tenantId,
+            });
+          }
+        }
+
         // Update task result with guardrail metadata
         return {
           ...result,
@@ -203,6 +265,27 @@ class MaestroOrchestrator {
           error: error.message,
           duration,
         });
+
+        if (taskId) {
+          await tasksRepo.update(
+            taskId,
+            {
+              status: 'failed',
+              error_message: error.message,
+            },
+            tenantId,
+          );
+
+          if (job.data.runId) {
+             await eventsRepo.create({
+              run_id: job.data.runId,
+              task_id: taskId,
+              type: 'TASK_FAILED',
+              payload: { error: error.message },
+              tenant_id: tenantId,
+            });
+          }
+        }
 
         return {
           success: false,
