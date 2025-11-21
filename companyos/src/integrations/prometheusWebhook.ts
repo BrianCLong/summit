@@ -3,14 +3,29 @@
  * Receives alerts from Prometheus Alertmanager and creates incidents/alerts
  */
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { Pool } from 'pg';
-import { AlertService } from '../services/alertService';
-import { SLOService } from '../services/sloService';
-import { IncidentService } from '../services/incidentService';
-import { AlertSeverity, AlertSource } from '../models/alert';
-import { IncidentSeverity } from '../models/incident';
-import { SLOType, ViolationSeverity } from '../models/slo';
+import { AlertService } from '../services/alertService.js';
+import { SLOService } from '../services/sloService.js';
+import { IncidentService } from '../services/incidentService.js';
+import { AlertSeverity, AlertSource, Alert } from '../models/alert.js';
+import { IncidentSeverity } from '../models/incident.js';
+import { SLOType, ViolationSeverity } from '../models/slo.js';
+
+interface PrometheusAlert {
+  status: 'firing' | 'resolved';
+  labels: Record<string, string>;
+  annotations: Record<string, string>;
+  startsAt: string;
+  endsAt?: string;
+  generatorURL?: string;
+  fingerprint?: string;
+}
+
+interface AlertmanagerPayload {
+  alerts: PrometheusAlert[];
+  groupLabels: Record<string, string>;
+}
 
 export function createPrometheusWebhookRouter(db: Pool): Router {
   const router = Router();
@@ -19,13 +34,14 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
   const incidentService = new IncidentService(db);
 
   // Alertmanager webhook endpoint
-  router.post('/prometheus-webhook', async (req, res) => {
-    const payload = req.body;
+  router.post('/prometheus-webhook', async (req: Request, res: Response): Promise<void> => {
+    const payload = req.body as AlertmanagerPayload;
 
     try {
       // Alertmanager sends alerts in groups
       if (!payload.alerts || !Array.isArray(payload.alerts)) {
-        return res.status(400).json({ error: 'Invalid payload' });
+        res.status(400).json({ error: 'Invalid payload' });
+        return;
       }
 
       for (const alert of payload.alerts) {
@@ -39,7 +55,7 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
     }
   });
 
-  async function handleAlert(alert: any, groupLabels: any) {
+  async function handleAlert(alert: PrometheusAlert, groupLabels: Record<string, string>): Promise<void> {
     const {
       status,
       labels = {},
@@ -61,7 +77,7 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
       alertSource: AlertSource.PROMETHEUS,
       severity,
       serviceName: labels.service || labels.job,
-      summary: annotations.summary || labels.alertname,
+      summary: annotations.summary || labels.alertname || 'No summary',
       description: annotations.description || annotations.message,
       labels,
       annotations,
@@ -106,16 +122,16 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
     }
   }
 
-  function isSLOAlert(labels: any, annotations: any): boolean {
+  function isSLOAlert(labels: Record<string, string>, annotations: Record<string, string>): boolean {
     return (
       labels.alertname?.toLowerCase().includes('slo') ||
-      labels.slo_name ||
-      annotations.slo_name
+      !!labels.slo_name ||
+      !!annotations.slo_name
     );
   }
 
-  async function handleSLOViolation(alert: any, labels: any, annotations: any) {
-    const sloName = labels.slo_name || annotations.slo_name || labels.alertname;
+  async function handleSLOViolation(alert: Alert, labels: Record<string, string>, annotations: Record<string, string>): Promise<void> {
+    const sloName = labels.slo_name || annotations.slo_name || labels.alertname || 'unknown';
     const serviceName = labels.service || labels.job || 'unknown';
 
     // Determine SLO type
@@ -152,10 +168,10 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
     });
   }
 
-  async function autoCreateIncident(alert: any, labels: any, annotations: any) {
+  async function autoCreateIncident(alert: Alert, labels: Record<string, string>, annotations: Record<string, string>): Promise<void> {
     // Check if incident already exists for this alert
     const existingIncidents = await db.query(
-      'SELECT id FROM maestro.incidents WHERE status NOT IN ($1, $2) AND metadata->\'alertFingerprint\' = $3',
+      "SELECT id FROM maestro.incidents WHERE status NOT IN ($1, $2) AND metadata->>'alertFingerprint' = $3",
       ['resolved', 'closed', alert.fingerprint]
     );
 
@@ -170,10 +186,10 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
 
     // Create new incident
     const incident = await incidentService.createIncident({
-      title: `[AUTO] ${labels.alertname}: ${annotations.summary || ''}`,
+      title: `[AUTO] ${labels.alertname || 'Alert'}: ${annotations.summary || ''}`,
       description: annotations.description || annotations.message || '',
       severity: incidentSeverity,
-      affectedServices: [labels.service || labels.job].filter(Boolean),
+      affectedServices: [labels.service || labels.job].filter(Boolean) as string[],
       impactDescription: annotations.impact,
       customerImpact: shouldFlagCustomerImpact(labels, annotations),
       createdBy: 'alertmanager-auto',
@@ -190,7 +206,7 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
     console.log(`Auto-created incident ${incident.id} for critical alert ${labels.alertname}`);
   }
 
-  function mapIncidentSeverity(alertSeverity: AlertSeverity, labels: any): IncidentSeverity {
+  function mapIncidentSeverity(alertSeverity: AlertSeverity, labels: Record<string, string>): IncidentSeverity {
     // Check for explicit severity label
     if (labels.incident_severity) {
       return labels.incident_severity as IncidentSeverity;
@@ -206,13 +222,13 @@ export function createPrometheusWebhookRouter(db: Pool): Router {
     return IncidentSeverity.SEV3;
   }
 
-  function shouldFlagCustomerImpact(labels: any, annotations: any): boolean {
+  function shouldFlagCustomerImpact(labels: Record<string, string>, annotations: Record<string, string>): boolean {
     return (
       labels.customer_facing === 'true' ||
       labels.customer_impact === 'true' ||
       annotations.customer_impact === 'true' ||
-      labels.service?.includes('api') ||
-      labels.service?.includes('web')
+      !!labels.service?.includes('api') ||
+      !!labels.service?.includes('web')
     );
   }
 

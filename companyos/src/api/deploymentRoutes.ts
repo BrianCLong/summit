@@ -3,27 +3,32 @@
  * REST endpoints for deployment tracking
  */
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { Pool } from 'pg';
-import { DeploymentService } from '../services/deploymentService';
+import { DeploymentService } from '../services/deploymentService.js';
 import {
   CreateDeploymentInput,
   UpdateDeploymentInput,
   DeploymentFilter,
   DeploymentEnvironment,
-} from '../models/deployment';
+} from '../models/deployment.js';
+
+// Extend Request type to include user
+interface AuthenticatedRequest extends Request {
+  user?: { id: string };
+}
 
 export function createDeploymentRoutes(db: Pool): Router {
   const router = Router();
   const deploymentService = new DeploymentService(db);
 
   // GET /api/companyos/deployments - List deployments
-  router.get('/', async (req, res) => {
+  router.get('/', async (req: Request, res: Response): Promise<void> => {
     try {
       const filter: DeploymentFilter = {};
       if (req.query.serviceName) filter.serviceName = req.query.serviceName as string;
       if (req.query.environment) filter.environment = req.query.environment as DeploymentEnvironment;
-      if (req.query.status) filter.status = req.query.status as any;
+      if (req.query.status) filter.status = req.query.status as DeploymentFilter['status'];
       if (req.query.deployedBy) filter.deployedBy = req.query.deployedBy as string;
       if (req.query.fromDate) filter.fromDate = new Date(req.query.fromDate as string);
       if (req.query.toDate) filter.toDate = new Date(req.query.toDate as string);
@@ -40,7 +45,7 @@ export function createDeploymentRoutes(db: Pool): Router {
   });
 
   // GET /api/companyos/deployments/stats - Get deployment statistics
-  router.get('/stats', async (req, res) => {
+  router.get('/stats', async (req: Request, res: Response): Promise<void> => {
     try {
       const serviceName = req.query.serviceName as string | undefined;
       const environment = req.query.environment as DeploymentEnvironment | undefined;
@@ -55,11 +60,12 @@ export function createDeploymentRoutes(db: Pool): Router {
   });
 
   // GET /api/companyos/deployments/:id - Get deployment by ID
-  router.get('/:id', async (req, res) => {
+  router.get('/:id', async (req: Request, res: Response): Promise<void> => {
     try {
       const deployment = await deploymentService.getDeployment(req.params.id);
       if (!deployment) {
-        return res.status(404).json({ error: 'Deployment not found' });
+        res.status(404).json({ error: 'Deployment not found' });
+        return;
       }
       res.json({ deployment });
     } catch (error) {
@@ -69,7 +75,7 @@ export function createDeploymentRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/deployments - Create deployment
-  router.post('/', async (req, res) => {
+  router.post('/', async (req: Request, res: Response): Promise<void> => {
     try {
       const input: CreateDeploymentInput = req.body;
       const deployment = await deploymentService.createDeployment(input);
@@ -81,12 +87,13 @@ export function createDeploymentRoutes(db: Pool): Router {
   });
 
   // PATCH /api/companyos/deployments/:id - Update deployment
-  router.patch('/:id', async (req, res) => {
+  router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
     try {
       const input: UpdateDeploymentInput = req.body;
       const deployment = await deploymentService.updateDeployment(req.params.id, input);
       if (!deployment) {
-        return res.status(404).json({ error: 'Deployment not found' });
+        res.status(404).json({ error: 'Deployment not found' });
+        return;
       }
       res.json({ deployment });
     } catch (error) {
@@ -96,11 +103,12 @@ export function createDeploymentRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/deployments/:id/succeeded - Mark deployment as succeeded
-  router.post('/:id/succeeded', async (req, res) => {
+  router.post('/:id/succeeded', async (req: Request, res: Response): Promise<void> => {
     try {
       const deployment = await deploymentService.markSucceeded(req.params.id);
       if (!deployment) {
-        return res.status(404).json({ error: 'Deployment not found' });
+        res.status(404).json({ error: 'Deployment not found' });
+        return;
       }
       res.json({ deployment });
     } catch (error) {
@@ -110,15 +118,17 @@ export function createDeploymentRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/deployments/:id/failed - Mark deployment as failed
-  router.post('/:id/failed', async (req, res) => {
+  router.post('/:id/failed', async (req: Request, res: Response): Promise<void> => {
     try {
       const { errorMessage } = req.body;
       if (!errorMessage) {
-        return res.status(400).json({ error: 'Missing errorMessage' });
+        res.status(400).json({ error: 'Missing errorMessage' });
+        return;
       }
       const deployment = await deploymentService.markFailed(req.params.id, errorMessage);
       if (!deployment) {
-        return res.status(404).json({ error: 'Deployment not found' });
+        res.status(404).json({ error: 'Deployment not found' });
+        return;
       }
       res.json({ deployment });
     } catch (error) {
@@ -128,12 +138,13 @@ export function createDeploymentRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/deployments/:id/rollback - Rollback deployment
-  router.post('/:id/rollback', async (req, res) => {
+  router.post('/:id/rollback', async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const rolledBackBy = req.user?.id || req.body.rolledBackBy || 'system';
       const deployment = await deploymentService.createRollback(req.params.id, rolledBackBy);
       if (!deployment) {
-        return res.status(404).json({ error: 'Original deployment not found' });
+        res.status(404).json({ error: 'Original deployment not found' });
+        return;
       }
       res.status(201).json({ deployment });
     } catch (error) {

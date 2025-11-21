@@ -3,22 +3,27 @@
  * REST endpoints for alert management
  */
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { Pool } from 'pg';
-import { AlertService } from '../services/alertService';
-import { CreateAlertInput, UpdateAlertInput, AlertFilter } from '../models/alert';
+import { AlertService } from '../services/alertService.js';
+import { CreateAlertInput, UpdateAlertInput, AlertFilter } from '../models/alert.js';
+
+// Extend Request type to include user
+interface AuthenticatedRequest extends Request {
+  user?: { id: string };
+}
 
 export function createAlertRoutes(db: Pool): Router {
   const router = Router();
   const alertService = new AlertService(db);
 
   // GET /api/companyos/alerts - List alerts
-  router.get('/', async (req, res) => {
+  router.get('/', async (req: Request, res: Response): Promise<void> => {
     try {
       const filter: AlertFilter = {};
       if (req.query.alertName) filter.alertName = req.query.alertName as string;
-      if (req.query.severity) filter.severity = req.query.severity as any;
-      if (req.query.status) filter.status = req.query.status as any;
+      if (req.query.severity) filter.severity = req.query.severity as AlertFilter['severity'];
+      if (req.query.status) filter.status = req.query.status as AlertFilter['status'];
       if (req.query.serviceName) filter.serviceName = req.query.serviceName as string;
       if (req.query.fromDate) filter.fromDate = new Date(req.query.fromDate as string);
       if (req.query.toDate) filter.toDate = new Date(req.query.toDate as string);
@@ -35,7 +40,7 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // GET /api/companyos/alerts/firing - Get firing alerts
-  router.get('/firing', async (req, res) => {
+  router.get('/firing', async (_req: Request, res: Response): Promise<void> => {
     try {
       const alerts = await alertService.getFiringAlerts();
       res.json({ alerts });
@@ -46,7 +51,7 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // GET /api/companyos/alerts/metrics - Get alert metrics
-  router.get('/metrics', async (req, res) => {
+  router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
     try {
       const days = parseInt(req.query.days as string) || 7;
       const metrics = await alertService.getAlertMetrics(days);
@@ -58,11 +63,12 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // GET /api/companyos/alerts/:id - Get alert by ID
-  router.get('/:id', async (req, res) => {
+  router.get('/:id', async (req: Request, res: Response): Promise<void> => {
     try {
       const alert = await alertService.getAlert(req.params.id);
       if (!alert) {
-        return res.status(404).json({ error: 'Alert not found' });
+        res.status(404).json({ error: 'Alert not found' });
+        return;
       }
       res.json({ alert });
     } catch (error) {
@@ -72,14 +78,15 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/alerts - Create alert
-  router.post('/', async (req, res) => {
+  router.post('/', async (req: Request, res: Response): Promise<void> => {
     try {
       // Check for duplicate using fingerprint
       if (req.body.fingerprint) {
         const existing = await alertService.findByFingerprint(req.body.fingerprint);
         if (existing && existing.status === 'firing') {
           // Alert already exists and is firing, return existing
-          return res.json({ alert: existing, deduplicated: true });
+          res.json({ alert: existing, deduplicated: true });
+          return;
         }
       }
 
@@ -93,12 +100,13 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // PATCH /api/companyos/alerts/:id - Update alert
-  router.patch('/:id', async (req, res) => {
+  router.patch('/:id', async (req: Request, res: Response): Promise<void> => {
     try {
       const input: UpdateAlertInput = req.body;
       const alert = await alertService.updateAlert(req.params.id, input);
       if (!alert) {
-        return res.status(404).json({ error: 'Alert not found' });
+        res.status(404).json({ error: 'Alert not found' });
+        return;
       }
       res.json({ alert });
     } catch (error) {
@@ -108,12 +116,13 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/alerts/:id/acknowledge - Acknowledge alert
-  router.post('/:id/acknowledge', async (req, res) => {
+  router.post('/:id/acknowledge', async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
       const acknowledgedBy = req.user?.id || req.body.acknowledgedBy || 'system';
       const alert = await alertService.acknowledgeAlert(req.params.id, acknowledgedBy);
       if (!alert) {
-        return res.status(404).json({ error: 'Alert not found' });
+        res.status(404).json({ error: 'Alert not found' });
+        return;
       }
       res.json({ alert });
     } catch (error) {
@@ -123,11 +132,12 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/alerts/:id/resolve - Resolve alert
-  router.post('/:id/resolve', async (req, res) => {
+  router.post('/:id/resolve', async (req: Request, res: Response): Promise<void> => {
     try {
       const alert = await alertService.resolveAlert(req.params.id);
       if (!alert) {
-        return res.status(404).json({ error: 'Alert not found' });
+        res.status(404).json({ error: 'Alert not found' });
+        return;
       }
       res.json({ alert });
     } catch (error) {
@@ -137,11 +147,12 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/alerts/:id/silence - Silence alert
-  router.post('/:id/silence', async (req, res) => {
+  router.post('/:id/silence', async (req: Request, res: Response): Promise<void> => {
     try {
       const alert = await alertService.silenceAlert(req.params.id);
       if (!alert) {
-        return res.status(404).json({ error: 'Alert not found' });
+        res.status(404).json({ error: 'Alert not found' });
+        return;
       }
       res.json({ alert });
     } catch (error) {
@@ -151,15 +162,17 @@ export function createAlertRoutes(db: Pool): Router {
   });
 
   // POST /api/companyos/alerts/:id/link-incident - Link alert to incident
-  router.post('/:id/link-incident', async (req, res) => {
+  router.post('/:id/link-incident', async (req: Request, res: Response): Promise<void> => {
     try {
       const { incidentId } = req.body;
       if (!incidentId) {
-        return res.status(400).json({ error: 'Missing incidentId' });
+        res.status(400).json({ error: 'Missing incidentId' });
+        return;
       }
       const alert = await alertService.linkToIncident(req.params.id, incidentId);
       if (!alert) {
-        return res.status(404).json({ error: 'Alert not found' });
+        res.status(404).json({ error: 'Alert not found' });
+        return;
       }
       res.json({ alert });
     } catch (error) {

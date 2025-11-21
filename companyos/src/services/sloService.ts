@@ -8,7 +8,7 @@ import {
   SLOViolation,
   CreateSLOViolationInput,
   SLOComplianceSummary,
-} from '../models/slo';
+} from '../models/slo.js';
 
 export class SLOService {
   constructor(private db: Pool) {}

@@ -3,12 +3,60 @@
  * Handles GitHub webhook events for incidents and deployments
  */
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { Pool } from 'pg';
 import crypto from 'crypto';
-import { IncidentService } from '../services/incidentService';
-import { DeploymentService } from '../services/deploymentService';
-import { IncidentSeverity, IncidentStatus } from '../models/incident';
+import { IncidentService } from '../services/incidentService.js';
+import { DeploymentService } from '../services/deploymentService.js';
+import { IncidentSeverity } from '../models/incident.js';
+
+interface GitHubLabel {
+  name: string;
+}
+
+interface GitHubUser {
+  login: string;
+}
+
+interface GitHubIssue {
+  id: number;
+  number: number;
+  title: string;
+  body?: string;
+  html_url: string;
+  user: GitHubUser;
+  labels?: GitHubLabel[];
+}
+
+interface GitHubRepository {
+  name: string;
+  full_name: string;
+}
+
+interface GitHubWorkflowRun {
+  id: number;
+  name: string;
+  path: string;
+  head_sha: string;
+  head_branch: string;
+  html_url: string;
+  conclusion?: string;
+  actor: GitHubUser;
+}
+
+interface GitHubDeployment {
+  id: number;
+  ref: string;
+  sha: string;
+  environment: string;
+  description?: string;
+  creator: GitHubUser;
+}
+
+interface GitHubDeploymentStatus {
+  state: string;
+  description?: string;
+}
 
 export function createGitHubWebhookRouter(db: Pool): Router {
   const router = Router();
@@ -16,8 +64,8 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   const deploymentService = new DeploymentService(db);
 
   // Webhook signature verification
-  const verifySignature = (req: any): boolean => {
-    const signature = req.headers['x-hub-signature-256'];
+  const verifySignature = (req: Request): boolean => {
+    const signature = req.headers['x-hub-signature-256'] as string | undefined;
     if (!signature || !process.env.GITHUB_WEBHOOK_SECRET) {
       return false;
     }
@@ -28,14 +76,15 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   };
 
   // Main webhook endpoint
-  router.post('/github-webhook', async (req, res) => {
+  router.post('/github-webhook', async (req: Request, res: Response): Promise<void> => {
     // Verify signature
     if (!verifySignature(req)) {
       console.warn('GitHub webhook signature verification failed');
-      return res.status(401).json({ error: 'Invalid signature' });
+      res.status(401).json({ error: 'Invalid signature' });
+      return;
     }
 
-    const event = req.headers['x-github-event'];
+    const event = req.headers['x-github-event'] as string;
     const payload = req.body;
 
     try {
@@ -64,11 +113,11 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   });
 
   // Handle issue events (for incident tracking)
-  async function handleIssueEvent(payload: any) {
+  async function handleIssueEvent(payload: { action: string; issue: GitHubIssue; repository: GitHubRepository }): Promise<void> {
     const { action, issue, repository } = payload;
 
     // Only handle issues with 'incident' label
-    const isIncident = issue.labels?.some((label: any) =>
+    const isIncident = issue.labels?.some((label) =>
       label.name.toLowerCase() === 'incident'
     );
 
@@ -80,14 +129,12 @@ export function createGitHubWebhookRouter(db: Pool): Router {
 
     if (action === 'opened') {
       // Create incident from GitHub issue
-      const severity = extractSeverity(issue.labels);
+      const severity = extractSeverity(issue.labels || []);
       await incidentService.createIncident({
         title: issue.title,
         description: issue.body || '',
         severity,
-        affectedServices: extractServices(issue.body),
-        githubIssueUrl: issue.html_url,
-        githubIssueNumber: issue.number,
+        affectedServices: extractServices(issue.body || ''),
         createdBy: issue.user.login,
         metadata: {
           repository: repository.full_name,
@@ -107,7 +154,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   }
 
   // Handle workflow run events (for deployment tracking)
-  async function handleWorkflowRunEvent(payload: any) {
+  async function handleWorkflowRunEvent(payload: { action: string; workflow_run: GitHubWorkflowRun; repository: GitHubRepository }): Promise<void> {
     const { action, workflow_run, repository } = payload;
 
     // Only track deployment workflows
@@ -161,7 +208,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   }
 
   // Handle deployment events
-  async function handleDeploymentEvent(payload: any) {
+  async function handleDeploymentEvent(payload: { deployment: GitHubDeployment; repository: GitHubRepository }): Promise<void> {
     const { deployment, repository } = payload;
 
     console.log(`GitHub deployment event for ${deployment.environment}`);
@@ -169,7 +216,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
     await deploymentService.createDeployment({
       serviceName: repository.name,
       version: deployment.ref,
-      environment: deployment.environment,
+      environment: mapGitHubEnvironment(deployment.environment),
       deployedBy: deployment.creator.login,
       commitSha: deployment.sha,
       metadata: {
@@ -181,13 +228,13 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   }
 
   // Handle deployment status events
-  async function handleDeploymentStatusEvent(payload: any) {
-    const { deployment_status, deployment, repository } = payload;
+  async function handleDeploymentStatusEvent(payload: { deployment_status: GitHubDeploymentStatus; deployment: GitHubDeployment; repository: GitHubRepository }): Promise<void> {
+    const { deployment_status, deployment } = payload;
 
     console.log(`GitHub deployment status: ${deployment_status.state} for ${deployment.environment}`);
 
     const result = await db.query(
-      'SELECT id FROM maestro.deployments WHERE metadata->\'deploymentId\' = $1',
+      "SELECT id FROM maestro.deployments WHERE metadata->>'deploymentId' = $1",
       [deployment.id.toString()]
     );
 
@@ -206,7 +253,7 @@ export function createGitHubWebhookRouter(db: Pool): Router {
   }
 
   // Helper functions
-  function extractSeverity(labels: any[]): IncidentSeverity {
+  function extractSeverity(labels: GitHubLabel[]): IncidentSeverity {
     const sevLabel = labels.find((l) => l.name.toLowerCase().startsWith('sev'));
     if (sevLabel) {
       const match = sevLabel.name.match(/sev(\d)/i);
@@ -235,12 +282,21 @@ export function createGitHubWebhookRouter(db: Pool): Router {
     return repoName;
   }
 
-  function extractEnvironment(workflowName: string, branch: string): any {
+  function extractEnvironment(workflowName: string, branch: string): 'dev' | 'staging' | 'preview' | 'production' | 'canary' {
     const name = (workflowName + ' ' + branch).toLowerCase();
     if (name.includes('production') || name.includes('prod')) return 'production';
     if (name.includes('staging')) return 'staging';
     if (name.includes('preview')) return 'preview';
     if (name.includes('canary')) return 'canary';
+    return 'dev';
+  }
+
+  function mapGitHubEnvironment(env: string): 'dev' | 'staging' | 'preview' | 'production' | 'canary' {
+    const normalized = env.toLowerCase();
+    if (normalized.includes('prod')) return 'production';
+    if (normalized.includes('stag')) return 'staging';
+    if (normalized.includes('prev')) return 'preview';
+    if (normalized.includes('canary')) return 'canary';
     return 'dev';
   }
 

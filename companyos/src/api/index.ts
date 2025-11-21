@@ -3,11 +3,11 @@
  * Main router for all CompanyOS operational endpoints
  */
 
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { Pool } from 'pg';
-import { createIncidentRoutes } from './incidentRoutes';
-import { createDeploymentRoutes } from './deploymentRoutes';
-import { createAlertRoutes } from './alertRoutes';
+import { createIncidentRoutes } from './incidentRoutes.js';
+import { createDeploymentRoutes } from './deploymentRoutes.js';
+import { createAlertRoutes } from './alertRoutes.js';
 
 export function createCompanyOSRouter(db: Pool): Router {
   const router = Router();
@@ -18,7 +18,7 @@ export function createCompanyOSRouter(db: Pool): Router {
   router.use('/alerts', createAlertRoutes(db));
 
   // Health check endpoint
-  router.get('/health', (req, res) => {
+  router.get('/health', (_req: Request, res: Response): void => {
     res.json({
       status: 'healthy',
       service: 'companyos-api',
@@ -27,7 +27,7 @@ export function createCompanyOSRouter(db: Pool): Router {
   });
 
   // Dashboard summary endpoint
-  router.get('/dashboard', async (req, res) => {
+  router.get('/dashboard', async (_req: Request, res: Response): Promise<void> => {
     try {
       // Fetch summary data for dashboard
       const activeIncidents = await db.query(

@@ -11,7 +11,7 @@ import {
   AlertFilter,
   AlertStatus,
   AlertMetrics,
-} from '../models/alert';
+} from '../models/alert.js';
 
 export class AlertService {
   constructor(private db: Pool) {}

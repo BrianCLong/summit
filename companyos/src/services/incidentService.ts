@@ -10,7 +10,7 @@ import {
   UpdateIncidentInput,
   IncidentFilter,
   IncidentStatus,
-} from '../models/incident';
+} from '../models/incident.js';
 
 export class IncidentService {
   constructor(private db: Pool) {}

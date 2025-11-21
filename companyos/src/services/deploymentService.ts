@@ -12,7 +12,7 @@ import {
   DeploymentStatus,
   DeploymentStats,
   DeploymentEnvironment,
-} from '../models/deployment';
+} from '../models/deployment.js';
 
 export class DeploymentService {
   constructor(private db: Pool) {}
