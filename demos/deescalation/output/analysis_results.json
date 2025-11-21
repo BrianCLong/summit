@@ -1,6 +1,6 @@
 {
   "demo_name": "De-escalation Coaching",
-  "processed_at": "2025-11-21T07:29:22.163116",
+  "processed_at": "2025-11-21T07:33:36.542427",
   "pipeline_version": "2.0.0",
   "mode": "mock",
   "api_url": "http://localhost:8000",
@@ -35,7 +35,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.161490",
+        "timestamp": "2025-11-21T07:33:36.540465",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.78,
@@ -58,7 +58,7 @@
           "Customer is shouting (high caps usage) - respond calmly."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.05602836608886719,
+        "processing_time_ms": 0.06103515625,
         "policy_flags": []
       }
     },
@@ -82,7 +82,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.161675",
+        "timestamp": "2025-11-21T07:33:36.540687",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.02,
@@ -102,7 +102,7 @@
           "Document defect for quality team"
         ],
         "escalation_risk": "low",
-        "processing_time_ms": 0.025987625122070312,
+        "processing_time_ms": 0.030040740966796875,
         "policy_flags": []
       }
     },
@@ -127,7 +127,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.161818",
+        "timestamp": "2025-11-21T07:33:36.540871",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.64,
@@ -148,7 +148,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.025510787963867188,
+        "processing_time_ms": 0.027179718017578125,
         "policy_flags": []
       }
     },
@@ -172,7 +172,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.161948",
+        "timestamp": "2025-11-21T07:33:36.541029",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.08,
@@ -192,7 +192,7 @@
           "Escalate to security if suspicious"
         ],
         "escalation_risk": "low",
-        "processing_time_ms": 0.02002716064453125,
+        "processing_time_ms": 0.02193450927734375,
         "policy_flags": []
       }
     },
@@ -217,7 +217,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.162066",
+        "timestamp": "2025-11-21T07:33:36.541189",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.89,
@@ -239,7 +239,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "critical",
-        "processing_time_ms": 0.025272369384765625,
+        "processing_time_ms": 0.025510787963867188,
         "policy_flags": []
       }
     },
@@ -263,7 +263,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.162195",
+        "timestamp": "2025-11-21T07:33:36.541351",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.01,
@@ -283,7 +283,7 @@
           "Set expectations on feature roadmap"
         ],
         "escalation_risk": "none",
-        "processing_time_ms": 0.024557113647460938,
+        "processing_time_ms": 0.029087066650390625,
         "policy_flags": []
       }
     },
@@ -308,7 +308,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.162328",
+        "timestamp": "2025-11-21T07:33:36.541507",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.72,
@@ -331,7 +331,7 @@
           "Customer is shouting (high caps usage) - respond calmly."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.025272369384765625,
+        "processing_time_ms": 0.02574920654296875,
         "policy_flags": []
       }
     },
@@ -356,7 +356,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.162460",
+        "timestamp": "2025-11-21T07:33:36.541654",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.68,
@@ -377,7 +377,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.030040740966796875,
+        "processing_time_ms": 0.032901763916015625,
         "policy_flags": []
       }
     },
@@ -402,7 +402,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.162596",
+        "timestamp": "2025-11-21T07:33:36.541840",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.05,
@@ -422,7 +422,7 @@
           "Offer loyalty discounts if applicable"
         ],
         "escalation_risk": "low",
-        "processing_time_ms": 0.02193450927734375,
+        "processing_time_ms": 0.024080276489257812,
         "policy_flags": []
       }
     },
@@ -447,7 +447,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.162720",
+        "timestamp": "2025-11-21T07:33:36.541982",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.48,
@@ -468,7 +468,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "medium",
-        "processing_time_ms": 0.030755996704101562,
+        "processing_time_ms": 0.026464462280273438,
         "policy_flags": []
       }
     },
@@ -493,7 +493,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.162892",
+        "timestamp": "2025-11-21T07:33:36.542144",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.85,
@@ -515,7 +515,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "critical",
-        "processing_time_ms": 0.025272369384765625,
+        "processing_time_ms": 0.025510787963867188,
         "policy_flags": []
       }
     },
@@ -540,7 +540,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:22.163020",
+        "timestamp": "2025-11-21T07:33:36.542311",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.0,
@@ -560,7 +560,7 @@
           "Ask for review if appropriate"
         ],
         "escalation_risk": "none",
-        "processing_time_ms": 0.023126602172851562,
+        "processing_time_ms": 0.028133392333984375,
         "policy_flags": []
       }
     }
@@ -578,11 +578,11 @@
       "high": 4,
       "critical": 2
     },
-    "total_processing_time_ms": 0.3337860107421875,
-    "avg_processing_time_ms": 0.027815500895182293,
+    "total_processing_time_ms": 0.35762786865234375,
+    "avg_processing_time_ms": 0.029802322387695312,
     "avg_toxicity": 0.4333333333333333,
     "error_count": 0,
     "success_rate": 1.0
   },
-  "pipeline_duration_seconds": 0.0022199153900146484
+  "pipeline_duration_seconds": 0.002626657485961914
 }

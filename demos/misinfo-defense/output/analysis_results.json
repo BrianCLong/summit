@@ -1,6 +1,6 @@
 {
   "demo_name": "Adversarial Misinfo Defense",
-  "processed_at": "2025-11-21T07:29:27.671563",
+  "processed_at": "2025-11-21T07:33:32.415190",
   "pipeline_version": "2.0.0",
   "mode": "mock",
   "total_posts": 10,
@@ -29,7 +29,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.670111",
+        "timestamp": "2025-11-21T07:33:32.413860",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -44,7 +44,7 @@
         "is_misinfo": true,
         "confidence": 0.92,
         "evidence": [],
-        "processing_time_ms": 0.03814697265625
+        "processing_time_ms": 0.041961669921875
       }
     },
     {
@@ -68,7 +68,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.670330",
+        "timestamp": "2025-11-21T07:33:32.414035",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -83,7 +83,7 @@
         "is_misinfo": false,
         "confidence": 0.98,
         "evidence": [],
-        "processing_time_ms": 0.016450881958007812
+        "processing_time_ms": 0.013589859008789062
       }
     },
     {
@@ -118,7 +118,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.670482",
+        "timestamp": "2025-11-21T07:33:32.414184",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -154,7 +154,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.016689300537109375
+        "processing_time_ms": 0.0133514404296875
       }
     },
     {
@@ -184,7 +184,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.670662",
+        "timestamp": "2025-11-21T07:33:32.414350",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -214,7 +214,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.012636184692382812
+        "processing_time_ms": 0.011444091796875
       }
     },
     {
@@ -237,7 +237,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.670778",
+        "timestamp": "2025-11-21T07:33:32.414465",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -282,7 +282,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.670903",
+        "timestamp": "2025-11-21T07:33:32.414589",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -345,7 +345,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.671085",
+        "timestamp": "2025-11-21T07:33:32.414728",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -365,7 +365,7 @@
         "is_misinfo": false,
         "confidence": 0.97,
         "evidence": [],
-        "processing_time_ms": 0.011205673217773438
+        "processing_time_ms": 0.012874603271484375
       }
     },
     {
@@ -394,7 +394,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.671217",
+        "timestamp": "2025-11-21T07:33:32.414862",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -427,7 +427,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.029087066650390625
+        "processing_time_ms": 0.011444091796875
       }
     },
     {
@@ -457,7 +457,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.671382",
+        "timestamp": "2025-11-21T07:33:32.414997",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -477,7 +477,7 @@
         "is_misinfo": false,
         "confidence": 0.91,
         "evidence": [],
-        "processing_time_ms": 0.010251998901367188
+        "processing_time_ms": 0.009298324584960938
       }
     },
     {
@@ -508,7 +508,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:29:27.671479",
+        "timestamp": "2025-11-21T07:33:32.415105",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -543,7 +543,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.010967254638671875
+        "processing_time_ms": 0.008106231689453125
       }
     }
   ],
@@ -552,11 +552,11 @@
     "posts_failed": 0,
     "misinfo_detected": 6,
     "legitimate_detected": 4,
-    "total_processing_time_ms": 0.16617774963378906,
-    "avg_processing_time_ms": 0.016617774963378906,
+    "total_processing_time_ms": 0.14281272888183594,
+    "avg_processing_time_ms": 0.014281272888183594,
     "avg_confidence": 0.932,
     "error_count": 0,
     "success_rate": 1.0
   },
-  "pipeline_duration_seconds": 0.0021719932556152344
+  "pipeline_duration_seconds": 0.0020296573638916016
 }
