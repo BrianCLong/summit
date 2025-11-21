@@ -25,6 +25,10 @@ import { Request, Response, NextFunction } from 'express'; // Import types for m
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
+import { NotificationService } from './notifications/NotificationService.js';
+import { MessagingService } from './messaging/MessagingService.js';
+import { getRedisClient } from './db/redis.js';
+import notificationRouter from './routes/notifications.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -222,6 +226,17 @@ export const createApp = async () => {
   startTrustWorker();
   // Start retention worker if enabled
   startRetentionWorker();
+
+  // Initialize Notification Service
+  const redisClient = getRedisClient();
+  const notificationService = new NotificationService(redisClient);
+  app.locals.notificationService = notificationService;
+
+  const messagingService = new MessagingService();
+  app.locals.messagingService = messagingService;
+
+  // Register routes
+  app.use('/api/notifications', notificationRouter);
 
   return app;
 };
