@@ -3,6 +3,7 @@ import { verifyToken } from '../lib/auth.js';
 import pino from 'pino';
 import { initGraphSync, registerGraphHandlers } from './graph-crdt.js';
 import { registerPresenceHandlers } from './presence.js';
+import { registerAnalyticsHandlers } from './analytics.js';
 
 const logger = pino();
 
@@ -91,6 +92,7 @@ export function initSocket(httpServer: any): Server {
 
     registerGraphHandlers(socket);
     registerPresenceHandlers(socket);
+    registerAnalyticsHandlers(socket);
 
     socket.on('disconnect', () => {
       logger.info(
