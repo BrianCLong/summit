@@ -18,3 +18,6 @@ export * from './backends/cloud-providers';
 
 // QRNG
 export * from './qrng/quantum-random';
+
+// Performance utilities
+export * from './utils/performance';
