@@ -1,0 +1,521 @@
+# PostgreSQL High Availability Configuration
+# Uses Patroni for automatic failover and streaming replication
+#
+# Features:
+# - Synchronous replication with automatic failover
+# - Connection pooling with PgBouncer
+# - Automatic backup integration
+# - Prometheus metrics export
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-db
+  labels:
+    app.kubernetes.io/component: database
+    app.kubernetes.io/part-of: intelgraph
+---
+# PostgreSQL ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgresql-ha-config
+  namespace: intelgraph-db
+data:
+  # Patroni configuration
+  patroni.yaml: |
+    scope: intelgraph-cluster
+    namespace: /service/
+    name: postgresql-${POD_NAME}
+
+    restapi:
+      listen: 0.0.0.0:8008
+      connect_address: ${POD_IP}:8008
+
+    etcd3:
+      hosts: etcd-0.etcd:2379,etcd-1.etcd:2379,etcd-2.etcd:2379
+
+    bootstrap:
+      dcs:
+        ttl: 30
+        loop_wait: 10
+        retry_timeout: 10
+        maximum_lag_on_failover: 1048576
+        synchronous_mode: true
+        synchronous_mode_strict: false
+        postgresql:
+          use_pg_rewind: true
+          use_slots: true
+          parameters:
+            max_connections: 200
+            shared_buffers: 2GB
+            effective_cache_size: 6GB
+            maintenance_work_mem: 512MB
+            checkpoint_completion_target: 0.9
+            wal_buffers: 64MB
+            default_statistics_target: 100
+            random_page_cost: 1.1
+            effective_io_concurrency: 200
+            min_wal_size: 1GB
+            max_wal_size: 4GB
+            max_worker_processes: 4
+            max_parallel_workers_per_gather: 2
+            max_parallel_workers: 4
+            max_parallel_maintenance_workers: 2
+            wal_level: replica
+            hot_standby: "on"
+            max_wal_senders: 10
+            max_replication_slots: 10
+            hot_standby_feedback: "on"
+            archive_mode: "on"
+            archive_command: '/scripts/archive_wal.sh %p %f'
+            archive_timeout: 300
+            log_min_duration_statement: 1000
+            log_checkpoints: "on"
+            log_connections: "on"
+            log_disconnections: "on"
+            log_lock_waits: "on"
+            log_temp_files: 0
+            log_autovacuum_min_duration: 0
+
+      initdb:
+        - encoding: UTF8
+        - data-checksums
+
+      pg_hba:
+        - local all all trust
+        - host all all 0.0.0.0/0 md5
+        - host replication replicator 0.0.0.0/0 md5
+
+    postgresql:
+      listen: 0.0.0.0:5432
+      connect_address: ${POD_IP}:5432
+      data_dir: /var/lib/postgresql/data
+      bin_dir: /usr/lib/postgresql/15/bin
+      authentication:
+        superuser:
+          username: postgres
+          password: ${POSTGRES_PASSWORD}
+        replication:
+          username: replicator
+          password: ${REPLICATION_PASSWORD}
+
+    tags:
+      nofailover: false
+      noloadbalance: false
+      clonefrom: false
+      nosync: false
+
+  # PgBouncer configuration
+  pgbouncer.ini: |
+    [databases]
+    intelgraph = host=postgresql-primary port=5432 dbname=intelgraph_prod
+
+    [pgbouncer]
+    listen_addr = 0.0.0.0
+    listen_port = 6432
+    auth_type = md5
+    auth_file = /etc/pgbouncer/userlist.txt
+    pool_mode = transaction
+    max_client_conn = 1000
+    default_pool_size = 25
+    min_pool_size = 5
+    reserve_pool_size = 5
+    reserve_pool_timeout = 3
+    server_lifetime = 3600
+    server_idle_timeout = 600
+    server_connect_timeout = 15
+    server_login_retry = 3
+    query_timeout = 120
+    query_wait_timeout = 60
+    client_idle_timeout = 300
+    admin_users = postgres
+    stats_users = postgres,monitoring
+    ignore_startup_parameters = extra_float_digits
+    log_connections = 1
+    log_disconnections = 1
+    log_pooler_errors = 1
+---
+# PostgreSQL StatefulSet
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgresql
+  namespace: intelgraph-db
+  labels:
+    app: postgresql
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/component: database
+spec:
+  serviceName: postgresql
+  replicas: 3
+  podManagementPolicy: OrderedReady
+  updateStrategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        app: postgresql
+        app.kubernetes.io/name: postgresql
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9187"
+    spec:
+      serviceAccountName: postgresql
+      securityContext:
+        fsGroup: 999
+        runAsUser: 999
+        runAsNonRoot: true
+
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: postgresql
+              topologyKey: kubernetes.io/hostname
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: node-type
+                    operator: In
+                    values:
+                      - database
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: postgresql
+
+      initContainers:
+        - name: init-chmod
+          image: busybox:1.36
+          command: ['sh', '-c', 'chmod 700 /var/lib/postgresql/data']
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          securityContext:
+            runAsUser: 0
+
+      containers:
+        - name: postgresql
+          image: postgres:15-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgresql
+              containerPort: 5432
+              protocol: TCP
+            - name: patroni
+              containerPort: 8008
+              protocol: TCP
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: postgres-password
+            - name: REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: replication-password
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "4Gi"
+            limits:
+              cpu: "4000m"
+              memory: "8Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: config
+              mountPath: /etc/patroni
+            - name: wal-archive
+              mountPath: /var/lib/postgresql/wal-archive
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8008
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8008
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /liveness
+              port: 8008
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 30
+
+        - name: postgres-exporter
+          image: prometheuscommunity/postgres-exporter:v0.15.0
+          ports:
+            - name: metrics
+              containerPort: 9187
+          env:
+            - name: DATA_SOURCE_URI
+              value: "localhost:5432/postgres?sslmode=disable"
+            - name: DATA_SOURCE_USER
+              value: "postgres"
+            - name: DATA_SOURCE_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: postgres-password
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
+
+      volumes:
+        - name: config
+          configMap:
+            name: postgresql-ha-config
+        - name: wal-archive
+          emptyDir: {}
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        labels:
+          app: postgresql
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast-ssd
+        resources:
+          requests:
+            storage: 100Gi
+---
+# PostgreSQL Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-primary
+  namespace: intelgraph-db
+  labels:
+    app: postgresql
+    role: primary
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+    - name: patroni
+      port: 8008
+      targetPort: 8008
+  selector:
+    app: postgresql
+    role: primary
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-replica
+  namespace: intelgraph-db
+  labels:
+    app: postgresql
+    role: replica
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: postgresql
+    role: replica
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  namespace: intelgraph-db
+  labels:
+    app: postgresql
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: 5432
+    - name: patroni
+      port: 8008
+      targetPort: 8008
+  selector:
+    app: postgresql
+---
+# PgBouncer Deployment for connection pooling
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgbouncer
+  namespace: intelgraph-db
+  labels:
+    app: pgbouncer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: pgbouncer
+  template:
+    metadata:
+      labels:
+        app: pgbouncer
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: pgbouncer
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: pgbouncer
+          image: bitnami/pgbouncer:1.21.0
+          ports:
+            - name: pgbouncer
+              containerPort: 6432
+          env:
+            - name: POSTGRESQL_HOST
+              value: postgresql-primary
+            - name: POSTGRESQL_PORT
+              value: "5432"
+            - name: PGBOUNCER_DATABASE
+              value: intelgraph_prod
+            - name: PGBOUNCER_PORT
+              value: "6432"
+            - name: PGBOUNCER_POOL_MODE
+              value: transaction
+            - name: PGBOUNCER_MAX_CLIENT_CONN
+              value: "1000"
+            - name: PGBOUNCER_DEFAULT_POOL_SIZE
+              value: "25"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 6432
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            tcpSocket:
+              port: 6432
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          volumeMounts:
+            - name: config
+              mountPath: /etc/pgbouncer
+      volumes:
+        - name: config
+          configMap:
+            name: postgresql-ha-config
+            items:
+              - key: pgbouncer.ini
+                path: pgbouncer.ini
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgbouncer
+  namespace: intelgraph-db
+  labels:
+    app: pgbouncer
+spec:
+  type: ClusterIP
+  ports:
+    - name: pgbouncer
+      port: 6432
+      targetPort: 6432
+  selector:
+    app: pgbouncer
+---
+# Pod Disruption Budget
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgresql-pdb
+  namespace: intelgraph-db
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: postgresql
+---
+# ServiceAccount
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: postgresql
+  namespace: intelgraph-db
+---
+# RBAC for Patroni
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: postgresql
+  namespace: intelgraph-db
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["create", "get", "list", "patch", "update", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    verbs: ["create", "get", "list", "patch", "update", "watch", "delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: postgresql
+  namespace: intelgraph-db
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: postgresql
+subjects:
+  - kind: ServiceAccount
+    name: postgresql
+    namespace: intelgraph-db
