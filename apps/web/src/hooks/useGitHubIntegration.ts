@@ -347,3 +347,77 @@ export const useGitHubStats = (repository: string) => {
     staleTime: 10800000, // 3 hours
   })
 }
+
+// Interface for PR creation
+export interface CreatePullRequestParams {
+  repository: string
+  title: string
+  body: string
+  head: string // Source branch
+  base: string // Target branch (e.g., 'main')
+  draft?: boolean
+  labels?: string[]
+  reviewers?: string[]
+  assignees?: string[]
+}
+
+export interface PullRequestResponse {
+  number: number
+  title: string
+  html_url: string
+  state: string
+  head: { ref: string }
+  base: { ref: string }
+  user: { login: string }
+  created_at: string
+  draft: boolean
+}
+
+// Hook for creating GitHub Pull Requests
+export const useCreatePullRequest = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (
+      params: CreatePullRequestParams
+    ): Promise<PullRequestResponse> => {
+      const response = await fetch('/api/integrations/github/pulls', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.message || 'Failed to create pull request')
+      }
+
+      return response.json()
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate GitHub metrics to refresh PR counts
+      queryClient.invalidateQueries({
+        queryKey: ['github-metrics', variables.repository],
+      })
+    },
+  })
+}
+
+// Hook to fetch repository branches
+export const useGitHubBranches = (repository: string) => {
+  return useQuery({
+    queryKey: ['github-branches', repository],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/integrations/github/branches?repo=${repository}`
+      )
+      if (!response.ok) {
+        throw new Error('Failed to fetch branches')
+      }
+      return response.json() as Promise<
+        Array<{ name: string; protected: boolean }>
+      >
+    },
+    staleTime: 60000, // 1 minute
+  })
+}

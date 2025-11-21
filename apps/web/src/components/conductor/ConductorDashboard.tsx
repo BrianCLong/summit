@@ -43,16 +43,19 @@ import {
   DollarSign,
   Shield,
   Zap,
+  Plus,
 } from 'lucide-react'
 import { useConductorMetrics } from '@/hooks/useConductorMetrics'
 import { useGitHubIntegration } from '@/hooks/useGitHubIntegration'
 import { useJIRAIntegration } from '@/hooks/useJIRAIntegration'
+import { CreatePullRequestModal } from '@/components/github'
 
 export const ConductorDashboard: React.FC = () => {
   const [selectedTimeRange, setSelectedTimeRange] = useState<
     '1h' | '24h' | '7d' | '30d'
   >('24h')
   const [refreshInterval] = useState(30000) // 30 seconds
+  const [createPRModalOpen, setCreatePRModalOpen] = useState(false)
 
   const {
     data: metrics,
@@ -532,6 +535,15 @@ export const ConductorDashboard: React.FC = () => {
             <div className="text-center py-8">Loading GitHub metrics...</div>
           ) : (
             <>
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={() => setCreatePRModalOpen(true)}
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Pull Request
+                </button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <MetricCard
                   title="Open PRs"
@@ -686,6 +698,15 @@ export const ConductorDashboard: React.FC = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Create Pull Request Modal */}
+      <CreatePullRequestModal
+        open={createPRModalOpen}
+        onOpenChange={setCreatePRModalOpen}
+        onSuccess={(pr) => {
+          window.open(pr.html_url, '_blank')
+        }}
+      />
     </div>
   )
 }
