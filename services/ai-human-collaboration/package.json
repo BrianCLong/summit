@@ -9,13 +9,19 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./integrations": {
+      "import": "./dist/integrations/index.js",
+      "types": "./dist/integrations/index.d.ts"
     }
   },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "eslint src/",
-    "test": "jest",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --coverage",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
@@ -25,13 +31,22 @@
     "recommendations",
     "commander-control",
     "audit-trail",
-    "traceability"
+    "traceability",
+    "agent-gateway"
   ],
   "author": "IntelGraph Team",
   "license": "UNLICENSED",
   "devDependencies": {
     "@types/node": "^20.10.0",
     "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "@intelgraph/agent-gateway": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@intelgraph/agent-gateway": {
+      "optional": true
+    }
   },
   "engines": {
     "node": ">=18.0.0"

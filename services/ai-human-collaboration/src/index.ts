@@ -10,6 +10,8 @@
  */
 
 export * from './types.js';
+export * from './performance.js';
+export * from './integrations/index.js';
 export { RecommendationEngine } from './RecommendationEngine.js';
 export { CommanderControl } from './CommanderControl.js';
 export { FeedbackCollector } from './FeedbackCollector.js';
