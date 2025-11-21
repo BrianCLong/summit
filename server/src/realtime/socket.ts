@@ -46,6 +46,10 @@ export function initSocket(httpServer: any): Server {
   ns.on('connection', (socket: UserSocket) => {
     logger.info(`Realtime connected ${socket.id} for user ${socket.user?.id}`);
 
+    if (socket.user?.id) {
+      socket.join(`user:${socket.user.id}`);
+    }
+
     const authorize =
       (roles: string[], event: string, handler: (...args: any[]) => void) =>
       (...args: any[]) => {
