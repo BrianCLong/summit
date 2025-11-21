@@ -1,0 +1,500 @@
+openapi: 3.0.3
+info:
+  title: ETL Assistant API
+  description: |
+    Interactive mapping, PII detection, and license enforcement for data ingestion.
+    Supports schema preview, PII scanning, and license compliance checking.
+  version: 1.0.0
+  contact:
+    name: IntelGraph Platform Team
+
+servers:
+  - url: /api/etl
+    description: ETL Assistant API
+
+paths:
+  /preview-schema:
+    post:
+      operationId: previewSchema
+      summary: Preview schema and get mapping suggestions
+      description: |
+        Analyzes sample data rows to infer field types and suggests mappings
+        to the canonical IntelGraph model (Person, Org, Asset, Location, Event).
+      tags:
+        - Schema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreviewSchemaRequest'
+            example:
+              sample_rows:
+                - first_name: John
+                  last_name: Doe
+                  email: john.doe@example.com
+              tenant_id: tenant_123
+      responses:
+        '200':
+          description: Schema preview successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaPreviewResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /pii-scan:
+    post:
+      operationId: piiScan
+      summary: Scan for PII and get redaction recommendations
+      description: |
+        Identifies personally identifiable information (PII) in datasets and
+        recommends appropriate redaction strategies.
+      tags:
+        - PII
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PIIScanRequest'
+            example:
+              sample_rows:
+                - ssn: '123-45-6789'
+                  email: user@example.com
+              tenant_id: tenant_123
+      responses:
+        '200':
+          description: PII scan successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PIIScanResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /license-check:
+    post:
+      operationId: licenseCheck
+      summary: Check license compliance
+      description: |
+        Verifies a data source against the license registry and returns
+        allow/deny with human-readable reasons.
+      tags:
+        - License
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LicenseCheckRequest'
+            example:
+              source_name: external-dataset
+              source_type: csv
+              operation: ingest
+              tenant_id: tenant_123
+      responses:
+        '200':
+          description: License check successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseCheckResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /configurations:
+    post:
+      operationId: saveConfiguration
+      summary: Save ETL configuration with lineage
+      description: Records accepted ETL configuration for provenance tracking.
+      tags:
+        - Configuration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SaveConfigurationRequest'
+      responses:
+        '201':
+          description: Configuration saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  config_id:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '503':
+          $ref: '#/components/responses/DatabaseUnavailable'
+
+    get:
+      operationId: listConfigurations
+      summary: List ETL configurations
+      tags:
+        - Configuration
+      parameters:
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: List of configurations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  configurations:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+                  limit:
+                    type: integer
+                  offset:
+                    type: integer
+
+  /configurations/{id}:
+    get:
+      operationId: getConfiguration
+      summary: Get ETL configuration by ID
+      tags:
+        - Configuration
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: tenant_id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Configuration found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ETLConfiguration'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  schemas:
+    PreviewSchemaRequest:
+      type: object
+      required:
+        - sample_rows
+        - tenant_id
+      properties:
+        sample_rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          minItems: 1
+          maxItems: 1000
+        tenant_id:
+          type: string
+        source_name:
+          type: string
+
+    SchemaPreviewResult:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldSchema'
+        suggested_mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingSuggestion'
+        primary_entity:
+          type: string
+          nullable: true
+        record_count:
+          type: integer
+        processing_time_ms:
+          type: integer
+
+    FieldSchema:
+      type: object
+      properties:
+        name:
+          type: string
+        inferred_type:
+          type: string
+          enum: [string, integer, float, boolean, date, email, phone, url, unknown]
+        nullable:
+          type: boolean
+        sample_values:
+          type: array
+          items: {}
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    MappingSuggestion:
+      type: object
+      properties:
+        source_field:
+          type: string
+        canonical_entity:
+          type: string
+          enum: [Person, Org, Location, Event, Asset, Document, Indicator, Case, Claim]
+        canonical_property:
+          type: string
+        confidence:
+          type: number
+        reasoning:
+          type: string
+
+    PIIScanRequest:
+      type: object
+      required:
+        - sample_rows
+        - tenant_id
+      properties:
+        sample_rows:
+          type: array
+          items:
+            type: object
+        tenant_id:
+          type: string
+
+    PIIScanResult:
+      type: object
+      properties:
+        pii_matches:
+          type: array
+          items:
+            $ref: '#/components/schemas/PIIMatch'
+        overall_risk:
+          type: string
+          enum: [none, low, medium, high, critical]
+        summary:
+          type: string
+        requires_dpia:
+          type: boolean
+        processing_time_ms:
+          type: integer
+
+    PIIMatch:
+      type: object
+      properties:
+        category:
+          type: string
+        severity:
+          type: string
+          enum: [none, low, medium, high, critical]
+        field_name:
+          type: string
+        sample_value:
+          type: string
+          description: Redacted sample for verification
+        match_count:
+          type: integer
+        confidence:
+          type: number
+        recommended_strategy:
+          type: string
+          enum: [none, mask, hash, encrypt, tokenize, remove]
+        reasoning:
+          type: string
+
+    LicenseCheckRequest:
+      type: object
+      required:
+        - source_name
+        - source_type
+        - tenant_id
+      properties:
+        source_name:
+          type: string
+        source_type:
+          type: string
+        operation:
+          type: string
+          enum: [ingest, query, export, transform]
+          default: ingest
+        purpose:
+          type: string
+        data_source_ids:
+          type: array
+          items:
+            type: string
+        tenant_id:
+          type: string
+
+    LicenseCheckResult:
+      type: object
+      properties:
+        compliance_status:
+          type: string
+          enum: [allow, warn, block]
+        reason:
+          type: string
+          description: Human-readable explanation
+        violations:
+          type: array
+          items:
+            type: object
+        warnings:
+          type: array
+          items:
+            type: object
+        appeal_path:
+          type: string
+          nullable: true
+
+    SaveConfigurationRequest:
+      type: object
+      required:
+        - tenant_id
+        - source_name
+        - source_type
+        - field_mappings
+        - pii_handling
+        - created_by
+      properties:
+        tenant_id:
+          type: string
+        source_name:
+          type: string
+        source_type:
+          type: string
+        sample_rows:
+          type: array
+          items:
+            type: object
+        field_mappings:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingSuggestion'
+        pii_handling:
+          type: array
+          items:
+            type: object
+        license_decision:
+          type: object
+        created_by:
+          type: string
+
+    ETLConfiguration:
+      type: object
+      properties:
+        id:
+          type: string
+        tenant_id:
+          type: string
+        source_name:
+          type: string
+        source_type:
+          type: string
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        field_mappings:
+          type: array
+          items:
+            type: object
+        pii_handling:
+          type: array
+          items:
+            type: object
+        license_decision:
+          type: object
+        metadata:
+          type: object
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    DatabaseUnavailable:
+      description: Database not available
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+tags:
+  - name: Schema
+    description: Schema inference and mapping suggestions
+  - name: PII
+    description: PII detection and redaction recommendations
+  - name: License
+    description: License compliance verification
+  - name: Configuration
+    description: ETL configuration management and lineage
