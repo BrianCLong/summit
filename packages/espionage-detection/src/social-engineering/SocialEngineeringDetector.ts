@@ -6,9 +6,9 @@
 
 import type {
   SocialEngineeringAttack,
-  ElicitationAttempt,
-  EspionageThreatLevel
+  ElicitationAttempt
 } from '../types.js';
+import { EspionageThreatLevel } from '../types.js';
 
 export interface ElicitationIndicator {
   technique: string;
@@ -182,10 +182,10 @@ export class SocialEngineeringDetector {
   ): EspionageThreatLevel {
     const avgConfidence = confidence * 100;
 
-    if (avgConfidence >= 90 || indicators.length >= 4) return 'CRITICAL';
-    if (avgConfidence >= 75 || indicators.length >= 3) return 'HIGH';
-    if (avgConfidence >= 60 || indicators.length >= 2) return 'MEDIUM';
-    return 'LOW';
+    if (avgConfidence >= 90 || indicators.length >= 4) return EspionageThreatLevel.CRITICAL;
+    if (avgConfidence >= 75 || indicators.length >= 3) return EspionageThreatLevel.HIGH;
+    if (avgConfidence >= 60 || indicators.length >= 2) return EspionageThreatLevel.MEDIUM;
+    return EspionageThreatLevel.LOW;
   }
 
   /**

@@ -45,7 +45,7 @@ export const BehavioralAnomalySchema = z.object({
   severity: z.nativeEnum(ThreatRiskLevel),
   baselineDeviation: z.number().min(0).max(100),
   description: z.string(),
-  context: z.record(z.any()),
+  context: z.record(z.string(), z.any()),
   mlConfidence: z.number().min(0).max(1)
 });
 

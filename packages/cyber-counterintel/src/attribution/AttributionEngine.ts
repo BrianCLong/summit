@@ -132,12 +132,9 @@ export class AttributionEngine {
         actorName: a.actor?.name || 'Unknown',
         confidence: a.combined
       })),
-      evidenceSummary: rankedActors[0]?.scores || {
-        technical: 0,
-        operational: 0,
-        strategic: 0,
-        overall: 0
-      },
+      evidenceSummary: rankedActors[0]?.scores
+        ? { technical: rankedActors[0].scores.technical, operational: rankedActors[0].scores.operational, strategic: rankedActors[0].scores.strategic, overall: rankedActors[0].combined }
+        : { technical: 0, operational: 0, strategic: 0, overall: 0 },
       falseFlagIndicators: falseFlagWarnings,
       confidenceFactors: this.identifyConfidenceFactors(evidence, rankedActors[0]),
       recommendation: this.generateRecommendation(primaryAttribution, falseFlagWarnings)

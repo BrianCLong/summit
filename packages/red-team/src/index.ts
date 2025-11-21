@@ -725,4 +725,3 @@ export class AutomatedResponseOrchestrator {
   }
 }
 
-export { RedTeamManager, AutomatedResponseOrchestrator };

@@ -6,14 +6,20 @@
 
 import type {
   TechnicalSurveillanceIndicator,
-  PhysicalSurveillance,
-  EspionageThreatLevel
+  PhysicalSurveillance
 } from '../types.js';
+import { EspionageThreatLevel } from '../types.js';
 
 export interface SurveillancePattern {
   type: string;
   frequency: number;
   locations: string[];
+  location: string;
+  method: string;
+  estimatedOperatives: number;
+  vehicles: string[];
+  duration: number;
+  description: string;
   timePattern: string;
   confidence: number;
 }
@@ -165,12 +171,12 @@ export class SurveillanceDetector {
    */
   private assessThreatLevel(signature: any): EspionageThreatLevel {
     if (signature.sophistication === 'ADVANCED') {
-      return 'CRITICAL';
+      return EspionageThreatLevel.CRITICAL;
     }
     if (signature.sophistication === 'HIGH') {
-      return 'HIGH';
+      return EspionageThreatLevel.HIGH;
     }
-    return 'MEDIUM';
+    return EspionageThreatLevel.MEDIUM;
   }
 
   /**
