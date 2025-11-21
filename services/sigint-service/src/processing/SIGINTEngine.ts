@@ -5,21 +5,22 @@
 
 import { EventEmitter } from 'events';
 import { v4 as uuid } from 'uuid';
-import { CollectionManager } from '@summit/sigint-collector';
-import { SignalGenerator } from '@summit/sigint-collector';
-import { SpectrumMonitor } from '@summit/sigint-collector';
-import { ModulationClassifier } from '@summit/rf-processor';
-import { SpectralAnalyzer } from '@summit/rf-processor';
-import { VoiceAnalyzer } from '@summit/comint-analyzer';
-import { MessageAnalyzer } from '@summit/comint-analyzer';
-import { CommunicationsMapper } from '@summit/comint-analyzer';
-import { PacketAnalyzer } from '@summit/network-interceptor';
-import { FlowAnalyzer } from '@summit/network-interceptor';
-import { CryptoAnalyzer } from '@summit/cryptanalysis-engine';
-import { TrafficPatternAnalyzer } from '@summit/cryptanalysis-engine';
-import { TDOALocator } from '@summit/geolocation-engine';
-import { TrackManager } from '@summit/geolocation-engine';
+import {
+  CollectionManager,
+  SignalGenerator,
+  SpectrumMonitor,
+  ExerciseManager,
+  DataSourceFactory,
+  RawSignal
+} from '@summit/sigint-collector';
+import { ModulationClassifier, SpectralAnalyzer } from '@summit/rf-processor';
+import { VoiceAnalyzer, MessageAnalyzer, CommunicationsMapper } from '@summit/comint-analyzer';
+import { PacketAnalyzer, FlowAnalyzer, DNSAnalyzer } from '@summit/network-interceptor';
+import { CryptoAnalyzer, TrafficPatternAnalyzer } from '@summit/cryptanalysis-engine';
+import { TDOALocator, TrackManager, Triangulator } from '@summit/geolocation-engine';
 import { ComplianceManager } from '../compliance/ComplianceManager';
+import { ReportGenerator } from '../reporting/ReportGenerator';
+import { VisualizationDataGenerator } from '../visualization/VisualizationData';
 
 export interface ProcessingTask {
   id: string;
@@ -40,6 +41,7 @@ export interface EngineStatus {
   tasksProcessed: number;
   activeCollectors: number;
   activeTracks: number;
+  activeExercise?: string;
   complianceStatus: 'compliant' | 'warning' | 'violation';
 }
 
@@ -50,6 +52,7 @@ export class SIGINTEngine extends EventEmitter {
   private collectionManager: CollectionManager;
   private signalGenerator: SignalGenerator;
   private spectrumMonitor: SpectrumMonitor;
+  private exerciseManager: ExerciseManager;
 
   // RF Processing
   private modulationClassifier: ModulationClassifier;
@@ -63,6 +66,7 @@ export class SIGINTEngine extends EventEmitter {
   // Network
   private packetAnalyzer: PacketAnalyzer;
   private flowAnalyzer: FlowAnalyzer;
+  private dnsAnalyzer: DNSAnalyzer;
 
   // Crypto
   private cryptoAnalyzer: CryptoAnalyzer;
@@ -71,12 +75,18 @@ export class SIGINTEngine extends EventEmitter {
   // Geolocation
   private tdoaLocator: TDOALocator;
   private trackManager: TrackManager;
+  private triangulator: Triangulator;
+
+  // Reporting & Visualization
+  private reportGenerator: ReportGenerator;
+  private visualizationGenerator: VisualizationDataGenerator;
 
   // State
   private status: EngineStatus['status'] = 'stopped';
   private startTime?: Date;
   private tasksProcessed: number = 0;
   private taskQueue: ProcessingTask[] = [];
+  private processingActive: boolean = false;
 
   constructor(complianceManager: ComplianceManager) {
     super();
@@ -92,6 +102,7 @@ export class SIGINTEngine extends EventEmitter {
       sweepRate: 1,
       sensitivity: -80
     });
+    this.exerciseManager = new ExerciseManager();
 
     this.modulationClassifier = new ModulationClassifier();
     this.spectralAnalyzer = new SpectralAnalyzer({ sampleRate: 1e6 });
@@ -102,19 +113,24 @@ export class SIGINTEngine extends EventEmitter {
 
     this.packetAnalyzer = new PacketAnalyzer();
     this.flowAnalyzer = new FlowAnalyzer();
+    this.dnsAnalyzer = new DNSAnalyzer();
 
     this.cryptoAnalyzer = new CryptoAnalyzer();
     this.trafficPatternAnalyzer = new TrafficPatternAnalyzer();
 
     this.tdoaLocator = new TDOALocator();
     this.trackManager = new TrackManager();
+    this.triangulator = new Triangulator();
+
+    this.reportGenerator = new ReportGenerator();
+    this.visualizationGenerator = new VisualizationDataGenerator();
 
     this.setupEventHandlers();
     this.complianceManager.log('ENGINE_INIT', 'SIGINT Engine initialized in TRAINING mode');
   }
 
   private setupEventHandlers(): void {
-    this.collectionManager.on('signal:collected', (signal) => {
+    this.collectionManager.on('signal:collected', (signal: RawSignal) => {
       this.emit('signal:collected', signal);
       this.complianceManager.log('SIGNAL_COLLECTED', `Signal ${signal.metadata.id} collected`);
     });
@@ -127,6 +143,15 @@ export class SIGINTEngine extends EventEmitter {
       this.emit('spectrum:anomaly', anomaly);
       this.complianceManager.log('ANOMALY_DETECTED', `Anomaly at ${anomaly.frequency}Hz`);
     });
+
+    this.exerciseManager.on('exercise:started', (exercise) => {
+      this.emit('exercise:started', exercise);
+      this.complianceManager.log('EXERCISE_STARTED', `Exercise ${exercise.id} started`);
+    });
+
+    this.exerciseManager.on('signal:generated', (signal) => {
+      this.emit('signal:collected', signal);
+    });
   }
 
   async start(): Promise<void> {
@@ -135,6 +160,7 @@ export class SIGINTEngine extends EventEmitter {
     this.status = 'running';
     this.startTime = new Date();
     this.spectrumMonitor.start();
+    this.processingActive = true;
 
     this.complianceManager.log('ENGINE_START', 'SIGINT Engine started');
     this.emit('status:changed', this.getStatus());
@@ -145,8 +171,15 @@ export class SIGINTEngine extends EventEmitter {
 
   async stop(): Promise<void> {
     this.status = 'stopped';
+    this.processingActive = false;
     this.spectrumMonitor.stop();
     await this.collectionManager.shutdown();
+
+    // End any active exercise
+    const activeExercise = this.exerciseManager.getActiveExercise();
+    if (activeExercise) {
+      this.exerciseManager.endExercise(activeExercise.id);
+    }
 
     this.complianceManager.log('ENGINE_STOP', 'SIGINT Engine stopped');
     this.emit('status:changed', this.getStatus());
@@ -154,6 +187,7 @@ export class SIGINTEngine extends EventEmitter {
 
   pause(): void {
     this.status = 'paused';
+    this.processingActive = false;
     this.spectrumMonitor.stop();
     this.emit('status:changed', this.getStatus());
   }
@@ -161,7 +195,9 @@ export class SIGINTEngine extends EventEmitter {
   resume(): void {
     if (this.status === 'paused') {
       this.status = 'running';
+      this.processingActive = true;
       this.spectrumMonitor.start();
+      this.processTaskQueue();
       this.emit('status:changed', this.getStatus());
     }
   }
@@ -191,7 +227,7 @@ export class SIGINTEngine extends EventEmitter {
   }
 
   private async processTaskQueue(): Promise<void> {
-    while (this.status === 'running') {
+    while (this.processingActive) {
       if (this.taskQueue.length > 0) {
         const task = this.taskQueue.shift()!;
         await this.processTask(task);
@@ -235,16 +271,13 @@ export class SIGINTEngine extends EventEmitter {
   }
 
   private async processCOMINT(_task: ProcessingTask): Promise<unknown> {
-    // Generate simulated COMINT data
     const message = this.signalGenerator.generateCOMINTMessage({
       communicationType: 'VOICE',
       language: 'en'
     });
 
-    // Analyze
     const analysis = await this.messageAnalyzer.analyze(message.content.transcription || '');
 
-    // Map communications
     if (message.participants.length >= 2) {
       this.communicationsMapper.addCommunication({
         source: message.participants[0].identifier,
@@ -264,48 +297,37 @@ export class SIGINTEngine extends EventEmitter {
   }
 
   private async processELINT(_task: ProcessingTask): Promise<unknown> {
-    // Generate simulated ELINT data
     const report = this.signalGenerator.generateELINTReport();
-
-    // Generate signal for analysis
     const signal = this.signalGenerator.generateRFSignal({
       signalType: 'RADAR',
       frequency: report.parameters.frequency
     });
 
-    // Classify modulation
     const classification = signal.iqData
       ? this.modulationClassifier.classify(signal.iqData.i, signal.iqData.q)
       : null;
 
-    return {
-      report,
-      signal: signal.metadata,
-      classification
-    };
+    return { report, signal: signal.metadata, classification };
   }
 
   private async processNetwork(_task: ProcessingTask): Promise<unknown> {
-    // Generate simulated network traffic
     const packets = this.packetAnalyzer.generateSimulatedPackets(100);
     const flows = this.flowAnalyzer.generateSimulatedFlows(10);
-
-    // Crypto analysis
+    const dnsTraffic = this.dnsAnalyzer.generateSimulatedTraffic(50, true);
     const encryptedTraffic = this.cryptoAnalyzer.generateSimulatedTraffic('web');
-
-    // Traffic pattern analysis
     const session = this.trafficPatternAnalyzer.generateSimulatedSession('web-browsing', 60);
 
     return {
       packetStats: this.packetAnalyzer.getStatistics(),
       flowStats: this.flowAnalyzer.getStatistics(),
+      dnsStats: this.dnsAnalyzer.getStatistics(),
+      dnsThreats: dnsTraffic.threats,
       encryptedTraffic,
       trafficSession: session
     };
   }
 
   private async processGeolocation(_task: ProcessingTask): Promise<unknown> {
-    // Setup simulated sensors
     const sensors = [
       { id: 'S1', latitude: 38.9, longitude: -77.0, altitude: 100, timestampAccuracy: 10 },
       { id: 'S2', latitude: 38.95, longitude: -77.05, altitude: 100, timestampAccuracy: 10 },
@@ -314,40 +336,36 @@ export class SIGINTEngine extends EventEmitter {
 
     sensors.forEach(s => this.tdoaLocator.registerSensor(s));
 
-    // Generate simulated measurements
     const measurements = sensors.map((s, i) => ({
       sensorId: s.id,
-      arrivalTime: Date.now() * 1e6 + i * 100, // nanoseconds
+      arrivalTime: Date.now() * 1e6 + i * 100,
       signalStrength: -60 + Math.random() * 20,
       frequency: 900e6,
       confidence: 0.8 + Math.random() * 0.15
     }));
 
-    // Calculate position
     const location = this.tdoaLocator.calculatePosition(measurements);
 
-    // Create track
     if (location) {
       this.trackManager.processLocation(location);
     }
 
-    return {
-      location,
-      activeTracks: this.trackManager.getActiveTracks()
-    };
+    return { location, activeTracks: this.trackManager.getActiveTracks() };
   }
 
   /**
    * Get engine status
    */
   getStatus(): EngineStatus {
+    const activeExercise = this.exerciseManager.getActiveExercise();
     return {
-      mode: 'TRAINING',
+      mode: activeExercise ? 'EXERCISE' : 'TRAINING',
       status: this.status,
       uptime: this.startTime ? Date.now() - this.startTime.getTime() : 0,
       tasksProcessed: this.tasksProcessed,
       activeCollectors: this.collectionManager.getCollectors().length,
       activeTracks: this.trackManager.getActiveTracks().length,
+      activeExercise: activeExercise?.id,
       complianceStatus: this.complianceManager.getComplianceStatus()
     };
   }
@@ -385,44 +403,69 @@ export class SIGINTEngine extends EventEmitter {
       this.signalGenerator.generateELINTReport()
     );
 
-    // Generate location data through tasks
-    const locationPromises = Array.from({ length: config.locations }, async () => {
-      const taskId = this.submitTask('GEOLOCATION', {}, 1);
-      // Wait for completion
-      return new Promise((resolve) => {
-        const handler = (task: ProcessingTask) => {
-          if (task.id === taskId) {
-            this.removeListener('task:completed', handler);
-            resolve(task.result);
-          }
-        };
-        this.on('task:completed', handler);
-      });
-    });
-
-    const locations = await Promise.all(locationPromises);
+    const locations: unknown[] = [];
+    for (let i = 0; i < config.locations; i++) {
+      const result = await this.processGeolocation({ id: uuid(), type: 'GEOLOCATION', status: 'pending', priority: 1, createdAt: new Date() });
+      locations.push(result);
+    }
 
     this.complianceManager.log('SCENARIO_GENERATED', `Generated ${type} training scenario`);
 
     return { signals, messages, reports, locations };
   }
 
-  // Expose analyzers for direct access
-  getCollectionManager(): CollectionManager {
-    return this.collectionManager;
+  /**
+   * Generate intelligence report
+   */
+  generateReport(params: Parameters<ReportGenerator['generateReport']>[0]) {
+    return this.reportGenerator.generateReport(params);
   }
 
-  getSpectrumMonitor(): SpectrumMonitor {
-    return this.spectrumMonitor;
+  /**
+   * Get visualization data
+   */
+  getVisualizationData() {
+    return {
+      spectrum: this.visualizationGenerator.generateSpectrumData({
+        startFreq: 30e6,
+        stopFreq: 6e9,
+        signals: [
+          { freq: 900e6, power: -40, bw: 10e6 },
+          { freq: 2.4e9, power: -50, bw: 20e6 },
+          { freq: 5.8e9, power: -55, bw: 40e6 }
+        ]
+      }),
+      network: this.visualizationGenerator.generateNetworkGraphData({
+        nodeCount: this.communicationsMapper.getNodes().length || 20,
+        edgeDensity: 0.2
+      }),
+      map: this.visualizationGenerator.generateMapData({
+        centerLat: 38.9,
+        centerLon: -77.0,
+        radius: 50,
+        markerCount: this.trackManager.getActiveTracks().length || 5,
+        showHeatmap: true,
+        showTracks: true
+      }),
+      timeline: this.visualizationGenerator.generateTimelineData({
+        startTime: new Date(Date.now() - 3600000),
+        endTime: new Date(),
+        eventCount: 20
+      }),
+      dashboard: this.visualizationGenerator.generateDashboardLayout('SIGINT Operations')
+    };
   }
 
-  getCommunicationsMapper(): CommunicationsMapper {
-    return this.communicationsMapper;
-  }
-
-  getTrackManager(): TrackManager {
-    return this.trackManager;
-  }
+  // Expose managers for direct access
+  getCollectionManager(): CollectionManager { return this.collectionManager; }
+  getSpectrumMonitor(): SpectrumMonitor { return this.spectrumMonitor; }
+  getCommunicationsMapper(): CommunicationsMapper { return this.communicationsMapper; }
+  getTrackManager(): TrackManager { return this.trackManager; }
+  getExerciseManager(): ExerciseManager { return this.exerciseManager; }
+  getReportGenerator(): ReportGenerator { return this.reportGenerator; }
+  getVisualizationGenerator(): VisualizationDataGenerator { return this.visualizationGenerator; }
+  getDNSAnalyzer(): DNSAnalyzer { return this.dnsAnalyzer; }
+  getTriangulator(): Triangulator { return this.triangulator; }
 
   private delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
