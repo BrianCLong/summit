@@ -31,7 +31,7 @@ export class ARIMA {
     // This is a placeholder - in production, use a library like 'arima' or call Python statsmodels
 
     // Step 1: Differencing (d times)
-    let differenced = this.difference(data, this.config.d);
+    const differenced = this.difference(data, this.config.d);
 
     // Step 2: Estimate AR parameters (p)
     const arParams = this.estimateARParameters(differenced, this.config.p);

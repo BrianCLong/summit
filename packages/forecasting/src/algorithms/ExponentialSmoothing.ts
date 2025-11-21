@@ -156,8 +156,8 @@ export class ExponentialSmoothing {
 
     const forecasts: ForecastPoint[] = [];
     const s = this.config.seasonal_periods || 12;
-    let currentLevel = this.level;
-    let currentTrend = this.trend;
+    const currentLevel = this.level;
+    const currentTrend = this.trend;
 
     for (let h = 1; h <= horizon; h++) {
       let forecast = currentLevel;
