@@ -2,11 +2,11 @@
  * WMD Program Development Tracking
  */
 
-import type {
-  WeaponsDevelopment,
+import {
+  type WeaponsDevelopment,
   ProgramStatus,
-  DevelopmentMilestone,
-  TechnicalCapability
+  type DevelopmentMilestone,
+  type TechnicalCapability
 } from './types.js';
 
 export class WeaponsDevelopmentTracker {
