@@ -1,8 +1,8 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
-import pino from 'pino';
-import crypto from 'crypto';
+import { pino } from 'pino';
+import crypto from 'node:crypto';
 
 import { BallotLedger } from './blockchain/ballot-ledger.js';
 import { DifferentialPrivacyEngine, HomomorphicTallying } from './privacy/differential-privacy.js';
