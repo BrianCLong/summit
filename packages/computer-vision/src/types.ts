@@ -76,7 +76,7 @@ export const DetectionSchema = z.object({
   bbox: BoundingBoxSchema,
   bbox_xyxy: z.tuple([z.number(), z.number(), z.number(), z.number()]),
   area: z.number(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type Detection = z.infer<typeof DetectionSchema>;
@@ -123,7 +123,7 @@ export const ModelConfigSchema = z.object({
   max_detections: z.number().int().positive().default(100),
   fp16: z.boolean().default(false),
   int8: z.boolean().default(false),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type ModelConfig = z.infer<typeof ModelConfigSchema>;
@@ -141,7 +141,7 @@ export const ProcessingResultSchema = z.object({
     device: z.string(),
   }),
   error: z.string().optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type ProcessingResult = z.infer<typeof ProcessingResultSchema>;
@@ -155,7 +155,7 @@ export const ImageMetadataSchema = z.object({
   format: z.string().optional(),
   color_space: z.string().optional(),
   dpi: z.tuple([z.number(), z.number()]).optional(),
-  exif: z.record(z.any()).optional(),
+  exif: z.record(z.string(), z.any()).optional(),
   file_size: z.number().optional(),
   hash: z.string().optional(),
 });
@@ -200,10 +200,10 @@ export const SimilarityResultSchema = z.object({
       id: z.string(),
       similarity_score: z.number().min(0).max(1),
       distance: z.number(),
-      metadata: z.record(z.any()).optional(),
+      metadata: z.record(z.string(), z.any()).optional(),
     })
   ),
-  search_params: z.record(z.any()).optional(),
+  search_params: z.record(z.string(), z.any()).optional(),
 });
 
 export type SimilarityResult = z.infer<typeof SimilarityResultSchema>;
@@ -272,7 +272,7 @@ export const TrackingResultSchema = z.object({
     x: z.number(),
     y: z.number(),
   }).optional(),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type TrackingResult = z.infer<typeof TrackingResultSchema>;
