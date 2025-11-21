@@ -10,6 +10,10 @@ export { DataValidator } from './validation/validator.js';
 export { QualityScorer } from './metrics/quality-scorer.js';
 export { AnomalyDetector } from './anomaly/anomaly-detector.js';
 export { DataRemediator } from './remediation/remediator.js';
+export { DataSteward } from './stewardship/data-steward.js';
+export * from './stewardship/data-steward.js';
+export { StreamQualityMonitor } from './streaming/stream-quality-monitor.js';
+export * from './streaming/stream-quality-monitor.js';
 
 // Main orchestrator class
 import { Pool } from 'pg';
