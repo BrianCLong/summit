@@ -50,18 +50,26 @@ show_banner() {
 # Help
 show_help() {
     show_banner
-    echo "Usage: $0 [DEMO_NAME]"
+    echo "Usage: $0 [COMMAND]"
     echo ""
     echo "Available Demos:"
     echo "  misinfo        Adversarial Misinformation Defense"
     echo "  deescalation   De-escalation Coaching"
     echo ""
+    echo "Utility Commands:"
+    echo "  test           Run all unit tests"
+    echo "  health         Run health check"
+    echo "  validate       Validate all datasets"
+    echo ""
     echo "Options:"
-    echo "  --help         Show this help message"
+    echo "  --help, -h     Show this help message"
+    echo "  --version, -v  Show version"
     echo ""
     echo "Examples:"
     echo "  $0 misinfo"
     echo "  $0 deescalation"
+    echo "  $0 test"
+    echo "  $0 health"
     echo ""
 }
 
@@ -228,26 +236,154 @@ with open('$RESULTS_FILE') as f:
     echo ""
 }
 
+# Run tests
+run_tests() {
+    log_info "Running all unit tests..."
+    echo ""
+
+    if [ -f "$SCRIPT_DIR/scripts/run_all_tests.sh" ]; then
+        bash "$SCRIPT_DIR/scripts/run_all_tests.sh"
+    else
+        log_error "Test runner not found"
+        exit 1
+    fi
+}
+
+# Run health check
+run_health_check() {
+    log_info "Running health check..."
+    echo ""
+
+    if [ -f "$SCRIPT_DIR/scripts/health_check.sh" ]; then
+        bash "$SCRIPT_DIR/scripts/health_check.sh"
+    else
+        log_error "Health check script not found"
+        exit 1
+    fi
+}
+
+# Validate datasets
+validate_datasets() {
+    log_info "Validating all datasets..."
+    echo ""
+
+    local errors=0
+
+    # Validate misinfo dataset
+    log_info "Validating misinfo dataset..."
+    if python3 -c "
+import json
+import sys
+errors = []
+with open('$SCRIPT_DIR/misinfo-defense/datasets/demo-posts.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        if line.strip():
+            try:
+                data = json.loads(line)
+                required = ['id', 'platform', 'text', 'timestamp']
+                for field in required:
+                    if field not in data:
+                        errors.append(f'Line {i}: missing {field}')
+            except json.JSONDecodeError as e:
+                errors.append(f'Line {i}: invalid JSON - {e}')
+if errors:
+    for e in errors:
+        print(f'  ✗ {e}')
+    sys.exit(1)
+else:
+    print(f'  ✓ Misinfo dataset valid')
+"; then
+        :
+    else
+        errors=$((errors + 1))
+    fi
+
+    # Validate deescalation dataset
+    log_info "Validating deescalation dataset..."
+    if python3 -c "
+import json
+import sys
+errors = []
+with open('$SCRIPT_DIR/deescalation/datasets/demo-conversations.jsonl') as f:
+    for i, line in enumerate(f, 1):
+        if line.strip():
+            try:
+                data = json.loads(line)
+                required = ['id', 'scenario', 'customer_message', 'timestamp']
+                for field in required:
+                    if field not in data:
+                        errors.append(f'Line {i}: missing {field}')
+            except json.JSONDecodeError as e:
+                errors.append(f'Line {i}: invalid JSON - {e}')
+if errors:
+    for e in errors:
+        print(f'  ✗ {e}')
+    sys.exit(1)
+else:
+    print(f'  ✓ Deescalation dataset valid')
+"; then
+        :
+    else
+        errors=$((errors + 1))
+    fi
+
+    echo ""
+    if [ $errors -eq 0 ]; then
+        log_success "All datasets valid!"
+    else
+        log_error "Dataset validation failed"
+        exit 1
+    fi
+}
+
+# Show version
+show_version() {
+    echo "Summit Demo CLI v2.0.0"
+    echo "Demo Infrastructure for Flagship Use Cases"
+}
+
 # Main
 main() {
-    show_banner
-
-    if [ $# -eq 0 ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    if [ $# -eq 0 ]; then
+        show_banner
         show_help
         exit 0
     fi
 
-    check_dependencies
-
     case "$1" in
+        --help|-h)
+            show_banner
+            show_help
+            exit 0
+            ;;
+        --version|-v)
+            show_version
+            exit 0
+            ;;
         misinfo)
+            show_banner
+            check_dependencies
             run_misinfo_demo
             ;;
         deescalation)
+            show_banner
+            check_dependencies
             run_deescalation_demo
             ;;
+        test)
+            show_banner
+            run_tests
+            ;;
+        health)
+            run_health_check
+            ;;
+        validate)
+            show_banner
+            validate_datasets
+            ;;
         *)
-            log_error "Unknown demo: $1"
+            show_banner
+            log_error "Unknown command: $1"
             echo ""
             show_help
             exit 1

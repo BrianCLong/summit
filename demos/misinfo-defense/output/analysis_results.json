@@ -1,6 +1,6 @@
 {
   "demo_name": "Adversarial Misinfo Defense",
-  "processed_at": "2025-11-21T07:33:32.415190",
+  "processed_at": "2025-11-21T07:39:51.304752",
   "pipeline_version": "2.0.0",
   "mode": "mock",
   "total_posts": 10,
@@ -29,7 +29,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.413860",
+        "timestamp": "2025-11-21T07:39:51.304423",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -44,7 +44,7 @@
         "is_misinfo": true,
         "confidence": 0.92,
         "evidence": [],
-        "processing_time_ms": 0.041961669921875
+        "processing_time_ms": 0.020742416381835938
       }
     },
     {
@@ -68,7 +68,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414035",
+        "timestamp": "2025-11-21T07:39:51.304494",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -83,7 +83,7 @@
         "is_misinfo": false,
         "confidence": 0.98,
         "evidence": [],
-        "processing_time_ms": 0.013589859008789062
+        "processing_time_ms": 0.007867813110351562
       }
     },
     {
@@ -118,7 +118,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414184",
+        "timestamp": "2025-11-21T07:39:51.304521",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -154,7 +154,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.0133514404296875
+        "processing_time_ms": 0.01049041748046875
       }
     },
     {
@@ -184,7 +184,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414350",
+        "timestamp": "2025-11-21T07:39:51.304551",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -214,7 +214,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.011444091796875
+        "processing_time_ms": 0.007867813110351562
       }
     },
     {
@@ -237,7 +237,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414465",
+        "timestamp": "2025-11-21T07:39:51.304584",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -252,7 +252,7 @@
         "is_misinfo": false,
         "confidence": 0.99,
         "evidence": [],
-        "processing_time_ms": 0.008344650268554688
+        "processing_time_ms": 0.0054836273193359375
       }
     },
     {
@@ -282,7 +282,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414589",
+        "timestamp": "2025-11-21T07:39:51.304605",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -315,7 +315,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.01239776611328125
+        "processing_time_ms": 0.0069141387939453125
       }
     },
     {
@@ -345,7 +345,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414728",
+        "timestamp": "2025-11-21T07:39:51.304642",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -365,7 +365,7 @@
         "is_misinfo": false,
         "confidence": 0.97,
         "evidence": [],
-        "processing_time_ms": 0.012874603271484375
+        "processing_time_ms": 0.007867813110351562
       }
     },
     {
@@ -394,7 +394,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414862",
+        "timestamp": "2025-11-21T07:39:51.304672",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -427,7 +427,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.011444091796875
+        "processing_time_ms": 0.005245208740234375
       }
     },
     {
@@ -457,7 +457,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.414997",
+        "timestamp": "2025-11-21T07:39:51.304696",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -477,7 +477,7 @@
         "is_misinfo": false,
         "confidence": 0.91,
         "evidence": [],
-        "processing_time_ms": 0.009298324584960938
+        "processing_time_ms": 0.005245208740234375
       }
     },
     {
@@ -508,7 +508,7 @@
         }
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:32.415105",
+        "timestamp": "2025-11-21T07:39:51.304718",
         "mode": "mock",
         "detection_results": {
           "text": {
@@ -543,7 +543,7 @@
             ]
           }
         ],
-        "processing_time_ms": 0.008106231689453125
+        "processing_time_ms": 0.0069141387939453125
       }
     }
   ],
@@ -552,11 +552,11 @@
     "posts_failed": 0,
     "misinfo_detected": 6,
     "legitimate_detected": 4,
-    "total_processing_time_ms": 0.14281272888183594,
-    "avg_processing_time_ms": 0.014281272888183594,
+    "total_processing_time_ms": 0.08463859558105469,
+    "avg_processing_time_ms": 0.008463859558105469,
     "avg_confidence": 0.932,
     "error_count": 0,
     "success_rate": 1.0
   },
-  "pipeline_duration_seconds": 0.0020296573638916016
+  "pipeline_duration_seconds": 0.0009636878967285156
 }

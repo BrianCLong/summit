@@ -1,6 +1,6 @@
 {
   "demo_name": "De-escalation Coaching",
-  "processed_at": "2025-11-21T07:33:36.542427",
+  "processed_at": "2025-11-21T07:39:51.473864",
   "pipeline_version": "2.0.0",
   "mode": "mock",
   "api_url": "http://localhost:8000",
@@ -32,10 +32,11 @@
           "absolutist_score": 0.82,
           "escalation_risk": "high",
           "recommended_approach": "acknowledge_frustration_validate_timeline"
-        }
+        },
+        "timestamp": "2025-11-20T09:00:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.540465",
+        "timestamp": "2025-11-21T07:39:51.472960",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.78,
@@ -58,7 +59,7 @@
           "Customer is shouting (high caps usage) - respond calmly."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.06103515625,
+        "processing_time_ms": 0.06341934204101562,
         "policy_flags": []
       }
     },
@@ -79,10 +80,11 @@
           "absolutist_score": 0.05,
           "escalation_risk": "low",
           "recommended_approach": "standard_resolution"
-        }
+        },
+        "timestamp": "2025-11-20T09:15:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.540687",
+        "timestamp": "2025-11-21T07:39:51.473089",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.02,
@@ -102,7 +104,7 @@
           "Document defect for quality team"
         ],
         "escalation_risk": "low",
-        "processing_time_ms": 0.030040740966796875,
+        "processing_time_ms": 0.033855438232421875,
         "policy_flags": []
       }
     },
@@ -124,10 +126,11 @@
           "absolutist_score": 0.71,
           "escalation_risk": "high",
           "recommended_approach": "acknowledge_business_impact_provide_timeline"
-        }
+        },
+        "timestamp": "2025-11-20T09:30:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.540871",
+        "timestamp": "2025-11-21T07:39:51.473170",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.64,
@@ -148,7 +151,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.027179718017578125,
+        "processing_time_ms": 0.03147125244140625,
         "policy_flags": []
       }
     },
@@ -169,10 +172,11 @@
           "absolutist_score": 0.15,
           "escalation_risk": "low",
           "recommended_approach": "troubleshooting_with_empathy"
-        }
+        },
+        "timestamp": "2025-11-20T09:45:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.541029",
+        "timestamp": "2025-11-21T07:39:51.473258",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.08,
@@ -192,7 +196,7 @@
           "Escalate to security if suspicious"
         ],
         "escalation_risk": "low",
-        "processing_time_ms": 0.02193450927734375,
+        "processing_time_ms": 0.0286102294921875,
         "policy_flags": []
       }
     },
@@ -214,10 +218,11 @@
           "absolutist_score": 0.88,
           "escalation_risk": "critical",
           "recommended_approach": "immediate_supervisor_escalation_plus_investigation"
-        }
+        },
+        "timestamp": "2025-11-20T10:00:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.541189",
+        "timestamp": "2025-11-21T07:39:51.473315",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.89,
@@ -239,7 +244,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "critical",
-        "processing_time_ms": 0.025510787963867188,
+        "processing_time_ms": 0.041484832763671875,
         "policy_flags": []
       }
     },
@@ -260,10 +265,11 @@
           "absolutist_score": 0.03,
           "escalation_risk": "none",
           "recommended_approach": "acknowledge_feedback_explain_process"
-        }
+        },
+        "timestamp": "2025-11-20T10:15:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.541351",
+        "timestamp": "2025-11-21T07:39:51.473407",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.01,
@@ -283,7 +289,7 @@
           "Set expectations on feature roadmap"
         ],
         "escalation_risk": "none",
-        "processing_time_ms": 0.029087066650390625,
+        "processing_time_ms": 0.03361701965332031,
         "policy_flags": []
       }
     },
@@ -305,10 +311,11 @@
           "absolutist_score": 0.79,
           "escalation_risk": "high",
           "recommended_approach": "acknowledge_special_occasion_expedite_resolution"
-        }
+        },
+        "timestamp": "2025-11-20T10:30:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.541507",
+        "timestamp": "2025-11-21T07:39:51.473477",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.72,
@@ -331,7 +338,7 @@
           "Customer is shouting (high caps usage) - respond calmly."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.02574920654296875,
+        "processing_time_ms": 0.036716461181640625,
         "policy_flags": []
       }
     },
@@ -353,10 +360,11 @@
           "absolutist_score": 0.75,
           "escalation_risk": "high",
           "recommended_approach": "acknowledge_issue_provide_workaround_timeline"
-        }
+        },
+        "timestamp": "2025-11-20T10:45:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.541654",
+        "timestamp": "2025-11-21T07:39:51.473546",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.68,
@@ -377,7 +385,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "high",
-        "processing_time_ms": 0.032901763916015625,
+        "processing_time_ms": 0.03266334533691406,
         "policy_flags": []
       }
     },
@@ -399,10 +407,11 @@
           "absolutist_score": 0.08,
           "escalation_risk": "low",
           "recommended_approach": "check_retention_offers"
-        }
+        },
+        "timestamp": "2025-11-20T11:00:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.541840",
+        "timestamp": "2025-11-21T07:39:51.473616",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.05,
@@ -422,7 +431,7 @@
           "Offer loyalty discounts if applicable"
         ],
         "escalation_risk": "low",
-        "processing_time_ms": 0.024080276489257812,
+        "processing_time_ms": 0.029087066650390625,
         "policy_flags": []
       }
     },
@@ -444,10 +453,11 @@
           "absolutist_score": 0.62,
           "escalation_risk": "medium",
           "recommended_approach": "transparency_provide_privacy_details_options"
-        }
+        },
+        "timestamp": "2025-11-20T11:15:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.541982",
+        "timestamp": "2025-11-21T07:39:51.473690",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.48,
@@ -468,7 +478,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "medium",
-        "processing_time_ms": 0.026464462280273438,
+        "processing_time_ms": 0.02574920654296875,
         "policy_flags": []
       }
     },
@@ -490,10 +500,11 @@
           "absolutist_score": 0.87,
           "escalation_risk": "critical",
           "recommended_approach": "immediate_escalation_expedite_refund"
-        }
+        },
+        "timestamp": "2025-11-20T11:30:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.542144",
+        "timestamp": "2025-11-21T07:39:51.473743",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.85,
@@ -515,7 +526,7 @@
           "⚠️ Customer using absolutist language - avoid matching tone."
         ],
         "escalation_risk": "critical",
-        "processing_time_ms": 0.025510787963867188,
+        "processing_time_ms": 0.02765655517578125,
         "policy_flags": []
       }
     },
@@ -537,10 +548,11 @@
           "absolutist_score": 0.02,
           "escalation_risk": "none",
           "recommended_approach": "acknowledge_forward_to_manager"
-        }
+        },
+        "timestamp": "2025-11-20T11:45:00Z"
       },
       "analysis": {
-        "timestamp": "2025-11-21T07:33:36.542311",
+        "timestamp": "2025-11-21T07:39:51.473812",
         "mode": "mock",
         "diagnostic": {
           "toxicity": 0.0,
@@ -560,7 +572,7 @@
           "Ask for review if appropriate"
         ],
         "escalation_risk": "none",
-        "processing_time_ms": 0.028133392333984375,
+        "processing_time_ms": 0.019550323486328125,
         "policy_flags": []
       }
     }
@@ -578,11 +590,11 @@
       "high": 4,
       "critical": 2
     },
-    "total_processing_time_ms": 0.35762786865234375,
-    "avg_processing_time_ms": 0.029802322387695312,
+    "total_processing_time_ms": 0.4038810729980469,
+    "avg_processing_time_ms": 0.03365675608317057,
     "avg_toxicity": 0.4333333333333333,
     "error_count": 0,
     "success_rate": 1.0
   },
-  "pipeline_duration_seconds": 0.002626657485961914
+  "pipeline_duration_seconds": 0.0014297962188720703
 }
