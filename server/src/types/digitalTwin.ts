@@ -72,6 +72,24 @@ export interface GeoJSONGeometry {
 }
 
 /**
+ * GeoJSON Feature
+ */
+export interface GeoJSONFeature {
+  type: 'Feature';
+  id?: string | number;
+  geometry: GeoJSONGeometry;
+  properties: Record<string, unknown>;
+}
+
+/**
+ * GeoJSON FeatureCollection
+ */
+export interface GeoJSONFeatureCollection {
+  type: 'FeatureCollection';
+  features: GeoJSONFeature[];
+}
+
+/**
  * Sensor binding configuration
  */
 export interface SensorBinding {
