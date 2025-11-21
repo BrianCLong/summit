@@ -2,21 +2,21 @@ import { z } from 'zod';
 
 // Digital Service Categories
 export const ServiceCategorySchema = z.enum([
-  'identity',           // e-ID, digital signatures
-  'voting',             // i-Voting systems
-  'taxation',           // e-Tax filing
-  'healthcare',         // e-Health records
-  'education',          // e-School systems
-  'business',           // e-Business registration
-  'residency',          // e-Residency programs
-  'governance',         // e-Governance portals
-  'justice',            // e-Court, e-Justice
-  'land_registry',      // Property registration
-  'customs',            // e-Customs
-  'social_services',    // Benefits, pensions
-  'transportation',     // Vehicle registration, licenses
-  'banking',            // Open banking, payments
-  'cybersecurity',      // Security infrastructure
+  'identity', // e-ID, digital signatures
+  'voting', // i-Voting systems
+  'taxation', // e-Tax filing
+  'healthcare', // e-Health records
+  'education', // e-School systems
+  'business', // e-Business registration
+  'residency', // e-Residency programs
+  'governance', // e-Governance portals
+  'justice', // e-Court, e-Justice
+  'land_registry', // Property registration
+  'customs', // e-Customs
+  'social_services', // Benefits, pensions
+  'transportation', // Vehicle registration, licenses
+  'banking', // Open banking, payments
+  'cybersecurity', // Security infrastructure
 ]);
 
 export type ServiceCategory = z.infer<typeof ServiceCategorySchema>;
@@ -41,11 +41,13 @@ export const DigitalServiceSchema = z.object({
   }),
 
   // Integration requirements
-  integrations: z.array(z.object({
-    name: z.string(),
-    type: z.enum(['required', 'optional', 'recommended']),
-    protocol: z.string(),
-  })),
+  integrations: z.array(
+    z.object({
+      name: z.string(),
+      type: z.enum(['required', 'optional', 'recommended']),
+      protocol: z.string(),
+    }),
+  ),
 
   // Compliance frameworks
   compliance: z.array(z.string()),
@@ -54,12 +56,14 @@ export const DigitalServiceSchema = z.object({
   dependencies: z.array(z.string()),
 
   // Metrics
-  metrics: z.object({
-    activeUsers: z.number().optional(),
-    transactionsPerYear: z.number().optional(),
-    costSavingsEur: z.number().optional(),
-    timeSavedHours: z.number().optional(),
-  }).optional(),
+  metrics: z
+    .object({
+      activeUsers: z.number().optional(),
+      transactionsPerYear: z.number().optional(),
+      costSavingsEur: z.number().optional(),
+      timeSavedHours: z.number().optional(),
+    })
+    .optional(),
 });
 
 export type DigitalService = z.infer<typeof DigitalServiceSchema>;
@@ -107,12 +111,14 @@ export const ExportPackageSchema = z.object({
   id: z.string().uuid(),
   name: z.string(),
   targetCountry: CountryProfileSchema,
-  services: z.array(z.object({
-    service: DigitalServiceSchema,
-    adaptations: z.array(z.string()),
-    estimatedCost: z.number(),
-    implementationMonths: z.number(),
-  })),
+  services: z.array(
+    z.object({
+      service: DigitalServiceSchema,
+      adaptations: z.array(z.string()),
+      estimatedCost: z.number(),
+      implementationMonths: z.number(),
+    }),
+  ),
 
   branding: z.object({
     primaryColor: z.string(),

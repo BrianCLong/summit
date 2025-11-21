@@ -38,7 +38,10 @@ export class MarketAnalyzer {
     score += (country.infrastructure.internetPenetration / 100) * 25;
 
     // Mobile subscriptions (max 15 points)
-    const mobileRatio = Math.min(country.infrastructure.mobileSubscriptions / country.population, 1.5);
+    const mobileRatio = Math.min(
+      country.infrastructure.mobileSubscriptions / country.population,
+      1.5,
+    );
     score += (mobileRatio / 1.5) * 15;
 
     // Digital literacy (max 20 points)
@@ -142,10 +145,14 @@ export class MarketAnalyzer {
       barriers.push('Limited internet connectivity');
     }
     if (country.infrastructure.digitalLiteracy === 'low') {
-      barriers.push('Low digital literacy requires extensive training programs');
+      barriers.push(
+        'Low digital literacy requires extensive training programs',
+      );
     }
     if (country.regulatory.cloudPolicy === 'local_only') {
-      barriers.push('Data localization requires local infrastructure investment');
+      barriers.push(
+        'Data localization requires local infrastructure investment',
+      );
     }
     if (!country.regulatory.eSignatureLaw) {
       barriers.push('No e-signature legislation - legal framework needed');
@@ -202,12 +209,12 @@ export class MarketAnalyzer {
    */
   generateAdaptations(
     serviceNames: string[],
-    country: CountryProfile
+    country: CountryProfile,
   ): AdaptationRecommendation[] {
     const recommendations: AdaptationRecommendation[] = [];
 
     for (const serviceName of serviceNames) {
-      const service = EstoniaDigitalCatalog.find(s => s.name === serviceName);
+      const service = EstoniaDigitalCatalog.find((s) => s.name === serviceName);
       if (!service) continue;
 
       // Language adaptation
@@ -237,7 +244,10 @@ export class MarketAnalyzer {
       }
 
       // Legal framework
-      if (!country.regulatory.eSignatureLaw && service.category === 'identity') {
+      if (
+        !country.regulatory.eSignatureLaw &&
+        service.category === 'identity'
+      ) {
         recommendations.push({
           serviceId: service.id,
           adaptationType: 'legal',

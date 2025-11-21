@@ -10,7 +10,8 @@ export const EstoniaDigitalCatalog: DigitalService[] = [
     id: uuid(),
     name: 'X-Road',
     category: 'governance',
-    description: 'Secure data exchange layer connecting all government databases',
+    description:
+      'Secure data exchange layer connecting all government databases',
     sourceCountry: 'EE',
     version: '7.0',
     maturityLevel: 'production',
@@ -38,7 +39,8 @@ export const EstoniaDigitalCatalog: DigitalService[] = [
     id: uuid(),
     name: 'e-ID / Mobile-ID / Smart-ID',
     category: 'identity',
-    description: 'National digital identity infrastructure with multiple authentication methods',
+    description:
+      'National digital identity infrastructure with multiple authentication methods',
     sourceCountry: 'EE',
     version: '3.0',
     maturityLevel: 'production',
@@ -73,7 +75,11 @@ export const EstoniaDigitalCatalog: DigitalService[] = [
       frontend: ['Qt', 'TypeScript'],
       databases: ['PostgreSQL'],
       infrastructure: ['Air-gapped servers', 'HSM'],
-      security: ['End-to-end encryption', 'Homomorphic tallying', 'Zero-knowledge proofs'],
+      security: [
+        'End-to-end encryption',
+        'Homomorphic tallying',
+        'Zero-knowledge proofs',
+      ],
     },
     integrations: [
       { name: 'e-ID', type: 'required', protocol: 'PKCS#11' },
@@ -118,7 +124,8 @@ export const EstoniaDigitalCatalog: DigitalService[] = [
     id: uuid(),
     name: 'e-Health',
     category: 'healthcare',
-    description: 'Nationwide electronic health records and e-prescription system',
+    description:
+      'Nationwide electronic health records and e-prescription system',
     sourceCountry: 'EE',
     version: '3.0',
     maturityLevel: 'production',
@@ -127,7 +134,11 @@ export const EstoniaDigitalCatalog: DigitalService[] = [
       frontend: ['React', 'Angular'],
       databases: ['PostgreSQL', 'TimescaleDB'],
       infrastructure: ['Private cloud', 'Kubernetes'],
-      security: ['End-to-end encryption', 'Audit logging', 'Consent management'],
+      security: [
+        'End-to-end encryption',
+        'Audit logging',
+        'Consent management',
+      ],
     },
     integrations: [
       { name: 'X-Road', type: 'required', protocol: 'REST' },
@@ -190,7 +201,11 @@ export const EstoniaDigitalCatalog: DigitalService[] = [
       { name: 'e-Business Registry', type: 'required', protocol: 'REST' },
     ],
     compliance: ['AML5', 'KYC', 'GDPR'],
-    dependencies: ['X-Road', 'e-ID / Mobile-ID / Smart-ID', 'e-Business Registry'],
+    dependencies: [
+      'X-Road',
+      'e-ID / Mobile-ID / Smart-ID',
+      'e-Business Registry',
+    ],
     metrics: {
       activeUsers: 100_000,
       transactionsPerYear: 30_000,
@@ -278,8 +293,10 @@ export const EstoniaDigitalCatalog: DigitalService[] = [
 /**
  * Get services by category
  */
-export function getServicesByCategory(category: ServiceCategory): DigitalService[] {
-  return EstoniaDigitalCatalog.filter(s => s.category === category);
+export function getServicesByCategory(
+  category: ServiceCategory,
+): DigitalService[] {
+  return EstoniaDigitalCatalog.filter((s) => s.category === category);
 }
 
 /**

@@ -6,9 +6,12 @@ import type {
   ExportPackage,
   ServiceCategory,
 } from '../models/types.js';
-import { EstoniaDigitalCatalog, calculateImplementationOrder } from '../analyzers/estonia-catalog.js';
+import {
+  EstoniaDigitalCatalog,
+  calculateImplementationOrder,
+} from '../analyzers/estonia-catalog.js';
 import { MarketAnalyzer } from '../analyzers/market-analyzer.js';
-import { BrandingEngine, type BrandingConfig } from '../branding/branding-engine.js';
+import { BrandingEngine } from '../branding/branding-engine.js';
 
 /**
  * Export Package Generator - Creates turnkey GovTech solution packages
@@ -22,7 +25,7 @@ export class PackageGenerator {
    */
   async generatePackage(
     country: CountryProfile,
-    requestedCategories?: ServiceCategory[]
+    requestedCategories?: ServiceCategory[],
   ): Promise<ExportPackage> {
     // Analyze the market
     const analysis = this.marketAnalyzer.analyzeMarket(country);
@@ -32,9 +35,11 @@ export class PackageGenerator {
     const selectedServices = this.selectServices(categories);
 
     // Calculate implementation order
-    const orderedNames = calculateImplementationOrder(selectedServices.map(s => s.name));
+    const orderedNames = calculateImplementationOrder(
+      selectedServices.map((s) => s.name),
+    );
     const orderedServices = orderedNames
-      .map(name => selectedServices.find(s => s.name === name))
+      .map((name) => selectedServices.find((s) => s.name === name))
       .filter((s): s is DigitalService => s !== undefined);
 
     // Generate branding
@@ -42,19 +47,19 @@ export class PackageGenerator {
 
     // Generate adaptations
     const adaptations = this.marketAnalyzer.generateAdaptations(
-      orderedServices.map(s => s.name),
-      country
+      orderedServices.map((s) => s.name),
+      country,
     );
 
     // Calculate costs and timelines
-    const serviceDetails = orderedServices.map(service => {
+    const serviceDetails = orderedServices.map((service) => {
       const serviceAdaptations = adaptations
-        .filter(a => a.serviceId === service.id)
-        .map(a => a.description);
+        .filter((a) => a.serviceId === service.id)
+        .map((a) => a.description);
 
       const baseCost = this.calculateBaseCost(service, country);
       const adaptationCost = adaptations
-        .filter(a => a.serviceId === service.id)
+        .filter((a) => a.serviceId === service.id)
         .reduce((sum, a) => sum + a.estimatedEffort * 800, 0); // $800/day
 
       return {
@@ -65,7 +70,10 @@ export class PackageGenerator {
       };
     });
 
-    const totalCost = serviceDetails.reduce((sum, s) => sum + s.estimatedCost, 0);
+    const totalCost = serviceDetails.reduce(
+      (sum, s) => sum + s.estimatedCost,
+      0,
+    );
     const totalDuration = this.calculateTotalDuration(serviceDetails);
 
     return {
@@ -93,15 +101,22 @@ export class PackageGenerator {
     const branding = this.brandingEngine.generateBranding(pkg.targetCountry);
 
     // Package manifest
-    zip.file('manifest.json', JSON.stringify({
-      id: pkg.id,
-      name: pkg.name,
-      country: pkg.targetCountry.code,
-      services: pkg.services.map(s => s.service.name),
-      totalCost: pkg.totalCost,
-      totalDuration: pkg.totalDuration,
-      generatedAt: new Date().toISOString(),
-    }, null, 2));
+    zip.file(
+      'manifest.json',
+      JSON.stringify(
+        {
+          id: pkg.id,
+          name: pkg.name,
+          country: pkg.targetCountry.code,
+          services: pkg.services.map((s) => s.service.name),
+          totalCost: pkg.totalCost,
+          totalDuration: pkg.totalDuration,
+          generatedAt: new Date().toISOString(),
+        },
+        null,
+        2,
+      ),
+    );
 
     // Executive summary
     zip.file('EXECUTIVE_SUMMARY.md', this.generateExecutiveSummary(pkg));
@@ -111,29 +126,34 @@ export class PackageGenerator {
     for (const serviceDetail of pkg.services) {
       techFolder?.file(
         `${this.slugify(serviceDetail.service.name)}.md`,
-        this.generateTechSpec(serviceDetail.service, pkg.targetCountry)
+        this.generateTechSpec(serviceDetail.service, pkg.targetCountry),
       );
     }
 
     // Branding assets
     const brandingFolder = zip.folder('branding');
-    brandingFolder?.file('theme.css', this.brandingEngine.generateThemeCSS(branding));
-    brandingFolder?.file('config.json', JSON.stringify(
-      this.brandingEngine.generateLocalizationConfig(pkg.targetCountry),
-      null,
-      2
-    ));
+    brandingFolder?.file(
+      'theme.css',
+      this.brandingEngine.generateThemeCSS(branding),
+    );
+    brandingFolder?.file(
+      'config.json',
+      JSON.stringify(
+        this.brandingEngine.generateLocalizationConfig(pkg.targetCountry),
+        null,
+        2,
+      ),
+    );
 
     // Service naming map
     const nameMap = this.brandingEngine.generateServiceNames(
-      pkg.services.map(s => s.service.name),
-      branding
+      pkg.services.map((s) => s.service.name),
+      branding,
     );
-    brandingFolder?.file('service-names.json', JSON.stringify(
-      Object.fromEntries(nameMap),
-      null,
-      2
-    ));
+    brandingFolder?.file(
+      'service-names.json',
+      JSON.stringify(Object.fromEntries(nameMap), null, 2),
+    );
 
     // Implementation roadmap
     zip.file('ROADMAP.md', this.generateRoadmap(pkg));
@@ -148,17 +168,19 @@ export class PackageGenerator {
     const services: DigitalService[] = [];
 
     // Always include X-Road (foundational)
-    const xroad = EstoniaDigitalCatalog.find(s => s.name === 'X-Road');
+    const xroad = EstoniaDigitalCatalog.find((s) => s.name === 'X-Road');
     if (xroad) services.push(xroad);
 
     // Always include identity
-    const identity = EstoniaDigitalCatalog.find(s => s.category === 'identity');
+    const identity = EstoniaDigitalCatalog.find(
+      (s) => s.category === 'identity',
+    );
     if (identity && !services.includes(identity)) services.push(identity);
 
     // Add services for requested categories
     for (const category of categories) {
       const categoryServices = EstoniaDigitalCatalog.filter(
-        s => s.category === category && !services.includes(s)
+        (s) => s.category === category && !services.includes(s),
       );
       services.push(...categoryServices);
     }
@@ -166,7 +188,10 @@ export class PackageGenerator {
     return services;
   }
 
-  private calculateBaseCost(service: DigitalService, country: CountryProfile): number {
+  private calculateBaseCost(
+    service: DigitalService,
+    country: CountryProfile,
+  ): number {
     // Base cost factors
     const categoryBaseCosts: Record<string, number> = {
       governance: 2_000_000,
@@ -191,15 +216,20 @@ export class PackageGenerator {
 
     // Scale by infrastructure readiness (inverse - less ready = more cost)
     const infrastructureMultiplier =
-      country.infrastructure.internetPenetration < 60 ? 1.5 :
-      country.infrastructure.internetPenetration < 80 ? 1.2 : 1;
+      country.infrastructure.internetPenetration < 60
+        ? 1.5
+        : country.infrastructure.internetPenetration < 80
+          ? 1.2
+          : 1;
 
-    return Math.round(baseCost * populationMultiplier * infrastructureMultiplier);
+    return Math.round(
+      baseCost * populationMultiplier * infrastructureMultiplier,
+    );
   }
 
   private estimateImplementationTime(
     service: DigitalService,
-    country: CountryProfile
+    country: CountryProfile,
   ): number {
     const baseMonths: Record<string, number> = {
       governance: 12,
@@ -227,10 +257,13 @@ export class PackageGenerator {
   }
 
   private calculateTotalDuration(
-    services: Array<{ implementationMonths: number }>
+    services: Array<{ implementationMonths: number }>,
   ): number {
     // Assume some parallelization (not fully sequential)
-    const totalSequential = services.reduce((sum, s) => sum + s.implementationMonths, 0);
+    const totalSequential = services.reduce(
+      (sum, s) => sum + s.implementationMonths,
+      0,
+    );
     return Math.round(totalSequential * 0.6); // 40% overlap
   }
 
@@ -250,7 +283,7 @@ for ${pkg.targetCountry.name}, based on Estonia's world-leading e-government inf
 
 ### Services Overview
 
-${pkg.services.map(s => `- **${s.service.name}**: ${s.service.description}`).join('\n')}
+${pkg.services.map((s) => `- **${s.service.name}**: ${s.service.description}`).join('\n')}
 
 ### Expected Outcomes
 
@@ -272,7 +305,10 @@ secure data exchange infrastructure before deploying citizen-facing services.
 `;
   }
 
-  private generateTechSpec(service: DigitalService, country: CountryProfile): string {
+  private generateTechSpec(
+    service: DigitalService,
+    country: CountryProfile,
+  ): string {
     return `# ${service.name} - Technical Specification
 
 ## Overview
@@ -286,31 +322,31 @@ ${service.description}
 ## Technology Stack
 
 ### Backend
-${service.techStack.backend.map(t => `- ${t}`).join('\n')}
+${service.techStack.backend.map((t) => `- ${t}`).join('\n')}
 
 ### Frontend
-${service.techStack.frontend.map(t => `- ${t}`).join('\n')}
+${service.techStack.frontend.map((t) => `- ${t}`).join('\n')}
 
 ### Databases
-${service.techStack.databases.map(t => `- ${t}`).join('\n')}
+${service.techStack.databases.map((t) => `- ${t}`).join('\n')}
 
 ### Infrastructure
-${service.techStack.infrastructure.map(t => `- ${t}`).join('\n')}
+${service.techStack.infrastructure.map((t) => `- ${t}`).join('\n')}
 
 ### Security
-${service.techStack.security.map(t => `- ${t}`).join('\n')}
+${service.techStack.security.map((t) => `- ${t}`).join('\n')}
 
 ## Integrations Required
 
-${service.integrations.map(i => `- **${i.name}** (${i.type}): ${i.protocol}`).join('\n')}
+${service.integrations.map((i) => `- **${i.name}** (${i.type}): ${i.protocol}`).join('\n')}
 
 ## Compliance Standards
 
-${service.compliance.map(c => `- ${c}`).join('\n')}
+${service.compliance.map((c) => `- ${c}`).join('\n')}
 
 ## Dependencies
 
-${service.dependencies.length > 0 ? service.dependencies.map(d => `- ${d}`).join('\n') : 'None (standalone service)'}
+${service.dependencies.length > 0 ? service.dependencies.map((d) => `- ${d}`).join('\n') : 'None (standalone service)'}
 
 ## Adaptation Notes for ${country.name}
 
@@ -340,7 +376,7 @@ Total Duration: ${pkg.totalDuration} months
 - **End**: Month ${currentMonth + service.implementationMonths}
 
 **Key Adaptations**:
-${service.adaptations.map(a => `- ${a}`).join('\n') || '- Standard deployment'}
+${service.adaptations.map((a) => `- ${a}`).join('\n') || '- Standard deployment'}
 
 ---
 

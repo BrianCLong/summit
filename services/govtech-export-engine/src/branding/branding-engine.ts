@@ -1,4 +1,4 @@
-import type { CountryProfile, ExportPackage } from '../models/types.js';
+import type { CountryProfile } from '../models/types.js';
 
 /**
  * Branding Engine - White-label and customize GovTech solutions for target markets
@@ -22,62 +22,72 @@ export interface BrandingConfig {
 
 // Pre-defined country branding templates
 const COUNTRY_BRANDING_TEMPLATES: Record<string, Partial<BrandingConfig>> = {
-  MT: { // Malta
+  MT: {
+    // Malta
     prefix: 'm-',
     primaryColor: '#CF142B',
     secondaryColor: '#FFFFFF',
     tagline: 'Digital Malta',
   },
-  FI: { // Finland
+  FI: {
+    // Finland
     prefix: 'suomi-',
     primaryColor: '#003580',
     secondaryColor: '#FFFFFF',
     tagline: 'Digital Finland',
   },
-  SG: { // Singapore
+  SG: {
+    // Singapore
     prefix: 'sg-',
     primaryColor: '#EF3340',
     secondaryColor: '#FFFFFF',
     tagline: 'Smart Nation Singapore',
   },
-  AE: { // UAE
+  AE: {
+    // UAE
     prefix: 'uae-',
     primaryColor: '#00732F',
     secondaryColor: '#FFFFFF',
     rtlSupport: true,
     tagline: 'Digital UAE',
   },
-  JP: { // Japan
+  JP: {
+    // Japan
     prefix: 'digi-',
     primaryColor: '#BC002D',
     secondaryColor: '#FFFFFF',
     tagline: 'Digital Japan',
   },
-  KR: { // South Korea
+  KR: {
+    // South Korea
     prefix: 'k-',
     primaryColor: '#003478',
     secondaryColor: '#FFFFFF',
     tagline: 'Digital Korea',
   },
-  BR: { // Brazil
+  BR: {
+    // Brazil
     prefix: 'gov-',
     primaryColor: '#009C3B',
     secondaryColor: '#FFDF00',
     tagline: 'Brasil Digital',
   },
-  IN: { // India
+  IN: {
+    // India
     prefix: 'digi-',
     primaryColor: '#FF9933',
     secondaryColor: '#138808',
     tagline: 'Digital India',
   },
-  NG: { // Nigeria
+  NG: {
+    // Nigeria
     prefix: 'ng-',
     primaryColor: '#008751',
     secondaryColor: '#FFFFFF',
     tagline: 'Digital Nigeria',
   },
-  KE: { // Kenya
+  KE: {
+    // Kenya
     prefix: 'e-',
     primaryColor: '#006600',
     secondaryColor: '#BB0000',
@@ -94,8 +104,8 @@ export class BrandingEngine {
 
     // Check if any official language uses RTL
     const rtlLanguages = ['ar', 'he', 'fa', 'ur'];
-    const needsRtl = country.localization.officialLanguages.some(
-      lang => rtlLanguages.includes(lang.toLowerCase())
+    const needsRtl = country.localization.officialLanguages.some((lang) =>
+      rtlLanguages.includes(lang.toLowerCase()),
     );
 
     return {
@@ -119,13 +129,13 @@ export class BrandingEngine {
    */
   generateServiceNames(
     originalNames: string[],
-    branding: BrandingConfig
+    branding: BrandingConfig,
   ): Map<string, string> {
     const nameMap = new Map<string, string>();
 
     for (const name of originalNames) {
       // Transform Estonian naming to country-specific
-      let newName = name
+      const newName = name
         .replace(/^e-/i, `${branding.prefix}`)
         .replace(/^i-/i, `${branding.prefix}`)
         .replace(/X-Road/i, `${branding.countryName}-Road`)
@@ -161,12 +171,16 @@ export class BrandingEngine {
 }
 
 /* RTL Support */
-${branding.rtlSupport ? `
+${
+  branding.rtlSupport
+    ? `
 [dir="rtl"] {
   direction: rtl;
   text-align: right;
 }
-` : ''}
+`
+    : ''
+}
 `.trim();
   }
 

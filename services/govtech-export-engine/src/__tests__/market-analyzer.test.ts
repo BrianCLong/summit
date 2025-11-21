@@ -48,7 +48,9 @@ describe('MarketAnalyzer', () => {
       const analysis = analyzer.analyzeMarket(sampleCountry);
 
       expect(analysis.enablers).toContain('Strong internet infrastructure');
-      expect(analysis.enablers).toContain('GDPR compliance simplifies data protection alignment');
+      expect(analysis.enablers).toContain(
+        'GDPR compliance simplifies data protection alignment',
+      );
     });
 
     it('should recommend governance and identity as foundational services', () => {
@@ -61,19 +63,25 @@ describe('MarketAnalyzer', () => {
 
   describe('generateAdaptations', () => {
     it('should generate language adaptations for non-English languages', () => {
-      const adaptations = analyzer.generateAdaptations(['X-Road'], sampleCountry);
+      const adaptations = analyzer.generateAdaptations(
+        ['X-Road'],
+        sampleCountry,
+      );
 
       const languageAdaptation = adaptations.find(
-        a => a.adaptationType === 'cultural' && a.description.includes('mt')
+        (a) => a.adaptationType === 'cultural' && a.description.includes('mt'),
       );
       expect(languageAdaptation).toBeDefined();
     });
 
     it('should generate currency adaptation', () => {
-      const adaptations = analyzer.generateAdaptations(['e-Tax'], sampleCountry);
+      const adaptations = analyzer.generateAdaptations(
+        ['e-Tax'],
+        sampleCountry,
+      );
 
-      const currencyAdaptation = adaptations.find(
-        a => a.description.includes('EUR')
+      const currencyAdaptation = adaptations.find((a) =>
+        a.description.includes('EUR'),
       );
       expect(currencyAdaptation).toBeDefined();
     });

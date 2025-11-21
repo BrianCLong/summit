@@ -1,13 +1,15 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, Application } from 'express';
 import helmet from 'helmet';
-import { v4 as uuid } from 'uuid';
 import { MarketAnalyzer } from './analyzers/market-analyzer.js';
-import { EstoniaDigitalCatalog, getServicesByCategory } from './analyzers/estonia-catalog.js';
+import {
+  EstoniaDigitalCatalog,
+  getServicesByCategory,
+} from './analyzers/estonia-catalog.js';
 import { BrandingEngine } from './branding/branding-engine.js';
 import { PackageGenerator } from './exporters/package-generator.js';
 import { CountryProfileSchema, ServiceCategorySchema } from './models/types.js';
 
-const app = express();
+const app: Application = express();
 app.use(helmet());
 app.use(express.json());
 
@@ -29,7 +31,7 @@ app.get('/health', (_req, res) => {
  */
 app.get('/api/catalog', (_req, res) => {
   res.json({
-    services: EstoniaDigitalCatalog.map(s => ({
+    services: EstoniaDigitalCatalog.map((s) => ({
       id: s.id,
       name: s.name,
       category: s.category,
@@ -50,7 +52,10 @@ app.get('/api/catalog/:category', (req, res) => {
   const result = ServiceCategorySchema.safeParse(category);
 
   if (!result.success) {
-    return res.status(400).json({ error: 'Invalid category', valid: ServiceCategorySchema.options });
+    return res.status(400).json({
+      error: 'Invalid category',
+      valid: ServiceCategorySchema.options,
+    });
   }
 
   const services = getServicesByCategory(result.data);
@@ -65,7 +70,9 @@ app.post('/api/analyze', (req, res) => {
   const result = CountryProfileSchema.safeParse(req.body);
 
   if (!result.success) {
-    return res.status(400).json({ error: 'Invalid country profile', details: result.error.issues });
+    return res
+      .status(400)
+      .json({ error: 'Invalid country profile', details: result.error.issues });
   }
 
   const analysis = marketAnalyzer.analyzeMarket(result.data);
@@ -86,11 +93,17 @@ app.post('/api/generate-package', async (req, res) => {
 
   const countryResult = CountryProfileSchema.safeParse(country);
   if (!countryResult.success) {
-    return res.status(400).json({ error: 'Invalid country profile', details: countryResult.error.issues });
+    return res.status(400).json({
+      error: 'Invalid country profile',
+      details: countryResult.error.issues,
+    });
   }
 
   try {
-    const pkg = await packageGenerator.generatePackage(countryResult.data, categories);
+    const pkg = await packageGenerator.generatePackage(
+      countryResult.data,
+      categories,
+    );
     packages.set(pkg.id, pkg);
 
     res.json({
@@ -99,7 +112,7 @@ app.post('/api/generate-package', async (req, res) => {
       totalCost: pkg.totalCost,
       totalDuration: pkg.totalDuration,
       servicesCount: pkg.services.length,
-      services: pkg.services.map(s => ({
+      services: pkg.services.map((s) => ({
         name: s.service.name,
         category: s.service.category,
         cost: s.estimatedCost,
@@ -108,7 +121,7 @@ app.post('/api/generate-package', async (req, res) => {
       })),
       branding: pkg.branding,
     });
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to generate package' });
   }
 });
@@ -128,9 +141,12 @@ app.get('/api/packages/:id/download', async (req, res) => {
     const zipBuffer = await packageGenerator.exportAsZip(pkg as any);
 
     res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', `attachment; filename="govtech-package-${req.params.id}.zip"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="govtech-package-${req.params.id}.zip"`,
+    );
     res.send(zipBuffer);
-  } catch (error) {
+  } catch (_error) {
     res.status(500).json({ error: 'Failed to generate ZIP' });
   }
 });
@@ -184,7 +200,9 @@ const PORT = process.env.PORT || 3050;
 
 app.listen(PORT, () => {
   console.log(`GovTech Export Engine running on port ${PORT}`);
-  console.log(`Catalog: ${EstoniaDigitalCatalog.length} Estonian digital services available`);
+  console.log(
+    `Catalog: ${EstoniaDigitalCatalog.length} Estonian digital services available`,
+  );
 });
 
 export { app };
