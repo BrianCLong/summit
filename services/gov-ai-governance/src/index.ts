@@ -15,7 +15,7 @@
  * 5. AUDITABILITY - Immutable, hash-chained audit trail
  */
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction, Express } from 'express';
 import { CitizenDataControl } from './citizen-data-control.js';
 import { EthicalAIRegistry } from './ethical-ai-registry.js';
 import { TransparencyService } from './transparency-service.js';
@@ -31,7 +31,7 @@ export { CitizenDataControl } from './citizen-data-control.js';
 export { EthicalAIRegistry } from './ethical-ai-registry.js';
 export { TransparencyService } from './transparency-service.js';
 
-const app = express();
+const app: Express = express();
 app.use(express.json());
 
 // Initialize services
