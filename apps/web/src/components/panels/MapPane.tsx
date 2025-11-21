@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { Layers, ZoomIn, ZoomOut, Maximize2, Navigation } from 'lucide-react'
+import { Layers, ZoomIn, ZoomOut, Maximize2, Navigation, Map as MapIcon } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { cn } from '@/lib/utils'
@@ -14,8 +14,12 @@ import {
 } from '@/features/viewSync/viewSyncSlice'
 import type { Entity, GeoLocation, PanelProps } from '@/types'
 
-// Set Mapbox access token
-mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN || 'pk.your-token-here'
+// Set Mapbox access token from environment variable
+// NOTE: Set REACT_APP_MAPBOX_TOKEN in your environment to enable the map
+const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN || ''
+if (MAPBOX_TOKEN) {
+  mapboxgl.accessToken = MAPBOX_TOKEN
+}
 
 interface MapPaneProps extends PanelProps<Entity[]> {
   onEntitySelect?: (entity: Entity) => void
@@ -234,6 +238,19 @@ export function MapPane({
         <div className="text-center text-muted-foreground">
           <p className="text-sm font-medium">Map Error</p>
           <p className="text-xs mt-1">{error.message}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show placeholder if Mapbox token is not configured
+  if (!MAPBOX_TOKEN) {
+    return (
+      <div className={cn('h-full w-full flex items-center justify-center bg-muted/30', className)}>
+        <div className="text-center text-muted-foreground p-4">
+          <MapIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p className="text-sm font-medium">Map Not Configured</p>
+          <p className="text-xs mt-1">Set REACT_APP_MAPBOX_TOKEN to enable the map</p>
         </div>
       </div>
     )
