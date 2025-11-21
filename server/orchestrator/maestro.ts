@@ -4,12 +4,15 @@ import {
   QueueEvents,
   Job,
   QueueOptions,
-  WorkerOptions,
+  // WorkerOptions,
 } from 'bullmq';
 import Redis from 'ioredis';
 import { logger } from '../utils/logger';
 import { PolicyGuard } from './policyGuard';
 import { Budget } from '../ai/llmBudget';
+import { runManager } from './runManager';
+import { recordRunInIntelGraph } from './intelGraphIntegration';
+import { RunType } from './types';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
@@ -38,6 +41,7 @@ export type AgentTask = {
   context: Record<string, any>;
   parentTaskId?: string;
   dependencies?: string[];
+  idempotencyKey?: string;
   metadata: {
     actor: string;
     timestamp: string;
@@ -66,21 +70,50 @@ class MaestroOrchestrator {
   }
 
   async enqueueTask(task: AgentTask): Promise<string> {
+    // Idempotency check via RunManager
+    if (task.idempotencyKey) {
+       const existingRun = await runManager.createRun({
+         type: task.kind as RunType,
+         input: task,
+         metadata: task.metadata,
+         idempotencyKey: task.idempotencyKey,
+         parentId: task.parentTaskId
+       });
+
+       // If run already exists and is complete or running, we might return early or handle differently
+       // For now, we'll proceed but log it. Ideally RunManager.createRun returns the existing run if found.
+    }
+
     // Pre-flight policy check
     const policyResult = await this.policyGuard.checkPolicy(task);
     if (!policyResult.allowed) {
       throw new Error(`Task blocked by policy: ${policyResult.reason}`);
     }
 
-    const job = await maestroQueue.add(task.kind, task, {
-      jobId: `${task.kind}-${task.repo}-${Date.now()}`,
+    // Create a Run entity to track this task
+    const run = await runManager.createRun({
+      type: task.kind as RunType,
+      input: task,
+      metadata: task.metadata,
+      idempotencyKey: task.idempotencyKey,
+      parentId: task.parentTaskId
     });
+
+    // Attach the Run ID to the job so workers can access it
+    const jobData = { ...task, runId: run.id };
+
+    const job = await maestroQueue.add(task.kind, jobData, {
+      jobId: run.id, // Use Run ID as Job ID for consistency
+    });
+
+    await recordRunInIntelGraph(run);
 
     logger.info('Task enqueued', {
       taskId: job.id,
       kind: task.kind,
       repo: task.repo,
       budgetUSD: task.budgetUSD,
+      runId: run.id
     });
 
     return job.id!;
@@ -102,7 +135,7 @@ class MaestroOrchestrator {
   }
 
   private initializeWorkers() {
-    const workerOptions: WorkerOptions = {
+    const workerOptions = {
       connection: redis,
       concurrency: 3,
       autorun: true,
@@ -163,6 +196,12 @@ class MaestroOrchestrator {
     return async (job: Job<T>): Promise<TaskResult> => {
       const startTime = Date.now();
       const budget = new Budget(job.data.budgetUSD);
+      // @ts-ignore
+      const runId = job.data.runId || job.id; // Fallback if not present
+
+      if (runId) {
+        await runManager.updateStatus(runId, 'running');
+      }
 
       try {
         // Policy guard
@@ -185,10 +224,33 @@ class MaestroOrchestrator {
           taskId: job.id,
           kind: job.data.kind,
           budget: budget.maxUSD,
+          runId
         });
 
         const result = await handler(job);
         const duration = Date.now() - startTime;
+
+        if (runId) {
+          await runManager.completeRun(runId, result.output);
+
+          if (result.artifacts) {
+             for (const artifactName of result.artifacts) {
+               // Basic artifact mapping
+               await runManager.addArtifact(runId, {
+                 id: artifactName, // Simple ID for now
+                 name: artifactName,
+                 type: 'unknown',
+                 location: artifactName
+               });
+             }
+          }
+
+          // Update IntelGraph
+          const run = await runManager.getRun(runId);
+          if (run) {
+            await recordRunInIntelGraph(run);
+          }
+        }
 
         // Update task result with guardrail metadata
         return {
@@ -202,7 +264,17 @@ class MaestroOrchestrator {
           taskId: job.id,
           error: error.message,
           duration,
+          runId
         });
+
+        if (runId) {
+          await runManager.updateStatus(runId, 'failed', error.message);
+           // Update IntelGraph
+          const run = await runManager.getRun(runId);
+          if (run) {
+            await recordRunInIntelGraph(run);
+          }
+        }
 
         return {
           success: false,
