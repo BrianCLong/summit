@@ -147,14 +147,14 @@ make smoke
 
 ### Service Endpoints (Development)
 
-| Service            | URL                           | Purpose                     |
-| ------------------ | ----------------------------- | --------------------------- |
-| **Frontend**       | http://localhost:3000         | React application           |
-| **GraphQL API**    | http://localhost:4000/graphql | Apollo GraphQL Playground   |
-| **Neo4j Browser**  | http://localhost:7474         | Graph database UI           |
-| **Postgres Admin** | http://localhost:8080         | Database admin (Adminer)    |
-| **Prometheus**     | http://localhost:9090         | Metrics                     |
-| **Grafana**        | http://localhost:3001         | Observability dashboards    |
+| Service            | URL                           | Purpose                   |
+| ------------------ | ----------------------------- | ------------------------- |
+| **Frontend**       | http://localhost:3000         | React application         |
+| **GraphQL API**    | http://localhost:4000/graphql | Apollo GraphQL Playground |
+| **Neo4j Browser**  | http://localhost:7474         | Graph database UI         |
+| **Postgres Admin** | http://localhost:8080         | Database admin (Adminer)  |
+| **Prometheus**     | http://localhost:9090         | Metrics                   |
+| **Grafana**        | http://localhost:3001         | Observability dashboards  |
 
 ### Environment Configuration
 
@@ -164,9 +164,99 @@ make smoke
 
 ### Docker Compose Profiles
 
-- **`docker-compose.dev.yml`**: Core stack (API, web, databases, observability)
-- **`docker-compose.ai.yml`**: AI/ML services (Kafka, AI worker)
-  - Start with: `make up-ai` or `./start.sh --ai`
+| Profile                            | Purpose                              | Command      |
+| ---------------------------------- | ------------------------------------ | ------------ |
+| `docker-compose.dev.yml`           | Core stack (API, dbs, observability) | `make up`    |
+| `docker-compose.ai.yml`            | AI/ML services (Kafka, AI worker)    | `make up-ai` |
+| `docker-compose.db.yml`            | Databases only                       | Manual       |
+| `docker-compose.observability.yml` | Full observability stack             | Manual       |
+| `docker-compose.minimal.yml`       | Minimal services for quick testing   | Manual       |
+| `docker-compose.opa.yml`           | Policy engine (OPA)                  | Manual       |
+
+### Docker Services (dev stack)
+
+| Service    | Container Name  | Port(s)    | Health Check              |
+| ---------- | --------------- | ---------- | ------------------------- |
+| PostgreSQL | summit-postgres | 5432       | `pg_isready`              |
+| Redis      | summit-redis    | 6379       | `redis-cli ping`          |
+| Neo4j      | summit-neo4j    | 7474, 7687 | `cypher-shell "RETURN 1"` |
+| API        | summit-api      | 4000       | `/health/ready`           |
+| Gateway    | summit-gateway  | 4100       | `/health`                 |
+
+### Environment Variables Reference
+
+**Core Application:**
+
+```bash
+NODE_ENV=development          # development | production | test
+PORT=4000                     # API server port
+CLIENT_PORT=3000              # Frontend port
+APP_URL=http://localhost:3000 # Frontend URL
+API_URL=http://localhost:4000 # API URL
+VITE_API_URL=http://localhost:4000/graphql  # Vite client env
+```
+
+**Database Connections:**
+
+```bash
+# PostgreSQL
+DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=summit_dev
+POSTGRES_USER=summit
+POSTGRES_PASSWORD=devpassword  # DEV-ONLY
+
+# Neo4j
+NEO4J_URI=bolt://localhost:7687
+NEO4J_USERNAME=neo4j
+NEO4J_PASSWORD=devpassword     # DEV-ONLY
+NEO4J_DATABASE=neo4j
+
+# Redis
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=devpassword     # DEV-ONLY
+```
+
+**Authentication (MUST change in production):**
+
+```bash
+JWT_SECRET=your_jwt_secret_key_change_in_production_12345
+JWT_EXPIRES_IN=24h
+JWT_REFRESH_SECRET=your_refresh_secret_key_change_in_production_67890
+JWT_REFRESH_EXPIRES_IN=7d
+```
+
+**Security & Rate Limiting:**
+
+```bash
+CORS_ORIGIN=http://localhost:3000  # Comma-separated in production
+RATE_LIMIT_WINDOW_MS=60000         # 60 seconds
+RATE_LIMIT_MAX=600                 # Max requests per window
+BCRYPT_ROUNDS=12
+```
+
+**AI/ML Configuration:**
+
+```bash
+ENABLE_AI_FEATURES=true
+AI_MODELS_PATH=src/ai/models
+AI_ENABLE_GPU=true
+AI_MAX_CONCURRENT_JOBS=5
+AI_BATCH_SIZE=32
+EMBEDDING_MODEL=all-MiniLM-L6-v2
+SPEECH_MODEL=whisper-base
+```
+
+**Feature Flags:**
+
+```bash
+ENABLE_AI_FEATURES=true
+ENABLE_REAL_TIME=true
+ENABLE_ANALYTICS=true
+ENABLE_PLUGINS=true
+```
 
 ---
 
@@ -174,15 +264,15 @@ make smoke
 
 ### Backend Stack
 
-| Layer               | Technology                            | Purpose                                    |
-| ------------------- | ------------------------------------- | ------------------------------------------ |
-| **API**             | Node.js 18+, Express, Apollo Server   | GraphQL federation, schema stitching       |
-| **Graph Database**  | Neo4j 5.x                             | Entity/relationship storage, graph queries |
-| **Relational DB**   | PostgreSQL 15+                        | Case metadata, audit, reporting            |
-| **Cache/Queue**     | Redis, Kafka/Redpanda                 | Caching, streaming, pub/sub                |
-| **Auth**            | OIDC/JWKS SSO, RBAC+ABAC (OPA)        | Authentication, authorization              |
-| **Observability**   | OpenTelemetry, Prometheus, Grafana    | Tracing, metrics, logs                     |
-| **Orchestration**   | Kubernetes, Helm, Terraform           | Deployment, infrastructure                 |
+| Layer              | Technology                          | Purpose                                    |
+| ------------------ | ----------------------------------- | ------------------------------------------ |
+| **API**            | Node.js 18+, Express, Apollo Server | GraphQL federation, schema stitching       |
+| **Graph Database** | Neo4j 5.x                           | Entity/relationship storage, graph queries |
+| **Relational DB**  | PostgreSQL 15+                      | Case metadata, audit, reporting            |
+| **Cache/Queue**    | Redis, Kafka/Redpanda               | Caching, streaming, pub/sub                |
+| **Auth**           | OIDC/JWKS SSO, RBAC+ABAC (OPA)      | Authentication, authorization              |
+| **Observability**  | OpenTelemetry, Prometheus, Grafana  | Tracing, metrics, logs                     |
+| **Orchestration**  | Kubernetes, Helm, Terraform         | Deployment, infrastructure                 |
 
 ### Frontend Stack
 
@@ -271,6 +361,7 @@ Follow **Conventional Commits** (enforced by commitlint):
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`
 
 Examples:
+
 ```
 feat(api): add entity search endpoint
 fix(graph): resolve neo4j connection timeout
@@ -281,6 +372,7 @@ chore(deps): update pnpm-lock.yaml
 #### Pre-commit Hooks (Husky)
 
 Automatically runs on commit:
+
 - **Gitleaks**: Secret scanning
 - **Lint-staged**: Format and lint changed files
 - **ESLint**: JavaScript/TypeScript linting
@@ -314,6 +406,51 @@ Defined in `.github/workflows/`:
 
 All workflows are required checks for merge.
 
+### Pull Request Workflow
+
+**PR Checklist** (from `.github/PULL_REQUEST_TEMPLATE.md`):
+
+- [ ] Code compiles & passes CI
+- [ ] Tests added/updated
+- [ ] Documentation updated
+- [ ] OPA policies verified
+- [ ] Grafana dashboards updated if applicable
+
+**Copilot Review Tasks** (use in PR comments):
+
+- `/explain-changes` - Get AI explanation of changes
+- `/generate-tests` - Generate test suggestions
+- `/risk-callouts` - Identify potential risks
+- `/summarize-diff` - Summarize the diff
+
+### API Health Endpoints
+
+| Endpoint           | Purpose                    | Expected Response |
+| ------------------ | -------------------------- | ----------------- |
+| `/health`          | Basic health check         | `200 OK`          |
+| `/health/ready`    | Kubernetes readiness probe | `200 OK`          |
+| `/health/live`     | Kubernetes liveness probe  | `200 OK`          |
+| `/health/detailed` | Detailed health with deps  | JSON status       |
+| `/metrics`         | Prometheus metrics         | Prometheus format |
+
+### GraphQL API Structure
+
+**API Location**: `services/api/src/`
+
+```
+services/api/src/
+├── app.ts           # Express app setup
+├── index.ts         # Entry point
+├── graphql/         # GraphQL schema & resolvers
+├── middleware/      # Auth, rate limiting, etc.
+├── routes/          # REST endpoints (health, etc.)
+├── db/              # Database connections
+├── realtime/        # WebSocket subscriptions
+└── utils/           # Shared utilities
+```
+
+**GraphQL Playground**: http://localhost:4000/graphql
+
 ---
 
 ## Code Conventions
@@ -329,7 +466,7 @@ All workflows are required checks for merge.
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
-    "strict": false,              // Gradual strictness migration
+    "strict": false, // Gradual strictness migration
     "skipLibCheck": true,
     "esModuleInterop": true,
     "resolveJsonModule": true
@@ -402,6 +539,7 @@ Alphabetized within each group, with newlines between groups.
 ### Test Types
 
 1. **Unit Tests**: Jest (SWC transformer)
+
    ```bash
    pnpm test:jest
    # or
@@ -409,11 +547,13 @@ Alphabetized within each group, with newlines between groups.
    ```
 
 2. **Integration Tests**: Jest with database/service mocks
+
    ```bash
    pnpm test:integration
    ```
 
 3. **E2E Tests**: Playwright
+
    ```bash
    pnpm e2e
    # or
@@ -442,6 +582,7 @@ Alphabetized within each group, with newlines between groups.
 The smoke test (`scripts/smoke-test.js`) validates this workflow using the dataset in `data/golden-path/demo-investigation.json`. Local runs match CI exactly.
 
 **Success Criteria**:
+
 - All health checks pass (`/health`, `/health/ready`, `/health/live`)
 - GraphQL mutations succeed
 - Graph queries return expected data
@@ -472,6 +613,7 @@ describe('EntityService', () => {
 ```
 
 **Key Rules**:
+
 - No `.only()` or `.skip()` in committed code (enforced by `jest/no-focused-tests`)
 - Use `beforeEach`/`afterEach` for setup/teardown
 - Mock external services in unit tests
@@ -515,6 +657,7 @@ mkdir -p services/my-service/src
 ### Database Migrations
 
 #### PostgreSQL (Prisma)
+
 ```bash
 pnpm db:pg:migrate      # Apply migrations
 pnpm db:pg:generate     # Generate Prisma client
@@ -522,12 +665,14 @@ pnpm db:pg:status       # Check migration status
 ```
 
 #### PostgreSQL (Knex)
+
 ```bash
 pnpm db:knex:migrate    # Apply migrations
 pnpm db:knex:rollback   # Rollback last batch
 ```
 
 #### Neo4j
+
 ```bash
 pnpm db:neo4j:migrate   # Custom migration scripts
 ```
@@ -593,6 +738,7 @@ docker exec -it <neo4j-container> cypher-shell -u neo4j -p devpassword
 ### Production Guardrails
 
 The API **refuses to boot in production** if:
+
 - `JWT_SECRET` or `JWT_REFRESH_SECRET` match known defaults
 - Database passwords are default values
 - CORS allow-lists include `localhost/*`
@@ -626,34 +772,34 @@ The API **refuses to boot in production** if:
 
 ### Configuration Files
 
-| File                        | Purpose                                        |
-| --------------------------- | ---------------------------------------------- |
-| `package.json`              | Root package, scripts, workspace config        |
-| `pnpm-workspace.yaml`       | pnpm workspace definition                      |
-| `turbo.json`                | Turbo build pipeline configuration             |
-| `tsconfig.base.json`        | Base TypeScript config                         |
-| `tsconfig.build.json`       | Project references for workspace builds        |
-| `eslint.config.js`          | ESLint v9 flat config                          |
-| `.eslintrc.cjs`             | Legacy ESLint config                           |
-| `.prettierrc`               | Prettier formatting rules                      |
-| `Makefile`                  | Golden path targets (bootstrap, up, smoke)     |
-| `.env.example`              | Development environment template               |
-| `docker-compose.dev.yml`    | Development stack definition                   |
-| `docker-compose.ai.yml`     | AI/ML services stack                           |
+| File                     | Purpose                                    |
+| ------------------------ | ------------------------------------------ |
+| `package.json`           | Root package, scripts, workspace config    |
+| `pnpm-workspace.yaml`    | pnpm workspace definition                  |
+| `turbo.json`             | Turbo build pipeline configuration         |
+| `tsconfig.base.json`     | Base TypeScript config                     |
+| `tsconfig.build.json`    | Project references for workspace builds    |
+| `eslint.config.js`       | ESLint v9 flat config                      |
+| `.eslintrc.cjs`          | Legacy ESLint config                       |
+| `.prettierrc`            | Prettier formatting rules                  |
+| `Makefile`               | Golden path targets (bootstrap, up, smoke) |
+| `.env.example`           | Development environment template           |
+| `docker-compose.dev.yml` | Development stack definition               |
+| `docker-compose.ai.yml`  | AI/ML services stack                       |
 
 ### Key Documentation
 
-| File/Directory                  | Purpose                                   |
-| ------------------------------- | ----------------------------------------- |
-| `README.md`                     | Project overview, quickstart              |
-| `docs/ARCHITECTURE.md`          | System architecture, stack details        |
-| `docs/DEVELOPER_ONBOARDING.md`  | 30-minute developer onboarding guide      |
-| `docs/ONBOARDING.md`            | Day-one onboarding                        |
-| `docs/REPOSITORY_STRUCTURE.md`  | Codebase organization                     |
-| `docs/Copilot-Playbook.md`      | AI copilot usage guide                    |
-| `docs/TESTPLAN.md`              | Testing strategy and plans                |
-| `RUNBOOKS/`                     | Operational runbooks                      |
-| `SECURITY/`                     | Security policies and guidelines          |
+| File/Directory                 | Purpose                              |
+| ------------------------------ | ------------------------------------ |
+| `README.md`                    | Project overview, quickstart         |
+| `docs/ARCHITECTURE.md`         | System architecture, stack details   |
+| `docs/DEVELOPER_ONBOARDING.md` | 30-minute developer onboarding guide |
+| `docs/ONBOARDING.md`           | Day-one onboarding                   |
+| `docs/REPOSITORY_STRUCTURE.md` | Codebase organization                |
+| `docs/Copilot-Playbook.md`     | AI copilot usage guide               |
+| `docs/TESTPLAN.md`             | Testing strategy and plans           |
+| `RUNBOOKS/`                    | Operational runbooks                 |
+| `SECURITY/`                    | Security policies and guidelines     |
 
 ### Key Scripts
 
@@ -669,11 +815,11 @@ The API **refuses to boot in production** if:
 
 ### Data & Fixtures
 
-| Location                                 | Purpose                           |
-| ---------------------------------------- | --------------------------------- |
-| `data/golden-path/demo-investigation.json` | Golden path test dataset        |
-| `scripts/devkit/seed-fixtures.js`        | Seed demo data                    |
-| `scripts/seed/`                          | Additional seed scripts           |
+| Location                                   | Purpose                  |
+| ------------------------------------------ | ------------------------ |
+| `data/golden-path/demo-investigation.json` | Golden path test dataset |
+| `scripts/devkit/seed-fixtures.js`          | Seed demo data           |
+| `scripts/seed/`                            | Additional seed scripts  |
 
 ---
 
@@ -682,6 +828,7 @@ The API **refuses to boot in production** if:
 ### Best Practices for AI Assistance
 
 1. **Always run tests after changes**:
+
    ```bash
    make smoke          # Golden path
    pnpm test           # Unit tests
@@ -774,9 +921,59 @@ export const EntityCard: React.FC<EntityCardProps> = ({ entity }) => {
 };
 ```
 
+### Copilot Golden Prompts
+
+Use these prompts for consistent AI-assisted development (from `docs/Copilot-Playbook.md`):
+
+**Tests:**
+
+```
+/write-tests for file: packages/ai-core/src/router.ts using vitest + msw; cover error paths and OPA deny.
+```
+
+**Policy:**
+
+```
+/author OPA rego for dual-control delete with reason-for-access; include unit tests.
+```
+
+**Kubernetes/Infra:**
+
+```
+/explain k8s manifests in ops/helm/values-prod.yaml and suggest KEDA autoscale rules for p95 latency.
+```
+
+**TypeScript:**
+
+```
+/extract component from src/ui/Dashboard.tsx into reusable widget with zod schema and prop typing.
+```
+
+**Grafana:**
+
+```
+/migrate this Grafana panel JSON to a library panel and add SLO burn-rate alerts.
+```
+
+### Key Services Overview
+
+| Service       | Location                | Purpose                         |
+| ------------- | ----------------------- | ------------------------------- |
+| `api`         | `services/api/`         | Main GraphQL API                |
+| `graph-api`   | `services/graph-api/`   | Graph-specific operations       |
+| `copilot`     | `services/copilot/`     | AI copilot service              |
+| `policy`      | `services/policy/`      | OPA policy engine               |
+| `audit_svc`   | `services/audit_svc/`   | Audit logging                   |
+| `prov-ledger` | `services/prov-ledger/` | Provenance tracking             |
+| `ingest`      | `services/ingest/`      | Data ingestion                  |
+| `enrichment`  | `services/enrichment/`  | Data enrichment                 |
+| `search`      | `services/search/`      | Search service                  |
+| `dev-gateway` | `services/dev-gateway/` | Development gateway (port 4100) |
+
 ### AI Assistant Guardrails
 
 **DO**:
+
 - ✅ Follow existing patterns and conventions
 - ✅ Add tests for new functionality
 - ✅ Update documentation when changing behavior
@@ -785,6 +982,7 @@ export const EntityCard: React.FC<EntityCardProps> = ({ entity }) => {
 - ✅ Check security implications (auth, input validation)
 
 **DON'T**:
+
 - ❌ Commit secrets or credentials
 - ❌ Skip the smoke test (`make smoke`)
 - ❌ Introduce breaking changes without discussion
@@ -843,6 +1041,20 @@ pnpm test -- --verbose
 jest --clearCache
 ```
 
+#### Issue: Neo4j connection errors
+
+```bash
+# Check Neo4j status
+docker exec -it summit-neo4j cypher-shell -u neo4j -p devpassword "RETURN 1"
+
+# View Neo4j logs
+docker logs summit-neo4j
+
+# Reset Neo4j data (caution: destroys data)
+docker-compose -f docker-compose.dev.yml down -v
+make up
+```
+
 #### Issue: Smoke test fails
 
 ```bash
@@ -857,6 +1069,50 @@ make down && make up
 
 # Wait for services
 ./scripts/wait-for-stack.sh
+```
+
+---
+
+## Performance Best Practices
+
+### Query Optimization
+
+**Neo4j Cypher:**
+
+```cypher
+// Use indexes for lookups
+MATCH (e:Entity {id: $id}) RETURN e
+
+// Limit traversal depth
+MATCH path = (e:Entity)-[*1..3]-(related) RETURN path LIMIT 100
+
+// Use parameters to enable query caching
+MATCH (e:Entity) WHERE e.type = $type RETURN e
+```
+
+**GraphQL:**
+
+- Use persisted queries for production (`pnpm persisted:build`)
+- Enable query complexity limits in Apollo Server
+- Use DataLoader for N+1 query prevention
+
+### Caching Strategy
+
+| Layer    | Technology | TTL        | Use Case                   |
+| -------- | ---------- | ---------- | -------------------------- |
+| API      | Redis      | 5-60 min   | Query results, sessions    |
+| GraphQL  | Apollo     | Per-query  | Field-level caching        |
+| Database | Neo4j      | Built-in   | Query plan caching         |
+| CDN      | CloudFront | 1-24 hours | Static assets, API gateway |
+
+### Resource Limits (Development)
+
+```yaml
+# Recommended Docker resource allocation
+- PostgreSQL: 512MB RAM, 1 CPU
+- Neo4j: 2GB RAM (heap), 2 CPU
+- Redis: 256MB RAM
+- API: 1GB RAM, 2 CPU
 ```
 
 ---
@@ -887,6 +1143,7 @@ make down && make up
 ### Updating This Document
 
 This document should be updated when:
+
 - Major architectural changes occur
 - New conventions are established
 - Development workflows change
@@ -897,6 +1154,7 @@ This document should be updated when:
 
 ### Version History
 
+- **2025-11-21**: Enhanced with environment variables, Docker services, PR workflow, API structure, Copilot prompts, and key services
 - **2025-11-20**: Initial creation (comprehensive audit of codebase)
 
 ---
