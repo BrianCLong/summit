@@ -12,14 +12,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "zod": "^4.1.12",
-    "uuid": "^11.0.5"
+    "uuid": "^11.0.5",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "typescript": "^5.9.3",
+    "eslint": "^9.39.1",
     "jest": "^30.2.0",
-    "eslint": "^9.39.1"
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
   },
   "type": "module"
 }
