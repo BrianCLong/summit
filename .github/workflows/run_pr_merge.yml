@@ -1,0 +1,45 @@
+name: Run PR Merge
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch:
+
+jobs:
+  get-prs:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_numbers: ${{ steps.get_prs.outputs.pr_numbers }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Get PRs to merge
+        id: get_prs
+        run: |
+          PR_NUMBERS=$(python scripts/get_bot_prs.py)
+          echo "pr_numbers=$PR_NUMBERS" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          BOT_AUTHORS: "dependabot[bot],renovate[bot]"
+
+  trigger-batch-merge:
+    needs: get-prs
+    if: needs.get-prs.outputs.pr_numbers != '[]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger batch merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBERS: ${{ needs.get-prs.outputs.pr_numbers }}
+        run: |
+          BRANCH_NAME="bot-pr-merge-$(date +%s)"
+          gh workflow run batch-merge.yml -f integration_branch="$BRANCH_NAME" -f pr_numbers="$PR_NUMBERS"
