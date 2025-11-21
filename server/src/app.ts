@@ -30,6 +30,7 @@ import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
 import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
+import githubRouter from './routes/github.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -94,6 +95,7 @@ export const createApp = async () => {
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.use('/api/webhooks', webhookRouter);
+  app.use('/api/integrations/github', githubRouter);
   app.get('/metrics', metricsRoute);
   app.use(
     rateLimit({
