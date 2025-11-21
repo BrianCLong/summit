@@ -72,21 +72,84 @@ paths:
       tags:
         - Runs
       deprecated: true
-      description: This endpoint is deprecated and will be removed in future versions. Please use /runs instead.
-      x-deprecated-alternatives:
-        - /runs
+      description: |
+        **⚠️ DEPRECATED**: This endpoint is deprecated and will be removed on 2025-12-31.
+
+        **Migration Path**: Use `/api/maestro/v2/runs` instead for paginated results with improved performance.
+
+        **Breaking Changes**:
+        - Response format changed from flat array to paginated object with metadata
+        - `status` field renamed to `state` in v2
+        - New required query parameters: `page` and `pageSize`
+
+        **Migration Guide**: See [V1 to V2 Migration Guide](https://docs.internal/migrations/v1-to-v2)
+
+        **Support**: Contact platform-engineering@company.com or #api-migrations on Slack
+      x-sunset-date: "2025-12-31T23:59:59Z"
+      x-successor-endpoint: "/api/maestro/v2/runs"
+      x-migration-guide: "https://docs.internal/migrations/v1-to-v2"
+      x-support-channel: "#api-migrations"
       responses:
         '200':
-          description: A list of runs
+          description: A list of runs (deprecated format)
+          headers:
+            Deprecation:
+              description: Indicates that the endpoint is deprecated
+              schema:
+                type: string
+                example: "true"
+            Sunset:
+              description: Date when the endpoint will be removed (RFC 8594)
+              schema:
+                type: string
+                example: "Sat, 31 Dec 2025 23:59:59 GMT"
+            Link:
+              description: Link to successor endpoint
+              schema:
+                type: string
+                example: '</api/maestro/v2/runs>; rel="successor-version"'
+            Warning:
+              description: Deprecation warning message (RFC 7234)
+              schema:
+                type: string
+                example: '299 - "This endpoint is deprecated and will be removed on 2025-12-31. Migrate to /api/maestro/v2/runs"'
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Run'
-      # Example of Sunset header (would be set by the server, not in OpenAPI spec)
-      # headers:
-      #   Sunset: "Fri, 31 Dec 2025 23:59:59 GMT"
+              examples:
+                deprecatedResponse:
+                  summary: Example deprecated response
+                  description: This shows the old flat array format that will be removed
+                  value:
+                    - id: "run-123"
+                      pipeline: "analysis-pipeline"
+                      status: "Succeeded"
+                      durationMs: 45000
+                      cost: 0.25
+                      createdAt: "2025-01-15T10:30:00Z"
+                      traceId: "abc123def456"
+        '410':
+          description: Gone - Endpoint has been removed (after sunset date)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Gone"
+                  message:
+                    type: string
+                    example: "This endpoint has been permanently removed."
+                  successorUrl:
+                    type: string
+                    example: "/api/maestro/v2/runs"
+                  documentation:
+                    type: string
+                    example: "https://docs.internal/api/deprecations"
   /pipelines:
     get:
       operationId: listPipelines
