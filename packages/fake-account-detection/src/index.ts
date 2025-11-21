@@ -3,6 +3,8 @@
  * Bot detection, sockpuppet identification, and profile authenticity scoring
  */
 
+export * from './psycholinguistics';
+
 export interface FakeAccountAnalysis {
   isFake: boolean;
   confidence: number;
