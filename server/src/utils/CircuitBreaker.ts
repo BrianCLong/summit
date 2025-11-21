@@ -16,6 +16,10 @@ interface CircuitBreakerOptions {
   errorRateThreshold: number; // Error rate percentage (e.g., 0.5 for 50%)
 }
 
+/**
+ * Implements the Circuit Breaker pattern to handle faults in distributed systems.
+ * Monitors execution metrics like failure rate and latency to prevent cascading failures.
+ */
 export class CircuitBreaker {
   private state: CircuitBreakerState = CircuitBreakerState.CLOSED;
   private failureCount: number = 0;
@@ -29,6 +33,10 @@ export class CircuitBreaker {
     stateChanges: number;
   };
 
+  /**
+   * Creates a new CircuitBreaker instance.
+   * @param {Partial<CircuitBreakerOptions>} options - Configuration options for the circuit breaker.
+   */
   constructor(options: Partial<CircuitBreakerOptions>) {
     this.options = {
       failureThreshold: 5,
@@ -51,10 +59,18 @@ export class CircuitBreaker {
     );
   }
 
+  /**
+   * Returns the current state of the circuit breaker.
+   * @returns {CircuitBreakerState} The current state (CLOSED, OPEN, HALF_OPEN).
+   */
   public getState(): CircuitBreakerState {
     return this.state;
   }
 
+  /**
+   * Retrieves performance metrics for the circuit breaker.
+   * @returns {object} An object containing metrics like error rate, p95 latency, and current state.
+   */
   public getMetrics() {
     return {
       ...this.metrics,
@@ -67,10 +83,18 @@ export class CircuitBreaker {
     };
   }
 
+  /**
+   * Gets the current consecutive failure count.
+   * @returns {number} The number of consecutive failures.
+   */
   public getFailureCount(): number {
     return this.failureCount;
   }
 
+  /**
+   * Gets the timestamp of the last failure.
+   * @returns {number} The timestamp in milliseconds.
+   */
   public getLastFailureTime(): number {
     return this.lastFailureTime;
   }
@@ -134,6 +158,15 @@ export class CircuitBreaker {
     logger.info('Circuit Breaker: CLOSED');
   }
 
+  /**
+   * Executes a command wrapped by the circuit breaker.
+   * Checks the circuit state before execution.
+   *
+   * @template T
+   * @param {() => Promise<T>} command - The async function to execute.
+   * @returns {Promise<T>} The result of the command.
+   * @throws {Error} If the circuit is OPEN or if the command fails.
+   */
   public async execute<T>(command: () => Promise<T>): Promise<T> {
     this.metrics.totalRequests++;
     this.evaluateState(); // Evaluate state before execution

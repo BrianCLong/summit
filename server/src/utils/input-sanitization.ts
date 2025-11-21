@@ -15,7 +15,11 @@ import validator from 'validator';
 import { escape as htmlEscape } from 'html-escaper';
 
 /**
- * Sanitize string input to prevent XSS
+ * Sanitize string input to prevent XSS by removing null bytes and escaping HTML characters.
+ *
+ * @param {string} input - The string to sanitize.
+ * @returns {string} The sanitized string.
+ * @throws {Error} If the input is not a string.
  */
 export function sanitizeString(input: string): string {
   if (typeof input !== 'string') {
@@ -32,7 +36,13 @@ export function sanitizeString(input: string): string {
 }
 
 /**
- * Sanitize HTML content (allow safe HTML tags)
+ * Sanitize HTML content by stripping unsafe tags and attributes.
+ * Allows a set of safe tags (b, i, em, strong, a, p, br).
+ *
+ * @param {string} input - The HTML string to sanitize.
+ * @param {string[]} [allowedTags] - Optional list of allowed tags.
+ * @returns {string} The sanitized HTML string.
+ * @throws {Error} If the input is not a string.
  */
 export function sanitizeHTML(input: string, allowedTags?: string[]): string {
   if (typeof input !== 'string') {
@@ -50,7 +60,11 @@ export function sanitizeHTML(input: string, allowedTags?: string[]): string {
 }
 
 /**
- * Validate and sanitize email address
+ * Validate and sanitize an email address.
+ *
+ * @param {string} email - The email address to validate.
+ * @returns {string} The normalized email address.
+ * @throws {Error} If the email address is invalid.
  */
 export function sanitizeEmail(email: string): string {
   if (!validator.isEmail(email)) {
@@ -61,7 +75,13 @@ export function sanitizeEmail(email: string): string {
 }
 
 /**
- * Validate and sanitize URL
+ * Validate and sanitize a URL.
+ * Checks for allowed protocols and prevents dangerous schemes like javascript: and data:.
+ *
+ * @param {string} url - The URL to validate.
+ * @param {string[]} [allowedProtocols=['http', 'https']] - List of allowed protocols.
+ * @returns {string} The validated URL.
+ * @throws {Error} If the URL is invalid or uses a dangerous scheme.
  */
 export function sanitizeURL(url: string, allowedProtocols: string[] = ['http', 'https']): string {
   if (!validator.isURL(url, { protocols: allowedProtocols, require_protocol: true })) {
@@ -78,7 +98,13 @@ export function sanitizeURL(url: string, allowedProtocols: string[] = ['http', '
 }
 
 /**
- * Sanitize file path to prevent path traversal
+ * Sanitize file path to prevent path traversal attacks.
+ * Optionally ensures the path is within a specific base directory.
+ *
+ * @param {string} path - The file path to sanitize.
+ * @param {string} [allowedBasePath] - Optional base path to restrict the file path to.
+ * @returns {string} The sanitized file path.
+ * @throws {Error} If path traversal is detected or the path is outside the allowed base path.
  */
 export function sanitizeFilePath(path: string, allowedBasePath?: string): string {
   if (typeof path !== 'string') {
@@ -113,8 +139,12 @@ export function sanitizeFilePath(path: string, allowedBasePath?: string): string
 }
 
 /**
- * Sanitize SQL input (for use with parameterized queries)
- * Note: Always use parameterized queries. This is additional protection.
+ * Sanitize SQL input by checking for common injection patterns.
+ * Note: This is a secondary defense; always use parameterized queries.
+ *
+ * @param {string} input - The SQL input string.
+ * @returns {string} The input string if safe.
+ * @throws {Error} If potential SQL injection patterns are detected.
  */
 export function sanitizeSQL(input: string): string {
   if (typeof input !== 'string') {
@@ -147,7 +177,11 @@ export function sanitizeSQL(input: string): string {
 }
 
 /**
- * Sanitize shell command input
+ * Sanitize shell command input by checking for dangerous characters.
+ *
+ * @param {string} input - The shell command input.
+ * @returns {string} The input string if safe.
+ * @throws {Error} If dangerous shell characters are detected.
  */
 export function sanitizeShellInput(input: string): string {
   if (typeof input !== 'string') {
@@ -165,7 +199,12 @@ export function sanitizeShellInput(input: string): string {
 }
 
 /**
- * Sanitize NoSQL query input
+ * Sanitize NoSQL query input to prevent operator injection.
+ * Recursively checks objects for keys starting with '$'.
+ *
+ * @param {any} input - The input to sanitize.
+ * @returns {any} The sanitized input.
+ * @throws {Error} If NoSQL operator injection is detected.
  */
 export function sanitizeNoSQL(input: any): any {
   if (typeof input === 'string') {
@@ -197,7 +236,13 @@ export function sanitizeNoSQL(input: any): any {
 }
 
 /**
- * Validate integer input
+ * Validate that the input is an integer within the specified range.
+ *
+ * @param {any} input - The input to validate.
+ * @param {number} [min] - The minimum allowed value.
+ * @param {number} [max] - The maximum allowed value.
+ * @returns {number} The parsed integer.
+ * @throws {Error} If the input is not a valid integer or out of range.
  */
 export function validateInteger(input: any, min?: number, max?: number): number {
   const num = parseInt(input, 10);
@@ -218,7 +263,13 @@ export function validateInteger(input: any, min?: number, max?: number): number 
 }
 
 /**
- * Validate float input
+ * Validate that the input is a float within the specified range.
+ *
+ * @param {any} input - The input to validate.
+ * @param {number} [min] - The minimum allowed value.
+ * @param {number} [max] - The maximum allowed value.
+ * @returns {number} The parsed float.
+ * @throws {Error} If the input is not a valid float or out of range.
  */
 export function validateFloat(input: any, min?: number, max?: number): number {
   const num = parseFloat(input);
@@ -239,7 +290,12 @@ export function validateFloat(input: any, min?: number, max?: number): number {
 }
 
 /**
- * Validate boolean input
+ * Validate that the input is a boolean value.
+ * Accepts boolean types, 'true'/'false' strings (case-insensitive), and 1/0 numbers.
+ *
+ * @param {any} input - The input to validate.
+ * @returns {boolean} The boolean value.
+ * @throws {Error} If the input is not a valid boolean representation.
  */
 export function validateBoolean(input: any): boolean {
   if (typeof input === 'boolean') {
@@ -261,7 +317,12 @@ export function validateBoolean(input: any): boolean {
 }
 
 /**
- * Validate UUID
+ * Validate that the input is a valid UUID.
+ *
+ * @param {string} input - The UUID string to validate.
+ * @param {validator.UUIDVersion} [version] - The UUID version to check against.
+ * @returns {string} The validated and lowercased UUID.
+ * @throws {Error} If the input is not a valid UUID.
  */
 export function validateUUID(input: string, version?: validator.UUIDVersion): string {
   if (!validator.isUUID(input, version)) {
@@ -272,7 +333,11 @@ export function validateUUID(input: string, version?: validator.UUIDVersion): st
 }
 
 /**
- * Sanitize JSON input
+ * Sanitize JSON input by parsing it and checking for prototype pollution.
+ *
+ * @param {string} input - The JSON string.
+ * @returns {any} The parsed JSON object.
+ * @throws {Error} If the JSON is invalid or prototype pollution is detected.
  */
 export function sanitizeJSON(input: string): any {
   try {
@@ -290,7 +355,10 @@ export function sanitizeJSON(input: string): any {
 }
 
 /**
- * Sanitize object to remove dangerous properties
+ * Sanitize an object by removing dangerous properties like __proto__, constructor, and prototype.
+ *
+ * @param {any} obj - The object to sanitize.
+ * @returns {any} The sanitized object.
  */
 export function sanitizeObject(obj: any): any {
   if (typeof obj !== 'object' || obj === null) {
@@ -319,7 +387,11 @@ export function sanitizeObject(obj: any): any {
 }
 
 /**
- * Rate limit key sanitizer
+ * Sanitize a rate limit key by allowing only safe characters (alphanumeric, -, _, .).
+ *
+ * @param {string} key - The rate limit key.
+ * @returns {string} The sanitized key.
+ * @throws {Error} If the key contains invalid characters or is empty.
  */
 export function sanitizeRateLimitKey(key: string): string {
   // Only allow alphanumeric, hyphens, underscores, and dots
@@ -333,27 +405,50 @@ export function sanitizeRateLimitKey(key: string): string {
 }
 
 /**
- * Comprehensive input validator
+ * Comprehensive input validator class that accumulates errors.
  */
 export class InputValidator {
   private errors: string[] = [];
 
+  /**
+   * Adds an error message to the list.
+   * @param {string} error - The error message.
+   */
   addError(error: string): void {
     this.errors.push(error);
   }
 
+  /**
+   * Checks if there are any validation errors.
+   * @returns {boolean} True if errors exist.
+   */
   hasErrors(): boolean {
     return this.errors.length > 0;
   }
 
+  /**
+   * Retrieves the list of validation errors.
+   * @returns {string[]} Array of error messages.
+   */
   getErrors(): string[] {
     return this.errors;
   }
 
+  /**
+   * Resets the validator, clearing all errors.
+   */
   reset(): void {
     this.errors = [];
   }
 
+  /**
+   * Validates a string input.
+   *
+   * @param {any} input - The input to validate.
+   * @param {string} fieldName - The name of the field (for error messages).
+   * @param {object} [options] - Validation options (minLength, maxLength, pattern).
+   * @returns {string | null} The sanitized string or null if validation fails.
+   */
   validateString(input: any, fieldName: string, options?: {
     minLength?: number;
     maxLength?: number;
@@ -387,6 +482,13 @@ export class InputValidator {
     }
   }
 
+  /**
+   * Validates an email input.
+   *
+   * @param {any} input - The input to validate.
+   * @param {string} fieldName - The name of the field.
+   * @returns {string | null} The sanitized email or null if validation fails.
+   */
   validateEmail(input: any, fieldName: string): string | null {
     try {
       return sanitizeEmail(input);
@@ -396,6 +498,13 @@ export class InputValidator {
     }
   }
 
+  /**
+   * Validates a URL input.
+   *
+   * @param {any} input - The input to validate.
+   * @param {string} fieldName - The name of the field.
+   * @returns {string | null} The sanitized URL or null if validation fails.
+   */
   validateURL(input: any, fieldName: string): string | null {
     try {
       return sanitizeURL(input);
@@ -405,6 +514,15 @@ export class InputValidator {
     }
   }
 
+  /**
+   * Validates an integer input.
+   *
+   * @param {any} input - The input to validate.
+   * @param {string} fieldName - The name of the field.
+   * @param {number} [min] - Minimum value.
+   * @param {number} [max] - Maximum value.
+   * @returns {number | null} The parsed integer or null if validation fails.
+   */
   validateInteger(input: any, fieldName: string, min?: number, max?: number): number | null {
     try {
       return validateInteger(input, min, max);

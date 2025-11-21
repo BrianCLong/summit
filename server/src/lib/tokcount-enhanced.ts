@@ -6,9 +6,14 @@
 import LRU from 'lru-cache';
 import logger from '../utils/logger';
 
+/** Supported LLM providers. */
 export type Provider = 'openai' | 'anthropic' | 'gemini';
+/** Part of the LLM interaction (prompt or completion). */
 export type Part = 'prompt' | 'completion';
 
+/**
+ * Input parameters for estimating token usage.
+ */
 export interface EstimateInput {
   payload: {
     messages?: any[];
@@ -21,6 +26,9 @@ export interface EstimateInput {
   model?: string;
 }
 
+/**
+ * Output of the token usage estimation.
+ */
 export interface EstimateOutput {
   provider: Provider;
   model: string;
@@ -34,6 +42,9 @@ export interface EstimateOutput {
   estimationMethod: 'precise' | 'heuristic' | 'cached' | 'reconciled';
 }
 
+/**
+ * Result of reconciling estimated usage with actual usage data.
+ */
 export interface ReconciliationResult extends EstimateOutput {
   reconciliationType: 'provider_api' | 'usage_logs' | 'billing_data';
   reconciliationConfidence: number; // 0-1
@@ -290,7 +301,11 @@ function getDefaultModel(provider: Provider): string {
 }
 
 /**
- * Main estimation function with caching and precise tokenization
+ * Estimates tokens and costs for a given payload using caching and precise/heuristic methods.
+ *
+ * @param {EstimateInput} input - The input payload and model information.
+ * @returns {Promise<EstimateOutput>} The estimated tokens and costs.
+ * @throws {Error} If no pricing information is available for the specified model.
  */
 export async function estimateTokensAndCost(
   input: EstimateInput,
@@ -374,7 +389,16 @@ export async function estimateTokensAndCost(
 }
 
 /**
- * Post-hoc reconciliation with actual provider usage
+ * Reconciles estimated usage with actual usage data from the provider or logs.
+ *
+ * @param {EstimateOutput} estimated - The original estimated usage.
+ * @param {object} actualData - The actual usage data.
+ * @param {object} [actualData.tokens] - Actual token counts.
+ * @param {number} actualData.tokens.prompt - Actual prompt tokens.
+ * @param {number} actualData.tokens.completion - Actual completion tokens.
+ * @param {number} [actualData.cost] - Actual cost.
+ * @param {'provider_api' | 'usage_logs' | 'billing_data'} actualData.source - Source of the actual data.
+ * @returns {Promise<ReconciliationResult | null>} The reconciled result or null if reconciliation fails.
  */
 export async function reconcileActualUsage(
   estimated: EstimateOutput,
@@ -452,14 +476,20 @@ export async function reconcileActualUsage(
 }
 
 /**
- * Get pricing information for a model
+ * Retrieves pricing information for a specific model.
+ *
+ * @param {Provider} provider - The provider name.
+ * @param {string} model - The model name.
+ * @returns {object | null} The pricing information or null if not found.
  */
 export function getModelPricing(provider: Provider, model: string) {
   return PRICING_REGISTRY[provider]?.[model] || null;
 }
 
 /**
- * List all supported models with their pricing
+ * Lists all supported models and their pricing.
+ *
+ * @returns {Array<{ provider: Provider, model: string, pricing: any }>} An array of supported models with pricing.
  */
 export function getSupportedModels(): Array<{
   provider: Provider;
@@ -486,7 +516,9 @@ export function getSupportedModels(): Array<{
 }
 
 /**
- * Cache statistics for monitoring
+ * Retrieves current cache statistics.
+ *
+ * @returns {object} Cache statistics including size, max size, and hit rate.
  */
 export function getCacheStats() {
   return {

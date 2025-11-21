@@ -6,17 +6,26 @@
 import crypto from 'crypto';
 import { MerkleNode, MerkleTree, MerkleProof } from '../types/provenance-beta.js';
 
+/**
+ * Class for building and verifying Merkle Trees.
+ */
 export class MerkleTreeBuilder {
   private leaves: { hash: string; data: any }[];
   private tree: MerkleNode[];
 
+  /**
+   * Creates a new MerkleTreeBuilder instance.
+   */
   constructor() {
     this.leaves = [];
     this.tree = [];
   }
 
   /**
-   * Add a leaf to the Merkle tree
+   * Add a leaf to the Merkle tree.
+   *
+   * @param {any} data - The data associated with the leaf.
+   * @param {string} [hash] - The pre-computed hash of the leaf. If omitted, the hash is computed from the data.
    */
   addLeaf(data: any, hash?: string): void {
     const leafHash = hash || this.computeHash(data);
@@ -24,7 +33,11 @@ export class MerkleTreeBuilder {
   }
 
   /**
-   * Build the Merkle tree from added leaves
+   * Build the Merkle tree from added leaves.
+   * Sorts leaves by hash to ensure a deterministic tree structure.
+   *
+   * @returns {MerkleTree} The constructed Merkle tree structure.
+   * @throws {Error} If no leaves have been added.
    */
   build(): MerkleTree {
     if (this.leaves.length === 0) {
@@ -74,7 +87,11 @@ export class MerkleTreeBuilder {
   }
 
   /**
-   * Get Merkle proof for a specific leaf hash
+   * Get Merkle proof for a specific leaf hash.
+   *
+   * @param {string} leafHash - The hash of the leaf to generate a proof for.
+   * @returns {string[]} An array of sibling hashes representing the proof path.
+   * @throws {Error} If the leaf hash is not found in the tree.
    */
   getProof(leafHash: string): string[] {
     const tree = this.buildIfNeeded();
@@ -114,7 +131,12 @@ export class MerkleTreeBuilder {
   }
 
   /**
-   * Verify a Merkle proof
+   * Verify a Merkle proof.
+   *
+   * @param {string} leafHash - The hash of the leaf being verified.
+   * @param {string[]} proof - The proof path (sibling hashes).
+   * @param {string} rootHash - The expected root hash of the Merkle tree.
+   * @returns {boolean} True if the proof is valid, false otherwise.
    */
   static verifyProof(
     leafHash: string,
@@ -137,7 +159,10 @@ export class MerkleTreeBuilder {
   }
 
   /**
-   * Build a Merkle tree from a list of items (convenience method)
+   * Build a Merkle tree from a list of items (convenience method).
+   *
+   * @param {any[]} items - The list of items to include in the tree.
+   * @returns {MerkleTree} The constructed Merkle tree.
    */
   static buildFromItems(items: any[]): MerkleTree {
     const builder = new MerkleTreeBuilder();
@@ -150,7 +175,11 @@ export class MerkleTreeBuilder {
   }
 
   /**
-   * Generate a full Merkle proof object
+   * Generate a full Merkle proof object.
+   *
+   * @param {string} leafHash - The hash of the leaf.
+   * @param {any[]} items - The list of items in the tree.
+   * @returns {MerkleProof} The proof object containing the proof path and root hash.
    */
   static generateProof(
     leafHash: string,
@@ -173,7 +202,10 @@ export class MerkleTreeBuilder {
   }
 
   /**
-   * Verify a full Merkle proof object
+   * Verify a full Merkle proof object.
+   *
+   * @param {MerkleProof} proof - The proof object to verify.
+   * @returns {boolean} True if the proof is valid.
    */
   static verifyProofObject(proof: MerkleProof): boolean {
     return MerkleTreeBuilder.verifyProof(
@@ -232,7 +264,10 @@ export class MerkleTreeBuilder {
  */
 
 /**
- * Build a Merkle tree and return root hash
+ * Build a Merkle tree and return root hash.
+ *
+ * @param {any[]} items - The items to build the tree from.
+ * @returns {string} The root hash of the Merkle tree.
  */
 export function buildMerkleRoot(items: any[]): string {
   const tree = MerkleTreeBuilder.buildFromItems(items);
@@ -240,7 +275,10 @@ export function buildMerkleRoot(items: any[]): string {
 }
 
 /**
- * Build a complete Merkle tree with proofs for all items
+ * Build a complete Merkle tree with proofs for all items.
+ *
+ * @param {any[]} items - The items to build the tree from.
+ * @returns {object} An object containing the root hash and a map of proofs.
  */
 export function buildMerkleTreeWithProofs(items: any[]): {
   root: string;
@@ -267,7 +305,11 @@ export function buildMerkleTreeWithProofs(items: any[]): {
 }
 
 /**
- * Verify that a set of items produces the expected Merkle root
+ * Verify that a set of items produces the expected Merkle root.
+ *
+ * @param {any[]} items - The items to verify.
+ * @param {string} expectedRoot - The expected root hash.
+ * @returns {boolean} True if the calculated root matches the expected root.
  */
 export function verifyMerkleRoot(items: any[], expectedRoot: string): boolean {
   try {
@@ -279,7 +321,12 @@ export function verifyMerkleRoot(items: any[], expectedRoot: string): boolean {
 }
 
 /**
- * Verify a single item against a Merkle root using its proof
+ * Verify a single item against a Merkle root using its proof.
+ *
+ * @param {string} itemHash - The hash of the item to verify.
+ * @param {string[]} proof - The proof path.
+ * @param {string} rootHash - The Merkle root hash.
+ * @returns {boolean} True if the item is verified.
  */
 export function verifyItem(
   itemHash: string,
@@ -290,7 +337,10 @@ export function verifyItem(
 }
 
 /**
- * Export Merkle tree structure for storage
+ * Export Merkle tree structure for storage.
+ *
+ * @param {MerkleTree} tree - The Merkle tree to export.
+ * @returns {object} The exported tree structure with metadata.
  */
 export function exportMerkleTree(tree: MerkleTree): {
   root: string;
@@ -315,7 +365,12 @@ export function exportMerkleTree(tree: MerkleTree): {
 }
 
 /**
- * Import and reconstruct Merkle tree from exported structure
+ * Import and reconstruct Merkle tree from exported structure.
+ *
+ * @param {object} exported - The exported tree structure.
+ * @param {any[]} originalItems - The original items used to build the tree.
+ * @returns {MerkleTree} The reconstructed Merkle tree.
+ * @throws {Error} If items are missing or the root hash mismatches.
  */
 export function importMerkleTree(
   exported: {
