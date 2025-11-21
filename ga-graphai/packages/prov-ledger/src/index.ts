@@ -36,6 +36,8 @@ import {
   normalizeWorkflow,
 } from 'common-types';
 
+export * from './mul-ledger';
+
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD
 // ============================================================================
