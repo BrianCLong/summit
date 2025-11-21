@@ -163,7 +163,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
    */
   getBestLink(): SatelliteLink | null {
     let bestLink: SatelliteLink | null = null;
-    let bestScore = -1;
+    let bestScore = -Infinity;
 
     for (const link of this.links.values()) {
       if (link.linkState !== 'connected') continue;
