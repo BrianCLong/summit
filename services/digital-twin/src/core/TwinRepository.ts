@@ -60,7 +60,7 @@ export class TwinRepository {
   async findById(id: string): Promise<DigitalTwin | null> {
     // Check cache first
     const cached = await this.redis.get(`${this.cachePrefix}${id}`);
-    if (cached) {
+    if (cached && typeof cached === 'string') {
       return JSON.parse(cached);
     }
 

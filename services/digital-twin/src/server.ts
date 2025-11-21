@@ -90,7 +90,7 @@ async function main() {
         twinService,
         simulationEngine,
         eventBus,
-        userId: req.headers['x-user-id'] ?? 'system',
+        userId: String(req.headers['x-user-id'] ?? 'system'),
       }),
     }),
   );
