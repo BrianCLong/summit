@@ -1,7 +1,82 @@
+# SLO Configuration for IntelGraph Platform
+# Defines Service Level Objectives and Error Budgets
+
 services:
+  # Web Frontend
   web:
     objective: 99.9
     window: 30d
     indicator:
       errors: sum(rate(http_requests_total{code=~"5..",job="web"}[5m]))
       total: sum(rate(http_requests_total{job="web"}[5m]))
+    error_budget:
+      monthly_minutes: 43.2  # 0.1% of 30 days
+
+  # GraphQL API Server
+  api:
+    objective: 99.95
+    window: 30d
+    indicator:
+      errors: sum(rate(graphql_requests_total{status="error",service="api"}[5m]))
+      total: sum(rate(graphql_requests_total{service="api"}[5m]))
+    latency:
+      p99_target_ms: 500
+      indicator: histogram_quantile(0.99, rate(graphql_request_duration_seconds_bucket{service="api"}[5m]))
+    error_budget:
+      monthly_minutes: 21.6  # 0.05% of 30 days
+
+  # API Gateway
+  gateway:
+    objective: 99.99
+    window: 30d
+    indicator:
+      errors: sum(rate(http_requests_total{code=~"5..",job="gateway"}[5m]))
+      total: sum(rate(http_requests_total{job="gateway"}[5m]))
+    latency:
+      p99_target_ms: 100
+      indicator: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job="gateway"}[5m]))
+    error_budget:
+      monthly_minutes: 4.32  # 0.01% of 30 days
+
+  # Neo4j Graph Database
+  neo4j:
+    objective: 99.9
+    window: 30d
+    indicator:
+      errors: sum(rate(neo4j_query_errors_total[5m]))
+      total: sum(rate(neo4j_queries_total[5m]))
+    latency:
+      p99_target_ms: 1000
+      indicator: histogram_quantile(0.99, rate(neo4j_query_duration_seconds_bucket[5m]))
+
+  # PostgreSQL Database
+  postgres:
+    objective: 99.95
+    window: 30d
+    indicator:
+      errors: sum(rate(pg_stat_database_xact_rollback{datname="intelgraph"}[5m]))
+      total: sum(rate(pg_stat_database_xact_commit{datname="intelgraph"}[5m])) + sum(rate(pg_stat_database_xact_rollback{datname="intelgraph"}[5m]))
+
+  # Copilot AI Service
+  copilot:
+    objective: 99.5
+    window: 30d
+    indicator:
+      errors: sum(rate(copilot_requests_total{status="error"}[5m]))
+      total: sum(rate(copilot_requests_total[5m]))
+    latency:
+      p99_target_ms: 30000  # AI operations can be slow
+      indicator: histogram_quantile(0.99, rate(copilot_request_duration_seconds_bucket[5m]))
+
+# Alerting thresholds
+alerts:
+  burn_rate_windows:
+    - window: 1h
+      burn_rate: 14.4  # 2% budget in 1 hour
+      severity: critical
+    - window: 6h
+      burn_rate: 6.0   # 5% budget in 6 hours
+      severity: warning
+    - window: 24h
+      burn_rate: 3.0   # 10% budget in 24 hours
+      severity: info

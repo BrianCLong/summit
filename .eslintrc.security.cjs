@@ -57,6 +57,24 @@ module.exports = {
     'strict': ['error', 'global'],
     'no-var': 'error',
     'prefer-const': 'error',
+
+    // Additional hardening rules (SRE Sprint 2025-11)
+    'no-proto': 'error',
+    'no-extend-native': 'error',
+    'no-iterator': 'error',
+    'no-labels': 'error',
+    'no-lone-blocks': 'error',
+    'no-self-compare': 'error',
+    'no-sequences': 'error',
+    'no-throw-literal': 'error',
+    'no-unused-expressions': ['error', { allowShortCircuit: true, allowTernary: true }],
+    'no-useless-call': 'error',
+    'no-useless-concat': 'error',
+    'no-void': 'error',
+    'no-with': 'error',
+    'radix': 'error',
+    'require-await': 'warn',
+    'no-shadow': 'warn',
   },
   overrides: [
     {
