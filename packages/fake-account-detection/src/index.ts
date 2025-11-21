@@ -4,6 +4,7 @@
  */
 
 export * from './psycholinguistics';
+export * from './graph-neural/gnn-analyzer';
 
 export interface FakeAccountAnalysis {
   isFake: boolean;
