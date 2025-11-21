@@ -20,6 +20,7 @@ import {
 } from '../auth/rbac-middleware.js';
 import { workflowRoutes } from './workflow-routes.js';
 import { workflowExecutor } from '../workflows/workflow-executor.js';
+import orchestratorRoutes from '../mcp/orchestrator-api.js';
 import logger from '../../config/logger.js';
 
 const router = Router();
@@ -508,5 +509,8 @@ router.use('/', agentRoutes);
 
 // Mount serving routes
 router.use('/serving', servingRoutes);
+
+// Mount MCP orchestrator routes
+router.use('/orchestrator', orchestratorRoutes);
 
 export { router as conductorRoutes };
