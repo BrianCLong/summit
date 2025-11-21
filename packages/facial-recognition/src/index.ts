@@ -6,3 +6,5 @@
  */
 
 export * from './types.js';
+export * from './matching-engine.js';
+export * from './liveness-detection.js';

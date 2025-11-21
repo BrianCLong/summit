@@ -6,3 +6,5 @@
  */
 
 export * from './types.js';
+export * from './attribution-engine.js';
+export * from './intelligence-analytics.js';
