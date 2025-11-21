@@ -1,9 +1,9 @@
-import express from 'express';
+import express, { Express } from 'express';
 import cron from 'node-cron';
 import { ComplianceOrchestrator } from './services/ComplianceOrchestrator.js';
 import { logger } from './utils/logger.js';
 
-const app = express();
+const app: Express = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3400;
