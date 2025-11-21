@@ -27,7 +27,7 @@ export interface SandboxExecutionResult {
   };
 }
 
-const ALLOWED_GLOBALS = ['Math', 'Date', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean'];
+const ALLOWED_GLOBALS = ['Math', 'Date', 'JSON', 'Array', 'Object', 'String', 'Number', 'Boolean', 'Error', 'TypeError', 'RangeError', 'setTimeout', 'clearTimeout', 'Promise'];
 
 export class SandboxRuntime {
   private quotas: ResourceQuotas;
@@ -168,13 +168,27 @@ export class SandboxRuntime {
     } catch (error) {
       const endTime = process.hrtime.bigint();
       const durationMs = Number(endTime - startTime) / 1_000_000;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      // Handle errors from VM context which may not be instanceof Error
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = String((error as { message: unknown }).message);
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
 
       logger.error({ executionId, error: errorMessage }, 'Sandbox execution failed');
 
+      // Detect timeout from various sources
+      const isTimeout =
+        errorMessage.toLowerCase().includes('timeout') ||
+        errorMessage.includes('Script execution timed out') ||
+        errorMessage.includes('execution time');
+
       return {
         id: executionId,
-        status: errorMessage.includes('timeout') ? 'timeout' : 'failed',
+        status: isTimeout ? 'timeout' : 'failed',
         output: null,
         logs: this.logs,
         error: errorMessage,
