@@ -10,30 +10,74 @@ import { riskRoutes } from './routes/risk.js';
 import { healthRoutes } from './routes/health.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { authMiddleware } from './middleware/auth.js';
+import { rateLimiters } from './middleware/rateLimit.js';
 
 const app = express();
 const PORT = process.env.PORT || 4100;
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+// Security middleware
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+  },
+}));
 
-// Health check (no auth)
+app.use(cors({
+  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+app.use(express.json({ limit: '10mb' }));
+
+// Request logging
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.info('Request completed', {
+      method: req.method,
+      path: req.path,
+      status: res.statusCode,
+      duration,
+    });
+  });
+  next();
+});
+
+// Health check (no auth, no rate limit)
 app.use('/health', healthRoutes);
 
-// Protected routes
-app.use('/api/v1/products', authMiddleware, productRoutes);
-app.use('/api/v1/transactions', authMiddleware, transactionRoutes);
-app.use('/api/v1/consent', authMiddleware, consentRoutes);
-app.use('/api/v1/providers', authMiddleware, providerRoutes);
-app.use('/api/v1/risk', authMiddleware, riskRoutes);
+// API routes with auth and rate limiting
+app.use('/api/v1/products', rateLimiters.api, authMiddleware, productRoutes);
+app.use('/api/v1/transactions', rateLimiters.transactions, authMiddleware, transactionRoutes);
+app.use('/api/v1/consent', rateLimiters.api, authMiddleware, consentRoutes);
+app.use('/api/v1/providers', rateLimiters.api, authMiddleware, providerRoutes);
+app.use('/api/v1/risk', rateLimiters.api, authMiddleware, riskRoutes);
 
 // Error handling
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+// Graceful shutdown
+const server = app.listen(PORT, () => {
   logger.info(`Marketplace service running on port ${PORT}`);
+});
+
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Server closed');
+    process.exit(0);
+  });
 });
 
 export default app;
