@@ -343,6 +343,36 @@ services:
     networks:
       - summit
 
+  ai-sandbox:
+    build:
+      context: ./services/ai-sandbox
+      dockerfile: Dockerfile
+    container_name: summit-ai-sandbox
+    restart: unless-stopped
+    environment:
+      PORT: 4020
+      NODE_ENV: development
+      LOG_LEVEL: info
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      WORKER_CONCURRENCY: 4
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+    ports:
+      - '4020:4020'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:4020/health']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=summit_ai_sandbox'
+      - 'prometheus.port=4020'
+
 volumes:
   postgres_data:
   redis_data:
