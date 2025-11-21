@@ -5,6 +5,7 @@ import { randomUUID as uuid } from 'crypto';
 import { EventEmitter } from 'events';
 import { MCPClient, mcpRegistry } from './client.js';
 import logger from '../../config/logger.js';
+import { orchestratorMetrics } from '../observability/prometheus.js';
 
 // ============================================================================
 // Types & Interfaces
@@ -145,6 +146,7 @@ export class MCPOrchestrator extends EventEmitter {
 
     this.executions.set(executionId, execution);
     this.emit('workflow:start', { executionId, workflowId });
+    orchestratorMetrics.recordWorkflowStart(workflowId);
 
     try {
       // Build execution DAG and run in topological order
@@ -174,6 +176,15 @@ export class MCPOrchestrator extends EventEmitter {
       // Self-evaluation
       execution.evaluation = this.evaluateExecution(execution);
       execution.completedAt = new Date();
+
+      // Record metrics
+      const durationMs = execution.completedAt.getTime() - execution.startedAt.getTime();
+      orchestratorMetrics.recordWorkflowComplete(
+        workflowId,
+        execution.status,
+        durationMs,
+        execution.evaluation?.score,
+      );
 
       this.emit('workflow:complete', { executionId, status: execution.status });
 
@@ -249,11 +260,20 @@ export class MCPOrchestrator extends EventEmitter {
 
         this.emit('step:complete', { stepId: step.id, result });
 
+        // Record step metrics
+        const stepDuration = Date.now() - startTime;
+        orchestratorMetrics.recordStepComplete(
+          execution.workflowId,
+          step.id,
+          'success',
+          stepDuration,
+        );
+
         return {
           stepId: step.id,
           status: 'success',
           result,
-          durationMs: Date.now() - startTime,
+          durationMs: stepDuration,
           server: serverName,
         };
 

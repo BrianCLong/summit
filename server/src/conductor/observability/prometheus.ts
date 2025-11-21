@@ -295,3 +295,119 @@ export class PrometheusConductorMetrics {
 
 // Singleton instance
 export const prometheusConductorMetrics = new PrometheusConductorMetrics();
+
+// ============================================================================
+// MCP Orchestrator Metrics
+// ============================================================================
+
+export const orchestratorWorkflowsTotal = new client.Counter({
+  name: 'orchestrator_workflows_total',
+  help: 'Total number of workflow executions',
+  labelNames: ['workflow_id', 'status'],
+});
+
+export const orchestratorStepsTotal = new client.Counter({
+  name: 'orchestrator_steps_total',
+  help: 'Total number of workflow step executions',
+  labelNames: ['workflow_id', 'step_id', 'status'],
+});
+
+export const orchestratorWorkflowDurationSeconds = new client.Histogram({
+  name: 'orchestrator_workflow_duration_seconds',
+  help: 'Duration of workflow executions in seconds',
+  labelNames: ['workflow_id'],
+  buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300],
+});
+
+export const orchestratorStepDurationSeconds = new client.Histogram({
+  name: 'orchestrator_step_duration_seconds',
+  help: 'Duration of individual step executions in seconds',
+  labelNames: ['workflow_id', 'step_id'],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5, 10],
+});
+
+export const orchestratorActiveWorkflowsGauge = new client.Gauge({
+  name: 'orchestrator_active_workflows',
+  help: 'Number of currently active workflow executions',
+});
+
+export const orchestratorEvaluationScoreHistogram = new client.Histogram({
+  name: 'orchestrator_evaluation_score',
+  help: 'Self-evaluation scores for completed workflows',
+  labelNames: ['workflow_id'],
+  buckets: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
+});
+
+export const orchestratorRetryTotal = new client.Counter({
+  name: 'orchestrator_retry_total',
+  help: 'Total number of step retries',
+  labelNames: ['workflow_id', 'step_id'],
+});
+
+export const orchestratorBudgetUsedTotal = new client.Counter({
+  name: 'orchestrator_budget_used_cents',
+  help: 'Total budget used by workflow executions in cents',
+  labelNames: ['workflow_id'],
+});
+
+// Register orchestrator metrics
+[
+  orchestratorWorkflowsTotal,
+  orchestratorStepsTotal,
+  orchestratorWorkflowDurationSeconds,
+  orchestratorStepDurationSeconds,
+  orchestratorActiveWorkflowsGauge,
+  orchestratorEvaluationScoreHistogram,
+  orchestratorRetryTotal,
+  orchestratorBudgetUsedTotal,
+].forEach((metric) => register.registerMetric(metric));
+
+// Orchestrator metrics recorder
+export class OrchestratorMetrics {
+  recordWorkflowStart(workflowId: string): void {
+    orchestratorActiveWorkflowsGauge.inc();
+  }
+
+  recordWorkflowComplete(
+    workflowId: string,
+    status: string,
+    durationMs: number,
+    evaluationScore?: number,
+  ): void {
+    orchestratorActiveWorkflowsGauge.dec();
+    orchestratorWorkflowsTotal.inc({ workflow_id: workflowId, status });
+    orchestratorWorkflowDurationSeconds.observe(
+      { workflow_id: workflowId },
+      durationMs / 1000,
+    );
+    if (evaluationScore !== undefined) {
+      orchestratorEvaluationScoreHistogram.observe(
+        { workflow_id: workflowId },
+        evaluationScore,
+      );
+    }
+  }
+
+  recordStepComplete(
+    workflowId: string,
+    stepId: string,
+    status: string,
+    durationMs: number,
+  ): void {
+    orchestratorStepsTotal.inc({ workflow_id: workflowId, step_id: stepId, status });
+    orchestratorStepDurationSeconds.observe(
+      { workflow_id: workflowId, step_id: stepId },
+      durationMs / 1000,
+    );
+  }
+
+  recordRetry(workflowId: string, stepId: string): void {
+    orchestratorRetryTotal.inc({ workflow_id: workflowId, step_id: stepId });
+  }
+
+  recordBudgetUsed(workflowId: string, costCents: number): void {
+    orchestratorBudgetUsedTotal.inc({ workflow_id: workflowId }, costCents);
+  }
+}
+
+export const orchestratorMetrics = new OrchestratorMetrics();
