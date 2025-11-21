@@ -13,15 +13,53 @@ import crypto from 'crypto';
 const PORT = parseInt(process.env.PORT || '4010');
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-// Database connection with retry logic
+// Database connection with optimized pooling
 const pool = new Pool({
   connectionString:
     process.env.DATABASE_URL ||
     'postgres://postgres:postgres@localhost:5432/provenance',
-  max: 20,
+  max: parseInt(process.env.DB_POOL_MAX || '20'),
+  min: parseInt(process.env.DB_POOL_MIN || '2'),
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 5000,
+  statement_timeout: 30000,
+  query_timeout: 30000,
 });
+
+// Track database connection state (exported for testing)
+export let dbHealthy = false;
+
+// Database query with retry logic (exported for external use)
+export async function queryWithRetry<T>(
+  query: string,
+  params: any[] = [],
+  retries = 3,
+): Promise<{ rows: T[] }> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const result = await pool.query(query, params);
+      dbHealthy = true;
+      return result as { rows: T[] };
+    } catch (error: any) {
+      lastError = error;
+
+      // Don't retry on constraint violations or syntax errors
+      if (error.code === '23505' || error.code === '42601') {
+        throw error;
+      }
+
+      if (attempt < retries) {
+        const delay = Math.min(100 * Math.pow(2, attempt), 2000);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+
+  dbHealthy = false;
+  throw lastError;
+}
 
 // Helper for flexible records
 const anyRecord = () => z.record(z.string(), z.any());
@@ -128,17 +166,29 @@ const ManifestSchema = z.object({
 });
 
 // ============================================================================
-// TypeScript Types
+// TypeScript Types (exported for external use)
 // ============================================================================
 
-type CreateClaim = z.infer<typeof CreateClaimSchema>;
-type Claim = z.infer<typeof ClaimSchema>;
-type TransformStep = z.infer<typeof TransformStepSchema>;
-type CreateEvidence = z.infer<typeof CreateEvidenceSchema>;
-type Evidence = z.infer<typeof EvidenceSchema>;
-type ProvenanceChain = z.infer<typeof ProvenanceChainSchema>;
-type DisclosureBundle = z.infer<typeof DisclosureBundleSchema>;
-type Manifest = z.infer<typeof ManifestSchema>;
+export type CreateClaim = z.infer<typeof CreateClaimSchema>;
+export type Claim = z.infer<typeof ClaimSchema>;
+export type TransformStep = z.infer<typeof TransformStepSchema>;
+export type CreateEvidence = z.infer<typeof CreateEvidenceSchema>;
+export type Evidence = z.infer<typeof EvidenceSchema>;
+export type ProvenanceChain = z.infer<typeof ProvenanceChainSchema>;
+export type DisclosureBundle = z.infer<typeof DisclosureBundleSchema>;
+export type Manifest = z.infer<typeof ManifestSchema>;
+
+// Export schemas for external validation
+export {
+  CreateClaimSchema,
+  ClaimSchema,
+  TransformStepSchema,
+  CreateEvidenceSchema,
+  EvidenceSchema,
+  ProvenanceChainSchema,
+  DisclosureBundleSchema,
+  ManifestSchema,
+};
 
 // ============================================================================
 // Utility Functions
@@ -175,7 +225,8 @@ function generateProvenanceId(): string {
   return `prov_${crypto.randomUUID()}`;
 }
 
-function generateCaseId(): string {
+// Export utility functions for external use
+export function generateCaseId(): string {
   return `case_${crypto.randomUUID()}`;
 }
 
@@ -249,29 +300,72 @@ server.register(cors, {
 // Add policy middleware to all routes
 server.addHook('preHandler', policyMiddleware);
 
-// Health check
-server.get('/health', async (request, reply) => {
+// ============================================================================
+// Health Check Endpoints (no auth required)
+// ============================================================================
+
+// Basic health check
+server.get('/health', { preHandler: [] }, async (_request, reply) => {
   try {
-    // Test database connection
     await pool.query('SELECT 1');
+    dbHealthy = true;
     return {
       status: 'healthy',
       timestamp: new Date().toISOString(),
       version: '1.0.0',
+      uptime: process.uptime(),
       dependencies: {
         database: 'healthy',
       },
     };
-  } catch (error) {
+  } catch (_error) {
+    dbHealthy = false;
     reply.status(503);
     return {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
       dependencies: {
         database: 'unhealthy',
       },
     };
   }
+});
+
+// Kubernetes readiness probe - checks if service can accept traffic
+server.get('/health/ready', { preHandler: [] }, async (_request, reply) => {
+  try {
+    // Check database connection with timeout
+    await Promise.race([
+      pool.query('SELECT 1'),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 3000),
+      ),
+    ]);
+
+    dbHealthy = true;
+    return {
+      status: 'ready',
+      timestamp: new Date().toISOString(),
+    };
+  } catch (_error) {
+    dbHealthy = false;
+    reply.status(503);
+    return {
+      status: 'not_ready',
+      timestamp: new Date().toISOString(),
+      error: 'Database connection failed',
+    };
+  }
+});
+
+// Kubernetes liveness probe - checks if service is alive
+server.get('/health/live', { preHandler: [] }, async (_request, _reply) => {
+  return {
+    status: 'alive',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  };
 });
 
 // ============================================================================
@@ -750,17 +844,64 @@ server.get('/export/manifest', async (request, reply) => {
   }
 });
 
+// ============================================================================
+// Server Lifecycle
+// ============================================================================
+
+// Graceful shutdown handler
+async function gracefulShutdown(signal: string) {
+  server.log.info({ signal }, 'Received shutdown signal');
+
+  try {
+    // Stop accepting new connections
+    await server.close();
+    server.log.info('Server closed');
+
+    // Close database pool
+    await pool.end();
+    server.log.info('Database pool closed');
+
+    process.exit(0);
+  } catch (err) {
+    server.log.error(err, 'Error during shutdown');
+    process.exit(1);
+  }
+}
+
+// Register shutdown handlers
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught errors
+process.on('uncaughtException', (err) => {
+  server.log.error(err, 'Uncaught exception');
+  gracefulShutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  server.log.error({ reason, promise }, 'Unhandled rejection');
+});
+
 // Start server
 const start = async () => {
   try {
+    // Test database connection before starting
+    await pool.query('SELECT 1');
+    dbHealthy = true;
+    server.log.info('Database connection established');
+
     await server.listen({ port: PORT, host: '0.0.0.0' });
     server.log.info(
-      `🗃️  Prov-Ledger service ready at http://localhost:${PORT}`,
+      { port: PORT, env: NODE_ENV },
+      'Prov-Ledger service ready',
     );
   } catch (err) {
-    server.log.error(err);
+    server.log.error(err, 'Failed to start server');
     process.exit(1);
   }
 };
 
 start();
+
+// Export for testing
+export { server, pool };

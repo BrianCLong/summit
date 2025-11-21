@@ -196,18 +196,22 @@ const migrations = [
 ];
 
 async function runMigrations() {
-  console.log('🗃️  Starting Prov-Ledger database migrations...');
+  // eslint-disable-next-line no-console
+  console.info('Starting Prov-Ledger database migrations...');
 
   try {
     for (const migration of migrations) {
-      console.log(`Running migration: ${migration.name}`);
+      // eslint-disable-next-line no-console
+      console.info(`Running migration: ${migration.name}`);
       await pool.query(migration.sql);
-      console.log(`✅ Completed: ${migration.name}`);
+      // eslint-disable-next-line no-console
+      console.info(`Completed: ${migration.name}`);
     }
 
-    console.log('🎉 All migrations completed successfully!');
+    // eslint-disable-next-line no-console
+    console.info('All migrations completed successfully!');
   } catch (error) {
-    console.error('❌ Migration failed:', error);
+    console.error('Migration failed:', error);
     process.exit(1);
   } finally {
     await pool.end();
