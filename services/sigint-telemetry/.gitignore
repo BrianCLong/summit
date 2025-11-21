@@ -1,0 +1,18 @@
+# Build output
+dist/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
