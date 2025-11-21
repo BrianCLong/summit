@@ -15,3 +15,9 @@ export * from './hotspot/getis-ord.js';
 
 // Movement pattern analysis
 export * from './temporal/movement-patterns.js';
+
+// Geofencing
+export * from './geofencing/geofence-manager.js';
+
+// Route analysis
+export * from './routing/route-analysis.js';

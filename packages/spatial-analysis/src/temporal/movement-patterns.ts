@@ -196,7 +196,7 @@ export class MovementAnalyzer {
     }
 
     // Circular pattern (high tortuosity, returns to origin)
-    const startEnd Distance = haversineDistance(
+    const startEndDistance = haversineDistance(
       track.points[0],
       track.points[track.points.length - 1]
     );
