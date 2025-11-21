@@ -92,7 +92,8 @@
     "metrics:complexity": "eslint --config .eslintrc.complexity.cjs 'server/src/**/*.{js,ts}' 'client/src/**/*.{js,jsx,ts,tsx}'",
     "metrics:duplication": "jscpd server/src client/src --min-lines 10 --reporters html,console --output ./jscpd-report",
     "metrics:loc": "cloc server/src client/src apps packages services --exclude-dir=node_modules,dist,build,coverage,.turbo,archive",
-    "metrics:all": "pnpm run metrics:report && pnpm run metrics:complexity && pnpm run metrics:loc"
+    "metrics:all": "pnpm run metrics:report && pnpm run metrics:complexity && pnpm run metrics:loc",
+    "metrics:validate": "node scripts/validate-maintainability-setup.cjs"
   },
   "keywords": [
     "intelligence-analysis",
