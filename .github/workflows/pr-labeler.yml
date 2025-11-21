@@ -1,17 +1,123 @@
-name: PR Labeler
+name: PR Auto-Labeler
+
 on:
   pull_request_target:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
-  label:
-    if: ${{ false }}
+  # Apply labels based on file patterns
+  label-by-files:
     runs-on: ubuntu-latest
-    continue-on-error: true
-    permissions:
-      contents: read
-      pull-requests: write
     steps:
-      - uses: actions/labeler@cf330b26a52b65a1b3b2c1b0cea41a014a019e4d # v5.0.0
-        continue-on-error: true
+      - name: Apply labels based on changed files
+        uses: actions/labeler@v5
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          configuration-path: .github/labeler.yml
+          sync-labels: true
+
+  # Apply semantic labels based on PR title
+  label-by-title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label by PR title
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title.toLowerCase();
+            const labels = [];
+
+            // Type detection from conventional commits
+            if (title.startsWith('feat:') || title.includes('[feature]')) {
+              labels.push('type: feature');
+            }
+            if (title.startsWith('fix:') || title.includes('[fix]') || title.includes('[bug]')) {
+              labels.push('type: bugfix');
+            }
+            if (title.startsWith('docs:') || title.includes('[docs]')) {
+              labels.push('type: documentation');
+            }
+            if (title.startsWith('refactor:') || title.includes('[refactor]')) {
+              labels.push('type: refactor');
+            }
+            if (title.startsWith('perf:') || title.includes('[perf]')) {
+              labels.push('type: performance');
+            }
+            if (title.startsWith('test:') || title.includes('[test]')) {
+              labels.push('type: tests');
+            }
+            if (title.startsWith('chore:') || title.includes('[chore]')) {
+              labels.push('type: chore');
+            }
+            if (title.startsWith('ci:') || title.includes('[ci]')) {
+              labels.push('type: ci/cd');
+            }
+            if (title.startsWith('security:') || title.includes('[security]')) {
+              labels.push('type: security');
+            }
+            if (title.startsWith('deps:') || title.startsWith('chore(deps)') || title.includes('[deps]')) {
+              labels.push('type: dependencies');
+            }
+
+            // Priority detection
+            if (title.includes('[urgent]') || title.includes('[critical]') || title.includes('🚨')) {
+              labels.push('priority: high');
+            }
+            if (title.includes('[breaking]') || title.includes('breaking change')) {
+              labels.push('breaking-change');
+            }
+
+            // Apply labels if any detected
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+            }
+
+  # Check and label based on PR body content
+  label-by-content:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label by PR body content
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = (context.payload.pull_request.body || '').toLowerCase();
+            const labels = [];
+
+            // Check for breaking changes
+            if (body.includes('breaking change') || body.includes('breaking-change')) {
+              labels.push('breaking-change');
+            }
+
+            // Check for security implications
+            if (body.includes('security') || body.includes('vulnerability') || body.includes('cve')) {
+              labels.push('type: security');
+            }
+
+            // Check if it's a WIP
+            if (body.includes('wip') || body.includes('work in progress')) {
+              labels.push('status: wip');
+            }
+
+            // Check if needs review
+            if (body.includes('ready for review') || body.includes('needs review')) {
+              labels.push('status: needs-review');
+            }
+
+            // Apply labels if any detected
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+            }
