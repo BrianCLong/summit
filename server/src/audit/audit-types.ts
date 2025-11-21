@@ -188,7 +188,7 @@ export interface AuditEvent {
   eventType: AuditEventType;
   level: AuditLevel;
   timestamp: Date;                      // ISO 8601 UTC timestamp
-  version: string;                      // Schema version for evolution
+  version?: string;                     // Schema version (optional for backwards compat)
 
   // === Context & Correlation ===
   correlationId: string;                // Groups related events
@@ -207,12 +207,12 @@ export interface AuditEvent {
 
   // === Service Context ===
   serviceId: string;                    // Service that generated event
-  serviceName: string;                  // Human-readable service name
+  serviceName?: string;                 // Human-readable service name (optional for backwards compat)
   serviceVersion?: string;              // Service version
-  environment: 'development' | 'staging' | 'production';
+  environment?: 'development' | 'staging' | 'production';  // Optional for backwards compat
 
   // === Resource Context ===
-  resourceType?: ResourceType;
+  resourceType?: ResourceType | string;  // Allow string for backwards compat
   resourceId?: string;                  // Primary resource identifier
   resourceIds?: string[];               // For bulk operations
   resourcePath?: string;                // API path or file path
@@ -300,9 +300,9 @@ export const AuditEventSchema = z.object({
 
   // Service
   serviceId: z.string(),
-  serviceName: z.string(),
+  serviceName: z.string().optional(),
   serviceVersion: z.string().optional(),
-  environment: z.enum(['development', 'staging', 'production']),
+  environment: z.enum(['development', 'staging', 'production']).optional(),
 
   // Resource
   resourceType: z.string().optional(),
@@ -401,23 +401,27 @@ export interface AuditQuery {
 
 /**
  * Compliance report interface
+ *
+ * Note: Many fields are optional for backwards compatibility with
+ * the existing AdvancedAuditSystem. New implementations should
+ * provide all fields.
  */
 export interface ComplianceReport {
-  id: string;
+  id?: string;
   framework: ComplianceFramework;
   period: {
     start: Date;
     end: Date;
   };
-  generatedAt: Date;
-  generatedBy: string;
+  generatedAt?: Date;
+  generatedBy?: string;
 
   summary: {
     totalEvents: number;
     criticalEvents: number;
     violations: number;
     complianceScore: number;  // 0-100
-    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    riskLevel?: 'low' | 'medium' | 'high' | 'critical';
   };
 
   violations: Array<{
@@ -427,17 +431,18 @@ export interface ComplianceReport {
     description: string;
     remediation: string;
     controlId?: string;       // SOC2 control ID, etc.
-    timestamp: Date;
+    timestamp?: Date;
   }>;
 
-  recommendations: Array<{
+  // Can be simple strings for backwards compat or structured objects
+  recommendations: string[] | Array<{
     priority: 'low' | 'medium' | 'high' | 'critical';
     category: string;
     description: string;
     implementationEffort: 'low' | 'medium' | 'high';
   }>;
 
-  controlsAssessed: Array<{
+  controlsAssessed?: Array<{
     controlId: string;
     controlName: string;
     status: 'passed' | 'failed' | 'not_applicable';
@@ -447,12 +452,14 @@ export interface ComplianceReport {
 
 /**
  * Forensic analysis interface for incident investigation
+ *
+ * Note: Many fields are optional for backwards compatibility.
  */
 export interface ForensicAnalysis {
-  id: string;
+  id?: string;
   correlationId: string;
-  investigatorId: string;
-  startedAt: Date;
+  investigatorId?: string;
+  startedAt?: Date;
   completedAt?: Date;
 
   timeline: AuditEvent[];
@@ -460,21 +467,23 @@ export interface ForensicAnalysis {
   actors: Array<{
     userId: string;
     email?: string;
-    actionsCount: number;
+    // actions is legacy, actionsCount is preferred
+    actions?: number;
+    actionsCount?: number;
     riskScore: number;      // 0-100
-    suspiciousActions: number;
-    firstSeen: Date;
-    lastSeen: Date;
-    ipAddresses: string[];
-    userAgents: string[];
+    suspiciousActions?: number;
+    firstSeen?: Date;
+    lastSeen?: Date;
+    ipAddresses?: string[];
+    userAgents?: string[];
   }>;
 
   resources: Array<{
     resourceId: string;
-    resourceType: ResourceType;
+    resourceType?: ResourceType | string;
     resourceName?: string;
     accessCount: number;
-    modificationCount: number;
+    modificationCount?: number;
     lastAccessed: Date;
     dataClassification?: DataClassification;
   }>;
@@ -483,12 +492,12 @@ export interface ForensicAnalysis {
     type: string;
     description: string;
     severity: number;       // 0-100
-    confidence: number;     // 0-100
+    confidence?: number;    // 0-100 (optional for backwards compat)
     events: string[];       // Event IDs
-    detectedAt: Date;
+    detectedAt?: Date;      // Optional for backwards compat
   }>;
 
-  summary: {
+  summary?: {
     eventCount: number;
     timeSpan: number;       // milliseconds
     uniqueActors: number;
@@ -497,8 +506,8 @@ export interface ForensicAnalysis {
     overallRiskScore: number;
   };
 
-  findings: string;
-  recommendations: string[];
+  findings?: string;
+  recommendations?: string[];
 }
 
 /**

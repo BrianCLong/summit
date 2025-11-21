@@ -1,170 +1,49 @@
 /**
  * Advanced Audit System - Comprehensive audit trails and decision logging
  * Implements immutable event logging, compliance tracking, and forensic capabilities
+ *
+ * @see /docs/audit/audit-system-design.md for full documentation
  */
 
-import { randomUUID, createHash } from 'crypto';
+import { randomUUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import { Logger } from 'pino';
-import { z } from 'zod';
-import { sign, verify } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
-// Core audit event types
-export type AuditEventType =
-  | 'system_start'
-  | 'system_stop'
-  | 'config_change'
-  | 'user_login'
-  | 'user_logout'
-  | 'user_action'
-  | 'resource_access'
-  | 'resource_modify'
-  | 'resource_delete'
-  | 'policy_decision'
-  | 'policy_violation'
-  | 'approval_request'
-  | 'approval_decision'
-  | 'orchestration_start'
-  | 'orchestration_complete'
-  | 'orchestration_fail'
-  | 'task_execute'
-  | 'task_complete'
-  | 'task_fail'
-  | 'data_export'
-  | 'data_import'
-  | 'data_breach'
-  | 'security_alert'
-  | 'compliance_violation'
-  | 'anomaly_detected';
+// Import types from the comprehensive audit-types module
+import {
+  type AuditEvent,
+  type AuditEventType,
+  type AuditLevel,
+  type ComplianceFramework,
+  type AuditQuery,
+  type ComplianceReport,
+  type ForensicAnalysis,
+  AuditEventSchema,
+} from './audit-types';
 
-export type AuditLevel = 'debug' | 'info' | 'warn' | 'error' | 'critical';
+// Import signing utilities
+import {
+  calculateEventHash,
+  signEvent as hmacSignEvent,
+  verifyEventSignature as hmacVerifySignature,
+} from './audit-signing';
 
-export type ComplianceFramework =
-  | 'SOX'
-  | 'GDPR'
-  | 'HIPAA'
-  | 'SOC2'
-  | 'NIST'
-  | 'ISO27001';
+// Re-export types for backwards compatibility
+export type {
+  AuditEvent,
+  AuditEventType,
+  AuditLevel,
+  ComplianceFramework,
+  AuditQuery,
+  ComplianceReport,
+  ForensicAnalysis,
+};
 
-export interface AuditEvent {
-  // Core identification
-  id: string;
-  eventType: AuditEventType;
-  level: AuditLevel;
-  timestamp: Date;
-
-  // Context
-  correlationId: string;
-  sessionId?: string;
-  requestId?: string;
-
-  // Actors
-  userId?: string;
-  tenantId: string;
-  serviceId: string;
-
-  // Resources
-  resourceType?: string;
-  resourceId?: string;
-  resourcePath?: string;
-
-  // Action details
-  action: string;
-  outcome: 'success' | 'failure' | 'partial';
-
-  // Content
-  message: string;
-  details: Record<string, any>;
-
-  // Security
-  ipAddress?: string;
-  userAgent?: string;
-
-  // Compliance
-  complianceRelevant: boolean;
-  complianceFrameworks: ComplianceFramework[];
-  dataClassification?: 'public' | 'internal' | 'confidential' | 'restricted';
-
-  // Integrity
-  hash?: string;
-  signature?: string;
-  previousEventHash?: string;
-}
-
-export interface AuditQuery {
-  startTime?: Date;
-  endTime?: Date;
-  eventTypes?: AuditEventType[];
-  levels?: AuditLevel[];
-  userIds?: string[];
-  tenantIds?: string[];
-  resourceTypes?: string[];
-  correlationIds?: string[];
-  complianceFrameworks?: ComplianceFramework[];
-  limit?: number;
-  offset?: number;
-}
-
-export interface ComplianceReport {
-  framework: ComplianceFramework;
-  period: {
-    start: Date;
-    end: Date;
-  };
-  summary: {
-    totalEvents: number;
-    criticalEvents: number;
-    violations: number;
-    complianceScore: number; // 0-100
-  };
-  violations: Array<{
-    eventId: string;
-    violationType: string;
-    severity: 'low' | 'medium' | 'high' | 'critical';
-    description: string;
-    remediation: string;
-  }>;
-  recommendations: string[];
-}
-
-export interface ForensicAnalysis {
-  correlationId: string;
-  timeline: AuditEvent[];
-  actors: Array<{
-    userId: string;
-    actions: number;
-    riskScore: number;
-  }>;
-  resources: Array<{
-    resourceId: string;
-    accessCount: number;
-    lastAccessed: Date;
-  }>;
-  anomalies: Array<{
-    type: string;
-    description: string;
-    severity: number;
-    events: string[];
-  }>;
-}
-
-// Validation schemas
-const AuditEventSchema = z.object({
-  eventType: z.string(),
-  level: z.enum(['debug', 'info', 'warn', 'error', 'critical']),
-  correlationId: z.string(),
-  tenantId: z.string(),
-  serviceId: z.string(),
-  action: z.string(),
-  outcome: z.enum(['success', 'failure', 'partial']),
-  message: z.string(),
-  details: z.record(z.any()),
-  complianceRelevant: z.boolean(),
-  complianceFrameworks: z.array(z.string()),
-});
+// Note: AuditQuery, ComplianceReport, ForensicAnalysis, and AuditEventSchema
+// are now imported from ./audit-types for consistency
 
 export class AdvancedAuditSystem extends EventEmitter {
   private db: Pool;
@@ -769,39 +648,49 @@ export class AdvancedAuditSystem extends EventEmitter {
     }
   }
 
+  /**
+   * Calculate SHA-256 hash of event content.
+   * Uses the centralized calculateEventHash utility for consistency.
+   */
   private calculateEventHash(event: AuditEvent): string {
-    const hashableData = {
-      id: event.id,
-      eventType: event.eventType,
-      timestamp: event.timestamp.toISOString(),
-      correlationId: event.correlationId,
-      tenantId: event.tenantId,
-      serviceId: event.serviceId,
-      action: event.action,
-      message: event.message,
-      details: event.details,
-    };
-
-    return createHash('sha256')
-      .update(JSON.stringify(hashableData, Object.keys(hashableData).sort()))
-      .digest('hex');
+    // Use centralized utility for consistent hashing
+    return calculateEventHash(event);
   }
 
+  /**
+   * Sign event with HMAC-SHA256.
+   *
+   * Supports two modes:
+   * - 'hmac': Pure HMAC-SHA256 signature (recommended for new deployments)
+   * - 'jwt': JWT wrapper for backwards compatibility
+   */
   private signEvent(event: AuditEvent): string {
-    return sign(
-      {
-        id: event.id,
-        hash: event.hash,
-        timestamp: event.timestamp.toISOString(),
-      },
-      this.signingKey,
-      { algorithm: 'HS256' },
-    );
+    // Use HMAC-SHA256 for new events (preferred)
+    // This provides better performance and simpler verification
+    return hmacSignEvent(event, this.signingKey);
   }
 
+  /**
+   * Verify event signature.
+   *
+   * Attempts HMAC verification first, falls back to JWT for legacy events.
+   */
   private verifyEventSignature(event: AuditEvent): boolean {
+    if (!event.signature) {
+      return false;
+    }
+
+    // Try HMAC verification first (new format)
+    if (hmacVerifySignature(event, this.signingKey)) {
+      return true;
+    }
+
+    // Fall back to JWT verification for legacy events
     try {
-      const payload = verify(event.signature!, this.signingKey) as any;
+      const payload = jwt.verify(event.signature, this.signingKey) as {
+        id?: string;
+        hash?: string;
+      };
       return payload.id === event.id && payload.hash === event.hash;
     } catch {
       return false;
