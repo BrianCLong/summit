@@ -14,6 +14,7 @@ import {
   executeToolAnywhere,
   initializeMCPClient,
 } from './mcp/client';
+import { orchestrator, MCPOrchestrator, WorkflowRecipes } from './mcp/orchestrator';
 import { randomUUID as uuid } from 'crypto';
 import {
   BudgetAdmissionController,
@@ -824,3 +825,6 @@ export let conductor: Conductor;
 export function initializeConductor(config: ConductorConfig): void {
   conductor = new Conductor(config);
 }
+
+// Re-export orchestrator components
+export { orchestrator, MCPOrchestrator, WorkflowRecipes };
