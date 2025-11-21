@@ -1,11 +1,16 @@
 import { toASCII } from 'punycode';
 
+/**
+ * Supported types of Indicators of Compromise (IoCs).
+ */
 export type IoCType = 'ip' | 'domain' | 'sha256' | 'url' | 'email';
 
 /**
  * Normalize indicator values into a canonical form for deduplication.
- * @param type Type of IoC (ip, domain, sha256, url, email)
- * @param v Raw IoC value
+ *
+ * @param {IoCType} type - Type of IoC (ip, domain, sha256, url, email).
+ * @param {string} v - Raw IoC value.
+ * @returns {string} The normalized IoC value.
  */
 export function normalizeIoC(type: IoCType, v: string): string {
   switch (type) {
@@ -30,7 +35,10 @@ export function normalizeIoC(type: IoCType, v: string): string {
 
 /**
  * Fuse multiple confidence scores into a single probability.
- * @param confidences Array of confidence values (0-100)
+ * Uses a probabilistic combination (noisy OR) to calculate the combined confidence.
+ *
+ * @param {number[]} confidences - Array of confidence values (0-100).
+ * @returns {number} The fused confidence score (0-100).
  */
 export function fuse(confidences: number[]): number {
   const probs = confidences.map((c) => {

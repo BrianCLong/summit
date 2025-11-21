@@ -5,6 +5,12 @@ import pino from 'pino';
 
 const logger = pino();
 
+/**
+ * Creates sample data for development and testing purposes.
+ * Populates Neo4j with entities and relationships, and PostgreSQL with users and investigations.
+ *
+ * @returns {Promise<void>} A promise that resolves when data creation is complete.
+ */
 export async function createSampleData(): Promise<void> {
   logger.info('Creating sample data for development...');
 
