@@ -1,0 +1,22 @@
+{
+  "name": "@intelgraph/election-disruption-detection",
+  "version": "1.0.0",
+  "description": "State-of-the-art election disruption detection using multi-modal AI, adversarial ML, and real-time threat correlation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@intelgraph/disinformation-detection": "workspace:*",
+    "@intelgraph/behavioral-analysis": "workspace:*",
+    "@intelgraph/graph-analytics": "workspace:*",
+    "@intelgraph/ml-pipeline": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

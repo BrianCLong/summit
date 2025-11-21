@@ -1,0 +1,21 @@
+{
+  "name": "@intelgraph/mass-behavior-dynamics",
+  "version": "1.0.0",
+  "description": "Revolutionary mass behavior dynamics engine using agent-based modeling, network contagion theory, and emergent collective intelligence prediction",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@intelgraph/graph-analytics": "workspace:*",
+    "@intelgraph/behavioral-analysis": "workspace:*",
+    "@intelgraph/ml-pipeline": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
