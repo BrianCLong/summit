@@ -1,0 +1,203 @@
+{
+  "schedule": [
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-01",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 0.2,
+        "epsilon_remaining": 2.8,
+        "advanced_epsilon": 0.2,
+        "advanced_epsilon_remaining": 2.8,
+        "delta_spent": 0.000001,
+        "delta_remaining": 0.000009
+      }
+    },
+    {
+      "metric_id": "metric-monthly-critical",
+      "metric_name": "Monthly Growth",
+      "date": "2025-01-01",
+      "frequency": "monthly",
+      "priority": "critical",
+      "epsilon_cost": 0.5,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 0.7,
+        "epsilon_remaining": 2.3,
+        "advanced_epsilon": 0.7,
+        "advanced_epsilon_remaining": 2.3,
+        "delta_spent": 0.000002,
+        "delta_remaining": 0.000008000000000000001
+      }
+    },
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-02",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 0.8999999999999999,
+        "epsilon_remaining": 2.1,
+        "advanced_epsilon": 0.8999999999999999,
+        "advanced_epsilon_remaining": 2.1,
+        "delta_spent": 0.000003,
+        "delta_remaining": 0.000007000000000000001
+      }
+    },
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-03",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 1.0999999999999999,
+        "epsilon_remaining": 1.9000000000000001,
+        "advanced_epsilon": 1.0999999999999999,
+        "advanced_epsilon_remaining": 1.9000000000000001,
+        "delta_spent": 0.000004,
+        "delta_remaining": 0.000006000000000000001
+      }
+    },
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-04",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 1.2999999999999998,
+        "epsilon_remaining": 1.7000000000000002,
+        "advanced_epsilon": 1.2999999999999998,
+        "advanced_epsilon_remaining": 1.7000000000000002,
+        "delta_spent": 0.0000049999999999999996,
+        "delta_remaining": 0.000005000000000000001
+      }
+    },
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-05",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 1.4999999999999998,
+        "epsilon_remaining": 1.5000000000000002,
+        "advanced_epsilon": 1.4999999999999998,
+        "advanced_epsilon_remaining": 1.5000000000000002,
+        "delta_spent": 0.000005999999999999999,
+        "delta_remaining": 0.0000040000000000000015
+      }
+    },
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-06",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 1.6999999999999997,
+        "epsilon_remaining": 1.3000000000000003,
+        "advanced_epsilon": 1.6999999999999997,
+        "advanced_epsilon_remaining": 1.3000000000000003,
+        "delta_spent": 0.000006999999999999999,
+        "delta_remaining": 0.0000030000000000000018
+      }
+    },
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-07",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 1.8999999999999997,
+        "epsilon_remaining": 1.1000000000000003,
+        "advanced_epsilon": 1.8999999999999997,
+        "advanced_epsilon_remaining": 1.1000000000000003,
+        "delta_spent": 0.000008,
+        "delta_remaining": 0.000002000000000000001
+      }
+    },
+    {
+      "metric_id": "metric-daily-critical",
+      "metric_name": "Daily Core Metric",
+      "date": "2025-01-08",
+      "frequency": "daily",
+      "priority": "critical",
+      "epsilon_cost": 0.2,
+      "delta_cost": 0.000001,
+      "group_size": 1,
+      "proof": {
+        "cumulative_epsilon": 2.0999999999999996,
+        "epsilon_remaining": 0.9000000000000004,
+        "advanced_epsilon": 2.0999999999999996,
+        "advanced_epsilon_remaining": 0.9000000000000004,
+        "delta_spent": 0.000009,
+        "delta_remaining": 0.0000010000000000000006
+      }
+    }
+  ],
+  "summary": {
+    "total_releases": 9,
+    "epsilon_cap": 3,
+    "epsilon_used": 2.0999999999999996,
+    "epsilon_remaining": 0.9000000000000004,
+    "advanced_epsilon": 2.0999999999999996,
+    "advanced_remaining": 0.9000000000000004,
+    "delta_cap": 0.00001,
+    "delta_used": 0.000009,
+    "delta_remaining": 0.0000010000000000000006,
+    "skipped": [
+      {
+        "metric_id": "metric-daily-critical",
+        "metric_name": "Daily Core Metric",
+        "date": "2025-01-09",
+        "reason": "invalid input: delta cap exhausted before advanced composition"
+      },
+      {
+        "metric_id": "metric-daily-critical",
+        "metric_name": "Daily Core Metric",
+        "date": "2025-01-10",
+        "reason": "invalid input: delta cap exhausted before advanced composition"
+      },
+      {
+        "metric_id": "metric-weekly-nth",
+        "metric_name": "Weekly Retention",
+        "date": "2025-01-01",
+        "reason": "invalid input: delta cap exhausted before advanced composition"
+      },
+      {
+        "metric_id": "metric-weekly-nth",
+        "metric_name": "Weekly Retention",
+        "date": "2025-01-08",
+        "reason": "invalid input: delta cap exhausted before advanced composition"
+      }
+    ]
+  }
+}
