@@ -153,6 +153,7 @@ export type EntityType =
 // -----------------------------------------------------------------------------
 
 export interface PersonProps {
+  [key: string]: unknown;
   /** Full name */
   name: string;
   /** First/given name */
@@ -206,6 +207,7 @@ export interface Person extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface OrganizationProps {
+  [key: string]: unknown;
   /** Legal name */
   name: string;
   /** Trading/DBA names */
@@ -256,6 +258,7 @@ export interface Organization extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface AssetProps {
+  [key: string]: unknown;
   /** Asset name/description */
   name: string;
   /** Asset type */
@@ -337,6 +340,7 @@ export interface Asset extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface LocationProps {
+  [key: string]: unknown;
   /** Location name */
   name: string;
   /** Location type */
@@ -393,6 +397,7 @@ export interface Location extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface EventProps {
+  [key: string]: unknown;
   /** Event name/title */
   name: string;
   /** Event type */
@@ -434,6 +439,7 @@ export interface Event extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface DocumentProps {
+  [key: string]: unknown;
   /** Document title */
   title: string;
   /** Document type */
@@ -498,6 +504,7 @@ export interface Document extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface ClaimProps {
+  [key: string]: unknown;
   /** Claim statement */
   statement: string;
   /** Claim type */
@@ -536,6 +543,7 @@ export interface Claim extends CanonicalEntity {
 // -----------------------------------------------------------------------------
 
 export interface CaseProps {
+  [key: string]: unknown;
   /** Case title */
   title: string;
   /** Case number/reference */

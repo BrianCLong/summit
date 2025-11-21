@@ -3,12 +3,10 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "noEmit": false,
+    "types": []
   },
   "include": ["src"],
-  "references": [
-    { "path": "../types" },
-    { "path": "../authority-compiler" },
-    { "path": "../prov-ledger-extensions" }
-  ]
+  "exclude": ["src/__tests__", "src/integration", "src/otel"]
 }

@@ -11,5 +11,6 @@ export * from './copilot-hooks';
 export * from './connector-hooks';
 export * from './rag-hooks';
 export * from './export-hooks';
-export * from './integration/server-setup';
-export * from './otel/instrumentation';
+
+// Integration examples available at ./integration/server-setup.ts
+// OTEL instrumentation available at ./otel/instrumentation.ts

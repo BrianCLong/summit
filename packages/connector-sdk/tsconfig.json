@@ -3,8 +3,10 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "noEmit": false,
+    "types": []
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }]
+  "exclude": ["src/__tests__"]
 }

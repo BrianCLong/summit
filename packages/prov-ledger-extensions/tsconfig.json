@@ -3,8 +3,10 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "noEmit": false,
+    "types": ["node"]
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }, { "path": "../prov-ledger" }]
+  "exclude": ["src/__tests__"]
 }

@@ -8,169 +8,98 @@ import {
   createPIIDetectionHook,
   createProvenanceHook,
   createAuditHook,
-  composeGovernancePlugins,
+  composeHooks,
+  DEFAULT_PII_PATTERNS,
+  type GovernancePlugin,
+  type AuditLogger,
+  type ProvenanceRecorder,
 } from '../graphql-hooks';
 
 import {
-  createCopilotValidationHook,
+  createQueryValidationHook,
   createCitationEnforcementHook,
   createCopilotProvenanceHook,
   createCostControlHook,
   composeCopilotHooks,
+  type CopilotHook,
 } from '../copilot-hooks';
 
 import {
-  createConnectorAuthHook,
+  createLicenseValidationHook,
   createConnectorRateLimitHook,
   createConnectorProvenanceHook,
   composeConnectorHooks,
+  type ConnectorHook,
 } from '../connector-hooks';
 
-// Configuration interfaces
-export interface GovernanceConfig {
-  authority: {
-    opaEndpoint?: string;
-    cacheEnabled: boolean;
-    cacheTtlMs: number;
-  };
-  pii: {
-    patterns: string[];
-    scrubEnabled: boolean;
-    reportEnabled: boolean;
-  };
-  provenance: {
-    ledgerEndpoint: string;
-    batchSize: number;
-    flushIntervalMs: number;
-  };
-  audit: {
-    logLevel: 'debug' | 'info' | 'warn' | 'error';
-    sensitiveFields: string[];
-  };
-  copilot: {
-    maxTokensPerRequest: number;
-    maxCostPerDay: number;
-    citationMinConfidence: number;
-    citationMinCoverage: number;
-  };
-  connectors: {
-    defaultRateLimit: number;
-    authRefreshMs: number;
-  };
-}
-
-const defaultConfig: GovernanceConfig = {
-  authority: {
-    cacheEnabled: true,
-    cacheTtlMs: 60000,
-  },
-  pii: {
-    patterns: [
-      '\\b\\d{3}-\\d{2}-\\d{4}\\b', // SSN
-      '\\b\\d{16}\\b', // Credit card
-      '\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b', // Email
-    ],
-    scrubEnabled: true,
-    reportEnabled: true,
-  },
-  provenance: {
-    ledgerEndpoint: 'http://localhost:4001',
-    batchSize: 100,
-    flushIntervalMs: 5000,
-  },
-  audit: {
-    logLevel: 'info',
-    sensitiveFields: ['password', 'token', 'secret', 'apiKey'],
-  },
-  copilot: {
-    maxTokensPerRequest: 4096,
-    maxCostPerDay: 100,
-    citationMinConfidence: 0.7,
-    citationMinCoverage: 0.9,
-  },
-  connectors: {
-    defaultRateLimit: 100,
-    authRefreshMs: 300000,
-  },
-};
-
 /**
- * Create full governance middleware stack for GraphQL
+ * Create GraphQL governance middleware stack
+ *
+ * @example
+ * ```typescript
+ * const middleware = createGraphQLGovernanceMiddleware({
+ *   authorityEvaluator: myPolicyEvaluator,
+ *   provenanceRecorder: myProvenanceClient,
+ *   auditLogger: myAuditLogger,
+ * });
+ * ```
  */
-export function createGraphQLGovernanceMiddleware(
-  config: Partial<GovernanceConfig> = {},
-  dependencies: {
-    authorityEvaluator: any;
-    provenanceRecorder: any;
-    auditLogger: any;
-  },
-) {
-  const mergedConfig = { ...defaultConfig, ...config };
-
-  return composeGovernancePlugins(
+export function createGraphQLGovernanceMiddleware(dependencies: {
+  authorityEvaluator: { evaluate: (ctx: unknown) => Promise<{ allowed: boolean; reason: string }> };
+  provenanceRecorder: ProvenanceRecorder;
+  auditLogger: AuditLogger;
+}): GovernancePlugin {
+  return composeHooks(
     createAuthorityHook(dependencies.authorityEvaluator),
-    createPIIDetectionHook({
-      patterns: mergedConfig.pii.patterns,
-      scrub: mergedConfig.pii.scrubEnabled,
-      report: mergedConfig.pii.reportEnabled,
-    }),
+    createPIIDetectionHook({ patterns: DEFAULT_PII_PATTERNS }),
     createProvenanceHook(dependencies.provenanceRecorder),
     createAuditHook(dependencies.auditLogger),
   );
 }
 
 /**
- * Create full governance middleware stack for Copilot
+ * Create Copilot governance middleware stack
+ *
+ * @example
+ * ```typescript
+ * const middleware = createCopilotGovernanceMiddleware({
+ *   costEstimator: myCostTracker,
+ *   citationValidator: myCitationValidator,
+ *   provenanceRecorder: myProvenanceClient,
+ * });
+ * ```
  */
-export function createCopilotGovernanceMiddleware(
-  config: Partial<GovernanceConfig> = {},
-  dependencies: {
-    costTracker: any;
-    citationTracker: any;
-    provenanceRecorder: any;
-  },
-) {
-  const mergedConfig = { ...defaultConfig, ...config };
-
+export function createCopilotGovernanceMiddleware(dependencies: {
+  costEstimator: { estimateCost: (req: unknown) => number };
+  citationValidator: { validate: (citations: unknown[]) => boolean };
+  provenanceRecorder: { record: (event: unknown) => Promise<void> };
+}): CopilotHook {
   return composeCopilotHooks(
-    createCopilotValidationHook({
-      maxTokens: mergedConfig.copilot.maxTokensPerRequest,
-    }),
-    createCostControlHook({
-      maxCostPerDay: mergedConfig.copilot.maxCostPerDay,
-      tracker: dependencies.costTracker,
-    }),
-    createCitationEnforcementHook({
-      minConfidence: mergedConfig.copilot.citationMinConfidence,
-      minCoverage: mergedConfig.copilot.citationMinCoverage,
-      tracker: dependencies.citationTracker,
-    }),
+    createQueryValidationHook({}),
+    createCostControlHook({ costEstimator: dependencies.costEstimator }),
+    createCitationEnforcementHook({ citationValidator: dependencies.citationValidator }),
     createCopilotProvenanceHook(dependencies.provenanceRecorder),
   );
 }
 
 /**
- * Create full governance middleware stack for Connectors
+ * Create Connector governance middleware stack
+ *
+ * @example
+ * ```typescript
+ * const middleware = createConnectorGovernanceMiddleware({
+ *   licenseValidator: myLicenseValidator,
+ *   provenanceRecorder: myProvenanceClient,
+ * });
+ * ```
  */
-export function createConnectorGovernanceMiddleware(
-  config: Partial<GovernanceConfig> = {},
-  dependencies: {
-    authManager: any;
-    rateLimiter: any;
-    provenanceRecorder: any;
-  },
-) {
-  const mergedConfig = { ...defaultConfig, ...config };
-
+export function createConnectorGovernanceMiddleware(dependencies: {
+  licenseValidator: { validate: (connectorId: string) => Promise<boolean> };
+  provenanceRecorder: { record: (event: unknown) => Promise<void> };
+}): ConnectorHook {
   return composeConnectorHooks(
-    createConnectorAuthHook(dependencies.authManager),
-    createConnectorRateLimitHook({
-      defaultLimit: mergedConfig.connectors.defaultRateLimit,
-      limiter: dependencies.rateLimiter,
-    }),
+    createLicenseValidationHook({ validator: dependencies.licenseValidator }),
+    createConnectorRateLimitHook({}),
     createConnectorProvenanceHook(dependencies.provenanceRecorder),
   );
 }
-
-// Export types
-export type { GovernanceConfig };

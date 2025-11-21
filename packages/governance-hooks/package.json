@@ -11,7 +11,9 @@
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@opentelemetry/api": "^1.7.0"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "graphql": "^16.8.0",
