@@ -36,7 +36,7 @@ Quick reference for operational procedures and incident response.
 ## Deployment & Operations
 
 - [Deploy Promote](./deploy-promote.yaml)
-- [Dev Bootstrap](./dev-bootstrap.yaml)
+- [Dev Bootstrap](./dev-bootstrap.md) — golden path startup with verification and troubleshooting
 - [MVP3 Go Live](./mvp3_go_live.md)
 - [V24 Coherence](./v24-coherence.md)
 

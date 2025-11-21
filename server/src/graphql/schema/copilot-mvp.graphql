@@ -1,0 +1,375 @@
+# AI Copilot MVP Schema - Auditable by Design
+#
+# Implements natural-language graph querying with:
+# - Generated Cypher preview
+# - Cost/row estimation
+# - Safety checks and policy explanations
+# - Results with citations and provenance
+# - Hypothesis generation
+# - Narrative building
+
+"""
+Natural language query input with preview capability
+"""
+input NLQueryInput {
+  """
+  Natural language query from the analyst
+  """
+  query: String!
+
+  """
+  Investigation context for the query
+  """
+  investigationId: ID!
+
+  """
+  User ID for audit trail
+  """
+  userId: ID
+
+  """
+  If true, only generate and preview the query without executing
+  """
+  dryRun: Boolean
+}
+
+"""
+Cypher query preview with cost estimation
+"""
+type CypherPreview {
+  """
+  Generated Cypher query
+  """
+  cypher: String!
+
+  """
+  Plain English explanation of what the query does
+  """
+  explanation: String!
+
+  """
+  Estimated number of rows this query will return
+  """
+  estimatedRows: Int!
+
+  """
+  Estimated cost in arbitrary units (for budgeting)
+  """
+  estimatedCost: Float!
+
+  """
+  Query complexity: low, medium, or high
+  """
+  complexity: String!
+
+  """
+  Safety warnings about the query
+  """
+  warnings: [String!]
+
+  """
+  Whether this query is allowed to execute
+  """
+  allowed: Boolean!
+
+  """
+  If blocked, the reason why (policy explanation)
+  """
+  blockReason: String
+
+  """
+  Audit trail identifier
+  """
+  auditId: ID
+}
+
+"""
+Query execution result with provenance
+"""
+type CypherExecutionResult {
+  """
+  Result records from query execution
+  """
+  records: [JSON!]!
+
+  """
+  Execution summary
+  """
+  summary: ExecutionSummary!
+
+  """
+  Entity citations involved in results
+  """
+  citations: [ID!]!
+
+  """
+  Audit trail identifier
+  """
+  auditId: ID
+}
+
+"""
+Execution metadata and performance
+"""
+type ExecutionSummary {
+  """
+  Number of records returned
+  """
+  recordCount: Int!
+
+  """
+  Execution time in milliseconds
+  """
+  executionTime: Float!
+}
+
+"""
+Hypothesis generation input
+"""
+input HypothesisInput {
+  """
+  Investigation to generate hypotheses for
+  """
+  investigationId: ID!
+
+  """
+  Optional focus entities to center hypotheses around
+  """
+  focusEntityIds: [ID!]
+
+  """
+  Number of hypotheses to generate
+  """
+  count: Int
+}
+
+"""
+Generated investigation hypothesis
+"""
+type Hypothesis {
+  """
+  Hypothesis ID
+  """
+  id: ID!
+
+  """
+  Hypothesis statement
+  """
+  statement: String!
+
+  """
+  Confidence score 0-1
+  """
+  confidence: Float!
+
+  """
+  Evidence supporting this hypothesis
+  """
+  supportingEvidence: [Evidence!]!
+
+  """
+  Entities involved in this hypothesis
+  """
+  involvedEntities: [ID!]!
+
+  """
+  Suggested next investigation steps
+  """
+  suggestedSteps: [String!]!
+}
+
+"""
+Evidence supporting a hypothesis
+"""
+type Evidence {
+  """
+  Evidence ID
+  """
+  id: ID!
+
+  """
+  Evidence type (document, relationship, pattern, etc.)
+  """
+  type: String!
+
+  """
+  Evidence description
+  """
+  description: String!
+
+  """
+  Evidence strength 0-1
+  """
+  strength: Float!
+
+  """
+  Source entity or relationship IDs
+  """
+  sourceIds: [ID!]!
+}
+
+"""
+Narrative generation input
+"""
+input NarrativeInput {
+  """
+  Investigation to build narrative for
+  """
+  investigationId: ID!
+
+  """
+  Narrative focus or theme
+  """
+  theme: String
+
+  """
+  Key entities to include in narrative
+  """
+  keyEntityIds: [ID!]
+
+  """
+  Desired narrative style
+  """
+  style: NarrativeStyle
+}
+
+"""
+Narrative style options
+"""
+enum NarrativeStyle {
+  """
+  Analytical report style
+  """
+  ANALYTICAL
+
+  """
+  Chronological timeline style
+  """
+  CHRONOLOGICAL
+
+  """
+  Network-centric style
+  """
+  NETWORK_FOCUSED
+
+  """
+  Threat assessment style
+  """
+  THREAT_ASSESSMENT
+}
+
+"""
+Generated investigation narrative
+"""
+type Narrative {
+  """
+  Narrative ID
+  """
+  id: ID!
+
+  """
+  Investigation ID
+  """
+  investigationId: ID!
+
+  """
+  Narrative title
+  """
+  title: String!
+
+  """
+  Narrative content (markdown formatted)
+  """
+  content: String!
+
+  """
+  Key findings highlighted in narrative
+  """
+  keyFindings: [String!]!
+
+  """
+  Entity citations used in narrative
+  """
+  citations: [ID!]!
+
+  """
+  Relationship paths that explain the narrative
+  """
+  supportingPaths: [WhyPath!]!
+
+  """
+  Confidence in narrative accuracy
+  """
+  confidence: Float!
+
+  """
+  Generated timestamp
+  """
+  createdAt: String!
+
+  """
+  Audit trail identifier
+  """
+  auditId: ID
+}
+
+# Query extensions
+extend type Query {
+  """
+  Preview a natural language query without executing it.
+  Returns generated Cypher, explanation, and cost estimate.
+  """
+  previewNLQuery(input: NLQueryInput!): CypherPreview!
+
+  """
+  Execute a natural language query after preview approval.
+  Returns results with full audit trail and citations.
+  """
+  executeNLQuery(input: NLQueryInput!): CypherExecutionResult!
+
+  """
+  Generate investigation hypotheses based on current graph state.
+  """
+  generateHypotheses(input: HypothesisInput!): [Hypothesis!]!
+
+  """
+  Build a narrative report from investigation data.
+  """
+  generateNarrative(input: NarrativeInput!): Narrative!
+
+  """
+  Get copilot suggestions for next investigation steps.
+  """
+  copilotSuggestions(investigationId: ID!): [String!]!
+}
+
+# Mutation extensions
+extend type Mutation {
+  """
+  Approve and execute a previewed Cypher query.
+  Requires the exact Cypher string from preview response.
+  """
+  executeCypherQuery(
+    cypher: String!
+    investigationId: ID!
+    auditId: ID
+  ): CypherExecutionResult!
+
+  """
+  Save a generated hypothesis for investigation tracking.
+  """
+  saveHypothesis(
+    investigationId: ID!
+    hypothesis: String!
+    confidence: Float!
+  ): Hypothesis!
+
+  """
+  Save a generated narrative as an investigation artifact.
+  """
+  saveNarrative(
+    investigationId: ID!
+    title: String!
+    content: String!
+  ): Narrative!
+}

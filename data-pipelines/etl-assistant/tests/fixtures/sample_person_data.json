@@ -1,0 +1,29 @@
+[
+  {
+    "first_name": "John",
+    "last_name": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "+1-555-0123",
+    "date_of_birth": "1985-03-15",
+    "ssn": "123-45-6789",
+    "address": "123 Main St, Springfield, IL"
+  },
+  {
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "email": "jane.smith@example.com",
+    "phone": "+1-555-0124",
+    "date_of_birth": "1990-07-22",
+    "ssn": "987-65-4321",
+    "address": "456 Elm St, Springfield, IL"
+  },
+  {
+    "first_name": "Bob",
+    "last_name": "Johnson",
+    "email": "bob.j@example.com",
+    "phone": "+1-555-0125",
+    "date_of_birth": "1978-11-30",
+    "ssn": "456-78-9012",
+    "address": "789 Oak Ave, Springfield, IL"
+  }
+]

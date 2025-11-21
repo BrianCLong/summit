@@ -1,0 +1,10 @@
+{
+  "name": "@intelgraph/audio-synthesis",
+  "version": "1.0.0",
+  "description": "Audio synthesis with TTS, voice cloning, and effects",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*"
+  }
+}

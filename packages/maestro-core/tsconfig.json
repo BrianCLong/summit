@@ -5,6 +5,7 @@
     "allowImportingTsExtensions": false,
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "types": []
   },
   "include": [
     "src"

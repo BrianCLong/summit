@@ -1,0 +1,44 @@
+{
+  "name": "@summit/autotriage",
+  "version": "1.0.0",
+  "description": "Automated triage engine for Summit issues and bug-bash results",
+  "type": "module",
+  "main": "cli.js",
+  "bin": {
+    "autotriage": "./cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf **/*.js **/*.d.ts **/*.js.map **/*.d.ts.map coverage",
+    "triage": "node cli.js triage",
+    "triage:github": "node cli.js triage --github",
+    "triage:all": "node cli.js triage --all",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "example": "node examples/usage-example.js"
+  },
+  "keywords": [
+    "triage",
+    "automation",
+    "issues",
+    "classification"
+  ],
+  "author": "Summit Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.19.25",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

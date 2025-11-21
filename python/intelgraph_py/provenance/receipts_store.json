@@ -5,5 +5,15 @@
       "env": "test"
     },
     "tx_id": "tx_1062835bb36a000e"
+  },
+  "tx_7ebb6d625d1c171d": {
+    "hash": "1ebecdc5402441647a1c69364e8ca74f45f22c0d5a9a2e6e5f67160a07df436e",
+    "metadata": {
+      "connector": "csv-connector",
+      "records_processed": 3,
+      "timestamp": 1763622799.8379366,
+      "version": "1.0.0"
+    },
+    "tx_id": "tx_7ebb6d625d1c171d"
   }
 }

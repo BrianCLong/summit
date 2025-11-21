@@ -1,4 +1,5 @@
 import { Pool } from 'pg';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 // Optional kafka integration: load lazily to avoid hard dep when not used
 let Kafka: any;
@@ -67,8 +68,32 @@ export async function webhookHandler(req: any, res: any) {
   res.sendStatus(202);
 }
 function verifyHmac(sig: string, body: Buffer, secret: string) {
-  // TODO: implement HMAC-SHA256 check
-  return Boolean(sig && body && secret);
+  if (!sig || !body || !secret) return false;
+
+  // Extract the hash from the signature (e.g., "sha256=abcd1234...")
+  const parts = sig.split('=');
+  if (parts.length !== 2) return false;
+
+  const [algorithm, providedHash] = parts;
+
+  // Support both sha256 and sha1 (though sha256 is preferred)
+  if (algorithm !== 'sha256' && algorithm !== 'sha1') return false;
+
+  // Compute the expected HMAC
+  const hmac = createHmac(algorithm, secret);
+  hmac.update(body);
+  const expectedHash = hmac.digest('hex');
+
+  // Timing-safe comparison to prevent timing attacks
+  try {
+    return timingSafeEqual(
+      Buffer.from(providedHash, 'hex'),
+      Buffer.from(expectedHash, 'hex')
+    );
+  } catch {
+    // If buffers have different lengths, timingSafeEqual throws
+    return false;
+  }
 }
 async function triggerRunbook(runbook: string, payload: any) {
   // TODO: enqueue a run with payload

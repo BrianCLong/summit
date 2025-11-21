@@ -1,0 +1,51 @@
+{
+  "name": "@intelgraph/speech-recognition",
+  "version": "1.0.0",
+  "description": "Speech-to-text recognition with multi-provider support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/audio-processing": "workspace:*",
+    "zod": "^4.1.12",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "eslint": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4"
+  },
+  "peerDependencies": {
+    "@google-cloud/speech": "^6.0.0",
+    "@aws-sdk/client-transcribe": "^3.0.0",
+    "microsoft-cognitiveservices-speech-sdk": "^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@google-cloud/speech": {
+      "optional": true
+    },
+    "@aws-sdk/client-transcribe": {
+      "optional": true
+    },
+    "microsoft-cognitiveservices-speech-sdk": {
+      "optional": true
+    }
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

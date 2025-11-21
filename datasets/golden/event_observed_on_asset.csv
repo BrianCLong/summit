@@ -1,0 +1,4 @@
+event_id,asset_id,purpose_tags,provenance_ref
+EVT-7001,ASSET-5001,security-monitoring|operations,s3csv/relationships/2025-09-01T15:30:00Z
+EVT-7002,ASSET-5002,operations|compliance,s3csv/relationships/2025-09-01T15:30:00Z
+EVT-7003,ASSET-5003,security-monitoring|analytics,s3csv/relationships/2025-09-01T15:30:00Z

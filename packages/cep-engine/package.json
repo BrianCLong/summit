@@ -1,0 +1,24 @@
+{
+  "name": "@intelgraph/cep-engine",
+  "version": "1.0.0",
+  "description": "Complex Event Processing engine for pattern detection and temporal analysis",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/kafka-integration": "workspace:*",
+    "@intelgraph/stream-processing": "workspace:*",
+    "eventemitter3": "^5.0.1",
+    "pino": "^8.17.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,90 @@
+<mjml>
+  <mj-head>
+    <mj-title>Critical Alert</mj-title>
+    <mj-preview>{{alertTitle}}</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-all>
+      <mj-text font-size="14px" color="#555" line-height="1.6"></mj-text>
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#dc3545" padding="20px">
+      <mj-column>
+        <mj-text color="#ffffff" font-size="24px" font-weight="bold" align="center">
+          ⚠️ CRITICAL ALERT
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="40px">
+      <mj-column>
+        <mj-text font-size="20px" font-weight="bold" color="#dc3545">
+          {{alertTitle}}
+        </mj-text>
+        <mj-text>
+          <strong>Severity:</strong> <span style="color: #dc3545;">{{severity}}</span>
+        </mj-text>
+        <mj-text>
+          <strong>Triggered:</strong> {{triggeredAt}}
+        </mj-text>
+        <mj-text>
+          <strong>Environment:</strong> {{environment}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f8f9fa" padding="30px 40px">
+      <mj-column>
+        <mj-text font-weight="bold" color="#333">
+          Description:
+        </mj-text>
+        <mj-text>
+          {{alertMessage}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="30px 40px">
+      <mj-column>
+        <mj-text font-weight="bold" color="#333">
+          Details:
+        </mj-text>
+        <mj-text>
+          <strong>Alert ID:</strong> {{alertId}}<br/>
+          <strong>Type:</strong> {{alertType}}<br/>
+          <strong>Source:</strong> {{source}}<br/>
+          <strong>Affected Service:</strong> {{affectedService}}
+        </mj-text>
+        <mj-spacer height="20px" />
+        <mj-button background-color="#dc3545" href="{{alertUrl}}">
+          View Alert Details
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#fff3cd" padding="20px 40px">
+      <mj-column>
+        <mj-text color="#856404" font-weight="bold">
+          Recommended Actions:
+        </mj-text>
+        <mj-text color="#856404">
+          {{recommendedActions}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="20px 40px">
+      <mj-column>
+        <mj-text color="#999" font-size="12px" align="center">
+          This is an automated alert from IntelGraph. Do not reply to this email.
+        </mj-text>
+        <mj-text color="#999" font-size="12px" align="center">
+          <a href="{{preferencesUrl}}" style="color: #999;">Manage Alert Preferences</a>
+        </mj-text>
+        <mj-text color="#999" font-size="12px" align="center">
+          {{companyName}} | {{companyAddress}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

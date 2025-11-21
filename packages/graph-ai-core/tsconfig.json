@@ -6,10 +6,12 @@
     "outDir": "dist",
     "rootDir": "./src",
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,
     "allowImportingTsExtensions": false
+    "types": []
   },
   "include": [
     "src"

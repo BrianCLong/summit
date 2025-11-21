@@ -2,6 +2,7 @@ const Joi = require('joi');
 const { v4: uuid } = require('uuid');
 const { getRedisClient } = require('../config/database');
 const GraphOpsService = require('../services/GraphOpsService');
+const GraphAnomalyService = require('../services/GraphAnomalyService');
 const TagService = require('../services/TagService');
 const { enqueueAIRequest } = require('../services/AIQueueService');
 const { metrics } = require('../monitoring/metrics');
@@ -31,6 +32,14 @@ const aiSchema = Joi.object({
   entityId: Joi.string().trim().min(1).required(),
 });
 
+const anomalySchema = Joi.object({
+  entityId: Joi.string().trim().min(1).required(),
+  investigationId: Joi.string().trim().min(1).required(),
+  radius: Joi.number().integer().min(1).max(3).default(1),
+  threshold: Joi.number().min(0).max(1).optional(),
+  contamination: Joi.number().min(0.01).max(0.5).optional(),
+});
+
 function ensureRole(user, allowedRoles = []) {
   if (!user) throw new Error('Not authenticated');
   if (allowedRoles.length === 0) return true;
@@ -47,6 +56,51 @@ function traceId() {
 }
 
 const resolvers = {
+  Query: {
+    graphTraversalAnomalies: async (_, args, { user, logger }) => {
+      const start = Date.now();
+      const tId = traceId();
+      const { value, error } = anomalySchema.validate(args);
+      if (error) {
+        const err = new Error(`Invalid input: ${error.message}`);
+        err.code = 'BAD_USER_INPUT';
+        err.traceId = tId;
+        throw err;
+      }
+
+      ensureRole(user, ['VIEWER', 'ANALYST', 'ADMIN']);
+      const tenantId = user?.tenantId || user?.tenant || 'default';
+
+      try {
+        const graph = await GraphOpsService.expandNeighborhood(value.entityId, value.radius, {
+          tenantId,
+          investigationId: value.investigationId,
+          traceId: tId,
+        });
+
+        const anomalyResult = await GraphAnomalyService.scoreTraversal(graph.nodes, graph.edges, {
+          entityId: value.entityId,
+          investigationId: value.investigationId,
+          tenantId,
+          threshold: value.threshold,
+          contamination: value.contamination,
+        });
+
+        metrics.resolverLatencyMs
+          .labels('graphTraversalAnomalies')
+          .observe(Date.now() - start);
+
+        return anomalyResult;
+      } catch (err) {
+        logger.error('graphTraversalAnomalies error', { err, traceId: tId });
+        const gqlErr = new Error('GRAPH_ANOMALY_FAILED');
+        gqlErr.code = 'GRAPH_ANOMALY_FAILED';
+        gqlErr.details = err.message;
+        gqlErr.traceId = tId;
+        throw gqlErr;
+      }
+    },
+  },
   Mutation: {
     expandNeighbors: async (_, args, { user, logger }) => {
       const start = Date.now();

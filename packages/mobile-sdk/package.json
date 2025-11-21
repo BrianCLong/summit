@@ -1,0 +1,52 @@
+{
+  "name": "@intelgraph/mobile-sdk",
+  "version": "1.0.0",
+  "description": "Shared mobile SDK for IntelGraph cross-platform applications",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./offline": {
+      "types": "./dist/offline/index.d.ts",
+      "import": "./dist/offline/index.js"
+    },
+    "./auth": {
+      "types": "./dist/auth/index.d.ts",
+      "import": "./dist/auth/index.js"
+    },
+    "./storage": {
+      "types": "./dist/storage/index.d.ts",
+      "import": "./dist/storage/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "idb": "^8.0.1",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "tsup": "^8.3.7",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.3"
+  },
+  "keywords": [
+    "mobile",
+    "sdk",
+    "offline",
+    "sync",
+    "cross-platform"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}

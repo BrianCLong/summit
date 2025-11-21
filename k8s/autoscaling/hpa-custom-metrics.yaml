@@ -1,0 +1,507 @@
+# =============================================================================
+# HORIZONTAL POD AUTOSCALERS WITH CUSTOM METRICS
+# =============================================================================
+# Advanced HPA configurations using custom metrics from Prometheus
+# Requires Prometheus Adapter or KEDA for custom metrics support
+# =============================================================================
+
+---
+# =============================================================================
+# HPA - API Server (Multi-Metric)
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-server-hpa
+  namespace: intelgraph-production
+  labels:
+    app: api-server
+    component: backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-server
+  minReplicas: 3
+  maxReplicas: 20
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+      selectPolicy: Min
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 30
+      - type: Pods
+        value: 4
+        periodSeconds: 30
+      selectPolicy: Max
+  metrics:
+    # CPU utilization
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    # Memory utilization
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+    # Custom metric: HTTP requests per second
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: "1000"
+
+    # Custom metric: GraphQL query rate
+    - type: Pods
+      pods:
+        metric:
+          name: graphql_query_rate
+        target:
+          type: AverageValue
+          averageValue: "500"
+
+    # Custom metric: P95 latency
+    - type: Pods
+      pods:
+        metric:
+          name: http_request_duration_p95
+        target:
+          type: AverageValue
+          averageValue: "200m"  # 200ms
+
+    # External metric: Queue depth
+    - type: External
+      external:
+        metric:
+          name: queue_depth
+          selector:
+            matchLabels:
+              queue_name: "api-tasks"
+        target:
+          type: AverageValue
+          averageValue: "100"
+
+---
+# =============================================================================
+# HPA - Web Frontend
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-frontend-hpa
+  namespace: intelgraph-production
+  labels:
+    app: web-frontend
+    component: frontend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-frontend
+  minReplicas: 2
+  maxReplicas: 15
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 30
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 5
+        periodSeconds: 15
+      selectPolicy: Max
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 60
+
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    # Custom metric: Active connections
+    - type: Pods
+      pods:
+        metric:
+          name: nginx_active_connections
+        target:
+          type: AverageValue
+          averageValue: "500"
+
+    # Custom metric: Request rate
+    - type: Pods
+      pods:
+        metric:
+          name: nginx_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: "1500"
+
+---
+# =============================================================================
+# HPA - Worker Services (Event-Driven)
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: worker-hpa
+  namespace: intelgraph-production
+  labels:
+    component: worker
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: worker
+  minReplicas: 2
+  maxReplicas: 50
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 600  # Scale down slowly
+      policies:
+      - type: Pods
+        value: 5
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 0  # Scale up immediately
+      policies:
+      - type: Percent
+        value: 100
+        periodSeconds: 15
+      - type: Pods
+        value: 10
+        periodSeconds: 15
+      selectPolicy: Max
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+
+    # External metric: Kafka lag
+    - type: External
+      external:
+        metric:
+          name: kafka_consumer_lag
+          selector:
+            matchLabels:
+              consumer_group: "worker-group"
+        target:
+          type: AverageValue
+          averageValue: "1000"
+
+    # External metric: Queue messages
+    - type: External
+      external:
+        metric:
+          name: rabbitmq_queue_messages
+          selector:
+            matchLabels:
+              queue: "worker-queue"
+        target:
+          type: AverageValue
+          averageValue: "500"
+
+---
+# =============================================================================
+# HPA - AI/ML Services (GPU-based)
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: ai-service-hpa
+  namespace: intelgraph-production
+  labels:
+    app: ai-service
+    component: ml
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: ai-service
+  minReplicas: 1
+  maxReplicas: 10
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 900  # 15 min cooldown
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 180
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 180  # 3 min warmup
+      policies:
+      - type: Pods
+        value: 2
+        periodSeconds: 60
+      selectPolicy: Max
+  metrics:
+    # GPU utilization (custom metric)
+    - type: Pods
+      pods:
+        metric:
+          name: gpu_utilization
+        target:
+          type: AverageValue
+          averageValue: "70"
+
+    # Inference queue depth
+    - type: Pods
+      pods:
+        metric:
+          name: inference_queue_depth
+        target:
+          type: AverageValue
+          averageValue: "50"
+
+    # Model inference latency P95
+    - type: Pods
+      pods:
+        metric:
+          name: inference_latency_p95
+        target:
+          type: AverageValue
+          averageValue: "1000m"  # 1 second
+
+---
+# =============================================================================
+# HPA - Neo4j Graph Database Query Service
+# =============================================================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: graph-service-hpa
+  namespace: intelgraph-production
+  labels:
+    app: graph-service
+    component: database-client
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: graph-service
+  minReplicas: 2
+  maxReplicas: 15
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+      - type: Percent
+        value: 25
+        periodSeconds: 60
+      selectPolicy: Max
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+      - type: Percent
+        value: 50
+        periodSeconds: 30
+      selectPolicy: Max
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+    # Custom metric: Cypher query rate
+    - type: Pods
+      pods:
+        metric:
+          name: cypher_query_rate
+        target:
+          type: AverageValue
+          averageValue: "100"
+
+    # Custom metric: Graph traversal latency
+    - type: Pods
+      pods:
+        metric:
+          name: graph_traversal_latency_p99
+        target:
+          type: AverageValue
+          averageValue: "500m"  # 500ms
+
+    # External metric: Neo4j connection pool
+    - type: External
+      external:
+        metric:
+          name: neo4j_pool_used_connections
+        target:
+          type: AverageValue
+          averageValue: "80"
+
+---
+# =============================================================================
+# PROMETHEUS ADAPTER CONFIG EXAMPLE
+# =============================================================================
+# This ConfigMap shows how to configure Prometheus Adapter for custom metrics
+# Apply this along with Prometheus Adapter deployment
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-adapter-config
+  namespace: monitoring
+data:
+  config.yaml: |
+    rules:
+    # HTTP requests per second
+    - seriesQuery: 'http_requests_total{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        matches: "^(.*)_total$"
+        as: "${1}_per_second"
+      metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'
+
+    # GraphQL query rate
+    - seriesQuery: 'graphql_queries_total{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        matches: "^(.*)_total$"
+        as: "${1}_rate"
+      metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'
+
+    # HTTP request duration P95
+    - seriesQuery: 'http_request_duration_seconds{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        matches: "^(.*)_seconds$"
+        as: "${1}_p95"
+      metricsQuery: 'histogram_quantile(0.95, rate(<<.Series>>_bucket{<<.LabelMatchers>>}[2m]))'
+
+    # Cypher query rate
+    - seriesQuery: 'neo4j_cypher_queries_total{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        matches: "^(.*)_total$"
+        as: "cypher_query_rate"
+      metricsQuery: 'rate(<<.Series>>{<<.LabelMatchers>>}[2m])'
+
+    # Active connections
+    - seriesQuery: 'nginx_connections_active{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        as: "nginx_active_connections"
+      metricsQuery: 'avg_over_time(<<.Series>>{<<.LabelMatchers>>}[2m])'
+
+    # Queue depth (external metric)
+    - seriesQuery: 'rabbitmq_queue_messages{namespace!="",queue!=""}'
+      resources:
+        template: <<.Resource>>
+      name:
+        as: "rabbitmq_queue_messages"
+      metricsQuery: 'avg_over_time(<<.Series>>{<<.LabelMatchers>>}[2m])'
+
+    # GPU utilization
+    - seriesQuery: 'dcgm_gpu_utilization{namespace!="",pod!=""}'
+      resources:
+        overrides:
+          namespace: {resource: "namespace"}
+          pod: {resource: "pod"}
+      name:
+        as: "gpu_utilization"
+      metricsQuery: 'avg_over_time(<<.Series>>{<<.LabelMatchers>>}[2m])'
+
+---
+# =============================================================================
+# KEDA SCALEDOBJECT EXAMPLE (Alternative to HPA)
+# =============================================================================
+# KEDA provides event-driven autoscaling with more metrics sources
+
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: worker-scaledobject
+  namespace: intelgraph-production
+spec:
+  scaleTargetRef:
+    name: worker
+  minReplicaCount: 2
+  maxReplicaCount: 50
+  pollingInterval: 30
+  cooldownPeriod: 300
+  triggers:
+    # Prometheus trigger
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus.monitoring.svc:9090
+        metricName: kafka_consumer_lag
+        query: sum(kafka_consumergroup_lag{consumergroup="worker-group"})
+        threshold: "1000"
+
+    # Kafka trigger
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka.kafka.svc:9092
+        consumerGroup: worker-group
+        topic: worker-tasks
+        lagThreshold: "500"
+
+    # RabbitMQ trigger
+    - type: rabbitmq
+      metadata:
+        host: amqp://rabbitmq.rabbitmq.svc:5672
+        queueName: worker-queue
+        queueLength: "500"

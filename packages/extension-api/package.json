@@ -1,0 +1,26 @@
+{
+  "name": "@summit/extension-api",
+  "version": "1.0.0",
+  "description": "Extension points API for Summit platform plugins",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["extension", "api", "extensibility"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@summit/plugin-system": "workspace:*",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}

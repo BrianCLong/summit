@@ -1,0 +1,21 @@
+{
+  "name": "@summit/dimensional-modeling",
+  "version": "1.0.0",
+  "description": "Dimensional modeling with star/snowflake schemas and SCD support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": ["dimensional-modeling", "star-schema", "snowflake-schema", "scd", "data-warehouse"],
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "typescript": "^5.3.0"
+  }
+}

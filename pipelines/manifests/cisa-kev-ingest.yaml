@@ -1,0 +1,133 @@
+apiVersion: summit.io/v1
+kind: Pipeline
+metadata:
+  name: cisa-kev-ingest
+  description: Ingest CISA Known Exploited Vulnerabilities catalog into graph database
+  owners:
+    - security-team@summit.io
+  tags:
+    domain: security
+    scope: vulnerability-intel
+    criticality: medium
+  annotations:
+    runbook: https://summit.io/runbooks/cisa-kev-ingest
+    source: data-pipelines/cisa-kev/ingest-cisa-kev.py
+    documentation: https://www.cisa.gov/known-exploited-vulnerabilities-catalog
+
+spec:
+  schedule:
+    cron: "0 */6 * * *"  # Every 6 hours
+    timezone: UTC
+    enabled: true
+
+  inputs:
+    - name: cisa_kev_catalog
+      namespace: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+      facets:
+        schema:
+          fields:
+            - name: cveID
+              type: string
+            - name: vendorProject
+              type: string
+            - name: product
+              type: string
+            - name: vulnerabilityName
+              type: string
+            - name: dateAdded
+              type: date
+            - name: shortDescription
+              type: string
+            - name: requiredAction
+              type: string
+            - name: dueDate
+              type: date
+
+  outputs:
+    - name: vulnerabilities
+      namespace: neo4j://summit-prod/vulnerabilities
+    - name: vendor_products
+      namespace: neo4j://summit-prod/vendor_products
+
+  tasks:
+    - id: fetch_catalog
+      name: Fetch CISA KEV Catalog
+      type: python
+      code:
+        module: data_pipelines.cisa_kev.ingest
+        function: fetch_cisa_catalog
+      params:
+        url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
+      retry:
+        attempts: 3
+        delay: 2m
+        backoff: exponential
+      timeout: 5m
+
+    - id: transform_to_graph
+      name: Transform to Graph Format
+      type: python
+      depends_on:
+        - fetch_catalog
+      code:
+        module: data_pipelines.cisa_kev.ingest
+        function: transform_to_graph
+      params:
+        generate_ingest_id: true
+      timeout: 10m
+
+    - id: load_neo4j
+      name: Load into Neo4j
+      type: python
+      depends_on:
+        - transform_to_graph
+      code:
+        module: data_pipelines.cisa_kev.ingest
+        function: load_neo4j
+      params:
+        merge_strategy: MERGE
+        batch_size: 100
+      env:
+        NEO4J_URI: bolt://localhost:7687
+        NEO4J_USER: neo4j
+      retry:
+        attempts: 3
+        delay: 5m
+        backoff: exponential
+      timeout: 30m
+
+    - id: validate_load
+      name: Validate Data Quality
+      type: python
+      depends_on:
+        - load_neo4j
+      code:
+        module: data_pipelines.quality
+        function: validate_kev_quality
+      params:
+        min_records: 900  # KEV catalog typically has 900+ entries
+        check_duplicates: true
+      timeout: 5m
+
+  governance:
+    budget:
+      per_run_usd: 1.00
+    slo:
+      latency_p95_ms: 600000  # 10 minutes
+      success_rate_percent: 99.5
+    policies:
+      - public-data-retention
+
+  observability:
+    openlineage:
+      enabled: true
+      namespace: summit-prod
+    alerts:
+      - condition: "failure_count > 2"
+        channels:
+          - slack://security-alerts
+
+  execution:
+    runtime: maestro
+    concurrency: 1
+    catchup: false

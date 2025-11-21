@@ -1,0 +1,376 @@
+{
+  "dashboard": {
+    "title": "IntelGraph Platform - Service Observability",
+    "tags": ["intelgraph", "observability", "service-metrics"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Health Overview",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 2,
+        "title": "HTTP Request Rate (req/s)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{route}} - {{status_code}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"}
+        ]
+      },
+      {
+        "id": 3,
+        "title": "HTTP Request Latency (P95, P99)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "P99"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"}
+        ]
+      },
+      {
+        "id": 4,
+        "title": "HTTP Error Rate (%)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status_code=~\"5..\"}[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "5xx Error Rate"
+          },
+          {
+            "expr": "rate(http_requests_total{status_code=~\"4..\"}[5m]) / rate(http_requests_total[5m]) * 100",
+            "legendFormat": "4xx Error Rate"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Error %"}
+        ]
+      },
+      {
+        "id": 5,
+        "title": "GraphQL Operations",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 6,
+        "title": "GraphQL Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(graphql_requests_total[5m])",
+            "legendFormat": "{{operation}} - {{operation_type}}"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "GraphQL Resolver Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_resolver_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{resolver_name}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"}
+        ]
+      },
+      {
+        "id": 8,
+        "title": "GraphQL Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(graphql_resolver_errors_total[5m])",
+            "legendFormat": "{{resolver_name}} - {{error_type}}"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Database Metrics",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 10,
+        "title": "PostgreSQL Connection Pool",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "db_connection_pool_active{database=\"postgresql\"}",
+            "legendFormat": "Active - {{pool}}"
+          },
+          {
+            "expr": "db_connection_pool_idle{database=\"postgresql\"}",
+            "legendFormat": "Idle - {{pool}}"
+          },
+          {
+            "expr": "db_connection_pool_waiting{database=\"postgresql\"}",
+            "legendFormat": "Waiting - {{pool}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Connections"}
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Database Query Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{database}} - {{operation}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"}
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Neo4j Sessions Active",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "neo4j_sessions_active"
+          }
+        ]
+      },
+      {
+        "id": 13,
+        "title": "Cache Performance",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 14,
+        "title": "Redis Cache Hit Ratio",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "redis_cache_hit_ratio",
+            "legendFormat": "{{cache_name}}"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "red"},
+            {"value": 0.7, "color": "yellow"},
+            {"value": 0.9, "color": "green"}
+          ]
+        }
+      },
+      {
+        "id": 15,
+        "title": "Redis Operation Latency (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(redis_operation_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{operation}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Latency"}
+        ]
+      },
+      {
+        "id": 16,
+        "title": "Redis Cache Hits vs Misses",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(redis_cache_hits_total[5m])",
+            "legendFormat": "Hits - {{operation}}"
+          },
+          {
+            "expr": "rate(redis_cache_misses_total[5m])",
+            "legendFormat": "Misses - {{operation}}"
+          }
+        ]
+      },
+      {
+        "id": 17,
+        "title": "System Resources",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 18,
+        "title": "Node.js Memory Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "application_memory_usage_bytes{component=\"heap_used\"} / 1024 / 1024",
+            "legendFormat": "Heap Used (MB)"
+          },
+          {
+            "expr": "application_memory_usage_bytes{component=\"heap_total\"} / 1024 / 1024",
+            "legendFormat": "Heap Total (MB)"
+          },
+          {
+            "expr": "application_memory_usage_bytes{component=\"rss\"} / 1024 / 1024",
+            "legendFormat": "RSS (MB)"
+          }
+        ],
+        "yaxes": [
+          {"format": "decmbytes", "label": "Memory"}
+        ]
+      },
+      {
+        "id": 19,
+        "title": "Event Loop Lag",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "nodejs_eventloop_lag_seconds",
+            "legendFormat": "Event Loop Lag"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Lag"}
+        ]
+      },
+      {
+        "id": 20,
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total[5m]) * 100",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "CPU %"}
+        ]
+      },
+      {
+        "id": 21,
+        "title": "WebSocket & Real-time",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 22,
+        "title": "Active WebSocket Connections",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "websocket_connections_active"
+          }
+        ]
+      },
+      {
+        "id": 23,
+        "title": "WebSocket Message Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(websocket_messages_total[5m])",
+            "legendFormat": "{{direction}} - {{event_type}}"
+          }
+        ]
+      },
+      {
+        "id": 24,
+        "title": "Job Queues (BullMQ)",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 25,
+        "title": "Queue Jobs Waiting",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "queue_jobs_waiting",
+            "legendFormat": "{{queue}}"
+          }
+        ]
+      },
+      {
+        "id": 26,
+        "title": "Queue Jobs Active",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "queue_jobs_active",
+            "legendFormat": "{{queue}}"
+          }
+        ]
+      },
+      {
+        "id": 27,
+        "title": "Queue Job Processing Time (P95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(queue_job_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{queue}} - {{job_type}}"
+          }
+        ],
+        "yaxes": [
+          {"format": "s", "label": "Duration"}
+        ]
+      },
+      {
+        "id": 28,
+        "title": "Errors & Alerts",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 29,
+        "title": "Service Errors (1h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "increase(service_errors_total[1h])"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "green"},
+            {"value": 10, "color": "yellow"},
+            {"value": 100, "color": "red"}
+          ]
+        }
+      },
+      {
+        "id": 30,
+        "title": "Error Rate by Service",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(service_errors_total[5m])",
+            "legendFormat": "{{service}} - {{error_type}}"
+          }
+        ]
+      }
+    ]
+  }
+}

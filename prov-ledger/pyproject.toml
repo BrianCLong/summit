@@ -9,6 +9,7 @@ dependencies = [
     "networkx",
     "prometheus-client",
     "cryptography",
+    "prov",
 ]
 
 [project.optional-dependencies]

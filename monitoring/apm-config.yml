@@ -1,0 +1,527 @@
+# Application Performance Monitoring (APM) Configuration
+# Supports both New Relic and Datadog APM integrations
+
+# ====================
+# NEW RELIC Configuration
+# ====================
+newrelic:
+  enabled: true
+  license_key: ${NEW_RELIC_LICENSE_KEY}
+  app_name: IntelGraph-Production
+
+  # Application Settings
+  application_logging:
+    enabled: true
+    forwarding:
+      enabled: true
+      max_samples_stored: 10000
+    metrics:
+      enabled: true
+    local_decorating:
+      enabled: true
+
+  # Transaction Tracing
+  transaction_tracer:
+    enabled: true
+    transaction_threshold: 0.5  # 500ms
+    record_sql: obfuscated
+    explain_threshold: 500
+    stack_trace_threshold: 500
+    top_n: 20
+
+  # Error Collector
+  error_collector:
+    enabled: true
+    ignore_status_codes: [401, 404]
+    capture_events: true
+    max_event_samples_stored: 100
+
+  # Distributed Tracing
+  distributed_tracing:
+    enabled: true
+
+  # Slow SQL
+  slow_sql:
+    enabled: true
+
+  # Custom Instrumentation
+  custom_insights_events:
+    enabled: true
+    max_samples_stored: 10000
+
+  # Browser Monitoring (RUM)
+  browser_monitoring:
+    enabled: true
+    auto_instrument: true
+
+  # Custom Metrics
+  custom_metrics:
+    - name: business.active_users
+      type: gauge
+    - name: business.api_requests
+      type: counter
+    - name: business.graph_analysis_jobs
+      type: counter
+    - name: business.data_ingestion_rate
+      type: gauge
+    - name: business.investigation_count
+      type: counter
+    - name: business.entity_count
+      type: gauge
+    - name: business.relationship_count
+      type: gauge
+
+# ====================
+# DATADOG Configuration
+# ====================
+datadog:
+  enabled: true
+  api_key: ${DATADOG_API_KEY}
+  app_key: ${DATADOG_APP_KEY}
+  site: datadoghq.com  # or datadoghq.eu for EU
+
+  # Service Configuration
+  service: intelgraph-api
+  env: production
+  version: ${APP_VERSION}
+
+  # APM Configuration
+  apm:
+    enabled: true
+
+    # Tracing
+    trace:
+      enabled: true
+      sample_rate: 1.0
+      analytics_enabled: true
+
+      # Trace Agent
+      agent_host: ${DD_AGENT_HOST:-datadog-agent}
+      agent_port: 8126
+
+      # Service Mapping
+      service_mapping:
+        postgres: intelgraph-postgres
+        redis: intelgraph-redis
+        neo4j: intelgraph-neo4j
+
+      # Tag Configuration
+      tags:
+        - env:production
+        - service:intelgraph-api
+        - team:platform
+        - criticality:high
+
+    # Profiling
+    profiling:
+      enabled: true
+      cpu_duration: 60s
+      heap_profile_rate: 524288
+
+    # Runtime Metrics
+    runtime_metrics:
+      enabled: true
+
+  # Logs Configuration
+  logs:
+    enabled: true
+    injection: true
+
+  # Real User Monitoring (RUM)
+  rum:
+    enabled: true
+    application_id: ${DD_RUM_APP_ID}
+    client_token: ${DD_RUM_CLIENT_TOKEN}
+    sample_rate: 100
+    track_interactions: true
+    track_resources: true
+    track_long_tasks: true
+
+    # Session Replay
+    session_replay:
+      enabled: true
+      sample_rate: 20
+
+  # Custom Metrics
+  dogstatsd:
+    enabled: true
+    host: ${DD_AGENT_HOST:-datadog-agent}
+    port: 8125
+
+    # Business Metrics
+    custom_metrics:
+      # User Metrics
+      - metric: intelgraph.users.active
+        type: gauge
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.users.sessions
+        type: gauge
+        tags:
+          - metric_type:business
+
+      # API Metrics
+      - metric: intelgraph.api.requests
+        type: counter
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.api.requests.by_tenant
+        type: counter
+        tags:
+          - metric_type:business
+
+      # Graph Analysis Metrics
+      - metric: intelgraph.graph.jobs.queued
+        type: gauge
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.graph.jobs.completed
+        type: counter
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.graph.jobs.failed
+        type: counter
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.graph.analysis.duration
+        type: histogram
+        tags:
+          - metric_type:performance
+
+      # Data Ingestion Metrics
+      - metric: intelgraph.ingestion.rate
+        type: gauge
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.ingestion.bytes
+        type: counter
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.ingestion.records
+        type: counter
+        tags:
+          - metric_type:business
+
+      # Entity & Relationship Metrics
+      - metric: intelgraph.entities.total
+        type: gauge
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.relationships.total
+        type: gauge
+        tags:
+          - metric_type:business
+
+      # Investigation Metrics
+      - metric: intelgraph.investigations.active
+        type: gauge
+        tags:
+          - metric_type:business
+
+      - metric: intelgraph.investigations.created
+        type: counter
+        tags:
+          - metric_type:business
+
+# ====================
+# OpenTelemetry Configuration (for vendor-neutral APM)
+# ====================
+opentelemetry:
+  enabled: true
+
+  # OTLP Exporter
+  exporter:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      protocol: grpc
+      compression: gzip
+
+  # Resource Attributes
+  resource:
+    service.name: intelgraph-api
+    service.version: ${APP_VERSION}
+    service.namespace: production
+    deployment.environment: production
+
+  # Tracing
+  traces:
+    enabled: true
+    sampler:
+      type: parentbased_traceidratio
+      ratio: 1.0
+
+    # Exporters
+    exporters:
+      - otlp
+      - jaeger
+
+  # Metrics
+  metrics:
+    enabled: true
+    exporter: otlp
+    interval: 60s
+
+  # Logs
+  logs:
+    enabled: true
+    exporter: otlp
+
+# ====================
+# Instrumentation Configuration
+# ====================
+instrumentation:
+  # Automatic Instrumentation
+  auto_instrument:
+    - express
+    - graphql
+    - postgres
+    - redis
+    - neo4j
+    - axios
+    - fetch
+
+  # Custom Spans
+  custom_spans:
+    - name: graph.query.execution
+      threshold_ms: 100
+    - name: ml.inference
+      threshold_ms: 500
+    - name: data.ingestion
+      threshold_ms: 200
+    - name: investigation.analysis
+      threshold_ms: 1000
+
+  # Performance Budgets
+  performance_budgets:
+    api_response_time_p95: 500  # ms
+    api_response_time_p99: 1000  # ms
+    database_query_time_p95: 100  # ms
+    graph_query_time_p95: 200  # ms
+    ml_inference_time_p95: 1000  # ms
+
+# ====================
+# Error Tracking Configuration
+# ====================
+error_tracking:
+  # Sentry Integration (alternative to APM error tracking)
+  sentry:
+    enabled: ${SENTRY_ENABLED:-false}
+    dsn: ${SENTRY_DSN}
+    environment: production
+    release: ${APP_VERSION}
+
+    # Error Sampling
+    sample_rate: 1.0
+    traces_sample_rate: 0.1
+
+    # Performance Monitoring
+    profiles_sample_rate: 0.1
+
+    # Integrations
+    integrations:
+      - express
+      - graphql
+      - postgres
+
+    # Before Send Hook
+    before_send:
+      filter_errors:
+        - ValidationError
+        - UnauthorizedError
+
+    # Tags
+    tags:
+      environment: production
+      service: intelgraph-api
+
+# ====================
+# Real User Monitoring (RUM) Configuration
+# ====================
+rum:
+  # Session Tracking
+  session_tracking:
+    enabled: true
+    sample_rate: 100
+    session_replay_rate: 20
+
+  # Performance Tracking
+  performance:
+    track_page_loads: true
+    track_route_changes: true
+    track_user_interactions: true
+    track_long_tasks: true
+    track_resources: true
+
+  # Error Tracking
+  errors:
+    track_js_errors: true
+    track_network_errors: true
+    track_console_errors: true
+
+  # Custom Events
+  custom_events:
+    - investigation.created
+    - investigation.updated
+    - investigation.shared
+    - graph.analysis.started
+    - graph.analysis.completed
+    - entity.created
+    - entity.linked
+    - export.started
+    - export.completed
+
+# ====================
+# Business Metrics Tracking
+# ====================
+business_metrics:
+  # Active Users
+  active_users:
+    enabled: true
+    interval: 60s
+    dimensions:
+      - tenant_id
+      - user_role
+      - subscription_tier
+
+  # API Request Volumes
+  api_volumes:
+    enabled: true
+    interval: 10s
+    dimensions:
+      - endpoint
+      - method
+      - tenant_id
+      - status_code
+
+  # Graph Analysis Jobs
+  graph_analysis:
+    enabled: true
+    interval: 30s
+    metrics:
+      - jobs_queued
+      - jobs_running
+      - jobs_completed
+      - jobs_failed
+      - average_duration
+    dimensions:
+      - job_type
+      - tenant_id
+
+  # Data Ingestion
+  data_ingestion:
+    enabled: true
+    interval: 30s
+    metrics:
+      - records_per_second
+      - bytes_per_second
+      - sources_active
+      - ingestion_errors
+    dimensions:
+      - source_type
+      - tenant_id
+
+# ====================
+# Synthetic Monitoring Configuration
+# ====================
+synthetic_monitoring:
+  # Uptime Checks
+  uptime_checks:
+    - name: api_health
+      url: https://api.intelgraph.com/health
+      interval: 60s
+      timeout: 5s
+
+    - name: graphql_health
+      url: https://api.intelgraph.com/graphql
+      method: POST
+      body: '{"query": "{__typename}"}'
+      interval: 60s
+      timeout: 10s
+
+    - name: web_app
+      url: https://app.intelgraph.com
+      interval: 60s
+      timeout: 10s
+
+  # API Tests
+  api_tests:
+    - name: authentication
+      endpoint: /api/auth/login
+      method: POST
+      interval: 300s
+
+    - name: entity_query
+      endpoint: /api/entities
+      method: GET
+      interval: 300s
+
+    - name: graph_query
+      endpoint: /graphql
+      method: POST
+      interval: 300s
+
+  # Critical User Journeys
+  user_journeys:
+    - name: create_investigation
+      steps:
+        - login
+        - create_investigation
+        - add_entities
+        - run_analysis
+      interval: 600s
+
+    - name: search_and_visualize
+      steps:
+        - login
+        - search_entities
+        - view_graph
+        - export_data
+      interval: 600s
+
+# ====================
+# SLO/SLA Configuration
+# ====================
+slo:
+  # Availability SLO: 99.9% uptime (43.8 minutes downtime/month)
+  availability:
+    target: 99.9
+    measurement_window: 30d
+    error_budget: 0.1  # 0.1%
+
+  # Latency SLO: 95% of requests < 500ms
+  latency:
+    p95_target: 500  # ms
+    p99_target: 1000  # ms
+    measurement_window: 30d
+
+  # Error Rate SLO: < 1% error rate
+  error_rate:
+    target: 1.0  # 1%
+    measurement_window: 30d
+
+  # Custom SLOs
+  custom:
+    - name: graph_query_performance
+      description: 95% of graph queries complete in < 200ms
+      target: 200  # ms
+      percentile: 95
+      measurement_window: 7d
+
+    - name: data_ingestion_reliability
+      description: 99% of ingestion jobs succeed
+      target: 99.0
+      measurement_window: 7d
+
+    - name: ml_inference_performance
+      description: 95% of ML inferences complete in < 1s
+      target: 1000  # ms
+      percentile: 95
+      measurement_window: 7d

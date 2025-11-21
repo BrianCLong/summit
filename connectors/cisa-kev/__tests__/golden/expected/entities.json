@@ -1,0 +1,48 @@
+[
+  {
+    "type": "Vulnerability",
+    "properties": {
+      "id": "CVE-2021-44228",
+      "cve_id": "CVE-2021-44228",
+      "name": "Apache Log4j Remote Code Execution Vulnerability",
+      "vendor_project": "Apache",
+      "product": "Log4j",
+      "vulnerability_name": "Apache Log4j Remote Code Execution Vulnerability",
+      "short_description": "Apache Log4j2 contains a vulnerability where a remote attacker can execute arbitrary code.",
+      "description": "Apache Log4j2 contains a vulnerability where a remote attacker can execute arbitrary code.",
+      "date_added": "2021-12-10",
+      "discovered_date": "2021-12-10",
+      "due_date": "2021-12-24",
+      "required_action": "Apply updates per vendor instructions or discontinue use of the product if updates are unavailable.",
+      "remediation": "Apply updates per vendor instructions or discontinue use of the product if updates are unavailable.",
+      "known_ransomware_use": true,
+      "source": "cisa-kev",
+      "confidence": 1.0,
+      "data_classification": "public",
+      "catalog_version": "2025.11.20"
+    }
+  },
+  {
+    "type": "Vulnerability",
+    "properties": {
+      "id": "CVE-2023-23397",
+      "cve_id": "CVE-2023-23397",
+      "name": "Microsoft Outlook Elevation of Privilege Vulnerability",
+      "vendor_project": "Microsoft",
+      "product": "Outlook",
+      "vulnerability_name": "Microsoft Outlook Elevation of Privilege Vulnerability",
+      "short_description": "Microsoft Outlook contains an elevation of privilege vulnerability that can be exploited to gain access to a user's Net-NTLMv2 hash.",
+      "description": "Microsoft Outlook contains an elevation of privilege vulnerability that can be exploited to gain access to a user's Net-NTLMv2 hash.",
+      "date_added": "2023-03-14",
+      "discovered_date": "2023-03-14",
+      "due_date": "2023-04-04",
+      "required_action": "Apply mitigations per vendor instructions or discontinue use of the product if mitigations are unavailable.",
+      "remediation": "Apply mitigations per vendor instructions or discontinue use of the product if mitigations are unavailable.",
+      "known_ransomware_use": false,
+      "source": "cisa-kev",
+      "confidence": 1.0,
+      "data_classification": "public",
+      "catalog_version": "2025.11.20"
+    }
+  }
+]

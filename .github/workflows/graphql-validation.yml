@@ -1,0 +1,293 @@
+name: GraphQL Schema Validation
+
+on:
+  pull_request:
+    paths:
+      - 'graphql/**'
+      - 'server/src/graphql/**'
+      - '**/schema.graphql'
+      - '**/schema*.ts'
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate-schema:
+    name: Validate GraphQL Schema
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch all history for schema comparison
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build schema validation tools
+        run: |
+          pnpm tsc graphql/schema-registry.ts --outDir dist/graphql --moduleResolution node --esModuleInterop
+          pnpm tsc graphql/validation-rules.ts --outDir dist/graphql --moduleResolution node --esModuleInterop
+
+      - name: Validate schema syntax
+        run: |
+          echo "Validating GraphQL schema syntax..."
+          node -e "
+            const fs = require('fs');
+            const { buildSchema } = require('graphql');
+
+            try {
+              const schema = fs.readFileSync('graphql/schema.graphql', 'utf-8');
+              buildSchema(schema);
+              console.log('✅ Schema syntax is valid');
+            } catch (error) {
+              console.error('❌ Schema syntax error:', error.message);
+              process.exit(1);
+            }
+          "
+
+      - name: Check for breaking changes
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Checking for breaking changes..."
+          git fetch origin ${{ github.base_ref }}:${{ github.base_ref }}
+
+          # Compare with base branch
+          if git show origin/${{ github.base_ref }}:graphql/schema.graphql > /tmp/base-schema.graphql 2>/dev/null; then
+            node tools/graphql/schema-check.mjs || {
+              echo "❌ Breaking changes detected!"
+              echo "Please update the schema version or fix breaking changes."
+              exit 1
+            }
+            echo "✅ No breaking changes detected"
+          else
+            echo "⚠️  Base schema not found, skipping breaking change check"
+          fi
+
+      - name: Run schema validation rules
+        run: |
+          echo "Running schema validation rules..."
+          node -e "
+            const fs = require('fs');
+            const { buildSchema } = require('graphql');
+            const { validateSchema } = require('./dist/graphql/validation-rules');
+
+            const schema = buildSchema(fs.readFileSync('graphql/schema.graphql', 'utf-8'));
+            const result = validateSchema(schema);
+
+            console.log('\\nValidation Results:');
+            console.log('===================');
+
+            if (result.errors.length > 0) {
+              console.log('\\n❌ Errors:');
+              result.errors.forEach(err => {
+                console.log(\`  - [\${err.rule}] \${err.message}\`);
+                if (err.path) console.log(\`    Path: \${err.path}\`);
+                if (err.suggestion) console.log(\`    Suggestion: \${err.suggestion}\`);
+              });
+            }
+
+            if (result.warnings.length > 0) {
+              console.log('\\n⚠️  Warnings:');
+              result.warnings.forEach(warn => {
+                console.log(\`  - [\${warn.rule}] \${warn.message}\`);
+                if (warn.path) console.log(\`    Path: \${warn.path}\`);
+                if (warn.suggestion) console.log(\`    Suggestion: \${warn.suggestion}\`);
+              });
+            }
+
+            if (result.errors.length === 0 && result.warnings.length === 0) {
+              console.log('\\n✅ Schema validation passed with no issues!');
+            }
+
+            if (!result.valid) {
+              console.log('\\n❌ Schema validation failed!');
+              process.exit(1);
+            }
+          "
+
+      - name: Check naming conventions
+        run: |
+          echo "Checking naming conventions..."
+          # Check that types are PascalCase
+          grep -E '^type [a-z]' graphql/schema.graphql && {
+            echo "❌ Type names must be PascalCase"
+            exit 1
+          } || echo "✅ Type naming conventions OK"
+
+          # Check that input types end with Input
+          grep -E '^input [A-Z][a-zA-Z]+[^Input] ' graphql/schema.graphql && {
+            echo "⚠️  Warning: Input types should end with 'Input'"
+          } || echo "✅ Input type naming conventions OK"
+
+      - name: Validate deprecations
+        run: |
+          echo "Validating deprecations..."
+          node -e "
+            const fs = require('fs');
+            const schema = fs.readFileSync('graphql/schema.graphql', 'utf-8');
+
+            // Check for @deprecated without proper reason
+            const deprecatedRegex = /@deprecated\\(\\s*reason:\\s*\"(.{0,9})\"\\s*\\)/g;
+            const matches = [...schema.matchAll(deprecatedRegex)];
+
+            if (matches.length > 0) {
+              console.log('❌ Found deprecations with insufficient reasons:');
+              matches.forEach(match => {
+                console.log(\`  - Reason too short: \"\${match[1]}\"\`);
+              });
+              console.log('\\nDeprecation reasons should be at least 10 characters and include:');
+              console.log('  1. Why it is deprecated');
+              console.log('  2. What to use instead');
+              console.log('  3. When it will be removed (optional)');
+              process.exit(1);
+            }
+
+            console.log('✅ Deprecations are properly documented');
+          "
+
+      - name: Check for schema anti-patterns
+        run: |
+          echo "Checking for common anti-patterns..."
+
+          # Check for generic field names
+          grep -E '^\s+(data|info|details|item|value):' graphql/schema.graphql && {
+            echo "⚠️  Warning: Found generic field names (data, info, details, item, value)"
+            echo "   Consider using more specific, descriptive names"
+          } || true
+
+          # Check for list fields without pagination in Query type
+          awk '/^type Query/,/^}/' graphql/schema.graphql | grep -E '^\s+\w+.*\[.*\]!' | grep -v 'limit\|first\|offset\|after' && {
+            echo "⚠️  Warning: Found list fields without pagination arguments"
+          } || echo "✅ Pagination checks OK"
+
+      - name: Generate complexity report
+        run: |
+          echo "Analyzing query complexity..."
+          node -e "
+            const fs = require('fs');
+            const { buildSchema } = require('graphql');
+            const { defaultComplexityConfig } = require('./dist/graphql/complexity-calculator');
+
+            console.log('\\nComplexity Configuration:');
+            console.log('=========================');
+            console.log(\`Max Complexity: \${defaultComplexityConfig.maxComplexity}\`);
+            console.log(\`Max Depth: \${defaultComplexityConfig.maxDepth}\`);
+            console.log(\`List Multiplier: \${defaultComplexityConfig.listMultiplier}\`);
+
+            if (defaultComplexityConfig.customComplexity) {
+              console.log('\\nCustom Field Complexities:');
+              defaultComplexityConfig.customComplexity.forEach((value, key) => {
+                console.log(\`  - \${key}: \${typeof value === 'function' ? 'custom calculator' : value}\`);
+              });
+            }
+          "
+
+      - name: Generate schema changelog
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "Generating schema changelog..."
+          node -e "
+            const fs = require('fs');
+            const { diff } = require('@graphql-inspector/core');
+            const { parse } = require('graphql');
+
+            try {
+              const baseSchema = fs.readFileSync('/tmp/base-schema.graphql', 'utf-8');
+              const currentSchema = fs.readFileSync('graphql/schema.graphql', 'utf-8');
+
+              const changes = diff(parse(baseSchema), parse(currentSchema));
+
+              if (changes.length === 0) {
+                console.log('✅ No schema changes detected');
+              } else {
+                console.log('\\nSchema Changes:');
+                console.log('================');
+
+                const breaking = changes.filter(c => c.criticality.level === 'BREAKING');
+                const dangerous = changes.filter(c => c.criticality.level === 'DANGEROUS');
+                const nonBreaking = changes.filter(c => c.criticality.level === 'NON_BREAKING');
+
+                if (breaking.length > 0) {
+                  console.log('\\n⚠️  BREAKING CHANGES:');
+                  breaking.forEach(c => console.log(\`  - \${c.message}\`));
+                }
+
+                if (dangerous.length > 0) {
+                  console.log('\\n⚡ DANGEROUS CHANGES:');
+                  dangerous.forEach(c => console.log(\`  - \${c.message}\`));
+                }
+
+                if (nonBreaking.length > 0) {
+                  console.log('\\n✨ NON-BREAKING CHANGES:');
+                  nonBreaking.forEach(c => console.log(\`  - \${c.message}\`));
+                }
+              }
+            } catch (error) {
+              console.log('⚠️  Could not generate changelog:', error.message);
+            }
+          "
+
+      - name: Comment PR with schema changes
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const { execSync } = require('child_process');
+
+            try {
+              const output = execSync('node -e "..."', { encoding: 'utf-8' });
+
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## GraphQL Schema Validation Results\n\n${output}`
+              });
+            } catch (error) {
+              console.log('Could not post comment:', error.message);
+            }
+
+  test-queries:
+    name: Test Query Complexity
+    runs-on: ubuntu-latest
+    needs: validate-schema
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test sample queries
+        run: |
+          echo "Testing sample queries against complexity limits..."
+          # This would test actual queries from your client code
+          pnpm test --testPathPattern=graphql.*complexity

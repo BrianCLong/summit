@@ -1,0 +1,239 @@
+[
+  {
+    "level": "Epic",
+    "name": "Tenant Isolation & Audit Controls",
+    "parent": null,
+    "moscow": "Must",
+    "releaseWindow": "Cut 1 (Week 1)",
+    "tenantCapability": "FedRAMP High; CJIS / Governance",
+    "acceptanceCriteria": "Scope covers tagging, audit logging, and staged rollout across regulated tenants.",
+    "verificationSteps": [
+      "PM/Eng sign-off on scope review"
+    ],
+    "evidenceHook": "Scope doc linked in Conductor evidence store (#EC-101)"
+  },
+  {
+    "level": "Story",
+    "name": "Automated Tenant Tagging of Workflows",
+    "parent": "Tenant Isolation & Audit Controls",
+    "moscow": "Must",
+    "releaseWindow": "Cut 1 (Week 1)",
+    "tenantCapability": "FedRAMP High / Orchestration Policy",
+    "acceptanceCriteria": "Tagged workloads carry tenant IDs end-to-end with <5 ms latency impact.",
+    "verificationSteps": [
+      "Run orchestration integration tests with tenant fixtures"
+    ],
+    "evidenceHook": "CI pipeline artifact orchestrator-tagging-report.html"
+  },
+  {
+    "level": "Task",
+    "name": "Extend orchestrator runtime to propagate tenant_id metadata",
+    "parent": "Automated Tenant Tagging of Workflows",
+    "moscow": "Must",
+    "releaseWindow": "Cut 1 (Week 1)",
+    "tenantCapability": "FedRAMP High / Runtime Isolation",
+    "acceptanceCriteria": "API accepts tenant_id, persists in job graph, and enforces validation rules; latency delta ≤5 ms.",
+    "verificationSteps": [
+      "Unit tests orchestrator-tenant.test.ts",
+      "Load test @ 500 rps",
+      "Code review approval"
+    ],
+    "evidenceHook": "Grafana panel TENANT_TAG_PROPAGATION snapshot + load test log"
+  },
+  {
+    "level": "Task",
+    "name": "Update schema validation & reject untagged jobs",
+    "parent": "Automated Tenant Tagging of Workflows",
+    "moscow": "Must",
+    "releaseWindow": "Cut 1 (Week 1)",
+    "tenantCapability": "CJIS / Policy Enforcement",
+    "acceptanceCriteria": "Requests without tenant_id fail with 400 and audit event; allowlist for system jobs documented.",
+    "verificationSteps": [
+      "Contract test suite",
+      "Negative API tests",
+      "Audit log inspected"
+    ],
+    "evidenceHook": "Audit event export audit-tenant-tagging.json"
+  },
+  {
+    "level": "Story",
+    "name": "Immutable Change Log for Regulated Tenants",
+    "parent": "Tenant Isolation & Audit Controls",
+    "moscow": "Should",
+    "releaseWindow": "Cut 1 (Week 1)",
+    "tenantCapability": "FedRAMP High / Compliance Reporting",
+    "acceptanceCriteria": "Change log captures actor, diff, approval for all tenant-affecting configs within 5 min of merge.",
+    "verificationSteps": [
+      "End-to-end test writing entry",
+      "Manual review of log retention"
+    ],
+    "evidenceHook": "Ledger entry ledger://change-log/CL-552"
+  },
+  {
+    "level": "Task",
+    "name": "Wire merge webhook to compliance ledger",
+    "parent": "Immutable Change Log for Regulated Tenants",
+    "moscow": "Must",
+    "releaseWindow": "Cut 1 (Week 1)",
+    "tenantCapability": "FedRAMP High / Audit Trail",
+    "acceptanceCriteria": "Webhook posts payload with commit SHA, tenant scope, reviewer; retries on failure.",
+    "verificationSteps": [
+      "Webhook integration test",
+      "Chaos retry drill (2 failures)"
+    ],
+    "evidenceHook": "Ledger screenshot + webhook retry log"
+  },
+  {
+    "level": "Task",
+    "name": "Add tenant filter dashboards for Sec review",
+    "parent": "Immutable Change Log for Regulated Tenants",
+    "moscow": "Should",
+    "releaseWindow": "Cut 1 (Week 1)",
+    "tenantCapability": "CJIS / Monitoring",
+    "acceptanceCriteria": "Dashboard surfaces last 7 days of tenant-tagged changes, filters by tenant.",
+    "verificationSteps": [
+      "Dashboard smoke test",
+      "Sec sign-off recorded"
+    ],
+    "evidenceHook": "Grafana export tenant-change-dashboard.json"
+  },
+  {
+    "level": "Epic",
+    "name": "Cost Guardrail Automation",
+    "parent": null,
+    "moscow": "Must",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "Shared / Cost Optimization",
+    "acceptanceCriteria": "Scope: automated cost guardrail evaluation and budget alerts across environments.",
+    "verificationSteps": [
+      "PM/FinOps scope review recorded"
+    ],
+    "evidenceHook": "Scope doc cost-guardrails-cut2.md"
+  },
+  {
+    "level": "Story",
+    "name": "Environment Cost Telemetry Ingestion",
+    "parent": "Cost Guardrail Automation",
+    "moscow": "Must",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "Shared / Cost Analytics",
+    "acceptanceCriteria": "Telemetry ingested hourly with <15 min lag, covers dev/stage/prod budgets.",
+    "verificationSteps": [
+      "Data freshness monitor",
+      "Unit tests for ingestion transforms"
+    ],
+    "evidenceHook": "DataDog check env-cost-lag report"
+  },
+  {
+    "level": "Task",
+    "name": "Deploy FinOps collector with per-env budgets",
+    "parent": "Environment Cost Telemetry Ingestion",
+    "moscow": "Must",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "Shared / Cost Analytics",
+    "acceptanceCriteria": "Collector publishes spend, compares to $4k/$7k/$12k budgets, raises event at 80%.",
+    "verificationSteps": [
+      "Integration test with mock billing feed",
+      "Threshold alert simulation"
+    ],
+    "evidenceHook": "Alert transcript + collector runbook snippet (#FIN-77)"
+  },
+  {
+    "level": "Task",
+    "name": "Wire budget alerts into Conductor Ops channel",
+    "parent": "Environment Cost Telemetry Ingestion",
+    "moscow": "Should",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "Shared / Ops Automation",
+    "acceptanceCriteria": "Slack channel receives alert with env tag and recommended action in <2 min.",
+    "verificationSteps": [
+      "Slack webhook test",
+      "On-call ack workflow verified"
+    ],
+    "evidenceHook": "Slack export + PagerDuty ack screenshot"
+  },
+  {
+    "level": "Story",
+    "name": "Weekly Cost & SLO Scorecard Automation",
+    "parent": "Cost Guardrail Automation",
+    "moscow": "Should",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "Shared / Executive Reporting",
+    "acceptanceCriteria": "Scorecard auto-generates before cut review with SLOs and cost variance.",
+    "verificationSteps": [
+      "Scheduled pipeline run",
+      "Report render QA"
+    ],
+    "evidenceHook": "Scorecard artifact scorecard-weekly.pdf"
+  },
+  {
+    "level": "Task",
+    "name": "Extend reporting job to join SLO + cost datasets",
+    "parent": "Weekly Cost & SLO Scorecard Automation",
+    "moscow": "Should",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "Shared / Analytics",
+    "acceptanceCriteria": "Report includes 99.9% SLO KPI, cost delta, and highlight of breaches.",
+    "verificationSteps": [
+      "Data validation tests",
+      "Review with PM + SRE"
+    ],
+    "evidenceHook": "dbt test log + signed meeting notes"
+  },
+  {
+    "level": "Epic",
+    "name": "Evidence & Control Observability",
+    "parent": null,
+    "moscow": "Must",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "FedRAMP High; CJIS / Compliance Ops",
+    "acceptanceCriteria": "Scope ensures every control emits machine-readable evidence each cut.",
+    "verificationSteps": [
+      "PM/Sec/QA alignment recorded"
+    ],
+    "evidenceHook": "Control coverage matrix evidence-map.xlsx"
+  },
+  {
+    "level": "Story",
+    "name": "Control Telemetry Coverage Map",
+    "parent": "Evidence & Control Observability",
+    "moscow": "Must",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "FedRAMP High / Compliance Ops",
+    "acceptanceCriteria": "Coverage map shows control→evidence hook mapping with status updated daily.",
+    "verificationSteps": [
+      "Generate coverage matrix",
+      "Spot check 3 controls"
+    ],
+    "evidenceHook": "Evidence repo item CTRL-12"
+  },
+  {
+    "level": "Task",
+    "name": "Instrument evidence hook annotations in pipelines",
+    "parent": "Control Telemetry Coverage Map",
+    "moscow": "Must",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "CJIS / Compliance Ops",
+    "acceptanceCriteria": "Each pipeline emits evidence metadata (control id, location, owner).",
+    "verificationSteps": [
+      "Pipeline unit tests",
+      "Nightly ingestion check",
+      "QA sign-off"
+    ],
+    "evidenceHook": "Evidence ingestion log + QA checklist"
+  },
+  {
+    "level": "Task",
+    "name": "Publish automated compliance digest to Sec portal",
+    "parent": "Control Telemetry Coverage Map",
+    "moscow": "Could",
+    "releaseWindow": "Cut 2 (Week 2)",
+    "tenantCapability": "FedRAMP High / Stakeholder Comms",
+    "acceptanceCriteria": "Digest summarizes control status, delivered weekly.",
+    "verificationSteps": [
+      "Render digest",
+      "Portal availability test"
+    ],
+    "evidenceHook": "Portal screenshot + delivery log"
+  }
+]

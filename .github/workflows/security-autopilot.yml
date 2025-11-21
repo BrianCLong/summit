@@ -1,0 +1,414 @@
+name: Security Autopilot
+
+# Run comprehensive security checks on every push and PR
+on:
+  push:
+    branches: [main, 'claude/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: security-autopilot-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+  issues: write
+  checks: write
+
+jobs:
+  # ========================================
+  # SAST: Static Application Security Testing
+  # ========================================
+  sast-codeql:
+    name: SAST (CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript,python
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript,python"
+
+  # ========================================
+  # Secret Scanning
+  # ========================================
+  secret-detection:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        with:
+          args: detect --source=. --no-banner --redact --verbose
+
+      - name: Check for .env files in commits
+        run: |
+          echo "🔍 Checking for accidentally committed .env files..."
+          if git log --all --pretty=format: --name-only --diff-filter=A | grep -E '\\.env$|\\.env\\.'; then
+            echo "❌ ERROR: .env files found in git history"
+            exit 1
+          else
+            echo "✅ No .env files found in commits"
+          fi
+
+  # ========================================
+  # Dependency Scanning
+  # ========================================
+  dependency-scan:
+    name: Dependency Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: |
+          echo "🔍 Running pnpm audit..."
+          pnpm audit --audit-level=moderate --json > audit-results.json || true
+
+          # Parse and display critical/high vulnerabilities
+          if [ -f audit-results.json ]; then
+            HIGH_COUNT=$(cat audit-results.json | jq '.metadata.vulnerabilities.high // 0')
+            CRITICAL_COUNT=$(cat audit-results.json | jq '.metadata.vulnerabilities.critical // 0')
+
+            echo "Critical: $CRITICAL_COUNT, High: $HIGH_COUNT"
+
+            if [ "$CRITICAL_COUNT" -gt 0 ] || [ "$HIGH_COUNT" -gt 0 ]; then
+              echo "❌ Found $CRITICAL_COUNT critical and $HIGH_COUNT high vulnerabilities"
+              echo "::error::Critical or high severity vulnerabilities detected"
+              exit 1
+            fi
+          fi
+
+      - name: Dependency Review (PRs only)
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-3.0, AGPL-3.0
+
+  # ========================================
+  # Container & Infrastructure Scanning
+  # ========================================
+  trivy-scan:
+    name: Trivy Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
+
+      - name: Upload Trivy results to Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Check Trivy for blockers
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-results.json'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          ignore-unfixed: true
+
+  # ========================================
+  # Crypto Hygiene Check
+  # ========================================
+  crypto-hygiene:
+    name: Crypto Hygiene Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+
+      - name: Run Crypto Hygiene Checker
+        run: |
+          node .security/crypto-hygiene-checker.cjs
+
+      - name: Check for hardcoded secrets patterns
+        run: |
+          echo "🔍 Checking for hardcoded crypto patterns..."
+
+          # Check for hardcoded keys/secrets (excluding test fixtures)
+          if grep -r -n -E "(private[_-]?key|secret[_-]?key|api[_-]?key)\s*=\s*['\"](?!process\.env|YOUR_|REPLACE_|TEST_|EXAMPLE_)[A-Za-z0-9+/=]{20,}" \
+            --include="*.ts" \
+            --include="*.js" \
+            --exclude-dir=node_modules \
+            --exclude-dir=dist \
+            --exclude-dir=coverage \
+            --exclude-dir=tests \
+            --exclude-dir=__tests__ \
+            --exclude-dir=fixtures \
+            . ; then
+            echo "❌ ERROR: Potential hardcoded secrets detected"
+            exit 1
+          else
+            echo "✅ No hardcoded secrets detected"
+          fi
+
+      - name: Verify KMS usage
+        run: |
+          echo "🔍 Verifying crypto operations use KMS..."
+
+          # Check that crypto operations reference KMS or env vars
+          if grep -r -n "crypto\\.createCipher\\|crypto\\.createDecipher" \
+            --include="*.ts" \
+            --include="*.js" \
+            --exclude-dir=node_modules \
+            --exclude-dir=tests \
+            --exclude-dir=__tests__ \
+            . ; then
+            echo "⚠️ WARNING: Found deprecated crypto.createCipher usage (should use createCipheriv)"
+          fi
+
+  # ========================================
+  # DAST: Dynamic Application Security Testing (ZAP)
+  # ========================================
+  zap-baseline:
+    name: ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Docker
+        run: |
+          docker --version
+
+      - name: Start application for scanning
+        run: |
+          # Start minimal services for ZAP scan
+          if [ -f docker-compose.yml ]; then
+            docker compose up -d client || echo "Client service not available"
+            sleep 10
+          fi
+
+      - name: ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'http://localhost:3000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a'
+          fail_action: true
+          allow_issue_writing: false
+
+      - name: Cleanup
+        if: always()
+        run: |
+          docker compose down || true
+
+  # ========================================
+  # Security Gates & Invariants
+  # ========================================
+  security-gates:
+    name: Security Gates
+    runs-on: ubuntu-latest
+    needs: [sast-codeql, secret-detection, dependency-scan, crypto-hygiene]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check Security Invariants
+        run: |
+          echo "🔒 Checking security invariants..."
+
+          # 1. Verify SECURITY.md exists and is up-to-date
+          if [ ! -f SECURITY.md ]; then
+            echo "❌ ERROR: SECURITY.md is missing"
+            exit 1
+          fi
+
+          # 2. Verify security headers configuration exists
+          if [ ! -f server/config/nginx/security-headers.conf ] && \
+             [ ! -f server/src/middleware/security.ts ]; then
+            echo "⚠️ WARNING: Security headers configuration not found"
+          fi
+
+          # 3. Verify no TODOs related to security are left unfixed
+          if git diff origin/main...HEAD | grep -i "TODO.*security.*FIXME\|FIXME.*security"; then
+            echo "⚠️ WARNING: Security-related TODOs found in changes"
+          fi
+
+          # 4. Check .ga-check report if exists
+          if [ -f .ga-check/report.txt ]; then
+            echo "✅ GA check report exists"
+            if grep -q "\[fail\]" .ga-check/report.txt; then
+              echo "⚠️ WARNING: GA check has failures (non-blocking)"
+            fi
+          fi
+
+          echo "✅ Security gates passed"
+
+      - name: Verify allowlist is valid
+        run: |
+          echo "🔍 Verifying security allowlist..."
+
+          if [ -f .security/allowlist.yaml ]; then
+            # Check for expired exceptions
+            TODAY=$(date +%Y-%m-%d)
+            if grep "expires:" .security/allowlist.yaml | grep -v "^#" | while read line; do
+              EXPIRY=$(echo $line | grep -oP 'expires:\s*\K[\d-]+')
+              if [[ "$EXPIRY" < "$TODAY" ]]; then
+                echo "❌ ERROR: Expired exception found: $EXPIRY"
+                exit 1
+              fi
+            done; then
+              echo "❌ ERROR: Found expired security exceptions"
+              exit 1
+            fi
+          fi
+
+          echo "✅ Allowlist is valid"
+
+  # ========================================
+  # Security Report & Summary
+  # ========================================
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [sast-codeql, secret-detection, dependency-scan, trivy-scan, crypto-hygiene, security-gates]
+    if: always()
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Generate Security Summary
+        run: |
+          echo "# 🔒 Security Autopilot Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Status Overview" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| SAST (CodeQL) | ${{ needs.sast-codeql.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Detection | ${{ needs.secret-detection.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Scan | ${{ needs.dependency-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Trivy Scan | ${{ needs.trivy-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Crypto Hygiene | ${{ needs.crypto-hygiene.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Gates | ${{ needs.security-gates.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Overall status
+          if [[ "${{ needs.sast-codeql.result }}" == "success" ]] && \
+             [[ "${{ needs.secret-detection.result }}" == "success" ]] && \
+             [[ "${{ needs.dependency-scan.result }}" == "success" ]] && \
+             [[ "${{ needs.trivy-scan.result }}" == "success" ]] && \
+             [[ "${{ needs.crypto-hygiene.result }}" == "success" ]] && \
+             [[ "${{ needs.security-gates.result }}" == "success" ]]; then
+            echo "## ✅ All Security Checks Passed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No high or critical security issues detected." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ⚠️ Security Issues Detected" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Please review the failed checks above and address any security concerns." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const results = {
+              sast: '${{ needs.sast-codeql.result }}',
+              secrets: '${{ needs.secret-detection.result }}',
+              dependencies: '${{ needs.dependency-scan.result }}',
+              trivy: '${{ needs.trivy-scan.result }}',
+              crypto: '${{ needs.crypto-hygiene.result }}',
+              gates: '${{ needs.security-gates.result }}'
+            };
+
+            const allPassed = Object.values(results).every(r => r === 'success');
+            const icon = allPassed ? '✅' : '⚠️';
+            const status = allPassed ? 'PASSED' : 'ISSUES DETECTED';
+
+            const body = `## ${icon} Security Autopilot: ${status}
+
+            | Security Check | Result |
+            |----------------|--------|
+            | SAST (CodeQL) | ${results.sast === 'success' ? '✅' : '❌'} ${results.sast} |
+            | Secret Detection | ${results.secrets === 'success' ? '✅' : '❌'} ${results.secrets} |
+            | Dependency Scan | ${results.dependencies === 'success' ? '✅' : '❌'} ${results.dependencies} |
+            | Container Scan (Trivy) | ${results.trivy === 'success' ? '✅' : '❌'} ${results.trivy} |
+            | Crypto Hygiene | ${results.crypto === 'success' ? '✅' : '❌'} ${results.crypto} |
+            | Security Gates | ${results.gates === 'success' ? '✅' : '❌'} ${results.gates} |
+
+            ${allPassed ?
+              '**No high or critical security vulnerabilities detected.** ✅' :
+              '**⚠️ Security issues detected. Please review the workflow logs and address findings before merging.**'
+            }
+
+            ---
+            *Security Autopilot runs on every push. View detailed results in the [Actions tab](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).*
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });

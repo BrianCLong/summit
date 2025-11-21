@@ -130,10 +130,10 @@ services:
     environment:
       NODE_ENV: development
       POSTGRES_HOST: postgres
-      POSTGRES_USER: intelgraph
+      POSTGRES_USER: summit
       POSTGRES_PASSWORD: dev_password
-      POSTGRES_DB: intelgraph_dev
-      POSTGRES_URL: postgres://intelgraph:dev_password@postgres:5432/intelgraph_dev
+      POSTGRES_DB: summit_dev
+      POSTGRES_URL: postgres://summit:dev_password@postgres:5432/summit_dev
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USERNAME: neo4j
       NEO4J_PASSWORD: dev_password
@@ -152,9 +152,9 @@ services:
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_USER: intelgraph
+      POSTGRES_USER: summit
       POSTGRES_PASSWORD: dev_password
-      POSTGRES_DB: intelgraph_dev
+      POSTGRES_DB: summit_dev
       NEO4J_URI: bolt://neo4j:7687
       NEO4J_USER: neo4j
       NEO4J_PASSWORD: dev_password
@@ -183,15 +183,18 @@ services:
       PORT: 4000
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_USER: intelgraph
+      POSTGRES_USER: summit
       POSTGRES_PASSWORD: dev_password
-      POSTGRES_DB: intelgraph_dev
+      POSTGRES_DB: summit_dev
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: dev_password
       REDIS_HOST: redis
       REDIS_PORT: 6379
       OPA_URL: http://opa:8181
       MOCK_SERVICE_URL: http://mock-services:4010
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-      OTEL_SERVICE_NAME: intelgraph-api
+      OTEL_SERVICE_NAME: summit-api
     volumes:
       - .:/workspace:cached
     ports:
@@ -265,12 +268,15 @@ services:
       WORKER_PORT: 4100
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_USER: intelgraph
+      POSTGRES_USER: summit
       POSTGRES_PASSWORD: dev_password
-      POSTGRES_DB: intelgraph_dev
+      POSTGRES_DB: summit_dev
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USERNAME: neo4j
+      NEO4J_PASSWORD: dev_password
       REDIS_URL: redis://redis:6379
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
-      OTEL_SERVICE_NAME: intelgraph-worker
+      OTEL_SERVICE_NAME: summit-worker
     volumes:
       - .:/workspace:cached
     ports:
@@ -298,7 +304,7 @@ services:
     ports:
       - '9090:9090'
     volumes:
-      - ./ops/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/prometheus/prometheus-dev.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -320,8 +326,8 @@ services:
       GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-worldmap-panel
     volumes:
       - grafana_data:/var/lib/grafana
-      - ./ops/observability/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./ops/observability/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./observability/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./observability/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
     depends_on:
       - prometheus
       - otel-collector

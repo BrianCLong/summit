@@ -1,0 +1,190 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: edge-computing
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edge-orchestrator-config
+  namespace: edge-computing
+data:
+  PORT: "8080"
+  NODE_ENV: "production"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: edge-orchestrator-secrets
+  namespace: edge-computing
+type: Opaque
+stringData:
+  jwt-secret: "change-me-in-production"
+  cloud-endpoint: "http://cloud-service:9000"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-orchestrator
+  namespace: edge-computing
+  labels:
+    app: edge-orchestrator
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: edge-orchestrator
+  template:
+    metadata:
+      labels:
+        app: edge-orchestrator
+    spec:
+      containers:
+      - name: edge-orchestrator
+        image: intelgraph/edge-orchestrator:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: edge-orchestrator-config
+              key: PORT
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: edge-orchestrator-config
+              key: NODE_ENV
+        - name: CLOUD_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: edge-orchestrator-secrets
+              key: cloud-endpoint
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        volumeMounts:
+        - name: edge-data
+          mountPath: /var/lib/edge/data
+        - name: edge-logs
+          mountPath: /var/log/edge
+        - name: edge-models
+          mountPath: /var/lib/edge/models
+      volumes:
+      - name: edge-data
+        persistentVolumeClaim:
+          claimName: edge-data-pvc
+      - name: edge-logs
+        persistentVolumeClaim:
+          claimName: edge-logs-pvc
+      - name: edge-models
+        persistentVolumeClaim:
+          claimName: edge-models-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-orchestrator
+  namespace: edge-computing
+spec:
+  selector:
+    app: edge-orchestrator
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: edge-data-pvc
+  namespace: edge-computing
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: edge-logs-pvc
+  namespace: edge-computing
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: edge-models-pvc
+  namespace: edge-computing
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: edge-orchestrator-hpa
+  namespace: edge-computing
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: edge-orchestrator
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80

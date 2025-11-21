@@ -1,0 +1,4 @@
+source_system_id,event_id,ingested_at,ingest_job_id,purpose_tags,provenance_ref
+SRC-OKTA,EVT-7001,2025-09-01T15:15:05Z,job-20250901-001,security-monitoring|operations,s3csv/relationships/2025-09-01T15:30:00Z
+SRC-DLP,EVT-7002,2025-09-01T14:40:06Z,job-20250901-002,operations|compliance,s3csv/relationships/2025-09-01T15:30:00Z
+SRC-CI,EVT-7003,2025-09-01T15:50:03Z,job-20250901-003,security-monitoring|analytics,s3csv/relationships/2025-09-01T15:30:00Z

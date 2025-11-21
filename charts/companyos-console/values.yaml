@@ -1,7 +1,11 @@
 image:
-  repository: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/summit-company/core-console
+  repository: summit/client
   tag: latest
   pullPolicy: IfNotPresent
+
+apiService:
+  name: intelgraph-api
+  port: 4000
 
 service:
   type: ClusterIP

@@ -1,0 +1,16 @@
+{
+  "name": "@summit/etl-pipelines",
+  "version": "1.0.0",
+  "description": "ETL/ELT pipeline infrastructure with data loading and transformation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": ["etl", "elt", "data-pipeline", "transformation", "loading"],
+  "license": "MIT",
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}

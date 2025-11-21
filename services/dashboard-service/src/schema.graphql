@@ -1,0 +1,318 @@
+type Dashboard {
+  id: ID!
+  name: String!
+  description: String
+  pages: [DashboardPage!]!
+  theme: DashboardTheme
+  permissions: DashboardPermissions
+  metadata: DashboardMetadata
+  version: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DashboardPage {
+  id: ID!
+  name: String!
+  layout: LayoutConfig!
+  widgets: [Widget!]!
+  filters: [GlobalFilter!]
+  order: Int!
+}
+
+type LayoutConfig {
+  type: String!
+  columns: Int
+  rowHeight: Int
+  breakpoints: JSON
+  cols: JSON
+}
+
+type Widget {
+  id: ID!
+  type: String!
+  title: String!
+  config: JSON!
+  layout: WidgetLayout!
+  dataSource: DataSourceConfig
+  interactions: WidgetInteractions
+  style: WidgetStyle
+}
+
+type WidgetLayout {
+  x: Int!
+  y: Int!
+  w: Int!
+  h: Int!
+  minW: Int
+  minH: Int
+  maxW: Int
+  maxH: Int
+  static: Boolean
+  isDraggable: Boolean
+  isResizable: Boolean
+}
+
+type DataSourceConfig {
+  type: String!
+  endpoint: String
+  query: String
+  variables: JSON
+  refreshInterval: Int
+  cache: Boolean
+}
+
+type WidgetInteractions {
+  onClick: String
+  onHover: String
+  onSelect: String
+  drillDown: DrillDownConfig
+  crossFilter: Boolean
+  exportable: Boolean
+}
+
+type DrillDownConfig {
+  enabled: Boolean!
+  targetDashboard: String
+  targetWidget: String
+  params: JSON
+}
+
+type WidgetStyle {
+  backgroundColor: String
+  borderColor: String
+  borderWidth: Int
+  borderRadius: Int
+  padding: Int
+  shadow: String
+}
+
+type DashboardTheme {
+  name: String!
+  colors: ThemeColors!
+  typography: ThemeTypography!
+  spacing: ThemeSpacing!
+  borderRadius: Int!
+  shadows: ThemeShadows!
+}
+
+type ThemeColors {
+  primary: String!
+  secondary: String!
+  background: String!
+  surface: String!
+  text: String!
+  textSecondary: String!
+  border: String!
+  accent: [String!]!
+}
+
+type ThemeTypography {
+  fontFamily: String!
+  fontSize: FontSizes!
+}
+
+type FontSizes {
+  small: Int!
+  medium: Int!
+  large: Int!
+}
+
+type ThemeSpacing {
+  unit: Int!
+}
+
+type ThemeShadows {
+  small: String!
+  medium: String!
+  large: String!
+}
+
+type DashboardPermissions {
+  owner: String!
+  viewers: [String!]!
+  editors: [String!]!
+  isPublic: Boolean!
+  allowExport: Boolean!
+  allowShare: Boolean!
+}
+
+type DashboardMetadata {
+  tags: [String!]!
+  category: String
+  folder: String
+  starred: Boolean
+  lastViewed: DateTime
+  viewCount: Int
+}
+
+type GlobalFilter {
+  id: ID!
+  name: String!
+  type: String!
+  field: String!
+  value: JSON
+  options: [JSON!]
+  appliesTo: [String!]
+}
+
+type WidgetTemplate {
+  id: ID!
+  name: String!
+  description: String!
+  type: String!
+  category: String!
+  icon: String!
+  defaultConfig: JSON!
+  defaultLayout: WidgetLayout!
+  thumbnail: String
+  tags: [String!]!
+}
+
+type DashboardTemplate {
+  id: ID!
+  name: String!
+  description: String!
+  category: String!
+  thumbnail: String
+  dashboard: JSON!
+  tags: [String!]!
+}
+
+scalar DateTime
+scalar JSON
+
+type Query {
+  # Dashboard queries
+  dashboard(id: ID!): Dashboard
+  dashboards(filter: DashboardFilterInput, limit: Int, offset: Int): [Dashboard!]!
+  dashboardTemplates(category: String): [DashboardTemplate!]!
+  widgetTemplates(category: String): [WidgetTemplate!]!
+
+  # Widget data queries
+  widgetData(widgetId: ID!, filters: JSON): JSON
+
+  # Search
+  searchDashboards(query: String!): [Dashboard!]!
+}
+
+type Mutation {
+  # Dashboard mutations
+  createDashboard(input: CreateDashboardInput!): Dashboard!
+  updateDashboard(id: ID!, input: UpdateDashboardInput!): Dashboard!
+  deleteDashboard(id: ID!): Boolean!
+  duplicateDashboard(id: ID!): Dashboard!
+
+  # Page mutations
+  createPage(dashboardId: ID!, input: CreatePageInput!): DashboardPage!
+  updatePage(pageId: ID!, input: UpdatePageInput!): DashboardPage!
+  deletePage(pageId: ID!): Boolean!
+  reorderPages(dashboardId: ID!, pageIds: [ID!]!): Dashboard!
+
+  # Widget mutations
+  addWidget(pageId: ID!, input: AddWidgetInput!): Widget!
+  updateWidget(widgetId: ID!, input: UpdateWidgetInput!): Widget!
+  deleteWidget(widgetId: ID!): Boolean!
+  duplicateWidget(widgetId: ID!): Widget!
+  moveWidget(widgetId: ID!, targetPageId: ID!): Boolean!
+
+  # Filter mutations
+  addFilter(pageId: ID!, input: AddFilterInput!): GlobalFilter!
+  updateFilter(filterId: ID!, input: UpdateFilterInput!): GlobalFilter!
+  removeFilter(filterId: ID!): Boolean!
+
+  # Permissions
+  updatePermissions(dashboardId: ID!, input: UpdatePermissionsInput!): Dashboard!
+  shareDashboard(dashboardId: ID!, userIds: [String!]!): Boolean!
+
+  # Export
+  exportDashboard(dashboardId: ID!, format: String!): String!
+}
+
+type Subscription {
+  # Real-time updates
+  dashboardUpdated(dashboardId: ID!): Dashboard!
+  widgetDataUpdated(widgetId: ID!): JSON!
+  collaborationEvent(dashboardId: ID!): CollaborationEvent!
+}
+
+type CollaborationEvent {
+  type: String!
+  userId: String!
+  userName: String!
+  data: JSON!
+  timestamp: DateTime!
+}
+
+# Input types
+input DashboardFilterInput {
+  tags: [String!]
+  category: String
+  owner: String
+  starred: Boolean
+}
+
+input CreateDashboardInput {
+  name: String!
+  description: String
+  theme: JSON
+  permissions: JSON
+}
+
+input UpdateDashboardInput {
+  name: String
+  description: String
+  theme: JSON
+  permissions: JSON
+  metadata: JSON
+}
+
+input CreatePageInput {
+  name: String!
+  layout: JSON!
+}
+
+input UpdatePageInput {
+  name: String
+  layout: JSON
+  filters: [JSON!]
+}
+
+input AddWidgetInput {
+  type: String!
+  title: String!
+  config: JSON!
+  layout: JSON!
+  dataSource: JSON
+}
+
+input UpdateWidgetInput {
+  title: String
+  config: JSON
+  layout: JSON
+  dataSource: JSON
+  interactions: JSON
+  style: JSON
+}
+
+input AddFilterInput {
+  name: String!
+  type: String!
+  field: String!
+  value: JSON
+  options: [JSON!]
+}
+
+input UpdateFilterInput {
+  name: String
+  value: JSON
+  options: [JSON!]
+}
+
+input UpdatePermissionsInput {
+  viewers: [String!]
+  editors: [String!]
+  isPublic: Boolean
+  allowExport: Boolean
+  allowShare: Boolean
+}

@@ -162,6 +162,11 @@ interface MergeEntitiesArgs {
   secondaryIds: string[];
 }
 
+interface TimelineArgs {
+  investigationId: string;
+  windowHours?: number;
+}
+
 export const multimodalResolvers = {
   Query: {
     // Media Sources
@@ -253,6 +258,26 @@ export const multimodalResolvers = {
       return await multimodalService.findCrossModalMatches(
         args.entityId,
         args.targetMediaTypes,
+        args.minSimilarity,
+      );
+    },
+
+    multimodalTimeline: async (
+      parent: any,
+      args: TimelineArgs,
+      context: Context,
+    ) => {
+      if (!context.user) throw new Error('Authentication required');
+
+      const multimodalService = new MultimodalDataService(
+        context.neo4jDriver,
+        context.authService,
+        context.storageService,
+      );
+
+      return await multimodalService.generateMultimodalTimeline(
+        args.investigationId,
+        args.windowHours ?? 72,
       );
     },
 

@@ -1,0 +1,590 @@
+openapi: 3.0.3
+info:
+  title: Provenance & Claim Ledger Service
+  description: |
+    Evidence/claim registration, provenance chain tracking, and disclosure bundle generation.
+
+    All requests require authorization headers:
+    - `x-authority-id`: Identifier for the requesting authority
+    - `x-reason-for-access`: Justification for the request
+  version: 1.0.0
+  contact:
+    name: IntelGraph Team
+    email: support@intelgraph.com
+
+servers:
+  - url: http://localhost:4010
+    description: Local development
+  - url: https://prov-ledger.intelgraph.com
+    description: Production
+
+tags:
+  - name: Claims
+    description: Claim registration and retrieval
+  - name: Evidence
+    description: Evidence registration with checksums
+  - name: Bundles
+    description: Disclosure bundle generation
+  - name: Provenance
+    description: Provenance chain tracking
+  - name: Verification
+    description: Hash verification utilities
+  - name: Health
+    description: Service health checks
+
+security:
+  - PolicyHeaders: []
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns service health status and database connectivity
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /claims:
+    post:
+      tags: [Claims]
+      summary: Create a claim
+      description: Register a new claim with content and metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClaimRequest'
+      responses:
+        '200':
+          description: Claim created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Claim'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Policy violation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyError'
+
+  /claims/{id}:
+    get:
+      tags: [Claims]
+      summary: Get claim by ID
+      description: Retrieve a claim's details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^claim_'
+      responses:
+        '200':
+          description: Claim found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Claim'
+        '404':
+          description: Claim not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /evidence:
+    post:
+      tags: [Evidence]
+      summary: Register evidence
+      description: Register evidence with checksum and optional transform chain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEvidenceRequest'
+      responses:
+        '200':
+          description: Evidence registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Evidence with this checksum already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /evidence/{id}:
+    get:
+      tags: [Evidence]
+      summary: Get evidence by ID
+      description: Retrieve evidence details including transform chain
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^evidence_'
+      responses:
+        '200':
+          description: Evidence found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+        '404':
+          description: Evidence not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /bundles/{caseId}:
+    get:
+      tags: [Bundles]
+      summary: Get disclosure bundle for case
+      description: Generate a disclosure bundle manifest with hash tree and merkle root
+      parameters:
+        - name: caseId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^case_'
+      responses:
+        '200':
+          description: Bundle generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisclosureBundle'
+        '404':
+          description: Case not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /provenance:
+    get:
+      tags: [Provenance]
+      summary: Get provenance chains
+      description: Retrieve provenance chains for a claim
+      parameters:
+        - name: claimId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Provenance chains found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProvenanceChain'
+    post:
+      tags: [Provenance]
+      summary: Create provenance chain
+      description: Register a new provenance chain for a claim
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProvenanceRequest'
+      responses:
+        '200':
+          description: Provenance chain created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProvenanceChain'
+
+  /hash/verify:
+    post:
+      tags: [Verification]
+      summary: Verify content hash
+      description: Verify that content matches expected hash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyHashRequest'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyHashResponse'
+
+  /export/manifest:
+    get:
+      tags: [Verification]
+      summary: Export manifest
+      description: Get export manifest with all claims and hash chain
+      responses:
+        '200':
+          description: Manifest generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manifest'
+
+components:
+  securitySchemes:
+    PolicyHeaders:
+      type: apiKey
+      in: header
+      name: x-authority-id
+      description: |
+        Requires two headers:
+        - x-authority-id: Authority identifier
+        - x-reason-for-access: Reason for accessing the resource
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        dependencies:
+          type: object
+          properties:
+            database:
+              type: string
+              enum: [healthy, unhealthy]
+
+    CreateClaimRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: object
+          description: Claim content (arbitrary JSON)
+        signature:
+          type: string
+          description: Optional cryptographic signature
+        metadata:
+          type: object
+          description: Additional metadata
+        sourceRef:
+          type: string
+          description: Reference to source (e.g., file://path)
+        licenseId:
+          type: string
+          description: Associated license ID
+        policyLabels:
+          type: array
+          items:
+            type: string
+          description: Policy classification labels
+
+    Claim:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^claim_'
+        content:
+          type: object
+        hash:
+          type: string
+          description: SHA-256 hash of content
+        signature:
+          type: string
+        metadata:
+          type: object
+        sourceRef:
+          type: string
+        licenseId:
+          type: string
+        policyLabels:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+
+    TransformStep:
+      type: object
+      required:
+        - transformType
+        - timestamp
+        - actorId
+      properties:
+        transformType:
+          type: string
+          description: Type of transformation (e.g., ocr, redaction)
+        timestamp:
+          type: string
+          format: date-time
+        actorId:
+          type: string
+          description: ID of actor that performed transform
+        config:
+          type: object
+          description: Transform-specific configuration
+
+    CreateEvidenceRequest:
+      type: object
+      required:
+        - sourceRef
+      properties:
+        caseId:
+          type: string
+          description: Optional case ID to link evidence
+        sourceRef:
+          type: string
+          description: Reference to source file/data
+        content:
+          description: Content to compute checksum from (if checksum not provided)
+        checksum:
+          type: string
+          description: SHA-256 checksum (computed if not provided)
+        checksumAlgorithm:
+          type: string
+          default: sha256
+        contentType:
+          type: string
+          description: MIME type
+        fileSize:
+          type: integer
+          description: File size in bytes
+        transformChain:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformStep'
+        licenseId:
+          type: string
+        policyLabels:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+
+    Evidence:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^evidence_'
+        caseId:
+          type: string
+        sourceRef:
+          type: string
+        checksum:
+          type: string
+        checksumAlgorithm:
+          type: string
+        contentType:
+          type: string
+        fileSize:
+          type: integer
+        transformChain:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformStep'
+        licenseId:
+          type: string
+        policyLabels:
+          type: array
+          items:
+            type: string
+        authorityId:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+
+    DisclosureBundle:
+      type: object
+      properties:
+        caseId:
+          type: string
+        version:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              sourceRef:
+                type: string
+              checksum:
+                type: string
+              transformChain:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransformStep'
+        hashTree:
+          type: array
+          items:
+            type: string
+          description: List of all evidence checksums
+        merkleRoot:
+          type: string
+          description: Merkle tree root hash for tamper-evidence
+        generated_at:
+          type: string
+          format: date-time
+
+    CreateProvenanceRequest:
+      type: object
+      required:
+        - claimId
+        - transforms
+        - sources
+        - lineage
+      properties:
+        claimId:
+          type: string
+        transforms:
+          type: array
+          items:
+            type: string
+        sources:
+          type: array
+          items:
+            type: string
+        lineage:
+          type: object
+
+    ProvenanceChain:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^prov_'
+        claim_id:
+          type: string
+        transforms:
+          type: array
+          items:
+            type: string
+        sources:
+          type: array
+          items:
+            type: string
+        lineage:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+
+    VerifyHashRequest:
+      type: object
+      required:
+        - content
+        - expectedHash
+      properties:
+        content:
+          description: Content to hash
+        expectedHash:
+          type: string
+
+    VerifyHashResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        expected_hash:
+          type: string
+        actual_hash:
+          type: string
+        verified_at:
+          type: string
+          format: date-time
+
+    Manifest:
+      type: object
+      properties:
+        version:
+          type: string
+        claims:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              hash:
+                type: string
+              transforms:
+                type: array
+                items:
+                  type: string
+        hash_chain:
+          type: string
+          description: Hash of all claim hashes
+        signature:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+
+    PolicyError:
+      type: object
+      properties:
+        error:
+          type: string
+        reason:
+          type: string
+        appealPath:
+          type: string
+          description: Path to appeal policy decision

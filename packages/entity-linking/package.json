@@ -1,0 +1,37 @@
+{
+  "name": "@intelgraph/entity-linking",
+  "version": "1.0.0",
+  "description": "Entity extraction, disambiguation, and linking to external knowledge bases",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/knowledge-graph": "workspace:*",
+    "zod": "^4.1.12",
+    "neo4j-driver": "6.0.1",
+    "uuid": "^11.0.3",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/uuid": "^11.0.0",
+    "eslint": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

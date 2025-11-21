@@ -32,6 +32,7 @@ import BehavioralAnalytics from '../components/behavioral/BehavioralAnalytics';
 import ReportingCaseManagement from '../components/reporting/ReportingCaseManagement';
 import ThreatHuntingDarkWeb from '../components/threat/ThreatHuntingDarkWeb';
 import IntelligenceFeedsEnrichment from '../components/intelligence/IntelligenceFeedsEnrichment';
+import GraphAnomalyWidget from '../components/dashboard/GraphAnomalyWidget';
 
 function HomeRouteInner() {
   const navigate = useNavigate();
@@ -1040,7 +1041,11 @@ function HomeRouteInner() {
       )}
 
       {activeTab === 'analytics' && (
-        <div>
+        <div style={{ display: 'grid', gap: '24px' }}>
+          <GraphAnomalyWidget
+            investigationId={selectedInvestigation?.id}
+            defaultEntityId={selectedInvestigation?.focusEntityId || selectedInvestigation?.entityId}
+          />
           <AdvancedAnalyticsDashboard
             investigationId={selectedInvestigation?.id}
             timeRange="24h"

@@ -1,0 +1,33 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "sourceMap": true,
+    "allowImportingTsExtensions": false
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../../packages/biometrics"
+    },
+    {
+      "path": "../../packages/facial-recognition"
+    },
+    {
+      "path": "../../packages/behavioral-analysis"
+    },
+    {
+      "path": "../../packages/identity-resolution"
+    },
+    {
+      "path": "../../packages/document-verification"
+    },
+    {
+      "path": "../../packages/watchlist-screening"
+    }
+  ]
+}

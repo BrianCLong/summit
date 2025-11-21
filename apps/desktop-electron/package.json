@@ -1,0 +1,93 @@
+{
+  "name": "@intelgraph/desktop",
+  "version": "1.0.0",
+  "description": "IntelGraph Desktop Application (Windows, Mac, Linux)",
+  "main": "dist-electron/main.js",
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && electron-builder",
+    "build:win": "npm run build -- --win",
+    "build:mac": "npm run build -- --mac",
+    "build:linux": "npm run build -- --linux",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "@apollo/client": "^4.0.9",
+    "graphql": "^16.12.0",
+    "@tanstack/react-query": "^5.8.4",
+    "electron-store": "^10.0.0",
+    "electron-updater": "^6.3.10",
+    "electron-log": "^5.2.6"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.0",
+    "electron": "^34.0.0",
+    "electron-builder": "^26.0.11",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.11",
+    "vite-plugin-electron": "^0.28.0",
+    "vite-plugin-electron-renderer": "^0.14.6",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.intelgraph.desktop",
+    "productName": "IntelGraph",
+    "directories": {
+      "output": "release/${version}"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"],
+      "icon": "build/icon.icns",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "build/icon.ico"
+    },
+    "linux": {
+      "target": ["AppImage", "deb", "rpm"],
+      "icon": "build/icon.png",
+      "category": "Office"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "intelgraph",
+      "repo": "summit"
+    }
+  },
+  "keywords": [
+    "electron",
+    "desktop",
+    "intelligence-analysis",
+    "cross-platform"
+  ]
+}

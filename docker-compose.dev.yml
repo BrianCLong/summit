@@ -61,6 +61,43 @@ services:
     networks:
       - summit
 
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
+    container_name: summit-elasticsearch
+    restart: unless-stopped
+    environment:
+      - discovery.type=single-node
+      - cluster.name=summit-search
+      - node.name=summit-search-node-1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD:-devpassword}
+      - xpack.security.enrollment.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    ports:
+      - '9200:9200'
+      - '9300:9300'
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1']
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=summit_elasticsearch'
+      - 'prometheus.port=9200'
+
   api:
     build:
       context: ./server
@@ -78,6 +115,9 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_USERNAME: elastic
+      ELASTICSEARCH_PASSWORD: ${ELASTICSEARCH_PASSWORD:-devpassword}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-600}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
@@ -89,6 +129,8 @@ services:
       redis:
         condition: service_healthy
       neo4j:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
@@ -135,6 +177,7 @@ services:
     environment:
       VITE_API_URL: http://api:4000/graphql
       VITE_WS_URL: ws://api:4000/graphql
+      VITE_WEBSOCKET_URL: ws://websocket-server:9001
       VITE_PORT: 3000
     ports:
       - '3000:3000'
@@ -148,6 +191,47 @@ services:
       retries: 10
     networks:
       - summit
+
+  websocket-server:
+    build:
+      context: ./services/websocket-server
+      dockerfile: Dockerfile
+    container_name: summit-websocket-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: 9001
+      HOST: 0.0.0.0
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_ALGORITHM: HS256
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      CORS_CREDENTIALS: "true"
+      CLUSTERING_ENABLED: "true"
+      NODE_ID: ws-dev-1
+      PERSISTENCE_ENABLED: "true"
+      PERSISTENCE_TTL: "3600"
+      HEARTBEAT_INTERVAL: "30000"
+      HEARTBEAT_TIMEOUT: "60000"
+    ports:
+      - '9001:9001'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })']
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=websocket_server'
+      - 'prometheus.port=9001'
 
   prometheus:
     image: prom/prometheus:latest
@@ -184,6 +268,7 @@ volumes:
   redis_data:
   neo4j_data:
   neo4j_logs:
+  elasticsearch_data:
   grafana_data:
 
 networks:

@@ -1,0 +1,456 @@
+# =============================================================================
+# POD DISRUPTION BUDGETS AND RESOURCE QUOTAS
+# =============================================================================
+# Comprehensive PDB and resource quota configuration for IntelGraph/Summit
+# Ensures high availability and prevents resource exhaustion
+# =============================================================================
+
+---
+# =============================================================================
+# NAMESPACE CONFIGURATION
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-production
+  labels:
+    name: intelgraph-production
+    environment: production
+    security.intelgraph.ai/level: high
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-staging
+  labels:
+    name: intelgraph-staging
+    environment: staging
+    security.intelgraph.ai/level: medium
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-development
+  labels:
+    name: intelgraph-development
+    environment: development
+    security.intelgraph.ai/level: low
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: baseline
+    pod-security.kubernetes.io/warn: baseline
+
+---
+# =============================================================================
+# POD DISRUPTION BUDGETS - API Server
+# =============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-server-pdb
+  namespace: intelgraph-production
+  labels:
+    app: api-server
+    component: backend
+    tier: critical
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: api-server
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+
+---
+# Alternative: Use maxUnavailable instead of minAvailable
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-server-pdb-max-unavailable
+  namespace: intelgraph-production
+  labels:
+    app: api-server
+    component: backend
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: api-server
+
+---
+# =============================================================================
+# POD DISRUPTION BUDGETS - Web Frontend
+# =============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: web-frontend-pdb
+  namespace: intelgraph-production
+  labels:
+    app: web-frontend
+    component: frontend
+    tier: critical
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: web-frontend
+  unhealthyPodEvictionPolicy: IfHealthyBudget
+
+---
+# =============================================================================
+# POD DISRUPTION BUDGETS - Gateway
+# =============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gateway-pdb
+  namespace: intelgraph-production
+  labels:
+    app: gateway
+    component: api-gateway
+    tier: critical
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: gateway
+
+---
+# =============================================================================
+# POD DISRUPTION BUDGETS - Worker Services
+# =============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: worker-pdb
+  namespace: intelgraph-production
+  labels:
+    component: worker
+    tier: standard
+spec:
+  maxUnavailable: "25%"
+  selector:
+    matchLabels:
+      component: worker
+
+---
+# =============================================================================
+# POD DISRUPTION BUDGETS - Database Services
+# =============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: postgres-pdb
+  namespace: intelgraph-production
+  labels:
+    app: postgres
+    component: database
+    tier: critical
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: postgres
+  unhealthyPodEvictionPolicy: AlwaysAllow
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: neo4j-pdb
+  namespace: intelgraph-production
+  labels:
+    app: neo4j
+    component: database
+    tier: critical
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: neo4j
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis-pdb
+  namespace: intelgraph-production
+  labels:
+    app: redis
+    component: cache
+    tier: high
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: redis
+
+---
+# =============================================================================
+# RESOURCE QUOTAS - Production Namespace
+# =============================================================================
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: production-compute-quota
+  namespace: intelgraph-production
+spec:
+  hard:
+    # Compute resources
+    requests.cpu: "100"
+    requests.memory: 200Gi
+    requests.storage: 2Ti
+    limits.cpu: "200"
+    limits.memory: 400Gi
+
+    # Object counts
+    pods: "200"
+    services: "50"
+    secrets: "100"
+    configmaps: "100"
+    persistentvolumeclaims: "100"
+    replicationcontrollers: "0"  # Use Deployments instead
+
+    # Service types
+    services.nodeports: "0"  # Disable NodePort in production
+    services.loadbalancers: "10"
+
+---
+# Extended resource quotas for specific resource classes
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: production-storage-quota
+  namespace: intelgraph-production
+spec:
+  hard:
+    # Storage classes
+    requests.storage: 2Ti
+    persistentvolumeclaims: "100"
+
+    # Storage class specific quotas
+    ssd.storageclass.storage.k8s.io/requests.storage: "500Gi"
+    ssd.storageclass.storage.k8s.io/persistentvolumeclaims: "50"
+
+    hdd.storageclass.storage.k8s.io/requests.storage: "2Ti"
+    hdd.storageclass.storage.k8s.io/persistentvolumeclaims: "50"
+
+---
+# Priority class quotas
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: production-priority-quota
+  namespace: intelgraph-production
+spec:
+  hard:
+    # High priority workloads
+    count/deployments.apps: "50"
+    count/statefulsets.apps: "20"
+    count/jobs.batch: "100"
+    count/cronjobs.batch: "20"
+  scopeSelector:
+    matchExpressions:
+    - operator: In
+      scopeName: PriorityClass
+      values: ["high"]
+
+---
+# =============================================================================
+# RESOURCE QUOTAS - Staging Namespace
+# =============================================================================
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: staging-compute-quota
+  namespace: intelgraph-staging
+spec:
+  hard:
+    # Reduced resources for staging
+    requests.cpu: "50"
+    requests.memory: 100Gi
+    requests.storage: 500Gi
+    limits.cpu: "100"
+    limits.memory: 200Gi
+
+    pods: "100"
+    services: "30"
+    secrets: "50"
+    configmaps: "50"
+    persistentvolumeclaims: "50"
+    services.nodeports: "0"
+    services.loadbalancers: "5"
+
+---
+# =============================================================================
+# RESOURCE QUOTAS - Development Namespace
+# =============================================================================
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: development-compute-quota
+  namespace: intelgraph-development
+spec:
+  hard:
+    # Minimal resources for development
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    requests.storage: 200Gi
+    limits.cpu: "40"
+    limits.memory: 80Gi
+
+    pods: "50"
+    services: "20"
+    secrets: "30"
+    configmaps: "30"
+    persistentvolumeclaims: "20"
+    services.nodeports: "5"
+    services.loadbalancers: "2"
+
+---
+# =============================================================================
+# LIMIT RANGES - Production Namespace
+# =============================================================================
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: production-limit-range
+  namespace: intelgraph-production
+spec:
+  limits:
+    # Container limits
+    - type: Container
+      default:
+        cpu: "1000m"
+        memory: "2Gi"
+        ephemeral-storage: "2Gi"
+      defaultRequest:
+        cpu: "250m"
+        memory: "512Mi"
+        ephemeral-storage: "1Gi"
+      max:
+        cpu: "8000m"
+        memory: "16Gi"
+        ephemeral-storage: "20Gi"
+      min:
+        cpu: "100m"
+        memory: "128Mi"
+        ephemeral-storage: "500Mi"
+      maxLimitRequestRatio:
+        cpu: "4"
+        memory: "4"
+
+    # Pod limits
+    - type: Pod
+      max:
+        cpu: "16000m"
+        memory: "32Gi"
+      min:
+        cpu: "100m"
+        memory: "128Mi"
+
+    # PVC limits
+    - type: PersistentVolumeClaim
+      max:
+        storage: "100Gi"
+      min:
+        storage: "1Gi"
+
+---
+# =============================================================================
+# LIMIT RANGES - Staging Namespace
+# =============================================================================
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: staging-limit-range
+  namespace: intelgraph-staging
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "500m"
+        memory: "1Gi"
+        ephemeral-storage: "1Gi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "256Mi"
+        ephemeral-storage: "500Mi"
+      max:
+        cpu: "4000m"
+        memory: "8Gi"
+        ephemeral-storage: "10Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+        ephemeral-storage: "250Mi"
+      maxLimitRequestRatio:
+        cpu: "4"
+        memory: "4"
+
+    - type: Pod
+      max:
+        cpu: "8000m"
+        memory: "16Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+
+    - type: PersistentVolumeClaim
+      max:
+        storage: "50Gi"
+      min:
+        storage: "500Mi"
+
+---
+# =============================================================================
+# LIMIT RANGES - Development Namespace
+# =============================================================================
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: development-limit-range
+  namespace: intelgraph-development
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "250m"
+        memory: "512Mi"
+        ephemeral-storage: "500Mi"
+      defaultRequest:
+        cpu: "50m"
+        memory: "128Mi"
+        ephemeral-storage: "250Mi"
+      max:
+        cpu: "2000m"
+        memory: "4Gi"
+        ephemeral-storage: "5Gi"
+      min:
+        cpu: "25m"
+        memory: "32Mi"
+        ephemeral-storage: "100Mi"
+      maxLimitRequestRatio:
+        cpu: "4"
+        memory: "4"
+
+    - type: Pod
+      max:
+        cpu: "4000m"
+        memory: "8Gi"
+      min:
+        cpu: "25m"
+        memory: "32Mi"
+
+    - type: PersistentVolumeClaim
+      max:
+        storage: "20Gi"
+      min:
+        storage: "100Mi"

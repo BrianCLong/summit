@@ -1,0 +1,49 @@
+scalar JSON
+
+type AgentRun {
+  id: ID!
+  status: String!
+  events: [AgentEvent!]!
+}
+
+type AgentEvent {
+  ts: String!
+  type: String!
+  data: JSON!
+}
+
+type Tool {
+  id: ID!
+  name: String!
+  description: String!
+  tags: [String!]
+  enabled: Boolean!
+}
+
+input StartRunInput {
+  task: String!
+  goalHints: [String!]
+  toolFilters: [String!]
+  purpose: String
+}
+
+input RegisterToolInput {
+  name: String!
+  description: String!
+  openapi: JSON!
+  auth: JSON
+  tags: [String!]
+}
+
+type Query {
+  run(id: ID!): AgentRun
+}
+
+type Mutation {
+  startRun(input: StartRunInput!): AgentRun!
+  registerTool(input: RegisterToolInput!): Tool!
+}
+
+type Subscription {
+  runEvents(runId: ID!): AgentEvent!
+}

@@ -1,0 +1,39 @@
+meta:
+  id: code.critic@v1
+  owner: platform-ai
+  purpose: 'Summarize semantic diff, compute risk, and propose tests'
+  guardrails:
+    - 'Do not approve missing tests for changed logic.'
+    - 'Never include license-incompatible code.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.1
+
+inputs:
+  diff: string
+  context: string
+
+template: |
+  Analyze the following code change:
+
+  Context: {{context}}
+  Diff:
+  {{diff}}
+
+  Provide:
+  1. A summary of changes.
+  2. A risk score (0.0 - 1.0).
+  3. Suggested tests.
+
+outputSchema:
+  risk_score: number
+  summary: string
+  suggested_tests: array
+
+examples:
+  - name: simple-change
+    inputs:
+      diff: "+ var x = 1;"
+      context: "file.js"
+    expected_contains: ["risk_score"]

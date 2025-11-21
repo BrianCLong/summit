@@ -1,0 +1,301 @@
+# Cost Optimization Alert Rules for Prometheus
+
+groups:
+  - name: cost_optimization
+    interval: 60s
+    rules:
+      # Budget Alerts
+      - alert: DailyCostBudgetExceeded
+        expr: sum(rate(resource_cost_total[24h])) * 86400 > 1000
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Daily cost budget exceeded"
+          description: "Daily cost of ${{ $value | humanize }} exceeds budget of $1000"
+          runbook_url: "https://docs.summit.io/runbooks/cost-exceeded"
+
+      - alert: DailyCostBudgetWarning
+        expr: sum(rate(resource_cost_total[24h])) * 86400 > 800
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Daily cost approaching budget limit"
+          description: "Daily cost of ${{ $value | humanize }} is approaching budget limit of $1000 (>80%)"
+
+      # Cost Anomaly Alerts
+      - alert: CostSpike
+        expr: |
+          (sum(rate(resource_cost_total[1h])) -
+           sum(rate(resource_cost_total[1h] offset 24h))) /
+          sum(rate(resource_cost_total[1h] offset 24h)) > 0.5
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Cost spike detected"
+          description: "Current hourly cost is {{ $value | humanizePercentage }} higher than 24 hours ago"
+          runbook_url: "https://docs.summit.io/runbooks/cost-spike"
+
+      # Resource Waste Alerts
+      - alert: IdleResourcesDetected
+        expr: |
+          count(
+            avg_over_time(resource_cpu_utilization_percent[1h]) < 20
+            and
+            avg_over_time(resource_memory_utilization_percent[1h]) < 30
+          ) > 10
+        for: 30m
+        labels:
+          severity: info
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Multiple idle resources detected"
+          description: "{{ $value }} resources have low CPU (<20%) and memory (<30%) utilization"
+          runbook_url: "https://docs.summit.io/runbooks/idle-resources"
+
+      # Database Connection Pool Alerts
+      - alert: PostgreSQLPoolExhaustion
+        expr: |
+          (pg_pool_active_connections / pg_pool_size) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "PostgreSQL connection pool near exhaustion"
+          description: "Pool {{ $labels.pool_name }} is {{ $value | humanizePercentage }} utilized"
+
+      - alert: Neo4jPoolExhaustion
+        expr: |
+          neo4j_pool_active_connections > 45
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Neo4j connection pool near exhaustion"
+          description: "Neo4j pool has {{ $value }} active connections (max: 50)"
+
+      # Rate Limiting Alerts
+      - alert: HighRateLimitRejects
+        expr: |
+          sum(rate(http_requests_rate_limited_total[5m])) /
+          sum(rate(http_requests_total[5m])) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "High rate of rate-limited requests"
+          description: "{{ $value | humanizePercentage }} of requests are being rate limited"
+
+      # Auto-Scaling Alerts
+      - alert: AutoScalerMaxedOut
+        expr: |
+          kube_deployment_spec_replicas == kube_hpa_spec_max_replicas
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "HPA reached maximum replicas"
+          description: "Deployment {{ $labels.deployment }} is at max replicas ({{ $value }})"
+          runbook_url: "https://docs.summit.io/runbooks/hpa-maxed"
+
+      - alert: AutoScalerFlapping
+        expr: |
+          changes(kube_deployment_spec_replicas[30m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "HPA is flapping"
+          description: "Deployment {{ $labels.deployment }} scaled {{ $value }} times in 30 minutes"
+
+      # Spot Instance Alerts
+      - alert: SpotInstanceInterruptionRate
+        expr: |
+          sum(rate(spot_instance_interruptions_total[1h])) > 0.1
+        for: 10m
+        labels:
+          severity: info
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "High spot instance interruption rate"
+          description: "{{ $value }} spot instance interruptions per hour"
+
+      - alert: SpotInstanceSavingsLow
+        expr: |
+          sum(spot_instance_savings_total) /
+          sum(compute_cost_total) < 0.4
+        for: 30m
+        labels:
+          severity: info
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Spot instance savings below target"
+          description: "Only {{ $value | humanizePercentage }} of compute cost saved by spot instances (target: 40%)"
+
+      # Query Performance Alerts
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95,
+            rate(database_query_duration_seconds_bucket[5m])
+          ) > 2
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Slow database queries detected"
+          description: "P95 query latency is {{ $value }}s for {{ $labels.database }}"
+
+      - alert: ExpensiveQueriesIncreasing
+        expr: |
+          sum(rate(expensive_query_count[5m])) > 10
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "High rate of expensive queries"
+          description: "{{ $value }} expensive queries per second"
+
+      # Cost Per Request Alerts
+      - alert: CostPerRequestIncreasing
+        expr: |
+          (sum(rate(resource_cost_total[1h])) /
+           sum(rate(http_requests_total[1h]))) > 0.008
+        for: 20m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Cost per request increasing"
+          description: "Current cost per request: ${{ $value }}"
+
+      # Resource Efficiency Alerts
+      - alert: LowCPUUtilization
+        expr: |
+          avg(avg_over_time(resource_cpu_utilization_percent[24h])) < 30
+        for: 1h
+        labels:
+          severity: info
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Low overall CPU utilization"
+          description: "Average CPU utilization is {{ $value }}% over 24 hours"
+
+      - alert: LowMemoryUtilization
+        expr: |
+          avg(avg_over_time(resource_memory_utilization_percent[24h])) < 40
+        for: 1h
+        labels:
+          severity: info
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Low overall memory utilization"
+          description: "Average memory utilization is {{ $value }}% over 24 hours"
+
+      # Budget Projection Alerts
+      - alert: MonthlyBudgetOverrunProjected
+        expr: |
+          (sum(rate(resource_cost_total[7d])) * 86400 * 30) > 25000
+        for: 30m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+        annotations:
+          summary: "Projected to exceed monthly budget"
+          description: "Projected monthly cost: ${{ $value | humanize }} (budget: $25,000)"
+          runbook_url: "https://docs.summit.io/runbooks/budget-overrun"
+
+  - name: cost_optimization_team_budgets
+    interval: 300s
+    rules:
+      # Per-team budget alerts (requires resource tagging)
+      - alert: TeamDailyBudgetExceeded
+        expr: |
+          sum by (team) (rate(resource_cost_total{tag_category="team"}[24h])) * 86400 > 200
+        for: 10m
+        labels:
+          severity: warning
+          cost_optimization: true
+        annotations:
+          summary: "Team {{ $labels.team }} exceeded daily budget"
+          description: "Team {{ $labels.team }} daily cost: ${{ $value | humanize }} (budget: $200)"
+
+      - alert: ProjectCostSpike
+        expr: |
+          sum by (project) (
+            rate(resource_cost_total{tag_category="project"}[1h]) -
+            rate(resource_cost_total{tag_category="project"}[1h] offset 24h)
+          ) / sum by (project) (
+            rate(resource_cost_total{tag_category="project"}[1h] offset 24h)
+          ) > 1.0
+        for: 20m
+        labels:
+          severity: warning
+          cost_optimization: true
+        annotations:
+          summary: "Cost spike detected for project {{ $labels.project }}"
+          description: "Project {{ $labels.project }} cost increased by {{ $value | humanizePercentage }} vs 24h ago"
+
+  - name: cost_optimization_slo
+    interval: 120s
+    rules:
+      # SLO: 95% of requests should cost < $0.01
+      - alert: CostPerRequestSLOViolation
+        expr: |
+          histogram_quantile(0.95,
+            rate(request_cost_bucket[5m])
+          ) > 0.01
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+          cost_optimization: true
+          slo: "cost-efficiency"
+        annotations:
+          summary: "Cost per request SLO violated"
+          description: "P95 cost per request is ${{ $value }} (SLO: $0.01)"
+
+      # SLO: Resource utilization should be > 50%
+      - alert: ResourceUtilizationSLOViolation
+        expr: |
+          (
+            avg(resource_cpu_utilization_percent) +
+            avg(resource_memory_utilization_percent)
+          ) / 2 < 50
+        for: 30m
+        labels:
+          severity: info
+          team: platform
+          cost_optimization: true
+          slo: "resource-efficiency"
+        annotations:
+          summary: "Resource utilization below SLO"
+          description: "Average resource utilization is {{ $value }}% (SLO: >50%)"

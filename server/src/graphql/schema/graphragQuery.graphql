@@ -1,0 +1,307 @@
+"""
+GraphQL schema for GraphRAG Query Preview functionality
+"""
+
+type Query {
+  """Execute a GraphRAG query with optional preview"""
+  graphragQuery(input: GraphRAGQueryInput!): GraphRAGQueryResponse!
+
+  """Get a query preview by ID"""
+  queryPreview(id: ID!): QueryPreview
+
+  """Get a glass-box run by ID"""
+  glassBoxRun(id: ID!): GlassBoxRun
+
+  """List glass-box runs for an investigation"""
+  glassBoxRuns(
+    investigationId: String!
+    status: RunStatus
+    limit: Int
+    offset: Int
+  ): GlassBoxRunsResult!
+
+  """Get replay history for a run"""
+  replayHistory(runId: ID!): [GlassBoxRun!]!
+}
+
+type Mutation {
+  """Create a query preview without executing"""
+  createQueryPreview(input: CreateQueryPreviewInput!): QueryPreview!
+
+  """Edit a query preview"""
+  editQueryPreview(previewId: ID!, editedQuery: String!): QueryPreview!
+
+  """Execute a query preview"""
+  executeQueryPreview(input: ExecuteQueryPreviewInput!): GraphRAGQueryResponse!
+
+  """Replay a run with optional modifications"""
+  replayRun(input: ReplayRunInput!): GraphRAGQueryResponse!
+}
+
+"""Input for GraphRAG query"""
+input GraphRAGQueryInput {
+  investigationId: String!
+  question: String!
+  focusEntityIds: [String!]
+  maxHops: Int
+  generateQueryPreview: Boolean
+  autoExecute: Boolean
+  maxRows: Int
+  timeout: Int
+}
+
+"""Input for creating a query preview"""
+input CreateQueryPreviewInput {
+  investigationId: String!
+  question: String!
+  language: QueryLanguage
+  focusEntityIds: [String!]
+  maxHops: Int
+  parameters: JSON
+}
+
+"""Input for executing a query preview"""
+input ExecuteQueryPreviewInput {
+  previewId: ID!
+  useEditedQuery: Boolean
+  dryRun: Boolean
+  maxRows: Int
+  timeout: Int
+}
+
+"""Input for replaying a run"""
+input ReplayRunInput {
+  runId: ID!
+  modifiedQuestion: String
+  modifiedParameters: JSON
+  skipCache: Boolean
+}
+
+"""GraphRAG query response with citations and preview"""
+type GraphRAGQueryResponse {
+  answer: String!
+  confidence: Float!
+  citations: [EnrichedCitation!]!
+  why_paths: [WhyPath!]
+  preview: PreviewSummary
+  runId: ID!
+  executionTimeMs: Float!
+  subgraphSize: SubgraphSize
+}
+
+"""Enriched citation with entity details"""
+type EnrichedCitation {
+  entityId: ID!
+  entityKind: String
+  entityLabels: [String!]
+  entityName: String
+  snippetText: String
+  confidence: Float
+  sourceUrl: String
+}
+
+"""Why path explaining reasoning"""
+type WhyPath {
+  from: ID!
+  to: ID!
+  relId: ID!
+  type: String!
+  supportScore: Float!
+  score_breakdown: ScoreBreakdown!
+}
+
+"""Score breakdown for why paths"""
+type ScoreBreakdown {
+  length: Float!
+  edgeType: Float!
+  centrality: Float!
+}
+
+"""Preview summary in query response"""
+type PreviewSummary {
+  id: ID!
+  generatedQuery: String!
+  queryExplanation: String!
+  costLevel: String!
+  riskLevel: String!
+  canExecute: Boolean!
+  requiresApproval: Boolean!
+}
+
+"""Subgraph size metadata"""
+type SubgraphSize {
+  nodeCount: Int!
+  edgeCount: Int!
+}
+
+"""Query preview with cost and risk analysis"""
+type QueryPreview {
+  id: ID!
+  investigationId: String!
+  tenantId: String!
+  userId: String!
+  naturalLanguageQuery: String!
+  parameters: JSON!
+  language: QueryLanguage!
+  generatedQuery: String!
+  queryExplanation: String!
+  costEstimate: CostEstimate!
+  riskAssessment: RiskAssessment!
+  syntacticallyValid: Boolean!
+  validationErrors: [String!]!
+  canExecute: Boolean!
+  requiresApproval: Boolean!
+  sandboxOnly: Boolean!
+  modelUsed: String!
+  confidence: Float!
+  generatedAt: DateTime!
+  expiresAt: DateTime!
+  executed: Boolean!
+  executedAt: DateTime
+  executionRunId: ID
+  editedQuery: String
+  editedBy: String
+  editedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Cost estimate for query execution"""
+type CostEstimate {
+  level: CostLevel!
+  estimatedRows: Int
+  estimatedTimeMs: Int
+  breakdown: CostBreakdown!
+  warnings: [String!]!
+}
+
+"""Cost breakdown details"""
+type CostBreakdown {
+  cartesianProduct: Boolean!
+  variableLengthPath: Boolean!
+  fullTableScan: Boolean!
+  complexAggregation: Boolean!
+}
+
+"""Risk assessment for query"""
+type RiskAssessment {
+  level: RiskLevel!
+  concerns: [String!]!
+  piiFields: [String!]!
+  mutationDetected: Boolean!
+  recommendedActions: [String!]!
+}
+
+"""Glass-box run for full observability"""
+type GlassBoxRun {
+  id: ID!
+  investigationId: String!
+  tenantId: String!
+  userId: String!
+  type: RunType!
+  status: RunStatus!
+  prompt: String!
+  parameters: JSON!
+  steps: [RunStep!]!
+  toolCalls: [ToolCall!]!
+  result: JSON
+  error: String
+  modelUsed: String
+  tokensUsed: Int
+  costEstimate: Float
+  confidence: Float
+  startTime: DateTime!
+  endTime: DateTime
+  durationMs: Int
+  replayable: Boolean!
+  parentRunId: ID
+  replayCount: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Execution step in a run"""
+type RunStep {
+  id: ID!
+  stepNumber: Int!
+  type: StepType!
+  description: String!
+  input: JSON
+  output: JSON
+  error: String
+  metadata: JSON
+  startTime: DateTime!
+  endTime: DateTime
+  durationMs: Int
+}
+
+"""Tool call in a run"""
+type ToolCall {
+  id: ID!
+  name: String!
+  parameters: JSON!
+  result: JSON
+  error: String
+  startTime: DateTime!
+  endTime: DateTime
+  durationMs: Int
+}
+
+"""Result for listing glass-box runs"""
+type GlassBoxRunsResult {
+  runs: [GlassBoxRun!]!
+  total: Int!
+}
+
+"""Query language"""
+enum QueryLanguage {
+  cypher
+  sql
+}
+
+"""Cost level"""
+enum CostLevel {
+  low
+  medium
+  high
+  very_high
+}
+
+"""Risk level"""
+enum RiskLevel {
+  low
+  medium
+  high
+}
+
+"""Run type"""
+enum RunType {
+  graphrag_query
+  nl_to_cypher
+  nl_to_sql
+  subgraph_retrieval
+}
+
+"""Run status"""
+enum RunStatus {
+  pending
+  running
+  completed
+  failed
+  cancelled
+}
+
+"""Step type"""
+enum StepType {
+  prompt
+  tool_call
+  llm_response
+  validation
+  cache_hit
+}
+
+"""JSON scalar type"""
+scalar JSON
+
+"""DateTime scalar type"""
+scalar DateTime

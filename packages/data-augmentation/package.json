@@ -1,0 +1,14 @@
+{
+  "name": "@intelgraph/data-augmentation",
+  "version": "1.0.0",
+  "description": "Comprehensive data augmentation for all modalities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/synthetic-data": "workspace:*",
+    "@intelgraph/text-generation": "workspace:*",
+    "@intelgraph/image-synthesis": "workspace:*",
+    "@intelgraph/audio-synthesis": "workspace:*"
+  }
+}

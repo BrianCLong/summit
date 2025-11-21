@@ -6,6 +6,7 @@
 
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
+const MultimodalFusionLayer = require('./MultimodalFusionLayer');
 
 class MultimodalDataService {
   constructor(neo4jDriver, authService, storageService) {
@@ -23,6 +24,8 @@ class MultimodalDataService {
       crossModalThreshold: 0.7,
       verificationThreshold: 0.8,
     };
+
+    this.fusionLayer = new MultimodalFusionLayer();
 
     this.initializeExtractors();
   }
@@ -70,6 +73,14 @@ class MultimodalDataService {
       mediaTypes: ['AUDIO', 'VIDEO'],
       entityTypes: ['PERSON', 'LOCATION', 'EVENT'],
       confidence: 0.7,
+    });
+
+    this.extractors.set('MULTIMODAL_CLIP', {
+      name: 'CLIP Multimodal Embedding',
+      version: '1.1.0',
+      mediaTypes: ['TEXT', 'IMAGE', 'VIDEO', 'AUDIO', 'DOCUMENT'],
+      entityTypes: ['PERSON', 'ORGANIZATION', 'EVENT', 'OBJECT', 'LOCATION'],
+      confidence: 0.92,
     });
   }
 
@@ -145,6 +156,27 @@ class MultimodalDataService {
         entityData.confidence,
       );
 
+      const mediaDescriptors = await this.fetchMediaDescriptors(
+        session,
+        entityData.extractedFrom,
+      );
+      const embeddingBundle = this.fusionLayer.generateEntityEmbeddings(
+        entityData,
+        mediaDescriptors,
+      );
+      const { overall: fusionConfidence, breakdown: confidenceBreakdown } =
+        this.fusionLayer.computeFusedConfidence(
+          entityData.confidence,
+          embeddingBundle.modalities,
+        );
+      const modalEmbeddings = embeddingBundle.modalities.reduce(
+        (acc, entry) => {
+          acc[entry.modality] = entry.vector;
+          return acc;
+        },
+        {},
+      );
+
       const result = await session.run(
         `
         CREATE (e:MultimodalEntity:Entity {
@@ -160,6 +192,10 @@ class MultimodalDataService {
           boundingBoxes: $boundingBoxes,
           temporalBounds: $temporalBounds,
           spatialContext: $spatialContext,
+          embedding: $embedding,
+          embeddingModalities: $embeddingModalities,
+          fusionConfidence: $fusionConfidence,
+          confidenceBreakdown: $confidenceBreakdown,
           verified: false,
           verifiedBy: null,
           verifiedAt: null,
@@ -197,6 +233,10 @@ class MultimodalDataService {
           boundingBoxes: entityData.boundingBoxes || [],
           temporalBounds: entityData.temporalBounds || [],
           spatialContext: entityData.spatialContext || null,
+          embedding: embeddingBundle.combined,
+          embeddingModalities: modalEmbeddings,
+          fusionConfidence,
+          confidenceBreakdown,
           createdBy: userId,
           mediaSourceIds: entityData.extractedFrom,
           investigationId: entityData.investigationId,
@@ -547,7 +587,7 @@ class MultimodalDataService {
   /**
    * Find cross-modal matches for an entity
    */
-  async findCrossModalMatches(entityId, targetMediaTypes = null) {
+  async findCrossModalMatches(entityId, targetMediaTypes = null, minSimilarity = null) {
     const session = this.driver.session();
 
     try {
@@ -570,6 +610,10 @@ class MultimodalDataService {
 
       const entity = entityResult.records[0].get('e').properties;
       const matches = [];
+      const similarityThreshold =
+        typeof minSimilarity === 'number'
+          ? minSimilarity
+          : this.qualityThresholds.crossModalThreshold;
 
       // Find potential matches based on label similarity and type
       const candidatesResult = await session.run(
@@ -606,10 +650,29 @@ class MultimodalDataService {
         const sourceType = record.get('sourceType');
         const targetType = record.get('targetType');
 
-        const similarity = this.calculateSimilarity(entity, candidate);
+        const similarityFromEmbedding = this.fusionLayer.computeSimilarity(
+          entity.embedding || [],
+          candidate.embedding || [],
+        );
+        const labelSimilarity = this.calculateSimilarity(entity, candidate);
+        const similarity = Math.max(similarityFromEmbedding, labelSimilarity);
 
-        if (similarity >= this.qualityThresholds.crossModalThreshold) {
+        if (similarity >= similarityThreshold) {
           const matchId = uuidv4();
+          const { overall: matchConfidence } = this.fusionLayer.computeFusedConfidence(
+            similarity,
+            [
+              {
+                modality: sourceType || 'SOURCE',
+                confidence: entity.fusionConfidence ?? entity.confidence ?? 0.5,
+              },
+              {
+                modality: targetType || 'TARGET',
+                confidence: candidate.fusionConfidence ?? candidate.confidence ?? 0.5,
+              },
+            ],
+            [similarity],
+          );
 
           await session.run(
             `
@@ -636,8 +699,8 @@ class MultimodalDataService {
               sourceType,
               targetType,
               similarity,
-              matchingFeatures: ['label', 'type'],
-              confidence: similarity,
+              matchingFeatures: ['embedding', 'label', 'type'],
+              confidence: matchConfidence,
             },
           );
 
@@ -645,7 +708,7 @@ class MultimodalDataService {
             id: matchId,
             matchedEntityId: candidate.id,
             similarity,
-            confidence: similarity,
+            confidence: matchConfidence,
           });
         }
       }
@@ -692,6 +755,11 @@ class MultimodalDataService {
         limit: searchInput.limit || 50,
       });
 
+      const queryEmbedding = this.fusionLayer.embedQuery(
+        searchInput.query,
+        searchInput.mediaTypes || [],
+      );
+
       const entities = result.records.map((record) => {
         const entity = this.formatMultimodalEntity(
           record.get('node').properties,
@@ -702,24 +770,182 @@ class MultimodalDataService {
         entity.crossModalMatches = record
           .get('crossModalMatches')
           .map((c) => this.formatCrossModalMatch(c.properties));
+        entity.relevance = this.fusionLayer.computeSimilarity(
+          queryEmbedding,
+          entity.embedding || [],
+        );
         return entity;
       });
 
+      const relationships = this.buildSyntheticRelationships(entities);
+      const mediaSources = this.aggregateMediaSources(entities);
+      const crossModalMatches = entities.flatMap(
+        (entity) => entity.crossModalMatches || [],
+      );
+
+      const confidenceSum = entities.reduce(
+        (sum, entity) => sum + (entity.fusionConfidence ?? entity.confidence ?? 0),
+        0,
+      );
+      const relevanceSum = entities.reduce(
+        (sum, entity) => sum + (entity.relevance ?? 0),
+        0,
+      );
+      const denominator = entities.length || 1;
+      const qualityScore = Number(
+        ((confidenceSum / denominator) * 0.6 + (relevanceSum / denominator) * 0.4).toFixed(3),
+      );
+
       return {
         entities,
-        relationships: [], // TODO: Add relationship search
-        mediaSources: [],
-        crossModalMatches: [],
+        relationships,
+        mediaSources,
+        crossModalMatches,
         totalCount: entities.length,
         searchTime: 0,
-        qualityScore: 1.0,
+        qualityScore,
       };
     } finally {
       await session.close();
     }
   }
 
+  async generateMultimodalTimeline(investigationId, windowHours = 72) {
+    const session = this.driver.session();
+
+    try {
+      const result = await session.run(
+        `
+        MATCH (i:Investigation {id: $investigationId})<-[:BELONGS_TO]-(e:MultimodalEntity)
+        OPTIONAL MATCH (e)-[:EXTRACTED_FROM]->(m:MediaSource)
+        RETURN e, collect(DISTINCT m) as mediaSources
+      `,
+        { investigationId },
+      );
+
+      const rawEvents = [];
+      for (const record of result.records) {
+        const entityProps = record.get('e').properties;
+        const formatted = this.formatMultimodalEntity(entityProps);
+        formatted.description = entityProps.description || null;
+        formatted.properties = entityProps.properties || {};
+        formatted.temporalBounds = entityProps.temporalBounds || [];
+        formatted.mediaSources = record
+          .get('mediaSources')
+          .map((media) => this.formatMediaSource(media.properties));
+
+        const timelineEntries = this.fusionLayer.projectEntityTimeline(formatted, {
+          windowHours,
+        });
+
+        for (const entry of timelineEntries) {
+          rawEvents.push({
+            id: entry.id,
+            entityId: entry.entityId,
+            label: entry.label,
+            description: entry.description,
+            mediaSourceIds: formatted.mediaSources.map((media) => media.id),
+            modalities: entry.modalities,
+            timestamp: entry.timestamp,
+            confidence: entry.confidence,
+            context: {
+              ...entry.context,
+              mediaSources: formatted.mediaSources,
+            },
+          });
+        }
+      }
+
+      const timeline = this.fusionLayer.buildTimeline(rawEvents, { windowHours }).map(
+        (event) => ({
+          id: event.id,
+          entityId: event.entityId,
+          label: event.label,
+          description: event.description,
+          mediaSourceIds: event.mediaSourceIds,
+          modalities: event.modalities,
+          timestamp: event.timestamp.toISOString(),
+          confidence: event.confidence,
+          confidenceLevel: this.determineConfidenceLevel(event.confidence),
+          context: event.context,
+          sequence: event.sequence,
+        }),
+      );
+
+      return timeline;
+    } finally {
+      await session.close();
+    }
+  }
+
   // Helper methods
+
+  async fetchMediaDescriptors(session, mediaSourceIds = []) {
+    if (!Array.isArray(mediaSourceIds) || mediaSourceIds.length === 0) {
+      return [];
+    }
+
+    const result = await session.run(
+      `
+      MATCH (m:MediaSource)
+      WHERE m.id IN $mediaSourceIds
+      RETURN m
+    `,
+      { mediaSourceIds },
+    );
+
+    return result.records.map((record) => record.get('m').properties);
+  }
+
+  aggregateMediaSources(entities) {
+    const seen = new Map();
+    for (const entity of entities) {
+      for (const media of entity.mediaSources || []) {
+        if (media?.id && !seen.has(media.id)) {
+          seen.set(media.id, media);
+        }
+      }
+    }
+    return [...seen.values()];
+  }
+
+  buildSyntheticRelationships(entities) {
+    if (!entities || entities.length === 0) {
+      return [];
+    }
+    const correlations = this.fusionLayer.inferCorrelations(entities);
+    if (correlations.length === 0) {
+      return [];
+    }
+    const entityMap = new Map(entities.map((entity) => [entity.id, entity]));
+    return correlations.map((correlation) => this.mapCorrelationToRelationship(correlation, entityMap));
+  }
+
+  mapCorrelationToRelationship(correlation, entityMap) {
+    const sourceEntity = entityMap.get(correlation.sourceId) || null;
+    const targetEntity = entityMap.get(correlation.targetId) || null;
+    return {
+      id: correlation.id,
+      uuid: correlation.id,
+      type: correlation.type,
+      label: correlation.label,
+      confidence: correlation.confidence,
+      confidenceLevel: this.determineConfidenceLevel(correlation.confidence),
+      extractionMethod: 'MULTIMODAL_CLIP',
+      verified: false,
+      createdAt: new Date().toISOString(),
+      weight: correlation.similarity,
+      properties: { sharedModalities: correlation.sharedModalities },
+      extractedFrom: [],
+      spatialContext: [],
+      temporalContext: [],
+      supportingEvidence: [],
+      validFrom: null,
+      validTo: null,
+      sourceEntity,
+      targetEntity,
+    };
+  }
 
   determineConfidenceLevel(confidence) {
     if (confidence >= 0.9) return 'VERY_HIGH';
@@ -846,6 +1072,10 @@ class MultimodalDataService {
       verified: properties.verified,
       createdAt: properties.createdAt,
       updatedAt: properties.updatedAt,
+      fusionConfidence: properties.fusionConfidence ?? properties.confidence,
+      embedding: properties.embedding || [],
+      embeddingModalities: properties.embeddingModalities || {},
+      confidenceBreakdown: properties.confidenceBreakdown || null,
     };
   }
 
@@ -884,6 +1114,9 @@ class MultimodalDataService {
       confidence: properties.confidence,
       sourceMediaType: properties.sourceMediaType,
       targetMediaType: properties.targetMediaType,
+      matchingFeatures: properties.matchingFeatures || [],
+      algorithm: properties.algorithm || 'label_similarity',
+      computedAt: properties.computedAt || null,
     };
   }
 }

@@ -21,39 +21,41 @@ Our mission: **supercharge development of the MVP** while **always keeping a dep
 
 ## 🔑 Quickstart (30 Minutes to Productive)
 
+**Prereqs:** Docker Desktop ≥ 4.x (8 GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+.
+
 ```bash
 # 1. Clone and enter repo
 git clone https://github.com/BrianCLong/summit.git
 cd summit
 
-# 2. Copy environment config
-cp .env.example .env
+# 2. Bootstrap dependencies + env (seeds .env from .env.example)
+make bootstrap
 
-# 3. Start core environment (minimal hardware)
-make bootstrap && make up
+# 3. Start the stack (API, UI, Postgres, Neo4j, Redis, observability)
+make up
 
-# 4. Run smoke tests (must pass!)
+# 4. Validate the golden path automation
 make smoke
 
-# 5. Optional: Enable AI/Kafka capabilities
-# make up-ai     # For AI processing
+# 5. Optional: AI/Kafka profile
+make up-ai
 ```
 
-- 💡 **Shortcut**: run `./start.sh [--ai]` to execute `make bootstrap && make up && make smoke` with health-gate polling.
-- ✅ If all green → you’re ready to develop!
+- 💡 **Shortcut:** `./start.sh [--ai]` wraps `make bootstrap && make up && make smoke` with health/ready polling; add `--skip-smoke` only when debugging startup issues.
+- ✅ If all green → you’re ready to develop.
 - ❌ If red → fix before coding. No broken builds allowed.
 
 ---
 
 ## 📋 Golden Path Workflow
 
-1. Create a new **Investigation**.
-2. Add **Entities** and **Relationships**.
-3. Import data (CSV or STIX/TAXII).
-4. Run **Copilot Goal**.
-5. Watch live **Events & Results** update in the graph.
+1. Open http://localhost:3000 once `make up` finishes (GraphQL is at http://localhost:4000/graphql for sanity checks).
+2. Create a new **Investigation** from the dashboard using the seeded dataset (`data/golden-path/demo-investigation.json`).
+3. Add **Entities** and **Relationships** with the graph explorer.
+4. Import or review seeded data, then run the **Copilot Goal**.
+5. Observe **Results** and graph updates in real time.
 
-👉 Every developer must be able to demo this flow at any time.
+👉 Every developer must be able to demo **Investigation → Entities → Relationships → Copilot → Results** on demand. `make smoke` executes the same path non-interactively.
 
 ---
 
@@ -101,12 +103,13 @@ make smoke
 ## 📚 Helpful Commands
 
 ```bash
+make help       # show all available commands with descriptions
 make up         # start environment
 make down       # stop & clean
-make seed       # load demo data
-make smoke      # full golden path smoke test
-make smoke-lite # simplified validation (fast)
+make smoke      # full golden path smoke test (validates end-to-end)
 ```
+
+💡 **Tip**: Run `make help` to see all available commands. For detailed command reference, see [docs/COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md).
 
 ---
 
@@ -134,7 +137,47 @@ make smoke-lite # simplified validation (fast)
 - Code covered by tests and instrumentation.
 - Docs reflect reality.
 
+## 🆘 Troubleshooting
+
+### "Docker is not running"
+```bash
+# Check Docker status
+docker info
+
+# If failed, start Docker Desktop and try again
+make up
+```
+
+### "Health checks failing"
+```bash
+# View detailed health status
+curl http://localhost:4000/health/detailed | jq
+
+# Check individual service logs
+docker-compose logs api
+docker-compose logs postgres
+docker-compose logs neo4j
+
+# Nuclear option: clean restart
+make down
+make up
+```
+
+### "Smoke tests failing"
+```bash
+# Run smoke with verbose output
+pnpm smoke
+
+# Check what failed and fix that specific step
+# Golden path: Investigation → Entities → Relationships → Copilot → Results
+
+# After fixing, validate
+make smoke
+```
+
+For more help, see [docs/COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) or ask in #summit-dev.
+
 ---
 
 > ⚡️ Remember: _Ship fast, but ship safe._
-> If it can’t deploy today, it doesn’t merge.
+> If it can't deploy today, it doesn't merge.

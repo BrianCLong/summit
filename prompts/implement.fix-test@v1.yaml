@@ -7,10 +7,11 @@ meta:
     - 'Respect license/TOS of any pasted snippet; cite source or omit'
     - 'If unsure about behavior, create a TODO with hypothesis & confidence'
     - 'Preserve existing test structure and naming conventions'
-  model_requirements:
-    min_context_window: 8000
-    preferred_models: ['gpt-4', 'claude-3-sonnet']
-    max_tokens: 2000
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.0
+  maxTokens: 2000
 
 inputs:
   test_output: string

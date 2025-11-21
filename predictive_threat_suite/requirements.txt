@@ -1,0 +1,44 @@
+# Predictive Threat Suite - Python Dependencies
+
+# Core framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+
+# Scientific computing & ML
+numpy==1.24.3
+scipy==1.11.3
+
+# Metrics and monitoring
+prometheus-client==0.19.0
+
+# HTTP client for testing
+requests==2.31.0
+httpx==0.25.1
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+
+# Data handling
+python-dateutil==2.8.2
+
+# Logging
+python-json-logger==2.0.7
+
+# Optional: Advanced time series forecasting
+# Uncomment these for production use with full ARIMA/Prophet support
+# statsmodels==0.14.0
+# pmdarima==2.0.4
+# prophet==1.1.5
+
+# Optional: Causal inference libraries
+# Uncomment for production causal modeling
+# dowhy==0.11.1
+# causalml==0.15.0
+
+# Development dependencies
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1

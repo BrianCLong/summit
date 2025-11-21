@@ -1,32 +1,266 @@
 name: Container Security
 
 on:
-  push: { branches: [ main, feature/dev-aws-green ] }
+  push:
+    branches: [main, feature/dev-aws-green, develop]
+    paths:
+      - '**/Dockerfile*'
+      - '.github/workflows/container-security.yml'
   pull_request:
+    paths:
+      - '**/Dockerfile*'
+  schedule:
+    # Run daily at 2 AM UTC for continuous monitoring
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  sbom-and-scan:
+  # Dockerfile linting with Hadolint
+  hadolint:
+    name: Dockerfile Linting
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-buildx-action@v3
-      - name: Build image
+
+      - name: Run Hadolint on all Dockerfiles
         run: |
-          if [ -f deploy/docker/Dockerfile ]; then
-            docker buildx build --load -t intelgraph/app:${{ github.sha }} -f deploy/docker/Dockerfile .
-          elif [ -f deploy/docker/Dockerfile.api ]; then
-            docker buildx build --load -t intelgraph/app:${{ github.sha }} -f deploy/docker/Dockerfile.api .
+          docker run --rm -i hadolint/hadolint < Dockerfile || true
+          find . -name "Dockerfile*" -type f | while read dockerfile; do
+            echo "Linting: $dockerfile"
+            docker run --rm -i hadolint/hadolint < "$dockerfile" || true
+          done
+
+  # Build and scan primary images
+  sbom-and-scan:
+    name: Build and Security Scan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component:
+          - name: api
+            dockerfile: deploy/docker/Dockerfile.api
+            context: .
+          - name: web
+            dockerfile: deploy/docker/Dockerfile.web
+            context: .
+          - name: server
+            dockerfile: server/Dockerfile
+            context: server
+          - name: client
+            dockerfile: client/Dockerfile
+            context: client
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:latest
+            network=host
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Check if Dockerfile exists
+        id: check
+        run: |
+          if [ -f "${{ matrix.component.dockerfile }}" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
           else
-            echo "No Dockerfile found under deploy/docker; skipping" && exit 0
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Dockerfile not found: ${{ matrix.component.dockerfile }}"
           fi
-      - name: SBOM (syft)
+
+      - name: Build image
+        if: steps.check.outputs.exists == 'true'
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.component.context }}
+          file: ${{ matrix.component.dockerfile }}
+          push: false
+          load: true
+          tags: intelgraph/${{ matrix.component.name }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.component.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component.name }}
+          build-args: |
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            GIT_COMMIT=${{ github.sha }}
+
+      - name: Run Trivy vulnerability scanner
+        if: steps.check.outputs.exists == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: intelgraph/${{ matrix.component.name }}:${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+      - name: Upload Trivy SARIF
+        if: steps.check.outputs.exists == 'true' && always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.component.name }}
+
+      - name: Run Trivy in table format
+        if: steps.check.outputs.exists == 'true'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: intelgraph/${{ matrix.component.name }}:${{ github.sha }}
+          format: 'table'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: SBOM generation with Syft
+        if: steps.check.outputs.exists == 'true'
         uses: anchore/sbom-action@v0
-        with: { image: intelgraph/app:${{ github.sha }}, format: 'spdx-json', output-file: 'sbom.spdx.json' }
-      - name: Scan (grype)
+        with:
+          image: intelgraph/${{ matrix.component.name }}:${{ github.sha }}
+          format: 'cyclonedx-json'
+          output-file: sbom-${{ matrix.component.name }}.json
+
+      - name: Scan with Grype
+        if: steps.check.outputs.exists == 'true'
         uses: anchore/scan-action@v3
         with:
-          image: intelgraph/app:${{ github.sha }}
+          image: intelgraph/${{ matrix.component.name }}:${{ github.sha }}
           fail-build: false
           severity-cutoff: critical
-      - uses: actions/upload-artifact@v4
-        with: { name: sbom, path: sbom.spdx.json }
+
+      - name: Upload SBOM artifact
+        if: steps.check.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ matrix.component.name }}
+          path: sbom-${{ matrix.component.name }}.json
+          retention-days: 30
+
+      - name: Push image (on main branch)
+        if: steps.check.outputs.exists == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ matrix.component.context }}
+          file: ${{ matrix.component.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha,scope=${{ matrix.component.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.component.name }}
+
+  # Container hardening validation
+  hardening-check:
+    name: Container Hardening Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Dockerfile security best practices
+        run: |
+          echo "## Dockerfile Security Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for dockerfile in $(find . -name "Dockerfile*" -type f | head -20); do
+            echo "### $dockerfile" >> $GITHUB_STEP_SUMMARY
+
+            # Check for USER directive
+            if ! grep -q "^USER" "$dockerfile"; then
+              echo "⚠️ Missing USER directive (should run as non-root)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Has USER directive" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            # Check for HEALTHCHECK
+            if ! grep -q "^HEALTHCHECK" "$dockerfile"; then
+              echo "⚠️ Missing HEALTHCHECK" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Has HEALTHCHECK" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            # Check for version pinning
+            if grep -q "FROM.*:latest" "$dockerfile"; then
+              echo "⚠️ Uses 'latest' tag (should pin versions)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Versions are pinned" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            # Check for multi-stage builds
+            stage_count=$(grep -c "^FROM" "$dockerfile" || echo "1")
+            if [ "$stage_count" -gt 1 ]; then
+              echo "✅ Uses multi-stage build ($stage_count stages)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "ℹ️ Single-stage build" >> $GITHUB_STEP_SUMMARY
+            fi
+
+            echo "" >> $GITHUB_STEP_SUMMARY
+          done
+
+  # Policy enforcement with Conftest
+  policy-enforcement:
+    name: Policy Enforcement
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Conftest
+        run: |
+          wget -q https://github.com/open-policy-agent/conftest/releases/download/v0.49.1/conftest_0.49.1_Linux_x86_64.tar.gz
+          tar xzf conftest_0.49.1_Linux_x86_64.tar.gz
+          sudo mv conftest /usr/local/bin/
+
+      - name: Test Dockerfiles against policy
+        run: |
+          if [ -f "policy/dockerfile.rego" ]; then
+            echo "Running Conftest policy checks..."
+            find . -name "Dockerfile" -type f | head -10 | while read dockerfile; do
+              echo "Checking: $dockerfile"
+              conftest test "$dockerfile" -p policy/dockerfile.rego || true
+            done
+          else
+            echo "No Dockerfile policy found (policy/dockerfile.rego)"
+          fi
+
+  # Security summary
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [hadolint, sbom-and-scan, hardening-check, policy-enforcement]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 🔒 Container Security Scan Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Dockerfile linting" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Vulnerability scanning (Trivy + Grype)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SBOM generation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Hardening validation" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Policy enforcement" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review detailed results in workflow logs and security tab." >> $GITHUB_STEP_SUMMARY

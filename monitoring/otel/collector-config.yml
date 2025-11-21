@@ -1,0 +1,196 @@
+# OpenTelemetry Collector configuration for IntelGraph
+# Collects traces, metrics, and logs from the application and exports them to various backends
+
+receivers:
+  # OTLP receiver for traces and metrics from instrumented applications
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://*"
+            - "https://*"
+
+  # Prometheus receiver to scrape metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 10s
+          static_configs:
+            - targets: ['localhost:8888']
+
+  # Host metrics receiver
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      disk:
+      filesystem:
+        metrics:
+          system.filesystem.utilization:
+            enabled: true
+      network:
+      load:
+      process:
+        mute_process_name_error: true
+
+processors:
+  # Batch processor for efficient data transmission
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Resource detection to add cloud/host metadata
+  resourcedetection:
+    detectors: [env, system, docker]
+    timeout: 5s
+    override: false
+
+  # Attributes processor to add custom labels
+  attributes:
+    actions:
+      - key: service.namespace
+        value: intelgraph
+        action: insert
+      - key: deployment.environment
+        from_attribute: ENV
+        action: upsert
+
+  # Resource processor for environment-specific attributes
+  resource:
+    attributes:
+      - key: host.name
+        from_attribute: host.name
+        action: upsert
+      - key: service.instance.id
+        from_attribute: service.instance.id
+        action: upsert
+
+  # Span metrics processor to generate metrics from traces
+  spanmetrics:
+    metrics_exporter: prometheus
+    latency_histogram_buckets: [2ms, 4ms, 6ms, 8ms, 10ms, 50ms, 100ms, 200ms, 400ms, 800ms, 1s, 1400ms, 2s, 5s, 10s, 15s]
+    dimensions:
+      - name: http.method
+      - name: http.status_code
+      - name: http.route
+      - name: service.name
+    dimensions_cache_size: 1000
+
+  # Filter to remove sensitive data
+  filter:
+    traces:
+      span:
+        - 'attributes["http.url"] == nil'
+    metrics:
+      metric:
+        - 'name == "unwanted.metric"'
+
+exporters:
+  # Prometheus exporter for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: intelgraph
+    const_labels:
+      environment: ${ENV}
+
+  # Prometheus remote write exporter
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    tls:
+      insecure: true
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # OTLP exporter for traces to Jaeger
+  otlp/jaeger:
+    endpoint: jaeger-collector:4317
+    tls:
+      insecure: true
+    sending_queue:
+      num_consumers: 10
+      queue_size: 1000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
+
+  # Logging exporter for debugging (disable in production)
+  logging:
+    loglevel: info
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # File exporter for backup
+  file:
+    path: /var/log/otel/traces.json
+    rotation:
+      max_megabytes: 100
+      max_days: 7
+      max_backups: 3
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: /health
+    check_collector_pipeline:
+      enabled: true
+      interval: 5m
+      exporter_failure_threshold: 5
+
+  # pprof extension for performance profiling
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zpages extension for debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, attributes, resource, batch, spanmetrics]
+      exporters: [otlp/jaeger, logging]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors: [memory_limiter, resourcedetection, attributes, resource, batch]
+      exporters: [prometheusremotewrite, prometheus, logging]
+
+    # Logs pipeline (future use)
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, resourcedetection, attributes, batch]
+      exporters: [logging]
+
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      level: detailed
+      address: 0.0.0.0:8888

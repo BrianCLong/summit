@@ -1,0 +1,28 @@
+{
+  "name": "@summit/operations-c2-service",
+  "version": "1.0.0",
+  "description": "Intelligence operations command and control backend service",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "intelligence",
+    "operations",
+    "command-control",
+    "c2"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/operations-management": "workspace:*",
+    "@intelgraph/collection-coordination": "workspace:*",
+    "@intelgraph/operations-center": "workspace:*",
+    "@intelgraph/multi-int-fusion": "workspace:*",
+    "@intelgraph/targeting-support": "workspace:*",
+    "@intelgraph/decision-support": "workspace:*"
+  }
+}

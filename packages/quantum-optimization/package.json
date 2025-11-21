@@ -1,0 +1,21 @@
+{
+  "name": "@summit/quantum-optimization",
+  "version": "1.0.0",
+  "description": "Quantum-inspired optimization algorithms for Summit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@summit/quantum-simulation": "workspace:*",
+    "mathjs": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.3"
+  }
+}

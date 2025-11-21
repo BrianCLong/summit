@@ -1,0 +1,220 @@
+apiVersion: summit.io/v1
+kind: Pipeline
+metadata:
+  name: ransomware-triage
+  description: Automated ransomware incident triage workflow (converted from RUNBOOK)
+  owners:
+    - incident-response@summit.io
+  tags:
+    domain: security
+    scope: incident-response
+    criticality: critical
+  annotations:
+    runbook: RUNBOOKS/ransomware-triage.yaml
+    playbook_type: incident-response
+    trigger: manual
+
+spec:
+  triggers:
+    - type: manual
+      config:
+        required_approval: true
+        approvers:
+          - soc-lead
+          - incident-commander
+    - type: webhook
+      config:
+        source: siem-alerts
+        filter: 'event.type == "ransomware_detected"'
+
+  inputs:
+    - name: incident_context
+      namespace: postgres://summit-prod/incidents
+    - name: network_telemetry
+      namespace: s3://summit-data/network-logs
+    - name: endpoint_telemetry
+      namespace: s3://summit-data/edr-logs
+
+  outputs:
+    - name: triage_report
+      namespace: s3://summit-data/incident-reports
+    - name: containment_actions
+      namespace: postgres://summit-prod/remediation_actions
+
+  tasks:
+    - id: gather_context
+      name: Gather Incident Context
+      type: python
+      code:
+        module: jobs.incident_response
+        function: gather_ransomware_context
+      params:
+        lookback_hours: 24
+        include_network: true
+        include_endpoint: true
+      timeout: 10m
+
+    - id: identify_patient_zero
+      name: Identify Patient Zero
+      type: python
+      depends_on:
+        - gather_context
+      code:
+        module: jobs.incident_response
+        function: identify_initial_infection
+      params:
+        techniques:
+          - timeline_analysis
+          - process_tree_analysis
+          - network_flow_analysis
+      timeout: 15m
+      resources:
+        cpu: "2"
+        memory: 4Gi
+
+    - id: map_lateral_movement
+      name: Map Lateral Movement
+      type: python
+      depends_on:
+        - identify_patient_zero
+      code:
+        module: jobs.graph_analytics
+        function: trace_lateral_movement
+      params:
+        max_depth: 5
+        include_smb: true
+        include_rdp: true
+        include_wmi: true
+      timeout: 20m
+
+    - id: identify_encrypted_systems
+      name: Identify Encrypted Systems
+      type: python
+      depends_on:
+        - map_lateral_movement
+      code:
+        module: jobs.incident_response
+        function: identify_encrypted_assets
+      params:
+        indicators:
+          - file_extension_changes
+          - ransom_notes
+          - encryption_processes
+      timeout: 10m
+
+    - id: assess_data_exfiltration
+      name: Assess Data Exfiltration
+      type: python
+      depends_on:
+        - gather_context
+      code:
+        module: jobs.incident_response
+        function: detect_exfiltration
+      params:
+        check_dns_tunneling: true
+        check_large_uploads: true
+        check_tor_usage: true
+      timeout: 15m
+
+    - id: generate_containment_plan
+      name: Generate Containment Plan
+      type: python
+      depends_on:
+        - identify_patient_zero
+        - map_lateral_movement
+        - identify_encrypted_systems
+        - assess_data_exfiltration
+      code:
+        module: jobs.incident_response
+        function: generate_containment_plan
+      params:
+        containment_strategy: isolation
+        preserve_forensics: true
+      timeout: 10m
+
+    - id: execute_containment
+      name: Execute Containment Actions
+      type: python
+      depends_on:
+        - generate_containment_plan
+      code:
+        module: jobs.incident_response
+        function: execute_containment
+      params:
+        require_approval: true
+        actions:
+          - network_isolation
+          - account_disablement
+          - edr_containment
+      timeout: 20m
+      env:
+        EDR_API_URL: https://edr.summit.io/api
+        FIREWALL_API_URL: https://firewall.summit.io/api
+
+    - id: generate_triage_report
+      name: Generate Triage Report
+      type: python
+      depends_on:
+        - identify_patient_zero
+        - map_lateral_movement
+        - identify_encrypted_systems
+        - assess_data_exfiltration
+        - execute_containment
+      code:
+        module: jobs.reporting
+        function: generate_incident_report
+      params:
+        format: pdf
+        include_timeline: true
+        include_iocs: true
+        include_recommendations: true
+        recipients:
+          - incident-commander
+          - ciso
+          - legal
+      timeout: 10m
+
+    - id: notify_stakeholders
+      name: Notify Stakeholders
+      type: python
+      depends_on:
+        - generate_triage_report
+      code:
+        module: jobs.notifications
+        function: send_incident_notification
+      params:
+        channels:
+          - slack://incident-response
+          - email://exec-team
+          - pagerduty://ir-team
+        severity: critical
+      timeout: 5m
+
+  governance:
+    budget:
+      per_run_usd: 25.00
+    slo:
+      latency_p95_ms: 3600000  # 1 hour for initial triage
+      success_rate_percent: 100.0
+    policies:
+      - incident-response-logging
+      - chain-of-custody
+      - data-preservation
+
+  observability:
+    openlineage:
+      enabled: true
+      namespace: summit-prod
+    alerts:
+      - condition: "task_failed"
+        channels:
+          - pagerduty://ir-oncall
+          - slack://incident-response
+      - condition: "duration > 1h"
+        channels:
+          - slack://incident-response
+
+  execution:
+    runtime: maestro
+    concurrency: 1
+    catchup: false

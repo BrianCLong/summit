@@ -1,0 +1,46 @@
+{
+  "name": "@summit/cloud-abstraction",
+  "version": "1.0.0",
+  "description": "Cloud-agnostic abstraction layer for multi-cloud deployments",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "multi-cloud",
+    "aws",
+    "azure",
+    "gcp",
+    "abstraction",
+    "cloud-native"
+  ],
+  "author": "Summit Team",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.450.0",
+    "@aws-sdk/client-dynamodb": "^3.450.0",
+    "@aws-sdk/client-sqs": "^3.450.0",
+    "@aws-sdk/client-sns": "^3.450.0",
+    "@aws-sdk/client-secrets-manager": "^3.450.0",
+    "@azure/storage-blob": "^12.17.0",
+    "@azure/cosmos": "^4.0.0",
+    "@azure/service-bus": "^7.9.0",
+    "@azure/keyvault-secrets": "^4.7.0",
+    "@google-cloud/storage": "^7.7.0",
+    "@google-cloud/firestore": "^7.1.0",
+    "@google-cloud/pubsub": "^4.0.0",
+    "@google-cloud/secret-manager": "^5.0.0",
+    "zod": "^3.22.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.0",
+    "eslint": "^8.55.0"
+  }
+}

@@ -54,3 +54,87 @@ export const httpRequestDuration = new Histogram({
   buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
   registers: [registry],
 });
+
+// GraphRAG Query Preview metrics
+export const graphragQueryTotal = new Counter({
+  name: 'intelgraph_graphrag_query_total',
+  help: 'Total GraphRAG queries executed',
+  labelNames: ['status', 'hasPreview'] as const,
+  registers: [registry],
+});
+
+export const graphragQueryDurationMs = new Histogram({
+  name: 'intelgraph_graphrag_query_duration_ms',
+  help: 'GraphRAG query execution duration in milliseconds',
+  labelNames: ['hasPreview'] as const,
+  buckets: [100, 500, 1000, 2000, 5000, 10000, 30000],
+  registers: [registry],
+});
+
+export const queryPreviewsTotal = new Counter({
+  name: 'intelgraph_query_previews_total',
+  help: 'Total query previews generated',
+  labelNames: ['language', 'status'] as const,
+  registers: [registry],
+});
+
+export const queryPreviewLatencyMs = new Histogram({
+  name: 'intelgraph_query_preview_latency_ms',
+  help: 'Query preview generation latency in milliseconds',
+  labelNames: ['language'] as const,
+  buckets: [50, 100, 250, 500, 1000, 2000, 5000],
+  registers: [registry],
+});
+
+export const queryPreviewErrorsTotal = new Counter({
+  name: 'intelgraph_query_preview_errors_total',
+  help: 'Total query preview errors',
+  labelNames: ['language'] as const,
+  registers: [registry],
+});
+
+export const queryPreviewExecutionsTotal = new Counter({
+  name: 'intelgraph_query_preview_executions_total',
+  help: 'Total query preview executions',
+  labelNames: ['language', 'dryRun', 'status'] as const,
+  registers: [registry],
+});
+
+export const glassBoxRunsTotal = new Counter({
+  name: 'intelgraph_glass_box_runs_total',
+  help: 'Total glass-box runs created',
+  labelNames: ['type', 'status'] as const,
+  registers: [registry],
+});
+
+export const glassBoxRunDurationMs = new Histogram({
+  name: 'intelgraph_glass_box_run_duration_ms',
+  help: 'Glass-box run duration in milliseconds',
+  labelNames: ['type'] as const,
+  buckets: [100, 500, 1000, 2000, 5000, 10000, 30000, 60000],
+  registers: [registry],
+});
+
+export const glassBoxCacheHits = new Counter({
+  name: 'intelgraph_glass_box_cache_hits_total',
+  help: 'Total glass-box cache hits',
+  labelNames: ['operation'] as const,
+  registers: [registry],
+});
+
+export const metrics = {
+  jobsProcessed,
+  outboxSyncLatency,
+  activeConnections,
+  databaseQueryDuration,
+  httpRequestDuration,
+  graphragQueryTotal,
+  graphragQueryDurationMs,
+  queryPreviewsTotal,
+  queryPreviewLatencyMs,
+  queryPreviewErrorsTotal,
+  queryPreviewExecutionsTotal,
+  glassBoxRunsTotal,
+  glassBoxRunDurationMs,
+  glassBoxCacheHits,
+};

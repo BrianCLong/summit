@@ -1,0 +1,2 @@
+- Follow repository default TypeScript style (2 spaces, eslint/prettier conventions).
+- Keep adapters free of direct runtime dependencies on vendor SDKs; type-only shims are acceptable.

@@ -334,6 +334,23 @@ class SmokeTest {
     });
 
     // Phase 2: API Health Checks
+    await this.test('Database Schema Verification', async () => {
+      const health = await this.fetchJson(
+        `${config.apiBaseUrl}/health/detailed`,
+      );
+
+      // Check PostgreSQL is healthy
+      if (health.services?.postgres !== 'healthy') {
+        throw new Error(
+          'PostgreSQL is not healthy. Run "make migrate" to initialize schema.',
+        );
+      }
+
+      // Verify critical tables exist by attempting a simple query
+      // The GraphQL API will fail if tables are missing, so this acts as a pre-check
+      await this.log('Schema verification: PostgreSQL healthy', 'info');
+    });
+
     await this.test('GraphQL API Health Check', async () => {
       const result = await this.retryOperation(async () => {
         return await this.graphqlRequest(QUERIES.healthCheck);

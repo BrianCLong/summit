@@ -81,6 +81,26 @@ const userResolvers = {
       // Placeholder: In a real implementation, soft delete user in PostgreSQL
       return true;
     },
+    updateUserPreferences: async (
+      _: any,
+      {
+        userId,
+        preferences,
+      }: { userId: string; preferences: Record<string, any> },
+    ) => {
+      logger.info(
+        `Updating preferences for user ${userId}: ${JSON.stringify(preferences)} (placeholder)`,
+      );
+      // Placeholder: In a real implementation, update user preferences in PostgreSQL
+      // The preferences field should merge with existing preferences, not replace them
+      return {
+        id: userId,
+        email: `user-${userId}@example.com`,
+        username: `user${userId}`,
+        preferences: preferences, // In real impl, this would be merged with existing preferences
+        updatedAt: new Date().toISOString(),
+      };
+    },
   },
 };
 

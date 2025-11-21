@@ -1,0 +1,100 @@
+{
+  "name": "IntelGraph",
+  "displayName": "IntelGraph",
+  "version": "1.0.0",
+  "expo": {
+    "name": "IntelGraph",
+    "slug": "intelgraph",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2563eb"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.intelgraph.mobile",
+      "infoPlist": {
+        "NSCameraUsageDescription": "IntelGraph needs access to your camera to capture photos and videos for evidence documentation.",
+        "NSMicrophoneUsageDescription": "IntelGraph needs access to your microphone to record audio evidence.",
+        "NSPhotoLibraryUsageDescription": "IntelGraph needs access to your photo library to select and upload evidence.",
+        "NSLocationWhenInUseUsageDescription": "IntelGraph needs your location to provide location-based intelligence and geofencing features.",
+        "NSLocationAlwaysUsageDescription": "IntelGraph needs background location access to track movements and provide geofencing alerts.",
+        "NSFaceIDUsageDescription": "IntelGraph uses Face ID to securely authenticate your identity.",
+        "UIBackgroundModes": ["location", "fetch", "remote-notification"]
+      },
+      "config": {
+        "googleMapsApiKey": "${GOOGLE_MAPS_API_KEY_IOS}"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2563eb"
+      },
+      "package": "com.intelgraph.mobile",
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "USE_BIOMETRIC",
+        "USE_FINGERPRINT",
+        "VIBRATE",
+        "WAKE_LOCK",
+        "RECEIVE_BOOT_COMPLETED"
+      ],
+      "config": {
+        "googleMaps": {
+          "apiKey": "${GOOGLE_MAPS_API_KEY_ANDROID}"
+        }
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow IntelGraph to use your location."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow IntelGraph to access your camera."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow IntelGraph to access your photos.",
+          "savePhotosPermission": "Allow IntelGraph to save photos."
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    },
+    "updates": {
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
+  }
+}

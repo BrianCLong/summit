@@ -1,0 +1,266 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "refresh": "Actualizar",
+    "close": "Cerrar",
+    "yes": "Sí",
+    "no": "No",
+    "submit": "Enviar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "continue": "Continuar",
+    "confirm": "Confirmar"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "investigations": "Investigaciones",
+    "graph": "Grafo",
+    "graphWorkbench": "Banco de Trabajo de Grafos",
+    "copilot": "Copiloto",
+    "orchestrator": "Orquestador",
+    "threats": "Evaluación de Amenazas",
+    "disclosures": "Empaquetador de Divulgaciones",
+    "accessIntel": "Inteligencia de Acceso",
+    "geoint": "Inteligencia Geográfica",
+    "reports": "Informes",
+    "settings": "Configuración",
+    "system": "Sistema",
+    "admin": "Administrador"
+  },
+  "auth": {
+    "appTitle": "IntelGraph",
+    "appSubtitle": "Plataforma de Análisis de Inteligencia",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "signIn": "Iniciar Sesión",
+    "signOut": "Cerrar Sesión",
+    "forgotPassword": "¿Olvidó su Contraseña?",
+    "rememberMe": "Recordarme",
+    "demoNotice": "Demo: Ingrese cualquier correo y contraseña para continuar",
+    "loginError": "Por favor ingrese correo electrónico y contraseña",
+    "loginSuccess": "Inicio de sesión exitoso",
+    "logoutSuccess": "Sesión cerrada exitosamente",
+    "sessionExpired": "Su sesión ha expirado. Por favor inicie sesión nuevamente."
+  },
+  "dashboard": {
+    "title": "Panel de Control",
+    "newInvestigation": "Nueva Investigación",
+    "startFromTemplate": "Comenzar desde Plantilla",
+    "sendDemoAlert": "Enviar Alerta de Demostración",
+    "activeInvestigations": "Investigaciones Activas",
+    "totalEntities": "Entidades Totales",
+    "relationships": "Relaciones",
+    "thisMonth": "Este Mes",
+    "recentInvestigations": "Investigaciones Recientes",
+    "entities": "entidades",
+    "entitiesPlural": "{count} entidades",
+    "updated": "Actualizado {time}",
+    "status": {
+      "active": "activo",
+      "pending": "pendiente",
+      "completed": "completado",
+      "archived": "archivado"
+    },
+    "stats": {
+      "activeInvestigations": "Investigaciones Activas",
+      "totalEntities": "Entidades Totales",
+      "relationships": "Relaciones",
+      "monthlyGrowth": "Este Mes"
+    }
+  },
+  "copilot": {
+    "title": "Copiloto Inteligente",
+    "subtitle": "Asistente de Análisis de Inteligencia con IA",
+    "placeholder": "Haga una pregunta o solicite análisis...",
+    "send": "Enviar",
+    "clear": "Limpiar",
+    "quickActions": "Acciones Rápidas",
+    "liveInsights": "Perspectivas en Vivo",
+    "analyzeNetwork": "Analizar Red",
+    "threatAssessment": "Evaluación de Amenazas",
+    "predictPatterns": "Predecir Patrones",
+    "investigationSummary": "Resumen de Investigación",
+    "thinking": "Pensando...",
+    "analyzing": "Analizando...",
+    "generating": "Generando respuesta...",
+    "responses": {
+      "networkAnalysis": {
+        "title": "🔍 **Análisis de Red Completo**",
+        "keyFindings": "**Hallazgos Clave:**",
+        "riskAssessment": "**Evaluación de Riesgos:**",
+        "recommendations": "**Recomendaciones:**",
+        "detected": "Se detectaron {count} grupos de riesgo potenciales en el grafo de relaciones",
+        "centralHub": "{name} parece ser un centro con {percent}% de conectividad",
+        "activitySpike": "Se detectó un pico de actividad inusual en los últimos {days} días"
+      },
+      "threatAssessment": {
+        "title": "🛡️ **Informe de Evaluación de Amenazas**",
+        "currentLevel": "**Nivel de Amenaza Actual: {level}**",
+        "activeThreats": "**Amenazas Activas Identificadas:**",
+        "threatVectors": "**Vectores de Amenaza:**",
+        "mitigation": "**Estrategias de Mitigación:**"
+      },
+      "predictiveAnalysis": {
+        "title": "🔮 **Resultados de Análisis Predictivo**",
+        "patternRecognition": "**Reconocimiento de Patrones:**",
+        "futurePredictions": "**Predicciones Futuras (Próximos {days} días):**",
+        "anomalyAlerts": "**Alertas de Anomalías:**"
+      },
+      "investigationSummary": {
+        "title": "📊 **Resumen de Investigación**",
+        "caseOverview": "**Descripción del Caso:**",
+        "keyEvidence": "**Evidencia Clave:**",
+        "currentStatus": "**Estado Actual:**",
+        "nextSteps": "**Próximos Pasos:**"
+      }
+    },
+    "insights": {
+      "moreConnections": "💡 {name} tiene {percent}% más conexiones que el promedio",
+      "unusualActivity": "⚠️ Actividad inusual detectada en el grupo {cluster}",
+      "personsOfInterest": "🎯 {count} nuevas personas de interés potenciales identificadas",
+      "communicationIncrease": "📈 Los patrones de comunicación muestran un aumento del {percent}%",
+      "crossReference": "🔍 Oportunidad de referencia cruzada con el Caso #{caseId}"
+    }
+  },
+  "investigations": {
+    "title": "Investigaciones",
+    "create": "Crear Investigación",
+    "open": "Abrir",
+    "details": "Detalles",
+    "timeline": "Línea de Tiempo",
+    "evidence": "Evidencia",
+    "notes": "Notas",
+    "collaborate": "Colaborar",
+    "status": "Estado",
+    "priority": "Prioridad",
+    "assignedTo": "Asignado A",
+    "createdBy": "Creado Por",
+    "lastModified": "Última Modificación"
+  },
+  "graph": {
+    "title": "Explorador de Grafos",
+    "nodes": "Nodos",
+    "edges": "Aristas",
+    "paths": "Rutas",
+    "neighbors": "Vecinos",
+    "streaming": "Transmisión",
+    "findPaths": "Buscar Rutas",
+    "shortestPaths": "Rutas Más Cortas",
+    "pathLength": "Longitud de Ruta",
+    "layout": "Diseño",
+    "filters": "Filtros",
+    "expand": "Expandir",
+    "collapse": "Colapsar",
+    "hideSelected": "Ocultar Seleccionados",
+    "showAll": "Mostrar Todo"
+  },
+  "search": {
+    "powerSearch": "Búsqueda Avanzada",
+    "savedSearches": "Búsquedas Guardadas",
+    "bulkActions": "Acciones en Lote",
+    "queryBuilder": "Constructor de Consultas",
+    "addFilter": "Agregar Filtro",
+    "clearFilters": "Limpiar Filtros",
+    "searchPlaceholder": "Buscar entidades, relaciones...",
+    "noResults": "No se encontraron resultados",
+    "searching": "Buscando..."
+  },
+  "reports": {
+    "title": "Informes",
+    "generateReport": "Generar Informe",
+    "executiveSummary": "Resumen Ejecutivo",
+    "forensicsReport": "Informe Forense",
+    "reportTemplate": "Plantilla de Informe",
+    "exportFormat": "Formato de Exportación",
+    "download": "Descargar",
+    "print": "Imprimir",
+    "share": "Compartir"
+  },
+  "settings": {
+    "title": "Configuración",
+    "profile": "Perfil",
+    "preferences": "Preferencias",
+    "security": "Seguridad",
+    "notifications": "Notificaciones",
+    "language": "Idioma",
+    "timezone": "Zona Horaria",
+    "theme": "Tema",
+    "darkMode": "Modo Oscuro",
+    "lightMode": "Modo Claro",
+    "autoMode": "Automático"
+  },
+  "errors": {
+    "genericError": "Ocurrió un error. Por favor intente nuevamente.",
+    "networkError": "Error de red. Por favor verifique su conexión.",
+    "notFound": "No encontrado",
+    "unauthorized": "No está autorizado para acceder a este recurso.",
+    "forbidden": "Acceso prohibido",
+    "serverError": "Error del servidor. Por favor intente más tarde.",
+    "validationError": "Por favor verifique su entrada e intente nuevamente.",
+    "backendConnection": "Falló la conexión con el backend. Verifique si el servidor está funcionando.",
+    "goalNotFound": "Error: Objetivo no encontrado",
+    "runNotFound": "Ejecución no encontrada",
+    "titleRequired": "Título requerido",
+    "feedUrlRequired": "URL de feed requerida",
+    "queryRequired": "Consulta requerida",
+    "translationNotFound": "Clave de traducción \"{key}\" no encontrada",
+    "unknownError": "Error desconocido"
+  },
+  "notifications": {
+    "success": "Éxito",
+    "info": "Información",
+    "warning": "Advertencia",
+    "error": "Error",
+    "saved": "Guardado exitosamente",
+    "deleted": "Eliminado exitosamente",
+    "updated": "Actualizado exitosamente",
+    "created": "Creado exitosamente"
+  },
+  "performance": {
+    "fps": "FPS",
+    "performance": "Rendimiento",
+    "budget": "Presupuesto",
+    "lighthouse": "Lighthouse"
+  },
+  "dates": {
+    "today": "Hoy",
+    "yesterday": "Ayer",
+    "lastWeek": "Última Semana",
+    "lastMonth": "Último Mes",
+    "custom": "Rango Personalizado"
+  },
+  "presence": {
+    "active": "activo",
+    "away": "ausente",
+    "busy": "ocupado",
+    "offline": "desconectado",
+    "usersOnline": "{count} usuarios en línea"
+  },
+  "entities": {
+    "person": "Persona",
+    "organization": "Organización",
+    "location": "Ubicación",
+    "document": "Documento",
+    "event": "Evento",
+    "account": "Cuenta",
+    "device": "Dispositivo",
+    "vehicle": "Vehículo"
+  },
+  "time": {
+    "now": "Ahora",
+    "minutesAgo": "hace {count} minutos",
+    "hoursAgo": "hace {count} horas",
+    "daysAgo": "hace {count} días",
+    "weeksAgo": "hace {count} semanas",
+    "monthsAgo": "hace {count} meses"
+  }
+}

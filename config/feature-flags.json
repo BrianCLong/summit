@@ -1,0 +1,177 @@
+{
+  "$schema": "./feature-flags.schema.json",
+  "version": "1.0.0",
+  "description": "Feature flags configuration for IntelGraph platform",
+  "environments": {
+    "development": {
+      "provider": "local",
+      "config": {
+        "file": "./feature-flags-dev.json"
+      }
+    },
+    "staging": {
+      "provider": "launchdarkly",
+      "config": {
+        "sdkKey": "${LAUNCHDARKLY_SDK_KEY_STAGING}",
+        "timeout": 5000,
+        "streamUri": "https://stream.launchdarkly.com",
+        "baseUri": "https://app.launchdarkly.com"
+      }
+    },
+    "production": {
+      "provider": "launchdarkly",
+      "config": {
+        "sdkKey": "${LAUNCHDARKLY_SDK_KEY_PRODUCTION}",
+        "timeout": 5000,
+        "streamUri": "https://stream.launchdarkly.com",
+        "baseUri": "https://app.launchdarkly.com"
+      }
+    }
+  },
+  "flags": {
+    "new-ui-dashboard": {
+      "key": "new-ui-dashboard",
+      "name": "New UI Dashboard",
+      "description": "Enable the redesigned dashboard UI",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["frontend", "ui", "dashboard"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      }
+    },
+    "advanced-analytics": {
+      "key": "advanced-analytics",
+      "name": "Advanced Analytics Engine",
+      "description": "Enable advanced analytics and ML-powered insights",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["analytics", "ml", "backend"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 10
+      }
+    },
+    "graph-query-optimizer": {
+      "key": "graph-query-optimizer",
+      "name": "Graph Query Optimizer",
+      "description": "Enable experimental query optimization for graph operations",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["performance", "graph", "backend"],
+      "rollout": {
+        "type": "targeted",
+        "rules": [
+          {
+            "attribute": "organization",
+            "operator": "in",
+            "values": ["internal", "beta-testers"]
+          }
+        ]
+      }
+    },
+    "real-time-collaboration": {
+      "key": "real-time-collaboration",
+      "name": "Real-time Collaboration",
+      "description": "Enable real-time collaborative editing features",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["collaboration", "realtime", "frontend"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      }
+    },
+    "api-rate-limit": {
+      "key": "api-rate-limit",
+      "name": "API Rate Limit",
+      "description": "Rate limit configuration for API endpoints",
+      "type": "json",
+      "defaultValue": {
+        "requestsPerMinute": 100,
+        "burstSize": 200
+      },
+      "tags": ["api", "performance", "backend"]
+    },
+    "maintenance-mode": {
+      "key": "maintenance-mode",
+      "name": "Maintenance Mode",
+      "description": "Enable maintenance mode (emergency kill switch)",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["emergency", "operations"],
+      "killSwitch": true
+    },
+    "use-new-auth-flow": {
+      "key": "use-new-auth-flow",
+      "name": "New Authentication Flow",
+      "description": "Enable new OAuth2/OIDC authentication flow",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["security", "auth", "backend"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      }
+    },
+    "experimental-features": {
+      "key": "experimental-features",
+      "name": "Experimental Features",
+      "description": "Enable experimental and preview features",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["experimental"],
+      "rollout": {
+        "type": "targeted",
+        "rules": [
+          {
+            "attribute": "userRole",
+            "operator": "in",
+            "values": ["admin", "developer"]
+          }
+        ]
+      }
+    },
+    "cache-strategy": {
+      "key": "cache-strategy",
+      "name": "Cache Strategy",
+      "description": "Select caching strategy for data layer",
+      "type": "string",
+      "defaultValue": "redis",
+      "allowedValues": ["redis", "memory", "hybrid"],
+      "tags": ["performance", "backend"]
+    },
+    "enable-telemetry": {
+      "key": "enable-telemetry",
+      "name": "Enable Telemetry",
+      "description": "Enable detailed telemetry and tracing",
+      "type": "boolean",
+      "defaultValue": true,
+      "tags": ["observability", "monitoring"]
+    }
+  },
+  "killSwitches": {
+    "emergency-readonly": {
+      "key": "emergency-readonly",
+      "name": "Emergency Read-Only Mode",
+      "description": "Force all users into read-only mode for emergency situations",
+      "defaultValue": false,
+      "tags": ["emergency", "operations"]
+    },
+    "disable-new-signups": {
+      "key": "disable-new-signups",
+      "name": "Disable New Signups",
+      "description": "Temporarily disable new user registrations",
+      "defaultValue": false,
+      "tags": ["emergency", "operations"]
+    },
+    "circuit-breaker-external-api": {
+      "key": "circuit-breaker-external-api",
+      "name": "External API Circuit Breaker",
+      "description": "Disable all external API calls if third-party services are down",
+      "defaultValue": false,
+      "tags": ["emergency", "resilience"]
+    }
+  }
+}

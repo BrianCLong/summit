@@ -1,6 +1,8 @@
 import { Pool } from 'pg';
 import { logger } from '../utils/logger';
 import { config } from '../config';
+import { ModelBenchmarkingService } from '../benchmarking/ModelBenchmarkingService.js';
+import { ModelRegistry } from '../benchmarking/ModelRegistry.js';
 import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs/promises';
@@ -45,7 +47,11 @@ export class TrainingPipeline {
   private pgPool: Pool;
   private modelsDir: string;
 
-  constructor(pgPool: Pool) {
+  constructor(
+    pgPool: Pool,
+    private readonly benchmarkingService?: ModelBenchmarkingService,
+    private readonly modelRegistry?: ModelRegistry,
+  ) {
     this.pgPool = pgPool;
     this.modelsDir = path.join(process.cwd(), 'models');
     this.ensureModelsDirectory();
@@ -231,6 +237,12 @@ export class TrainingPipeline {
         trainingTime: metrics.trainingTime,
       });
 
+      await this.recordPerformanceSnapshot(modelVersion, metrics, {
+        stage: 'training',
+        dataset: 'entity_resolution_feedback',
+        trainingExamples: examples.length,
+      });
+
       // Auto-activate if meets criteria
       if (await this.shouldActivateModel(modelVersion)) {
         await this.activateModel(modelId);
@@ -288,6 +300,25 @@ export class TrainingPipeline {
       const metrics: TrainingMetrics = JSON.parse(metricsData);
 
       logger.info(`Evaluation completed for model ${modelId}:`, metrics);
+
+      await this.recordPerformanceSnapshot(
+        {
+          id: modelId,
+          version: modelVersion.version,
+          modelType: modelVersion.modelType,
+          metrics,
+          isActive: modelVersion.isActive,
+          createdAt: modelVersion.createdAt,
+          modelPath: modelVersion.modelPath,
+          hyperparameters: modelVersion.hyperparameters,
+        },
+        metrics,
+        {
+          stage: 'evaluation',
+          dataset: 'holdout',
+          testExamples: testExamples.length,
+        },
+      );
       return metrics;
     } catch (error) {
       logger.error('Error evaluating model:', error);
@@ -431,6 +462,10 @@ export class TrainingPipeline {
   }
 
   async activateModel(modelId: string): Promise<void> {
+    if (this.modelRegistry) {
+      await this.modelRegistry.setActive(modelId);
+      return;
+    }
     const client = await this.pgPool.connect();
 
     try {
@@ -503,5 +538,34 @@ export class TrainingPipeline {
     // This would integrate with a job scheduler like Bull or Agenda
     logger.info(`Scheduled training for ${modelType} with cron: ${cron}`);
     // Implementation would depend on chosen job scheduler
+  }
+
+  private async recordPerformanceSnapshot(
+    modelVersion: ModelVersion,
+    metrics: TrainingMetrics,
+    context: Record<string, any>,
+  ): Promise<void> {
+    if (!this.benchmarkingService) {
+      return;
+    }
+
+    try {
+      await this.benchmarkingService.recordPerformance({
+        modelVersionId: modelVersion.id,
+        modelType: modelVersion.modelType,
+        accuracy: metrics.accuracy ?? 0,
+        precision: metrics.precision ?? 0,
+        recall: metrics.recall ?? 0,
+        f1Score: metrics.f1Score ?? 0,
+        testSetSize: metrics.totalExamples ?? undefined,
+        evaluationDate: new Date(),
+        evaluationContext: context,
+      });
+    } catch (error) {
+      logger.warn('Failed to record performance snapshot', {
+        modelVersionId: modelVersion.id,
+        error: (error as Error).message,
+      });
+    }
   }
 }

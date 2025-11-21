@@ -89,6 +89,42 @@ gh workflow run "Deploy to AWS Free Tier" \
   --field force_rebuild=true
 ```
 
+## 🧰 Zero-Cost IaC, GitOps, and Observability Options
+
+You can extend the base AWS Free Tier footprint with fully open-source tooling—no
+license fees, only the infrastructure you already run. Two battle-tested
+reference stacks are available depending on how quickly you want to get started
+and how mature your GitOps practices are. A deeper breakdown (with component
+tables and operating tips) lives in
+[../zero-cost-stacks.md](../zero-cost-stacks.md).
+
+### Option A — Minimal, fast to stand up
+
+1. **Provisioning & Configuration**: [OpenTofu](https://opentofu.org/) for IaC,
+   plus Ansible for post-provision configuration and app bootstrapping.
+2. **Kubernetes Scaling**: Cluster Autoscaler (for nodes) and optional
+   [KEDA](https://keda.sh/) for event-driven scale-to-zero workloads.
+3. **Observability**: Prometheus + Alertmanager, Grafana OSS, Loki, and the
+   Prometheus blackbox exporter for uptime probes.
+
+### Option B — Full GitOps control plane
+
+1. **Provisioning**: Crossplane to extend Kubernetes APIs with cloud resources
+   managed from Git.
+2. **GitOps CD**: Argo CD _or_ Flux CD to keep clusters in sync from Git (pick
+   the one that best matches your team’s tooling).
+3. **Observability**: Prometheus + Grafana OSS + Alertmanager, with Grafana
+   Mimir for long-term metrics, Loki for logs, and Tempo for tracing. Route all
+   telemetry via the OpenTelemetry Collector.
+4. **Autoscaling**: KEDA for event-driven workloads alongside the Kubernetes
+   Cluster Autoscaler for nodes.
+
+Both stacks run entirely on free/open-source licenses, so you only pay for the
+compute and storage you already control. Start with Option A when you need quick
+coverage, and graduate to Option B when you want full GitOps guardrails and
+long-term telemetry retention. For mix-and-match guidance, jump to the shared
+reference in [../zero-cost-stacks.md](../zero-cost-stacks.md).
+
 ## 📊 Monitoring & Observability
 
 ### Grafana Dashboards

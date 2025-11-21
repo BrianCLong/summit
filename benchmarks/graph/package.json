@@ -1,0 +1,23 @@
+{
+  "name": "@intelgraph/graph-bench",
+  "version": "0.1.0",
+  "description": "Neo4j graph performance benchmark harness for Summit",
+  "type": "module",
+  "main": "runner/index.js",
+  "scripts": {
+    "bench:quick": "node runner/index.js --size small --scenarios quick",
+    "bench:full": "node runner/index.js --size all --scenarios all",
+    "bench:ci": "node runner/index.js --size small,medium --scenarios ci --budget-check",
+    "bench:profile": "node --inspect runner/index.js --size medium --scenarios all",
+    "report": "node runner/report.js",
+    "clean": "rm -rf reports/*.json reports/*.html"
+  },
+  "dependencies": {
+    "neo4j-driver": "^5.22.0",
+    "pino": "^8.16.0",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

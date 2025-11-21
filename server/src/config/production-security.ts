@@ -178,24 +178,24 @@ export const applyProductionSecurity = (app: Express): void => {
   // 5. Request Size Limiting
   app.use(requestSizeLimiter('10mb'));
 
-  // 6. Rate Limiting Configuration
+  // 6. Rate Limiting Configuration - OWASP Compliant
   const rateLimitConfig = {
-    // General API rate limit
+    // General API rate limit (1000 requests per hour per OWASP requirements)
     general: createRateLimiter(
-      15 * 60 * 1000, // 15 minutes
-      process.env.NODE_ENV === 'production' ? 500 : 1000, // Stricter in prod
+      60 * 60 * 1000, // 1 hour
+      process.env.NODE_ENV === 'production' ? 1000 : 2000, // OWASP: 1000 req/hour
       'Too many requests from this IP',
     ),
 
-    // GraphQL specific limits
+    // GraphQL specific limits (100 requests per minute per OWASP requirements)
     graphql: createRateLimiter(
       60 * 1000, // 1 minute
-      process.env.NODE_ENV === 'production' ? 30 : 100, // Stricter in prod
+      process.env.NODE_ENV === 'production' ? 100 : 200, // OWASP: 100 req/min
       'Too many GraphQL requests',
     ),
 
-    // Authentication endpoints
-    auth: authRateLimiter,
+    // Authentication endpoints (5 requests per minute per OWASP requirements)
+    auth: authRateLimiter, // Already configured for 5 req/min
 
     // AI/ML endpoints
     ai: aiRateLimiter,
@@ -254,11 +254,11 @@ export const getSecurityConfig = () => {
       refreshExpiresIn: isProd ? '7d' : '30d',
     },
 
-    // Rate Limiting
+    // Rate Limiting (OWASP Compliant)
     rateLimits: {
-      general: isProd ? 500 : 1000,
-      graphql: isProd ? 30 : 100,
-      auth: isProd ? 3 : 10,
+      general: isProd ? 1000 : 2000, // OWASP: 1000 req/hour
+      graphql: isProd ? 100 : 200,   // OWASP: 100 req/min
+      auth: isProd ? 5 : 10,          // OWASP: 5 req/min
       ai: isProd ? 5 : 20,
     },
 

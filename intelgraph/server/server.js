@@ -8,20 +8,18 @@ const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 
 // Configuration
-require('dotenv').config();
+const config = require('./src/config');
 
-// Basic configuration
-const config = {
-  env: process.env.NODE_ENV || 'development',
-  port: process.env.PORT || 4000,
-  cors: {
-    origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  },
-  rateLimit: {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000,
-    maxRequests: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100,
-  },
-};
+// Database
+const { connectNeo4j, connectPostgres, connectRedis, closeConnections } = require('./src/config/database');
+
+// Services
+const GraphService = require('./src/services/GraphService');
+const EntityService = require('./src/services/EntityService');
+const GraphAnalysisService = require('./src/services/GraphAnalysisService');
+
+// GraphQL Schema
+const { typeDefs } = require('./src/graphql/schema');
 
 // Simple logger
 const logger = {
@@ -30,81 +28,70 @@ const logger = {
   warn: (message) => console.warn(`[WARN] ${message}`),
 };
 
-// Basic GraphQL schema and resolvers
-const { gql } = require('apollo-server-express');
-const {
-  generateEngagementPlan,
-} = require('./src/modules/activities/engagementPlan');
-
-const typeDefs = gql`
-  type Query {
-    hello: String
-    status: String
-  }
-
-  input ConfigInput {
-    collaborationIntensity: Float
-    engagementAmplification: Float
-    globalDataSync: Boolean
-    hybridCoordination: Boolean
-    integrityThreshold: Float
-    complianceStandard: Boolean
-    opportunityPrecision: Float
-    stabilizationNexus: Float
-    engagementIntensity: Float
-    coherenceScale: Float
-  }
-
-  type EngagementMetric {
-    name: String!
-    label: String!
-    score: Float!
-    trend: Float!
-    summary: String!
-  }
-
-  type EngagementPlanConfig {
-    collaborationIntensity: Float!
-    engagementAmplification: Float!
-    globalDataSync: Boolean!
-    hybridCoordination: Boolean!
-    integrityThreshold: Float!
-    complianceStandard: Boolean!
-    opportunityPrecision: Float!
-    stabilizationNexus: Float!
-    engagementIntensity: Float!
-    coherenceScale: Float!
-  }
-
-  type EngagementPlan {
-    ids: [ID!]!
-    generatedAt: String!
-    metrics: [EngagementMetric!]!
-    highlights: [String!]!
-    recommendedActions: [String!]!
-    config: EngagementPlanConfig!
-  }
-
-  type Mutation {
-    ping: String
-    deployCollaborative(ids: [ID!]!, config: ConfigInput): EngagementPlan!
-  }
-`;
+// Resolvers
+const graphService = new GraphService();
+const entityService = new EntityService();
+const graphAnalysisService = new GraphAnalysisService();
 
 const resolvers = {
   Query: {
     hello: () => 'Hello from IntelGraph Platform!',
     status: () => 'Server is running successfully',
+
+    // Graph Queries
+    graphData: async (_, { investigationId }) => {
+        return await graphService.getInvestigationGraph(investigationId);
+    },
+
+    searchEntities: async (_, { query, investigationId, limit }) => {
+        return await entityService.searchEntities(query, investigationId, limit);
+    },
+
+    // Provenance
+    decision: async (_, { id }) => {
+        return await graphService.getDecisionProvenance(id);
+    }
   },
   Mutation: {
     ping: () => 'pong',
-    deployCollaborative: (_, { ids = [], config }) =>
-      generateEngagementPlan(ids, config),
+
+    // Provenance
+    createDecision: async (_, { input }, context) => {
+        // Mock userId for now if not in context
+        const userId = context.user ? context.user.id : 'unknown-user';
+        return await graphService.createDecision({
+            ...input,
+            userId
+        });
+    }
   },
+  // Resolving Interface/Union types or complex fields would go here
+  GraphNode: {
+      type: (parent) => parent.type || 'CUSTOM' // Fallback
+  }
 };
 
 async function startServer() {
   try {
+    // Connect to Databases
+    try {
+        await connectNeo4j();
+    } catch (e) {
+        logger.warn('Neo4j connection failed, some features will be unavailable.');
+    }
+
+    try {
+        await connectPostgres();
+    } catch (e) {
+         logger.warn('Postgres connection failed.');
+    }
+
+    try {
+        await connectRedis();
+    } catch (e) {
+        logger.warn('Redis connection failed.');
+    }
+
     // Create Express app
     const app = express();
     const httpServer = createServer(app);
@@ -173,9 +160,13 @@ async function startServer() {
           return connection.context;
         }
 
+        // TODO: Extract user from token
+        const user = { id: 'mock-user-id', role: 'ADMIN' };
+
         return {
           req,
           logger,
+          user
         };
       },
     });
@@ -220,6 +211,7 @@ async function startServer() {
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
       await apolloServer.stop();
+      await closeConnections();
       httpServer.close(() => {
         logger.info('Process terminated');
         process.exit(0);

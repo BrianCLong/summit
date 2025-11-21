@@ -4,6 +4,8 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true
+    "allowImportingTsExtensions": false,
+    "types": []
   },
   "include": ["src"],
   "references": [{ "path": "../types" }, { "path": "../ai-core" }]

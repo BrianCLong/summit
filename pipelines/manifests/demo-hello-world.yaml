@@ -1,0 +1,171 @@
+apiVersion: summit.io/v1
+kind: Pipeline
+metadata:
+  name: demo-hello-world
+  description: Simple demo pipeline to validate the unified orchestration system
+  owners:
+    - platform-team@summit.io
+  tags:
+    domain: demo
+    scope: test
+    criticality: low
+  annotations:
+    purpose: End-to-end validation of unified pipeline orchestration
+    demo: "true"
+
+spec:
+  schedule:
+    cron: "*/15 * * * *"  # Every 15 minutes
+    timezone: UTC
+    enabled: false  # Manual trigger only
+
+  inputs:
+    - name: demo_config
+      namespace: file:///home/user/summit/pipelines/demo/config.json
+      facets:
+        schema:
+          fields:
+            - name: message
+              type: string
+            - name: iterations
+              type: integer
+
+  outputs:
+    - name: demo_results
+      namespace: file:///home/user/summit/pipelines/demo/results.json
+    - name: demo_summary
+      namespace: file:///home/user/summit/pipelines/demo/summary.txt
+
+  tasks:
+    - id: setup
+      name: Setup Demo Environment
+      type: python
+      code:
+        command: |
+          import os
+          import json
+          demo_dir = 'pipelines/demo'
+          os.makedirs(demo_dir, exist_ok=True)
+          config = {'message': 'Hello from Summit Pipeline!', 'iterations': 3}
+          with open(f'{demo_dir}/config.json', 'w') as f:
+              json.dump(config, f)
+          print(f'✅ Created demo config: {config}')
+      timeout: 30s
+
+    - id: fetch_data
+      name: Fetch Demo Data
+      type: python
+      depends_on:
+        - setup
+      code:
+        command: |
+          import json
+          with open('pipelines/demo/config.json') as f:
+              config = json.load(f)
+          print(f'📥 Fetched config: {config}')
+          return config
+      timeout: 30s
+
+    - id: process_data
+      name: Process Demo Data
+      type: python
+      depends_on:
+        - fetch_data
+      code:
+        command: |
+          import json
+          import time
+          with open('pipelines/demo/config.json') as f:
+              config = json.load(f)
+
+          results = []
+          for i in range(config['iterations']):
+              result = {
+                  'iteration': i + 1,
+                  'message': f"{config['message']} (iteration {i + 1})",
+                  'timestamp': time.time()
+              }
+              results.append(result)
+              print(f'  ✓ Processed iteration {i + 1}')
+
+          with open('pipelines/demo/results.json', 'w') as f:
+              json.dump(results, f, indent=2)
+
+          print(f'✅ Processed {len(results)} iterations')
+          return results
+      timeout: 1m
+      retry:
+        attempts: 2
+        delay: 5s
+        backoff: exponential
+
+    - id: generate_summary
+      name: Generate Summary Report
+      type: python
+      depends_on:
+        - process_data
+      code:
+        command: |
+          import json
+          from datetime import datetime
+
+          with open('pipelines/demo/results.json') as f:
+              results = json.load(f)
+
+          summary = f"""
+          ==========================================
+          Summit Pipeline Demo - Execution Summary
+          ==========================================
+
+          Executed: {datetime.now().isoformat()}
+          Pipeline: demo-hello-world
+          Total Iterations: {len(results)}
+
+          Results:
+          """
+
+          for result in results:
+              summary += f"\n  • Iteration {result['iteration']}: {result['message']}"
+
+          summary += "\n\n✅ Pipeline completed successfully!\n"
+
+          with open('pipelines/demo/summary.txt', 'w') as f:
+              f.write(summary)
+
+          print(summary)
+          return {'total_iterations': len(results), 'status': 'success'}
+      timeout: 30s
+
+    - id: cleanup
+      name: Cleanup (Optional)
+      type: bash
+      depends_on:
+        - generate_summary
+      code:
+        command: |
+          echo "🧹 Demo pipeline completed. Results available in pipelines/demo/"
+          echo "   - config.json"
+          echo "   - results.json"
+          echo "   - summary.txt"
+      timeout: 10s
+
+  governance:
+    budget:
+      per_run_usd: 0.10
+    slo:
+      latency_p95_ms: 120000  # 2 minutes
+      success_rate_percent: 99.9
+
+  observability:
+    openlineage:
+      enabled: true
+      namespace: summit-demo
+    alerts:
+      - condition: "failure"
+        channels:
+          - stdout
+
+  execution:
+    runtime: local
+    concurrency: 1
+    catchup: false

@@ -1,0 +1,10 @@
+{
+  "name": "@intelgraph/geospatial-synthesis",
+  "version": "1.0.0",
+  "description": "Geospatial data synthesis with privacy preservation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*"
+  }
+}

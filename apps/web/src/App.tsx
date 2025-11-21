@@ -30,6 +30,7 @@ import HelpPage from '@/pages/HelpPage'
 import ChangelogPage from '@/pages/ChangelogPage'
 import SignInPage from '@/pages/SignInPage'
 import AccessDeniedPage from '@/pages/AccessDeniedPage'
+import TriPanePage from '@/pages/TriPanePage'
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -52,6 +53,9 @@ function App() {
                   <Route path="/" element={<Layout />}>
                     <Route index element={<HomePage />} />
                     <Route path="explore" element={<ExplorePage />} />
+
+                    {/* Tri-Pane Analysis */}
+                    <Route path="analysis/tri-pane" element={<TriPanePage />} />
 
                     {/* Alerts */}
                     <Route path="alerts" element={<AlertsPage />} />

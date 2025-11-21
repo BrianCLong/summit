@@ -1,11 +1,36 @@
 version: 2
+
+# OWASP-Compliant Dependabot Configuration
+# Implements automated dependency updates for security compliance
+# Aligned with OWASP A06:2021 - Vulnerable and Outdated Components
+
 updates:
+  # Main NPM dependencies - Weekly updates
   - package-ecosystem: 'npm'
     directory: '/'
-    schedule: { interval: 'weekly', day: 'monday', time: '07:00' }
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '07:00'
+      timezone: 'UTC'
     groups:
+      # Security-critical packages (helmets, crypto, auth)
+      security:
+        patterns:
+          - 'helmet*'
+          - 'express-rate-limit*'
+          - 'jsonwebtoken'
+          - 'argon2*'
+          - 'bcrypt*'
+          - 'crypto*'
+          - 'cors'
+          - '@types/jsonwebtoken'
+        update-types: ['minor', 'patch']
+      # React ecosystem
       react-stack:
         patterns: ['react*', 'react-*-*', 'next*', 'zustand*', 'redux*']
+        update-types: ['minor', 'patch']
+      # Development tooling
       tooling:
         patterns:
           [
@@ -17,20 +42,75 @@ updates:
             'vitest*',
             '@types/*',
           ]
+        update-types: ['minor', 'patch']
+      # UI and graphics libraries
       ui-graphics:
         patterns:
           ['@mui/*', 'three*', 'd3*', 'canvas*', 'mapbox*', 'react-map-gl*']
+        update-types: ['minor', 'patch']
+      # Database drivers and clients
+      database:
+        patterns: ['pg', '@types/pg', 'neo4j-driver', 'ioredis', 'redis']
+        update-types: ['minor', 'patch']
+      # All other minor/patch updates
       minor-patch:
         update-types: ['minor', 'patch']
-    open-pull-requests-limit: 15
-  - package-ecosystem: 'github-actions'
-    directory: '/'
-    schedule: { interval: 'weekly' }
+    open-pull-requests-limit: 20
+    labels: ['dependencies', 'automated']
+    reviewers: ['security-team']
+    commit-message:
+      prefix: 'chore(deps):'
+      include: 'scope'
+
+  # Security-only updates - Daily monitoring
   - package-ecosystem: 'npm'
     directory: '/'
-    schedule: { interval: 'daily' } # security only
-    allow: [{ dependency-type: 'direct' }]
-    labels: ['security-blocker']
+    schedule:
+      interval: 'daily'
+      time: '03:00'
+      timezone: 'UTC'
+    allow:
+      - dependency-type: 'direct'
+      - dependency-type: 'indirect' # Include transitive dependencies for security
+    labels: ['security', 'critical', 'dependencies']
+    reviewers: ['security-team']
+    assignees: ['security-team']
+    commit-message:
+      prefix: 'security(deps):'
+      include: 'scope'
+    # Only security updates
+    open-pull-requests-limit: 10
     ignore:
       - dependency-name: '*'
-        update-types: ['version-update:semver-major'] # security lane only
+        update-types: ['version-update:semver-major'] # Exclude major versions for security lane
+
+  # GitHub Actions - Weekly updates
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '07:00'
+      timezone: 'UTC'
+    labels: ['github-actions', 'dependencies']
+    commit-message:
+      prefix: 'ci(actions):'
+    open-pull-requests-limit: 5
+
+  # Docker (if applicable) - Weekly updates
+  - package-ecosystem: 'docker'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '08:00'
+      timezone: 'UTC'
+    labels: ['docker', 'dependencies']
+    commit-message:
+      prefix: 'build(docker):'
+    open-pull-requests-limit: 5
+
+# Note: Configure Dependabot security updates in repository settings:
+# Settings > Security > Dependabot security updates (Enable)
+# Settings > Security > Dependabot alerts (Enable)
+# Settings > Security > Dependabot rules (Configure auto-merge for patch updates)

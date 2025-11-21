@@ -1,0 +1,187 @@
+# Istio Configuration for Primary Cluster (EKS)
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: primary-cluster
+spec:
+  profile: default
+
+  # Multi-cluster configuration
+  values:
+    global:
+      meshID: summit-mesh
+      multiCluster:
+        clusterName: eks-primary
+      network: network1
+
+      # Mutual TLS
+      mtls:
+        enabled: true
+        auto: true
+
+      # Telemetry
+      tracer:
+        zipkin:
+          address: zipkin.istio-system:9411
+
+      # Proxy configuration
+      proxy:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+
+        # Enable access logging
+        accessLogFile: /dev/stdout
+        accessLogEncoding: JSON
+
+        # Concurrency
+        concurrency: 2
+
+        # Enable Envoy stats
+        enablePrometheusMerge: true
+
+  # Components
+  components:
+    base:
+      enabled: true
+
+    pilot:
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2048Mi
+          limits:
+            cpu: 2000m
+            memory: 4096Mi
+        hpaSpec:
+          minReplicas: 2
+          maxReplicas: 5
+          metrics:
+          - type: Resource
+            resource:
+              name: cpu
+              targetAverageUtilization: 80
+        env:
+        - name: PILOT_ENABLE_WORKLOAD_ENTRY_AUTOREGISTRATION
+          value: "true"
+        - name: PILOT_ENABLE_WORKLOAD_ENTRY_HEALTHCHECKS
+          value: "true"
+
+    ingressGateways:
+    - name: istio-ingressgateway
+      enabled: true
+      k8s:
+        service:
+          type: LoadBalancer
+          ports:
+          - port: 15021
+            targetPort: 15021
+            name: status-port
+          - port: 80
+            targetPort: 8080
+            name: http2
+          - port: 443
+            targetPort: 8443
+            name: https
+          - port: 15443
+            targetPort: 15443
+            name: tls
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+        hpaSpec:
+          minReplicas: 2
+          maxReplicas: 5
+
+    - name: istio-eastwestgateway
+      enabled: true
+      label:
+        istio: eastwestgateway
+        app: istio-eastwestgateway
+        topology.istio.io/network: network1
+      k8s:
+        service:
+          type: LoadBalancer
+          ports:
+          - port: 15021
+            targetPort: 15021
+            name: status-port
+          - port: 15443
+            targetPort: 15443
+            name: tls
+          - port: 15012
+            targetPort: 15012
+            name: tcp-istiod
+          - port: 15017
+            targetPort: 15017
+            name: tcp-webhook
+        env:
+        - name: ISTIO_META_ROUTER_MODE
+          value: "sni-dnat"
+        - name: ISTIO_META_REQUESTED_NETWORK_VIEW
+          value: network1
+
+    egressGateways:
+    - name: istio-egressgateway
+      enabled: true
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 2000m
+            memory: 1024Mi
+
+    cni:
+      enabled: false
+
+  # Mesh config
+  meshConfig:
+    enablePrometheusMerge: true
+
+    # Access logging
+    accessLogFile: /dev/stdout
+    accessLogEncoding: JSON
+
+    # Default config
+    defaultConfig:
+      proxyMetadata: {}
+      tracing:
+        sampling: 1.0
+        zipkin:
+          address: zipkin.istio-system:9411
+
+    # Enable auto mTLS
+    enableAutoMtls: true
+
+    # Service settings
+    defaultServiceExportTo:
+    - "*"
+
+    defaultVirtualServiceExportTo:
+    - "*"
+
+    defaultDestinationRuleExportTo:
+    - "*"
+
+    # Outbound traffic policy
+    outboundTrafficPolicy:
+      mode: ALLOW_ANY
+
+    # Root namespace for config
+    rootNamespace: istio-system
+
+    # Trust domain
+    trustDomain: cluster.local

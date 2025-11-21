@@ -25,6 +25,7 @@ type User {
   id: ID!
   email: String!
   username: String
+  preferences: JSON
   createdAt: DateTime!
   updatedAt: DateTime
 }
@@ -407,6 +408,7 @@ input SemanticSearchFilter {
     deleteRelationship(id: ID!): Boolean!
     createUser(input: UserInput!): User!
     updateUser(id: ID!, input: UserInput!): User!
+    updateUserPreferences(userId: ID!, preferences: JSON!): User!
     deleteUser(id: ID!): Boolean!
     createInvestigation(input: InvestigationInput!): Investigation!
     updateInvestigation(id: ID!, input: InvestigationInput!): Investigation!

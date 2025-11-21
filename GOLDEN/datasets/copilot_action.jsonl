@@ -1,0 +1,2 @@
+{"state": "User account compromised.", "expected_output": "Lock account"}
+{"state": "Database connection failed.", "expected_output": "Check logs"}

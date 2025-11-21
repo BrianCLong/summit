@@ -1,0 +1,232 @@
+# =============================================================================
+# OPTIMIZED MULTI-STAGE DOCKERFILE FOR INTELGRAPH/SUMMIT
+# =============================================================================
+# This Dockerfile implements container best practices:
+# - Multi-stage builds for minimal image size
+# - Layer caching optimization
+# - Security hardening (non-root, distroless base)
+# - Health checks and proper signal handling
+# - Build-time security scanning
+# =============================================================================
+
+# =============================================================================
+# Stage 1: Base Dependencies (cached layer)
+# =============================================================================
+FROM node:20.11.0-alpine3.19 AS base
+
+# Install system dependencies in a single layer
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    cairo-dev \
+    jpeg-dev \
+    pango-dev \
+    musl-dev \
+    giflib-dev \
+    pixman-dev \
+    pangomm-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    ca-certificates && \
+    rm -rf /var/cache/apk/*
+
+WORKDIR /app
+
+# Enable corepack for pnpm support
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# =============================================================================
+# Stage 2: Dependencies Installation (leverages layer caching)
+# =============================================================================
+FROM base AS dependencies
+
+# Copy package files only (optimizes layer caching)
+COPY package.json pnpm-lock.yaml* package-lock.json* ./
+
+# Install dependencies based on available lock file
+RUN if [ -f pnpm-lock.yaml ]; then \
+        pnpm install --frozen-lockfile --prod; \
+    elif [ -f package-lock.json ]; then \
+        npm ci --only=production --no-audit --no-fund; \
+    else \
+        npm install --only=production --no-audit --no-fund; \
+    fi && \
+    # Clean npm cache
+    npm cache clean --force
+
+# =============================================================================
+# Stage 3: Build Stage
+# =============================================================================
+FROM base AS builder
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* package-lock.json* ./
+
+# Install ALL dependencies (including devDependencies for build)
+RUN if [ -f pnpm-lock.yaml ]; then \
+        pnpm install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then \
+        npm ci --no-audit --no-fund; \
+    else \
+        npm install --no-audit --no-fund; \
+    fi
+
+# Copy source code
+COPY . .
+
+# Build the application (if TypeScript or build step exists)
+RUN if [ -f "tsconfig.json" ]; then \
+        npm run build 2>/dev/null || pnpm build 2>/dev/null || true; \
+    fi
+
+# =============================================================================
+# Stage 4: Security Scanning (optional, can be skipped in dev)
+# =============================================================================
+FROM aquasec/trivy:latest AS security-scan
+
+COPY --from=builder /app /scan
+
+# Run Trivy scan (informational, doesn't fail build)
+RUN trivy fs --no-progress --format table --exit-code 0 /scan || true
+
+# =============================================================================
+# Stage 5: Production Runtime (Distroless)
+# =============================================================================
+FROM gcr.io/distroless/nodejs20-debian12:nonroot AS production-distroless
+
+# Labels for image metadata and security tracking
+LABEL org.opencontainers.image.source="https://github.com/BrianCLong/summit" \
+      org.opencontainers.image.title="intelgraph-summit" \
+      org.opencontainers.image.description="AI-augmented intelligence analysis platform" \
+      org.opencontainers.image.vendor="IntelGraph" \
+      security.scan="trivy" \
+      security.distroless="true" \
+      security.nonroot="true" \
+      security.readonly-rootfs="recommended"
+
+# Environment variables
+ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=2048 --enable-source-maps" \
+    PORT=4000
+
+WORKDIR /app
+
+# Copy production dependencies
+COPY --from=dependencies --chown=65532:65532 /app/node_modules ./node_modules
+
+# Copy built application
+COPY --from=builder --chown=65532:65532 /app/dist ./dist 2>/dev/null || true
+COPY --from=builder --chown=65532:65532 /app/src ./src 2>/dev/null || true
+COPY --from=builder --chown=65532:65532 /app/*.js . 2>/dev/null || true
+COPY --from=builder --chown=65532:65532 /app/package.json ./
+
+# Health check (distroless includes curl alternative)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD ["/nodejs/bin/node", "-e", "require('http').get('http://localhost:4000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+
+# Use non-root user (distroless nonroot = 65532)
+USER 65532:65532
+
+EXPOSE 4000
+
+# Start application (adjust based on your entry point)
+CMD ["dist/index.js"]
+
+# =============================================================================
+# Stage 6: Production Runtime (Alpine) - Alternative to distroless
+# =============================================================================
+FROM node:20.11.0-alpine3.19 AS production-alpine
+
+# Security hardening
+RUN apk add --no-cache \
+    dumb-init \
+    curl \
+    ca-certificates && \
+    rm -rf /var/cache/apk/* && \
+    # Create non-root user
+    addgroup -g 1001 -S nodejs && \
+    adduser -S intelgraph -u 1001 -G nodejs -s /sbin/nologin
+
+# Labels
+LABEL org.opencontainers.image.source="https://github.com/BrianCLong/summit" \
+      org.opencontainers.image.title="intelgraph-summit-alpine" \
+      security.scan="trivy" \
+      security.nonroot="true"
+
+ENV NODE_ENV=production \
+    NODE_OPTIONS="--max-old-space-size=2048" \
+    PORT=4000
+
+WORKDIR /app
+
+# Copy production dependencies and application
+COPY --from=dependencies --chown=1001:1001 /app/node_modules ./node_modules
+COPY --from=builder --chown=1001:1001 /app/dist ./dist 2>/dev/null || true
+COPY --from=builder --chown=1001:1001 /app/src ./src 2>/dev/null || true
+COPY --from=builder --chown=1001:1001 /app/*.js . 2>/dev/null || true
+COPY --from=builder --chown=1001:1001 /app/package.json ./
+
+# Set file permissions (read-only for security)
+RUN chmod -R 555 /app && \
+    mkdir -p /tmp/app && \
+    chown 1001:1001 /tmp/app && \
+    chmod 755 /tmp/app
+
+USER 1001:1001
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/health || wget -q -O- http://localhost:${PORT}/health || exit 1
+
+EXPOSE 4000
+
+# Use dumb-init for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["node", "src/index.ts"]
+
+# =============================================================================
+# Stage 7: Development Runtime
+# =============================================================================
+FROM base AS development
+
+# Install development tools
+RUN apk add --no-cache \
+    git \
+    curl \
+    vim && \
+    npm install -g nodemon tsx && \
+    rm -rf /var/cache/apk/*
+
+# Create non-root user for development
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S devuser -u 1001 -G nodejs
+
+WORKDIR /app
+RUN chown -R devuser:nodejs /app
+
+USER devuser
+
+# Copy package files
+COPY --chown=devuser:nodejs package.json pnpm-lock.yaml* package-lock.json* ./
+
+# Install all dependencies (including dev)
+RUN if [ -f pnpm-lock.yaml ]; then \
+        pnpm install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then \
+        npm ci; \
+    else \
+        npm install; \
+    fi
+
+# Copy source code
+COPY --chown=devuser:nodejs . .
+
+# Create necessary directories
+RUN mkdir -p uploads logs tmp
+
+EXPOSE 4000 9229
+
+# Health check for development
+HEALTHCHECK --interval=30s --timeout=10s CMD curl -f http://localhost:4000/health || exit 1
+
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,356 @@
+# Common values template for all Summit charts
+# This file provides defaults for observability, security, and operational excellence
+# Charts should import and override these values as needed
+
+# ============================================================================
+# OpenTelemetry Configuration
+# ============================================================================
+opentelemetry:
+  enabled: true
+
+  # OTEL Collector endpoint
+  collector:
+    endpoint: "otel-collector.observability.svc.cluster.local:4317"
+    protocol: grpc  # grpc or http
+
+  # Sampling configuration
+  sampling:
+    type: "parentbased_traceidratio"
+    ratio: 1.0  # 100% in dev, reduce in prod
+
+  # Resource attributes
+  resource:
+    attributes:
+      service.namespace: "summit"
+      deployment.environment: "dev"  # Override per environment
+
+  # Instrumentation
+  instrumentation:
+    # Automatic instrumentation via init containers
+    auto: true
+    # Manual SDK configuration
+    sdk:
+      traces:
+        enabled: true
+        exporter: otlp
+      metrics:
+        enabled: true
+        exporter: otlp
+      logs:
+        enabled: true
+        exporter: otlp
+
+  # Environment variables for OTEL SDK
+  env:
+    - name: OTEL_EXPORTER_OTLP_ENDPOINT
+      value: "http://otel-collector.observability.svc.cluster.local:4317"
+    - name: OTEL_EXPORTER_OTLP_PROTOCOL
+      value: "grpc"
+    - name: OTEL_TRACES_SAMPLER
+      value: "parentbased_traceidratio"
+    - name: OTEL_TRACES_SAMPLER_ARG
+      value: "1.0"
+    - name: OTEL_METRICS_EXPORTER
+      value: "otlp"
+    - name: OTEL_LOGS_EXPORTER
+      value: "otlp"
+    - name: OTEL_SERVICE_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.labels['app.kubernetes.io/name']
+    - name: OTEL_RESOURCE_ATTRIBUTES
+      value: "service.namespace=summit,deployment.environment=dev"
+
+# ============================================================================
+# Prometheus Configuration
+# ============================================================================
+prometheus:
+  enabled: true
+
+  # ServiceMonitor for Prometheus Operator
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+    scrapeTimeout: 10s
+    path: /metrics
+    port: metrics
+    labels:
+      prometheus: kube-prometheus
+    relabelings: []
+    metricRelabelings: []
+
+  # PrometheusRule for alerts
+  prometheusRule:
+    enabled: true
+    namespace: monitoring
+    labels:
+      prometheus: kube-prometheus
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+            /
+            sum(rate(http_requests_total[5m])) by (service)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate detected"
+          description: "Service {{ $labels.service }} has error rate above 5%"
+
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod is crash looping"
+          description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is crash looping"
+
+  # Metrics port configuration
+  metrics:
+    port: 9090
+    enabled: true
+
+# ============================================================================
+# Feature Flags Configuration
+# ============================================================================
+featureFlags:
+  enabled: true
+
+  # Provider: flagd, launchdarkly, unleash, split
+  provider: "flagd"
+
+  # Flagd configuration (open-source)
+  flagd:
+    enabled: true
+    endpoint: "flagd.summit.svc.cluster.local:8013"
+    socketPath: ""
+    # Sync provider
+    sync:
+      provider: kubernetes
+      uri: "core.openfeature.dev/summit/feature-flags"
+
+  # LaunchDarkly configuration (commercial)
+  launchdarkly:
+    enabled: false
+    sdkKeySecretName: "launchdarkly-sdk-key"
+    sdkKeySecretKey: "sdk-key"
+    streamUri: "https://stream.launchdarkly.com"
+    baseUri: "https://app.launchdarkly.com"
+
+  # Default flags (overridden by provider)
+  defaults:
+    enableNewUI: false
+    enableBetaFeatures: false
+    enableAdvancedAnalytics: true
+    enableDistributedTracing: true
+
+  # Environment variables for feature flag SDK
+  env:
+    - name: FEATURE_FLAGS_ENABLED
+      value: "true"
+    - name: FEATURE_FLAGS_PROVIDER
+      value: "flagd"
+    - name: FLAGD_HOST
+      value: "flagd.summit.svc.cluster.local"
+    - name: FLAGD_PORT
+      value: "8013"
+
+# ============================================================================
+# Security Configuration
+# ============================================================================
+security:
+  # Pod Security Context
+  podSecurityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 3000
+    fsGroup: 2000
+    seccompProfile:
+      type: RuntimeDefault
+
+  # Container Security Context
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1000
+    capabilities:
+      drop:
+        - ALL
+      add:
+        - NET_BIND_SERVICE
+
+  # Network Policies
+  networkPolicy:
+    enabled: true
+    policyTypes:
+      - Ingress
+      - Egress
+    ingress:
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                name: ingress-nginx
+        ports:
+          - protocol: TCP
+            port: 8080
+      - from:
+          - namespaceSelector:
+              matchLabels:
+                name: monitoring
+        ports:
+          - protocol: TCP
+            port: 9090
+    egress:
+      # DNS
+      - to: []
+        ports:
+          - protocol: UDP
+            port: 53
+      # HTTPS
+      - to: []
+        ports:
+          - protocol: TCP
+            port: 443
+
+  # Service Account
+  serviceAccount:
+    create: true
+    automount: true
+    annotations: {}
+
+# ============================================================================
+# Secrets Management
+# ============================================================================
+secrets:
+  # External Secrets Operator
+  externalSecrets:
+    enabled: true
+    backend: "aws-secretsmanager"  # aws-secretsmanager, vault, gcpsm, azure-keyvault
+
+    # AWS Secrets Manager
+    awsSecretsManager:
+      region: "us-east-1"
+      roleArn: ""
+
+    # Vault
+    vault:
+      server: "http://vault.vault.svc.cluster.local:8200"
+      path: "secret"
+      roleArn: ""
+
+    # Refresh interval
+    refreshInterval: "1h"
+
+  # Sealed Secrets (alternative)
+  sealedSecrets:
+    enabled: false
+    controllerName: "sealed-secrets-controller"
+    controllerNamespace: "kube-system"
+
+# ============================================================================
+# High Availability Configuration
+# ============================================================================
+highAvailability:
+  # Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 1
+    # maxUnavailable: 1
+
+  # Pod Anti-Affinity
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+
+  # Autoscaling
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+# ============================================================================
+# Health Probes
+# ============================================================================
+probes:
+  # Startup probe
+  startup:
+    enabled: true
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 30
+
+  # Liveness probe
+  liveness:
+    enabled: true
+    httpGet:
+      path: /healthz
+      port: http
+    initialDelaySeconds: 15
+    periodSeconds: 10
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 3
+
+  # Readiness probe
+  readiness:
+    enabled: true
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 3
+
+# ============================================================================
+# Resource Management
+# ============================================================================
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+# ============================================================================
+# Zero Trust / Service Mesh
+# ============================================================================
+serviceMesh:
+  enabled: false
+  type: "istio"  # istio, linkerd, consul
+
+  # Istio configuration
+  istio:
+    injection: enabled  # Label for automatic sidecar injection
+    mtls:
+      mode: STRICT
+
+  # Linkerd configuration
+  linkerd:
+    injection: enabled
+
+# ============================================================================
+# Backup and Disaster Recovery
+# ============================================================================
+backup:
+  enabled: false
+  schedule: "0 2 * * *"  # 2 AM daily
+  retention: 30  # days
+  destination: "s3://backups/summit"

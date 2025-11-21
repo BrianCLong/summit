@@ -1,0 +1,22 @@
+{
+  "name": "@intelgraph/graph-compute",
+  "version": "1.0.0",
+  "description": "Graph analytics compute service with worker pool",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/graph-analytics": "workspace:*",
+    "redis": "^4.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^20.0.0"
+  },
+  "type": "module"
+}

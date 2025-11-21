@@ -8,6 +8,7 @@
     "isolatedModules": true,
     "noEmit": false,
     "declaration": true,
+    "allowImportingTsExtensions": false,
     "outDir": "../../dist/services/build-hub",
     "rootDir": "src",
     "removeComments": true,

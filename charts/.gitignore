@@ -1,0 +1,50 @@
+# Charts .gitignore - Extra protection for secrets
+# CRITICAL: Never commit secrets to Git!
+
+# Secret values files (except examples)
+secrets.yaml
+secrets.*.yaml
+*-secrets.yaml
+secret-values.yaml
+values.secrets.yaml
+
+# Packaged charts
+*.tgz
+dist/
+
+# Chart dependencies
+charts/
+Chart.lock
+
+# Generated files
+*.tmp
+*.swp
+*.swo
+
+# Kubernetes config
+kubeconfig
+kubeconfig.*
+*.kubeconfig
+
+# Environment-specific secrets (keep templates)
+values.local.yaml
+values.*.local.yaml
+
+# External Secrets (actual secrets, not manifests)
+external-secrets-data.yaml
+
+# Helm secrets plugin files
+secrets.*.dec
+secrets.dec
+
+# Age keys
+age.key
+age.*.key
+
+# SOPS keys
+.sops.yaml.local
+sops.key
+
+# Testing artifacts
+test-output/
+.test-cache/

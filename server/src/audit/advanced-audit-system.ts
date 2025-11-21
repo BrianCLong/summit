@@ -1109,3 +1109,13 @@ export class AdvancedAuditSystem extends EventEmitter {
     this.logger.info('Audit system shutdown complete');
   }
 }
+
+// Export singleton instance
+// Note: This instance should be initialized with proper DB and Redis connections
+// For now, export the class and let consumers create instances as needed
+export const advancedAuditSystem = {
+  logEvent: async (event: Partial<AuditEvent>) => {
+    // Stub implementation - in production this would use the actual AdvancedAuditSystem instance
+    console.log('Audit event:', event);
+  },
+};

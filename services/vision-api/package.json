@@ -1,0 +1,41 @@
+{
+  "name": "@intelgraph/vision-api",
+  "version": "1.0.0",
+  "description": "Unified Computer Vision API Service for IntelGraph Platform",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/computer-vision": "workspace:*",
+    "@intelgraph/object-detection": "workspace:*",
+    "@intelgraph/face-analysis": "workspace:*",
+    "@intelgraph/ocr": "workspace:*",
+    "@intelgraph/satellite-imagery": "workspace:*",
+    "@intelgraph/video-analysis": "workspace:*",
+    "@intelgraph/image-forensics": "workspace:*",
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "helmet": "^8.0.0",
+    "multer": "^1.4.5-lts.1",
+    "zod": "^4.1.12",
+    "winston": "^3.17.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "tsx": "^4.19.2",
+    "@types/express": "^5.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.14.0",
+    "jest": "^30.2.0",
+    "eslint": "^9.39.1"
+  }
+}

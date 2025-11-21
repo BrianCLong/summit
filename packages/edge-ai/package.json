@@ -1,0 +1,47 @@
+{
+  "name": "@intelgraph/edge-ai",
+  "version": "1.0.0",
+  "description": "Edge AI and ML inference capabilities with model optimization",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "edge-ai",
+    "ml-inference",
+    "tensorflow-lite",
+    "onnx",
+    "model-optimization"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/edge-computing": "workspace:*",
+    "pino": "^8.17.2",
+    "eventemitter3": "^5.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0"
+  },
+  "peerDependencies": {
+    "onnxruntime-node": "^1.16.0",
+    "@tensorflow/tfjs-node": "^4.15.0"
+  },
+  "peerDependenciesMeta": {
+    "onnxruntime-node": {
+      "optional": true
+    },
+    "@tensorflow/tfjs-node": {
+      "optional": true
+    }
+  }
+}

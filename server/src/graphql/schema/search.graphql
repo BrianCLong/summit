@@ -1,0 +1,693 @@
+# Search Types and Queries
+
+"""
+Search query input for full-text, semantic, and hybrid search
+"""
+input SearchQueryInput {
+  """
+  Search query text
+  """
+  query: String!
+
+  """
+  Type of search to perform
+  """
+  searchType: SearchType = FULLTEXT
+
+  """
+  Filters to apply to the search
+  """
+  filters: SearchFiltersInput
+
+  """
+  Sorting options
+  """
+  sort: SortOptionsInput
+
+  """
+  Pagination options
+  """
+  pagination: PaginationInput
+
+  """
+  Boost configuration for relevance scoring
+  """
+  boost: BoostConfigInput
+
+  """
+  Facets to include in the response
+  """
+  facets: [String!]
+
+  """
+  Highlighting configuration
+  """
+  highlight: HighlightConfigInput
+}
+
+"""
+Search type enumeration
+"""
+enum SearchType {
+  """
+  Full-text search with fuzzy matching
+  """
+  FULLTEXT
+
+  """
+  Semantic/vector search based on meaning
+  """
+  SEMANTIC
+
+  """
+  Hybrid search combining fulltext and semantic
+  """
+  HYBRID
+
+  """
+  Fuzzy search for approximate matching
+  """
+  FUZZY
+}
+
+"""
+Search filters input
+"""
+input SearchFiltersInput {
+  """
+  Date range filter
+  """
+  dateRange: DateRangeFilterInput
+
+  """
+  Entity types to filter by
+  """
+  entityTypes: [String!]
+
+  """
+  Sources to filter by
+  """
+  sources: [String!]
+
+  """
+  Tags to filter by
+  """
+  tags: [String!]
+
+  """
+  Confidence score range
+  """
+  confidence: ConfidenceRangeInput
+
+  """
+  Custom filters as key-value pairs
+  """
+  custom: JSON
+}
+
+"""
+Date range filter input
+"""
+input DateRangeFilterInput {
+  """
+  Field name to filter on
+  """
+  field: String!
+
+  """
+  Start date (ISO 8601 format)
+  """
+  from: String
+
+  """
+  End date (ISO 8601 format)
+  """
+  to: String
+}
+
+"""
+Confidence range filter input
+"""
+input ConfidenceRangeInput {
+  """
+  Minimum confidence score (0-1)
+  """
+  min: Float
+
+  """
+  Maximum confidence score (0-1)
+  """
+  max: Float
+}
+
+"""
+Sort options input
+"""
+input SortOptionsInput {
+  """
+  Field to sort by
+  """
+  field: String!
+
+  """
+  Sort order
+  """
+  order: SortOrder = DESC
+
+  """
+  Aggregation mode for multi-valued fields
+  """
+  mode: SortMode
+}
+
+"""
+Sort order enumeration
+"""
+enum SortOrder {
+  ASC
+  DESC
+}
+
+"""
+Sort mode for multi-valued fields
+"""
+enum SortMode {
+  MIN
+  MAX
+  SUM
+  AVG
+  MEDIAN
+}
+
+"""
+Pagination input
+"""
+input PaginationInput {
+  """
+  Page number (1-indexed)
+  """
+  page: Int = 1
+
+  """
+  Number of results per page
+  """
+  size: Int = 20
+
+  """
+  Scroll cursor for large result sets
+  """
+  scroll: String
+}
+
+"""
+Boost configuration for relevance scoring
+"""
+input BoostConfigInput {
+  """
+  Field boost factors
+  """
+  fields: JSON
+
+  """
+  Function-based boost configurations
+  """
+  functions: [BoostFunctionInput!]
+}
+
+"""
+Boost function input
+"""
+input BoostFunctionInput {
+  """
+  Function type
+  """
+  type: String!
+
+  """
+  Field to apply function to
+  """
+  field: String
+
+  """
+  Boost factor
+  """
+  factor: Float
+
+  """
+  Modifier function
+  """
+  modifier: String
+
+  """
+  Default value for missing fields
+  """
+  missing: Float
+}
+
+"""
+Highlight configuration input
+"""
+input HighlightConfigInput {
+  """
+  Fields to highlight
+  """
+  fields: [String!]!
+
+  """
+  Fragment size in characters
+  """
+  fragmentSize: Int = 150
+
+  """
+  Number of fragments to return
+  """
+  numberOfFragments: Int = 3
+
+  """
+  HTML tags to wrap highlights (opening)
+  """
+  preTags: [String!]
+
+  """
+  HTML tags to wrap highlights (closing)
+  """
+  postTags: [String!]
+}
+
+"""
+Search response
+"""
+type SearchResponse {
+  """
+  Original search query
+  """
+  query: SearchQueryInput!
+
+  """
+  Search results
+  """
+  results: [SearchResult!]!
+
+  """
+  Total number of results
+  """
+  total: SearchTotal!
+
+  """
+  Execution time in milliseconds
+  """
+  took: Int!
+
+  """
+  Whether the query timed out
+  """
+  timedOut: Boolean!
+
+  """
+  Faceted aggregations
+  """
+  facets: JSON
+
+  """
+  Query suggestions and spelling corrections
+  """
+  suggestions: [SearchSuggestion!]
+
+  """
+  Scroll ID for pagination
+  """
+  scrollId: String
+}
+
+"""
+Search result item
+"""
+type SearchResult {
+  """
+  Result ID
+  """
+  id: ID!
+
+  """
+  Result type
+  """
+  type: SearchResultType!
+
+  """
+  Relevance score
+  """
+  score: Float!
+
+  """
+  Source document
+  """
+  source: JSON!
+
+  """
+  Highlighted fields
+  """
+  highlight: JSON
+
+  """
+  Score explanation (for debugging)
+  """
+  explanation: JSON
+}
+
+"""
+Search result type enumeration
+"""
+enum SearchResultType {
+  ENTITY
+  CASE
+  DOCUMENT
+  COMMENT
+  EVENT
+}
+
+"""
+Total results information
+"""
+type SearchTotal {
+  """
+  Total count value
+  """
+  value: Int!
+
+  """
+  Relation to actual count (eq = exact, gte = lower bound)
+  """
+  relation: String!
+}
+
+"""
+Search suggestion
+"""
+type SearchSuggestion {
+  """
+  Suggested text
+  """
+  text: String!
+
+  """
+  Suggestion score
+  """
+  score: Float!
+
+  """
+  Frequency in index
+  """
+  freq: Int
+}
+
+"""
+Autocomplete suggestion
+"""
+type AutocompleteSuggestion {
+  """
+  Suggestion text
+  """
+  text: String!
+
+  """
+  Result type
+  """
+  type: SearchResultType!
+
+  """
+  Relevance score
+  """
+  score: Float!
+
+  """
+  Highlighted text
+  """
+  highlight: JSON
+}
+
+"""
+Saved search
+"""
+type SavedSearch {
+  """
+  Saved search ID
+  """
+  id: ID!
+
+  """
+  Search name
+  """
+  name: String!
+
+  """
+  Search description
+  """
+  description: String
+
+  """
+  Search query configuration
+  """
+  query: JSON!
+
+  """
+  User who saved the search
+  """
+  userId: String!
+
+  """
+  Whether the search is public
+  """
+  isPublic: Boolean!
+
+  """
+  Tags for categorizing searches
+  """
+  tags: [String!]!
+
+  """
+  Number of times executed
+  """
+  executionCount: Int!
+
+  """
+  Last execution timestamp
+  """
+  lastExecuted: String
+
+  """
+  Created timestamp
+  """
+  createdAt: String!
+
+  """
+  Updated timestamp
+  """
+  updatedAt: String!
+}
+
+"""
+Search metrics and analytics
+"""
+type SearchMetrics {
+  """
+  Total number of queries
+  """
+  totalQueries: Int!
+
+  """
+  Average execution time in milliseconds
+  """
+  avgExecutionTime: Float!
+
+  """
+  Success rate (0-1)
+  """
+  successRate: Float!
+
+  """
+  Number of failed queries
+  """
+  failedQueries: Int!
+
+  """
+  Most popular queries
+  """
+  topQueries: [PopularQuery!]!
+
+  """
+  Slowest queries
+  """
+  slowQueries: [SlowQuery!]!
+
+  """
+  Cache hit rate (0-1)
+  """
+  cacheHitRate: Float!
+}
+
+"""
+Popular query statistics
+"""
+type PopularQuery {
+  """
+  Query text
+  """
+  query: String!
+
+  """
+  Number of executions
+  """
+  executionCount: Int!
+
+  """
+  Number of unique users
+  """
+  uniqueUsers: Int!
+
+  """
+  Average click-through rate
+  """
+  avgClickThroughRate: Float!
+}
+
+"""
+Slow query information
+"""
+type SlowQuery {
+  """
+  Query text
+  """
+  query: String!
+
+  """
+  Average execution time
+  """
+  avgExecutionTime: Float!
+
+  """
+  Total number of executions
+  """
+  totalExecutions: Int!
+
+  """
+  Success rate
+  """
+  successRate: Float!
+
+  """
+  Average result count
+  """
+  avgResultCount: Float!
+
+  """
+  Last execution timestamp
+  """
+  lastExecuted: String!
+}
+
+"""
+Search health status
+"""
+type SearchHealth {
+  """
+  Overall status
+  """
+  status: String!
+
+  """
+  Detailed component statuses
+  """
+  details: JSON!
+}
+
+extend type Query {
+  """
+  Perform a search across all indexed content
+  """
+  search(query: SearchQueryInput!): SearchResponse!
+
+  """
+  Get autocomplete suggestions
+  """
+  autocomplete(query: String!, limit: Int = 10): [AutocompleteSuggestion!]!
+
+  """
+  Get query suggestions based on user input
+  """
+  querySuggestions(prefix: String!, limit: Int = 10): [String!]!
+
+  """
+  Get personalized query suggestions for current user
+  """
+  personalizedSuggestions(limit: Int = 10): [String!]!
+
+  """
+  Get a saved search by ID
+  """
+  savedSearch(id: ID!): SavedSearch
+
+  """
+  List saved searches for current user
+  """
+  savedSearches(
+    includePublic: Boolean = false
+    tags: [String!]
+    limit: Int = 50
+    offset: Int = 0
+  ): [SavedSearch!]!
+
+  """
+  Get search metrics and analytics
+  """
+  searchMetrics(startDate: String!, endDate: String!): SearchMetrics!
+
+  """
+  Get search system health status
+  """
+  searchHealth: SearchHealth!
+}
+
+extend type Mutation {
+  """
+  Save a search for future use
+  """
+  saveSearch(
+    name: String!
+    description: String
+    query: SearchQueryInput!
+    isPublic: Boolean = false
+    tags: [String!] = []
+  ): SavedSearch!
+
+  """
+  Update a saved search
+  """
+  updateSavedSearch(
+    id: ID!
+    name: String
+    description: String
+    query: SearchQueryInput
+    isPublic: Boolean
+    tags: [String!]
+  ): SavedSearch!
+
+  """
+  Delete a saved search
+  """
+  deleteSavedSearch(id: ID!): Boolean!
+
+  """
+  Execute a saved search
+  """
+  executeSavedSearch(id: ID!): SearchResponse!
+
+  """
+  Track a search result click (for analytics)
+  """
+  trackSearchClick(queryId: String!, resultId: String!, position: Int!): Boolean!
+
+  """
+  Reindex all entities (admin only)
+  """
+  reindexAll: Boolean!
+}

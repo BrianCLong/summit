@@ -1,0 +1,657 @@
+"""
+Admin Panel GraphQL API
+Comprehensive administration interface for Summit/IntelGraph
+All mutations require ADMIN role and emit audit events
+"""
+
+scalar JSON
+scalar DateTime
+scalar Upload
+
+# ============================================================================
+# ENUMS
+# ============================================================================
+
+enum UserRole {
+  ADMIN
+  ANALYST
+  VIEWER
+  MODERATOR
+  PLATFORM_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+  PENDING
+}
+
+enum ModerationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ESCALATED
+}
+
+enum ModerationPriority {
+  LOW
+  NORMAL
+  HIGH
+  CRITICAL
+}
+
+enum ModerationCategory {
+  ABUSE
+  SPAM
+  INAPPROPRIATE
+  VIOLATION
+  OTHER
+}
+
+enum AlertType {
+  SECURITY
+  PERFORMANCE
+  ERROR
+  WARNING
+  INFO
+}
+
+enum AlertSeverity {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  INFO
+}
+
+enum AlertStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  RESOLVED
+  DISMISSED
+}
+
+enum ExportFormat {
+  JSON
+  CSV
+  XLSX
+  PDF
+}
+
+enum ExportType {
+  USERS
+  AUDIT_LOGS
+  ENTITIES
+  INVESTIGATIONS
+  MODERATION_QUEUE
+  SYSTEM_METRICS
+  FULL_BACKUP
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum AuditLogStatus {
+  SUCCESS
+  FAILURE
+  ERROR
+}
+
+# ============================================================================
+# TYPES
+# ============================================================================
+
+type User {
+  id: ID!
+  email: String!
+  username: String
+  firstName: String
+  lastName: String
+  fullName: String
+  role: UserRole!
+  isActive: Boolean!
+  isSuspended: Boolean!
+  suspendedAt: DateTime
+  suspendedBy: User
+  suspensionReason: String
+  lastLogin: DateTime
+  lastLoginIp: String
+  avatarUrl: String
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime
+
+  # Analytics
+  loginCount: Int
+  investigationCount: Int
+  entityCount: Int
+  activitySummary: UserActivitySummary
+}
+
+type UserActivitySummary {
+  totalActions: Int!
+  lastAction: DateTime
+  investigationsCreated: Int!
+  entitiesCreated: Int!
+  relationshipsCreated: Int!
+  recentActions: [AuditLog!]!
+}
+
+type UserConnection {
+  edges: [UserEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type UserEdge {
+  node: User!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type AuditLog {
+  id: ID!
+  timestamp: DateTime!
+  user: User
+  action: String!
+  resourceType: String!
+  resourceId: String
+  details: JSON
+  ipAddress: String
+  userAgent: String
+  status: AuditLogStatus!
+  errorMessage: String
+  tenantId: String
+  sessionId: String
+  requestId: String
+  metadata: JSON
+}
+
+type AuditLogConnection {
+  edges: [AuditLogEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type AuditLogEdge {
+  node: AuditLog!
+  cursor: String!
+}
+
+type UserImpersonation {
+  id: ID!
+  adminUser: User!
+  targetUser: User!
+  reason: String!
+  startedAt: DateTime!
+  endedAt: DateTime
+  ipAddress: String
+  userAgent: String
+  metadata: JSON
+  isActive: Boolean!
+}
+
+type ModerationItem {
+  id: ID!
+  contentType: String!
+  contentId: ID!
+  reporter: User
+  reason: String!
+  category: ModerationCategory!
+  status: ModerationStatus!
+  priority: ModerationPriority!
+  assignedTo: User
+  reviewedBy: User
+  reviewedAt: DateTime
+  resolution: String
+  actionTaken: String
+  notes: String
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ModerationConnection {
+  edges: [ModerationEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ModerationEdge {
+  node: ModerationItem!
+  cursor: String!
+}
+
+type FeatureFlag {
+  id: ID!
+  key: String!
+  name: String!
+  description: String
+  flagType: String!
+  defaultValue: JSON!
+  enabled: Boolean!
+  rolloutPercentage: Int!
+  targetUsers: [ID!]
+  targetRoles: [UserRole!]
+  targetTenants: [ID!]
+  conditions: JSON
+  tags: [String!]
+  createdBy: User
+  updatedBy: User
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  history: [FeatureFlagHistory!]
+}
+
+type FeatureFlagHistory {
+  id: ID!
+  flag: FeatureFlag!
+  changedBy: User
+  fieldName: String!
+  oldValue: JSON
+  newValue: JSON
+  reason: String
+  createdAt: DateTime!
+}
+
+type SystemMetric {
+  id: ID!
+  metricName: String!
+  metricValue: Float!
+  metricType: String!
+  labels: JSON
+  timestamp: DateTime!
+  tenantId: String
+}
+
+type AdminAlert {
+  id: ID!
+  alertType: AlertType!
+  severity: AlertSeverity!
+  title: String!
+  message: String!
+  source: String!
+  resourceType: String
+  resourceId: String
+  status: AlertStatus!
+  acknowledgedBy: User
+  acknowledgedAt: DateTime
+  resolvedBy: User
+  resolvedAt: DateTime
+  resolutionNotes: String
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DataExport {
+  id: ID!
+  exportType: ExportType!
+  format: ExportFormat!
+  filters: JSON
+  status: ExportStatus!
+  requestedBy: User!
+  fileUrl: String
+  fileSizeBytes: Int
+  recordCount: Int
+  startedAt: DateTime
+  completedAt: DateTime
+  errorMessage: String
+  expiresAt: DateTime
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SystemConfig {
+  id: ID!
+  configKey: String!
+  configValue: JSON!
+  configType: String!
+  category: String!
+  description: String
+  isSensitive: Boolean!
+  validationSchema: JSON
+  updatedBy: User
+  updatedAt: DateTime!
+}
+
+type AdminDashboardStats {
+  users: UserStats!
+  audit: AuditStats!
+  moderation: ModerationStats!
+  alerts: AlertStats!
+  system: SystemStats!
+}
+
+type UserStats {
+  totalUsers: Int!
+  activeUsers: Int!
+  suspendedUsers: Int!
+  adminUsers: Int!
+  analystUsers: Int!
+  viewerUsers: Int!
+  activeToday: Int!
+  activeThisWeek: Int!
+  newThisMonth: Int!
+}
+
+type AuditStats {
+  totalEvents: Int!
+  eventsToday: Int!
+  eventsThisWeek: Int!
+  successfulEvents: Int!
+  failedEvents: Int!
+  uniqueUsers: Int!
+  topActions: [ActionCount!]!
+}
+
+type ActionCount {
+  action: String!
+  count: Int!
+}
+
+type ModerationStats {
+  totalItems: Int!
+  pendingItems: Int!
+  approvedItems: Int!
+  rejectedItems: Int!
+  criticalItems: Int!
+  highPriorityItems: Int!
+  avgResolutionTimeSeconds: Float!
+}
+
+type AlertStats {
+  totalAlerts: Int!
+  activeAlerts: Int!
+  criticalAlerts: Int!
+  highSeverityAlerts: Int!
+  securityAlerts: Int!
+  performanceAlerts: Int!
+}
+
+type SystemStats {
+  uptime: Float!
+  cpuUsage: Float!
+  memoryUsage: Float!
+  diskUsage: Float!
+  activeConnections: Int!
+  requestsPerMinute: Float!
+  avgResponseTime: Float!
+}
+
+# ============================================================================
+# INPUTS
+# ============================================================================
+
+input UserSearchFilters {
+  query: String
+  role: UserRole
+  isActive: Boolean
+  isSuspended: Boolean
+  createdAfter: DateTime
+  createdBefore: DateTime
+  lastLoginAfter: DateTime
+  lastLoginBefore: DateTime
+}
+
+input AuditLogFilters {
+  userId: ID
+  action: String
+  resourceType: String
+  resourceId: String
+  status: AuditLogStatus
+  startDate: DateTime
+  endDate: DateTime
+  tenantId: String
+}
+
+input ModerationFilters {
+  status: ModerationStatus
+  priority: ModerationPriority
+  category: ModerationCategory
+  assignedTo: ID
+  contentType: String
+}
+
+input CreateUserInput {
+  email: String!
+  username: String
+  firstName: String
+  lastName: String
+  password: String!
+  role: UserRole!
+  metadata: JSON
+}
+
+input UpdateUserInput {
+  email: String
+  username: String
+  firstName: String
+  lastName: String
+  role: UserRole
+  isActive: Boolean
+  metadata: JSON
+}
+
+input SuspendUserInput {
+  userId: ID!
+  reason: String!
+  duration: Int # Minutes, null for indefinite
+}
+
+input ImpersonateUserInput {
+  targetUserId: ID!
+  reason: String!
+}
+
+input ReviewModerationInput {
+  itemId: ID!
+  status: ModerationStatus!
+  actionTaken: String
+  resolution: String
+  notes: String
+}
+
+input CreateFeatureFlagInput {
+  key: String!
+  name: String!
+  description: String
+  flagType: String!
+  defaultValue: JSON!
+  enabled: Boolean
+  rolloutPercentage: Int
+  targetUsers: [ID!]
+  targetRoles: [UserRole!]
+  targetTenants: [ID!]
+  conditions: JSON
+  tags: [String!]
+}
+
+input UpdateFeatureFlagInput {
+  enabled: Boolean
+  defaultValue: JSON
+  rolloutPercentage: Int
+  targetUsers: [ID!]
+  targetRoles: [UserRole!]
+  targetTenants: [ID!]
+  conditions: JSON
+  tags: [String!]
+  reason: String
+}
+
+input CreateDataExportInput {
+  exportType: ExportType!
+  format: ExportFormat!
+  filters: JSON
+}
+
+input UpdateSystemConfigInput {
+  configKey: String!
+  configValue: JSON!
+  reason: String
+}
+
+input CreateAlertInput {
+  alertType: AlertType!
+  severity: AlertSeverity!
+  title: String!
+  message: String!
+  source: String!
+  resourceType: String
+  resourceId: String
+  metadata: JSON
+}
+
+# ============================================================================
+# QUERIES
+# ============================================================================
+
+type Query {
+  # Dashboard
+  adminDashboard: AdminDashboardStats!
+
+  # User Management
+  users(
+    first: Int
+    after: String
+    filters: UserSearchFilters
+  ): UserConnection!
+  user(id: ID!): User
+  searchUsers(query: String!, limit: Int): [User!]!
+
+  # Audit Logs
+  auditLogs(
+    first: Int
+    after: String
+    filters: AuditLogFilters
+  ): AuditLogConnection!
+  auditLog(id: ID!): AuditLog
+
+  # Impersonation
+  activeImpersonations: [UserImpersonation!]!
+  impersonationHistory(
+    userId: ID
+    first: Int
+    after: String
+  ): [UserImpersonation!]!
+
+  # Moderation
+  moderationQueue(
+    first: Int
+    after: String
+    filters: ModerationFilters
+  ): ModerationConnection!
+  moderationItem(id: ID!): ModerationItem
+
+  # Feature Flags
+  featureFlags: [FeatureFlag!]!
+  featureFlag(id: ID, key: String): FeatureFlag
+
+  # System Metrics
+  systemMetrics(
+    metricNames: [String!]
+    startDate: DateTime
+    endDate: DateTime
+    tenantId: String
+  ): [SystemMetric!]!
+
+  # Alerts
+  adminAlerts(
+    status: AlertStatus
+    severity: AlertSeverity
+    limit: Int
+  ): [AdminAlert!]!
+  adminAlert(id: ID!): AdminAlert
+
+  # Exports
+  dataExports(
+    first: Int
+    after: String
+  ): [DataExport!]!
+  dataExport(id: ID!): DataExport
+
+  # System Configuration
+  systemConfig(category: String): [SystemConfig!]!
+  systemConfigValue(key: String!): SystemConfig
+}
+
+# ============================================================================
+# MUTATIONS
+# ============================================================================
+
+type Mutation {
+  # User Management
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  deleteUser(id: ID!, reason: String!): Boolean!
+  suspendUser(input: SuspendUserInput!): User!
+  unsuspendUser(userId: ID!, reason: String!): User!
+  resetUserPassword(userId: ID!): String! # Returns temporary password
+
+  # Impersonation
+  startImpersonation(input: ImpersonateUserInput!): UserImpersonation!
+  endImpersonation(impersonationId: ID!): UserImpersonation!
+
+  # Moderation
+  assignModeration(itemId: ID!, assignTo: ID!): ModerationItem!
+  reviewModeration(input: ReviewModerationInput!): ModerationItem!
+  escalateModeration(itemId: ID!, reason: String!): ModerationItem!
+
+  # Feature Flags
+  createFeatureFlag(input: CreateFeatureFlagInput!): FeatureFlag!
+  updateFeatureFlag(id: ID!, input: UpdateFeatureFlagInput!): FeatureFlag!
+  deleteFeatureFlag(id: ID!): Boolean!
+  toggleFeatureFlag(id: ID!, enabled: Boolean!, reason: String): FeatureFlag!
+
+  # Alerts
+  createAlert(input: CreateAlertInput!): AdminAlert!
+  acknowledgeAlert(id: ID!): AdminAlert!
+  resolveAlert(id: ID!, resolutionNotes: String!): AdminAlert!
+  dismissAlert(id: ID!): AdminAlert!
+
+  # Data Exports
+  createDataExport(input: CreateDataExportInput!): DataExport!
+  cancelDataExport(id: ID!): DataExport!
+
+  # System Configuration
+  updateSystemConfig(input: UpdateSystemConfigInput!): SystemConfig!
+
+  # Bulk Operations
+  bulkSuspendUsers(userIds: [ID!]!, reason: String!): [User!]!
+  bulkUpdateUserRole(userIds: [ID!]!, role: UserRole!): [User!]!
+  bulkDeleteUsers(userIds: [ID!]!, reason: String!): Boolean!
+}
+
+# ============================================================================
+# SUBSCRIPTIONS
+# ============================================================================
+
+type Subscription {
+  # Real-time dashboard updates
+  dashboardStatsUpdated: AdminDashboardStats!
+
+  # New alerts
+  newAlert: AdminAlert!
+
+  # Moderation queue updates
+  moderationItemAdded: ModerationItem!
+  moderationItemUpdated(itemId: ID): ModerationItem!
+
+  # Export status updates
+  exportStatusChanged(exportId: ID!): DataExport!
+
+  # Audit log stream (filtered)
+  auditLogCreated(filters: AuditLogFilters): AuditLog!
+}

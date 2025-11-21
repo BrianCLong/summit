@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/runbook-r1-rapid-attribution",
+  "version": "1.0.0",
+  "description": "R1 Rapid Attribution - CTI runbook for automated threat actor attribution",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:integration": "jest --testMatch='**/tests/integration/**/*.test.ts'",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "cti",
+    "threat-intelligence",
+    "attribution",
+    "runbook"
+  ],
+  "author": "IntelGraph CTI Team",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@intelgraph/runbook-engine": "file:../../engine",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.0.0"
+  }
+}

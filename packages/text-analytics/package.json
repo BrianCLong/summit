@@ -1,0 +1,54 @@
+{
+  "name": "@intelgraph/text-analytics",
+  "version": "1.0.0",
+  "description": "Comprehensive text analytics including sentiment analysis, topic modeling, and text classification",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./sentiment": {
+      "import": "./dist/sentiment/index.js",
+      "types": "./dist/sentiment/index.d.ts"
+    },
+    "./topic-modeling": {
+      "import": "./dist/topic-modeling/index.js",
+      "types": "./dist/topic-modeling/index.d.ts"
+    },
+    "./classification": {
+      "import": "./dist/classification/index.js",
+      "types": "./dist/classification/index.d.ts"
+    },
+    "./similarity": {
+      "import": "./dist/similarity/index.js",
+      "types": "./dist/similarity/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "text-analytics",
+    "sentiment-analysis",
+    "topic-modeling",
+    "text-classification",
+    "nlp"
+  ],
+  "dependencies": {
+    "@intelgraph/nlp": "workspace:*",
+    "@intelgraph/entity-extraction": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3",
+    "eslint": "9.39.1"
+  }
+}

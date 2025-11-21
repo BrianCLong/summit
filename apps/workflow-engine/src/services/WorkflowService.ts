@@ -471,6 +471,38 @@ export class WorkflowService extends EventEmitter {
     return { conditionResult: result };
   }
 
+  private async executeParallelStep(
+    execution: WorkflowExecution,
+    workflow: WorkflowDefinition,
+    step: WorkflowStep,
+  ): Promise<any> {
+    // Execute all child steps in parallel
+    const childSteps = this.findChildSteps(workflow, step);
+
+    if (childSteps.length === 0) {
+      throw new Error('Parallel step must have at least one child step');
+    }
+
+    const promises = childSteps.map((childStep) =>
+      this.executeStep(execution, workflow, childStep).catch((error) => ({
+        error: error.message,
+        stepId: childStep.id,
+      })),
+    );
+
+    const results = await Promise.all(promises);
+
+    // Check if any child step failed
+    const errors = results.filter((r: any) => r.error);
+    if (errors.length > 0) {
+      throw new Error(
+        `${errors.length} parallel step(s) failed: ${errors.map((e: any) => e.error).join(', ')}`,
+      );
+    }
+
+    return { parallelResults: results, completedSteps: childSteps.length };
+  }
+
   private async executeLoopStep(
     execution: WorkflowExecution,
     workflow: WorkflowDefinition,

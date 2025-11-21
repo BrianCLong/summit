@@ -1,0 +1,25 @@
+{
+  "name": "@summit/mission-coordination-service",
+  "version": "1.0.0",
+  "description": "Mission execution coordination and real-time monitoring service",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "mission",
+    "coordination",
+    "execution",
+    "monitoring"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/operations-management": "workspace:*",
+    "@intelgraph/collection-coordination": "workspace:*",
+    "@intelgraph/operations-center": "workspace:*"
+  }
+}

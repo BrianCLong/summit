@@ -1,0 +1,23 @@
+{
+  "name": "@summit/crypto-service",
+  "version": "1.0.0",
+  "description": "Cryptographic service with post-quantum cryptography support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@summit/post-quantum-crypto": "workspace:*",
+    "@summit/cryptographic-agility": "workspace:*",
+    "express": "^4.18.2",
+    "@types/express": "^4.17.17"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.1"
+  }
+}

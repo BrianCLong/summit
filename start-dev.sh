@@ -3,6 +3,7 @@
 
 set -euo pipefail
 
+echo "⚠️  NOTE: This is a legacy wrapper script. Prefer using 'make up' or 'npm run dev' for standard development workflows."
 echo "🚀 Starting Maestro development environment..."
 
 # Check if Docker is running
@@ -22,7 +23,7 @@ sleep 10
 # Check service health
 echo "🔍 Checking service health..."
 
-services=("postgres" "redis" "neo4j" "maestro-server")
+services=("postgres" "redis" "neo4j" "api" "web")
 for service in "${services[@]}"; do
     if docker-compose -f docker-compose.dev.yml ps "$service" | grep -q "healthy\|Up"; then
         echo "✅ $service is ready"
@@ -36,15 +37,14 @@ echo "🎉 Development environment started!"
 echo ""
 echo "🌐 Access URLs:"
 echo "   Web UI:       http://localhost:3000"
-echo "   API:          http://localhost:8080"
+echo "   API:          http://localhost:4000/graphql"
 echo "   Prometheus:   http://localhost:9090"
 echo "   Grafana:      http://localhost:3001 (admin/admin)"
-echo "   Jaeger:       http://localhost:16686"
 echo "   Neo4j:        http://localhost:7474 (neo4j/maestro_dev_password)"
 echo ""
 echo "📊 Health endpoints:"
-echo "   API Health:   curl http://localhost:8080/healthz"
-echo "   API Metrics:  curl http://localhost:8080/metrics"
+echo "   API Health:   curl http://localhost:4000/health/ready"
+echo "   Web Health:   curl http://localhost:3000"
 echo ""
 echo "🔧 Development commands:"
 echo "   View logs:    docker-compose -f docker-compose.dev.yml logs -f [service]"

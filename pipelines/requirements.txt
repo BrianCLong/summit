@@ -1,0 +1,16 @@
+# Summit Pipeline Orchestration Requirements
+
+# Core dependencies
+pyyaml>=6.0
+jsonschema>=4.0.0
+
+# OpenLineage integration
+# openlineage-python>=0.20.0  # Uncomment to enable
+requests>=2.28.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Optional: Airflow for DAG generation testing
+# apache-airflow>=2.5.0  # Only needed if testing Airflow DAG generation

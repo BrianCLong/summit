@@ -1,0 +1,33 @@
+{
+  "name": "@intelgraph/orchestration",
+  "version": "1.0.0",
+  "description": "Advanced orchestration patterns for distributed workflows",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "uuid": "^13.0.0",
+    "redis": "^5.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "orchestration",
+    "saga",
+    "circuit-breaker",
+    "event-sourcing",
+    "cqrs",
+    "distributed-systems"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "type": "module"
+}

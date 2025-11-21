@@ -1,25 +1,215 @@
-# Production overlay for Maestro
+# Production Environment Configuration
+# Golden Path: OTEL + Prometheus + Feature Flags with production settings
+
 namespace: maestro
+
 image:
   repository: ghcr.io/brianclong/maestro-control-plane
   pullPolicy: IfNotPresent
+  # Use digest for immutable deployments in prod
+  # digest: sha256:...
 
+replicaCount: 3  # Higher count for production
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 2000m
+    memory: 2Gi
+
+# ============================================================================
+# OpenTelemetry - Production Settings
+# ============================================================================
+opentelemetry:
+  enabled: true
+  collector:
+    endpoint: "otel-collector.observability.svc.cluster.local:4317"
+  sampling:
+    ratio: 0.1  # 10% sampling in production to reduce overhead
+    type: "parentbased_traceidratio"
+
+# ============================================================================
+# Prometheus Metrics - Enabled
+# ============================================================================
+metrics:
+  enabled: true
+  prometheusRule:
+    enabled: true
+    namespace: monitoring
+
+serviceMonitor:
+  enabled: true
+  interval: 30s  # Less frequent in prod
+
+# ============================================================================
+# Feature Flags - Production Mode
+# ============================================================================
+featureFlags:
+  enabled: true
+  provider: flagd  # or launchdarkly for production
+  defaults:
+    enableNewUI: false  # Conservative in prod
+    enableBetaFeatures: false
+    enableAdvancedAnalytics: true
+
+# ============================================================================
+# Zero Trust & Security
+# ============================================================================
 zeroTrust:
   enabled: true
   mesh: istio
 
+# ============================================================================
+# Deployment Strategy
+# ============================================================================
 argoRollouts:
   enabled: true
-  autoPromotionEnabled: false
+  autoPromotionEnabled: false  # Manual promotion in prod
 
+# ============================================================================
+# Audit & Compliance
+# ============================================================================
 audit:
   worm:
     enabled: true
-    bucket: your-worm-bucket
-    retentionDays: 365
+    bucket: maestro-audit-prod-worm
+    retentionDays: 2555  # 7 years for compliance
 
+# ============================================================================
+# Application Configuration
+# ============================================================================
 env:
   - name: NODE_ENV
     value: production
+  - name: LOG_LEVEL
+    value: 'info'  # Less verbose in prod
   - name: ALLOW_UNSIGNED_POLICY
     value: 'false'
+
+  # OTEL Configuration
+  - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    value: "http://otel-collector.observability.svc.cluster.local:4317"
+  - name: OTEL_SERVICE_NAME
+    value: "maestro"
+  - name: OTEL_RESOURCE_ATTRIBUTES
+    value: "service.namespace=summit,deployment.environment=production"
+  - name: OTEL_TRACES_SAMPLER
+    value: "parentbased_traceidratio"
+  - name: OTEL_TRACES_SAMPLER_ARG
+    value: "0.1"  # 10% sampling
+
+  # Feature Flags
+  - name: FEATURE_FLAGS_ENABLED
+    value: "true"
+  - name: FLAGD_HOST
+    value: "flagd.summit.svc.cluster.local"
+
+  # Application Secrets (from External Secrets or Sealed Secrets)
+  - name: OIDC_ISSUER
+    valueFrom:
+      secretKeyRef:
+        name: maestro-secrets
+        key: oidc_issuer
+  - name: POSTGRES_URL
+    valueFrom:
+      secretKeyRef:
+        name: maestro-secrets
+        key: pg_url
+  - name: REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: maestro-secrets
+        key: redis_url
+  - name: KAFKA_BROKERS
+    value: 'kafka.kafka.svc.cluster.local:9092'
+  - name: S3_BUCKET
+    value: 'maestro-artifacts-prod'
+
+# ============================================================================
+# High Availability
+# ============================================================================
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2  # Always keep 2 pods running
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+# Pod anti-affinity for better distribution
+affinity:
+  podAntiAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+            - key: app.kubernetes.io/name
+              operator: In
+              values:
+                - maestro
+        topologyKey: kubernetes.io/hostname
+
+# ============================================================================
+# Network Policy - Strict in Production
+# ============================================================================
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+  egress:
+    # OTEL Collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+      ports:
+        - port: 4317
+        - port: 4318
+    # Kafka
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kafka
+      ports:
+        - port: 9092
+    # Redis
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - port: 6379
+    # Postgres
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - port: 5432
+    # HTTPS for external services
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53

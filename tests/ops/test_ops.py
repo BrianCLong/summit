@@ -18,7 +18,13 @@ from ops.admin_studio_api import (
 )
 from ops.chaos_hooks import inject_broker_kill_hook, inject_pod_kill_hook, trigger_chaos_drill
 from ops.cost_guard import apply_query_budget, get_archive_tier_cost_estimate, kill_slow_query
-from ops.observability import get_slo_dashboard_url, init_otel_tracing, record_prom_metric
+from ops.observability import (
+    clear_recorded_prom_metrics,
+    get_recorded_prom_metrics,
+    get_slo_dashboard_url,
+    init_otel_tracing,
+    record_prom_metric,
+)
 
 
 class TestOpsStubs(unittest.TestCase):
@@ -28,10 +34,15 @@ class TestOpsStubs(unittest.TestCase):
         _FEATURE_FLAGS.clear()
         _FEATURE_FLAGS["new_feature"] = False
         _FEATURE_FLAGS["experimental_ui"] = False
+        clear_recorded_prom_metrics()
 
     def test_observability_stubs(self):
         init_otel_tracing()
         record_prom_metric("test_metric", 1.0, {"label": "value"})
+        metrics = get_recorded_prom_metrics("test_metric")
+        self.assertEqual(len(metrics), 1)
+        self.assertEqual(metrics[0]["value"], 1.0)
+        self.assertEqual(metrics[0]["labels"], {"label": "value"})
         self.assertIn("grafana", get_slo_dashboard_url("test_service"))
 
     def test_cost_guard_stubs(self):

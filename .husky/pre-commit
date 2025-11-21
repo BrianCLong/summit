@@ -1,1 +1,24 @@
-npx --no lint-staged
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔒 Running pre-commit checks..."
+
+# Run gitleaks to detect secrets
+echo "🔍 Scanning for secrets..."
+if command -v gitleaks &> /dev/null; then
+  gitleaks protect --staged --verbose || {
+    echo "❌ Secret detected! Please remove sensitive data before committing."
+    exit 1
+  }
+else
+  echo "⚠️  Gitleaks not installed. Install with: brew install gitleaks (macOS) or see https://github.com/gitleaks/gitleaks"
+fi
+
+# Run lint-staged to check only staged files (fast!)
+echo "🔍 Running lint-staged..."
+pnpm exec lint-staged || {
+  echo "❌ Lint-staged checks failed. Please fix the issues before committing."
+  exit 1
+}
+
+echo "✅ All pre-commit checks passed!"

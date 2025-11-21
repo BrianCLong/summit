@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "companyos-console.fullname" . }}-nginx
+data:
+  default.conf: |
+    server {
+      listen {{ .Values.service.port }};
+      location / {
+        root   /usr/share/nginx/html;
+        try_files $uri /index.html;
+      }
+      location /api/ {
+        proxy_pass http://{{ .Values.apiService.name }}:{{ .Values.apiService.port }}/;
+      }
+      location /health {
+        access_log off;
+        add_header 'Content-Type' 'text/plain';
+        return 200 "healthy\n";
+      }
+    }

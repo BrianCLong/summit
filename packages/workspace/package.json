@@ -1,0 +1,19 @@
+{
+  "name": "@intelgraph/workspace",
+  "version": "1.0.0",
+  "description": "Multi-tenant workspace management with RBAC",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "zod": "^3.22.0",
+    "nanoid": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
+  }
+}

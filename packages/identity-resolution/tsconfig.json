@@ -1,0 +1,29 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "sourceMap": true,
+    "allowImportingTsExtensions": false,
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../biometrics"
+    },
+    {
+      "path": "../facial-recognition"
+    },
+    {
+      "path": "../behavioral-analysis"
+    },
+    {
+      "path": "../common-types"
+    }
+  ]
+}

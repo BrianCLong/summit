@@ -1,0 +1,33 @@
+{
+  "name": "@intelgraph/edge-computing",
+  "version": "1.0.0",
+  "description": "Core edge computing infrastructure and types",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "edge-computing",
+    "distributed-intelligence",
+    "edge-ai",
+    "iot"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "zod": "^3.22.4",
+    "eventemitter3": "^5.0.1",
+    "pino": "^8.17.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0"
+  }
+}

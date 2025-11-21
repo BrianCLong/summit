@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../packages/supply-chain-types" },
+    { "path": "../../packages/supplier-risk" },
+    { "path": "../../packages/third-party-risk" },
+    { "path": "../../packages/compliance-monitor" }
+  ]
+}
