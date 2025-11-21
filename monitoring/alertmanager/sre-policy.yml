@@ -71,6 +71,14 @@ route:
       group_interval: 15m
       repeat_interval: 2h
 
+    # ML observability alerts routed to PagerDuty + ML Ops channel
+    - match:
+        component: ml-observability
+      receiver: 'ml-pagerduty'
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 2h
+
 receivers:
   - name: 'default'
     slack_configs:
@@ -158,6 +166,26 @@ receivers:
           *Model*: {{ .CommonLabels.model }}
           *Issue*: {{ .CommonAnnotations.summary }}
           *Drift Score*: {{ .CommonAnnotations.drift_score }}
+
+  - name: 'ml-pagerduty'
+    pagerduty_configs:
+      - service_key: '{{ .PagerDutyServiceKey }}'
+        description: 'ML Observability Alert: {{ .CommonAnnotations.summary }}'
+        severity: '{{ if eq .CommonLabels.severity "page" }}critical{{ else }}warning{{ end }}'
+        details:
+          service: '{{ .CommonLabels.service }}'
+          model: '{{ .CommonLabels.model }}'
+          runbook: '{{ .CommonAnnotations.runbook_url }}'
+    slack_configs:
+      - api_url: '{{ .SlackWebhookURL }}'
+        channel: '#ml-ops'
+        title: '🤖 ML Observability Alert'
+        text: |
+          *Alert*: {{ .CommonLabels.alertname }}
+          *Model*: {{ .CommonLabels.model }}
+          *Deployment*: {{ .CommonLabels.deployment }}
+          *Severity*: {{ .CommonLabels.severity }}
+          *Runbook*: {{ .CommonAnnotations.runbook_url }}
 
 # Inhibition rules to prevent alert fatigue
 inhibit_rules:
