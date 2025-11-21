@@ -189,3 +189,4 @@ neo4j/backups/
 *.pem
 *.key
 *.signed.json
+node-compile-cache/
