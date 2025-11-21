@@ -2,7 +2,7 @@
  * Tests for RelationshipExtractor
  */
 
-import { RelationshipExtractor } from '../src/extraction/RelationshipExtractor';
+import { RelationshipExtractor } from '../src/extraction/RelationshipExtractor.js';
 
 describe('RelationshipExtractor', () => {
   let extractor: RelationshipExtractor;

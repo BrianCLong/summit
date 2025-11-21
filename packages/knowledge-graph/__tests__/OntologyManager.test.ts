@@ -2,7 +2,8 @@
  * Tests for OntologyManager
  */
 
-import { OntologyManager, STANDARD_NAMESPACES } from '../src/ontology/OntologyManager';
+import { OntologyManager } from '../src/ontology/OntologyManager.js';
+import { STANDARD_NAMESPACES } from '../src/types/ontology.js';
 
 describe('OntologyManager', () => {
   let ontologyManager: OntologyManager;

@@ -2,7 +2,7 @@
  * Tests for InferenceEngine
  */
 
-import { InferenceEngine } from '../src/engine/InferenceEngine';
+import { InferenceEngine } from '../src/engine/InferenceEngine.js';
 
 describe('InferenceEngine', () => {
   let engine: InferenceEngine;
