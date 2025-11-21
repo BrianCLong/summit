@@ -177,6 +177,7 @@ services:
     environment:
       VITE_API_URL: http://api:4000/graphql
       VITE_WS_URL: ws://api:4000/graphql
+      VITE_WEBSOCKET_URL: ws://websocket-server:9001
       VITE_PORT: 3000
     ports:
       - '3000:3000'
@@ -190,6 +191,47 @@ services:
       retries: 10
     networks:
       - summit
+
+  websocket-server:
+    build:
+      context: ./services/websocket-server
+      dockerfile: Dockerfile
+    container_name: summit-websocket-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: 9001
+      HOST: 0.0.0.0
+      NODE_ENV: ${NODE_ENV:-development}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
+      JWT_ALGORITHM: HS256
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      CORS_CREDENTIALS: "true"
+      CLUSTERING_ENABLED: "true"
+      NODE_ID: ws-dev-1
+      PERSISTENCE_ENABLED: "true"
+      PERSISTENCE_TTL: "3600"
+      HEARTBEAT_INTERVAL: "30000"
+      HEARTBEAT_TIMEOUT: "60000"
+    ports:
+      - '9001:9001'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:9001/health/live", (res) => { process.exit(res.statusCode === 200 ? 0 : 1); })']
+      interval: 15s
+      timeout: 10s
+      retries: 3
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=websocket_server'
+      - 'prometheus.port=9001'
 
   prometheus:
     image: prom/prometheus:latest
