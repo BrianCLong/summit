@@ -4,7 +4,7 @@
  */
 
 import { EventEmitter } from 'events';
-import { QualityRule, ValidationResult, DataAnomaly } from '../types.js';
+import { QualityRule, ValidationResult, Violation } from '../types.js';
 
 export interface StreamConfig {
   batchSize: number;
@@ -41,7 +41,6 @@ export class StreamQualityMonitor extends EventEmitter {
     throughput: 0,
     latencyMs: 0,
   };
-  private buffer: any[] = [];
   private windowStart: number = Date.now();
 
   constructor(private config: StreamConfig) {
@@ -91,7 +90,7 @@ export class StreamQualityMonitor extends EventEmitter {
   }
 
   private validateRecord(record: Record<string, any>, rule: QualityRule): ValidationResult {
-    const passed = this.evaluateRule(record, rule);
+    const { passed, violations } = this.evaluateRule(record, rule);
     return {
       ruleId: rule.id,
       ruleName: rule.name,
@@ -99,27 +98,65 @@ export class StreamQualityMonitor extends EventEmitter {
       severity: rule.severity,
       message: passed ? 'Validation passed' : `Failed: ${rule.name}`,
       affectedRows: passed ? 0 : 1,
-      affectedColumns: rule.columns,
-      violations: passed ? [] : [{ record, rule: rule.id }],
-      executedAt: new Date(),
+      affectedColumns: Object.keys(record),
+      violations,
+      timestamp: new Date(),
     };
   }
 
-  private evaluateRule(record: Record<string, any>, rule: QualityRule): boolean {
+  private evaluateRule(record: Record<string, any>, rule: QualityRule): { passed: boolean; violations: Violation[] } {
+    const violations: Violation[] = [];
+
     switch (rule.type) {
       case 'completeness':
-        return rule.columns.every(col => record[col] != null && record[col] !== '');
-      case 'validity':
-        if (rule.parameters?.pattern) {
-          const regex = new RegExp(rule.parameters.pattern);
-          return rule.columns.every(col => regex.test(String(record[col] || '')));
+        for (const [col, val] of Object.entries(record)) {
+          if (val == null || val === '') {
+            violations.push({
+              columnName: col,
+              currentValue: val,
+              expectedValue: 'non-null value',
+              message: `Column ${col} is empty or null`,
+            });
+          }
         }
-        return true;
-      case 'uniqueness':
-        return true; // Requires cross-record check
+        break;
+
+      case 'validity':
+        if (rule.condition.operator === 'matches' && rule.condition.value) {
+          const regex = new RegExp(rule.condition.value);
+          for (const [col, val] of Object.entries(record)) {
+            if (typeof val === 'string' && !regex.test(val)) {
+              violations.push({
+                columnName: col,
+                currentValue: val,
+                expectedValue: `matches ${rule.condition.value}`,
+                message: `Column ${col} does not match pattern`,
+              });
+            }
+          }
+        }
+        break;
+
+      case 'consistency':
+        if (rule.condition.operator === 'equals') {
+          for (const [col, val] of Object.entries(record)) {
+            if (val !== rule.condition.value) {
+              violations.push({
+                columnName: col,
+                currentValue: val,
+                expectedValue: rule.condition.value,
+                message: `Column ${col} does not equal expected value`,
+              });
+            }
+          }
+        }
+        break;
+
       default:
-        return true;
+        break;
     }
+
+    return { passed: violations.length === 0, violations };
   }
 
   private updateMetrics(): void {
