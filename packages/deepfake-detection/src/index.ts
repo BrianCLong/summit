@@ -13,6 +13,8 @@ export * from './streaming/streaming-engine';
 export * from './explainable/explainable-ai';
 export * from './ensemble/meta-learner';
 export * from './multimodal/fusion-engine';
+export * from './zero-shot/zero-shot-detector';
+export * from './active-learning/active-learner';
 
 import { FacialDeepfakeDetector } from './facial/facial-detector';
 import { VoiceDeepfakeDetector } from './voice/voice-detector';
