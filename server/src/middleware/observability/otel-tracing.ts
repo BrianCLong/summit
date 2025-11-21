@@ -43,28 +43,63 @@ export class OTelTracingService {
 
   constructor() {
     this.config = {
-      enabled: false,
+      enabled: process.env.OTEL_ENABLED !== 'false',
       service_name: process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
       service_version: process.env.OTEL_SERVICE_VERSION || '2.5.0',
       jaeger_endpoint:
         process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
       prometheus_enabled: process.env.PROMETHEUS_ENABLED !== 'false',
-      sample_rate: parseFloat(process.env.OTEL_SAMPLE_RATE || '0.1'),
+      sample_rate: parseFloat(process.env.OTEL_SAMPLE_RATE || '1.0'),
     };
 
-    this.tracer = noopTracer; // No-op tracer
+    this.tracer = noopTracer;
+    if (this.config.enabled) {
+      this.initializeSDK();
+    }
   }
 
   // Committee requirement: OTEL SDK initialization
   private initializeSDK(): void {
-    // No-op in this build
-    this.tracer = noopTracer;
-    logger.info({ message: 'OTel tracing disabled (no-op).' });
+    try {
+      // Dynamic import to avoid breaking if @opentelemetry not installed
+      const { trace } = require('@opentelemetry/api');
+      this.tracer = trace.getTracer(this.config.service_name, this.config.service_version);
+      logger.info({ message: 'OTel tracing enabled', service: this.config.service_name });
+    } catch {
+      this.tracer = noopTracer;
+      logger.warn({ message: 'OTel SDK not available, using no-op tracer' });
+    }
   }
 
   // Committee requirement: Express middleware for request tracing
   createMiddleware() {
-    return (_req: Request, _res: Response, next: NextFunction) => next();
+    return (req: Request, res: Response, next: NextFunction) => {
+      if (!this.config.enabled) {
+        return next();
+      }
+
+      const span = this.tracer.startSpan(`HTTP ${req.method} ${req.path}`, {
+        kind: SpanKind.SERVER,
+        attributes: {
+          'http.method': req.method,
+          'http.url': req.url,
+          'http.route': req.path,
+          'http.user_agent': req.get('user-agent') || '',
+        },
+      });
+
+      res.on('finish', () => {
+        span.setAttributes({
+          'http.status_code': res.statusCode,
+        });
+        span.setStatus({
+          code: res.statusCode >= 400 ? SpanStatusCode.ERROR : SpanStatusCode.OK,
+        });
+        span.end();
+      });
+
+      next();
+    };
   }
 
   // Committee requirement: Manual span creation for business operations
