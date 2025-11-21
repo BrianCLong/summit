@@ -336,7 +336,7 @@ export class DataProfiler {
       ORDER BY ordinal_position
     `;
     const result = await client.query(query, [tableName]);
-    return result.rows.map(row => row.column_name);
+    return result.rows.map((row: { column_name: string }) => row.column_name);
   }
 
   private getEmptyStatistics(): DataStatistics {
