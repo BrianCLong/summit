@@ -3,7 +3,7 @@
  * Comprehensive graph algorithm library
  */
 
-export * from './pathfinding/ShortestPath';
-export * from './centrality/CentralityMeasures';
-export * from './community/CommunityDetection';
-export * from './clustering/GraphClustering';
+export * from './pathfinding/ShortestPath.js';
+export * from './centrality/CentralityMeasures.js';
+export * from './community/CommunityDetection.js';
+export * from './clustering/GraphClustering.js';

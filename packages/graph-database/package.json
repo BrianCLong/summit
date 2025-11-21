@@ -10,17 +10,10 @@
     "test": "jest",
     "lint": "eslint src/**/*.ts"
   },
-  "dependencies": {
-    "@intelgraph/common-types": "workspace:*",
-    "zod": "^4.1.12",
-    "nanoid": "^5.0.0",
-    "lru-cache": "^11.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "typescript": "^5.9.3",
-    "@jest/globals": "^30.0.0",
-    "@types/jest": "^30.0.0"
+    "typescript": "^5.9.3"
   },
   "exports": {
     ".": {

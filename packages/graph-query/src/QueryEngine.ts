@@ -45,7 +45,6 @@ export class QueryEngine {
     return {
       ...result,
       stats: {
-        ...result.stats,
         executionTime: Date.now() - startTime
       }
     };
@@ -452,9 +451,11 @@ export class QueryEngine {
     if (!this.isNode(item) && !this.isEdge(item)) return false;
 
     if (args.length === 1) {
-      return args[0] in item.properties;
+      const key = String(args[0]);
+      return key in item.properties;
     } else if (args.length === 2) {
-      return item.properties[args[0] as string] === args[1];
+      const key = String(args[0]);
+      return item.properties[key] === args[1];
     }
 
     return false;

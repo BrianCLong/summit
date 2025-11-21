@@ -3,146 +3,132 @@
  * Native property graph data model with temporal and hypergraph support
  */
 
-import { z } from 'zod';
+// Simple ID generator (no external dependency)
+export function generateId(): string {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 11)}`;
+}
 
 // Node Types
-export const NodePropertySchema = z.record(z.unknown());
-export type NodeProperty = z.infer<typeof NodePropertySchema>;
+export type NodeProperty = Record<string, unknown>;
 
-export const NodeSchema = z.object({
-  id: z.string(),
-  labels: z.array(z.string()),
-  properties: NodePropertySchema,
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  version: z.number().default(1),
-  deleted: z.boolean().default(false)
-});
-
-export type Node = z.infer<typeof NodeSchema>;
+export interface Node {
+  id: string;
+  labels: string[];
+  properties: NodeProperty;
+  createdAt: number;
+  updatedAt: number;
+  version: number;
+  deleted: boolean;
+}
 
 // Edge Types
-export const EdgePropertySchema = z.record(z.unknown());
-export type EdgeProperty = z.infer<typeof EdgePropertySchema>;
+export type EdgeProperty = Record<string, unknown>;
 
-export const EdgeSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  sourceId: z.string(),
-  targetId: z.string(),
-  properties: EdgePropertySchema,
-  weight: z.number().default(1.0),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  version: z.number().default(1),
-  deleted: z.boolean().default(false),
-  // Temporal support
-  validFrom: z.number().optional(),
-  validTo: z.number().optional()
-});
-
-export type Edge = z.infer<typeof EdgeSchema>;
+export interface Edge {
+  id: string;
+  type: string;
+  sourceId: string;
+  targetId: string;
+  properties: EdgeProperty;
+  weight: number;
+  createdAt: number;
+  updatedAt: number;
+  version: number;
+  deleted: boolean;
+  validFrom?: number;
+  validTo?: number;
+}
 
 // Hyperedge for complex n-ary relationships
-export const HyperedgeSchema = z.object({
-  id: z.string(),
-  type: z.string(),
-  nodeIds: z.array(z.string()),
-  properties: EdgePropertySchema,
-  weight: z.number().default(1.0),
-  createdAt: z.number(),
-  updatedAt: z.number(),
-  version: z.number().default(1),
-  deleted: z.boolean().default(false)
-});
-
-export type Hyperedge = z.infer<typeof HyperedgeSchema>;
+export interface Hyperedge {
+  id: string;
+  type: string;
+  nodeIds: string[];
+  properties: EdgeProperty;
+  weight: number;
+  createdAt: number;
+  updatedAt: number;
+  version: number;
+  deleted: boolean;
+}
 
 // Index-free adjacency structures
 export interface AdjacencyList {
-  outgoing: Map<string, Set<string>>; // nodeId -> Set of edge IDs
-  incoming: Map<string, Set<string>>; // nodeId -> Set of edge IDs
-  byType: Map<string, Set<string>>;   // type -> Set of edge IDs
+  outgoing: Map<string, Set<string>>;
+  incoming: Map<string, Set<string>>;
+  byType: Map<string, Set<string>>;
 }
 
 // Graph Schema
-export const GraphSchemaConstraintSchema = z.object({
-  nodeLabel: z.string().optional(),
-  edgeType: z.string().optional(),
-  propertyKey: z.string(),
-  propertyType: z.enum(['string', 'number', 'boolean', 'date', 'array', 'object']),
-  required: z.boolean().default(false),
-  unique: z.boolean().default(false),
-  indexed: z.boolean().default(false)
-});
+export type PropertyType = 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object';
+export type IndexType = 'btree' | 'hash' | 'fulltext' | 'spatial' | 'vector';
 
-export type GraphSchemaConstraint = z.infer<typeof GraphSchemaConstraintSchema>;
+export interface GraphSchemaConstraint {
+  nodeLabel?: string;
+  edgeType?: string;
+  propertyKey: string;
+  propertyType: PropertyType;
+  required: boolean;
+  unique: boolean;
+  indexed: boolean;
+}
 
-export const GraphSchemaSchema = z.object({
-  version: z.number(),
-  constraints: z.array(GraphSchemaConstraintSchema),
-  indexes: z.array(z.object({
-    name: z.string(),
-    nodeLabel: z.string().optional(),
-    edgeType: z.string().optional(),
-    properties: z.array(z.string()),
-    type: z.enum(['btree', 'hash', 'fulltext', 'spatial', 'vector'])
-  }))
-});
+export interface GraphIndex {
+  name: string;
+  nodeLabel?: string;
+  edgeType?: string;
+  properties: string[];
+  type: IndexType;
+}
 
-export type GraphSchema = z.infer<typeof GraphSchemaSchema>;
+export interface GraphSchema {
+  version: number;
+  constraints: GraphSchemaConstraint[];
+  indexes: GraphIndex[];
+}
 
 // Transaction Types
-export const TransactionSchema = z.object({
-  id: z.string(),
-  startTime: z.number(),
-  endTime: z.number().optional(),
-  status: z.enum(['active', 'committed', 'aborted']),
-  isolationLevel: z.enum(['read_uncommitted', 'read_committed', 'repeatable_read', 'serializable']),
-  operations: z.array(z.object({
-    type: z.enum(['create_node', 'update_node', 'delete_node', 'create_edge', 'update_edge', 'delete_edge']),
-    entityId: z.string(),
-    before: z.unknown().optional(),
-    after: z.unknown().optional()
-  }))
-});
+export type TransactionStatus = 'active' | 'committed' | 'aborted';
+export type IsolationLevel = 'read_uncommitted' | 'read_committed' | 'repeatable_read' | 'serializable';
+export type OperationType = 'create_node' | 'update_node' | 'delete_node' | 'create_edge' | 'update_edge' | 'delete_edge';
 
-export type Transaction = z.infer<typeof TransactionSchema>;
+export interface TransactionOperation {
+  type: OperationType;
+  entityId: string;
+  before?: unknown;
+  after?: unknown;
+}
+
+export interface Transaction {
+  id: string;
+  startTime: number;
+  endTime?: number;
+  status: TransactionStatus;
+  isolationLevel: IsolationLevel;
+  operations: TransactionOperation[];
+}
 
 // Partition Types
-export const PartitionStrategySchema = z.enum([
-  'hash',
-  'range',
-  'list',
-  'composite',
-  'edge_cut',
-  'vertex_cut'
-]);
+export type PartitionStrategy = 'hash' | 'range' | 'list' | 'composite' | 'edge_cut' | 'vertex_cut';
 
-export type PartitionStrategy = z.infer<typeof PartitionStrategySchema>;
-
-export const PartitionSchema = z.object({
-  id: z.string(),
-  strategy: PartitionStrategySchema,
-  nodeIds: z.set(z.string()),
-  edgeIds: z.set(z.string()),
-  metadata: z.record(z.unknown())
-});
-
-export type Partition = z.infer<typeof PartitionSchema>;
+export interface Partition {
+  id: string;
+  strategy: PartitionStrategy;
+  nodeIds: Set<string>;
+  edgeIds: Set<string>;
+  metadata: Record<string, unknown>;
+}
 
 // Storage Configuration
-export const StorageConfigSchema = z.object({
-  dataDir: z.string(),
-  cacheSize: z.number().default(1024 * 1024 * 100), // 100MB default
-  enableCompression: z.boolean().default(true),
-  enableEncryption: z.boolean().default(false),
-  partitionStrategy: PartitionStrategySchema.default('hash'),
-  replicationFactor: z.number().default(1),
-  writeAheadLog: z.boolean().default(true)
-});
-
-export type StorageConfig = z.infer<typeof StorageConfigSchema>;
+export interface StorageConfig {
+  dataDir: string;
+  cacheSize: number;
+  enableCompression: boolean;
+  enableEncryption: boolean;
+  partitionStrategy: PartitionStrategy;
+  replicationFactor: number;
+  writeAheadLog: boolean;
+}
 
 // Query Types
 export interface GraphQuery {
@@ -174,22 +160,27 @@ export interface MatchPattern {
   };
 }
 
+export type ComparisonOperator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'IN' | 'CONTAINS' | 'STARTS_WITH' | 'ENDS_WITH' | 'REGEX';
+export type LogicalOperator = 'AND' | 'OR' | 'NOT';
+export type AggregationType = 'COUNT' | 'SUM' | 'AVG' | 'MIN' | 'MAX' | 'COLLECT';
+export type SortDirection = 'ASC' | 'DESC';
+
 export interface WhereClause {
   field: string;
-  operator: '=' | '!=' | '>' | '<' | '>=' | '<=' | 'IN' | 'CONTAINS' | 'STARTS_WITH' | 'ENDS_WITH' | 'REGEX';
+  operator: ComparisonOperator;
   value: unknown;
-  logicalOp?: 'AND' | 'OR' | 'NOT';
+  logicalOp?: LogicalOperator;
 }
 
 export interface ReturnClause {
   field: string;
   alias?: string;
-  aggregation?: 'COUNT' | 'SUM' | 'AVG' | 'MIN' | 'MAX' | 'COLLECT';
+  aggregation?: AggregationType;
 }
 
 export interface OrderByClause {
   field: string;
-  direction: 'ASC' | 'DESC';
+  direction: SortDirection;
 }
 
 // Path Types
@@ -215,9 +206,14 @@ export interface GraphStats {
 
 // Error Types
 export class GraphDatabaseError extends Error {
-  constructor(message: string, public code: string, public details?: unknown) {
+  code: string;
+  details?: unknown;
+
+  constructor(message: string, code: string, details?: unknown) {
     super(message);
     this.name = 'GraphDatabaseError';
+    this.code = code;
+    this.details = details;
   }
 }
 
@@ -232,5 +228,51 @@ export class ConstraintViolationError extends GraphDatabaseError {
   constructor(message: string, details?: unknown) {
     super(message, 'CONSTRAINT_VIOLATION', details);
     this.name = 'ConstraintViolationError';
+  }
+}
+
+// Simple LRU Cache implementation (no external dependency)
+export class SimpleLRUCache<K, V> {
+  private cache: Map<K, V>;
+  private maxSize: number;
+
+  constructor(options: { max: number }) {
+    this.cache = new Map();
+    this.maxSize = options.max;
+  }
+
+  get(key: K): V | undefined {
+    const value = this.cache.get(key);
+    if (value !== undefined) {
+      // Move to end (most recently used)
+      this.cache.delete(key);
+      this.cache.set(key, value);
+    }
+    return value;
+  }
+
+  set(key: K, value: V): void {
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.maxSize) {
+      // Delete oldest (first) entry
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
+    }
+    this.cache.set(key, value);
+  }
+
+  delete(key: K): boolean {
+    return this.cache.delete(key);
+  }
+
+  clear(): void {
+    this.cache.clear();
+  }
+
+  get size(): number {
+    return this.cache.size;
   }
 }

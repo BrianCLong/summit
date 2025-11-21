@@ -3,5 +3,5 @@
  * Native graph storage with index-free adjacency
  */
 
-export * from './types';
-export * from './storage/GraphStorage';
+export * from './types.js';
+export * from './storage/GraphStorage.js';

@@ -3,18 +3,17 @@
  * Index-free adjacency architecture with optimized node/edge storage
  */
 
-import { nanoid } from 'nanoid';
-import { LRUCache } from 'lru-cache';
-import type {
-  Node,
-  Edge,
-  Hyperedge,
-  AdjacencyList,
-  StorageConfig,
-  GraphStats,
-  Transaction,
-  GraphDatabaseError
-} from '../types';
+import {
+  generateId,
+  SimpleLRUCache,
+  type Node,
+  type Edge,
+  type Hyperedge,
+  type AdjacencyList,
+  type StorageConfig,
+  type GraphStats,
+  type Transaction
+} from '../types.js';
 
 export class GraphStorage {
   private nodes: Map<string, Node>;
@@ -23,17 +22,17 @@ export class GraphStorage {
   private adjacency: AdjacencyList;
 
   // Indexes for fast lookup
-  private labelIndex: Map<string, Set<string>>; // label -> node IDs
-  private typeIndex: Map<string, Set<string>>;  // type -> edge IDs
+  private labelIndex: Map<string, Set<string>>;
+  private typeIndex: Map<string, Set<string>>;
   private propertyIndexes: Map<string, Map<unknown, Set<string>>>;
 
   // Cache for frequently accessed entities
-  private nodeCache: LRUCache<string, Node>;
-  private edgeCache: LRUCache<string, Edge>;
+  private nodeCache: SimpleLRUCache<string, Node>;
+  private edgeCache: SimpleLRUCache<string, Edge>;
 
   // Transaction log
   private activeTransactions: Map<string, Transaction>;
-  private wal: Transaction[]; // Write-ahead log
+  private wal: Transaction[];
 
   private config: StorageConfig;
   private stats: GraphStats;
@@ -63,15 +62,8 @@ export class GraphStorage {
     this.typeIndex = new Map();
     this.propertyIndexes = new Map();
 
-    this.nodeCache = new LRUCache({
-      max: 10000,
-      ttl: 1000 * 60 * 5 // 5 minutes
-    });
-
-    this.edgeCache = new LRUCache({
-      max: 50000,
-      ttl: 1000 * 60 * 5
-    });
+    this.nodeCache = new SimpleLRUCache({ max: 10000 });
+    this.edgeCache = new SimpleLRUCache({ max: 50000 });
 
     this.activeTransactions = new Map();
     this.wal = [];
@@ -91,7 +83,7 @@ export class GraphStorage {
   createNode(labels: string[], properties: Record<string, unknown> = {}): Node {
     const now = Date.now();
     const node: Node = {
-      id: nanoid(),
+      id: generateId(),
       labels,
       properties,
       createdAt: now,
@@ -125,7 +117,6 @@ export class GraphStorage {
   }
 
   getNode(id: string): Node | undefined {
-    // Check cache first
     const cached = this.nodeCache.get(id);
     if (cached) {
       return cached;
@@ -162,11 +153,9 @@ export class GraphStorage {
       return false;
     }
 
-    // Soft delete
     node.deleted = true;
     node.updatedAt = Date.now();
 
-    // Remove from indexes
     for (const label of node.labels) {
       const labelSet = this.labelIndex.get(label);
       if (labelSet) {
@@ -174,7 +163,6 @@ export class GraphStorage {
       }
     }
 
-    // Clean up edges
     const outgoing = this.adjacency.outgoing.get(id) || new Set();
     const incoming = this.adjacency.incoming.get(id) || new Set();
 
@@ -184,7 +172,6 @@ export class GraphStorage {
 
     this.nodeCache.delete(id);
 
-    // Update stats
     this.stats.nodeCount--;
     for (const label of node.labels) {
       const count = this.stats.labelCounts.get(label) || 0;
@@ -210,14 +197,13 @@ export class GraphStorage {
     properties: Record<string, unknown> = {},
     weight: number = 1.0
   ): Edge | undefined {
-    // Verify nodes exist
     if (!this.getNode(sourceId) || !this.getNode(targetId)) {
       return undefined;
     }
 
     const now = Date.now();
     const edge: Edge = {
-      id: nanoid(),
+      id: generateId(),
       type,
       sourceId,
       targetId,
@@ -232,11 +218,9 @@ export class GraphStorage {
     this.edges.set(edge.id, edge);
     this.edgeCache.set(edge.id, edge);
 
-    // Update adjacency lists (index-free adjacency)
     this.adjacency.outgoing.get(sourceId)!.add(edge.id);
     this.adjacency.incoming.get(targetId)!.add(edge.id);
 
-    // Update type index
     if (!this.adjacency.byType.has(type)) {
       this.adjacency.byType.set(type, new Set());
     }
@@ -247,7 +231,6 @@ export class GraphStorage {
     }
     this.typeIndex.get(type)!.add(edge.id);
 
-    // Update stats
     this.stats.edgeCount++;
     this.stats.typeCounts.set(type, (this.stats.typeCounts.get(type) || 0) + 1);
     this.updateGraphMetrics();
@@ -295,18 +278,15 @@ export class GraphStorage {
       return false;
     }
 
-    // Soft delete
     edge.deleted = true;
     edge.updatedAt = Date.now();
 
-    // Remove from adjacency lists
     this.adjacency.outgoing.get(edge.sourceId)?.delete(id);
     this.adjacency.incoming.get(edge.targetId)?.delete(id);
     this.adjacency.byType.get(edge.type)?.delete(id);
 
     this.edgeCache.delete(id);
 
-    // Update stats
     this.stats.edgeCount--;
     const typeCount = this.stats.typeCounts.get(edge.type) || 0;
     this.stats.typeCounts.set(edge.type, Math.max(0, typeCount - 1));
@@ -387,14 +367,13 @@ export class GraphStorage {
     type: string,
     properties: Record<string, unknown> = {}
   ): Hyperedge | undefined {
-    // Verify all nodes exist
     if (!nodeIds.every(id => this.getNode(id))) {
       return undefined;
     }
 
     const now = Date.now();
     const hyperedge: Hyperedge = {
-      id: nanoid(),
+      id: generateId(),
       type,
       nodeIds,
       properties,
@@ -429,14 +408,12 @@ export class GraphStorage {
       return;
     }
 
-    // Average degree
     let totalDegree = 0;
     for (const nodeId of this.nodes.keys()) {
       totalDegree += this.getDegree(nodeId);
     }
     this.stats.avgDegree = totalDegree / this.stats.nodeCount;
 
-    // Density = 2 * edges / (nodes * (nodes - 1))
     if (this.stats.nodeCount > 1) {
       this.stats.density = (2 * this.stats.edgeCount) /
         (this.stats.nodeCount * (this.stats.nodeCount - 1));
@@ -485,7 +462,6 @@ export class GraphStorage {
   importGraph(data: { nodes: Node[]; edges: Edge[]; hyperedges?: Hyperedge[] }): void {
     this.clear();
 
-    // Import nodes
     for (const node of data.nodes) {
       this.nodes.set(node.id, node);
       this.adjacency.outgoing.set(node.id, new Set());
@@ -499,7 +475,6 @@ export class GraphStorage {
       }
     }
 
-    // Import edges
     for (const edge of data.edges) {
       this.edges.set(edge.id, edge);
       this.adjacency.outgoing.get(edge.sourceId)?.add(edge.id);
@@ -516,14 +491,12 @@ export class GraphStorage {
       this.typeIndex.get(edge.type)!.add(edge.id);
     }
 
-    // Import hyperedges
     if (data.hyperedges) {
       for (const hyperedge of data.hyperedges) {
         this.hyperedges.set(hyperedge.id, hyperedge);
       }
     }
 
-    // Rebuild stats
     this.stats.nodeCount = this.nodes.size;
     this.stats.edgeCount = this.edges.size;
     this.updateGraphMetrics();

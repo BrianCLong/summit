@@ -3,4 +3,4 @@
  * Pattern detection and relationship analysis
  */
 
-export * from './PatternMining';
+export * from './PatternMining.js';

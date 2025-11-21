@@ -11,16 +11,11 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "@intelgraph/graph-database": "workspace:*",
-    "@intelgraph/graph-algorithms": "workspace:*",
-    "@intelgraph/common-types": "workspace:*",
-    "zod": "^4.1.12"
+    "@intelgraph/graph-database": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "typescript": "^5.9.3",
-    "@jest/globals": "^30.0.0",
-    "@types/jest": "^30.0.0"
+    "typescript": "^5.9.3"
   },
   "exports": {
     ".": {
