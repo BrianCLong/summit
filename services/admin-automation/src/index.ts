@@ -13,3 +13,6 @@ export * from './form-autocomplete.js';
 export * from './proactive-service-resolver.js';
 export * from './workflow-automation.js';
 export * from './metrics.js';
+export * from './cache.js';
+export * from './errors.js';
+export * from './repository.js';
