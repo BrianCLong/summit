@@ -7,7 +7,7 @@
  * - Regulatory compliance (NIST, SOC2, FedRAMP, etc.)
  */
 
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { AuditEntry, Vulnerability, ScanConfig, ScanResult, ZeroTrustContext } from '../types.js';
 
 export interface ComplianceLoggerConfig {
