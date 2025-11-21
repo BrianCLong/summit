@@ -12,8 +12,9 @@
     "removeComments": true,
     "allowSyntheticDefaultImports": true,
     "allowImportingTsExtensions": false,
-    "composite": true
-    ,"tsBuildInfoFile": "dist/.tsbuildinfo"
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": []
   },
   "include": [
     "src"
@@ -22,4 +23,5 @@
     "node_modules",
     "dist",
     "**/*.test.ts"
-  ],
+  ]
+}

@@ -4,8 +4,11 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "types": [],
+    "skipLibCheck": true
   },
   "include": [
     "src"
-  ],
+  ]
+}

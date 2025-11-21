@@ -9,8 +9,10 @@
     "baseUrl": ".",
     "paths": {
       "@maestro/core/*": ["../maestro-core/dist/*"]
-    }
+    },
+    "types": []
   },
   "include": [
     "src"
-  ],
+  ]
+}

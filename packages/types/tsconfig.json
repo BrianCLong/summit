@@ -6,8 +6,10 @@
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "rootDir": "src",
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "types": []
   },
   "include": [
     "src"
-  ],
+  ]
+}

@@ -5,14 +5,13 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "types": [
-      "node",
-      "jest"
-    ],
+    "types": [],
     "allowImportingTsExtensions": false,
     "composite": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "skipLibCheck": true
   },
   "include": [
     "src"
-  ],
+  ]
+}

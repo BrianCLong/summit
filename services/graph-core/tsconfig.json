@@ -6,12 +6,15 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "allowImportingTsExtensions": false,
-    "composite": true
-    ,"tsBuildInfoFile": "dist/.tsbuildinfo"
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": [],
+    "skipLibCheck": true
   },
   "include": [
     "src"
   ],
   "exclude": [
     "node_modules"
-  ],
+  ]
+}

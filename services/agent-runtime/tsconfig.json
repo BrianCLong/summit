@@ -4,8 +4,10 @@
     "composite": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "types": []
   },
   "include": [
     "src"
-  ],
+  ]
+}
