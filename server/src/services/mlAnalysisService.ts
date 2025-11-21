@@ -4,6 +4,12 @@ import {
   GraphRelationship,
 } from './persistenceService';
 import { cacheService } from './cacheService';
+import {
+  ActorAwarenessOptions,
+  ActorAwarenessResult,
+  ActorSignal,
+  StochasticActorAwareness,
+} from './StochasticActorAwareness';
 
 interface MLPrediction {
   confidence: number;
@@ -43,8 +49,10 @@ interface GraphMetrics {
 export class MLAnalysisService {
   private modelVersion = '1.2.3';
   private lastTraining = new Date().toISOString();
+  private readonly actorAwareness: StochasticActorAwareness;
 
-  constructor() {
+  constructor(deps: { actorAwareness?: StochasticActorAwareness } = {}) {
+    this.actorAwareness = deps.actorAwareness ?? new StochasticActorAwareness();
     console.log('[ML] AI/ML Analysis Service initialized');
     console.log(`[ML] Model version: ${this.modelVersion}`);
   }
@@ -449,6 +457,38 @@ export class MLAnalysisService {
         'Behavioral Analyzer v2.5',
       ],
       cache_stats: cacheService.getStats(),
+    };
+  }
+
+  generateStochasticActorAwareness(
+    signals: ActorSignal[],
+    options: ActorAwarenessOptions = {},
+  ): {
+    actors: ActorAwarenessResult[];
+    summary: string;
+    sampleCount: number;
+    dominantActor: ActorAwarenessResult | null;
+  } {
+    if (!Array.isArray(signals) || signals.length === 0) {
+      return {
+        actors: [],
+        summary: 'No actor signals provided for awareness simulation.',
+        sampleCount: 0,
+        dominantActor: null,
+      };
+    }
+
+    const simulation = this.actorAwareness.runSimulation(signals, options);
+    const summary = this.actorAwareness.buildSummary(
+      simulation,
+      options.summaryLimit ?? 3,
+    );
+
+    return {
+      actors: simulation,
+      summary,
+      sampleCount: options.sampleCount ?? 500,
+      dominantActor: simulation.length > 0 ? simulation[0] : null,
     };
   }
 }
