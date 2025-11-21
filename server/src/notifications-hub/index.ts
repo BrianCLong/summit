@@ -63,6 +63,18 @@ export {
   type PreferencesStorage,
   type RolePreferences,
 } from './preferences/PreferencesManager.js';
+export {
+  PostgresPreferencesStorage,
+  notificationPreferencesMigrations,
+  type PostgresPreferencesStorageConfig,
+} from './preferences/PostgresPreferencesStorage.js';
+
+// GraphQL
+export { notificationsTypeDefs } from './graphql/schema.js';
+export {
+  notificationsResolvers,
+  createNotificationsContext,
+} from './graphql/resolvers.js';
 
 /**
  * Factory function to create a fully configured notification hub
