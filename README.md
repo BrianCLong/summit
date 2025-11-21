@@ -13,23 +13,34 @@
 - **Golden path = `make bootstrap && make up && make smoke`**. Fresh clones must go green before you write code.
 - `./start.sh [--ai]` wraps the golden path on laptops and CI. It fails fast if health probes do not respond.
 - The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
+- **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
 
-## Quickstart (Local)
+## 🚀 Quickstart (< 60 Seconds)
 
-**Prereqs:** Docker Desktop ≥ 4.x (8 GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+.
+**Prerequisites:** Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+, ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available.
 
 ```bash
 git clone https://github.com/BrianCLong/summit.git
 cd summit
+./start.sh              # One-command bootstrap: installs deps, starts services, runs smoke test
+```
+
+**Alternative (manual steps):**
+```bash
 make bootstrap          # installs pnpm deps + venv + .env
 make up                 # docker-compose.dev.yml + migrations (API, web, dbs, observability)
 make smoke              # golden path automation against seeded data
 ```
 
-- One-command bootstrap: `./start.sh` (add `--ai` to include kafka + ai-worker, `--skip-smoke` only for debugging).
-- **Database migrations run automatically** during `make up`. For manual migration: `make migrate`.
-- Services: Client http://localhost:3000, GraphQL http://localhost:4000/graphql, Neo4j http://localhost:7474, Prometheus http://localhost:9090, Grafana http://localhost:3001.
-- Optional AI/Kafka stack: `make up-ai` (or `./start.sh --ai`) loads `docker-compose.ai.yml`.
+**Service Endpoints:**
+- **Frontend**: http://localhost:3000 (React Application)
+- **GraphQL API**: http://localhost:4000/graphql (Apollo Playground)
+- **Neo4j Browser**: http://localhost:7474 (Graph Database UI)
+- **Adminer**: http://localhost:8080 (Database Admin)
+- **Prometheus**: http://localhost:9090 (Metrics)
+- **Grafana**: http://localhost:3001 (Observability Dashboards)
+
+**Optional AI/Kafka stack:** `./start.sh --ai` or `make up-ai` loads `docker-compose.ai.yml`.
 
 ### Observability & Health
 
@@ -79,31 +90,6 @@ The `ci.yml` workflow runs on every PR + main: cached `pnpm install`, `make boot
 [![Weekly Copilot Adoption Report](https://github.com/BrianCLong/summit/actions/workflows/copilot-adoption-report.yml/badge.svg)](.github/workflows/copilot-adoption-report.yml)
 
 **Production-Ready MVP** • AI-augmented intelligence analysis platform combining graph analytics, real-time collaboration, and enterprise security. Built for the intelligence community with deployability-first principles.
-
-## 🚀 Quick Start (< 60 Seconds)
-
-### Prerequisites
-
-- [Docker Desktop](https://docs.docker.com/get-docker/) 4.0+
-- [Docker Compose](https://docs.docker.com/compose/install/) 2.0+
-- 8GB+ RAM recommended
-- Ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available
-
-### One-Command Startup
-
-```bash
-# Clone and start the platform
-git clone https://github.com/BrianCLong/summit.git
-cd summit
-./start.sh
-```
-
-**🎯 Access Points**:
-
-- **Frontend**: http://localhost:3000 (React Application)
-- **Backend**: http://localhost:4000/graphql (GraphQL API)
-- **Neo4j**: http://localhost:7474 (Graph Database UI)
-- **Adminer**: http://localhost:8080 (Database Admin)
 
 ## 🎯 Golden Path Demo (Seeded Dataset)
 
@@ -164,11 +150,15 @@ make down
 - [Real-Time Narrative Simulation Engine](#-real-time-narrative-simulation-engine)
 - [API Documentation](#-api-documentation)
 - [Security](#-security)
+- [Testing](#-testing)
 - [Contributing](#-contributing)
 - [Support](#-support)
-- [Developer Onboarding](docs/ONBOARDING.md)
-- [Documentation Index](docs/README.md)
-- [Project Management](docs/project_management/README.md)
+
+**📚 Additional Documentation:**
+- [Developer Onboarding Guide](docs/ONBOARDING.md) - 30-minute quickstart for new developers
+- [AI Agent Collaboration Guide](CONTRIBUTING.md) - Guidelines for AI agent contributions
+- [Documentation Index](docs/README.md) - Complete documentation reference
+- [CLAUDE.md](CLAUDE.md) - Comprehensive AI assistant guide for the codebase
 
 ## ✨ Features
 
