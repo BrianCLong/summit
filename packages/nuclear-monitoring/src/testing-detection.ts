@@ -4,7 +4,7 @@
  * Detects and analyzes nuclear test events through seismic and radionuclide monitoring.
  */
 
-import type { NuclearTest, TestType, ConfidenceLevel, GeoLocation } from './types.js';
+import { type NuclearTest, TestType, ConfidenceLevel, type GeoLocation } from './types.js';
 
 export class NuclearTestingDetection {
   private tests: Map<string, NuclearTest>;
