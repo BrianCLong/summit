@@ -1,0 +1,267 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "title": "IntelGraph Compliance & Security Dashboard",
+  "uid": "intelgraph-compliance",
+  "version": 1,
+  "panels": [
+    {
+      "title": "Security Compliance Score",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "avg(security_compliance_score{namespace=\"intelgraph-prod\"})",
+          "legendFormat": "Compliance Score"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "orange", "value": 70 },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 95 }
+            ]
+          },
+          "max": 100,
+          "min": 0,
+          "unit": "percent"
+        }
+      }
+    },
+    {
+      "title": "CVE Count by Severity",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(vulnerability_count{severity=\"critical\"})",
+          "legendFormat": "Critical"
+        },
+        {
+          "expr": "sum(vulnerability_count{severity=\"high\"})",
+          "legendFormat": "High"
+        },
+        {
+          "expr": "sum(vulnerability_count{severity=\"medium\"})",
+          "legendFormat": "Medium"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "yellow", "value": 1 },
+              { "color": "orange", "value": 5 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Secret Scan Status",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 3, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "gitleaks_secrets_detected{namespace=\"intelgraph-prod\"}",
+          "legendFormat": "Secrets Found"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Container Image Vulnerabilities",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 9, "x": 15, "y": 0 },
+      "targets": [
+        {
+          "expr": "trivy_vulnerability_count{severity=\"CRITICAL\"}",
+          "legendFormat": "Critical"
+        },
+        {
+          "expr": "trivy_vulnerability_count{severity=\"HIGH\"}",
+          "legendFormat": "High"
+        },
+        {
+          "expr": "trivy_vulnerability_count{severity=\"MEDIUM\"}",
+          "legendFormat": "Medium"
+        }
+      ]
+    },
+    {
+      "title": "Policy Compliance by Service",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "opa_policy_evaluation_total{result=\"allow\"} / opa_policy_evaluation_total * 100",
+          "format": "table",
+          "legendFormat": "{{service}}"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value": "Compliance %",
+              "service": "Service"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Authentication Failures",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(auth_failures_total{namespace=\"intelgraph-prod\"}[5m])) by (reason)",
+          "legendFormat": "{{reason}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "lineWidth": 2
+          }
+        }
+      }
+    },
+    {
+      "title": "RBAC Denials",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum(increase(rbac_denial_total{namespace=\"intelgraph-prod\"}[24h]))",
+          "legendFormat": "24h Denials"
+        }
+      ]
+    },
+    {
+      "title": "Audit Log Volume",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 18, "x": 6, "y": 16 },
+      "targets": [
+        {
+          "expr": "sum(rate(audit_log_entries_total{namespace=\"intelgraph-prod\"}[5m])) by (action)",
+          "legendFormat": "{{action}}"
+        }
+      ]
+    },
+    {
+      "title": "Certificate Expiry",
+      "type": "table",
+      "gridPos": { "h": 6, "w": 12, "x": 0, "y": 24 },
+      "targets": [
+        {
+          "expr": "(cert_expiry_timestamp_seconds - time()) / 86400",
+          "format": "table",
+          "legendFormat": "{{domain}}"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "renameByName": {
+              "Value": "Days Until Expiry",
+              "domain": "Domain"
+            }
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "orange", "value": 14 },
+              { "color": "yellow", "value": 30 },
+              { "color": "green", "value": 60 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "SBOM Coverage",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 24 },
+      "targets": [
+        {
+          "expr": "sbom_coverage_ratio * 100",
+          "legendFormat": "SBOM Coverage"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": 0 },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Dependency Update Status",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 24 },
+      "targets": [
+        {
+          "expr": "dependency_outdated_count",
+          "legendFormat": "Outdated Deps"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "yellow", "value": 10 },
+              { "color": "orange", "value": 25 },
+              { "color": "red", "value": 50 }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "namespace",
+        "type": "query",
+        "query": "label_values(security_compliance_score, namespace)",
+        "current": { "value": "intelgraph-prod" }
+      }
+    ]
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refresh": "5m"
+}
