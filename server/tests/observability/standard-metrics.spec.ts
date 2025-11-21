@@ -10,7 +10,7 @@ import {
   createStandardMetrics,
   REDMetrics,
   USEMetrics,
-} from '../../src/observability/standard-metrics';
+} from '../../src/observability/standard-metrics.js';
 
 describe('Standard Metrics', () => {
   let registry: Registry;

@@ -14,7 +14,7 @@ import {
   withCostGuardDB,
   CostGuardError,
   costGuard,
-} from '../../src/cost-guard/middleware';
+} from '../../src/cost-guard/middleware.js';
 
 describe('Cost Guard Middleware', () => {
   let mockReq: any;

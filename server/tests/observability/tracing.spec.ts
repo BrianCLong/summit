@@ -5,8 +5,7 @@
  */
 
 import { describe, test, expect, beforeEach, jest, afterEach } from '@jest/globals';
-import { TracingService } from '../../src/observability/tracing';
-import { SpanStatusCode } from '@opentelemetry/api';
+import { TracingService } from '../../src/observability/tracing.js';
 
 describe('OpenTelemetry Tracing', () => {
   let tracingService: TracingService;
