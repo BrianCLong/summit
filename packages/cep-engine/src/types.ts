@@ -1,5 +1,3 @@
-import { StreamMessage } from '@intelgraph/kafka-integration';
-
 /**
  * Pattern definition
  */

@@ -2,17 +2,14 @@
   "name": "@intelgraph/stream-processor",
   "version": "1.0.0",
   "description": "Stream processor service with sinks, enrichment, and real-time processing",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "build": "tsc",
     "dev": "tsx watch src/server.ts",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@intelgraph/kafka-integration": "workspace:*",
-    "@intelgraph/stream-processing": "workspace:*",
-    "@intelgraph/stream-analytics": "workspace:*",
-    "@intelgraph/cep-engine": "workspace:*",
     "pg": "^8.16.3",
     "ioredis": "^5.3.2",
     "pino": "^8.17.2"

@@ -1,14 +1,29 @@
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import pino from 'pino';
-import { StreamMessage } from '@intelgraph/kafka-integration';
 
 const logger = pino({ name: 'stream-sinks' });
 
 /**
+ * Stream message type (mirrors @intelgraph/kafka-integration)
+ */
+export interface StreamMessage<T = unknown> {
+  metadata: {
+    eventId: string;
+    eventType: string;
+    timestamp: number;
+    source: string;
+    correlationId?: string;
+    tenantId?: string;
+  };
+  payload: T;
+  headers?: Record<string, string>;
+}
+
+/**
  * Base sink interface
  */
-export interface Sink<T = any> {
+export interface Sink<T = unknown> {
   write(messages: StreamMessage<T>[]): Promise<void>;
   close(): Promise<void>;
 }
