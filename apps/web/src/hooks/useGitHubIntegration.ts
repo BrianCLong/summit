@@ -347,3 +347,83 @@ export const useGitHubStats = (repository: string) => {
     staleTime: 10800000, // 3 hours
   })
 }
+
+// Hook for creating GitHub Pull Requests from the UI
+export interface CreatePullRequestInput {
+  title: string
+  body: string
+  head: string
+  base?: string
+  draft?: boolean
+  labels?: string[]
+  assignees?: string[]
+  repository: string
+}
+
+export interface PullRequestResult {
+  number: number
+  url: string
+  htmlUrl: string
+  state: string
+  title: string
+  draft: boolean
+  mergeable: boolean | null
+  createdAt: string
+}
+
+export const useCreatePullRequest = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (
+      pr: CreatePullRequestInput
+    ): Promise<PullRequestResult> => {
+      const response = await fetch('/api/integrations/github/pull-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: pr.title,
+          body: pr.body,
+          head: pr.head,
+          base: pr.base || 'main',
+          draft: pr.draft || false,
+          labels: pr.labels || [],
+          assignees: pr.assignees || [],
+          targetRepo: pr.repository,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}))
+        throw new Error(error.message || 'Failed to create pull request')
+      }
+
+      return response.json()
+    },
+    onSuccess: (data, variables) => {
+      // Invalidate and refetch GitHub metrics
+      queryClient.invalidateQueries({
+        queryKey: ['github-metrics', variables.repository],
+      })
+    },
+  })
+}
+
+// Hook for listing branches
+export const useGitHubBranches = (repository: string) => {
+  return useQuery({
+    queryKey: ['github-branches', repository],
+    queryFn: async () => {
+      const response = await fetch(
+        `/api/integrations/github/branches?repo=${repository}`
+      )
+      if (!response.ok) {
+        throw new Error('Failed to fetch branches')
+      }
+      return response.json() as Promise<
+        Array<{ name: string; protected: boolean }>
+      >
+    },
+    staleTime: 60000, // 1 minute
+  })
+}
