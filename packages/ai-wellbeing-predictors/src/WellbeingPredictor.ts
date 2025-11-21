@@ -1,4 +1,11 @@
-import { randomUUID } from 'crypto';
+// Simple UUID v4 generator for cross-platform compatibility
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 import {
   CitizenWellbeingProfile,
   WellbeingPrediction,
@@ -75,7 +82,7 @@ export class WellbeingPredictor {
 
     return {
       citizenId: profile.citizenId,
-      predictionId: randomUUID(),
+      predictionId: generateUUID(),
       timestamp: new Date().toISOString(),
       overallWellbeingScore: Math.round(overallScore * 100) / 100,
       domainScores: domainScores as Record<WellbeingDomain, number>,

@@ -10,45 +10,39 @@
  */
 
 // Core prediction engine
-export { WellbeingPredictor } from './WellbeingPredictor.js';
+import { WellbeingPredictor } from './WellbeingPredictor.js';
+export { WellbeingPredictor };
 
 // Intervention recommendation system
-export { InterventionRecommender } from './InterventionRecommender.js';
+import { InterventionRecommender } from './InterventionRecommender.js';
+export { InterventionRecommender };
 
 // Resource allocation optimizer
-export { ResourceAllocator } from './ResourceAllocator.js';
+import { ResourceAllocator } from './ResourceAllocator.js';
+export { ResourceAllocator };
 
 // Type exports
-export {
-  // Data schemas
-  HealthDataSchema,
-  EconomicDataSchema,
-  EducationalDataSchema,
-  BehavioralDataSchema,
-  CitizenWellbeingProfileSchema,
-  // Prediction schemas
-  WellbeingPredictionSchema,
-  InterventionRecommendationSchema,
-  ResourceAllocationSchema,
-  CohortAnalysisSchema,
-  // Enum schemas
-  WellbeingDomainSchema,
-  RiskLevelSchema,
-  InterventionTypeSchema,
-  // Types
-  type HealthData,
-  type EconomicData,
-  type EducationalData,
-  type BehavioralData,
-  type CitizenWellbeingProfile,
-  type WellbeingDomain,
-  type RiskLevel,
-  type InterventionType,
-  type WellbeingPrediction,
-  type InterventionRecommendation,
-  type ResourceAllocation,
-  type CohortAnalysis,
+export type {
+  HealthData,
+  EconomicData,
+  EducationalData,
+  BehavioralData,
+  CitizenWellbeingProfile,
+  WellbeingDomain,
+  RiskLevel,
+  InterventionType,
+  WellbeingPrediction,
+  InterventionRecommendation,
+  ResourceAllocation,
+  CohortAnalysis,
+  ContributingFactor,
+  ResourceRequirements,
+  DomainAllocation,
+  TopRiskFactor,
+  HistoricalScore,
 } from './types.js';
+
+export { isValidWellbeingDomain, isValidRiskLevel } from './types.js';
 
 /**
  * Create a complete wellbeing prediction pipeline
@@ -58,10 +52,6 @@ export function createWellbeingPipeline(config?: {
   interventionValidityDays?: number;
   allocationReservePercent?: number;
 }) {
-  const { WellbeingPredictor } = require('./WellbeingPredictor.js');
-  const { InterventionRecommender } = require('./InterventionRecommender.js');
-  const { ResourceAllocator } = require('./ResourceAllocator.js');
-
   return {
     predictor: new WellbeingPredictor(config?.domainWeights),
     recommender: new InterventionRecommender(config?.interventionValidityDays),

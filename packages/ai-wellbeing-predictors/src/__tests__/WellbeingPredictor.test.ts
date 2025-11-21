@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { WellbeingPredictor } from '../WellbeingPredictor.js';
 import { InterventionRecommender } from '../InterventionRecommender.js';
 import { ResourceAllocator } from '../ResourceAllocator.js';
-import { CitizenWellbeingProfile } from '../types.js';
+import type { CitizenWellbeingProfile } from '../types.js';
 
 describe('WellbeingPredictor', () => {
   const predictor = new WellbeingPredictor();

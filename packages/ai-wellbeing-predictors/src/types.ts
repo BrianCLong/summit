@@ -1,190 +1,190 @@
-import { z } from 'zod';
-
 // ============================================================================
-// Data Domain Schemas
+// Data Domain Types
 // ============================================================================
 
-export const HealthDataSchema = z.object({
-  citizenId: z.string(),
-  timestamp: z.string().datetime(),
-  chronicConditions: z.array(z.string()).default([]),
-  recentHospitalizations: z.number().default(0),
-  mentalHealthScore: z.number().min(0).max(100).optional(),
-  accessToHealthcare: z.enum(['none', 'limited', 'adequate', 'full']),
-  vaccinationStatus: z.enum(['none', 'partial', 'complete']).optional(),
-  lastCheckupDate: z.string().datetime().optional(),
-  disabilityStatus: z.boolean().default(false),
-  nutritionScore: z.number().min(0).max(100).optional(),
-});
+export interface HealthData {
+  citizenId: string;
+  timestamp: string;
+  chronicConditions: string[];
+  recentHospitalizations: number;
+  mentalHealthScore?: number;
+  accessToHealthcare: 'none' | 'limited' | 'adequate' | 'full';
+  vaccinationStatus?: 'none' | 'partial' | 'complete';
+  lastCheckupDate?: string;
+  disabilityStatus: boolean;
+  nutritionScore?: number;
+}
 
-export const EconomicDataSchema = z.object({
-  citizenId: z.string(),
-  timestamp: z.string().datetime(),
-  employmentStatus: z.enum(['employed', 'unemployed', 'underemployed', 'retired', 'student', 'disabled']),
-  incomeLevel: z.enum(['poverty', 'low', 'middle', 'high']),
-  housingStability: z.enum(['homeless', 'unstable', 'stable', 'owned']),
-  debtToIncomeRatio: z.number().min(0).optional(),
-  socialBenefitsReceived: z.array(z.string()).default([]),
-  foodSecurityStatus: z.enum(['insecure', 'marginal', 'secure']),
-  utilityAccessScore: z.number().min(0).max(100).optional(),
-});
+export interface EconomicData {
+  citizenId: string;
+  timestamp: string;
+  employmentStatus: 'employed' | 'unemployed' | 'underemployed' | 'retired' | 'student' | 'disabled';
+  incomeLevel: 'poverty' | 'low' | 'middle' | 'high';
+  housingStability: 'homeless' | 'unstable' | 'stable' | 'owned';
+  debtToIncomeRatio?: number;
+  socialBenefitsReceived: string[];
+  foodSecurityStatus: 'insecure' | 'marginal' | 'secure';
+  utilityAccessScore?: number;
+}
 
-export const EducationalDataSchema = z.object({
-  citizenId: z.string(),
-  timestamp: z.string().datetime(),
-  highestEducationLevel: z.enum(['none', 'primary', 'secondary', 'vocational', 'undergraduate', 'graduate', 'doctoral']),
-  currentEnrollment: z.boolean().default(false),
-  literacyLevel: z.enum(['illiterate', 'basic', 'functional', 'proficient']),
-  digitalLiteracy: z.enum(['none', 'basic', 'intermediate', 'advanced']),
-  skillsGapIndicators: z.array(z.string()).default([]),
-  trainingParticipation: z.number().default(0),
-});
+export interface EducationalData {
+  citizenId: string;
+  timestamp: string;
+  highestEducationLevel: 'none' | 'primary' | 'secondary' | 'vocational' | 'undergraduate' | 'graduate' | 'doctoral';
+  currentEnrollment: boolean;
+  literacyLevel: 'illiterate' | 'basic' | 'functional' | 'proficient';
+  digitalLiteracy: 'none' | 'basic' | 'intermediate' | 'advanced';
+  skillsGapIndicators: string[];
+  trainingParticipation: number;
+}
 
-export const BehavioralDataSchema = z.object({
-  citizenId: z.string(),
-  timestamp: z.string().datetime(),
-  serviceEngagementScore: z.number().min(0).max(100),
-  communityParticipation: z.enum(['isolated', 'low', 'moderate', 'high']),
-  socialSupportNetwork: z.enum(['none', 'weak', 'moderate', 'strong']),
-  riskBehaviors: z.array(z.string()).default([]),
-  crisisHistoryCount: z.number().default(0),
-  complianceScore: z.number().min(0).max(100).optional(),
-  mobilityPattern: z.enum(['sedentary', 'limited', 'moderate', 'active']).optional(),
-});
+export interface BehavioralData {
+  citizenId: string;
+  timestamp: string;
+  serviceEngagementScore: number;
+  communityParticipation: 'isolated' | 'low' | 'moderate' | 'high';
+  socialSupportNetwork: 'none' | 'weak' | 'moderate' | 'strong';
+  riskBehaviors: string[];
+  crisisHistoryCount: number;
+  complianceScore?: number;
+  mobilityPattern?: 'sedentary' | 'limited' | 'moderate' | 'active';
+}
 
 // ============================================================================
 // Prediction & Analysis Types
 // ============================================================================
 
-export const WellbeingDomainSchema = z.enum([
-  'health',
-  'economic',
-  'educational',
-  'social',
-  'housing',
-  'mental_health',
-  'food_security',
-  'employment',
-]);
+export type WellbeingDomain =
+  | 'health'
+  | 'economic'
+  | 'educational'
+  | 'social'
+  | 'housing'
+  | 'mental_health'
+  | 'food_security'
+  | 'employment';
 
-export const RiskLevelSchema = z.enum(['critical', 'high', 'moderate', 'low', 'minimal']);
+export type RiskLevel = 'critical' | 'high' | 'moderate' | 'low' | 'minimal';
 
-export const InterventionTypeSchema = z.enum([
-  'immediate_crisis',
-  'preventive_outreach',
-  'resource_allocation',
-  'program_enrollment',
-  'case_management',
-  'community_connection',
-  'skills_training',
-  'health_screening',
-]);
+export type InterventionType =
+  | 'immediate_crisis'
+  | 'preventive_outreach'
+  | 'resource_allocation'
+  | 'program_enrollment'
+  | 'case_management'
+  | 'community_connection'
+  | 'skills_training'
+  | 'health_screening';
 
-export const WellbeingPredictionSchema = z.object({
-  citizenId: z.string(),
-  predictionId: z.string(),
-  timestamp: z.string().datetime(),
-  overallWellbeingScore: z.number().min(0).max(100),
-  domainScores: z.record(WellbeingDomainSchema, z.number().min(0).max(100)),
-  riskLevel: RiskLevelSchema,
-  trajectoryTrend: z.enum(['declining', 'stable', 'improving']),
-  confidenceScore: z.number().min(0).max(1),
-  predictionHorizon: z.enum(['30_days', '90_days', '180_days', '365_days']),
-  contributingFactors: z.array(z.object({
-    factor: z.string(),
-    impact: z.number().min(-1).max(1),
-    domain: WellbeingDomainSchema,
-  })),
-});
+export interface ContributingFactor {
+  factor: string;
+  impact: number;
+  domain: WellbeingDomain;
+}
 
-export const InterventionRecommendationSchema = z.object({
-  recommendationId: z.string(),
-  citizenId: z.string(),
-  predictionId: z.string(),
-  interventionType: InterventionTypeSchema,
-  priority: z.enum(['urgent', 'high', 'medium', 'low']),
-  targetDomains: z.array(WellbeingDomainSchema),
-  suggestedPrograms: z.array(z.string()),
-  estimatedImpact: z.number().min(0).max(100),
-  resourceRequirements: z.object({
-    estimatedCost: z.number().optional(),
-    staffHours: z.number().optional(),
-    duration: z.string().optional(),
-  }),
-  rationale: z.string(),
-  createdAt: z.string().datetime(),
-  expiresAt: z.string().datetime().optional(),
-});
+export interface WellbeingPrediction {
+  citizenId: string;
+  predictionId: string;
+  timestamp: string;
+  overallWellbeingScore: number;
+  domainScores: Record<WellbeingDomain, number>;
+  riskLevel: RiskLevel;
+  trajectoryTrend: 'declining' | 'stable' | 'improving';
+  confidenceScore: number;
+  predictionHorizon: '30_days' | '90_days' | '180_days' | '365_days';
+  contributingFactors: ContributingFactor[];
+}
 
-export const ResourceAllocationSchema = z.object({
-  allocationId: z.string(),
-  region: z.string(),
-  timestamp: z.string().datetime(),
-  totalBudget: z.number(),
-  allocations: z.array(z.object({
-    domain: WellbeingDomainSchema,
-    amount: z.number(),
-    rationale: z.string(),
-    expectedOutcomes: z.array(z.string()),
-  })),
-  populationAtRisk: z.number(),
-  projectedImpact: z.object({
-    citizensServed: z.number(),
-    wellbeingImprovement: z.number(),
-  }),
-});
+export interface ResourceRequirements {
+  estimatedCost?: number;
+  staffHours?: number;
+  duration?: string;
+}
 
-export const CohortAnalysisSchema = z.object({
-  cohortId: z.string(),
-  criteria: z.record(z.string(), z.unknown()),
-  populationSize: z.number(),
-  averageWellbeingScore: z.number(),
-  riskDistribution: z.record(RiskLevelSchema, z.number()),
-  topRiskFactors: z.array(z.object({
-    factor: z.string(),
-    prevalence: z.number(),
-    averageImpact: z.number(),
-  })),
-  recommendedInterventions: z.array(z.string()),
-  projectedOutcomes: z.object({
-    withIntervention: z.number(),
-    withoutIntervention: z.number(),
-  }),
-});
+export interface InterventionRecommendation {
+  recommendationId: string;
+  citizenId: string;
+  predictionId: string;
+  interventionType: InterventionType;
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  targetDomains: WellbeingDomain[];
+  suggestedPrograms: string[];
+  estimatedImpact: number;
+  resourceRequirements: ResourceRequirements;
+  rationale: string;
+  createdAt: string;
+  expiresAt?: string;
+}
 
-// ============================================================================
-// Type Exports
-// ============================================================================
+export interface DomainAllocation {
+  domain: WellbeingDomain;
+  amount: number;
+  rationale: string;
+  expectedOutcomes: string[];
+}
 
-export type HealthData = z.infer<typeof HealthDataSchema>;
-export type EconomicData = z.infer<typeof EconomicDataSchema>;
-export type EducationalData = z.infer<typeof EducationalDataSchema>;
-export type BehavioralData = z.infer<typeof BehavioralDataSchema>;
-export type WellbeingDomain = z.infer<typeof WellbeingDomainSchema>;
-export type RiskLevel = z.infer<typeof RiskLevelSchema>;
-export type InterventionType = z.infer<typeof InterventionTypeSchema>;
-export type WellbeingPrediction = z.infer<typeof WellbeingPredictionSchema>;
-export type InterventionRecommendation = z.infer<typeof InterventionRecommendationSchema>;
-export type ResourceAllocation = z.infer<typeof ResourceAllocationSchema>;
-export type CohortAnalysis = z.infer<typeof CohortAnalysisSchema>;
+export interface ResourceAllocation {
+  allocationId: string;
+  region: string;
+  timestamp: string;
+  totalBudget: number;
+  allocations: DomainAllocation[];
+  populationAtRisk: number;
+  projectedImpact: {
+    citizensServed: number;
+    wellbeingImprovement: number;
+  };
+}
+
+export interface TopRiskFactor {
+  factor: string;
+  prevalence: number;
+  averageImpact: number;
+}
+
+export interface CohortAnalysis {
+  cohortId: string;
+  criteria: Record<string, unknown>;
+  populationSize: number;
+  averageWellbeingScore: number;
+  riskDistribution: Record<RiskLevel, number>;
+  topRiskFactors: TopRiskFactor[];
+  recommendedInterventions: string[];
+  projectedOutcomes: {
+    withIntervention: number;
+    withoutIntervention: number;
+  };
+}
 
 // ============================================================================
 // Integrated Citizen Profile
 // ============================================================================
 
-export const CitizenWellbeingProfileSchema = z.object({
-  citizenId: z.string(),
-  lastUpdated: z.string().datetime(),
-  healthData: HealthDataSchema.optional(),
-  economicData: EconomicDataSchema.optional(),
-  educationalData: EducationalDataSchema.optional(),
-  behavioralData: BehavioralDataSchema.optional(),
-  predictions: z.array(WellbeingPredictionSchema).default([]),
-  activeInterventions: z.array(InterventionRecommendationSchema).default([]),
-  historicalScores: z.array(z.object({
-    timestamp: z.string().datetime(),
-    score: z.number(),
-  })).default([]),
-});
+export interface HistoricalScore {
+  timestamp: string;
+  score: number;
+}
 
-export type CitizenWellbeingProfile = z.infer<typeof CitizenWellbeingProfileSchema>;
+export interface CitizenWellbeingProfile {
+  citizenId: string;
+  lastUpdated: string;
+  healthData?: HealthData;
+  economicData?: EconomicData;
+  educationalData?: EducationalData;
+  behavioralData?: BehavioralData;
+  predictions: WellbeingPrediction[];
+  activeInterventions: InterventionRecommendation[];
+  historicalScores: HistoricalScore[];
+}
+
+// ============================================================================
+// Validation Helpers
+// ============================================================================
+
+export function isValidWellbeingDomain(domain: string): domain is WellbeingDomain {
+  return ['health', 'economic', 'educational', 'social', 'housing', 'mental_health', 'food_security', 'employment'].includes(domain);
+}
+
+export function isValidRiskLevel(level: string): level is RiskLevel {
+  return ['critical', 'high', 'moderate', 'low', 'minimal'].includes(level);
+}

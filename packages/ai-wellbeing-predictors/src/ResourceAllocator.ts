@@ -1,4 +1,11 @@
-import { randomUUID } from 'crypto';
+// Simple UUID v4 generator for cross-platform compatibility
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 import {
   WellbeingPrediction,
   ResourceAllocation,
@@ -45,7 +52,7 @@ export class ResourceAllocator {
     ).length;
 
     return {
-      allocationId: randomUUID(),
+      allocationId: generateUUID(),
       region,
       timestamp: new Date().toISOString(),
       totalBudget,
@@ -74,7 +81,7 @@ export class ResourceAllocator {
     const interventions = this.identifyTopInterventions(predictions);
 
     return {
-      cohortId: randomUUID(),
+      cohortId: generateUUID(),
       criteria,
       populationSize: predictions.length,
       averageWellbeingScore: Math.round(avgScore * 100) / 100,
@@ -105,13 +112,12 @@ export class ResourceAllocator {
     const needs = new Map<WellbeingDomain, { totalScore: number; count: number; atRisk: number }>();
 
     for (const prediction of predictions) {
-      for (const [domain, score] of Object.entries(prediction.domainScores)) {
-        const d = domain as WellbeingDomain;
-        const current = needs.get(d) || { totalScore: 0, count: 0, atRisk: 0 };
+      for (const [domain, score] of Object.entries(prediction.domainScores) as [WellbeingDomain, number][]) {
+        const current = needs.get(domain) || { totalScore: 0, count: 0, atRisk: 0 };
         current.totalScore += score;
         current.count++;
         if (score < 50) current.atRisk++;
-        needs.set(d, current);
+        needs.set(domain, current);
       }
     }
 
@@ -240,12 +246,9 @@ export class ResourceAllocator {
     const domainCounts = new Map<WellbeingDomain, number>();
 
     for (const prediction of predictions) {
-      for (const [domain, score] of Object.entries(prediction.domainScores)) {
+      for (const [domain, score] of Object.entries(prediction.domainScores) as [WellbeingDomain, number][]) {
         if (score < 50) {
-          domainCounts.set(
-            domain as WellbeingDomain,
-            (domainCounts.get(domain as WellbeingDomain) || 0) + 1
-          );
+          domainCounts.set(domain, (domainCounts.get(domain) || 0) + 1);
         }
       }
     }

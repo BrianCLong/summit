@@ -1,4 +1,11 @@
-import { randomUUID } from 'crypto';
+// Simple UUID v4 generator for cross-platform compatibility
+function generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 import {
   WellbeingPrediction,
   InterventionRecommendation,
@@ -165,11 +172,11 @@ export class InterventionRecommender {
     const domainStats = new Map<WellbeingDomain, { total: number; count: number }>();
 
     for (const prediction of predictions) {
-      for (const [domain, score] of Object.entries(prediction.domainScores)) {
-        const current = domainStats.get(domain as WellbeingDomain) || { total: 0, count: 0 };
+      for (const [domain, score] of Object.entries(prediction.domainScores) as [WellbeingDomain, number][]) {
+        const current = domainStats.get(domain) || { total: 0, count: 0 };
         current.total += score;
         current.count++;
-        domainStats.set(domain as WellbeingDomain, current);
+        domainStats.set(domain, current);
       }
     }
 
@@ -223,7 +230,7 @@ export class InterventionRecommender {
     const expiresAt = new Date(now.getTime() + this.validityDays * 24 * 60 * 60 * 1000);
 
     return {
-      recommendationId: randomUUID(),
+      recommendationId: generateUUID(),
       citizenId: prediction.citizenId,
       predictionId: prediction.predictionId,
       interventionType: template.type,
@@ -250,7 +257,7 @@ export class InterventionRecommender {
 
     const now = new Date();
     return {
-      recommendationId: randomUUID(),
+      recommendationId: generateUUID(),
       citizenId: prediction.citizenId,
       predictionId: prediction.predictionId,
       interventionType: 'immediate_crisis',
