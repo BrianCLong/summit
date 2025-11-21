@@ -1,8 +1,12 @@
 import type { AudioBuffer } from '@intelgraph/audio-processing';
-import { BaseSTTProvider } from './base.js';
+import { BaseSTTProvider, ProviderConfig } from './base.js';
 import type { STTConfig, TranscriptionResult, WhisperModel } from '../types.js';
 import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
 import axios from 'axios';
+
+export interface WhisperConfig extends ProviderConfig {
+  model?: WhisperModel;
+}
 
 /**
  * Whisper STT Provider
@@ -11,13 +15,13 @@ import axios from 'axios';
 export class WhisperProvider extends BaseSTTProvider {
   private apiKey?: string;
   private endpoint: string;
-  private model: WhisperModel;
+  private model: string;
 
-  constructor(config: { apiKey?: string; endpoint?: string; model?: WhisperModel } = {}) {
+  constructor(config: WhisperConfig = {}) {
     super(config);
     this.apiKey = config.apiKey || process.env.OPENAI_API_KEY;
     this.endpoint = config.endpoint || 'https://api.openai.com/v1/audio/transcriptions';
-    this.model = config.model || 'large-v3' as WhisperModel;
+    this.model = config.model || 'whisper-1';
   }
 
   getName(): string {
@@ -26,51 +30,54 @@ export class WhisperProvider extends BaseSTTProvider {
 
   async transcribe(audio: AudioBuffer, config: STTConfig): Promise<TranscriptionResult> {
     this.validateConfig(config);
-    const mergedConfig = this.mergeConfig(config);
 
     try {
-      // Prepare form data
-      const formData = new FormData();
-      const blob = new Blob([audio.data], { type: 'audio/wav' });
-      formData.append('file', blob, 'audio.wav');
-      formData.append('model', this.model);
-      formData.append('language', mergedConfig.language.split('-')[0]); // Whisper uses 2-letter codes
-      formData.append('response_format', 'verbose_json');
-
-      if (mergedConfig.enableWordTimestamps) {
-        formData.append('timestamp_granularities', 'word');
+      // Convert buffer to Uint8Array for Blob compatibility
+      let uint8Array: Uint8Array;
+      if (Buffer.isBuffer(audio.data)) {
+        uint8Array = new Uint8Array(audio.data);
+      } else {
+        uint8Array = audio.data as Uint8Array;
       }
 
-      if (mergedConfig.temperature !== undefined) {
-        formData.append('temperature', String(mergedConfig.temperature));
+      // Prepare form data
+      const formData = new FormData();
+      const blob = new Blob([uint8Array as BlobPart], { type: 'audio/wav' });
+      formData.append('file', blob, 'audio.wav');
+      formData.append('model', this.model);
+      formData.append('language', config.language.split('-')[0]);
+      formData.append('response_format', 'verbose_json');
+
+      if (config.enableWordTimestamps) {
+        formData.append('timestamp_granularities[]', 'word');
+      }
+
+      if (config.temperature !== undefined) {
+        formData.append('temperature', String(config.temperature));
       }
 
       // Make API request
       const response = await axios.post(this.endpoint, formData, {
         headers: {
           'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'multipart/form-data'
         }
       });
 
-      // Transform Whisper response to our format
-      return this.transformWhisperResponse(response.data, mergedConfig);
+      return this.transformWhisperResponse(response.data, config, audio);
     } catch (error) {
-      throw new Error(`Whisper transcription failed: ${error}`);
+      throw new Error(`Whisper transcription failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   protected getProviderLanguages(): string[] {
-    // Whisper supports 100+ languages
     return Array.from(SUPPORTED_LANGUAGES);
   }
 
   getMaxDuration(): number {
-    // Whisper API has a 25MB file size limit
-    return 3600; // ~1 hour of audio
+    return 3600;
   }
 
-  private transformWhisperResponse(response: any, config: STTConfig): TranscriptionResult {
+  private transformWhisperResponse(response: any, config: STTConfig, audio: AudioBuffer): TranscriptionResult {
     const segments = (response.segments || []).map((seg: any) => ({
       text: seg.text,
       startTime: seg.start,
@@ -89,7 +96,7 @@ export class WhisperProvider extends BaseSTTProvider {
       segments,
       language: response.language || config.language,
       languageConfidence: 1.0,
-      duration: response.duration,
+      duration: response.duration || audio.metadata.duration,
       provider: STTProvider.WHISPER,
       model: this.model,
       metadata: {

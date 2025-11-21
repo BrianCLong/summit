@@ -117,7 +117,7 @@ export const VoiceCloningDetectionSchema = z.object({
   confidence: z.number().min(0).max(1),
   originalSpeaker: z.string().optional(),
   artifacts: z.array(z.string()),
-  technicalMarkers: z.record(z.number())
+  technicalMarkers: z.record(z.string(), z.number())
 });
 
 export type VoiceCloningDetection = z.infer<typeof VoiceCloningDetectionSchema>;

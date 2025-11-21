@@ -1,0 +1,38 @@
+{
+  "name": "@intelgraph/text-to-speech",
+  "version": "1.0.0",
+  "description": "Text-to-speech synthesis with multi-provider support",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/audio-processing": "workspace:*",
+    "zod": "^4.1.12",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "@types/node": "^24.10.1"
+  },
+  "peerDependencies": {
+    "@google-cloud/text-to-speech": "^5.0.0",
+    "@aws-sdk/client-polly": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@google-cloud/text-to-speech": { "optional": true },
+    "@aws-sdk/client-polly": { "optional": true }
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

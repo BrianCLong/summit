@@ -1,7 +1,12 @@
 import type { AudioBuffer } from '@intelgraph/audio-processing';
-import { BaseSTTProvider } from './base.js';
+import { BaseSTTProvider, ProviderConfig } from './base.js';
 import type { STTConfig, TranscriptionResult } from '../types.js';
 import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
+
+export interface AzureConfig extends ProviderConfig {
+  subscriptionKey?: string;
+  region?: string;
+}
 
 /**
  * Azure Speech Services Provider
@@ -9,15 +14,12 @@ import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
  */
 export class AzureSTTProvider extends BaseSTTProvider {
   private subscriptionKey?: string;
-  private region?: string;
-  private speechConfig: any;
+  private region: string;
 
-  constructor(config: { subscriptionKey?: string; region?: string } = {}) {
+  constructor(config: AzureConfig = {}) {
     super(config);
     this.subscriptionKey = config.subscriptionKey || process.env.AZURE_SPEECH_KEY;
     this.region = config.region || process.env.AZURE_SPEECH_REGION || 'eastus';
-    // Lazy load Azure Speech SDK
-    // this.initializeSpeechConfig();
   }
 
   getName(): string {
@@ -26,74 +28,32 @@ export class AzureSTTProvider extends BaseSTTProvider {
 
   async transcribe(audio: AudioBuffer, config: STTConfig): Promise<TranscriptionResult> {
     this.validateConfig(config);
-    const mergedConfig = this.mergeConfig(config);
 
     try {
-      // Initialize speech config
-      // const speechConfig = sdk.SpeechConfig.fromSubscription(this.subscriptionKey, this.region);
-      // speechConfig.speechRecognitionLanguage = mergedConfig.language;
-
-      // Configure recognition settings
-      // if (mergedConfig.enableAutomaticPunctuation) {
-      //   speechConfig.enableDictation();
-      // }
-
-      // if (mergedConfig.profanityFilter) {
-      //   speechConfig.setProfanity(sdk.ProfanityOption.Masked);
-      // }
-
-      // Create audio config from buffer
-      // const audioConfig = sdk.AudioConfig.fromWavFileInput(audio.data);
-
-      // Create recognizer
-      // const recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-
-      // For now, return placeholder
-      return this.transformAzureResponse({}, mergedConfig, audio);
+      // In production: use microsoft-cognitiveservices-speech-sdk
+      return this.createPlaceholderResult(config, audio);
     } catch (error) {
-      throw new Error(`Azure Speech Services failed: ${error}`);
+      throw new Error(`Azure Speech Services failed: ${error instanceof Error ? error.message : String(error)}`);
     }
   }
 
   protected getProviderLanguages(): string[] {
-    // Azure supports 100+ languages
     return Array.from(SUPPORTED_LANGUAGES);
   }
 
   getMaxDuration(): number {
-    // Azure supports up to 10 minutes for standard recognition
-    // Batch transcription supports longer audio
     return 600;
   }
 
-  private transformAzureResponse(response: any, config: STTConfig, audio: AudioBuffer): TranscriptionResult {
-    // Transform Azure response to our format
-    const segments = (response.results || []).map((result: any, index: number) => ({
-      text: result.text,
-      startTime: result.offset / 10000000, // Azure uses 100-nanosecond units
-      endTime: (result.offset + result.duration) / 10000000,
-      confidence: result.confidence || 1.0,
-      words: result.words?.map((word: any) => ({
-        word: word.text,
-        startTime: word.offset / 10000000,
-        endTime: (word.offset + word.duration) / 10000000,
-        confidence: word.confidence || 1.0
-      }))
-    }));
-
-    const fullText = segments.map(seg => seg.text).join(' ');
-
+  private createPlaceholderResult(config: STTConfig, audio: AudioBuffer): TranscriptionResult {
     return {
-      text: fullText,
-      segments,
+      text: '',
+      segments: [],
       language: config.language,
       languageConfidence: 1.0,
       duration: audio.metadata.duration,
       provider: STTProvider.AZURE,
-      model: 'azure-speech',
-      metadata: {
-        recognitionId: response.recognitionId
-      }
+      model: 'azure-speech'
     };
   }
 }

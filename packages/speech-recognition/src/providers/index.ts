@@ -2,11 +2,11 @@
  * STT Provider implementations
  */
 
-export { BaseSTTProvider, STTProviderFactory } from './base.js';
-export { WhisperProvider } from './whisper.js';
-export { GoogleSTTProvider } from './google.js';
-export { AWSTranscribeProvider } from './aws.js';
-export { AzureSTTProvider } from './azure.js';
+export { BaseSTTProvider, STTProviderFactory, ProviderConfig } from './base.js';
+export { WhisperProvider, WhisperConfig } from './whisper.js';
+export { GoogleSTTProvider, GoogleConfig } from './google.js';
+export { AWSTranscribeProvider, AWSConfig } from './aws.js';
+export { AzureSTTProvider, AzureConfig } from './azure.js';
 
 // Auto-register providers
 import { STTProviderFactory } from './base.js';
@@ -16,7 +16,7 @@ import { AWSTranscribeProvider } from './aws.js';
 import { AzureSTTProvider } from './azure.js';
 import { STTProvider } from '../types.js';
 
-STTProviderFactory.register(STTProvider.WHISPER, () => new WhisperProvider());
-STTProviderFactory.register(STTProvider.GOOGLE, () => new GoogleSTTProvider());
-STTProviderFactory.register(STTProvider.AWS, () => new AWSTranscribeProvider());
-STTProviderFactory.register(STTProvider.AZURE, () => new AzureSTTProvider());
+STTProviderFactory.register(STTProvider.WHISPER, (config) => new WhisperProvider(config));
+STTProviderFactory.register(STTProvider.GOOGLE, (config) => new GoogleSTTProvider(config));
+STTProviderFactory.register(STTProvider.AWS, (config) => new AWSTranscribeProvider(config));
+STTProviderFactory.register(STTProvider.AZURE, (config) => new AzureSTTProvider(config));

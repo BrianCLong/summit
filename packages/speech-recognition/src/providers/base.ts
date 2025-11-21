@@ -1,16 +1,30 @@
 import type { AudioBuffer } from '@intelgraph/audio-processing';
 import type { ISTTProvider } from '../interfaces.js';
-import type { STTConfig, TranscriptionResult, STTProvider } from '../types.js';
-import { SUPPORTED_LANGUAGES } from '../types.js';
+import type { STTConfig, TranscriptionResult } from '../types.js';
+import { STTProvider, SUPPORTED_LANGUAGES } from '../types.js';
+
+/**
+ * Provider-specific configuration
+ */
+export interface ProviderConfig {
+  apiKey?: string;
+  region?: string;
+  endpoint?: string;
+  projectId?: string;
+  keyFilename?: string;
+  subscriptionKey?: string;
+  bucketName?: string;
+  [key: string]: unknown;
+}
 
 /**
  * Base class for STT providers
  */
 export abstract class BaseSTTProvider implements ISTTProvider {
-  protected config: Partial<STTConfig>;
+  protected providerConfig: ProviderConfig;
 
-  constructor(config: Partial<STTConfig> = {}) {
-    this.config = config;
+  constructor(config: ProviderConfig = {}) {
+    this.providerConfig = config;
   }
 
   abstract getName(): string;
@@ -51,40 +65,30 @@ export abstract class BaseSTTProvider implements ISTTProvider {
       throw new Error(`Language ${config.language} not supported by ${this.getName()}`);
     }
   }
-
-  /**
-   * Merge configurations
-   */
-  protected mergeConfig(config: STTConfig): STTConfig {
-    return {
-      ...this.config,
-      ...config
-    } as STTConfig;
-  }
 }
 
 /**
  * Factory for creating STT providers
  */
 export class STTProviderFactory {
-  private static providers = new Map<STTProvider, () => ISTTProvider>();
+  private static providers = new Map<STTProvider, (config?: ProviderConfig) => ISTTProvider>();
 
   /**
    * Register a provider
    */
-  static register(type: STTProvider, factory: () => ISTTProvider): void {
+  static register(type: STTProvider, factory: (config?: ProviderConfig) => ISTTProvider): void {
     this.providers.set(type, factory);
   }
 
   /**
    * Create provider instance
    */
-  static create(type: STTProvider, config?: Partial<STTConfig>): ISTTProvider {
+  static create(type: STTProvider, config?: ProviderConfig): ISTTProvider {
     const factory = this.providers.get(type);
     if (!factory) {
       throw new Error(`Provider ${type} not registered`);
     }
-    return factory();
+    return factory(config);
   }
 
   /**
