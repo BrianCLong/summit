@@ -11,3 +11,5 @@ export * from './copilot-hooks';
 export * from './connector-hooks';
 export * from './rag-hooks';
 export * from './export-hooks';
+export * from './integration/server-setup';
+export * from './otel/instrumentation';
