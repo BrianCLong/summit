@@ -18,9 +18,21 @@ import logger from '../utils/logger.js';
 import { typeDefs } from './schema/index.js';
 import resolvers from './resolvers-combined.js';
 
+// Import DataLoaders
+import { createDataLoaders, type DataLoaders } from './dataloaders/index.js';
+import { getNeo4jDriver } from '../db/neo4j.js';
+import { getPostgresPool } from '../db/postgres.js';
+
+// Import performance optimization plugins
+import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/queryComplexityPlugin.js';
+import { createAPQPlugin } from './plugins/apqPlugin.js';
+import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
+import resolverMetricsPlugin from './plugins/resolverMetrics.js';
+
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
   dataSources: any;
+  loaders: DataLoaders;
   user?: {
     id: string;
     roles: string[];
@@ -69,10 +81,22 @@ function createSecureSchema() {
 
 // Context function for Apollo v5
 async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
+  const neo4jDriver = getNeo4jDriver();
+  const pgPool = getPostgresPool();
+  const tenantId = req.user?.tenantId || req.user?.tenant || 'default';
+
+  // Create request-scoped DataLoaders to batch queries
+  const loaders = createDataLoaders({
+    neo4jDriver,
+    pgPool,
+    tenantId,
+  });
+
   return {
     dataSources: {
       // Data sources will be injected here
     },
+    loaders, // DataLoaders for batch loading
     user: req.user, // Populated by auth middleware
     request: {
       ip: req.ip || req.connection.remoteAddress,
@@ -102,6 +126,24 @@ export function createApolloV5Server(
       ...(process.env.NODE_ENV === 'development'
         ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
         : []),
+
+      // Performance optimization plugins
+      createQueryComplexityPlugin({
+        maximumComplexity: 1000,
+        getMaxComplexityForUser: getMaxComplexityByRole,
+        enforceComplexity: process.env.ENFORCE_QUERY_COMPLEXITY === 'true' || process.env.NODE_ENV === 'production',
+        logComplexity: true,
+      }),
+
+      createAPQPlugin({
+        // Redis will be injected if available
+        enabled: process.env.ENABLE_APQ !== 'false',
+        ttl: 86400, // 24 hours
+      }),
+
+      createPerformanceMonitoringPlugin(),
+
+      resolverMetricsPlugin,
 
       // Custom telemetry plugin
       {
