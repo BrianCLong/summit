@@ -3,7 +3,7 @@
  * Basic unit tests for time series storage and query functionality
  */
 
-import { QueryBuilder, query } from '../query/QueryBuilder.js';
+import { query } from '../query/QueryBuilder.js';
 
 describe('QueryBuilder', () => {
   it('should build a basic query with time range', () => {

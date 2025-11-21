@@ -9,7 +9,6 @@
 import { mean, std } from 'mathjs';
 import {
   ARIMAConfig,
-  Forecast,
   ForecastPoint,
   ForecastMetrics
 } from '../models/ForecastModels.js';
@@ -26,7 +25,7 @@ export class ARIMA {
   /**
    * Fit ARIMA model to training data
    */
-  async fit(data: number[], timestamps?: Date[]): Promise<void> {
+  async fit(data: number[], _timestamps?: Date[]): Promise<void> {
     // Implement ARIMA parameter estimation
     // This is a placeholder - in production, use a library like 'arima' or call Python statsmodels
 
@@ -199,7 +198,6 @@ export class ARIMA {
     let sumAbsError = 0;
     let sumSquaredError = 0;
     let sumPercentError = 0;
-    let sumActual = 0;
 
     for (let i = 0; i < n; i++) {
       const error = actual[i] - predicted[i];
@@ -209,8 +207,6 @@ export class ARIMA {
       if (actual[i] !== 0) {
         sumPercentError += Math.abs(error / actual[i]);
       }
-
-      sumActual += actual[i];
     }
 
     const mae = sumAbsError / n;
@@ -269,7 +265,7 @@ export class ARIMA {
               bestAIC = aic;
               bestConfig = config;
             }
-          } catch (error) {
+          } catch {
             // Skip invalid configurations
             continue;
           }

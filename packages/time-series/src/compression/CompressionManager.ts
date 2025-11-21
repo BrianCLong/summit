@@ -121,7 +121,7 @@ export class CompressionManager {
         started_at: startTime,
         completed_at: new Date()
       };
-    } catch (error) {
+    } catch {
       return {
         job_id: Date.now(),
         table_name: tableName,

@@ -6,7 +6,7 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { Anomaly, AnomalyAlert } from '../models/AnomalyModels.js';
+import { Anomaly } from '../models/AnomalyModels.js';
 
 export interface StreamingBuffer {
   values: number[];
@@ -249,8 +249,8 @@ export class StreamingAnomalyDetector {
     for (const callback of this.callbacks) {
       try {
         await callback(anomaly);
-      } catch (error) {
-        console.error('Error in anomaly callback:', error);
+      } catch {
+        // Callback error - continue processing
       }
     }
   }

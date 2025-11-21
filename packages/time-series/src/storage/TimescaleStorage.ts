@@ -6,10 +6,8 @@
  * Copyright (c) 2025 IntelGraph
  */
 
-import { Pool, QueryResult } from 'pg';
+import { Pool } from 'pg';
 import {
-  TimeSeries,
-  TimeSeriesPoint,
   TimeSeriesMetric,
   HypertableConfig,
   ContinuousAggregateConfig,

@@ -9,8 +9,7 @@
 import {
   EnsembleConfig,
   ForecastPoint,
-  ForecastMetrics,
-  Forecast
+  ForecastMetrics
 } from '../models/ForecastModels.js';
 import { ARIMA } from '../algorithms/ARIMA.js';
 import { ExponentialSmoothing } from '../algorithms/ExponentialSmoothing.js';

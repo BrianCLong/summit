@@ -34,7 +34,7 @@ export class SeasonalDecomposition {
     timestamps: Date[],
     config: STLConfig
   ): DecompositionResult {
-    const { period, seasonal_smoothing = 7, trend_smoothing = 0, robust = false } = config;
+    const { period, seasonal_smoothing: _seasonal_smoothing = 7, trend_smoothing = 0, robust: _robust = false } = config;
 
     // Initialize components
     const trend = new Array(data.length).fill(0);

@@ -270,7 +270,7 @@ export class ExponentialSmoothing {
               bestRMSE = metrics.rmse!;
               bestConfig = testConfig;
             }
-          } catch (error) {
+          } catch {
             continue;
           }
         }
