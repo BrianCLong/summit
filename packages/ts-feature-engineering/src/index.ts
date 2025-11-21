@@ -62,13 +62,33 @@ export class FeatureExtractor {
    * Extract comprehensive features from time series
    */
   static extractFeatures(data: number[], timestamps?: Date[]): TimeSeriesFeatures {
+    const stats = this.extractStatisticalFeatures(data);
+    const trend = this.extractTrendFeatures(data);
+    const seasonality = this.extractSeasonalityFeatures(data);
+    const complexity = this.extractComplexityFeatures(data);
+    const peaks = this.extractPeakFeatures(data);
+    const timeFeatures = timestamps ? this.extractTimeFeatures(timestamps) : {};
+
     return {
-      ...this.extractStatisticalFeatures(data),
-      ...this.extractTrendFeatures(data),
-      ...this.extractSeasonalityFeatures(data),
-      ...this.extractComplexityFeatures(data),
-      ...this.extractPeakFeatures(data),
-      ...(timestamps ? this.extractTimeFeatures(timestamps) : {})
+      mean: stats.mean ?? 0,
+      std: stats.std ?? 0,
+      min: stats.min ?? 0,
+      max: stats.max ?? 0,
+      median: stats.median ?? 0,
+      q25: stats.q25 ?? 0,
+      q75: stats.q75 ?? 0,
+      iqr: stats.iqr ?? 0,
+      skewness: stats.skewness ?? 0,
+      kurtosis: stats.kurtosis ?? 0,
+      trend_slope: trend.trend_slope ?? 0,
+      trend_r_squared: trend.trend_r_squared ?? 0,
+      autocorrelation: seasonality.autocorrelation ?? [],
+      entropy: complexity.entropy ?? 0,
+      complexity: complexity.complexity ?? 0,
+      num_peaks: peaks.num_peaks ?? 0,
+      num_troughs: peaks.num_troughs ?? 0,
+      peak_prominence: peaks.peak_prominence ?? [],
+      ...timeFeatures
     };
   }
 
