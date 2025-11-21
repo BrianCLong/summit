@@ -20,6 +20,8 @@
     "@intelgraph/satellite-imagery": "workspace:*",
     "@intelgraph/video-analysis": "workspace:*",
     "@intelgraph/image-forensics": "workspace:*",
+    "@intelgraph/visual-similarity": "workspace:*",
+    "@intelgraph/image-enhancement": "workspace:*",
     "express": "^4.21.2",
     "cors": "^2.8.5",
     "helmet": "^8.0.0",
