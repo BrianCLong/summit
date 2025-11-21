@@ -12,6 +12,8 @@ const Env = z
     REDIS_HOST: z.string().default('localhost'),
     REDIS_PORT: z.coerce.number().default(6379),
     REDIS_PASSWORD: z.string().optional().default(''),
+    REDIS_USERNAME: z.string().optional(),
+    REDIS_TLS: z.boolean().default(false),
     JWT_SECRET: z.string().min(32),
     JWT_REFRESH_SECRET: z.string().min(32),
     CORS_ORIGIN: z.string().default('http://localhost:3000'),
