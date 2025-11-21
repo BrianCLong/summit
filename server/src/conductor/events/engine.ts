@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import { createHmac, timingSafeEqual } from 'crypto';
+import logger from '../../config/logger.js';
 
 // Optional kafka integration: load lazily to avoid hard dep when not used
 let Kafka: any;
@@ -57,17 +58,31 @@ async function storeOffset(src: any, partition: number, offset: number) {
 }
 
 export async function webhookHandler(req: any, res: any) {
+  const eventId = req.headers['x-event-id'] || 'unknown';
+  const runbook = req.query.runbook;
   const sig =
     req.headers['x-hub-signature-256'] || req.headers['x-intelgraph-signature'];
-  if (!verifyHmac(sig, req.rawBody, process.env.WEBHOOK_SECRET!))
+
+  if (!verifyHmac(sig, req.rawBody, process.env.WEBHOOK_SECRET || '')) {
+    logger.warn({ eventId, runbook }, 'Webhook signature verification failed');
     return res.status(401).end();
-  await triggerRunbook(req.query.runbook, {
-    eventKey: req.headers['x-event-id'],
+  }
+
+  logger.info({ eventId, runbook }, 'Webhook signature verified successfully');
+
+  await triggerRunbook(runbook, {
+    eventKey: eventId,
     value: req.body,
   });
   res.sendStatus(202);
 }
-function verifyHmac(sig: string, body: Buffer, secret: string) {
+
+/**
+ * Verifies an HMAC signature for webhook payloads.
+ * Supports GitHub-style signatures (sha256=hash or sha1=hash).
+ * Uses timing-safe comparison to prevent timing attacks.
+ */
+export function verifyHmac(sig: string | undefined, body: Buffer | undefined, secret: string): boolean {
   if (!sig || !body || !secret) return false;
 
   // Extract the hash from the signature (e.g., "sha256=abcd1234...")
@@ -79,6 +94,9 @@ function verifyHmac(sig: string, body: Buffer, secret: string) {
   // Support both sha256 and sha1 (though sha256 is preferred)
   if (algorithm !== 'sha256' && algorithm !== 'sha1') return false;
 
+  // Validate provided hash is valid hex
+  if (!/^[a-f0-9]+$/i.test(providedHash)) return false;
+
   // Compute the expected HMAC
   const hmac = createHmac(algorithm, secret);
   hmac.update(body);
@@ -86,12 +104,15 @@ function verifyHmac(sig: string, body: Buffer, secret: string) {
 
   // Timing-safe comparison to prevent timing attacks
   try {
-    return timingSafeEqual(
-      Buffer.from(providedHash, 'hex'),
-      Buffer.from(expectedHash, 'hex')
-    );
+    const providedBuf = Buffer.from(providedHash, 'hex');
+    const expectedBuf = Buffer.from(expectedHash, 'hex');
+
+    // Ensure buffers are same length before comparison
+    if (providedBuf.length !== expectedBuf.length) return false;
+
+    return timingSafeEqual(providedBuf, expectedBuf);
   } catch {
-    // If buffers have different lengths, timingSafeEqual throws
+    // If any error occurs during comparison, reject
     return false;
   }
 }
