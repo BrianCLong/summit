@@ -3,6 +3,12 @@ import pino from 'pino';
 import citizenRoutes from './routes/citizen.js';
 import { createHealthRouter } from './middleware/health.js';
 import { metricsMiddleware, metricsCollector } from './middleware/metrics.js';
+import {
+  rateLimitMiddleware,
+  sanitizeInput,
+  securityHeaders,
+  requestId,
+} from './middleware/security.js';
 import { cacheService } from './services/CacheService.js';
 
 const logger = pino({
@@ -13,8 +19,18 @@ const logger = pino({
 const app = express();
 const PORT = process.env.PORT || 4010;
 
-// Middleware
-app.use(express.json({ limit: '10mb' }));
+// Security middleware (before parsing)
+app.use(securityHeaders);
+app.use(requestId);
+
+// Body parsing
+app.use(express.json({ limit: '1mb' }));
+app.use(sanitizeInput);
+
+// Rate limiting for API routes
+app.use('/api', rateLimitMiddleware);
+
+// Metrics
 app.use(metricsMiddleware);
 
 // Request logging
@@ -26,12 +42,13 @@ app.use((req, res, next) => {
       path: req.path,
       status: res.statusCode,
       duration: Date.now() - start,
+      requestId: res.getHeader('X-Request-ID'),
     });
   });
   next();
 });
 
-// Health routes
+// Health routes (no rate limiting)
 app.use(createHealthRouter());
 
 // Prometheus metrics endpoint
