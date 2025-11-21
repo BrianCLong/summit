@@ -1,0 +1,37 @@
+{
+  "name": "@summitsec/vcr-kit",
+  "version": "0.1.0",
+  "description": "Verifiable Consent Receipt toolkit with issuer, verifier, CLI, and middleware",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "vcr-kit": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts",
+    "test": "node --test dist/**/*.spec.js"
+  },
+  "keywords": [
+    "verifiable credentials",
+    "consent",
+    "privacy",
+    "did"
+  ],
+  "author": "Summit Engineering",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@noble/ed25519": "^3.0.0",
+    "bs58": "^6.0.0",
+    "canonicalize": "^2.0.0",
+    "commander": "^12.1.0",
+    "luxon": "^3.5.0"
+  },
+  "devDependencies": {
+    "@types/bs58": "^4.0.4",
+    "@types/node": "^20.12.7",
+    "typescript": "^5.9.2"
+  }
+}
