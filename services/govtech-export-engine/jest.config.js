@@ -14,6 +14,9 @@ export default {
       },
     ],
   },
+  transformIgnorePatterns: [
+    'node_modules/(?!(uuid|jszip)/)',
+  ],
   testMatch: ['**/__tests__/**/*.test.ts', '**/*.spec.ts'],
   collectCoverageFrom: [
     'src/**/*.ts',
