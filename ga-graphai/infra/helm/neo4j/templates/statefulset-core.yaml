@@ -1,0 +1,126 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "neo4j.fullname" . }}-core
+  labels:
+    {{- include "neo4j.labels" . | nindent 4 }}
+    app.kubernetes.io/component: core
+  annotations:
+    replication.summit.sh/role: core
+spec:
+  serviceName: {{ include "neo4j.fullname" . }}-discovery
+  replicas: {{ .Values.regions.primary.coreReplicas }}
+  selector:
+    matchLabels:
+      {{- include "neo4j.matchLabels" (dict "root" . "component" "core") | nindent 6 }}
+      summit.slo/region: {{ .Values.regions.primary.name | quote }}
+  template:
+    metadata:
+      labels:
+        {{- include "neo4j.matchLabels" (dict "root" . "component" "core") | nindent 8 }}
+        summit.slo/region: {{ .Values.regions.primary.name | quote }}
+      annotations:
+        replication.summit.sh/region: {{ .Values.regions.primary.name | quote }}
+    spec:
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml .Values.nodeSelector | nindent 8 }}
+      {{- end }}
+      {{- if .Values.tolerations }}
+      tolerations:
+        {{- range .Values.tolerations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - {{ .Values.regions.primary.name }}
+        {{- with .Values.extraAffinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      containers:
+        - name: neo4j
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: bolt
+              containerPort: {{ .Values.service.bolt.port }}
+            - name: http
+              containerPort: {{ .Values.service.http.port }}
+            - name: discovery
+              containerPort: {{ .Values.service.discovery.port }}
+          env:
+            - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+              value: "yes"
+            - name: NEO4J_CONF
+              value: /conf/neo4j.conf
+            - name: NEO4J_dbms_mode
+              value: CORE
+            - name: NEO4J_causal__clustering_expected__core__cluster__size
+              value: {{ include "neo4j.totalCores" . | quote }}
+            - name: NEO4J_causal__clustering_kubernetes_service__name
+              value: {{ include "neo4j.fullname" . }}-discovery
+            - name: NEO4J_causal__clustering_kubernetes_service__namespace
+              value: {{ .Release.Namespace }}
+            - name: NEO4J_causal__clustering_kubernetes_label__selector
+              value: app.kubernetes.io/component=core,app.kubernetes.io/instance={{ .Release.Name }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: NEO4J_causal__clustering_discovery__advertised__address
+              value: $(POD_NAME).{{ include "neo4j.fullname" . }}-discovery:{{ .Values.service.discovery.port }}
+            - name: NEO4J_causal__clustering_transaction__advertised__address
+              value: $(POD_IP):{{ .Values.service.bolt.port }}
+            - name: NEO4J_dbms_default__advertised__address
+              value: $(POD_IP)
+          {{- if .Values.auth.enabled }}
+          envFrom:
+            - secretRef:
+                name: {{ if .Values.auth.existingSecret }}{{ .Values.auth.existingSecret }}{{ else }}{{ include "neo4j.fullname" . }}-auth{{ end }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.coreResources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+          readinessProbe:
+            httpGet:
+              path: /db/manage/server/ha/available
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: bolt
+            initialDelaySeconds: 60
+            periodSeconds: 20
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "neo4j.fullname" . }}-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          replication.summit.sh/tier: core
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: {{ .Values.storage.className | quote }}
+        resources:
+          requests:
+            storage: {{ .Values.storage.size | quote }}

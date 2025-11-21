@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "postgres.fullname" . }}-writer
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+    app.kubernetes.io/component: writer
+  annotations:
+    replication.summit.sh/global-role: writer
+    {{- if .Values.monitoring.enabled }}
+    {{- with .Values.monitoring.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- end }}
+    {{- with .Values.service.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: {{ .Values.service.port }}
+      targetPort: postgres
+  selector:
+    {{- include "postgres.matchLabels" (dict "root" . "component" "writer") | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "postgres.fullname" . }}-replicas
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
+    app.kubernetes.io/component: replica
+  annotations:
+    replication.summit.sh/global-role: replica
+spec:
+  clusterIP: None
+  ports:
+    - name: postgres
+      port: {{ .Values.service.port }}
+      targetPort: postgres
+  selector:
+    {{- include "postgres.matchLabels" (dict "root" . "component" "replica") | nindent 4 }}
