@@ -3,8 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "allowImportingTsExtensions": false
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }]
+  "exclude": ["src/__tests__/**/*.test.ts"]
 }
