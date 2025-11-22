@@ -32,7 +32,8 @@ export class CopilotNLQueryService {
       query.toLowerCase().includes('show')
     ) {
       return {
-        cypher: 'MATCH (n) RETURN n LIMIT 10',
+        // SECURITY: Always enforce tenant isolation in generated Cypher
+        cypher: 'MATCH (n) WHERE n.tenantId = $tenantId RETURN n LIMIT 10',
         explanation: `Generated safe Cypher for: "${query}"`,
         confidence: 0.7,
         preview: true,
@@ -40,7 +41,9 @@ export class CopilotNLQueryService {
     }
 
     return {
-      cypher: 'MATCH (n) RETURN count(n) as total_nodes',
+      // SECURITY: Always enforce tenant isolation in generated Cypher
+      cypher:
+        'MATCH (n) WHERE n.tenantId = $tenantId RETURN count(n) as total_nodes',
       explanation: 'Default safe query - preview mode',
       confidence: 0.5,
       preview: true,
