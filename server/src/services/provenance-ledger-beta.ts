@@ -21,6 +21,8 @@ import type {
   EvidenceInput,
   Claim,
   ClaimInput,
+  ClaimEvidenceLink,
+  ClaimEvidenceLinkInput,
   License,
   LicenseInput,
   ExportManifest,
@@ -529,8 +531,128 @@ export class ProvenanceLedgerBetaService {
   }
 
   // ============================================================================
+  // CLAIM-EVIDENCE LINK MANAGEMENT
+  // ============================================================================
+
+  async linkClaimToEvidence(
+    input: ClaimEvidenceLinkInput,
+  ): Promise<ClaimEvidenceLink> {
+    const id = `link-${crypto.randomUUID()}`;
+    const now = new Date();
+
+    try {
+      // Verify claim and evidence exist
+      const claim = await this.getClaim(input.claim_id);
+      if (!claim) {
+        throw new Error(`Claim ${input.claim_id} not found`);
+      }
+
+      const evidence = await this.getEvidence(input.evidence_id);
+      if (!evidence) {
+        throw new Error(`Evidence ${input.evidence_id} not found`);
+      }
+
+      await timescaleQuery(
+        `
+        INSERT INTO claim_evidence_links (
+          id, claim_id, evidence_id, relation_type, confidence,
+          created_by, created_at, notes
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `,
+        [
+          id,
+          input.claim_id,
+          input.evidence_id,
+          input.relation_type,
+          input.confidence || null,
+          input.created_by,
+          now,
+          input.notes || null,
+        ],
+      );
+
+      // Record in provenance chain
+      await this.recordProvenanceEntry({
+        operation_type: 'CLAIM_EVIDENCE_LINK_CREATED',
+        actor_id: input.created_by,
+        metadata: {
+          link_id: id,
+          claim_id: input.claim_id,
+          evidence_id: input.evidence_id,
+          relation_type: input.relation_type,
+        },
+      });
+
+      logger.info({
+        message: 'Claim-evidence link created',
+        link_id: id,
+        claim_id: input.claim_id,
+        evidence_id: input.evidence_id,
+        relation_type: input.relation_type,
+      });
+
+      return {
+        id,
+        created_at: now,
+        ...input,
+      } as ClaimEvidenceLink;
+    } catch (error) {
+      logger.error({
+        message: 'Failed to create claim-evidence link',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new Error('Claim-evidence link creation failed');
+    }
+  }
+
+  async getClaimEvidenceLinks(
+    claimId: string,
+  ): Promise<ClaimEvidenceLink[]> {
+    const result = await timescaleQuery(
+      'SELECT * FROM claim_evidence_links WHERE claim_id = $1 ORDER BY created_at DESC',
+      [claimId],
+    );
+
+    return result.rows as ClaimEvidenceLink[];
+  }
+
+  async getEvidenceClaimLinks(
+    evidenceId: string,
+  ): Promise<ClaimEvidenceLink[]> {
+    const result = await timescaleQuery(
+      'SELECT * FROM claim_evidence_links WHERE evidence_id = $1 ORDER BY created_at DESC',
+      [evidenceId],
+    );
+
+    return result.rows as ClaimEvidenceLink[];
+  }
+
+  // ============================================================================
   // PROVENANCE CHAIN
   // ============================================================================
+
+  private async getLastAuditHash(): Promise<string | null> {
+    try {
+      const result = await timescaleQuery(
+        `SELECT content_hash FROM provenance_chain
+         ORDER BY timestamp DESC, id DESC
+         LIMIT 1`,
+        [],
+      );
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      return result.rows[0].content_hash;
+    } catch (error) {
+      logger.error({
+        message: 'Failed to get last audit hash',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return null;
+    }
+  }
 
   private async recordProvenanceEntry(entry: {
     operation_type: string;
@@ -540,10 +662,21 @@ export class ProvenanceLedgerBetaService {
   }): Promise<string> {
     const id = crypto.randomUUID();
     const timestamp = new Date();
-    const content_hash = this.computeHash({ ...entry, timestamp });
+
+    // Get the previous hash for chaining
+    const prevHash = await this.getLastAuditHash();
+
+    // Compute content hash including previous hash for chain integrity
+    const content_hash = this.computeHash({
+      ...entry,
+      timestamp,
+      prev_hash: prevHash,
+    });
+
     const signature = this.generateSignature({
       id,
       content_hash,
+      prev_hash: prevHash,
       ...entry,
       timestamp,
     });
@@ -557,17 +690,139 @@ export class ProvenanceLedgerBetaService {
     `,
       [
         id,
-        entry.parent_hash || null,
+        prevHash || null,
         content_hash,
         entry.operation_type,
         entry.actor_id,
         timestamp,
-        JSON.stringify(entry.metadata),
+        JSON.stringify({ ...entry.metadata, prev_hash: prevHash }),
         signature,
       ],
     );
 
     return id;
+  }
+
+  async verifyAuditChain(options?: {
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+  }): Promise<{
+    valid: boolean;
+    totalRecords: number;
+    verifiedRecords: number;
+    brokenAt?: string;
+    errors: Array<{ recordId: string; error: string }>;
+  }> {
+    try {
+      let query = `
+        SELECT id, parent_hash, content_hash, operation_type, actor_id,
+               timestamp, metadata, signature
+        FROM provenance_chain
+        WHERE 1=1
+      `;
+      const params: any[] = [];
+
+      if (options?.startDate) {
+        params.push(options.startDate);
+        query += ` AND timestamp >= $${params.length}`;
+      }
+
+      if (options?.endDate) {
+        params.push(options.endDate);
+        query += ` AND timestamp <= $${params.length}`;
+      }
+
+      query += ` ORDER BY timestamp ASC, id ASC`;
+
+      if (options?.limit) {
+        params.push(options.limit);
+        query += ` LIMIT $${params.length}`;
+      }
+
+      const result = await timescaleQuery(query, params);
+      const records = result.rows;
+
+      if (records.length === 0) {
+        return {
+          valid: true,
+          totalRecords: 0,
+          verifiedRecords: 0,
+          errors: [],
+        };
+      }
+
+      let previousHash: string | null = null;
+      let verifiedCount = 0;
+      const errors: Array<{ recordId: string; error: string }> = [];
+      let brokenAt: string | undefined;
+
+      for (const record of records) {
+        // Check that parent_hash matches the previous record's content_hash
+        if (previousHash !== null && record.parent_hash !== previousHash) {
+          errors.push({
+            recordId: record.id,
+            error: `Hash chain broken: expected parent_hash=${previousHash}, got ${record.parent_hash}`,
+          });
+          if (!brokenAt) {
+            brokenAt = record.id;
+          }
+        } else {
+          // Recompute the content hash to verify integrity
+          const metadata = typeof record.metadata === 'string'
+            ? JSON.parse(record.metadata)
+            : record.metadata;
+
+          const expectedHash = this.computeHash({
+            operation_type: record.operation_type,
+            actor_id: record.actor_id,
+            metadata: {
+              ...metadata,
+            },
+            timestamp: record.timestamp,
+            prev_hash: record.parent_hash,
+          });
+
+          if (expectedHash !== record.content_hash) {
+            errors.push({
+              recordId: record.id,
+              error: `Content hash mismatch: expected ${expectedHash}, got ${record.content_hash}`,
+            });
+            if (!brokenAt) {
+              brokenAt = record.id;
+            }
+          } else {
+            verifiedCount++;
+          }
+        }
+
+        previousHash = record.content_hash;
+      }
+
+      const valid = errors.length === 0;
+
+      logger.info({
+        message: 'Audit chain verification completed',
+        valid,
+        totalRecords: records.length,
+        verifiedRecords: verifiedCount,
+        errorCount: errors.length,
+      });
+
+      return {
+        valid,
+        totalRecords: records.length,
+        verifiedRecords: verifiedCount,
+        brokenAt,
+        errors,
+      };
+    } catch (error) {
+      logger.error({
+        message: 'Failed to verify audit chain',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw new Error('Audit chain verification failed');
+    }
   }
 
   async getProvenanceChain(itemId: string): Promise<ProvenanceChain> {

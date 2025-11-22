@@ -154,6 +154,27 @@ export interface EvidenceInput {
 // CLAIM TYPES
 // ============================================================================
 export type ClaimType = 'factual' | 'inferential' | 'predictive' | 'evaluative';
+export type ClaimEvidenceRelationType = 'SUPPORTS' | 'CONTRADICTS';
+
+export interface ClaimEvidenceLink {
+  id: string;
+  claim_id: string;
+  evidence_id: string;
+  relation_type: ClaimEvidenceRelationType;
+  confidence?: number;
+  created_by: string;
+  created_at: Date;
+  notes?: string;
+}
+
+export interface ClaimEvidenceLinkInput {
+  claim_id: string;
+  evidence_id: string;
+  relation_type: ClaimEvidenceRelationType;
+  confidence?: number;
+  created_by: string;
+  notes?: string;
+}
 
 export interface Claim {
   id: string;
