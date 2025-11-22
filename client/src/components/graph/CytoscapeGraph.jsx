@@ -1,10 +1,4 @@
-import React, {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-} from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Paper,
@@ -33,24 +27,7 @@ import {
   DialogActions,
   TextField,
 } from '@mui/material';
-import {
-  ZoomIn,
-  ZoomOut,
-  CenterFocusStrong,
-  Add,
-  Save,
-  Refresh,
-  Settings,
-  FilterList,
-  Timeline,
-  AccountTree,
-  Psychology,
-  AutoGraph,
-  GroupWork,
-  PlayArrow,
-  Stop,
-  Download,
-} from '@mui/icons-material';
+import { Download } from '@mui/icons-material';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -117,15 +94,16 @@ function CytoscapeGraph() {
     timeRange: [0, 100],
   });
   const [lodMode, setLodMode] = useState('high'); // "high", "medium", "low"
-  const [lodModeChanges, setLodModeChanges] = useState(0);
+  const [lodModeChanges, setLodModeChanges] = useState(0); // Telemetry
   const [suggestedEdges, setSuggestedEdges] = useState([]);
 
   useEffect(() => {
+    // Increment telemetry counter when LOD mode changes
     setLodModeChanges((prev) => prev + 1);
   }, [lodMode]);
 
   // WebSocket connection for real-time updates
-  const socket = useSocket('wss://localhost:4000');
+  const socket = useSocket('ws://localhost:4000');
 
   // AI operations hook
   const aiOps = useAIOperations();
@@ -215,13 +193,13 @@ function CytoscapeGraph() {
     {
       selector: '.highlighted',
       style: {
+        opacity: 0.3,
         'background-color': '#FFD700',
         'line-color': '#FFD700',
         'target-arrow-color': '#FFD700',
         'transition-property':
           'background-color, line-color, target-arrow-color, opacity',
         'transition-duration': '0.3s',
-        opacity: 1,
       },
     },
     {
@@ -230,6 +208,22 @@ function CytoscapeGraph() {
         opacity: 0.3,
       },
     },
+    // LOD: Hide labels at low zoom levels
+    {
+      selector: 'node[zoom < 0.5]', // Adjust threshold as needed
+      style: {
+        label: '',
+        'text-opacity': 0,
+      },
+    },
+    {
+      selector: 'edge[zoom < 0.5]', // Adjust threshold as needed
+      style: {
+        label: '',
+        'text-opacity': 0,
+      },
+    },
+    // LOD: Simplified styles for low detail mode
     {
       selector: '.low-detail',
       style: {
@@ -239,106 +233,103 @@ function CytoscapeGraph() {
         'background-color': '#ccc',
         'line-color': '#eee',
         'target-arrow-shape': 'none',
-        'curve-style': 'haystack',
+        'curve-style': 'haystack', // Simpler edge rendering
         opacity: 0.7,
       },
     },
   ];
 
   // Layout configurations
-  const layoutConfigs = useMemo(
-    () => ({
-      fcose: {
-        name: 'fcose',
-        quality: 'default',
-        randomize: false,
-        animate: true,
-        animationDuration: 1000,
-        fit: true,
-        padding: 30,
-        nodeDimensionsIncludeLabels: true,
-        uniformNodeDimensions: false,
-        packComponents: true,
-        nodeRepulsion: 4500,
-        idealEdgeLength: 50,
-        edgeElasticity: 0.45,
-        nestingFactor: 0.1,
-      },
-      cola: {
-        name: 'cola',
-        animate: true,
-        animationDuration: 1000,
-        refresh: 1,
-        maxSimulationTime: 4000,
-        ungrabifyWhileSimulating: false,
-        fit: true,
-        padding: 30,
-        nodeDimensionsIncludeLabels: true,
-        randomize: false,
-        avoidOverlap: true,
-        handleDisconnected: true,
-        convergenceThreshold: 0.01,
-        nodeSpacing: 10,
-      },
-      dagre: {
-        name: 'dagre',
-        rankDir: 'TB',
-        animate: true,
-        animationDuration: 1000,
-        fit: true,
-        padding: 30,
-        spacingFactor: 1.25,
-        nodeDimensionsIncludeLabels: true,
-        ranker: 'network-simplex',
-      },
-      'cose-bilkent': {
-        name: 'cose-bilkent',
-        animate: true,
-        animationDuration: 1000,
-        refresh: 30,
-        fit: true,
-        padding: 30,
-        nodeDimensionsIncludeLabels: true,
-        randomize: false,
-        nodeRepulsion: 4500,
-        idealEdgeLength: 50,
-        edgeElasticity: 0.45,
-        nestingFactor: 0.1,
-        gravity: 0.25,
-        numIter: 2500,
-        tile: true,
-        tilingPaddingVertical: 10,
-        tilingPaddingHorizontal: 10,
-      },
-      circle: {
-        name: 'circle',
-        animate: true,
-        animationDuration: 1000,
-        fit: true,
-        padding: 30,
-        radius: 200,
-        startAngle: -Math.PI / 2,
-        sweep: 2 * Math.PI,
-        clockwise: true,
-        sort: undefined,
-      },
-      grid: {
-        name: 'grid',
-        animate: true,
-        animationDuration: 1000,
-        fit: true,
-        padding: 30,
-        avoidOverlap: true,
-        avoidOverlapPadding: 10,
-        nodeDimensionsIncludeLabels: true,
-        spacingFactor: 1.25,
-        condense: false,
-        rows: undefined,
-        cols: undefined,
-      },
-    }),
-    [],
-  );
+  const layoutConfigs = {
+    fcose: {
+      name: 'fcose',
+      quality: 'default',
+      randomize: false,
+      animate: true,
+      animationDuration: 1000,
+      fit: true,
+      padding: 30,
+      nodeDimensionsIncludeLabels: true,
+      uniformNodeDimensions: false,
+      packComponents: true,
+      nodeRepulsion: 4500,
+      idealEdgeLength: 50,
+      edgeElasticity: 0.45,
+      nestingFactor: 0.1,
+    },
+    cola: {
+      name: 'cola',
+      animate: true,
+      animationDuration: 1000,
+      refresh: 1,
+      maxSimulationTime: 4000,
+      ungrabifyWhileSimulating: false,
+      fit: true,
+      padding: 30,
+      nodeDimensionsIncludeLabels: true,
+      randomize: false,
+      avoidOverlap: true,
+      handleDisconnected: true,
+      convergenceThreshold: 0.01,
+      nodeSpacing: 10,
+    },
+    dagre: {
+      name: 'dagre',
+      rankDir: 'TB',
+      animate: true,
+      animationDuration: 1000,
+      fit: true,
+      padding: 30,
+      spacingFactor: 1.25,
+      nodeDimensionsIncludeLabels: true,
+      ranker: 'network-simplex',
+    },
+    'cose-bilkent': {
+      name: 'cose-bilkent',
+      animate: true,
+      animationDuration: 1000,
+      refresh: 30,
+      fit: true,
+      padding: 30,
+      nodeDimensionsIncludeLabels: true,
+      randomize: false,
+      nodeRepulsion: 4500,
+      idealEdgeLength: 50,
+      edgeElasticity: 0.45,
+      nestingFactor: 0.1,
+      gravity: 0.25,
+      numIter: 2500,
+      tile: true,
+      tilingPaddingVertical: 10,
+      tilingPaddingHorizontal: 10,
+    },
+    circle: {
+      name: 'circle',
+      animate: true,
+      animationDuration: 1000,
+      fit: true,
+      padding: 30,
+      radius: 200,
+      startAngle: -Math.PI / 2,
+      sweep: 2 * Math.PI,
+      clockwise: true,
+      sort: undefined,
+    },
+    grid: {
+      name: 'grid',
+      animate: true,
+      animationDuration: 1000,
+      fit: true,
+      padding: 30,
+      avoidOverlap: true,
+      avoidOverlapPadding: 10,
+      nodeDimensionsIncludeLabels: true,
+      spacingFactor: 1.25,
+      condense: false,
+      rows: undefined,
+      cols: undefined,
+    },
+  };
 
   const sampleNodes = [
     {
@@ -546,14 +537,22 @@ function CytoscapeGraph() {
         const zoom = cytoscapeInstance.zoom();
         const numElements = cytoscapeInstance.elements().size();
 
-        let nextMode = 'high';
+        let newLodMode = 'high';
         if (zoom < 0.3 || numElements > 10000) {
-          nextMode = 'low';
+          // Example thresholds
+          newLodMode = 'low';
         } else if (zoom < 0.7 || numElements > 5000) {
-          nextMode = 'medium';
+          newLodMode = 'medium';
         }
 
-        setLodMode((prev) => (prev === nextMode ? prev : nextMode));
+        if (newLodMode !== lodMode) {
+          setLodMode(newLodMode);
+          if (newLodMode === 'low') {
+            cytoscapeInstance.elements().addClass('low-detail');
+          } else {
+            cytoscapeInstance.elements().removeClass('low-detail');
+          }
+        }
       };
 
       // Initial LOD update and event listeners
@@ -582,15 +581,7 @@ function CytoscapeGraph() {
         setCy(null);
       }
     };
-  }, [
-    cy,
-    clearHighlights,
-    currentLayout,
-    dispatch,
-    highlightConnectedElements,
-    highlightEdge,
-    layoutConfigs,
-  ]);
+  }, [lodMode]);
 
   useEffect(() => {
     if (cy && (nodes.length > 0 || edges.length > 0)) {
@@ -601,14 +592,7 @@ function CytoscapeGraph() {
 
       cy.elements().remove();
       cy.add(elements);
-      if (debouncedApplyLayout) {
-        debouncedApplyLayout(currentLayout);
-      } else {
-        const config = layoutConfigs[currentLayout];
-        if (config) {
-          cy.layout(config).run();
-        }
-      }
+      debouncedApplyLayout(currentLayout); // Use the debounced function here
     }
   }, [cy, nodes, edges, currentLayout, debouncedApplyLayout]);
 
@@ -683,73 +667,30 @@ function CytoscapeGraph() {
     return colors[communityId % colors.length];
   };
 
-  const debounce = useCallback((func, delay) => {
-    let timeoutId;
-    return (...args) => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-        func(...args);
-      }, delay);
+  // Utility for debouncing layout operations
+  const debounce = (func, delay) => {
+    let timeout;
+    return function (...args) {
+      const context = this;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(context, args), delay);
     };
-  }, []);
+  };
 
-  const debouncedApplyLayout = useMemo(() => {
-    if (!cy) {
-      return null;
-    }
-    return debounce((layoutName) => {
-      const config = layoutConfigs[layoutName];
-      if (!config) {
-        return;
+  const debouncedApplyLayout = useRef(
+    debounce((layoutName) => {
+      if (cy) {
+        const startTime = performance.now();
+        const layout = cy.layout(layoutConfigs[layoutName]);
+        layout.run();
+        layout.promiseOn('layoutstop').then(() => {
+          const endTime = performance.now();
+          const duration = endTime - startTime;
+          console.log(`Layout '${layoutName}' took ${duration.toFixed(2)} ms`);
+        });
       }
-      const layout = cy.layout(config);
-      const startTime = performance.now();
-      layout.run();
-      if (typeof layout?.promiseOn === 'function') {
-        layout
-          .promiseOn('layoutstop')
-          .then(() => {
-            const duration = performance.now() - startTime;
-            console.log(
-              `Layout '${layoutName}' took ${duration.toFixed(2)} ms`,
-            );
-          })
-          .catch(() => {
-            /* ignore timing errors */
-          });
-      }
-    }, 300);
-  }, [cy, debounce, layoutConfigs]);
-
-  useEffect(() => {
-    if (!cy) return;
-
-    cy.batch(() => {
-      cy.nodes().forEach((node) => {
-        node.removeClass('low-detail');
-        if (lodMode === 'low') {
-          node.addClass('low-detail');
-          node.style('label', '');
-        } else {
-          node.style('label', node.data('label') ?? '');
-        }
-      });
-
-      cy.edges().forEach((edge) => {
-        edge.removeClass('low-detail');
-        if (lodMode === 'low') {
-          edge.addClass('low-detail');
-          edge.style('label', '');
-        } else if (lodMode === 'medium') {
-          edge.style('label', '');
-        } else {
-          edge.style('label', edge.data('label') ?? '');
-        }
-      });
-    });
-  }, [cy, lodMode]);
+    }, 300),
+  ).current; // Debounce for 300ms
   // Apply AI Insights highlighting
   useEffect(() => {
     if (!cy) return;
@@ -1169,6 +1110,7 @@ function CytoscapeGraph() {
         </Box>
       </Box>
 
+      {/* Investigation Presence */}
       {id && <InvestigationPresence />}
 
       <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>

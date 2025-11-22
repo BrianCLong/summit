@@ -653,14 +653,18 @@ const CollaborationPanel = ({ investigationId = 'inv-001' }) => {
                           <IconButton
                             color="success"
                             size="small"
-                            onClick={() => handleResolveEdit(edit.id, 'APPLIED')}
+                            onClick={() =>
+                              handleResolveEdit(edit.id, 'APPLIED')
+                            }
                           >
                             <Check />
                           </IconButton>
                           <IconButton
                             color="error"
                             size="small"
-                            onClick={() => handleResolveEdit(edit.id, 'REJECTED')}
+                            onClick={() =>
+                              handleResolveEdit(edit.id, 'REJECTED')
+                            }
                           >
                             <Close />
                           </IconButton>

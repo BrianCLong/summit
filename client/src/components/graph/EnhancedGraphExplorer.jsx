@@ -24,7 +24,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  ListItemButton, // <--- Added ListItemButton import
+  ListItemButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -2202,22 +2202,20 @@ function EnhancedGraphExplorer() {
           />
           <List>
             {searchResults.map((result) => (
-              <ListItem
-                key={result.id}
-                button
-                onClick={() => handleSearchResultClick(result)}
-              >
-                <ListItemIcon>
-                  <Chip
-                    label={result.type}
-                    size="small"
-                    sx={{ bgcolor: getNodeColor(result.type), color: 'white' }}
+              <ListItem key={result.id} disablePadding>
+                <ListItemButton onClick={() => handleSearchResultClick(result)}>
+                  <ListItemIcon>
+                    <Chip
+                      label={result.type}
+                      size="small"
+                      sx={{ bgcolor: getNodeColor(result.type), color: 'white' }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={result.label}
+                    secondary={`ID: ${result.id}`}
                   />
-                </ListItemIcon>
-                <ListItemText
-                  primary={result.label}
-                  secondary={`ID: ${result.id}`}
-                />
+                </ListItemButton>
               </ListItem>
             ))}
           </List>
