@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight maestro-test maestro-api
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -20,6 +20,10 @@ help:
 	@echo "  make migrate      - Run database migrations (PostgreSQL + Neo4j)"
 	@echo "  make smoke        - Run smoke tests (validates golden path)"
 	@echo "  make down         - Stop all services"
+	@echo ""
+	@echo "Maestro (Run/Artifact tracking):"
+	@echo "  make maestro-api  - Start Maestro API server (port 8001)"
+	@echo "  make maestro-test - Run Maestro test suite"
 	@echo ""
 	@echo "Quick start: ./start.sh (runs bootstrap + up + migrate + smoke)"
 	@echo ""
@@ -206,3 +210,27 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+maestro-test:
+	@echo "==> maestro-test: Running Maestro test suite..."
+	@if [ -d .venv ]; then \
+	  . .venv/bin/activate && pytest tests/maestro/ -v; \
+	elif command -v pytest >/dev/null 2>&1; then \
+	  pytest tests/maestro/ -v; \
+	else \
+	  echo "ERROR: pytest not found. Run 'make bootstrap' first."; \
+	  exit 1; \
+	fi
+	@echo ""
+	@echo "maestro-test: DONE ✓"
+
+maestro-api:
+	@echo "==> maestro-api: Starting Maestro API server..."
+	@if [ -d .venv ]; then \
+	  . .venv/bin/activate && python -m uvicorn maestro.app:app --host 0.0.0.0 --port 8001 --reload; \
+	elif command -v uvicorn >/dev/null 2>&1; then \
+	  python -m uvicorn maestro.app:app --host 0.0.0.0 --port 8001 --reload; \
+	else \
+	  echo "ERROR: uvicorn not found. Run 'make bootstrap' and install fastapi and uvicorn."; \
+	  exit 1; \
+	fi
