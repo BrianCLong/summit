@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import { enableTemporal, disableTemporal } from '../temporal/control.js';
+import { requireStepUp } from '../middleware/stepup.js';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -99,7 +100,7 @@ router.get('/admin/config', (req, res) => {
   res.json(memConfig);
 });
 
-router.post('/admin/config', express.json(), (req, res) => {
+router.post('/admin/config', requireStepUp(2), express.json(), (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
   const allowed = Object.keys(memConfig).filter(
     (k) => !['TENANT_OVERRIDES', 'TENANT_DEFAULTS'].includes(k),

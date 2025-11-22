@@ -6,11 +6,14 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
 import monitoringRouter from './routes/monitoring.js';
 import healthRouter from './routes/health.js';
+import authRouter from './routes/auth.js';
+import webauthnRouter from './routes/webauthn.js';
 import aiRouter from './routes/ai.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
@@ -20,8 +23,6 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import jwt from 'jsonwebtoken'; // Assuming jsonwebtoken is available or will be installed
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
 import { startTrustWorker } from './workers/trustScoreWorker.js';
@@ -29,9 +30,6 @@ import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
 
 export const createApp = async () => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-
   const app = express();
   const logger = pino();
   app.use(helmet());
@@ -54,6 +52,7 @@ export const createApp = async () => {
   );
   app.use(pinoHttp({ logger, redact: ['req.headers.authorization'] }));
   app.use(express.json({ limit: '1mb' }));
+  app.use(cookieParser());
   app.use(auditLogger);
 
   // Health endpoints (exempt from rate limiting)
@@ -61,6 +60,8 @@ export const createApp = async () => {
   app.use(healthRouter);
 
   // Other routes (exempt from rate limiting)
+  app.use('/auth', authRouter);
+  app.use('/webauthn', webauthnRouter);
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);

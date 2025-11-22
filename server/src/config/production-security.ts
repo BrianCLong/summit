@@ -47,8 +47,12 @@ export const productionAuthMiddleware = (
   res: Response,
   next: NextFunction,
 ): void => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader?.split(' ')[1]; // Bearer TOKEN
+  let token = req.headers.authorization?.split(' ')[1]; // Bearer TOKEN
+
+  // Also check cookies
+  if (!token && req.cookies && req.cookies.access_token) {
+    token = req.cookies.access_token;
+  }
 
   if (!token) {
     logger.warn(

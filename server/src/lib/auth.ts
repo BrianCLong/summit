@@ -125,9 +125,16 @@ export const requireRole = (
 };
 
 function extractToken(req: any): string | null {
+  // Check Authorization header
   const authHeader = req.headers?.authorization;
   if (authHeader?.startsWith('Bearer ')) {
     return authHeader.substring(7);
   }
+
+  // Check Cookies
+  if (req.cookies && req.cookies.access_token) {
+    return req.cookies.access_token;
+  }
+
   return null;
 }
