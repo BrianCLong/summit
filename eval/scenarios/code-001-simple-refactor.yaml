@@ -1,0 +1,147 @@
+# Code Transformation Scenario: Simple Refactoring
+
+id: sc-code-transformation-001
+version: 1.0.0
+type: code_transformation
+name: Refactor Nested Conditionals to Early Returns
+description: |
+  Refactor a function with deeply nested conditional logic into a cleaner
+  version using early returns pattern for improved readability.
+tags:
+  - code
+  - refactoring
+  - readability
+  - best-practices
+
+inputs:
+  - type: code
+    content: |
+      function processUser(user) {
+        if (user) {
+          if (user.isActive) {
+            if (user.hasPermission('read')) {
+              if (user.profile) {
+                return user.profile;
+              } else {
+                throw new Error('Profile not found');
+              }
+            } else {
+              throw new Error('Permission denied');
+            }
+          } else {
+            throw new Error('User is inactive');
+          }
+        } else {
+          throw new Error('User not found');
+        }
+      }
+    metadata:
+      language: javascript
+      context: |
+        This function is part of a user management system. It validates
+        various conditions before returning user profile data.
+
+constraints:
+  - type: time_limit
+    value: 60000
+    strict: true
+  - type: cost_limit
+    value: 0.05
+    strict: false
+
+expectedOutputs:
+  - type: assertion
+    value: early_return
+    description: Should use early returns instead of nested conditionals
+  - type: assertion
+    value: error_handling
+    description: Should preserve all error handling logic
+
+scoringStrategy:
+  method: hybrid
+  rules:
+    assertions:
+      - type: contains
+        value: "if (!user)"
+        weight: 0.3
+        errorMessage: Should check for null/undefined user first
+      - type: contains
+        value: "throw new Error"
+        weight: 0.2
+        errorMessage: Should preserve error handling
+      - type: not_contains
+        value: "if (user) {"
+        weight: 0.2
+        errorMessage: Should not have nested conditionals
+    aggregation: weighted_average
+  llmJudge:
+    model: claude-sonnet-4
+    prompt: |
+      Evaluate this code refactoring on:
+      1. Readability improvement (0-1)
+      2. Correctness - preserves original logic (0-1)
+      3. Follows early return pattern (0-1)
+      Provide scores and brief rationale.
+    dimensions:
+      - readability
+      - correctness
+      - pattern_compliance
+  weights:
+    rule_based: 0.5
+    llm_judged: 0.5
+
+rubric:
+  dimensions:
+    - name: readability
+      weight: 0.4
+      description: How much easier is the refactored code to read and understand
+      levels:
+        - score: 1.0
+          label: Excellent
+          description: Significantly improved readability with early returns
+        - score: 0.7
+          label: Good
+          description: Some improvement in readability
+        - score: 0.4
+          label: Fair
+          description: Minimal improvement
+        - score: 0.0
+          label: Poor
+          description: No improvement or worse readability
+
+    - name: correctness
+      weight: 0.4
+      description: Preserves original logic and error handling
+      levels:
+        - score: 1.0
+          label: Perfect
+          description: All logic preserved exactly
+        - score: 0.5
+          label: Partial
+          description: Some logic preserved
+        - score: 0.0
+          label: Incorrect
+          description: Logic changed or broken
+
+    - name: pattern_compliance
+      weight: 0.2
+      description: Follows early return pattern correctly
+      levels:
+        - score: 1.0
+          label: Full Compliance
+          description: Perfect early return implementation
+        - score: 0.5
+          label: Partial Compliance
+          description: Some early returns but not consistent
+        - score: 0.0
+          label: Non-Compliant
+          description: No early returns used
+
+difficulty: easy
+estimatedCost: 0.02
+estimatedDuration: 5000
+createdBy: platform-team
+metadata:
+  category: code-quality
+  language: javascript
+  complexity: low
