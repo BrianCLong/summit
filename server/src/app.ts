@@ -32,6 +32,8 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+import apiDocsRouter from './routes/api-docs.js';
+import queuesDashboardRouter from './routes/queues-dashboard.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -87,6 +89,12 @@ export const createApp = async () => {
   // Health endpoints (exempt from rate limiting)
   const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
+
+  // API Documentation (exempt from rate limiting)
+  app.use('/api/docs', apiDocsRouter);
+
+  // Queue Dashboard (exempt from rate limiting)
+  app.use('/queues', queuesDashboardRouter);
 
   // Other routes (exempt from rate limiting)
   app.use('/monitoring', monitoringRouter);
