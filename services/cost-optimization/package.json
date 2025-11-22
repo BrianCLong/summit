@@ -23,7 +23,6 @@
   "license": "PROPRIETARY",
   "dependencies": {
     "@aws-sdk/client-cost-explorer": "^3.450.0",
-    "@aws-sdk/client-ce": "^3.450.0",
     "@aws-sdk/client-pricing": "^3.450.0",
     "@aws-sdk/client-ec2": "^3.450.0",
     "@aws-sdk/client-rds": "^3.450.0",
