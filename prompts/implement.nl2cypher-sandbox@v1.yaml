@@ -1,0 +1,658 @@
+meta:
+  id: implement.nl2cypher-sandbox@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build natural language to Cypher query generator with cost preview, safety guardrails, and dry-run validation'
+  tags: ['nl2cypher', 'query-generation', 'cost-control', 'safety', 'sandbox']
+  guardrails:
+    - 'No write operations (CREATE, MERGE, DELETE, SET, REMOVE) in sandbox mode'
+    - 'Cost estimates must be shown before execution'
+    - 'Query timeout limits enforced (max 30s)'
+    - 'Row limit caps (max 10,000 rows)'
+    - 'Policy violations must block execution with clear reasons'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.3
+  maxTokens: 8000
+
+inputs:
+  neo4j_version: string
+  llm_provider: string
+  max_query_cost_usd: string
+
+template: |
+  You are implementing the **NL→Cypher Sandbox** for IntelGraph.
+
+  ## Objective
+
+  Build a natural language to Cypher query generator that translates analyst questions into Neo4j queries with cost/row estimates, safety guardrails, dry-run validation, and undo/redo capabilities.
+
+  ## Target Paths
+
+  Create the following directory structure:
+
+  ```
+  services/nl2cypher/
+    ├── src/
+    │   ├── api/
+    │   │   ├── routes.ts
+    │   │   └── QueryController.ts
+    │   ├── generator/
+    │   │   ├── NLProcessor.ts
+    │   │   ├── CypherGenerator.ts
+    │   │   ├── SchemaRetriever.ts
+    │   │   └── PromptBuilder.ts
+    │   ├── estimator/
+    │   │   ├── CostEstimator.ts
+    │   │   ├── RowEstimator.ts
+    │   │   └── TimeEstimator.ts
+    │   ├── safety/
+    │   │   ├── QueryValidator.ts
+    │   │   ├── WriteDetector.ts
+    │   │   ├── PolicyEnforcer.ts
+    │   │   └── SafetyRules.ts
+    │   ├── executor/
+    │   │   ├── DryRunner.ts
+    │   │   ├── QueryExecutor.ts
+    │   │   └── ResultFormatter.ts
+    │   └── history/
+    │       ├── QueryHistory.ts
+    │       └── UndoRedoStack.ts
+    ├── tests/
+    │   ├── unit/
+    │   ├── integration/
+    │   └── prompts/
+    │       └── test-suite.yaml
+    ├── Dockerfile
+    └── README.md
+
+  apps/analyst-console/
+    ├── src/
+    │   └── panels/
+    │       ├── NLQueryPanel.tsx
+    │       ├── CypherPreview.tsx
+    │       ├── CostEstimateCard.tsx
+    │       ├── QueryHistory.tsx
+    │       └── ResultsTable.tsx
+    └── tests/
+  ```
+
+  ## Core Features
+
+  ### 1. Natural Language Processing
+
+  **Input:** Natural language questions from analysts
+
+  **Examples:**
+  - "Show me all people connected to Acme Corp"
+  - "Find suspicious transactions over $10,000 in the last 30 days"
+  - "What are the top 10 most connected organizations?"
+  - "Trace the relationship path between Alice and Bob"
+
+  **NLProcessor.ts:**
+
+  ```typescript
+  interface NLQuery {
+    raw: string;
+    intent: QueryIntent;
+    entities: ExtractedEntity[];
+    filters: Filter[];
+    aggregations: Aggregation[];
+    orderBy?: OrderBy;
+    limit?: number;
+  }
+
+  enum QueryIntent {
+    FIND_NODES = 'find_nodes',
+    FIND_PATHS = 'find_paths',
+    FIND_RELATIONSHIPS = 'find_relationships',
+    AGGREGATE = 'aggregate',
+    ANALYZE = 'analyze',
+  }
+
+  async function processNL(question: string): Promise<NLQuery> {
+    // Use LLM ({{llm_provider}}) to parse intent
+    // Extract entities, filters, aggregations
+    // Identify query type
+    return {
+      raw: question,
+      intent: QueryIntent.FIND_NODES,
+      entities: [{ type: 'Person', value: 'Alice' }],
+      filters: [],
+      aggregations: [],
+      limit: 100,
+    };
+  }
+  ```
+
+  ### 2. Cypher Generation
+
+  **CypherGenerator.ts:**
+
+  ```typescript
+  interface GeneratedQuery {
+    cypher: string;
+    parameters: Record<string, any>;
+    explanation: string;
+    confidence: number;
+  }
+
+  async function generateCypher(nlQuery: NLQuery, schema: GraphSchema): Promise<GeneratedQuery> {
+    // Build context-aware prompt
+    const prompt = buildPrompt(nlQuery, schema);
+
+    // Call LLM to generate Cypher
+    const response = await llm.generate(prompt);
+
+    // Parse and validate Cypher
+    const parsed = parseCypher(response.cypher);
+
+    return {
+      cypher: parsed.query,
+      parameters: parsed.params,
+      explanation: response.explanation,
+      confidence: response.confidence,
+    };
+  }
+  ```
+
+  **Schema Retrieval:**
+
+  ```typescript
+  interface GraphSchema {
+    nodeLabels: string[];
+    relationshipTypes: string[];
+    properties: Record<string, PropertySchema>;
+    indexes: Index[];
+    constraints: Constraint[];
+  }
+
+  async function retrieveSchema(neo4jSession): Promise<GraphSchema> {
+    // Get labels: CALL db.labels()
+    // Get rel types: CALL db.relationshipTypes()
+    // Get properties: CALL db.schema.nodeTypeProperties()
+    // Get indexes: SHOW INDEXES
+    return schema;
+  }
+  ```
+
+  ### 3. Cost & Row Estimation
+
+  **CostEstimator.ts:**
+
+  ```typescript
+  interface CostEstimate {
+    estimatedRows: number;
+    estimatedTimeMs: number;
+    estimatedCostUSD: number;
+    confidence: 'low' | 'medium' | 'high';
+    warnings: string[];
+  }
+
+  async function estimateCost(cypher: string, params: any): Promise<CostEstimate> {
+    // Use EXPLAIN to get query plan
+    const plan = await neo4j.run(`EXPLAIN ${cypher}`, params);
+
+    // Parse dbHits, rows, operators
+    const dbHits = extractDbHits(plan);
+    const estimatedRows = extractEstimatedRows(plan);
+
+    // Cost model: $0.01 per 1M dbHits (example)
+    const costUSD = (dbHits / 1_000_000) * 0.01;
+
+    // Time estimate: 1ms per 1000 dbHits (heuristic)
+    const timeMs = dbHits / 1000;
+
+    return {
+      estimatedRows,
+      estimatedTimeMs: timeMs,
+      estimatedCostUSD: costUSD,
+      confidence: determineConfidence(plan),
+      warnings: checkForExpensiveOps(plan),
+    };
+  }
+  ```
+
+  **Warning Detection:**
+
+  - **CartesianProduct**: Warn if no join conditions
+  - **AllNodesScan**: Suggest adding index
+  - **Large Result Set**: Warn if estimatedRows > 10,000
+  - **No Index Usage**: Suggest creating index
+
+  ### 4. Safety Guardrails
+
+  **WriteDetector.ts:**
+
+  ```typescript
+  const WRITE_KEYWORDS = [
+    'CREATE', 'MERGE', 'DELETE', 'REMOVE', 'SET',
+    'DROP', 'CREATE INDEX', 'CREATE CONSTRAINT',
+  ];
+
+  function detectWrites(cypher: string): boolean {
+    const normalized = cypher.toUpperCase();
+    return WRITE_KEYWORDS.some(keyword => normalized.includes(keyword));
+  }
+  ```
+
+  **PolicyEnforcer.ts:**
+
+  ```typescript
+  interface PolicyViolation {
+    rule: string;
+    severity: 'error' | 'warning';
+    message: string;
+    remediation: string;
+  }
+
+  function enforcePolicy(cypher: string, estimate: CostEstimate): PolicyViolation[] {
+    const violations: PolicyViolation[] = [];
+
+    // Rule 1: No writes in sandbox
+    if (detectWrites(cypher)) {
+      violations.push({
+        rule: 'no-writes-in-sandbox',
+        severity: 'error',
+        message: 'Write operations are not allowed in sandbox mode',
+        remediation: 'Use read-only queries (MATCH, RETURN, WHERE)',
+      });
+    }
+
+    // Rule 2: Cost limit
+    if (estimate.estimatedCostUSD > parseFloat('{{max_query_cost_usd}}')) {
+      violations.push({
+        rule: 'cost-limit-exceeded',
+        severity: 'error',
+        message: `Estimated cost $${estimate.estimatedCostUSD.toFixed(4)} exceeds limit ${{max_query_cost_usd}}`,
+        remediation: 'Add filters or LIMIT clause to reduce result set',
+      });
+    }
+
+    // Rule 3: Row limit
+    if (estimate.estimatedRows > 10_000) {
+      violations.push({
+        rule: 'row-limit-exceeded',
+        severity: 'warning',
+        message: `Estimated ${estimate.estimatedRows} rows exceeds recommended limit of 10,000`,
+        remediation: 'Add LIMIT clause or filter criteria',
+      });
+    }
+
+    // Rule 4: Timeout
+    if (estimate.estimatedTimeMs > 30_000) {
+      violations.push({
+        rule: 'timeout-risk',
+        severity: 'warning',
+        message: `Estimated time ${estimate.estimatedTimeMs}ms may timeout`,
+        remediation: 'Optimize query or add indexes',
+      });
+    }
+
+    return violations;
+  }
+  ```
+
+  ### 5. Dry-Run Validation
+
+  **DryRunner.ts:**
+
+  ```typescript
+  async function dryRun(cypher: string, params: any): Promise<DryRunResult> {
+    // Step 1: Syntax check with EXPLAIN
+    const explainResult = await neo4j.run(`EXPLAIN ${cypher}`, params);
+
+    // Step 2: Profile with LIMIT 0 to validate query structure
+    const profileResult = await neo4j.run(`PROFILE ${cypher} LIMIT 0`, params);
+
+    // Step 3: Extract warnings and suggestions
+    const warnings = extractWarnings(explainResult);
+    const suggestions = generateSuggestions(profileResult);
+
+    return {
+      valid: true,
+      warnings,
+      suggestions,
+      estimatedPlan: explainResult,
+    };
+  }
+  ```
+
+  ### 6. Query History & Undo/Redo
+
+  **UndoRedoStack.ts:**
+
+  ```typescript
+  class QueryHistoryManager {
+    private history: QueryEntry[] = [];
+    private currentIndex: number = -1;
+
+    push(entry: QueryEntry): void {
+      // Truncate forward history when new query added
+      this.history = this.history.slice(0, this.currentIndex + 1);
+      this.history.push(entry);
+      this.currentIndex++;
+    }
+
+    undo(): QueryEntry | null {
+      if (this.currentIndex > 0) {
+        this.currentIndex--;
+        return this.history[this.currentIndex];
+      }
+      return null;
+    }
+
+    redo(): QueryEntry | null {
+      if (this.currentIndex < this.history.length - 1) {
+        this.currentIndex++;
+        return this.history[this.currentIndex];
+      }
+      return null;
+    }
+
+    canUndo(): boolean {
+      return this.currentIndex > 0;
+    }
+
+    canRedo(): boolean {
+      return this.currentIndex < this.history.length - 1;
+    }
+  }
+  ```
+
+  ## Frontend UI (NLQueryPanel.tsx)
+
+  ### Layout
+
+  ```tsx
+  <NLQueryPanel>
+    <QueryInput
+      placeholder="Ask a question about the graph..."
+      onSubmit={handleNLQuery}
+    />
+
+    <CypherPreview
+      cypher={generatedQuery.cypher}
+      explanation={generatedQuery.explanation}
+      confidence={generatedQuery.confidence}
+      onEdit={handleCypherEdit}
+    />
+
+    <CostEstimateCard
+      estimate={costEstimate}
+      violations={policyViolations}
+    />
+
+    <ActionButtons>
+      <Button onClick={handleDryRun} variant="outlined">
+        Dry Run
+      </Button>
+      <Button onClick={handleExecute} variant="contained" disabled={hasErrors}>
+        Execute
+      </Button>
+      <IconButton onClick={handleUndo} disabled={!canUndo}>
+        <UndoIcon />
+      </IconButton>
+      <IconButton onClick={handleRedo} disabled={!canRedo}>
+        <RedoIcon />
+      </IconButton>
+    </ActionButtons>
+
+    <ResultsTable
+      results={queryResults}
+      metadata={resultMetadata}
+    />
+
+    <QueryHistory
+      history={queryHistory}
+      onSelect={handleSelectHistoryItem}
+    />
+  </NLQueryPanel>
+  ```
+
+  ### Cost Estimate Card
+
+  ```tsx
+  <CostEstimateCard estimate={estimate}>
+    <Chip label={`~${estimate.estimatedRows} rows`} />
+    <Chip label={`~${estimate.estimatedTimeMs}ms`} />
+    <Chip label={`~$${estimate.estimatedCostUSD.toFixed(4)}`} color="primary" />
+
+    {estimate.warnings.map(warning => (
+      <Alert severity="warning">{warning}</Alert>
+    ))}
+
+    {violations.map(violation => (
+      <Alert severity={violation.severity}>
+        {violation.message}
+        <Button size="small">{violation.remediation}</Button>
+      </Alert>
+    ))}
+  </CostEstimateCard>
+  ```
+
+  ## API Endpoints
+
+  ### POST /api/nl2cypher/generate
+
+  **Request:**
+  ```json
+  {
+    "question": "Show me all people connected to Acme Corp",
+    "context": {
+      "investigationId": "inv_123",
+      "maxCost": 0.10
+    }
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "cypher": "MATCH (p:Person)-[r]-(o:Organization {name: $orgName}) RETURN p, r LIMIT 100",
+    "parameters": { "orgName": "Acme Corp" },
+    "explanation": "This query finds all Person nodes with any relationship to the Organization 'Acme Corp'",
+    "confidence": 0.92,
+    "estimate": {
+      "estimatedRows": 47,
+      "estimatedTimeMs": 120,
+      "estimatedCostUSD": 0.0012,
+      "confidence": "high",
+      "warnings": []
+    },
+    "violations": []
+  }
+  ```
+
+  ### POST /api/nl2cypher/dry-run
+
+  **Request:**
+  ```json
+  {
+    "cypher": "MATCH (p:Person) RETURN p",
+    "parameters": {}
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "valid": true,
+    "warnings": ["Query will scan all Person nodes"],
+    "suggestions": ["Add WHERE clause to filter results", "Consider using index on Person.name"],
+    "plan": { ... }
+  }
+  ```
+
+  ## Testing Requirements
+
+  ### Prompt Test Suite
+
+  **File:** `tests/prompts/test-suite.yaml`
+
+  Create 20+ test cases covering:
+
+  1. **Simple node lookups**
+     - "Find person named Alice" → `MATCH (p:Person {name: "Alice"}) RETURN p`
+
+  2. **Relationship queries**
+     - "Who does Alice know?" → `MATCH (p:Person {name: "Alice"})-[:KNOWS]->(other) RETURN other`
+
+  3. **Path finding**
+     - "Shortest path from Alice to Bob" → `MATCH path = shortestPath((a:Person {name: "Alice"})-[*]-(b:Person {name: "Bob"})) RETURN path`
+
+  4. **Aggregations**
+     - "Count organizations by country" → `MATCH (o:Organization) RETURN o.country, count(o) AS total ORDER BY total DESC`
+
+  5. **Temporal queries**
+     - "Events in last 30 days" → `MATCH (e:Event) WHERE e.timestamp > datetime() - duration('P30D') RETURN e`
+
+  **Validation:**
+  - Generated Cypher must be syntactically valid
+  - No write operations in sandbox mode
+  - Accuracy ≥95% on test suite
+
+  ### Blocked Queries Test
+
+  ```typescript
+  describe('Safety Guardrails', () => {
+    it('should block CREATE queries', async () => {
+      const question = "Create a new person named Charlie";
+      const result = await generateAndValidate(question);
+
+      expect(result.violations).toContainEqual({
+        rule: 'no-writes-in-sandbox',
+        severity: 'error',
+      });
+      expect(result.canExecute).toBe(false);
+    });
+
+    it('should warn on expensive queries', async () => {
+      const question = "Show all nodes and all relationships";
+      const result = await generateAndValidate(question);
+
+      expect(result.violations).toContainEqual({
+        rule: 'cost-limit-exceeded',
+        severity: 'error',
+      });
+    });
+  });
+  ```
+
+  ## Documentation
+
+  ### README.md
+
+  - Architecture overview
+  - LLM prompt engineering guide
+  - Cost model explanation
+  - Safety rules reference
+  - API documentation
+  - Example queries
+
+  ### Prompt Engineering Guide
+
+  Document the system prompt used for Cypher generation:
+
+  ```
+  You are a Neo4j Cypher expert. Convert natural language questions to valid Cypher queries.
+
+  Graph Schema:
+  - Nodes: {{nodeLabels}}
+  - Relationships: {{relationshipTypes}}
+  - Properties: {{properties}}
+
+  Rules:
+  1. ONLY use labels and properties from the schema
+  2. Use parameterized queries ($param syntax)
+  3. Add LIMIT clauses for large result sets
+  4. Prefer indexed properties in WHERE clauses
+  5. No write operations (CREATE, MERGE, DELETE, SET, REMOVE)
+
+  Question: {{question}}
+
+  Output JSON:
+  {
+    "cypher": "...",
+    "parameters": {...},
+    "explanation": "...",
+    "confidence": 0.0-1.0
+  }
+  ```
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Service accepts natural language questions via API
+  - [ ] Cypher generation uses graph schema for context
+  - [ ] Cost estimates shown before execution (rows, time, $)
+  - [ ] Dry-run validates query without executing
+  - [ ] Write operations blocked in sandbox mode
+  - [ ] Policy violations prevent execution with clear reasons
+  - [ ] Undo/redo works for query history
+  - [ ] UI shows Cypher preview with explanation
+  - [ ] Test suite achieves ≥95% accuracy on 20+ prompts
+  - [ ] Blocked queries logged with policy rule violated
+  - [ ] Telemetry tracks: question → cypher → estimate → violations → execution
+  - [ ] Expensive queries (>10k rows, >${{max_query_cost_usd}}) blocked
+  - [ ] Unit test coverage ≥80%
+  - [ ] API documentation includes request/response examples
+
+  ## Performance Targets
+
+  - NL → Cypher generation: <3s p95
+  - Cost estimation (EXPLAIN): <500ms p95
+  - Dry-run validation: <1s p95
+  - Query execution (if allowed): <30s timeout
+
+  ## Security Checklist
+
+  - [ ] LLM API keys stored securely (env vars or secrets)
+  - [ ] Neo4j credentials not exposed in logs
+  - [ ] Cypher injection prevention (parameterized queries)
+  - [ ] Rate limiting on API endpoints (10 req/min per user)
+  - [ ] Audit log for all query generations and executions
+  - [ ] Policy enforcement cannot be bypassed
+
+  ## Integration Points
+
+  - **Neo4j**: Query execution and schema retrieval
+  - **LLM Provider ({{llm_provider}})**: Cypher generation
+  - **Cost Service**: Budget tracking
+  - **Audit Service**: Query logging
+  - **Telemetry**: Usage metrics and accuracy tracking
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for service and frontend
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Use Turbo for builds
+  - Include golden path smoke test
+
+  Remember: **Safety first.** No query executes without passing all policy checks. Cost transparency builds analyst trust.
+
+examples:
+  - name: 'openai-gpt4'
+    inputs:
+      neo4j_version: '5.x'
+      llm_provider: 'OpenAI GPT-4'
+      max_query_cost_usd: '0.10'
+    expected_contains:
+      - 'OpenAI'
+      - 'cost estimate'
+      - 'dry-run'
+      - 'policy violations'
+      - '95% accuracy'
+
+  - name: 'claude-sonnet'
+    inputs:
+      neo4j_version: '5.x'
+      llm_provider: 'Anthropic Claude'
+      max_query_cost_usd: '0.05'
+    expected_contains:
+      - 'Claude'
+      - 'no-writes-in-sandbox'
+      - 'undo/redo'
+      - 'parameterized queries'

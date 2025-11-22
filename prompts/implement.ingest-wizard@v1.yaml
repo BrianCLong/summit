@@ -1,0 +1,542 @@
+meta:
+  id: implement.ingest-wizard@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build schema-aware ETL wizard with policy enforcement and automated lineage tracking'
+  tags: ['etl', 'data-ingest', 'policy', 'dpia', 'license-compliance']
+  guardrails:
+    - 'All data sources must pass license and TOS validation'
+    - 'PII detection must run before any storage'
+    - 'DPIA checklists required for high-risk data'
+    - 'Redaction options must be presented for sensitive fields'
+    - 'Complete lineage must be tracked from source to Neo4j'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 8000
+
+inputs:
+  frontend_framework: string
+  worker_runtime: string
+  sample_dataset_size: string
+
+template: |
+  You are implementing the **Ingest Wizard** system for IntelGraph.
+
+  ## Objective
+
+  Build a minimal web wizard that guides analysts through compliant data ingestion with automated field mapping, PII detection, license enforcement, and validated job specification export.
+
+  ## Target Paths
+
+  Create the following directory structure:
+
+  ```
+  apps/ingest-wizard/
+    ├── src/
+    │   ├── pages/
+    │   │   ├── UploadPage.tsx
+    │   │   ├── MappingPage.tsx
+    │   │   ├── PolicyPage.tsx
+    │   │   └── ReviewPage.tsx
+    │   ├── components/
+    │   │   ├── FileUploader.tsx
+    │   │   ├── FieldMapper.tsx
+    │   │   ├── PIIDetector.tsx
+    │   │   ├── LicenseChecker.tsx
+    │   │   └── JobSpecExporter.tsx
+    │   ├── hooks/
+    │   │   ├── useSchemaInference.ts
+    │   │   ├── usePIIDetection.ts
+    │   │   └── useLicenseValidation.ts
+    │   ├── utils/
+    │   │   ├── csvParser.ts
+    │   │   ├── jsonNormalizer.ts
+    │   │   └── specGenerator.ts
+    │   └── types/
+    │       ├── IngestJob.ts
+    │       └── FieldMapping.ts
+    ├── tests/
+    │   ├── e2e/
+    │   │   └── ingest-workflow.spec.ts
+    │   ├── unit/
+    │   └── fixtures/
+    │       └── sample_10k.csv
+    ├── package.json
+    └── README.md
+
+  packages/policies/
+    ├── src/
+    │   ├── licenses/
+    │   │   ├── LicenseRegistry.ts
+    │   │   ├── TOSValidator.ts
+    │   │   └── known-licenses.json
+    │   ├── dpia/
+    │   │   ├── DPIAChecklist.ts
+    │   │   ├── RiskAssessment.ts
+    │   │   └── templates/
+    │   │       └── standard-dpia.yaml
+    │   └── redaction/
+    │       ├── RedactionPresets.ts
+    │       └── strategies.json
+    └── tests/
+
+  workers/ingest/
+    ├── src/
+    │   ├── JobProcessor.ts
+    │   ├── Transformer.ts
+    │   ├── Neo4jLoader.ts
+    │   └── LineageTracker.ts
+    ├── Dockerfile
+    └── tests/
+  ```
+
+  ## Frontend: {{frontend_framework}}
+
+  ### Step 1: Upload Page
+
+  **Component: `UploadPage.tsx`**
+
+  - Drag-and-drop or file picker for CSV/JSON
+  - Max file size: 100MB
+  - Supported formats: CSV, JSON, JSONL, Excel (XLSX)
+  - Display preview of first 10 rows
+  - Auto-detect delimiter, headers, encoding
+
+  **Features:**
+
+  - Progress indicator during upload
+  - Client-side validation (format, size)
+  - Error handling for malformed files
+  - SHA-256 hash generation for provenance
+
+  ### Step 2: Mapping Page
+
+  **Component: `MappingPage.tsx`**
+
+  - Display inferred schema (columns + types)
+  - Suggest entity/relationship mappings:
+    - Column → Entity property
+    - Column → Relationship type
+    - Column → Temporal field
+  - Auto-detect common patterns:
+    - Names (Person entities)
+    - Organizations
+    - Locations (geocoding suggestions)
+    - Dates/times
+    - IDs/references
+
+  **Field Mapper UI:**
+
+  ```tsx
+  <FieldMapper
+    columns={['name', 'email', 'org', 'created_at']}
+    suggestions={{
+      name: { entity: 'Person', property: 'fullName', confidence: 0.95 },
+      email: { entity: 'Person', property: 'email', isPII: true },
+      org: { entity: 'Organization', property: 'name' },
+      created_at: { property: 'timestamp', type: 'datetime' }
+    }}
+    onMappingChange={handleMappingChange}
+  />
+  ```
+
+  **PII Detection:**
+
+  - Scan all text fields for:
+    - Email addresses
+    - Phone numbers
+    - SSNs / national IDs
+    - Credit card numbers
+    - IP addresses
+  - Flag fields with PII
+  - Suggest redaction strategies
+
+  ### Step 3: Policy Page
+
+  **Component: `PolicyPage.tsx`**
+
+  - **License & TOS Enforcement**
+    - Display license selection dropdown
+    - Validate against known licenses (MIT, GPL, proprietary, etc.)
+    - Require TOS acknowledgment
+    - Block ingest if license is restrictive (e.g., non-commercial only)
+
+  - **DPIA Checklist**
+    - Risk assessment questionnaire:
+      - "Does this data contain PII?"
+      - "Is this data from a high-risk jurisdiction?"
+      - "Will this data be shared externally?"
+    - Auto-calculate risk score (Low/Medium/High)
+    - Require additional approvals for High risk
+
+  - **Redaction Presets**
+    - Email: `****@domain.com`
+    - Phone: `***-***-1234`
+    - SSN: `***-**-1234`
+    - Custom regex patterns
+    - Preview redacted output
+
+  **Example DPIA Checklist:**
+
+  ```yaml
+  version: "1.0"
+  questions:
+    - id: pii_present
+      text: "Does this dataset contain Personally Identifiable Information (PII)?"
+      weight: 10
+      options: [yes, no]
+
+    - id: jurisdiction
+      text: "Is this data subject to GDPR, CCPA, or other privacy regulations?"
+      weight: 8
+      options: [yes, no]
+
+    - id: external_sharing
+      text: "Will this data be shared with external parties?"
+      weight: 7
+      options: [yes, no]
+
+  risk_matrix:
+    - score: 0-10
+      level: Low
+      action: "Proceed with standard safeguards"
+
+    - score: 11-20
+      level: Medium
+      action: "Require manager approval"
+
+    - score: 21+
+      level: High
+      action: "Require legal and DPO review"
+  ```
+
+  ### Step 4: Review & Export
+
+  **Component: `ReviewPage.tsx`**
+
+  - Display complete job specification
+  - Show estimated row count and processing time
+  - Preview entity/relationship graph
+  - Export options:
+    - JSON job spec
+    - YAML config
+    - Direct submit to ingest queue
+
+  **Export Button:**
+
+  ```tsx
+  <JobSpecExporter
+    jobSpec={generatedSpec}
+    onExport={(format) => downloadJobSpec(format)}
+    formats={['json', 'yaml']}
+  />
+  ```
+
+  ## Job Specification Schema
+
+  ```typescript
+  interface IngestJobSpec {
+    version: string;
+    metadata: {
+      source: string;
+      uploadedBy: string;
+      timestamp: string;
+      sha256: string;
+    };
+    license: {
+      type: string;
+      url?: string;
+      requiresAttribution: boolean;
+      restrictions: string[];
+    };
+    dpia: {
+      riskLevel: 'Low' | 'Medium' | 'High';
+      approvals: string[];
+      checklist: Record<string, any>;
+    };
+    schema: {
+      format: 'csv' | 'json' | 'jsonl' | 'xlsx';
+      delimiter?: string;
+      encoding: string;
+      headers: string[];
+    };
+    mappings: {
+      entities: Array<{
+        sourceColumn: string;
+        entityType: string;
+        properties: Record<string, string>;
+        redaction?: RedactionStrategy;
+      }>;
+      relationships: Array<{
+        fromColumn: string;
+        toColumn: string;
+        relationshipType: string;
+        properties?: Record<string, string>;
+      }>;
+    };
+    lineage: {
+      sourceSystem: string;
+      transformations: string[];
+      destinations: string[];
+    };
+  }
+  ```
+
+  ## Backend Worker: {{worker_runtime}}
+
+  ### JobProcessor (workers/ingest/)
+
+  - Poll ingest queue (Kafka/Redis)
+  - Validate job spec
+  - Execute transformations
+  - Load into Neo4j
+  - Track lineage in provenance ledger
+
+  **Processing Steps:**
+
+  1. **Validation**
+     - Verify license is allowed
+     - Check DPIA approvals
+     - Validate schema matches file
+
+  2. **Transformation**
+     - Parse CSV/JSON
+     - Apply redaction rules
+     - Normalize data types
+     - Deduplicate entities
+
+  3. **Loading**
+     - Batch Cypher inserts (500 rows/batch)
+     - Create entities with properties
+     - Create relationships
+     - Index key properties
+
+  4. **Lineage**
+     - Register evidence in provenance ledger
+     - Add transform claims (parsing, redaction, normalization)
+     - Link to Neo4j node IDs
+     - Export lineage bundle
+
+  ## Policy Enforcement
+
+  ### License Gates (packages/policies/)
+
+  **Known Licenses:**
+
+  - **Allowed**: Public Domain, CC-BY, CC-BY-SA, MIT, Apache-2.0
+  - **Restricted**: CC-BY-NC (non-commercial), GPL (viral)
+  - **Blocked**: All Rights Reserved, Unknown
+
+  **Enforcement Rules:**
+
+  ```typescript
+  const licensePolicy = {
+    'CC-BY-NC': {
+      allowed: false,
+      reason: 'Non-commercial restriction conflicts with platform use',
+    },
+    'GPL-3.0': {
+      allowed: true,
+      warnings: ['Viral license - derivatives must be GPL'],
+      requiresAttribution: true,
+    },
+    'Public Domain': {
+      allowed: true,
+      requiresAttribution: false,
+    },
+  };
+  ```
+
+  ### DPIA Risk Calculator
+
+  ```typescript
+  function calculateDPIARisk(answers: Record<string, any>): RiskLevel {
+    let score = 0;
+
+    if (answers.pii_present === 'yes') score += 10;
+    if (answers.jurisdiction === 'yes') score += 8;
+    if (answers.external_sharing === 'yes') score += 7;
+    // ... more questions
+
+    if (score <= 10) return 'Low';
+    if (score <= 20) return 'Medium';
+    return 'High';
+  }
+  ```
+
+  ## Testing Requirements
+
+  ### E2E Test (Cypress)
+
+  **Test: `ingest-workflow.spec.ts`**
+
+  ```typescript
+  describe('Ingest Wizard E2E', () => {
+    it('should complete full ingest workflow with sample_10k.csv', () => {
+      cy.visit('/ingest-wizard');
+
+      // Step 1: Upload
+      cy.get('[data-testid=file-upload]').attachFile('sample_10k.csv');
+      cy.contains('10,000 rows detected').should('be.visible');
+
+      // Step 2: Mapping
+      cy.get('[data-testid=next-button]').click();
+      cy.get('[data-testid=field-mapper]').should('be.visible');
+      cy.get('[data-testid=auto-map-button]').click();
+      cy.contains('PII detected in 2 fields').should('be.visible');
+
+      // Step 3: Policy
+      cy.get('[data-testid=next-button]').click();
+      cy.get('[data-testid=license-select]').select('CC-BY-4.0');
+      cy.get('[data-testid=dpia-checklist]').should('be.visible');
+      cy.get('[data-testid=pii-present-yes]').check();
+      cy.contains('Risk Level: Medium').should('be.visible');
+
+      // Step 4: Export
+      cy.get('[data-testid=next-button]').click();
+      cy.get('[data-testid=export-json]').click();
+      cy.readFile('cypress/downloads/ingest-job-spec.json').should('exist');
+    });
+
+    it('should block ingest with non-commercial license', () => {
+      // ... test blocking logic
+    });
+  });
+  ```
+
+  ### Unit Tests
+
+  - CSV parsing with various delimiters
+  - PII detection (email, phone, SSN)
+  - License validation
+  - DPIA risk calculation
+  - Redaction strategies
+  - Job spec generation
+
+  ### Performance Test
+
+  **Requirement:** 10,000-row CSV processes in ≤10 minutes
+
+  - Measure upload time
+  - Measure schema inference time
+  - Measure PII scanning time
+  - Measure total end-to-end time
+  - Assert < 600 seconds
+
+  ## Sample Dataset
+
+  **File:** `tests/fixtures/sample_10k.csv`
+
+  Generate a 10,000-row CSV with:
+
+  - Columns: `id`, `name`, `email`, `organization`, `phone`, `created_at`, `notes`
+  - 20% of rows have PII (email, phone)
+  - Various organizations (100 unique)
+  - Timestamps spanning 2020-2025
+  - Include edge cases: nulls, special characters, long text
+
+  ## Documentation
+
+  ### apps/ingest-wizard/README.md
+
+  - User guide with screenshots
+  - Developer setup instructions
+  - API reference for job specs
+  - Troubleshooting guide
+
+  ### Integration Guide
+
+  - How to add new license types
+  - How to customize DPIA checklists
+  - How to add redaction strategies
+  - How to extend schema inference
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Wizard supports CSV, JSON, JSONL, XLSX uploads
+  - [ ] Auto-detection works for delimiters, headers, encoding
+  - [ ] Field mapping suggests entity types with ≥80% accuracy on test data
+  - [ ] PII detection identifies emails, phones, SSNs
+  - [ ] License validation blocks non-commercial licenses
+  - [ ] DPIA checklist calculates risk score correctly
+  - [ ] Redaction presets work for email, phone, SSN
+  - [ ] Export generates valid JSON job spec
+  - [ ] Cypress E2E test passes for `sample_10k.csv`
+  - [ ] 10,000-row CSV processes in ≤10 minutes
+  - [ ] Lineage tracked: source file → transformations → Neo4j nodes
+  - [ ] License gates logged in audit service
+  - [ ] Unit test coverage ≥80%
+  - [ ] README includes user guide and screenshots
+
+  ## UI/UX Guidelines
+
+  - Use IntelGraph design system (MUI components)
+  - Mobile-responsive layout
+  - Keyboard navigation support
+  - Progress indicator across steps
+  - Clear error messages with remediation steps
+  - "Save draft" functionality
+  - Undo/redo for mapping changes
+
+  ## Security Checklist
+
+  - [ ] File uploads validated on client and server
+  - [ ] Max file size enforced (100MB)
+  - [ ] No arbitrary code execution in CSV parsing
+  - [ ] PII never logged or cached
+  - [ ] License validation cannot be bypassed
+  - [ ] DPIA approvals stored in audit log
+  - [ ] Job specs signed with operator key
+
+  ## Integration Points
+
+  - **Provenance Ledger**: Register source file and transformations
+  - **Neo4j**: Load entities and relationships
+  - **Audit Service**: Log license checks and DPIA decisions
+  - **Queue Service**: Submit jobs to ingest worker
+
+  ## Performance Targets
+
+  - Upload 10MB file: <5s
+  - Schema inference: <2s
+  - PII scan (10k rows): <10s
+  - Job spec generation: <1s
+  - Total wizard completion: <2 minutes (user interaction time)
+
+  ## Follow IntelGraph Conventions
+
+  - Use {{frontend_framework}} for frontend
+  - Use {{worker_runtime}} for backend worker
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Use Turbo for builds
+  - Include golden path smoke test
+
+  Remember: **License and DPIA gates are non-negotiable.** If validation fails, the wizard must block export and clearly explain why.
+
+examples:
+  - name: 'nextjs-node-worker'
+    inputs:
+      frontend_framework: 'Next.js'
+      worker_runtime: 'Node.js'
+      sample_dataset_size: '10000'
+    expected_contains:
+      - 'Next.js'
+      - 'Cypress'
+      - 'PII detection'
+      - 'license validation'
+      - '10,000 rows'
+
+  - name: 'react-python-worker'
+    inputs:
+      frontend_framework: 'React'
+      worker_runtime: 'Python'
+      sample_dataset_size: '50000'
+    expected_contains:
+      - 'React'
+      - 'DPIA'
+      - 'redaction'
+      - 'Python'
