@@ -3,7 +3,15 @@
  */
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
-import { register, webVitalValue } from '../monitoring/metrics.js';
+import {
+  register,
+  webVitalValue,
+  goldenPathStepTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours,
+} from '../monitoring/metrics.js';
 import {
   performHealthCheck,
   getCachedHealthStatus,
@@ -256,6 +264,84 @@ router.post('/web-vitals', (req: Request, res: Response) => {
     res
       .status(500)
       .json({ error: 'Failed to record web vital', details: error.message });
+  }
+});
+
+/**
+ * Telemetry events endpoint
+ * POST /telemetry/events
+ */
+router.post('/telemetry/events', (req: Request, res: Response) => {
+  const { event, labels } = req.body;
+  const tenantId = (req.headers['x-tenant-id'] as string) || 'unknown';
+
+  if (!event) {
+    return res.status(400).json({ error: 'Event name is required' });
+  }
+
+  try {
+    // Handle golden path events
+    if (event === 'golden_path_step') {
+      goldenPathStepTotal.inc({
+        step: labels?.step || 'unknown',
+        status: labels?.status || 'success',
+        tenant_id: tenantId,
+      });
+    }
+
+    res.status(202).json({ status: 'accepted' });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ error: 'Failed to record event', details: error.message });
+  }
+});
+
+/**
+ * DORA Metrics Webhook
+ * POST /telemetry/dora
+ * Allows external CI/CD systems to push DORA metrics.
+ */
+router.post('/telemetry/dora', (req: Request, res: Response) => {
+  const { metric, value, labels } = req.body;
+  const tenantId = (req.headers['x-tenant-id'] as string) || 'unknown';
+
+  if (!metric) {
+    return res.status(400).json({ error: 'Metric name is required' });
+  }
+
+  try {
+    switch (metric) {
+      case 'deployment':
+        maestroDeploymentsTotal.inc({
+          environment: labels?.environment || 'production',
+          status: labels?.status || 'success',
+        });
+        break;
+      case 'lead_time':
+        if (typeof value === 'number') {
+          maestroPrLeadTimeHours.observe(value);
+        }
+        break;
+      case 'change_failure_rate':
+        if (typeof value === 'number') {
+          maestroChangeFailureRate.set(value);
+        }
+        break;
+      case 'mttr':
+        if (typeof value === 'number') {
+          maestroMttrHours.observe(value);
+        }
+        break;
+      default:
+        return res.status(400).json({ error: 'Unknown DORA metric' });
+    }
+
+    res.status(202).json({ status: 'accepted' });
+  } catch (error: any) {
+    res
+      .status(500)
+      .json({ error: 'Failed to record DORA metric', details: error.message });
   }
 });
 

@@ -363,6 +363,37 @@ const serviceAutoRemediationsTotal = new client.Counter({
   labelNames: ['service', 'action', 'result'],
 });
 
+// Golden Path Metrics
+const goldenPathStepTotal = new client.Counter({
+  name: 'golden_path_step_total',
+  help: 'Completion of steps in the Golden Path user journey',
+  labelNames: ['step', 'status', 'tenant_id'],
+});
+
+// DORA Metrics (Maestro)
+const maestroDeploymentsTotal = new client.Counter({
+  name: 'maestro_deployments_total',
+  help: 'Total number of deployments',
+  labelNames: ['environment', 'status'],
+});
+
+const maestroPrLeadTimeHours = new client.Histogram({
+  name: 'maestro_pr_lead_time_hours',
+  help: 'Lead time for changes in hours',
+  buckets: [1, 4, 12, 24, 48, 168],
+});
+
+const maestroChangeFailureRate = new client.Gauge({
+  name: 'maestro_change_failure_rate',
+  help: 'Change failure rate percentage',
+});
+
+const maestroMttrHours = new client.Histogram({
+  name: 'maestro_mttr_hours',
+  help: 'Mean time to recovery in hours',
+  buckets: [0.1, 0.5, 1, 4, 24],
+});
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -378,6 +409,11 @@ register.registerMetric(businessUserSignupsTotal);
 register.registerMetric(businessApiCallsTotal);
 register.registerMetric(businessRevenueTotal);
 register.registerMetric(serviceAutoRemediationsTotal);
+register.registerMetric(goldenPathStepTotal);
+register.registerMetric(maestroDeploymentsTotal);
+register.registerMetric(maestroPrLeadTimeHours);
+register.registerMetric(maestroChangeFailureRate);
+register.registerMetric(maestroMttrHours);
 
 const metrics = {
   graphExpandRequestsTotal,
@@ -450,4 +486,9 @@ export {
   businessApiCallsTotal,
   businessRevenueTotal,
   serviceAutoRemediationsTotal,
+  goldenPathStepTotal,
+  maestroDeploymentsTotal,
+  maestroPrLeadTimeHours,
+  maestroChangeFailureRate,
+  maestroMttrHours,
 };
