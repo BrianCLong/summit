@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intelgraph-core"
+version = "0.1.0"
+description = "IntelGraph minimal decision & claims slice"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "Topicality", email = "hello@topicality.co" }]
+dependencies = [
+  "fastapi>=0.109.0",
+  "uvicorn[standard]>=0.27.0",
+  "pydantic>=2.5.0",
+  "sqlmodel>=0.0.14",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4.0",
+  "pytest-asyncio>=0.23.0",
+  "httpx>=0.26.0",
+  "mypy>=1.8.0",
+]
+
+[tool.pytest.ini_options]
+minversion = "7.4"
+addopts = "-ra -q -v"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.mypy]
+python_version = "3.11"
+warn_unused_configs = true
+disallow_untyped_defs = true
+strict_optional = true
+ignore_missing_imports = true
