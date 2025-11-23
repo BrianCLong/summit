@@ -1,0 +1,505 @@
+---
+# Operations Zone Network Policies
+# Controls traffic for mesh-ops namespace (monitoring, operator console)
+
+# Allow DNS resolution for all pods in ops zone
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: mesh-ops
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Allow operator console API ingress from authenticated operators (via edge)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: operator-console-api-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: mesh-operator-console-api
+  policyTypes:
+    - Ingress
+  ingress:
+    # From auth-gateway (after OIDC authentication)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+          podSelector:
+            matchLabels:
+              app: auth-gateway
+      ports:
+        - protocol: TCP
+          port: 8090
+
+    # From operator console UI (same namespace)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mesh-operator-console-ui
+      ports:
+        - protocol: TCP
+          port: 8090
+
+---
+# Allow operator console UI ingress from external (via load balancer)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: operator-console-ui-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: mesh-operator-console-ui
+  policyTypes:
+    - Ingress
+  ingress:
+    # From anywhere (will be filtered by auth-gateway and LoadBalancer)
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 3000
+
+---
+# Allow Prometheus to scrape metrics from all namespaces
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus-scrape-egress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: prometheus
+  policyTypes:
+    - Egress
+  egress:
+    # Scrape metrics from edge zone
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+      ports:
+        - protocol: TCP
+          port: 9091
+
+    # Scrape metrics from control plane
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+      ports:
+        - protocol: TCP
+          port: 9091
+
+    # Scrape metrics from data plane
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-data
+      ports:
+        - protocol: TCP
+          port: 9091
+
+    # Scrape metrics from storage plane
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-storage
+      ports:
+        - protocol: TCP
+          port: 9091
+        - protocol: TCP
+          port: 9187  # PostgreSQL exporter
+        - protocol: TCP
+          port: 9121  # Redis exporter
+
+---
+# Allow Prometheus ingress for its own UI and API
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: prometheus-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: prometheus
+  policyTypes:
+    - Ingress
+  ingress:
+    # From Grafana
+    - from:
+        - podSelector:
+            matchLabels:
+              app: grafana
+      ports:
+        - protocol: TCP
+          port: 9090
+
+    # From operator console API (for metrics queries)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mesh-operator-console-api
+      ports:
+        - protocol: TCP
+          port: 9090
+
+    # From external (via auth-gateway)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+      ports:
+        - protocol: TCP
+          port: 9090
+
+---
+# Allow Grafana ingress for UI access
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: grafana-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: grafana
+  policyTypes:
+    - Ingress
+  ingress:
+    # From external (via auth-gateway)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+      ports:
+        - protocol: TCP
+          port: 3001
+
+    # From operator console
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mesh-operator-console-ui
+      ports:
+        - protocol: TCP
+          port: 3001
+
+---
+# Allow Grafana egress to Prometheus
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: grafana-egress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: grafana
+  policyTypes:
+    - Egress
+  egress:
+    # To Prometheus
+    - to:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+
+    # To Jaeger (for trace visualization)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: jaeger-query
+      ports:
+        - protocol: TCP
+          port: 16686
+
+---
+# Allow Jaeger collector ingress from all zones (for trace ingestion)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jaeger-collector-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: jaeger-collector
+  policyTypes:
+    - Ingress
+  ingress:
+    # From all namespaces for trace submission
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 14250  # gRPC
+        - protocol: TCP
+          port: 14268  # HTTP
+
+---
+# Allow Jaeger query UI ingress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jaeger-query-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: jaeger-query
+  policyTypes:
+    - Ingress
+  ingress:
+    # From Grafana
+    - from:
+        - podSelector:
+            matchLabels:
+              app: grafana
+      ports:
+        - protocol: TCP
+          port: 16686
+
+    # From operator console
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mesh-operator-console-ui
+      ports:
+        - protocol: TCP
+          port: 16686
+
+    # From external (via auth-gateway)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+      ports:
+        - protocol: TCP
+          port: 16686
+
+---
+# Allow operator console API to communicate with control plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: operator-console-api-egress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: mesh-operator-console-api
+  policyTypes:
+    - Egress
+  egress:
+    # To mesh-orchestrator
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: mesh-orchestrator
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # To policy-enforcer
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: policy-enforcer
+      ports:
+        - protocol: TCP
+          port: 8081
+
+    # To registry services
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchExpressions:
+              - key: app
+                operator: In
+                values:
+                  - agent-registry
+                  - tool-registry
+                  - tenant-registry
+      ports:
+        - protocol: TCP
+          port: 8083
+
+    # To mesh-eval
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: mesh-eval
+      ports:
+        - protocol: TCP
+          port: 8084
+
+    # To storage plane (for direct queries, backups)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-storage
+          podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # To Prometheus
+    - to:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+
+---
+# Allow log aggregation (Loki) to receive logs from all zones
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: loki-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: loki
+  policyTypes:
+    - Ingress
+  ingress:
+    # From all namespaces (via promtail/log shippers)
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 3100
+
+    # From Grafana for log queries
+    - from:
+        - podSelector:
+            matchLabels:
+              app: grafana
+      ports:
+        - protocol: TCP
+          port: 3100
+
+---
+# Allow Alertmanager ingress from Prometheus
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alertmanager-ingress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: alertmanager
+  policyTypes:
+    - Ingress
+  ingress:
+    # From Prometheus
+    - from:
+        - podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9093
+
+    # From external (via auth-gateway) for UI
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+      ports:
+        - protocol: TCP
+          port: 9093
+
+---
+# Allow Alertmanager egress for notifications (email, Slack, PagerDuty, etc.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alertmanager-egress
+  namespace: mesh-ops
+spec:
+  podSelector:
+    matchLabels:
+      app: alertmanager
+  policyTypes:
+    - Egress
+  egress:
+    # Allow HTTPS for external notification services
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 587  # SMTP with STARTTLS
+
+---
+# Allow health check probes from Kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: mesh-ops
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3001
+        - protocol: TCP
+          port: 8090
+        - protocol: TCP
+          port: 9090
+        - protocol: TCP
+          port: 9093
+        - protocol: TCP
+          port: 16686

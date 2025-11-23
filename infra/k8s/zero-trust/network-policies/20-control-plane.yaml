@@ -1,0 +1,360 @@
+---
+# Control Plane Network Policies
+# Controls traffic for mesh-control namespace
+
+# Allow DNS resolution for all pods in control plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: mesh-control
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Allow mesh-orchestrator ingress from auth-gateway (edge) and data plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mesh-orchestrator-ingress
+  namespace: mesh-control
+spec:
+  podSelector:
+    matchLabels:
+      app: mesh-orchestrator
+  policyTypes:
+    - Ingress
+  ingress:
+    # From auth-gateway in edge zone
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+          podSelector:
+            matchLabels:
+              app: auth-gateway
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090  # gRPC
+
+    # From agent runtimes in data plane (for task results, status updates)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-data
+          podSelector:
+            matchLabels:
+              app: agent-runtime
+      ports:
+        - protocol: TCP
+          port: 9090  # gRPC
+
+    # From ops zone for monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 9091  # Metrics endpoint
+
+---
+# Allow routing-gateway ingress from mesh-orchestrator and edge
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: routing-gateway-ingress
+  namespace: mesh-control
+spec:
+  podSelector:
+    matchLabels:
+      app: routing-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    # From mesh-orchestrator
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mesh-orchestrator
+      ports:
+        - protocol: TCP
+          port: 8082
+
+    # From ops zone for monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 9091
+
+---
+# Allow policy-enforcer ingress from all control plane services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: policy-enforcer-ingress
+  namespace: mesh-control
+spec:
+  podSelector:
+    matchLabels:
+      app: policy-enforcer
+  policyTypes:
+    - Ingress
+  ingress:
+    # From edge zone
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+      ports:
+        - protocol: TCP
+          port: 8081
+
+    # From within control plane
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8081
+
+    # From data plane
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-data
+      ports:
+        - protocol: TCP
+          port: 8081
+
+    # From ops zone for monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 9091
+
+---
+# Allow registry services ingress from control plane and edge
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: registry-services-ingress
+  namespace: mesh-control
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - agent-registry
+          - tool-registry
+          - tenant-registry
+  policyTypes:
+    - Ingress
+  ingress:
+    # From within control plane
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8083
+
+    # From edge zone
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-edge
+      ports:
+        - protocol: TCP
+          port: 8083
+
+    # From ops zone for monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 9091
+
+---
+# Allow mesh-eval ingress from control plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mesh-eval-ingress
+  namespace: mesh-control
+spec:
+  podSelector:
+    matchLabels:
+      app: mesh-eval
+  policyTypes:
+    - Ingress
+  ingress:
+    # From within control plane
+    - from:
+        - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8084
+
+    # From ops zone for monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 9091
+
+---
+# Allow control plane services to communicate with storage plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-storage
+  namespace: mesh-control
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # PostgreSQL
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-storage
+          podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Redis
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-storage
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Kafka/Redpanda (if using)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-storage
+          podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+
+---
+# Allow control plane services to communicate with data plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-data-plane
+  namespace: mesh-control
+spec:
+  podSelector:
+    matchLabels:
+      app: mesh-orchestrator
+  policyTypes:
+    - Egress
+  egress:
+    # Agent runtimes
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-data
+          podSelector:
+            matchLabels:
+              app: agent-runtime
+      ports:
+        - protocol: TCP
+          port: 8085
+
+---
+# Allow control plane to make external API calls (model providers, etc.)
+# This should be restricted to specific services and destinations
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-external-apis
+  namespace: mesh-control
+spec:
+  podSelector:
+    matchLabels:
+      app: routing-gateway
+  policyTypes:
+    - Egress
+  egress:
+    # Allow HTTPS to external destinations (model providers)
+    # Note: In production, use egress gateway with domain filtering
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Specific CIDR blocks can be added here for known model provider IPs
+    # - to:
+    #     - ipBlock:
+    #         cidr: 13.107.42.14/32  # Example: OpenAI API
+    #   ports:
+    #     - protocol: TCP
+    #       port: 443
+
+---
+# Allow health check probes from Kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: mesh-control
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+        - protocol: TCP
+          port: 8082
+        - protocol: TCP
+          port: 8083
+        - protocol: TCP
+          port: 8084

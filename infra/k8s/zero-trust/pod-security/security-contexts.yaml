@@ -1,0 +1,373 @@
+---
+# Pod Security Standards - Security Contexts
+# These are example security contexts that comply with the "restricted" Pod Security Standard
+# Apply these to all pod specifications in the Agentic Mesh
+
+# Example 1: Standard Application Pod (mesh-orchestrator, routing-gateway, etc.)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-app-pod
+  namespace: mesh-control
+  labels:
+    app: example-app
+spec:
+  # Pod-level security context
+  securityContext:
+    # Run as non-root user
+    runAsNonRoot: true
+    runAsUser: 10001
+    runAsGroup: 10001
+    fsGroup: 10001
+    # Drop all capabilities by default
+    seccompProfile:
+      type: RuntimeDefault
+    # Prevent privilege escalation
+    allowPrivilegeEscalation: false
+
+  containers:
+    - name: app
+      image: ghcr.io/brianlong/summit/mesh-orchestrator:latest
+      # Container-level security context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
+
+      # Resource limits
+      resources:
+        limits:
+          cpu: "2"
+          memory: "4Gi"
+        requests:
+          cpu: "500m"
+          memory: "1Gi"
+
+      # Volume mounts (read-only where possible)
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: cache
+          mountPath: /app/cache
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+
+  volumes:
+    # Ephemeral volumes for temporary data
+    - name: tmp
+      emptyDir:
+        sizeLimit: 1Gi
+    - name: cache
+      emptyDir:
+        sizeLimit: 2Gi
+    # ConfigMap volume (read-only)
+    - name: config
+      configMap:
+        name: app-config
+
+---
+# Example 2: Database Pod (PostgreSQL, Redis)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-db-pod
+  namespace: mesh-storage
+  labels:
+    app: postgresql
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 999  # postgres user
+    runAsGroup: 999
+    fsGroup: 999
+    seccompProfile:
+      type: RuntimeDefault
+
+  containers:
+    - name: postgres
+      image: postgres:15-alpine
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        # Cannot use readOnlyRootFilesystem for PostgreSQL
+        # readOnlyRootFilesystem: false
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+
+      resources:
+        limits:
+          cpu: "4"
+          memory: "8Gi"
+        requests:
+          cpu: "1"
+          memory: "2Gi"
+
+      volumeMounts:
+        - name: data
+          mountPath: /var/lib/postgresql/data
+        - name: config
+          mountPath: /etc/postgresql
+          readOnly: true
+
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: postgresql-data
+    - name: config
+      configMap:
+        name: postgresql-config
+
+---
+# Example 3: Sandboxed Workload (agent-runtime, tool-executor)
+# Maximum isolation for untrusted code execution
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-sandbox-pod
+  namespace: mesh-data
+  labels:
+    app: agent-runtime
+    workload-type: sandbox
+  annotations:
+    # Use gVisor or Kata Containers for additional isolation
+    io.kubernetes.cri.untrusted-workload: "true"
+spec:
+  # Pod-level security context with maximum restrictions
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534  # nobody user
+    runAsGroup: 65534
+    fsGroup: 65534
+    seccompProfile:
+      type: Localhost
+      localhostProfile: sandbox-strict.json  # Custom seccomp profile
+    # SELinux/AppArmor (if available)
+    # seLinuxOptions:
+    #   level: "s0:c123,c456"
+
+  # Runtime class for gVisor/Kata
+  runtimeClassName: gvisor
+
+  containers:
+    - name: sandbox
+      image: ghcr.io/brianlong/summit/agent-runtime:latest
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: Localhost
+          localhostProfile: sandbox-strict.json
+
+      # Strict resource limits for sandboxes
+      resources:
+        limits:
+          cpu: "1"
+          memory: "2Gi"
+          ephemeral-storage: "1Gi"
+        requests:
+          cpu: "250m"
+          memory: "512Mi"
+          ephemeral-storage: "500Mi"
+
+      # Only ephemeral volumes (no persistent storage)
+      volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: workspace
+          mountPath: /workspace
+
+  volumes:
+    - name: tmp
+      emptyDir:
+        sizeLimit: 500Mi
+    - name: workspace
+      emptyDir:
+        sizeLimit: 500Mi
+
+  # Strict termination grace period
+  terminationGracePeriodSeconds: 30
+
+  # Host restrictions
+  hostNetwork: false
+  hostPID: false
+  hostIPC: false
+
+---
+# Example 4: Monitoring/Observability Pod (Prometheus, Grafana)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-monitoring-pod
+  namespace: mesh-ops
+  labels:
+    app: prometheus
+spec:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 65534  # nobody
+    runAsGroup: 65534
+    fsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+
+  containers:
+    - name: prometheus
+      image: prom/prometheus:latest
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+
+      resources:
+        limits:
+          cpu: "4"
+          memory: "8Gi"
+        requests:
+          cpu: "1"
+          memory: "2Gi"
+
+      volumeMounts:
+        - name: data
+          mountPath: /prometheus
+        - name: config
+          mountPath: /etc/prometheus
+          readOnly: true
+
+  volumes:
+    - name: data
+      persistentVolumeClaim:
+        claimName: prometheus-data
+    - name: config
+      configMap:
+        name: prometheus-config
+
+---
+# Custom Seccomp Profile for Sandboxes
+# Save as: /var/lib/kubelet/seccomp/sandbox-strict.json
+# This profile blocks dangerous syscalls while allowing basic operations
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: seccomp-sandbox-strict
+  namespace: mesh-data
+data:
+  sandbox-strict.json: |
+    {
+      "defaultAction": "SCMP_ACT_ERRNO",
+      "architectures": ["SCMP_ARCH_X86_64", "SCMP_ARCH_AARCH64"],
+      "syscalls": [
+        {
+          "names": [
+            "accept",
+            "accept4",
+            "access",
+            "arch_prctl",
+            "bind",
+            "brk",
+            "clock_gettime",
+            "clone",
+            "close",
+            "connect",
+            "dup",
+            "dup2",
+            "epoll_create",
+            "epoll_ctl",
+            "epoll_wait",
+            "exit",
+            "exit_group",
+            "fcntl",
+            "fstat",
+            "futex",
+            "getcwd",
+            "getdents64",
+            "getegid",
+            "geteuid",
+            "getgid",
+            "getpid",
+            "getppid",
+            "getuid",
+            "listen",
+            "lseek",
+            "mmap",
+            "mprotect",
+            "munmap",
+            "nanosleep",
+            "openat",
+            "pipe",
+            "poll",
+            "read",
+            "readv",
+            "recvfrom",
+            "recvmsg",
+            "rt_sigaction",
+            "rt_sigprocmask",
+            "rt_sigreturn",
+            "sendmsg",
+            "sendto",
+            "set_robust_list",
+            "setsockopt",
+            "shutdown",
+            "sigaltstack",
+            "socket",
+            "stat",
+            "tgkill",
+            "write",
+            "writev"
+          ],
+          "action": "SCMP_ACT_ALLOW"
+        }
+      ]
+    }
+
+---
+# AppArmor Profile for Additional Security (optional)
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apparmor-sandbox-profile
+  namespace: mesh-data
+data:
+  sandbox-profile: |
+    #include <tunables/global>
+
+    profile mesh-sandbox flags=(attach_disconnected,mediate_deleted) {
+      #include <abstractions/base>
+
+      # Network access (restricted)
+      network inet tcp,
+      network inet udp,
+
+      # File system (read-only except /tmp and /workspace)
+      / r,
+      /tmp/** rw,
+      /workspace/** rw,
+      /app/** r,
+
+      # Deny dangerous paths
+      deny /proc/** w,
+      deny /sys/** w,
+      deny /dev/** w,
+
+      # Deny privilege escalation
+      deny capability,
+      deny @{HOME}/.ssh/** rw,
+      deny /etc/shadow r,
+    }
