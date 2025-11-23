@@ -33,16 +33,16 @@ async function deleteUserHandler(
       return;
     }
 
-    // TODO: Implement actual user deletion logic
-    // This should:
-    // 1. Verify the requesting user has admin permissions
-    // 2. Check that the target user exists
-    // 3. Perform soft-delete (mark as deleted, don't actually remove)
-    // 4. Log the deletion to audit trail
-    // 5. Revoke all active sessions for the deleted user
+    // IMPLEMENTATION PENDING: User deletion requires database service integration
+    // Required steps once UserService and AuditService are available:
+    // 1. await context.requirePermission('user:delete')
+    // 2. const targetUser = await UserService.findById(userId)
+    // 3. await UserService.softDelete(userId, { deletedBy: req.user.id })
+    // 4. await AuditService.log('USER_DELETED', { userId, adminId: req.user.id })
+    // 5. await SessionService.revokeAllForUser(userId)
     res.status(501).json({
       error: 'User deletion not yet implemented',
-      message: 'This endpoint requires additional implementation',
+      message: 'This endpoint requires integration with UserService, AuditService, and SessionService',
     });
   } catch (error) {
     next(error);
