@@ -5,11 +5,12 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -83,12 +84,20 @@ export const createApp = async () => {
 
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
+  app.use(httpCacheMiddleware);
 
   // Health endpoints (exempt from rate limiting)
   const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
 
-  // Other routes (exempt from rate limiting)
+  // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
+  // Note: /graphql has its own rate limiting chain above
+  app.use((req, res, next) => {
+      if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
+      return rateLimitMiddleware(req, res, next);
+  });
+
+  // Other routes
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
@@ -99,13 +108,6 @@ export const createApp = async () => {
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
   app.get('/metrics', metricsRoute);
-  app.use(
-    rateLimit({
-      windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
-      max: Number(process.env.RATE_LIMIT_MAX || 600),
-      message: { error: 'Too many requests, please try again later' },
-    }),
-  );
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
@@ -183,6 +185,7 @@ export const createApp = async () => {
     './graphql/plugins/auditLogger.js'
   );
   const { depthLimit } = await import('./graphql/validation/depthLimit.js');
+  const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
 
   const apollo = new ApolloServer({
     schema,
@@ -191,6 +194,7 @@ export const createApp = async () => {
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
+      rateLimitAndCachePlugin(schema) as any,
       // Enable PBAC in production
       ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
     ],
@@ -249,6 +253,7 @@ export const createApp = async () => {
     '/graphql',
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    rateLimitMiddleware, // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, { context: getContext }),
   );
 
