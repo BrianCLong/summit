@@ -159,6 +159,7 @@ make down
 - [AI Agent Collaboration Guide](CONTRIBUTING.md) - Guidelines for AI agent contributions
 - [Documentation Index](docs/README.md) - Complete documentation reference
 - [CLAUDE.md](CLAUDE.md) - Comprehensive AI assistant guide for the codebase
+- [CLAUDE_CODE.md](CLAUDE_CODE.md) - Guide for using Claude Code CLI with this repository
 
 ## ✨ Features
 
