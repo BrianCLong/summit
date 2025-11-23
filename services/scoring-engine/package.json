@@ -1,0 +1,31 @@
+{
+  "name": "@intelgraph/scoring-engine",
+  "version": "0.1.0",
+  "description": "Pluggable scoring engine for evaluating agent outputs",
+  "type": "module",
+  "main": "./dist/engine.js",
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "keywords": [
+    "scoring",
+    "evaluation",
+    "agentic-mesh"
+  ],
+  "author": "Summit Platform Team",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@intelgraph/mesh-eval-sdk": "workspace:*",
+    "zod": "^3.22.4",
+    "pino": "^8.17.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}
