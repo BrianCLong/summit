@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { CopilotNLQueryService } from '../services/CopilotNLQueryService';
+import { goldenPathStepTotal } from '../monitoring/metrics.js';
 
 const router = Router();
 const copilotService = new CopilotNLQueryService();
@@ -17,6 +18,13 @@ router.post('/nl-to-cypher', async (req, res) => {
     }
 
     const result = await copilotService.translateToVypher({ query, context });
+
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'unknown';
+    goldenPathStepTotal.inc({
+      step: 'copilot_query',
+      status: 'success',
+      tenant_id: tenantId
+    });
 
     res.json({
       success: true,
