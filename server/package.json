@@ -95,7 +95,7 @@
     "neo4j-driver": "6.0.1",
     "node-fetch": "3.3.2",
     "node-nlp": "^4.27.0",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^7.0.7",
     "parquetjs": "0.11.2",
     "pg": "8.16.3",
     "pgvector": "0.2.1",
