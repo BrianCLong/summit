@@ -17,6 +17,7 @@ import {
 import { getNeo4jDriver, getRedisClient } from '../../config/database.js';
 import pino from 'pino';
 import { GraphQLError } from 'graphql';
+import { withCache } from '../../utils/cacheHelper.js';
 
 const logger = pino({ name: 'graphragResolvers' });
 
@@ -67,64 +68,70 @@ export const graphragResolvers = {
     /**
      * Query the knowledge graph using explainable GraphRAG
      */
-    graphRagAnswer: async (
-      _: any,
-      args: { input: GraphRAGQueryInput },
-      context: Context,
-    ): Promise<GraphRAGResponse> => {
-      if (!context.user) {
-        throw new Error('Authentication required');
-      }
-
-      const service = initializeServices();
-      const { input } = args;
-
-      try {
-        logger.info(
-          `GraphRAG query received. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Question Length: ${input.question.length}, Use Case: ${input.useCase || 'default'}`,
-        );
-
-        const request: GraphRAGRequest = {
-          investigationId: input.investigationId,
-          question: input.question,
-          focusEntityIds: input.focusEntityIds,
-          maxHops: input.maxHops,
-          temperature: input.temperature,
-          maxTokens: input.maxTokens,
-          useCase: input.useCase,
-          rankingStrategy: input.rankingStrategy,
-        };
-
-        const response = await service.answer(request);
-
-        logger.info(
-          `GraphRAG query completed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Confidence: ${response.confidence}, Citations Count: ${response.citations.entityIds.length}, Why Paths Count: ${response.why_paths.length}`,
-        );
-
-        return response;
-      } catch (error) {
-        logger.error(
-          `GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        );
-
-        if (
-          error instanceof Error &&
-          error.message === 'LLM schema invalid after retry'
-        ) {
-          throw new GraphQLError('Invalid LLM response format', {
-            extensions: { code: 'BAD_REQUEST' },
-          });
+    graphRagAnswer: withCache(
+      // Cache key generator
+      (parent, args, context) => `graphrag:${args.input.investigationId}:${args.input.question}:${args.input.useCase || 'default'}`,
+      // Resolver
+      async (
+        _: any,
+        args: { input: GraphRAGQueryInput },
+        context: Context,
+      ): Promise<GraphRAGResponse> => {
+        if (!context.user) {
+          throw new Error('Authentication required');
         }
 
-        throw new Error(
-          error instanceof Error
-            ? `GraphRAG query failed: ${error.message}`
-            : 'GraphRAG query failed: Unknown error',
-        );
-      }
-    },
+        const service = initializeServices();
+        const { input } = args;
+
+        try {
+          logger.info(
+            `GraphRAG query received. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Question Length: ${input.question.length}, Use Case: ${input.useCase || 'default'}`,
+          );
+
+          const request: GraphRAGRequest = {
+            investigationId: input.investigationId,
+            question: input.question,
+            focusEntityIds: input.focusEntityIds,
+            maxHops: input.maxHops,
+            temperature: input.temperature,
+            maxTokens: input.maxTokens,
+            useCase: input.useCase,
+            rankingStrategy: input.rankingStrategy,
+          };
+
+          const response = await service.answer(request);
+
+          logger.info(
+            `GraphRAG query completed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Confidence: ${response.confidence}, Citations Count: ${response.citations.entityIds.length}, Why Paths Count: ${response.why_paths.length}`,
+          );
+
+          return response;
+        } catch (error) {
+          logger.error(
+            `GraphRAG query failed. Investigation ID: ${input.investigationId}, User ID: ${context.user.id}, Error: ${
+              error instanceof Error ? error.message : 'Unknown error'
+            }`,
+          );
+
+          if (
+            error instanceof Error &&
+            error.message === 'LLM schema invalid after retry'
+          ) {
+            throw new GraphQLError('Invalid LLM response format', {
+              extensions: { code: 'BAD_REQUEST' },
+            });
+          }
+
+          throw new Error(
+            error instanceof Error
+              ? `GraphRAG query failed: ${error.message}`
+              : 'GraphRAG query failed: Unknown error',
+          );
+        }
+      },
+      600 // 10 minute cache for expensive GraphRAG queries
+    ),
 
     /**
      * Get similar entities using embedding search

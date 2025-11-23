@@ -15,12 +15,22 @@ const Env = z
     JWT_SECRET: z.string().min(32),
     JWT_REFRESH_SECRET: z.string().min(32),
     CORS_ORIGIN: z.string().default('http://localhost:3000'),
+    RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
+    RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
+    RATE_LIMIT_MAX_AUTHENTICATED: z.coerce.number().default(1000),
+    CACHE_ENABLED: z.coerce.boolean().default(true),
+    CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
   })
   .passthrough(); // Allow extra env vars
 
 // Environment variable documentation for helpful error messages
 const ENV_VAR_HELP: Record<string, string> = {
   DATABASE_URL: 'PostgreSQL connection string (e.g., postgresql://user:pass@host:5432/db)',
+  RATE_LIMIT_WINDOW_MS: 'Window size for rate limiting in milliseconds (default: 60000)',
+  RATE_LIMIT_MAX_REQUESTS: 'Max requests per window per user/IP (default: 100)',
+  RATE_LIMIT_MAX_AUTHENTICATED: 'Max requests per window for authenticated users (default: 1000)',
+  CACHE_ENABLED: 'Enable or disable caching (default: true)',
+  CACHE_TTL_DEFAULT: 'Default cache TTL in seconds (default: 300)',
   NEO4J_URI: 'Neo4j bolt URI (e.g., bolt://localhost:7687)',
   NEO4J_USER: 'Neo4j username (default: neo4j)',
   NEO4J_PASSWORD: 'Neo4j password (set in Neo4j config)',
