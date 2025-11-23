@@ -26,12 +26,16 @@
     "shpjs": "^6.0.0",
     "xml2js": "^0.6.2",
     "proj4": "^2.12.1",
-    "fast-xml-parser": "^4.5.0"
+    "fast-xml-parser": "^4.5.0",
+    "uuid": "^11.0.3",
+    "neo4j-driver": "^6.0.1"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
     "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
     "typescript": "^5.9.3"
   }
 }
