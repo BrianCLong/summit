@@ -3,7 +3,7 @@
  * Modern GraphQL server with enhanced security and observability
  */
 
-import { ApolloServer } from '@apollo/server';
+import { ApolloServer, type ApolloServerPlugin } from '@apollo/server';
 import { expressMiddleware } from '@apollo/server/express4';
 import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
@@ -28,6 +28,11 @@ import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/q
 import { createAPQPlugin } from './plugins/apqPlugin.js';
 import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
+import auditLoggerPlugin from './plugins/auditLogger.js';
+import pbacPlugin from './plugins/pbac.js';
+// @ts-ignore: JS file without type definitions
+import PersistedQueriesPlugin from './plugins/persistedQueries.js';
+import { depthLimit } from './validation/depthLimit.js';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
@@ -35,8 +40,11 @@ export interface GraphQLContext {
   loaders: DataLoaders;
   user?: {
     id: string;
-    roles: string[];
+    roles?: string[]; // Normalized roles
+    role?: string;   // Legacy role
     tenantId: string;
+    sub?: string; // JWT sub
+    email?: string;
   };
   request: {
     ip: string;
@@ -47,6 +55,12 @@ export interface GraphQLContext {
     traceId: string;
     spanId: string;
   };
+  audit?: {
+      before?: any;
+      after?: any;
+  };
+  isAuthenticated: boolean;
+  requestId?: string;
 }
 
 // GraphQL Shield Security Rules
@@ -66,7 +80,7 @@ const permissions = shield({
       return !!context.user;
     },
   },
-});
+}, { allowExternalErrors: true }); // Allow external errors to pass through
 
 // Create enhanced GraphQL schema with security
 function createSecureSchema() {
@@ -80,10 +94,11 @@ function createSecureSchema() {
 }
 
 // Context function for Apollo v5
-async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
+async function createContext({ req, res }: { req: any, res: any }): Promise<GraphQLContext> {
   const neo4jDriver = getNeo4jDriver();
   const pgPool = getPostgresPool();
-  const tenantId = req.user?.tenantId || req.user?.tenant || 'default';
+  // Support multiple tenant ID locations
+  const tenantId = req.user?.tenantId || req.user?.tenant || req.headers['x-tenant-id'] || 'default';
 
   // Create request-scoped DataLoaders to batch queries
   const loaders = createDataLoaders({
@@ -92,12 +107,16 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
     tenantId,
   });
 
+  const user = req.user;
+
   return {
     dataSources: {
       // Data sources will be injected here
     },
     loaders, // DataLoaders for batch loading
-    user: req.user, // Populated by auth middleware
+    user,
+    isAuthenticated: !!user,
+    requestId: req.requestId,
     request: {
       ip: req.ip || req.connection.remoteAddress,
       headers: req.headers,
@@ -112,16 +131,17 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
 
 // Apollo Server v5 factory
 export function createApolloV5Server(
-  httpServer: any,
+  httpServer?: any,
 ): ApolloServer<GraphQLContext> {
   const schema = createSecureSchema();
 
-  const server = new ApolloServer<GraphQLContext>({
-    schema,
-    plugins: [
-      // Graceful shutdown
-      ApolloServerPluginDrainHttpServer({ httpServer }),
+  // Instantiate PersistedQueriesPlugin
+  const persistedQueries = new PersistedQueriesPlugin({
+      // In development, we might want to allow non-persisted queries
+      allowNonPersisted: process.env.NODE_ENV !== 'production',
+  });
 
+  const plugins: ApolloServerPlugin<GraphQLContext>[] = [
       // Enhanced landing page for development
       ...(process.env.NODE_ENV === 'development'
         ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
@@ -144,6 +164,14 @@ export function createApolloV5Server(
       createPerformanceMonitoringPlugin(),
 
       resolverMetricsPlugin,
+
+      auditLoggerPlugin,
+
+      // Enable PBAC (Field-level auth)
+      pbacPlugin() as any,
+
+      // Persisted Queries Allow-listing
+      persistedQueries.apolloServerPlugin(),
 
       // Custom telemetry plugin
       {
@@ -185,7 +213,16 @@ export function createApolloV5Server(
           };
         },
       },
-    ],
+  ];
+
+  // Only add DrainHttpServer plugin if httpServer is provided
+  if (httpServer) {
+    plugins.unshift(ApolloServerPluginDrainHttpServer({ httpServer }));
+  }
+
+  const server = new ApolloServer<GraphQLContext>({
+    schema,
+    plugins,
 
     // Enhanced error formatting
     formatError: (formattedError, error) => {
@@ -200,12 +237,20 @@ export function createApolloV5Server(
 
       // Don't expose internal errors in production
       if (process.env.NODE_ENV === 'production') {
+        // Allow some errors through if they are safe
+        if (formattedError.extensions?.code === 'BAD_USER_INPUT' ||
+            formattedError.extensions?.code === 'UNAUTHENTICATED' ||
+            formattedError.extensions?.code === 'FORBIDDEN' ||
+            formattedError.extensions?.code === 'QUERY_TOO_COMPLEX' ||
+            formattedError.extensions?.code === 'PERSISTED_QUERY_NOT_FOUND' ||
+            formattedError.extensions?.code === 'PERSISTED_QUERY_NOT_SUPPORTED') {
+            return formattedError;
+        }
+
         return {
-          message: formattedError.message,
-          locations: formattedError.locations,
-          path: formattedError.path,
+          message: 'Internal server error',
           extensions: {
-            code: formattedError.extensions?.code,
+            code: 'INTERNAL_SERVER_ERROR',
           },
         };
       }
@@ -215,6 +260,11 @@ export function createApolloV5Server(
 
     // Disable introspection and playground in production
     introspection: process.env.NODE_ENV !== 'production',
+
+    // Validation rules including Depth Limiting
+    validationRules: [
+        depthLimit(process.env.NODE_ENV === 'production' ? 6 : 10)
+    ],
 
     // Include stack traces in development
     includeStacktraceInErrorResponses: process.env.NODE_ENV !== 'production',
@@ -227,55 +277,5 @@ export function createApolloV5Server(
 export function createGraphQLMiddleware(server: ApolloServer<GraphQLContext>) {
   return expressMiddleware(server, {
     context: createContext,
-
-    // Enhanced CORS configuration
-    cors: {
-      origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000'],
-      credentials: true,
-      methods: ['GET', 'POST'],
-      allowedHeaders: [
-        'Content-Type',
-        'Authorization',
-        'Apollo-Require-Preflight',
-        'X-Tenant-ID',
-        'X-User-ID',
-      ],
-    } as cors.CorsOptions,
   });
-}
-
-// Health check endpoint for Apollo v5
-export function createHealthCheck(server: ApolloServer<GraphQLContext>) {
-  return async (req: any, res: any) => {
-    try {
-      // Simple GraphQL health query
-      const result = await server.executeOperation(
-        {
-          query: 'query Health { __typename }',
-        },
-        { contextValue: await createContext({ req }) },
-      );
-
-      if (result.body.kind === 'single' && !result.body.singleResult.errors) {
-        res.status(200).json({
-          status: 'healthy',
-          service: 'apollo-v5-graphql',
-          timestamp: new Date().toISOString(),
-        });
-      } else {
-        const body = result.body as any;
-        res.status(503).json({
-          status: 'unhealthy',
-          service: 'apollo-v5-graphql',
-          errors: body.singleResult?.errors || (body.kind === 'single' ? body.singleResult?.errors : []),
-        });
-      }
-    } catch (error) {
-      res.status(503).json({
-        status: 'unhealthy',
-        service: 'apollo-v5-graphql',
-        error: error instanceof Error ? error.message : 'Unknown error',
-      });
-    }
-  };
 }

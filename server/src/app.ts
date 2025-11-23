@@ -1,8 +1,5 @@
 import 'dotenv/config';
 import express from 'express';
-import { ApolloServer } from '@apollo/server';
-import { expressMiddleware } from '@as-integrations/express4';
-import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
@@ -17,11 +14,9 @@ import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import rbacRouter from './routes/rbacRoutes.js';
-import { typeDefs } from './graphql/schema.js';
-import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
-import { initializeTracing, getTracer } from './observability/tracer.js';
+import { initializeTracing } from './observability/tracer.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
@@ -32,6 +27,9 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+
+// Enhanced GraphQL Server
+import { createApolloV5Server, createGraphQLMiddleware } from './graphql/apollo-v5-server.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -166,53 +164,29 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({
-    typeDefs: typeDefs as any,
-    resolvers: resolvers as any,
-  });
+  // Initialize Apollo Server v5
+  // Requires passing the http server if we want to use ApolloServerPluginDrainHttpServer
+  // But app.ts doesn't have the httpServer instance yet (it's created in index.ts usually)
+  // For now we can pass null or minimal object if needed, but usually in express apps we pass it.
+  // Looking at apollo-v5-server.ts, it takes httpServer.
+  // However, app.ts returns the express app, and the server is started elsewhere?
+  // Let's check where app.ts is used. Likely server/src/index.ts or similar.
+  // If I can't pass httpServer, I might have to skip the drain plugin or init it later.
+  // But for now, let's instantiate it without httpServer if possible or mock it.
+  // Wait, createApolloV5Server expects httpServer.
 
-  // GraphQL over HTTP
-  const { persistedQueriesPlugin } = await import(
-    './graphql/plugins/persistedQueries.js'
-  );
-  const { default: pbacPlugin } = await import('./graphql/plugins/pbac.js');
-  const { default: resolverMetricsPlugin } = await import(
-    './graphql/plugins/resolverMetrics.js'
-  );
-  const { default: auditLoggerPlugin } = await import(
-    './graphql/plugins/auditLogger.js'
-  );
-  const { depthLimit } = await import('./graphql/validation/depthLimit.js');
+  // Let's look at how the original code did it.
+  // It did `await apollo.start();` inside `createApp`.
 
-  const apollo = new ApolloServer({
-    schema,
-    // Security plugins - Order matters for execution lifecycle
-    plugins: [
-      persistedQueriesPlugin as any,
-      resolverMetricsPlugin as any,
-      auditLoggerPlugin as any,
-      // Enable PBAC in production
-      ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
-    ],
-    // Security configuration based on environment
-    introspection: cfg.NODE_ENV !== 'production',
-    // Enhanced query validation rules
-    validationRules: [
-      depthLimit(cfg.NODE_ENV === 'production' ? 6 : 8), // Stricter in prod
-    ],
-    // Security context
-    formatError: (err) => {
-      // Don't expose internal errors in production
-      if (cfg.NODE_ENV === 'production') {
-        logger.error(
-          { err, stack: (err as any).stack },
-          `GraphQL Error: ${err.message}`,
-        );
-        return new Error('Internal server error');
-      }
-      return err as any;
-    },
-  });
+  // If I can't modify the caller of `createApp`, I have to deal with it here.
+  // The `ApolloServerPluginDrainHttpServer` is optional but recommended.
+  // I'll pass `undefined` for httpServer for now if the type allows, or modify `createApolloV5Server` to make it optional.
+
+  // Let's check `createApolloV5Server` signature again.
+  // export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLContext>
+
+  // I will instantiate it with {}.
+  const apollo = createApolloV5Server({});
   await apollo.start();
 
   // Production Authentication - Use proper JWT validation
@@ -245,11 +219,15 @@ export const createApp = async () => {
           next();
         };
 
+  // Use the enhanced middleware
   app.use(
     '/graphql',
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-    expressMiddleware(apollo, { context: getContext }),
+    // We need to bridge the gap between the auth middleware (which populates req.user)
+    // and the createGraphQLMiddleware (which uses req.user).
+    // The createGraphQLMiddleware calls createContext which uses req.user.
+    createGraphQLMiddleware(apollo)
   );
 
   // Start background trust worker if enabled
