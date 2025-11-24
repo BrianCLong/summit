@@ -61,6 +61,23 @@
       "path": "connectors/csv_connector/"
     },
     {
+      "id": "parquet",
+      "name": "Parquet Connector",
+      "description": "Import entities and relationships from Apache Parquet files",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "file-import",
+      "capabilities": ["pull", "batch"],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["none"],
+      "rateLimit": null,
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/parquet.md",
+      "path": "connectors/parquet_connector/"
+    },
+    {
       "id": "duckdb",
       "name": "DuckDB Connector",
       "description": "Query analytical data from DuckDB databases",
