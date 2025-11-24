@@ -1,0 +1,138 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: runbook-service
+  namespace: intelgraph
+  labels:
+    app: runbook-service
+    component: orchestration
+spec:
+  selector:
+    app: runbook-service
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4000
+      protocol: TCP
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: runbook-service
+  namespace: intelgraph
+  labels:
+    app: runbook-service
+    component: orchestration
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: runbook-service
+  template:
+    metadata:
+      labels:
+        app: runbook-service
+        component: orchestration
+    spec:
+      serviceAccountName: runbook-service
+      containers:
+        - name: runbook-service
+          image: intelgraph/runbook-service:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "4000"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: runbook-service-secrets
+                  key: database-url
+            - name: OPA_ENDPOINT
+              value: "http://opa:8181"
+            - name: MAX_CONCURRENT_STEPS
+              value: "10"
+            - name: MAX_EXECUTION_TIME_MS
+              value: "3600000"
+            - name: RATE_LIMIT_PER_TENANT
+              value: "100"
+            - name: LOG_LEVEL
+              value: "info"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 4000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: runbook-service
+  namespace: intelgraph
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: runbook-service-hpa
+  namespace: intelgraph
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: runbook-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: runbook-service-pdb
+  namespace: intelgraph
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: runbook-service
