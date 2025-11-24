@@ -1,0 +1,98 @@
+# Corruption Network Scenario Template
+
+name: Government Corruption Investigation
+description: Investigation of alleged corruption involving government officials, contractors, and kickback schemes
+type: CORRUPTION_INVESTIGATION
+
+parameters:
+  type: corruption-network
+  size: large
+  noiseLevel: 0.18
+  missingDataRate: 0.12
+  conflictingEvidenceRate: 0.08
+  temporalSpan:
+    start: 2020-01-01
+    end: 2024-12-31
+  seed: 34567
+
+copilotGoal: |
+  Trace money flows from government contracts to officials, identify beneficial
+  ownership structures, and establish quid pro quo relationships. Focus on:
+  1. Contract award patterns
+  2. Financial connections to officials
+  3. Beneficial ownership chains
+  4. Evidence of coordination
+
+expectedKeyEntities:
+  - type: PERSON
+    role: government_official
+    count: 5-10
+  - type: ORGANIZATION
+    role: contractor
+    count: 10-15
+  - type: PERSON
+    role: intermediary
+    count: 5-10
+  - type: DOCUMENT
+    role: evidence
+    count: 20-30
+
+workflow:
+  name: Corruption Investigation Workflow
+  description: Follow the money and connections
+  strategy: targeted
+  steps:
+    - type: CREATE_INVESTIGATION
+      params: {}
+
+    - type: ADD_ENTITY
+      params:
+        entityIndex: 0-all
+
+    - type: ADD_RELATIONSHIP
+      params:
+        relationshipIndex: 0-all
+
+    - type: QUERY_ENTITIES
+      params:
+        type: PERSON
+        limit: 100
+
+    - type: RUN_COPILOT
+      params:
+        goal: "Identify government officials and their connections"
+        timeout: 60000
+
+    - type: QUERY_ENTITIES
+      params:
+        type: ORGANIZATION
+        limit: 100
+
+    - type: EXPAND_NETWORK
+      params:
+        entityId: key-official
+        depth: 3
+
+    - type: RUN_COPILOT
+      params:
+        goal: "Trace financial flows and beneficial ownership"
+        timeout: 60000
+
+    - type: SEARCH
+      params:
+        query: "kickback OR bribe OR payoff"
+
+    - type: EXPORT_DATA
+      params: {}
+
+evaluationCriteria:
+  successThresholds:
+    coverageRate: 0.85
+    keyEntitiesFound: 0.75
+    precision: 0.65
+    recall: 0.7
+
+  performanceTargets:
+    maxDuration: 360000  # 6 minutes
+    maxQueriesPerSession: 60
+    copilotSuccessRate: 0.88
