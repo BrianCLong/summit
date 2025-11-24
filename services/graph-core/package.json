@@ -9,7 +9,11 @@
     "test": "jest"
   },
   "dependencies": {
+    "@apollo/server": "^4.11.0",
+    "@graphql-tools/schema": "^10.0.6",
     "express": "^5.1.0",
+    "graphql": "^16.9.0",
+    "graphql-scalars": "^1.23.0",
     "zod": "^4.1.12",
     "neo4j-driver": "^6.0.1",
     "pg": "^8.16.3",
@@ -17,15 +21,18 @@
     "body-parser": "^1.20.2"
   },
   "devDependencies": {
-    "ts-jest": "^29.4.5",
-    "typescript": "^5.9.3",
+    "@types/body-parser": "^1.19.5",
     "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
-    "supertest": "^7.1.4",
+    "@types/pg": "^8.11.6",
     "@types/supertest": "^6.0.3",
     "@types/uuid": "^11.0.0",
-    "@types/body-parser": "^1.19.5"
+    "jest": "^29.7.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.5",
+    "tsx": "^4.19.1",
+    "typescript": "^5.9.3"
   },
   "type": "module",
   "types": "dist/index.d.ts",
@@ -33,6 +40,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./canonical": {
+      "types": "./dist/canonical/index.d.ts",
+      "import": "./dist/canonical/index.js"
+    },
+    "./canonical/types": {
+      "types": "./dist/canonical/types.d.ts",
+      "import": "./dist/canonical/types.js"
+    },
+    "./canonical/validation": {
+      "types": "./dist/canonical/validation.d.ts",
+      "import": "./dist/canonical/validation.js"
     }
-  }
+  },
+  "files": [
+    "dist",
+    "src/graphql/schema.graphql"
+  ]
 }
