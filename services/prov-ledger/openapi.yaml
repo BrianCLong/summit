@@ -2,12 +2,13 @@ openapi: 3.0.3
 info:
   title: Provenance & Claim Ledger Service
   description: |
-    Evidence/claim registration, provenance chain tracking, and disclosure bundle generation.
+    Evidence/claim registration, provenance chain tracking, contradiction graphs,
+    and disclosure bundle generation with Merkle proofs and cryptographic signing.
 
     All requests require authorization headers:
     - `x-authority-id`: Identifier for the requesting authority
     - `x-reason-for-access`: Justification for the request
-  version: 1.0.0
+  version: 2.0.0
   contact:
     name: IntelGraph Team
     email: support@intelgraph.com
@@ -19,16 +20,22 @@ servers:
     description: Production
 
 tags:
+  - name: Sources
+    description: Original data source registration
+  - name: Transforms
+    description: Data transformation tracking
   - name: Claims
-    description: Claim registration and retrieval
+    description: Claim registration and relationships
   - name: Evidence
     description: Evidence registration with checksums
   - name: Bundles
     description: Disclosure bundle generation
+  - name: Manifests
+    description: Export manifest creation and verification
   - name: Provenance
     description: Provenance chain tracking
   - name: Verification
-    description: Hash verification utilities
+    description: Hash and proof verification utilities
   - name: Health
     description: Service health checks
 
@@ -56,6 +63,157 @@ paths:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
 
+  /healthz:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      security: []
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+  /readyz:
+    get:
+      tags: [Health]
+      summary: Readiness probe
+      security: []
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ready
+
+  # ============================================================================
+  # Source Endpoints
+  # ============================================================================
+  /source/register:
+    post:
+      tags: [Sources]
+      summary: Register a source
+      description: Register a new data source with content hash and metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSourceRequest'
+      responses:
+        '200':
+          description: Source registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Source with this hash already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /source/{id}:
+    get:
+      tags: [Sources]
+      summary: Get source by ID
+      description: Retrieve source details including custody chain
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^src_'
+      responses:
+        '200':
+          description: Source found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Source'
+        '404':
+          description: Source not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================================================
+  # Transform Endpoints
+  # ============================================================================
+  /transform/register:
+    post:
+      tags: [Transforms]
+      summary: Register a transform
+      description: Register a data transformation with input/output hashes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransformRequest'
+      responses:
+        '200':
+          description: Transform registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transform'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /transform/{id}:
+    get:
+      tags: [Transforms]
+      summary: Get transform by ID
+      description: Retrieve transform details including parameters and lineage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^tx_'
+      responses:
+        '200':
+          description: Transform found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transform'
+        '404':
+          description: Transform not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================================================
+  # Claims Endpoints
+  # ============================================================================
   /claims:
     post:
       tags: [Claims]
@@ -113,6 +271,172 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /claim/link-evidence:
+    post:
+      tags: [Claims]
+      summary: Link evidence to claim
+      description: Create a relationship between a claim and supporting/contradicting evidence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkEvidenceRequest'
+      responses:
+        '200':
+          description: Evidence linked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimEvidenceLink'
+        '404':
+          description: Claim or evidence not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /claim/{claimId}/evidence:
+    get:
+      tags: [Claims]
+      summary: Get evidence for claim
+      description: Retrieve all evidence linked to a claim
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evidence links found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimEvidenceResponse'
+
+  /claim/contradicts:
+    post:
+      tags: [Claims]
+      summary: Mark claim contradiction
+      description: Create a contradiction relationship between two claims
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimRelationshipRequest'
+      responses:
+        '200':
+          description: Contradiction recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimRelationship'
+        '400':
+          description: Invalid request (e.g., same claim)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: One or both claims not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /claim/supports:
+    post:
+      tags: [Claims]
+      summary: Mark claim support
+      description: Create a support relationship between two claims
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimRelationshipRequest'
+      responses:
+        '200':
+          description: Support recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimRelationship'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: One or both claims not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /claim/relationship:
+    post:
+      tags: [Claims]
+      summary: Create claim relationship
+      description: Create any type of relationship between two claims
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClaimRelationshipRequest'
+      responses:
+        '200':
+          description: Relationship created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClaimRelationship'
+
+  /claim/{claimId}/contradictions:
+    get:
+      tags: [Claims]
+      summary: Get claim contradictions
+      description: Retrieve all claims that contradict this claim
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contradictions found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContradictionsResponse'
+
+  /claim/{claimId}/supports:
+    get:
+      tags: [Claims]
+      summary: Get supporting claims
+      description: Retrieve all claims that support this claim
+      parameters:
+        - name: claimId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Supporting claims found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupportsResponse'
+
+  # ============================================================================
+  # Evidence Endpoints
+  # ============================================================================
   /evidence:
     post:
       tags: [Evidence]
@@ -144,6 +468,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /evidence/register:
+    post:
+      tags: [Evidence]
+      summary: Register evidence (alias)
+      description: Alias for POST /evidence
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEvidenceRequest'
+      responses:
+        '200':
+          description: Evidence registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Evidence'
+
   /evidence/{id}:
     get:
       tags: [Evidence]
@@ -170,11 +513,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # ============================================================================
+  # Bundle Endpoints
+  # ============================================================================
   /bundles/{caseId}:
     get:
       tags: [Bundles]
       summary: Get disclosure bundle for case
-      description: Generate a disclosure bundle manifest with hash tree and merkle root
+      description: Generate a disclosure bundle with Merkle tree and inclusion proofs
       parameters:
         - name: caseId
           in: path
@@ -196,6 +542,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # ============================================================================
+  # Manifest Endpoints
+  # ============================================================================
+  /manifest/export:
+    post:
+      tags: [Manifests]
+      summary: Export manifest
+      description: Create a signed export manifest with selective disclosure
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExportManifestRequest'
+      responses:
+        '200':
+          description: Manifest created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportManifest'
+
+  /manifest/{manifestId}:
+    get:
+      tags: [Manifests]
+      summary: Get manifest by ID
+      description: Retrieve manifest details including proofs
+      parameters:
+        - name: manifestId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^manifest_'
+      responses:
+        '200':
+          description: Manifest found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExportManifest'
+        '404':
+          description: Manifest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /manifest/verify:
+    post:
+      tags: [Manifests]
+      summary: Verify manifest
+      description: Verify manifest integrity and optionally signature
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyManifestRequest'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestVerificationResult'
+        '404':
+          description: Manifest not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # ============================================================================
+  # Provenance Endpoints
+  # ============================================================================
   /provenance:
     get:
       tags: [Provenance]
@@ -234,6 +656,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/ProvenanceChain'
 
+  # ============================================================================
+  # Verification Endpoints
+  # ============================================================================
   /hash/verify:
     post:
       tags: [Verification]
@@ -253,18 +678,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/VerifyHashResponse'
 
+  /proof/verify:
+    post:
+      tags: [Verification]
+      summary: Verify Merkle proof
+      description: Verify that a leaf hash is included in a Merkle tree
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyProofRequest'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifyProofResponse'
+
   /export/manifest:
     get:
       tags: [Verification]
-      summary: Export manifest
-      description: Get export manifest with all claims and hash chain
+      summary: Export manifest (legacy)
+      description: Get legacy export manifest with all claims and hash chain
       responses:
         '200':
           description: Manifest generated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Manifest'
+                $ref: '#/components/schemas/LegacyManifest'
 
 components:
   securitySchemes:
@@ -295,7 +739,135 @@ components:
             database:
               type: string
               enum: [healthy, unhealthy]
+            kafka:
+              type: string
+              enum: [healthy, unhealthy, disconnected, disabled]
 
+    # Source Schemas
+    CreateSourceRequest:
+      type: object
+      required:
+        - sourceType
+      properties:
+        sourceType:
+          type: string
+          enum: [document, database, api, user_input, sensor]
+        content:
+          description: Content to compute hash from (if sourceHash not provided)
+        sourceHash:
+          type: string
+          description: SHA-256 hash (computed if not provided)
+        originUrl:
+          type: string
+          format: uri
+        licenseId:
+          type: string
+        metadata:
+          type: object
+        retentionPolicy:
+          type: string
+          default: STANDARD
+
+    Source:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^src_'
+        sourceHash:
+          type: string
+        sourceType:
+          type: string
+        originUrl:
+          type: string
+        licenseId:
+          type: string
+        custodyChain:
+          type: array
+          items:
+            type: string
+        retentionPolicy:
+          type: string
+        metadata:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+        idempotent:
+          type: boolean
+          description: True if source already existed
+
+    # Transform Schemas
+    CreateTransformRequest:
+      type: object
+      required:
+        - transformType
+        - inputHash
+        - outputHash
+        - algorithm
+        - version
+        - durationMs
+      properties:
+        transformType:
+          type: string
+        inputHash:
+          type: string
+        outputHash:
+          type: string
+        algorithm:
+          type: string
+        version:
+          type: string
+        parameters:
+          type: object
+        durationMs:
+          type: integer
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        parentTransforms:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+
+    Transform:
+      type: object
+      properties:
+        id:
+          type: string
+          pattern: '^tx_'
+        transformType:
+          type: string
+        inputHash:
+          type: string
+        outputHash:
+          type: string
+        algorithm:
+          type: string
+        version:
+          type: string
+        parameters:
+          type: object
+        executionTimestamp:
+          type: string
+          format: date-time
+        durationMs:
+          type: integer
+        executedBy:
+          type: string
+        confidence:
+          type: number
+        parentTransforms:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+
+    # Claim Schemas
     CreateClaimRequest:
       type: object
       required:
@@ -304,23 +876,23 @@ components:
         content:
           type: object
           description: Claim content (arbitrary JSON)
+        claimType:
+          type: string
+          enum: [factual, inferential, predictive, evaluative]
+          default: factual
         signature:
           type: string
           description: Optional cryptographic signature
         metadata:
           type: object
-          description: Additional metadata
         sourceRef:
           type: string
-          description: Reference to source (e.g., file://path)
         licenseId:
           type: string
-          description: Associated license ID
         policyLabels:
           type: array
           items:
             type: string
-          description: Policy classification labels
 
     Claim:
       type: object
@@ -330,6 +902,8 @@ components:
           pattern: '^claim_'
         content:
           type: object
+        claimType:
+          type: string
         hash:
           type: string
           description: SHA-256 hash of content
@@ -349,6 +923,160 @@ components:
           type: string
           format: date-time
 
+    LinkEvidenceRequest:
+      type: object
+      required:
+        - claimId
+        - evidenceId
+      properties:
+        claimId:
+          type: string
+        evidenceId:
+          type: string
+        relationshipType:
+          type: string
+          enum: [supports, contradicts, references]
+          default: supports
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        metadata:
+          type: object
+
+    ClaimEvidenceLink:
+      type: object
+      properties:
+        id:
+          type: string
+        claimId:
+          type: string
+        evidenceId:
+          type: string
+        relationshipType:
+          type: string
+        confidence:
+          type: number
+        linkedAt:
+          type: string
+          format: date-time
+
+    ClaimEvidenceResponse:
+      type: object
+      properties:
+        claimId:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              relationshipType:
+                type: string
+              confidence:
+                type: number
+              checksum:
+                type: string
+              sourceRef:
+                type: string
+              contentType:
+                type: string
+              linkedAt:
+                type: string
+                format: date-time
+
+    ClaimRelationshipRequest:
+      type: object
+      required:
+        - sourceClaimId
+        - targetClaimId
+      properties:
+        sourceClaimId:
+          type: string
+        targetClaimId:
+          type: string
+        relationshipType:
+          type: string
+          enum: [contradicts, supports, supersedes, refines]
+        strength:
+          type: number
+          minimum: 0
+          maximum: 1
+        rationale:
+          type: string
+        metadata:
+          type: object
+
+    ClaimRelationship:
+      type: object
+      properties:
+        id:
+          type: string
+        sourceClaimId:
+          type: string
+        targetClaimId:
+          type: string
+        relationshipType:
+          type: string
+        strength:
+          type: number
+        rationale:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ContradictionsResponse:
+      type: object
+      properties:
+        claimId:
+          type: string
+        contradictions:
+          type: array
+          items:
+            type: object
+            properties:
+              claimId:
+                type: string
+              content:
+                type: object
+              hash:
+                type: string
+              strength:
+                type: number
+              rationale:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+
+    SupportsResponse:
+      type: object
+      properties:
+        claimId:
+          type: string
+        supports:
+          type: array
+          items:
+            type: object
+            properties:
+              claimId:
+                type: string
+              content:
+                type: object
+              hash:
+                type: string
+              strength:
+                type: number
+              rationale:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+
+    # Evidence Schemas
     TransformStep:
       type: object
       required:
@@ -358,16 +1086,13 @@ components:
       properties:
         transformType:
           type: string
-          description: Type of transformation (e.g., ocr, redaction)
         timestamp:
           type: string
           format: date-time
         actorId:
           type: string
-          description: ID of actor that performed transform
         config:
           type: object
-          description: Transform-specific configuration
 
     CreateEvidenceRequest:
       type: object
@@ -376,24 +1101,19 @@ components:
       properties:
         caseId:
           type: string
-          description: Optional case ID to link evidence
         sourceRef:
           type: string
-          description: Reference to source file/data
         content:
           description: Content to compute checksum from (if checksum not provided)
         checksum:
           type: string
-          description: SHA-256 checksum (computed if not provided)
         checksumAlgorithm:
           type: string
           default: sha256
         contentType:
           type: string
-          description: MIME type
         fileSize:
           type: integer
-          description: File size in bytes
         transformChain:
           type: array
           items:
@@ -442,6 +1162,18 @@ components:
           format: date-time
         metadata:
           type: object
+        idempotent:
+          type: boolean
+
+    # Bundle/Manifest Schemas
+    MerkleProof:
+      type: object
+      properties:
+        dir:
+          type: string
+          enum: [L, R]
+        hash:
+          type: string
 
     DisclosureBundle:
       type: object
@@ -469,14 +1201,151 @@ components:
           type: array
           items:
             type: string
-          description: List of all evidence checksums
         merkleRoot:
           type: string
-          description: Merkle tree root hash for tamper-evidence
+        merkleProofs:
+          type: array
+          items:
+            type: object
+            properties:
+              evidenceId:
+                type: string
+              leafHash:
+                type: string
+              proof:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MerkleProof'
         generated_at:
           type: string
           format: date-time
 
+    ExportManifestRequest:
+      type: object
+      properties:
+        caseId:
+          type: string
+        evidenceIds:
+          type: array
+          items:
+            type: string
+        claimIds:
+          type: array
+          items:
+            type: string
+        manifestType:
+          type: string
+          enum: [disclosure, chain-of-custody, selective, audit]
+          default: disclosure
+        sign:
+          type: boolean
+          default: false
+        signerKeyId:
+          type: string
+
+    ManifestItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [evidence, claim, source, transform]
+        hash:
+          type: string
+        metadata:
+          type: object
+
+    ExportManifest:
+      type: object
+      properties:
+        manifestId:
+          type: string
+        manifestVersion:
+          type: string
+        manifestType:
+          type: string
+        caseId:
+          type: string
+        contentHash:
+          type: string
+        merkleRoot:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestItem'
+        proofs:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId:
+                type: string
+              itemType:
+                type: string
+              leafHash:
+                type: string
+              proof:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MerkleProof'
+        signature:
+          type: string
+        signerKeyId:
+          type: string
+        signatureAlgorithm:
+          type: string
+        generated_at:
+          type: string
+          format: date-time
+
+    VerifyManifestRequest:
+      type: object
+      required:
+        - manifestId
+      properties:
+        manifestId:
+          type: string
+        publicKey:
+          type: string
+          description: PEM-encoded public key for signature verification
+
+    ManifestVerificationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        manifestId:
+          type: string
+        merkleRoot:
+          type: string
+        merkleValid:
+          type: boolean
+        signatureValid:
+          type: boolean
+        itemsVerified:
+          type: integer
+        itemsValid:
+          type: integer
+        itemVerifications:
+          type: array
+          items:
+            type: object
+            properties:
+              itemId:
+                type: string
+              itemType:
+                type: string
+              leafHash:
+                type: string
+              valid:
+                type: boolean
+        verified_at:
+          type: string
+          format: date-time
+
+    # Provenance Schemas
     CreateProvenanceRequest:
       type: object
       required:
@@ -520,6 +1389,7 @@ components:
           type: string
           format: date-time
 
+    # Verification Schemas
     VerifyHashRequest:
       type: object
       required:
@@ -544,7 +1414,38 @@ components:
           type: string
           format: date-time
 
-    Manifest:
+    VerifyProofRequest:
+      type: object
+      required:
+        - leafHash
+        - proof
+        - merkleRoot
+      properties:
+        leafHash:
+          type: string
+        proof:
+          type: array
+          items:
+            $ref: '#/components/schemas/MerkleProof'
+        merkleRoot:
+          type: string
+
+    VerifyProofResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        leafHash:
+          type: string
+        merkleRoot:
+          type: string
+        proofLength:
+          type: integer
+        verified_at:
+          type: string
+          format: date-time
+
+    LegacyManifest:
       type: object
       properties:
         version:
@@ -564,13 +1465,13 @@ components:
                   type: string
         hash_chain:
           type: string
-          description: Hash of all claim hashes
         signature:
           type: string
         generated_at:
           type: string
           format: date-time
 
+    # Error Schemas
     Error:
       type: object
       properties:
