@@ -12,6 +12,8 @@ import { glossaryRouter } from './routes/glossaryRoutes.js';
 import { searchRouter } from './routes/searchRoutes.js';
 import { analyticsRouter } from './routes/analyticsRoutes.js';
 import { lineageRouter } from './routes/lineageRoutes.js';
+import { dataSourceRouter } from './routes/dataSourceRoutes.js';
+import { schemaRouter } from './routes/schemaRoutes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -31,6 +33,8 @@ app.get('/health', (req, res) => {
 
 // API Routes
 app.use('/api/v1/catalog', catalogRouter);
+app.use('/api/v1/catalog', dataSourceRouter); // Data sources, datasets, fields
+app.use('/api/v1/catalog/schemas', schemaRouter); // Schema registry
 app.use('/api/v1/glossary', glossaryRouter);
 app.use('/api/v1/search', searchRouter);
 app.use('/api/v1/analytics', analyticsRouter);
