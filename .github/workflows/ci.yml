@@ -211,8 +211,10 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
       - name: Bring up stack (make up)
         run: make up
-      - name: Golden path smoke tests
-        run: make smoke
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+      - name: Run Playwright E2E tests
+        run: pnpm test:e2e
       - name: Compose logs on failure
         if: failure()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
