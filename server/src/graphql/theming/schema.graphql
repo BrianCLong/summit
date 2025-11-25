@@ -1,0 +1,326 @@
+# UI Theming System GraphQL Schema
+
+"""
+Theme color palette color definition
+"""
+type PaletteColor {
+  main: String!
+  light: String
+  dark: String
+  contrastText: String
+}
+
+"""
+Theme color palette
+"""
+type Palette {
+  mode: ThemeMode!
+  primary: PaletteColor
+  secondary: PaletteColor
+  error: PaletteColor
+  warning: PaletteColor
+  info: PaletteColor
+  success: PaletteColor
+  background: PaletteBackground
+  text: PaletteText
+}
+
+"""
+Palette background colors
+"""
+type PaletteBackground {
+  default: String!
+  paper: String!
+}
+
+"""
+Palette text colors
+"""
+type PaletteText {
+  primary: String!
+  secondary: String!
+  disabled: String
+}
+
+"""
+Typography variant definition
+"""
+type TypographyVariant {
+  fontFamily: String
+  fontSize: String
+  fontWeight: String
+  lineHeight: String
+  letterSpacing: String
+}
+
+"""
+Typography configuration
+"""
+type Typography {
+  fontFamily: String
+  fontSize: Int
+  h1: TypographyVariant
+  h2: TypographyVariant
+  h3: TypographyVariant
+  h4: TypographyVariant
+  h5: TypographyVariant
+  h6: TypographyVariant
+  subtitle1: TypographyVariant
+  subtitle2: TypographyVariant
+  body1: TypographyVariant
+  body2: TypographyVariant
+  button: TypographyVariant
+  caption: TypographyVariant
+  overline: TypographyVariant
+}
+
+"""
+Shape configuration
+"""
+type Shape {
+  borderRadius: Int!
+}
+
+"""
+Complete theme configuration (Material-UI compatible)
+"""
+type ThemeConfig {
+  palette: Palette
+  typography: Typography
+  shape: Shape
+  spacing: Int
+}
+
+"""
+Theme mode enumeration
+"""
+enum ThemeMode {
+  LIGHT
+  DARK
+}
+
+"""
+Dark mode preference
+"""
+enum DarkModePreference {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+"""
+UI Theme definition
+"""
+type UITheme {
+  id: ID!
+  name: String!
+  displayName: String!
+  description: String
+  role: String
+  tenantId: String
+  themeConfig: ThemeConfig!
+  version: Int!
+  isActive: Boolean!
+  isDefault: Boolean!
+  createdBy: String
+  createdAt: DateTime!
+  updatedBy: String
+  updatedAt: DateTime!
+}
+
+"""
+User theme preference
+"""
+type UserThemePreference {
+  id: ID!
+  userId: ID!
+  tenantId: ID!
+  theme: UITheme
+  customOverrides: ThemeConfig
+  autoSwitchByRole: Boolean!
+  darkModePreference: DarkModePreference!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Effective theme result
+"""
+type EffectiveTheme {
+  theme: ThemeConfig!
+  source: ThemeSource!
+  themeId: ID
+  themeName: String
+}
+
+"""
+Theme source enumeration
+"""
+enum ThemeSource {
+  USER_PREFERENCE
+  ROLE_BASED
+  DEFAULT
+}
+
+"""
+Theme validation result
+"""
+type ThemeValidationResult {
+  valid: Boolean!
+  errors: [String!]!
+  warnings: [String!]!
+}
+
+"""
+Theme component (reusable theme fragment)
+"""
+type ThemeComponent {
+  id: ID!
+  componentName: String!
+  displayName: String!
+  description: String
+  category: String
+  componentConfig: ThemeConfig!
+  isActive: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Theme preset (theme variation)
+"""
+type ThemePreset {
+  id: ID!
+  presetName: String!
+  displayName: String!
+  description: String
+  baseTheme: UITheme
+  presetOverrides: ThemeConfig!
+  tags: [String!]
+  isPublic: Boolean!
+  isFeatured: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Create theme input
+"""
+input CreateThemeInput {
+  name: String!
+  displayName: String!
+  description: String
+  role: String
+  tenantId: String
+  themeConfig: JSON!
+  isActive: Boolean
+  isDefault: Boolean
+}
+
+"""
+Update theme input
+"""
+input UpdateThemeInput {
+  displayName: String
+  description: String
+  themeConfig: JSON
+  isActive: Boolean
+  isDefault: Boolean
+}
+
+"""
+Update user theme preference input
+"""
+input UpdateUserThemePreferenceInput {
+  themeId: ID
+  customOverrides: JSON
+  autoSwitchByRole: Boolean
+  darkModePreference: DarkModePreference
+}
+
+"""
+Theme list filter
+"""
+input ThemeFilterInput {
+  role: String
+  tenantId: String
+  isActive: Boolean
+}
+
+extend type Query {
+  """
+  Get theme by ID
+  """
+  theme(id: ID!): UITheme @auth
+
+  """
+  Get theme by name
+  """
+  themeByName(name: String!, tenantId: String): UITheme @auth
+
+  """
+  List all themes
+  """
+  themes(filter: ThemeFilterInput): [UITheme!]! @auth
+
+  """
+  Get effective theme for current user
+  """
+  myEffectiveTheme(systemDarkMode: Boolean): EffectiveTheme! @auth
+
+  """
+  Get user theme preference
+  """
+  myThemePreference: UserThemePreference @auth
+
+  """
+  Validate theme configuration
+  """
+  validateThemeConfig(config: JSON!): ThemeValidationResult! @auth
+
+  """
+  List theme components
+  """
+  themeComponents(category: String): [ThemeComponent!]! @auth
+
+  """
+  List theme presets
+  """
+  themePresets(featured: Boolean): [ThemePreset!]! @auth
+}
+
+extend type Mutation {
+  """
+  Create a new theme (admin only)
+  """
+  createTheme(input: CreateThemeInput!): UITheme! @auth @requireRole(role: ADMIN)
+
+  """
+  Update theme (admin only)
+  """
+  updateTheme(id: ID!, input: UpdateThemeInput!): UITheme! @auth @requireRole(role: ADMIN)
+
+  """
+  Delete theme (admin only)
+  """
+  deleteTheme(id: ID!): Boolean! @auth @requireRole(role: ADMIN)
+
+  """
+  Update user theme preference
+  """
+  updateMyThemePreference(
+    input: UpdateUserThemePreferenceInput!
+  ): UserThemePreference! @auth
+
+  """
+  Reset user theme preference to defaults
+  """
+  resetMyThemePreference: UserThemePreference! @auth
+}
+
+extend type Subscription {
+  """
+  Subscribe to theme updates for current user
+  """
+  themeUpdated: EffectiveTheme! @auth
+}
