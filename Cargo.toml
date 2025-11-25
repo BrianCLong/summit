@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "ibrs",
-    "bindings/ibrs-node"
+    "bindings/ibrs-node",
+    "rust/psc-runner"
 ]
 resolver = "2"
 
