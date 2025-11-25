@@ -33,6 +33,14 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+import { auroraRouter } from './routes/aurora.js';
+import { oracleRouter } from './routes/oracle.js';
+import { phantomLimbRouter } from './routes/phantom_limb.js';
+import { echelon2Router } from './routes/echelon2.js';
+import { mnemosyneRouter } from './routes/mnemosyne.js';
+import { necromancerRouter } from './routes/necromancer.js';
+import { zeroDayRouter } from './routes/zero_day.js';
+import { abyssRouter } from './routes/abyss.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -107,6 +115,14 @@ export const createApp = async () => {
   app.use('/api/webhooks', webhookRouter);
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
+  app.use('/api/aurora', auroraRouter);
+  app.use('/api/oracle', oracleRouter);
+  app.use('/api/phantom-limb', phantomLimbRouter);
+  app.use('/api/echelon2', echelon2Router);
+  app.use('/api/mnemosyne', mnemosyneRouter);
+  app.use('/api/necromancer', necromancerRouter);
+  app.use('/api/zero-day', zeroDayRouter);
+  app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
