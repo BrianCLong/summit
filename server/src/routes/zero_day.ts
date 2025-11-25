@@ -95,7 +95,8 @@ router.post('/delegate-authority', async (req, res, next) => {
     const log = await zeroDayService.delegateAutonomousAuthority(threatId, humanOperatorId);
     res.json(log);
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    // 409 Conflict is more appropriate for a state-related rejection
+    res.status(409).json({ message: error.message });
   }
 });
 
