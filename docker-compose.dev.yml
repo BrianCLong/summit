@@ -373,6 +373,35 @@ services:
       - 'prometheus.job=summit_ai_sandbox'
       - 'prometheus.port=4020'
 
+  agentic-mesh-evaluation:
+    build:
+      context: ./services/agentic-mesh-evaluation
+      dockerfile: Dockerfile
+    container_name: summit-agentic-mesh-evaluation
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 4200
+      HOST: 0.0.0.0
+      REDIS_URL: redis://redis:6379
+      LOG_LEVEL: info
+    ports:
+      - '4200:4200'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'node', '-e', 'require("http").get("http://localhost:4200/health", (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})']
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=agentic_mesh_evaluation'
+      - 'prometheus.port=4200'
+      - 'prometheus.path=/metrics'
+
 volumes:
   postgres_data:
   redis_data:

@@ -1,0 +1,129 @@
+{
+  "dashboard": {
+    "title": "Agentic Mesh Evaluation - Overview",
+    "tags": ["agentic-mesh", "evaluation", "ai-agents"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Mesh Health Overview",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "mesh_nodes_total{status=\"healthy\"}",
+            "legendFormat": "Healthy Nodes"
+          },
+          {
+            "expr": "mesh_nodes_total{status=\"degraded\"}",
+            "legendFormat": "Degraded Nodes"
+          },
+          {
+            "expr": "mesh_nodes_total{status=\"failed\"}",
+            "legendFormat": "Failed Nodes"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 0, "w": 8, "h": 4}
+      },
+      {
+        "id": 2,
+        "title": "Task Success Rate",
+        "type": "gauge",
+        "targets": [
+          {
+            "expr": "rate(mesh_tasks_total{status=\"success\"}[5m]) / rate(mesh_tasks_total[5m]) * 100",
+            "legendFormat": "Success Rate %"
+          }
+        ],
+        "gridPos": {"x": 8, "y": 0, "w": 8, "h": 4},
+        "fieldConfig": {
+          "defaults": {
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 80, "color": "yellow"},
+                {"value": 95, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Average Latency",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(mesh_task_duration_seconds_bucket[5m]))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(mesh_task_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(mesh_task_duration_seconds_bucket[5m]))",
+            "legendFormat": "p99"
+          }
+        ],
+        "gridPos": {"x": 16, "y": 0, "w": 8, "h": 4}
+      },
+      {
+        "id": 4,
+        "title": "Throughput (Tasks/s)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "mesh_throughput_per_second",
+            "legendFormat": "{{mesh_id}}"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 6}
+      },
+      {
+        "id": 5,
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "mesh_error_rate",
+            "legendFormat": "{{mesh_id}}"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 6}
+      },
+      {
+        "id": 6,
+        "title": "Resource Utilization",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "mesh_resource_utilization{resource_type=\"cpu\"}",
+            "legendFormat": "CPU - {{node_id}}"
+          },
+          {
+            "expr": "mesh_resource_utilization{resource_type=\"memory\"}",
+            "legendFormat": "Memory - {{node_id}}"
+          }
+        ],
+        "gridPos": {"x": 0, "y": 10, "w": 12, "h": 6}
+      },
+      {
+        "id": 7,
+        "title": "Message Latency",
+        "type": "heatmap",
+        "targets": [
+          {
+            "expr": "rate(mesh_message_latency_ms_bucket[5m])",
+            "legendFormat": "{{le}}"
+          }
+        ],
+        "gridPos": {"x": 12, "y": 10, "w": 12, "h": 6}
+      }
+    ]
+  }
+}
