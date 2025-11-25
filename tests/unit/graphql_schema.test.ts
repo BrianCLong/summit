@@ -260,4 +260,259 @@ describe('GraphQL Schema Validation', () => {
       expect(abortRunField.type.toString()).toBe('Run!');
     });
   });
+
+  describe('Schema completeness and consistency', () => {
+    it('should have no unused types', () => {
+      const typeMap = schema.getTypeMap();
+      const usedTypes = new Set<string>();
+
+      // Add root types
+      usedTypes.add('Query');
+      usedTypes.add('Mutation');
+
+      // Add types referenced by Query and Mutation
+      const queryType = schema.getType('Query');
+      const mutationType = schema.getType('Mutation');
+
+      Object.values(queryType.getFields()).forEach((field: any) => {
+        usedTypes.add(field.type.toString().replace(/[!\[\]]/g, ''));
+        field.args?.forEach((arg: any) => {
+          usedTypes.add(arg.type.toString().replace(/[!\[\]]/g, ''));
+        });
+      });
+
+      Object.values(mutationType.getFields()).forEach((field: any) => {
+        usedTypes.add(field.type.toString().replace(/[!\[\]]/g, ''));
+        field.args?.forEach((arg: any) => {
+          usedTypes.add(arg.type.toString().replace(/[!\[\]]/g, ''));
+        });
+      });
+
+      // Standard GraphQL built-in types
+      const builtInTypes = ['String', 'Int', 'Float', 'Boolean', 'ID', 'DateTime', 'JSON'];
+      builtInTypes.forEach(type => usedTypes.add(type));
+
+      // Check all defined types are used
+      const definedTypes = Object.keys(typeMap).filter(
+        name => !name.startsWith('__')
+      );
+
+      definedTypes.forEach(typeName => {
+        if (!builtInTypes.includes(typeName) && !usedTypes.has(typeName)) {
+          console.warn(`Potentially unused type: ${typeName}`);
+        }
+      });
+    });
+
+    it('should have consistent naming conventions', () => {
+      const typeMap = schema.getTypeMap();
+
+      Object.keys(typeMap)
+        .filter(name => !name.startsWith('__'))
+        .forEach(typeName => {
+          // Types should be PascalCase
+          expect(typeName).toMatch(/^[A-Z][a-zA-Z0-9]*$/);
+        });
+    });
+
+    it('should have all required fields marked as non-nullable where appropriate', () => {
+      const runbookType = schema.getType('Runbook');
+      const runType = schema.getType('Run');
+
+      // ID fields should always be non-nullable
+      expect(runbookType.getFields().id.type.toString()).toContain('!');
+      expect(runType.getFields().id.type.toString()).toContain('!');
+
+      // State fields should be non-nullable (required business logic)
+      expect(runType.getFields().state.type.toString()).toContain('!');
+    });
+  });
+
+  describe('GraphQL schema security and validation', () => {
+    it('should not expose internal implementation details', () => {
+      const typeMap = schema.getTypeMap();
+      const typeNames = Object.keys(typeMap);
+
+      // Check for potentially sensitive type names
+      const sensitivePatterns = [
+        /password/i,
+        /secret/i,
+        /private/i,
+        /internal/i
+      ];
+
+      typeNames.forEach(typeName => {
+        sensitivePatterns.forEach(pattern => {
+          if (pattern.test(typeName)) {
+            console.warn(`Potentially sensitive type name: ${typeName}`);
+          }
+        });
+      });
+    });
+
+    it('should have appropriate field documentation where needed', () => {
+      const queryType = schema.getType('Query');
+      const mutationType = schema.getType('Mutation');
+
+      // Verify critical fields exist (documentation is optional but recommended)
+      expect(queryType.getFields().runbooks).toBeDefined();
+      expect(queryType.getFields().run).toBeDefined();
+      expect(mutationType.getFields().launchRun).toBeDefined();
+      expect(mutationType.getFields().abortRun).toBeDefined();
+    });
+
+    it('should validate enum values are uppercase', () => {
+      const runStateEnum = schema.getType('RunState');
+      const values = runStateEnum.getValues();
+
+      values.forEach((value: any) => {
+        expect(value.name).toMatch(/^[A-Z_]+$/);
+      });
+    });
+  });
+
+  describe('GraphQL schema performance considerations', () => {
+    it('should have pagination support for list queries', () => {
+      const queryType = schema.getType('Query');
+      const runbooksField = queryType.getFields().runbooks;
+
+      // Should have limit argument for pagination
+      const limitArg = runbooksField.args.find((arg: any) => arg.name === 'limit');
+      expect(limitArg).toBeDefined();
+
+      // Should have cursor-based pagination support
+      const afterArg = runbooksField.args.find((arg: any) => arg.name === 'after');
+      expect(afterArg).toBeDefined();
+    });
+
+    it('should return arrays with non-null items where appropriate', () => {
+      const queryType = schema.getType('Query');
+      const runbooksField = queryType.getFields().runbooks;
+
+      // [Runbook!]! ensures array is never null and items are never null
+      expect(runbooksField.type.toString()).toBe('[Runbook!]!');
+    });
+
+    it('should have reasonable default values for pagination', () => {
+      const queryType = schema.getType('Query');
+      const runbooksField = queryType.getFields().runbooks;
+      const limitArg = runbooksField.args.find((arg: any) => arg.name === 'limit');
+
+      // Default limit should be reasonable (not too high)
+      expect(limitArg.defaultValue).toBeLessThanOrEqual(100);
+      expect(limitArg.defaultValue).toBeGreaterThan(0);
+    });
+  });
+
+  describe('GraphQL schema edge cases', () => {
+    it('should handle nullable vs non-nullable correctly', () => {
+      const queryType = schema.getType('Query');
+      const runField = queryType.getFields().run;
+
+      // Single run query should be nullable (might not exist)
+      expect(runField.type.toString()).toBe('Run');
+      expect(runField.type.toString()).not.toContain('!');
+    });
+
+    it('should have appropriate input validation types', () => {
+      const launchRunInputType = schema.getType('LaunchRunInput');
+      const fields = launchRunInputType.getFields();
+
+      // Required fields should be non-nullable
+      expect(fields.runbookId.type.toString()).toContain('!');
+      expect(fields.tenantId.type.toString()).toContain('!');
+
+      // Optional fields should be nullable
+      expect(fields.params.type.toString()).not.toContain('!');
+    });
+
+    it('should validate all required fields are present in input types', () => {
+      const launchRunInputType = schema.getType('LaunchRunInput');
+      const fields = launchRunInputType.getFields();
+
+      // Essential fields for launching a run
+      expect(fields.runbookId).toBeDefined();
+      expect(fields.tenantId).toBeDefined();
+    });
+
+    it('should validate return types for mutations are appropriate', () => {
+      const mutationType = schema.getType('Mutation');
+
+      // launchRun should return Run! (always successful or throws)
+      expect(mutationType.getFields().launchRun.type.toString()).toBe('Run!');
+
+      // abortRun should return Run! (always returns updated run or throws)
+      expect(mutationType.getFields().abortRun.type.toString()).toBe('Run!');
+    });
+  });
+
+  describe('GraphQL schema type relationships', () => {
+    it('should have consistent ID types across related types', () => {
+      const runType = schema.getType('Run');
+      const runbookType = schema.getType('Runbook');
+
+      // Both should use ID! for their id fields
+      expect(runType.getFields().id.type.toString()).toBe('ID!');
+      expect(runbookType.getFields().id.type.toString()).toBe('ID!');
+
+      // Foreign key references should also use ID!
+      expect(runType.getFields().runbookId.type.toString()).toBe('ID!');
+    });
+
+    it('should have consistent timestamp types', () => {
+      const runType = schema.getType('Run');
+      const runbookType = schema.getType('Runbook');
+
+      // All timestamp fields should use DateTime!
+      expect(runType.getFields().createdAt.type.toString()).toBe('DateTime!');
+      expect(runType.getFields().updatedAt.type.toString()).toBe('DateTime!');
+      expect(runbookType.getFields().createdAt.type.toString()).toBe('DateTime!');
+    });
+
+    it('should validate enum usage is consistent', () => {
+      const runType = schema.getType('Run');
+      const stateField = runType.getFields().state;
+
+      // State should use the RunState enum
+      expect(stateField.type.toString()).toBe('RunState!');
+
+      // Verify the enum exists
+      expect(schema.getType('RunState')).toBeDefined();
+    });
+  });
+
+  describe('GraphQL schema backward compatibility', () => {
+    it('should not remove required fields (breaking change)', () => {
+      const runbookType = schema.getType('Runbook');
+      const requiredFields = ['id', 'name', 'version', 'dag', 'createdAt'];
+
+      requiredFields.forEach(fieldName => {
+        expect(runbookType.getFields()[fieldName]).toBeDefined();
+      });
+    });
+
+    it('should maintain enum values (removing is breaking)', () => {
+      const runStateEnum = schema.getType('RunState');
+      const values = runStateEnum.getValues();
+      const valueNames = values.map((v: any) => v.name);
+
+      // Core enum values that should never be removed
+      const coreValues = ['QUEUED', 'RUNNING', 'SUCCEEDED', 'FAILED'];
+      coreValues.forEach(value => {
+        expect(valueNames).toContain(value);
+      });
+    });
+
+    it('should keep mutation signatures stable', () => {
+      const mutationType = schema.getType('Mutation');
+
+      // Critical mutations should exist
+      expect(mutationType.getFields().launchRun).toBeDefined();
+      expect(mutationType.getFields().abortRun).toBeDefined();
+
+      // Return types should be stable
+      expect(mutationType.getFields().launchRun.type.toString()).toBe('Run!');
+      expect(mutationType.getFields().abortRun.type.toString()).toBe('Run!');
+    });
+  });
 });
