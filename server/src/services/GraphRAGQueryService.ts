@@ -104,6 +104,8 @@ export class GraphRAGQueryService {
   async query(request: GraphRAGQueryRequest): Promise<GraphRAGQueryResponse> {
     const startTime = Date.now();
 
+    metrics.featureUsageTotal.inc({ tenant_id: request.tenantId, feature_name: 'graphrag_query' });
+
     logger.info({
       investigationId: request.investigationId,
       question: request.question,

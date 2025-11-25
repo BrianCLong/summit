@@ -122,6 +122,66 @@ export const glassBoxCacheHits = new Counter({
   registers: [registry],
 });
 
+// Narrative Simulation Metrics
+export const narrativeSimulationTicksTotal = new Counter({
+  name: 'intelgraph_narrative_simulation_ticks_total',
+  help: 'Total number of simulation ticks',
+  labelNames: ['simulation_id'] as const,
+  registers: [registry],
+});
+
+export const narrativeSimulationEventsTotal = new Counter({
+  name: 'intelgraph_narrative_simulation_events_total',
+  help: 'Total number of events processed by the simulation',
+  labelNames: ['simulation_id', 'event_type'] as const,
+  registers: [registry],
+});
+
+export const narrativeSimulationDurationSeconds = new Histogram({
+  name: 'intelgraph_narrative_simulation_duration_seconds',
+  help: 'Duration of each simulation tick',
+  labelNames: ['simulation_id'] as const,
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
+  registers: [registry],
+});
+
+export const narrativeSimulationActiveSimulations = new Gauge({
+    name: 'intelgraph_narrative_simulation_active_simulations',
+    help: 'Number of active simulations',
+    registers: [registry],
+});
+
+
+// User Behavior Metrics
+export const userLoginsTotal = new Counter({
+    name: 'intelgraph_user_logins_total',
+    help: 'Total number of user logins',
+    labelNames: ['tenant_id', 'result'] as const,
+    registers: [registry],
+});
+
+export const userLogoutsTotal = new Counter({
+    name: 'intelgraph_user_logouts_total',
+    help: 'Total number of user logouts',
+    labelNames: ['tenant_id'] as const,
+    registers: [registry],
+});
+
+export const userSessionDurationSeconds = new Histogram({
+    name: 'intelgraph_user_session_duration_seconds',
+    help: 'Duration of user sessions',
+    labelNames: ['tenant_id'] as const,
+    buckets: [60, 300, 600, 1800, 3600, 7200, 14400, 28800], // 1m to 8h
+    registers: [registry],
+});
+
+export const featureUsageTotal = new Counter({
+    name: 'intelgraph_feature_usage_total',
+    help: 'Total number of times a feature is used',
+    labelNames: ['tenant_id', 'feature_name'] as const,
+    registers: [registry],
+});
+
 export const metrics = {
   jobsProcessed,
   outboxSyncLatency,
@@ -137,4 +197,12 @@ export const metrics = {
   glassBoxRunsTotal,
   glassBoxRunDurationMs,
   glassBoxCacheHits,
+  narrativeSimulationTicksTotal,
+  narrativeSimulationEventsTotal,
+  narrativeSimulationDurationSeconds,
+  narrativeSimulationActiveSimulations,
+  userLoginsTotal,
+  userLogoutsTotal,
+  userSessionDurationSeconds,
+  featureUsageTotal,
 };

@@ -1,0 +1,141 @@
+{
+  "dashboard": {
+    "title": "IntelGraph - Enhanced Application Insights",
+    "tags": ["intelgraph", "application", "insights"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "AI Copilot - Query Volume",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_graphrag_query_total[5m])",
+            "legendFormat": "Queries",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "AI Copilot - Query Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(intelgraph_graphrag_query_duration_ms_bucket[5m]))",
+            "legendFormat": "Duration (ms)",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Narrative Simulation - Tick Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_narrative_simulation_ticks_total[5m])",
+            "legendFormat": "Ticks per second",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Narrative Simulation - Event Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_narrative_simulation_events_total[5m])",
+            "legendFormat": "{{event_type}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      },
+      {
+        "id": 5,
+        "title": "User Logins",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_user_logins_total[5m])",
+            "legendFormat": "{{result}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+      },
+      {
+        "id": 6,
+        "title": "Feature Usage",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_feature_usage_total[5m])",
+            "legendFormat": "{{feature_name}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 }
+      },
+      {
+        "id": 7,
+        "title": "Active Simulations",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "intelgraph_narrative_simulation_active_simulations",
+            "legendFormat": "Active Simulations",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 24 }
+      },
+      {
+        "id": 8,
+        "title": "Simulation Tick Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(intelgraph_narrative_simulation_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Duration (s)",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 6, "y": 24 }
+      },
+      {
+        "id": 9,
+        "title": "User Logouts",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(intelgraph_user_logouts_total[5m])",
+            "legendFormat": "Logouts",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 12, "y": 24 }
+      },
+      {
+        "id": 10,
+        "title": "User Session Duration (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(intelgraph_user_session_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95 Session Duration (s)",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 6, "x": 18, "y": 24 }
+      }
+    ],
+    "refresh": "10s",
+    "time": { "from": "now-1h", "to": "now" }
+  }
+}
