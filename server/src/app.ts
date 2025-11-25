@@ -33,6 +33,7 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+import resourcesRouter from './routes/resources.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -107,6 +108,7 @@ export const createApp = async () => {
   app.use('/api/webhooks', webhookRouter);
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
+  app.use('/api', resourcesRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
