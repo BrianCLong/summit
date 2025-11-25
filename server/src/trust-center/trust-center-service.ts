@@ -61,7 +61,7 @@ interface TrustCenterReport {
 interface AuditExportActor {
   id?: string;
   email?: string;
-  role?: Role;
+  role?: Role | string;
   permissions?: Permission[];
   tenantId?: string;
 }
@@ -76,9 +76,19 @@ export class TrustCenterService {
     this.timestampService = process.env.TIMESTAMP_SERVICE_URL; // Optional 3rd-party timestamping
   }
 
+  private normalizeRole(role?: string | Role): Role | undefined {
+    if (!role) return undefined;
+    const lowerRole = role.toLowerCase();
+    return Object.values(Role).includes(lowerRole as Role)
+      ? (lowerRole as Role)
+      : undefined;
+  }
+
   private allowSensitiveData(actor?: AuditExportActor): boolean {
     if (!actor) return false;
-    if (actor.role === Role.ADMIN || actor.role === Role.SUPER_ADMIN) return true;
+    const normalizedRole = this.normalizeRole(actor.role);
+    if (normalizedRole === Role.ADMIN || normalizedRole === Role.SUPER_ADMIN)
+      return true;
     return (
       actor.permissions?.includes(Permission.SYSTEM_ADMIN) ||
       actor.permissions?.includes(Permission.AUDIT_EXPORT) ||

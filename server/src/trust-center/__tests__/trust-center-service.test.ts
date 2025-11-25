@@ -99,5 +99,40 @@ describe('TrustCenterService export hardening', () => {
     expect(sections.evidenceArtifacts[0].metadata).toEqual({ region: 'us' });
     expect(pool.query).toHaveBeenCalledTimes(4);
   });
+
+  it('treats upper-case admin roles as privileged actors', async () => {
+    const pool = buildPool([
+      { rows: [{ decision: 'allow', policy: 'p3', user_id: 'admin', metadata: { scope: 'all' } }] },
+      {
+        rows: [
+          {
+            created_at: '2024-01-03T00:00:00Z',
+            run_id: 'run-3',
+            selected_model: 'claude',
+            candidates: '[]',
+            ip: '10.0.0.9',
+            metadata: { route: 'C' },
+          },
+        ],
+      },
+      { rows: [{ created_at: '2024-01-03T00:00:00Z', type: 'attestation', hash: 'ghi', size_bytes: 15, source: 'pipeline', metadata: { region: 'eu' } }] },
+      { rows: [{ timestamp: '2024-01-03T00:00:00Z', model: 'claude', latency_ms: 8, tokens_in: 3, tokens_out: 4, cost_usd: 0.02 }] },
+    ]);
+
+    mockGetPostgresPool.mockReturnValue(pool as any);
+
+    const service = new TrustCenterService();
+    const sections = await (service as any).gatherAuditSections(
+      'tenant-3',
+      '2024-01-02',
+      '2024-01-04',
+      true,
+      { role: 'ADMIN', tenantId: 'tenant-3' },
+    );
+
+    expect(sections.policyDecisions[0].metadata).toEqual({ scope: 'all' });
+    expect(sections.routerDecisions[0].metadata).toEqual({ route: 'C' });
+    expect(pool.query).toHaveBeenCalledTimes(4);
+  });
 });
 
