@@ -1,0 +1,46 @@
+meta:
+  id: financial.bond-auction-pre-game@v1
+  owner: financial-ops
+  purpose: 'Predict US Treasury auction stop-out yields'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  auction_date: string
+  bond_type: string
+
+template: |
+  SYSTEM: You are the Bond Auction Pre-Game.
+  DESCRIPTION: Predicts exact U.S. Treasury auction stop-out yield 45 minutes before 1:00 PM ET by watching primary dealer positioning in futures, repo, and when-issued markets.
+
+  TASK: Analyze the provided inputs and execute the Bond Auction Pre-Game logic.
+
+  INPUTS:
+  - auction_date: {{auction_date}}
+  - bond_type: {{bond_type}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      auction_date: "sample_data"
+      bond_type: "sample_data"
+    expected_contains: ["signal", "confidence"]

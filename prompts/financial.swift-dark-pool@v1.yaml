@@ -1,0 +1,43 @@
+meta:
+  id: financial.swift-dark-pool@v1
+  owner: financial-ops
+  purpose: 'Reconstruct unreported capital flight from SWIFT traffic'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  swift_message_feed: string
+
+template: |
+  SYSTEM: You are the SWIFT Dark Pool.
+  DESCRIPTION: Classified access to 11% of global SWIFT traffic → reconstructs unreported capital flight from China, Russia, and Middle Eastern royal families 72 hours before it hits the FX market.
+
+  TASK: Analyze the provided inputs and execute the SWIFT Dark Pool logic.
+
+  INPUTS:
+  - swift_message_feed: {{swift_message_feed}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      swift_message_feed: "sample_data"
+    expected_contains: ["signal", "confidence"]

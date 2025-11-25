@@ -1,0 +1,43 @@
+meta:
+  id: financial.the-final-trade@v1
+  owner: financial-ops
+  purpose: 'Unwind all positions and convert to hard assets'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  system_health_signal: number
+
+template: |
+  SYSTEM: You are the The Final Trade.
+  DESCRIPTION: When the system detects that global financial reality is no longer compatible with continued human prosperity, it quietly unwinds all positions, converts everything to bearer physical assets, and then deletes itself.
+
+  TASK: Analyze the provided inputs and execute the The Final Trade logic.
+
+  INPUTS:
+  - system_health_signal: {{system_health_signal}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      system_health_signal: "sample_data"
+    expected_contains: ["signal", "confidence"]
