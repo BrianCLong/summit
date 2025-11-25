@@ -1,3 +1,4 @@
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
 import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
@@ -297,20 +298,15 @@ function instrumentSession(session: any) {
     params?: any,
     labels: { operation?: string; label?: string } = {},
   ) => {
-    const { operation = 'unknown', label = 'general' } = labels;
-    const start = Date.now();
-    neo4jQueryTotal.inc({ operation, label });
+    telemetry.subsystems.database.queries.add(1);
+    const startTime = Date.now();
     try {
-      const result = await originalRun(cypher, params);
-      const latency = Date.now() - start;
-      neo4jQueryLatencyMs.observe({ operation, label }, latency);
-      if (latency > 300) {
-        logger.warn(`Slow Neo4j query (${latency}ms): ${cypher}`);
-      }
-      return result;
+      return await originalRun(cypher, params);
     } catch (error) {
-      neo4jQueryErrorsTotal.inc({ operation, label });
+      telemetry.subsystems.database.errors.add(1);
       throw error;
+    } finally {
+      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
     }
   };
   return session;
