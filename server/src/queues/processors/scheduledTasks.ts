@@ -10,6 +10,10 @@ import { Job } from 'bullmq';
 import { queueRegistry, QueueName } from '../config.js';
 import logger from '../../utils/logger.js';
 
+const DAILY_CLEANUP_JOB = 'daily-cleanup';
+const HOURLY_ANALYTICS_JOB = 'hourly-analytics';
+const WEEKLY_REPORT_JOB = 'weekly-report';
+
 /**
  * Daily cleanup job
  * Runs every day at 2 AM
@@ -118,13 +122,26 @@ export function initializeScheduledTasks(): void {
   const analyticsQueue = queueRegistry.getQueue(QueueName.ANALYTICS);
 
   // Register workers
-  queueRegistry.registerWorker('daily-cleanup', dailyCleanupProcessor);
-  queueRegistry.registerWorker('hourly-analytics', hourlyAnalyticsProcessor);
-  queueRegistry.registerWorker('weekly-report', weeklyReportProcessor);
+  queueRegistry.registerWorker(QueueName.ANALYTICS, async (job: Job) => {
+    switch (job.name) {
+      case DAILY_CLEANUP_JOB:
+        return dailyCleanupProcessor(job);
+      case HOURLY_ANALYTICS_JOB:
+        return hourlyAnalyticsProcessor(job);
+      case WEEKLY_REPORT_JOB:
+        return weeklyReportProcessor(job);
+      default:
+        logger.warn('Received job with unknown name on analytics queue', {
+          jobId: job.id,
+          jobName: job.name,
+        });
+        return Promise.resolve();
+    }
+  });
 
   // Add repeatable jobs
   analyticsQueue.add(
-    'daily-cleanup',
+    DAILY_CLEANUP_JOB,
     {},
     {
       repeat: {
@@ -134,7 +151,7 @@ export function initializeScheduledTasks(): void {
   );
 
   analyticsQueue.add(
-    'hourly-analytics',
+    HOURLY_ANALYTICS_JOB,
     {},
     {
       repeat: {
@@ -144,7 +161,7 @@ export function initializeScheduledTasks(): void {
   );
 
   analyticsQueue.add(
-    'weekly-report',
+    WEEKLY_REPORT_JOB,
     {},
     {
       repeat: {
