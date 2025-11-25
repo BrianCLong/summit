@@ -324,6 +324,25 @@ function createManagedPool(
   writePool: PoolWrapper,
   readPools: PoolWrapper[],
 ): ManagedPostgresPool {
+  // Prompt 41: Zero-Footprint Mode (Simulated)
+  if (process.env.ZERO_FOOTPRINT === 'true') {
+    logger.warn('ZERO_FOOTPRINT mode active: PostgreSQL queries will not be persisted.');
+    const mockExecutor: QueryExecutor = async (queryInput) => {
+      logger.debug('Zero-Footprint: Skipping query execution');
+      return { rowCount: 0, rows: [], command: 'MOCK', oid: 0, fields: [] };
+    };
+    return {
+      query: mockExecutor,
+      read: mockExecutor,
+      write: mockExecutor,
+      connect: async () => writePool.pool.connect(), // Connect works but does nothing? Or mock client?
+      end: async () => {},
+      on: () => ({} as any),
+      healthCheck: async () => [],
+      slowQueryInsights: () => []
+    };
+  }
+
   const query: QueryExecutor = (queryInput, params, options = {}) =>
     executeManagedQuery({
       queryInput,

@@ -240,6 +240,10 @@ function createDriverFacade(): Neo4jDriver {
   const facade: Partial<Neo4jDriver> = {};
 
   facade.session = ((options?: Parameters<Neo4jDriver['session']>[0]) => {
+    // Prompt 41: Zero-Footprint Mode
+    if (process.env.ZERO_FOOTPRINT === 'true') {
+      return instrumentSession(createMockSession());
+    }
     const session = realDriver
       ? realDriver.session(options)
       : createMockSession();
