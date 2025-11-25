@@ -1,0 +1,213 @@
+# P22: SLO Definitions
+# Service Level Objectives for Summit platform
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: summit-platform-slos
+  namespace: summit-observability
+  labels:
+    app.kubernetes.io/part-of: summit
+    app.kubernetes.io/component: slo
+spec:
+  service: "summit-platform"
+  labels:
+    owner: "platform-team"
+    tier: "1"
+  slos:
+    # API Availability SLO - 99.9% uptime
+    - name: "api-availability"
+      objective: 99.9
+      description: "API endpoints should be available 99.9% of the time"
+      labels:
+        category: "availability"
+        severity: "critical"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(http_requests_total{
+              job="graphql-api",
+              code=~"5.."
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(http_requests_total{
+              job="graphql-api"
+            }[{{.window}}]))
+      alerting:
+        name: "SummitAPIAvailability"
+        labels:
+          category: "availability"
+        annotations:
+          summary: "API availability SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/api-availability"
+        pageAlert:
+          labels:
+            severity: "critical"
+        ticketAlert:
+          labels:
+            severity: "warning"
+
+    # API Latency SLO - p99 < 500ms
+    - name: "api-latency-p99"
+      objective: 99.0
+      description: "99% of API requests should complete within 500ms"
+      labels:
+        category: "latency"
+        severity: "high"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(http_request_duration_seconds_bucket{
+              job="graphql-api",
+              le="0.5"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(http_request_duration_seconds_count{
+              job="graphql-api"
+            }[{{.window}}]))
+      alerting:
+        name: "SummitAPILatency"
+        labels:
+          category: "latency"
+        annotations:
+          summary: "API latency SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/api-latency"
+        pageAlert:
+          labels:
+            severity: "high"
+        ticketAlert:
+          labels:
+            severity: "medium"
+
+    # Database Query SLO - p95 < 100ms
+    - name: "database-query-latency"
+      objective: 99.5
+      description: "95% of database queries should complete within 100ms"
+      labels:
+        category: "latency"
+        severity: "high"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(db_query_duration_seconds_bucket{
+              le="0.1"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(db_query_duration_seconds_count[{{.window}}]))
+      alerting:
+        name: "SummitDatabaseLatency"
+        labels:
+          category: "latency"
+        annotations:
+          summary: "Database query latency SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/database-latency"
+        pageAlert:
+          labels:
+            severity: "high"
+
+    # Graph Traversal SLO - Success rate
+    - name: "graph-traversal-success"
+      objective: 99.5
+      description: "Graph traversal queries should succeed 99.5% of the time"
+      labels:
+        category: "correctness"
+        severity: "high"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(neo4j_query_total{
+              status="error"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(neo4j_query_total[{{.window}}]))
+      alerting:
+        name: "SummitGraphTraversalSuccess"
+        annotations:
+          summary: "Graph traversal success rate SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/graph-traversal"
+
+    # Copilot Response SLO - p95 < 5s
+    - name: "copilot-response-time"
+      objective: 95.0
+      description: "95% of Copilot requests should complete within 5 seconds"
+      labels:
+        category: "latency"
+        severity: "medium"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(copilot_request_duration_seconds_bucket{
+              le="5"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(copilot_request_duration_seconds_count[{{.window}}]))
+      alerting:
+        name: "SummitCopilotLatency"
+        annotations:
+          summary: "Copilot response time SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/copilot-latency"
+
+    # Search Relevance SLO
+    - name: "search-success-rate"
+      objective: 99.0
+      description: "Search queries should return results 99% of the time"
+      labels:
+        category: "correctness"
+        severity: "medium"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(search_queries_total{
+              result="empty"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(search_queries_total[{{.window}}]))
+      alerting:
+        name: "SummitSearchSuccess"
+        annotations:
+          summary: "Search success rate SLO is at risk"
+
+    # Authentication SLO - 99.99% availability
+    - name: "auth-availability"
+      objective: 99.99
+      description: "Authentication service must be available 99.99% of the time"
+      labels:
+        category: "availability"
+        severity: "critical"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(auth_requests_total{
+              status="error"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(auth_requests_total[{{.window}}]))
+      alerting:
+        name: "SummitAuthAvailability"
+        labels:
+          category: "security"
+        annotations:
+          summary: "Authentication availability SLO is at risk"
+          runbook_url: "https://runbooks.summit.io/slo/auth-availability"
+        pageAlert:
+          labels:
+            severity: "critical"
+
+    # Data Pipeline SLO - Freshness
+    - name: "data-pipeline-freshness"
+      objective: 99.0
+      description: "Data pipelines should complete within SLA 99% of the time"
+      labels:
+        category: "freshness"
+        severity: "medium"
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(pipeline_jobs_total{
+              status="late"
+            }[{{.window}}]))
+          totalQuery: |
+            sum(rate(pipeline_jobs_total[{{.window}}]))
+      alerting:
+        name: "SummitPipelineFreshness"
+        annotations:
+          summary: "Data pipeline freshness SLO is at risk"

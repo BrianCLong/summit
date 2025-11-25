@@ -1,0 +1,166 @@
+# P21: Resource Budgets - LimitRanges
+# Defines default and max resources for containers and pods
+apiVersion: v1
+kind: List
+items:
+  # Production LimitRange
+  - apiVersion: v1
+    kind: LimitRange
+    metadata:
+      name: production-limits
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      limits:
+        # Container defaults and limits
+        - type: Container
+          default:
+            cpu: "500m"
+            memory: "512Mi"
+          defaultRequest:
+            cpu: "100m"
+            memory: "128Mi"
+          min:
+            cpu: "50m"
+            memory: "64Mi"
+          max:
+            cpu: "4"
+            memory: "8Gi"
+          maxLimitRequestRatio:
+            cpu: "10"
+            memory: "4"
+
+        # Pod-level limits
+        - type: Pod
+          min:
+            cpu: "50m"
+            memory: "64Mi"
+          max:
+            cpu: "16"
+            memory: "32Gi"
+
+        # PVC limits
+        - type: PersistentVolumeClaim
+          min:
+            storage: "1Gi"
+          max:
+            storage: "100Gi"
+
+  # Staging LimitRange
+  - apiVersion: v1
+    kind: LimitRange
+    metadata:
+      name: staging-limits
+      namespace: summit-staging
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      limits:
+        - type: Container
+          default:
+            cpu: "250m"
+            memory: "256Mi"
+          defaultRequest:
+            cpu: "50m"
+            memory: "64Mi"
+          min:
+            cpu: "25m"
+            memory: "32Mi"
+          max:
+            cpu: "2"
+            memory: "4Gi"
+          maxLimitRequestRatio:
+            cpu: "10"
+            memory: "4"
+
+        - type: Pod
+          min:
+            cpu: "25m"
+            memory: "32Mi"
+          max:
+            cpu: "8"
+            memory: "16Gi"
+
+        - type: PersistentVolumeClaim
+          min:
+            storage: "512Mi"
+          max:
+            storage: "50Gi"
+
+  # Development LimitRange - more permissive
+  - apiVersion: v1
+    kind: LimitRange
+    metadata:
+      name: development-limits
+      namespace: summit-development
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      limits:
+        - type: Container
+          default:
+            cpu: "100m"
+            memory: "128Mi"
+          defaultRequest:
+            cpu: "25m"
+            memory: "32Mi"
+          min:
+            cpu: "10m"
+            memory: "16Mi"
+          max:
+            cpu: "1"
+            memory: "2Gi"
+          maxLimitRequestRatio:
+            cpu: "20"
+            memory: "8"
+
+        - type: Pod
+          max:
+            cpu: "4"
+            memory: "8Gi"
+
+        - type: PersistentVolumeClaim
+          max:
+            storage: "20Gi"
+
+  # AI workloads LimitRange - GPU-aware
+  - apiVersion: v1
+    kind: LimitRange
+    metadata:
+      name: ai-workloads-limits
+      namespace: summit-ai
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      limits:
+        - type: Container
+          default:
+            cpu: "2"
+            memory: "8Gi"
+          defaultRequest:
+            cpu: "1"
+            memory: "4Gi"
+          min:
+            cpu: "500m"
+            memory: "2Gi"
+          max:
+            cpu: "16"
+            memory: "64Gi"
+            nvidia.com/gpu: "4"
+
+        - type: Pod
+          max:
+            cpu: "32"
+            memory: "128Gi"
+            nvidia.com/gpu: "8"
+
+        - type: PersistentVolumeClaim
+          min:
+            storage: "10Gi"
+          max:
+            storage: "500Gi"

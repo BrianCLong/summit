@@ -1,0 +1,165 @@
+# P21: Resource Budgets - PodDisruptionBudgets
+# Ensures service availability during voluntary disruptions
+apiVersion: v1
+kind: List
+items:
+  # API Gateway PDB - Critical path, high availability
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: api-gateway-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: api-gateway
+    spec:
+      minAvailable: 2
+      selector:
+        matchLabels:
+          app: api-gateway
+      maxUnavailable: 1
+      unhealthyPodEvictionPolicy: IfHealthyBudget
+
+  # GraphQL API PDB
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: graphql-api-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: graphql-api
+    spec:
+      minAvailable: "50%"
+      selector:
+        matchLabels:
+          app: graphql-api
+      unhealthyPodEvictionPolicy: IfHealthyBudget
+
+  # Web Frontend PDB
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: web-frontend-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: web
+    spec:
+      minAvailable: 2
+      selector:
+        matchLabels:
+          app: web
+      unhealthyPodEvictionPolicy: IfHealthyBudget
+
+  # Neo4j Database PDB - Stateful, requires quorum
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: neo4j-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: database
+    spec:
+      maxUnavailable: 1
+      selector:
+        matchLabels:
+          app: neo4j
+      unhealthyPodEvictionPolicy: AlwaysAllow
+
+  # PostgreSQL PDB
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: postgresql-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: database
+    spec:
+      maxUnavailable: 1
+      selector:
+        matchLabels:
+          app: postgresql
+      unhealthyPodEvictionPolicy: AlwaysAllow
+
+  # Redis PDB - Sentinel mode
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: redis-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: cache
+    spec:
+      minAvailable: 2
+      selector:
+        matchLabels:
+          app: redis
+      unhealthyPodEvictionPolicy: IfHealthyBudget
+
+  # Kafka PDB - Requires broker majority
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: kafka-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: messaging
+    spec:
+      maxUnavailable: 1
+      selector:
+        matchLabels:
+          app: kafka
+      unhealthyPodEvictionPolicy: AlwaysAllow
+
+  # Copilot Service PDB
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: copilot-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: ai
+    spec:
+      minAvailable: 1
+      selector:
+        matchLabels:
+          app: copilot
+      unhealthyPodEvictionPolicy: IfHealthyBudget
+
+  # Analytics Engine PDB
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: analytics-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: analytics
+    spec:
+      minAvailable: "50%"
+      selector:
+        matchLabels:
+          app: analytics-engine
+      unhealthyPodEvictionPolicy: IfHealthyBudget
+
+  # Worker Pods PDB - Can tolerate more disruption
+  - apiVersion: policy/v1
+    kind: PodDisruptionBudget
+    metadata:
+      name: workers-pdb
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: workers
+    spec:
+      maxUnavailable: "30%"
+      selector:
+        matchLabels:
+          app.kubernetes.io/component: worker
+      unhealthyPodEvictionPolicy: IfHealthyBudget

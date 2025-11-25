@@ -1,0 +1,130 @@
+# P21: Resource Budgets - PriorityClasses
+# Defines pod scheduling priorities for resource contention
+apiVersion: v1
+kind: List
+items:
+  # System critical - Should never be evicted
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-system-critical
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 1000000000
+    globalDefault: false
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      Critical system components that must always run.
+      Used for: ingress controllers, cert-manager, monitoring core.
+
+  # Database tier - High priority, data integrity
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-database
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 900000000
+    globalDefault: false
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      Database and stateful workloads requiring high availability.
+      Used for: PostgreSQL, Neo4j, Redis primary.
+
+  # API tier - User-facing services
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-api
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 800000000
+    globalDefault: false
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      User-facing API services requiring low latency.
+      Used for: GraphQL API, REST endpoints, Gateway.
+
+  # Web tier - Frontend services
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-web
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 700000000
+    globalDefault: false
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      Frontend web applications and static content servers.
+      Used for: React app, documentation sites.
+
+  # Worker tier - Background processing
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-worker
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 500000000
+    globalDefault: false
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      Background workers and async job processors.
+      Used for: queue consumers, scheduled jobs.
+
+  # Batch tier - Long-running jobs
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-batch
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 300000000
+    globalDefault: false
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      Batch processing and ETL workloads.
+      Used for: data pipelines, report generation.
+
+  # AI/ML tier - GPU workloads
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-ai
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 600000000
+    globalDefault: false
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      AI/ML workloads requiring GPU resources.
+      Used for: model inference, training jobs.
+
+  # Default tier - Standard workloads
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-default
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 100000000
+    globalDefault: true
+    preemptionPolicy: PreemptLowerPriority
+    description: >
+      Default priority for standard workloads.
+      Applied when no priority class is specified.
+
+  # Development tier - Lowest priority
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: summit-development
+      labels:
+        app.kubernetes.io/part-of: summit
+    value: 10000000
+    globalDefault: false
+    preemptionPolicy: Never
+    description: >
+      Development and testing workloads.
+      Can be evicted to make room for production.
