@@ -68,7 +68,10 @@ export function sendCollabEvent(event, payload) {
   seq += 1;
   const op = {
     event,
-    payload,
+    payload: {
+      timestamp: new Date().toISOString(),
+      ...payload,
+    },
     opId: `${Date.now()}-${seq}`,
     seq,
     sentAt: Date.now(),

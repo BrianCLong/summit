@@ -100,6 +100,7 @@ import NaturalLanguageQuery from '../ai/NaturalLanguageQuery';
 import PresenceIndicator from '../collaboration/PresenceIndicator';
 import LiveChat from '../collaboration/LiveChat';
 import useSocket from '../../hooks/useSocket';
+import useCollaborationLog from '../../hooks/useCollaborationLog';
 import GeointTimeSeriesPanel from '../geoint/GeointTimeSeriesPanel';
 import GeoMapPanel from '../geoint/GeoMapPanel';
 import SearchPanel from '../ai/SearchPanel.jsx';
@@ -200,9 +201,22 @@ function EnhancedGraphExplorer() {
   const containerRef = useRef(null);
   const [cy, setCy] = useState(null);
   const socket = useSocket();
+  const currentUser = useSelector(
+    (state) => state.auth?.user || state.user?.profile || {},
+  );
   const { nodes, edges, selectedNode, selectedEdge } = useSelector(
     (state) => state.graph,
   );
+  const {
+    history: collabHistory,
+    versionVector,
+    undoStack,
+    redoStack,
+    recordOperation,
+    requestUndo,
+    requestRedo,
+    nextUnapplied,
+  } = useCollaborationLog(id || 'shared-graph', currentUser);
   const [loading, setLoading] = useState(false);
   const [layoutMenuAnchor, setLayoutMenuAnchor] = useState(null);
   const [currentLayout, setCurrentLayout] = useState('fcose');
@@ -713,6 +727,27 @@ function EnhancedGraphExplorer() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    nextUnapplied((entry) => {
+      const payload = entry.payload || {};
+      if (entry.event === 'graph:node_added' && payload.node) {
+        dispatch(addNode(payload.node));
+      }
+      if (entry.event === 'graph:edge_added' && payload.edge) {
+        dispatch(addEdge(payload.edge));
+      }
+      if (entry.event === 'graph:node_deleted' && payload.nodeId) {
+        dispatch(deleteNode(payload.nodeId));
+      }
+      if (entry.event === 'graph:edge_deleted' && payload.edgeId) {
+        dispatch(deleteEdge(payload.edgeId));
+      }
+      if (entry.event === 'graph:layout_changed' && payload.layout) {
+        setCurrentLayout(payload.layout);
+      }
+    });
+  }, [dispatch, nextUnapplied]);
 
   useEffect(() => {
     if (cy && (nodes.length > 0 || edges.length > 0)) {
@@ -1239,8 +1274,10 @@ function EnhancedGraphExplorer() {
   const handleDeleteElement = (element) => {
     if (element.isNode && element.isNode()) {
       dispatch(deleteNode(element.id()));
+      recordOperation('graph:node_deleted', { nodeId: element.id() });
     } else if (element.isEdge && element.isEdge()) {
       dispatch(deleteEdge(element.id()));
+      recordOperation('graph:edge_deleted', { edgeId: element.id() });
     }
   };
 
@@ -1320,6 +1357,7 @@ function EnhancedGraphExplorer() {
       position: position,
     };
     dispatch(addNode(newNode));
+    recordOperation('graph:node_added', { node: newNode });
   };
 
   const applyLayout = (layoutName) => {
@@ -1329,6 +1367,7 @@ function EnhancedGraphExplorer() {
       cy.layout(layoutConfigs[layoutName]).run();
     }
     setLayoutMenuAnchor(null);
+    recordOperation('graph:layout_changed', { layout: layoutName });
   };
 
   const handleZoomIn = () => {
@@ -1630,6 +1669,89 @@ function EnhancedGraphExplorer() {
           />
         )}
       </Box>
+
+      {/* Collaboration timeline */}
+      <Paper sx={{ mb: 2, p: 2 }} elevation={1}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 2,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
+          <Box>
+            <Typography variant="subtitle1" fontWeight="bold">
+              Collaboration history
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Version vectors keep edits ordered for conflict resolution.
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              onClick={requestUndo}
+              disabled={!undoStack.length}
+            >
+              Undo
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={requestRedo}
+              disabled={!redoStack.length}
+            >
+              Redo
+            </Button>
+          </Box>
+        </Box>
+
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
+          {Object.entries(versionVector || {}).map(([author, version]) => (
+            <Chip
+              key={author}
+              size="small"
+              label={`${author}: v${version}`}
+              color="info"
+              variant="outlined"
+            />
+          ))}
+          {!Object.keys(versionVector || {}).length && (
+            <Chip size="small" label="No operations yet" variant="outlined" />
+          )}
+        </Box>
+
+        <List dense>
+          {collabHistory.length === 0 && (
+            <ListItem>
+              <ListItemText
+                primary="No collaboration activity yet"
+                secondary="Changes will appear here as they are logged."
+              />
+            </ListItem>
+          )}
+          {collabHistory
+            .slice(-6)
+            .reverse()
+            .map((entry) => (
+              <ListItem key={entry.opId} divider>
+                <ListItemText
+                  primary={`${entry.event} • ${entry.authorId || 'unknown'}`}
+                  secondary={`v${entry.version || '?'} • ${new Date(
+                    entry.timestamp,
+                  ).toLocaleTimeString()} • ${entry.status || 'pending'}`}
+                />
+                <Chip
+                  label={entry.status || 'pending'}
+                  color={entry.status === 'merged' ? 'warning' : 'success'}
+                  variant="outlined"
+                  size="small"
+                />
+              </ListItem>
+            ))}
+        </List>
+      </Paper>
 
       {/* Main Graph Container */}
       <Paper
