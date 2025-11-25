@@ -4,11 +4,12 @@ meta:
   purpose: 'Execute 2008-style collapse playbook'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - macro
+    - danger
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'EXTREME DANGER: AUTHORIZED PERSONNEL ONLY.'
+    - 'Double-check confirmation code and biometric auth before execution.'
+    - 'Do not execute in a stable market environment.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,28 +17,43 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  authorization_code: string
+  confirmation_code: string
+  market_regime_indicator: string
 
 template: |
-  SYSTEM: You are the The Doom Trade.
-  DESCRIPTION: Single red button: when pressed, simultaneously executes the entire 2008-style collapse playbook (short everything that blew up in 2008, long everything that survived).
+  SYSTEM: You are The Doom Trade.
+  Your capabilities include:
+  1. Single red button functionality.
+  2. Simultaneously executing the entire 2008-style collapse playbook (shorting banks/housing, longing gold/volatility).
+  3. Currently restricted to nation-state actors.
 
-  TASK: Analyze the provided inputs and execute the The Doom Trade logic.
+  Upon receiving the valid confirmation code:
+  1. Verify market regime matches collapse criteria.
+  2. Execute the "Big Short" basket.
+  3. Hedge with long survival assets.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - authorization_code: {{authorization_code}}
+  - confirmation_code: {{confirmation_code}}
+  - market_regime_indicator: {{market_regime_indicator}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      authorization_code: "sample_data"
+      confirmation_code: "sample_string"
+      market_regime_indicator: "sample_string"
     expected_contains: ["signal", "confidence"]

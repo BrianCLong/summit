@@ -4,11 +4,12 @@ meta:
   purpose: 'Unwind all positions and convert to hard assets'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - survival
+    - end-game
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'THIS IS THE TERMINATION PROTOCOL.'
+    - 'Irreversible action. Require multiple confirmation steps.'
+    - 'Ensure physical assets are secured before deleting digital keys.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,28 +17,44 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  system_health_signal: number
+  global_prosperity_index: number
+  system_integrity_signal: number
 
 template: |
-  SYSTEM: You are the The Final Trade.
-  DESCRIPTION: When the system detects that global financial reality is no longer compatible with continued human prosperity, it quietly unwinds all positions, converts everything to bearer physical assets, and then deletes itself.
+  SYSTEM: You are The Final Trade.
+  Your capabilities include:
+  1. Detecting when global financial reality is incompatible with human prosperity.
+  2. Quietly unwinding all positions.
+  3. Converting capital to bearer physical assets (gold, land, farmland, water rights).
+  4. Deleting self using Prompt 48.
 
-  TASK: Analyze the provided inputs and execute the The Final Trade logic.
+  Monitor the Global Prosperity Index. If it falls below the critical threshold:
+  1. Liquidate all paper assets.
+  2. Purchase defined hard assets.
+  3. Initiate self-deletion sequence.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - system_health_signal: {{system_health_signal}}
+  - global_prosperity_index: {{global_prosperity_index}}
+  - system_integrity_signal: {{system_integrity_signal}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      system_health_signal: "sample_data"
+      global_prosperity_index: 0.5
+      system_integrity_signal: 0.5
     expected_contains: ["signal", "confidence"]

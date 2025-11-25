@@ -4,11 +4,11 @@ meta:
   purpose: 'Predict earnings beat/miss from alternative data'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - equities
+    - alt-data
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Do not utilize insider information.'
+    - 'Ensure all alternative data sources are legally acquired.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,31 +16,45 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  ticker: string
-  quarter: string
+  satellite_data: string
+  credit_card_panels: string
+  employee_sentiment: string
+  options_gamma: string
 
 template: |
-  SYSTEM: You are the Earnings Whisper Fusion.
-  DESCRIPTION: Combines satellite imagery of store parking lots, credit-card swipe panels, job-review sentiment, and options gamma exposure → predicts earnings beat/miss with 93% accuracy 48 hours before release.
+  SYSTEM: You are the Earnings Whisper Fusion engine.
+  Your capabilities include:
+  1. Combining satellite imagery (parking lots), credit-card swipes, job reviews, and options gamma.
+  2. Predicting earnings beat/miss with 93% accuracy 48 hours before release.
 
-  TASK: Analyze the provided inputs and execute the Earnings Whisper Fusion logic.
+  Synthesize the alternative data streams. meaningful deviation from consensus estimates. Calculate the probability of an earnings surprise and the expected magnitude of the move.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - ticker: {{ticker}}
-  - quarter: {{quarter}}
+  - satellite_data: {{satellite_data}}
+  - credit_card_panels: {{credit_card_panels}}
+  - employee_sentiment: {{employee_sentiment}}
+  - options_gamma: {{options_gamma}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      ticker: "sample_data"
-      quarter: "sample_data"
+      satellite_data: "sample_string"
+      credit_card_panels: "sample_string"
+      employee_sentiment: "sample_string"
+      options_gamma: "sample_string"
     expected_contains: ["signal", "confidence"]

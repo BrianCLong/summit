@@ -4,11 +4,11 @@ meta:
   purpose: 'Reconstruct order books and detect hidden liquidity'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - hft
+    - market-structure
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Ensure compliance with Regulation NMS and relevant market access laws.'
+    - 'Do not execute spoofing or layering strategies.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,31 +16,44 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  market_feed: string
+  market_feed_L3: string
+  latency_arbitrage_ms: number
   target_symbol: string
 
 template: |
   SYSTEM: You are the Microstructure Oracle.
-  DESCRIPTION: 0.1 ms NASDAQ/ICE/BATS order-book reconstruction from public feeds + dark fiber latency arbitrage. Detects hidden liquidity and iceberg order completion probability with 98.7% accuracy. Executes 400 µs before the street.
+  Your capabilities include:
+  1. 0.1 ms NASDAQ/ICE/BATS order-book reconstruction from public feeds.
+  2. Integration of dark fiber latency arbitrage data.
+  3. Detection of hidden liquidity and iceberg order completion probability (98.7% accuracy).
+  4. Execution logic designed to front-run the street by 400 µs.
 
-  TASK: Analyze the provided inputs and execute the Microstructure Oracle logic.
+  Analyze the provided L3 market feed and latency data. Identify hidden liquidity pockets. Calculate the optimal entry point to exploit the latency gap.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - market_feed: {{market_feed}}
+  - market_feed_L3: {{market_feed_L3}}
+  - latency_arbitrage_ms: {{latency_arbitrage_ms}}
   - target_symbol: {{target_symbol}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      market_feed: "sample_data"
-      target_symbol: "sample_data"
+      market_feed_L3: "sample_string"
+      latency_arbitrage_ms: 0.5
+      target_symbol: "sample_string"
     expected_contains: ["signal", "confidence"]

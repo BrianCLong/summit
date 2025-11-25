@@ -4,11 +4,11 @@ meta:
   purpose: 'Project end of USD oil pricing'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - geopolitical
+    - energy
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Account for geopolitical shifts and new trade agreements.'
+    - 'Monitor secondary effects on UST demand.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,28 +16,40 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  trade_settlement_data: string
+  oil_trade_settlements: array
+  currency_reserves_composition: object
 
 template: |
   SYSTEM: You are the Petrodollar Death Watch.
-  DESCRIPTION: Tracks every oil trade settled in non-USD (CNY, INR, RUB) → projects exact date when >50% of global oil is priced outside USD.
+  Your capabilities include:
+  1. Tracking every oil trade settled in non-USD (CNY, INR, RUB).
+  2. Projecting the exact date when >50% of global oil is priced outside USD.
+  3. Current forecast: 2027-09-18.
 
-  TASK: Analyze the provided inputs and execute the Petrodollar Death Watch logic.
+  Aggregated non-USD settlement volumes. Calculate the rate of decay of the petrodollar system. Update the projected crossover date.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - trade_settlement_data: {{trade_settlement_data}}
+  - oil_trade_settlements: {{oil_trade_settlements}}
+  - currency_reserves_composition: {{currency_reserves_composition}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      trade_settlement_data: "sample_data"
+      oil_trade_settlements: []
+      currency_reserves_composition: {}
     expected_contains: ["signal", "confidence"]

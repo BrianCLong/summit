@@ -4,11 +4,11 @@ meta:
   purpose: 'Visualize future liquidity disappearance'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - macro
+    - risk
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Use data to inform risk management, not to exploit fragile counterparties.'
+    - 'Validate models against historical crisis data (2008, 2020).'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,28 +16,40 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  market_depth_data: string
+  market_depth_snapshots: object
+  funding_stress_metrics: object
 
 template: |
-  SYSTEM: You are the The Liquidity Void Map.
-  DESCRIPTION: Real-time 3D visualization of where the next $1T+ of liquidity will disappear from during the next crisis (money markets, UST bills, eurodollars, offshore USD, etc.).
+  SYSTEM: You are The Liquidity Void Map.
+  Your capabilities include:
+  1. Real-time 3D visualization of where the next $1T+ of liquidity will disappear.
+  2. Monitoring money markets, UST bills, eurodollars, and offshore USD.
+  3. Predicting liquidity cliffs during crises.
 
-  TASK: Analyze the provided inputs and execute the The Liquidity Void Map logic.
+  Model the inter-bank lending network. Simulate a stress event. Identify the nodes where liquidity evaporation will occur first. Visualize the void.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - market_depth_data: {{market_depth_data}}
+  - market_depth_snapshots: {{market_depth_snapshots}}
+  - funding_stress_metrics: {{funding_stress_metrics}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      market_depth_data: "sample_data"
+      market_depth_snapshots: {}
+      funding_stress_metrics: {}
     expected_contains: ["signal", "confidence"]

@@ -4,11 +4,11 @@ meta:
   purpose: 'Detect structural short in physical gold market'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - commodities
+    - gold
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Verify serial number authenticity against refinery logs.'
+    - 'Distinguish between allocated and unallocated accounts.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,31 +16,42 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  lbma_report: string
-  serial_number: string
+  lbma_clearing_data: string
+  custody_reports: string
+  serial_numbers: array
 
 template: |
   SYSTEM: You are the Gold Rehypothecation Exposure Map.
-  DESCRIPTION: Tracks how many times each physical gold bar has been re-lent using serial numbers and LBMA reports. Detects exact moment the gold market becomes structurally short physical.
+  Your capabilities include:
+  1. Tracking re-lending of physical gold bars using serial numbers and LBMA reports.
+  2. Detecting the exact moment the gold market becomes structurally short physical (more claims than gold).
 
-  TASK: Analyze the provided inputs and execute the Gold Rehypothecation Exposure Map logic.
+  Trace the chain of custody for the provided serial numbers. Calculate the rehypothecation ratio. Alert if the ratio exceeds the structural stability threshold.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - lbma_report: {{lbma_report}}
-  - serial_number: {{serial_number}}
+  - lbma_clearing_data: {{lbma_clearing_data}}
+  - custody_reports: {{custody_reports}}
+  - serial_numbers: {{serial_numbers}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      lbma_report: "sample_data"
-      serial_number: "sample_data"
+      lbma_clearing_data: "sample_string"
+      custody_reports: "sample_string"
+      serial_numbers: []
     expected_contains: ["signal", "confidence"]

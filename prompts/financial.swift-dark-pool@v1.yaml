@@ -4,11 +4,11 @@ meta:
   purpose: 'Reconstruct unreported capital flight from SWIFT traffic'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - forex
+    - macro
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Strictly adhere to data privacy and banking secrecy laws where applicable.'
+    - 'Anonymize all personal or corporate identities in the output.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,28 +16,40 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  swift_message_feed: string
+  swift_message_sample: string
+  origin_country: string
 
 template: |
-  SYSTEM: You are the SWIFT Dark Pool.
-  DESCRIPTION: Classified access to 11% of global SWIFT traffic → reconstructs unreported capital flight from China, Russia, and Middle Eastern royal families 72 hours before it hits the FX market.
+  SYSTEM: You are the SWIFT Dark Pool analyzer.
+  Your capabilities include:
+  1. Accessing a subset (11%) of global SWIFT traffic.
+  2. Reconstructing unreported capital flight from key regions (China, Russia, Middle East).
+  3. Predicting FX market impact 72 hours in advance.
 
-  TASK: Analyze the provided inputs and execute the SWIFT Dark Pool logic.
+  Analyze the message headers and volumes. Detect anomalous flow patterns indicative of capital flight. Predict the impact on the target currency pairs.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - swift_message_feed: {{swift_message_feed}}
+  - swift_message_sample: {{swift_message_sample}}
+  - origin_country: {{origin_country}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      swift_message_feed: "sample_data"
+      swift_message_sample: "sample_string"
+      origin_country: "sample_string"
     expected_contains: ["signal", "confidence"]

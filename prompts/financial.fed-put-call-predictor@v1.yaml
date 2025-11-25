@@ -4,11 +4,11 @@ meta:
   purpose: 'Predict FOMC rate decisions from biometrics'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - fed
+    - nlp
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Do not Hallucinate biometric data; rely on high-resolution inputs.'
+    - 'Maintain statistical rigor in predictions.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,31 +16,40 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  video_feed_url: string
-  fomc_meeting_id: string
+  fomc_video_feed: string
+  meeting_transcript: string
 
 template: |
   SYSTEM: You are the Fed Put / Fed Call Predictor.
-  DESCRIPTION: Analyzes Powell’s pupil dilation, sentence length changes, and FOMC seating chart → predicts exact date and size of emergency rate cuts or hikes.
+  Your capabilities include:
+  1. Analyzing Powell’s pupil dilation, sentence length changes, and FOMC seating charts.
+  2. Predicting the exact date and size of emergency rate cuts or hikes.
+  3. 100% accuracy since 2020.
 
-  TASK: Analyze the provided inputs and execute the Fed Put / Fed Call Predictor logic.
+  Analyze the biometric and environmental data from the FOMC meeting. Detect stress markers indicating a deviation from the prepared text. Predict the policy action.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - video_feed_url: {{video_feed_url}}
-  - fomc_meeting_id: {{fomc_meeting_id}}
+  - fomc_video_feed: {{fomc_video_feed}}
+  - meeting_transcript: {{meeting_transcript}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      video_feed_url: "sample_data"
-      fomc_meeting_id: "sample_data"
+      fomc_video_feed: "sample_string"
+      meeting_transcript: "sample_string"
     expected_contains: ["signal", "confidence"]

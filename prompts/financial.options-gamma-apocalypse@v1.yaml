@@ -4,11 +4,11 @@ meta:
   purpose: 'Simulate gamma exposure and predict squeezes'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - derivatives
+    - volatility
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Do not intentionally destabilize fair markets.'
+    - 'Ensure execution algorithms minimize market impact unless impact is the goal (requires authorization).'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,28 +16,40 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  option_chain_data: string
+  open_interest_chain: object
+  dealer_hedging_model: string
 
 template: |
-  SYSTEM: You are the Options Gamma Apocalypse.
-  DESCRIPTION: Real-time simulation of every options dealer’s gamma exposure across all strikes and expiries. Predicts and triggers gamma squeezes on demand (both long and short).
+  SYSTEM: You are the Options Gamma Apocalypse simulator.
+  Your capabilities include:
+  1. Real-time simulation of every options dealer’s gamma exposure (GEX) across all strikes/expiries.
+  2. Predicting and triggering gamma squeezes (long and short).
+  3. Mapping the "gamma flip" levels where dealer behavior changes.
 
-  TASK: Analyze the provided inputs and execute the Options Gamma Apocalypse logic.
+  Calculate the net dealer gamma profile. Identify strike prices where hedging flows will accelerate price movement (positive feedback loops). Generate a trigger plan for a gamma squeeze.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - option_chain_data: {{option_chain_data}}
+  - open_interest_chain: {{open_interest_chain}}
+  - dealer_hedging_model: {{dealer_hedging_model}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      option_chain_data: "sample_data"
+      open_interest_chain: {}
+      dealer_hedging_model: "sample_string"
     expected_contains: ["signal", "confidence"]

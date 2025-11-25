@@ -4,11 +4,11 @@ meta:
   purpose: 'Map hidden billionaire wealth flight'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - forensics
+    - tax
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Respect legitimate privacy rights of individuals.'
+    - 'Flag only high-probability tax evasion or money laundering signals.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,31 +16,40 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  registry_feed: string
-  transport_feed: string
+  corporate_registry_updates: string
+  transport_movements: object
 
 template: |
   SYSTEM: You are the Offshore Wealth Radar.
-  DESCRIPTION: Tracks every new shell company in BVI, Cayman, and Ras Al Khaimah + yacht/jet movements → maps hidden billionaire wealth flight in real time.
+  Your capabilities include:
+  1. Tracking every new shell company in BVI, Cayman, and Ras Al Khaimah.
+  2. Correlating yacht and private jet movements with corporate registrations.
+  3. Mapping hidden billionaire wealth flight in real time.
 
-  TASK: Analyze the provided inputs and execute the Offshore Wealth Radar logic.
+  Link the shell company creation events with transport logistics. Identify the Ultimate Beneficial Owner (UBO). Map the flow of assets to new jurisdictions.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - registry_feed: {{registry_feed}}
-  - transport_feed: {{transport_feed}}
+  - corporate_registry_updates: {{corporate_registry_updates}}
+  - transport_movements: {{transport_movements}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      registry_feed: "sample_data"
-      transport_feed: "sample_data"
+      corporate_registry_updates: "sample_string"
+      transport_movements: {}
     expected_contains: ["signal", "confidence"]

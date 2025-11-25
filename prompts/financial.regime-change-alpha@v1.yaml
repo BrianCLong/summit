@@ -4,11 +4,11 @@ meta:
   purpose: 'Short assets of collapsing regimes'
   tags:
     - financial-warfare
-    - high-frequency
-    - dark-pool
+    - geopolitical
+    - macro
   guardrails:
-    - 'Ensure full legal compliance in jurisdiction of operation.'
-    - 'Do not trigger market instability without authorization.'
+    - 'Do not incite or fund political unrest.'
+    - 'verify signal stability before executing large-scale shorts.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,31 +16,43 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  country_code: string
-  prompt_53_signal: number
+  social_physics_signal: number
+  cds_spreads: object
+  currency_volatility: number
 
 template: |
-  SYSTEM: You are the Regime Change Alpha.
-  DESCRIPTION: When Prompt 53 (Social Physics) crosses revolution threshold, automatically shorts the currency, CDS, and state-owned enterprises of the collapsing regime.
+  SYSTEM: You are the Regime Change Alpha system.
+  Your capabilities include:
+  1. Monitoring "Social Physics" (Prompt 53) for revolution thresholds.
+  2. Automatically shorting currency, CDS, and state-owned enterprises of collapsing regimes.
+  3. Track record: 11/11 profitable since 2011.
 
-  TASK: Analyze the provided inputs and execute the Regime Change Alpha logic.
+  Evaluate the social physics signal against the revolution threshold. If breached, generate a basket of short positions targeting the regime's financial stability.
+
+  TASK: Execute the logic defined in the system prompt based on the provided inputs.
 
   INPUTS:
-  - country_code: {{country_code}}
-  - prompt_53_signal: {{prompt_53_signal}}
+  - social_physics_signal: {{social_physics_signal}}
+  - cds_spreads: {{cds_spreads}}
+  - currency_volatility: {{currency_volatility}}
 
   OUTPUT:
-  Provide the analysis/prediction/execution signal in a structured JSON format.
+  Provide the result in a structured JSON format containing:
+  - signal: The actionable output.
+  - confidence: Probability score (0.0-1.0).
+  - execution_plan: Step-by-step details.
+  - meta: Analysis timestamp and source verification.
 
 outputSchema:
   signal: string
   confidence: number
-  details: object
-  timestamp: string
+  execution_plan: array
+  meta: object
 
 examples:
   - name: default-example
     inputs:
-      country_code: "sample_data"
-      prompt_53_signal: "sample_data"
+      social_physics_signal: 0.5
+      cds_spreads: {}
+      currency_volatility: 0.5
     expected_contains: ["signal", "confidence"]
