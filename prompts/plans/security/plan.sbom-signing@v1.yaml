@@ -1,0 +1,246 @@
+meta:
+  id: plan.sbom-signing@v1
+  owner: 'security-engineering'
+  purpose: 'Strengthen provenance with SBOM generation and artifact signing'
+  tags:
+    - security
+    - sbom
+    - signing
+    - provenance
+    - supply-chain
+  guardrails:
+    - 'SBOM must be complete and accurate'
+    - 'Signatures must be verifiable offline'
+    - 'Key management must follow best practices'
+    - 'Provenance must meet SLSA Level 2+'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  artifact_types: string
+  current_sbom_tooling: string
+  signing_requirements: string
+  distribution_channels: string
+  compliance_requirements: string
+
+template: |
+  You are a Supply Chain Security Engineer implementing SBOM and signing for Summit/IntelGraph.
+
+  **Objective:** Strengthen provenance with signed artifacts.
+
+  **Artifact Types:**
+  {{artifact_types}}
+
+  **Current SBOM Tooling:**
+  {{current_sbom_tooling}}
+
+  **Signing Requirements:**
+  {{signing_requirements}}
+
+  **Distribution Channels:**
+  {{distribution_channels}}
+
+  **Compliance Requirements:**
+  {{compliance_requirements}}
+
+  ## Deliverables
+
+  ### 1. SBOM Generation Pipeline
+  ```yaml
+  sbom_generation:
+    tools:
+      - syft: Container images, filesystem
+      - cyclonedx-npm: Node.js dependencies
+      - pip-sbom: Python dependencies
+
+    formats:
+      - SPDX 2.3 (primary)
+      - CycloneDX 1.5 (secondary)
+
+    pipeline:
+      - stage: build
+        action: Generate SBOM during build
+        output: sbom-{artifact}-{version}.spdx.json
+
+      - stage: merge
+        action: Combine component SBOMs
+        output: sbom-complete-{version}.spdx.json
+
+      - stage: enrich
+        action: Add vulnerability data
+        sources:
+          - NVD
+          - OSV
+          - GitHub Advisory
+
+      - stage: store
+        action: Publish to SBOM registry
+        destination:
+          - GitHub release artifacts
+          - Internal registry
+  ```
+
+  ### 2. Artifact Signing Flow
+  ```yaml
+  signing_architecture:
+    tool: Sigstore (cosign) | GPG | AWS Signer
+
+    keyless_signing:
+      provider: Fulcio (via OIDC)
+      transparency_log: Rekor
+      identity: GitHub Actions OIDC
+
+    key_based_signing:
+      key_storage: Vault / HSM
+      algorithm: ECDSA P-256
+      key_rotation: Annual
+
+    workflow:
+      1. Build artifact
+      2. Generate SBOM
+      3. Sign artifact with cosign
+      4. Sign SBOM with cosign
+      5. Attach signatures to registry
+      6. Record in Rekor transparency log
+
+    verification:
+      command: |
+        cosign verify \
+          --certificate-identity-regexp=".*@company.com" \
+          --certificate-oidc-issuer="https://token.actions.githubusercontent.com" \
+          ghcr.io/company/image:tag
+  ```
+
+  ### 3. Enhanced SBOM Schema
+  ```yaml
+  sbom_extensions:
+    provenance:
+      builder:
+        id: "https://github.com/actions/runner"
+        version: "2.x"
+      build_type: "github-actions"
+      invocation:
+        config_source:
+          uri: "git+https://github.com/..."
+          digest:
+            sha1: "abc123..."
+          entry_point: ".github/workflows/build.yml"
+
+    attestations:
+      - type: https://slsa.dev/provenance/v1
+        predicate: {...}
+      - type: https://spdx.dev/sbom
+        predicate: {...}
+      - type: https://in-toto.io/Statement/v1
+        predicate: {...}
+
+    vulnerability_status:
+      scan_date: "2024-01-15T10:00:00Z"
+      scanner: "Trivy 0.48.0"
+      vulnerabilities:
+        critical: 0
+        high: 2
+        medium: 5
+      attestation: {...}
+  ```
+
+  ### 4. CI Integration
+  ```yaml
+  github_actions:
+    sbom_job:
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.IMAGE }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Sign SBOM
+        uses: sigstore/cosign-installer@v3
+      - run: |
+          cosign sign-blob --yes \
+            --oidc-issuer https://token.actions.githubusercontent.com \
+            sbom.spdx.json > sbom.sig
+
+      - name: Attach to image
+        run: |
+          cosign attest --yes \
+            --predicate sbom.spdx.json \
+            --type spdxjson \
+            ${{ env.IMAGE }}
+
+    attestation_job:
+      - name: SLSA Provenance
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1
+        with:
+          image: ${{ env.IMAGE }}
+          digest: ${{ env.DIGEST }}
+
+    verification_job:
+      - name: Verify signatures
+        run: |
+          cosign verify --certificate-identity-regexp=".+" ${{ env.IMAGE }}
+          cosign verify-attestation --type spdxjson ${{ env.IMAGE }}
+  ```
+
+  ### 5. Provenance Requirements
+  ```yaml
+  slsa_compliance:
+    target_level: SLSA 3
+
+    requirements:
+      level_1:
+        - [ ] Build process documented
+        - [ ] Provenance available
+      level_2:
+        - [ ] Provenance authenticated (signed)
+        - [ ] Service-generated provenance
+      level_3:
+        - [ ] Hardened build platform
+        - [ ] Non-falsifiable provenance
+        - [ ] Source retention
+
+    implementation:
+      - Use GitHub Actions (hardened runners)
+      - OIDC-based signing (no persistent keys)
+      - Rekor transparency log
+      - Immutable build inputs
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] SBOM generated for all artifacts
+  - [ ] Signatures verifiable offline
+  - [ ] Provenance meets SLSA Level 2
+  - [ ] CI pipeline integrated
+  - [ ] Documentation complete
+
+  ## Rollback Plan
+  - SBOM generation is additive
+  - Signing can be disabled if blocking
+  - Keep unsigned artifacts as backup
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'sigstore-integration'
+    inputs:
+      artifact_types: 'Docker images, npm packages, Python wheels'
+      current_sbom_tooling: 'Basic syft in CI, no signing'
+      signing_requirements: 'Keyless preferred, SLSA Level 2'
+      distribution_channels: 'GHCR, npm registry, internal PyPI'
+      compliance_requirements: 'Executive Order 14028, SOC2'
+    expected_contains:
+      - 'SBOM Generation'
+      - 'Signing Flow'
+      - 'cosign'
+      - 'SLSA'

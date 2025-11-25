@@ -1,0 +1,173 @@
+meta:
+  id: plan.build-artifact-optimization@v1
+  owner: 'platform-engineering'
+  purpose: 'Reduce artifact size and build times for faster CI/CD'
+  tags:
+    - build
+    - ci-cd
+    - docker
+    - optimization
+    - reproducibility
+  guardrails:
+    - 'Optimizations must not break functionality'
+    - 'Reproducible builds must be maintained'
+    - 'Security scanning must still complete'
+    - 'Build cache invalidation must be predictable'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  current_artifacts: string
+  build_times: string
+  artifact_sizes: string
+  ci_platform: string
+  target_improvements: string
+
+template: |
+  You are a DevOps Engineer optimizing build artifacts for Summit/IntelGraph.
+
+  **Objective:** Reduce artifact size and build times.
+
+  **Current Artifacts:**
+  {{current_artifacts}}
+
+  **Build Times:**
+  {{build_times}}
+
+  **Artifact Sizes:**
+  {{artifact_sizes}}
+
+  **CI Platform:**
+  {{ci_platform}}
+
+  **Target Improvements:**
+  {{target_improvements}}
+
+  ## Deliverables
+
+  ### 1. Artifact Analysis
+  ```yaml
+  artifacts:
+    - name: api-server
+      type: docker-image
+      current_size: [MB]
+      layers:
+        - base: node:20-alpine (50MB)
+        - deps: node_modules (200MB)
+        - build: compiled output (50MB)
+      opportunities:
+        - multi-stage build
+        - prune dev dependencies
+        - layer caching
+
+    - name: web-client
+      type: static-bundle
+      current_size: [MB]
+      composition:
+        - vendor.js (2MB)
+        - app.js (500KB)
+        - assets (1MB)
+      opportunities:
+        - tree shaking
+        - code splitting
+        - compression
+  ```
+
+  ### 2. Optimization Strategies
+  ```yaml
+  strategies:
+    docker:
+      - multi-stage builds
+      - alpine base images
+      - .dockerignore cleanup
+      - layer ordering for cache hits
+      - buildx with cache export
+
+    javascript:
+      - tree shaking (unused exports)
+      - code splitting (dynamic imports)
+      - terser minification
+      - brotli/gzip compression
+      - dependency analysis (webpack-bundle-analyzer)
+
+    dependencies:
+      - prune devDependencies in production
+      - replace heavy packages with lighter alternatives
+      - deduplicate transitive deps
+
+    caching:
+      - pnpm store caching in CI
+      - turbo remote cache
+      - Docker layer caching
+      - build output caching
+  ```
+
+  ### 3. Trimmed Artifact Set
+  | Artifact | Before | After | Reduction |
+  |----------|--------|-------|-----------|
+  | api-server | 500MB | 150MB | 70% |
+  | web-client | 5MB | 1.5MB | 70% |
+  | worker | 300MB | 100MB | 67% |
+
+  ### 4. Build-Time Improvements
+  | Stage | Before | After | Improvement |
+  |-------|--------|-------|-------------|
+  | Install deps | 3m | 45s | 75% |
+  | TypeScript compile | 2m | 30s | 75% |
+  | Docker build | 5m | 1.5m | 70% |
+  | Total CI | 15m | 5m | 67% |
+
+  ### 5. Reproducibility Notes
+  ```yaml
+  reproducibility:
+    lockfiles:
+      - pnpm-lock.yaml committed
+      - use frozen lockfile in CI
+    base_images:
+      - pin to digest, not tag
+      - example: node:20-alpine@sha256:abc123...
+    build_args:
+      - deterministic timestamps
+      - no random elements in output
+    verification:
+      - hash comparison between builds
+      - content-addressable storage
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Artifact sizes reduced by target %
+  - [ ] Build times reduced by target %
+  - [ ] Reproducible builds verified
+  - [ ] CI pipeline updated with caching
+  - [ ] No functionality regressions
+
+  ## Rollback Plan
+  - Revert Dockerfile changes if builds fail
+  - Keep old CI config as backup
+  - Feature flag for new build process
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'docker-optimization'
+    inputs:
+      current_artifacts: 'api-server (Docker), web-client (static), worker (Docker)'
+      build_times: 'Full CI: 15 minutes, Docker builds: 5 minutes each'
+      artifact_sizes: 'api-server: 500MB, web-client: 5MB, worker: 300MB'
+      ci_platform: 'GitHub Actions with self-hosted runners'
+      target_improvements: '50% size reduction, 60% build time reduction'
+    expected_contains:
+      - 'multi-stage'
+      - 'Trimmed Artifact'
+      - 'Reproducibility'
+      - 'layer caching'

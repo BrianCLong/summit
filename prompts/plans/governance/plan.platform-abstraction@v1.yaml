@@ -1,0 +1,331 @@
+meta:
+  id: plan.platform-abstraction@v1
+  owner: 'platform-engineering'
+  purpose: 'Reduce platform-specific drift with common abstractions'
+  tags:
+    - platform
+    - abstraction
+    - interfaces
+    - portability
+    - standardization
+  guardrails:
+    - 'Abstractions must not hide necessary complexity'
+    - 'Performance overhead must be minimal'
+    - 'Escape hatches must exist for edge cases'
+    - 'Abstractions must be well documented'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  platforms: string
+  current_drift: string
+  shared_capabilities: string
+  team_structure: string
+  portability_requirements: string
+
+template: |
+  You are a Platform Architect designing abstractions for Summit/IntelGraph.
+
+  **Objective:** Reduce platform-specific drift.
+
+  **Platforms:**
+  {{platforms}}
+
+  **Current Drift:**
+  {{current_drift}}
+
+  **Shared Capabilities:**
+  {{shared_capabilities}}
+
+  **Team Structure:**
+  {{team_structure}}
+
+  **Portability Requirements:**
+  {{portability_requirements}}
+
+  ## Deliverables
+
+  ### 1. Interface Contracts
+  ```yaml
+  contracts:
+    configuration:
+      interface: |
+        interface ConfigProvider {
+          get<T>(key: string): T | undefined;
+          getRequired<T>(key: string): T;
+          getWithDefault<T>(key: string, defaultValue: T): T;
+          watch(key: string, callback: (value: unknown) => void): void;
+        }
+
+      implementations:
+        - name: EnvConfigProvider
+          source: Environment variables
+          usage: Development, simple deployments
+
+        - name: VaultConfigProvider
+          source: HashiCorp Vault
+          usage: Production secrets
+
+        - name: FileConfigProvider
+          source: YAML/JSON files
+          usage: Static configuration
+
+    logging:
+      interface: |
+        interface Logger {
+          debug(message: string, context?: object): void;
+          info(message: string, context?: object): void;
+          warn(message: string, context?: object): void;
+          error(message: string, error?: Error, context?: object): void;
+          child(context: object): Logger;
+        }
+
+      implementations:
+        - name: PinoLogger
+        - name: WinstonLogger
+        - name: ConsoleLogger (dev)
+
+    metrics:
+      interface: |
+        interface MetricsClient {
+          counter(name: string, labels?: Record<string, string>): Counter;
+          gauge(name: string, labels?: Record<string, string>): Gauge;
+          histogram(name: string, buckets?: number[], labels?: Record<string, string>): Histogram;
+        }
+
+      implementations:
+        - name: PrometheusClient
+        - name: DatadogClient
+        - name: NoOpClient (testing)
+
+    cache:
+      interface: |
+        interface CacheClient {
+          get<T>(key: string): Promise<T | null>;
+          set<T>(key: string, value: T, ttl?: number): Promise<void>;
+          delete(key: string): Promise<void>;
+          exists(key: string): Promise<boolean>;
+        }
+
+      implementations:
+        - name: RedisCache
+        - name: MemoryCache
+        - name: NoOpCache
+
+    queue:
+      interface: |
+        interface QueueClient {
+          publish(topic: string, message: object): Promise<void>;
+          subscribe(topic: string, handler: (message: object) => Promise<void>): void;
+          acknowledge(messageId: string): Promise<void>;
+        }
+
+      implementations:
+        - name: KafkaQueue
+        - name: RedisQueue
+        - name: InMemoryQueue (testing)
+  ```
+
+  ### 2. Adapter Pattern
+  ```yaml
+  adapters:
+    structure:
+      packages/
+        platform-core/         # Interfaces
+        platform-adapters/     # Implementations
+          config-env/
+          config-vault/
+          logger-pino/
+          cache-redis/
+          queue-kafka/
+
+    registration:
+      dependency_injection: |
+        // Container registration
+        container.register('config', EnvConfigProvider);
+        container.register('logger', PinoLogger);
+        container.register('cache', RedisCache);
+
+        // Usage
+        const config = container.resolve<ConfigProvider>('config');
+        const logger = container.resolve<Logger>('logger');
+
+      factory_pattern: |
+        // Factory for creating platform clients
+        const platformFactory = createPlatformFactory({
+          config: 'env',
+          logger: 'pino',
+          cache: 'redis',
+          queue: 'kafka',
+        });
+
+        const { config, logger, cache, queue } = platformFactory.create();
+
+    testing:
+      mocks: |
+        // All interfaces have mock implementations
+        import { MockConfigProvider, MockLogger, MockCache } from '@summit/platform-mocks';
+
+        const mockConfig = new MockConfigProvider({
+          'database.host': 'localhost',
+          'database.port': 5432,
+        });
+  ```
+
+  ### 3. Service Templates
+  ```yaml
+  templates:
+    microservice:
+      structure: |
+        service-template/
+          src/
+            index.ts           # Entry point
+            config.ts          # Configuration loading
+            server.ts          # HTTP server setup
+            health.ts          # Health checks
+            platform.ts        # Platform client setup
+          Dockerfile
+          package.json
+          README.md
+
+      platform_setup: |
+        // platform.ts
+        import { createPlatformFactory } from '@summit/platform-core';
+
+        export const platform = createPlatformFactory({
+          config: process.env.CONFIG_PROVIDER || 'env',
+          logger: process.env.LOGGER_PROVIDER || 'pino',
+          cache: process.env.CACHE_PROVIDER || 'redis',
+          metrics: process.env.METRICS_PROVIDER || 'prometheus',
+        });
+
+        export const { config, logger, cache, metrics } = platform.create();
+
+      health_check: |
+        // health.ts
+        export async function healthCheck(): Promise<HealthStatus> {
+          const checks = await Promise.all([
+            platform.cache.ping(),
+            platform.database.ping(),
+          ]);
+          return { status: checks.every(c => c.ok) ? 'healthy' : 'unhealthy', checks };
+        }
+
+    worker:
+      structure: Same as microservice + queue consumer
+
+    scheduled_job:
+      structure: Same as microservice + cron scheduler
+  ```
+
+  ### 4. Migration Guide
+  ```yaml
+  migration:
+    from_direct_usage:
+      before: |
+        // Direct Redis usage
+        import Redis from 'ioredis';
+        const redis = new Redis(process.env.REDIS_URL);
+        await redis.set('key', 'value');
+
+      after: |
+        // Through abstraction
+        import { cache } from './platform';
+        await cache.set('key', 'value');
+
+    steps:
+      1. Install platform packages
+      2. Create platform.ts
+      3. Replace direct imports with abstraction
+      4. Update tests to use mocks
+      5. Verify functionality
+      6. Remove direct dependencies
+
+    codemods:
+      available:
+        - ioredis-to-cache
+        - pino-to-logger
+        - dotenv-to-config
+
+    backwards_compatibility:
+      - Old code continues to work
+      - Gradual migration supported
+      - Escape hatches for edge cases
+  ```
+
+  ### 5. Portability Matrix
+  ```yaml
+  portability:
+    environments:
+      local:
+        config: env + files
+        cache: memory
+        queue: memory
+        database: docker containers
+
+      staging:
+        config: env + vault
+        cache: redis
+        queue: kafka
+        database: managed cloud
+
+      production:
+        config: vault
+        cache: redis cluster
+        queue: kafka cluster
+        database: managed cloud HA
+
+    switching:
+      config_only: |
+        # Environment variable switches implementation
+        CONFIG_PROVIDER=vault
+        CACHE_PROVIDER=redis
+        QUEUE_PROVIDER=kafka
+
+      no_code_changes: true
+      testing: Required for each combination
+
+    escape_hatches:
+      direct_access: |
+        // When abstraction doesn't fit
+        const rawRedis = platform.cache.getUnderlyingClient();
+        // Use with caution, reduces portability
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Core interfaces defined
+  - [ ] Adapters for key providers
+  - [ ] Service templates updated
+  - [ ] Migration guide complete
+  - [ ] Tests passing with mocks
+
+  ## Rollback Plan
+  - Abstractions are additive
+  - Direct usage still works
+  - Gradual adoption path
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'platform-abstraction'
+    inputs:
+      platforms: 'Local Docker, AWS staging, AWS production, on-prem option'
+      current_drift: 'Direct Redis calls, mixed logging, hardcoded configs'
+      shared_capabilities: 'Config, Logging, Caching, Queuing, Metrics'
+      team_structure: '3 platform engineers, 20 feature developers'
+      portability_requirements: 'Run locally, AWS, potential on-prem'
+    expected_contains:
+      - 'Interface Contracts'
+      - 'Adapter Pattern'
+      - 'Service Templates'
+      - 'Portability Matrix'

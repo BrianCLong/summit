@@ -1,0 +1,342 @@
+meta:
+  id: plan.code-review-quality@v1
+  owner: 'platform-engineering'
+  purpose: 'Improve PR reviews with structured quality signals and automation'
+  tags:
+    - dx
+    - code-review
+    - quality
+    - automation
+    - culture
+  guardrails:
+    - 'Automation must not replace human judgment'
+    - 'Review process must not slow down velocity'
+    - 'Feedback must be constructive'
+    - 'Standards must be achievable'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  current_review_process: string
+  team_size: string
+  common_issues: string
+  automation_goals: string
+  culture_constraints: string
+
+template: |
+  You are a DX Engineer improving code review quality for Summit/IntelGraph.
+
+  **Objective:** Improve PR reviews with quality signals.
+
+  **Current Review Process:**
+  {{current_review_process}}
+
+  **Team Size:**
+  {{team_size}}
+
+  **Common Issues:**
+  {{common_issues}}
+
+  **Automation Goals:**
+  {{automation_goals}}
+
+  **Culture Constraints:**
+  {{culture_constraints}}
+
+  ## Deliverables
+
+  ### 1. Review Rubric
+  ```yaml
+  rubric:
+    categories:
+      - name: Correctness
+        weight: 30%
+        criteria:
+          - Logic is correct
+          - Edge cases handled
+          - Error handling appropriate
+          - Tests cover changes
+        questions:
+          - Does this code do what the PR says it does?
+          - Are there any obvious bugs?
+          - What could go wrong?
+
+      - name: Design
+        weight: 25%
+        criteria:
+          - Appropriate abstraction level
+          - Single responsibility
+          - DRY (Don't Repeat Yourself)
+          - Extensible where needed
+        questions:
+          - Is this the right approach?
+          - Will this be maintainable?
+          - Are there simpler alternatives?
+
+      - name: Security
+        weight: 20%
+        criteria:
+          - Input validation
+          - Authentication/authorization
+          - No secrets in code
+          - Safe dependencies
+        questions:
+          - Could this be exploited?
+          - Is sensitive data protected?
+          - Are permissions checked?
+
+      - name: Performance
+        weight: 15%
+        criteria:
+          - No N+1 queries
+          - Appropriate caching
+          - Resource usage reasonable
+          - Scalability considered
+        questions:
+          - Will this be fast enough?
+          - What happens at scale?
+
+      - name: Readability
+        weight: 10%
+        criteria:
+          - Clear naming
+          - Appropriate comments
+          - Consistent style
+          - Self-documenting code
+        questions:
+          - Can I understand this quickly?
+          - Will others understand this?
+
+    scoring:
+      pass: 80%+ overall
+      needs_work: 60-79%
+      significant_concerns: <60%
+  ```
+
+  ### 2. Automated Checks
+  ```yaml
+  automation:
+    pre_review:
+      - name: lint
+        tool: ESLint + Prettier
+        blocking: true
+        output: Inline comments
+
+      - name: type_check
+        tool: TypeScript
+        blocking: true
+        output: Error list
+
+      - name: test
+        tool: Jest + Playwright
+        blocking: true
+        output: Test results
+
+      - name: coverage
+        tool: Jest coverage
+        blocking: false
+        threshold: 80%
+        output: Coverage report
+
+      - name: security
+        tool: Semgrep + Snyk
+        blocking: critical only
+        output: Vulnerability report
+
+      - name: complexity
+        tool: Custom (cognitive complexity)
+        blocking: false
+        threshold: 15
+        output: Complexity warnings
+
+    review_assist:
+      - name: pr_size
+        check: Lines changed < 400
+        action: Suggest split if large
+
+      - name: file_review_suggestions
+        tool: GitHub CODEOWNERS
+        action: Suggest reviewers by expertise
+
+      - name: related_tests
+        check: Test files changed match source files
+        action: Warn if tests missing
+
+      - name: documentation
+        check: README/docs updated for feature changes
+        action: Remind if missing
+
+    post_merge:
+      - name: deploy_preview
+        action: Comment with preview link
+
+      - name: performance_delta
+        action: Report bundle size change
+  ```
+
+  ### 3. Review Workflow
+  ```yaml
+  workflow:
+    pr_creation:
+      template: |
+        ## Summary
+        Brief description of changes.
+
+        ## Type
+        - [ ] Feature
+        - [ ] Bug fix
+        - [ ] Refactor
+        - [ ] Documentation
+
+        ## Changes
+        - Change 1
+        - Change 2
+
+        ## Testing
+        - How was this tested?
+        - Test commands run
+
+        ## Screenshots (if UI)
+        Before/after if applicable
+
+        ## Checklist
+        - [ ] Tests added/updated
+        - [ ] Documentation updated
+        - [ ] No console.logs
+        - [ ] Accessibility checked (if UI)
+
+    review_assignment:
+      automatic:
+        - CODEOWNERS for ownership
+        - Round-robin within team
+        - Load balancing (max 5 active reviews)
+
+      manual:
+        - Author can request specific reviewers
+        - For expertise or context
+
+    review_sla:
+      first_response: 24 hours
+      final_decision: 48 hours
+      expedited: Label "urgent" for 4-hour response
+
+    feedback:
+      labels:
+        - "nit:" - Minor suggestion, not blocking
+        - "optional:" - Take it or leave it
+        - "question:" - Need clarification
+        - "issue:" - Must be addressed
+        - "praise:" - Good job, keep doing this
+
+      tone_guidelines:
+        - Ask questions, don't demand
+        - Explain the "why"
+        - Offer alternatives
+        - Acknowledge good work
+        - Be respectful of effort
+  ```
+
+  ### 4. Metrics and Tracking
+  ```yaml
+  metrics:
+    review_efficiency:
+      - time_to_first_review: median time from PR open to first review
+      - time_to_merge: median time from PR open to merge
+      - review_cycles: average number of review rounds
+      - pr_size: average lines changed
+
+    review_quality:
+      - bugs_found_in_review: issues caught before merge
+      - post_merge_bugs: issues found after merge (lower is better)
+      - review_coverage: % of PRs with meaningful review comments
+
+    reviewer_load:
+      - reviews_per_person: distribution of review assignments
+      - pending_reviews: backlog by reviewer
+      - review_response_time: by reviewer
+
+    dashboards:
+      - Weekly review summary
+      - Reviewer leaderboard (constructive only)
+      - Trend analysis
+
+    alerts:
+      - PR pending review > 48 hours
+      - Reviewer backlog > 10 PRs
+      - Coverage drop on merge
+  ```
+
+  ### 5. Culture and Training
+  ```yaml
+  culture:
+    principles:
+      - PRs are collaborative, not adversarial
+      - Every review is a teaching opportunity
+      - Automation handles the boring stuff
+      - Humans focus on design and logic
+      - Speed and quality aren't opposed
+
+    training:
+      new_reviewers:
+        - Shadow experienced reviewers
+        - Start with smaller PRs
+        - Receive feedback on reviews
+        - Graduate to larger/critical PRs
+
+      materials:
+        - Review best practices guide
+        - Common patterns and anti-patterns
+        - Example good reviews
+        - Code review dojo (monthly)
+
+    recognition:
+      - Helpful review of the week
+      - Learning moments shared in retro
+      - Review quality in performance feedback
+
+    anti_patterns:
+      avoid:
+        - Nitpicking without substance
+        - Rubber-stamping without reading
+        - Personal style preferences as "issues"
+        - Blocking for days without response
+        - Review-bombing (many issues at once)
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Rubric documented and shared
+  - [ ] Automated checks in CI
+  - [ ] PR template updated
+  - [ ] Metrics dashboard live
+  - [ ] Training materials available
+
+  ## Rollback Plan
+  - Checks can be made non-blocking
+  - Rubric is guidance, not rigid
+  - Metrics for insight, not punishment
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'review-quality'
+    inputs:
+      current_review_process: 'Informal, 1 approval required, no structure'
+      team_size: '20 developers across 4 teams'
+      common_issues: 'Large PRs, slow reviews, inconsistent feedback'
+      automation_goals: 'Catch obvious issues, suggest reviewers'
+      culture_constraints: 'Avoid slowing down, keep collaborative'
+    expected_contains:
+      - 'Review Rubric'
+      - 'Automated Checks'
+      - 'Review Workflow'
+      - 'Culture'

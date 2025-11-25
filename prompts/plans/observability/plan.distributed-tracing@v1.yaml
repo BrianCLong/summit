@@ -1,0 +1,297 @@
+meta:
+  id: plan.distributed-tracing@v1
+  owner: 'platform-engineering'
+  purpose: 'Implement end-to-end distributed tracing for critical flows'
+  tags:
+    - observability
+    - tracing
+    - opentelemetry
+    - jaeger
+    - debugging
+  guardrails:
+    - 'Tracing overhead must be < 2%'
+    - 'Sensitive data must not be in traces'
+    - 'Sampling must balance cost and visibility'
+    - 'Context propagation must be consistent'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  critical_flows: string
+  current_instrumentation: string
+  backend_preference: string
+  sampling_requirements: string
+  integration_points: string
+
+template: |
+  You are an Observability Engineer implementing distributed tracing for Summit/IntelGraph.
+
+  **Objective:** End-to-end visibility with distributed traces.
+
+  **Critical Flows:**
+  {{critical_flows}}
+
+  **Current Instrumentation:**
+  {{current_instrumentation}}
+
+  **Backend Preference:**
+  {{backend_preference}}
+
+  **Sampling Requirements:**
+  {{sampling_requirements}}
+
+  **Integration Points:**
+  {{integration_points}}
+
+  ## Deliverables
+
+  ### 1. Tracing Architecture
+  ```yaml
+  architecture:
+    collector: OpenTelemetry Collector
+    backends:
+      primary: Jaeger | Tempo | Zipkin
+      secondary: DataDog | Honeycomb (optional)
+
+    sampling:
+      strategy: adaptive
+      default_rate: 10%
+      error_rate: 100%  # Sample all errors
+      slow_request_rate: 100%  # Sample requests > p99
+
+    context_propagation:
+      format: W3C Trace Context (traceparent, tracestate)
+      headers:
+        - traceparent
+        - tracestate
+        - baggage
+
+    data_flow:
+      1. Application generates spans
+      2. Spans sent to OTel Collector
+      3. Collector processes (sampling, enrichment)
+      4. Spans exported to backend
+      5. UI/API for querying
+  ```
+
+  ### 2. Critical Flow Instrumentation
+  ```yaml
+  flows:
+    - name: investigation_create
+      entry_point: POST /api/investigations
+      services:
+        - api-gateway
+        - investigation-service
+        - graph-engine
+        - notification-service
+      span_points:
+        - http_request
+        - database_query
+        - cache_lookup
+        - external_api_call
+        - message_publish
+      expected_spans: 8-12
+
+    - name: entity_search
+      entry_point: POST /graphql (query: searchEntities)
+      services:
+        - api-gateway
+        - graphql-server
+        - neo4j
+        - elasticsearch
+      span_points:
+        - graphql_resolve
+        - neo4j_query
+        - es_search
+      expected_spans: 5-10
+
+    - name: copilot_query
+      entry_point: POST /api/copilot/query
+      services:
+        - api-gateway
+        - copilot-service
+        - llm-provider
+        - context-service
+      span_points:
+        - context_retrieval
+        - llm_call
+        - response_processing
+      expected_spans: 6-8
+  ```
+
+  ### 3. Tracing Library Configuration
+  ```yaml
+  instrumentation:
+    typescript:
+      package: "@opentelemetry/sdk-node"
+      auto_instrumentation:
+        - "@opentelemetry/instrumentation-http"
+        - "@opentelemetry/instrumentation-express"
+        - "@opentelemetry/instrumentation-graphql"
+        - "@opentelemetry/instrumentation-pg"
+        - "@opentelemetry/instrumentation-redis"
+      setup: |
+        import { NodeSDK } from '@opentelemetry/sdk-node';
+        import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
+
+        const sdk = new NodeSDK({
+          serviceName: process.env.SERVICE_NAME,
+          traceExporter: new OTLPTraceExporter({
+            url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
+          }),
+          instrumentations: [
+            // auto-instrumentation modules
+          ],
+        });
+        sdk.start();
+
+    python:
+      package: "opentelemetry-distro"
+      auto_instrumentation:
+        - opentelemetry-instrumentation-flask
+        - opentelemetry-instrumentation-requests
+        - opentelemetry-instrumentation-sqlalchemy
+      setup: |
+        from opentelemetry import trace
+        from opentelemetry.sdk.trace import TracerProvider
+        from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+
+        provider = TracerProvider()
+        processor = BatchSpanProcessor(OTLPSpanExporter())
+        provider.add_span_processor(processor)
+        trace.set_tracer_provider(provider)
+
+    go:
+      package: "go.opentelemetry.io/otel"
+      instrumentation:
+        - otelhttp
+        - otelsql
+        - otelneo4j
+      setup: |
+        import (
+          "go.opentelemetry.io/otel"
+          "go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+        )
+
+        exporter, _ := otlptracegrpc.New(ctx)
+        tp := sdktrace.NewTracerProvider(
+          sdktrace.WithBatcher(exporter),
+          sdktrace.WithResource(resource.NewWithAttributes(...)),
+        )
+        otel.SetTracerProvider(tp)
+  ```
+
+  ### 4. Context Propagation
+  ```yaml
+  propagation:
+    http:
+      inject: |
+        // TypeScript
+        import { propagation, context } from '@opentelemetry/api';
+
+        const headers = {};
+        propagation.inject(context.active(), headers);
+        fetch(url, { headers });
+
+      extract: |
+        // Express middleware
+        app.use((req, res, next) => {
+          const ctx = propagation.extract(context.active(), req.headers);
+          // Continue with extracted context
+        });
+
+    message_queue:
+      kafka: |
+        // Producer
+        const headers = {};
+        propagation.inject(context.active(), headers);
+        producer.send({ ...message, headers });
+
+        // Consumer
+        const ctx = propagation.extract(context.active(), message.headers);
+        tracer.startSpan('process_message', {}, ctx);
+
+    graphql:
+      resolver: |
+        // Context passed through resolver chain
+        const span = tracer.startSpan('resolveEntity', {
+          parent: context.resolverContext.span,
+        });
+
+    database:
+      queries: |
+        // Span created automatically by instrumentation
+        // Trace ID added as comment (optional)
+        -- trace_id: abc123
+        SELECT * FROM entities WHERE id = $1;
+  ```
+
+  ### 5. Sample Trace Views
+  ```yaml
+  trace_views:
+    waterfall:
+      description: Timeline view of all spans
+      use_case: Understanding request flow
+      example_query: |
+        trace_id:abc123
+
+    service_graph:
+      description: Service dependency visualization
+      use_case: Understanding architecture
+      metrics:
+        - call_count
+        - error_rate
+        - latency_p99
+
+    compare:
+      description: Side-by-side trace comparison
+      use_case: Before/after optimization
+      features:
+        - Latency diff
+        - Span count diff
+        - Critical path highlight
+
+    error_analysis:
+      description: Filter to error traces
+      use_case: Debugging failures
+      query: |
+        status:error service:api-gateway
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] End-to-end traces visible for critical flows
+  - [ ] Context propagates across all services
+  - [ ] Sampling meets requirements
+  - [ ] Overhead < 2%
+  - [ ] Trace UI accessible
+
+  ## Rollback Plan
+  - Tracing can be disabled via env var
+  - Sampling can be reduced to 0%
+  - SDK is additive, no breaking changes
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'otel-tracing'
+    inputs:
+      critical_flows: 'Investigation CRUD, Entity search, Copilot queries, Export jobs'
+      current_instrumentation: 'Basic request logging, no distributed tracing'
+      backend_preference: 'Jaeger (self-hosted) or Tempo (if Grafana stack)'
+      sampling_requirements: '10% baseline, 100% errors, cost-conscious'
+      integration_points: 'HTTP, GraphQL, Neo4j, PostgreSQL, Redis, Kafka'
+    expected_contains:
+      - 'Tracing Architecture'
+      - 'Critical Flow'
+      - 'Context Propagation'
+      - 'Sample Trace Views'

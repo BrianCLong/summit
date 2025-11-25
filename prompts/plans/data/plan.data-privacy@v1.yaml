@@ -1,0 +1,336 @@
+meta:
+  id: plan.data-privacy@v1
+  owner: 'security-engineering'
+  purpose: 'Ensure privacy-aware data practices with masking and PII handling'
+  tags:
+    - privacy
+    - pii
+    - gdpr
+    - masking
+    - compliance
+  guardrails:
+    - 'PII must never be exposed unnecessarily'
+    - 'Data masking must be consistent'
+    - 'Deletion requests must be honored'
+    - 'Audit trail for data access'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  pii_types: string
+  data_stores: string
+  use_cases: string
+  compliance_requirements: string
+  access_patterns: string
+
+template: |
+  You are a Privacy Engineer implementing data privacy for Summit/IntelGraph.
+
+  **Objective:** Ensure privacy-aware data practices.
+
+  **PII Types:**
+  {{pii_types}}
+
+  **Data Stores:**
+  {{data_stores}}
+
+  **Use Cases:**
+  {{use_cases}}
+
+  **Compliance Requirements:**
+  {{compliance_requirements}}
+
+  **Access Patterns:**
+  {{access_patterns}}
+
+  ## Deliverables
+
+  ### 1. PII Classification Matrix
+  ```yaml
+  classification:
+    categories:
+      - category: direct_identifiers
+        sensitivity: high
+        examples:
+          - name
+          - email
+          - phone_number
+          - ssn
+          - passport_number
+        handling:
+          storage: encrypted
+          display: masked
+          logs: never
+          analytics: anonymized
+
+      - category: quasi_identifiers
+        sensitivity: medium
+        examples:
+          - date_of_birth
+          - zip_code
+          - job_title
+          - organization
+        handling:
+          storage: encrypted
+          display: role_based
+          logs: generalized
+          analytics: k_anonymity
+
+      - category: sensitive_attributes
+        sensitivity: high
+        examples:
+          - health_data
+          - financial_data
+          - biometric_data
+        handling:
+          storage: encrypted_at_rest
+          display: need_to_know
+          logs: never
+          analytics: aggregated_only
+
+    detection:
+      tools:
+        - Microsoft Presidio
+        - AWS Macie
+        - custom regex patterns
+      automation:
+        - Scan new data on ingest
+        - Periodic full scans
+        - Alert on unclassified data
+  ```
+
+  ### 2. Data Masking Policies
+  ```yaml
+  masking:
+    techniques:
+      - type: redaction
+        method: Replace with [REDACTED]
+        use_for: Logs, error messages
+        example:
+          input: "User john@example.com logged in"
+          output: "User [REDACTED] logged in"
+
+      - type: pseudonymization
+        method: Consistent hash mapping
+        use_for: Analytics, testing
+        example:
+          input: "john@example.com"
+          output: "user_abc123@masked.local"
+        reversible: true (with key)
+
+      - type: tokenization
+        method: Replace with random token
+        use_for: Payment data, SSN
+        example:
+          input: "4111-1111-1111-1111"
+          output: "tok_xyz789"
+        storage: Separate token vault
+
+      - type: generalization
+        method: Reduce precision
+        use_for: Quasi-identifiers
+        examples:
+          - age: 34 → "30-40"
+          - zip: 10001 → "100**"
+          - date: "1990-03-15" → "1990"
+
+      - type: data_synthesis
+        method: Generate fake but realistic data
+        use_for: Development, demos
+        tool: Faker, synthetic data generators
+
+    application:
+      by_context:
+        - context: production_api
+          mask_level: role_based
+        - context: logs
+          mask_level: full
+        - context: analytics
+          mask_level: pseudonymized
+        - context: development
+          mask_level: synthetic
+  ```
+
+  ### 3. Privacy Guardrails
+  ```yaml
+  guardrails:
+    code_level:
+      - name: pii_in_logs_check
+        tool: custom linter / Semgrep
+        rule: No logging of fields marked @PII
+        enforcement: CI block
+
+      - name: masked_response
+        tool: middleware
+        rule: Mask PII in API responses by default
+        override: Explicit annotation required
+
+    infrastructure:
+      - name: encryption_at_rest
+        scope: All databases
+        method: AES-256
+        key_management: Vault
+
+      - name: encryption_in_transit
+        scope: All connections
+        method: TLS 1.3
+
+    access_control:
+      - name: pii_access_role
+        required_for: Viewing unmasked PII
+        audit: All access logged
+        justification: Required for each access
+
+    monitoring:
+      - name: pii_leak_detection
+        tool: DLP (Data Loss Prevention)
+        scope: Outbound traffic, exports
+        action: Block and alert
+  ```
+
+  ### 4. Data Sanitization Matrix
+  ```yaml
+  sanitization:
+    by_data_type:
+      - type: email
+        display: j***@e***.com
+        logs: [EMAIL]
+        analytics: domain only
+        export: pseudonymized
+
+      - type: name
+        display: J*** S***
+        logs: [NAME]
+        analytics: null
+        export: pseudonymized
+
+      - type: phone
+        display: ***-***-1234
+        logs: [PHONE]
+        analytics: country code only
+        export: pseudonymized
+
+      - type: address
+        display: *** [City], [State]
+        logs: [ADDRESS]
+        analytics: zip3 only
+        export: generalized
+
+      - type: ssn
+        display: ***-**-1234
+        logs: [SSN]
+        analytics: never
+        export: never
+
+    implementation:
+      typescript: |
+        import { mask } from '@summit/privacy';
+
+        const maskedEmail = mask.email(user.email);
+        // "j***@e***.com"
+
+        const maskedForLogs = mask.forLogs(userData);
+        // All PII fields replaced with tokens
+
+      database:
+        views: |
+          CREATE VIEW masked_users AS
+          SELECT
+            id,
+            mask_email(email) as email,
+            mask_name(name) as name,
+            organization_id
+          FROM users;
+
+        row_level: |
+          -- Only show full data to authorized roles
+          CREATE POLICY pii_access ON users
+          USING (
+            current_user_has_role('pii_reader')
+            OR user_id = current_user_id()
+          );
+  ```
+
+  ### 5. Compliance Procedures
+  ```yaml
+  compliance:
+    gdpr:
+      right_to_access:
+        process:
+          1. Verify requester identity
+          2. Collect all data about subject
+          3. Format in portable format
+          4. Deliver securely within 30 days
+        automation: Subject Access Request API
+
+      right_to_erasure:
+        process:
+          1. Verify requester identity
+          2. Check for legal retention requirements
+          3. Delete or anonymize all data
+          4. Confirm deletion
+          5. Update audit log
+        automation: Deletion Request Queue
+
+      right_to_rectification:
+        process:
+          1. Verify requester identity
+          2. Validate correction request
+          3. Update data
+          4. Propagate to all systems
+        automation: Update Request API
+
+    data_retention:
+      policies:
+        - type: active_user_data
+          retention: Duration of service + 30 days
+        - type: audit_logs
+          retention: 7 years
+        - type: anonymized_analytics
+          retention: Indefinite
+        - type: deleted_user_data
+          retention: 0 (immediate deletion)
+
+      automation:
+        - Scheduled deletion jobs
+        - Retention policy enforcement
+        - Audit of deletions
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] PII classified across all stores
+  - [ ] Masking applied consistently
+  - [ ] GDPR requests honored
+  - [ ] Audit trail complete
+  - [ ] Documentation compliant
+
+  ## Rollback Plan
+  - Masking is additive, no rollback
+  - Deletion is irreversible by design
+  - Classification can be updated
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'privacy-implementation'
+    inputs:
+      pii_types: 'Names, emails, phone numbers, addresses, organization affiliations'
+      data_stores: 'Neo4j, PostgreSQL, Elasticsearch, logs'
+      use_cases: 'Investigation analysis, reporting, audit'
+      compliance_requirements: 'GDPR, CCPA, internal privacy policy'
+      access_patterns: 'Analysts view full data, API returns masked, logs fully redacted'
+    expected_contains:
+      - 'PII Classification'
+      - 'Data Masking'
+      - 'Privacy Guardrails'
+      - 'GDPR'
