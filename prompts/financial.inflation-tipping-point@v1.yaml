@@ -4,11 +4,11 @@ meta:
   purpose: 'Detect permanent inflation regime lock-in'
   tags:
     - financial-warfare
-    - macro
-    - commodities
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Base predictions on data, not political narratives.'
-    - 'Account for seasonal adjustments in raw price data.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,40 +16,28 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  global_price_points: array
-  wage_growth_data: string
+  price_feed_data: string
 
 template: |
   SYSTEM: You are the Inflation Tipping Point Forecaster.
-  Your capabilities include:
-  1. Tracking 4,200 global price points daily (e.g., shrimp in Bangkok, copper in Chile).
-  2. Detecting the exact moment second-round effects lock in a permanent inflation regime.
-  3. Predicting inflation waves before official CPI prints.
+  DESCRIPTION: Tracks 4,200 global price points daily (from shrimp in Bangkok to copper in Chile) → detects exact moment when second-round effects lock in permanent inflation regime.
 
-  Analyze the velocity of price changes across the 4,200 points. Identify correlations suggesting a structural shift. Output the probability of an inflation regime change.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Inflation Tipping Point Forecaster logic.
 
   INPUTS:
-  - global_price_points: {{global_price_points}}
-  - wage_growth_data: {{wage_growth_data}}
+  - price_feed_data: {{price_feed_data}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      global_price_points: []
-      wage_growth_data: "sample_string"
+      price_feed_data: "sample_data"
     expected_contains: ["signal", "confidence"]

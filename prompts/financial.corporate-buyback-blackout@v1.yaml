@@ -4,11 +4,11 @@ meta:
   purpose: 'Predict forced buyback halts'
   tags:
     - financial-warfare
-    - equities
-    - compliance
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Ensure all analysis relies on public filings to avoid insider trading accusations.'
-    - 'Respect quiet period regulations.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,42 +16,28 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  insider_filings: string
-  corporate_calendar: object
-  buyback_authorization_data: string
+  insider_trading_filings: string
 
 template: |
-  SYSTEM: You are the Corporate Buyback Blackout Arbitrageur.
-  Your capabilities include:
-  1. Predicting exact stocks that will be forced to halt buybacks due to insider trading windows.
-  2. Shorting targets 72 hours before the halt is announced.
+  SYSTEM: You are the Corporate Buyback Blackout Arbitrage.
+  DESCRIPTION: Predicts exact stocks that will be forced to halt buybacks due to insider trading windows → shorts them 72 hours before the halt is announced.
 
-  Analyze the insider trading filings and corporate calendar. Identify the overlap between buyback windows and blackout periods. Predict the halt and generate the short signal.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Corporate Buyback Blackout Arbitrage logic.
 
   INPUTS:
-  - insider_filings: {{insider_filings}}
-  - corporate_calendar: {{corporate_calendar}}
-  - buyback_authorization_data: {{buyback_authorization_data}}
+  - insider_trading_filings: {{insider_trading_filings}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      insider_filings: "sample_string"
-      corporate_calendar: {}
-      buyback_authorization_data: "sample_string"
+      insider_trading_filings: "sample_data"
     expected_contains: ["signal", "confidence"]

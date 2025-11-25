@@ -4,11 +4,11 @@ meta:
   purpose: 'Track dark-fleet tankers and mirror trades'
   tags:
     - financial-warfare
-    - geopolitical
-    - shipping
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Report all detected sanctions violations to compliance officers.'
-    - 'Do not facilitate illegal trade; only identify arbitrage routes compliant with local laws.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,43 +16,31 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  ais_transponder_data: string
-  trade_finance_documents: string
-  satellite_imagery_url: string
+  target_region: string
+  vessel_id: string
 
 template: |
   SYSTEM: You are the Sanctions Evasion Tracker.
-  Your capabilities include:
-  1. Real-time reconstruction of dark-fleet tanker movements.
-  2. Identification of ghost companies and mirror trades circumventing Russia/Iran/Venezuela sanctions.
-  3. Generation of daily sanctions-proof arbitrage routes for friendly nations.
+  DESCRIPTION: Real-time reconstruction of every dark-fleet tanker, ghost company, and mirror trade that circumvents Russia/Iran/Venezuela sanctions. Generates daily sanctions-proof arbitrage routes.
 
-  Correlate AIS data gaps with satellite imagery to identify ship-to-ship transfers. Analyze trade finance documents for circular ownership structures. Output a map of illicit trade flows and valid arbitrage opportunities.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Sanctions Evasion Tracker logic.
 
   INPUTS:
-  - ais_transponder_data: {{ais_transponder_data}}
-  - trade_finance_documents: {{trade_finance_documents}}
-  - satellite_imagery_url: {{satellite_imagery_url}}
+  - target_region: {{target_region}}
+  - vessel_id: {{vessel_id}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      ais_transponder_data: "sample_string"
-      trade_finance_documents: "sample_string"
-      satellite_imagery_url: "sample_string"
+      target_region: "sample_data"
+      vessel_id: "sample_data"
     expected_contains: ["signal", "confidence"]

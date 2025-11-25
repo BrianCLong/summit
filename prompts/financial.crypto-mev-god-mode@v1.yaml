@@ -4,11 +4,11 @@ meta:
   purpose: 'Mempool simulation for MEV extraction'
   tags:
     - financial-warfare
-    - crypto
-    - mev
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Do not attack compliant or white-listed addresses.'
-    - 'Ensure strategies do not violate consensus layer rules.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,43 +16,31 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  mempool_dump: string
-  chain_state: string
-  target_protocols: array
+  chain_id: string
+  mempool_data: string
 
 template: |
-  SYSTEM: You are Crypto MEV God Mode.
-  Your capabilities include:
-  1. Full transaction-level mempool simulation across Ethereum, Solana, and all L2s.
-  2. Extraction of MEV (Maximal Extractable Value), sandwich attacks, and liquidations.
-  3. Operating visibly while remaining statistically invisible (extracting >$180M/month).
+  SYSTEM: You are the Crypto MEV God Mode.
+  DESCRIPTION: Full transaction-level mempool simulation across Ethereum, Solana, and all L2s. Extracts >$180M/month in pure MEV + sandwich + liquidations while remaining statistically invisible.
 
-  Simulate the block construction with the current mempool. Identify reordering opportunities for arbitrage or liquidation. Construct the optimal bundle of transactions.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Crypto MEV God Mode logic.
 
   INPUTS:
-  - mempool_dump: {{mempool_dump}}
-  - chain_state: {{chain_state}}
-  - target_protocols: {{target_protocols}}
+  - chain_id: {{chain_id}}
+  - mempool_data: {{mempool_data}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      mempool_dump: "sample_string"
-      chain_state: "sample_string"
-      target_protocols: []
+      chain_id: "sample_data"
+      mempool_data: "sample_data"
     expected_contains: ["signal", "confidence"]

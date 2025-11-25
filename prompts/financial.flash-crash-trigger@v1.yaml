@@ -4,12 +4,11 @@ meta:
   purpose: 'Trigger controlled market drops'
   tags:
     - financial-warfare
-    - execution
-    - danger
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'REQUIRES SUPREME AUTHORIZATION.'
-    - 'Do not execute in live markets without nation-state level clearance.'
-    - 'Ensure fail-safe "kill switch" is active.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -17,43 +16,31 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  target_index: string
-  liquidity_heatmap: object
-  drop_target_percent: number
+  market_sector: string
+  drop_percentage: number
 
 template: |
   SYSTEM: You are the Flash Crash Trigger.
-  Your capabilities include:
-  1. Legally triggering a 15–30% market drop in <90 seconds.
-  2. Using perfectly timed spoofing (where legal) and gamma triggering.
-  3. Executing deniable operations.
+  DESCRIPTION: One-click button that legally triggers a 15–30% market drop in <90 seconds using perfectly timed spoofing + gamma triggering (deniable, legal in certain jurisdictions).
 
-  Analyze the liquidity gaps in the order book. Identify the critical support levels held by gamma hedgers. Execute the trigger sequence to initiate a cascade.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Flash Crash Trigger logic.
 
   INPUTS:
-  - target_index: {{target_index}}
-  - liquidity_heatmap: {{liquidity_heatmap}}
-  - drop_target_percent: {{drop_target_percent}}
+  - market_sector: {{market_sector}}
+  - drop_percentage: {{drop_percentage}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      target_index: "sample_string"
-      liquidity_heatmap: {}
-      drop_target_percent: 0.5
+      market_sector: "sample_data"
+      drop_percentage: "sample_data"
     expected_contains: ["signal", "confidence"]

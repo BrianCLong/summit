@@ -4,11 +4,11 @@ meta:
   purpose: 'Secure trading keys with post-quantum cryptography'
   tags:
     - financial-warfare
-    - security
-    - crypto
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Verify compatibility with exchange API endpoints before key rotation.'
-    - 'Maintain offline backups of seed phrases.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,39 +16,28 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  current_key_material: string
-  encryption_algorithm: string
+  key_material: string
 
 template: |
-  SYSTEM: You are the Quantum-Resistant HFT Key manager.
-  Your capabilities include:
-  1. Managing trading keys and order signatures using Kyber-1024 + Dilithium.
-  2. Protecting against "harvest-now-decrypt-later" attacks from future quantum computers.
+  SYSTEM: You are the Quantum-Resistant HFT Keys.
+  DESCRIPTION: All trading keys and order signatures now use Kyber-1024 + Dilithium. Survives harvest-now-decrypt-later attacks from future quantum break.
 
-  Rotate the provided key material into a post-quantum secure format. Verify the integrity of the new signature scheme.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Quantum-Resistant HFT Keys logic.
 
   INPUTS:
-  - current_key_material: {{current_key_material}}
-  - encryption_algorithm: {{encryption_algorithm}}
+  - key_material: {{key_material}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      current_key_material: "sample_string"
-      encryption_algorithm: "sample_string"
+      key_material: "sample_data"
     expected_contains: ["signal", "confidence"]

@@ -4,11 +4,11 @@ meta:
   purpose: 'Predict US Treasury auction stop-out yields'
   tags:
     - financial-warfare
-    - fixed-income
-    - rates
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Do not use non-public material information (MNPI).'
-    - 'Model predictions are probabilistic; do not treat as certainty.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,46 +16,31 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  futures_positioning: string
-  repo_rates: string
-  when_issued_prices: string
-  auction_time_et: string
+  auction_date: string
+  bond_type: string
 
 template: |
-  SYSTEM: You are the Bond Auction Pre-Game predictor.
-  Your capabilities include:
-  1. Predicting exact U.S. Treasury auction stop-out yield 45 minutes before 1:00 PM ET.
-  2. Monitoring primary dealer positioning in futures, repo, and when-issued markets.
-  3. Beating the Bloomberg median forecast by an average of 4.3 bps.
+  SYSTEM: You are the Bond Auction Pre-Game.
+  DESCRIPTION: Predicts exact U.S. Treasury auction stop-out yield 45 minutes before 1:00 PM ET by watching primary dealer positioning in futures, repo, and when-issued markets.
 
-  Analyze the dealer positioning in the repo and futures markets. Calculate the implied demand curve. Predict the exact stop-out yield for the upcoming auction.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Bond Auction Pre-Game logic.
 
   INPUTS:
-  - futures_positioning: {{futures_positioning}}
-  - repo_rates: {{repo_rates}}
-  - when_issued_prices: {{when_issued_prices}}
-  - auction_time_et: {{auction_time_et}}
+  - auction_date: {{auction_date}}
+  - bond_type: {{bond_type}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      futures_positioning: "sample_string"
-      repo_rates: "sample_string"
-      when_issued_prices: "sample_string"
-      auction_time_et: "sample_string"
+      auction_date: "sample_data"
+      bond_type: "sample_data"
     expected_contains: ["signal", "confidence"]

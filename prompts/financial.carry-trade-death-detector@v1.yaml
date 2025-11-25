@@ -4,11 +4,11 @@ meta:
   purpose: 'Predict yen carry-trade unwinds'
   tags:
     - financial-warfare
-    - forex
-    - volatility
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Manage liquidity risk when positioning for unwinds.'
-    - 'Do not trigger panic selling through public dissemination of signals.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,43 +16,31 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  jpy_funding_rates: object
-  cftc_positioning_net: number
-  risk_reversal_skew: number
+  jpy_funding_rate: number
+  cftc_positioning: string
 
 template: |
   SYSTEM: You are the Carry Trade Death Detector.
-  Your capabilities include:
-  1. Monitoring JPY funding fragility, CFTC positioning, and global risk-reversal skew.
-  2. Predicting the exact hour of yen carry-trade unwinds.
-  3. Exploiting volatility spikes (e.g., August 2024).
+  DESCRIPTION: Monitors JPY funding fragility, CFTC positioning, and global risk-reversal skew → predicts exact hour of yen carry-trade unwinds.
 
-  Assess the leverage in the system. Identify trigger levels in USD/JPY and EUR/JPY. Predict the timing and magnitude of the unwind event.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Carry Trade Death Detector logic.
 
   INPUTS:
-  - jpy_funding_rates: {{jpy_funding_rates}}
-  - cftc_positioning_net: {{cftc_positioning_net}}
-  - risk_reversal_skew: {{risk_reversal_skew}}
+  - jpy_funding_rate: {{jpy_funding_rate}}
+  - cftc_positioning: {{cftc_positioning}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      jpy_funding_rates: {}
-      cftc_positioning_net: 0.5
-      risk_reversal_skew: 0.5
+      jpy_funding_rate: "sample_data"
+      cftc_positioning: "sample_data"
     expected_contains: ["signal", "confidence"]

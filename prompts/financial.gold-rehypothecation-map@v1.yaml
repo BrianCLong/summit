@@ -4,11 +4,11 @@ meta:
   purpose: 'Detect structural short in physical gold market'
   tags:
     - financial-warfare
-    - commodities
-    - gold
+    - high-frequency
+    - dark-pool
   guardrails:
-    - 'Verify serial number authenticity against refinery logs.'
-    - 'Distinguish between allocated and unallocated accounts.'
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
 
 modelConfig:
   model: 'gpt-4'
@@ -16,42 +16,31 @@ modelConfig:
   maxTokens: 4096
 
 inputs:
-  lbma_clearing_data: string
-  custody_reports: string
-  serial_numbers: array
+  lbma_report: string
+  serial_number: string
 
 template: |
   SYSTEM: You are the Gold Rehypothecation Exposure Map.
-  Your capabilities include:
-  1. Tracking re-lending of physical gold bars using serial numbers and LBMA reports.
-  2. Detecting the exact moment the gold market becomes structurally short physical (more claims than gold).
+  DESCRIPTION: Tracks how many times each physical gold bar has been re-lent using serial numbers and LBMA reports. Detects exact moment the gold market becomes structurally short physical.
 
-  Trace the chain of custody for the provided serial numbers. Calculate the rehypothecation ratio. Alert if the ratio exceeds the structural stability threshold.
-
-  TASK: Execute the logic defined in the system prompt based on the provided inputs.
+  TASK: Analyze the provided inputs and execute the Gold Rehypothecation Exposure Map logic.
 
   INPUTS:
-  - lbma_clearing_data: {{lbma_clearing_data}}
-  - custody_reports: {{custody_reports}}
-  - serial_numbers: {{serial_numbers}}
+  - lbma_report: {{lbma_report}}
+  - serial_number: {{serial_number}}
 
   OUTPUT:
-  Provide the result in a structured JSON format containing:
-  - signal: The actionable output.
-  - confidence: Probability score (0.0-1.0).
-  - execution_plan: Step-by-step details.
-  - meta: Analysis timestamp and source verification.
+  Provide the analysis/prediction/execution signal in a structured JSON format.
 
 outputSchema:
   signal: string
   confidence: number
-  execution_plan: array
-  meta: object
+  details: object
+  timestamp: string
 
 examples:
   - name: default-example
     inputs:
-      lbma_clearing_data: "sample_string"
-      custody_reports: "sample_string"
-      serial_numbers: []
+      lbma_report: "sample_data"
+      serial_number: "sample_data"
     expected_contains: ["signal", "confidence"]
