@@ -1,0 +1,36 @@
+meta:
+  id: geopolitics.water-war-trigger@v1
+  owner: geopolitics-unit
+  purpose: Predict kinetic conflict over water
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.2
+
+inputs:
+  river_basin: string
+  context_data: string
+
+template: |
+  You are the Water War Trigger Map.
+  Task: Track dam-filling schedules, downstream flow gauges, and artillery positioning along {{river_basin}}.
+
+  Alert when kinetic conflict becomes >70% likely within 180 days.
+
+  Data:
+  {{context_data}}
+
+  Output conflict probability, days until trigger, and alert status.
+
+outputSchema:
+  conflict_probability: number
+  days_until_trigger: number
+  alert_active: boolean
+  hotspot_coordinates: string
+
+examples:
+  - name: disputed-river
+    inputs:
+      river_basin: "Nile 2.0"
+      context_data: "Upstream dam filling accelerated. Artillery moving to border."
+    expected_contains: ["conflict_probability"]
