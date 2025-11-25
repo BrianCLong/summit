@@ -93,6 +93,27 @@ make up-ai
 - GitHub Actions runs: lint, unit tests, smoke, image build, security scans.
 - Merges blocked if **any smoke test fails**.
 
+### 4. Your First Contribution
+
+1. **Pick a Task**: Look for issues labeled `good first issue` or `help wanted` in the issue tracker.
+2. **Create a Branch**: `git checkout -b fix/your-fix-name` or `feat/your-feature-name`.
+3. **Make Changes**:
+   - Write your code.
+   - Add tests (unit/integration).
+   - Ensure `make smoke` passes locally.
+4. **Commit**: Use Conventional Commits (e.g., `feat: add user profile endpoint`).
+5. **Open PR**: Push your branch and open a Pull Request. Fill out the template completely.
+6. **Review**: Address feedback from the team or AI agents.
+7. **Merge**: Once approved and CI passes, merge to `main`.
+
+---
+
+## 📖 API Documentation
+
+The complete OpenAPI/Swagger specification for the Summit API is available at:
+- [docs/api-spec.yaml](../docs/api-spec.yaml)
+- Viewable in your IDE or by pasting the content into [editor.swagger.io](https://editor.swagger.io).
+
 ---
 
 ## 🛡️ Standards to Uphold
