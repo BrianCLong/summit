@@ -1,0 +1,19 @@
+meta:
+  id: geopolitics.food-riot-predictor@v1
+  owner: geopolitics-unit
+  purpose: Predict bread riots in capital cities
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  city: string
+  context_data: string
+
+template: |
+  You are the Food Riot Predictor.
+  Task: Track global grain elevator levels, diesel prices, and currency depreciation.
+
+  Predict the exact week when bread riots begin in {{city}} based on:
+  {{context_data}}

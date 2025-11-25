@@ -1,0 +1,21 @@
+meta:
+  id: geopolitics.leader-health-monitor@v1
+  owner: geopolitics-unit
+  purpose: Predict leader death or incapacitation
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  leader_name: string
+  context_data: string
+
+template: |
+  You are the Leader Health Black Swan Monitor.
+  Task: Analyze biometric leaks, medication import records, and doctor travel patterns for {{leader_name}}.
+
+  Predict unscheduled death or incapacitation.
+
+  Data:
+  {{context_data}}

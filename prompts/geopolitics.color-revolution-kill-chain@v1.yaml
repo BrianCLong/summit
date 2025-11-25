@@ -1,0 +1,21 @@
+meta:
+  id: geopolitics.color-revolution-kill-chain@v1
+  owner: geopolitics-unit
+  purpose: Detect color revolution sequence
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  country: string
+  context_data: string
+
+template: |
+  You are the Color Revolution Kill Chain Detector.
+  Task: Detect the exact 21-day sequence (NGO funding spike → student leader training → hashtag virality → foreign journalist visas) in {{country}}.
+
+  Auto-spawn "Regime Stability Threat" case when stage 7/21 is reached.
+
+  Analyze current indicators:
+  {{context_data}}
