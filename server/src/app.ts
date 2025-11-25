@@ -7,6 +7,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
+import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
+import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
+import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
@@ -85,6 +88,32 @@ export const createApp = async () => {
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
   app.use(httpCacheMiddleware);
+
+  // Telemetry middleware
+  app.use((req, res, next) => {
+    snapshotter.trackRequest(req);
+    const start = process.hrtime();
+    telemetry.incrementActiveConnections();
+    telemetry.subsystems.api.requests.add(1);
+
+    res.on('finish', () => {
+      snapshotter.untrackRequest(req);
+      const diff = process.hrtime(start);
+      const duration = diff[0] * 1e3 + diff[1] * 1e-6;
+      telemetry.recordRequest(duration, {
+        method: req.method,
+        route: req.route?.path ?? req.path,
+        status: res.statusCode,
+      });
+      telemetry.decrementActiveConnections();
+
+      if (res.statusCode >= 500) {
+        telemetry.subsystems.api.errors.add(1);
+      }
+    });
+
+    next();
+  });
 
   // Health endpoints (exempt from rate limiting)
   const healthRouter = (await import('./routes/health.js')).default;
@@ -269,6 +298,8 @@ export const createApp = async () => {
       // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
       // though import side-effects usually suffice.
   }
+
+  logger.info('Anomaly detector activated.');
 
   return app;
 };
