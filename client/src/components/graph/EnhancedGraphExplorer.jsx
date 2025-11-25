@@ -729,24 +729,27 @@ function EnhancedGraphExplorer() {
   }, []);
 
   useEffect(() => {
-    nextUnapplied((entry) => {
-      const payload = entry.payload || {};
-      if (entry.event === 'graph:node_added' && payload.node) {
-        dispatch(addNode(payload.node));
-      }
-      if (entry.event === 'graph:edge_added' && payload.edge) {
-        dispatch(addEdge(payload.edge));
-      }
-      if (entry.event === 'graph:node_deleted' && payload.nodeId) {
-        dispatch(deleteNode(payload.nodeId));
-      }
-      if (entry.event === 'graph:edge_deleted' && payload.edgeId) {
-        dispatch(deleteEdge(payload.edgeId));
-      }
-      if (entry.event === 'graph:layout_changed' && payload.layout) {
-        setCurrentLayout(payload.layout);
-      }
-    });
+    let applied;
+    do {
+      applied = nextUnapplied((entry) => {
+        const payload = entry.payload || {};
+        if (entry.event === 'graph:node_added' && payload.node) {
+          dispatch(addNode(payload.node));
+        }
+        if (entry.event === 'graph:edge_added' && payload.edge) {
+          dispatch(addEdge(payload.edge));
+        }
+        if (entry.event === 'graph:node_deleted' && payload.nodeId) {
+          dispatch(deleteNode(payload.nodeId));
+        }
+        if (entry.event === 'graph:edge_deleted' && payload.edgeId) {
+          dispatch(deleteEdge(payload.edgeId));
+        }
+        if (entry.event === 'graph:layout_changed' && payload.layout) {
+          setCurrentLayout(payload.layout);
+        }
+      });
+    } while (applied);
   }, [dispatch, nextUnapplied]);
 
   useEffect(() => {
@@ -1081,7 +1084,9 @@ function EnhancedGraphExplorer() {
     // Edge creation events
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEles) => {
       const newEdge = addedEles[0];
-      dispatch(addEdge(newEdge.data()));
+      const edgeData = newEdge.data();
+      dispatch(addEdge(edgeData));
+      recordOperation('graph:edge_added', { edge: edgeData });
     });
   };
 
@@ -1274,10 +1279,17 @@ function EnhancedGraphExplorer() {
   const handleDeleteElement = (element) => {
     if (element.isNode && element.isNode()) {
       dispatch(deleteNode(element.id()));
-      recordOperation('graph:node_deleted', { nodeId: element.id() });
+      recordOperation('graph:node_deleted', {
+        nodeId: element.id(),
+        node: element.data(),
+        position: element.position(),
+      });
     } else if (element.isEdge && element.isEdge()) {
       dispatch(deleteEdge(element.id()));
-      recordOperation('graph:edge_deleted', { edgeId: element.id() });
+      recordOperation('graph:edge_deleted', {
+        edgeId: element.id(),
+        edge: element.data(),
+      });
     }
   };
 

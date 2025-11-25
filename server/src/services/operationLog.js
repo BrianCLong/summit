@@ -76,9 +76,36 @@ class OperationLogManager {
     if (!target) return null;
 
     const vector = this.mergeVector(state, authorId || clientId || 'unknown');
+    let revertEvent = target.event;
+    let revertPayload = { ...(target.payload || {}) };
+
+    if (target.event === 'graph:node_added') {
+      revertEvent = 'graph:node_deleted';
+      revertPayload = { nodeId: target.payload?.node?.id || target.payload?.nodeId };
+    }
+
+    if (target.event === 'graph:edge_added') {
+      revertEvent = 'graph:edge_deleted';
+      revertPayload = { edgeId: target.payload?.edge?.id || target.payload?.edgeId };
+    }
+
+    if (target.event === 'graph:node_deleted') {
+      revertEvent = 'graph:node_added';
+      revertPayload = {
+        nodeId: target.payload?.nodeId,
+        node: target.payload?.node,
+        position: target.payload?.position,
+      };
+    }
+
+    if (target.event === 'graph:edge_deleted') {
+      revertEvent = 'graph:edge_added';
+      revertPayload = { edge: target.payload?.edge, edgeId: target.payload?.edgeId };
+    }
+
     const revert = {
       opId: `undo-${target.opId}-${Date.now()}`,
-      event: 'collab:undo',
+      event: revertEvent,
       investigationId,
       authorId: authorId || clientId || 'unknown',
       targetOpId: target.opId,
@@ -86,7 +113,7 @@ class OperationLogManager {
       version: state.entries.length + 1,
       versionVector: { ...vector },
       status: 'applied',
-      payload: { targetOpId: target.opId },
+      payload: { ...revertPayload, targetOpId: target.opId },
     };
 
     state.entries.push(revert);
