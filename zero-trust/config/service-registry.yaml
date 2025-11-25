@@ -1,0 +1,443 @@
+# Service Identity Registry
+# Comprehensive registry of all services and their SPIFFE identities
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-registry
+  namespace: intelgraph-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: service-registry
+data:
+  services.yaml: |
+    # Service Registry Version
+    version: "1.0.0"
+    lastUpdated: "2025-11-25T00:00:00Z"
+
+    # Service Categories and Definitions
+    categories:
+      # Core Platform Services
+      core:
+        description: "Core platform infrastructure services"
+        services:
+          - name: api-gateway
+            namespace: intelgraph-ga
+            serviceAccount: ga-gateway
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-gateway
+            ports:
+              - name: graphql
+                port: 4000
+                protocol: TCP
+              - name: websocket
+                port: 4001
+                protocol: TCP
+              - name: metrics
+                port: 9090
+                protocol: TCP
+            tier: critical
+
+          - name: api-server
+            namespace: intelgraph-ga
+            serviceAccount: intelgraph-api
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/intelgraph-api
+            ports:
+              - name: http
+                port: 4001
+                protocol: TCP
+              - name: metrics
+                port: 9090
+                protocol: TCP
+            tier: critical
+
+          - name: adminsec
+            namespace: intelgraph-ga
+            serviceAccount: ga-adminsec
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-adminsec
+            ports:
+              - name: http
+                port: 3000
+                protocol: TCP
+              - name: grpc
+                port: 3001
+                protocol: TCP
+              - name: metrics
+                port: 9090
+                protocol: TCP
+            tier: critical
+
+          - name: authz-gateway
+            namespace: intelgraph-ga
+            serviceAccount: authz-gateway
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/authz-gateway
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 9091
+                protocol: TCP
+            tier: critical
+
+      # Intelligence Services
+      intelligence:
+        description: "Intelligence analysis and processing services"
+        services:
+          - name: graphai
+            namespace: intelgraph-ga
+            serviceAccount: ga-graphai
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-graphai
+            ports:
+              - name: http
+                port: 8000
+                protocol: TCP
+            tier: high
+
+          - name: osint-service
+            namespace: intelgraph-ga
+            serviceAccount: ga-osint
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-osint
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+            tier: high
+
+          - name: fintel-service
+            namespace: intelgraph-ga
+            serviceAccount: ga-fintel
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-fintel
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+            tier: high
+
+          - name: cyber-service
+            namespace: intelgraph-ga
+            serviceAccount: ga-cyber
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-cyber
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+            tier: high
+
+          - name: tradecraft-service
+            namespace: intelgraph-ga
+            serviceAccount: ga-tradecraft
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-tradecraft
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+            tier: high
+
+          - name: nlp-service
+            namespace: intelgraph-ai
+            serviceAccount: nlp-service
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ai/sa/nlp-service
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 50051
+                protocol: TCP
+            tier: high
+
+      # Data Services
+      data:
+        description: "Data storage and processing services"
+        services:
+          - name: graph-core
+            namespace: intelgraph-data
+            serviceAccount: graph-core
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-data/sa/graph-core
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 50051
+                protocol: TCP
+            tier: critical
+
+          - name: neo4j
+            namespace: intelgraph-data
+            serviceAccount: neo4j
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-data/sa/neo4j
+            ports:
+              - name: bolt
+                port: 7687
+                protocol: TCP
+              - name: http
+                port: 7474
+                protocol: TCP
+              - name: https
+                port: 7473
+                protocol: TCP
+              - name: cluster
+                port: 5000
+                protocol: TCP
+              - name: raft
+                port: 6000
+                protocol: TCP
+              - name: discovery
+                port: 7000
+                protocol: TCP
+            tier: critical
+
+          - name: postgresql
+            namespace: intelgraph-data
+            serviceAccount: postgresql
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-data/sa/postgresql
+            ports:
+              - name: postgres
+                port: 5432
+                protocol: TCP
+              - name: metrics
+                port: 9187
+                protocol: TCP
+            tier: critical
+
+          - name: redis
+            namespace: intelgraph-data
+            serviceAccount: redis
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-data/sa/redis
+            ports:
+              - name: redis
+                port: 6379
+                protocol: TCP
+              - name: sentinel
+                port: 26379
+                protocol: TCP
+              - name: metrics
+                port: 9121
+                protocol: TCP
+            tier: critical
+
+          - name: kafka
+            namespace: intelgraph-data
+            serviceAccount: kafka
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-data/sa/kafka
+            ports:
+              - name: kafka
+                port: 9092
+                protocol: TCP
+              - name: kafka-internal
+                port: 9093
+                protocol: TCP
+              - name: kafka-controller
+                port: 9094
+                protocol: TCP
+            tier: high
+
+      # Analytics Services
+      analytics:
+        description: "Analytics and ML services"
+        services:
+          - name: analytics-engine
+            namespace: intelgraph-analytics
+            serviceAccount: analytics-engine
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-analytics/sa/analytics-engine
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 50051
+                protocol: TCP
+            tier: high
+
+          - name: stream-processor
+            namespace: intelgraph-analytics
+            serviceAccount: stream-processor
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-analytics/sa/stream-processor
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+            tier: high
+
+          - name: prediction-service
+            namespace: intelgraph-ai
+            serviceAccount: prediction-service
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ai/sa/prediction-service
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 50051
+                protocol: TCP
+            tier: high
+
+      # AI Services
+      ai:
+        description: "AI and ML model serving services"
+        services:
+          - name: ai-service-platform
+            namespace: intelgraph-ai
+            serviceAccount: ai-service-platform
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ai/sa/ai-service-platform
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 50051
+                protocol: TCP
+            tier: high
+
+          - name: model-serving
+            namespace: intelgraph-ai
+            serviceAccount: model-serving
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ai/sa/model-serving
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 8081
+                protocol: TCP
+            tier: high
+
+          - name: copilot
+            namespace: intelgraph-ai
+            serviceAccount: copilot
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ai/sa/copilot
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: websocket
+                port: 8081
+                protocol: TCP
+            tier: high
+
+      # Forensics & Audit Services
+      forensics:
+        description: "Forensics, audit, and compliance services"
+        services:
+          - name: forensics-service
+            namespace: intelgraph-ga
+            serviceAccount: ga-forensics
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-forensics
+            ports:
+              - name: http
+                port: 9000
+                protocol: TCP
+            tier: high
+
+          - name: audit-service
+            namespace: intelgraph-system
+            serviceAccount: audit-svc
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-system/sa/audit-svc
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 50051
+                protocol: TCP
+            tier: critical
+
+          - name: prov-ledger
+            namespace: intelgraph-system
+            serviceAccount: prov-ledger
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-system/sa/prov-ledger
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+              - name: grpc
+                port: 50051
+                protocol: TCP
+            tier: critical
+
+      # Worker Services
+      workers:
+        description: "Background processing and worker services"
+        services:
+          - name: worker
+            namespace: intelgraph-ga
+            serviceAccount: ga-worker
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-worker
+            ports:
+              - name: health
+                port: 8080
+                protocol: TCP
+            tier: high
+
+          - name: exporter
+            namespace: intelgraph-system
+            serviceAccount: exporter
+            spiffeId: spiffe://intelgraph.local/ns/intelgraph-system/sa/exporter
+            ports:
+              - name: http
+                port: 8080
+                protocol: TCP
+            tier: medium
+
+      # Observability Services
+      observability:
+        description: "Monitoring and observability services"
+        services:
+          - name: prometheus
+            namespace: monitoring
+            serviceAccount: prometheus
+            spiffeId: spiffe://intelgraph.local/ns/monitoring/sa/prometheus
+            ports:
+              - name: http
+                port: 9090
+                protocol: TCP
+            tier: critical
+
+          - name: grafana
+            namespace: monitoring
+            serviceAccount: grafana
+            spiffeId: spiffe://intelgraph.local/ns/monitoring/sa/grafana
+            ports:
+              - name: http
+                port: 3000
+                protocol: TCP
+            tier: high
+
+          - name: otel-collector
+            namespace: observability
+            serviceAccount: otel-collector
+            spiffeId: spiffe://intelgraph.local/ns/observability/sa/otel-collector
+            ports:
+              - name: otlp-grpc
+                port: 4317
+                protocol: TCP
+              - name: otlp-http
+                port: 4318
+                protocol: TCP
+              - name: prometheus
+                port: 8889
+                protocol: TCP
+            tier: high
+
+    # Service Tier Definitions
+    tiers:
+      critical:
+        description: "Platform-critical services that must be highly available"
+        sla: "99.99%"
+        maxLatency: "100ms"
+
+      high:
+        description: "Important services with high availability requirements"
+        sla: "99.9%"
+        maxLatency: "500ms"
+
+      medium:
+        description: "Standard services with normal availability"
+        sla: "99.5%"
+        maxLatency: "1000ms"
+
+      low:
+        description: "Non-critical services"
+        sla: "99%"
+        maxLatency: "5000ms"

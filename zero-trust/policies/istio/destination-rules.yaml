@@ -1,0 +1,289 @@
+# Istio DestinationRules
+# mTLS and traffic management configuration
+
+---
+# Global destination rule for all services
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: global-mtls
+  namespace: istio-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  host: "*.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+
+---
+# IntelGraph GA services
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: intelgraph-ga-services
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+spec:
+  host: "*.intelgraph-ga.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 10s
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 10
+      minHealthPercent: 50
+  exportTo:
+    - "."
+    - "istio-system"
+
+---
+# API Gateway destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: api-gateway
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+    app.kubernetes.io/part-of: api-gateway
+spec:
+  host: ga-gateway.intelgraph-ga.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 500
+        connectTimeout: 5s
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 500
+        http2MaxRequests: 5000
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 5s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 20
+    loadBalancer:
+      simple: LEAST_REQUEST
+
+---
+# API Server destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: api-server
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+    app.kubernetes.io/part-of: api-server
+spec:
+  host: intelgraph-api.intelgraph-ga.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 200
+        connectTimeout: 5s
+      http:
+        http1MaxPendingRequests: 200
+        http2MaxRequests: 2000
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 10
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+# Neo4j destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: neo4j
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+spec:
+  host: neo4j.intelgraph-data.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 50
+        connectTimeout: 10s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 50
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+# PostgreSQL destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: postgresql
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+spec:
+  host: postgresql.intelgraph-data.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 10s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 50
+
+---
+# Redis destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: redis
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+spec:
+  host: redis.intelgraph-data.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 200
+        connectTimeout: 5s
+    outlierDetection:
+      consecutive5xxErrors: 10
+      interval: 5s
+      baseEjectionTime: 10s
+      maxEjectionPercent: 20
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+# Kafka destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: kafka
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+spec:
+  host: kafka.intelgraph-data.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 10s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+# AI Services destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ai-services
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+spec:
+  host: "*.intelgraph-ai.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 50
+        connectTimeout: 30s
+        tcpKeepalive:
+          time: 3600s
+          interval: 60s
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        idleTimeout: 3600s
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 20
+    loadBalancer:
+      simple: LEAST_REQUEST
+
+---
+# Analytics Services destination rule
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: analytics-services
+  namespace: intelgraph-analytics
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: traffic-management
+spec:
+  host: "*.intelgraph-analytics.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 75
+        connectTimeout: 15s
+      http:
+        http1MaxPendingRequests: 75
+        http2MaxRequests: 500
+        idleTimeout: 1800s
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 20s
+      baseEjectionTime: 45s
+      maxEjectionPercent: 15
+    loadBalancer:
+      simple: ROUND_ROBIN

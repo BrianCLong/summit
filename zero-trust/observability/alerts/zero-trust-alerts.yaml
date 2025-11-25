@@ -1,0 +1,282 @@
+# Zero-Trust Alerting Rules
+# Prometheus alerting for zero-trust policy violations and security events
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: zero-trust-alerts
+  namespace: monitoring
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: alerting
+    prometheus: main
+    role: alert-rules
+spec:
+  groups:
+    #############################################
+    # POLICY VIOLATION ALERTS
+    #############################################
+    - name: zero-trust.policy-violations
+      interval: 30s
+      rules:
+        - alert: ZeroTrustPolicyDenialRateHigh
+          expr: |
+            sum(rate(istio_requests_total{response_code="403"}[5m])) by (destination_service_name)
+            /
+            sum(rate(istio_requests_total[5m])) by (destination_service_name)
+            > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            category: security
+            team: platform-security
+          annotations:
+            summary: "High policy denial rate for {{ $labels.destination_service_name }}"
+            description: "Service {{ $labels.destination_service_name }} is experiencing a denial rate of {{ $value | humanizePercentage }} over the last 5 minutes. This may indicate misconfigured policies or an attack."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/policy-denials"
+
+        - alert: ZeroTrustUnauthorizedAccessAttempt
+          expr: |
+            sum(increase(opa_decision_total{decision="deny", policy="zerotrust.service_authz"}[5m])) by (source_service, destination_service)
+            > 10
+          for: 2m
+          labels:
+            severity: critical
+            category: security
+            team: platform-security
+          annotations:
+            summary: "Unauthorized access attempts detected"
+            description: "{{ $value }} unauthorized access attempts from {{ $labels.source_service }} to {{ $labels.destination_service }} in the last 5 minutes."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/unauthorized-access"
+
+        - alert: ZeroTrustNetworkPolicyViolation
+          expr: |
+            sum(increase(cilium_drop_count_total{reason="Policy denied"}[5m])) by (destination_namespace, destination_pod)
+            > 100
+          for: 5m
+          labels:
+            severity: warning
+            category: security
+            team: platform-security
+          annotations:
+            summary: "Network policy violations detected"
+            description: "{{ $value }} packets dropped due to network policy violations for {{ $labels.destination_pod }} in {{ $labels.destination_namespace }}."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/network-policy-violations"
+
+    #############################################
+    # mTLS ALERTS
+    #############################################
+    - name: zero-trust.mtls
+      interval: 30s
+      rules:
+        - alert: MTLSHandshakeFailureRateHigh
+          expr: |
+            sum(rate(istio_tcp_connections_closed_total{connection_security_policy!="mutual_tls"}[5m])) by (destination_service_name)
+            /
+            sum(rate(istio_tcp_connections_opened_total[5m])) by (destination_service_name)
+            > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            category: security
+            team: platform-security
+          annotations:
+            summary: "High mTLS handshake failure rate for {{ $labels.destination_service_name }}"
+            description: "mTLS handshake failures are at {{ $value | humanizePercentage }} for {{ $labels.destination_service_name }}. Check certificate validity and mesh configuration."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/mtls-failures"
+
+        - alert: MTLSNotEnforced
+          expr: |
+            sum(istio_tcp_connections_opened_total{connection_security_policy!="mutual_tls"}) by (destination_service_name, destination_namespace)
+            > 0
+          for: 10m
+          labels:
+            severity: critical
+            category: security
+            team: platform-security
+          annotations:
+            summary: "Non-mTLS connections detected to {{ $labels.destination_service_name }}"
+            description: "Service {{ $labels.destination_service_name }} in {{ $labels.destination_namespace }} is accepting non-mTLS connections. This violates zero-trust policy."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/mtls-enforcement"
+
+        - alert: MTLSCertificateExpiryWarning
+          expr: |
+            (spire_agent_svid_expiry_time_seconds - time()) / 3600 < 24
+          for: 5m
+          labels:
+            severity: warning
+            category: security
+            team: platform-security
+          annotations:
+            summary: "SVID certificate expiring soon"
+            description: "SVID certificate will expire in {{ $value | humanize }} hours. Certificate rotation should happen automatically."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/certificate-rotation"
+
+        - alert: MTLSCertificateExpired
+          expr: |
+            (spire_agent_svid_expiry_time_seconds - time()) < 0
+          for: 1m
+          labels:
+            severity: critical
+            category: security
+            team: platform-security
+          annotations:
+            summary: "SVID certificate has expired"
+            description: "SVID certificate has expired. Service-to-service communication will fail."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/certificate-rotation"
+
+    #############################################
+    # SPIFFE/SPIRE ALERTS
+    #############################################
+    - name: zero-trust.spire
+      interval: 30s
+      rules:
+        - alert: SPIREServerDown
+          expr: |
+            up{job="spire-server"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            category: security
+            team: platform-security
+          annotations:
+            summary: "SPIRE server is down"
+            description: "SPIRE server has been down for more than 2 minutes. New workload certificates cannot be issued."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/spire-server-down"
+
+        - alert: SPIREAgentDown
+          expr: |
+            sum(up{job="spire-agent"}) by (instance)
+            == 0
+          for: 5m
+          labels:
+            severity: critical
+            category: security
+            team: platform-security
+          annotations:
+            summary: "SPIRE agent down on {{ $labels.instance }}"
+            description: "SPIRE agent on {{ $labels.instance }} has been down for more than 5 minutes. Workloads on this node cannot get certificates."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/spire-agent-down"
+
+        - alert: SPIRESVIDRotationFailure
+          expr: |
+            increase(spire_agent_svid_rotation_failure_total[15m]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            category: security
+            team: platform-security
+          annotations:
+            summary: "SVID rotation failures detected"
+            description: "{{ $value }} SVID rotation failures in the last 15 minutes. Check SPIRE agent connectivity to server."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/svid-rotation"
+
+        - alert: SPIREHighLatency
+          expr: |
+            histogram_quantile(0.99, rate(spire_server_svid_creation_duration_seconds_bucket[5m])) > 1
+          for: 10m
+          labels:
+            severity: warning
+            category: performance
+            team: platform-security
+          annotations:
+            summary: "High SVID creation latency"
+            description: "99th percentile SVID creation latency is {{ $value | humanizeDuration }}. Check SPIRE server resources."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/spire-performance"
+
+    #############################################
+    # OPA/AUTHORIZATION ALERTS
+    #############################################
+    - name: zero-trust.opa
+      interval: 30s
+      rules:
+        - alert: OPAPolicyEvaluationErrors
+          expr: |
+            sum(rate(opa_decision_errors_total[5m])) by (policy) > 0
+          for: 5m
+          labels:
+            severity: warning
+            category: security
+            team: platform-security
+          annotations:
+            summary: "OPA policy evaluation errors for {{ $labels.policy }}"
+            description: "OPA policy {{ $labels.policy }} is experiencing evaluation errors. Check policy syntax and input data."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/opa-errors"
+
+        - alert: OPAHighLatency
+          expr: |
+            histogram_quantile(0.99, rate(opa_decision_latency_seconds_bucket[5m])) > 0.1
+          for: 10m
+          labels:
+            severity: warning
+            category: performance
+            team: platform-security
+          annotations:
+            summary: "High OPA policy evaluation latency"
+            description: "99th percentile OPA evaluation latency is {{ $value | humanizeDuration }}. This may impact request latency."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/opa-performance"
+
+        - alert: OPAPolicyLoadFailure
+          expr: |
+            sum(opa_bundle_last_successful_activation_time) by (name)
+            <
+            (time() - 3600)
+          for: 15m
+          labels:
+            severity: critical
+            category: security
+            team: platform-security
+          annotations:
+            summary: "OPA bundle not updated for {{ $labels.name }}"
+            description: "OPA bundle {{ $labels.name }} has not been updated in over an hour. Policy may be stale."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/opa-bundle"
+
+    #############################################
+    # SECURITY INCIDENT ALERTS
+    #############################################
+    - name: zero-trust.security-incidents
+      interval: 15s
+      rules:
+        - alert: PotentialLateralMovement
+          expr: |
+            sum(increase(opa_decision_total{decision="deny", reason=~".*unauthorized.*"}[5m])) by (source_namespace, destination_namespace)
+            > 50
+            and
+            source_namespace != destination_namespace
+          for: 2m
+          labels:
+            severity: critical
+            category: security-incident
+            team: security-operations
+          annotations:
+            summary: "Potential lateral movement detected"
+            description: "High volume of cross-namespace denied requests from {{ $labels.source_namespace }} to {{ $labels.destination_namespace }}. Possible lateral movement attempt."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/lateral-movement"
+
+        - alert: BruteForceAuthAttempts
+          expr: |
+            sum(increase(istio_requests_total{response_code="401", destination_service_name="ga-adminsec"}[5m])) by (source_workload)
+            > 100
+          for: 5m
+          labels:
+            severity: critical
+            category: security-incident
+            team: security-operations
+          annotations:
+            summary: "Possible brute force authentication attempt"
+            description: "{{ $value }} failed authentication attempts from {{ $labels.source_workload }} in the last 5 minutes."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/brute-force"
+
+        - alert: UnusualDataExfiltration
+          expr: |
+            sum(rate(istio_tcp_sent_bytes_total[5m])) by (source_workload, destination_workload)
+            > 100000000  # 100MB/s
+          for: 10m
+          labels:
+            severity: warning
+            category: security-incident
+            team: security-operations
+          annotations:
+            summary: "Unusual data transfer detected"
+            description: "High data transfer rate ({{ $value | humanize1024 }}/s) from {{ $labels.source_workload }} to {{ $labels.destination_workload }}."
+            runbook_url: "https://docs.intelgraph.io/runbooks/zero-trust/data-exfiltration"

@@ -1,0 +1,558 @@
+# Network Policies for Database Services
+# PostgreSQL, Neo4j, Redis, Kafka
+
+---
+# PostgreSQL Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-ingress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: postgresql
+    policy.intelgraph.io/type: database-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from API Server
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: intelgraph-api
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow from Worker pods
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-worker
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow from Analytics Engine
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-analytics
+          podSelector:
+            matchLabels:
+              app: analytics-engine
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow from Stream Processor
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-analytics
+          podSelector:
+            matchLabels:
+              app: stream-processor
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow from Audit Service
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-system
+          podSelector:
+            matchLabels:
+              app: audit-svc
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow from SPIRE Server
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: spire-system
+          podSelector:
+            matchLabels:
+              app: spire-server
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow replication between PostgreSQL pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow backup jobs
+    - from:
+        - podSelector:
+            matchLabels:
+              app: postgresql-backup
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow Prometheus metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9187
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-egress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: postgresql
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes:
+    - Egress
+  egress:
+    # Allow replication to other PostgreSQL pods
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+---
+# Neo4j Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: neo4j-ingress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: neo4j
+    policy.intelgraph.io/type: database-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: neo4j
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from API Server
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: intelgraph-api
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow from Graph Core
+    - from:
+        - podSelector:
+            matchLabels:
+              app: graph-core
+      ports:
+        - protocol: TCP
+          port: 7687
+        - protocol: TCP
+          port: 7474
+
+    # Allow from GraphAI
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-graphai
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow from Worker pods
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-worker
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow from Intelligence Verticals
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              component: intelligence-vertical
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow from Analytics Engine
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-analytics
+          podSelector:
+            matchLabels:
+              app: analytics-engine
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow cluster communication
+    - from:
+        - podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 5000
+        - protocol: TCP
+          port: 6000
+        - protocol: TCP
+          port: 7000
+        - protocol: TCP
+          port: 7687
+
+    # Allow backup jobs
+    - from:
+        - podSelector:
+            matchLabels:
+              app: neo4j-backup
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 2004
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: neo4j-egress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: neo4j
+spec:
+  podSelector:
+    matchLabels:
+      app: neo4j
+  policyTypes:
+    - Egress
+  egress:
+    # Allow cluster communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 5000
+        - protocol: TCP
+          port: 6000
+        - protocol: TCP
+          port: 7000
+        - protocol: TCP
+          port: 7687
+
+---
+# Redis Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-ingress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: redis
+    policy.intelgraph.io/type: database-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from API Server
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: intelgraph-api
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow from API Gateway (session cache)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-gateway
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow from Worker pods
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-worker
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow from Analytics services
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-analytics
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow Sentinel communication
+    - from:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+
+    # Allow from Redis Sentinel
+    - from:
+        - podSelector:
+            matchLabels:
+              app: redis-sentinel
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9121
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-egress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: redis
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Egress
+  egress:
+    # Allow Sentinel communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+        - protocol: TCP
+          port: 26379
+
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis-sentinel
+      ports:
+        - protocol: TCP
+          port: 26379
+
+---
+# Kafka Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-ingress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: kafka
+    policy.intelgraph.io/type: database-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: kafka
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from API Server
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: intelgraph-api
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # Allow from Worker pods
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-worker
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # Allow from Stream Processor
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-analytics
+          podSelector:
+            matchLabels:
+              app: stream-processor
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # Allow from Analytics Engine
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-analytics
+          podSelector:
+            matchLabels:
+              app: analytics-engine
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # Allow internal cluster communication
+    - from:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093
+        - protocol: TCP
+          port: 9094
+
+    # Allow Prometheus metrics
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9308
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-egress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: kafka
+spec:
+  podSelector:
+    matchLabels:
+      app: kafka
+  policyTypes:
+    - Egress
+  egress:
+    # Allow internal cluster communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093
+        - protocol: TCP
+          port: 9094
+
+    # Allow to ZooKeeper (if used)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: zookeeper
+      ports:
+        - protocol: TCP
+          port: 2181

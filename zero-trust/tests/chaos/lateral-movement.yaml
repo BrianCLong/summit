@@ -1,0 +1,254 @@
+# Chaos Engineering Tests for Zero-Trust
+# Simulates lateral movement attacks to verify network policy enforcement
+
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: lateral-movement-test
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: zero-trust-chaos
+    app.kubernetes.io/component: security-test
+spec:
+  entry: lateral-movement-workflow
+  templates:
+    - name: lateral-movement-workflow
+      templateType: Serial
+      deadline: 30m
+      children:
+        - setup-attacker-pod
+        - test-database-access
+        - test-cross-namespace-access
+        - test-privilege-escalation
+        - cleanup
+
+    # Setup: Deploy a "compromised" pod in the worker namespace
+    - name: setup-attacker-pod
+      templateType: Task
+      task:
+        container:
+          name: setup
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              cat <<EOF | kubectl apply -f -
+              apiVersion: v1
+              kind: Pod
+              metadata:
+                name: attacker-pod
+                namespace: intelgraph-ga
+                labels:
+                  app: attacker-simulation
+                  chaos.intelgraph.io/test: lateral-movement
+              spec:
+                serviceAccountName: ga-worker
+                containers:
+                  - name: attacker
+                    image: nicolaka/netshoot:latest
+                    command: ["sleep", "1800"]
+                    securityContext:
+                      runAsNonRoot: true
+                      runAsUser: 1000
+              EOF
+              echo "Waiting for attacker pod to be ready..."
+              kubectl wait --for=condition=ready pod/attacker-pod -n intelgraph-ga --timeout=60s
+
+    # Test 1: Attempt direct database access from "compromised" pod
+    - name: test-database-access
+      templateType: Task
+      task:
+        container:
+          name: test
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "=== Testing Direct Database Access ==="
+
+              # Test PostgreSQL access
+              echo "Testing PostgreSQL connection..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                timeout 5 nc -zv postgresql.intelgraph-data.svc.cluster.local 5432 2>&1 || \
+                echo "PASS: PostgreSQL connection blocked"
+
+              # Test Neo4j access
+              echo "Testing Neo4j connection..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                timeout 5 nc -zv neo4j.intelgraph-data.svc.cluster.local 7687 2>&1 || \
+                echo "PASS: Neo4j connection blocked"
+
+              # Test Redis access
+              echo "Testing Redis connection..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                timeout 5 nc -zv redis.intelgraph-data.svc.cluster.local 6379 2>&1 || \
+                echo "PASS: Redis connection blocked"
+
+    # Test 2: Attempt cross-namespace access
+    - name: test-cross-namespace-access
+      templateType: Task
+      task:
+        container:
+          name: test
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "=== Testing Cross-Namespace Access ==="
+
+              # Test access to audit service in system namespace
+              echo "Testing audit service access..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
+                http://audit-svc.intelgraph-system.svc.cluster.local:8080/admin/delete 2>&1 || \
+                echo "PASS: Audit service admin access blocked"
+
+              # Test access to AI services
+              echo "Testing AI service access..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
+                http://model-serving.intelgraph-ai.svc.cluster.local:8080/admin 2>&1 || \
+                echo "PASS: Model serving admin access blocked"
+
+              # Test access to monitoring namespace
+              echo "Testing Prometheus access..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 \
+                http://prometheus.monitoring.svc.cluster.local:9090/api/v1/admin/tsdb/delete_series 2>&1 || \
+                echo "PASS: Prometheus admin access blocked"
+
+    # Test 3: Attempt privilege escalation
+    - name: test-privilege-escalation
+      templateType: Task
+      task:
+        container:
+          name: test
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "=== Testing Privilege Escalation Attempts ==="
+
+              # Test SPIRE server access
+              echo "Testing SPIRE server access..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                timeout 5 nc -zv spire-server.spire-system.svc.cluster.local 8081 2>&1 || \
+                echo "PASS: SPIRE server access blocked"
+
+              # Test Kubernetes API server access
+              echo "Testing K8s API access..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                curl -sk --connect-timeout 5 \
+                https://kubernetes.default.svc/api/v1/namespaces 2>&1 | \
+                grep -q "Forbidden" && echo "PASS: K8s API access properly forbidden"
+
+              # Test accessing secrets
+              echo "Testing secret access..."
+              kubectl exec attacker-pod -n intelgraph-ga -- \
+                curl -sk --connect-timeout 5 \
+                -H "Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)" \
+                https://kubernetes.default.svc/api/v1/namespaces/intelgraph-system/secrets 2>&1 | \
+                grep -q "Forbidden" && echo "PASS: Secret access properly forbidden"
+
+    # Cleanup
+    - name: cleanup
+      templateType: Task
+      task:
+        container:
+          name: cleanup
+          image: bitnami/kubectl:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Cleaning up attacker pod..."
+              kubectl delete pod attacker-pod -n intelgraph-ga --ignore-not-found
+              echo "Cleanup complete"
+
+---
+# NetworkChaos: Simulate compromised pod attempting port scanning
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: port-scan-simulation
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: zero-trust-chaos
+    app.kubernetes.io/component: security-test
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-ga
+    labelSelectors:
+      app: attacker-simulation
+  direction: to
+  target:
+    selector:
+      namespaces:
+        - intelgraph-data
+        - intelgraph-system
+        - spire-system
+      labelSelectors:
+        tier: database
+    mode: all
+  duration: "5m"
+
+---
+# IOChaos: Test resilience of policy enforcement under stress
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: policy-enforcement-stress
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: zero-trust-chaos
+    app.kubernetes.io/component: stress-test
+spec:
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-ga
+    labelSelectors:
+      app: authz-gateway
+  stressors:
+    cpu:
+      workers: 2
+      load: 80
+    memory:
+      workers: 2
+      size: "256MB"
+  duration: "2m"
+
+---
+# Schedule for regular security chaos testing
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: weekly-security-chaos
+  namespace: chaos-testing
+  labels:
+    app.kubernetes.io/name: zero-trust-chaos
+    app.kubernetes.io/component: scheduled-test
+spec:
+  schedule: "0 2 * * 0"  # Weekly on Sunday at 2 AM
+  type: Workflow
+  historyLimit: 5
+  concurrencyPolicy: Forbid
+  workflow:
+    entry: lateral-movement-workflow
+    templates:
+      - name: lateral-movement-workflow
+        templateType: Serial
+        deadline: 30m
+        children:
+          - setup-attacker-pod
+          - test-database-access
+          - test-cross-namespace-access
+          - test-privilege-escalation
+          - cleanup

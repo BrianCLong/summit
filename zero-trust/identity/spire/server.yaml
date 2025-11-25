@@ -1,0 +1,427 @@
+# SPIRE Server Deployment
+# Central identity provider for zero-trust architecture
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spire-system
+  labels:
+    name: spire-system
+    security.intelgraph.io/zero-trust: "enabled"
+    istio-injection: disabled
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spire-server
+  namespace: spire-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: spire-server-cluster-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: ["authentication.k8s.io"]
+    resources: ["tokenreviews"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: spire-server-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: spire-server-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: spire-server
+    namespace: spire-system
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-server-config
+  namespace: spire-system
+data:
+  server.conf: |
+    server {
+      bind_address = "0.0.0.0"
+      bind_port = "8081"
+      socket_path = "/tmp/spire-server/private/api.sock"
+      trust_domain = "intelgraph.local"
+      data_dir = "/run/spire/data"
+      log_level = "INFO"
+      log_format = "json"
+
+      # SVID configuration
+      default_x509_svid_ttl = "1h"
+      default_jwt_svid_ttl = "5m"
+
+      # CA configuration
+      ca_subject {
+        country = ["US"]
+        organization = ["IntelGraph"]
+        common_name = "IntelGraph SPIRE CA"
+      }
+
+      # Federation (disabled by default)
+      federation {
+        bundle_endpoint {
+          address = "0.0.0.0"
+          port = 8443
+        }
+      }
+    }
+
+    plugins {
+      # DataStore plugin - PostgreSQL for HA
+      DataStore "sql" {
+        plugin_data {
+          database_type = "postgres"
+          connection_string = "host=postgresql.spire-system.svc.cluster.local port=5432 user=spire password=ENV:POSTGRES_PASSWORD dbname=spire sslmode=require"
+          max_open_conns = 50
+          max_idle_conns = 10
+          conn_max_lifetime = "1h"
+        }
+      }
+
+      # Node attestor - Kubernetes PSAT
+      NodeAttestor "k8s_psat" {
+        plugin_data {
+          clusters = {
+            "intelgraph-prod" = {
+              service_account_allow_list = [
+                "spire-system:spire-agent"
+              ]
+              audience = ["spire-server"]
+            }
+          }
+        }
+      }
+
+      # Key manager - disk-based for production (use HSM in high-security)
+      KeyManager "disk" {
+        plugin_data {
+          keys_path = "/run/spire/data/keys.json"
+        }
+      }
+
+      # Upstream authority - self-signed CA
+      UpstreamAuthority "disk" {
+        plugin_data {
+          key_file_path = "/run/spire/secrets/ca.key"
+          cert_file_path = "/run/spire/secrets/ca.crt"
+        }
+      }
+
+      # Notifier for bundle rotation
+      Notifier "k8sbundle" {
+        plugin_data {
+          namespace = "spire-system"
+          config_map = "spire-bundle"
+        }
+      }
+    }
+
+    # Health checks
+    health_checks {
+      listener_enabled = true
+      bind_address = "0.0.0.0"
+      bind_port = "8080"
+      live_path = "/live"
+      ready_path = "/ready"
+    }
+
+    # Telemetry
+    telemetry {
+      Prometheus {
+        host = "0.0.0.0"
+        port = 9988
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: spire-server
+  namespace: spire-system
+  labels:
+    app: spire-server
+    app.kubernetes.io/name: spire-server
+    app.kubernetes.io/component: identity
+spec:
+  replicas: 3
+  serviceName: spire-server
+  selector:
+    matchLabels:
+      app: spire-server
+  template:
+    metadata:
+      labels:
+        app: spire-server
+        app.kubernetes.io/name: spire-server
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9988"
+    spec:
+      serviceAccountName: spire-server
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: spire-server
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: spire-server
+          image: ghcr.io/spiffe/spire-server:1.9.0
+          args: ["-config", "/run/spire/config/server.conf"]
+          ports:
+            - name: grpc
+              containerPort: 8081
+              protocol: TCP
+            - name: federation
+              containerPort: 8443
+              protocol: TCP
+            - name: health
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9988
+              protocol: TCP
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: spire-db-credentials
+                  key: password
+          volumeMounts:
+            - name: spire-config
+              mountPath: /run/spire/config
+              readOnly: true
+            - name: spire-data
+              mountPath: /run/spire/data
+            - name: spire-secrets
+              mountPath: /run/spire/secrets
+              readOnly: true
+            - name: spire-socket
+              mountPath: /tmp/spire-server/private
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+      volumes:
+        - name: spire-config
+          configMap:
+            name: spire-server-config
+        - name: spire-secrets
+          secret:
+            secretName: spire-ca-secrets
+        - name: spire-socket
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: spire-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: fast-ssd
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spire-server
+  namespace: spire-system
+  labels:
+    app: spire-server
+spec:
+  type: ClusterIP
+  ports:
+    - name: grpc
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+    - name: federation
+      port: 8443
+      targetPort: 8443
+      protocol: TCP
+    - name: health
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+    - name: metrics
+      port: 9988
+      targetPort: 9988
+      protocol: TCP
+  selector:
+    app: spire-server
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spire-server-headless
+  namespace: spire-system
+  labels:
+    app: spire-server
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: grpc
+      port: 8081
+      targetPort: 8081
+      protocol: TCP
+  selector:
+    app: spire-server
+
+---
+# Network Policy for SPIRE Server
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: spire-server-network-policy
+  namespace: spire-system
+spec:
+  podSelector:
+    matchLabels:
+      app: spire-server
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from SPIRE agents
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: spire-system
+          podSelector:
+            matchLabels:
+              app: spire-agent
+      ports:
+        - protocol: TCP
+          port: 8081
+    # Allow health checks from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9988
+    # Allow federation from other SPIRE servers
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: spire-system
+      ports:
+        - protocol: TCP
+          port: 8443
+  egress:
+    # Allow to PostgreSQL
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow SPIRE server cluster communication
+    - to:
+        - podSelector:
+            matchLabels:
+              app: spire-server
+      ports:
+        - protocol: TCP
+          port: 8081
+
+---
+# PodDisruptionBudget for SPIRE Server
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: spire-server-pdb
+  namespace: spire-system
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: spire-server
+
+---
+# ServiceMonitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spire-server-monitor
+  namespace: spire-system
+  labels:
+    app: spire-server
+spec:
+  selector:
+    matchLabels:
+      app: spire-server
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics

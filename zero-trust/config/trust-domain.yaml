@@ -1,0 +1,112 @@
+# SPIFFE Trust Domain Configuration
+# Defines the trust boundaries for the IntelGraph platform
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: zero-trust-config
+  namespace: intelgraph-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: config
+    app.kubernetes.io/part-of: intelgraph
+data:
+  trust-domain.yaml: |
+    # Primary Trust Domain Configuration
+    trustDomain: intelgraph.local
+
+    # Trust domain hierarchy
+    domains:
+      primary:
+        name: intelgraph.local
+        description: Primary IntelGraph production domain
+        spireServer: spire-server.spire-system.svc.cluster.local:8081
+
+      federated:
+        - name: intelgraph.staging.local
+          description: Staging environment (limited federation)
+          spireServer: spire-server.spire-staging.svc.cluster.local:8081
+          federationEnabled: true
+
+        - name: intelgraph.dr.local
+          description: Disaster recovery site
+          spireServer: spire-server.spire-dr.svc.cluster.local:8081
+          federationEnabled: true
+
+    # SVID configuration
+    svid:
+      ttl: 3600                    # 1 hour default
+      maxTtl: 86400                # 24 hours maximum
+      refreshHint: 1800            # Refresh at 50% of TTL
+
+    # Workload attestation
+    attestation:
+      k8s:
+        enabled: true
+        clusterName: intelgraph-prod
+        serviceAccountAllowList:
+          - pattern: "^intelgraph-.*"
+          - pattern: "^ga-.*"
+          - pattern: "^conductor-.*"
+        namespaceAllowList:
+          - intelgraph-system
+          - intelgraph-ga
+          - intelgraph-data
+          - intelgraph-analytics
+          - intelgraph-ai
+          - conductor
+          - monitoring
+          - observability
+
+      unix:
+        enabled: false
+
+      docker:
+        enabled: false
+
+    # Certificate authority configuration
+    ca:
+      upstreamAuthority:
+        type: disk
+        diskConfig:
+          keyFilePath: /run/spire/data/keys/ca.key
+          certFilePath: /run/spire/data/keys/ca.crt
+          bundleFilePath: /run/spire/data/keys/bundle.crt
+
+      # X.509 certificate constraints
+      x509:
+        keyType: ec-p256
+        caSubject:
+          country: ["US"]
+          organization: ["IntelGraph Security"]
+          commonName: "IntelGraph SPIRE CA"
+
+    # JWT-SVID configuration (for token-based auth)
+    jwt:
+      issuer: "https://spire.intelgraph.local"
+      ttl: 300                     # 5 minutes
+      audiences:
+        - intelgraph-api
+        - intelgraph-gateway
+        - conductor
+
+---
+# Trust Bundle ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spiffe-trust-bundle
+  namespace: intelgraph-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: trust-bundle
+data:
+  trust-bundle.json: |
+    {
+      "trustDomains": {
+        "intelgraph.local": {
+          "keys": [],
+          "refreshHint": 3600
+        }
+      }
+    }

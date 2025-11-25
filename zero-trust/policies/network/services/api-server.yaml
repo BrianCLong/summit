@@ -1,0 +1,185 @@
+# Network Policy for API Server
+# Core application server with GraphQL API
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-server-ingress
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: api-server
+    policy.intelgraph.io/type: service-policy
+  annotations:
+    policy.intelgraph.io/description: "API Server ingress - accepts from gateway and workers"
+spec:
+  podSelector:
+    matchLabels:
+      app: intelgraph-api
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from API Gateway
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ga-gateway
+      ports:
+        - protocol: TCP
+          port: 4001
+
+    # Allow from Worker pods
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ga-worker
+      ports:
+        - protocol: TCP
+          port: 4001
+
+    # Allow from internal services
+    - from:
+        - podSelector:
+            matchLabels:
+              app: ga-graphai
+      ports:
+        - protocol: TCP
+          port: 4001
+
+    # Allow health checks
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+
+    # Allow Istio mesh traffic
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              istio-injection: enabled
+      ports:
+        - protocol: TCP
+          port: 15090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-server-egress
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: api-server
+    policy.intelgraph.io/type: service-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: intelgraph-api
+  policyTypes:
+    - Egress
+  egress:
+    # Allow to PostgreSQL
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Allow to Neo4j
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow to Redis
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow to Kafka
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # Allow to Authorization Gateway (OPA)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: authz-gateway
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9091
+
+    # Allow to Audit service
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-system
+          podSelector:
+            matchLabels:
+              app: audit-svc
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow to Provenance Ledger
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-system
+          podSelector:
+            matchLabels:
+              app: prov-ledger
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow to OpenTelemetry
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app: otel-collector
+      ports:
+        - protocol: TCP
+          port: 4317
+        - protocol: TCP
+          port: 4318
