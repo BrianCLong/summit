@@ -1,0 +1,50 @@
+groups:
+  - name: application.availability
+    rules:
+      - alert: HighApiLatency
+        expr: histogram_quantile(0.95, rate(intelgraph_http_request_duration_seconds_bucket[5m])) > 1
+        for: 2m
+        labels:
+          severity: warning
+          service: application
+        annotations:
+          summary: "High API Latency"
+          description: "The p95 API latency is {{ $value }}s, which is above the 1s threshold."
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-api-latency"
+
+      - alert: HighApiErrorRate
+        expr: (sum(rate(intelgraph_http_request_duration_seconds_count{status=~"5.*"}[5m])) / sum(rate(intelgraph_http_request_duration_seconds_count[5m]))) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: application
+        annotations:
+          summary: "High API Error Rate"
+          description: "The API error rate is {{ $value | humanizePercentage }}, which is above the 5% threshold."
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-api-error-rate"
+
+  - name: application.security
+    rules:
+      - alert: FailedLoginSpike
+        expr: sum(rate(intelgraph_user_logins_total{result="failure"}[5m])) > 5
+        for: 1m
+        labels:
+          severity: critical
+          service: application
+        annotations:
+          summary: "Spike in failed login attempts"
+          description: "There have been {{ $value }} failed login attempts in the last 5 minutes."
+          runbook_url: "https://docs.intelgraph.com/runbooks/failed-login-spike"
+
+  - name: application.simulation
+    rules:
+      - alert: NoActiveSimulations
+        expr: intelgraph_narrative_simulation_active_simulations == 0
+        for: 15m
+        labels:
+          severity: warning
+          service: application
+        annotations:
+          summary: "No active simulations"
+          description: "There have been no active simulations for the last 15 minutes."
+          runbook_url: "https://docs.intelgraph.com/runbooks/no-active-simulations"
