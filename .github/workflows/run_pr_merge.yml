@@ -36,10 +36,16 @@ jobs:
     if: needs.get-prs.outputs.pr_numbers != '[]'
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Trigger batch merge
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBERS: ${{ needs.get-prs.outputs.pr_numbers }}
         run: |
           BRANCH_NAME="bot-pr-merge-$(date +%s)"
-          gh workflow run batch-merge.yml -f integration_branch="$BRANCH_NAME" -f pr_numbers="$PR_NUMBERS"
+          gh workflow run batch-merge.yml \
+            --repo ${{ github.repository }} \
+            -f integration_branch="$BRANCH_NAME" \
+            -f pr_numbers="$PR_NUMBERS"
