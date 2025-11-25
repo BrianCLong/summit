@@ -16,7 +16,7 @@ import type {
 import { generateFromPattern, queryPatterns } from './query-patterns';
 import { estimateQueryCost, isSafeToExecute, generateCostWarnings } from './cost-estimator';
 import { validateCypher, extractRequiredParameters, isReadOnlyQuery } from './validator';
-import { explainQuery, summarizeQuery } from './explainer';
+import { buildQueryExplanation, explainQuery, summarizeQuery } from './explainer';
 
 const logger = pino({ name: 'nl-graph-query' });
 
@@ -106,6 +106,11 @@ export class NlGraphQueryService {
       const explanation = request.verbose
         ? explainQuery(cypher, true)
         : summarizeQuery(cypher);
+      const explanationDetails = buildQueryExplanation(cypher, {
+        warnings,
+        estimatedCost: estimatedCost.costClass,
+        verbose: request.verbose,
+      });
 
       // Extract required parameters
       const requiredParameters = extractRequiredParameters(cypher);
@@ -126,6 +131,7 @@ export class NlGraphQueryService {
       const response: CompileResponse = {
         queryId,
         cypher,
+        explanationDetails,
         estimatedCost,
         explanation,
         requiredParameters,
@@ -146,6 +152,8 @@ export class NlGraphQueryService {
           isSafe,
           warningCount: warnings.length,
           requiredParams: requiredParameters.length,
+          explanationConfidence: explanationDetails.confidence,
+          evidenceCount: explanationDetails.evidence.length,
         },
         'Query compilation completed',
       );
