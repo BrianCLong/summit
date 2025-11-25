@@ -5,7 +5,8 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
 
@@ -40,14 +41,17 @@ const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 
+const queryClient = new QueryClient()
+
 function App() {
   return (
     <ApolloProvider client={apolloClient}>
-      <SocketProvider>
-        <TooltipProvider>
-          <AuthProvider>
-            <SearchProvider>
-              <Router>
+      <QueryClientProvider client={queryClient}>
+        <SocketProvider>
+          <TooltipProvider>
+            <AuthProvider>
+              <SearchProvider>
+                <Router>
                 <React.Suspense
                   fallback={
                     <div className="flex h-screen items-center justify-center">
@@ -117,11 +121,12 @@ function App() {
                     </Route>
                   </Routes>
                 </React.Suspense>
-              </Router>
-            </SearchProvider>
-          </AuthProvider>
-        </TooltipProvider>
-      </SocketProvider>
+                </Router>
+              </SearchProvider>
+            </AuthProvider>
+          </TooltipProvider>
+        </SocketProvider>
+      </QueryClientProvider>
     </ApolloProvider>
   )
 }

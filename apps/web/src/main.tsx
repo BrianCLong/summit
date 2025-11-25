@@ -3,9 +3,11 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
 
-// Start MSW for development
+// Start MSW for development or when explicitly enabled
 async function enableMocking() {
-  if (process.env.NODE_ENV !== 'development') {
+  const shouldMock = import.meta.env.DEV || import.meta.env.VITE_ENABLE_MSW === 'true'
+
+  if (!shouldMock) {
     return
   }
 
@@ -13,6 +15,9 @@ async function enableMocking() {
 
   return worker.start({
     onUnhandledRequest: 'bypass',
+    serviceWorker: {
+      url: '/mockServiceWorker.js'
+    }
   })
 }
 
