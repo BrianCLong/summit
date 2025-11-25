@@ -99,8 +99,16 @@ export class NlGraphQueryService {
         );
       }
 
-      // Estimate query cost
+      // Generate warnings
       const estimatedCost = estimateQueryCost(cypher);
+      const warnings = [
+        ...validation.warnings,
+        ...generateCostWarnings(estimatedCost),
+      ];
+
+      if (!isReadOnlyQuery(cypher)) {
+        warnings.push('Query contains mutation operations - execution blocked');
+      }
 
       // Generate explanation
       const explanation = request.verbose
@@ -117,16 +125,6 @@ export class NlGraphQueryService {
 
       // Check safety
       const isSafe = isSafeToExecute(estimatedCost) && isReadOnlyQuery(cypher);
-
-      // Generate warnings
-      const warnings = [
-        ...validation.warnings,
-        ...generateCostWarnings(estimatedCost),
-      ];
-
-      if (!isReadOnlyQuery(cypher)) {
-        warnings.push('Query contains mutation operations - execution blocked');
-      }
 
       const response: CompileResponse = {
         queryId,
