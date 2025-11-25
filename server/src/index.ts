@@ -14,6 +14,7 @@ import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
+import { streamingRateLimiter } from './routes/streaming.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -106,6 +107,7 @@ const startServer = async () => {
     logger.info(`Shutting down. Signal: ${sig}`);
     wss.close();
     io.close(); // Close Socket.IO server
+    streamingRateLimiter.destroy();
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),
