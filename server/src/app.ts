@@ -8,7 +8,7 @@ import helmet from 'helmet';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { auditLogger } from './middleware/audit-logger.js';
-import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { correlationIdMiddleware } from './middleware/correlationId.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';

@@ -1,4 +1,5 @@
 import pino from 'pino';
+import { getCorrelationId } from '../middleware/correlationId.js';
 
 const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
@@ -8,6 +9,9 @@ const logger = pino({
     },
   },
   timestamp: pino.stdTimeFunctions.isoTime,
+  mixin() {
+    return { correlationId: getCorrelationId() };
+  },
   browser: {
     asObject: true,
   },
