@@ -241,3 +241,5 @@ id_ed25519.*
 # PR Dashboard generated files
 pr-dashboard-report.json
 pr-dashboard.html
+target/
+rust/target/
