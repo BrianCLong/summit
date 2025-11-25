@@ -20,6 +20,8 @@ const Env = z
     RATE_LIMIT_MAX_AUTHENTICATED: z.coerce.number().default(1000),
     CACHE_ENABLED: z.coerce.boolean().default(true),
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
+    L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
+    L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
   })
   .passthrough(); // Allow extra env vars
 
