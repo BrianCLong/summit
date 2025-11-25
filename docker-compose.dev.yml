@@ -176,6 +176,29 @@ services:
       - 'prometheus.job=summit_gateway'
       - 'prometheus.port=4100'
 
+  slo-exporter:
+    build:
+      context: ./apps/slo-exporter
+      dockerfile: Dockerfile
+    container_name: summit-slo-exporter
+    restart: unless-stopped
+    environment:
+      PORT: 9092
+      PROMETHEUS_URL: http://prometheus:9090
+      API_URL: http://api:4000
+    ports:
+      - '9092:9092'
+    depends_on:
+      prometheus:
+        condition: service_started
+      api:
+        condition: service_healthy
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=slo_exporter'
+      - 'prometheus.port=9092'
+
   web:
     build:
       context: ./client
