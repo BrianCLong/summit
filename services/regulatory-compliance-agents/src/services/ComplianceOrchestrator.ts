@@ -125,15 +125,16 @@ export class ComplianceOrchestrator extends EventEmitter {
       for (const adaptation of adaptations) {
         if (!adaptation.requiresApproval && adaptation.status === 'approved') {
           await this.adaptationAgent.applyAdaptation(adaptation.id);
+          continue;
         }
-      }
 
-      // Auto-apply low-risk adaptations if configured
-      if (this.config.autoApplyLowRiskAdaptations && assessment.riskScore < this.config.riskThresholdForAutoApply) {
-        for (const adaptation of adaptations) {
-          if (adaptation.requiresApproval && adaptation.status === 'approved') {
-            await this.adaptationAgent.applyAdaptation(adaptation.id);
-          }
+        // Auto-apply low-risk adaptations if configured
+        if (
+          this.config.autoApplyLowRiskAdaptations &&
+          assessment.riskScore < this.config.riskThresholdForAutoApply &&
+          adaptation.status === 'approved'
+        ) {
+          await this.adaptationAgent.applyAdaptation(adaptation.id);
         }
       }
 
