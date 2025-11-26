@@ -34,7 +34,7 @@ const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
-const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const AnalystWorkspace = React.lazy(() => import('@/pages/AnalystWorkspace'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -68,16 +68,13 @@ function App() {
                       element={<AccessDeniedPage />}
                     />
 
+                    {/* Analyst Workspace - Full screen layout, distinct from standard dashboard layout */}
+                    <Route path="/analyst" element={<AnalystWorkspace />} />
+
                     {/* Protected routes with layout */}
                     <Route path="/" element={<Layout />}>
                       <Route index element={<HomePage />} />
                       <Route path="explore" element={<ExplorePage />} />
-
-                      {/* Tri-Pane Analysis */}
-                      <Route
-                        path="analysis/tri-pane"
-                        element={<TriPanePage />}
-                      />
 
                       {/* Alerts */}
                       <Route path="alerts" element={<AlertsPage />} />

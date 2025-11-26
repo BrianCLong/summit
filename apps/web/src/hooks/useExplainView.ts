@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from '@apollo/client'
 import { gql } from '@apollo/client'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import type { Entity, Relationship } from '@/types'
 
 // GraphQL queries for Explain View data
