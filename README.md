@@ -8,14 +8,7 @@
 
 > Deployable-first IntelGraph (Summit) stack with GraphQL, React, Neo4j, PostgreSQL, Redis, and observability/AI services.
 
-## 🛠 Developer Onboarding (Deployable-First)
-
-- **Golden path = `make bootstrap && make up && make smoke`**. Fresh clones must go green before you write code.
-- `./start.sh [--ai]` wraps the golden path on laptops and CI. It fails fast if health probes do not respond.
-- The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
-- **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
-
-## 🚀 Quickstart (< 60 Seconds)
+## 🚀 Getting Started (< 60 Seconds)
 
 **Prerequisites:** Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+, ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available.
 
@@ -41,6 +34,117 @@ make smoke              # golden path automation against seeded data
 - **Grafana**: http://localhost:3001 (Observability Dashboards)
 
 **Optional AI/Kafka stack:** `./start.sh --ai` or `make up-ai` loads `docker-compose.ai.yml`.
+
+💡 **New to Summit?** Run `make help` for a quick command reference, or see [docs/COMMAND_REFERENCE.md](docs/COMMAND_REFERENCE.md) for the full guide.
+
+
+## 🏗️ Architecture
+
+The Summit platform is designed with a modular, scalable architecture to support real-time intelligence analysis.
+
+```
+┌───────────────────────────────────────────┐
+│              Presentation Layer           │
+│  ┌───────────────┐      ┌───────────────┐ │
+│  │  React Client │      │ Mobile Client │ │
+│  │ (apps/web)    │      │ (apps/mobile) │ │
+│  └───────────────┘      └───────────────┘ │
+└───────────────────────────────────────────┘
+                 │ (GraphQL API)
+                 ▼
+┌───────────────────────────────────────────┐
+│               Application Layer           │
+│  ┌───────────────┐      ┌───────────────┐ │
+│  │  Gateway      │──────│  GraphQL API  │ │
+│  │ (apps/gateway)│      │ (apps/server) │ │
+│  └───────────────┘      └───────────────┘ │
+│         │                 │               │
+│         ▼                 ▼               │
+│  ┌───────────────┐ ┌───────────────┐      │
+│  │ AI/ML Engine  │ │ Search Engine │      │
+│  │(apps/ml-engine)│ │(apps/search)  │      │
+│  └───────────────┘ └───────────────┘      │
+└───────────────────────────────────────────┘
+                 │
+                 ▼
+┌───────────────────────────────────────────┐
+│                  Data Layer               │
+│  ┌───────────────┐      ┌───────────────┐ │
+│  │   PostgreSQL  │      │     Neo4j     │ │
+│  └───────────────┘      └───────────────┘ │
+│  ┌───────────────┐      ┌───────────────┐ │
+│  │     Redis     │      │   TimescaleDB │ │
+│  └───────────────┘      └───────────────┘ │
+└───────────────────────────────────────────┘
+                 │
+                 ▼
+┌───────────────────────────────────────────┐
+│             Infrastructure Layer          │
+│  ┌───────────────┐      ┌───────────────┐ │
+│  │    Docker     │      │  Kubernetes   │ │
+│  └───────────────┘      └───────────────┘ │
+│  ┌───────────────┐      ┌───────────────┐ │
+│  │  Prometheus   │      │    Grafana    │ │
+│  └───────────────┘      └───────────────┘ │
+└───────────────────────────────────────────┘
+```
+
+### Data Flow
+
+1.  **Client Request**: The React application sends GraphQL queries/mutations to the API gateway.
+2.  **Authentication & Authorization**: The gateway verifies JWT tokens and forwards requests to the appropriate backend service.
+3.  **Business Logic**: The GraphQL API processes requests, orchestrating calls to various microservices (e.g., AI/ML, Search).
+4.  **Database Operations**: Services interact with the data layer: Neo4j for graph data, PostgreSQL for relational data, Redis for caching, and TimescaleDB for time-series data.
+5.  **Real-time Updates**: The API uses WebSockets to push real-time updates to connected clients.
+
+## 📦 Module Breakdown
+
+The repository is organized into three main directories: `apps`, `packages`, and `services`.
+
+### /apps
+
+This directory contains the deployable applications of the Summit platform.
+
+| Directory          | Description                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `web`              | The main React-based web interface for the Summit platform.                                             |
+| `server`           | The core backend server, providing the GraphQL API.                                                     |
+| `gateway`          | An API gateway that sits in front of the backend services, handling authentication and routing.         |
+| `ml-engine`        | A dedicated service for machine learning and AI-powered analysis.                                       |
+| `search-engine`    | A service for advanced search and indexing capabilities.                                                |
+| `analytics-engine` | A service for processing and analyzing large volumes of data.                                           |
+| `mobile-native`    | A native mobile application for iOS and Android.                                                        |
+| `desktop-electron` | A desktop application built with Electron.                                                              |
+
+### /packages
+
+This directory contains shared libraries and modules used across multiple applications.
+
+| Directory          | Description                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `graph-sdk`        | A software development kit for interacting with the graph database.                                     |
+| `auth-library`     | A library for handling authentication and authorization logic.                                          |
+| `eslint-config`    | Shared ESLint configurations to ensure consistent code style.                                           |
+| `tsconfig`         | Shared TypeScript configurations.                                                                       |
+
+### /services
+
+This directory contains backend microservices that provide specific functionalities.
+
+| Directory          | Description                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `ingestion`        | A service for ingesting data from various sources into the Summit platform.                             |
+| `notifications`    | A service for sending notifications to users (e.g., email, SMS, push notifications).                    |
+| `reporting`        | A service for generating reports and dashboards.                                                        |
+| `collaboration`    | A service that provides real-time collaboration features.                                               |
+| `audit`            | A service for logging and auditing user actions.                                                        |
+
+## 🛠 Developer Onboarding (Deployable-First)
+
+- **Golden path = `make bootstrap && make up && make smoke`**. Fresh clones must go green before you write code.
+- `./start.sh [--ai]` wraps the golden path on laptops and CI. It fails fast if health probes do not respond.
+- The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
+- **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
 
 ### Observability & Health
 
@@ -73,8 +177,6 @@ pnpm lint             # ESLint + Ruff (for Python helpers)
 pnpm typecheck        # tsconfig project references
 pnpm smoke            # same as make smoke (Node-based E2E)
 ```
-
-💡 **New to Summit?** Run `make help` for a quick command reference, or see [docs/COMMAND_REFERENCE.md](docs/COMMAND_REFERENCE.md) for the full guide.
 
 ## CI Status
 
@@ -261,75 +363,6 @@ npm test -- --config jest.config.ts narrative
 ```
 
 This executes focused Jest suites for the engine core and REST endpoints while keeping broader CI runs unchanged.
-
-## 🏗️ Architecture
-
-### Technology Stack
-
-#### Frontend
-
-- **Framework**: React 18 with Hooks and Context API
-- **State Management**: Redux Toolkit with RTK Query
-- **UI Library**: Material-UI (MUI) v5
-- **Graph Visualization**: Cytoscape.js with extensions
-- **Build Tool**: Vite with Hot Module Replacement
-- **Testing**: Jest + React Testing Library + Playwright E2E
-
-#### Backend
-
-- **Runtime**: Node.js 20+ with TypeScript
-- **API**: GraphQL with Apollo Server v4
-- **Web Framework**: Express.js with security middleware
-- **Authentication**: JWT with refresh token rotation
-- **Real-time**: Socket.io for WebSocket connections
-
-#### Databases
-
-- **Graph Database**: Neo4j 5 Community Edition
-- **Relational Database**: PostgreSQL 16 with pgvector
-- **Time-series Database**: TimescaleDB 2
-- **Cache/Session Store**: Redis 7 with persistence
-- **File Storage**: Local filesystem with S3 compatibility
-
-#### Infrastructure
-
-- **Containerization**: Docker with multi-stage builds
-- **Orchestration**: Docker Compose for development
-- **Monitoring**: OpenTelemetry + Prometheus + Grafana
-- **Reverse Proxy**: Nginx (production)
-- **CI/CD**: GitHub Actions with automated testing
-
-### System Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   React Client  │◄──►│  GraphQL API    │◄──►│    Neo4j DB     │
-│                 │    │                 │    │                 │
-│ • Investigation │    │ • Authentication│    │ • Graph Data    │
-│ • Graph Viz     │    │ • CRUD Ops      │    │ • Relationships │
-│ • Real-time UI  │    │ • Subscriptions │    │ • Analytics     │
-│ • Material-UI   │    │ • Rate Limiting │    │ • Constraints   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-
-                       ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-                       │  PostgreSQL DB  │    │   TimescaleDB   │    │    Redis Cache  │
-                       │                 │    │                 │    │                 │
-                       │ • User Data     │    │ • Time-series   │    │ • Sessions      │
-                       │ • Audit Logs    │    │ • Metrics       │    │ • Real-time     │
-                       │ • Metadata      │    │                 │    │ • Rate Limiting │
-                       │ • Vector Store  │    │                 │    │ • Pub/Sub       │
-                       └─────────────────┘    └─────────────────┘    └─────────────────┘
-```
-
-### Data Flow
-
-1. **Client Request**: React app sends GraphQL queries/mutations
-2. **Authentication**: JWT token validation and RBAC checks
-3. **Rate Limiting**: Redis-based request throttling
-4. **Business Logic**: Resolver functions process requests
-5. **Database Operations**: Neo4j for graph data, PostgreSQL for metadata, TimescaleDB for time-series metrics
-6. **Real-time Updates**: Socket.io broadcasts changes to connected clients
-7. **Caching**: Redis caches frequent queries and session data
 
 ## 🛠️ Development
 
@@ -923,7 +956,6 @@ Access Grafana dashboards at http://localhost:3100:
 - Memory usage >90%
 
 **Warning Alerts**:
-
 - Elevated response times
 - Queue backlog buildup
 - Low disk space
