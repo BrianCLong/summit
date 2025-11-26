@@ -20,7 +20,7 @@ interface QueuedRequest {
   amount: number;
   priority: number; // Lower number means higher priority
   identifiers: { teamId?: string; userId?: string };
-  resolve: (value: boolean | PromiseLike<boolean>)- void;
+  resolve: (value: boolean | PromiseLike<boolean>) => void;
   reject: (reason?: any) => void;
 }
 

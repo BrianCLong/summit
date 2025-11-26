@@ -1,8 +1,8 @@
 // server/src/routes/resources.ts
 
 import { Router, Request, Response, NextFunction } from 'express';
-import { quotaManager, QuotaMap } from '../lib/resources/quota-manager';
-import { budgetTracker } from '../lib/resources/budget-tracker';
+import { quotaManager, QuotaMap } from '../lib/resources/quota-manager.js';
+import { budgetTracker } from '../lib/resources/budget-tracker.js';
 
 const router = Router();
 
