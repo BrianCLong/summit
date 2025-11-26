@@ -1,0 +1,54 @@
+name: SLO Compliance Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+
+jobs:
+  slo-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@9.12.0 --activate
+      
+      - name: Start services
+        run: |
+          make bootstrap
+          make up
+          
+      - name: Wait for API
+        run: |
+          timeout 60 bash -c 'until curl -f http://localhost:4000/health; do sleep 2; done'
+      
+      - name: Generate SLO badge
+        run: node scripts/ci/generate-slo-badge.mjs
+      
+      - name: Upload badge
+        uses: actions/upload-artifact@v4
+        with:
+          name: slo-badge
+          path: .badges/slo-status.svg
+      
+      - name: Comment PR with SLO status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const badge = fs.readFileSync('.badges/slo-status.svg', 'utf8');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## SLO Compliance\n\n![SLO Badge](data:image/svg+xml;base64,${Buffer.from(badge).toString('base64')})`
+            });

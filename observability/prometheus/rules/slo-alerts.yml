@@ -1,0 +1,32 @@
+groups:
+  - name: graphql_slo_alerts
+    interval: 30s
+    rules:
+      - alert: GraphQLLatencySLOViolation
+        expr: histogram_quantile(0.95, rate(graphql_operation_duration_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          slo: latency_p95
+        annotations:
+          summary: "GraphQL API p95 latency exceeds SLO target"
+          description: "p95 latency is {{ $value }}s, exceeding 500ms SLO"
+
+      - alert: GraphQLErrorRateSLOViolation
+        expr: rate(graphql_errors_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          slo: error_rate
+        annotations:
+          summary: "GraphQL API error rate exceeds SLO target"
+          description: "Error rate is {{ $value }}, exceeding 1% SLO"
+
+      - alert: SLOExporterDown
+        expr: up{job="slo-exporter"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "SLO Exporter is down"
+          description: "SLO metrics collection has stopped"
