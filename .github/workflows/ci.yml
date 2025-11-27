@@ -255,3 +255,84 @@ jobs:
         run: pnpm -w run build
       - name: Unit tests
         run: pnpm -w run test
+
+  companyos-security:
+    name: CompanyOS SBOM / Signing / Scan / Disclosure
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      security-events: write
+    env:
+      COMPANYOS_IMAGE: ghcr.io/${{ github.repository }}/companyos-api:${{ github.sha }}
+      SBOM_PATH: sbom-companyos-api.json
+      TRIVY_JSON: trivy-companyos-api.json
+      DISCLOSURE_PACK: disclosure-pack-companyos-api.json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Enable corepack + install deps
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Build companyos-api image
+        run: |
+          docker build \
+            -f docker/Dockerfile.companyos-api \
+            -t $COMPANYOS_IMAGE \
+            .
+
+      - name: Install syft & trivy & cosign
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          curl -sSfL https://raw.githubusercontent.com/sigstore/cosign/main/install.sh | sh -s -- -b /usr/local/bin
+
+      - name: Generate SBOM (syft)
+        run: |
+          syft packages "docker:$COMPANYOS_IMAGE" -o json > "$SBOM_PATH"
+
+      - name: Sign image (cosign keyless or key-based)
+        env:
+          COSIGN_EXPERIMENTAL: "true"
+        run: |
+          cosign sign $COMPANYOS_IMAGE
+
+      - name: Vulnerability scan (Trivy JSON + gating)
+        run: |
+          trivy image --format json --output "$TRIVY_JSON" "$COMPANYOS_IMAGE" || true
+          node companyos/scripts/enforce-trivy-budget.js "$TRIVY_JSON"
+
+      - name: Generate disclosure pack
+        run: |
+          node companyos/scripts/generate-disclosure-pack.js \
+            --sbom "$SBOM_PATH" \
+            --trivy "$TRIVY_JSON" \
+            --out "$DISCLOSURE_PACK" \
+            --product "companyos-api" \
+            --environment "prod" \
+            --tenant "global" \
+            --build-id "${{ github.sha }}"
+
+      - name: Upload artifacts (SBOM + disclosure)
+        uses: actions/upload-artifact@v4
+        with:
+          name: companyos-security-${{ github.sha }}
+          path: |
+            $SBOM_PATH
+            $TRIVY_JSON
+            $DISCLOSURE_PACK
