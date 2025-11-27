@@ -1,0 +1,32 @@
+# config.yaml
+# Main configuration for your auto-scientist project.
+
+research_goal: "Develop a high-accuracy model for text classification on the 20 Newsgroups dataset."
+
+# Path to the curriculum file, relative to the project directory.
+curriculum_file: "curriculum.yaml"
+
+# Maximum number of plan->run->advance iterations to perform in a single `auto-scientist run` command.
+max_iterations: 20
+
+# Configuration for the Planner
+planner:
+  # Provider for the LLM. See litellm documentation for all supported providers.
+  # https://docs.litellm.ai/docs/providers
+  provider: "openai"
+
+  # Model name. For OpenAI, this could be "gpt-4-turbo", "gpt-3.5-turbo", etc.
+  model: "gpt-4-turbo"
+
+  # Temperature for the LLM call. Lower values are more deterministic.
+  temperature: 0.1
+
+  # API key can be set here, but it's recommended to use environment variables
+  # (e.g., OPENAI_API_KEY) for security.
+  # api_key: "sk-..."
+
+# Configuration for the Runner
+runner:
+  # Path to the user-defined training function, in the format "module.path:function_name".
+  # This function is executed in an isolated subprocess for each experiment.
+  train_fn_path: "experiment:train_fn"

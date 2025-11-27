@@ -1,0 +1,15 @@
+# Auto-Scientist specific
+/artifacts
+/graph.json
+
+# Python environments
+.venv
+venv
+
+# Python artifacts
+__pycache__
+*.pyc
+
+# IDE folders
+.vscode
+.idea

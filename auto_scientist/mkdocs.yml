@@ -1,0 +1,53 @@
+# mkdocs.yml
+site_name: Auto-Scientist SDK
+site_url: https://example.github.io/auto-scientist/
+repo_url: https://github.com/example/auto-scientist
+repo_name: example/auto-scientist
+edit_uri: ""
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light vs dark mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdown-extensions.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            show_root_heading: true
+            show_source: false
+
+nav:
+  - 'index.md'
+  - 'Getting Started': 'getting-started.md'
+  - 'Architecture': 'architecture.md'
+  - 'API Reference': 'api.md'

@@ -1,0 +1,37 @@
+# curriculum.yaml
+# Defines the stages of the research. The auto-scientist will progress
+# through these stages sequentially based on the results of the experiments.
+
+stages:
+  - name: "baseline"
+    description: "Establish a simple, reproducible baseline model to understand the problem's difficulty."
+    goals:
+      - "Run a standard model (e.g., Logistic Regression with TF-IDF) to get an initial performance metric."
+      - "Ensure the data loading and evaluation pipeline is working correctly."
+    constraints:
+      # Stop this stage once a single run achieves an accuracy of at least 0.85
+      required_metrics:
+        accuracy: 0.85
+      # Or, stop after a maximum of 3 runs to avoid getting stuck.
+      max_runs: 3
+
+  - name: "improvement"
+    description: "Iteratively try to improve upon the baseline by exploring model types and hyperparameters."
+    goals:
+      - "Experiment with different model architectures or more advanced feature engineering."
+      - "Tune key hyperparameters to optimize the target metric."
+    constraints:
+      required_metrics:
+        accuracy: 0.90
+      max_runs: 10
+
+  - name: "robustness_check"
+    description: "Test the best model's robustness and generalization capabilities."
+    goals:
+      - "Evaluate the model on a held-out test set or a dataset with a slight distribution shift."
+      - "Analyze potential failure modes."
+    constraints:
+      required_metrics:
+        # The goal is to maintain performance on the new data.
+        test_accuracy: 0.88
+      max_runs: 5

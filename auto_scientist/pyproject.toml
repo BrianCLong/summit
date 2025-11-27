@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auto-scientist"
+version = "1.0.0"
+description = "A framework for orchestrating and automating scientific research with LLM agents."
+authors = [{ name = "Jules", email = "jules@example.com" }]
+license = { text = "MIT" }
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "pyyaml>=6.0",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/example/auto-scientist"
+"Repository" = "https://github.com/example/auto-scientist"
+"Bug Tracker" = "https://github.com/example/auto-scientist/issues"
+
+[project.scripts]
+auto-scientist = "auto_scientist.cli:app"
+
+[project.optional-dependencies]
+cli = [
+    "typer[all]>=0.9.0",
+    "rich>=13.0.0",
+]
+llm = [
+    "litellm>=1.15.0",
+    "openai>=1.0.0",
+]
+viz = [
+    "graphviz>=0.20.0",
+]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings[python]>=0.23.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+auto_scientist = ["templates/**"]
+
+[tool.ruff]
+line-length = 88
+select = ["E", "W", "F", "I", "C", "B"]
+ignore = ["B008"]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+pretty = true
+show_error_codes = true
