@@ -968,6 +968,98 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     return result.rows.map((row) => this.mapRowToEntry(row));
   }
 
+  async generateExportManifest(
+    tenantId: string,
+    exportId: string,
+    resourceIds: string[],
+  ): Promise<string> {
+    return tracer.startActiveSpan(
+      'provenance_ledger.generate_manifest',
+      async (span: any) => {
+        span.setAttributes?.({
+          tenant_id: tenantId,
+          export_id: exportId,
+          resource_count: resourceIds.length,
+        });
+
+        // 1. Fetch provenance entries for the resources
+        // This is a simplified fetch - real world would trace lineage graph
+        const entries: ProvenanceEntry[] = [];
+        for (const rid of resourceIds) {
+          const resEntries = await this.getEntries(tenantId, {
+            resourceType: 'Evidence', // Assuming Evidence type for now
+            limit: 100, // Reasonable limit for manifest proof
+          });
+          // Filter in memory for specific resource if getEntries doesn't support by ID
+          const relevant = resEntries.filter((e) => e.resourceId === rid);
+          entries.push(...relevant);
+        }
+
+        // 2. Compute root hash of these specific entries (Merkle tree subset)
+        const hashes = entries.map((e) => e.currentHash).sort();
+        const rootHash = this.computeMerkleRoot(hashes);
+
+        // 3. Get the latest signed root for this tenant
+        const roots = await this.getTenantSignedRoots(tenantId);
+        const latestRoot = roots[roots.length - 1];
+
+        // 4. Construct manifest
+        const manifest = {
+          exportId,
+          tenantId,
+          timestamp: new Date().toISOString(),
+          content: {
+            resourceCount: resourceIds.length,
+            resources: resourceIds,
+          },
+          provenance: {
+            entryCount: entries.length,
+            rootHash, // Hash of the exported items
+            chainTip: latestRoot?.rootHash || 'genesis', // Anchor to global chain
+            signatures: [
+              {
+                signer: 'provenance-ledger-v2',
+                timestamp: new Date().toISOString(),
+                signature: await this.signWithCosign(rootHash), // Sign the specific export root
+              },
+            ],
+          },
+        };
+
+        span.setAttributes?.({
+          manifest_root_hash: rootHash,
+        });
+
+        return JSON.stringify(manifest, null, 2);
+      },
+    );
+  }
+
+  private async getTenantSignedRoots(tenantId: string): Promise<LedgerRoot[]> {
+    const result = await pool.query(
+      `SELECT * FROM provenance_ledger_roots
+       WHERE tenant_id = $1
+       ORDER BY end_sequence ASC`,
+      [tenantId],
+    );
+    return result.rows.map((row) => ({
+      id: row.id,
+      tenantId: row.tenant_id,
+      rootHash: row.root_hash,
+      startSequence: BigInt(row.start_sequence),
+      endSequence: BigInt(row.end_sequence),
+      entryCount: row.entry_count,
+      timestamp: row.timestamp,
+      signature: row.signature,
+      cosignBundle: row.cosign_bundle,
+      merkleProof: row.merkle_proof
+        ? typeof row.merkle_proof === 'string'
+          ? JSON.parse(row.merkle_proof)
+          : row.merkle_proof
+        : undefined,
+    }));
+  }
+
   async exportLedger(
     tenantId: string,
     format: 'json' | 'csv' = 'json',
