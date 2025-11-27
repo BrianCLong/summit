@@ -1,0 +1,93 @@
+{
+  "epic": "Provenance & Claim Ledger (Service)",
+  "key": "LEDGER-EPIC",
+  "archiveName": "prov-ledger-epic.zip",
+  "repo": "services/prov-ledger/",
+  "description": "Stateless API + append-only store to register evidence, parse claims, compute contradiction graphs, and emit a verifiable export manifest (hash tree + transform chain).",
+  "milestones": [
+    "M1: Contracts & fixtures",
+    "M2: Core write/read paths",
+    "M3: Contradiction graph",
+    "M4: Export manifest + CLI verifier",
+    "M5: Perf hardening & SLOs"
+  ],
+  "stories": [
+    {
+      "key": "LEDGER-1",
+      "summary": "Define contracts and fixtures",
+      "description": "Define contracts (ledger.proto, openapi.yaml), event schemas (claims.registered.v1, contradiction.updated.v1), and golden fixtures."
+    },
+    {
+      "key": "LEDGER-2",
+      "summary": "Implement /evidence/register",
+      "description": "Implement /evidence/register endpoint with idempotent writes and hash tree storage."
+    },
+    {
+      "key": "LEDGER-3",
+      "summary": "Implement /claim/parse",
+      "description": "Implement /claim/parse endpoint with syntax validation and normalization."
+    },
+    {
+      "key": "LEDGER-4",
+      "summary": "Implement /claim/contradictions",
+      "description": "Implement /claim/contradictions endpoint with graph walk algorithm. Must meet 50k nodes p95<1.5s target."
+    },
+    {
+      "key": "LEDGER-5",
+      "summary": "Implement /export/manifest",
+      "description": "Implement /export/manifest endpoint producing Merkle summary and transform chain."
+    },
+    {
+      "key": "LEDGER-6",
+      "summary": "CLI ledger-verify tool",
+      "description": "Implement CLI ledger-verify to validate manifests offline."
+    },
+    {
+      "key": "LEDGER-7",
+      "summary": "Outbox + Kafka publishing",
+      "description": "Implement outbox pattern with Kafka publishing, retry logic, and dead-letter queue."
+    },
+    {
+      "key": "LEDGER-8",
+      "summary": "Observability and SLOs",
+      "description": "Add OTEL instrumentation, Prometheus metrics, SLO definitions, and operational runbooks."
+    }
+  ],
+  "definitionOfDone": [
+    "API & event fixtures stable; contract tests pass",
+    "Golden E2E: ingest->resolve->report including manifest verification",
+    "p95 latency targets met on seeded dataset",
+    "No edits beyond services/prov-ledger/*"
+  ],
+  "acceptanceTests": [
+    {
+      "name": "Register/parse/contradict/export happy paths",
+      "expected": "HTTP 2xx responses for all endpoints"
+    },
+    {
+      "name": "Manifest verification",
+      "expected": "Passes on 100 fixture bundles"
+    },
+    {
+      "name": "Chaos resilience",
+      "expected": "Kafka kill causes at-most-once external effects; outbox drains after recovery"
+    }
+  ],
+  "testEvidence": [
+    {
+      "type": "unit",
+      "path": "services/prov-ledger/src/__tests__/",
+      "artifact": "test-results/unit/prov-ledger.xml"
+    },
+    {
+      "type": "integration",
+      "path": "services/prov-ledger/tests/integration/",
+      "artifact": "test-results/integration/prov-ledger.json"
+    },
+    {
+      "type": "e2e",
+      "path": "tests/e2e/prov-ledger.spec.ts",
+      "artifact": "test-results/e2e/prov-ledger-report.json"
+    }
+  ]
+}
