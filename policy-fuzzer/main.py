@@ -1,3 +1,4 @@
+import argparse
 import time  # Import the time module
 
 from canaries import CANARIES

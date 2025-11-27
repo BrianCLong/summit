@@ -1,0 +1,63 @@
+{
+  "dashboard": {
+    "title": "IntelGraph - GenAI Observability",
+    "tags": ["intelgraph", "genai", "llm", "metrics"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "LLM Request Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(llm_requests_total[5m])",
+            "legendFormat": "{{provider}} - {{model}} - {{status}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "LLM Latency (p95)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(llm_request_duration_seconds_bucket[5m]))",
+            "legendFormat": "{{provider}} {{model}} p95",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Token Usage Rate",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(llm_tokens_total[5m])",
+            "legendFormat": "{{provider}} {{model}} {{type}}",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Total Errors",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(llm_requests_total{status='error'}[1h]))",
+            "legendFormat": "Errors (1h)",
+            "refId": "A"
+          }
+        ],
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 }
+      }
+    ],
+    "refresh": "10s",
+    "time": { "from": "now-1h", "to": "now" }
+  }
+}
