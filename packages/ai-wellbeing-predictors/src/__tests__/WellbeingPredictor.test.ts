@@ -3,6 +3,7 @@ import { WellbeingPredictor } from '../WellbeingPredictor.js';
 import { InterventionRecommender } from '../InterventionRecommender.js';
 import { ResourceAllocator } from '../ResourceAllocator.js';
 import { CitizenWellbeingProfile } from '../types.js';
+import { createWellbeingPipeline, type WellbeingPipelineConfig } from '../index.js';
 
 describe('WellbeingPredictor', () => {
   const predictor = new WellbeingPredictor();
@@ -431,5 +432,52 @@ describe('ResourceAllocator', () => {
         expect(domainAllocation.amount).toBeLessThanOrEqual(availableBudget);
       }
     });
+  });
+});
+
+describe('createWellbeingPipeline', () => {
+  it('should create a complete pipeline with default config', () => {
+    const pipeline = createWellbeingPipeline();
+
+    expect(pipeline).toBeDefined();
+    expect(pipeline.predictor).toBeInstanceOf(WellbeingPredictor);
+    expect(pipeline.recommender).toBeInstanceOf(InterventionRecommender);
+    expect(pipeline.allocator).toBeInstanceOf(ResourceAllocator);
+  });
+
+  it('should create a pipeline with custom config', () => {
+    const config: WellbeingPipelineConfig = {
+      allocationReservePercent: 0.20,
+    };
+    const pipeline = createWellbeingPipeline(config);
+
+    expect(pipeline).toBeDefined();
+    expect(pipeline.predictor).toBeInstanceOf(WellbeingPredictor);
+    expect(pipeline.recommender).toBeInstanceOf(InterventionRecommender);
+    expect(pipeline.allocator).toBeInstanceOf(ResourceAllocator);
+  });
+
+  it('should work end-to-end with pipeline components', () => {
+    const pipeline = createWellbeingPipeline();
+
+    // Create test profiles
+    const profiles: CitizenWellbeingProfile[] = Array.from({ length: 5 }, (_, i) => ({
+      citizenId: `citizen-${i}`,
+      lastUpdated: new Date().toISOString(),
+      predictions: [],
+      activeInterventions: [],
+      historicalScores: [],
+    }));
+
+    // Run through the pipeline
+    const predictions = pipeline.predictor.predictBatch(profiles);
+    expect(predictions).toHaveLength(5);
+
+    const recommendations = pipeline.recommender.recommend(predictions[0]);
+    expect(recommendations).toBeDefined();
+
+    const allocation = pipeline.allocator.allocate(predictions, 100000, 'test-region');
+    expect(allocation.totalBudget).toBe(100000);
+    expect(allocation.allocations.length).toBeGreaterThan(0);
   });
 });
