@@ -23,7 +23,7 @@ insightface==0.7.3
 pytesseract==0.3.10
 paddleocr==2.7.3
 easyocr==1.7.0
-paddlepaddle==2.5.1
+paddlepaddle==2.6.0
 
 # Speech Processing
 librosa==0.10.1
