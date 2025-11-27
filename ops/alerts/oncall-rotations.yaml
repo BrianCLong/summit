@@ -1,0 +1,38 @@
+# On-call rotation and PagerDuty escalation coverage for SLO burn alerts
+apiVersion: ops.summit.ai/v1alpha1
+kind: OnCallCoverage
+metadata:
+  name: intelgraph-oncall-rotations
+spec:
+  pagerduty_service: intelgraph-ml-observability
+  escalation_policy: sre-ml-primary
+  verification_play: ml-major-incident
+  rotations:
+    - service: api
+      schedule: sre-core-weekly
+      pagerduty_escalation_policy: sre-ml-primary
+      verification_hooks:
+        - type: pagerduty-synthetic
+          description: Trigger synthetic API alert to exercise PagerDuty escalation
+        - type: slack-handoff
+          description: Confirm schedule handoff message delivered to #sre-alerts
+    - service: gateway
+      schedule: sre-core-weekly
+      pagerduty_escalation_policy: sre-ml-primary
+      verification_hooks:
+        - type: pagerduty-synthetic
+          description: Fire synthetic NLQ alert to verify gateway escalation chain
+        - type: slack-handoff
+          description: Confirm gateway ownership noted in #oncall-bridge
+    - service: neo4j
+      schedule: sre-core-weekly
+      pagerduty_escalation_policy: sre-ml-primary
+      verification_hooks:
+        - type: pagerduty-synthetic
+          description: Trigger database connection alert to validate on-call paging
+        - type: slack-handoff
+          description: Confirm Neo4j backup owner receives handoff ping
+  ci:
+    pagerduty_config: ops/alerts/pagerduty-ml-service.yaml
+    alert_payload_dir: ops/runbooks/generated/alerts
+    verification_script: ops/observability-ci/scripts/check_oncall_paths.py

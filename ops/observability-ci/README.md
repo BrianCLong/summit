@@ -30,3 +30,10 @@ make up
 ```
 
 Visit Grafana at http://localhost:3000 and Prometheus at http://localhost:9090.
+
+## Alert runbook automation
+
+- `python scripts/alert_runbook_generator.py` builds one-click remediation payloads and the
+  aggregated catalog in `ops/runbooks/generated` from `ops/alerts/slo-burn-rules.yml`.
+- `python scripts/check_oncall_paths.py` verifies on-call rotation coverage and PagerDuty
+  escalation wiring; it is invoked by `scripts/smoke-test.sh` for CI safety.

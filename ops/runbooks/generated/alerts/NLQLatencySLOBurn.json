@@ -1,0 +1,10 @@
+{
+  "alert_id": "NLQLatencySLOBurn",
+  "alert_name": "NL\u2192Cypher latency SLO burning fast",
+  "severity": "critical",
+  "service": "gateway",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "95th percentile NL\u2192Cypher latency is {{ $value }}s (threshold: 2.0s) over the last 5 minutes"
+}

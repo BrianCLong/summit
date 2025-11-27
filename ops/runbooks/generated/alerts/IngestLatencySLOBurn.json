@@ -1,0 +1,10 @@
+{
+  "alert_id": "IngestLatencySLOBurn",
+  "alert_name": "Data ingest latency SLO breach",
+  "severity": "warning",
+  "service": "api",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "95th percentile ingest latency is {{ $value }}s (threshold: 1.5s)"
+}

@@ -1,0 +1,10 @@
+{
+  "alert_id": "DatabaseConnectionPoolHigh",
+  "alert_name": "Database connection pool usage high",
+  "severity": "warning",
+  "service": "neo4j",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "Neo4j connection pool is {{ $value | humanizePercentage }} full (threshold: 80%)"
+}
