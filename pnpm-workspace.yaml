@@ -8,3 +8,4 @@ packages:
   - 'tools/*'
 exclude:
   - 'archive/**'
+  - 'apps/desktop-electron'
