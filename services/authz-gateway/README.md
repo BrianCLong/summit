@@ -23,6 +23,7 @@ npm run test:fuzz
 
 - `GET /subject/:id/attributes` – aggregated subject attributes with cache controls.
 - `POST /authorize` – returns ABAC decision payload (`allow`, `reason`, `obligations`).
+- `POST /auth/oidc/callback` – validates OIDC id_tokens against configured JWKS, enforces MFA in staging, and mints managed sessions.
 - `POST /auth/webauthn/challenge` & `POST /auth/step-up` – WebAuthn challenge/response for step-up auth tokens.
 
 ## Governance Gate Fuzzing

@@ -2,8 +2,8 @@ import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
-import { initKeys, getPublicJwk, getPrivateKey } from './keys';
-import { login, introspect } from './auth';
+import { initKeys, getPublicJwk } from './keys';
+import { login, introspect, oidcLogin } from './auth';
 import { requireAuth } from './middleware';
 import {
   startObservability,
@@ -15,6 +15,7 @@ import { StepUpManager } from './stepup';
 import { authorize } from './policy';
 import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
+import { sessionManager } from './session';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
@@ -41,6 +42,19 @@ export async function createApp(): Promise<express.Application> {
 
   app.get('/.well-known/jwks.json', (_req, res) => {
     res.json({ keys: [getPublicJwk()] });
+  });
+
+  app.post('/auth/oidc/callback', async (req, res) => {
+    const { idToken } = req.body || {};
+    if (!idToken) {
+      return res.status(400).json({ error: 'id_token_required' });
+    }
+    try {
+      const token = await oidcLogin(idToken);
+      res.json({ token });
+    } catch (error) {
+      res.status(401).json({ error: (error as Error).message });
+    }
   });
 
   app.post('/auth/introspect', async (req, res) => {
@@ -176,16 +190,13 @@ export async function createApp(): Promise<express.Application> {
           signature,
           challenge,
         });
-        const { SignJWT } = await import('jose');
-        const token = await new SignJWT({
-          ...req.user,
+        const sid = String(req.user?.sid || '');
+        const token = await sessionManager.elevateSession(sid, {
           acr: 'loa2',
-        })
-          .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
-          .setIssuedAt()
-          .setExpirationTime('1h')
-          .sign(getPrivateKey());
-        res.json({ token });
+          amr: ['hwk', 'fido2'],
+          extendSeconds: 30 * 60,
+        });
+        res.json({ token, acr: 'loa2', amr: ['hwk', 'fido2'] });
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
       }
