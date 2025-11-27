@@ -7,6 +7,7 @@ This folder ships the curated rules and base configuration for the IntelGraph ob
 - `prometheus.yml` – opinionated scrape configuration covering Maestro services, OTEL collector, Jaeger, Loki, and Kubernetes pods. Includes alertmanager wiring and references all rule files in this directory.
 - `prometheus-rule-slo.yaml` – legacy platform SLO alerts (graph latency and HTTP error burn rate).
 - `rules-business.yaml` – business KPI recordings (signups, API calls, revenue) with anomaly detection, SLA/SLO alerts, and capacity planning projections.
+- `workflow-slo-rules.yaml` – workflow-specific SLO recordings and burn alerts for ingest, query, copilot, and vertical intelligence paths.
 
 ## Usage
 
