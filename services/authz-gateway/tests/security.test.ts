@@ -29,7 +29,12 @@ function signChallenge(challenge: string) {
 async function performStepUp(app: express.Express, token: string) {
   const challengeRes = await request(app)
     .post('/auth/webauthn/challenge')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      action: 'dataset:read',
+      resourceId: 'dataset-alpha',
+      classification: 'confidential',
+    });
   const signature = signChallenge(challengeRes.body.challenge);
   const step = await request(app)
     .post('/auth/step-up')
@@ -156,5 +161,74 @@ describe('security', () => {
       .set('x-resource-classification', 'public')
       .set('x-resource-tags', 'admin-only');
     expect(res.status).toBe(403);
+  });
+
+  it('rejects expired elevation windows', async () => {
+    const app = await createApp();
+    const sessionId = 'session-expired';
+    const token = await new SignJWT({
+      sub: 'alice',
+      tenantId: 'tenantA',
+      roles: ['reader'],
+      acr: 'loa2',
+      sid: sessionId,
+      elevation: {
+        sessionId,
+        requestedAction: 'dataset:read',
+        resourceId: 'dataset-alpha',
+        tenantId: 'tenantA',
+        classification: 'confidential',
+        mechanism: 'webauthn',
+        challengeId: 'expired',
+        grantedAt: new Date(Date.now() - 10_000).toISOString(),
+        expiresAt: new Date(Date.now() - 1_000).toISOString(),
+      },
+    })
+      .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(getPrivateKey());
+
+    const res = await request(app)
+      .get('/protected/resource')
+      .set('Authorization', `Bearer ${token}`)
+      .set('x-tenant-id', 'tenantA')
+      .set('x-resource-id', 'dataset-alpha');
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe('step_up_required');
+  });
+
+  it('binds elevated tokens to their source session', async () => {
+    const app = await createApp();
+    const token = await new SignJWT({
+      sub: 'alice',
+      tenantId: 'tenantA',
+      roles: ['reader'],
+      acr: 'loa2',
+      sid: 'session-a',
+      elevation: {
+        sessionId: 'session-b',
+        requestedAction: 'dataset:read',
+        resourceId: 'dataset-alpha',
+        tenantId: 'tenantA',
+        classification: 'confidential',
+        mechanism: 'webauthn',
+        challengeId: 'mismatch',
+        grantedAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 10_000).toISOString(),
+      },
+    })
+      .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
+      .setIssuedAt()
+      .setExpirationTime('1h')
+      .sign(getPrivateKey());
+
+    const res = await request(app)
+      .get('/protected/resource')
+      .set('Authorization', `Bearer ${token}`)
+      .set('x-tenant-id', 'tenantA')
+      .set('x-resource-id', 'dataset-alpha');
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe('step_up_required');
   });
 });

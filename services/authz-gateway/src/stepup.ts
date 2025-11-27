@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import credentials from './data/webauthn-credentials.json';
+import type { ElevationContext, ElevationGrant } from './types';
 
 interface CredentialRecord {
   credentialId: string;
@@ -14,6 +15,7 @@ const credentialDirectory = credentials as Record<string, CredentialRecord[]>;
 export interface StepUpOptions {
   ttlMs?: number;
   now?: () => number;
+  elevationTtlMs?: number;
 }
 
 export interface StepUpChallenge {
@@ -25,6 +27,10 @@ export interface StepUpChallenge {
     displayName: string;
   }[];
   expiresAt: string;
+  context: Pick<
+    ElevationContext,
+    'requestedAction' | 'resourceId' | 'classification' | 'tenantId'
+  >;
 }
 
 export interface StepUpVerification {
@@ -38,9 +44,11 @@ interface ChallengeCacheEntry {
   credentialId: string;
   expiresAt: number;
   used: boolean;
+  context: ElevationContext;
 }
 
 const DEFAULT_STEP_UP_TTL = 5 * 60 * 1000;
+const DEFAULT_ELEVATION_TTL = 10 * 60 * 1000;
 
 function toBase64Url(buffer: Buffer) {
   return buffer
@@ -71,18 +79,30 @@ function getRegisteredCredentials(userId: string): CredentialRecord[] {
 export class StepUpManager {
   private ttlMs: number;
   private now: () => number;
+  private elevationTtlMs: number;
   private challengeCache = new Map<string, ChallengeCacheEntry>();
 
   constructor(options: StepUpOptions = {}) {
     this.ttlMs = options.ttlMs ?? DEFAULT_STEP_UP_TTL;
     this.now = options.now ?? Date.now;
+    this.elevationTtlMs = options.elevationTtlMs ?? DEFAULT_ELEVATION_TTL;
   }
 
   clear() {
     this.challengeCache.clear();
   }
 
-  createChallenge(userId: string): StepUpChallenge {
+  createChallenge(userId: string, context: ElevationContext): StepUpChallenge {
+    if (!context.sessionId) {
+      throw new Error('session_missing');
+    }
+    if (!context.requestedAction) {
+      throw new Error('action_missing');
+    }
+    const normalizedContext: ElevationContext = {
+      ...context,
+      currentAcr: context.currentAcr ?? 'loa1',
+    };
     const registered = getRegisteredCredentials(userId);
     if (!registered.length) {
       throw new Error('no_registered_device');
@@ -95,6 +115,7 @@ export class StepUpManager {
       credentialId: primary.credentialId,
       expiresAt: this.now() + this.ttlMs,
       used: false,
+      context: normalizedContext,
     });
     return {
       challenge,
@@ -105,10 +126,20 @@ export class StepUpManager {
         displayName: entry.deviceName,
       })),
       expiresAt: new Date(this.now() + this.ttlMs).toISOString(),
+      context: {
+        requestedAction: normalizedContext.requestedAction,
+        resourceId: normalizedContext.resourceId,
+        classification: normalizedContext.classification,
+        tenantId: normalizedContext.tenantId,
+      },
     };
   }
 
-  verifyResponse(userId: string, payload: StepUpVerification): boolean {
+  verifyResponse(
+    userId: string,
+    payload: StepUpVerification,
+    sessionId: string,
+  ): ElevationGrant {
     const entry = this.challengeCache.get(userId);
     if (!entry) {
       throw new Error('challenge_not_found');
@@ -125,6 +156,9 @@ export class StepUpManager {
     }
     if (payload.credentialId !== entry.credentialId) {
       throw new Error('credential_mismatch');
+    }
+    if (entry.context.sessionId !== sessionId) {
+      throw new Error('session_mismatch');
     }
 
     const registered = getRegisteredCredentials(userId).find(
@@ -143,6 +177,12 @@ export class StepUpManager {
       throw new Error('signature_invalid');
     }
     entry.used = true;
-    return true;
+    return {
+      ...entry.context,
+      grantedAt: new Date(this.now()).toISOString(),
+      expiresAt: new Date(this.now() + this.elevationTtlMs).toISOString(),
+      mechanism: 'webauthn',
+      challengeId: entry.challenge,
+    };
   }
 }

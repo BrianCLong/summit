@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { SignJWT, jwtVerify } from 'jose';
 import { getPrivateKey, getPublicKey } from './keys';
 import { log } from './audit';
@@ -27,12 +28,15 @@ export async function login(username: string, password: string) {
   if (!user || user.password !== password) {
     throw new Error('invalid_credentials');
   }
+  const sessionId = crypto.randomUUID();
   const token = await new SignJWT({
     sub: user.sub,
     tenantId: user.tenantId,
     roles: user.roles,
     clearance: user.clearance,
     acr: 'loa1',
+    sid: sessionId,
+    sessionEstablishedAt: new Date().toISOString(),
   })
     .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
     .setIssuedAt()

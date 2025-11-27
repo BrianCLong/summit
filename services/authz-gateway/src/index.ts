@@ -150,7 +150,23 @@ export async function createApp(): Promise<express.Application> {
     (req: AuthenticatedRequest, res) => {
       try {
         const userId = String(req.user?.sub || '');
-        const challenge = stepUpManager.createChallenge(userId);
+        const sessionId = String((req.user as { sid?: string })?.sid || '');
+        const { action, resourceId, classification, tenantId } = req.body || {};
+        if (!action) {
+          return res.status(400).json({ error: 'action_missing' });
+        }
+        if (!sessionId) {
+          return res.status(401).json({ error: 'session_missing' });
+        }
+        const challenge = stepUpManager.createChallenge(userId, {
+          sessionId,
+          requestedAction: action,
+          resourceId: resourceId || req.resourceAttributes?.id,
+          classification:
+            classification || req.resourceAttributes?.classification,
+          tenantId: tenantId || req.subjectAttributes?.tenantId,
+          currentAcr: String(req.user?.acr || 'loa1'),
+        });
         res.json(challenge);
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
@@ -171,15 +187,21 @@ export async function createApp(): Promise<express.Application> {
         if (!credentialId || !signature || !challenge) {
           return res.status(400).json({ error: 'missing_challenge_payload' });
         }
-        stepUpManager.verifyResponse(userId, {
-          credentialId,
-          signature,
-          challenge,
-        });
+        const sessionId = String((req.user as { sid?: string })?.sid || '');
+        const elevation = stepUpManager.verifyResponse(
+          userId,
+          {
+            credentialId,
+            signature,
+            challenge,
+          },
+          sessionId,
+        );
         const { SignJWT } = await import('jose');
         const token = await new SignJWT({
           ...req.user,
           acr: 'loa2',
+          elevation,
         })
           .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
           .setIssuedAt()
