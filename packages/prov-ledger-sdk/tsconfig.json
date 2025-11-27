@@ -2,13 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "types": [
-      "node"
-    ],
     "allowImportingTsExtensions": false,
-    "composite": true
-    ,"tsBuildInfoFile": "dist/.tsbuildinfo"
-    "types": []
+    "composite": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "types": ["node"]
   },
   "include": [
     "src"

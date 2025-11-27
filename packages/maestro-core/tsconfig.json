@@ -4,7 +4,7 @@
     "outDir": "dist",
     "allowImportingTsExtensions": false,
     "composite": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
     "types": []
   },
   "include": [
