@@ -5,14 +5,25 @@
  * Environment checks and build system diagnostics
  */
 
+import axios from 'axios';
 import { execSync } from 'child_process';
 import { promises as fs } from 'fs';
+import neo4j from 'neo4j-driver';
 import path from 'path';
 import os from 'os';
+import { Pool } from 'pg';
+import { createClient } from 'redis';
+
+import Ajv from 'ajv';
 
 interface DiagnosticCheck {
   name: string;
-  category: 'environment' | 'tools' | 'configuration' | 'performance';
+  category:
+    | 'environment'
+    | 'tools'
+    | 'configuration'
+    | 'performance'
+    | 'golden-path';
   check: () => Promise<DiagnosticResult>;
 }
 
@@ -161,6 +172,49 @@ class MaestroDoctor {
       name: 'Parallel Execution',
       category: 'performance',
       check: this.checkParallelExecution,
+    });
+
+    // Golden path checks
+    this.checks.push({
+      name: 'Environment Variables',
+      category: 'golden-path',
+      check: this.checkEnvironmentVariables,
+    });
+
+    this.checks.push({
+      name: 'Postgres Connectivity',
+      category: 'golden-path',
+      check: this.checkPostgresConnectivity,
+    });
+
+    this.checks.push({
+      name: 'Neo4j Connectivity',
+      category: 'golden-path',
+      check: this.checkNeo4jConnectivity,
+    });
+
+    this.checks.push({
+      name: 'Redis Connectivity',
+      category: 'golden-path',
+      check: this.checkRedisConnectivity,
+    });
+
+    this.checks.push({
+      name: 'Core Service Health',
+      category: 'golden-path',
+      check: this.checkServiceHealth,
+    });
+
+    this.checks.push({
+      name: 'Schema Compatibility',
+      category: 'golden-path',
+      check: this.checkSchemaCompatibility,
+    });
+
+    this.checks.push({
+      name: 'Connector Availability',
+      category: 'golden-path',
+      check: this.checkConnectorAvailability,
     });
   }
 
@@ -527,6 +581,358 @@ class MaestroDoctor {
       };
     }
   };
+
+  private checkEnvironmentVariables = async (): Promise<DiagnosticResult> => {
+    const requiredVars = [
+      { key: 'DATABASE_URL', description: 'Postgres connection string' },
+      { key: 'POSTGRES_URL', description: 'Postgres connection string' },
+      { key: 'NEO4J_URI', description: 'Neo4j bolt URI' },
+      { key: 'NEO4J_USER', description: 'Neo4j username' },
+      { key: 'NEO4J_PASSWORD', description: 'Neo4j password' },
+      { key: 'REDIS_URL', description: 'Redis connection string' },
+    ];
+
+    const missing = requiredVars.filter((variable) => !process.env[variable.key]);
+
+    if (missing.length === requiredVars.length) {
+      return {
+        status: 'fail',
+        message: 'Core environment not configured',
+        details:
+          'None of the database or cache variables are set; golden path checks will fail',
+        fix: 'Populate DATABASE_URL/POSTGRES_URL, NEO4J_*, and REDIS_URL in your .env',
+        impact: 'high',
+      };
+    }
+
+    if (missing.length > 0) {
+      const names = missing.map((variable) => variable.key).join(', ');
+      return {
+        status: 'warn',
+        message: `Missing variables: ${names}`,
+        fix: 'Add the missing variables to align with the golden path defaults',
+        impact: 'high',
+      };
+    }
+
+    return {
+      status: 'pass',
+      message: 'Core environment variables present',
+    };
+  };
+
+  private checkPostgresConnectivity = async (): Promise<DiagnosticResult> => {
+    const connectionString =
+      process.env.POSTGRES_URL || process.env.DATABASE_URL || '';
+
+    if (!connectionString) {
+      return {
+        status: 'warn',
+        message: 'Postgres connection string not configured',
+        fix: 'Set DATABASE_URL or POSTGRES_URL to enable database checks',
+        impact: 'high',
+      };
+    }
+
+    const pool = new Pool({
+      connectionString,
+      connectionTimeoutMillis: 3000,
+      max: 1,
+    });
+
+    try {
+      const client = await pool.connect();
+      await client.query('SELECT 1');
+      client.release();
+      await pool.end();
+      return {
+        status: 'pass',
+        message: 'Postgres reachable and responding',
+        details: `Using ${connectionString.split('@').pop()}`,
+      };
+    } catch (error) {
+      await pool.end();
+      return {
+        status: 'fail',
+        message: 'Postgres connection failed',
+        details: (error as Error).message,
+        fix: 'Confirm the database is running and the connection string is correct',
+        impact: 'high',
+      };
+    }
+  };
+
+  private checkNeo4jConnectivity = async (): Promise<DiagnosticResult> => {
+    const uri = process.env.NEO4J_URI;
+    const user = process.env.NEO4J_USER;
+    const password = process.env.NEO4J_PASSWORD;
+
+    if (!uri || !user || !password) {
+      return {
+        status: 'warn',
+        message: 'Neo4j credentials not fully configured',
+        fix: 'Set NEO4J_URI, NEO4J_USER, and NEO4J_PASSWORD for graph checks',
+        impact: 'high',
+      };
+    }
+
+    const driver = neo4j.driver(uri, neo4j.auth.basic(user, password), {
+      maxConnectionPoolSize: 1,
+      connectionTimeout: 3000,
+    });
+
+    try {
+      const session = driver.session();
+      await session.run('RETURN 1');
+      await session.close();
+      await driver.close();
+      return {
+        status: 'pass',
+        message: 'Neo4j reachable and responding',
+      };
+    } catch (error) {
+      await driver.close();
+      return {
+        status: 'fail',
+        message: 'Neo4j connection failed',
+        details: (error as Error).message,
+        fix: 'Confirm the bolt URI, credentials, and service availability',
+        impact: 'high',
+      };
+    }
+  };
+
+  private checkRedisConnectivity = async (): Promise<DiagnosticResult> => {
+    const redisUrl = process.env.REDIS_URL;
+
+    if (!redisUrl) {
+      return {
+        status: 'warn',
+        message: 'Redis URL not configured',
+        fix: 'Set REDIS_URL for cache connectivity',
+        impact: 'medium',
+      };
+    }
+
+    const client = createClient({
+      url: redisUrl,
+      socket: { connectTimeout: 3000 },
+    });
+
+    try {
+      await client.connect();
+      await client.ping();
+      await client.quit();
+      return {
+        status: 'pass',
+        message: 'Redis reachable and responding',
+      };
+    } catch (error) {
+      await client.quit().catch(() => undefined);
+      return {
+        status: 'fail',
+        message: 'Redis connection failed',
+        details: (error as Error).message,
+        fix: 'Verify REDIS_URL and ensure Redis is running',
+        impact: 'medium',
+      };
+    }
+  };
+
+  private checkServiceHealth = async (): Promise<DiagnosticResult> => {
+    const endpoints = this.getHealthEndpoints();
+
+    if (endpoints.length === 0) {
+      return {
+        status: 'warn',
+        message: 'No service health endpoints configured',
+        fix: 'Set SUMMIT_HEALTH_ENDPOINTS or ensure the API PORT is configured',
+        impact: 'medium',
+      };
+    }
+
+    const unhealthy: string[] = [];
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await axios.get(endpoint, { timeout: 3000 });
+        if (response.status >= 300) {
+          unhealthy.push(`${endpoint} (status ${response.status})`);
+        }
+      } catch (error) {
+        unhealthy.push(`${endpoint} (${(error as Error).message})`);
+      }
+    }
+
+    if (unhealthy.length === 0) {
+      return {
+        status: 'pass',
+        message: `${endpoints.length} health endpoint(s) reachable`,
+      };
+    }
+
+    return {
+      status: 'fail',
+      message: `Unhealthy services: ${unhealthy.join(', ')}`,
+      fix: 'Start the API stack and verify the health routes are exposed',
+      impact: 'high',
+    };
+  };
+
+  private checkSchemaCompatibility = async (): Promise<DiagnosticResult> => {
+    const baselinePath = path.join(process.cwd(), 'schema', 'baseline.graphql');
+    const activeSchemaPath = path.join(process.cwd(), 'graphql', 'schema.graphql');
+
+    try {
+      const [baseline, active] = await Promise.all([
+        fs.readFile(baselinePath, 'utf8'),
+        fs.readFile(activeSchemaPath, 'utf8'),
+      ]);
+
+      const baselineTypes = this.extractTypeNames(baseline);
+      const missing = baselineTypes.filter((typeName) =>
+        !active.includes(`type ${typeName}`) &&
+        !active.includes(`interface ${typeName}`) &&
+        !active.includes(`enum ${typeName}`),
+      );
+
+      if (missing.length === 0) {
+        return {
+          status: 'pass',
+          message: 'GraphQL schema matches baseline contract',
+        };
+      }
+
+      return {
+        status: 'warn',
+        message: `Baseline types missing: ${missing.join(', ')}`,
+        fix: 'Regenerate schema or backfill missing types before deploying',
+        impact: 'medium',
+      };
+    } catch (error) {
+      return {
+        status: 'warn',
+        message: 'Unable to validate schema compatibility',
+        details: (error as Error).message,
+        fix: 'Ensure schema/baseline.graphql and graphql/schema.graphql exist',
+        impact: 'medium',
+      };
+    }
+  };
+
+  private checkConnectorAvailability = async (): Promise<DiagnosticResult> => {
+    const registryPath = path.join(process.cwd(), 'connectors', 'registry.json');
+    const schemaPath = path.join(process.cwd(), 'connectors', 'registry.schema.json');
+
+    if (!(await this.pathExists(registryPath))) {
+      return {
+        status: 'warn',
+        message: 'Connector registry not found',
+        fix: 'Create connectors/registry.json to enumerate available connectors',
+        impact: 'medium',
+      };
+    }
+
+    try {
+      const registry = JSON.parse(await fs.readFile(registryPath, 'utf8'));
+      const connectors = Array.isArray(registry.connectors)
+        ? registry.connectors
+        : [];
+
+      const missingPaths: string[] = [];
+
+      for (const connector of connectors) {
+        const connectorPath = connector.path
+          ? path.join(process.cwd(), connector.path)
+          : path.join(process.cwd(), 'connectors', `${connector.id}_connector`);
+
+        if (!(await this.pathExists(connectorPath))) {
+          missingPaths.push(connector.id || connectorPath);
+        }
+      }
+
+      const schemaIssues = await this.validateConnectorSchema(registry, schemaPath);
+
+      if (missingPaths.length === 0 && schemaIssues.length === 0) {
+        return {
+          status: 'pass',
+          message: `${connectors.length} connectors registered and available`,
+        };
+      }
+
+      const issues = [
+        schemaIssues.length > 0
+          ? `Schema drift: ${schemaIssues.join('; ')}`
+          : null,
+        missingPaths.length > 0
+          ? `Missing on disk: ${missingPaths.join(', ')}`
+          : null,
+      ].filter(Boolean);
+
+      return {
+        status: 'warn',
+        message: issues.join(' | '),
+        fix: 'Align registry.json with registry.schema.json and ensure connector folders exist',
+        impact: 'medium',
+      };
+    } catch (error) {
+      return {
+        status: 'warn',
+        message: 'Failed to read connector registry',
+        details: (error as Error).message,
+        fix: 'Validate connectors/registry.json is valid JSON',
+        impact: 'medium',
+      };
+    }
+  };
+
+  private getHealthEndpoints(): string[] {
+    if (process.env.SUMMIT_HEALTH_ENDPOINTS) {
+      return process.env.SUMMIT_HEALTH_ENDPOINTS.split(',')
+        .map((endpoint) => endpoint.trim())
+        .filter(Boolean);
+    }
+
+    const port = process.env.PORT || '4000';
+    return [`http://localhost:${port}/health`];
+  }
+
+  private async pathExists(targetPath: string): Promise<boolean> {
+    try {
+      await fs.access(targetPath);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private extractTypeNames(schema: string): string[] {
+    const matches = [...schema.matchAll(/^(type|interface|enum)\s+(\w+)/gm)];
+    return matches.map((match) => match[2]);
+  }
+
+  private async validateConnectorSchema(
+    registry: any,
+    schemaPath: string,
+  ): Promise<string[]> {
+    if (!(await this.pathExists(schemaPath))) {
+      return [];
+    }
+
+    try {
+      const schema = JSON.parse(await fs.readFile(schemaPath, 'utf8'));
+      const ajv = new Ajv({ allErrors: true });
+      const validate = ajv.compile(schema);
+      const valid = validate(registry);
+
+      if (valid) return [];
+      return (validate.errors || []).map(
+        (err) => `${err.instancePath || 'root'} ${err.message}`,
+      );
+    } catch (error) {
+      return [(error as Error).message];
+    }
+  }
 
   private checkBuildCache = async (): Promise<DiagnosticResult> => {
     const cacheDir = path.join(process.cwd(), '.maestro-cache');
