@@ -11,6 +11,7 @@ cat > /tmp/pr_comment.md <<EOF
 🔍 **Preview Environment Ready**
 - **Namespace:** \`${NS}\`
 - **URL:** ${URL}
+- **TTL (hours):** ${PREVIEW_TTL_HOURS:-72}
 - **Traces:** Jaeger → service:${ID}
 - **Metrics:** Grafana dashboard → namespace:${NS}
 
