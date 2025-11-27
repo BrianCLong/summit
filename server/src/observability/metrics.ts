@@ -148,4 +148,21 @@ export const metrics = {
     help: 'Total cache misses',
     registers: [registry],
   }),
+  soc2JobRuns: new Counter({
+    name: 'intelgraph_soc2_job_runs_total',
+    help: 'Total SOC2 evidence generation job runs',
+    labelNames: ['status'] as const,
+    registers: [registry],
+  }),
+  soc2JobDuration: new Histogram({
+    name: 'intelgraph_soc2_job_duration_seconds',
+    help: 'Duration of SOC2 evidence generation job runs in seconds',
+    buckets: [1, 5, 15, 30, 60, 120, 300],
+    registers: [registry],
+  }),
+  soc2PacketSize: new Gauge({
+    name: 'intelgraph_soc2_packet_size_bytes',
+    help: 'Size of the generated SOC2 evidence packet in bytes',
+    registers: [registry],
+  }),
 };

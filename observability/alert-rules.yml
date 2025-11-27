@@ -342,3 +342,17 @@ groups:
           summary: 'Conductor performance is degraded'
           description: 'Both expert execution and MCP operation latencies are elevated'
           runbook_url: 'https://docs.intelgraph.com/runbooks/performance-degraded'
+
+  # Background Job monitoring
+  - name: intelgraph.jobs
+    rules:
+      - alert: SOC2EvidenceJobFailed
+        expr: increase(intelgraph_soc2_job_runs_total{status="failure"}[1h]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: compliance
+        annotations:
+          summary: "SOC2 evidence generation job failed"
+          description: "The automated monthly SOC2 evidence generation job has failed. Manual investigation is required to ensure compliance evidence is not missed for the audit period."
+          runbook_url: "https://docs.intelgraph.com/runbooks/soc2-evidence-job-failed"
