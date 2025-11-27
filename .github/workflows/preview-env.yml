@@ -177,43 +177,200 @@ jobs:
           pnpm test:golden-path
 
   update-pr:
-    if: github.event.action != 'closed'
-    needs: [deploy-preview, smoke-tests]
+    if: github.event.action != 'closed' && always()
+    needs: [build-images, deploy-preview, smoke-tests]
     runs-on: ubuntu-latest
+    env:
+      HAS_KUBECONFIG: ${{ secrets.KUBECONFIG != '' }}
     steps:
-      - name: Update PR with preview URLs
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup kubectl
+        if: env.HAS_KUBECONFIG == 'true'
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Configure kubeconfig
+        if: env.HAS_KUBECONFIG == 'true'
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Prepare preview metadata
+        id: meta
+        env:
+          PREVIEW_URL: https://pr-${{ github.event.number }}.preview.intelgraph.dev
+        run: |
+          PREVIEW_URL="${PREVIEW_URL}"
+          GRAPHQL_URL="${PREVIEW_URL}/graphql"
+          HEALTH_URL="${PREVIEW_URL}/health"
+          METRICS_URL="${PREVIEW_URL}/metrics"
+
+          ENCODED_PREVIEW=$(python - <<'PY'
+import os
+import urllib.parse
+
+print(urllib.parse.quote(os.environ.get("PREVIEW_URL", ""), safe=""))
+PY
+)
+          ENCODED_GRAPHQL=$(python - <<'PY'
+import os
+import urllib.parse
+
+print(urllib.parse.quote(os.environ.get("PREVIEW_URL", "") + "/graphql", safe=""))
+PY
+)
+
+          echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+          echo "graphql_url=${GRAPHQL_URL}" >> $GITHUB_OUTPUT
+          echo "health_url=${HEALTH_URL}" >> $GITHUB_OUTPUT
+          echo "metrics_url=${METRICS_URL}" >> $GITHUB_OUTPUT
+          echo "preview_qr=https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${ENCODED_PREVIEW}" >> $GITHUB_OUTPUT
+          echo "graphql_qr=https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${ENCODED_GRAPHQL}" >> $GITHUB_OUTPUT
+          echo "deploy_status=${{ needs.deploy-preview.result }}" >> $GITHUB_OUTPUT
+          echo "smoke_status=${{ needs.smoke-tests.result }}" >> $GITHUB_OUTPUT
+
+      - name: Capture performance metrics
+        id: perf
+        env:
+          PREVIEW_URL: https://pr-${{ github.event.number }}.preview.intelgraph.dev
+        run: |
+          set +e
+          curl -w "http_code=%{http_code}\ntime_total=%{time_total}\ntime_connect=%{time_connect}\ntime_starttransfer=%{time_starttransfer}\nsize_download=%{size_download}\n" \
+            -o /tmp/health_body.txt -s --max-time 20 "${PREVIEW_URL}/health" > /tmp/performance.txt
+          status=$?
+          set -e
+
+          if [ $status -ne 0 ]; then
+            SUMMARY="Health endpoint unreachable (curl exit ${status})."
+          else
+            HTTP_CODE=$(grep "http_code" /tmp/performance.txt | cut -d"=" -f2)
+            TOTAL=$(grep "time_total" /tmp/performance.txt | cut -d"=" -f2)
+            CONNECT=$(grep "time_connect" /tmp/performance.txt | cut -d"=" -f2)
+            TTFB=$(grep "time_starttransfer" /tmp/performance.txt | cut -d"=" -f2)
+            SIZE=$(grep "size_download" /tmp/performance.txt | cut -d"=" -f2)
+            SUMMARY="HTTP ${HTTP_CODE} • total ${TOTAL}s • connect ${CONNECT}s • TTFB ${TTFB}s • bytes ${SIZE}"
+          fi
+
+          echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
+          echo "raw<<'EOF'" >> $GITHUB_OUTPUT
+          cat /tmp/performance.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Fetch deployment logs
+        id: logs
+        env:
+          NAMESPACE: ${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}
+        run: |
+          if [ "${HAS_KUBECONFIG}" != "true" ]; then
+            echo "Kubeconfig unavailable for this run; deployment logs not collected." > deployment.log
+            echo "path=deployment.log" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          set +e
+          kubectl logs deployment/intelgraph-pr-${{ github.event.number }} -n ${NAMESPACE} --tail=80 > deployment.log
+          status=$?
+          set -e
+
+          if [ $status -ne 0 ]; then
+            echo "Deployment logs unavailable (exit ${status})." > deployment.log
+          fi
+
+          echo "path=deployment.log" >> $GITHUB_OUTPUT
+
+      - name: Upload deployment logs
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-deployment-logs-pr-${{ github.event.number }}
+          path: ${{ steps.logs.outputs.path }}
+          retention-days: 7
+
+      - name: Update PR with preview details
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREVIEW_URL: ${{ steps.meta.outputs.preview_url }}
+          GRAPHQL_URL: ${{ steps.meta.outputs.graphql_url }}
+          HEALTH_URL: ${{ steps.meta.outputs.health_url }}
+          METRICS_URL: ${{ steps.meta.outputs.metrics_url }}
+          PREVIEW_QR: ${{ steps.meta.outputs.preview_qr }}
+          GRAPHQL_QR: ${{ steps.meta.outputs.graphql_qr }}
+          DEPLOY_STATUS: ${{ steps.meta.outputs.deploy_status || 'skipped' }}
+          SMOKE_STATUS: ${{ steps.meta.outputs.smoke_status || 'skipped' }}
+          PERF_SUMMARY: ${{ steps.perf.outputs.summary }}
+          PERF_RAW: ${{ steps.perf.outputs.raw }}
+          SERVER_IMAGE: ${{ needs.build-images.outputs.server-image || '' }}
+          CLIENT_IMAGE: ${{ needs.build-images.outputs.client-image || '' }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          PREVIEW_URL="https://pr-${{ github.event.number }}.preview.intelgraph.dev"
-          METRICS_URL="${PREVIEW_URL}/metrics"
-          HEALTH_URL="${PREVIEW_URL}/health"
-          GRAPHQL_URL="${PREVIEW_URL}/graphql"
+          format_status() {
+            case "$1" in
+              success) echo "✅ Success" ;;
+              failure) echo "❌ Failed" ;;
+              cancelled) echo "⚠️ Cancelled" ;;
+              skipped) echo "⚠️ Skipped" ;;
+              *) echo "ℹ️ $1" ;;
+            esac
+          }
+
+          DEPLOY_STATUS=${DEPLOY_STATUS:-skipped}
+          SMOKE_STATUS=${SMOKE_STATUS:-skipped}
+          PERF_SUMMARY=${PERF_SUMMARY:-"Performance metrics unavailable."}
+          PERF_RAW=${PERF_RAW:-"No metrics captured."}
+          SERVER_IMAGE=${SERVER_IMAGE:-"Unavailable (build failed or skipped)."}
+          CLIENT_IMAGE=${CLIENT_IMAGE:-"Unavailable (build failed or skipped)."}
+
+          DEPLOY_TEXT=$(format_status "${DEPLOY_STATUS}")
+          SMOKE_TEXT=$(format_status "${SMOKE_STATUS}")
+
+          LOG_SNIPPET=$(sed -n '1,60p' deployment.log)
 
           cat > pr-comment.md << EOF
-          ## 🚀 Preview Environment Ready
+          ## 🚀 Preview Environment Update
 
-          | Service | URL | Status |
-          |---------|-----|--------|
-          | **Application** | [${PREVIEW_URL}](${PREVIEW_URL}) | ✅ Ready |
-          | **GraphQL Playground** | [${GRAPHQL_URL}](${GRAPHQL_URL}) | ✅ Ready |
-          | **Health Check** | [${HEALTH_URL}](${HEALTH_URL}) | ✅ Healthy |
-          | **Metrics** | [${METRICS_URL}](${METRICS_URL}) | ✅ Active |
+          | Check | Status |
+          |-------|--------|
+          | Deployment | ${DEPLOY_TEXT} |
+          | Smoke & E2E | ${SMOKE_TEXT} |
+          | Preview URL | [${PREVIEW_URL}](${PREVIEW_URL}) |
+          | GraphQL Playground | [${GRAPHQL_URL}](${GRAPHQL_URL}) |
+          | Health Check | [${HEALTH_URL}](${HEALTH_URL}) |
+          | Metrics Endpoint | [${METRICS_URL}](${METRICS_URL}) |
 
-          ### 🧪 Test Results
-          - ✅ Smoke tests passed
-          - ✅ Health checks passed
-          - ✅ GraphQL endpoint responsive
-          - ✅ E2E golden path tests passed
+          ### 📦 Build Artifacts
+          - Server image: \`${SERVER_IMAGE}\`
+          - Client image: \`${CLIENT_IMAGE}\`
+          - Workflow run artifacts: [Download from run](${RUN_URL}#artifacts)
 
-          ### 🔧 Environment Details
-          - **Namespace**: ${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}
-          - **Images**:
-            - Server: \`pr-${{ github.event.number }}\`
-            - Client: \`pr-${{ github.event.number }}\`
-          - **Auto-teardown**: When PR is closed
+          ### 📱 Mobile Testing (QR Codes)
+          | Preview | GraphQL |
+          |---------|---------|
+          | ![](${PREVIEW_QR}) | ![](${GRAPHQL_QR}) |
 
-          > This preview environment is automatically updated with each push to this PR.
+          ### 📊 Performance Snapshot
+          - ${PERF_SUMMARY}
+
+          <details>
+          <summary>Raw metrics</summary>
+
+          ```
+          ${PERF_RAW}
+          ```
+
+          </details>
+
+          ### 📜 Deployment Logs
+          - Stored as artifact: **preview-deployment-logs-pr-${{ github.event.number }}**
+          - Preview snippet:
+
+          ```
+          ${LOG_SNIPPET}
+          ```
+
+          > This preview environment updates automatically with each push. Resources will be reclaimed when the PR is closed.
           EOF
 
           gh pr comment ${{ github.event.number }} --body-file pr-comment.md
