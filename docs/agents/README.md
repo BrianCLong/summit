@@ -34,3 +34,16 @@ Runbooks
 Master Prompts
 
 - [Link Analysis Canvas Orchestrator](./link-analysis-canvas-master-prompt.md) — coordinates the tri-pane workspace, telemetry, and policy guardrails for investigative workflows.
+
+Agent Variant Superprompts
+
+Platform-optimized superprompts for AI coding agents. See [variants/README.md](./variants/README.md) for full documentation.
+
+| Variant | Target Agent | Focus |
+|---------|--------------|-------|
+| [Claude Code](./variants/claude-code-superprompt.md) | Claude (Anthropic) | Strategic reasoning, third-order implications |
+| [Codex](./variants/codex-superprompt.md) | OpenAI Codex | Deterministic, strict correctness |
+| [Jules/Gemini](./variants/jules-gemini-superprompt.md) | Google Gemini | Multi-file refactoring, cross-context |
+| [Warp/Cursor](./variants/warp-cursor-superprompt.md) | Terminal/IDE | Dev-loop optimization, commands |
+| [Summit/IG](./variants/summit-ig-superprompt.md) | Enterprise | Monorepo-aware, compliance-first |
+| [CI-Aware](./variants/ci-aware-superprompt.md) | Pipeline | GitHub Actions, merge-train ops |
