@@ -10,49 +10,18 @@ import {
   DialogContent,
   DialogTitle,
   Typography,
-  List,
-  ListItemButton,
-  TextField,
-  InputAdornment,
-  IconButton,
 } from '@mui/material';
-import {
-  Mic,
-  Phone,
-  Videocam,
-  Message,
-  RocketLaunch,
-  ShowChart as Activity,
-  Group,
-  Lightbulb,
-  Search,
-} from '@mui/icons-material';
-import { motion } from 'framer-motion';
-
-const agents = [
-  { id: 'maestro', name: 'Maestro Conductor', tags: ['router', 'exec'] },
-  { id: 'codex', name: 'CodeGen Codex', tags: ['dev', 'test'] },
-  { id: 'sentinel', name: 'Sentinel CI', tags: ['sec', 'policy'] },
-  { id: 'scribe', name: 'Scribe', tags: ['notes', 'transcribe'] },
-];
-
-const tiles = [
-  {
-    id: 'status',
-    title: 'System Status',
-    metric: 'OK',
-    desc: 'All lanes green',
-  },
-  { id: 'incidents', title: 'Incidents', metric: '0', desc: 'No active' },
-  { id: 'deploys', title: 'Deploys', metric: '3', desc: 'prod canary live' },
-  { id: 'cost', title: 'LLM Spend', metric: '$42', desc: '24h window' },
-];
+import { Lightbulb, Mic } from '@mui/icons-material';
+import AgentCard from './AgentCard';
+import SystemStatusCard from './SystemStatusCard';
+import ActionsPanel from './ActionsPanel';
+import CommandPalette from './CommandPalette';
+import { agents, systemStatus } from './mockData';
 
 export default function Switchboard() {
   const [openChat, setOpenChat] = useState(false);
   const [cmdOpen, setCmdOpen] = useState(false);
   const [meeting, setMeeting] = useState(false);
-  const [commandInput, setCommandInput] = useState('');
 
   const handleCommandSelect = (command: string) => {
     if (command.includes('meeting')) {
@@ -61,111 +30,21 @@ export default function Switchboard() {
       setOpenChat(true);
     }
     setCmdOpen(false);
-    setCommandInput('');
   };
-
-  const filteredCommands = [
-    'Start meeting',
-    'Message Scribe',
-    'Open Graph View',
-    '/call maestro',
-    '/present deck',
-    '/join room',
-    '/status api',
-  ].filter((cmd) => cmd.toLowerCase().includes(commandInput.toLowerCase()));
 
   return (
     <Box className="grid grid-cols-12 gap-4 p-4">
       {/* Left rail */}
       <Box component="aside" className="col-span-3 space-y-3">
-        <Card className="rounded-2xl">
-          <CardHeader
-            title={
-              <Typography variant="h6" className="flex items-center gap-2">
-                <Group className="h-4 w-4" />
-                Agents
-              </Typography>
-            }
-          />
-          <CardContent className="space-y-2">
-            {agents.map((a) => (
-              <Box
-                key={a.id}
-                className="flex items-center justify-between p-2 rounded-xl bg-gray-100 dark:bg-gray-800"
-              >
-                <Box>
-                  <Typography variant="subtitle1" className="font-medium">
-                    {a.name}
-                  </Typography>
-                  <Typography variant="caption" className="text-xs opacity-70">
-                    {a.tags.join(' • ')}
-                  </Typography>
-                </Box>
-                <Box className="flex gap-2">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => setOpenChat(true)}
-                    startIcon={<Message />}
-                  >
-                    Chat
-                  </Button>
-                  <Button size="small" variant="outlined" startIcon={<Phone />}>
-                    Call
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<Videocam />}
-                  >
-                    Video
-                  </Button>
-                </Box>
-              </Box>
-            ))}
-          </CardContent>
-        </Card>
-        <Button
-          variant="contained"
-          className="w-full"
-          onClick={() => setCmdOpen(true)}
-          startIcon={<RocketLaunch />}
-        >
-          Open Command Palette (⌘K)
-        </Button>
+        <AgentCard agents={agents} onChat={() => setOpenChat(true)} />
+        <ActionsPanel onOpenCommandPalette={() => setCmdOpen(true)} />
       </Box>
 
       {/* Center tiles */}
       <Box component="main" className="col-span-6 space-y-3">
         <Box className="grid grid-cols-2 gap-3">
-          {tiles.map((t) => (
-            <motion.div
-              key={t.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card className="rounded-2xl">
-                <CardHeader
-                  title={
-                    <Typography
-                      variant="h6"
-                      className="flex items-center gap-2"
-                    >
-                      <Activity className="h-4 w-4" />
-                      {t.title}
-                    </Typography>
-                  }
-                />
-                <CardContent>
-                  <Typography variant="h4" className="font-bold">
-                    {t.metric}
-                  </Typography>
-                  <Typography variant="body2" className="opacity-70">
-                    {t.desc}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </motion.div>
+          {systemStatus.map((s) => (
+            <SystemStatusCard key={s.id} status={s} />
           ))}
         </Box>
         <Card className="rounded-2xl">
@@ -228,36 +107,11 @@ export default function Switchboard() {
       </Dialog>
 
       {/* Command Palette */}
-      <Dialog
+      <CommandPalette
         open={cmdOpen}
         onClose={() => setCmdOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogContent className="p-0">
-          <TextField
-            fullWidth
-            placeholder="/call maestro | /present deck | /join room | /status api"
-            value={commandInput}
-            onChange={(e) => setCommandInput(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-          }}
-          className="p-4"
-        />
-        <List>
-          {filteredCommands.map((cmd, index) => (
-            <ListItemButton key={index} onClick={() => handleCommandSelect(cmd)}>
-              <Typography>{cmd}</Typography>
-            </ListItemButton>
-          ))}
-        </List>
-      </DialogContent>
-    </Dialog>
-  </Box>
+        onCommandSelect={handleCommandSelect}
+      />
+    </Box>
   );
 }
