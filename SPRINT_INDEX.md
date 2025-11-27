@@ -122,6 +122,23 @@ Located in repository root (`/SPRINT_*.md`)
 - Consistency validation
 - Performance benchmarking
 
+### Information Warfare Series
+
+| Sprint | File | Focus | Status |
+|--------|------|-------|--------|
+| **Sprint 26** | `INFO_WARFARE_SPRINTS_26_30.md` | Information Environment Mapping | 📋 Planned |
+| **Sprint 27** | `INFO_WARFARE_SPRINTS_26_30.md` | Disinformation Campaign Detection | 📋 Planned |
+| **Sprint 28** | `INFO_WARFARE_SPRINTS_26_30.md` | Narrative Conflict Simulation | 📋 Planned |
+| **Sprint 29** | `INFO_WARFARE_SPRINTS_26_30.md` | Strategic Communication Resilience | 📋 Planned |
+| **Sprint 30** | `INFO_WARFARE_SPRINTS_26_30.md` | Information Warfare Threat Intelligence | 📋 Planned |
+
+**Key Deliverables:**
+- Ecosystem mapping & visualization
+- ML-driven disinformation detection
+- Narrative simulation sandbox
+- Automated resilience & signal boosting
+- Threat intelligence taxonomy & reporting
+
 ---
 
 ## Chronological Sprint Timeline
