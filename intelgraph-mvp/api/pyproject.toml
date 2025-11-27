@@ -10,6 +10,9 @@ dependencies = [
     "python-jose[cryptography]",
     "neo4j",
     "python-multipart",
+    "psycopg[binary]",
+    "requests",
+    "click",
 ]
 
 [project.optional-dependencies]

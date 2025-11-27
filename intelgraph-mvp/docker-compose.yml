@@ -7,6 +7,14 @@ services:
     ports:
       - '7474:7474'
       - '7687:7687'
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - '5432:5432'
   api:
     build: ./api
     environment:
@@ -14,8 +22,10 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=devpassword
       - JWT_SECRET=dev-secret
+      - POSTGRES_DSN=postgresql://postgres:devpassword@postgres:5432/postgres
     depends_on:
       - neo4j
+      - postgres
     ports:
       - '8000:8000'
   web:

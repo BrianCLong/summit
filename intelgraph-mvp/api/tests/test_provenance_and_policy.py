@@ -10,6 +10,7 @@ def test_provenance_and_policy(client, auth_headers):
     node = graph.get_nodes("Person", "t1", "c1")[0]
     assert node.provenance.source == "csv"
     assert node.policy.sensitivity == "T"
+    assert len(app.state.provenance_store.records) > 0
 
 
 def test_clearance_denied(client, auth_headers):
