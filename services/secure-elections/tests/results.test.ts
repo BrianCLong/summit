@@ -83,6 +83,26 @@ describe('RealTimeAggregator', () => {
       expect(results!.precinctsCounted).toBe(1);
       expect(results!.reportingProgress).toBe(50);
     });
+
+    it('should reject duplicate precinct submissions and keep tallies stable', () => {
+      aggregator.registerElection(testElection, ['precinct-1']);
+
+      const precinctResults = new Map([
+        ['mayor-race', new Map([['candidate-a', 10]])],
+      ]);
+
+      aggregator.reportPrecinct('test-election-1', 'precinct-1', precinctResults);
+
+      const firstResults = aggregator.getResults('test-election-1');
+      expect(firstResults!.items[0].totalVotes).toBe(10);
+
+      expect(() =>
+        aggregator.reportPrecinct('test-election-1', 'precinct-1', precinctResults)
+      ).toThrow('Precinct precinct-1 has already reported');
+
+      const finalResults = aggregator.getResults('test-election-1');
+      expect(finalResults!.items[0].totalVotes).toBe(10);
+    });
   });
 
   describe('certifyResults', () => {
@@ -107,6 +127,28 @@ describe('RealTimeAggregator', () => {
       expect(() => aggregator.certifyResults('test-election-1')).toThrow(
         'Cannot certify: not all precincts reported'
       );
+    });
+
+    it('computes audit hash from vote totals', () => {
+      aggregator.registerElection(testElection, ['precinct-1']);
+
+      const initialPrecinctResults = new Map([
+        ['mayor-race', new Map([['candidate-a', 2], ['candidate-b', 1]])],
+      ]);
+
+      aggregator.reportPrecinct('test-election-1', 'precinct-1', initialPrecinctResults);
+      const initialResults = aggregator.getResults('test-election-1');
+      const initialHash = initialResults!.auditHash;
+
+      // Apply additional votes to mutate tallies and expect hash to change
+      aggregator.recordVote('test-election-1', [
+        { itemId: 'mayor-race', selectedOptions: ['candidate-b'] },
+      ]);
+
+      const updatedResults = aggregator.getResults('test-election-1');
+      const updatedHash = updatedResults!.auditHash;
+
+      expect(updatedHash).not.toBe(initialHash);
     });
   });
 

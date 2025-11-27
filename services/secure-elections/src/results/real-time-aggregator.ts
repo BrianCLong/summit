@@ -116,6 +116,14 @@ export class RealTimeAggregator extends EventEmitter {
       throw new Error(`Election ${electionId} not registered`);
     }
 
+    if (!precincts.has(precinctId)) {
+      throw new Error(`Precinct ${precinctId} not registered for election ${electionId}`);
+    }
+
+    if (precincts.get(precinctId)) {
+      throw new Error(`Precinct ${precinctId} has already reported`);
+    }
+
     // Add precinct results to running totals
     for (const [itemId, options] of results) {
       const existingCounts = itemTallies.get(itemId);
@@ -270,7 +278,16 @@ export class RealTimeAggregator extends EventEmitter {
     const results = this.tallies.get(electionId);
     if (!results) return '';
 
-    const data = JSON.stringify(Array.from(results.entries()));
+    const normalized = Array.from(results.entries())
+      .sort(([itemIdA], [itemIdB]) => itemIdA.localeCompare(itemIdB))
+      .map(([itemId, options]) => ({
+        itemId,
+        options: Array.from(options.entries())
+          .sort(([optionIdA], [optionIdB]) => optionIdA.localeCompare(optionIdB))
+          .map(([optionId, votes]) => ({ optionId, votes })),
+      }));
+
+    const data = JSON.stringify(normalized);
     return crypto.createHash('sha256').update(data).digest('hex');
   }
 
