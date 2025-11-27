@@ -61,12 +61,55 @@ export interface ScalingConfig {
   targetCPU?: number;
   targetMemory?: number;
   customMetrics?: CustomMetricConfig[];
+  stabilizationWindowSeconds?: number;
+  spikeDetection?: SpikeDetectionConfig;
+  predictiveScaling?: PredictiveScalingConfig;
+  costOptimization?: CostOptimizationPolicy;
 }
 
 export interface CustomMetricConfig {
   name: string;
   target: number;
   type: 'Utilization' | 'Value' | 'AverageValue';
+}
+
+export interface HorizontalPodAutoscalerConfig {
+  name: string;
+  serviceId: string;
+  minReplicas: number;
+  maxReplicas: number;
+  metrics: HPAMetricConfig[];
+  stabilizationWindowSeconds: number;
+  spikeDetection: SpikeDetectionConfig;
+  predictiveScaling: PredictiveScalingConfig;
+  costOptimization: CostOptimizationPolicy;
+}
+
+export interface HPAMetricConfig {
+  type: 'cpu' | 'memory' | 'custom';
+  name?: string;
+  targetAverageUtilization: number;
+}
+
+export interface SpikeDetectionConfig {
+  enabled: boolean;
+  thresholdPercentage: number;
+  evaluationWindow: number;
+  scaleUpFactor: number;
+}
+
+export interface PredictiveScalingConfig {
+  enabled: boolean;
+  lookbackMinutes: number;
+  forecastMinutes: number;
+  maxStep: number;
+}
+
+export interface CostOptimizationPolicy {
+  enabled: boolean;
+  preferredUtilization: number;
+  maxIdleReplicas: number;
+  consolidationWindow: number;
 }
 
 export interface TrafficConfig {
@@ -204,6 +247,13 @@ export interface ResourceUtilization {
   storage: number;
 }
 
+interface ScalingSignalSummary {
+  cpu: number;
+  memory: number;
+  custom: Record<string, number>;
+  composite: number;
+}
+
 /**
  * Cross-Service Orchestrator for Maestro v7
  *
@@ -223,6 +273,9 @@ export class CrossServiceOrchestrator extends EventEmitter {
   private trafficManager: TrafficManager;
 
   private services: Map<string, ServiceDefinition> = new Map();
+  private autoScalingPolicies: Map<string, HorizontalPodAutoscalerConfig> =
+    new Map();
+  private scalingObservations: Map<string, number[]> = new Map();
   private executingPlans: Map<string, OrchestrationExecution> = new Map();
   private isInitialized = false;
 
@@ -289,6 +342,11 @@ export class CrossServiceOrchestrator extends EventEmitter {
 
       // Store service definition
       this.services.set(service.id, service);
+
+      // Precompute autoscaling policies so every service is covered
+      const hpaConfig = this.buildHorizontalPodAutoscaler(service);
+      this.autoScalingPolicies.set(service.id, hpaConfig);
+      this.scalingObservations.set(service.id, []);
 
       // Update dependency graph
       await this.dependencyMapper.addService(service);
@@ -1197,7 +1255,217 @@ export class CrossServiceOrchestrator extends EventEmitter {
   }
 
   private calculateDesiredReplicas(service: ServiceDefinition): number {
-    return service.scaling.minReplicas; // Simplified
+    const policy = this.autoScalingPolicies.get(service.id);
+    if (!policy) {
+      return service.scaling.minReplicas;
+    }
+
+    const signals = this.collectScalingSignals(service, policy);
+    const history = this.scalingObservations.get(service.id) ?? [];
+    history.push(signals.composite);
+
+    const maxHistoryLength = Math.max(
+      5,
+      Math.round(policy.stabilizationWindowSeconds / 30),
+    );
+    if (history.length > maxHistoryLength) {
+      history.shift();
+    }
+    this.scalingObservations.set(service.id, history);
+
+    let desired = Math.max(
+      policy.minReplicas,
+      Math.ceil(signals.composite * policy.minReplicas),
+    );
+    desired = Math.min(desired, policy.maxReplicas);
+
+    if (
+      policy.spikeDetection.enabled &&
+      this.detectLoadSpike(history, policy.spikeDetection)
+    ) {
+      desired = Math.min(
+        policy.maxReplicas,
+        Math.ceil(desired * policy.spikeDetection.scaleUpFactor),
+      );
+    }
+
+    if (policy.predictiveScaling.enabled) {
+      const predicted = this.predictReplicaNeed(policy, history);
+      desired = Math.min(policy.maxReplicas, Math.max(desired, predicted));
+    }
+
+    if (policy.costOptimization.enabled) {
+      desired = this.applyCostOptimization(desired, policy);
+    }
+
+    return desired;
+  }
+
+  private buildHorizontalPodAutoscaler(
+    service: ServiceDefinition,
+  ): HorizontalPodAutoscalerConfig {
+    const metrics: HPAMetricConfig[] = [
+      {
+        type: 'cpu',
+        targetAverageUtilization: service.scaling.targetCPU ?? 70,
+      },
+      {
+        type: 'memory',
+        targetAverageUtilization: service.scaling.targetMemory ?? 75,
+      },
+      ...(service.scaling.customMetrics ?? []).map((metric) => ({
+        type: 'custom',
+        name: metric.name,
+        targetAverageUtilization: metric.target,
+      })),
+    ];
+
+    return {
+      name: `${service.id}-hpa`,
+      serviceId: service.id,
+      minReplicas: service.scaling.minReplicas,
+      maxReplicas: service.scaling.maxReplicas,
+      metrics,
+      stabilizationWindowSeconds: service.scaling.stabilizationWindowSeconds ?? 300,
+      spikeDetection:
+        service.scaling.spikeDetection ??
+        ({
+          enabled: true,
+          thresholdPercentage: 40,
+          evaluationWindow: 5,
+          scaleUpFactor: 1.5,
+        } satisfies SpikeDetectionConfig),
+      predictiveScaling:
+        service.scaling.predictiveScaling ??
+        ({
+          enabled: true,
+          lookbackMinutes: 30,
+          forecastMinutes: 10,
+          maxStep: 0.3,
+        } satisfies PredictiveScalingConfig),
+      costOptimization:
+        service.scaling.costOptimization ??
+        ({
+          enabled: true,
+          preferredUtilization: 70,
+          maxIdleReplicas: 1,
+          consolidationWindow: 900,
+        } satisfies CostOptimizationPolicy),
+    };
+  }
+
+  private collectScalingSignals(
+    service: ServiceDefinition,
+    policy: HorizontalPodAutoscalerConfig,
+  ): ScalingSignalSummary {
+    const signals: ScalingSignalSummary = {
+      cpu: 0,
+      memory: 0,
+      custom: {},
+      composite: 0,
+    };
+
+    for (const metric of policy.metrics) {
+      const metricName = metric.name || metric.type;
+      const currentValue = this.getMetricValue(service.id, metricName);
+      const utilization =
+        metric.targetAverageUtilization > 0
+          ? currentValue / metric.targetAverageUtilization
+          : 0;
+
+      if (metric.type === 'cpu') {
+        signals.cpu = utilization;
+      } else if (metric.type === 'memory') {
+        signals.memory = utilization;
+      } else if (metric.type === 'custom' && metric.name) {
+        signals.custom[metric.name] = utilization;
+      }
+
+      signals.composite = Math.max(signals.composite, utilization);
+    }
+
+    if (signals.composite === 0) {
+      signals.composite = 1;
+    }
+
+    return signals;
+  }
+
+  private detectLoadSpike(
+    history: number[],
+    config: SpikeDetectionConfig,
+  ): boolean {
+    if (history.length < config.evaluationWindow) {
+      return false;
+    }
+
+    const recent = history.slice(-config.evaluationWindow);
+    const baseline = recent
+      .slice(0, -1)
+      .reduce((sum, value) => sum + value, 0) /
+      Math.max(1, recent.length - 1);
+    const latest = recent[recent.length - 1];
+
+    if (baseline === 0) {
+      return latest > 0;
+    }
+
+    const percentageIncrease = ((latest - baseline) / baseline) * 100;
+    return percentageIncrease >= config.thresholdPercentage;
+  }
+
+  private predictReplicaNeed(
+    policy: HorizontalPodAutoscalerConfig,
+    history: number[],
+  ): number {
+    if (!history.length || !policy.predictiveScaling.enabled) {
+      return policy.minReplicas;
+    }
+
+    const windowSize = Math.max(
+      2,
+      Math.round(policy.predictiveScaling.lookbackMinutes / 2),
+    );
+    const samples = history.slice(-windowSize);
+    const averageLoad =
+      samples.reduce((sum, value) => sum + value, 0) / samples.length;
+
+    const projectedLoad =
+      averageLoad * (1 + policy.predictiveScaling.maxStep);
+    const predictedReplicas = Math.ceil(projectedLoad * policy.minReplicas);
+
+    return Math.min(Math.max(predictedReplicas, policy.minReplicas), policy.maxReplicas);
+  }
+
+  private applyCostOptimization(
+    desiredReplicas: number,
+    policy: HorizontalPodAutoscalerConfig,
+  ): number {
+    const { preferredUtilization, maxIdleReplicas } =
+      policy.costOptimization;
+    const utilizationFactor = preferredUtilization / 100;
+
+    const optimized = Math.ceil(desiredReplicas * utilizationFactor);
+    const upperBound = policy.maxReplicas - maxIdleReplicas;
+
+    return Math.max(policy.minReplicas, Math.min(optimized, upperBound));
+  }
+
+  private getMetricValue(serviceId: string, metricName: string): number {
+    const collector = this.metricsCollector as any;
+
+    if (
+      collector &&
+      typeof collector.getServiceMetric === 'function'
+    ) {
+      return collector.getServiceMetric(serviceId, metricName) ?? 0;
+    }
+
+    if (collector && typeof collector.getMetric === 'function') {
+      return collector.getMetric(metricName, serviceId) ?? 0;
+    }
+
+    return 0;
   }
 
   private sleep(ms: number): Promise<void> {
