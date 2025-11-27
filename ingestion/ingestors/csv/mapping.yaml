@@ -1,0 +1,31 @@
+# Sample mapping configuration for CSV ingest
+version: 1
+source:
+  type: s3
+  bucket: 'intelgraph-bucket' # Using a fixed bucket name for the demo
+entities:
+  - type: Person
+    label: Person
+    filter: "type == 'Person'"
+    properties:
+      id: "data['id']"
+      name: "data['name']"
+      email: "data['email']"
+      tenant: "'{{ TENANT_ID }}'"
+  - type: Org
+    label: Organization
+    filter: "type == 'Org'"
+    properties:
+      id: "data['id']"
+      name: "data['name']"
+      tenant: "'{{ TENANT_ID }}'"
+edges:
+  - type: MEMBER_OF
+    source:
+      type: Person
+      key: "id" # Simplified to just the key name
+    destination:
+      type: Org
+      key: "id" # Simplified to just the key name
+    properties:
+      role: "data['role']"
