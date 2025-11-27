@@ -43,6 +43,7 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+import { generateTokens } from '../lib/auth.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
@@ -114,6 +115,7 @@ interface DatabaseUser {
   last_login?: Date;
   created_at: Date;
   updated_at?: Date;
+  token_version?: number;
 }
 
 /**
@@ -121,14 +123,14 @@ interface DatabaseUser {
  *
  * @interface AuthResponse
  * @property {User} user - The authenticated user object
- * @property {string} token - JWT access token (24h expiry by default)
+ * @property {string} accessToken - JWT access token (24h expiry by default)
  * @property {string} refreshToken - Refresh token for token rotation (7d expiry)
  * @property {number} expiresIn - Token expiration time in seconds
  */
 interface AuthResponse {
   user: User;
-  token: string;
-  refreshToken: string;
+  accessToken: string;
+  refreshToken: string; // This is sent in the cookie, not the response body
   expiresIn: number;
 }
 
@@ -146,16 +148,9 @@ interface TokenPayload {
   role: string;
 }
 
-/**
- * Token pair containing access and refresh tokens
- *
- * @interface TokenPair
- * @property {string} token - JWT access token
- * @property {string} refreshToken - UUID refresh token for rotation
- */
-interface TokenPair {
-  token: string;
-  refreshToken: string;
+interface RefreshTokenPayload {
+  userId: string;
+  token_version: number;
 }
 
 /**
@@ -281,7 +276,7 @@ export class AuthService {
         `
         INSERT INTO users (email, username, password_hash, first_name, last_name, role)
         VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, email, username, first_name, last_name, role, is_active, created_at
+        RETURNING id, email, username, first_name, last_name, role, is_active, created_at, token_version
       `,
         [
           userData.email,
@@ -294,15 +289,15 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
-      const { token, refreshToken } = await this.generateTokens(user, client);
+      const { accessToken, refreshToken } = generateTokens(user);
 
       await client.query('COMMIT');
 
       return {
         user: this.formatUser(user),
-        token,
+        accessToken: accessToken,
         refreshToken,
-        expiresIn: 24 * 60 * 60,
+        expiresIn: 15 * 60,
       };
     } catch (error) {
       await client.query('ROLLBACK');
@@ -367,13 +362,13 @@ export class AuthService {
         [user.id],
       );
 
-      const { token, refreshToken } = await this.generateTokens(user, client);
+      const { accessToken, refreshToken } = generateTokens(user);
 
       return {
         user: this.formatUser(user),
-        token,
+        accessToken: accessToken,
         refreshToken,
-        expiresIn: 24 * 60 * 60,
+        expiresIn: 15 * 60,
       };
     } catch (error) {
       logger.error('Error logging in user:', error);
@@ -384,51 +379,10 @@ export class AuthService {
   }
 
   /**
-   * Generate JWT access token and refresh token pair
-   *
-   * Creates a signed JWT with user payload and stores refresh token in database.
-   * Refresh tokens have 7-day validity and are stored for token rotation.
-   *
-   * @private
-   * @param {DatabaseUser} user - Database user record
-   * @param {PoolClient} client - PostgreSQL client for transaction
-   * @returns {Promise<TokenPair>} Object containing access token and refresh token
-   */
-  private async generateTokens(
-    user: DatabaseUser,
-    client: PoolClient,
-  ): Promise<TokenPair> {
-    const tokenPayload: TokenPayload = {
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    };
-
-    // @ts-ignore - jwt.sign overload mismatch
-    const token = jwt.sign(tokenPayload, config.jwt.secret, {
-      expiresIn: config.jwt.expiresIn,
-    });
-
-    const refreshToken = uuidv4();
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
-    await client.query(
-      `
-      INSERT INTO user_sessions (user_id, refresh_token, expires_at)
-      VALUES ($1, $2, $3)
-    `,
-      [user.id, refreshToken, expiresAt],
-    );
-
-    return { token, refreshToken };
-  }
-
-  /**
    * Verify and decode a JWT access token
    *
-   * Validates token signature, checks against blacklist, and returns user if valid.
-   * Returns null for invalid, expired, or blacklisted tokens.
+   * Validates token signature and returns user if valid.
+   * Returns null for invalid or expired tokens.
    *
    * @param {string} token - JWT access token to verify
    * @returns {Promise<User | null>} User object if valid, null otherwise
@@ -446,19 +400,6 @@ export class AuthService {
       if (!token) return null;
 
       const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
-
-      // Check if token is blacklisted
-      const blacklistCheck = await this.pool.query(
-        'SELECT 1 FROM token_blacklist WHERE token_hash = $1',
-        [this.hashToken(token)],
-      );
-
-      if (blacklistCheck.rows.length > 0) {
-        logger.warn('Blacklisted token attempted to be used:', {
-          userId: decoded.userId,
-        });
-        return null;
-      }
 
       const client = await this.pool.connect();
       const userResult = await client.query(
@@ -479,143 +420,67 @@ export class AuthService {
   }
 
   /**
-   * Refresh access token using refresh token
-   * Implements token rotation - old refresh token is invalidated
+   * Refresh access token using a refresh token.
+   * This is a stateless operation that verifies the refresh token and issues a new pair of tokens.
    */
-  async refreshAccessToken(refreshToken: string): Promise<TokenPair | null> {
-    const client = await this.pool.connect();
-
+  async refreshAccessToken(
+    refreshToken: string,
+  ): Promise<{ accessToken: string; refreshToken: string } | null> {
     try {
-      // Verify refresh token exists and is not expired
-      const sessionResult = await client.query(
-        `
-        SELECT user_id, expires_at, is_revoked
-        FROM user_sessions
-        WHERE refresh_token = $1
-      `,
-        [refreshToken],
-      );
+      const decoded = jwt.verify(
+        refreshToken,
+        config.jwt.secret,
+      ) as RefreshTokenPayload;
 
-      if (sessionResult.rows.length === 0) {
-        logger.warn('Invalid refresh token used');
-        return null;
-      }
-
-      const session = sessionResult.rows[0];
-
-      // Check if token is revoked
-      if (session.is_revoked) {
-        logger.warn('Revoked refresh token attempted to be used');
-        return null;
-      }
-
-      // Check if token is expired
-      if (new Date(session.expires_at) < new Date()) {
-        logger.warn('Expired refresh token used');
-        await client.query(
-          'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
-          [refreshToken],
-        );
-        return null;
-      }
-
-      // Get user data
-      const userResult = await client.query(
-        'SELECT * FROM users WHERE id = $1 AND is_active = true',
-        [session.user_id],
+      const userResult = await this.pool.query(
+        'SELECT id, email, role, token_version FROM users WHERE id = $1 AND is_active = true',
+        [decoded.userId],
       );
 
       if (userResult.rows.length === 0) {
+        logger.warn('Refresh token user not found');
         return null;
       }
 
-      const user = userResult.rows[0] as DatabaseUser;
+      const user = userResult.rows[0];
 
-      // Revoke old refresh token
-      await client.query(
-        'UPDATE user_sessions SET is_revoked = true WHERE refresh_token = $1',
-        [refreshToken],
+      if (user.token_version !== decoded.token_version) {
+        logger.warn('Refresh token is revoked');
+        return null;
+      }
+
+      const { accessToken, refreshToken: newRefreshToken } = generateTokens(
+        user,
       );
 
-      // Generate new token pair with rotation
-      const newTokenPair = await this.generateTokens(user, client);
-
-      logger.info('Token successfully refreshed with rotation', {
-        userId: user.id,
-      });
-
-      return newTokenPair;
+      return { accessToken: accessToken, refreshToken: newRefreshToken };
     } catch (error) {
       logger.error('Error refreshing token:', error);
       return null;
-    } finally {
-      client.release();
     }
   }
 
   /**
-   * Revoke/blacklist an access token
+   * Logout - revoke all user sessions by incrementing token_version
    */
-  async revokeToken(token: string): Promise<boolean> {
+  async logout(userId: string): Promise<boolean> {
     try {
-      const tokenHash = this.hashToken(token);
-
-      await this.pool.query(
-        `
-        INSERT INTO token_blacklist (token_hash, revoked_at, expires_at)
-        VALUES ($1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + INTERVAL '24 hours')
-        ON CONFLICT (token_hash) DO NOTHING
-      `,
-        [tokenHash],
-      );
-
-      logger.info('Token successfully blacklisted');
-      return true;
-    } catch (error) {
-      logger.error('Error revoking token:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Logout - revoke all user sessions
-   */
-  async logout(userId: string, currentToken?: string): Promise<boolean> {
-    const client = await this.pool.connect();
-
-    try {
-      await client.query('BEGIN');
-
-      // Revoke all refresh tokens for user
-      await client.query(
-        'UPDATE user_sessions SET is_revoked = true WHERE user_id = $1',
+      const result = await this.pool.query(
+        'UPDATE users SET token_version = token_version + 1 WHERE id = $1',
         [userId],
       );
 
-      // Blacklist current access token if provided
-      if (currentToken) {
-        await this.revokeToken(currentToken);
+      if (result.rowCount === 0) {
+        logger.warn('Attempted to logout non-existent user', { userId });
+        return false;
       }
 
-      await client.query('COMMIT');
-
-      logger.info('User logged out successfully', { userId });
+      logger.info('User tokens revoked successfully', { userId });
       return true;
     } catch (error) {
-      await client.query('ROLLBACK');
-      logger.error('Error during logout:', error);
+      logger.error('Error during token revocation:', error);
       return false;
-    } finally {
-      client.release();
     }
-  }
-
-  /**
-   * Hash token for blacklist storage (avoid storing full tokens)
-   */
-  private hashToken(token: string): string {
-    const crypto = require('crypto');
-    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   /**
