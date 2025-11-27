@@ -1,0 +1,18 @@
+# Sample mapping for CSV ingest
+version: 1
+source:
+  type: csv
+  path: /data/entities.csv
+mapping:
+  - from: id
+    to: id
+    type: string
+  - from: name
+    to: properties.name
+    type: string
+  - from: type
+    to: labels
+    type: array
+  - from: tenant_id
+    to: properties.tenant_id
+    type: string

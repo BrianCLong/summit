@@ -1,0 +1,6 @@
+source_id,target_id,type,tenant_id
+person-1,org-1,MEMBER_OF,dev-tenant
+person-2,org-1,MEMBER_OF,dev-tenant
+org-1,asset-1,OWNS,dev-tenant
+event-1,person-1,MENTIONED_IN,dev-tenant
+indicator-1,event-1,RELATED_TO,dev-tenant

@@ -1,0 +1,7 @@
+id,name,type,tenant_id
+person-1,Alice,Person,dev-tenant
+person-2,Bob,Person,dev-tenant
+org-1,Acme Corp,Org,dev-tenant
+asset-1,Domain,example.com,dev-tenant
+event-1,"Login from new device",Event,dev-tenant
+indicator-1,"CVE-2021-44228",Indicator,dev-tenant

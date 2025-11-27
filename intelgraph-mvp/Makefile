@@ -1,5 +1,7 @@
+.PHONY: up
 up:
-	docker compose up --build
+	docker compose up -d
 
-test:
-	cd api && pytest
+.PHONY: down
+down:
+	docker compose down
