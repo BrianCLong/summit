@@ -1,0 +1,10 @@
+{
+  "alert": "SafeMutationsDown",
+  "description": "No healthy API instances detected",
+  "expr": "up{job=\"intelgraph-api\"} == 0",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/api-down",
+  "service": "intelgraph-api",
+  "severity": "critical",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "IntelGraph API completely down"
+}

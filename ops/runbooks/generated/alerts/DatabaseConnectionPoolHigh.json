@@ -1,0 +1,10 @@
+{
+  "alert": "DatabaseConnectionPoolHigh",
+  "description": "Neo4j connection pool is {{ $value | humanizePercentage }} full (threshold: 80%)",
+  "expr": "(\n  neo4j_connections_active{job=\"neo4j\"} /\n  neo4j_connections_max{job=\"neo4j\"}\n) > 0.8\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/db-connections",
+  "service": "neo4j",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Database connection pool usage high"
+}

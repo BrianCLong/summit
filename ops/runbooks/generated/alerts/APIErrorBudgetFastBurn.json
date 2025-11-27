@@ -1,0 +1,10 @@
+{
+  "alert": "APIErrorBudgetFastBurn",
+  "description": "IntelGraph API burn rate >14.4x. Auto-rollback triggered in pipeline.",
+  "expr": "(1 - (sum(rate(http_requests_total{service=\"intelgraph-api\",status!~\"5..\"}[5m])) /\n  sum(rate(http_requests_total{service=\"intelgraph-api\"}[5m])))) / 0.001 > 14.4\n",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/observability-sre",
+  "service": "intelgraph-api",
+  "severity": "critical",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "API error budget burning too fast (5m window)"
+}

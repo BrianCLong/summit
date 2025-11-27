@@ -1,0 +1,10 @@
+{
+  "alert": "PolicyViolationIncrease",
+  "description": "Policy violations at {{ $value }} per second for policy {{ $labels.policy }}",
+  "expr": "sum(rate(policy_violations_total{action=\"deny\"}[5m])) > 5\n",
+  "runbook_url": "https://runbooks.intelgraph.io/security/policy-violations",
+  "service": "security",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Policy violation rate increased"
+}
