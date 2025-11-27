@@ -1,16 +1,17 @@
 #!/bin/bash
 
-# Maestro Conductor v24.2.0 - Blue/Green Deployment Script
-# Epic E10: Zero-downtime deployments with automatic rollback
+# IntelGraph - Blue/Green Deployment Script
+# Zero-downtime deployments with automatic rollback
 
 set -euo pipefail
 
 # Configuration
 ENVIRONMENT="${1:-staging}"
 IMAGE_TAG="${2:-latest}"
-NAMESPACE="intelgraph-${ENVIRONMENT}"
-RELEASE_NAME="maestro"
-TIMEOUT=300 # 5 minutes
+NAMESPACE="${NAMESPACE:-intelgraph-${ENVIRONMENT}}"
+RELEASE_NAME="${RELEASE_NAME:-intelgraph}"
+SERVICE_NAME="${SERVICE_NAME:-${RELEASE_NAME}-service}"
+TIMEOUT=${TIMEOUT:-300} # 5 minutes
 
 # Colors for output
 RED='\033[0;31m'
@@ -64,7 +65,7 @@ determine_environments() {
     log_info "Determining current deployment environment..."
     
     # Check which environment is currently active
-    CURRENT_ENV=$(kubectl get service "${RELEASE_NAME}-service" -n "$NAMESPACE" -o jsonpath='{.spec.selector.environment}' 2>/dev/null || echo "none")
+    CURRENT_ENV=$(kubectl get service "$SERVICE_NAME" -n "$NAMESPACE" -o jsonpath='{.spec.selector.environment}' 2>/dev/null || echo "none")
     
     if [[ "$CURRENT_ENV" == "blue" ]]; then
         NEXT_ENV="green"
@@ -103,7 +104,7 @@ ensure_namespace() {
 
 # Deploy to the next environment
 deploy_next_environment() {
-    log_info "Deploying Maestro v24.2.0 to $NEXT_ENV environment..."
+    log_info "Deploying ${RELEASE_NAME} ${IMAGE_TAG} to $NEXT_ENV environment..."
     
     # Prepare Helm values for the deployment
     cat > "/tmp/values-${NEXT_ENV}.yaml" << EOF
@@ -316,7 +317,7 @@ switch_traffic() {
     log_info "Switching traffic to $NEXT_ENV environment..."
     
     # Update the main service selector to point to the new environment
-    kubectl patch service "${RELEASE_NAME}-service" \
+    kubectl patch service "$SERVICE_NAME" \
         --namespace "$NAMESPACE" \
         --type='merge' \
         --patch="{\"spec\":{\"selector\":{\"environment\":\"$NEXT_ENV\"}}}"
@@ -325,7 +326,7 @@ switch_traffic() {
     sleep 10
     
     # Verify the switch
-    NEW_SELECTOR=$(kubectl get service "${RELEASE_NAME}-service" \
+    NEW_SELECTOR=$(kubectl get service "$SERVICE_NAME" \
         -n "$NAMESPACE" \
         -o jsonpath='{.spec.selector.environment}')
     
@@ -399,7 +400,7 @@ rollback() {
         log_info "Rolling back to $PREVIOUS_ENV environment..."
         
         # Switch service back to previous environment
-        kubectl patch service "${RELEASE_NAME}-service" \
+        kubectl patch service "$SERVICE_NAME" \
             --namespace "$NAMESPACE" \
             --type='merge' \
             --patch="{\"spec\":{\"selector\":{\"environment\":\"$PREVIOUS_ENV\"}}}"
@@ -415,7 +416,7 @@ rollback() {
 
 # Main deployment function
 main() {
-    log_info "Starting Blue/Green deployment for Maestro Conductor v24.2.0"
+    log_info "Starting Blue/Green deployment for ${RELEASE_NAME}"
     log_info "Environment: $ENVIRONMENT"
     log_info "Image: $IMAGE_TAG"
     
