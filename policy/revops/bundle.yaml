@@ -1,0 +1,11 @@
+name: revops
+version: revops-2025.01.03
+includes:
+  - schemas/input/*.json
+  - schemas/decision/*.json
+  - rego/*.rego
+  - tests/*.rego
+meta:
+  owner: revops-domain-team
+  slos:
+    decision_latency_ms_p95: 100

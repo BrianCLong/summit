@@ -1,0 +1,118 @@
+{
+  "revops": {
+    "limits": {
+      "global_max_discount": 50
+    },
+    "config": {
+      "tenant": {
+        "tenant-default": {
+          "blocklist": {
+            "domains": ["blocked.test"]
+          },
+          "lead_routing": {
+            "enterprise": {
+              "assignee": {"type": "team", "id": "enterprise-team"},
+              "sla": {"first_touch_hours": 4}
+            },
+            "smb": {
+              "assignee": {"type": "team", "id": "smb-queue"},
+              "sla": {"first_touch_hours": 24}
+            },
+            "midmarket": {
+              "assignee": {"type": "team", "id": "midmarket-pod"},
+              "sla": {"first_touch_hours": 8}
+            }
+          },
+          "lead_routing_flags": {
+            "important_countries": ["GB", "DE"]
+          },
+          "discounts": {
+            "smb": {
+              "max_discount": {
+                "ae": 20,
+                "sales_manager": 30,
+                "vp_sales": 40
+              },
+              "approvals": {
+                "thresholds": [
+                  {"max_discount": 20, "approvers": []},
+                  {"max_discount": 30, "approvers": ["sales_manager"]},
+                  {"max_discount": 40, "approvers": ["sales_manager", "finance"]}
+                ]
+              },
+              "min_term_months": 12
+            },
+            "enterprise": {
+              "max_discount": {
+                "ae": 15,
+                "sales_manager": 25,
+                "vp_sales": 35
+              },
+              "approvals": {
+                "thresholds": [
+                  {"max_discount": 15, "approvers": []},
+                  {"max_discount": 25, "approvers": ["sales_manager"]},
+                  {"max_discount": 35, "approvers": ["sales_manager", "finance", "vp_sales"]}
+                ]
+              },
+              "min_term_months": 12
+            }
+          },
+          "contracts": {
+            "required_signers": ["buyer", "legal"],
+            "required_approvals": ["sales_manager"]
+          }
+        },
+        "tenant-enterprise": {
+          "blocklist": {
+            "domains": []
+          },
+          "lead_routing": {
+            "enterprise": {
+              "assignee": {"type": "team", "id": "global-enterprise"},
+              "sla": {"first_touch_hours": 2}
+            }
+          },
+          "lead_routing_flags": {
+            "important_countries": ["US"]
+          },
+          "discounts": {
+            "enterprise": {
+              "max_discount": {
+                "ae": 10,
+                "sales_manager": 20,
+                "vp_sales": 30
+              },
+              "approvals": {
+                "thresholds": [
+                  {"max_discount": 10, "approvers": []},
+                  {"max_discount": 20, "approvers": ["sales_manager"]},
+                  {"max_discount": 30, "approvers": ["sales_manager", "finance"]}
+                ]
+              },
+              "min_term_months": 12
+            }
+          },
+          "contracts": {
+            "required_signers": ["buyer", "cfo"],
+            "required_approvals": ["finance"]
+          }
+        }
+      },
+      "tenant_overrides": {}
+    }
+  },
+  "revops_fixtures": {
+    "leads": [
+      {"id": "lead-123", "email": "cto@bigcorp.com", "domain": "bigcorp.com", "company_size": "1000+", "country": "GB", "segment_hint": ""},
+      {"id": "lead-999", "email": "spam@blocked.test", "domain": "blocked.test", "company_size": "1-199", "country": "US", "segment_hint": ""}
+    ],
+    "quotes": [
+      {"id": "quote-1", "segment": "enterprise", "discount_percentage": 20, "total_value": 100000, "term_months": 12, "non_standard_terms": []}
+    ],
+    "contracts": [
+      {"id": "contract-1", "status": "signed", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [{"role": "buyer", "signed_at": "2025-01-01T00:00:00Z"}], "approvals": ["sales_manager"], "flags": []},
+      {"id": "contract-2", "status": "draft", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [], "approvals": [], "flags": []}
+    ]
+  }
+}

@@ -1,0 +1,4 @@
+[
+  {"id": "contract-1", "status": "signed", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [{"role": "buyer", "signed_at": "2025-01-01T00:00:00Z"}, {"role": "legal", "signed_at": "2025-01-01T00:00:00Z"}], "approvals": ["sales_manager"], "flags": []},
+  {"id": "contract-2", "status": "draft", "region": "US", "term_months": 12, "mrr": 20000, "signatures": [], "approvals": [], "flags": ["needs_review"]}
+]

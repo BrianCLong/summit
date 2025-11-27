@@ -1,0 +1,4 @@
+[
+  {"id": "lead-123", "email": "cto@bigcorp.com", "domain": "bigcorp.com", "company_size": "1000+", "country": "GB", "state": "", "segment_hint": ""},
+  {"id": "lead-999", "email": "spam@blocked.test", "domain": "blocked.test", "company_size": "1-199", "country": "US", "state": "CA", "segment_hint": ""}
+]

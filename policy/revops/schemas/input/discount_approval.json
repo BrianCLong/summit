@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Discount Approval Input",
+  "type": "object",
+  "required": ["quote", "tenant", "subject"],
+  "properties": {
+    "quote": {
+      "type": "object",
+      "required": ["id", "segment", "discount_percentage", "total_value"],
+      "properties": {
+        "id": { "type": "string" },
+        "segment": { "type": "string" },
+        "discount_percentage": { "type": "number", "minimum": 0 },
+        "total_value": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string" },
+        "region": { "type": "string" },
+        "term_months": { "type": "integer", "minimum": 1 },
+        "non_standard_terms": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "subject": {
+      "type": "object",
+      "required": ["id", "role"],
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" }
+      }
+    },
+    "tenant": {
+      "type": "object",
+      "required": ["id"],
+      "properties": { "id": { "type": "string" } }
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "submitted_at": { "type": "string", "format": "date-time" },
+        "opportunity_id": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
