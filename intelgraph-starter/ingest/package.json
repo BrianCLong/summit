@@ -1,0 +1,16 @@
+{
+  "name": "intelgraph-ingest",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "csv-parse": "^5.5.5",
+    "express": "^4.19.2",
+    "form-data": "^4.0.1",
+    "minio": "^8.9.1",
+    "node-fetch": "^3.3.2",
+    "yargs": "^17.7.2"
+  }
+}

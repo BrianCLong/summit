@@ -1,0 +1,12 @@
+# Column to property mapping for the ingest stub
+entity:
+  type: type
+  name: name
+  description: description
+  labels: labels
+
+relationship:
+  type: type
+  sourceId: sourceId
+  targetId: targetId
+  confidence: confidence
