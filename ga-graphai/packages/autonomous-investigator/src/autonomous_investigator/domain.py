@@ -14,6 +14,7 @@ class Signal:
     signal_type: str
     severity: float
     confidence: float
+    domain: str = "unspecified"
 
 
 @dataclass(frozen=True)
@@ -62,3 +63,46 @@ class Plan:
     differentiation_factors: list[str]
     counterfactual_branches: list[str]
     assurance_score: float
+
+
+@dataclass(frozen=True)
+class EvidenceLink:
+    """Link between two signals that forms part of an evidence chain."""
+
+    source_id: str
+    target_id: str
+    rationale: str
+    confidence: float
+
+
+@dataclass(frozen=True)
+class EvidenceChain:
+    """Ordered collection of evidentiary links supporting a finding."""
+
+    chain_id: str
+    links: list[EvidenceLink]
+    strength: float
+    narrative: str
+
+
+@dataclass(frozen=True)
+class DomainCorrelation:
+    """Domain-specific correlation summary for the unified report."""
+
+    domain: str
+    signals: list[str]
+    coverage: float
+    mean_confidence: float
+    mean_severity: float
+    dominant_types: list[str]
+
+
+@dataclass(frozen=True)
+class CorrelationReport:
+    """Cross-domain correlation report with evidence and confidence."""
+
+    case_id: str
+    summary: str
+    domain_correlations: list[DomainCorrelation]
+    evidence_chains: list[EvidenceChain]
+    overall_confidence: float
