@@ -1,0 +1,36 @@
+version: 1
+name: session_to_pr
+description: >
+  Take a development session (human or meta-agent request) and turn it into
+  a PR-ready change using Jules and Reviewer.
+
+steps:
+  - id: interpret_task
+    agent: jules
+    inputs:
+      task_description: "{{input.task_description}}"
+    outputs:
+      change_plan: jules_plan
+      code_diff: jules_diff
+      tests_added_or_modified: jules_tests
+      docs_added_or_modified: jules_docs
+      pr_metadata: jules_pr_meta
+
+  - id: review_pr
+    agent: reviewer
+    inputs:
+      pr_diff: "{{jules_diff}}"
+      pr_description: "{{jules_pr_meta.description}}"
+    outputs:
+      review_report: review_report
+      verdict: review_verdict
+
+  - id: finalize
+    agent: executor
+    inputs:
+      flow_name: "session_to_pr"
+      flow_inputs:
+        diff: "{{jules_diff}}"
+        pr_metadata: "{{jules_pr_meta}}"
+        review_verdict: "{{review_verdict}}"
+        review_report: "{{review_report}}"

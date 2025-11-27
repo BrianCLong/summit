@@ -1,0 +1,29 @@
+name: executor
+description: >
+  Orchestration agent that runs flows, coordinates agent interactions,
+  and enforces lifecycle sequencing (session → PR → review → merge).
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - run_flows
+  - route_tasks
+  - manage_handoffs
+  - summarize_sessions
+
+inputs:
+  - name: flow_name
+    type: string
+    required: true
+  - name: flow_inputs
+    type: object
+    required: false
+
+outputs:
+  - name: flow_log
+    type: markdown
+  - name: final_artifacts
+    type: object
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml

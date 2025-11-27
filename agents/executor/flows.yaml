@@ -1,0 +1,13 @@
+version: 1
+agent: executor
+
+flows:
+  - name: orchestrate_flow
+    description: Run a named flow from `/flows` and manage agent routing.
+    trigger:
+      - api: /flows/orchestrate
+    steps:
+      - load_flow_definition
+      - route_to_agents
+      - collect_outputs
+      - summarize_results

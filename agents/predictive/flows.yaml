@@ -1,0 +1,12 @@
+version: 1
+agent: predictive
+
+flows:
+  - name: generate_forecast
+    description: Provide prioritized forecasts and risk assessments.
+    trigger:
+      - api: /flows/generate_forecast
+    steps:
+      - gather_signals
+      - analyze_risks
+      - produce_prioritized_actions
