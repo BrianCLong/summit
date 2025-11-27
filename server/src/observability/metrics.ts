@@ -137,4 +137,15 @@ export const metrics = {
   glassBoxRunsTotal,
   glassBoxRunDurationMs,
   glassBoxCacheHits,
+  cacheHits: new Counter({
+    name: 'intelgraph_cache_hits_total',
+    help: 'Total cache hits',
+    labelNames: ['level'] as const,
+    registers: [registry],
+  }),
+  cacheMisses: new Counter({
+    name: 'intelgraph_cache_misses_total',
+    help: 'Total cache misses',
+    registers: [registry],
+  }),
 };
