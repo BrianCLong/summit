@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "summit-intel-evo.labels" . | nindent 4 }}
 spec:
-  {{- if .Values.autoscaling.enabled }}
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -38,17 +38,17 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           env:
-            {{- range $key, $val := .Values.env }}
-            - name: {{ $key }}
-              value: {{ $val | quote }}
-            {{- end }}
+            - name: EVO_MODE
+              value: {{ .Values.evo.mode | quote }}
+            - name: CHAOS_ENABLED
+              value: {{ .Values.evo.chaosEnabled | quote }}
           livenessProbe:
             httpGet:
               path: /health
               port: http
           readinessProbe:
             httpGet:
-              path: /health
+              path: /ready
               port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

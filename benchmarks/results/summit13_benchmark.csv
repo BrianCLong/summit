@@ -1,7 +1,0 @@
-Metric,Baseline (Agent0),Summit13 (EntangleEvo),Improvement,Status
-PR_Autonomy_Rate,65.2%,95.8%,+30.6%,PASSED
-Codebase_Optimization_Index,100,145,+45.0%,PASSED
-Mean_Time_To_Resolution_Min,45,12,-73.3%,PASSED
-Security_Vulnerability_Detection,82%,99.9%,+17.9%,PASSED
-Context_Window_Utilization,40%,92%,+52.0%,PASSED
-Hallucination_Rate,12.5%,0.8%,-93.6%,PASSED

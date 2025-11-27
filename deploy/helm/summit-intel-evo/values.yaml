@@ -1,13 +1,11 @@
 # Default values for summit-intel-evo.
-
-replicaCount: 3
+replicaCount: 1
 
 image:
   repository: ghcr.io/brianclong/summit-intel-evo
   pullPolicy: IfNotPresent
   tag: "v1.0.0"
 
-imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
@@ -18,20 +16,9 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext:
-  # capabilities:
-  #   drop:
-  #   - ALL
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-  runAsUser: 1000
-
 service:
   type: ClusterIP
-  port: 80
+  port: 8080
 
 ingress:
   enabled: false
@@ -47,14 +34,14 @@ ingress:
 resources:
   limits:
     cpu: 500m
-    memory: 512Mi
+    memory: 1024Mi
   requests:
     cpu: 100m
     memory: 128Mi
 
 autoscaling:
   enabled: true
-  minReplicas: 3
+  minReplicas: 1
   maxReplicas: 10
   targetCPUUtilizationPercentage: 80
 
@@ -64,6 +51,7 @@ tolerations: []
 
 affinity: {}
 
-env:
-  SUMMIT_MODE: "enterprise"
-  ENABLE_EVO: "true"
+evo:
+  mode: "autonomous"
+  rounds: 50
+  chaosEnabled: true
