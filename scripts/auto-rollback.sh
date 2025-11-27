@@ -8,10 +8,13 @@ set -euo pipefail
 NAMESPACE="${NAMESPACE:-intelgraph}"
 SERVICE_NAME="${SERVICE_NAME:-intelgraph-server}"
 PROMETHEUS_URL="${PROMETHEUS_URL:-http://prometheus:9090}"
+PROMETHEUS_BEARER_TOKEN="${PROMETHEUS_BEARER_TOKEN:-}"
 ROLLBACK_ENABLED="${ROLLBACK_ENABLED:-true}"
 DRY_RUN="${DRY_RUN:-false}"
 MONITORING_DURATION="${MONITORING_DURATION:-300}" # 5 minutes
 CHECK_INTERVAL="${CHECK_INTERVAL:-30}"             # 30 seconds
+RESPONSIBLE_ENGINEER="${RESPONSIBLE_ENGINEER:-}"   # Slack/GitHub assignment target
+ALLOW_NON_CANARY="${ALLOW_NON_CANARY:-false}"      # allow rollback outside canary when explicitly set
 
 # SLO thresholds
 AVAILABILITY_THRESHOLD="0.999"    # 99.9%
@@ -32,6 +35,26 @@ error() {
     exit 1
 }
 
+validate_configuration() {
+    if [[ -z "$PROMETHEUS_URL" ]]; then
+        error "PROMETHEUS_URL is required for SLO evaluation"
+    fi
+
+    if [[ ! -f "$HOME/.kube/config" ]]; then
+        error "kubeconfig is required at $HOME/.kube/config; ensure the workflow provides KUBE_CONFIG"
+    fi
+
+    case "$ROLLBACK_ENABLED" in
+        true|false) ;;
+        *) error "ROLLBACK_ENABLED must be 'true' or 'false'" ;;
+    esac
+
+    case "$DRY_RUN" in
+        true|false) ;;
+        *) error "DRY_RUN must be 'true' or 'false'" ;;
+    esac
+}
+
 # Check if required tools are available
 check_dependencies() {
     log "🔧 Checking dependencies..."
@@ -50,6 +73,10 @@ check_dependencies() {
         missing_tools+=("jq")
     fi
 
+    if ! command -v bc &> /dev/null; then
+        missing_tools+=("bc")
+    fi
+
     if [[ ${#missing_tools[@]} -gt 0 ]]; then
         error "Missing required tools: ${missing_tools[*]}"
     fi
@@ -61,12 +88,18 @@ check_dependencies() {
 prometheus_query() {
     local query="$1"
     local timeout="${2:-10}"
+    local auth_args=()
+
+    if [[ -n "$PROMETHEUS_BEARER_TOKEN" ]]; then
+        auth_args=("-H" "Authorization: Bearer ${PROMETHEUS_BEARER_TOKEN}")
+    fi
 
     log "📊 Querying Prometheus: $query"
 
     curl -s \
         --max-time "$timeout" \
         --get \
+        "${auth_args[@]}" \
         --data-urlencode "query=$query" \
         "$PROMETHEUS_URL/api/v1/query" | \
     jq -r '.data.result[0].value[1] // "null"' 2>/dev/null || echo "null"
@@ -91,6 +124,7 @@ get_deployment_info() {
     # Check if this is a canary deployment
     local canary_annotation=$(echo "$deployment" | jq -r '.metadata.annotations["deployment.kubernetes.io/canary"] // "false"')
     IS_CANARY_DEPLOYMENT="$canary_annotation"
+    RESPONSIBLE_ENGINEER="${RESPONSIBLE_ENGINEER:-$(echo "$deployment" | jq -r '.metadata.annotations["deployment.kubernetes.io/owner"] // empty')}"
 
     log "📦 Current image: $CURRENT_IMAGE"
     log "📊 Replicas: $READY_REPLICAS/$CURRENT_REPLICAS"
@@ -165,6 +199,7 @@ check_slo_compliance() {
 # Trigger rollback
 trigger_rollback() {
     local reason="$1"
+    local rollback_method="image-patch"
 
     log "🔄 Triggering automatic rollback..."
     log "📝 Reason: $reason"
@@ -179,55 +214,51 @@ trigger_rollback() {
         return 1
     fi
 
-    # Check if rollback target is available
     if [[ -z "${ROLLBACK_TARGET:-}" ]]; then
-        error "No rollback target specified - cannot perform automatic rollback"
-    fi
-
-    # Create rollback annotation
-    local rollback_annotation="auto-rollback-$(date +%s)"
-
-    # Perform the rollback
-    log "🔄 Rolling back deployment to $ROLLBACK_TARGET..."
-
-    if kubectl patch deployment "$SERVICE_NAME" -n "$NAMESPACE" \
-        --type='merge' \
-        -p="{
-            \"metadata\": {
-                \"annotations\": {
-                    \"deployment.kubernetes.io/rollback\": \"$rollback_annotation\",
-                    \"deployment.kubernetes.io/rollback-reason\": \"$reason\",
-                    \"deployment.kubernetes.io/rollback-timestamp\": \"$(date -Iseconds)\"
-                }
-            },
-            \"spec\": {
-                \"template\": {
-                    \"spec\": {
-                        \"containers\": [{
-                            \"name\": \"$SERVICE_NAME\",
-                            \"image\": \"$ROLLBACK_TARGET\"
-                        }]
-                    }
-                }
-            }
-        }"; then
-
-        log "✅ Rollback initiated successfully"
-
-        # Wait for rollback to complete
-        log "⏳ Waiting for rollback to complete..."
-        if kubectl rollout status deployment "$SERVICE_NAME" -n "$NAMESPACE" --timeout=300s; then
-            log "✅ Rollback completed successfully"
-
-            # Send notifications
-            send_rollback_notification "$reason"
-
-            return 0
-        else
-            error "Rollback failed to complete within timeout"
+        rollback_method="rollout-undo"
+        ROLLBACK_TARGET="previous-revision"
+        log "ℹ️  No explicit rollback target found; reverting to previous ReplicaSet revision"
+        if ! kubectl rollout undo deployment "$SERVICE_NAME" -n "$NAMESPACE"; then
+            error "Failed to initiate rollback to previous revision"
         fi
     else
-        error "Failed to initiate rollback"
+        local rollback_annotation="auto-rollback-$(date +%s)"
+        log "🔄 Rolling back deployment to $ROLLBACK_TARGET..."
+
+        if ! kubectl patch deployment "$SERVICE_NAME" -n "$NAMESPACE" \
+            --type='merge' \
+            -p="{
+                \"metadata\": {
+                    \"annotations\": {
+                        \"deployment.kubernetes.io/rollback\": \"$rollback_annotation\",
+                        \"deployment.kubernetes.io/rollback-reason\": \"$reason\",
+                        \"deployment.kubernetes.io/rollback-timestamp\": \"$(date -Iseconds)\"
+                    }
+                },
+                \"spec\": {
+                    \"template\": {
+                        \"spec\": {
+                            \"containers\": [{
+                                \"name\": \"$SERVICE_NAME\",
+                                \"image\": \"$ROLLBACK_TARGET\"
+                            }]
+                        }
+                    }
+                }
+            }"; then
+            error "Failed to initiate rollback"
+        fi
+    fi
+
+    log "✅ Rollback initiated successfully via $rollback_method"
+
+    log "⏳ Waiting for rollback to complete..."
+    if kubectl rollout status deployment "$SERVICE_NAME" -n "$NAMESPACE" --timeout=300s; then
+        log "✅ Rollback completed successfully"
+        send_rollback_notification "$reason"
+        return 0
+    else
+        error "Rollback failed to complete within timeout"
     fi
 }
 
@@ -316,6 +347,7 @@ send_slack_notification() {
             \"fields\": [
                 {\"title\": \"Service\", \"value\": \"$SERVICE_NAME\", \"short\": true},
                 {\"title\": \"Namespace\", \"value\": \"$NAMESPACE\", \"short\": true},
+                {\"title\": \"Responsible\", \"value\": \"${RESPONSIBLE_ENGINEER:-unassigned}\", \"short\": true},
                 {\"title\": \"Reason\", \"value\": \"$reason\", \"short\": false},
                 {\"title\": \"SLO Violations\", \"value\": \"$SLO_VIOLATIONS\", \"short\": false}
             ],
@@ -384,15 +416,17 @@ main() {
     log "🔄 Rollback enabled: $ROLLBACK_ENABLED"
     log "🧪 Dry run: $DRY_RUN"
 
+    validate_configuration
+
     # Check dependencies
     check_dependencies
 
     # Get deployment information
     get_deployment_info
 
-    # Only monitor if this is a canary deployment
-    if [[ "$IS_CANARY_DEPLOYMENT" != "true" ]]; then
-        log "ℹ️  Not a canary deployment - skipping SLO monitoring"
+    # Only monitor if this is a canary deployment unless explicitly allowed
+    if [[ "$IS_CANARY_DEPLOYMENT" != "true" && "$ALLOW_NON_CANARY" != "true" ]]; then
+        log "ℹ️  Not a canary deployment and ALLOW_NON_CANARY=false - skipping SLO monitoring"
         exit 0
     fi
 
