@@ -39,6 +39,7 @@
     "build": "turbo run build --cache-dir=.turbo --continue",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
+    "deploy": "node --loader ts-node/esm ops/deployment/automation/unified-deploy.ts",
     "deploy:dev": "scripts/deploy.sh dev",
     "deploy:staging": "scripts/deploy.sh staging",
     "deploy:prod": "scripts/deploy.sh prod",
