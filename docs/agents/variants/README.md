@@ -10,13 +10,17 @@ This directory contains specialized superprompts tailored for different AI codin
 
 ### Design Philosophy
 
-All variants enforce a **Third-Order Execution Model**:
+All variants enforce an **Order-Based Execution Model**. Standard variants use third-order; the ultra-maximal variant extends to seventh-order and beyond:
 
 | Order | Scope | Description |
 |-------|-------|-------------|
 | **1st-Order** | Explicit | Direct instructions stated in the specification |
 | **2nd-Order** | Implicit | Everything required to fulfill 1st-order: types, schemas, tests, configs, infra |
 | **3rd-Order** | Systemic | Logical implications: integrations, security, observability, migrations, CI/CD |
+| **4th-Order** | Quality | Production readiness: full test coverage, documentation, error handling |
+| **5th-Order** | Operations | Deployability: CI/CD, infrastructure-as-code, observability |
+| **6th-Order** | Compliance | Enterprise: security hardening, audit trails, regulatory compliance |
+| **7th-Order** | Future | Sustainability: extensibility, migration paths, scaling strategies |
 
 ### Quality Gates
 
@@ -43,6 +47,7 @@ Every superprompt enforces these non-negotiable standards:
 | [Warp/Cursor](./warp-cursor-superprompt.md) | Terminal/IDE Agents | Dev-loop optimization, command generation, continuous delivery |
 | [Summit/IG](./summit-ig-superprompt.md) | Enterprise Context | Monorepo-aware, compliance-first, full ecosystem integration |
 | [CI-Aware](./ci-aware-superprompt.md) | Pipeline Integration | GitHub Actions, merge-train compatibility, provenance tracking |
+| [Ultra-Maximal](./ultra-maximal-superprompt.md) | High-Capability Agents | 7th+ order extrapolation, complete production delivery, innovation mandate |
 
 ---
 
@@ -58,6 +63,7 @@ Choose based on your context:
 - **Warp/Cursor**: Interactive development, rapid iteration, terminal-based workflows
 - **Summit/IG**: Enterprise features, compliance requirements, multi-service orchestration
 - **CI-Aware**: Pipeline changes, release engineering, merge-train operations
+- **Ultra-Maximal**: Greenfield projects, complete system builds, maximum innovation and polish
 
 ### 2. Applying a Superprompt
 
@@ -191,6 +197,11 @@ Key metrics:
 ---
 
 ## Changelog
+
+### v1.1.0 (2025-11-27)
+- Added Ultra-Maximal variant with 7th+ order extrapolation
+- Extended order model to cover 4th-7th orders
+- Added innovation mandate and future roadmap requirements
 
 ### v1.0.0 (2025-11-27)
 - Initial release with 6 agent variants

@@ -47,3 +47,4 @@ Platform-optimized superprompts for AI coding agents. See [variants/README.md](.
 | [Warp/Cursor](./variants/warp-cursor-superprompt.md) | Terminal/IDE | Dev-loop optimization, commands |
 | [Summit/IG](./variants/summit-ig-superprompt.md) | Enterprise | Monorepo-aware, compliance-first |
 | [CI-Aware](./variants/ci-aware-superprompt.md) | Pipeline | GitHub Actions, merge-train ops |
+| [Ultra-Maximal](./variants/ultra-maximal-superprompt.md) | High-Capability | 7th+ order, complete delivery |
