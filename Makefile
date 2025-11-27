@@ -206,3 +206,32 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+# Canonical Developer Commands (for docs/dev/onboarding.md)
+.PHONY: dev-setup dev-run dev-test dev-lint
+
+dev-setup: bootstrap
+	@echo "==> dev-setup: Alias for bootstrap. DONE ✓"
+
+dev-run: up
+	@echo "==> dev-run: Alias for up. DONE ✓"
+
+dev-test:
+	@echo "==> dev-test: Running the main test suite..."
+	@if [ -f package.json ]; then \
+	  if command -v pnpm >/dev/null 2>&1; then pnpm test; \
+	  else npm test; fi; \
+	else \
+	  echo "WARNING: package.json missing; skipping tests"; \
+	fi
+	@echo "dev-test: DONE ✓"
+
+dev-lint:
+	@echo "==> dev-lint: Running lint and format checks..."
+	@if [ -f package.json ]; then \
+	  if command -v pnpm >/dev/null 2>&1; then pnpm lint && pnpm format:check; \
+	  else npm run lint && npm run format:check; fi; \
+	else \
+	  echo "WARNING: package.json missing; skipping linting"; \
+	fi
+	@echo "dev-lint: DONE ✓"

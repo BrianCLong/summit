@@ -8,39 +8,25 @@
 
 > Deployable-first IntelGraph (Summit) stack with GraphQL, React, Neo4j, PostgreSQL, Redis, and observability/AI services.
 
-## 🛠 Developer Onboarding (Deployable-First)
+## 🚀 Getting Started (Developer Quickstart)
 
-- **Golden path = `make bootstrap && make up && make smoke`**. Fresh clones must go green before you write code.
-- `./start.sh [--ai]` wraps the golden path on laptops and CI. It fails fast if health probes do not respond.
-- The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
-- **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
+The canonical guide for setting up a local development environment is now located at:
 
-## 🚀 Quickstart (< 60 Seconds)
+> ### 📚 [docs/dev/onboarding.md](./docs/dev/onboarding.md)
 
-**Prerequisites:** Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+, ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available.
+This guide provides a single set of commands and steps to go from a fresh clone to a running application.
 
+**The TL;DR:**
 ```bash
+# Clone, install dependencies, start services, and run smoke tests
 git clone https://github.com/BrianCLong/summit.git
 cd summit
-./start.sh              # One-command bootstrap: installs deps, starts services, runs smoke test
+make dev-setup
+make dev-run
+make smoke
 ```
 
-**Alternative (manual steps):**
-```bash
-make bootstrap          # installs pnpm deps + venv + .env
-make up                 # docker-compose.dev.yml + migrations (API, web, dbs, observability)
-make smoke              # golden path automation against seeded data
-```
-
-**Service Endpoints:**
-- **Frontend**: http://localhost:3000 (React Application)
-- **GraphQL API**: http://localhost:4000/graphql (Apollo Playground)
-- **Neo4j Browser**: http://localhost:7474 (Graph Database UI)
-- **Adminer**: http://localhost:8080 (Database Admin)
-- **Prometheus**: http://localhost:9090 (Metrics)
-- **Grafana**: http://localhost:3001 (Observability Dashboards)
-
-**Optional AI/Kafka stack:** `./start.sh --ai` or `make up-ai` loads `docker-compose.ai.yml`.
+For prerequisites, troubleshooting, and a detailed breakdown of the development workflow, please refer to the [onboarding guide](./docs/dev/onboarding.md).
 
 ### Observability & Health
 
