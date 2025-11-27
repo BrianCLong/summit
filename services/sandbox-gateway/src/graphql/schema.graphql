@@ -1,0 +1,754 @@
+"""
+Sandbox Gateway GraphQL Schema
+
+Provides comprehensive API for sandbox tenant management,
+data lab operations, and promotion workflows.
+"""
+
+# =============================================================================
+# Scalars
+# =============================================================================
+
+scalar DateTime
+scalar JSON
+scalar UUID
+
+# =============================================================================
+# Enums
+# =============================================================================
+
+enum TenantType {
+  PRODUCTION
+  SANDBOX
+  DATALAB
+  STAGING
+}
+
+enum SandboxIsolationLevel {
+  STANDARD
+  ENHANCED
+  AIRGAPPED
+  RESEARCH
+}
+
+enum DataAccessMode {
+  SYNTHETIC_ONLY
+  ANONYMIZED
+  SAMPLED
+  STRUCTURE_ONLY
+}
+
+enum SandboxStatus {
+  PROVISIONING
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+  ARCHIVED
+  TERMINATED
+}
+
+enum ConnectorType {
+  DATABASE
+  API
+  FILE_SYSTEM
+  STREAMING
+  EXTERNAL_SERVICE
+  FEDERATION
+}
+
+enum AnonymizationTechnique {
+  REDACTION
+  HASHING
+  PSEUDONYMIZATION
+  GENERALIZATION
+  MASKING
+  NOISE_ADDITION
+  K_ANONYMITY
+  DIFFERENTIAL_PRIVACY
+}
+
+enum CloneStrategy {
+  STRUCTURE_ONLY
+  SYNTHETIC
+  ANONYMIZED
+  SAMPLED
+  FUZZED
+}
+
+enum DataSourceType {
+  NEO4J
+  POSTGRESQL
+  INVESTIGATION
+  ENTITY_SET
+  SCENARIO
+}
+
+enum PromotionStatus {
+  DRAFT
+  PENDING_REVIEW
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  PROMOTED
+  ROLLED_BACK
+}
+
+enum PromotionType {
+  QUERY
+  WORKFLOW
+  SCRIPT
+  CONFIGURATION
+  MODEL
+}
+
+enum ScenarioCategory {
+  INTELLIGENCE_ANALYSIS
+  FRAUD_DETECTION
+  NETWORK_ANALYSIS
+  ENTITY_RESOLUTION
+  THREAT_DETECTION
+  COMPLIANCE
+  CUSTOM
+}
+
+# =============================================================================
+# Input Types
+# =============================================================================
+
+input ResourceQuotaInput {
+  maxCpuMs: Int
+  maxMemoryMb: Int
+  maxStorageGb: Float
+  maxExecutionsPerHour: Int
+  maxConcurrentSandboxes: Int
+  maxDataExportMb: Int
+  maxNetworkBytesPerHour: Int
+}
+
+input DataAccessPolicyInput {
+  mode: DataAccessMode
+  maxRecords: Int
+  allowedEntityTypes: [String!]
+  blockedEntityTypes: [String!]
+  piiHandling: String
+  allowLinkbackToProduction: Boolean
+  requireAnonymizationAudit: Boolean
+  retentionDays: Int
+}
+
+input UIIndicatorInput {
+  mode: String
+  bannerText: String
+  bannerColor: String
+  watermarkText: String
+  watermarkOpacity: Float
+  showDataSourceWarning: Boolean
+  confirmBeforeExport: Boolean
+}
+
+input CreateSandboxInput {
+  name: String!
+  description: String
+  parentTenantId: UUID
+  isolationLevel: SandboxIsolationLevel
+  preset: String
+  resourceQuotas: ResourceQuotaInput
+  dataAccessPolicy: DataAccessPolicyInput
+  expiresInDays: Int
+  teamIds: [String!]
+  tags: [String!]
+}
+
+input UpdateSandboxInput {
+  name: String
+  description: String
+  resourceQuotas: ResourceQuotaInput
+  dataAccessPolicy: DataAccessPolicyInput
+  uiIndicators: UIIndicatorInput
+  status: SandboxStatus
+  expiresAt: DateTime
+  teamIds: [String!]
+  tags: [String!]
+}
+
+input FieldAnonymizationInput {
+  fieldPath: String!
+  technique: AnonymizationTechnique!
+  preserveFormat: Boolean
+  preserveLength: Boolean
+  kValue: Int
+  epsilon: Float
+  hashAlgorithm: String
+  maskChar: String
+  maskFromStart: Int
+  maskFromEnd: Int
+}
+
+input DataCloneInput {
+  sandboxId: UUID!
+  name: String!
+  description: String
+  sourceType: DataSourceType!
+  sourceConfig: JSON!
+  strategy: CloneStrategy!
+  fieldAnonymization: [FieldAnonymizationInput!]
+  sampleSize: Int
+  sampleMethod: String
+  outputFormat: String
+  includeRelationships: Boolean
+  preserveGraph: Boolean
+}
+
+input SyntheticFieldInput {
+  name: String!
+  type: String!
+  generator: String!
+  config: JSON
+  nullable: Boolean
+  nullProbability: Float
+}
+
+input RelationshipTypeInput {
+  type: String!
+  targetEntityType: String!
+  direction: String!
+  probability: Float
+  minCount: Int
+  maxCount: Int
+}
+
+input SyntheticEntitySchemaInput {
+  entityType: String!
+  fields: [SyntheticFieldInput!]!
+  relationshipTypes: [RelationshipTypeInput!]
+}
+
+input SyntheticDataConfigInput {
+  totalEntities: Int!
+  entityDistribution: JSON
+  seed: Int
+  locale: String
+  generateRelationships: Boolean
+  connectivityDensity: Float
+}
+
+input SyntheticDataInput {
+  sandboxId: UUID!
+  name: String!
+  schemas: [SyntheticEntitySchemaInput!]!
+  config: SyntheticDataConfigInput!
+  outputFormat: String
+}
+
+input ScenarioSimulationInput {
+  sandboxId: UUID!
+  templateId: UUID!
+  name: String!
+  description: String
+  parameters: JSON
+  scale: Float
+  seed: Int
+  outputFormat: String
+}
+
+input SandboxQueryInput {
+  sandboxId: UUID!
+  query: String!
+  queryType: String!
+  parameters: JSON
+  timeout: Int
+  limit: Int
+}
+
+input CreatePromotionInput {
+  sandboxId: UUID!
+  targetTenantId: UUID!
+  promotionType: PromotionType!
+  artifactId: String!
+  artifactName: String!
+  artifactVersion: String
+  justification: String!
+  rollbackPlan: String
+}
+
+input PromotionReviewInput {
+  requestId: UUID!
+  decision: String!
+  comments: String
+}
+
+# =============================================================================
+# Types
+# =============================================================================
+
+type ResourceQuota {
+  maxCpuMs: Int!
+  maxMemoryMb: Int!
+  maxStorageGb: Float!
+  maxExecutionsPerHour: Int!
+  maxConcurrentSandboxes: Int!
+  maxDataExportMb: Int!
+  maxNetworkBytesPerHour: Int!
+}
+
+type DataAccessPolicy {
+  mode: DataAccessMode!
+  maxRecords: Int!
+  allowedEntityTypes: [String!]!
+  blockedEntityTypes: [String!]!
+  piiHandling: String!
+  allowLinkbackToProduction: Boolean!
+  requireAnonymizationAudit: Boolean!
+  retentionDays: Int!
+}
+
+type ConnectorRestriction {
+  connectorType: ConnectorType!
+  allowed: Boolean!
+  allowlist: [String!]!
+  blocklist: [String!]!
+  requireApproval: Boolean!
+  auditAllAccess: Boolean!
+}
+
+type UIIndicatorConfig {
+  mode: String!
+  bannerText: String!
+  bannerColor: String!
+  watermarkText: String!
+  watermarkOpacity: Float!
+  showDataSourceWarning: Boolean!
+  confirmBeforeExport: Boolean!
+}
+
+type AuditConfig {
+  logAllQueries: Boolean!
+  logAllMutations: Boolean!
+  logDataAccess: Boolean!
+  logExportAttempts: Boolean!
+  logLinkbackAttempts: Boolean!
+  alertOnSuspiciousActivity: Boolean!
+  retainAuditLogsDays: Int!
+  exportAuditFormat: String!
+}
+
+type IntegrationRestrictions {
+  allowFederation: Boolean!
+  allowExternalExports: Boolean!
+  allowWebhooks: Boolean!
+  allowApiKeys: Boolean!
+  allowedIntegrations: [String!]!
+  blockedIntegrations: [String!]!
+  maxExternalCalls: Int!
+}
+
+type SandboxTenantProfile {
+  id: UUID!
+  name: String!
+  description: String
+  tenantType: TenantType!
+  parentTenantId: UUID
+  ownerId: String!
+  teamIds: [String!]!
+  allowedUserIds: [String!]!
+  isolationLevel: SandboxIsolationLevel!
+  resourceQuotas: ResourceQuota!
+  dataAccessPolicy: DataAccessPolicy!
+  connectorRestrictions: [ConnectorRestriction!]!
+  uiIndicators: UIIndicatorConfig!
+  auditConfig: AuditConfig!
+  integrationRestrictions: IntegrationRestrictions!
+  complianceFrameworks: [String!]!
+  dataClassification: String!
+  status: SandboxStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  expiresAt: DateTime
+  lastAccessedAt: DateTime
+  tags: [String!]!
+  metadata: JSON
+
+  # Computed fields
+  isExpired: Boolean!
+  daysUntilExpiration: Int
+  usageMetrics: SandboxUsageMetrics
+  linkbackAttempts(limit: Int): [LinkbackAttempt!]!
+  validationReport: ValidationReport!
+}
+
+type SandboxUsageMetrics {
+  sandboxId: UUID!
+  queryCount: Int!
+  mutationCount: Int!
+  dataAccessCount: Int!
+  exportAttempts: Int!
+  linkbackAttempts: Int!
+  cpuTimeMs: Int!
+  memoryPeakMb: Int!
+  storageUsedGb: Float!
+  uniqueUsers: Int!
+  activeSessionMinutes: Int!
+}
+
+type LinkbackAttempt {
+  id: UUID!
+  sandboxId: UUID!
+  userId: String!
+  timestamp: DateTime!
+  sourceType: String!
+  sourceId: String!
+  targetProductionId: String
+  blocked: Boolean!
+  reason: String!
+  riskScore: Float!
+  metadata: JSON
+}
+
+type ValidationFinding {
+  severity: String!
+  code: String!
+  message: String!
+  field: String
+  suggestion: String
+}
+
+type ValidationReport {
+  valid: Boolean!
+  findings: [ValidationFinding!]!
+  timestamp: DateTime!
+  profileId: UUID!
+}
+
+type SandboxPreset {
+  name: String!
+  description: String!
+  isolationLevel: SandboxIsolationLevel!
+  tenantType: TenantType!
+}
+
+type DataCloneStatistics {
+  sourceRecords: Int!
+  clonedRecords: Int!
+  anonymizedFields: Int!
+  relationshipsCloned: Int!
+  processingTimeMs: Int!
+}
+
+type AnonymizationReportEntry {
+  fieldPath: String!
+  technique: String!
+  recordsAffected: Int!
+}
+
+type DataCloneAudit {
+  anonymizationReport: [AnonymizationReportEntry!]!
+  validationPassed: Boolean!
+  warnings: [String!]!
+}
+
+type DataCloneResult {
+  id: UUID!
+  requestId: UUID!
+  sandboxId: UUID!
+  status: String!
+  statistics: DataCloneStatistics!
+  audit: DataCloneAudit!
+  outputLocation: String
+  outputNodeId: String
+  startedAt: DateTime!
+  completedAt: DateTime
+  error: String
+}
+
+type SyntheticDataStatistics {
+  entitiesGenerated: Int!
+  relationshipsGenerated: Int!
+  byEntityType: JSON!
+  generationTimeMs: Int!
+}
+
+type SyntheticDataResult {
+  id: UUID!
+  sandboxId: UUID!
+  status: String!
+  statistics: SyntheticDataStatistics!
+  outputLocation: String
+  sampleData: [JSON!]
+  startedAt: DateTime!
+  completedAt: DateTime
+  error: String
+}
+
+type ScenarioTemplate {
+  id: UUID!
+  name: String!
+  description: String
+  category: ScenarioCategory!
+  entityTemplates: [JSON!]!
+  relationshipTemplates: [JSON!]!
+  parameters: JSON!
+  createdBy: String!
+  createdAt: DateTime!
+  isPublic: Boolean!
+  tags: [String!]!
+}
+
+type SandboxQueryResult {
+  id: UUID!
+  sandboxId: UUID!
+  status: String!
+  data: [JSON!]
+  rowCount: Int!
+  executionTimeMs: Int!
+  plan: String
+  warnings: [String!]!
+  error: String
+}
+
+type PromotionApproval {
+  reviewerId: String!
+  decision: String!
+  comments: String
+  timestamp: DateTime!
+}
+
+type PromotionValidationResults {
+  securityScan: JSON
+  performanceTest: JSON
+  complianceCheck: JSON
+  dataLeakageScan: JSON
+}
+
+type PromotionRequest {
+  id: UUID!
+  sandboxId: UUID!
+  requesterId: String!
+  targetTenantId: UUID!
+  promotionType: PromotionType!
+  artifactId: String!
+  artifactName: String!
+  artifactVersion: String
+  status: PromotionStatus!
+  reviewers: [String!]!
+  approvals: [PromotionApproval!]!
+  validationResults: PromotionValidationResults!
+  justification: String!
+  rollbackPlan: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  promotedAt: DateTime
+}
+
+type EnforcementDecision {
+  allowed: Boolean!
+  reason: String!
+  code: String
+  requiresAudit: Boolean!
+  warnings: [String!]!
+  filters: [JSON!]
+}
+
+type DataLabSession {
+  id: UUID!
+  sandboxId: UUID!
+  userId: String!
+  startedAt: DateTime!
+  lastActivityAt: DateTime!
+  operationCount: Int!
+}
+
+# =============================================================================
+# Queries
+# =============================================================================
+
+type Query {
+  # Sandbox Profile Queries
+  """Get a sandbox profile by ID"""
+  sandbox(id: UUID!): SandboxTenantProfile
+
+  """List sandbox profiles for the current user"""
+  sandboxes(
+    status: SandboxStatus
+    includeExpired: Boolean
+    limit: Int
+    offset: Int
+  ): [SandboxTenantProfile!]!
+
+  """Get available sandbox presets"""
+  sandboxPresets: [SandboxPreset!]!
+
+  """Validate a sandbox configuration"""
+  validateSandbox(id: UUID!): ValidationReport!
+
+  """Check if an operation is allowed in a sandbox"""
+  checkEnforcement(
+    sandboxId: UUID!
+    operation: String!
+    connectorType: ConnectorType
+    targetEndpoint: String
+    dataFields: [String!]
+  ): EnforcementDecision!
+
+  # Data Lab Queries
+  """Get a data clone result by ID"""
+  dataClone(id: UUID!): DataCloneResult
+
+  """List data clones for a sandbox"""
+  dataClones(sandboxId: UUID!, limit: Int, offset: Int): [DataCloneResult!]!
+
+  """Get a synthetic data result by ID"""
+  syntheticData(id: UUID!): SyntheticDataResult
+
+  """List synthetic data results for a sandbox"""
+  syntheticDataResults(sandboxId: UUID!, limit: Int, offset: Int): [SyntheticDataResult!]!
+
+  """List available scenario templates"""
+  scenarioTemplates(category: ScenarioCategory): [ScenarioTemplate!]!
+
+  """Get a scenario template by ID"""
+  scenarioTemplate(id: UUID!): ScenarioTemplate
+
+  # Promotion Queries
+  """Get a promotion request by ID"""
+  promotionRequest(id: UUID!): PromotionRequest
+
+  """List promotion requests for a sandbox"""
+  promotionRequests(
+    sandboxId: UUID!
+    status: PromotionStatus
+    limit: Int
+    offset: Int
+  ): [PromotionRequest!]!
+
+  """List promotion requests pending review by current user"""
+  pendingReviews(limit: Int, offset: Int): [PromotionRequest!]!
+
+  # Session Queries
+  """Get active data lab session"""
+  activeSession(sandboxId: UUID!): DataLabSession
+
+  # Audit Queries
+  """Get linkback attempts for a sandbox"""
+  linkbackAttempts(sandboxId: UUID!, limit: Int): [LinkbackAttempt!]!
+
+  # Health
+  """Service health check"""
+  health: HealthStatus!
+}
+
+type HealthStatus {
+  status: String!
+  version: String!
+  uptime: Int!
+  dependencies: [DependencyHealth!]!
+}
+
+type DependencyHealth {
+  name: String!
+  status: String!
+  latencyMs: Int
+  error: String
+}
+
+# =============================================================================
+# Mutations
+# =============================================================================
+
+type Mutation {
+  # Sandbox Profile Mutations
+  """Create a new sandbox profile"""
+  createSandbox(input: CreateSandboxInput!): SandboxTenantProfile!
+
+  """Update a sandbox profile"""
+  updateSandbox(id: UUID!, input: UpdateSandboxInput!): SandboxTenantProfile!
+
+  """Activate a sandbox (move from provisioning to active)"""
+  activateSandbox(id: UUID!): SandboxTenantProfile!
+
+  """Suspend a sandbox"""
+  suspendSandbox(id: UUID!, reason: String!): SandboxTenantProfile!
+
+  """Resume a suspended sandbox"""
+  resumeSandbox(id: UUID!): SandboxTenantProfile!
+
+  """Archive a sandbox"""
+  archiveSandbox(id: UUID!): SandboxTenantProfile!
+
+  """Delete a sandbox permanently"""
+  deleteSandbox(id: UUID!): Boolean!
+
+  """Extend sandbox expiration"""
+  extendSandbox(id: UUID!, days: Int!): SandboxTenantProfile!
+
+  # Data Lab Mutations
+  """Clone data into sandbox"""
+  cloneData(input: DataCloneInput!): DataCloneResult!
+
+  """Generate synthetic data"""
+  generateSyntheticData(input: SyntheticDataInput!): SyntheticDataResult!
+
+  """Run scenario simulation"""
+  runScenario(input: ScenarioSimulationInput!): SyntheticDataResult!
+
+  """Execute query in sandbox"""
+  executeSandboxQuery(input: SandboxQueryInput!): SandboxQueryResult!
+
+  """Create custom scenario template"""
+  createScenarioTemplate(
+    name: String!
+    description: String
+    category: ScenarioCategory!
+    entityTemplates: [JSON!]!
+    relationshipTemplates: [JSON!]!
+    parameters: JSON
+    isPublic: Boolean
+    tags: [String!]
+  ): ScenarioTemplate!
+
+  # Session Mutations
+  """Start a data lab session"""
+  startSession(sandboxId: UUID!): DataLabSession!
+
+  """End a data lab session"""
+  endSession(sessionId: UUID!): Boolean!
+
+  # Promotion Mutations
+  """Create a promotion request"""
+  createPromotionRequest(input: CreatePromotionInput!): PromotionRequest!
+
+  """Submit promotion for review"""
+  submitForReview(requestId: UUID!, reviewers: [String!]!): PromotionRequest!
+
+  """Add review decision to promotion"""
+  reviewPromotion(input: PromotionReviewInput!): PromotionRequest!
+
+  """Execute an approved promotion"""
+  executePromotion(requestId: UUID!): PromotionRequest!
+
+  """Rollback a promotion"""
+  rollbackPromotion(requestId: UUID!, reason: String!): PromotionRequest!
+
+  """Cancel a promotion request"""
+  cancelPromotion(requestId: UUID!): PromotionRequest!
+}
+
+# =============================================================================
+# Subscriptions
+# =============================================================================
+
+type Subscription {
+  """Subscribe to sandbox status changes"""
+  sandboxStatusChanged(sandboxId: UUID!): SandboxTenantProfile!
+
+  """Subscribe to data clone progress"""
+  dataCloneProgress(requestId: UUID!): DataCloneResult!
+
+  """Subscribe to synthetic data generation progress"""
+  syntheticDataProgress(requestId: UUID!): SyntheticDataResult!
+
+  """Subscribe to promotion status changes"""
+  promotionStatusChanged(requestId: UUID!): PromotionRequest!
+
+  """Subscribe to linkback attempt alerts"""
+  linkbackAlert(sandboxId: UUID!): LinkbackAttempt!
+}
