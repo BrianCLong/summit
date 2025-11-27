@@ -17,6 +17,7 @@ on:
 env:
   REGISTRY: ghcr.io
   NAMESPACE_PREFIX: intelgraph-pr
+  PREVIEW_TTL_HOURS: 72
 
 concurrency:
   group: preview-${{ github.event.number }}
@@ -98,7 +99,22 @@ jobs:
       - name: Create namespace
         run: |
           NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          PR_NUMBER=${{ github.event.number }}
+          EXPIRY=$(date -u -d "+${PREVIEW_TTL_HOURS} hours" +"%Y-%m-%dT%H:%M:%SZ")
+          REFRESHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
           kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl label namespace ${NAMESPACE} \
+            preview.summit.ai/enabled=true \
+            preview.summit.ai/pull-request=${PR_NUMBER} \
+            --overwrite
+
+          kubectl annotate namespace ${NAMESPACE} \
+            preview.summit.ai/expiry="${EXPIRY}" \
+            preview.summit.ai/ttl-hours="${PREVIEW_TTL_HOURS}" \
+            preview.summit.ai/last-refresh="${REFRESHED_AT}" \
+            --overwrite
 
       - name: Deploy preview environment
         run: |
@@ -211,6 +227,7 @@ jobs:
           - **Images**:
             - Server: \`pr-${{ github.event.number }}\`
             - Client: \`pr-${{ github.event.number }}\`
+          - **Auto-expiry**: ${PREVIEW_TTL_HOURS}h after last refresh
           - **Auto-teardown**: When PR is closed
 
           > This preview environment is automatically updated with each push to this PR.
