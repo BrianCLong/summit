@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from features import build_degree_features
+from analytics import analyze_graph
 
 
 class FeatureBuildRequest(BaseModel):
@@ -19,6 +21,88 @@ class Feature(BaseModel):
 
 class FeatureBuildResponse(BaseModel):
     features: list[Feature]
+
+
+class GraphNode(BaseModel):
+    id: str
+    label: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class GraphEdge(BaseModel):
+    source: str
+    target: str
+    weight: float | None = None
+    timestamp: str | float | None = None
+    label: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class CustomAlgorithm(BaseModel):
+    name: str
+    algorithm: str
+    parameters: dict[str, Any] = Field(default_factory=dict)
+
+
+class PatternInsights(BaseModel):
+    triangles: list[list[str]]
+    cycles: list[list[str]]
+    hubs: list[str]
+
+
+class CentralityInsights(BaseModel):
+    degree: dict[str, float]
+    betweenness: dict[str, float]
+    closeness: dict[str, float]
+    eigenvector: dict[str, float]
+    top_hubs: list[str]
+
+
+class CommunityInsights(BaseModel):
+    communities: list[list[str]]
+    modularity: float | None
+
+
+class TemporalInsights(BaseModel):
+    start: str | None
+    end: str | None
+    activity_by_day: dict[str, int]
+    recency_by_node: dict[str, str]
+
+
+class CustomAlgorithmResult(BaseModel):
+    name: str
+    algorithm: str
+    result: dict[str, Any]
+
+
+class VisualizationNode(BaseModel):
+    id: str
+    x: float
+    y: float
+    degree: int
+    betweenness: float
+    community: int | None = None
+
+
+class Visualization(BaseModel):
+    nodes: list[VisualizationNode]
+    edges: list[dict[str, Any]]
+
+
+class GraphAnalysisRequest(BaseModel):
+    nodes: list[GraphNode] | None = None
+    edges: list[GraphEdge]
+    custom_algorithms: list[CustomAlgorithm] = Field(default_factory=list)
+
+
+class GraphAnalysisResponse(BaseModel):
+    patterns: PatternInsights
+    centrality: CentralityInsights
+    communities: CommunityInsights
+    temporal: TemporalInsights
+    custom_algorithms: list[CustomAlgorithmResult]
+    visualization: Visualization
 
 
 @dataclass(frozen=True)
@@ -94,6 +178,16 @@ def feature_build(req: FeatureBuildRequest) -> FeatureBuildResponse:
     data = build_degree_features(req.edges)
     features = [Feature(node=n, degree=d) for n, d in data.items()]
     return FeatureBuildResponse(features=features)
+
+
+@app.post("/graph/analyze", response_model=GraphAnalysisResponse)
+def graph_analyze(req: GraphAnalysisRequest) -> GraphAnalysisResponse:
+    analysis = analyze_graph(
+        [node.model_dump() for node in req.nodes] if req.nodes else None,
+        [edge.model_dump() for edge in req.edges],
+        [algo.model_dump() for algo in req.custom_algorithms],
+    )
+    return GraphAnalysisResponse(**analysis)
 
 
 def _score_model(candidate: ModelProfile, request: RouteRequest) -> float:
