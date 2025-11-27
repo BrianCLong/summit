@@ -13,6 +13,8 @@
     "dev": "turbo run dev --parallel --cache-dir=.turbo",
     "server:dev": "npm run --workspace=apps/server dev",
     "client:dev": "cd client && npm run dev",
+    "compliance-console:dev": "pnpm --filter compliance-console dev",
+    "compliance-console:build": "pnpm --filter compliance-console build",
     "devkit:seed": "node scripts/devkit/seed-fixtures.js",
     "devkit:parity": "node scripts/devkit/check-parity.js",
     "devkit:smoke": "node smoke-test.js --ci",
