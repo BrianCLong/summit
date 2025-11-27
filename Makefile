@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight companyos-bootstrap companyos-up companyos-down companyos-smoke
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -178,7 +178,7 @@ down:
 	fi
 
 smoke:
-	@echo "==> smoke: Running golden path validation..."
+@echo "==> smoke: Running golden path validation..."
 	@echo ""
 	@# Check services are running
 	@if ! curl -fsS http://localhost:4000/health >/dev/null 2>&1; then \
@@ -206,3 +206,15 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+companyos-bootstrap:
+	pnpm install --filter @companyos/companyos-api...
+
+companyos-up:
+	docker compose -f docker/docker-compose.companyos.yml up -d
+
+companyos-down:
+	docker compose -f docker/docker-compose.companyos.yml down -v
+
+companyos-smoke:
+	node companyos/scripts/smoke-companyos.js
