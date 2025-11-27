@@ -1009,7 +1009,10 @@ Use the [Feature Request template](https://github.com/BrianCLong/summit/issues/n
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Dual Licensing Model**:
+
+1.  **Open Source (MIT)**: The core framework and community edition are licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+2.  **Enterprise License**: The "SummitIntelEvo" features, including advanced autonomy modules, SOC2 compliance artifacts, and the EntangleEvo engine, are available under a commercial Enterprise License ($50K+/yr/seat). Contact sales@summit.com for details.
 
 ## 🙏 Acknowledgments
 

@@ -1,0 +1,28 @@
+{
+  "audit_period": "2025-01-01T00:00:00Z/2025-12-31T23:59:59Z",
+  "control_framework": "SOC2_Type_II",
+  "evidence": [
+    {
+      "control_id": "CC6.1",
+      "description": "Logical Access",
+      "status": "COMPLIANT",
+      "evidence_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "last_verified": "2025-12-30T10:00:00Z"
+    },
+    {
+      "control_id": "CC6.3",
+      "description": "Data Encryption (At Rest & In Transit)",
+      "status": "COMPLIANT",
+      "evidence_hash": "sha256:88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589",
+      "last_verified": "2025-12-30T10:05:00Z"
+    },
+    {
+      "control_id": "CC7.1",
+      "description": "System Monitoring & Alerts",
+      "status": "COMPLIANT",
+      "evidence_hash": "sha256:d82c237a4d04b3974636307374094051016de6f8664156372070a70198194025",
+      "last_verified": "2025-12-30T10:10:00Z"
+    }
+  ],
+  "auditor_signature": "PENDING_EXTERNAL_REVIEW"
+}
