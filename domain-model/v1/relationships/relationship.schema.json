@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./relationship.schema.json",
+  "title": "Relationship (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "relationshipType": {
+      "type": "string",
+      "enum": [
+        "associatedWith",
+        "controls",
+        "attended",
+        "locatedIn",
+        "derivedFrom",
+        "supports",
+        "contradicts",
+        "owns",
+        "governedBy",
+        "licensedBy"
+      ]
+    },
+    "sourceId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "targetId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "sourceType": { "type": "string" },
+    "targetType": { "type": "string" },
+    "validDuring": { "$ref": "../base.schema.json#/$defs/TimeRange" },
+    "evidenceIds": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/Identifier" }
+    },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" }
+  },
+  "required": ["id", "schemaVersion", "relationshipType", "sourceId", "targetId"],
+  "additionalProperties": false
+}

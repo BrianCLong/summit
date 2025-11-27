@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./asset.schema.json",
+  "title": "Asset (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Asset" },
+    "name": { "type": "string" },
+    "assetType": { "type": "string" },
+    "ownerId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "locationId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "value": { "type": "number" },
+    "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name", "assetType"],
+  "additionalProperties": false
+}

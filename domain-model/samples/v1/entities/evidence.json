@@ -1,0 +1,17 @@
+{
+  "id": "evidence-900",
+  "schemaVersion": "v1",
+  "entityType": "Evidence",
+  "title": "Firewall export",
+  "description": "Logs showing credential exfiltration",
+  "caseId": "case-77",
+  "artifactType": "log-bundle",
+  "uri": "s3://intelgraph-demo/firewall-export.gz",
+  "hash": "sha256:abcd1234",
+  "collectedAt": "2025-02-01T14:10:00Z",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "forensics",
+    "ingestedAt": "2025-02-01T14:12:00Z"
+  }
+}

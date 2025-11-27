@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./license.schema.json",
+  "title": "License (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "License" },
+    "name": { "type": "string" },
+    "holderId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "scope": { "type": "string" },
+    "issuedBy": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "validFor": { "$ref": "../base.schema.json#/$defs/TimeRange" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}

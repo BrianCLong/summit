@@ -1,0 +1,13 @@
+{
+  "id": "policy-1",
+  "schemaVersion": "v1",
+  "entityType": "PolicyTag",
+  "label": "need-to-know",
+  "description": "Restricts access to investigators assigned to the case",
+  "appliesTo": ["Case", "Evidence"],
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "governance",
+    "ingestedAt": "2025-02-01T14:00:00Z"
+  }
+}
