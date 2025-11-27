@@ -6,6 +6,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import { getTracer } from '../observability/tracer.js';
+import { getLogContext, withLogContext } from '../config/logger.js';
 
 // Extend Express Request type to include correlation IDs
 declare global {
@@ -46,22 +47,33 @@ export function correlationIdMiddleware(
   req.traceId = tracer.getTraceId() || '';
   req.spanId = tracer.getSpanId() || '';
 
-  // Add to current span if available
-  if (req.traceId) {
-    tracer.setAttribute('correlation.id', correlationId);
-    tracer.setAttribute('correlation.request_id', correlationId);
-  }
+  return withLogContext(
+    {
+      correlationId,
+      traceId: req.traceId || undefined,
+      spanId: req.spanId || undefined,
+      userId: (req as any).user?.sub || (req as any).user?.id,
+      tenantId: (req as any).user?.tenant_id || (req as any).tenant_id,
+    },
+    () => {
+      // Add to current span if available
+      if (req.traceId) {
+        tracer.setAttribute('correlation.id', correlationId);
+        tracer.setAttribute('correlation.request_id', correlationId);
+      }
 
-  // Inject correlation ID into response headers
-  res.setHeader(CORRELATION_ID_HEADER, correlationId);
-  res.setHeader(REQUEST_ID_HEADER, correlationId);
+      // Inject correlation ID into response headers
+      res.setHeader(CORRELATION_ID_HEADER, correlationId);
+      res.setHeader(REQUEST_ID_HEADER, correlationId);
 
-  // Add trace ID to response if available (for debugging)
-  if (req.traceId) {
-    res.setHeader('x-trace-id', req.traceId);
-  }
+      // Add trace ID to response if available (for debugging)
+      if (req.traceId) {
+        res.setHeader('x-trace-id', req.traceId);
+      }
 
-  next();
+      next();
+    },
+  );
 }
 
 /**
@@ -75,12 +87,17 @@ export function getCorrelationContext(req: Request): {
   userId?: string;
   tenantId?: string;
 } {
+  const context = getLogContext();
+
   return {
-    correlationId: req.correlationId,
-    traceId: req.traceId,
-    spanId: req.spanId,
-    userId: (req as any).user?.sub || (req as any).user?.id,
-    tenantId: (req as any).user?.tenant_id || (req as any).tenant_id,
+    correlationId: req.correlationId || context.correlationId || '',
+    traceId: req.traceId || context.traceId || '',
+    spanId: req.spanId || context.spanId || '',
+    userId:
+      (req as any).user?.sub ||
+      (req as any).user?.id ||
+      context.userId,
+    tenantId: (req as any).user?.tenant_id || (req as any).tenant_id || context.tenantId,
   };
 }
 
