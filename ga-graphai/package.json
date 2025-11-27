@@ -5,6 +5,8 @@
     "packages/*"
   ],
   "scripts": {
-    "test": "npm run -ws --if-present test"
+    "test": "npm run -ws --if-present test",
+    "smoke": "npm run -ws --if-present test:smoke",
+    "load": "npm run -ws --if-present test:load"
   }
 }

@@ -7,6 +7,7 @@ import type {
   FallbackTrigger,
   MetaOrchestratorTelemetry,
   PipelineStageDefinition,
+  PolicyRule,
   PlannerDecision,
   PlannerExplanation,
   PlannerObservation,
@@ -16,6 +17,15 @@ import type {
   SelfHealingPolicy,
   StageFallbackStrategy,
 } from '@ga-graphai/common-types';
+import {
+  OrchestrationKnowledgeGraph,
+  type CostSignalRecord,
+  type EnvironmentRecord,
+  type GraphSnapshot,
+  type IncidentRecord,
+  type PipelineRecord,
+  type ServiceRecord,
+} from '@ga-graphai/knowledge-graph';
 
 export interface PricingFeed {
   getPricingSignals(): Promise<PricingSignal[]>;
@@ -104,6 +114,465 @@ function normalize(values: number[]): number[] {
     return values.map(() => 0);
   }
   return values.map((value) => value / max);
+}
+
+interface ReferenceGraphData {
+  pipelines: PipelineRecord[];
+  services: ServiceRecord[];
+  environments: EnvironmentRecord[];
+  incidents?: IncidentRecord[];
+  policies?: PolicyRule[];
+  costSignals?: CostSignalRecord[];
+}
+
+interface ReferenceWorkflowDefinition {
+  pipelineId: string;
+  focusServiceId: string;
+  stages: PipelineStageDefinition[];
+  providers: CloudProviderDescriptor[];
+  pricing: PricingSignal[];
+  planMetadata: Record<string, unknown>;
+  executionScripts: Record<string, StageExecutionResult[]>;
+  graph: ReferenceGraphData;
+}
+
+export interface ReferenceWorkflowResult {
+  plan: ExplainablePlan;
+  outcome: ExecutionOutcome;
+  telemetry: MetaOrchestratorTelemetry;
+  graphSnapshot: GraphSnapshot;
+  serviceContext?: ReturnType<OrchestrationKnowledgeGraph['queryService']>;
+  auditTrail: AuditEntry[];
+}
+
+const HELLO_WORLD_WORKFLOW: ReferenceWorkflowDefinition = {
+  pipelineId: 'pipeline-hello-world',
+  focusServiceId: 'svc-hello-world',
+  stages: [
+    {
+      id: 'stage-hello-build',
+      name: 'Hello Build + Deploy',
+      description: 'Compile, lint, and deploy the hello-world reference service.',
+      requiredCapabilities: ['compute'],
+      complianceTags: ['pci'],
+      minThroughputPerMinute: 60,
+      slaSeconds: 120,
+      guardrail: {
+        maxErrorRate: 0.02,
+        recoveryTimeoutSeconds: 30,
+      },
+      fallbackStrategies: [
+        { provider: 'aws', region: 'us-east-1', trigger: 'execution-failure' },
+      ],
+    },
+  ],
+  providers: [
+    {
+      name: 'azure',
+      regions: ['eastus'],
+      services: ['compute'],
+      reliabilityScore: 0.96,
+      sustainabilityScore: 0.62,
+      securityCertifications: ['pci'],
+      maxThroughputPerMinute: 110,
+      baseLatencyMs: 75,
+      policyTags: ['pci'],
+    },
+    {
+      name: 'aws',
+      regions: ['us-east-1'],
+      services: ['compute'],
+      reliabilityScore: 0.94,
+      sustainabilityScore: 0.55,
+      securityCertifications: ['pci'],
+      maxThroughputPerMinute: 120,
+      baseLatencyMs: 70,
+      policyTags: ['pci'],
+    },
+  ],
+  pricing: [
+    {
+      provider: 'azure',
+      region: 'eastus',
+      service: 'compute',
+      pricePerUnit: 0.85,
+      currency: 'USD',
+      unit: 'per-minute',
+      effectiveAt: new Date().toISOString(),
+    },
+    {
+      provider: 'aws',
+      region: 'us-east-1',
+      service: 'compute',
+      pricePerUnit: 1.1,
+      currency: 'USD',
+      unit: 'per-minute',
+      effectiveAt: new Date().toISOString(),
+    },
+  ],
+  planMetadata: {
+    releaseTrain: 'hello-world',
+    environment: 'dev',
+  },
+  executionScripts: {
+    azure: [
+      {
+        status: 'success',
+        throughputPerMinute: 75,
+        cost: 4.5,
+        errorRate: 0.01,
+        logs: ['hello-world:azure:deploy-success'],
+      },
+    ],
+  },
+  graph: {
+    pipelines: [
+      {
+        id: 'pipeline-hello-world',
+        name: 'Hello World Delivery',
+        owner: 'intelgraph-core',
+        stages: [
+          {
+            id: 'stage-hello-build',
+            name: 'Hello Build + Deploy',
+            pipelineId: 'pipeline-hello-world',
+            serviceId: 'svc-hello-world',
+            environmentId: 'env-dev',
+            capability: 'deploy',
+            guardrails: { maxErrorRate: 0.02 },
+            complianceTags: ['pci'],
+          },
+        ],
+      },
+    ],
+    services: [
+      {
+        id: 'svc-hello-world',
+        name: 'Hello World API',
+        tier: 'tier-2',
+        languages: ['ts'],
+        dependencies: ['svc-hello-case'],
+        soxCritical: false,
+      },
+    ],
+    environments: [
+      {
+        id: 'env-dev',
+        name: 'Development',
+        stage: 'dev',
+        region: 'us-east-1',
+        complianceTags: ['pci'],
+      },
+    ],
+    incidents: [],
+    policies: [
+      {
+        id: 'policy-hello-world',
+        description: 'Hello World deploys must lint and run orchestration smoke.',
+        effect: 'allow',
+        actions: ['deploy'],
+        resources: ['service:svc-hello-world'],
+        conditions: [],
+        obligations: [],
+        tags: ['pci'],
+      },
+    ],
+    costSignals: [
+      {
+        serviceId: 'svc-hello-world',
+        timeBucket: new Date().toISOString(),
+        saturation: 0.15,
+        budgetBreaches: 0,
+        throttleCount: 0,
+        slowQueryCount: 0,
+      },
+    ],
+  },
+};
+
+const HELLO_CASE_WORKFLOW: ReferenceWorkflowDefinition = {
+  pipelineId: 'pipeline-hello-case',
+  focusServiceId: 'svc-hello-case',
+  stages: [
+    {
+      id: 'stage-hello-case-intake',
+      name: 'Hello Case Intake',
+      description: 'Ingest, enrich, and classify the case signal.',
+      requiredCapabilities: ['ml', 'compute'],
+      complianceTags: ['fedramp'],
+      minThroughputPerMinute: 40,
+      slaSeconds: 300,
+      guardrail: {
+        maxErrorRate: 0.05,
+        recoveryTimeoutSeconds: 60,
+      },
+      fallbackStrategies: [
+        { provider: 'aws', region: 'us-west-2', trigger: 'execution-failure' },
+      ],
+    },
+  ],
+  providers: [
+    {
+      name: 'azure',
+      regions: ['westus2'],
+      services: ['compute', 'ml'],
+      reliabilityScore: 0.91,
+      sustainabilityScore: 0.74,
+      securityCertifications: ['fedramp'],
+      maxThroughputPerMinute: 80,
+      baseLatencyMs: 90,
+      policyTags: ['fedramp'],
+    },
+    {
+      name: 'aws',
+      regions: ['us-west-2'],
+      services: ['compute', 'ml'],
+      reliabilityScore: 0.97,
+      sustainabilityScore: 0.6,
+      securityCertifications: ['fedramp', 'iso'],
+      maxThroughputPerMinute: 120,
+      baseLatencyMs: 70,
+      policyTags: ['fedramp'],
+    },
+  ],
+  pricing: [
+    {
+      provider: 'azure',
+      region: 'westus2',
+      service: 'ml',
+      pricePerUnit: 0.4,
+      currency: 'USD',
+      unit: 'per-minute',
+      effectiveAt: new Date().toISOString(),
+    },
+    {
+      provider: 'aws',
+      region: 'us-west-2',
+      service: 'ml',
+      pricePerUnit: 0.8,
+      currency: 'USD',
+      unit: 'per-minute',
+      effectiveAt: new Date().toISOString(),
+    },
+  ],
+  planMetadata: {
+    releaseTrain: 'hello-case',
+    environment: 'prod',
+  },
+  executionScripts: {
+    azure: [
+      {
+        status: 'failure',
+        throughputPerMinute: 20,
+        cost: 3.2,
+        errorRate: 0.12,
+        logs: ['hello-case:azure:transform-timeout'],
+      },
+    ],
+    aws: [
+      {
+        status: 'success',
+        throughputPerMinute: 55,
+        cost: 6.4,
+        errorRate: 0.02,
+        logs: ['hello-case:aws:fallback-success'],
+      },
+    ],
+  },
+  graph: {
+    pipelines: [
+      {
+        id: 'pipeline-hello-case',
+        name: 'Hello Case Discovery',
+        owner: 'intelgraph-response',
+        stages: [
+          {
+            id: 'stage-hello-case-intake',
+            name: 'Hello Case Intake',
+            pipelineId: 'pipeline-hello-case',
+            serviceId: 'svc-hello-case',
+            environmentId: 'env-prod',
+            capability: 'triage',
+            guardrails: { maxErrorRate: 0.05 },
+            policies: ['policy-hello-case'],
+            complianceTags: ['fedramp'],
+          },
+        ],
+      },
+    ],
+    services: [
+      {
+        id: 'svc-hello-case',
+        name: 'Hello Case API',
+        tier: 'tier-1',
+        owningTeam: 'intelgraph-response',
+        dependencies: ['svc-hello-world'],
+        piiClassification: 'high',
+        soxCritical: true,
+      },
+    ],
+    environments: [
+      {
+        id: 'env-prod',
+        name: 'Production',
+        stage: 'prod',
+        region: 'us-west-2',
+        zeroTrustTier: 2,
+        complianceTags: ['fedramp'],
+      },
+    ],
+    incidents: [
+      {
+        id: 'incident-hello-case-1',
+        serviceId: 'svc-hello-case',
+        environmentId: 'env-prod',
+        severity: 'high',
+        occurredAt: new Date(Date.now() - 86_400_000).toISOString(),
+        status: 'open',
+        rootCauseCategory: 'latency',
+      },
+      {
+        id: 'incident-hello-case-2',
+        serviceId: 'svc-hello-case',
+        environmentId: 'env-prod',
+        severity: 'medium',
+        occurredAt: new Date(Date.now() - 2 * 86_400_000).toISOString(),
+        status: 'mitigated',
+        rootCauseCategory: 'cost',
+      },
+    ],
+    policies: [
+      {
+        id: 'policy-hello-case',
+        description: 'Cases must stay within FedRAMP routing and carry provenance.',
+        effect: 'allow',
+        actions: ['triage'],
+        resources: ['service:svc-hello-case'],
+        conditions: [],
+        obligations: ['attach-provenance', 'persist-trace'],
+        tags: ['fedramp'],
+      },
+    ],
+    costSignals: [
+      {
+        serviceId: 'svc-hello-case',
+        timeBucket: new Date().toISOString(),
+        saturation: 0.82,
+        budgetBreaches: 3,
+        throttleCount: 2,
+        slowQueryCount: 1,
+      },
+    ],
+  },
+};
+
+async function buildReferenceGraph(
+  graphData: ReferenceGraphData,
+  focusServiceId: string,
+): Promise<{
+  graphSnapshot: GraphSnapshot;
+  serviceContext?: ReturnType<OrchestrationKnowledgeGraph['queryService']>;
+}> {
+  const graph = new OrchestrationKnowledgeGraph();
+  graph.registerPipelineConnector({
+    loadPipelines: async () => graphData.pipelines,
+  });
+  graph.registerServiceConnector({
+    loadServices: async () => graphData.services,
+  });
+  graph.registerEnvironmentConnector({
+    loadEnvironments: async () => graphData.environments,
+  });
+  if (graphData.incidents) {
+    graph.registerIncidentConnector({
+      loadIncidents: async () => graphData.incidents ?? [],
+    });
+  }
+  if (graphData.policies) {
+    graph.registerPolicyConnector({
+      loadPolicies: async () => graphData.policies ?? [],
+    });
+  }
+  if (graphData.costSignals) {
+    graph.registerCostSignalConnector({
+      loadCostSignals: async () => graphData.costSignals ?? [],
+    });
+  }
+  const graphSnapshot = await graph.refresh();
+  return {
+    graphSnapshot,
+    serviceContext: graph.queryService(focusServiceId),
+  };
+}
+
+export async function runReferenceWorkflow(
+  definition: ReferenceWorkflowDefinition,
+): Promise<ReferenceWorkflowResult> {
+  const pricingFeed: PricingFeed = {
+    getPricingSignals: async () => definition.pricing,
+  };
+  const executionScripts = new Map<string, StageExecutionResult[]>(
+    Object.entries(definition.executionScripts).map(([provider, results]) => [
+      provider,
+      [...results],
+    ]),
+  );
+  const auditTrail: AuditEntry[] = [];
+  const execution: ExecutionAdapter = {
+    async execute(request) {
+      const queue = executionScripts.get(request.decision.provider) ?? [];
+      const result = queue.shift();
+      executionScripts.set(request.decision.provider, queue);
+      if (result) {
+        return result;
+      }
+      return {
+        status: 'success',
+        throughputPerMinute: request.stage.minThroughputPerMinute,
+        cost: request.decision.expectedCost,
+        errorRate: 0.01,
+        logs: ['reference-default-success'],
+      };
+    },
+  };
+
+  const orchestrator = new MetaOrchestrator({
+    pipelineId: definition.pipelineId,
+    providers: definition.providers,
+    pricingFeed,
+    execution,
+    auditSink: {
+      record: (entry) => {
+        auditTrail.push(entry);
+      },
+    },
+    reasoningModel: new TemplateReasoningModel(),
+    selfHealing: { ...DEFAULT_SELF_HEALING, maxRetries: 3 },
+  });
+
+  const outcome = await orchestrator.executePlan(
+    definition.stages,
+    definition.planMetadata,
+  );
+  const telemetry = orchestrator.deriveTelemetry(outcome);
+  const graph = await buildReferenceGraph(definition.graph, definition.focusServiceId);
+
+  return {
+    plan: outcome.plan,
+    outcome,
+    telemetry,
+    graphSnapshot: graph.graphSnapshot,
+    serviceContext: graph.serviceContext,
+    auditTrail,
+  };
+}
+
+export function runHelloWorldWorkflow(): Promise<ReferenceWorkflowResult> {
+  return runReferenceWorkflow(HELLO_WORLD_WORKFLOW);
+}
+
+export function runHelloCaseWorkflow(): Promise<ReferenceWorkflowResult> {
+  return runReferenceWorkflow(HELLO_CASE_WORKFLOW);
 }
 
 function matchPricing(
