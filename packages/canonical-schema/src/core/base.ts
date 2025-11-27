@@ -97,7 +97,18 @@ export interface ProvenanceChain {
  * Canonical Entity Base Type
  * All entities in Summit inherit from this base
  */
-export interface CanonicalEntityBase {
+export interface BitemporalWindow {
+  /** Business validity start (real-world time) */
+  validFrom: Date;
+  /** Business validity end; undefined/null means still valid */
+  validTo?: Date;
+  /** When this fact was first observed in the system */
+  observedAt: Date;
+  /** System record timestamp (immutable once written) */
+  recordedAt: Date;
+}
+
+export interface CanonicalEntityBase extends BitemporalWindow {
   // Identity
   id: string;                          // UUID primary key
   canonicalId?: string;                // ER master entity ID
@@ -119,11 +130,6 @@ export interface CanonicalEntityBase {
 
   // Policy & Governance
   policyLabels: PolicyLabels;          // 7 mandatory labels
-
-  // Temporal (Bitemporal)
-  validFrom: Date;                     // Business time start
-  validTo?: Date;                      // Business time end
-  recordedAt: Date;                    // System time
 
   // Audit
   createdAt: Date;
