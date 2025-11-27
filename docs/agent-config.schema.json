@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Autonomous Development Agent Configuration",
+  "type": "object",
+  "properties": {
+    "prompt": { "type": "string", "description": "Loaded prompt text" },
+    "mode": {
+      "type": "string",
+      "enum": ["universal", "in-house", "react", "multi-agent", "swe"],
+      "description": "Prompt/behavior variant to apply"
+    },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Enabled tool identifiers for the agent runtime"
+    },
+    "modules": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Modules to instantiate (interpreter, planner, executor, etc.)"
+    },
+    "pr": {
+      "type": "object",
+      "properties": {
+        "branch": { "type": "string", "description": "Target branch name" },
+        "autoMerge": { "type": "boolean", "default": false },
+        "reviewChecklist": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Required checklist items prior to merge"
+        }
+      },
+      "required": ["branch"],
+      "additionalProperties": false
+    },
+    "qualityGates": {
+      "type": "object",
+      "properties": {
+        "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+        "lint": { "type": "boolean", "default": true },
+        "typecheck": { "type": "boolean", "default": true },
+        "securityScan": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    },
+    "observability": {
+      "type": "object",
+      "properties": {
+        "metrics": { "type": "boolean", "default": true },
+        "traces": { "type": "boolean", "default": false },
+        "logs": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["prompt", "mode", "tools"],
+  "additionalProperties": false
+}
