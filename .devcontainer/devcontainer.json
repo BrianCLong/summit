@@ -1,141 +1,41 @@
 {
-  "name": "IntelGraph Development Environment",
-  "dockerComposeFile": "docker-compose.yml",
-  "service": "devcontainer",
+  "name": "Summit Dev Environment",
+  "dockerComposeFile": [
+    "../docker-compose.dev.yml"
+  ],
+  "service": "api",
   "workspaceFolder": "/workspace",
-  "shutdownAction": "stopCompose",
-
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "20"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/github-cli:1": {
-      "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/git:1": {
-      "version": "latest"
-    }
-  },
-
   "customizations": {
     "vscode": {
       "extensions": [
+        "ms-azuretools.vscode-docker",
         "esbenp.prettier-vscode",
         "dbaeumer.vscode-eslint",
-        "ms-vscode.vscode-typescript-next",
-        "bradlc.vscode-tailwindcss",
-        "ms-vscode.vscode-json",
-        "redhat.vscode-yaml",
-        "ms-azuretools.vscode-docker",
-        "github.vscode-pull-request-github",
-        "ms-vscode.vscode-jest",
-        "streetsidesoftware.code-spell-checker",
-        "formulahendry.auto-rename-tag",
-        "christian-kohler.path-intellisense"
+        "firsttris.vscode-jest-runner",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "charliermarsh.ruff",
+        "github.copilot",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "graphql.vscode-graphql",
+        "neo4j.neo4j-extension-pack"
       ],
       "settings": {
-        "typescript.preferences.importModuleSpecifier": "relative",
-        "typescript.suggest.autoImports": true,
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.testing.pytestEnabled": true,
         "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.codeActionsOnSave": {
-          "source.fixAll.eslint": true,
-          "source.organizeImports": true
+        "prettier.requireConfig": true,
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
-        "files.exclude": {
-          "**/node_modules": true,
-          "**/dist": true,
-          "**/.git": true
-        },
-        "search.exclude": {
-          "**/node_modules": true,
-          "**/dist": true,
-          "**/coverage": true
-        },
-        "terminal.integrated.defaultProfile.linux": "bash",
-        "git.autofetch": true,
-        "git.enableSmartCommit": true
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        }
       }
     }
   },
-
-  "forwardPorts": [
-    3000, 3001, 4000, 4010, 4100, 4317, 4318, 5432, 6379, 7474, 8080, 8181,
-    9090, 9464, 16686
-  ],
-  "portsAttributes": {
-    "3000": {
-      "label": "Web App",
-      "onAutoForward": "notify"
-    },
-    "3001": {
-      "label": "Storybook",
-      "onAutoForward": "notify"
-    },
-    "4000": {
-      "label": "API Gateway",
-      "onAutoForward": "notify"
-    },
-    "4010": {
-      "label": "Mock Services",
-      "onAutoForward": "silent"
-    },
-    "4100": {
-      "label": "Worker Health",
-      "onAutoForward": "silent"
-    },
-    "4317": {
-      "label": "OTLP gRPC",
-      "onAutoForward": "silent"
-    },
-    "4318": {
-      "label": "OTLP HTTP",
-      "onAutoForward": "silent"
-    },
-    "5432": {
-      "label": "PostgreSQL",
-      "onAutoForward": "silent"
-    },
-    "6379": {
-      "label": "Redis",
-      "onAutoForward": "silent"
-    },
-    "7474": {
-      "label": "Neo4j Browser",
-      "onAutoForward": "notify"
-    },
-    "8080": {
-      "label": "Grafana",
-      "onAutoForward": "notify"
-    },
-    "8181": {
-      "label": "OPA",
-      "onAutoForward": "silent"
-    },
-    "9090": {
-      "label": "Prometheus",
-      "onAutoForward": "silent"
-    },
-    "9464": {
-      "label": "OTEL Metrics",
-      "onAutoForward": "silent"
-    },
-    "16686": {
-      "label": "Jaeger",
-      "onAutoForward": "notify"
-    }
-  },
-
-  "postCreateCommand": "bash .devcontainer/setup.sh",
-
-  "remoteUser": "node",
-  "containerUser": "node",
-
-  "mounts": [
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
-    "source=${localWorkspaceFolder}/.env,target=/workspace/.env,type=bind,consistency=cached"
-  ]
+  "postCreateCommand": "make dev-setup",
+  "remoteUser": "node"
 }

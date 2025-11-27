@@ -1,18 +1,28 @@
-pre-commit:
+# lefthook.yml
+# ==============================================================================
+# Git hooks managed by Lefthook.
+# See https://github.com/evilmartians/lefthook for more details.
+# ==============================================================================
+
+pre-push:
   parallel: true
   commands:
+    # --------------------------------------------------------------------------
+    # Proactive Quality Gates
+    #
+    # These commands run before any code is pushed to the remote repository,
+    # ensuring that all code adheres to our quality and correctness standards.
+    # --------------------------------------------------------------------------
     lint:
-      run: pnpm lint-staged
-    typecheck:
-      run: pnpm -w typecheck
-      stage_fixed: true
-pre-push:
-  parallel: false
-  commands:
+      run: make dev-lint
+    test:
+      run: make dev-test
+
+    # --------------------------------------------------------------------------
+    # Ancillary Checks
+    # --------------------------------------------------------------------------
     hook-signature:
       run: scripts/hooks/verify-hook-signature.sh
-    smoke:
-      run: node smoke-test.js --ci
     parity:
       run: node scripts/devkit/check-parity.js
     actionlint:
@@ -21,3 +31,20 @@ pre-push:
       run: npx hadolint Dockerfile || true
     gitleaks:
       run: npx gitleaks detect --redact --no-banner
+
+pre-commit:
+  parallel: true
+  commands:
+    # --------------------------------------------------------------------------
+    # Fast Feedback Loop
+    #
+    # These commands run before each commit, providing rapid feedback on
+    # staged changes. They are a subset of the more comprehensive pre-push
+    # checks.
+    # --------------------------------------------------------------------------
+    lint-staged:
+      glob: "*.{js,jsx,ts,tsx,py,graphql,md,css,scss,json,yml,yaml,html,xml}"
+      run: npx lint-staged
+    typecheck:
+      run: pnpm -w typecheck
+      stage_fixed: true
