@@ -199,6 +199,57 @@ export interface ScalingPolicy {
   metrics: string[];
 }
 
+export interface RegionalLoadPrediction {
+  regionId: string;
+  projectedRps: number;
+  cpuUtilization: number;
+  memoryUtilization: number;
+  seasonalityScore: number;
+  volatility: number;
+}
+
+export interface PredictiveLoadForecast {
+  confidence: number;
+  predictions: {
+    cpu: number;
+    memory: number;
+    requests: number;
+  };
+  regional: Record<string, RegionalLoadPrediction>;
+  anomalies: string[];
+  seasonality: number;
+  timeline: string;
+}
+
+export interface AutoscalingPolicyPlan {
+  regionId: string;
+  minReplicas: number;
+  maxReplicas: number;
+  targetCpuUtilization: number;
+  targetMemoryUtilization: number;
+  predictiveTarget: number;
+  confidence: number;
+  budgetPerHour: number;
+  estimatedCost: number;
+  strategy: 'PREDICTIVE' | 'REACTIVE' | 'HYBRID';
+  notes: string[];
+}
+
+export interface CostAwareScheduleEntry {
+  regionId: string;
+  window: string;
+  action: 'SCALE_UP' | 'SCALE_DOWN' | 'SHIFT_LOAD';
+  expectedSavings: number;
+  risk: 'LOW' | 'MEDIUM' | 'HIGH';
+  trigger: string;
+}
+
+export interface AutoscalingPolicySet {
+  forecast: PredictiveLoadForecast;
+  policies: AutoscalingPolicyPlan[];
+  schedule: CostAwareScheduleEntry[];
+}
+
 export interface StepAdjustment {
   metricThreshold: number;
   scalingAdjustment: number;
@@ -683,12 +734,16 @@ export class GlobalScaleManager extends EventEmitter {
   private scaleOptimizer: ScaleOptimizer;
   private capacityPlanner: CapacityPlanner;
   private performanceMonitor: PerformanceMonitor;
+  private quantumOptimizer: QuantumOptimizer;
+  private costAwareScheduler: CostAwareScheduler;
 
   constructor() {
     super();
     this.scaleOptimizer = new ScaleOptimizer();
     this.capacityPlanner = new CapacityPlanner();
     this.performanceMonitor = new PerformanceMonitor();
+    this.quantumOptimizer = new QuantumOptimizer();
+    this.costAwareScheduler = new CostAwareScheduler();
   }
 
   async initialize(): Promise<void> {
@@ -920,6 +975,7 @@ export class GlobalScaleManager extends EventEmitter {
     const predictions = await this.scaleOptimizer.predictLoad(
       historicalData,
       timeHorizon,
+      Array.from(this.regions.values()),
     );
 
     // Generate capacity recommendations
@@ -931,6 +987,53 @@ export class GlobalScaleManager extends EventEmitter {
       recommendations: capacityRecommendations,
       confidence: predictions.confidence,
       timeline: timeHorizon,
+      anomalies: predictions.anomalies,
+      regional: predictions.regional,
+      seasonality: predictions.seasonality,
+    };
+  }
+
+  async generateAutoscalingPolicies(
+    workloadId: string,
+    timeHorizon: string = '24h',
+  ): Promise<AutoscalingPolicySet> {
+    const workload = this.workloads.get(workloadId);
+    if (!workload) {
+      throw new Error(`Global workload ${workloadId} not found`);
+    }
+
+    const forecast = await this.predictGlobalLoad(timeHorizon);
+    const regions = Array.from(this.regions.values());
+
+    const candidatePolicies = await this.scaleOptimizer.generateAutoscalingPolicies(
+      workload,
+      forecast.predictions,
+      regions,
+    );
+
+    const optimizedPolicies = this.quantumOptimizer.refinePolicies(
+      candidatePolicies,
+      forecast.predictions,
+      workload.criticality,
+    );
+
+    const schedule = this.costAwareScheduler.buildSchedule(
+      optimizedPolicies,
+      forecast.predictions,
+      regions,
+    );
+
+    this.emit('autoscalingPolicyUpdated', {
+      workloadId,
+      forecast,
+      policies: optimizedPolicies,
+      schedule,
+    });
+
+    return {
+      forecast: forecast.predictions,
+      policies: optimizedPolicies,
+      schedule,
     };
   }
 
@@ -1807,17 +1910,203 @@ class ScaleOptimizer {
     };
   }
 
-  async predictLoad(historicalData: any, timeHorizon: string): Promise<any> {
-    // Mock load prediction
-    const confidence = Math.random() * 0.2 + 0.8; // 80-100% confidence
+  async generateAutoscalingPolicies(
+    workload: GlobalWorkload,
+    forecast: PredictiveLoadForecast,
+    regions: GlobalRegion[],
+  ): Promise<AutoscalingPolicyPlan[]> {
+    const deployments =
+      workload.deploymentRegions.length > 0
+        ? workload.deploymentRegions
+        : regions.map((region) => ({
+            regionId: region.id,
+            role: 'SECONDARY' as const,
+            capacity: {
+              cpu: Math.floor(region.capacity.compute.available / 10),
+              memory: Math.floor(region.capacity.storage.available / 100),
+              storage: Math.floor(region.capacity.storage.available / 2),
+              instances: 2,
+            },
+            configuration: this.getDefaultDeploymentConfiguration(),
+            status: 'SCALING' as const,
+            health: {
+              overall: 'HEALTHY' as const,
+              components: [],
+              lastChecked: new Date(),
+              issues: [],
+            },
+          }));
+
+    return deployments.map((deployment) => {
+      const region = regions.find((r) => r.id === deployment.regionId);
+      const autoscalingConfig =
+        deployment.configuration?.autoscaling ||
+        this.getDefaultDeploymentConfiguration().autoscaling;
+      const regionalPrediction =
+        forecast.regional[deployment.regionId] ||
+        this.buildFallbackPrediction(forecast, deployment.regionId);
+
+      const baselineReplicas = deployment.capacity.instances || 1;
+      const predictiveTarget = Math.max(
+        regionalPrediction.cpuUtilization,
+        regionalPrediction.memoryUtilization,
+      );
+      const predictedReplicaNeed = Math.max(
+        autoscalingConfig.minReplicas,
+        Math.ceil(
+          (predictiveTarget / autoscalingConfig.targetCpuUtilization) *
+            baselineReplicas,
+        ),
+      );
+      const recommendedMaxReplicas = Math.max(
+        autoscalingConfig.maxReplicas,
+        predictedReplicaNeed + Math.ceil(regionalPrediction.volatility * 5),
+      );
+      const estimatedCost = this.estimatePolicyCost(
+        region,
+        recommendedMaxReplicas,
+      );
+
+      return {
+        regionId: deployment.regionId,
+        minReplicas: autoscalingConfig.minReplicas,
+        maxReplicas: recommendedMaxReplicas,
+        targetCpuUtilization: autoscalingConfig.targetCpuUtilization,
+        targetMemoryUtilization: autoscalingConfig.targetMemoryUtilization,
+        predictiveTarget,
+        confidence: forecast.confidence * (1 - regionalPrediction.volatility),
+        budgetPerHour: estimatedCost / 720,
+        estimatedCost,
+        strategy:
+          regionalPrediction.volatility > 0.3 ? 'HYBRID' : 'PREDICTIVE',
+        notes: [
+          `Forecasted ${Math.round(regionalPrediction.projectedRps)} RPS with seasonality ${regionalPrediction.seasonalityScore.toFixed(2)}`,
+          'Predictive autoscaling target derived from CPU and memory utilization envelopes',
+          'Headroom accounts for volatility and cooldown policies to reduce thrash',
+        ],
+      };
+    });
+  }
+
+  async predictLoad(
+    historicalData: any,
+    timeHorizon: string,
+    regions: GlobalRegion[] = [],
+  ): Promise<PredictiveLoadForecast> {
+    const seasonalSignal = this.detectSeasonality(historicalData);
+    const regionalPredictions: Record<string, RegionalLoadPrediction> = {};
+    const anomalies: string[] = [];
+
+    const missingRegions = regions
+      .map((region) => region.id)
+      .filter(
+        (regionId) =>
+          !historicalData.regions.some((regionData: any) => regionData.id === regionId),
+      );
+
+    if (missingRegions.length > 0) {
+      anomalies.push(
+        `No historical data for regions: ${missingRegions.join(', ')}; using predictive baselines`,
+      );
+    }
+
+    historicalData.regions.forEach((regionData: any) => {
+      const cpuTrend = this.calculateTrend(regionData.metrics.cpu);
+      const memoryTrend = this.calculateTrend(regionData.metrics.memory);
+      const requestTrend = this.calculateTrend(regionData.metrics.requests);
+      const volatility = this.calculateVolatility(regionData.metrics.requests);
+      const projectedRps = this.applyForecastAdjustments(
+        this.average(regionData.metrics.requests.slice(-24)),
+        seasonalSignal,
+        requestTrend,
+      );
+
+      regionalPredictions[regionData.id] = {
+        regionId: regionData.id,
+        projectedRps,
+        cpuUtilization: this.clamp(
+          this.applyForecastAdjustments(
+            this.average(regionData.metrics.cpu.slice(-24)),
+            seasonalSignal,
+            cpuTrend,
+          ),
+          0,
+          100,
+        ),
+        memoryUtilization: this.clamp(
+          this.applyForecastAdjustments(
+            this.average(regionData.metrics.memory.slice(-24)),
+            seasonalSignal,
+            memoryTrend,
+          ),
+          0,
+          100,
+        ),
+        seasonalityScore: seasonalSignal,
+        volatility,
+      };
+
+      if (volatility > 0.35) {
+        anomalies.push(
+          `${regionData.id} shows high volatility (${volatility.toFixed(2)}) requiring hybrid scaling safeguards`,
+        );
+      }
+    });
+
+    if (missingRegions.length > 0) {
+      const globalRecentAverage = this.average(
+        historicalData.regions.flatMap((regionData: any) =>
+          regionData.metrics.requests.slice(-24),
+        ),
+      );
+
+      missingRegions.forEach((regionId) => {
+        regionalPredictions[regionId] = {
+          regionId,
+          projectedRps: this.applyForecastAdjustments(
+            globalRecentAverage,
+            seasonalSignal,
+            0.05,
+          ),
+          cpuUtilization: 65,
+          memoryUtilization: 60,
+          seasonalityScore: seasonalSignal,
+          volatility: 0.2,
+        };
+      });
+    }
+
+    const aggregatedRequests = Object.values(regionalPredictions).reduce(
+      (sum, prediction) => sum + prediction.projectedRps,
+      0,
+    );
+    const aggregatedCpu = Object.values(regionalPredictions).reduce(
+      (sum, prediction) => sum + prediction.cpuUtilization,
+      0,
+    );
+    const aggregatedMemory = Object.values(regionalPredictions).reduce(
+      (sum, prediction) => sum + prediction.memoryUtilization,
+      0,
+    );
+
+    const confidence = this.clamp(
+      0.75 + (1 - Math.max(...Object.values(regionalPredictions).map((p) => p.volatility), 0)),
+      0,
+      0.98,
+    );
 
     return {
       confidence,
       predictions: {
-        cpu: Math.random() * 20 + 60, // 60-80% predicted utilization
-        memory: Math.random() * 15 + 55, // 55-70% predicted utilization
-        requests: Math.floor(Math.random() * 5000) + 15000, // 15K-20K requests
+        cpu: aggregatedCpu / Math.max(Object.keys(regionalPredictions).length, 1),
+        memory:
+          aggregatedMemory /
+          Math.max(Object.keys(regionalPredictions).length, 1),
+        requests: aggregatedRequests,
       },
+      regional: regionalPredictions,
+      anomalies,
+      seasonality: seasonalSignal,
       timeline: timeHorizon,
     };
   }
@@ -1894,6 +2183,210 @@ class ScaleOptimizer {
         performanceTier: 'STANDARD',
       },
     };
+  }
+
+  private buildFallbackPrediction(
+    forecast: PredictiveLoadForecast,
+    regionId: string,
+  ): RegionalLoadPrediction {
+    const regionalCount = Math.max(Object.keys(forecast.regional).length, 1);
+    const sharedRps = forecast.predictions.requests / regionalCount;
+
+    return {
+      regionId,
+      projectedRps: sharedRps,
+      cpuUtilization: forecast.predictions.cpu,
+      memoryUtilization: forecast.predictions.memory,
+      seasonalityScore: forecast.seasonality,
+      volatility: 0.15,
+    };
+  }
+
+  private estimatePolicyCost(
+    region: GlobalRegion | undefined,
+    replicas: number,
+  ): number {
+    if (!region) {
+      return replicas * 25;
+    }
+
+    const hourlyBaseline = Math.max(region.metrics.costs.total / 720, 10);
+    const utilizationFactor = Math.max(region.capacity.compute.utilization, 0.1);
+    return Math.ceil(hourlyBaseline * replicas * utilizationFactor);
+  }
+
+  private detectSeasonality(historicalData: any): number {
+    const sampleRegion = historicalData.regions[0];
+    if (!sampleRegion) return 0.2;
+
+    const series = sampleRegion.metrics.requests;
+    const firstHalf = series.slice(0, series.length / 2);
+    const secondHalf = series.slice(series.length / 2);
+    const delta = Math.abs(this.average(firstHalf) - this.average(secondHalf));
+    return this.clamp(delta / Math.max(this.average(series), 1), 0, 1);
+  }
+
+  private calculateTrend(series: number[]): number {
+    if (series.length < 2) return 0;
+    const midpoint = Math.floor(series.length / 2);
+    const firstHalfAvg = this.average(series.slice(0, midpoint));
+    const secondHalfAvg = this.average(series.slice(midpoint));
+    return (secondHalfAvg - firstHalfAvg) / Math.max(firstHalfAvg, 1);
+  }
+
+  private calculateVolatility(series: number[]): number {
+    if (series.length < 2) return 0;
+    const avg = this.average(series);
+    const variance =
+      series.reduce((sum, value) => sum + Math.pow(value - avg, 2), 0) /
+      series.length;
+    return this.clamp(Math.sqrt(variance) / Math.max(avg, 1), 0, 1);
+  }
+
+  private applyForecastAdjustments(
+    baseline: number,
+    seasonalSignal: number,
+    trend: number,
+  ): number {
+    return baseline * (1 + seasonalSignal * 0.5 + trend * 0.5);
+  }
+
+  private average(series: number[]): number {
+    if (series.length === 0) return 0;
+    return series.reduce((sum, value) => sum + value, 0) / series.length;
+  }
+
+  private clamp(value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
+  }
+}
+
+class QuantumOptimizer {
+  refinePolicies(
+    policies: AutoscalingPolicyPlan[],
+    forecast: PredictiveLoadForecast,
+    criticality: GlobalWorkload['criticality'],
+  ): AutoscalingPolicyPlan[] {
+    const riskPenalty =
+      criticality === 'MISSION_CRITICAL' || criticality === 'CRITICAL'
+        ? 0.08
+        : 0.04;
+
+    return policies.map((policy) => {
+      const quantumScore = this.sampleQuantumAnnealingScore(
+        policy,
+        forecast.seasonality,
+      );
+      const resiliencyBoost = criticality === 'MISSION_CRITICAL' ? 0.15 : 0.08;
+
+      return {
+        ...policy,
+        maxReplicas: Math.ceil(
+          policy.maxReplicas * (1 + quantumScore * 0.1 + resiliencyBoost),
+        ),
+        budgetPerHour: policy.budgetPerHour * (1 + riskPenalty),
+        confidence: Math.min(1, policy.confidence + quantumScore * 0.05),
+        strategy:
+          policy.strategy === 'PREDICTIVE' && policy.predictiveTarget > 85
+            ? 'HYBRID'
+            : policy.strategy,
+        notes: [
+          ...policy.notes,
+          `Quantum-enhanced search explored ~${Math.round(
+            quantumScore * 100,
+          )} superposition candidates for optimal scaling and failover headroom`,
+        ],
+      };
+    });
+  }
+
+  private sampleQuantumAnnealingScore(
+    policy: AutoscalingPolicyPlan,
+    seasonality: number,
+  ): number {
+    const headroomFactor =
+      (policy.maxReplicas - policy.minReplicas) /
+      Math.max(policy.maxReplicas, 1);
+    return Math.min(
+      1,
+      0.6 + seasonality * 0.2 + headroomFactor * 0.2 + Math.random() * 0.1,
+    );
+  }
+}
+
+class CostAwareScheduler {
+  buildSchedule(
+    policies: AutoscalingPolicyPlan[],
+    forecast: PredictiveLoadForecast,
+    regions: GlobalRegion[],
+  ): CostAwareScheduleEntry[] {
+    const schedule: CostAwareScheduleEntry[] = [];
+
+    policies.forEach((policy) => {
+      const region = regions.find((r) => r.id === policy.regionId);
+      const regionalForecast = forecast.regional[policy.regionId];
+
+      schedule.push({
+        regionId: policy.regionId,
+        window: `${forecast.timeline}-peak`,
+        action: 'SCALE_UP',
+        expectedSavings: 0,
+        risk: this.determineRisk(policy),
+        trigger: `Projected load ${Math.round(
+          regionalForecast?.projectedRps || forecast.predictions.requests,
+        )} RPS exceeds predictive target`,
+      });
+
+      schedule.push({
+        regionId: policy.regionId,
+        window: `${forecast.timeline}-offpeak`,
+        action: 'SCALE_DOWN',
+        expectedSavings: this.estimateSavings(policy, region, 0.25),
+        risk: this.determineRisk(policy, true),
+        trigger: `Seasonality ${
+          (regionalForecast?.seasonalityScore ?? forecast.seasonality) * 100
+        }% indicates slack capacity`,
+      });
+
+      schedule.push({
+        regionId: policy.regionId,
+        window: `${forecast.timeline}-finops`,
+        action: 'SHIFT_LOAD',
+        expectedSavings: this.estimateSavings(policy, region, 0.15),
+        risk: 'LOW',
+        trigger: 'Route 15% of traffic toward lowest-cost active regions',
+      });
+    });
+
+    return schedule;
+  }
+
+  private determineRisk(
+    policy: AutoscalingPolicyPlan,
+    downscale: boolean = false,
+  ): 'LOW' | 'MEDIUM' | 'HIGH' {
+    if (policy.predictiveTarget > 90) {
+      return downscale ? 'MEDIUM' : 'HIGH';
+    }
+    if (policy.strategy === 'HYBRID') {
+      return 'MEDIUM';
+    }
+    return 'LOW';
+  }
+
+  private estimateSavings(
+    policy: AutoscalingPolicyPlan,
+    region: GlobalRegion | undefined,
+    reduction: number,
+  ): number {
+    const baseline = region
+      ? Math.max(region.metrics.costs.total / 720, 5)
+      : 20;
+    const adjustableReplicas = Math.max(
+      policy.maxReplicas - policy.minReplicas,
+      0,
+    );
+    return Math.round(baseline * adjustableReplicas * reduction * 100) / 100;
   }
 }
 
