@@ -28,7 +28,7 @@ let securityConfig = { ...DEFAULT_CONFIG };
 /**
  * Configure security settings
  */
-export function configureecurity(config: Partial<SecurityConfig>): void {
+export function configureSecurity(config: Partial<SecurityConfig>): void {
   securityConfig = { ...securityConfig, ...config };
 }
 
