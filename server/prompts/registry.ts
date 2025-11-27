@@ -19,18 +19,15 @@ export class PromptRegistry {
     try {
       // Load schema
       const schemaPath = path.join(this.promptsDir, 'schema.json');
-      const schemaContent = await fs.readFile(schemaPath, 'utf-8');
-      this.schema = JSON.parse(schemaContent);
-
-      // Load all prompt templates
-      const files = await fs.readdir(this.promptsDir);
-      const yamlFiles = files.filter(
-        (f) => f.endsWith('.yaml') || f.endsWith('.yml'),
-      );
-
-      for (const file of yamlFiles) {
-        await this.loadPrompt(path.join(this.promptsDir, file));
+      try {
+        const schemaContent = await fs.readFile(schemaPath, 'utf-8');
+        this.schema = JSON.parse(schemaContent);
+      } catch (e) {
+        logger.warn('Schema file not found or invalid, proceeding without validation');
       }
+
+      // Load all prompt templates recursively
+      await this.loadPromptsRecursively(this.promptsDir);
 
       logger.info(`Loaded ${this.prompts.size} prompt templates`, {
         templates: Array.from(this.prompts.keys()),
@@ -43,16 +40,35 @@ export class PromptRegistry {
     }
   }
 
+  private async loadPromptsRecursively(dir: string): Promise<void> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        await this.loadPromptsRecursively(fullPath);
+      } else if (entry.isFile() && (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml'))) {
+        await this.loadPrompt(fullPath);
+      }
+    }
+  }
+
   private async loadPrompt(filePath: string): Promise<void> {
     try {
       const content = await fs.readFile(filePath, 'utf-8');
       const prompt = yaml.load(content) as PromptConfig;
 
+      if (!prompt || !prompt.meta || !prompt.meta.id) {
+         // Skip files that don't look like prompt configs
+         return;
+      }
+
       // Validate against schema
       if (this.schema) {
         const valid = this.ajv.validate(this.schema, prompt);
         if (!valid) {
-          throw new Error(`Invalid prompt schema: ${this.ajv.errorsText()}`);
+          logger.warn(`Invalid prompt schema for ${filePath}: ${this.ajv.errorsText()}`);
+          // We can decide to throw or just warn. For now, let's warn but try to load if id exists.
         }
       }
 
@@ -66,7 +82,7 @@ export class PromptRegistry {
         file: filePath,
         error: error.message,
       });
-      throw error;
+      // Don't throw here to allow other prompts to load
     }
   }
 

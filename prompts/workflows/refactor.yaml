@@ -1,0 +1,21 @@
+meta:
+  id: workflow.refactor@v1
+  owner: engineering
+  purpose: Workflow for code improvement without behavioral change.
+  tags: [workflow, refactor]
+
+modelConfig:
+  model: gpt-4-turbo
+  temperature: 0.0
+
+inputs:
+  target_files: string
+  goal: string
+
+template: |
+  {{> agent.engineer task_description="Refactor code to achieve: {{goal}}" tech_stack="TypeScript" related_files="{{target_files}}"}}
+
+  Constraints:
+  - NO behavioral changes.
+  - All existing tests MUST pass.
+  - Improve readability and performance.
