@@ -1,0 +1,46 @@
+id: FLOW_INCIDENT_RESPONSE
+owner: SEC-DEF
+description: Standard response flow for security incidents or anomalies.
+nodes:
+  - id: detection
+    owner: SEC-DEF
+    input: Alert / Signal
+    action: Triage & Confirm
+    output: Confirmed Incident
+  - id: classification_containment
+    owner: SEC-DEF
+    input: Confirmed Incident
+    action: Isolate affected systems/tenants
+    output: Contained State
+  - id: governance_notification
+    owner: GOV-STEWARD
+    input: Contained State
+    action: Log for audit, notify stakeholders if severe
+    output: Audit Record
+  - id: investigation
+    owner: SEC-DEF
+    input: Contained State
+    action: Forensics, Root Cause Analysis
+    output: RCA Report
+  - id: remediation
+    owner: MC-ARCH
+    input: RCA Report
+    action: Patch / Fix / Restore
+    output: Restored System
+  - id: post_mortem
+    owner: SSIGHT
+    input: Restored System
+    action: Review process, update drift metrics
+    output: Improved Playbooks
+edges:
+  - source: detection
+    target: classification_containment
+  - source: classification_containment
+    target: governance_notification
+    type: parallel
+  - source: classification_containment
+    target: investigation
+  - source: investigation
+    target: remediation
+  - source: remediation
+    target: post_mortem
