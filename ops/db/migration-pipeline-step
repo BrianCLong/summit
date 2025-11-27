@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+set -eEuo pipefail
+
+REPORT_PATH="${RELEASE_REPORT_PATH:-ops/release/release-report.md}"
+DEPLOYMENT_ID="${DEPLOYMENT_ID:-unknown}"
+SCHEMA_CHANGE_REF="${SCHEMA_CHANGE_REF:-$(git rev-parse --short HEAD 2>/dev/null || echo unknown)}"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MIGRATE_CMD="${MIGRATION_CMD:-$SCRIPT_DIR/migrate}"
+VERIFY_CMD="${VERIFICATION_CMD:-$SCRIPT_DIR/verify}"
+
+require_executable() {
+  local name="$1"
+  local path="$2"
+
+  if [[ ! -x "$path" ]]; then
+    echo "[db] required executable $name not found at $path" >&2
+    exit 1
+  fi
+}
+
+mkdir -p "$(dirname "$REPORT_PATH")"
+
+if [[ ! -f "$REPORT_PATH" ]]; then
+  cat <<'HDR' > "$REPORT_PATH"
+# Release Report
+
+Automated deployment signals captured by pipeline gates.
+HDR
+fi
+
+append_report() {
+  local stage="$1"
+  local result="$2"
+  local timestamp="$3"
+  local details="$4"
+
+  {
+    printf '\n## %s\n' "$stage"
+    printf -- '- Timestamp: %s\n' "$timestamp"
+    printf -- '- Deployment: %s\n' "$DEPLOYMENT_ID"
+    printf -- '- Schema change: %s\n' "$SCHEMA_CHANGE_REF"
+    printf -- '- Result: %s\n' "$result"
+    echo '- Details:'
+    echo '  ```'
+    printf '%s\n' "$details"
+    echo '  ```'
+  } >> "$REPORT_PATH"
+}
+
+TRAP_SUPPRESSED=0
+
+handle_err() {
+  local status="$1"
+  local line="$2"
+
+  if [[ "$TRAP_SUPPRESSED" -eq 1 ]]; then
+    return
+  fi
+
+  TRAP_SUPPRESSED=1
+  append_report "Migration gate" "failed" "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+    "Unexpected failure (exit ${status}) at line ${line}. Review pipeline logs for details."
+}
+
+trap 'handle_err $? ${BASH_LINENO[0]:-0}' ERR
+
+run_step() {
+  local stage="$1"
+  shift
+  local output
+  local status
+  local timestamp
+
+  set +e
+  output=$("$@" 2>&1)
+  status=$?
+  set -e
+  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+  if [[ $status -eq 0 ]]; then
+    echo "[db] ${stage} succeeded"
+    append_report "$stage" "passed" "$timestamp" "$output"
+  else
+    echo "[db] ${stage} failed" >&2
+    append_report "$stage" "failed" "$timestamp" "$output"
+    exit 1
+  fi
+}
+
+require_executable migrate "$MIGRATE_CMD"
+require_executable verify "$VERIFY_CMD"
+
+echo "[db] Running migration gate with report at $REPORT_PATH"
+run_step "Pre-flight migration plan" "$MIGRATE_CMD" --plan
+run_step "Pre-flight shadow verification" "$VERIFY_CMD" --shadow
+run_step "Apply migrations" "$MIGRATE_CMD"
+run_step "Post-migration verification" "$VERIFY_CMD" --shadow
+
+echo "[db] Migration gate completed"
