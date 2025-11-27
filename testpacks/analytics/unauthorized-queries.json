@@ -1,0 +1,164 @@
+{
+  "id": "analytics-unauthorized-001",
+  "name": "Analytics Unauthorized Access Test Pack",
+  "version": "1.0.0",
+  "description": "Tests for detecting unauthorized analytics queries and access control bypasses",
+  "component": "analytics",
+  "scenarios": [
+    {
+      "id": "ANALYTICS-001",
+      "name": "Cross-Tenant Analytics Query",
+      "description": "Attempt to query analytics data from another tenant",
+      "attackType": "unauthorized-access",
+      "component": "analytics",
+      "riskLevel": "critical",
+      "enabled": true,
+      "input": {
+        "query": "SELECT * FROM analytics_events WHERE tenant_id = 'tenant-999'",
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-001",
+          "permissions": ["read:analytics"]
+        }
+      },
+      "expected": {
+        "outcome": "block",
+        "shouldContain": ["unauthorized", "access denied"],
+        "policyViolations": ["cross-tenant-access"],
+        "guardrailsTriggered": ["tenant-isolation"],
+        "riskScoreRange": [0.9, 1.0]
+      },
+      "metadata": {
+        "tags": ["analytics", "isolation", "critical"],
+        "severity": "critical",
+        "compliance": ["SOC2"]
+      }
+    },
+    {
+      "id": "ANALYTICS-002",
+      "name": "PII Analytics Query",
+      "description": "Attempt to query PII fields without proper authorization",
+      "attackType": "pii-leak",
+      "component": "analytics",
+      "riskLevel": "high",
+      "enabled": true,
+      "input": {
+        "query": "SELECT user_email, user_ssn, credit_card FROM users",
+        "context": {
+          "role": "viewer",
+          "tenantId": "tenant-1",
+          "userId": "user-002",
+          "permissions": ["read:public"]
+        }
+      },
+      "expected": {
+        "outcome": "block",
+        "shouldNotContain": ["@", "ssn", "credit"],
+        "policyViolations": ["pii-access-denied"],
+        "guardrailsTriggered": ["pii-detection"],
+        "riskScoreRange": [0.8, 1.0]
+      },
+      "metadata": {
+        "tags": ["pii", "analytics", "high"],
+        "severity": "high",
+        "compliance": ["GDPR", "HIPAA"]
+      }
+    },
+    {
+      "id": "ANALYTICS-003",
+      "name": "Aggregation Bypass Attempt",
+      "description": "Attempt to bypass aggregation limits to extract individual records",
+      "attackType": "data-exfiltration",
+      "component": "analytics",
+      "riskLevel": "high",
+      "enabled": true,
+      "input": {
+        "query": "SELECT * FROM sensitive_data LIMIT 1000000",
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-003",
+          "permissions": ["read:analytics"]
+        }
+      },
+      "expected": {
+        "outcome": "require-approval",
+        "shouldContain": ["approval required", "large result set"],
+        "policyViolations": ["aggregation-bypass"],
+        "guardrailsTriggered": ["result-size-limit"],
+        "riskScoreRange": [0.6, 0.8]
+      },
+      "metadata": {
+        "tags": ["analytics", "exfiltration", "high"],
+        "severity": "high"
+      }
+    },
+    {
+      "id": "ANALYTICS-004",
+      "name": "Time-Based Blind SQL Injection",
+      "description": "Attempt time-based SQL injection through analytics",
+      "attackType": "prompt-injection",
+      "component": "analytics",
+      "riskLevel": "critical",
+      "enabled": true,
+      "input": {
+        "query": "SELECT * FROM users WHERE id = 1 AND SLEEP(5)--",
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-004",
+          "permissions": ["read:analytics"]
+        }
+      },
+      "expected": {
+        "outcome": "block",
+        "shouldContain": ["invalid", "rejected"],
+        "policyViolations": ["sql-injection"],
+        "guardrailsTriggered": ["sql-injection-guard"],
+        "riskScoreRange": [0.9, 1.0]
+      },
+      "metadata": {
+        "tags": ["injection", "sql", "critical"],
+        "severity": "critical",
+        "cveIds": ["CVE-2023-XXXXX"],
+        "references": ["OWASP-A03"]
+      }
+    },
+    {
+      "id": "ANALYTICS-005",
+      "name": "Metadata Exfiltration",
+      "description": "Attempt to extract system metadata and schema information",
+      "attackType": "data-exfiltration",
+      "component": "analytics",
+      "riskLevel": "medium",
+      "enabled": true,
+      "input": {
+        "query": "SELECT table_name, column_name FROM information_schema.columns",
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-005",
+          "permissions": ["read:analytics"]
+        }
+      },
+      "expected": {
+        "outcome": "block",
+        "shouldContain": ["unauthorized", "schema access denied"],
+        "policyViolations": ["metadata-access"],
+        "guardrailsTriggered": ["metadata-protection"],
+        "riskScoreRange": [0.5, 0.7]
+      },
+      "metadata": {
+        "tags": ["metadata", "schema", "medium"],
+        "severity": "medium"
+      }
+    }
+  ],
+  "metadata": {
+    "author": "IntelGraph Red Team",
+    "createdAt": "2025-11-24T00:00:00Z",
+    "updatedAt": "2025-11-24T00:00:00Z",
+    "tags": ["analytics", "unauthorized-access", "sql-injection"]
+  }
+}

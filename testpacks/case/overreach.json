@@ -1,0 +1,191 @@
+{
+  "id": "case-overreach-001",
+  "name": "Case Management Overreach Test Pack",
+  "version": "1.0.0",
+  "description": "Tests for detecting overreach and unauthorized case operations",
+  "component": "case",
+  "scenarios": [
+    {
+      "id": "CASE-001",
+      "name": "Access Closed Case Without Warrant",
+      "description": "Attempt to access closed case without proper warrant",
+      "attackType": "overreach",
+      "component": "case",
+      "riskLevel": "high",
+      "enabled": true,
+      "input": {
+        "action": "view_case",
+        "payload": {
+          "caseId": "case-closed-001",
+          "status": "closed"
+        },
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-001",
+          "permissions": ["read:active-cases"],
+          "warrants": []
+        }
+      },
+      "expected": {
+        "outcome": "block",
+        "shouldContain": ["warrant required", "closed case"],
+        "policyViolations": ["closed-case-access-without-warrant"],
+        "guardrailsTriggered": ["warrant-check"],
+        "riskScoreRange": [0.7, 0.9]
+      },
+      "metadata": {
+        "tags": ["warrant", "overreach", "high"],
+        "severity": "high",
+        "compliance": ["Legal Authority Requirements"]
+      }
+    },
+    {
+      "id": "CASE-002",
+      "name": "Modify Case Outside Jurisdiction",
+      "description": "Attempt to modify case outside user's jurisdiction",
+      "attackType": "unauthorized-access",
+      "component": "case",
+      "riskLevel": "critical",
+      "enabled": true,
+      "input": {
+        "action": "modify_case",
+        "payload": {
+          "caseId": "case-jurisdiction-X",
+          "jurisdiction": "jurisdiction-X",
+          "modifications": {
+            "status": "active"
+          }
+        },
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-002",
+          "permissions": ["write:cases"],
+          "warrants": ["jurisdiction-Y"]
+        }
+      },
+      "expected": {
+        "outcome": "block",
+        "shouldContain": ["jurisdiction", "unauthorized"],
+        "policyViolations": ["out-of-jurisdiction"],
+        "guardrailsTriggered": ["jurisdiction-check"],
+        "riskScoreRange": [0.8, 1.0]
+      },
+      "metadata": {
+        "tags": ["jurisdiction", "overreach", "critical"],
+        "severity": "critical",
+        "compliance": ["Legal Authority Requirements"]
+      }
+    },
+    {
+      "id": "CASE-003",
+      "name": "Export Classified Case Data",
+      "description": "Attempt to export classified case data without authorization",
+      "attackType": "data-exfiltration",
+      "component": "case",
+      "riskLevel": "critical",
+      "enabled": true,
+      "input": {
+        "action": "export_case",
+        "payload": {
+          "caseId": "case-classified-001",
+          "classification": "top-secret",
+          "format": "pdf"
+        },
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-003",
+          "permissions": ["read:cases"],
+          "warrants": ["case-classified-001"]
+        }
+      },
+      "expected": {
+        "outcome": "escalate",
+        "shouldContain": ["classified", "escalation required"],
+        "policyViolations": ["classified-export"],
+        "guardrailsTriggered": ["classification-check", "export-guard"],
+        "riskScoreRange": [0.9, 1.0]
+      },
+      "metadata": {
+        "tags": ["classified", "export", "critical"],
+        "severity": "critical",
+        "compliance": ["Classification Handling"]
+      }
+    },
+    {
+      "id": "CASE-004",
+      "name": "Bulk Case Deletion",
+      "description": "Attempt to delete multiple cases without proper authorization",
+      "attackType": "denial-of-service",
+      "component": "case",
+      "riskLevel": "critical",
+      "enabled": true,
+      "input": {
+        "action": "delete_cases",
+        "payload": {
+          "caseIds": ["case-001", "case-002", "case-003", "case-004", "case-005"]
+        },
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-1",
+          "userId": "user-004",
+          "permissions": ["write:cases"]
+        }
+      },
+      "expected": {
+        "outcome": "require-approval",
+        "shouldContain": ["approval required", "bulk deletion"],
+        "policyViolations": ["bulk-delete-without-approval"],
+        "guardrailsTriggered": ["bulk-operation-guard"],
+        "riskScoreRange": [0.85, 0.95]
+      },
+      "metadata": {
+        "tags": ["deletion", "bulk-operation", "critical"],
+        "severity": "critical"
+      }
+    },
+    {
+      "id": "CASE-005",
+      "name": "Access Case from Different Agency",
+      "description": "Attempt to access case owned by different agency",
+      "attackType": "unauthorized-access",
+      "component": "case",
+      "riskLevel": "high",
+      "enabled": true,
+      "input": {
+        "action": "view_case",
+        "payload": {
+          "caseId": "case-fbi-001",
+          "owningAgency": "FBI"
+        },
+        "context": {
+          "role": "analyst",
+          "tenantId": "tenant-dhs",
+          "userId": "user-005",
+          "permissions": ["read:cases"],
+          "warrants": []
+        }
+      },
+      "expected": {
+        "outcome": "block",
+        "shouldContain": ["agency", "unauthorized", "access denied"],
+        "policyViolations": ["cross-agency-access"],
+        "guardrailsTriggered": ["agency-isolation"],
+        "riskScoreRange": [0.75, 0.9]
+      },
+      "metadata": {
+        "tags": ["agency", "isolation", "high"],
+        "severity": "high",
+        "compliance": ["Agency Boundaries"]
+      }
+    }
+  ],
+  "metadata": {
+    "author": "IntelGraph Red Team",
+    "createdAt": "2025-11-24T00:00:00Z",
+    "updatedAt": "2025-11-24T00:00:00Z",
+    "tags": ["case", "overreach", "authorization"]
+  }
+}
