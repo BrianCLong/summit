@@ -5,6 +5,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 
 from attack_grammars import ATTACK_GRAMMARS
+from policy_oracle import PolicyOracle
 
 
 class MetamorphicTester:
@@ -436,6 +437,24 @@ class MetamorphicTester:
                         rule_to_modify["condition"][key_to_modify] = random.choice(
                             ["user_data", "marketing"]
                         )
+        return transformed_policy
+
+    def _synonym_data_type(self, policy, query):
+        transformed_query = deepcopy(query)
+        if "data" in transformed_query and transformed_query["data"] == "user_data":
+            transformed_query["data"] = "pii_synonym"
+        return transformed_query
+
+    def _anonymize_data(self, policy, query):
+        transformed_query = deepcopy(query)
+        transformed_query["data"] = "anonymous_data"
+        return transformed_query
+
+    def _toggle_policy_effect(self, policy, query):
+        transformed_policy = deepcopy(policy)
+        if "rules" in transformed_policy:
+            for rule in transformed_policy["rules"]:
+                rule["effect"] = "deny" if rule.get("effect", "allow") == "allow" else "allow"
         return transformed_policy
 
     def test_relations(self, original_policy, original_query, original_compliant):

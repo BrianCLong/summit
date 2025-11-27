@@ -1,0 +1,41 @@
+name: Policy Fuzzing
+
+on:
+  push:
+    paths:
+      - 'policy/**'
+      - 'policy-fuzzer/**'
+  pull_request:
+    paths:
+      - 'policy/**'
+      - 'policy-fuzzer/**'
+  workflow_dispatch:
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Run Policy Fuzzer (Standard)
+        run: |
+          cd policy-fuzzer
+          python main.py --iterations 50
+
+      - name: Run Policy Fuzzer (Aggressive)
+        if: success()
+        run: |
+          cd policy-fuzzer
+          python main.py --iterations 20 --enable-synonym-dodges --enable-field-aliasing
+
+      - name: Archive Fuzzing Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fuzzing-reports
+          path: policy-fuzzer/reports/
