@@ -1,0 +1,18 @@
+service: companyos-api
+owner: companyos-team
+description: >
+  CompanyOS API for disclosure packs, compliance actions, and policy operations.
+
+runtime:
+  language: node
+  port: 4100
+  job_label: companyos-api
+
+deploy:
+  helm_chart: charts/companyos-api
+  canary_values_file: values-canary.yaml
+
+slo_profile: companyos-default
+environment:
+  default_region: us
+  tier: critical

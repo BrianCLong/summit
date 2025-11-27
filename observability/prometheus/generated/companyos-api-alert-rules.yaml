@@ -1,0 +1,32 @@
+groups:
+  - name: companyos-api-slo-alerts
+    rules:
+      - alert: CompanyosApiHighErrorRate
+        expr: companyos-api:error_rate:ratio5m > 0.01
+        for: 15m
+        labels:
+          severity: warning
+          service: companyos-api
+        annotations:
+          summary: "High error rate on companyos-api"
+          description: "Error rate over 1% for 15m. Check recent deployments or incidents."
+
+      - alert: CompanyosApiSevereErrorRate
+        expr: companyos-api:error_rate:ratio5m > 0.02
+        for: 10m
+        labels:
+          severity: critical
+          service: companyos-api
+        annotations:
+          summary: "Severe error rate on companyos-api"
+          description: "Error rate over 2% for 10m. Consider rollback."
+
+      - alert: CompanyosApiHighLatencyP95
+        expr: companyos-api:latency_p95:seconds5m > 0.3
+        for: 15m
+        labels:
+          severity: warning
+          service: companyos-api
+        annotations:
+          summary: "High latency (p95) on companyos-api"
+          description: "p95 latency > 300ms for 15m. Investigate recent changes."
