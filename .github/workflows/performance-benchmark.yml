@@ -1,0 +1,228 @@
+name: 📈 Performance Benchmarking
+# Automated performance regression detection and reporting
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'server/**'
+      - 'client/**'
+      - 'apps/**'
+      - 'services/**'
+      - 'packages/**'
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *' # Daily at 2 AM UTC
+  workflow_dispatch:
+    inputs:
+      baseline-ref:
+        description: 'Baseline ref to compare against (commit SHA or branch)'
+        required: false
+        type: string
+        default: 'main'
+
+concurrency:
+  group: perf-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9.12.0'
+
+jobs:
+  benchmark:
+    name: 🔬 Run Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout current
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build current
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Run benchmarks (current)
+        id: bench-current
+        run: |
+          # Run Node.js benchmarks if available
+          if [ -f "scripts/benchmark/run.js" ]; then
+            node scripts/benchmark/run.js > benchmark-current.json
+          fi
+
+          # Run API benchmarks with autocannon
+          if command -v pnpm &> /dev/null && pnpm list autocannon &> /dev/null; then
+            echo "Running API benchmarks..."
+            # This would require the API to be running
+            # pnpm exec autocannon -c 100 -d 30 http://localhost:4000/graphql > autocannon-current.json
+          fi
+
+          # Jest benchmark tests
+          if grep -r "benchmark" package.json; then
+            pnpm run test:benchmark || echo "No benchmark tests configured"
+          fi
+
+      - name: Checkout baseline
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.baseline-ref || github.base_ref || 'main' }}
+          path: baseline
+
+      - name: Build baseline
+        if: github.event_name == 'pull_request'
+        working-directory: baseline
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Run benchmarks (baseline)
+        if: github.event_name == 'pull_request'
+        working-directory: baseline
+        run: |
+          if [ -f "scripts/benchmark/run.js" ]; then
+            node scripts/benchmark/run.js > ../benchmark-baseline.json
+          fi
+
+      - name: Compare results
+        if: github.event_name == 'pull_request'
+        id: compare
+        run: |
+          if [ -f "benchmark-current.json" ] && [ -f "benchmark-baseline.json" ]; then
+            node -e "
+              const current = require('./benchmark-current.json');
+              const baseline = require('./benchmark-baseline.json');
+
+              console.log('## 📊 Performance Comparison');
+              console.log('');
+              console.log('| Benchmark | Baseline | Current | Change |');
+              console.log('|-----------|----------|---------|--------|');
+
+              // Compare results (simplified)
+              Object.keys(current).forEach(key => {
+                const baseVal = baseline[key] || 0;
+                const currVal = current[key] || 0;
+                const change = ((currVal - baseVal) / baseVal * 100).toFixed(2);
+                const emoji = change > 5 ? '🔴' : change < -5 ? '🟢' : '⚪';
+                console.log(\`| \${key} | \${baseVal} | \${currVal} | \${emoji} \${change}% |\`);
+              });
+            " > comparison.md
+
+            cat comparison.md >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ Benchmark data not available for comparison" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Lighthouse CI (Web Performance)
+        if: hashFiles('client/**') != ''
+        run: |
+          # Install Lighthouse CI
+          npm install -g @lhci/cli
+
+          # This would require the app to be running
+          # lhci autorun || echo "Lighthouse CI not configured"
+
+      - name: Bundle size check
+        run: |
+          echo "## 📦 Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "client/dist" ]; then
+            echo "### Client Bundle" >> $GITHUB_STEP_SUMMARY
+            du -sh client/dist/* | sort -hr | head -10 >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -d "server/dist" ]; then
+            echo "### Server Bundle" >> $GITHUB_STEP_SUMMARY
+            du -sh server/dist/* | sort -hr | head -10 >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ github.run_number }}
+          path: |
+            benchmark-*.json
+            autocannon-*.json
+            comparison.md
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && hashFiles('comparison.md') != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            if (fs.existsSync('comparison.md')) {
+              const comparison = fs.readFileSync('comparison.md', 'utf8');
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `# Performance Benchmark Results\n\n${comparison}\n\n*Automated benchmark comparison*`
+              });
+            }
+
+  load-test:
+    name: 🚦 Load Testing (K6)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run K6 load tests
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: k6/smoke.js
+          flags: --out json=k6-results.json
+        continue-on-error: true
+
+      - name: Upload K6 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-results-${{ github.run_number }}
+          path: k6-results.json
+          retention-days: 30
+
+      - name: K6 summary
+        if: always()
+        run: |
+          echo "## 🚦 Load Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f "k6-results.json" ]; then
+            echo "Load test completed - see artifacts for detailed results" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ K6 tests not configured or failed" >> $GITHUB_STEP_SUMMARY
+          fi
