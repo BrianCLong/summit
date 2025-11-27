@@ -1,7 +1,9 @@
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID, sign } from 'crypto';
 import logger from '../../config/logger';
 import { writeAudit } from '../../utils/audit';
 import {
+  AutomatedPreservationOptions,
+  AutomatedPreservationResult,
   AuditTrailEntry,
   ChainOfCustodyAdapter,
   ComplianceCheckpoint,
@@ -21,10 +23,29 @@ import {
   PreservationHoldInput,
   PreservationHoldResult,
   PreservationVerificationResult,
+  TamperProofSeal,
 } from './types';
 
 function cloneDeep<T>(value: T): T {
-  return JSON.parse(JSON.stringify(value));
+  if (value instanceof Date) {
+    return new Date(value.getTime()) as unknown as T;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => cloneDeep(item)) as unknown as T;
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.entries(value as Record<string, unknown>).reduce(
+      (acc, [key, nestedValue]) => {
+        (acc as Record<string, unknown>)[key] = cloneDeep(nestedValue);
+        return acc;
+      },
+      {} as Record<string, unknown>,
+    ) as T;
+  }
+
+  return value;
 }
 
 function now(): Date {
@@ -58,6 +79,36 @@ export class LegalHoldOrchestrator {
     this.lifecyclePolicies = options.lifecyclePolicies ?? [];
     this.auditWriter =
       options.auditWriter ?? this.defaultAuditWriter.bind(this);
+  }
+
+  async automatePreservation(
+    input: LegalHoldInitiationInput,
+    options: AutomatedPreservationOptions = {},
+  ): Promise<AutomatedPreservationResult> {
+    const hold = await this.initiateHold(input);
+    const verifications = await this.verifyPreservation(hold.holdId);
+
+    let exports: EDiscoveryCollectionResult[] | undefined;
+    if (input.eDiscovery?.enabled && !options.skipExports) {
+      exports = await this.prepareEDiscoveryExport(hold.holdId, {
+        exportFormat: input.eDiscovery.exportFormats?.[0],
+        matterId: input.eDiscovery.matterId,
+        searchTerms: input.scope.searchTerms,
+      });
+    }
+
+    let tamperSeal: TamperProofSeal | undefined;
+    if (!options.skipSeal) {
+      tamperSeal = await this.sealPreservationPackage(
+        hold.holdId,
+        input.issuedBy.id,
+        input.issuedBy.role,
+      );
+    }
+
+    const updatedHold = await this.ensureHold(hold.holdId);
+
+    return { hold: updatedHold, verifications, tamperSeal, exports };
   }
 
   async initiateHold(
@@ -359,6 +410,9 @@ export class LegalHoldOrchestrator {
     request: Omit<EDiscoveryCollectionRequest, 'holdId' | 'caseId'>,
   ): Promise<EDiscoveryCollectionResult[]> {
     const hold = await this.ensureHold(holdId);
+    if (!hold.eDiscovery?.enabled) {
+      throw new Error('eDiscovery exports are not enabled for this legal hold');
+    }
     const exportRequests: EDiscoveryCollectionResult[] = [];
 
     for (const connectorResult of hold.connectors) {
@@ -543,6 +597,108 @@ export class LegalHoldOrchestrator {
       ? await this.chainOfCustody.verify(hold.caseId)
       : false;
     return { hold, auditTrail, custodyVerified };
+  }
+
+  private async sealPreservationPackage(
+    holdId: string,
+    actorId: string,
+    actorRole?: string,
+  ): Promise<TamperProofSeal> {
+    const hold = await this.ensureHold(holdId);
+    const payload = {
+      holdId: hold.holdId,
+      caseId: hold.caseId,
+      custodians: hold.custodians.map((custodian) => ({
+        id: custodian.id,
+        status: custodian.status,
+        acknowledgedAt: custodian.acknowledgedAt,
+        notifiedAt: custodian.notifiedAt,
+      })),
+      connectors: hold.connectors,
+      lifecyclePolicies: hold.lifecyclePolicies,
+      eDiscovery: hold.eDiscovery?.latestCollections ?? [],
+      compliance: hold.compliance,
+      notifications: hold.notifications,
+      metadata: hold.metadata,
+      updatedAt: hold.updatedAt,
+    };
+
+    const sealHash = createHash('sha256')
+      .update(JSON.stringify(payload))
+      .digest('hex');
+
+    const sealCreatedAt = now();
+    const seal: TamperProofSeal = {
+      algorithm: 'sha256',
+      hash: sealHash,
+      signedBy: actorId,
+      createdAt: sealCreatedAt,
+    };
+
+    const signingKeys = this.chainOfCustody?.getSigningKeys?.();
+    if (signingKeys?.privateKey) {
+      try {
+        seal.signature = sign(
+          null,
+          Buffer.from(sealHash),
+          signingKeys.privateKey,
+        ).toString('base64');
+
+        if (signingKeys.publicKey) {
+          const publicKeyPem = signingKeys.publicKey
+            .export({ type: 'spki', format: 'pem' })
+            .toString();
+          seal.publicKeyFingerprint = createHash('sha256')
+            .update(publicKeyPem)
+            .digest('hex');
+        }
+      } catch (error) {
+        logger.error(
+          { err: error, holdId },
+          'Failed to sign tamper-proof seal',
+        );
+      }
+    }
+
+    await this.repository.update(holdId, {
+      tamperSeal: seal,
+      updatedAt: sealCreatedAt,
+    });
+
+    await this.appendAudit({
+      holdId,
+      caseId: hold.caseId,
+      actorId,
+      actorRole,
+      action: 'LEGAL_HOLD_SEALED',
+      details: {
+        hashAlgorithm: seal.algorithm,
+        publicKeyFingerprint: seal.publicKeyFingerprint,
+      },
+      createdAt: sealCreatedAt,
+    });
+
+    if (this.chainOfCustody) {
+      try {
+        await this.chainOfCustody.appendEvent({
+          caseId: hold.caseId,
+          actorId,
+          action: 'LEGAL_HOLD_SEALED',
+          payload: {
+            holdId,
+            sealHash: seal.hash,
+            fingerprint: seal.publicKeyFingerprint,
+          },
+        });
+      } catch (error) {
+        logger.error(
+          { err: error, holdId },
+          'Failed to append chain of custody seal event',
+        );
+      }
+    }
+
+    return seal;
   }
 
   private async notifyCustodians(
