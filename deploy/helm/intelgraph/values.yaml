@@ -71,6 +71,30 @@ podSecurityStandards:
   audit: restricted
   warn: restricted
 
+# Namespace-level resource safety rails
+namespaceLimits:
+  enabled: false
+  quota:
+    pods: 50
+    requestsCpu: '8'
+    requestsMemory: '16Gi'
+    limitsCpu: '16'
+    limitsMemory: '24Gi'
+    persistentVolumeClaims: 5
+    services: 20
+    configMaps: 50
+    secrets: 50
+  limitRange:
+    defaultRequest:
+      cpu: '100m'
+      memory: '256Mi'
+    default:
+      cpu: '500m'
+      memory: '512Mi'
+    max:
+      cpu: '2'
+      memory: '2Gi'
+
 # External dependencies configuration
 external:
   postgres:

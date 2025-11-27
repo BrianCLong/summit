@@ -1,0 +1,75 @@
+{{- if .Values.namespaceLimits.enabled }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-quota
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+spec:
+  hard:
+    {{- if .Values.namespaceLimits.quota.pods }}
+    pods: {{ .Values.namespaceLimits.quota.pods | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.requestsCpu }}
+    requests.cpu: {{ .Values.namespaceLimits.quota.requestsCpu | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.requestsMemory }}
+    requests.memory: {{ .Values.namespaceLimits.quota.requestsMemory | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.limitsCpu }}
+    limits.cpu: {{ .Values.namespaceLimits.quota.limitsCpu | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.limitsMemory }}
+    limits.memory: {{ .Values.namespaceLimits.quota.limitsMemory | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.persistentVolumeClaims }}
+    persistentvolumeclaims: {{ .Values.namespaceLimits.quota.persistentVolumeClaims | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.services }}
+    services: {{ .Values.namespaceLimits.quota.services | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.configMaps }}
+    configmaps: {{ .Values.namespaceLimits.quota.configMaps | quote }}
+    {{- end }}
+    {{- if .Values.namespaceLimits.quota.secrets }}
+    secrets: {{ .Values.namespaceLimits.quota.secrets | quote }}
+    {{- end }}
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: {{ include "intelgraph.fullname" . }}-limits
+  labels:
+    {{- include "intelgraph.labels" . | nindent 4 }}
+spec:
+  limits:
+    - type: Container
+      {{- if .Values.namespaceLimits.limitRange.defaultRequest }}
+      defaultRequest:
+        {{- if .Values.namespaceLimits.limitRange.defaultRequest.cpu }}
+        cpu: {{ .Values.namespaceLimits.limitRange.defaultRequest.cpu | quote }}
+        {{- end }}
+        {{- if .Values.namespaceLimits.limitRange.defaultRequest.memory }}
+        memory: {{ .Values.namespaceLimits.limitRange.defaultRequest.memory | quote }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.namespaceLimits.limitRange.default }}
+      default:
+        {{- if .Values.namespaceLimits.limitRange.default.cpu }}
+        cpu: {{ .Values.namespaceLimits.limitRange.default.cpu | quote }}
+        {{- end }}
+        {{- if .Values.namespaceLimits.limitRange.default.memory }}
+        memory: {{ .Values.namespaceLimits.limitRange.default.memory | quote }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.namespaceLimits.limitRange.max }}
+      max:
+        {{- if .Values.namespaceLimits.limitRange.max.cpu }}
+        cpu: {{ .Values.namespaceLimits.limitRange.max.cpu | quote }}
+        {{- end }}
+        {{- if .Values.namespaceLimits.limitRange.max.memory }}
+        memory: {{ .Values.namespaceLimits.limitRange.max.memory | quote }}
+        {{- end }}
+      {{- end }}
+{{- end }}
