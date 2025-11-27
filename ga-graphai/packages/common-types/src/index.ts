@@ -822,6 +822,69 @@ export interface RateLimitResult {
   config: RateLimitConfig;
 }
 
+export interface WorkspaceAnalyst {
+  id: string;
+  displayName: string;
+  role?: string;
+  team?: string;
+}
+
+export type PresenceStatus = 'active' | 'idle' | 'offline';
+
+export interface WorkspacePresence {
+  analyst: WorkspaceAnalyst;
+  status: PresenceStatus;
+  lastSeen: number;
+  focus?: string;
+  activity?: string;
+}
+
+export interface WorkspaceEntry {
+  key: string;
+  value: unknown;
+  version: number;
+  updatedAt: number;
+  updatedBy: WorkspaceAnalyst;
+}
+
+export interface WorkspaceActivity {
+  id: string;
+  type: 'update' | 'presence' | 'conflict' | 'sync';
+  actor: WorkspaceAnalyst;
+  timestamp: number;
+  description: string;
+  relatedKeys?: string[];
+  version?: number;
+}
+
+export interface WorkspaceConflict {
+  key: string;
+  localVersion: number;
+  incomingVersion: number;
+  resolvedWith: 'local' | 'incoming';
+  note?: string;
+  lastKnownBy: WorkspaceAnalyst;
+  incomingAuthor: WorkspaceAnalyst;
+}
+
+export interface WorkspaceUpdate {
+  workspaceId: string;
+  baseVersion: number;
+  timestamp: number;
+  summary: string;
+  changes: Record<string, unknown>;
+  author: WorkspaceAnalyst;
+}
+
+export interface WorkspaceSyncState {
+  workspaceId: string;
+  version: number;
+  entries: WorkspaceEntry[];
+  presences: WorkspacePresence[];
+  activities: WorkspaceActivity[];
+  conflicts?: WorkspaceConflict[];
+}
+
 export interface GatewayAuthContext {
   tenantId: string;
   actor: CursorActor;
