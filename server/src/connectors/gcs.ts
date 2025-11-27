@@ -19,6 +19,8 @@ import { Counter, Histogram, Gauge } from 'prom-client';
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 import crypto from 'crypto';
+import { PiiTaggedField } from '../../lib/pii/types';
+import { ProvenanceMetadata } from '../../lib/provenance/types';
 
 const tracer = {
   startActiveSpan: async (
@@ -101,6 +103,8 @@ export interface UploadOptions {
     | 'publicReadWrite'
     | 'bucketOwnerRead'
     | 'bucketOwnerFullControl';
+  pii?: PiiTaggedField[];
+  provenance?: ProvenanceMetadata;
 }
 
 export interface DownloadOptions {
@@ -165,10 +169,18 @@ export class GCSConnector extends EventEmitter {
 
       try {
         const file = this.bucket.file(options.destination || objectName);
+        const combinedMetadata = { ...options.metadata };
+        if (options.provenance) {
+          combinedMetadata.provenance = JSON.stringify(options.provenance);
+        }
+        if (options.pii) {
+          combinedMetadata.pii = JSON.stringify(options.pii);
+        }
+
         const stream = file.createWriteStream({
           metadata: {
             contentType: options.contentType || 'application/octet-stream',
-            metadata: options.metadata,
+            metadata: combinedMetadata,
           },
           resumable: options.resumable !== false,
           public: options.public || false,
