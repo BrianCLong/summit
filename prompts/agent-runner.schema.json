@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Runner Config",
+  "type": "object",
+  "required": ["version", "profile", "prompt_pack", "safety", "execution", "reporting", "telemetry", "tools"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "prompt_pack": {
+      "type": "object",
+      "required": ["universal", "summit", "spec"],
+      "properties": {
+        "universal": { "type": "string", "format": "uri-reference" },
+        "summit": { "type": "string", "format": "uri-reference" },
+        "spec": { "type": "string", "format": "uri-reference" }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "required": [
+        "disallow_secrets",
+        "redact_outputs",
+        "enforce_instruction_hierarchy",
+        "deny_binary_writes",
+        "max_output_tokens"
+      ],
+      "properties": {
+        "disallow_secrets": { "type": "boolean" },
+        "redact_outputs": { "type": "boolean" },
+        "enforce_instruction_hierarchy": { "type": "boolean" },
+        "deny_binary_writes": { "type": "boolean" },
+        "max_output_tokens": { "type": "integer", "minimum": 256 }
+      }
+    },
+    "execution": {
+      "type": "object",
+      "required": ["planning_required", "prefer_small_commits", "enforce_conventional_commits", "respect_agents_files"],
+      "properties": {
+        "planning_required": { "type": "boolean" },
+        "prefer_small_commits": { "type": "boolean" },
+        "enforce_conventional_commits": { "type": "boolean" },
+        "respect_agents_files": { "type": "boolean" },
+        "test_commands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        },
+        "lint_commands": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": []
+        }
+      }
+    },
+    "reporting": {
+      "type": "object",
+      "required": ["require_citations", "test_status_emojis", "include_risks", "include_followups"],
+      "properties": {
+        "require_citations": { "type": "boolean" },
+        "test_status_emojis": { "type": "boolean" },
+        "include_risks": { "type": "boolean" },
+        "include_followups": { "type": "boolean" }
+      }
+    },
+    "telemetry": {
+      "type": "object",
+      "required": ["enable_structured_logs", "metrics"],
+      "properties": {
+        "enable_structured_logs": { "type": "boolean" },
+        "metrics": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    },
+    "tools": {
+      "type": "object",
+      "required": ["search", "shell", "vcs", "formatting"],
+      "properties": {
+        "search": { "type": "string" },
+        "shell": { "type": "string" },
+        "vcs": { "type": "string" },
+        "formatting": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}
