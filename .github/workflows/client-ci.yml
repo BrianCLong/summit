@@ -53,6 +53,24 @@ jobs:
         run: npm run build
         working-directory: client
 
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+        working-directory: client
+
+      - name: Run E2E critical workflows
+        run: npm run test:e2e -- --config=playwright.config.ts --project=chromium --reporter=junit,line --output=playwright-results
+        working-directory: client
+
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-playwright-artifacts
+          path: |
+            client/playwright-report
+            client/playwright-results
+            client/test-results
+
       - name: Generate Persisted Queries Manifest
         run: npm run persist:queries
         working-directory: client
