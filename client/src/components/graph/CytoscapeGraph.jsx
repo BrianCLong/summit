@@ -63,6 +63,7 @@ import {
 import { setCommunityData } from '../../store/slices/aiInsightsSlice';
 import { useSocket } from '../../hooks/useSocket';
 import { useAIOperations } from '../../ai/insightsHooks';
+import { useFlag } from '../../hooks/useFlag';
 import AIInsightsPanel from '../ai/AIInsightsPanel';
 import { useApolloClient } from '@apollo/client';
 import cytoscape from 'cytoscape';
@@ -81,6 +82,16 @@ cytoscape.use(dagre);
 cytoscape.use(fcose);
 cytoscape.use(coseBilkent);
 cytoscape.use(popper);
+
+const LOD_THRESHOLDS = {
+  high: 1.2,
+  medium: 0.6,
+};
+
+const BENCHMARK_GRAPH_SIZE = {
+  nodes: 600,
+  edges: 1200,
+};
 
 function CytoscapeGraph() {
   const { id } = useParams();
@@ -116,6 +127,11 @@ function CytoscapeGraph() {
     relationshipTypes: [],
     timeRange: [0, 100],
   });
+  const [benchmarkResults, setBenchmarkResults] = useState(null);
+  const [lastViewportZoom, setLastViewportZoom] = useState(null);
+  const lodFeatureEnabled = useFlag('graph-lod');
+  const aggregationFeatureEnabled = useFlag('graph-lod-aggregation');
+  const benchmarkFeatureEnabled = useFlag('graph-lod-benchmark');
   const [lodMode, setLodMode] = useState('high'); // "high", "medium", "low"
   const [lodModeChanges, setLodModeChanges] = useState(0);
   const [suggestedEdges, setSuggestedEdges] = useState([]);
@@ -241,6 +257,39 @@ function CytoscapeGraph() {
         'target-arrow-shape': 'none',
         'curve-style': 'haystack',
         opacity: 0.7,
+      },
+    },
+    {
+      selector: '.aggregation-node',
+      style: {
+        'background-color': '#607d8b',
+        'border-color': '#eceff1',
+        'border-width': 2,
+        width: 50,
+        height: 50,
+        shape: 'round-rectangle',
+        'font-size': '11px',
+        'text-wrap': 'wrap',
+        'text-max-width': 80,
+      },
+    },
+    {
+      selector: '.aggregation-edge',
+      style: {
+        'line-color': '#90a4ae',
+        'target-arrow-color': '#90a4ae',
+        'target-arrow-shape': 'triangle',
+        'curve-style': 'straight',
+        width: 4,
+        label: 'data(weightLabel)',
+        'font-size': '9px',
+        'text-rotation': 'autorotate',
+      },
+    },
+    {
+      selector: '.hidden-original',
+      style: {
+        display: 'none',
       },
     },
   ];
@@ -546,10 +595,14 @@ function CytoscapeGraph() {
         const zoom = cytoscapeInstance.zoom();
         const numElements = cytoscapeInstance.elements().size();
 
+        setLastViewportZoom(zoom);
+
+        if (!lodFeatureEnabled) return;
+
         let nextMode = 'high';
-        if (zoom < 0.3 || numElements > 10000) {
+        if (zoom < LOD_THRESHOLDS.medium || numElements > 10000) {
           nextMode = 'low';
-        } else if (zoom < 0.7 || numElements > 5000) {
+        } else if (zoom < LOD_THRESHOLDS.high || numElements > 5000) {
           nextMode = 'medium';
         }
 
@@ -590,6 +643,7 @@ function CytoscapeGraph() {
     highlightConnectedElements,
     highlightEdge,
     layoutConfigs,
+    lodFeatureEnabled,
   ]);
 
   useEffect(() => {
@@ -730,26 +784,66 @@ function CytoscapeGraph() {
       cy.nodes().forEach((node) => {
         node.removeClass('low-detail');
         if (lodMode === 'low') {
-          node.addClass('low-detail');
-          node.style('label', '');
+          if (node.hasClass('aggregation-node')) {
+            node.style('label', node.data('label') ?? '');
+          } else {
+            node.addClass('low-detail');
+            node.style('label', '');
+          }
+        } else if (lodMode === 'medium') {
+          node.style('label', node.data('label') ?? '');
+          node.style('font-size', '10px');
         } else {
           node.style('label', node.data('label') ?? '');
+          node.style('font-size', '12px');
         }
       });
 
       cy.edges().forEach((edge) => {
         edge.removeClass('low-detail');
         if (lodMode === 'low') {
-          edge.addClass('low-detail');
-          edge.style('label', '');
+          if (edge.hasClass('aggregation-edge')) {
+            edge.style('label', edge.data('weightLabel') ?? '');
+            edge.style('curve-style', 'straight');
+          } else {
+            edge.addClass('low-detail');
+            edge.style('label', '');
+            edge.style('curve-style', 'haystack');
+          }
         } else if (lodMode === 'medium') {
           edge.style('label', '');
+          edge.style('curve-style', 'straight');
         } else {
-          edge.style('label', edge.data('label') ?? '');
+          edge.style(
+            'label',
+            edge.data('label') ?? edge.data('weightLabel') ?? '',
+          );
+          edge.style('curve-style', 'bezier');
         }
       });
     });
   }, [cy, lodMode]);
+
+  useEffect(() => {
+    if (!cy) return;
+
+    if (!aggregationFeatureEnabled) {
+      restoreAggregatedView();
+      return;
+    }
+
+    if (lodMode === 'low') {
+      buildAggregatedView();
+    } else {
+      restoreAggregatedView();
+    }
+  }, [
+    cy,
+    lodMode,
+    aggregationFeatureEnabled,
+    buildAggregatedView,
+    restoreAggregatedView,
+  ]);
   // Apply AI Insights highlighting
   useEffect(() => {
     if (!cy) return;
@@ -834,6 +928,174 @@ function CytoscapeGraph() {
     };
     return colors[type] || '#666';
   };
+
+  const generateBenchmarkGraph = useCallback((nodeCount, edgeCount) => {
+    const nodeTypes = ['PERSON', 'ORGANIZATION', 'LOCATION', 'DOCUMENT'];
+
+    const benchmarkNodes = Array.from({ length: nodeCount }, (_, idx) => ({
+      data: {
+        id: `bench-node-${idx}`,
+        label: `Entity ${idx}`,
+        type: nodeTypes[idx % nodeTypes.length],
+        importance: (idx % 5) + 1,
+      },
+    }));
+
+    const benchmarkEdges = [];
+    for (let i = 0; i < edgeCount; i += 1) {
+      const source = `bench-node-${i % nodeCount}`;
+      const target = `bench-node-${(i * 7 + 13) % nodeCount}`;
+      if (source === target) continue;
+      benchmarkEdges.push({
+        data: {
+          id: `bench-edge-${i}`,
+          source,
+          target,
+          label: `REL_${(i % 7) + 1}`,
+          type: 'ASSOCIATION',
+          weight: (i % 5) / 2 + 0.5,
+        },
+      });
+    }
+
+    return { nodes: benchmarkNodes, edges: benchmarkEdges.slice(0, edgeCount) };
+  }, []);
+
+  const restoreAggregatedView = useCallback(() => {
+    if (!cy) return;
+
+    cy.batch(() => {
+      cy.nodes('.aggregation-node').remove();
+      cy.edges('.aggregation-edge').remove();
+      cy.nodes('.hidden-original').removeClass('hidden-original');
+      cy.edges('.hidden-original').removeClass('hidden-original');
+    });
+  }, [cy]);
+
+  const buildAggregatedView = useCallback(() => {
+    if (!cy) return;
+
+    cy.nodes('.aggregation-node').remove();
+    cy.edges('.aggregation-edge').remove();
+
+    const clusters = new Map();
+
+    cy.nodes().forEach((node) => {
+      const clusterKey = node.data('community') ?? node.data('type') ?? 'Other';
+      if (!clusters.has(clusterKey)) {
+        clusters.set(clusterKey, []);
+      }
+      clusters.get(clusterKey).push(node);
+    });
+
+    const nodeToCluster = new Map();
+    clusters.forEach((members, key) => {
+      members.forEach((member) => nodeToCluster.set(member.id(), key));
+    });
+
+    cy.batch(() => {
+      cy.nodes().forEach((node) => {
+        if (!node.hasClass('aggregation-node')) {
+          node.addClass('hidden-original');
+        }
+      });
+
+      cy.edges().forEach((edge) => {
+        if (!edge.hasClass('aggregation-edge')) {
+          edge.addClass('hidden-original');
+        }
+      });
+    });
+
+    const aggregationNodes = Array.from(clusters.entries()).map(
+      ([clusterKey, members], idx) => {
+        const safeKey = `${clusterKey}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+        return {
+          data: {
+            id: `agg-${safeKey || idx}`,
+            label: `${clusterKey} (${members.length})`,
+            memberIds: members.map((member) => member.id()),
+            type: 'AGGREGATION',
+          },
+          classes: 'aggregation-node',
+        };
+      },
+    );
+
+    const aggregationEdgesMap = new Map();
+    cy.edges().forEach((edge) => {
+      if (edge.hasClass('aggregation-edge')) return;
+
+      const sourceKey = nodeToCluster.get(edge.source().id());
+      const targetKey = nodeToCluster.get(edge.target().id());
+      if (!sourceKey || !targetKey) return;
+
+      const safeSource = `${sourceKey}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+      const safeTarget = `${targetKey}`.replace(/[^a-zA-Z0-9_-]/g, '-');
+      const mapKey = `${safeSource}->${safeTarget}`;
+
+      const prev = aggregationEdgesMap.get(mapKey);
+      aggregationEdgesMap.set(mapKey, {
+        source: `agg-${safeSource}`,
+        target: `agg-${safeTarget}`,
+        count: (prev?.count || 0) + 1,
+      });
+    });
+
+    const aggregationEdges = Array.from(aggregationEdgesMap.values()).map(
+      ({ source, target, count }, idx) => ({
+        data: {
+          id: `agg-edge-${idx}-${source}-${target}`,
+          source,
+          target,
+          weightLabel: `${count} links`,
+          weight: count,
+        },
+        classes: 'aggregation-edge',
+      }),
+    );
+
+    cy.add([...aggregationNodes, ...aggregationEdges]);
+  }, [cy]);
+
+  const runPerformanceBenchmark = useCallback(async () => {
+    if (!benchmarkFeatureEnabled) return;
+
+    const benchmarkCy = cytoscape({ headless: true, elements: [] });
+    const { nodes: benchNodes, edges: benchEdges } = generateBenchmarkGraph(
+      BENCHMARK_GRAPH_SIZE.nodes,
+      BENCHMARK_GRAPH_SIZE.edges,
+    );
+
+    const start = performance.now();
+    benchmarkCy.add([...benchNodes, ...benchEdges]);
+    const afterAdd = performance.now();
+
+    const layout = benchmarkCy.layout({ name: 'cose', animate: false, randomize: true });
+    layout.run();
+
+    if (typeof layout.promiseOn === 'function') {
+      await layout.promiseOn('layoutstop').catch(() => {});
+    }
+
+    const end = performance.now();
+    benchmarkCy.destroy();
+
+    setBenchmarkResults({
+      nodes: benchNodes.length,
+      edges: benchEdges.length,
+      ingestMs: (afterAdd - start).toFixed(1),
+      layoutMs: (end - afterAdd).toFixed(1),
+      totalMs: (end - start).toFixed(1),
+    });
+
+    setNotification({
+      message: `LOD benchmark: ${benchNodes.length} nodes/${benchEdges.length} edges processed in ${(
+        end - start
+      ).toFixed(1)} ms`,
+      severity: 'info',
+    });
+  }, [benchmarkFeatureEnabled, generateBenchmarkGraph]);
 
   const highlightConnectedElements = useCallback(
     (node) => {
@@ -1123,6 +1385,15 @@ function CytoscapeGraph() {
           >
             AI Tools
           </Button>
+          {benchmarkFeatureEnabled && (
+            <Button
+              variant="outlined"
+              startIcon={<Timeline />}
+              onClick={runPerformanceBenchmark}
+            >
+              LOD Benchmark
+            </Button>
+          )}
           <Button
             variant="outlined"
             startIcon={<FilterList />} // Using FilterList icon for LOD for now
@@ -1198,12 +1469,49 @@ function CytoscapeGraph() {
           color="info"
           variant="outlined"
         />
+        <Chip
+          label={`Viewport Zoom: ${
+            lastViewportZoom !== null ? lastViewportZoom.toFixed(2) : 'n/a'
+          }`}
+          color="default"
+          variant="outlined"
+        />
+        <Chip
+          label={`Aggregation: ${
+            aggregationFeatureEnabled && lodMode === 'low'
+              ? 'Supernodes active'
+              : 'Full detail'
+          }`}
+          color={
+            aggregationFeatureEnabled && lodMode === 'low' ? 'success' : 'default'
+          }
+          variant="outlined"
+        />
+        {benchmarkResults && (
+          <Chip
+            label={`Benchmark: ${benchmarkResults.totalMs} ms (${benchmarkResults.nodes}n/${benchmarkResults.edges}e)`}
+            color="secondary"
+            variant="outlined"
+          />
+        )}
       </Box>
 
       <Alert severity="info" sx={{ mb: 2 }}>
-        Advanced graph visualization with Cytoscape.js. Select nodes/edges to
-        see details, right-click for context menu.
+        Advanced graph visualization with Cytoscape.js. Level of detail now
+        responds to zoom: labels and edge curves simplify as you zoom out, and
+        optional supernode aggregation collapses clusters at low zoom. Use the
+        LOD toggle to override and the benchmark control to validate
+        performance.
       </Alert>
+
+      {benchmarkResults && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          LOD benchmark processed {benchmarkResults.nodes} nodes and
+          {` ${benchmarkResults.edges}`} edges in {benchmarkResults.totalMs} ms
+          ({benchmarkResults.ingestMs} ms ingest, {benchmarkResults.layoutMs} ms
+          layout).
+        </Alert>
+      )}
 
       <Paper
         sx={{
