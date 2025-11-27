@@ -1,0 +1,17 @@
+{
+  "name": "@intelgraph/redis",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "ioredis": "^4.28.5",
+    "dotenv": "^16.0.0",
+    "pino": "^7.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.7",
+    "typescript": "^4.4.4"
+  }
+}

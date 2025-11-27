@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@intelgraph/redis": ["../../packages/redis/src"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "../../packages/redis" }]
+}
