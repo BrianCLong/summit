@@ -100,6 +100,49 @@ jobs:
           NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
           kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Enforce preview resource limits
+        run: |
+          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          cat <<'EOF' | kubectl apply -n ${NAMESPACE} -f -
+          apiVersion: v1
+          kind: ResourceQuota
+          metadata:
+            name: preview-quota
+          spec:
+            hard:
+              requests.cpu: "2"
+              requests.memory: 4Gi
+              limits.cpu: "4"
+              limits.memory: 8Gi
+              pods: "10"
+              services: "20"
+              configmaps: "20"
+              secrets: "20"
+              persistentvolumeclaims: "5"
+              requests.storage: 10Gi
+          ---
+          apiVersion: v1
+          kind: LimitRange
+          metadata:
+            name: preview-defaults
+          spec:
+            limits:
+              - type: Container
+                defaultRequest:
+                  cpu: 200m
+                  memory: 256Mi
+                default:
+                  cpu: 500m
+                  memory: 1Gi
+                max:
+                  cpu: 750m
+                  memory: 2Gi
+              - type: Pod
+                max:
+                  cpu: "2"
+                  memory: 3Gi
+          EOF
+
       - name: Deploy preview environment
         run: |
           NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
@@ -108,6 +151,7 @@ jobs:
           helm upgrade --install \
             intelgraph-pr-${PR_NUMBER} \
             ./deploy/helm/intelgraph \
+            --values ./deploy/helm/intelgraph/values-preview.yaml \
             --namespace ${NAMESPACE} \
             --set image.server.repository=${{ env.REGISTRY }}/${{ github.repository }}/server \
             --set image.server.tag=pr-${PR_NUMBER} \
