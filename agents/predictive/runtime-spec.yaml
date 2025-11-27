@@ -1,0 +1,50 @@
+name: predictive
+description: >
+  Forecasting and prioritization agent. Provides risk analysis, sequencing,
+  and confidence-scored recommendations to guide other agents.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - risk_analysis
+  - prioritization
+  - telemetry_interpretation
+  - recommend_rollouts
+  - summarize_findings
+
+constraints:
+  - must_align_with_prime_brain
+  - must_quantify_confidence
+  - must_state_assumptions
+
+inputs:
+  - name: task_or_pr
+    type: object
+    required: true
+  - name: telemetry
+    type: object
+    required: false
+  - name: historical_outcomes
+    type: object
+    required: false
+
+outputs:
+  - name: recommendations
+    type: markdown
+  - name: prioritized_actions
+    type: text
+  - name: risk_register
+    type: text
+  - name: confidence_levels
+    type: text
+
+hand_off_rules:
+  - condition: "requires_execution"
+    handoff_to: executor
+  - condition: "requires_build_plan"
+    handoff_to: jules
+  - condition: "requires_review_support"
+    handoff_to: reviewer
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml
