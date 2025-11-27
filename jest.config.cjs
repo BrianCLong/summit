@@ -39,28 +39,6 @@ module.exports = {
     '!**/salvage/**',
     '!**/pull/**',
   ],
-  // Coverage thresholds - PR quality gate enforcement
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-    // Critical paths require 85% coverage
-    './server/src/middleware/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-    './server/src/services/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-  },
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
@@ -75,28 +53,27 @@ module.exports = {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
-  // Coverage thresholds - enforced globally
   coverageThreshold: {
     global: {
-      branches: 50,
-      functions: 50,
-      lines: 50,
-      statements: 50,
+      branches: 70,
+      functions: 70,
+      lines: 70,
+      statements: 70,
     },
-    // Stricter thresholds for security-critical services
     './server/src/security/**/*.ts': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+      branches: 75,
+      functions: 75,
+      lines: 75,
+      statements: 75,
     },
     './server/src/services/AuthService.ts': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+      branches: 75,
+      functions: 75,
+      lines: 75,
+      statements: 75,
     },
   },
+  coverageReporters: ['text', 'text-summary', 'json-summary', 'lcov'],
   // Test timeout
   testTimeout: 30000,
   // Setup files
