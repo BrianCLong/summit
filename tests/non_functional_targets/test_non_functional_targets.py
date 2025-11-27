@@ -43,18 +43,29 @@ class TestNonFunctionalTargetsStubs(unittest.TestCase):
         self.assertIn("data", heatmap)
 
     def test_run_pod_kill_chaos_test(self):
-        result = run_pod_kill_chaos_test(["pod-a", "pod-b"])
+        result = run_pod_kill_chaos_test(["pod-a", "pod-b"], dry_run=True)
         self.assertIn("status", result)
 
     def test_run_broker_kill_chaos_test(self):
-        result = run_broker_kill_chaos_test(["broker-1"])
+        result = run_broker_kill_chaos_test(["broker-1"], dry_run=True)
         self.assertIn("status", result)
 
     def test_simulate_pitr_recovery(self):
-        self.assertTrue(simulate_pitr_recovery("backup-123"))
+        outcome = simulate_pitr_recovery(
+            "backup-123",
+            target_timestamp="2025-01-01T00:00:00Z",
+            rto_objective_seconds=5000,
+            rpo_objective_seconds=100000000,
+        )
+        self.assertTrue(outcome["success"])
+        self.assertIn("recovery_time_seconds", outcome)
+        self.assertIn("rpo_seconds", outcome)
 
     def test_simulate_cross_region_failover(self):
-        self.assertTrue(simulate_cross_region_failover("us-east-1", "us-west-2"))
+        outcome = simulate_cross_region_failover("us-east-1", "us-west-2", dry_run=False)
+        self.assertIn("replication_lag_seconds", outcome)
+        self.assertIn("failover_duration_seconds", outcome)
+        self.assertTrue(outcome["success"])
 
     def test_apply_data_minimization(self):
         raw_data = {"name": "John Doe", "email": "john@example.com", "age": 30}
