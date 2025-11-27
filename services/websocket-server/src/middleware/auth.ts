@@ -4,7 +4,7 @@
 
 import jwt from 'jsonwebtoken';
 import { Socket } from 'socket.io';
-import { AuthenticatedSocket, UserClaims } from '../types/index.js';
+import { UserClaims } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { WebSocketConfig } from '../types/index.js';
 
@@ -36,18 +36,17 @@ export function createAuthMiddleware(config: WebSocketConfig) {
         return next(new Error('Token expired'));
       }
 
-      // Attach user claims to socket
-      const authSocket = socket as AuthenticatedSocket;
-      authSocket.user = decoded;
-      authSocket.tenantId = decoded.tenantId || 'default';
-      authSocket.connectionId = `${authSocket.tenantId}:${decoded.userId}:${socket.id}`;
-      authSocket.connectedAt = Date.now();
+      // Attach user claims to socket data
+      socket.data.user = decoded;
+      socket.data.tenantId = decoded.tenantId || 'default';
+      socket.data.connectionId = `${socket.data.tenantId}:${decoded.userId}:${socket.id}`;
+      socket.data.connectedAt = Date.now();
 
       logger.info(
         {
-          connectionId: authSocket.connectionId,
+          connectionId: socket.data.connectionId,
           userId: decoded.userId,
-          tenantId: authSocket.tenantId,
+          tenantId: socket.data.tenantId,
         },
         'WebSocket authentication successful'
       );
@@ -73,13 +72,13 @@ export function createAuthMiddleware(config: WebSocketConfig) {
 }
 
 export function requirePermission(permission: string) {
-  return (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
-    if (!socket.user?.permissions?.includes(permission)) {
+  return (socket: Socket, next: (err?: Error) => void) => {
+    if (!socket.data.user?.permissions?.includes(permission)) {
       logger.warn(
         {
-          connectionId: socket.connectionId,
+          connectionId: socket.data.connectionId,
           permission,
-          userPermissions: socket.user?.permissions,
+          userPermissions: socket.data.user?.permissions,
         },
         'Permission denied'
       );
@@ -90,13 +89,13 @@ export function requirePermission(permission: string) {
 }
 
 export function requireRole(role: string) {
-  return (socket: AuthenticatedSocket, next: (err?: Error) => void) => {
-    if (!socket.user?.roles?.includes(role)) {
+  return (socket: Socket, next: (err?: Error) => void) => {
+    if (!socket.data.user?.roles?.includes(role)) {
       logger.warn(
         {
-          connectionId: socket.connectionId,
+          connectionId: socket.data.connectionId,
           role,
-          userRoles: socket.user?.roles,
+          userRoles: socket.data.user?.roles,
         },
         'Role required'
       );

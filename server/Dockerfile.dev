@@ -26,7 +26,7 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 # Copy package files and install as root
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy source code and set permissions
 COPY . .

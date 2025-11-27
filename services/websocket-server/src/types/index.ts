@@ -15,12 +15,6 @@ export interface UserClaims {
   iat: number;
 }
 
-export interface AuthenticatedSocket extends Socket {
-  user: UserClaims;
-  tenantId: string;
-  connectionId: string;
-  connectedAt: number;
-}
 
 export interface ConnectionMetadata {
   id: string;

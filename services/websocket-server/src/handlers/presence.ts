@@ -2,14 +2,15 @@
  * Presence Event Handlers
  */
 
-import { AuthenticatedSocket, PresenceStatus } from '../types/index.js';
+import { Socket } from 'socket.io';
+import { PresenceStatus } from '../types/index.js';
 import { HandlerDependencies } from './index.js';
 import { wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
 import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';
 
 export function registerPresenceHandlers(
-  socket: AuthenticatedSocket,
+  socket: Socket,
   deps: HandlerDependencies
 ): void {
   const { connectionManager, presenceManager, roomManager, rateLimiter, io } = deps;
@@ -24,30 +25,30 @@ export function registerPresenceHandlers(
         const status = data.status || 'online';
 
         // Update connection manager
-        connectionManager.updatePresence(socket.connectionId, status);
+        connectionManager.updatePresence(socket.data.connectionId, status);
 
         // Update presence in all rooms
-        const rooms = roomManager.getSocketRooms(socket.connectionId);
+        const rooms = roomManager.getSocketRooms(socket.data.connectionId);
 
         for (const room of rooms) {
-          await presenceManager.touchPresence(room, socket.user.userId);
+          await presenceManager.touchPresence(room, socket.data.user.userId);
         }
 
         metrics.recordMessageLatency(
-          socket.tenantId,
+          socket.data.tenantId,
           'presence:heartbeat',
           Date.now() - startTime
         );
       } catch (error) {
         logger.error(
           {
-            connectionId: socket.connectionId,
+            connectionId: socket.data.connectionId,
             error: (error as Error).message,
           },
           'Failed to process heartbeat'
         );
 
-        metrics.recordError(socket.tenantId, 'presence_heartbeat', 'error');
+        metrics.recordError(socket.data.tenantId, 'presence_heartbeat', 'error');
       }
     })
   );
@@ -65,29 +66,29 @@ export function registerPresenceHandlers(
           const { status, metadata } = data;
 
           // Update connection manager
-          connectionManager.updatePresence(socket.connectionId, status);
+          connectionManager.updatePresence(socket.data.connectionId, status);
 
           // Update presence in all rooms
-          const rooms = roomManager.getSocketRooms(socket.connectionId);
+          const rooms = roomManager.getSocketRooms(socket.data.connectionId);
 
           for (const room of rooms) {
-            await presenceManager.updateStatus(room, socket.user.userId, status, metadata);
+            await presenceManager.updateStatus(room, socket.data.user.userId, status, metadata);
 
             // Broadcast to room
             const presence = await presenceManager.getRoomPresence(room);
             io.to(room).emit('presence:update', { room, presence });
           }
 
-          metrics.presenceUpdates.inc({ tenant: socket.tenantId, status });
+          metrics.presenceUpdates.inc({ tenant: socket.data.tenantId, status });
           metrics.recordMessageLatency(
-            socket.tenantId,
+            socket.data.tenantId,
             'presence:status',
             Date.now() - startTime
           );
         } catch (error) {
           logger.error(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               error: (error as Error).message,
             },
             'Failed to update presence status'
@@ -98,7 +99,7 @@ export function registerPresenceHandlers(
             message: 'Failed to update presence status',
           });
 
-          metrics.recordError(socket.tenantId, 'presence_status', 'error');
+          metrics.recordError(socket.data.tenantId, 'presence_status', 'error');
         }
       }
     )

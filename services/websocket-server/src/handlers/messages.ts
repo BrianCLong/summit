@@ -2,14 +2,14 @@
  * Message Event Handlers
  */
 
-import { AuthenticatedSocket } from '../types/index.js';
+import { Socket } from 'socket.io';
 import { HandlerDependencies } from './index.js';
 import { wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
 import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';
 
 export function registerMessageHandlers(
-  socket: AuthenticatedSocket,
+  socket: Socket,
   deps: HandlerDependencies
 ): void {
   const { roomManager, messagePersistence, rateLimiter, io } = deps;
@@ -30,11 +30,11 @@ export function registerMessageHandlers(
           const { room, payload, persistent = false } = data;
 
           // Verify user is in the room
-          const userRooms = roomManager.getSocketRooms(socket.connectionId);
+          const userRooms = roomManager.getSocketRooms(socket.data.connectionId);
           if (!userRooms.includes(room)) {
             logger.warn(
               {
-                connectionId: socket.connectionId,
+                connectionId: socket.data.connectionId,
                 room,
               },
               'Attempted to send message to room not joined'
@@ -46,14 +46,14 @@ export function registerMessageHandlers(
               message: 'You are not a member of this room',
             });
 
-            metrics.recordError(socket.tenantId, 'room_send', 'not_in_room');
+            metrics.recordError(socket.data.tenantId, 'room_send', 'not_in_room');
             return;
           }
 
           // Create message
           const message = {
             room,
-            from: socket.user.userId,
+            from: socket.data.user.userId,
             payload,
             timestamp: Date.now(),
           };
@@ -63,7 +63,7 @@ export function registerMessageHandlers(
           if (persistent) {
             const persisted = await messagePersistence.storeMessage(message);
             messageId = persisted.id;
-            metrics.messagePersisted.inc({ tenant: socket.tenantId, room });
+            metrics.messagePersisted.inc({ tenant: socket.data.tenantId, room });
           }
 
           // Broadcast to room (excluding sender)
@@ -80,12 +80,12 @@ export function registerMessageHandlers(
 
           ack?.({ success: true, messageId });
 
-          metrics.recordMessageSent(socket.tenantId, 'room:message');
-          metrics.recordMessageLatency(socket.tenantId, 'room:send', Date.now() - startTime);
+          metrics.recordMessageSent(socket.data.tenantId, 'room:message');
+          metrics.recordMessageLatency(socket.data.tenantId, 'room:send', Date.now() - startTime);
 
           logger.debug(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               room,
               persistent,
               messageId,
@@ -95,7 +95,7 @@ export function registerMessageHandlers(
         } catch (error) {
           logger.error(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               error: (error as Error).message,
             },
             'Failed to send message'
@@ -107,7 +107,7 @@ export function registerMessageHandlers(
             message: 'Failed to send message',
           });
 
-          metrics.recordError(socket.tenantId, 'room_send', 'error');
+          metrics.recordError(socket.data.tenantId, 'room_send', 'error');
         }
       }
     )

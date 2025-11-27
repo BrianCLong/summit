@@ -3,12 +3,12 @@
  * Handles room-based pub/sub with authorization
  */
 
-import { AuthenticatedSocket } from '../types/index.js';
+import { Socket } from 'socket.io';
 import { logger } from '../utils/logger.js';
 import { EventEmitter } from 'events';
 
 export type RoomAuthorizationHandler = (
-  socket: AuthenticatedSocket,
+  socket: Socket,
   room: string,
   action: 'join' | 'leave' | 'send'
 ) => Promise<boolean> | boolean;
@@ -29,7 +29,7 @@ export class RoomManager extends EventEmitter {
    * Join a room
    */
   public async join(
-    socket: AuthenticatedSocket,
+    socket: Socket,
     room: string,
     metadata?: Record<string, unknown>
   ): Promise<{ success: boolean; error?: string }> {
@@ -38,7 +38,7 @@ export class RoomManager extends EventEmitter {
       const allowed = await this.authHandler(socket, room, 'join');
       if (!allowed) {
         logger.warn(
-          { connectionId: socket.connectionId, room },
+          { connectionId: socket.data.connectionId, room },
           'Room join unauthorized'
         );
         return { success: false, error: 'Unauthorized' };
@@ -46,7 +46,7 @@ export class RoomManager extends EventEmitter {
     }
 
     // Normalize room name with tenant prefix
-    const normalizedRoom = this.normalizeRoom(socket.tenantId, room);
+    const normalizedRoom = this.normalizeRoom(socket.data.tenantId, room);
 
     // Join Socket.IO room
     socket.join(normalizedRoom);
@@ -55,16 +55,16 @@ export class RoomManager extends EventEmitter {
     if (!this.roomToSockets.has(normalizedRoom)) {
       this.roomToSockets.set(normalizedRoom, new Set());
     }
-    this.roomToSockets.get(normalizedRoom)!.add(socket.connectionId);
+    this.roomToSockets.get(normalizedRoom)!.add(socket.data.connectionId);
 
-    if (!this.socketToRooms.has(socket.connectionId)) {
-      this.socketToRooms.set(socket.connectionId, new Set());
+    if (!this.socketToRooms.has(socket.data.connectionId)) {
+      this.socketToRooms.set(socket.data.connectionId, new Set());
     }
-    this.socketToRooms.get(socket.connectionId)!.add(normalizedRoom);
+    this.socketToRooms.get(socket.data.connectionId)!.add(normalizedRoom);
 
     logger.info(
       {
-        connectionId: socket.connectionId,
+        connectionId: socket.data.connectionId,
         room: normalizedRoom,
         membersCount: this.roomToSockets.get(normalizedRoom)!.size,
       },
@@ -72,9 +72,9 @@ export class RoomManager extends EventEmitter {
     );
 
     this.emit('room:joined', {
-      connectionId: socket.connectionId,
-      userId: socket.user.userId,
-      tenantId: socket.tenantId,
+      connectionId: socket.data.connectionId,
+      userId: socket.data.user.userId,
+      tenantId: socket.data.tenantId,
       room: normalizedRoom,
       metadata,
     });
@@ -86,10 +86,10 @@ export class RoomManager extends EventEmitter {
    * Leave a room
    */
   public async leave(
-    socket: AuthenticatedSocket,
+    socket: Socket,
     room: string
   ): Promise<{ success: boolean }> {
-    const normalizedRoom = this.normalizeRoom(socket.tenantId, room);
+    const normalizedRoom = this.normalizeRoom(socket.data.tenantId, room);
 
     // Leave Socket.IO room
     socket.leave(normalizedRoom);
@@ -97,23 +97,23 @@ export class RoomManager extends EventEmitter {
     // Update tracking
     const roomSockets = this.roomToSockets.get(normalizedRoom);
     if (roomSockets) {
-      roomSockets.delete(socket.connectionId);
+      roomSockets.delete(socket.data.connectionId);
       if (roomSockets.size === 0) {
         this.roomToSockets.delete(normalizedRoom);
       }
     }
 
-    const socketRooms = this.socketToRooms.get(socket.connectionId);
+    const socketRooms = this.socketToRooms.get(socket.data.connectionId);
     if (socketRooms) {
       socketRooms.delete(normalizedRoom);
       if (socketRooms.size === 0) {
-        this.socketToRooms.delete(socket.connectionId);
+        this.socketToRooms.delete(socket.data.connectionId);
       }
     }
 
     logger.info(
       {
-        connectionId: socket.connectionId,
+        connectionId: socket.data.connectionId,
         room: normalizedRoom,
         remainingMembers: roomSockets?.size || 0,
       },
@@ -121,9 +121,9 @@ export class RoomManager extends EventEmitter {
     );
 
     this.emit('room:left', {
-      connectionId: socket.connectionId,
-      userId: socket.user.userId,
-      tenantId: socket.tenantId,
+      connectionId: socket.data.connectionId,
+      userId: socket.data.user.userId,
+      tenantId: socket.data.tenantId,
       room: normalizedRoom,
     });
 

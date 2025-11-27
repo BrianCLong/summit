@@ -2,14 +2,14 @@
  * Room Event Handlers
  */
 
-import { AuthenticatedSocket } from '../types/index.js';
+import { Socket } from 'socket.io';
 import { HandlerDependencies } from './index.js';
 import { wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
 import { logger } from '../utils/logger.js';
 import * as metrics from '../metrics/prometheus.js';
 
 export function registerRoomHandlers(
-  socket: AuthenticatedSocket,
+  socket: Socket,
   deps: HandlerDependencies
 ): void {
   const { connectionManager, presenceManager, roomManager, rateLimiter, io } = deps;
@@ -34,17 +34,17 @@ export function registerRoomHandlers(
 
           if (!result.success) {
             ack?.({ success: false, error: result.error });
-            metrics.recordError(socket.tenantId, 'room_join', result.error || 'unknown');
+            metrics.recordError(socket.data.tenantId, 'room_join', result.error || 'unknown');
             return;
           }
 
           // Add to connection manager
-          connectionManager.addRoom(socket.connectionId, room);
+          connectionManager.addRoom(socket.data.connectionId, room);
 
           // Set presence in room
-          await presenceManager.setPresence(room, socket.user.userId, {
+          await presenceManager.setPresence(room, socket.data.user.userId, {
             status: 'online',
-            username: socket.user.userId,
+            username: socket.data.user.userId,
           });
 
           // Get current presence
@@ -54,7 +54,7 @@ export function registerRoomHandlers(
           socket.to(room).emit('presence:join', {
             room,
             user: {
-              userId: socket.user.userId,
+              userId: socket.data.user.userId,
               status: 'online' as const,
               lastSeen: Date.now(),
             },
@@ -67,21 +67,21 @@ export function registerRoomHandlers(
           // Send current presence to joiner
           socket.emit('presence:update', { room, presence });
 
-          metrics.roomJoins.inc({ tenant: socket.tenantId });
-          metrics.recordMessageLatency(socket.tenantId, 'room:join', Date.now() - startTime);
+          metrics.roomJoins.inc({ tenant: socket.data.tenantId });
+          metrics.recordMessageLatency(socket.data.tenantId, 'room:join', Date.now() - startTime);
 
           logger.info(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               room,
-              membersCount: roomManager.getRoomSize(socket.tenantId, room),
+              membersCount: roomManager.getRoomSize(socket.data.tenantId, room),
             },
             'Room joined'
           );
         } catch (error) {
           logger.error(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               error: (error as Error).message,
             },
             'Failed to join room'
@@ -93,7 +93,7 @@ export function registerRoomHandlers(
             message: 'Failed to join room',
           });
 
-          metrics.recordError(socket.tenantId, 'room_join', 'error');
+          metrics.recordError(socket.data.tenantId, 'room_join', 'error');
         }
       }
     )
@@ -118,27 +118,27 @@ export function registerRoomHandlers(
           await roomManager.leave(socket, room);
 
           // Remove from connection manager
-          connectionManager.removeRoom(socket.connectionId, room);
+          connectionManager.removeRoom(socket.data.connectionId, room);
 
           // Remove presence
-          await presenceManager.removePresence(room, socket.user.userId);
+          await presenceManager.removePresence(room, socket.data.user.userId);
 
           // Notify room
           socket.to(room).emit('presence:leave', {
             room,
-            userId: socket.user.userId,
+            userId: socket.data.user.userId,
           });
 
           // Send success response
           socket.emit('room:left', { room });
           ack?.({ success: true });
 
-          metrics.roomLeaves.inc({ tenant: socket.tenantId });
-          metrics.recordMessageLatency(socket.tenantId, 'room:leave', Date.now() - startTime);
+          metrics.roomLeaves.inc({ tenant: socket.data.tenantId });
+          metrics.recordMessageLatency(socket.data.tenantId, 'room:leave', Date.now() - startTime);
 
           logger.info(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               room,
             },
             'Room left'
@@ -146,7 +146,7 @@ export function registerRoomHandlers(
         } catch (error) {
           logger.error(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               error: (error as Error).message,
             },
             'Failed to leave room'
@@ -158,7 +158,7 @@ export function registerRoomHandlers(
             message: 'Failed to leave room',
           });
 
-          metrics.recordError(socket.tenantId, 'room_leave', 'error');
+          metrics.recordError(socket.data.tenantId, 'room_leave', 'error');
         }
       }
     )
@@ -178,7 +178,7 @@ export function registerRoomHandlers(
           const { room } = data;
 
           // Check if user is in room
-          const userRooms = roomManager.getSocketRooms(socket.connectionId);
+          const userRooms = roomManager.getSocketRooms(socket.data.connectionId);
           if (!userRooms.includes(room)) {
             ack?.({ presence: [] });
             return;
@@ -189,14 +189,14 @@ export function registerRoomHandlers(
         } catch (error) {
           logger.error(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               error: (error as Error).message,
             },
             'Failed to query presence'
           );
 
           ack?.({ presence: [] });
-          metrics.recordError(socket.tenantId, 'query_presence', 'error');
+          metrics.recordError(socket.data.tenantId, 'query_presence', 'error');
         }
       }
     )
@@ -210,19 +210,19 @@ export function registerRoomHandlers(
       rateLimiter,
       (ack?: (response: { rooms: string[] }) => void) => {
         try {
-          const rooms = roomManager.getSocketRooms(socket.connectionId);
+          const rooms = roomManager.getSocketRooms(socket.data.connectionId);
           ack?.({ rooms });
         } catch (error) {
           logger.error(
             {
-              connectionId: socket.connectionId,
+              connectionId: socket.data.connectionId,
               error: (error as Error).message,
             },
             'Failed to query rooms'
           );
 
           ack?.({ rooms: [] });
-          metrics.recordError(socket.tenantId, 'query_rooms', 'error');
+          metrics.recordError(socket.data.tenantId, 'query_rooms', 'error');
         }
       }
     )

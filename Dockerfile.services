@@ -1,0 +1,43 @@
+# Build stage
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Copy root package files
+COPY package*.json ./
+COPY tsconfig.base.json ./
+
+# Install root dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy service-specific files
+ARG SERVICE_PATH
+COPY ${SERVICE_PATH}/package*.json ${SERVICE_PATH}/
+COPY ${SERVICE_PATH}/tsconfig.json ${SERVICE_PATH}/
+
+# Install service dependencies
+WORKDIR /app/${SERVICE_PATH}
+RUN npm install --legacy-peer-deps
+
+# Copy service source
+COPY ${SERVICE_PATH}/src ./src
+
+# Build service
+RUN npm run build
+
+# Runtime stage
+FROM node:20-alpine
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
+# Copy built app and dependencies
+ARG SERVICE_PATH
+COPY --from=builder /app/${SERVICE_PATH}/dist ./dist
+COPY --from=builder /app/${SERVICE_PATH}/node_modules ./node_modules
+COPY --from=builder /app/${SERVICE_PATH}/package.json ./
+
+USER nodejs

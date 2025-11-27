@@ -4,7 +4,6 @@
  */
 
 import { Server } from 'socket.io';
-import { AuthenticatedSocket } from '../types/index.js';
 import { ConnectionManager } from '../managers/ConnectionManager.js';
 import { PresenceManager } from '../managers/PresenceManager.js';
 import { RoomManager } from '../managers/RoomManager.js';
@@ -28,26 +27,26 @@ export interface HandlerDependencies {
 export function registerEventHandlers(deps: HandlerDependencies): void {
   const { io, connectionManager, presenceManager, roomManager, messagePersistence, rateLimiter } = deps;
 
-  io.on('connection', (socket: AuthenticatedSocket) => {
+  io.on('connection', (socket) => {
     const startTime = Date.now();
 
     logger.info(
       {
-        connectionId: socket.connectionId,
-        userId: socket.user.userId,
-        tenantId: socket.tenantId,
+        connectionId: socket.data.connectionId,
+        userId: socket.data.user.userId,
+        tenantId: socket.data.tenantId,
       },
       'Client connected'
     );
 
     // Register connection
     connectionManager.register(socket);
-    metrics.recordConnectionStart(socket.tenantId);
+    metrics.recordConnectionStart(socket.data.tenantId);
 
     // Send connection established event
     socket.emit('connection:established', {
-      connectionId: socket.connectionId,
-      tenantId: socket.tenantId,
+      connectionId: socket.data.connectionId,
+      tenantId: socket.data.tenantId,
     });
 
     // Register specific handlers
@@ -61,9 +60,9 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
 
       logger.info(
         {
-          connectionId: socket.connectionId,
-          userId: socket.user.userId,
-          tenantId: socket.tenantId,
+          connectionId: socket.data.connectionId,
+          userId: socket.data.user.userId,
+          tenantId: socket.data.tenantId,
           reason,
           durationSeconds: duration,
         },
@@ -71,15 +70,15 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
       );
 
       // Unregister connection
-      connectionManager.unregister(socket.connectionId);
+      connectionManager.unregister(socket.data.connectionId);
 
       // Leave all rooms
-      roomManager.leaveAll(socket.connectionId);
+      roomManager.leaveAll(socket.data.connectionId);
 
       // Remove presence from all rooms where user was active
-      const rooms = roomManager.getSocketRooms(socket.connectionId);
+      const rooms = roomManager.getSocketRooms(socket.data.connectionId);
       for (const room of rooms) {
-        await presenceManager.removePresence(room, socket.user.userId);
+        await presenceManager.removePresence(room, socket.data.user.userId);
 
         // Broadcast presence update
         const presence = await presenceManager.getRoomPresence(room);
@@ -87,25 +86,25 @@ export function registerEventHandlers(deps: HandlerDependencies): void {
       }
 
       // Record metrics
-      metrics.recordConnectionEnd(socket.tenantId, reason, duration);
+      metrics.recordConnectionEnd(socket.data.tenantId, reason, duration);
     });
 
     // Handle errors
     socket.on('error', (error) => {
       logger.error(
         {
-          connectionId: socket.connectionId,
+          connectionId: socket.data.connectionId,
           error: error.message,
         },
         'Socket error'
       );
 
-      metrics.recordError(socket.tenantId, 'socket_error', 'unknown');
+      metrics.recordError(socket.data.tenantId, 'socket_error', 'unknown');
     });
 
     // Update activity on any event
     socket.onAny(() => {
-      connectionManager.updateActivity(socket.connectionId);
+      connectionManager.updateActivity(socket.data.connectionId);
     });
   });
 
