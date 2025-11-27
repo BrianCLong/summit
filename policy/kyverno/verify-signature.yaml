@@ -1,0 +1,28 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signature
+spec:
+  validationFailureAction: Enforce
+  background: false
+  rules:
+    - name: verify-signature
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      verifyImages:
+      - imageReferences:
+        - "ghcr.io/briancclong/summit/*"
+        attestations:
+        - predicateType: https://slsa.dev/provenance/v0.2
+          conditions:
+          - all:
+            - key: "{{ builder.id }}"
+              operator: Equals
+              value: "https://github.com/actions/runner-images"
+        key: |-
+          -----BEGIN PUBLIC KEY-----
+          (Insert your Cosign public key here)
+          -----END PUBLIC KEY-----
