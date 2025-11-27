@@ -211,8 +211,16 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
       - name: Bring up stack (make up)
         run: make up
-      - name: Golden path smoke tests
-        run: make smoke
+      - name: Guarded Code Gate (Smoke & Health)
+        run: ./scripts/ci-smoke-gate.sh
+      - name: Upload SLO Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slo-artifacts
+          path: |
+            slo-results.json
+            slo-badge.json
       - name: Compose logs on failure
         if: failure()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
