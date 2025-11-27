@@ -1,0 +1,12 @@
+{
+  "alert_id": "auto-higherrorrate",
+  "alert_name": "HighErrorRate",
+  "description": "High error rate",
+  "metrics": {
+    "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m]) > 0.05"
+  },
+  "service": "observability-ci",
+  "severity": "page",
+  "tenant_id": null,
+  "timestamp": "{{ generated }}"
+}
