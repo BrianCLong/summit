@@ -2,8 +2,12 @@ import { performance } from 'node:perf_hooks';
 import type {
   ClusterNodeState,
   CostGuardDecision,
+  BudgetAlert,
+  BudgetPolicy,
+  CostCategory,
   PlanBudgetInput,
   ResourceOptimizationConfig,
+  SpendObservation,
   ScalingDecision,
   SlowQueryRecord,
   TenantBudgetProfile,
@@ -18,14 +22,30 @@ const DEFAULT_PROFILE: TenantBudgetProfile = {
   concurrencyLimit: 12,
 };
 
+const DEFAULT_BUDGET_POLICY: BudgetPolicy = {
+  categories: {
+    infrastructure: { limit: 2500, alertThreshold: 0.8 },
+    inference: { limit: 1800, alertThreshold: 0.85 },
+    storage: { limit: 900, alertThreshold: 0.85 },
+  },
+  anomalyStdDevTolerance: 2.2,
+  historyWindow: 20,
+  throttleOnBreach: true,
+};
+
 export class CostGuard {
   private readonly profile: TenantBudgetProfile;
+  private readonly budgetPolicy: BudgetPolicy;
   private budgetsExceeded = 0;
   private kills = 0;
   private readonly slowQueries = new Map<string, SlowQueryRecord>();
+  private readonly categorySpend = new Map<CostCategory, number>();
+  private readonly featureSpend = new Map<string, Map<string, number>>();
+  private readonly spendHistory = new Map<CostCategory, number[]>();
 
-  constructor(profile?: TenantBudgetProfile) {
+  constructor(profile?: TenantBudgetProfile, budgetPolicy?: BudgetPolicy) {
     this.profile = profile ?? DEFAULT_PROFILE;
+    this.budgetPolicy = budgetPolicy ?? DEFAULT_BUDGET_POLICY;
   }
 
   get metrics() {
@@ -33,6 +53,19 @@ export class CostGuard {
       budgetsExceeded: this.budgetsExceeded,
       kills: this.kills,
       activeSlowQueries: this.slowQueries.size,
+      categorySpend: Object.fromEntries(this.categorySpend),
+      servicesTracked: this.featureSpend.size,
+    };
+  }
+
+  get costAttribution() {
+    const features: Record<string, Record<string, number>> = {};
+    for (const [serviceId, featureMap] of this.featureSpend.entries()) {
+      features[serviceId] = Object.fromEntries(featureMap);
+    }
+    return {
+      categories: Object.fromEntries(this.categorySpend),
+      features,
     };
   }
 
@@ -93,6 +126,84 @@ export class CostGuard {
     };
   }
 
+  trackSpend(observation: SpendObservation): BudgetAlert {
+    if (!Number.isFinite(observation.cost) || observation.cost < 0) {
+      throw new Error('Spend observation cost must be a non-negative finite value.');
+    }
+
+    this.recordCategorySpend(observation.category, observation.cost);
+    const featureSpend = this.recordFeatureSpend(
+      observation.serviceId,
+      observation.feature,
+      observation.cost,
+    );
+    const history = this.recordHistory(observation.category, observation.cost);
+    const anomalies = this.detectAnomalies(observation.category, history);
+    const policy = this.budgetPolicy.categories[observation.category];
+    const categoryTotal = this.categorySpend.get(observation.category) ?? 0;
+    const utilization = policy
+      ? Number((categoryTotal / policy.limit).toFixed(3))
+      : 0;
+
+    let status: BudgetAlert['status'] = 'ok';
+    let action: BudgetAlert['action'] = 'allow';
+    let reason = 'Spend within budget.';
+    let guardrailEnforced = false;
+    let incrementBudgetExceeded = false;
+
+    if (policy) {
+      if (utilization >= 1) {
+        status = 'breach';
+        action = this.budgetPolicy.throttleOnBreach ? 'throttle' : 'allow';
+        reason =
+          'Budget exceeded; throttling to protect spend and enforce guardrails.';
+        guardrailEnforced = true;
+        incrementBudgetExceeded = true;
+      } else if (utilization >= policy.alertThreshold) {
+        status = 'alert';
+        reason = 'Spend approaching budget limit; alerting operators.';
+      }
+    }
+
+    if (anomalies.length > 0) {
+      reason = `${reason} Anomaly detected: ${anomalies.join('; ')}`;
+      if (status === 'ok') {
+        status = 'alert';
+      }
+      if (
+        this.budgetPolicy.throttleOnBreach &&
+        (utilization >= (policy?.alertThreshold ?? 1) || anomalies.length > 1)
+      ) {
+        action = 'throttle';
+        guardrailEnforced = guardrailEnforced || status !== 'ok';
+        incrementBudgetExceeded = incrementBudgetExceeded || status !== 'ok';
+      }
+    }
+
+    if (
+      guardrailEnforced &&
+      incrementBudgetExceeded &&
+      (action === 'throttle' || status === 'breach')
+    ) {
+      this.budgetsExceeded += 1;
+    }
+
+    return {
+      category: observation.category,
+      serviceId: observation.serviceId,
+      feature: observation.feature,
+      utilization,
+      status,
+      action,
+      reason,
+      anomalies,
+      totals: {
+        categorySpend: categoryTotal,
+        featureSpend,
+      },
+    };
+  }
+
   killSlowQuery(
     queryId: string,
     tenantId: string,
@@ -121,9 +232,72 @@ export class CostGuard {
   release(queryId: string): void {
     this.slowQueries.delete(queryId);
   }
+
+  private recordCategorySpend(category: CostCategory, cost: number) {
+    const total = this.categorySpend.get(category) ?? 0;
+    this.categorySpend.set(category, Number((total + cost).toFixed(3)));
+  }
+
+  private recordFeatureSpend(
+    serviceId: string,
+    feature: string,
+    cost: number,
+  ): number {
+    const existing = this.featureSpend.get(serviceId) ?? new Map();
+    const current = existing.get(feature) ?? 0;
+    const updated = Number((current + cost).toFixed(3));
+    existing.set(feature, updated);
+    this.featureSpend.set(serviceId, existing);
+    return updated;
+  }
+
+  private recordHistory(category: CostCategory, cost: number): number[] {
+    const history = this.spendHistory.get(category) ?? [];
+    history.push(cost);
+    if (history.length > this.budgetPolicy.historyWindow) {
+      history.shift();
+    }
+    this.spendHistory.set(category, history);
+    return history;
+  }
+
+  private detectAnomalies(
+    category: CostCategory,
+    history: number[],
+  ): string[] {
+    if (history.length < 3) {
+      return [];
+    }
+    const recent = history[history.length - 1];
+    const baseline = history.slice(0, -1);
+    const mean = baseline.reduce((sum, value) => sum + value, 0) / baseline.length;
+    const variance =
+      baseline.reduce((sum, value) => sum + (value - mean) ** 2, 0) /
+      baseline.length;
+    const stdDev = Math.sqrt(variance);
+    const anomalies: string[] = [];
+
+    if (stdDev === 0) {
+      if (recent > mean * (1 + this.budgetPolicy.anomalyStdDevTolerance / 10)) {
+        anomalies.push(
+          `Spend spike detected for ${category}: ${recent.toFixed(2)} vs steady baseline ${mean.toFixed(2)}.`,
+        );
+      }
+      return anomalies;
+    }
+
+    const zScore = (recent - mean) / stdDev;
+    if (zScore >= this.budgetPolicy.anomalyStdDevTolerance) {
+      anomalies.push(
+        `Spend spike detected for ${category}: z-score ${zScore.toFixed(2)} exceeds tolerance ${this.budgetPolicy.anomalyStdDevTolerance}.`,
+      );
+    }
+
+    return anomalies;
+  }
 }
 
-export { DEFAULT_PROFILE };
+export { DEFAULT_BUDGET_POLICY, DEFAULT_PROFILE };
 const DEFAULT_OPTIMIZATION_CONFIG: ResourceOptimizationConfig = {
   smoothingFactor: 0.6,
   targetCpuUtilization: 0.65,
@@ -322,8 +496,12 @@ export class ResourceOptimizationEngine {
 
 export { DEFAULT_OPTIMIZATION_CONFIG };
 export type {
+  BudgetAlert,
+  BudgetPolicy,
   ClusterNodeState,
+  CostCategory,
   CostGuardDecision,
+  SpendObservation,
   PlanBudgetInput,
   ResourceOptimizationConfig,
   ScalingDecision,
