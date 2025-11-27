@@ -115,10 +115,9 @@ jobs:
             node_modules/.cache
           retention-days: 1
 
-  # Security lane: Run security scans (non-blocking on PR)
+  # Security lane: Run security scans and block on outstanding vulnerabilities
   security-scan:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Generate SBOM (SPDX)
@@ -137,9 +136,56 @@ jobs:
           scan-type: fs
           format: table
           severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
+          ignore-unfixed: false
+          exit-code: '1'
           vuln-type: 'os,library'
+
+  # DAST lane: OWASP ZAP baseline against running stack
+  owasp-zap:
+    runs-on: ubuntu-latest
+    needs: build-test
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Boot application stack (preview profile)
+        run: |
+          docker compose -f docker-compose.dev.yml pull --ignore-pull-failures || true
+          docker compose -f docker-compose.dev.yml up -d api web
+
+      - name: Wait for web to be healthy
+        run: |
+          for i in {1..24}; do
+            if curl -fsS http://localhost:3000/health; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Web service failed to become healthy in time" >&2
+          exit 1
+
+      - name: OWASP ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: 'http://localhost:3000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -l Medium -m 5'
+          fail_action: true
+
+      - name: Upload ZAP report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+          if-no-files-found: warn
+        if: always()
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose -f docker-compose.dev.yml down -v
 
   # Integration lane: Golden path smoke tests
   golden-path:
