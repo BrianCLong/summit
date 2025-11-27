@@ -120,15 +120,15 @@ export class EntityRepo {
   /**
    * Update entity with dual-write
    */
-  async update(input: EntityUpdateInput): Promise<Entity | null> {
+  async update(input: EntityUpdateInput, tenantId: string): Promise<Entity | null> {
     const client = await this.pg.connect();
 
     try {
       await client.query('BEGIN');
 
       const updateFields: string[] = [];
-      const params: any[] = [input.id];
-      let paramIndex = 2;
+      const params: any[] = [input.id, tenantId];
+      let paramIndex = 3;
 
       if (input.labels !== undefined) {
         updateFields.push(`labels = $${paramIndex}`);
@@ -146,7 +146,7 @@ export class EntityRepo {
 
       const { rows } = (await client.query(
         `UPDATE entities SET ${updateFields.join(', ')}
-         WHERE id = $1
+         WHERE id = $1 AND tenant_id = $2
          RETURNING *`,
         params,
       )) as { rows: EntityRow[] };
@@ -199,15 +199,15 @@ export class EntityRepo {
   /**
    * Delete entity with dual-write
    */
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, tenantId: string): Promise<boolean> {
     const client = await this.pg.connect();
 
     try {
       await client.query('BEGIN');
 
       const { rowCount } = await client.query(
-        `DELETE FROM entities WHERE id = $1`,
-        [id],
+        `DELETE FROM entities WHERE id = $1 AND tenant_id = $2`,
+        [id, tenantId],
       );
 
       if (rowCount && rowCount > 0) {
@@ -222,7 +222,7 @@ export class EntityRepo {
 
         // Best effort Neo4j delete
         try {
-          await this.deleteNeo4jNode(id);
+          await this.deleteNeo4jNode(id, tenantId);
         } catch (neo4jError) {
           repoLogger.warn(
             { entityId: id, error: neo4jError },
@@ -360,16 +360,16 @@ export class EntityRepo {
   /**
    * Delete entity node from Neo4j
    */
-  private async deleteNeo4jNode(id: string): Promise<void> {
+  private async deleteNeo4jNode(id: string, tenantId?: string): Promise<void> {
     const session = this.neo4j.session();
+    const query = tenantId
+      ? `MATCH (e:Entity {id: $id, tenantId: $tenantId}) DETACH DELETE e`
+      : `MATCH (e:Entity {id: $id}) DETACH DELETE e`;
+    const params = tenantId ? { id, tenantId } : { id };
 
     try {
       await session.executeWrite(async (tx) => {
-        await tx.run(
-          `MATCH (e:Entity {id: $id})
-           DETACH DELETE e`,
-          { id },
-        );
+        await tx.run(query, params);
       });
     } finally {
       await session.close();
