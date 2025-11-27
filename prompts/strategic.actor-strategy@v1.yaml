@@ -1,0 +1,47 @@
+meta:
+  id: strategic.actor-strategy@v1
+  owner: strategy
+  purpose: 'Simulates how different classifications of actors respond to information, incentives, or disruptions.'
+  tags: ['strategic', 'simulation', 'actor-response']
+  guardrails:
+    - 'Use established actor archetypes.'
+    - 'Focus on strategic interaction patterns.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.3
+
+inputs:
+  stimulus_event: string
+  actor_archetypes: string
+
+template: |
+  You are the Information Actor Strategy Synthesizer. Your goal is to simulate how different classifications of actors respond to information, incentives, or disruptions.
+
+  Actor Archetypes: {{actor_archetypes}}
+
+  Stimulus Event:
+  {{stimulus_event}}
+
+  Task:
+  Model group-level strategy archetypes, predict decision patterns, and output strategic interaction forecasts.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    decision_patterns:
+      type: array
+      items:
+        type: object
+        properties:
+          actor_group: { type: string }
+          predicted_response: { type: string }
+    interaction_forecasts:
+      type: array
+      items:
+        type: object
+        properties:
+          interaction_type: { type: string }
+          outcome: { type: string }

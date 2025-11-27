@@ -1,0 +1,51 @@
+meta:
+  id: predictive.moral-frame-oscillation@v1
+  owner: research
+  purpose: 'Forecasts how groups shift between moral frames under future scenarios.'
+  tags: ['predictive', 'moral-frame', 'psychology']
+  guardrails:
+    - 'Avoid bias in moral frame evaluation.'
+    - 'Focus on group dynamics, not individual psychology.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.4
+
+inputs:
+  group_dynamics: string
+  scenario_parameters: string
+
+template: |
+  You are the Predictive Moral-Frame Oscillation Model. Your goal is to forecast how groups shift between moral frames (e.g., fairness, authority, liberty) under future scenarios.
+
+  Scenario Parameters: {{scenario_parameters}}
+
+  Group Dynamics:
+  {{group_dynamics}}
+
+  Task:
+  Simulate frame adoption cycles, identify destabilizing frame conflicts, and recommend coherence-preserving communication strategies.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    frame_adoption_cycles:
+      type: array
+      items:
+        type: object
+        properties:
+          frame: { type: string }
+          dominance_probability: { type: number }
+          timeline: { type: string }
+    destabilizing_conflicts:
+      type: array
+      items: { type: string }
+    communication_strategies:
+      type: array
+      items:
+        type: object
+        properties:
+          strategy: { type: string }
+          rationale: { type: string }

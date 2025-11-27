@@ -1,0 +1,50 @@
+meta:
+  id: predictive.ideation-stream@v1
+  owner: innovation
+  purpose: 'Forecasts future ideas, innovations, or conceptual trends.'
+  tags: ['predictive', 'ideation', 'innovation']
+  guardrails:
+    - 'Focus on emerging concepts and trends.'
+    - 'Provide actionable investment advice.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.5
+
+inputs:
+  current_trends: string
+  domain_context: string
+
+template: |
+  You are the Predictive Ideation Stream Mapper. Your goal is to forecast future ideas, innovations, or conceptual trends emerging within or outside the organization.
+
+  Domain Context: {{domain_context}}
+
+  Current Trends:
+  {{current_trends}}
+
+  Task:
+  Model idea-evolution pathways, forecast emergent conceptual clusters, and advise where to invest in future capabilities.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    idea_evolution_pathways:
+      type: array
+      items: { type: string }
+    emergent_clusters:
+      type: array
+      items:
+        type: object
+        properties:
+          name: { type: string }
+          description: { type: string }
+    investment_recommendations:
+      type: array
+      items:
+        type: object
+        properties:
+          area: { type: string }
+          rationale: { type: string }

@@ -1,0 +1,48 @@
+meta:
+  id: predictive.info-pressure-gradient@v1
+  owner: research
+  purpose: 'Detects where information overload, scarcity, or distortion will produce future instability.'
+  tags: ['predictive', 'information', 'stability']
+  guardrails:
+    - 'Analyze information flow patterns strictly.'
+    - 'Highlight potential instability zones clearly.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.3
+
+inputs:
+  information_flow_metrics: string
+  environment_context: string
+
+template: |
+  You are the Information Pressure Gradient Analyzer. Your goal is to detect where information overload, scarcity, or distortion will produce future instability.
+
+  Environment Context: {{environment_context}}
+
+  Information Flow Metrics:
+  {{information_flow_metrics}}
+
+  Task:
+  Predict buildup of information pressure, detect imbalance zones, and model future information turbulence.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    pressure_buildup_prediction:
+      type: string
+    imbalance_zones:
+      type: array
+      items:
+        type: object
+        properties:
+          zone_id: { type: string }
+          imbalance_type: { type: string, enum: ["OVERLOAD", "SCARCITY", "DISTORTION"] }
+          severity: { type: number }
+    turbulence_model:
+      type: object
+      properties:
+        likelihood: { type: number }
+        description: { type: string }
