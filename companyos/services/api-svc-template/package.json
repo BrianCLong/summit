@@ -1,0 +1,38 @@
+{
+  "name": "@companyos/api-svc-template",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "lint": "eslint --ext .ts src tests",
+    "seed": "node -e \"console.log('seed: no-op template')\"",
+    "sbom": "syft packages dir:. -o json > sbom.json"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "config": "^3.3.11",
+    "express": "^4.19.2",
+    "pino": "^9.4.0",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/config": "^3.3.3",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.7.0",
+    "@types/supertest": "^6.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.8.1",
+    "@typescript-eslint/parser": "^8.8.1",
+    "eslint": "^9.11.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "supertest": "^7.0.0",
+    "tsconfig-paths": "^4.3.2",
+    "tsx": "^4.16.5",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.2"
+  }
+}

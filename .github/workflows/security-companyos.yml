@@ -1,0 +1,47 @@
+name: CompanyOS Security
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  sbom-sign-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build image
+        run: |
+          docker build -t companyos/api-svc-template:$GITHUB_SHA companyos/services/api-svc-template
+
+      - name: Generate SBOM
+        run: |
+          syft packages docker:companyos/api-svc-template:$GITHUB_SHA -o json > sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.sha }}
+          path: sbom.json
+
+      - name: Sign image
+        run: |
+          cosign sign --yes companyos/api-svc-template:$GITHUB_SHA
+
+      - name: Scan image (Trivy example)
+        run: |
+          trivy image --exit-code 0 --severity LOW,MEDIUM companyos/api-svc-template:$GITHUB_SHA
+          trivy image --exit-code 1 --severity HIGH,CRITICAL companyos/api-svc-template:$GITHUB_SHA

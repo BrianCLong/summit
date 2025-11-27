@@ -1,0 +1,8 @@
+{
+  "service": {
+    "port": 4000
+  },
+  "opa": {
+    "url": "https://opa.companyos.example.com/v1/data/companyos/authz/customer/allow"
+  }
+}
