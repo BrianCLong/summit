@@ -1,0 +1,238 @@
+name: unified-ci-cd
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment environment"
+        type: choice
+        required: false
+        default: dev
+        options:
+          - dev
+          - staging
+          - prod
+      rollback_version:
+        description: "Version or image tag to rollback to when deploy fails"
+        type: string
+        required: false
+        default: latest-stable
+      rollback_dry_run:
+        description: "Execute rollback in dry-run mode"
+        type: boolean
+        required: false
+        default: true
+
+concurrency:
+  group: unified-cicd-${{ github.event.inputs.environment || github.ref || github.run_id }}
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  NODE_VERSION: 20
+
+jobs:
+  context:
+    name: Derive deployment context
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_environment: ${{ steps.env.outputs.environment }}
+      image_tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Select environment
+        id: env
+        env:
+          INPUT_ENV: ${{ github.event.inputs.environment || '' }}
+        run: |
+          env_name="dev"
+          if [ -n "$INPUT_ENV" ]; then
+            env_name="$INPUT_ENV"
+          elif [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            env_name="prod"
+          elif [[ "$GITHUB_REF" == refs/heads/release/* ]]; then
+            env_name="staging"
+          fi
+          echo "environment=$env_name" >> "$GITHUB_OUTPUT"
+      - name: Generate image tag
+        id: tag
+        run: |
+          ts="$(date -u +%Y%m%d%H%M)"
+          echo "tag=${GITHUB_SHA::7}-${ts}" >> "$GITHUB_OUTPUT"
+
+  test-and-coverage:
+    name: Lint, typecheck, test & coverage
+    runs-on: ubuntu-latest
+    needs: context
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+      - name: Typecheck
+        run: pnpm run typecheck
+      - name: Unit and integration tests
+        run: pnpm run test:jest
+      - name: Coverage
+        run: pnpm run test:coverage
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.sha }}
+          path: coverage/
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN || '' }}
+          files: ./coverage/lcov.info
+          flags: unified
+          fail_ci_if_error: false
+
+  security:
+    name: Security scanning (Snyk & Trivy)
+    runs-on: ubuntu-latest
+    needs: context
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Snyk Open Source scan
+        uses: snyk/actions/node@master
+        if: env.SNYK_TOKEN != ''
+        with:
+          command: test
+          args: --all-projects --severity-threshold=medium
+      - name: Snyk monitor (optional)
+        uses: snyk/actions/node@master
+        if: env.SNYK_TOKEN != '' && github.event_name == 'push'
+        with:
+          command: monitor
+          args: --all-projects --severity-threshold=medium
+      - name: Build image for Trivy
+        run: docker build -t local-ci-image:latest .
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+      - name: Trivy image scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: local-ci-image:latest
+          format: table
+          exit-code: '1'
+          ignore-unfixed: true
+          severity: HIGH,CRITICAL
+
+  build-image:
+    name: Build and publish container image
+    runs-on: ubuntu-latest
+    needs: [test-and-coverage, security, context]
+    if: success()
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_uri: ${{ steps.image.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.context.outputs.deployment_environment }}-${{ needs.context.outputs.image_tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.context.outputs.deployment_environment }}-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Set image output
+        id: image
+        run: echo "image=${REGISTRY}/${IMAGE_NAME}:${{ needs.context.outputs.deployment_environment }}-${{ needs.context.outputs.image_tag }}" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy to ${{ needs.context.outputs.deployment_environment }}
+    runs-on: ubuntu-latest
+    needs: [build-image, context]
+    if: github.event_name != 'pull_request'
+    environment:
+      name: ${{ needs.context.outputs.deployment_environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure deploy scripts are executable
+        run: chmod +x scripts/deploy.sh
+      - name: Deploy
+        env:
+          DEPLOY_ENV: ${{ needs.context.outputs.deployment_environment }}
+          IMAGE: ${{ needs.build-image.outputs.image_uri }}
+        run: |
+          echo "Deploying $IMAGE to $DEPLOY_ENV"
+          ./scripts/deploy.sh "$DEPLOY_ENV" "$IMAGE"
+
+  rollback:
+    name: Automated rollback
+    runs-on: ubuntu-latest
+    needs: [deploy, build-image, context]
+    if: needs.deploy.result == 'failure'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute rollback
+        env:
+          TARGET_VERSION: ${{ github.event.inputs.rollback_version || needs.context.outputs.image_tag }}
+          ROLLBACK_DRY_RUN: ${{ github.event.inputs.rollback_dry_run || 'true' }}
+          DEPLOY_ENV: ${{ needs.context.outputs.deployment_environment }}
+        run: |
+          chmod +x scripts/emergency-rollback.sh
+          extra_flags=""
+          if [ "$ROLLBACK_DRY_RUN" = "true" ]; then
+            extra_flags="--dry-run"
+          fi
+          ./scripts/emergency-rollback.sh --version "$TARGET_VERSION" --reason "CI/CD auto rollback for $DEPLOY_ENV" $extra_flags
