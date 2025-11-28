@@ -1,0 +1,57 @@
+{
+  "name": "@intelgraph/agent-execution-platform",
+  "version": "1.0.0",
+  "description": "Enterprise-grade agent execution platform with safety, logging, and orchestration",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:unit": "jest tests/unit",
+    "test:integration": "jest tests/integration",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "agent",
+    "orchestration",
+    "execution",
+    "pipeline",
+    "safety",
+    "logging"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@intelgraph/types": "workspace:*",
+    "express": "^4.21.2",
+    "zod": "^3.24.1",
+    "winston": "^3.11.0",
+    "ioredis": "^5.3.2",
+    "pg": "^8.16.3",
+    "uuid": "^9.0.1",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "dotenv": "^17.2.3",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "express-rate-limit": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.19",
+    "@types/uuid": "^9.0.8",
+    "typescript": "^5.9.3",
+    "tsx": "^4.20.6",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0"
+  }
+}
