@@ -22,11 +22,17 @@ const Env = z
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
     L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
+    PROV_LEDGER_URL: z.string().default('http://localhost:8000'),
+    PROV_LEDGER_AUTHORITY_ID: z.string().default('intelgraph-server'),
+    PROV_LEDGER_REASON: z.string().default('data-mutation'),
   })
   .passthrough(); // Allow extra env vars
 
 // Environment variable documentation for helpful error messages
 const ENV_VAR_HELP: Record<string, string> = {
+  PROV_LEDGER_URL: 'URL of the Provenance Ledger service (default: http://localhost:8000)',
+  PROV_LEDGER_AUTHORITY_ID: 'Authority ID for Provenance Ledger requests',
+  PROV_LEDGER_REASON: 'Reason for access for Provenance Ledger requests',
   DATABASE_URL: 'PostgreSQL connection string (e.g., postgresql://user:pass@host:5432/db)',
   RATE_LIMIT_WINDOW_MS: 'Window size for rate limiting in milliseconds (default: 60000)',
   RATE_LIMIT_MAX_REQUESTS: 'Max requests per window per user/IP (default: 100)',
