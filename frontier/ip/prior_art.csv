@@ -1,0 +1,5 @@
+Category,Concept,Existing Approaches,Our Delta
+RLHF/Feedback,"Feedback loops for alignment","OpenAI-style RLHF, Anthropic-style Constitutional AI (post-hoc alignment)","Closed-loop between telemetry and pretraining data mix, not just post-hoc alignment."
+Synthetic Data,"Self-instruct / synthetic generation","Alpaca, Vicuna (text-only self-instruct)","Graph/tool-specific traces, schema'd for IntelGraph/Summit use."
+Active Learning,"Uncertainty sampling","Active learning based on uncertainty/loss","Combine uncertainty/loss with tool usage & graph coverage metrics."
+Safety,"Safety-focused synthetic data","Constitutional AI filtering","Integrate safety policies directly into the curriculum engine and templates, not just filtering."
