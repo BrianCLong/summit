@@ -2,12 +2,8 @@ import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
 import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
-import {
-  neo4jConnectivityUp,
-  neo4jQueryErrorsTotal,
-  neo4jQueryLatencyMs,
-  neo4jQueryTotal,
-} from '../metrics/neo4jMetrics.js';
+import { neo4jConnectivityUp } from '../metrics/neo4jMetrics.js';
+import { neo4jPerformanceMonitor } from './neo4jPerformanceMonitor.js';
 
 dotenv.config();
 
@@ -291,25 +287,74 @@ function createMockTransaction() {
   } as any;
 }
 
-function instrumentSession(session: any) {
+export type QueryLabelMetadata = { operation?: string; label?: string };
+
+export function instrumentSession(session: Neo4jSession): Neo4jSession {
   const originalRun = session.run.bind(session);
   session.run = async (
     cypher: string,
     params?: any,
-    labels: { operation?: string; label?: string } = {},
+    config?: any,
+    labels?: QueryLabelMetadata,
   ) => {
     telemetry.subsystems.database.queries.add(1);
     const startTime = Date.now();
+    const resolvedLabels = normalizeLabels(labels, cypher);
+
     try {
-      return await originalRun(cypher, params);
+      const result = await originalRun(cypher, params, config);
+      const durationMs = Date.now() - startTime;
+      neo4jPerformanceMonitor.recordSuccess({
+        cypher,
+        params,
+        durationMs,
+        labels: resolvedLabels,
+      });
+      return result;
     } catch (error) {
       telemetry.subsystems.database.errors.add(1);
+      neo4jPerformanceMonitor.recordError({
+        cypher,
+        params,
+        durationMs: Date.now() - startTime,
+        labels: resolvedLabels,
+        error: (error as Error).message,
+      });
       throw error;
     } finally {
       telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
     }
   };
   return session;
+}
+
+function inferOperation(cypher: string): string {
+  const normalized = cypher.trim().split(/\s+/)[0]?.toUpperCase();
+  if (['CREATE', 'MERGE', 'SET', 'DELETE', 'DETACH'].includes(normalized)) {
+    return 'write';
+  }
+  if (['MATCH', 'RETURN', 'WITH', 'UNWIND', 'CALL'].includes(normalized)) {
+    return 'read';
+  }
+  return 'unknown';
+}
+
+function inferLabel(cypher: string): string {
+  const labelMatch = cypher.match(/:([A-Z][A-Za-z0-9_]+)/);
+  return labelMatch?.[1] || 'unlabeled';
+}
+
+function normalizeLabels(
+  labels: QueryLabelMetadata | undefined,
+  cypher: string,
+): { operation: string; label: string } {
+  const operation = labels?.operation || inferOperation(cypher);
+  const label = labels?.label || inferLabel(cypher);
+
+  return {
+    operation: operation || 'unknown',
+    label: label || 'unlabeled',
+  };
 }
 
 // Export a convenience object for simple queries
