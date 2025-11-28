@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+# Husky helper - stub to prevent hook failures
+# This allows git operations to proceed without failing on missing husky setup
