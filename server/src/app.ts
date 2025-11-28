@@ -44,6 +44,9 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import secureDevOpsRouter from './routes/secure-devops.js';
+import complianceForgeRouter from './routes/compliance-forge.js';
+import velocityRoiRouter from './routes/velocity-roi.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -152,6 +155,11 @@ export const createApp = async () => {
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+  // Prototype Product Routes
+  app.use('/api/secure-devops', secureDevOpsRouter);
+  app.use('/api/compliance-forge', complianceForgeRouter);
+  app.use('/api/velocity-roi', velocityRoiRouter);
+
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
