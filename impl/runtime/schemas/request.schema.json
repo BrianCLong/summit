@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Frontier Runtime Request",
+  "type": "object",
+  "properties": {
+    "endpoint": {
+      "type": "string",
+      "enum": ["chat", "completions", "graph-run"]
+    },
+    "tenantId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }
+  },
+  "required": ["endpoint", "tenantId", "payload"]
+}
