@@ -186,12 +186,13 @@ async def detect_deepfake(
     based on file type or uses specified detector.
     """
     start_time = time.time()
+    detector_type = request.detector_type or "unknown"
     
     try:
         # Download media file from URL
         logger.info(f"Downloading media from {request.media_url}")
         media_data = await storage_client.download(request.media_url)
-        
+
         # Determine detector type if not specified
         detector_type = request.detector_type or await _infer_media_type(media_data)
         
@@ -242,7 +243,7 @@ async def detect_deepfake(
         )
         
     except Exception as e:
-        DETECTION_REQUESTS.labels(detector_type=detector_type, status="error").inc()
+        DETECTION_REQUESTS.labels(detector_type=detector_type or "unknown", status="error").inc()
         logger.error(f"Detection failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
