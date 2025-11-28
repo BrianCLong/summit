@@ -38,6 +38,11 @@ class ComprehensiveTelemetry {
       requests: this.createCounter('subsystem_api_requests_total', 'Total number of API requests'),
       errors: this.createCounter('subsystem_api_errors_total', 'Total number of API errors'),
     },
+    sigint: {
+        signalsIngested: this.createCounter('sigint_signals_ingested_total', 'Total number of RF signals ingested'),
+        jammingEvents: this.createCounter('sigint_jamming_events_total', 'Total number of detected jamming events'),
+        decryptions: this.createCounter('sigint_decryptions_total', 'Total number of successful decryptions'),
+    },
   };
 
   // Request/response timing
@@ -131,6 +136,11 @@ class ComprehensiveTelemetry {
   public recordRequest(duration: number, attributes: Record<string, string | number>) {
     this.requestDuration.record(duration, attributes);
     this.notifyListeners('request_duration_seconds', duration);
+  }
+
+  public recordLatency(name: string, value: number, attributes: Record<string, string | number> = {}) {
+     const histogram = this.createHistogram(`${name}_latency_ms`, `Latency for ${name} in ms`);
+     histogram.record(value, attributes);
   }
 
   public incrementActiveConnections() {
