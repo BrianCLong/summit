@@ -445,11 +445,40 @@ export function generatePatternQueries(
             ? `RETURN DISTINCT ${alias}.${property} AS value`
             : `RETURN ${aggFunction}(${alias}.${property}) AS value`;
 
-        aggQuery.query = aggQuery.query.replace(/RETURN.*$/m, returnClause);
+        const queryLines = aggQuery.query.split('\n');
+        const limitIndex = queryLines.findIndex((line) =>
+          line.trim().startsWith('LIMIT')
+        );
+        const limitClause = limitIndex !== -1 ? queryLines.splice(limitIndex, 1)[0] : '';
 
-        if (agg.threshold !== undefined) {
-          aggQuery.query += `\nHAVING value >= ${agg.threshold}`;
+        const returnIndex = queryLines.findIndex((line) =>
+          line.trim().startsWith('RETURN')
+        );
+
+        if (returnIndex !== -1) {
+          if (agg.threshold !== undefined) {
+            const aggregationExpression =
+              aggFunction === 'DISTINCT'
+                ? `DISTINCT ${alias}.${property}`
+                : `${aggFunction}(${alias}.${property})`;
+
+            queryLines.splice(
+              returnIndex,
+              1,
+              `WITH ${aggregationExpression} AS value`,
+              `WHERE value >= ${agg.threshold}`,
+              'RETURN value',
+            );
+          } else {
+            queryLines[returnIndex] = returnClause;
+          }
         }
+
+        if (limitClause) {
+          queryLines.push(limitClause);
+        }
+
+        aggQuery.query = queryLines.join('\n');
 
         queries.push(aggQuery);
       }
