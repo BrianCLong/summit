@@ -1,0 +1,35 @@
+name: CDIS
+
+on:
+  pull_request:
+  push:
+    branches:
+      - feat/cdis
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ai/cdis/requirements.txt
+      - name: Lint
+        run: |
+          ruff check ai/cdis
+      - name: Tests
+        run: |
+          pytest ai/cdis/tests
+      - name: Playwright (headless)
+        run: |
+          cd ai/cdis/e2e
+          npm install --ignore-scripts --no-fund
+          npx playwright install --with-deps chromium
+          npm test -- --reporter=line
+        env:
+          CAUSAL_LAB_ENABLED: true
