@@ -2,6 +2,7 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'services/*'
+  - 'ingestion/contracts'
   - 'contracts/*'
   - 'server'
   - 'client'
