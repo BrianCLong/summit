@@ -1,6 +1,6 @@
 {
   "name": "@summit/rptc",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Robust Prompt Template Compiler with typed slots, validation, adapters, and test synthesis.",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/version-control",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Git-like version control for analyses and intelligence artifacts",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

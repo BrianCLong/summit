@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/procurement-automation",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Automated government procurement, compliance paperwork, and ATO acceleration engine",
   "type": "module",
   "main": "dist/index.js",

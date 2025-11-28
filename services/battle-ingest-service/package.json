@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/battle-ingest-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Data ingestion service for multidomain battle management",
   "type": "module",
   "main": "dist/index.js",

@@ -2,7 +2,7 @@
   "name": "maestro",
   "displayName": "Maestro Orchestration",
   "description": "VS Code extension for Maestro workflow orchestration",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "publisher": "intelgraph",
   "engines": {
     "vscode": "^1.74.0"

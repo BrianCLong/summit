@@ -1,6 +1,6 @@
 {
   "name": "deepagent-mvp",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "DeepAgent-style MVP for IntelGraph",
   "main": "dist/index.js",
   "scripts": {

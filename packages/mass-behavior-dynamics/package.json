@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mass-behavior-dynamics",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Revolutionary mass behavior dynamics engine using agent-based modeling, network contagion theory, and emergent collective intelligence prediction",
   "type": "module",
   "main": "dist/index.js",

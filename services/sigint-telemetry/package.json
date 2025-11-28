@@ -1,6 +1,6 @@
 {
   "name": "@summit/sigint-telemetry",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Defensive SIGINT/CYBINT Telemetry Simulation Stack - Blue Team Analytics",
   "type": "module",
   "main": "dist/index.js",

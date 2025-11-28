@@ -1,6 +1,6 @@
 {
   "name": "@summit/prov-ledger-extensions",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Enhanced provenance tracking extensions for Summit Platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

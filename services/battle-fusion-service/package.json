@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/battle-fusion-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Multidomain data fusion service creating operational truth",
   "type": "module",
   "main": "dist/index.js",

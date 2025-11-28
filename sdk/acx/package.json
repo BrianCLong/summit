@@ -1,6 +1,6 @@
 {
   "name": "@summit/acx",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Adaptive Consent Experience SDK for web, iOS, and Android",
   "type": "module",
   "engines": {

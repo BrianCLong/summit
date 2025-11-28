@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/event-booster",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Synthetic event booster framework with configurable patterns, generators, and benchmarking tools.",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-viz",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Graph visualization layouts and rendering",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

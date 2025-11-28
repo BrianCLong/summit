@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/foreign-fighters",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Foreign fighter tracking and analysis system",
   "license": "MIT",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/satellite-imagery",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Satellite and aerial imagery analysis including change detection, building detection, land use classification",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

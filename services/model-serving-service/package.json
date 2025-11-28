@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/model-serving-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Model serving service with batching and caching",
   "main": "dist/index.js",
   "scripts": {

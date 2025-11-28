@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-bench",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Neo4j graph performance benchmark harness for Summit",
   "type": "module",
   "main": "runner/index.js",

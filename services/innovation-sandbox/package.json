@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/innovation-sandbox",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Secure Innovation Sandbox for rapid prototyping with data protection and mission deployment",
   "type": "module",
   "main": "dist/index.js",

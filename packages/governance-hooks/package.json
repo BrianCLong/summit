@@ -1,6 +1,6 @@
 {
   "name": "@summit/governance-hooks",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Pre-built governance hooks for Summit platform services",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

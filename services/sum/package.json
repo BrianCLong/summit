@@ -1,6 +1,6 @@
 {
   "name": "@summit/sum",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Secure UDF Marketplace service providing static and runtime safety guarantees for tenant code submissions.",
   "type": "module",
   "main": "dist/index.js",

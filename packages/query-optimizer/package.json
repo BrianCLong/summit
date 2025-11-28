@@ -1,6 +1,6 @@
 {
   "name": "@summit/query-optimizer",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Advanced query optimizer with cost-based optimization and materialized views",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

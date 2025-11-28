@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/mcp-core",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Shared Model Context Protocol server core with multi-tenant auth, policy, and transport adapters.",
   "type": "module",
   "main": "dist/index.js",

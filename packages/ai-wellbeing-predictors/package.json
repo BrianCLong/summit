@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ai-wellbeing-predictors",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "AI-driven prediction tools for proactive citizen wellbeing forecasting and early interventions",
   "type": "module",
   "main": "dist/index.js",

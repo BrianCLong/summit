@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/object-detection",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Advanced object detection with YOLO v8/v9, Faster R-CNN, and multi-object tracking",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

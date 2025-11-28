@@ -1,6 +1,6 @@
 {
   "name": "@summit/pbs-dashboard",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "Static dashboard generator for PBS backtest reports",
   "scripts": {

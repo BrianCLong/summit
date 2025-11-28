@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/audio-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Audio processing orchestration service",
   "main": "src/main.ts",
   "type": "module",

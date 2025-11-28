@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/regulatory-compliance-agents",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Autonomous agents for continuous regulatory compliance monitoring and workflow adaptation",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@summit/decs-cli",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "CLI wrapper for the Data Embargo & Cooling-Off Scheduler",
   "type": "module",
   "bin": {
