@@ -1,0 +1,22 @@
+environments:
+  dev:
+    mode: permissive
+    enforce: false
+    log_only: true
+    bundles: [access_control]
+  staging:
+    mode: strict
+    enforce: true
+    bundles: [access_control, governance]
+  prod:
+    mode: strict
+    enforce: true
+    bundles: [access_control, governance]
+
+policies:
+  governance:
+    path: policy/rego/governance.rego
+    criticality: high
+  access_control:
+    path: policy/rego/access_control.rego
+    criticality: high
