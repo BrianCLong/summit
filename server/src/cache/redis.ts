@@ -1,19 +1,53 @@
-import Redis from 'ioredis';
+import Redis, { Cluster, type ClusterNode } from 'ioredis';
+import config from '../config/index.js';
+
+type RedisLike = Redis | Cluster;
+
+function parseClusterNodes(nodes: string[]): ClusterNode[] {
+  return (nodes || [])
+    .map((node) => {
+      const [host, port] = node.split(':');
+      const parsedPort = Number(port || config.redis.port);
+      if (!host) return null;
+      return { host, port: Number.isNaN(parsedPort) ? config.redis.port : parsedPort };
+    })
+    .filter(Boolean) as ClusterNode[];
+}
 
 export class RedisService {
-  private pub: Redis;
-  private sub: Redis;
+  private pub: RedisLike;
+  private sub: RedisLike;
 
   constructor(
-    urlOrOpts: string | { url: string } = process.env.REDIS_URL ||
-      'redis://localhost:6379',
+    urlOrOpts: string | { url?: string; clusterNodes?: string[] } =
+      process.env.REDIS_URL || 'redis://localhost:6379',
   ) {
     const url = typeof urlOrOpts === 'string' ? urlOrOpts : urlOrOpts.url;
-    this.pub = new Redis(url);
-    this.sub = new Redis(url);
+    const clusterNodes =
+      (typeof urlOrOpts === 'string' ? config.redis.clusterNodes : urlOrOpts.clusterNodes) ||
+      [];
+    const parsedNodes = parseClusterNodes(clusterNodes);
+    const shouldUseCluster =
+      (clusterNodes?.length ?? 0) > 0 || config.redis.useCluster;
+
+    if (shouldUseCluster && parsedNodes.length) {
+      const redisOptions = {
+        redisOptions: {
+          tls: config.redis.tls ? {} : undefined,
+          lazyConnect: true,
+        },
+      };
+      this.pub = new Cluster(parsedNodes, redisOptions);
+      this.sub = new Cluster(parsedNodes, redisOptions);
+    } else {
+      const resolvedUrl =
+        url || `redis://${config.redis.host}:${config.redis.port}`;
+      this.pub = new Redis(resolvedUrl);
+      this.sub = new Redis(resolvedUrl);
+    }
   }
 
-  getClient(): Redis {
+  getClient(): RedisLike {
     return this.sub;
   }
 
