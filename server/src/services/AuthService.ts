@@ -194,6 +194,10 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'graph:read',
     'graph:export',
     'ai:request',
+    'agent:create',
+    'agent:read',
+    'agent:update',
+    'roi:read',
   ],
   VIEWER: [
     'investigation:read',
@@ -202,6 +206,8 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'tag:read',
     'graph:read',
     'graph:export',
+    'agent:read',
+    'roi:read',
   ],
 };
 
