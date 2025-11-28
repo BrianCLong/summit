@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Device Trust Posture Status</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      .status-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+      .pill { padding: 0.25rem 0.75rem; border-radius: 999px; font-size: 0.9rem; }
+      .pill.ok { background: #e8f5e9; color: #2e7d32; }
+      .pill.warn { background: #fff3e0; color: #f57c00; }
+      .pill.block { background: #ffebee; color: #c62828; }
+      pre { overflow: auto; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Device Trust Posture</h1>
+      <p>Client-side checks run in a secure context and avoid invasive collection. Signals are summarized and sent to the DTPE attestation plane.</p>
+
+      <section>
+        <h3>Runtime posture</h3>
+        <div class="status-grid" id="posture-cards"></div>
+      </section>
+
+      <section>
+        <h3>Remediation guide</h3>
+        <ul>
+          <li>Enable firewall and disk encryption.</li>
+          <li>Ensure WebAuthn with user verification is available.</li>
+          <li>Keep secure context (HTTPS) and disable cross-origin clipboard injections.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>Clipboard guard</h3>
+        <p><button id="copy-claims" type="button">Copy anonymized claims</button> <span id="copy-state" aria-live="polite"></span></p>
+      </section>
+
+      <section>
+        <h3>Policy preview</h3>
+        <pre id="policy-preview"></pre>
+      </section>
+    </main>
+
+    <script>
+      const secureContext = window.isSecureContext;
+      const postureCards = [
+        { label: 'Secure context', status: secureContext ? 'ok' : 'block', details: secureContext ? 'HTTPS/localhost detected' : 'Upgrade to HTTPS for attestation' },
+        { label: 'Clipboard API', status: navigator.clipboard && secureContext ? 'ok' : 'warn', details: secureContext ? 'Clipboard available; gated with user intent' : 'Clipboard blocked until secure context' },
+        { label: 'UA hints', status: navigator.userAgentData ? 'ok' : 'warn', details: navigator.userAgentData ? 'Client Hints available' : 'Falling back to legacy UA parsing' },
+      ];
+
+      function renderPosture() {
+        const cards = postureCards
+          .map((item) => `<article><header><strong>${item.label}</strong></header><span class="pill ${item.status}">${item.status}</span><p>${item.details}</p></article>`)
+          .join('');
+        $('#posture-cards').html(cards);
+      }
+
+      async function fetchPolicies() {
+        try {
+          const res = await fetch('/platform/device-trust/policies.json');
+          if (!res.ok) throw new Error('Unable to load policies');
+          const json = await res.json();
+          $('#policy-preview').text(JSON.stringify(json, null, 2));
+        } catch (err) {
+          $('#policy-preview').text('Policy preview unavailable: ' + err.message);
+        }
+      }
+
+      $('#copy-claims').on('click', async () => {
+        const claims = { secureContext, timestamp: new Date().toISOString(), minimal: true };
+        if (!secureContext || !navigator.clipboard) {
+          $('#copy-state').text('Copy blocked: secure context required');
+          return;
+        }
+        const payload = JSON.stringify(claims);
+        await navigator.clipboard.writeText(payload);
+        $('#copy-state').text('Claims copied without sensitive data');
+      });
+
+      $(function init() {
+        renderPosture();
+        fetchPolicies();
+      });
+    </script>
+  </body>
+</html>

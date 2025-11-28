@@ -1,0 +1,15 @@
+{
+  "name": "device-trust-policy",
+  "version": "0.1.0",
+  "description": "Node.js policy and claims service for the Device Trust Posture Engine",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node src/server.js --selftest"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "helmet": "^7.1.0"
+  }
+}
