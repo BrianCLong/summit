@@ -1,8 +1,42 @@
 apiVersion: v2
 name: summit
-description: Summit (formerly IntelGraph)
+description: Summit (formerly IntelGraph) - Comprehensive Deployment
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: '1.0.0'
 aliases:
   - intelgraph
+
+dependencies:
+  - name: server
+    version: 0.1.0
+    repository: file://../server
+    condition: server.enabled
+  - name: client
+    version: 0.1.0
+    repository: file://../client
+    condition: client.enabled
+  - name: worker-python
+    version: 0.1.0
+    repository: file://../worker-python
+    condition: worker-python.enabled
+  - name: ai-service
+    version: 0.1.0
+    repository: file://../ai-service
+    condition: ai-service.enabled
+  - name: postgres
+    version: 0.1.0
+    repository: file://../postgres
+    condition: postgres.enabled
+  - name: redis
+    version: 0.1.0
+    repository: file://../redis
+    condition: redis.enabled
+  - name: neo4j
+    version: 0.1.0
+    repository: file://../neo4j
+    condition: neo4j.enabled
+  - name: istio-config
+    version: 0.1.0
+    repository: file://../istio-config
+    condition: istio-config.enabled
