@@ -1,0 +1,469 @@
+version: '1.0.0'
+description: Document type definitions for business document ontology
+
+documents:
+  # Corporate Governance
+  - id: doc.articles_of_incorporation
+    name: Articles of Incorporation
+    category: Corporate Governance
+    subcategory: Formation
+    description: Foundational document creating the corporation or LLC.
+    confidentiality: HighlyRestricted
+    lifecycle: GovernanceCore
+    retention_period: Permanent
+    owner_department: Legal
+    requires_signatures:
+      - Founder
+      - RegisteredAgent
+    legal_basis:
+      - StateCorporateLaw
+    risk_level: High
+
+  - id: doc.operating_agreement
+    name: Operating Agreement
+    category: Corporate Governance
+    subcategory: Formation
+    description: Defines ownership, management, and operations for LLCs.
+    confidentiality: HighlyRestricted
+    lifecycle: GovernanceVersioned
+    retention_period: Permanent
+    owner_department: Legal
+    requires_signatures:
+      - Member
+      - Manager
+    legal_basis:
+      - StateLLCLaw
+    risk_level: High
+
+  - id: doc.bylaws
+    name: Corporate Bylaws
+    category: Corporate Governance
+    subcategory: Formation
+    description: Rules governing the internal management of the corporation.
+    confidentiality: HighlyRestricted
+    lifecycle: GovernanceVersioned
+    retention_period: Permanent
+    owner_department: Legal
+    requires_signatures:
+      - BoardChair
+      - Secretary
+    legal_basis:
+      - CorporateGovernanceRules
+    risk_level: High
+
+  - id: doc.board_minutes
+    name: Board Minutes
+    category: Corporate Governance
+    subcategory: BoardRecord
+    description: Official records of board meetings and decisions.
+    confidentiality: HighlyRestricted
+    lifecycle: GovernanceRecord
+    retention_period: 7y_or_Permanent
+    owner_department: CorporateSecretary
+    requires_signatures:
+      - BoardChair
+      - Secretary
+    legal_basis:
+      - CorporateGovernanceRules
+    risk_level: High
+
+  - id: doc.board_resolution
+    name: Board Resolution
+    category: Corporate Governance
+    subcategory: BoardRecord
+    description: Formal decision made by the board of directors.
+    confidentiality: HighlyRestricted
+    lifecycle: GovernanceRecord
+    retention_period: Permanent
+    owner_department: CorporateSecretary
+    requires_signatures:
+      - BoardChair
+      - Secretary
+    legal_basis:
+      - CorporateGovernanceRules
+    risk_level: High
+
+  # Finance
+  - id: doc.general_ledger
+    name: General Ledger
+    category: Finance
+    subcategory: Accounting
+    description: Master record of all financial transactions.
+    confidentiality: Confidential
+    lifecycle: Record
+    retention_period: 7y_plus
+    owner_department: Finance
+    requires_signatures:
+      - Controller
+      - CFO
+    legal_basis:
+      - GAAP
+      - IFRS
+      - TaxLaw
+    risk_level: High
+
+  - id: doc.financial_statement
+    name: Financial Statement
+    category: Finance
+    subcategory: Reporting
+    description: Periodic financial reports including balance sheet, income statement, and cash flow.
+    confidentiality: Confidential
+    lifecycle: Record
+    retention_period: 7y_plus
+    owner_department: Finance
+    requires_signatures:
+      - CFO
+      - Controller
+    legal_basis:
+      - GAAP
+      - IFRS
+      - SEC
+    risk_level: High
+
+  - id: doc.invoice_customer
+    name: Invoice (Customer)
+    category: Finance
+    subcategory: Receivables
+    description: Billing document issued to customers.
+    confidentiality: Internal
+    lifecycle: Record
+    retention_period: 7y
+    owner_department: Finance
+    requires_signatures:
+      - FinanceApprover
+    legal_basis:
+      - TaxLaw
+      - ContractLaw
+    risk_level: Medium
+
+  - id: doc.budget
+    name: Budget
+    category: Finance
+    subcategory: Planning
+    description: Financial plan for a specified period.
+    confidentiality: Confidential
+    lifecycle: Versioned
+    retention_period: 5y
+    owner_department: Finance
+    requires_signatures:
+      - CFO
+      - CEO
+    legal_basis: []
+    risk_level: Medium
+
+  # HR
+  - id: doc.employment_agreement
+    name: Employment Agreement
+    category: HR
+    subcategory: Employment
+    description: Contract outlining terms of employment.
+    confidentiality: HighlyRestricted
+    lifecycle: Contract
+    retention_period: Term_plus_7y
+    owner_department: HR
+    requires_signatures:
+      - Employee
+      - EmployerRep
+    legal_basis:
+      - EmploymentLaw
+    risk_level: High
+
+  - id: doc.offer_letter
+    name: Offer Letter
+    category: HR
+    subcategory: Employment
+    description: Formal offer of employment to a candidate.
+    confidentiality: Confidential
+    lifecycle: Record
+    retention_period: Term_plus_3y
+    owner_department: HR
+    requires_signatures:
+      - HiringManager
+      - HR
+    legal_basis:
+      - EmploymentLaw
+    risk_level: Medium
+
+  - id: doc.employee_handbook
+    name: Employee Handbook
+    category: HR
+    subcategory: Policy
+    description: Comprehensive guide to company policies and procedures for employees.
+    confidentiality: Internal
+    lifecycle: Policy
+    retention_period: Active_plus_history
+    owner_department: HR
+    requires_signatures:
+      - CHRO
+      - GC
+    legal_basis:
+      - EmploymentLaw
+    risk_level: Medium
+
+  # Legal
+  - id: doc.nda_mutual
+    name: NDA (Mutual)
+    category: Legal
+    subcategory: Contract
+    description: Agreement to protect confidential information between parties.
+    confidentiality: Confidential
+    lifecycle: Contract
+    retention_period: Term_plus_3_7y
+    owner_department: Legal
+    requires_signatures:
+      - AuthorizedSignatory
+    legal_basis:
+      - ContractLaw
+    risk_level: High
+
+  - id: doc.msa
+    name: Master Services Agreement
+    category: Legal
+    subcategory: Contract
+    description: Governing agreement setting general terms for services.
+    confidentiality: Confidential
+    lifecycle: Contract
+    retention_period: Relationship_plus_7y
+    owner_department: Legal
+    requires_signatures:
+      - AuthorizedSignatory
+    legal_basis:
+      - ContractLaw
+    risk_level: High
+
+  - id: doc.sow
+    name: Statement of Work
+    category: Legal
+    subcategory: ContractAttachment
+    description: Defines scope, deliverables, and pricing under an MSA.
+    confidentiality: Confidential
+    lifecycle: Contract
+    retention_period: Project_plus_7y
+    owner_department: Delivery
+    requires_signatures:
+      - AuthorizedSignatory
+    legal_basis:
+      - ContractLaw
+    risk_level: High
+
+  - id: doc.dpa
+    name: Data Processing Agreement
+    category: Legal
+    subcategory: Contract
+    description: Defines obligations around personal data processing.
+    confidentiality: Confidential
+    lifecycle: Contract
+    retention_period: Term_plus_7y
+    owner_department: Legal
+    requires_signatures:
+      - AuthorizedSignatory
+    legal_basis:
+      - GDPR
+      - PrivacyLaw
+    risk_level: High
+
+  - id: doc.privacy_policy
+    name: Privacy Policy
+    category: Legal
+    subcategory: ExternalPolicy
+    description: Describes how user data is collected, used, stored.
+    confidentiality: Public
+    lifecycle: ExternalPolicy
+    retention_period: Active_plus_archived
+    owner_department: Legal
+    requires_signatures:
+      - GC
+      - DPO
+    legal_basis:
+      - GDPR
+      - CCPA
+    risk_level: Medium
+
+  - id: doc.tos
+    name: Terms of Service
+    category: Legal
+    subcategory: ExternalPolicy
+    description: Contractual terms governing use of the service.
+    confidentiality: Public
+    lifecycle: ExternalPolicy
+    retention_period: Active_plus_archived
+    owner_department: Legal
+    requires_signatures:
+      - GC
+      - CEO
+    legal_basis:
+      - ContractLaw
+      - ConsumerLaw
+    risk_level: High
+
+  # Product
+  - id: doc.prd
+    name: Product Requirements Document
+    category: Product
+    subcategory: Requirements
+    description: Defines what a product or feature should do and why.
+    confidentiality: Internal
+    lifecycle: Versioned
+    retention_period: Product_life_plus_history
+    owner_department: Product
+    requires_signatures:
+      - ProductOwner
+    legal_basis: []
+    risk_level: Medium
+
+  - id: doc.product_roadmap
+    name: Product Roadmap
+    category: Product
+    subcategory: Planning
+    description: Strategic plan for product development over time.
+    confidentiality: Confidential
+    lifecycle: Versioned
+    retention_period: 3y
+    owner_department: Product
+    requires_signatures:
+      - CPO
+    legal_basis: []
+    risk_level: Medium
+
+  # Engineering
+  - id: doc.tech_spec
+    name: Technical Specification
+    category: Engineering
+    subcategory: Design
+    description: Detailed technical design derived from a PRD.
+    confidentiality: Internal
+    lifecycle: Versioned
+    retention_period: Product_life_plus_history
+    owner_department: Engineering
+    requires_signatures:
+      - TechLead
+    legal_basis: []
+    risk_level: Medium
+
+  - id: doc.adr
+    name: Architecture Decision Record
+    category: Engineering
+    subcategory: Design
+    description: Documents significant architectural decisions and their rationale.
+    confidentiality: Internal
+    lifecycle: Versioned
+    retention_period: Product_life_plus_history
+    owner_department: Engineering
+    requires_signatures:
+      - Architect
+    legal_basis: []
+    risk_level: Medium
+
+  # Operations
+  - id: doc.runbook
+    name: Runbook
+    category: Operations
+    subcategory: SRE
+    description: Step-by-step procedures to run or repair a system.
+    confidentiality: Internal
+    lifecycle: Versioned
+    retention_period: System_life
+    owner_department: SRE
+    requires_signatures:
+      - ServiceOwner
+    legal_basis: []
+    risk_level: High
+
+  - id: doc.incident_postmortem
+    name: Incident Postmortem
+    category: Operations
+    subcategory: Incident
+    description: Analysis and remediation plan after incidents.
+    confidentiality: Internal
+    lifecycle: Record
+    retention_period: 3_7y
+    owner_department: SRE
+    requires_signatures:
+      - IncidentCommander
+      - ServiceOwner
+    legal_basis:
+      - SOC2
+      - ISO27001_A16
+    risk_level: High
+
+  # Security
+  - id: doc.security_policy
+    name: Security Policy
+    category: Security
+    subcategory: Policy
+    description: Top-level information security policy.
+    confidentiality: Internal
+    lifecycle: Policy
+    retention_period: Active_plus_history
+    owner_department: Security
+    requires_signatures:
+      - CISO
+      - CEO
+    legal_basis:
+      - ISO27001
+      - SOC2
+    risk_level: High
+
+  - id: doc.incident_response_plan
+    name: Incident Response Plan
+    category: Security
+    subcategory: Plan
+    description: Procedures for responding to security incidents.
+    confidentiality: Restricted
+    lifecycle: Policy
+    retention_period: Active_plus_history
+    owner_department: Security
+    requires_signatures:
+      - CISO
+    legal_basis:
+      - ISO27001
+      - SOC2
+      - GDPR
+    risk_level: High
+
+  - id: doc.penetration_test_report
+    name: Penetration Test Report
+    category: Security
+    subcategory: Assessment
+    description: Results of authorized penetration testing.
+    confidentiality: HighlyRestricted
+    lifecycle: Record
+    retention_period: 3y
+    owner_department: Security
+    requires_signatures:
+      - CISO
+    legal_basis:
+      - ISO27001
+      - SOC2
+    risk_level: Critical
+
+  # AI/ML
+  - id: doc.model_card
+    name: Model Card
+    category: AI_ML
+    subcategory: Governance
+    description: Documentation of an AI/ML model's purpose, data, performance, and risks.
+    confidentiality: Internal
+    lifecycle: Versioned
+    retention_period: Model_life_plus_7y
+    owner_department: AI_Governance
+    requires_signatures:
+      - ModelOwner
+      - RiskOwner
+    legal_basis:
+      - EU_AI_Act
+    risk_level: High
+
+  - id: doc.sbom
+    name: Software Bill of Materials
+    category: Security
+    subcategory: SupplyChain
+    description: List of components and dependencies for a software artifact.
+    confidentiality: Internal
+    lifecycle: GeneratedArtifact
+    retention_period: Per_release
+    owner_department: Security
+    requires_signatures: []
+    legal_basis:
+      - Executive_Order_14028
+    risk_level: High

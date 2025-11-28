@@ -1,0 +1,456 @@
+# Document Governance GraphQL Schema
+
+scalar DateTime
+scalar JSON
+
+# Enums
+enum ClassificationLevel {
+  Public
+  Internal
+  Confidential
+  Restricted
+  HighlyRestricted
+  Classified_Internal
+  Classified_Regulated
+}
+
+enum RiskLevel {
+  Low
+  Medium
+  High
+  Critical
+}
+
+enum LifecycleType {
+  Contract
+  Policy
+  Record
+  Versioned
+  GovernanceCore
+  GovernanceRecord
+  GovernanceVersioned
+  ExternalPolicy
+  GeneratedArtifact
+}
+
+enum RelationshipType {
+  GOVERNS
+  GOVERNED_BY
+  DERIVES_FROM
+  DERIVED_INTO
+  REQUIRES
+  REQUIRED_BY
+  SUPERSEDES
+  SUPERSEDED_BY
+  INFORMS
+  INFORMED_BY
+  EVIDENCES
+  EVIDENCED_BY
+  OWNED_BY
+  OWNS
+  AMENDS
+  AMENDED_BY
+  REFERENCES
+  REFERENCED_BY
+  CONFLICTS_WITH
+  ATTACHES_TO
+  HAS_ATTACHMENT
+  IMPLEMENTS
+  IMPLEMENTED_BY
+}
+
+enum CreationSource {
+  human
+  ai
+  hybrid
+  automated
+  imported
+}
+
+enum ApprovalStatus {
+  pending
+  approved
+  rejected
+  expired
+  cancelled
+}
+
+# Types
+type DocumentType {
+  id: ID!
+  name: String!
+  category: String!
+  subcategory: String
+  description: String!
+  confidentiality: ClassificationLevel!
+  lifecycle: LifecycleType!
+  retentionPeriod: String!
+  ownerDepartment: String!
+  requiresSignatures: [String!]!
+  legalBasis: [String!]!
+  riskLevel: RiskLevel!
+}
+
+type Document {
+  id: ID!
+  documentType: DocumentType!
+  title: String!
+  description: String
+  version: String!
+  status: String!
+  classification: ClassificationLevel!
+  ownerId: String!
+  ownerDepartment: String!
+  createdBy: String!
+  createdAt: DateTime!
+  updatedBy: String!
+  updatedAt: DateTime!
+  effectiveDate: DateTime
+  expirationDate: DateTime
+  reviewDate: DateTime
+  tags: [String!]!
+  metadata: JSON
+
+  # Related data
+  relationships: [DocumentRelationship!]!
+  lifecycleHistory: [LifecycleHistoryEntry!]!
+  riskScore: RiskScore
+  complianceStatus: ComplianceCheckResult
+  provenance: AIProvenance
+}
+
+type DocumentRelationship {
+  id: ID!
+  relationshipType: RelationshipType!
+  sourceDocument: Document!
+  targetDocument: Document!
+  description: String
+  createdBy: String!
+  createdAt: DateTime!
+  isActive: Boolean!
+}
+
+type LifecycleState {
+  id: String!
+  description: String!
+  isInitial: Boolean!
+  isTerminal: Boolean!
+}
+
+type LifecycleTransition {
+  from: String!
+  to: String!
+  requiresApproval: Boolean!
+  approvers: [String!]
+  notes: String
+}
+
+type LifecycleDefinition {
+  type: LifecycleType!
+  description: String!
+  states: [LifecycleState!]!
+  defaultState: String!
+  transitions: [LifecycleTransition!]!
+}
+
+type LifecycleHistoryEntry {
+  id: ID!
+  documentId: ID!
+  previousState: String
+  newState: String!
+  transitionType: String!
+  triggeredBy: String!
+  triggeredAt: DateTime!
+  approvalRequestId: ID
+  comment: String
+}
+
+type AvailableTransition {
+  targetState: String!
+  requiresApproval: Boolean!
+  approvers: [String!]
+  notes: String
+}
+
+type TransitionResult {
+  success: Boolean!
+  documentId: ID!
+  previousState: String!
+  newState: String!
+  transitionId: ID
+  errors: [String!]!
+  warnings: [String!]!
+  requiresApproval: Boolean!
+  approvalRequestId: ID
+}
+
+type ApprovalRequest {
+  id: ID!
+  documentId: ID!
+  transitionFrom: String!
+  transitionTo: String!
+  requestedBy: String!
+  requestedAt: DateTime!
+  approvers: [String!]!
+  status: ApprovalStatus!
+  comment: String
+}
+
+type RiskDimension {
+  id: String!
+  name: String!
+  description: String!
+  weight: Float!
+  factors: [String!]!
+}
+
+type RiskModifier {
+  name: String!
+  value: Float!
+  reason: String!
+}
+
+type RiskScore {
+  documentId: ID!
+  scoredAt: DateTime!
+  dimensionScores: JSON!
+  weightedScore: Float!
+  riskLevel: RiskLevel!
+  modifiersApplied: [RiskModifier!]!
+}
+
+type ComplianceStandard {
+  id: ID!
+  name: String!
+  authority: String!
+  description: String
+  categories: [String!]!
+}
+
+type SectionResult {
+  sectionName: String!
+  present: Boolean!
+  compliant: Boolean!
+  issues: [String!]!
+  suggestions: [String!]!
+}
+
+type RiskIssue {
+  severity: String!
+  description: String!
+  recommendation: String!
+  standard: String
+}
+
+type ComplianceCheckResult {
+  documentId: ID!
+  documentTypeId: String!
+  checkedAt: DateTime!
+  overallCompliant: Boolean!
+  applicableStandards: [String!]!
+  sectionResults: [SectionResult!]!
+  missingSections: [String!]!
+  riskIssues: [RiskIssue!]!
+  score: Int!
+}
+
+type AuditFinding {
+  id: ID!
+  documentId: ID!
+  findingType: String!
+  severity: String!
+  title: String!
+  description: String!
+  recommendation: String!
+  complianceStandard: String
+  foundAt: DateTime!
+  foundBy: String!
+  status: String!
+  resolvedAt: DateTime
+  resolvedBy: String
+  resolutionNotes: String
+}
+
+type AIProvenance {
+  id: ID!
+  documentId: ID!
+  createdBy: CreationSource!
+  aiModel: String
+  aiModelVersion: String
+  sourceDocuments: [String!]!
+  reviewedByHuman: Boolean!
+  humanReviewerId: String
+  humanReviewerRole: String
+  reviewTimestamp: DateTime
+  signOffRequired: Boolean!
+  signOffObtained: Boolean!
+  signOffBy: String
+  signOffRole: String
+  signOffTimestamp: DateTime
+  confidenceScore: Float
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DocumentSearchResult {
+  documents: [Document!]!
+  total: Int!
+  limit: Int!
+  offset: Int!
+  hasMore: Boolean!
+}
+
+# Inputs
+input CreateDocumentInput {
+  documentTypeId: ID!
+  title: String!
+  description: String
+  classification: ClassificationLevel!
+  ownerId: String!
+  ownerDepartment: String!
+  effectiveDate: DateTime
+  expirationDate: DateTime
+  tags: [String!]
+  metadata: JSON
+}
+
+input UpdateDocumentInput {
+  title: String
+  description: String
+  classification: ClassificationLevel
+  ownerId: String
+  ownerDepartment: String
+  effectiveDate: DateTime
+  expirationDate: DateTime
+  reviewDate: DateTime
+  tags: [String!]
+  metadata: JSON
+}
+
+input TransitionInput {
+  documentId: ID!
+  targetState: String!
+  comment: String
+}
+
+input ApprovalDecisionInput {
+  approvalRequestId: ID!
+  decision: String!
+  comment: String
+}
+
+input CreateRelationshipInput {
+  sourceDocumentId: ID!
+  targetDocumentId: ID!
+  relationshipType: RelationshipType!
+  description: String
+}
+
+input DocumentSearchInput {
+  query: String
+  documentTypeIds: [ID!]
+  classifications: [ClassificationLevel!]
+  statuses: [String!]
+  ownerDepartments: [String!]
+  ownerIds: [String!]
+  tags: [String!]
+  riskLevels: [RiskLevel!]
+  complianceStandards: [String!]
+  createdAfter: DateTime
+  createdBefore: DateTime
+  updatedAfter: DateTime
+  updatedBefore: DateTime
+  expiringWithinDays: Int
+  limit: Int
+  offset: Int
+  sortBy: String
+  sortOrder: String
+}
+
+input CreateProvenanceInput {
+  documentId: ID!
+  createdBy: CreationSource!
+  aiModel: String
+  aiModelVersion: String
+  sourceDocuments: [String!]
+  sourceUrls: [String!]
+  retrievalAugmented: Boolean
+  signOffRequired: Boolean
+  confidenceScore: Float
+}
+
+input RecordHumanReviewInput {
+  documentId: ID!
+  reviewerId: String!
+  reviewerRole: String!
+  notes: String
+}
+
+input RecordSignOffInput {
+  documentId: ID!
+  signOffBy: String!
+  signOffRole: String!
+}
+
+# Queries
+type Query {
+  # Document Types
+  documentTypes: [DocumentType!]!
+  documentType(id: ID!): DocumentType
+
+  # Documents
+  document(id: ID!): Document
+  documents(input: DocumentSearchInput): DocumentSearchResult!
+
+  # Lifecycle
+  lifecycleDefinition(type: LifecycleType!): LifecycleDefinition!
+  availableTransitions(documentId: ID!): [AvailableTransition!]!
+  lifecycleHistory(documentId: ID!): [LifecycleHistoryEntry!]!
+  pendingApprovals(approverId: String!): [ApprovalRequest!]!
+
+  # Risk
+  riskDimensions: [RiskDimension!]!
+  riskScore(documentId: ID!): RiskScore
+  highRiskDocuments(minRiskLevel: RiskLevel): [RiskScore!]!
+
+  # Compliance
+  complianceStandards: [ComplianceStandard!]!
+  applicableStandards(documentTypeId: ID!): [ComplianceStandard!]!
+  complianceCheck(documentId: ID!): ComplianceCheckResult!
+  auditFindings(documentId: ID!): [AuditFinding!]!
+
+  # Provenance
+  provenance(documentId: ID!): AIProvenance
+
+  # Relationships
+  documentRelationships(documentId: ID!, direction: String): [DocumentRelationship!]!
+}
+
+# Mutations
+type Mutation {
+  # Documents
+  createDocument(input: CreateDocumentInput!): Document!
+  updateDocument(id: ID!, input: UpdateDocumentInput!): Document!
+  deleteDocument(id: ID!): Boolean!
+
+  # Lifecycle
+  requestTransition(input: TransitionInput!): TransitionResult!
+  processApproval(input: ApprovalDecisionInput!): TransitionResult!
+
+  # Risk
+  calculateRiskScore(documentId: ID!): RiskScore!
+
+  # Compliance
+  runComplianceCheck(documentId: ID!): ComplianceCheckResult!
+  createAuditFinding(documentId: ID!, findingType: String!, severity: String!, title: String!, description: String!, recommendation: String!, complianceStandard: String): AuditFinding!
+  resolveAuditFinding(findingId: ID!, resolutionNotes: String!): AuditFinding!
+
+  # Provenance
+  createProvenance(input: CreateProvenanceInput!): AIProvenance!
+  recordHumanReview(input: RecordHumanReviewInput!): AIProvenance!
+  recordSignOff(input: RecordSignOffInput!): AIProvenance!
+
+  # Relationships
+  createRelationship(input: CreateRelationshipInput!): DocumentRelationship!
+  deactivateRelationship(id: ID!): Boolean!
+}

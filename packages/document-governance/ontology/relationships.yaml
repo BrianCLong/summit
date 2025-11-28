@@ -1,0 +1,229 @@
+version: '1.0.0'
+description: Document relationship type definitions
+
+relationships:
+  - id: rel.GOVERNS
+    name: GOVERNS
+    description: Parent agreement or policy governs child document.
+    symmetric: false
+    transitive: true
+    inverse: rel.GOVERNED_BY
+    examples:
+      - from: doc.msa
+        to: doc.sow
+        description: MSA governs SOW terms and conditions
+      - from: doc.security_policy
+        to: doc.access_control_policy
+        description: Top-level security policy governs sub-policies
+      - from: doc.articles_of_incorporation
+        to: doc.bylaws
+        description: Articles govern bylaws
+
+  - id: rel.GOVERNED_BY
+    name: GOVERNED_BY
+    description: Document is governed by a parent document (inverse of GOVERNS).
+    symmetric: false
+    transitive: true
+    inverse: rel.GOVERNS
+
+  - id: rel.DERIVES_FROM
+    name: DERIVES_FROM
+    description: Document is derived from another as a refinement or implementation.
+    symmetric: false
+    transitive: true
+    inverse: rel.DERIVED_INTO
+    examples:
+      - from: doc.tech_spec
+        to: doc.prd
+        description: Technical spec derives from product requirements
+      - from: doc.runbook
+        to: doc.tech_spec
+        description: Runbook derives from technical specification
+      - from: doc.adr
+        to: doc.tech_spec
+        description: ADR derives from technical decisions in spec
+
+  - id: rel.DERIVED_INTO
+    name: DERIVED_INTO
+    description: Document has been refined into another (inverse of DERIVES_FROM).
+    symmetric: false
+    transitive: true
+    inverse: rel.DERIVES_FROM
+
+  - id: rel.REQUIRES
+    name: REQUIRES
+    description: Document cannot be valid without another document.
+    symmetric: false
+    transitive: true
+    inverse: rel.REQUIRED_BY
+    examples:
+      - from: doc.sow
+        to: doc.msa
+        description: SOW requires an MSA to be in place
+      - from: doc.dpa
+        to: doc.msa
+        description: DPA requires an MSA
+      - from: doc.board_resolution
+        to: doc.board_minutes
+        description: Resolution requires minutes documenting the meeting
+
+  - id: rel.REQUIRED_BY
+    name: REQUIRED_BY
+    description: Document is required by another (inverse of REQUIRES).
+    symmetric: false
+    transitive: true
+    inverse: rel.REQUIRES
+
+  - id: rel.SUPERSEDES
+    name: SUPERSEDES
+    description: Newer version replaces an older document.
+    symmetric: false
+    transitive: true
+    inverse: rel.SUPERSEDED_BY
+    notes: Used for version control and document history tracking
+
+  - id: rel.SUPERSEDED_BY
+    name: SUPERSEDED_BY
+    description: Document has been replaced by a newer version (inverse of SUPERSEDES).
+    symmetric: false
+    transitive: true
+    inverse: rel.SUPERSEDES
+
+  - id: rel.INFORMS
+    name: INFORMS
+    description: Output of one document informs creation or change of another.
+    symmetric: false
+    transitive: false
+    inverse: rel.INFORMED_BY
+    examples:
+      - from: doc.incident_postmortem
+        to: doc.runbook
+        description: Postmortem findings inform runbook updates
+      - from: doc.vulnerability_assessment
+        to: doc.incident_response_plan
+        description: Vulnerability findings inform response planning
+      - from: doc.audit_report
+        to: doc.risk_assessment
+        description: Audit findings inform risk assessment
+      - from: doc.model_evaluation_report
+        to: doc.model_card
+        description: Evaluation results inform model card updates
+
+  - id: rel.INFORMED_BY
+    name: INFORMED_BY
+    description: Document was informed by another (inverse of INFORMS).
+    symmetric: false
+    transitive: false
+    inverse: rel.INFORMS
+
+  - id: rel.EVIDENCES
+    name: EVIDENCES
+    description: Used as evidence for a control, audit, or compliance claim.
+    symmetric: false
+    transitive: false
+    inverse: rel.EVIDENCED_BY
+    examples:
+      - from: doc.audit_report
+        to: doc.compliance_attestation
+        description: Audit report serves as evidence for compliance
+      - from: doc.penetration_test_report
+        to: doc.compliance_attestation
+        description: Pentest report evidences security compliance
+      - from: doc.vulnerability_assessment
+        to: doc.audit_report
+        description: Vulnerability assessment evidences audit findings
+
+  - id: rel.EVIDENCED_BY
+    name: EVIDENCED_BY
+    description: Document is evidenced by another (inverse of EVIDENCES).
+    symmetric: false
+    transitive: false
+    inverse: rel.EVIDENCES
+
+  - id: rel.OWNED_BY
+    name: OWNED_BY
+    description: Maps document to accountable owner role or department.
+    symmetric: false
+    transitive: false
+    inverse: rel.OWNS
+    notes: Owner is responsible for document accuracy, updates, and compliance
+
+  - id: rel.OWNS
+    name: OWNS
+    description: Role or department owns the document (inverse of OWNED_BY).
+    symmetric: false
+    transitive: false
+    inverse: rel.OWNED_BY
+
+  - id: rel.AMENDS
+    name: AMENDS
+    description: Document amends or modifies another document.
+    symmetric: false
+    transitive: false
+    inverse: rel.AMENDED_BY
+    notes: Used for contract amendments, policy updates that don't fully supersede
+
+  - id: rel.AMENDED_BY
+    name: AMENDED_BY
+    description: Document has been amended by another (inverse of AMENDS).
+    symmetric: false
+    transitive: false
+    inverse: rel.AMENDS
+
+  - id: rel.REFERENCES
+    name: REFERENCES
+    description: Document references another document.
+    symmetric: false
+    transitive: false
+    inverse: rel.REFERENCED_BY
+    notes: General citation or cross-reference relationship
+
+  - id: rel.REFERENCED_BY
+    name: REFERENCED_BY
+    description: Document is referenced by another (inverse of REFERENCES).
+    symmetric: false
+    transitive: false
+    inverse: rel.REFERENCES
+
+  - id: rel.CONFLICTS_WITH
+    name: CONFLICTS_WITH
+    description: Document has conflicting terms with another.
+    symmetric: true
+    transitive: false
+    notes: Used to flag potential legal or operational conflicts
+
+  - id: rel.ATTACHES_TO
+    name: ATTACHES_TO
+    description: Document is an attachment or exhibit to another.
+    symmetric: false
+    transitive: false
+    inverse: rel.HAS_ATTACHMENT
+    examples:
+      - from: doc.sow
+        to: doc.msa
+        description: SOW attaches to MSA as an exhibit
+
+  - id: rel.HAS_ATTACHMENT
+    name: HAS_ATTACHMENT
+    description: Document has attachments or exhibits (inverse of ATTACHES_TO).
+    symmetric: false
+    transitive: false
+    inverse: rel.ATTACHES_TO
+
+  - id: rel.IMPLEMENTS
+    name: IMPLEMENTS
+    description: Document implements requirements from another.
+    symmetric: false
+    transitive: false
+    inverse: rel.IMPLEMENTED_BY
+    examples:
+      - from: doc.security_policy
+        to: doc.compliance_attestation
+        description: Security policy implements compliance requirements
+
+  - id: rel.IMPLEMENTED_BY
+    name: IMPLEMENTED_BY
+    description: Document's requirements are implemented by another (inverse of IMPLEMENTS).
+    symmetric: false
+    transitive: false
+    inverse: rel.IMPLEMENTS

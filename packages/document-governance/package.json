@@ -1,0 +1,71 @@
+{
+  "name": "@intelgraph/document-governance",
+  "version": "1.0.0",
+  "description": "Business Document Ontology and Governance Framework for Summit/IntelGraph/CompanyOS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "migrate": "node dist/neo4j/migrate.js",
+    "seed": "node dist/neo4j/seed.js"
+  },
+  "dependencies": {
+    "@intelgraph/knowledge-graph": "workspace:*",
+    "zod": "^4.1.12",
+    "neo4j-driver": "6.0.1",
+    "uuid": "^11.0.3",
+    "yaml": "^2.3.4",
+    "handlebars": "^4.7.8",
+    "ajv": "^8.12.0",
+    "date-fns": "^3.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/uuid": "^11.0.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ontology": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    },
+    "./services": {
+      "types": "./dist/services/index.d.ts",
+      "import": "./dist/services/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "ontology",
+    "templates"
+  ],
+  "keywords": [
+    "document-governance",
+    "ontology",
+    "compliance",
+    "lifecycle",
+    "risk-scoring",
+    "intelgraph"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit.git",
+    "directory": "packages/document-governance"
+  },
+  "license": "UNLICENSED"
+}
