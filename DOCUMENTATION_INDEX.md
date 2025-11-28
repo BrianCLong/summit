@@ -75,6 +75,22 @@ Quick lookup guide for common tasks and patterns.
 - Troubleshooting issues
 - Finding monitoring endpoints
 
+### 4. **ops/production-deployment-runbook.md**
+Step-by-step production promotion runbook covering pre-checks, staging parity, rollout/rollback commands, and evidence collection requirements.
+
+**When to use:**
+- Executing a production deployment with auditable steps
+- Capturing smoke/health output for the release ticket
+- Enforcing persisted queries and rate limits during rollout
+
+### 5. **ops/production-readiness-validation.md**
+Validation plan that turns the identified production gaps into actionable tests (performance, security, backup/DR, observability, E2E workflows) with acceptance criteria.
+
+**When to use:**
+- Planning a production readiness audit
+- Running load, DR, and security validation with expected outcomes
+- Preparing evidence for go/no-go decisions
+
 ## Quick Navigation
 
 ### I want to understand...
