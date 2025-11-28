@@ -1,0 +1,5 @@
+Category,Tool,Description,Our Delta
+Guardrails,NVIDIA NeMo Guardrails,Programmable guardrails for LLM inputs/outputs.,Cross-layer policy engine covering data/training/runtime.
+Observability,Arize Phoenix,LLM evaluation and tracing.,Graph-structured telemetry linking training to inference.
+Governance,Credo AI,AI governance and compliance platform.,Automated feedback loops from policy violations to data/alignment.
+Tracing,LangSmith,Tracing and debugging for LLM apps.,Integrated with graph operations and frontier-specific stack.
