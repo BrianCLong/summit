@@ -1,0 +1,31 @@
+name: Agentic Policy Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'tasks/**'
+      - '.agentic/**'
+
+jobs:
+  policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Build summitctl
+        run: |
+          cd tools/summitctl
+          npm install
+          npm run build
+
+      - name: Run Policy Check
+        run: |
+          # Find any task definitions in the PR and validate them
+          # This is a placeholder logic assuming tasks are defined in JSON files
+          find . -name "task-*.json" -print0 | xargs -0 -I {} ./tools/summitctl/dist/index.js policy check {}
