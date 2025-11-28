@@ -1,0 +1,410 @@
+# FedRAMP High Baseline Controls - Zero Trust Mapping
+# Automated compliance validation for IntelGraph platform
+apiVersion: compliance.intelgraph.io/v1
+kind: ComplianceFramework
+metadata:
+  name: fedramp-high-zero-trust
+  namespace: zero-trust-system
+  labels:
+    framework: fedramp
+    baseline: high
+    version: rev5
+spec:
+  frameworkInfo:
+    name: "FedRAMP High Baseline"
+    title: "Federal Risk and Authorization Management Program"
+    version: "Rev 5"
+    lastUpdated: "2023-05-30"
+    authority: "General Services Administration (GSA)"
+
+  # Control families relevant to Zero Trust
+  controlFamilies:
+    # Access Control (AC)
+    - family: AC
+      name: "Access Control"
+      controls:
+        - id: AC-2
+          name: "Account Management"
+          enhancement: "(1)(2)(3)(4)(5)(7)(9)(10)(12)(13)"
+          implementation:
+            zeroTrustMapping:
+              - "Identity verification via SPIFFE/SPIRE"
+              - "Just-in-time access provisioning"
+              - "Automated account lifecycle management"
+            components:
+              - spire-server
+              - identity-service
+              - access-manager
+            evidence:
+              automated:
+                - query: "spire_server_registered_entries_total"
+                  description: "Total registered workload identities"
+                - query: "identity_service_account_operations_total"
+                  description: "Account management operations"
+              manual:
+                - "Account management procedures documentation"
+
+        - id: AC-3
+          name: "Access Enforcement"
+          enhancement: "(2)(3)(4)"
+          implementation:
+            zeroTrustMapping:
+              - "Policy-based access control via OPA"
+              - "Attribute-based access decisions"
+              - "Per-request authorization"
+            components:
+              - opa-gatekeeper
+              - authorization-service
+            evidence:
+              automated:
+                - query: "opa_decisions_total{decision='allow'}"
+                - query: "opa_decisions_total{decision='deny'}"
+
+        - id: AC-4
+          name: "Information Flow Enforcement"
+          enhancement: "(4)(21)"
+          implementation:
+            zeroTrustMapping:
+              - "Network policies enforce data flow"
+              - "L7 policy controls application protocols"
+              - "Data loss prevention integration"
+            components:
+              - cilium-network-policies
+              - istio-authorization
+              - dlp-service
+
+        - id: AC-6
+          name: "Least Privilege"
+          enhancement: "(1)(2)(3)(5)(9)(10)"
+          implementation:
+            zeroTrustMapping:
+              - "Minimal RBAC permissions"
+              - "Service-specific network access"
+              - "Time-bounded credentials"
+            components:
+              - kubernetes-rbac
+              - network-policies
+              - credential-service
+
+        - id: AC-17
+          name: "Remote Access"
+          enhancement: "(1)(2)(3)(4)(9)"
+          implementation:
+            zeroTrustMapping:
+              - "Identity-based access regardless of location"
+              - "mTLS for all connections"
+              - "Device trust verification"
+            components:
+              - identity-proxy
+              - device-trust-service
+              - mtls-gateway
+
+    # Audit and Accountability (AU)
+    - family: AU
+      name: "Audit and Accountability"
+      controls:
+        - id: AU-2
+          name: "Event Logging"
+          enhancement: "(a)(d)"
+          implementation:
+            zeroTrustMapping:
+              - "Comprehensive access logging"
+              - "Policy decision logging"
+              - "Identity operation logging"
+            components:
+              - audit-service
+              - logging-pipeline
+            evidence:
+              automated:
+                - query: "audit_events_total"
+                - query: "logging_pipeline_bytes_total"
+
+        - id: AU-3
+          name: "Content of Audit Records"
+          enhancement: "(1)(2)"
+          implementation:
+            zeroTrustMapping:
+              - "Rich context in audit records"
+              - "Identity information included"
+              - "Policy evaluation context"
+            auditFields:
+              - timestamp
+              - sourceIdentity
+              - targetResource
+              - action
+              - outcome
+              - policyDecision
+              - riskScore
+              - sessionId
+              - requestContext
+
+        - id: AU-6
+          name: "Audit Record Review, Analysis, and Reporting"
+          enhancement: "(1)(3)(4)(5)(6)"
+          implementation:
+            zeroTrustMapping:
+              - "Automated anomaly detection"
+              - "Real-time alerting"
+              - "Compliance reporting"
+            components:
+              - siem-integration
+              - anomaly-detector
+              - compliance-reporter
+
+        - id: AU-12
+          name: "Audit Record Generation"
+          enhancement: "(1)(3)"
+          implementation:
+            zeroTrustMapping:
+              - "Immutable audit trail"
+              - "Cryptographic verification"
+              - "Centralized collection"
+
+    # Configuration Management (CM)
+    - family: CM
+      name: "Configuration Management"
+      controls:
+        - id: CM-2
+          name: "Baseline Configuration"
+          enhancement: "(1)(2)(3)(7)"
+          implementation:
+            zeroTrustMapping:
+              - "Policy-as-code baselines"
+              - "GitOps configuration management"
+              - "Drift detection"
+            components:
+              - policy-repository
+              - gitops-controller
+              - drift-detector
+
+        - id: CM-3
+          name: "Configuration Change Control"
+          enhancement: "(1)(2)(4)(6)"
+          implementation:
+            zeroTrustMapping:
+              - "Policy change approval workflow"
+              - "Automated impact analysis"
+              - "Rollback capabilities"
+            components:
+              - policy-ci-cd
+              - change-analyzer
+              - rollback-controller
+
+        - id: CM-7
+          name: "Least Functionality"
+          enhancement: "(1)(2)"
+          implementation:
+            zeroTrustMapping:
+              - "Minimal container images"
+              - "Network allow-list only"
+              - "Disabled unnecessary services"
+
+    # Identification and Authentication (IA)
+    - family: IA
+      name: "Identification and Authentication"
+      controls:
+        - id: IA-2
+          name: "Identification and Authentication (Organizational Users)"
+          enhancement: "(1)(2)(5)(6)(8)(12)"
+          implementation:
+            zeroTrustMapping:
+              - "Strong identity verification"
+              - "Multi-factor authentication"
+              - "Phishing-resistant authentication"
+            components:
+              - oidc-provider
+              - mfa-service
+              - fido2-server
+
+        - id: IA-3
+          name: "Device Identification and Authentication"
+          enhancement: "(1)(3)(4)"
+          implementation:
+            zeroTrustMapping:
+              - "Device attestation via TPM/cloud"
+              - "Device certificates"
+              - "Hardware-bound credentials"
+            components:
+              - spire-agent
+              - device-attestor
+              - tpm-service
+
+        - id: IA-5
+          name: "Authenticator Management"
+          enhancement: "(1)(2)(6)"
+          implementation:
+            zeroTrustMapping:
+              - "Automated credential rotation"
+              - "Certificate lifecycle management"
+              - "Secure credential storage"
+
+        - id: IA-8
+          name: "Identification and Authentication (Non-Organizational Users)"
+          enhancement: "(1)(2)(4)"
+          implementation:
+            zeroTrustMapping:
+              - "Federated identity support"
+              - "External trust validation"
+              - "Guest access controls"
+
+    # System and Communications Protection (SC)
+    - family: SC
+      name: "System and Communications Protection"
+      controls:
+        - id: SC-7
+          name: "Boundary Protection"
+          enhancement: "(3)(4)(5)(7)(8)(18)(21)"
+          implementation:
+            zeroTrustMapping:
+              - "Software-defined perimeter"
+              - "Micro-segmentation"
+              - "Identity-based boundaries"
+            components:
+              - network-policies
+              - service-mesh
+              - identity-proxy
+
+        - id: SC-8
+          name: "Transmission Confidentiality and Integrity"
+          enhancement: "(1)(2)"
+          implementation:
+            zeroTrustMapping:
+              - "mTLS for all traffic"
+              - "TLS 1.3 minimum"
+              - "Certificate-based authentication"
+
+        - id: SC-12
+          name: "Cryptographic Key Establishment and Management"
+          enhancement: "(1)(2)(3)"
+          implementation:
+            zeroTrustMapping:
+              - "Automated key rotation"
+              - "HSM-backed key storage"
+              - "FIPS 140-2 validated cryptography"
+            components:
+              - key-management-service
+              - hsm-integration
+              - certificate-authority
+
+        - id: SC-13
+          name: "Cryptographic Protection"
+          implementation:
+            zeroTrustMapping:
+              - "FIPS-approved algorithms"
+              - "Strong cipher suites"
+            algorithms:
+              encryption:
+                - AES-256-GCM
+                - ChaCha20-Poly1305
+              hashing:
+                - SHA-256
+                - SHA-384
+              keyExchange:
+                - ECDHE
+              signing:
+                - ECDSA
+                - Ed25519
+
+        - id: SC-23
+          name: "Session Authenticity"
+          implementation:
+            zeroTrustMapping:
+              - "Cryptographic session binding"
+              - "Session token validation"
+              - "Replay prevention"
+
+    # System and Information Integrity (SI)
+    - family: SI
+      name: "System and Information Integrity"
+      controls:
+        - id: SI-4
+          name: "System Monitoring"
+          enhancement: "(2)(4)(5)(12)(16)(22)"
+          implementation:
+            zeroTrustMapping:
+              - "Continuous security monitoring"
+              - "Behavioral analysis"
+              - "Threat detection"
+            components:
+              - monitoring-stack
+              - threat-detector
+              - behavioral-analyzer
+
+        - id: SI-7
+          name: "Software, Firmware, and Information Integrity"
+          enhancement: "(1)(2)(5)(6)(7)(15)"
+          implementation:
+            zeroTrustMapping:
+              - "Software supply chain security"
+              - "Image signing and verification"
+              - "SBOM generation"
+            components:
+              - image-signing-service
+              - sbom-generator
+              - supply-chain-validator
+
+---
+apiVersion: compliance.intelgraph.io/v1
+kind: ComplianceAssessment
+metadata:
+  name: fedramp-high-assessment
+  namespace: zero-trust-system
+spec:
+  framework: fedramp-high-zero-trust
+  schedule: "0 3 * * *"  # Daily at 3 AM
+
+  assessmentConfig:
+    # Continuous monitoring
+    continuousMonitoring:
+      enabled: true
+      interval: 5m
+      criticalControlsOnly: false
+
+    # Evidence collection
+    evidenceCollection:
+      enabled: true
+      retention: 365d  # 1 year for FedRAMP
+      encryption: true
+      sources:
+        - type: kubernetes
+        - type: spire
+        - type: opa
+        - type: audit_logs
+        - type: prometheus
+        - type: network_flows
+
+    # POA&M integration
+    poamIntegration:
+      enabled: true
+      autoCreateFindings: true
+      severityMapping:
+        critical: P1
+        high: P2
+        medium: P3
+        low: P4
+
+  # Reporting
+  reporting:
+    format: oscal-json  # OSCAL format for FedRAMP
+    destinations:
+      - type: s3
+        bucket: fedramp-evidence
+        prefix: assessments/
+      - type: grc-platform
+        endpoint: https://grc.intelgraph.io/api/v1/assessments
+    includeEvidence: true
+    includeScreenshots: true
+    signReport: true
+
+  # Alerting
+  alerting:
+    enabled: true
+    channels:
+      - type: pagerduty
+        severity: critical
+      - type: slack
+        channel: "#compliance-alerts"
+      - type: email
+        recipients:
+          - isso@intelgraph.io
+          - ao@intelgraph.io
