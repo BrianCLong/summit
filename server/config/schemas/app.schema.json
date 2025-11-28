@@ -10,7 +10,13 @@
     "database": { "$ref": "./database.schema.json" },
     "auth": { "$ref": "./auth.schema.json" },
     "services": { "$ref": "./services.schema.json" },
-    "features": { "$ref": "./features.schema.json" }
+    "features": { "$ref": "./features.schema.json" },
+    "security": { "$ref": "./security.schema.json" },
+    "environments": {
+      "type": "object",
+      "description": "Environment-specific overrides keyed by environment name.",
+      "additionalProperties": { "type": "object" }
+    }
   },
   "required": ["version", "database", "auth"]
 }

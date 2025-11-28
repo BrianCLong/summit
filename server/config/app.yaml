@@ -1,0 +1,58 @@
+version: 1
+database:
+  host: localhost
+  port: 5432
+  user: summit
+  password: vault://database/creds#password?default=dev-db-password&optional=true
+  database: summit
+auth:
+  jwt:
+    secret: env://JWT_SECRET?default=dev-jwt-secret
+    expiresIn: 1h
+  apiKey:
+    header: X-API-Key
+services:
+  redis:
+    url: redis://localhost:6379
+features:
+  enableNewDashboard: true
+  enableExperimentalFeatures: false
+  flags:
+    secureConfig:
+      description: Enforces secure config defaults
+      enabled: true
+      environments:
+        production: true
+        development: true
+    auditTrail:
+      description: Enables audit logging endpoints
+      enabled: false
+      environments:
+        development: true
+      rolloutPercentage: 50
+security:
+  secrets:
+    providerPreference:
+      - vault
+      - awsSecretsManager
+      - environment
+    cacheTtlSeconds: 300
+    fileBasePath: ./config/secrets
+    rotation:
+      enabled: true
+      intervalSeconds: 900
+    encryptionKeyEnv: CONFIG_ENCRYPTION_KEY
+    auditLogPath: ./logs/config-audit.log
+    vault:
+      address: http://localhost:8200
+      tokenEnv: VAULT_TOKEN
+      kvMountPath: secret/data
+    aws:
+      region: us-east-1
+environments:
+  staging:
+    services:
+      redis:
+        url: redis://staging-redis:6379
+    features:
+      enableExperimentalFeatures: true
