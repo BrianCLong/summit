@@ -1,7 +1,9 @@
 import http from 'http';
 import express from 'express';
+import { GraphQLError } from 'graphql';
 import { useServer } from 'graphql-ws/use/ws';
 import { WebSocketServer } from 'ws';
+import { randomUUID } from 'node:crypto';
 import pino from 'pino';
 import { getContext } from './lib/auth.js';
 import path from 'path';
@@ -11,6 +13,7 @@ import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
+import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
@@ -54,7 +57,60 @@ const startServer = async () => {
   useServer(
     {
       schema,
-      context: getContext,
+      context: async (ctx) => {
+        const request = (ctx.extra as any).request ?? (ctx as any).extra;
+        const baseContext = await getContext({ req: request });
+
+        return {
+          ...baseContext,
+          connectionId: (ctx.extra as any).connectionId,
+          pubsub: subscriptionEngine.getPubSub(),
+          subscriptionEngine,
+        };
+      },
+      onConnect: (ctx) => {
+        const connectionId = randomUUID();
+        (ctx.extra as any).connectionId = connectionId;
+        subscriptionEngine.registerConnection(
+          connectionId,
+          (ctx.extra as any).socket,
+        );
+      },
+      onSubscribe: (ctx, msg) => {
+        const socket = (ctx.extra as any).socket;
+        if (!subscriptionEngine.enforceBackpressure(socket)) {
+          return [new GraphQLError('Backpressure threshold exceeded')];
+        }
+        const connectionId = (ctx.extra as any).connectionId;
+        if (connectionId) {
+          subscriptionEngine.trackSubscription(connectionId, msg.id);
+        }
+        (ctx.extra as any).lastFanoutStart = process.hrtime.bigint();
+      },
+      onNext: (ctx) => {
+        const startedAt =
+          (ctx.extra as any).lastFanoutStart ?? process.hrtime.bigint();
+        subscriptionEngine.recordFanout(startedAt);
+        (ctx.extra as any).lastFanoutStart = process.hrtime.bigint();
+      },
+      onComplete: (ctx, msg) => {
+        const connectionId = (ctx.extra as any).connectionId;
+        if (connectionId) {
+          subscriptionEngine.completeSubscription(connectionId, msg?.id);
+        }
+      },
+      onError: (ctx, msg, errors) => {
+        logger.error(
+          { errors, operationId: msg?.id, connectionId: (ctx.extra as any).connectionId },
+          'GraphQL WS subscription error',
+        );
+      },
+      onClose: (ctx) => {
+        const connectionId = (ctx.extra as any).connectionId;
+        if (connectionId) {
+          subscriptionEngine.unregisterConnection(connectionId);
+        }
+      },
       // ...wsMiddleware,
     },
     wss,
