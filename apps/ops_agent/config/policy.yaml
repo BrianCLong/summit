@@ -1,0 +1,10 @@
+tenant: sre
+region: us-east
+purpose: operations
+sensitivity: internal
+overrides:
+  allow_tools:
+    - fetch_metrics
+    - restart_service
+  safety_policies:
+    - check_change_window

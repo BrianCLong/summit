@@ -1,0 +1,8 @@
+tenant: engineering
+region: global
+purpose: dev_assistant
+sensitivity: internal
+overrides:
+  banned_terms:
+    - secret
+    - password
