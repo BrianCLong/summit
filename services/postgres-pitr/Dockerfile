@@ -9,7 +9,8 @@ RUN apk add --no-cache \
     wget \
     bash \
     aws-cli \
-    lz4
+    lz4 \
+    jq
 
 # Install WAL-G
 ENV WALG_VERSION=v3.0.0
@@ -23,10 +24,12 @@ COPY config/walg.json /etc/wal-g.d/walg.json
 COPY scripts/wal-archive.sh /usr/local/bin/wal-archive.sh
 COPY scripts/wal-restore.sh /usr/local/bin/wal-restore.sh
 COPY scripts/base-backup.sh /usr/local/bin/base-backup.sh
+COPY scripts/pitr-restore.sh /usr/local/bin/pitr-restore.sh
 
 RUN chmod +x /usr/local/bin/wal-archive.sh \
     /usr/local/bin/wal-restore.sh \
-    /usr/local/bin/base-backup.sh
+    /usr/local/bin/base-backup.sh \
+    /usr/local/bin/pitr-restore.sh
 
 # Configure PostgreSQL for PITR
 COPY config/postgresql-pitr.conf /etc/postgresql/postgresql-pitr.conf
