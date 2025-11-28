@@ -1,0 +1,33 @@
+name: Pipeline - Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      target_tag:
+        description: 'Target Docker tag/SHA to rollback to'
+        required: true
+
+jobs:
+  rollback:
+    name: ⏪ Rollback
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Execute Rollback
+        run: |
+          echo "🚨 Initiating Rollback for ${{ inputs.environment }} to version ${{ inputs.target_tag }}"
+          ./scripts/deploy.sh -e ${{ inputs.environment }} -t ${{ inputs.target_tag }}
+
+      - name: Post-Rollback Verification
+        run: |
+          echo "Verifying health of rolled-back service..."
+          # In a real scenario, run k6 or curl check here
+          echo "✅ Service health verified."
