@@ -1,0 +1,512 @@
+# Audit Black Box Service - CI/CD Pipeline
+#
+# Comprehensive CI/CD for the immutable audit system.
+# Includes security scanning, compliance checks, and multi-stage deployment.
+
+name: Audit Black Box CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'services/audit-blackbox-service/**'
+      - 'services/logging-pipeline/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/audit-blackbox-service/**'
+      - 'services/logging-pipeline/**'
+  workflow_dispatch:
+    inputs:
+      deploy_environment:
+        description: 'Environment to deploy to'
+        required: false
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '9'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/audit-blackbox-service
+
+jobs:
+  # ============================================================================
+  # Build and Test
+  # ============================================================================
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: services/audit-blackbox-service
+
+      - name: Type check
+        run: pnpm typecheck
+        working-directory: services/audit-blackbox-service
+
+      - name: Lint
+        run: pnpm lint
+        working-directory: services/audit-blackbox-service
+
+      - name: Run unit tests
+        run: pnpm test -- --coverage --maxWorkers=2
+        working-directory: services/audit-blackbox-service
+
+      - name: Run property-based tests
+        run: pnpm test -- property-based.test.ts --maxWorkers=2
+        working-directory: services/audit-blackbox-service
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: services/audit-blackbox-service/coverage/lcov.info
+          flags: audit-blackbox
+          fail_ci_if_error: false
+
+      - name: Build
+        run: pnpm build
+        working-directory: services/audit-blackbox-service
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: services/audit-blackbox-service/dist
+          retention-days: 7
+
+  # ============================================================================
+  # Security Scanning
+  # ============================================================================
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: services/audit-blackbox-service
+
+      - name: Run npm audit
+        run: pnpm audit --audit-level=high
+        working-directory: services/audit-blackbox-service
+        continue-on-error: true
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --file=services/audit-blackbox-service/package.json --severity-threshold=high
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'services/audit-blackbox-service'
+          severity: 'CRITICAL,HIGH'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ============================================================================
+  # Compliance Checks
+  # ============================================================================
+  compliance:
+    name: Compliance Checks
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: services/audit-blackbox-service
+
+      - name: Check cryptographic compliance
+        run: |
+          echo "Checking cryptographic algorithm usage..."
+          # Ensure only approved algorithms are used
+          if grep -rn "md5\|sha1" services/audit-blackbox-service/src --include="*.ts" | grep -v "test"; then
+            echo "WARNING: Found potentially weak hash algorithms"
+            exit 1
+          fi
+          echo "Cryptographic compliance check passed"
+
+      - name: Verify hash chain implementation
+        run: |
+          echo "Verifying hash chain implementation..."
+          # Check for required components
+          if ! grep -q "calculateChainHash" services/audit-blackbox-service/src/store/immutable-store.ts; then
+            echo "ERROR: Hash chain implementation not found"
+            exit 1
+          fi
+          echo "Hash chain verification passed"
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: services/audit-blackbox-service
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+          retention-days: 90
+
+      - name: License compliance check
+        run: |
+          cd services/audit-blackbox-service
+          npx license-checker --production --failOn "GPL;LGPL;AGPL" || echo "License check completed with warnings"
+
+  # ============================================================================
+  # Integration Tests
+  # ============================================================================
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: audit
+          POSTGRES_PASSWORD: audit_test_password
+          POSTGRES_DB: audit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: services/audit-blackbox-service
+
+      - name: Run integration tests
+        run: pnpm test -- integration.test.ts --maxWorkers=1
+        working-directory: services/audit-blackbox-service
+        env:
+          DATABASE_URL: postgresql://audit:audit_test_password@localhost:5432/audit_test
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+
+  # ============================================================================
+  # Load Tests (on main branch only)
+  # ============================================================================
+  load-tests:
+    name: Load Tests
+    runs-on: ubuntu-latest
+    needs: [build, integration-tests]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: services/audit-blackbox-service
+
+      - name: Run load tests
+        run: pnpm test -- load.test.ts --maxWorkers=1 --testTimeout=60000
+        working-directory: services/audit-blackbox-service
+
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: services/audit-blackbox-service/coverage
+          retention-days: 30
+
+  # ============================================================================
+  # Docker Build
+  # ============================================================================
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [build, security-scan, compliance]
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix={{branch}}-
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: services/audit-blackbox-service
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_VERSION=${{ env.NODE_VERSION }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            VCS_REF=${{ github.sha }}
+
+      - name: Run container security scan
+        uses: aquasecurity/trivy-action@master
+        if: github.event_name != 'pull_request'
+        with:
+          image-ref: '${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}'
+          format: 'sarif'
+          output: 'container-trivy.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload container scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: github.event_name != 'pull_request'
+        with:
+          sarif_file: 'container-trivy.sarif'
+
+  # ============================================================================
+  # Deploy to Staging
+  # ============================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [docker-build, integration-tests]
+    if: github.ref == 'refs/heads/main' || github.event.inputs.deploy_environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging-audit.intelgraph.io
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.STAGING_KUBECONFIG }}
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/audit-blackbox-service \
+            audit-blackbox=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -n audit-system
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/audit-blackbox-service \
+            -n audit-system \
+            --timeout=300s
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests against staging..."
+          # Add smoke test commands here
+          curl -f https://staging-audit.intelgraph.io/health || exit 1
+
+  # ============================================================================
+  # Deploy to Production (manual approval required)
+  # ============================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    if: github.ref == 'refs/heads/main' && github.event.inputs.deploy_environment == 'production'
+    environment:
+      name: production
+      url: https://audit.intelgraph.io
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+
+      - name: Set Kubernetes context
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.PRODUCTION_KUBECONFIG }}
+
+      - name: Create deployment backup
+        run: |
+          kubectl get deployment audit-blackbox-service \
+            -n audit-system \
+            -o yaml > deployment-backup.yaml
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl set image deployment/audit-blackbox-service \
+            audit-blackbox=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -n audit-system
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/audit-blackbox-service \
+            -n audit-system \
+            --timeout=600s
+
+      - name: Run production smoke tests
+        run: |
+          echo "Running smoke tests against production..."
+          curl -f https://audit.intelgraph.io/health || exit 1
+
+      - name: Notify deployment
+        uses: slackapi/slack-github-action@v1.24.0
+        if: always()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
+        with:
+          payload: |
+            {
+              "text": "Audit Black Box Service deployed to production",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Audit Black Box Service* deployed to production\n*Commit:* ${{ github.sha }}\n*Status:* ${{ job.status }}"
+                  }
+                }
+              ]
+            }

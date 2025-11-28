@@ -1,0 +1,65 @@
+# Audit Black Box Service - Ingress Configuration
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: audit-blackbox-ingress
+  namespace: audit-system
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Frame-Options "DENY" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Content-Security-Policy "default-src 'self'" always;
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - audit.intelgraph.io
+      secretName: audit-blackbox-tls
+  rules:
+    - host: audit.intelgraph.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: audit-blackbox-service
+                port:
+                  number: 80
+
+---
+# Internal ingress for service-to-service communication
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: audit-blackbox-internal
+  namespace: audit-system
+  annotations:
+    kubernetes.io/ingress.class: nginx-internal
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  ingressClassName: nginx-internal
+  rules:
+    - host: audit.internal.svc
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: audit-blackbox-service
+                port:
+                  number: 80
