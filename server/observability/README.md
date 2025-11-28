@@ -81,6 +81,18 @@ The observability stack is automatically initialized in `app.ts`:
 - ✅ Enhanced Pino logging with trace context
 - ✅ Prometheus metrics collection
 
+### Drop-in server wiring
+
+The Express bootstrap already wires the required middleware in this order:
+
+1. `correlationIdMiddleware` – normalizes/creates `x-correlation-id` and injects trace IDs into responses.
+2. `requestContextMiddleware` – stores correlation + trace IDs in an async-local context and exposes them to structured logs via `appLogger`.
+3. `pinoHttp` using `appLogger` – every log line includes `correlationId`, `traceId`, `spanId`, `userId`, and `tenantId`.
+4. `httpMetricsMiddleware` – emits RED/SLO metrics (`http_requests_total`, `http_request_duration_seconds`, `slo_availability_percentage`).
+   The availability gauge reflects the rolling success rate (5xx responses degrade the gauge until the ratio recovers).
+
+For new routes, no extra wiring is required—metrics, logs, and traces flow automatically.
+
 #### **Database Instrumentation**
 
 Wrap your database clients with instrumentation:
@@ -311,6 +323,14 @@ logger.info({ userId, action: 'create' }, 'User created investigation');
 | Latency (P95) | <500ms | 5% >500ms |
 | Latency (P99) | <2s | 1% >2s |
 | Cache Hit Ratio | >70% | - |
+
+Operational metrics mapped to these SLOs:
+
+- Availability: `slo_availability_percentage{slo="api-availability"}` (100 for success, 0 for 5xx).
+- Latency: `http_request_duration_seconds_bucket` evaluated with `histogram_quantile`.
+- Error budget burn: `(rate(http_requests_total{status_code=~"5.."}[5m]) / rate(http_requests_total[5m])) / 0.001`.
+
+Dashboards: import `grafana/observability-stack.json` for a curated RED/SLO view.
 
 ## Privacy & Security
 

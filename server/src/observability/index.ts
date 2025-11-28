@@ -39,3 +39,5 @@ export type {
 // Legacy exports (for backwards compatibility)
 export * from './telemetry';
 export * from './metrics';
+export * from './http-metrics-middleware';
+export * from './request-context';
