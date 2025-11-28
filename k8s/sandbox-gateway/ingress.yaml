@@ -1,0 +1,78 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: sandbox-gateway
+  namespace: intelgraph
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "https://app.intelgraph.io"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "Authorization, Content-Type, X-Request-ID"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Security headers
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      add_header X-Frame-Options "DENY" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+      add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';" always;
+spec:
+  tls:
+    - hosts:
+        - sandbox-api.intelgraph.io
+      secretName: sandbox-gateway-tls
+  rules:
+    - host: sandbox-api.intelgraph.io
+      http:
+        paths:
+          - path: /graphql
+            pathType: Prefix
+            backend:
+              service:
+                name: sandbox-gateway
+                port:
+                  number: 4100
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: sandbox-gateway
+                port:
+                  number: 4100
+          - path: /api/v1
+            pathType: Prefix
+            backend:
+              service:
+                name: sandbox-gateway
+                port:
+                  number: 4100
+---
+# Internal-only metrics endpoint (no external exposure)
+apiVersion: v1
+kind: Service
+metadata:
+  name: sandbox-gateway-metrics
+  namespace: intelgraph
+  labels:
+    app: sandbox-gateway
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "4100"
+    prometheus.io/path: "/metrics"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - port: 4100
+      targetPort: http
+      protocol: TCP
+      name: metrics
+  selector:
+    app: sandbox-gateway
