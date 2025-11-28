@@ -49,6 +49,9 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
+import ErrorBoundary, {
+  ErrorFallback as ErrorBoundaryFallback,
+} from './components/common/ErrorBoundary';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -630,6 +633,7 @@ function NotFoundPage() {
 // Main Layout Component
 function MainLayout() {
   const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const location = useLocation();
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -640,47 +644,58 @@ function MainLayout() {
       />
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
-        <React.Suspense
-          fallback={
-            <Box sx={{ width: '100%', mt: 2 }}>
-              <LinearProgress />
-              <Typography
-                variant="body2"
-                align="center"
-                sx={{ mt: 2 }}
-                color="text.secondary"
-              >
-                Loading component...
-              </Typography>
-            </Box>
-          }
+        <ErrorBoundary
+          resetKeys={[location.pathname]}
+          fallback={(error, _errorInfo, resetErrorBoundary) => (
+            <ErrorBoundaryFallback
+              error={error}
+              resetErrorBoundary={resetErrorBoundary}
+              title="We couldn't load this view"
+            />
+          )}
         >
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/investigations" element={<InvestigationsPage />} />
-              <Route path="/graph" element={<GraphExplorerPage />} />
-              <Route path="/copilot" element={<CopilotPage />} />
-              <Route path="/orchestrator" element={<OrchestratorPage />} />
-              <Route path="/threats" element={<ThreatsPage />} />
-              <Route path="/disclosures" element={<DisclosurePackagerPage />} />
-              <Route path="/access-intel" element={<AccessIntelPage />} />
-              <Route path="/geoint" element={<InvestigationsPage />} />
-              <Route path="/reports" element={<InvestigationsPage />} />
-              <Route element={<ProtectedRoute roles={['ADMIN']} />}>
-                <Route path="/system" element={<InvestigationsPage />} />
-                <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
-                <Route
-                  path="/wargame-dashboard"
-                  element={<ExecutiveDashboard />}
-                />
+          <React.Suspense
+            fallback={
+              <Box sx={{ width: '100%', mt: 2 }}>
+                <LinearProgress />
+                <Typography
+                  variant="body2"
+                  align="center"
+                  sx={{ mt: 2 }}
+                  color="text.secondary"
+                >
+                  Loading component...
+                </Typography>
+              </Box>
+            }
+          >
+            <Routes>
+              <Route path="/login" element={<LoginPage />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/investigations" element={<InvestigationsPage />} />
+                <Route path="/graph" element={<GraphExplorerPage />} />
+                <Route path="/copilot" element={<CopilotPage />} />
+                <Route path="/orchestrator" element={<OrchestratorPage />} />
+                <Route path="/threats" element={<ThreatsPage />} />
+                <Route path="/disclosures" element={<DisclosurePackagerPage />} />
+                <Route path="/access-intel" element={<AccessIntelPage />} />
+                <Route path="/geoint" element={<InvestigationsPage />} />
+                <Route path="/reports" element={<InvestigationsPage />} />
+                <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+                  <Route path="/system" element={<InvestigationsPage />} />
+                  <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
+                  <Route
+                    path="/wargame-dashboard"
+                    element={<ExecutiveDashboard />}
+                  />
+                </Route>
+                <Route path="*" element={<NotFoundPage />} />
               </Route>
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
-        </React.Suspense>
+            </Routes>
+          </React.Suspense>
+        </ErrorBoundary>
       </Box>
     </Box>
   );
