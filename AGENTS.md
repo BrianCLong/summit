@@ -1,5 +1,10 @@
 # Repository Guidelines
 
+> **GOVERNANCE NOTICE:**
+> This document provides technical guidelines for agents working in this repository.
+> It is subordinate to the **[Constitution of the Ecosystem](docs/governance/CONSTITUTION.md)**.
+> All agents must adhere to the **Foundational Laws** and their specific **[Mandates](docs/governance/AGENT_MANDATES.md)**.
+
 ## Project Structure & Module Organization
 
 - Apps: `server/` (Node/Express/GraphQL), `client/` (React/Vite).
