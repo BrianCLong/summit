@@ -1,0 +1,17 @@
+apiVersion: cce/v1alpha1
+kind: EnclaveManifest
+metadata:
+  name: default-cce
+spec:
+  measurement: "f1c8c55d3c9d5b57a3678c3a60afcd72bafc2c24d0c9b5580d1a6d1f44b68859"
+  allowedRegions:
+    - us-east-1
+    - us-west-2
+    - eu-central-1
+  quotes:
+    - id: test-quote-1
+      region: us-east-1
+      quote: "attest:test-quote-1:f1c8c55d3c9d5b57a3678c3a60afcd72bafc2c24d0c9b5580d1a6d1f44b68859"
+    - id: test-quote-2
+      region: eu-central-1
+      quote: "attest:test-quote-2:f1c8c55d3c9d5b57a3678c3a60afcd72bafc2c24d0c9b5580d1a6d1f44b68859"
