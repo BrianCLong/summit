@@ -1,0 +1,8 @@
+source_id,target_id,type,role
+1,4,MEMBER_OF,Engineer
+2,4,MEMBER_OF,Analyst
+3,5,MEMBER_OF,CEO
+... (lines 1-100000 of generated data)
+100001,200000,MEMBER_OF,Intern
+... (lines 100002-200000 of generated data)
+199999,200000,MEMBER_OF,Consultant
