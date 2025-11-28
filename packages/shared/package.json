@@ -1,7 +1,7 @@
 {
-  "name": "@intelgraph/extensions",
+  "name": "@summit/shared",
   "version": "1.0.0",
-  "description": "Extension system for IntelGraph platform",
+  "description": "Shared utilities and types for Summit platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
