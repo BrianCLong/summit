@@ -1,0 +1,111 @@
+name: fraud-ring
+type: financial-crime
+description: Financial fraud network with shell companies and layered transactions
+params:
+  nodeCount: 50
+  edgeDensity: 0.3
+  noiseLevel: 0.1
+  seed: 42
+
+entities:
+  - type: PERSON
+    distribution:
+      count: 20
+      attributes:
+        role:
+          - analyst
+          - executive
+          - intermediary
+          - facilitator
+        risk_score:
+          distribution: normal
+          mean: 60
+          stddev: 15
+
+  - type: ORGANIZATION
+    distribution:
+      count: 20
+      attributes:
+        sector:
+          - finance
+          - tech
+          - shell
+          - consulting
+        risk_score:
+          distribution: normal
+          mean: 70
+          stddev: 20
+
+  - type: LOCATION
+    distribution:
+      count: 10
+      attributes:
+        country:
+          - USA
+          - Cayman Islands
+          - Switzerland
+          - Singapore
+          - Panama
+
+relationships:
+  - type: OWNS
+    from: PERSON
+    to: ORGANIZATION
+    probability: 0.3
+    attributes:
+      stake:
+        distribution: uniform
+        min: 10
+        max: 100
+      since:
+        distribution: daterange
+        start: "2020-01-01"
+        end: "2024-12-31"
+
+  - type: TRANSACTS_WITH
+    from: ORGANIZATION
+    to: ORGANIZATION
+    probability: 0.4
+    attributes:
+      amount:
+        distribution: lognormal
+        mean: 11.5
+        stddev: 1.0
+      timestamp:
+        distribution: daterange
+        start: "2024-01-01"
+        end: "2024-12-31"
+
+  - type: LOCATED_IN
+    from: ORGANIZATION
+    to: LOCATION
+    probability: 0.5
+
+  - type: WORKS_FOR
+    from: PERSON
+    to: ORGANIZATION
+    probability: 0.6
+    attributes:
+      title:
+        - CEO
+        - CFO
+        - Director
+        - Consultant
+      since:
+        distribution: daterange
+        start: "2018-01-01"
+        end: "2024-12-31"
+
+signals:
+  - type: anomaly
+    entities:
+      - suspicious-transaction-pattern
+      - circular-transfers
+      - rapid-fund-movement
+    count: 5
+
+  - type: missing_data
+    probability: 0.1
+
+  - type: conflicting_evidence
+    count: 2

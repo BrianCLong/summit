@@ -1,0 +1,93 @@
+name: terror-cell
+type: security-threat
+description: Terror network with communication patterns and safe houses
+params:
+  nodeCount: 30
+  edgeDensity: 0.25
+  noiseLevel: 0.15
+  seed: 123
+
+entities:
+  - type: PERSON
+    distribution:
+      count: 20
+      attributes:
+        role:
+          - leader
+          - operative
+          - courier
+          - financier
+          - recruiter
+        threat_level:
+          distribution: normal
+          mean: 70
+          stddev: 20
+
+  - type: LOCATION
+    distribution:
+      count: 10
+      attributes:
+        location_type:
+          - safe_house
+          - meeting_point
+          - border_crossing
+          - training_camp
+        risk_score:
+          distribution: normal
+          mean: 65
+          stddev: 15
+
+relationships:
+  - type: COMMUNICATES_WITH
+    from: PERSON
+    to: PERSON
+    probability: 0.3
+    attributes:
+      frequency:
+        distribution: uniform
+        min: 1
+        max: 10
+      last_contact:
+        distribution: daterange
+        start: "2024-01-01"
+        end: "2024-12-31"
+      method:
+        - encrypted_messaging
+        - phone
+        - in_person
+        - courier
+
+  - type: VISITS
+    from: PERSON
+    to: LOCATION
+    probability: 0.4
+    attributes:
+      last_visit:
+        distribution: daterange
+        start: "2024-01-01"
+        end: "2024-12-31"
+      frequency:
+        distribution: uniform
+        min: 1
+        max: 5
+
+  - type: FUNDS
+    from: PERSON
+    to: PERSON
+    probability: 0.2
+    attributes:
+      amount:
+        distribution: lognormal
+        mean: 9.0
+        stddev: 1.5
+
+signals:
+  - type: anomaly
+    entities:
+      - communication-spike
+      - coordinated-movement
+      - unusual-funding-pattern
+    count: 3
+
+  - type: missing_data
+    probability: 0.15

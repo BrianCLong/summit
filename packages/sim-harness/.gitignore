@@ -1,0 +1,11 @@
+node_modules/
+dist/
+*.log
+reports/*.json
+reports/*.html
+reports/*.csv
+!reports/.gitkeep
+.env
+.DS_Store
+coverage/
+*.tsbuildinfo
