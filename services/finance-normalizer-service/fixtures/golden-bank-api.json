@@ -1,0 +1,138 @@
+{
+  "account": {
+    "accountId": "acc-123456789",
+    "iban": "GB82WEST12345698765432",
+    "currency": "GBP"
+  },
+  "transactions": [
+    {
+      "transactionId": "txn-001",
+      "date": "2024-01-15T09:30:00Z",
+      "amount": 5000.00,
+      "currency": "GBP",
+      "type": "DEPOSIT",
+      "description": "Initial deposit",
+      "counterparty": {
+        "name": "ACME Corporation Ltd",
+        "accountNumber": "12345678"
+      },
+      "balance": 5000.00,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-002",
+      "date": "2024-01-16T14:15:00Z",
+      "amount": -1250.50,
+      "currency": "GBP",
+      "type": "PAYMENT",
+      "description": "Supplier payment - Invoice INV-001",
+      "counterparty": {
+        "name": "Global Supplies Ltd",
+        "iban": "GB29NWBK60161331926819"
+      },
+      "balance": 3749.50,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-003",
+      "date": "2024-01-17T10:00:00Z",
+      "amount": 2500.00,
+      "currency": "GBP",
+      "type": "WIRE",
+      "description": "Client payment - Project Alpha",
+      "counterparty": {
+        "name": "Tech Innovations PLC",
+        "bic": "MIDLGB2L"
+      },
+      "balance": 6249.50,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-004",
+      "date": "2024-01-18T16:45:00Z",
+      "amount": -89.99,
+      "currency": "GBP",
+      "type": "CARD_PURCHASE",
+      "description": "Amazon.co.uk - Office supplies",
+      "merchantName": "AMAZON UK",
+      "balance": 6159.51,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-005",
+      "date": "2024-01-19T11:30:00Z",
+      "amount": -500.00,
+      "currency": "GBP",
+      "type": "TRANSFER",
+      "description": "Internal transfer to savings",
+      "counterparty": {
+        "name": "Own Savings Account",
+        "accountNumber": "87654321"
+      },
+      "balance": 5659.51,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-006",
+      "date": "2024-01-22T09:00:00Z",
+      "amount": 15000.00,
+      "currency": "GBP",
+      "type": "WIRE",
+      "description": "Large contract payment - Phase 1",
+      "counterparty": {
+        "name": "Government Department XYZ",
+        "iban": "GB82BARC20040178912345"
+      },
+      "balance": 20659.51,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-007",
+      "date": "2024-01-23T15:00:00Z",
+      "amount": -7500.00,
+      "currency": "GBP",
+      "type": "PAYMENT",
+      "description": "Quarterly rent payment",
+      "counterparty": {
+        "name": "Commercial Properties Holdings",
+        "accountNumber": "55667788"
+      },
+      "balance": 13159.51,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-008",
+      "date": "2024-01-25T12:30:00Z",
+      "amount": 45.75,
+      "currency": "GBP",
+      "type": "INTEREST",
+      "description": "Monthly interest credit",
+      "balance": 13205.26,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-009",
+      "date": "2024-01-26T10:00:00Z",
+      "amount": -25.00,
+      "currency": "GBP",
+      "type": "FEE",
+      "description": "Monthly account fee",
+      "counterparty": {
+        "name": "Westminister Bank"
+      },
+      "balance": 13180.26,
+      "status": "COMPLETED"
+    },
+    {
+      "transactionId": "txn-010",
+      "date": "2024-01-30T17:00:00Z",
+      "amount": 125.00,
+      "currency": "GBP",
+      "type": "CARD_REFUND",
+      "description": "Refund - Order #12345",
+      "merchantName": "JOHN LEWIS",
+      "balance": 13305.26,
+      "status": "COMPLETED"
+    }
+  ]
+}

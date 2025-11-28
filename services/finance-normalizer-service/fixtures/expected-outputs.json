@@ -1,0 +1,101 @@
+{
+  "golden-bank-statement.csv": {
+    "totalRecords": 15,
+    "expectedTransactions": 15,
+    "expectedParties": 14,
+    "sampleValidation": {
+      "firstTransaction": {
+        "referenceNumber": "DEP001",
+        "type": "DEPOSIT",
+        "amountCents": 500000,
+        "currency": "USD",
+        "direction": "CREDIT"
+      },
+      "lastTransaction": {
+        "referenceNumber": "TRF001",
+        "type": "TRANSFER",
+        "amountCents": -2214051,
+        "currency": "USD",
+        "direction": "DEBIT"
+      }
+    },
+    "totals": {
+      "totalCredits": 21625.50,
+      "totalDebits": -31625.50,
+      "netChange": -10000.00
+    }
+  },
+  "golden-swift-mt940.txt": {
+    "format": "SWIFT_MT940",
+    "totalRecords": 5,
+    "expectedTransactions": 5,
+    "sampleValidation": {
+      "firstTransaction": {
+        "type": "TRANSFER",
+        "amountCents": 500000,
+        "currency": "EUR",
+        "direction": "CREDIT",
+        "hasParty": true,
+        "partyName": "ACME GMBH"
+      }
+    },
+    "openingBalance": {
+      "amountCents": 2500000,
+      "currency": "EUR",
+      "indicator": "C"
+    },
+    "closingBalance": {
+      "amountCents": 4075000,
+      "currency": "EUR",
+      "indicator": "C"
+    }
+  },
+  "golden-bank-api.json": {
+    "format": "JSON",
+    "totalRecords": 10,
+    "expectedTransactions": 10,
+    "expectedParties": 8,
+    "sampleValidation": {
+      "firstTransaction": {
+        "transactionId": "txn-001",
+        "type": "DEPOSIT",
+        "amountCents": 500000,
+        "currency": "GBP",
+        "direction": "CREDIT"
+      },
+      "interestTransaction": {
+        "transactionId": "txn-008",
+        "type": "INTEREST",
+        "amountCents": 4575,
+        "currency": "GBP"
+      }
+    },
+    "totals": {
+      "totalCredits": 22670.75,
+      "totalDebits": -9365.49,
+      "netChange": 13305.26
+    }
+  },
+  "patternDetection": {
+    "fanInScenario": {
+      "description": "Multiple parties sending to single beneficiary",
+      "minimumParties": 3,
+      "timeWindowHours": 24,
+      "expectedPatternType": "FAN_IN"
+    },
+    "fanOutScenario": {
+      "description": "Single party sending to multiple beneficiaries",
+      "minimumBeneficiaries": 3,
+      "timeWindowHours": 24,
+      "expectedPatternType": "FAN_OUT"
+    },
+    "structuringScenario": {
+      "description": "Multiple transactions just below reporting threshold",
+      "thresholdCents": 1000000,
+      "tolerancePercent": 10,
+      "minimumTransactions": 3,
+      "expectedPatternType": "STRUCTURING",
+      "expectedSeverity": "HIGH"
+    }
+  }
+}

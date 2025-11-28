@@ -1,0 +1,16 @@
+date,amount,balance,description,reference,counterparty,type
+2024-01-02,5000.00,15000.00,Opening deposit,DEP001,ACME Corp Ltd,DEPOSIT
+2024-01-03,-150.00,14850.00,Wire transfer fee,FEE001,First National Bank,FEE
+2024-01-05,2500.00,17350.00,Invoice payment INV-2024-001,PMT001,Global Industries Inc,PAYMENT
+2024-01-08,-3000.00,14350.00,Supplier payment,WIR001,Smith & Associates LLC,WIRE
+2024-01-10,750.00,15100.00,Refund from vendor,REF001,Tech Solutions Corp,CARD_REFUND
+2024-01-12,-89.99,15010.01,Office supplies,POS001,OfficeMax,CARD_PURCHASE
+2024-01-15,1500.00,16510.01,Customer payment,PMT002,Johnson Family Trust,PAYMENT
+2024-01-15,-500.00,16010.01,Employee reimbursement,CHK001,John Smith,CHECK
+2024-01-18,3250.00,19260.01,Contract milestone payment,PMT003,Federal Government Agency,WIRE
+2024-01-20,-1200.00,18060.01,Monthly rent,ACH001,Commercial Property LLC,ACH
+2024-01-22,-45.00,18015.01,Service charge,FEE002,First National Bank,FEE
+2024-01-25,8500.00,26515.01,Large client payment,PMT004,MegaCorp International,WIRE
+2024-01-28,-4500.00,22015.01,Equipment purchase,WIR002,Industrial Equipment Co,WIRE
+2024-01-30,125.50,22140.51,Interest payment,INT001,First National Bank,INTEREST
+2024-01-31,-22140.51,0.00,Account closure transfer,TRF001,New Bank Account,TRANSFER

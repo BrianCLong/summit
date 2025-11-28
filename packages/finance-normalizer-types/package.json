@@ -1,0 +1,45 @@
+{
+  "name": "@intelgraph/finance-normalizer-types",
+  "version": "1.0.0",
+  "description": "Canonical financial schemas for finance normalization layer",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "finance",
+    "normalization",
+    "ledger",
+    "transactions",
+    "intelgraph"
+  ]
+}
