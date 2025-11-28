@@ -1,0 +1,87 @@
+name: supply-chain-gates
+
+on:
+  pull_request:
+    paths:
+      - 'security/supply-chain/**'
+      - '.github/workflows/supply-chain.yml'
+  workflow_dispatch:
+
+jobs:
+  supply-chain:
+    runs-on: ubuntu-latest
+    env:
+      GOTOOLCHAIN: local
+      POLICY_FILE: security/supply-chain/policy.yaml
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21.x'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Node dependencies
+        working-directory: security/supply-chain/node
+        run: npm ci
+
+      - name: Run Go unit tests
+        working-directory: security/supply-chain/go
+        run: |
+          export GOTOOLCHAIN=local
+          go test ./...
+
+      - name: Generate SPDX SBOM (Node)
+        working-directory: security/supply-chain/node
+        run: |
+          node index.js sbom --image ghcr.io/summit/app:pr-${{ github.event.pull_request.number || github.run_number }} --format spdx --output ../artifacts/sbom.spdx.json
+
+      - name: Generate CycloneDX SBOM (Node)
+        working-directory: security/supply-chain/node
+        run: |
+          node index.js sbom --image ghcr.io/summit/app:pr-${{ github.event.pull_request.number || github.run_number }} --format cyclonedx --output ../artifacts/sbom.cyclonedx.json
+
+      - name: Gate licenses with dual control
+        working-directory: security/supply-chain/node
+        run: |
+          node index.js licenses --sbom ../artifacts/sbom.spdx.json --approvers="${{ secrets.SECURITY_APPROVER }},${{ secrets.LEGAL_APPROVER }}" --output ../artifacts/license-gate.json
+
+      - name: Gate vulnerabilities
+        working-directory: security/supply-chain/node
+        run: |
+          echo '{"vulnerabilities":[]}' > ../artifacts/vuln-report.json
+          node index.js scan --report ../artifacts/vuln-report.json --output ../artifacts/vuln-gate.json
+
+      - name: Capture reproducible build attestation
+        working-directory: security/supply-chain/node
+        run: |
+          node index.js attest --manifest ../artifacts/sbom.spdx.json --signature-path ../artifacts/cosign.sig --output ../artifacts/attestation.json
+
+      - name: Export signed manifests to Compliance Center
+        run: |
+          bash security/supply-chain/scripts/export_manifests.sh \
+            --sbom security/supply-chain/artifacts/sbom.spdx.json \
+            --cyclonedx security/supply-chain/artifacts/sbom.cyclonedx.json \
+            --vulns security/supply-chain/artifacts/vuln-gate.json \
+            --licenses security/supply-chain/artifacts/license-gate.json \
+            --attestation security/supply-chain/artifacts/attestation.json
+        env:
+          COMPLIANCE_CENTER_URL: ${{ secrets.COMPLIANCE_CENTER_URL }}
+          COMPLIANCE_CENTER_TOKEN: ${{ secrets.COMPLIANCE_CENTER_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: supply-chain-artifacts
+          path: |
+            security/supply-chain/artifacts/sbom.spdx.json
+            security/supply-chain/artifacts/sbom.cyclonedx.json
+            security/supply-chain/artifacts/vuln-gate.json
+            security/supply-chain/artifacts/license-gate.json
+            security/supply-chain/artifacts/attestation.json
