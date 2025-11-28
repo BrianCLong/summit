@@ -1,210 +1,205 @@
 /**
  * Model Serving Service
- * Production model inference with batching, caching, and monitoring
+ * Production-grade model inference with runtime routing, versioning, batching, monitoring, and drift detection.
  */
 
 import express from 'express';
-import type { InferenceRequest, InferenceResponse, DeploymentConfig } from '@intelgraph/deep-learning-core';
+import { z } from 'zod';
+import {
+  DeploymentConfigSchema,
+  InferenceRequestSchema,
+  type InferenceRequest,
+  type DeploymentConfig,
+} from '@intelgraph/deep-learning-core';
+import { BatchProcessor } from './batching.js';
+import { ModelRegistry } from './registry.js';
+import { RuntimeRouter } from './runtime.js';
+import { OptimizationProfile, RuntimeConfig } from './types.js';
 
 const app = express();
 app.use(express.json());
 
-// Model registry
-const deployedModels = new Map<string, DeploymentConfig>();
+const runtimeRouter = new RuntimeRouter();
+const registry = new ModelRegistry();
+const batchProcessor = new BatchProcessor(runtimeRouter, registry);
 
-// Request batching queue
-interface BatchRequest {
-  request: InferenceRequest;
-  resolve: (response: InferenceResponse) => void;
-  reject: (error: Error) => void;
-  timestamp: number;
-}
+const RuntimeConfigSchema = z.object({
+  type: z.enum(['tensorflow', 'onnx', 'mock']),
+  endpoint: z.string().optional(),
+  modelSignature: z.string().optional(),
+  timeoutMs: z.number().optional(),
+});
 
-const batchQueue: BatchRequest[] = [];
-const BATCH_TIMEOUT_MS = 50;
-const MAX_BATCH_SIZE = 32;
+const OptimizationSchema = z.object({
+  targetLatencyMs: z.number().optional(),
+  preferBatching: z.boolean().optional(),
+  quantization: z.string().optional(),
+  cacheTtlSeconds: z.number().optional(),
+  warmTargets: z.number().optional(),
+  hardwareProfile: z.string().optional(),
+});
 
-// Deploy model
+const DeploySchema = z.object({
+  config: DeploymentConfigSchema,
+  runtime: RuntimeConfigSchema,
+  optimization: OptimizationSchema.optional(),
+  metadata: z.record(z.any()).optional(),
+  status: z.enum(['active', 'shadow', 'retired']).optional(),
+});
+
+const PredictionSchema = InferenceRequestSchema.extend({
+  abTestId: z.string().optional(),
+});
+
+const BatchPredictionSchema = z.object({
+  requests: z.array(PredictionSchema).min(1),
+});
+
+const AbTestSchema = z.object({
+  modelId: z.string(),
+  name: z.string(),
+  targetMetric: z.string().optional(),
+  variants: z
+    .array(
+      z.object({
+        version: z.string(),
+        weight: z.number().positive(),
+        isShadow: z.boolean().optional(),
+      }),
+    )
+    .min(1),
+});
+
 app.post('/api/v1/models/deploy', (req, res) => {
   try {
-    const config: DeploymentConfig = req.body;
-    deployedModels.set(config.modelId, config);
-    
-    res.json({
+    const payload = DeploySchema.parse(req.body);
+    const deployed = registry.deploy({
+      modelId: payload.config.modelId,
+      version: payload.config.version,
+      config: payload.config as DeploymentConfig,
+      runtime: payload.runtime as RuntimeConfig,
+      optimization: payload.optimization as OptimizationProfile | undefined,
+      metadata: payload.metadata,
+      status: payload.status,
+    });
+
+    res.status(201).json({
       message: 'Model deployed successfully',
-      modelId: config.modelId,
-      version: config.version,
-      replicas: config.replicas || 1,
+      deployment: deployed,
     });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
 });
 
-// List deployed models
-app.get('/api/v1/models', (req, res) => {
-  const models = Array.from(deployedModels.entries()).map(([id, config]) => ({
-    modelId: id,
-    version: config.version,
-    environment: config.environment,
-    replicas: config.replicas,
-  }));
-  
-  res.json({ models, total: models.length });
+app.post('/api/v1/models/:modelId/promote', (req, res) => {
+  const { modelId } = req.params;
+  const { version } = req.body as { version?: string };
+  if (!version) return res.status(400).json({ error: 'version is required' });
+
+  const promoted = registry.promote(modelId, version);
+  if (!promoted) return res.status(404).json({ error: 'Model version not found' });
+
+  res.json({ message: 'Version promoted', modelId, version });
 });
 
-// Predict (with batching)
+app.get('/api/v1/models', (_req, res) => {
+  res.json({ models: registry.listModels() });
+});
+
+app.get('/api/v1/models/:modelId/versions', (req, res) => {
+  const { modelId } = req.params;
+  res.json({ versions: registry.listVersions(modelId) });
+});
+
+app.post('/api/v1/models/:modelId/ab-tests', (req, res) => {
+  try {
+    const payload = AbTestSchema.parse(req.body);
+    if (payload.modelId !== req.params.modelId) {
+      return res.status(400).json({ error: 'modelId in path and body must match' });
+    }
+
+    const test = registry.createAbTest(payload.modelId, payload);
+    if (!test) return res.status(404).json({ error: 'Model not found' });
+
+    res.status(201).json({ abTest: test });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.post('/api/v1/predict', async (req, res) => {
   try {
-    const inferenceRequest: InferenceRequest = req.body;
-    
-    if (!deployedModels.has(inferenceRequest.modelId)) {
-      return res.status(404).json({ error: 'Model not deployed' });
-    }
-    
-    const response = await processBatchedRequest(inferenceRequest);
-    res.json(response);
+    const payload = PredictionSchema.parse(req.body);
+    const version = registry.selectVersion(payload.modelId, payload.version, payload.abTestId);
+
+    if (!version) return res.status(404).json({ error: 'Model version not found' });
+
+    const response = await batchProcessor.enqueue(
+      payload.modelId,
+      version.version,
+      version.runtime,
+      payload as InferenceRequest,
+      version.optimization,
+      payload.abTestId,
+    );
+
+    res.json({ response, version: version.version, runtime: version.runtime.type });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 });
 
-// Predict (non-batched, immediate)
-app.post('/api/v1/predict/immediate', async (req, res) => {
+app.post('/api/v1/predict/batch', async (req, res) => {
   try {
-    const inferenceRequest: InferenceRequest = req.body;
-    
-    if (!deployedModels.has(inferenceRequest.modelId)) {
-      return res.status(404).json({ error: 'Model not deployed' });
-    }
-    
-    const response = await runInference(inferenceRequest);
-    res.json(response);
+    const payload = BatchPredictionSchema.parse(req.body);
+    const results = await Promise.all(
+      payload.requests.map(async (item) => {
+        const version = registry.selectVersion(item.modelId, item.version, item.abTestId);
+        if (!version) throw new Error(`Model ${item.modelId} not deployed`);
+
+        const response = await batchProcessor.enqueue(
+          item.modelId,
+          version.version,
+          version.runtime,
+          item as InferenceRequest,
+          version.optimization,
+          item.abTestId,
+        );
+
+        return { modelId: item.modelId, version: version.version, response };
+      }),
+    );
+
+    res.json({ results });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    res.status(400).json({ error: error.message });
   }
 });
 
-// Model metrics
-app.get('/api/v1/models/:modelId/metrics', (req, res) => {
+app.get('/api/v1/models/:modelId/monitoring', (req, res) => {
   const { modelId } = req.params;
-  
-  if (!deployedModels.has(modelId)) {
-    return res.status(404).json({ error: 'Model not found' });
-  }
-  
-  res.json({
-    modelId,
-    metrics: {
-      requestsPerSecond: 150,
-      averageLatency: 25,
-      p95Latency: 45,
-      p99Latency: 80,
-      errorRate: 0.001,
-    },
-    timestamp: new Date().toISOString(),
-  });
+  const metrics = registry.getMonitoring(modelId);
+  if (metrics.length === 0) return res.status(404).json({ error: 'Model not found' });
+
+  res.json({ modelId, metrics });
 });
 
-// Health check
-app.get('/health', (req, res) => {
+app.get('/api/v1/models/:modelId/drift', (req, res) => {
+  const { modelId } = req.params;
+  const signals = registry.getDriftSignals(modelId);
+  if (signals.length === 0) return res.status(404).json({ error: 'Model not found' });
+
+  res.json({ modelId, signals });
+});
+
+app.get('/health', (_req, res) => {
   res.json({
     status: 'healthy',
     service: 'model-serving-service',
-    deployedModels: deployedModels.size,
     timestamp: new Date().toISOString(),
   });
 });
-
-// Process batched inference request
-async function processBatchedRequest(request: InferenceRequest): Promise<InferenceResponse> {
-  return new Promise((resolve, reject) => {
-    batchQueue.push({
-      request,
-      resolve,
-      reject,
-      timestamp: Date.now(),
-    });
-    
-    // Process batch if full or timeout
-    if (batchQueue.length >= MAX_BATCH_SIZE) {
-      processBatch();
-    }
-  });
-}
-
-// Process batch of requests
-async function processBatch(): Promise<void> {
-  if (batchQueue.length === 0) return;
-  
-  const batch = batchQueue.splice(0, MAX_BATCH_SIZE);
-  
-  try {
-    // Run batched inference
-    const results = await runBatchInference(batch.map((b) => b.request));
-    
-    // Resolve individual requests
-    batch.forEach((item, index) => {
-      item.resolve(results[index]);
-    });
-  } catch (error) {
-    batch.forEach((item) => {
-      item.reject(error as Error);
-    });
-  }
-}
-
-// Run batched inference
-async function runBatchInference(requests: InferenceRequest[]): Promise<InferenceResponse[]> {
-  const startTime = Date.now();
-  
-  // Simulate batch inference
-  await new Promise((resolve) => setTimeout(resolve, 10));
-  
-  const inferenceTime = Date.now() - startTime;
-  
-  return requests.map((req) => ({
-    predictions: [Math.random(), Math.random(), Math.random()],
-    confidences: [0.8, 0.15, 0.05],
-    metadata: {
-      modelId: req.modelId,
-      version: req.version || 'latest',
-      inferenceTime,
-      batchSize: requests.length,
-    },
-  }));
-}
-
-// Run single inference
-async function runInference(request: InferenceRequest): Promise<InferenceResponse> {
-  const startTime = Date.now();
-  
-  // Simulate inference
-  await new Promise((resolve) => setTimeout(resolve, 5));
-  
-  const inferenceTime = Date.now() - startTime;
-  
-  return {
-    predictions: [Math.random(), Math.random(), Math.random()],
-    confidences: [0.8, 0.15, 0.05],
-    metadata: {
-      modelId: request.modelId,
-      version: request.version || 'latest',
-      inferenceTime,
-      batchSize: 1,
-    },
-  };
-}
-
-// Periodic batch processing
-setInterval(() => {
-  if (batchQueue.length > 0) {
-    const oldestRequest = batchQueue[0];
-    if (Date.now() - oldestRequest.timestamp >= BATCH_TIMEOUT_MS) {
-      processBatch();
-    }
-  }
-}, 10);
 
 const PORT = process.env.MODEL_SERVING_PORT || 3002;
 
