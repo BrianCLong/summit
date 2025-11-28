@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import DOMPurify from 'dompurify';
 import {
   Box,
   Card,
@@ -35,130 +34,122 @@ import {
 import AdvancedPatternDetection from './AdvancedPatternDetection';
 import { useMutation } from '@apollo/client';
 import { GENERATE_ENTITIES_FROM_TEXT } from '../../graphql/copilot.gql';
-import { useI18n } from '../../hooks/useI18n';
-import LocaleSelector from '../i18n/LocaleSelector';
 
-// Helper function to generate localized AI responses
-function getLocalizedResponses(t) {
-  return {
-    'analyze network': [
-      t('copilot.responses.networkAnalysis.title'),
-      '',
-      t('copilot.responses.networkAnalysis.keyFindings'),
-      '• ' + t('copilot.responses.networkAnalysis.detected', { count: 3 }),
-      '• ' + t('copilot.responses.networkAnalysis.centralHub', { name: 'John Smith', percent: 85 }),
-      '• ' + t('copilot.responses.networkAnalysis.activitySpike', { days: 30 }),
-      '',
-      t('copilot.responses.networkAnalysis.riskAssessment'),
-      '• High: TechCorp Inc (financial irregularities)',
-      '• Medium: Document #47 (incomplete verification)',
-      '• Low: Standard employee connections',
-      '',
-      t('copilot.responses.networkAnalysis.recommendations'),
-      "1. Investigate TechCorp's recent financial transactions",
-      '2. Verify authenticity of Document #47',
-      "3. Monitor John Smith's activity patterns",
-    ],
-    'threat assessment': [
-      t('copilot.responses.threatAssessment.title'),
-      '',
-      t('copilot.responses.threatAssessment.currentLevel', { level: 'MODERATE' }),
-      '',
-      t('copilot.responses.threatAssessment.activeThreats'),
-      '• Suspicious financial patterns (Score: 75/100)',
-      '• Irregular communication networks (Score: 60/100)',
-      '• Geographic anomalies (Score: 45/100)',
-      '',
-      t('copilot.responses.threatAssessment.threatVectors'),
-      '1. **Financial:** Unusual large transactions',
-      '2. **Communication:** Encrypted channels usage increase',
-      '3. **Behavioral:** Meeting pattern changes',
-      '',
-      t('copilot.responses.threatAssessment.mitigation'),
-      '• Enhanced monitoring of flagged entities',
-      '• Cross-reference with external threat databases',
-      '• Deploy additional surveillance protocols',
-    ],
-    'predict patterns': [
-      t('copilot.responses.predictiveAnalysis.title'),
-      '',
-      t('copilot.responses.predictiveAnalysis.patternRecognition'),
-      '• Weekly meeting cycles detected (92% confidence)',
-      '• Communication burst patterns every 14 days',
-      '• Geographic clustering around SF Bay Area',
-      '',
-      t('copilot.responses.predictiveAnalysis.futurePredictions', { days: 30 }),
-      '• 78% probability of increased activity mid-month',
-      '• Likely new connections: 2-3 additional entities',
-      '• Expected communication volume: +35%',
-      '',
-      t('copilot.responses.predictiveAnalysis.anomalyAlerts'),
-      '• Watch for unusual weekend activity',
-      '• Monitor for new international connections',
-      '• Flag transactions >$50K threshold',
-    ],
-    'investigation summary': [
-      t('copilot.responses.investigationSummary.title'),
-      '',
-      t('copilot.responses.investigationSummary.caseOverview'),
-      '• Total Entities: 47',
-      '• Active Connections: 156',
-      '• Investigation Duration: 23 days',
-      '',
-      t('copilot.responses.investigationSummary.keyEvidence'),
-      '• 12 financial documents analyzed',
-      '• 8 witness interviews completed',
-      '• 34 communication records reviewed',
-      '',
-      t('copilot.responses.investigationSummary.currentStatus'),
-      '• Evidence Quality: Strong (85%)',
-      '• Case Completion: 67%',
-      '• Confidence Level: High',
-      '',
-      t('copilot.responses.investigationSummary.nextSteps'),
-      '1. Verify remaining financial transactions',
-      '2. Interview 3 additional witnesses',
-      '3. Cross-reference with database XYZ',
-    ],
-  };
-}
+// Simulated AI responses for demo
+const intelligentResponses = {
+  'analyze network': [
+    '🔍 **Network Analysis Complete**',
+    '',
+    '**Key Findings:**',
+    '• Detected 3 potential risk clusters in the relationship graph',
+    '• John Smith appears to be a central hub with 85% connectivity',
+    '• Unusual activity spike detected in the last 30 days',
+    '',
+    '**Risk Assessment:**',
+    '• High: TechCorp Inc (financial irregularities)',
+    '• Medium: Document #47 (incomplete verification)',
+    '• Low: Standard employee connections',
+    '',
+    '**Recommendations:**',
+    "1. Investigate TechCorp's recent financial transactions",
+    '2. Verify authenticity of Document #47',
+    "3. Monitor John Smith's activity patterns",
+  ],
+  'threat assessment': [
+    '🛡️ **Threat Assessment Report**',
+    '',
+    '**Current Threat Level: MODERATE**',
+    '',
+    '**Active Threats Identified:**',
+    '• Suspicious financial patterns (Score: 75/100)',
+    '• Irregular communication networks (Score: 60/100)',
+    '• Geographic anomalies (Score: 45/100)',
+    '',
+    '**Threat Vectors:**',
+    '1. **Financial:** Unusual large transactions',
+    '2. **Communication:** Encrypted channels usage increase',
+    '3. **Behavioral:** Meeting pattern changes',
+    '',
+    '**Mitigation Strategies:**',
+    '• Enhanced monitoring of flagged entities',
+    '• Cross-reference with external threat databases',
+    '• Deploy additional surveillance protocols',
+  ],
+  'predict patterns': [
+    '🔮 **Predictive Analysis Results**',
+    '',
+    '**Pattern Recognition:**',
+    '• Weekly meeting cycles detected (92% confidence)',
+    '• Communication burst patterns every 14 days',
+    '• Geographic clustering around SF Bay Area',
+    '',
+    '**Future Predictions (Next 30 days):**',
+    '• 78% probability of increased activity mid-month',
+    '• Likely new connections: 2-3 additional entities',
+    '• Expected communication volume: +35%',
+    '',
+    '**Anomaly Alerts:**',
+    '• Watch for unusual weekend activity',
+    '• Monitor for new international connections',
+    '• Flag transactions >$50K threshold',
+  ],
+  'investigation summary': [
+    '📊 **Investigation Summary**',
+    '',
+    '**Case Overview:**',
+    '• Total Entities: 47',
+    '• Active Connections: 156',
+    '• Investigation Duration: 23 days',
+    '',
+    '**Key Evidence:**',
+    '• 12 financial documents analyzed',
+    '• 8 witness interviews completed',
+    '• 34 communication records reviewed',
+    '',
+    '**Current Status:**',
+    '• Evidence Quality: Strong (85%)',
+    '• Case Completion: 67%',
+    '• Confidence Level: High',
+    '',
+    '**Next Steps:**',
+    '1. Verify remaining financial transactions',
+    '2. Interview 3 additional witnesses',
+    '3. Cross-reference with database XYZ',
+  ],
+};
 
-function getQuickActions(t) {
-  return [
-    {
-      label: t('copilot.analyzeNetwork'),
-      icon: <TimelineIcon />,
-      query: 'analyze network',
-    },
-    {
-      label: t('copilot.threatAssessment'),
-      icon: <SecurityIcon />,
-      query: 'threat assessment',
-    },
-    {
-      label: t('copilot.predictPatterns'),
-      icon: <TrendingIcon />,
-      query: 'predict patterns',
-    },
-    {
-      label: t('copilot.investigationSummary'),
-      icon: <InsightIcon />,
-      query: 'investigation summary',
-    },
-  ];
-}
+const quickActions = [
+  {
+    label: 'Analyze Network',
+    icon: <TimelineIcon />,
+    query: 'analyze network',
+  },
+  {
+    label: 'Threat Assessment',
+    icon: <SecurityIcon />,
+    query: 'threat assessment',
+  },
+  {
+    label: 'Predict Patterns',
+    icon: <TrendingIcon />,
+    query: 'predict patterns',
+  },
+  {
+    label: 'Investigation Summary',
+    icon: <InsightIcon />,
+    query: 'investigation summary',
+  },
+];
 
-function getAiInsights(t) {
-  return [
-    t('copilot.insights.moreConnections', { name: 'John Smith', percent: 40 }),
-    t('copilot.insights.unusualActivity', { cluster: 'financial' }),
-    t('copilot.insights.personsOfInterest', { count: 3 }),
-    t('copilot.insights.communicationIncrease', { percent: 25 }),
-    t('copilot.insights.crossReference', { caseId: '34B' }),
-  ];
-}
+const aiInsights = [
+  '💡 John Smith has 40% more connections than average',
+  '⚠️ Unusual activity detected in financial cluster',
+  '🎯 3 new potential persons of interest identified',
+  '📈 Communication patterns show 25% increase',
+  '🔍 Cross-reference opportunity with Case #34B',
+];
 
-function ChatMessage({ message, isUser, isLoading, t }) {
+function ChatMessage({ message, isUser, isLoading }) {
   return (
     <ListItem
       sx={{
@@ -185,7 +176,7 @@ function ChatMessage({ message, isUser, isLoading, t }) {
           >
             {isLoading ? (
               <Box>
-                <Typography variant="body2">🤖 {t('copilot.analyzing')}</Typography>
+                <Typography variant="body2">🤖 Analyzing...</Typography>
                 <LinearProgress sx={{ mt: 1 }} />
               </Box>
             ) : (
@@ -197,8 +188,9 @@ function ChatMessage({ message, isUser, isLoading, t }) {
                   '& em': { fontStyle: 'italic' },
                 }}
                 dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(
-                    message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'),
+                  __html: message.replace(
+                    /\*\*(.*?)\*\*/g,
+                    '<strong>$1</strong>',
                   ),
                 }}
               />
@@ -211,18 +203,14 @@ function ChatMessage({ message, isUser, isLoading, t }) {
 }
 
 export default function IntelligentCopilot() {
-  const { t, locale } = useI18n();
-
-  const getWelcomeMessage = () => ({
-    id: 1,
-    text: "👋 " + (locale === 'es-ES'
-      ? "¡Hola! Soy tu Analista de Inteligencia con IA. Puedo ayudarte a analizar redes, evaluar amenazas, predecir patrones y generar perspectivas de tus datos de investigación. ¿Qué te gustaría explorar?"
-      : "Hello! I'm your AI Intelligence Analyst. I can help you analyze networks, assess threats, predict patterns, and generate insights from your investigation data. What would you like to explore?"),
-    isUser: false,
-    timestamp: new Date(),
-  });
-
-  const [messages, setMessages] = useState([getWelcomeMessage()]);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      text: "👋 Hello! I'm your AI Intelligence Analyst. I can help you analyze networks, assess threats, predict patterns, and generate insights from your investigation data. What would you like to explore?",
+      isUser: false,
+      timestamp: new Date(),
+    },
+  ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [notes, setNotes] = useState('');
@@ -261,11 +249,10 @@ export default function IntelligentCopilot() {
     setTimeout(
       () => {
         const query = text.toLowerCase();
-        const intelligentResponses = getLocalizedResponses(t);
         let aiResponse =
-          (locale === 'es-ES'
-            ? 'Entiendo que quieres saber sobre: ' + text + '\n\nAún estoy aprendiendo sobre este tema. Intenta preguntar sobre análisis de redes, evaluación de amenazas, predicción de patrones o resúmenes de investigación para obtener información más detallada.'
-            : 'I understand you want to know about: ' + text + "\n\nI'm still learning about this topic. Try asking about network analysis, threat assessment, pattern prediction, or investigation summaries for more detailed insights.");
+          'I understand you want to know about: ' +
+          text +
+          "\n\nI'm still learning about this topic. Try asking about network analysis, threat assessment, pattern prediction, or investigation summaries for more detailed insights.";
 
         // Find matching response
         for (const [key, response] of Object.entries(intelligentResponses)) {
@@ -305,17 +292,12 @@ export default function IntelligentCopilot() {
     setMessages([
       {
         id: 1,
-        text: "👋 " + (locale === 'es-ES'
-          ? "¡Chat limpiado! Estoy listo para ayudar con tu análisis de inteligencia. ¿Qué te gustaría explorar?"
-          : "Chat cleared! I'm ready to help with your intelligence analysis. What would you like to explore?"),
+        text: "👋 Chat cleared! I'm ready to help with your intelligence analysis. What would you like to explore?",
         isUser: false,
         timestamp: new Date(),
       },
     ]);
   };
-
-  const quickActions = getQuickActions(t);
-  const aiInsights = getAiInsights(t);
 
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -329,22 +311,20 @@ export default function IntelligentCopilot() {
               alignItems: 'center',
             }}
           >
-            <Box sx={{ flex: 1 }}>
+            <Box>
               <Typography variant="h4" gutterBottom>
-                🤖 {t('copilot.title')}
+                🤖 AI Intelligence Copilot
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                {t('copilot.subtitle')}
+                Your AI-powered analyst for pattern recognition, threat
+                assessment, and investigative insights
               </Typography>
             </Box>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <LocaleSelector variant="button" size="small" />
-              <Tooltip title={t('copilot.clear')}>
-                <IconButton onClick={clearChat} color="primary">
-                  <ClearIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
+            <Tooltip title="Clear Chat">
+              <IconButton onClick={clearChat} color="primary">
+                <ClearIcon />
+              </IconButton>
+            </Tooltip>
           </Box>
         </CardContent>
       </Card>
@@ -357,7 +337,7 @@ export default function IntelligentCopilot() {
           <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
               fullWidth
-              placeholder={t('copilot.placeholder')}
+              placeholder="Paste notes or summary..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               multiline
@@ -387,7 +367,7 @@ export default function IntelligentCopilot() {
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 <AutoAwesomeIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                {t('copilot.liveInsights')}
+                Live Insights
               </Typography>
               <List dense>
                 {aiInsights.map((insight, index) => (
@@ -409,7 +389,7 @@ export default function IntelligentCopilot() {
               <Divider sx={{ my: 2 }} />
 
               <Typography variant="subtitle2" gutterBottom>
-                {t('copilot.quickActions')}
+                Quick Actions
               </Typography>
               <Grid container spacing={1}>
                 {quickActions.map((action, index) => (
@@ -459,11 +439,10 @@ export default function IntelligentCopilot() {
                       key={message.id}
                       message={message.text}
                       isUser={message.isUser}
-                      t={t}
                     />
                   ))}
                   {isLoading && (
-                    <ChatMessage message="" isUser={false} isLoading={true} t={t} />
+                    <ChatMessage message="" isUser={false} isLoading={true} />
                   )}
                 </List>
                 <div ref={messagesEndRef} />
@@ -472,15 +451,13 @@ export default function IntelligentCopilot() {
               {/* Input Area */}
               <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
                 <Alert severity="info" sx={{ mb: 2, fontSize: '0.85rem' }}>
-                  {locale === 'es-ES'
-                    ? '💡 Intenta preguntar: "analizar red", "evaluación de amenazas", "predecir patrones", o "resumen de investigación"'
-                    : '💡 Try asking: "analyze network", "threat assessment", "predict patterns", or "investigation summary"'
-                  }
+                  💡 Try asking: "analyze network", "threat assessment",
+                  "predict patterns", or "investigation summary"
                 </Alert>
                 <Box sx={{ display: 'flex', gap: 1 }}>
                   <TextField
                     fullWidth
-                    placeholder={t('copilot.placeholder')}
+                    placeholder="Ask me about patterns, threats, connections, or investigations..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}

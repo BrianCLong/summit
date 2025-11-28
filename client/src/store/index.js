@@ -1,10 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authSlice from './slices/authSlice';
-import graphSlice from './slices/graphSlice';
+import * as graphSliceModule from './slices/graphSlice';
+const graphSlice = graphSliceModule.default || graphSliceModule;
 import uiSlice from './slices/uiSlice';
 import graphInteraction from './slices/graphInteractionSlice';
-import graphUISlice from './slices/graphUISlice'; // Import the new graphUISlice
-import aiInsightsReducer from './slices/aiInsightsSlice'; // Import the new aiInsightsSlice
+import graphUISlice from './slices/graphUISlice';
+import aiInsightsReducer from './slices/aiInsightsSlice';
 import timelineReducer from './slices/timelineSlice';
 import graphData from './graphSlice';
 import socket from './socketSlice';
@@ -16,8 +17,8 @@ export const store = configureStore({
     timeline: timelineReducer,
     ui: uiSlice,
     graphInteraction,
-    graphUI: graphUISlice, // Add the new graphUISlice
-    aiInsights: aiInsightsReducer, // Add the new aiInsightsReducer
+    graphUI: graphUISlice,
+    aiInsights: aiInsightsReducer,
     graphData,
     socket,
   },
