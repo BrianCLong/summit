@@ -228,6 +228,28 @@ export class CopilotService {
         };
       }
 
+      // Execute compiled Cypher within sandbox budgets
+      const executionResult = await this.executeQuery(preview, context);
+
+      if (!executionResult.success) {
+        return {
+          type: 'refusal',
+          data: {
+            refusalId: randomUUID(),
+            reason:
+              executionResult.error || 'Query execution failed due to sandbox restrictions',
+            category: 'internal_error',
+            suggestions: [
+              'Try simplifying your question',
+              'Adjust filters to reduce query cost',
+              'Contact support if the problem persists',
+            ],
+            timestamp: new Date().toISOString(),
+            auditId: randomUUID(),
+          },
+        };
+      }
+
       // Step 5: Generate answer with GraphRAG
       const answer = await this.generateAnswer(request, context, preview);
 
@@ -238,6 +260,11 @@ export class CopilotService {
           : this.redactionService;
 
       const redactedResult = redactionService.redactAnswer(answer);
+
+      const warnings = [
+        ...redactedResult.content.warnings,
+        ...executionResult.warnings,
+      ];
 
       // Step 7: Final guardrail validation
       const validation = this.guardrailsService.validateAnswer(
@@ -278,7 +305,8 @@ export class CopilotService {
         type: 'answer',
         data: {
           ...redactedResult.content,
-          executedQuery: preview.cypher,
+          warnings,
+          executedQuery: executionResult.cypher,
         },
       };
     } catch (error) {
