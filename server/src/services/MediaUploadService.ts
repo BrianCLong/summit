@@ -9,6 +9,20 @@ import ffmpeg from 'fluent-ffmpeg';
 // @ts-ignore - Upload type not exported from graphql-upload-ts
 import { Upload } from 'graphql-upload-ts';
 import pino from 'pino';
+import exifReader from 'exif-reader';
+import {
+  ImageProcessingPipeline,
+  defaultImageProcessingConfig,
+  type ImageProcessingOptions,
+  type ImageProcessingResult,
+  type ProcessedImage,
+  type FacialRecognitionResult,
+} from './ImageProcessingPipeline.js';
+import {
+  CdnUploadService,
+  type CdnUploadConfig,
+  type CdnUploadRequest,
+} from './CdnUploadService.js';
 
 const logger = pino({ name: 'MediaUploadService' });
 
@@ -22,6 +36,8 @@ export interface MediaUploadConfig {
   uploadPath: string;
   thumbnailPath: string;
   chunkSize: number;
+  imageProcessing?: ImageProcessingOptions;
+  cdnUpload?: CdnUploadConfig;
 }
 
 export interface MediaMetadata {
@@ -34,6 +50,25 @@ export interface MediaMetadata {
   dimensions?: MediaDimensions;
   duration?: number;
   metadata: Record<string, any>;
+}
+
+export type DerivativeType = 'optimized' | 'thumbnail' | 'conversion';
+
+export interface DerivativeFile {
+  type: DerivativeType;
+  format: string;
+  filename: string;
+  width?: number;
+  height?: number;
+  cdnUrl?: string;
+  sourcePath?: string;
+}
+
+export interface ImageProcessingMetadata {
+  derivatives: DerivativeFile[];
+  exif?: Record<string, any>;
+  facialRecognition?: FacialRecognitionResult;
+  cdn?: Record<string, string>;
 }
 
 export interface MediaDimensions {
@@ -55,9 +90,20 @@ export enum MediaType {
 
 export class MediaUploadService {
   private config: MediaUploadConfig;
+  private imageProcessingPipeline?: ImageProcessingPipeline;
+  private cdnUploadService?: CdnUploadService;
 
   constructor(config: MediaUploadConfig) {
     this.config = config;
+    this.imageProcessingPipeline = new ImageProcessingPipeline(
+      config.uploadPath,
+      config.thumbnailPath,
+      config.imageProcessing || defaultImageProcessingConfig,
+    );
+
+    if (config.cdnUpload?.enabled) {
+      this.cdnUploadService = new CdnUploadService(config.cdnUpload);
+    }
     this.ensureDirectories();
   }
 
@@ -113,53 +159,112 @@ export class MediaUploadService {
         );
       }
 
-      // Calculate checksum
-      const checksum = await this.calculateChecksum(tempFilePath);
+        // Determine media type
+        const mediaType = this.getMediaType(mimetype);
+        const baseFilename = path.parse(uniqueFilename).name;
 
-      // Determine media type
-      const mediaType = this.getMediaType(mimetype);
+        // Extract metadata based on media type
+        const initialDimensions = await this.extractMediaDimensions(
+          tempFilePath,
+          mediaType,
+          mimetype,
+        );
+        const duration = await this.extractDuration(tempFilePath, mediaType);
 
-      // Extract metadata based on media type
-      const dimensions = await this.extractMediaDimensions(
-        tempFilePath,
-        mediaType,
-        mimetype,
-      );
-      const duration = await this.extractDuration(tempFilePath, mediaType);
-      const additionalMetadata = await this.extractAdditionalMetadata(
-        tempFilePath,
-        mediaType,
-      );
+        // Move to final location prior to derivative generation
+        await fs.rename(tempFilePath, finalFilePath);
 
-      // Move to final location
-      await fs.rename(tempFilePath, finalFilePath);
+        let dimensions = initialDimensions;
+        let processingMetadata: ImageProcessingMetadata | undefined;
 
-      // Generate thumbnail if applicable
-      if (mediaType === MediaType.IMAGE || mediaType === MediaType.VIDEO) {
-        await this.generateThumbnail(finalFilePath, mediaType, uniqueFilename);
-      }
+        if (mediaType === MediaType.IMAGE && this.imageProcessingPipeline) {
+          const processed = await this.imageProcessingPipeline.processImage(
+            finalFilePath,
+            mimetype,
+            baseFilename,
+          );
 
-      const metadata: MediaMetadata = {
-        filename: uniqueFilename,
-        originalName: filename || 'unknown',
-        mimeType: mimetype,
-        filesize: stats.size,
-        checksum,
-        mediaType,
-        dimensions,
-        duration,
-        metadata: {
-          uploadedBy: userId,
-          uploadedAt: new Date().toISOString(),
-          processingVersion: '1.0',
-          ...additionalMetadata,
-        },
-      };
+          dimensions = {
+            width: processed.optimizedInfo.width,
+            height: processed.optimizedInfo.height,
+            channels: processed.optimizedInfo.channels,
+          };
 
-      logger.info(
-        `Successfully uploaded media: ${uniqueFilename}, size: ${stats.size}, type: ${mediaType}`,
-      );
-      return metadata;
+          processingMetadata = this.mapImageProcessingMetadata(
+            processed,
+            uniqueFilename,
+          );
+        }
+
+        if (mediaType === MediaType.VIDEO) {
+          await this.generateThumbnail(finalFilePath, mediaType, uniqueFilename);
+        }
+
+        const additionalMetadata = await this.extractAdditionalMetadata(
+          finalFilePath,
+          mediaType,
+        );
+
+        if (processingMetadata?.exif && !additionalMetadata.exif) {
+          additionalMetadata.exif = processingMetadata.exif;
+        }
+
+        if (processingMetadata?.facialRecognition) {
+          additionalMetadata.facialRecognition =
+            processingMetadata.facialRecognition;
+        }
+
+        if (processingMetadata) {
+          const cdnMap = await this.uploadToCdn(
+            finalFilePath,
+            uniqueFilename,
+            mimetype,
+            processingMetadata.derivatives,
+          );
+
+          processingMetadata.derivatives = processingMetadata.derivatives.map(
+            (derivative) => ({
+              ...derivative,
+              cdnUrl: derivative.cdnUrl || cdnMap[derivative.filename],
+            }),
+          );
+          processingMetadata.cdn = cdnMap;
+        }
+
+        const finalStats = await fs.stat(finalFilePath);
+        const checksum = await this.calculateChecksum(finalFilePath);
+
+        const metadata: MediaMetadata = {
+          filename: uniqueFilename,
+          originalName: filename || 'unknown',
+          mimeType: mimetype,
+          filesize: finalStats.size,
+          checksum,
+          mediaType,
+          dimensions,
+          duration,
+          metadata: {
+            uploadedBy: userId,
+            uploadedAt: new Date().toISOString(),
+            processingVersion: '2.0',
+            ...additionalMetadata,
+            ...(processingMetadata
+              ? {
+                  imageProcessing: {
+                    ...processingMetadata,
+                    derivatives: processingMetadata.derivatives.map(
+                      ({ sourcePath, ...rest }) => rest,
+                    ),
+                  },
+                }
+              : {}),
+          },
+        };
+
+        logger.info(
+          `Successfully uploaded media: ${uniqueFilename}, size: ${finalStats.size}, type: ${mediaType}`,
+        );
+        return metadata;
     } catch (error) {
       // Cleanup on error
       try {
@@ -372,28 +477,29 @@ export class MediaUploadService {
    * Parse EXIF data for image metadata
    */
   private parseExifData(exifBuffer: Buffer): Record<string, any> {
-    // Simplified EXIF parsing - in production, use a proper EXIF library
-    const metadata: Record<string, any> = {};
-
     try {
-      // This is a placeholder - implement proper EXIF parsing
-      metadata.hasExif = true;
-      metadata.exifSize = exifBuffer.length;
+      const decoded = exifReader(exifBuffer);
+      return {
+        image: decoded.image,
+        thumbnail: decoded.thumbnail,
+        exif: decoded.exif,
+        gps: decoded.gps,
+        interoperability: decoded.interoperability,
+      };
     } catch (error) {
       logger.warn('Failed to parse EXIF data:', error);
+      return { exifError: 'PARSE_FAILED' };
     }
-
-    return metadata;
   }
 
   /**
    * Extract AV metadata using FFprobe
    */
-  private async extractAVMetadata(
-    filePath: string,
-  ): Promise<Record<string, any>> {
-    return new Promise((resolve) => {
-      ffmpeg.ffprobe(filePath, (err, metadata) => {
+    private async extractAVMetadata(
+      filePath: string,
+    ): Promise<Record<string, any>> {
+      return new Promise((resolve) => {
+        ffmpeg.ffprobe(filePath, (err, metadata) => {
         if (err) {
           logger.warn(`Failed to extract AV metadata from ${filePath}:`, err);
           resolve({});
@@ -428,6 +534,74 @@ export class MediaUploadService {
         resolve(result);
       });
     });
+  }
+
+  private mapImageProcessingMetadata(
+    processed: ImageProcessingResult,
+    canonicalFilename: string,
+  ): ImageProcessingMetadata {
+    const derivatives: DerivativeFile[] = [
+      {
+        type: 'optimized',
+        format: path.extname(canonicalFilename).replace('.', '') || 'jpeg',
+        filename: canonicalFilename,
+        width: processed.optimizedInfo.width,
+        height: processed.optimizedInfo.height,
+      },
+      ...this.mapProcessedImages('thumbnail', processed.thumbnails),
+      ...this.mapProcessedImages('conversion', processed.conversions),
+    ];
+
+    return {
+      derivatives,
+      exif: processed.exif,
+      facialRecognition: processed.facialRecognition,
+    };
+  }
+
+  private mapProcessedImages(
+    type: DerivativeType,
+    images: ProcessedImage[],
+  ): DerivativeFile[] {
+    return images.map((image) => ({
+      type,
+      format: image.format,
+      filename: path.basename(image.path),
+      width: image.width,
+      height: image.height,
+      sourcePath: image.path,
+    }));
+  }
+
+  private async uploadToCdn(
+    mainFilePath: string,
+    mainFilename: string,
+    mimeType: string,
+    derivatives?: DerivativeFile[],
+  ): Promise<Record<string, string>> {
+    if (!this.cdnUploadService) return {};
+
+    const requests: CdnUploadRequest[] = [
+      {
+        localPath: mainFilePath,
+        key: mainFilename,
+        contentType: mimeType,
+      },
+    ];
+
+    for (const derivative of derivatives || []) {
+      const localPath =
+        derivative.sourcePath ||
+        path.join(this.config.uploadPath, derivative.filename);
+
+      requests.push({
+        localPath,
+        key: derivative.filename,
+        contentType: `image/${derivative.format}`,
+      });
+    }
+
+    return this.cdnUploadService.uploadFiles(requests);
   }
 
   /**
@@ -588,4 +762,15 @@ export const defaultMediaUploadConfig: MediaUploadConfig = {
   thumbnailPath:
     process.env.MEDIA_THUMBNAIL_PATH || '/tmp/intelgraph/thumbnails',
   chunkSize: 64 * 1024, // 64KB chunks
+  imageProcessing: defaultImageProcessingConfig,
+  cdnUpload: {
+    enabled: false,
+    bucket: process.env.MEDIA_CDN_BUCKET || '',
+    region: process.env.MEDIA_CDN_REGION || 'us-east-1',
+    basePath: process.env.MEDIA_CDN_BASE_PATH,
+    endpoint: process.env.MEDIA_CDN_ENDPOINT,
+    publicUrl: process.env.MEDIA_CDN_PUBLIC_URL,
+    accessKeyId: process.env.MEDIA_CDN_ACCESS_KEY_ID,
+    secretAccessKey: process.env.MEDIA_CDN_SECRET_ACCESS_KEY,
+  },
 };
