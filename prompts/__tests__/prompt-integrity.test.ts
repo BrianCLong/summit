@@ -22,6 +22,7 @@ describe('Prompt Integrity Suite', () => {
     'capability-matrix.md',
     'enterprise-4th-order.md',
     'workflow-automation.md',
+    'ultra-prime-recursive-meta-extrapolative.md',
   ];
 
   describe('File Existence', () => {

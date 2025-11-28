@@ -2,6 +2,7 @@
 
 | Agent              | Capabilities                                            | Ideal Use Cases                                            | Strengths                                  | Limitations                                  |
 |--------------------|----------------------------------------------------------|-------------------------------------------------------------|---------------------------------------------|-----------------------------------------------|
+| Ultra-Prime Agent  | Recursive meta-extrapolation, complete perfection        | Greenfield projects, mission-critical systems, research      | Deepest extrapolation, highest quality      | Highest latency, most expensive               |
 | Claude Code        | Deep reasoning, architecture, third-order inference      | Complex features, cross-module behavior, system design       | Long context, architectural insight         | Can be verbose, slower than specialized agents|
 | Codex              | Deterministic strict code generation                     | Critical-path features, high-risk code, CI-bound work        | Fast, precise, deterministic                | Less architectural reasoning                  |
 | Jules/Gemini       | Cross-file, multimodal, schema harmonization             | Refactors, dataflow fixes, large coherent features           | Multimodal, cross-file coordination         | May need guidance on conventions              |
@@ -64,21 +65,42 @@
 4. Claude Code
 5. Summit Superprompt
 6. CI/CD Superprompt
+7. Ultra-Prime Agent (slowest, most thorough)
 
 ### Correctness
-1. Codex (deterministic)
-2. CI/CD Superprompt
-3. Claude Code
-4. Summit Superprompt
-5. Jules/Gemini
-6. Cursor/Warp
+1. Ultra-Prime Agent (perfect, zero-defect)
+2. Codex (deterministic)
+3. CI/CD Superprompt
+4. Claude Code
+5. Summit Superprompt
+6. Jules/Gemini
+7. Cursor/Warp
 
 ### Comprehensiveness
-1. Claude Code
-2. Summit Superprompt
+1. Ultra-Prime Agent (most complete)
+2. Claude Code
+3. Summit Superprompt
+4. Jules/Gemini
+5. CI/CD Superprompt
+6. Codex
+7. Cursor/Warp
+
+### Innovation
+1. Ultra-Prime Agent (maximum innovation)
+2. Claude Code
+3. Summit Superprompt
+4. Jules/Gemini
+5. Codex
+6. CI/CD Superprompt
+7. Cursor/Warp
+
+### Cost
+1. Cursor/Warp (cheapest)
+2. Codex
 3. Jules/Gemini
 4. CI/CD Superprompt
-5. Codex
-6. Cursor/Warp
+5. Claude Code
+6. Summit Superprompt
+7. Ultra-Prime Agent (most expensive)
 
 This table guides agent selection in Maestro Conductor and manual task routing.

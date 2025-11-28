@@ -33,17 +33,26 @@ Your job is to route tasks to the correct specialized agent.
 - Immediate execution needed
 
 #### Use **SUMMIT SUPERPROMPT** if:
-- Work touches Summit, IntelGraph, Maestro, or Switchboard  
-- Multi-service integration needed  
+- Work touches Summit, IntelGraph, Maestro, or Switchboard
+- Multi-service integration needed
 - Enterprise architecture involved
 - Cross-boundary changes required
 
 #### Use **CI/CD SUPERPROMPT** if:
-- Process touches build pipeline  
-- Workflows need modification  
-- Tests require structural updates  
+- Process touches build pipeline
+- Workflows need modification
+- Tests require structural updates
 - Pipeline health is critical
 - Provenance/SBOM affected
+
+#### Use **ULTRA-PRIME AGENT** if:
+- Nothing less than perfect will do
+- Greenfield project requiring deep architectural vision
+- Complex system requiring maximum completeness
+- Research requiring comprehensive analysis
+- Mission-critical implementation with zero tolerance for gaps
+- Maximum extrapolation and foresight required
+- Innovation and excellence are paramount
 
 ---
 
@@ -52,6 +61,8 @@ Your job is to route tasks to the correct specialized agent.
 ```
 Task Analysis
 │
+├─ Perfection Required? ──YES──> Ultra-Prime Agent
+│       NO│
 ├─ Multiple Services? ──YES──> Summit Superprompt
 │       NO│
 ├─ CI/CD Related? ──YES──> CI/CD Superprompt
@@ -93,6 +104,11 @@ Return:
 **Task**: "Refactor user types across all services"
 **Selected Agent**: Jules/Gemini
 **Reason**: Cross-file type harmonization across multiple services
+
+### Example 4
+**Task**: "Design and implement a new distributed tracing system for the platform"
+**Selected Agent**: Ultra-Prime Agent
+**Reason**: Greenfield project requiring deep architectural vision, comprehensive implementation, maximum extrapolation of requirements, complete documentation, and production-ready perfection. Nothing less than excellence will do for platform-wide observability.
 
 ---
 
