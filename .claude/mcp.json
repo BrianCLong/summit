@@ -1,0 +1,51 @@
+{
+  "$schema": "https://claude.ai/schemas/mcp-config.json",
+  "mcpServers": {
+    "github": {
+      "description": "GitHub API integration for PR and issue management",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "enabled": true
+    },
+    "filesystem": {
+      "description": "Enhanced filesystem operations with project-aware context",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/user/summit"],
+      "enabled": true
+    },
+    "memory": {
+      "description": "Persistent memory for session context and learned patterns",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "enabled": true
+    },
+    "postgres": {
+      "description": "PostgreSQL database introspection and query execution",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres"],
+      "env": {
+        "POSTGRES_URL": "${DATABASE_URL}"
+      },
+      "enabled": false,
+      "note": "Enable when working with database operations"
+    },
+    "brave-search": {
+      "description": "Web search for documentation and error lookup",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "enabled": false,
+      "note": "Enable for external documentation lookup"
+    }
+  },
+  "globalSettings": {
+    "timeout": 30000,
+    "retryAttempts": 3,
+    "logLevel": "info"
+  }
+}
