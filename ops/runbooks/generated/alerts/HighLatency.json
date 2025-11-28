@@ -1,0 +1,12 @@
+{
+  "alert_id": "auto-highlatency",
+  "alert_name": "HighLatency",
+  "description": "High request latency",
+  "metrics": {
+    "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 0.5"
+  },
+  "service": "observability-ci",
+  "severity": "page",
+  "tenant_id": null,
+  "timestamp": "{{ generated }}"
+}
