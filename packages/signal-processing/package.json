@@ -1,0 +1,20 @@
+{
+  "name": "@intelgraph/signal-processing",
+  "version": "1.0.0",
+  "description": "Real-time signal processing toolkit with FFT, wavelets, digital filters, Kalman denoising, and streaming connectors.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w -p tsconfig.json",
+    "test": "jest --runInBand --rootDir ../../ --config ../../jest.config.cjs --runTestsByPath packages/signal-processing/__tests__",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "fft.js": "^0.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
