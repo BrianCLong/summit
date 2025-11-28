@@ -1,0 +1,538 @@
+openapi: 3.0.3
+info:
+  title: Media Pipeline Service API
+  description: Media and communications pipeline for intake and processing
+  version: 1.0.0
+  contact:
+    name: IntelGraph Platform
+servers:
+  - url: http://localhost:4020
+    description: Local development server
+
+paths:
+  /health:
+    get:
+      summary: Basic health check
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/ready:
+    get:
+      summary: Readiness probe
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is ready
+        '503':
+          description: Service is not ready
+
+  /health/live:
+    get:
+      summary: Liveness probe
+      tags: [Health]
+      responses:
+        '200':
+          description: Service is alive
+
+  /api/v1/media:
+    post:
+      summary: Create a new media asset
+      tags: [Media]
+      security:
+        - PolicyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaAssetCreateRequest'
+      responses:
+        '201':
+          description: Media asset created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                  message:
+                    type: string
+        '400':
+          description: Validation error
+        '403':
+          description: Policy denial
+
+    get:
+      summary: List media assets
+      tags: [Media]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+        - name: caseId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of media assets
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MediaAsset'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+
+  /api/v1/media/{id}:
+    get:
+      summary: Get media asset by ID
+      tags: [Media]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Media asset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaAsset'
+        '404':
+          description: Not found
+
+    patch:
+      summary: Update media asset
+      tags: [Media]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MediaAssetUpdateRequest'
+      responses:
+        '200':
+          description: Updated media asset
+        '404':
+          description: Not found
+
+    delete:
+      summary: Delete media asset
+      tags: [Media]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          description: Asset under legal hold
+        '404':
+          description: Not found
+
+  /api/v1/media/{id}/process:
+    post:
+      summary: Trigger processing for media asset
+      tags: [Media]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                skipTranscription:
+                  type: boolean
+                skipDiarization:
+                  type: boolean
+                skipRedaction:
+                  type: boolean
+                language:
+                  type: string
+                expectedSpeakerCount:
+                  type: integer
+      responses:
+        '202':
+          description: Processing started
+        '404':
+          description: Not found
+        '409':
+          description: Already processing
+
+  /api/v1/transcripts/{id}:
+    get:
+      summary: Get transcript by ID
+      tags: [Transcripts]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transcript
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transcript'
+        '404':
+          description: Not found
+
+  /api/v1/transcripts/{id}/utterances:
+    get:
+      summary: Get utterances for transcript
+      tags: [Transcripts]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: speaker
+          in: query
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          schema:
+            type: integer
+        - name: endTime
+          in: query
+          schema:
+            type: integer
+        - name: keyTurnsOnly
+          in: query
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: List of utterances
+        '404':
+          description: Not found
+
+  /api/v1/transcripts/{id}/export:
+    get:
+      summary: Export transcript
+      tags: [Transcripts]
+      security:
+        - PolicyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, txt, srt, vtt]
+            default: json
+        - name: redacted
+          in: query
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Exported transcript
+        '404':
+          description: Not found
+
+  /api/v1/providers:
+    get:
+      summary: List all providers
+      tags: [Providers]
+      responses:
+        '200':
+          description: Provider list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stt:
+                    type: array
+                    items:
+                      type: string
+                  diarization:
+                    type: array
+                    items:
+                      type: string
+
+  /api/v1/providers/health:
+    get:
+      summary: Get provider health status
+      tags: [Providers]
+      responses:
+        '200':
+          description: Provider health
+
+components:
+  securitySchemes:
+    PolicyAuth:
+      type: apiKey
+      in: header
+      name: X-Authority-Id
+      description: Authority binding for policy enforcement
+
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        uptime:
+          type: integer
+
+    MediaAssetCreateRequest:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [audio, video, document, chat_log, email, image]
+        format:
+          type: string
+        tenantId:
+          type: string
+        caseId:
+          type: string
+          format: uuid
+        investigationId:
+          type: string
+          format: uuid
+        metadata:
+          type: object
+        storage:
+          type: object
+        sourceConnector:
+          type: string
+        sourceRef:
+          type: string
+        policy:
+          $ref: '#/components/schemas/PolicyLabels'
+        processImmediately:
+          type: boolean
+          default: true
+
+    MediaAssetUpdateRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        metadata:
+          type: object
+        policy:
+          $ref: '#/components/schemas/PolicyLabels'
+
+    MediaAsset:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        format:
+          type: string
+        status:
+          type: string
+        metadata:
+          type: object
+        storage:
+          type: object
+        checksum:
+          type: string
+        transcriptId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    Transcript:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        mediaAssetId:
+          type: string
+          format: uuid
+        format:
+          type: string
+        language:
+          type: string
+        utterances:
+          type: array
+          items:
+            $ref: '#/components/schemas/Utterance'
+        participants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParticipantRef'
+        speakerCount:
+          type: integer
+        wordCount:
+          type: integer
+        duration:
+          type: integer
+        confidence:
+          type: number
+
+    Utterance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        transcriptId:
+          type: string
+          format: uuid
+        sequenceNumber:
+          type: integer
+        speakerLabel:
+          type: string
+        content:
+          type: string
+        startTime:
+          type: integer
+        endTime:
+          type: integer
+        confidence:
+          type: number
+
+    ParticipantRef:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        speakerId:
+          type: string
+        displayName:
+          type: string
+        entityId:
+          type: string
+          format: uuid
+
+    PolicyLabels:
+      type: object
+      properties:
+        sensitivity:
+          type: string
+        classification:
+          type: string
+        retentionPolicy:
+          type: string
+        rtbfEligible:
+          type: boolean
+
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        hasMore:
+          type: boolean
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Media
+    description: Media asset management
+  - name: Transcripts
+    description: Transcript access and management
+  - name: Providers
+    description: Provider management
