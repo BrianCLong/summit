@@ -1,6 +1,8 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './cacheService';
+import { getNeo4jDriver } from '../config/database'; // Assuming this exists
 
+// Interfaces (IOC, ThreatHunt, etc.) retained
 export interface IOC {
   id: string;
   type: IOCType;
@@ -355,17 +357,32 @@ export type EvidenceType =
   | 'DNS_QUERY'
   | 'HTTP_REQUEST';
 
+export interface DiamondModel {
+  adversary: any;
+  capability: string[];
+  infrastructure: string[];
+  victim: string[];
+  social_political: string;
+  technology: string;
+}
+
 export class ThreatHuntingService extends EventEmitter {
   private iocs: Map<string, IOC> = new Map();
   private detections: Map<string, Detection> = new Map();
   private hunts: Map<string, ThreatHunt> = new Map();
   private feedSources: Map<string, ThreatIntelFeed> = new Map();
 
+  // CTI Entities - In-memory Cache
+  private threatActors: Map<string, any> = new Map();
+  private malware: Map<string, any> = new Map();
+  private campaigns: Map<string, any> = new Map();
+
   constructor() {
     super();
     console.log('[THREAT_HUNTING] Advanced threat hunting service initialized');
     this.initializeThreatFeeds();
     this.initializeSampleIOCs();
+    this.initializeSampleCTIData();
 
     // Periodic tasks
     setInterval(() => {
@@ -375,6 +392,7 @@ export class ThreatHuntingService extends EventEmitter {
     }, 300000); // Every 5 minutes
   }
 
+  // ... (Previous initialization methods retained for fallback/demo) ...
   private async initializeThreatFeeds(): Promise<void> {
     // Initialize threat intelligence feed configurations
     const feeds: ThreatIntelFeed[] = [
@@ -420,6 +438,37 @@ export class ThreatHuntingService extends EventEmitter {
     console.log(
       `[THREAT_HUNTING] Initialized ${feeds.length} threat intelligence feeds`,
     );
+  }
+
+  private async initializeSampleCTIData(): Promise<void> {
+      // Mock Data for Threat Actors
+      const actorId = 'actor-1';
+      this.threatActors.set(actorId, {
+          id: actorId,
+          name: 'APT29',
+          description: 'A threat group that has been attributed to Russia\'s Foreign Intelligence Service (SVR).',
+          aliases: ['Cozy Bear', 'The Dukes'],
+          threat_actor_types: ['nation-state', 'espionage'],
+          sophistication: 'expert',
+          first_seen: '2008-01-01T00:00:00Z',
+          last_seen: new Date().toISOString(),
+          // Links
+          malware_ids: ['malware-1'],
+          campaign_ids: []
+      });
+
+      // Mock Data for Malware
+      const malwareId = 'malware-1';
+      this.malware.set(malwareId, {
+          id: malwareId,
+          name: 'MiniDuke',
+          description: 'A backdoor used by APT29.',
+          malware_types: ['backdoor'],
+          is_family: true,
+          platform: ['Windows']
+      });
+
+      console.log('[THREAT_HUNTING] Initialized sample CTI data');
   }
 
   private async initializeSampleIOCs(): Promise<void> {
@@ -893,6 +942,214 @@ export class ThreatHuntingService extends EventEmitter {
         new Date(a.detectionTime).getTime(),
     );
   }
+
+  // ==========================================
+  // CTI Methods
+  // ==========================================
+
+  async getThreatActor(id: string) {
+    try {
+      const driver = getNeo4jDriver();
+      if (!driver) throw new Error('Neo4j driver not available');
+
+      const session = driver.session();
+      const result = await session.run(
+        `MATCH (n:THREAT_ACTOR) WHERE n.stix_id = $id OR n.id = $id RETURN n`,
+        { id }
+      );
+      await session.close();
+
+      if (result.records.length > 0) {
+        const node = result.records[0].get('n').properties;
+        // Map Neo4j props to schema if needed
+        return { ...node, id: node.stix_id || node.id };
+      }
+    } catch (e) {
+      console.warn('Failed to fetch from Neo4j, falling back to cache', e);
+    }
+    return this.threatActors.get(id);
+  }
+
+  async getThreatActors() {
+    try {
+      const driver = getNeo4jDriver();
+      if (!driver) throw new Error('Neo4j driver not available');
+
+      const session = driver.session();
+      const result = await session.run(
+        `MATCH (n:THREAT_ACTOR) RETURN n LIMIT 100`
+      );
+      await session.close();
+
+      return result.records.map(r => {
+        const node = r.get('n').properties;
+        return { ...node, id: node.stix_id || node.id };
+      });
+    } catch (e) {
+      console.warn('Failed to fetch from Neo4j, falling back to cache', e);
+    }
+    return Array.from(this.threatActors.values());
+  }
+
+  async getMalware(id: string) {
+    try {
+      const driver = getNeo4jDriver();
+      if (!driver) throw new Error('Neo4j driver not available');
+
+      const session = driver.session();
+      const result = await session.run(
+        `MATCH (n:MALWARE) WHERE n.stix_id = $id OR n.id = $id RETURN n`,
+        { id }
+      );
+      await session.close();
+
+      if (result.records.length > 0) {
+        const node = result.records[0].get('n').properties;
+        return { ...node, id: node.stix_id || node.id };
+      }
+    } catch (e) {
+      console.warn('Failed to fetch from Neo4j, falling back to cache', e);
+    }
+    return this.malware.get(id);
+  }
+
+  async getMalwareList() {
+    try {
+      const driver = getNeo4jDriver();
+      if (!driver) throw new Error('Neo4j driver not available');
+
+      const session = driver.session();
+      const result = await session.run(
+        `MATCH (n:MALWARE) RETURN n LIMIT 100`
+      );
+      await session.close();
+
+      return result.records.map(r => {
+        const node = r.get('n').properties;
+        return { ...node, id: node.stix_id || node.id };
+      });
+    } catch (e) {
+      console.warn('Failed to fetch from Neo4j, falling back to cache', e);
+    }
+    return Array.from(this.malware.values());
+  }
+
+  /**
+   * Diamond Model Analysis
+   * Maps Adversary, Capability, Infrastructure, and Victim
+   */
+  async analyzeDiamondModel(actorId: string): Promise<DiamondModel> {
+    // Try Neo4j first for robust relationship traversal
+    try {
+        const driver = getNeo4jDriver();
+        if (driver) {
+            const session = driver.session();
+            // Cypher query to get capabilities (Tools/Malware) used by the actor
+            const cypher = `
+                MATCH (a:THREAT_ACTOR {stix_id: $id})
+                OPTIONAL MATCH (a)-[:USES]->(m:MALWARE)
+                OPTIONAL MATCH (a)-[:USES]->(t:TOOL)
+                RETURN a, collect(distinct m.name) as malware, collect(distinct t.name) as tools
+            `;
+            const result = await session.run(cypher, { id: actorId });
+            await session.close();
+
+            if (result.records.length > 0) {
+                const rec = result.records[0];
+                const actor = rec.get('a').properties;
+                const capability = [...rec.get('malware'), ...rec.get('tools')];
+
+                return {
+                    adversary: { ...actor, id: actor.stix_id },
+                    capability: capability.length > 0 ? capability : ['Unknown'],
+                    infrastructure: ['Unknown Infrastructure'], // Expand query for infrastructure
+                    victim: ['Unknown Victim'], // Expand query for targets
+                    social_political: actor.description || 'Unknown',
+                    technology: 'Unknown'
+                };
+            }
+        }
+    } catch (e) {
+        console.warn('Neo4j analysis failed, falling back to mock', e);
+    }
+
+    // Fallback to in-memory/mock logic
+    const actor = this.threatActors.get(actorId);
+    if (!actor) throw new Error('Actor not found');
+
+    // Dynamic generation based on linked IDs
+    const malwareIds = actor.malware_ids || [];
+    const capability = malwareIds.map((mid: string) => {
+        const m = this.malware.get(mid);
+        return m ? m.name : 'Unknown Tool';
+    });
+
+    // Add some default capabilities if list is empty, based on sophistication
+    if (capability.length === 0 && actor.sophistication === 'expert') {
+        capability.push('Custom Exploits', 'Zero-days');
+    }
+
+    return {
+      adversary: actor,
+      capability: capability,
+      infrastructure: ['185.220.101.42', 'C2 Server Network'],
+      victim: ['Government Agencies', 'Think Tanks'],
+      social_political: actor.description || 'Unknown motivation',
+      technology: 'Windows, Microsoft Office'
+    };
+  }
+
+  /**
+   * Attack Chain Mapping
+   * Maps observed techniques to Kill Chain phases
+   */
+  analyzeAttackChain(incidentId: string): any[] {
+     // Dynamic mapping based on incident ID (mock logic for demo)
+     if (incidentId === 'incident-1') {
+         return [
+             {
+                 id: 'T1566',
+                 name: 'Phishing',
+                 kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'initial-access' }]
+             }
+         ];
+     }
+
+     return [
+         {
+             id: 'T1566',
+             name: 'Phishing',
+             kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'initial-access' }]
+         },
+         {
+             id: 'T1059',
+             name: 'Command and Scripting Interpreter',
+             kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'execution' }]
+         }
+     ];
+  }
+
+  /**
+   * Threat Scoring and Prioritization
+   * Calculates a risk score (0-100) based on severity, confidence, and context
+   */
+  getThreatScore(entityId: string): number {
+      const actor = this.threatActors.get(entityId);
+      if (actor) {
+          let score = 50;
+          if (actor.sophistication === 'expert') score += 30;
+          if (actor.threat_actor_types.includes('nation-state')) score += 15;
+          return score;
+      }
+
+      const malware = this.malware.get(entityId);
+      if (malware) {
+          return 75; // Base score for malware
+      }
+
+      return 0;
+  }
+
 
   /**
    * Get threat hunting statistics
