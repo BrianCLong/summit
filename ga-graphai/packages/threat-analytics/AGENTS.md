@@ -1,0 +1,3 @@
+- Threat analytics and detection package.
+- Use 2 spaces for indentation in TypeScript files.
+- Run `npm test` in this package after making changes.
