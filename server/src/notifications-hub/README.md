@@ -81,17 +81,29 @@ Over 30 predefined event types across categories:
 
 ### Receivers
 
-Three built-in receiver types:
+Six built-in receiver types:
 
 1. **EmailReceiver** - SMTP/email service integration with HTML templating
 2. **ChatReceiver** - Unified adapter for Slack, Teams, Discord, Mattermost
 3. **WebhookReceiver** - HTTP webhooks with authentication and signature verification
+4. **SmsReceiver** - SMS delivery with retry and length-aware short messaging
+5. **PushReceiver** - Mobile/desktop push notifications (FCM/APNs/mock)
+6. **RealtimeReceiver** - WebSocket/SSE fan-out for in-product toasts and live views
 
 Each receiver supports:
 - Retry with exponential backoff
 - Health checks
 - Delivery metrics
 - Custom configuration
+
+Additional capabilities:
+
+- **Templating engine** using `TemplateRegistry`/`TemplateRenderer` for consistent subject/body/CTA across channels
+- **Batching & digests** configurable per-channel per-user, with automatic digest generation and delivery history
+- **Realtime streaming** through the `RealtimeSessionManager` for SSE/WebSocket clients
+- **Reliability controls** including per-user rate limiting, dead letter queue with retry, and WebSocket connection pooling
+- **Observability** via Prometheus metrics (dead letters, latency histograms, channel delivery counters)
+- **Deterministic simulations** optional on mock receivers (email/chat/webhook) to disable random latency/failures during tests
 
 ### Preferences & Noise Control
 

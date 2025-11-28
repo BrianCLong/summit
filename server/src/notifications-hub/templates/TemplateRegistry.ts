@@ -265,6 +265,19 @@ Review spending and adjust resource allocation if necessary.`,
       callToAction: 'View Budget Details',
       variables: ['subject.name', 'message'],
     });
+
+    // Notification lifecycle templates
+    this.register({
+      id: 'notification_digest',
+      eventType: EventType.NOTIFICATION_DIGEST,
+      title: 'Digest: {{payload.events.length}} new notifications',
+      shortMessage: 'Digest with {{payload.events.length}} notifications',
+      message: `You have {{payload.events.length}} new notifications queued for {{payload.channel}}.
+
+{{message}}`,
+      callToAction: 'Review notifications',
+      variables: ['payload.events.length', 'payload.channel'],
+    });
   }
 
   /**
