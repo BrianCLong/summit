@@ -1,0 +1,72 @@
+groups:
+  - name: sla.rules
+    rules:
+      - record: service:availability:30d
+        expr: avg_over_time(probe_success{job="blackbox"}[30d])
+      - alert: ServiceAvailabilitySLADegraded
+        expr: service:availability:30d < 0.999
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: "${service} availability below 99.9% SLA"
+          description: |-
+            The blackbox probe for {{ $labels.instance }} has fallen below the 99.9% SLA over the
+            past 30 days. Investigate upstream dependencies and rollout health.
+      - alert: ServiceErrorBudgetBurn
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) by (service)
+            /
+          sum(rate(http_requests_total[5m])) by (service) > 0.02
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.service }} error budget burning fast"
+          description: |-
+            5xx error rate exceeded 2% for service {{ $labels.service }}.
+            Check recent deploys, roll back if necessary, and verify downstream dependencies.
+      - alert: P95LatencyRegression
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) > 0.75
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $labels.service }} p95 latency regression"
+          description: "Observed p95 latency above 750ms for service {{ $labels.service }} over the last 10m."
+      - alert: OpenTelemetryPipelineErrors
+        expr: sum(rate(otelcol_exporter_send_failed_requests_total[5m])) by (exporter) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "OpenTelemetry exporter {{ $labels.exporter }} is failing"
+          description: "Collector exporter {{ $labels.exporter }} has send failures. Check upstream/downstream connectivity."
+      - alert: ElasticsearchClusterUnhealthy
+        expr: elasticsearch_cluster_health_status{color="red"} == 1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Elasticsearch cluster health is RED"
+          description: "Logs indexing is degraded. Check storage pressure, memory, and cluster events."
+      - alert: LoggingErrorSpike
+        expr: sum(rate(filebeat_events_active_total[5m])) by (app) > 0 and sum(rate(filebeat_published_events_total[5m])) by (app) == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Filebeat is receiving but not publishing logs"
+          description: "Filebeat active events increasing without publish throughput for {{ $labels.app }}."
+      - alert: ProfilingIngestionStalled
+        expr: sum(rate(pyroscope_ingester_samples_appended_total[5m])) == 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pyroscope ingestion stalled"
+          description: "No profiling samples were appended in the last 15 minutes."

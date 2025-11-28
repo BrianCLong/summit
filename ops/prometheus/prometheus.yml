@@ -5,6 +5,7 @@ global:
 
 rule_files:
   - prometheus-rule-slo.yaml
+  - prometheus-rule-sla.yaml
   - rules-business.yaml
 
 alerting:
@@ -88,6 +89,32 @@ scrape_configs:
         labels:
           service: elasticsearch
           tier: logging
+
+  - job_name: pyroscope
+    metrics_path: /metrics
+    static_configs:
+      - targets:
+          - pyroscope:4040
+        labels:
+          service: pyroscope
+          tier: telemetry
+
+  - job_name: blackbox
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+          - http://maestro-api:8080/healthz
+          - http://maestro-gateway:8081/healthz
+          - http://maestro-worker:9400/healthz
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
 
   - job_name: kubernetes-pods
     kubernetes_sd_configs:

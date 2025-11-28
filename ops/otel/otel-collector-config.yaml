@@ -24,19 +24,24 @@ processors:
       - key: deployment.environment
         value: ${DEPLOYMENT_ENVIRONMENT}
         action: upsert
+extensions:
+  health_check:
+    endpoint: 0.0.0.0:13133
+  pprof:
+    endpoint: 0.0.0.0:1777
 exporters:
-  otlp/tempo:
-    endpoint: tempo:4317
+  otlp/jaeger:
+    endpoint: jaeger:4317
     tls:
       insecure: true
   otlp/elasticsearch:
-    endpoint: http://elasticsearch:9200
+    endpoint: http://elasticsearch-apm:9200
     tls:
       insecure: true
   prometheus:
     endpoint: 0.0.0.0:9464
   prometheusremotewrite/main:
-    endpoint: http://prometheus.monitoring:9090/api/v1/write
+    endpoint: http://prometheus:9090/api/v1/write
   loki:
     endpoint: http://loki:3100/loki/api/v1/push
     labels:
@@ -47,11 +52,12 @@ service:
   telemetry:
     logs:
       level: info
+  extensions: [health_check, pprof]
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch, attributes/add_env]
-      exporters: [otlp/tempo]
+      exporters: [otlp/jaeger]
     metrics:
       receivers: [otlp, prometheus]
       processors: [batch, attributes/add_env]
