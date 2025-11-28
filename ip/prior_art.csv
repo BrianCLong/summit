@@ -1,0 +1,8 @@
+System/Paper,URL,Key Capabilities,License,Relevance to SRE,Claim Delta
+OpenAI Evals,https://github.com/openai/evals,Standardized framework for running benchmarks.,MIT,Baseline reference.,SRE adds graph-based topological metrics (Claim 1) vs Evals' linear output matching.
+DeepEval,https://github.com/confident-ai/deepeval,Unit-test style metrics for LLMs.,Apache 2.0,DX inspiration.,SRE's "Curriculum Policy" (Claim 2) dynamically selects tests, unlike DeepEval's static suites.
+Ragas,https://github.com/explodinggradients/ragas,RAG metrics (Context Precision/Recall).,Apache 2.0,Component metrics.,SRE generalizes "Context" to "Dependency Edges" (Claim 8) in a general reasoning graph.
+LangSmith,https://smith.langchain.com/,Trace visualization and management.,Proprietary,UI Standard.,LangSmith visualizes trees (spans); SRE models explicit DAGs with "Correction" edges (Claim 4).
+The Social Laboratory,https://arxiv.org/abs/2510.01295,Multi-agent debate evaluation.,N/A,Research basis.,SRE operationalizes "Consensus" as a graph convergence pattern (Claim 3) suitable for automation.
+Self-Evolving Curriculum,https://arxiv.org/abs/2505.14970,Dynamic difficulty adjustment.,N/A,Curriculum logic.,SRE creates a productized "System" (Claim 2) integrating this logic with graph-based feedback.
+AUTO-CEI,https://arxiv.org/abs/2310.xxxx,Step count as difficulty proxy.,N/A,Metric basis.,SRE expands "Step Count" to "Topological Efficiency" (Claim 1) accounting for parallel branches.

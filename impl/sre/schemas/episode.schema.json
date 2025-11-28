@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Reasoning Episode Schema",
+  "description": "A graph-structured representation of a reasoning episode, capturing thoughts, actions, observations, and their causal dependencies.",
+  "type": "object",
+  "properties": {
+    "episode_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for the episode."
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Identifier of the task being attempted."
+    },
+    "run_config": {
+      "type": "object",
+      "description": "Configuration parameters for the run (model, temperature, tools, etc.)."
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Identifier of the primary agent or system."
+    },
+    "start_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "end_time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "graph": {
+      "type": "object",
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "type": {
+                "type": "string",
+                "enum": ["thought", "call", "observation", "correction", "system", "communication"]
+              },
+              "content": { "type": "string" },
+              "metadata": { "type": "object" },
+              "timestamp": { "type": "string", "format": "date-time" }
+            },
+            "required": ["id", "type"]
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "source": { "type": "string" },
+              "target": { "type": "string" },
+              "relation": {
+                "type": "string",
+                "enum": ["follows", "depends_on", "corrects", "contradicts", "refines"]
+              }
+            },
+            "required": ["source", "target"]
+          }
+        }
+      },
+      "required": ["nodes", "edges"]
+    },
+    "outcome": {
+      "type": "object",
+      "description": "The final output or result of the episode."
+    },
+    "scores": {
+      "type": "object",
+      "description": "Computed metrics for the episode (e.g., accuracy, efficiency, coherence).",
+      "additionalProperties": {
+        "type": "number"
+      }
+    },
+    "feedback": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string", "enum": ["human", "model_critic"] },
+          "score": { "type": "number" },
+          "comment": { "type": "string" }
+        }
+      }
+    }
+  },
+  "required": ["episode_id", "task_id", "graph"]
+}
