@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScalingRecommendation",
+  "type": "object",
+  "required": ["objective", "recommended_config", "predicted_metrics", "expected_utility"],
+  "properties": {
+    "objective": {
+      "type": "string",
+      "description": "Primary optimization objective (e.g., reasoning_score, tool_success_rate)."
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "budget": {
+          "type": "object",
+          "properties": {
+            "gpu_hours": {"type": "number"},
+            "wall_clock_hours": {"type": "number"},
+            "cost_usd": {"type": "number"}
+          },
+          "additionalProperties": false
+        },
+        "max_params": {
+          "type": "number",
+          "description": "Maximum allowed parameter count."
+        },
+        "context_len_range": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Inclusive context length bounds in tokens."
+        },
+        "allow_moe": {
+          "type": "boolean",
+          "description": "Whether mixture-of-experts architectures are allowed."
+        },
+        "safety_minimum": {
+          "type": "number",
+          "description": "Minimum safety score required."
+        }
+      },
+      "additionalProperties": false
+    },
+    "preference_weights": {
+      "type": "object",
+      "properties": {
+        "quality": {"type": "number"},
+        "safety": {"type": "number"},
+        "latency": {"type": "number"},
+        "cost": {"type": "number"}
+      },
+      "additionalProperties": false
+    },
+    "recommended_config": {
+      "$ref": "./config.schema.json"
+    },
+    "predicted_metrics": {
+      "$ref": "./metrics.schema.json"
+    },
+    "expected_utility": {
+      "type": "number",
+      "description": "Scalar utility from the AutoML scorer."
+    },
+    "pareto_candidates": {
+      "type": "array",
+      "description": "Optional Pareto frontier candidate configs with predicted metrics.",
+      "items": {
+        "type": "object",
+        "required": ["config", "predicted_metrics"],
+        "properties": {
+          "config": {"$ref": "./config.schema.json"},
+          "predicted_metrics": {"$ref": "./metrics.schema.json"},
+          "expected_utility": {"type": "number"}
+        },
+        "additionalProperties": false
+      }
+    },
+    "follow_on_experiments": {
+      "type": "array",
+      "description": "Planned experiments to validate or explore around the recommendation.",
+      "items": {
+        "type": "object",
+        "required": ["id", "config"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier for the follow-on experiment."
+          },
+          "config": {
+            "$ref": "./config.schema.json"
+          },
+          "rationale": {
+            "type": "string",
+            "description": "Why this experiment was selected (e.g., exploration, robustness check)."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "explanations": {
+      "type": "object",
+      "properties": {
+        "feature_importance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["feature", "importance"],
+            "properties": {
+              "feature": {"type": "string"},
+              "importance": {"type": "number"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form explanation of why the configuration was chosen."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

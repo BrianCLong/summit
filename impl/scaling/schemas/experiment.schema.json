@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScalingExperiment",
+  "type": "object",
+  "required": ["id", "timestamp", "config", "metrics"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique experiment identifier."
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO8601 timestamp when the experiment completed or snapshot was taken."
+    },
+    "config": {
+      "$ref": "./config.schema.json"
+    },
+    "metrics": {
+      "$ref": "./metrics.schema.json"
+    },
+    "hardware": {
+      "type": "object",
+      "properties": {
+        "gpu_type": {
+          "type": "string",
+          "description": "GPU model name."
+        },
+        "num_gpus": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of GPUs used."
+        },
+        "accelerator_memory_gb": {
+          "type": "number",
+          "description": "Memory per accelerator in GB."
+        },
+        "cpu_type": {
+          "type": "string",
+          "description": "CPU model name."
+        }
+      },
+      "additionalProperties": false
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "git_commit": {
+          "type": "string",
+          "description": "Commit hash used to produce the run."
+        },
+        "container_image": {
+          "type": "string",
+          "description": "Container image reference if applicable."
+        },
+        "orchestrator_run_id": {
+          "type": "string",
+          "description": "External scheduler or orchestrator identifier."
+        }
+      },
+      "additionalProperties": false
+    },
+    "data_versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["dataset_id", "version"],
+        "properties": {
+          "dataset_id": {
+            "type": "string",
+            "description": "Dataset identifier."
+          },
+          "version": {
+            "type": "string",
+            "description": "Dataset version or hash."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "derived": {
+      "type": "object",
+      "properties": {
+        "flops": {
+          "type": "number",
+          "description": "Estimated total FLOPs for the run."
+        },
+        "effective_tokens": {
+          "type": "number",
+          "description": "Tokens adjusted for curriculum/augmentation effects."
+        },
+        "cost_usd": {
+          "type": "number",
+          "description": "Estimated cost of the run in USD."
+        }
+      },
+      "additionalProperties": false
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "checkpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "URIs to checkpoints."
+        },
+        "logs_uri": {
+          "type": "string",
+          "description": "URI to raw training/eval logs."
+        },
+        "plots_uri": {
+          "type": "string",
+          "description": "URI to plots or visualization bundle."
+        }
+      },
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Arbitrary tags for filtering and cohorting."
+    }
+  },
+  "additionalProperties": false
+}
