@@ -1,0 +1,227 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: secure-headers
+  namespace: gateway
+spec:
+  headers:
+    customResponseHeaders:
+      Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+      X-Frame-Options: DENY
+      X-Content-Type-Options: nosniff
+      Referrer-Policy: strict-origin-when-cross-origin
+    customRequestHeaders:
+      X-Forwarded-Proto: https
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: request-identity
+  namespace: gateway
+spec:
+  headers:
+    customRequestHeaders:
+      X-Request-Id: "{traefik-request-id}"
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: rate-limit
+  namespace: gateway
+spec:
+  rateLimit:
+    average: 600
+    burst: 200
+    period: 1m
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: jwt-auth
+  namespace: gateway
+spec:
+  forwardAuth:
+    address: http://authz-gateway.default.svc.cluster.local/verify
+    trustForwardHeader: true
+    authResponseHeaders:
+      - X-User-Id
+      - X-User-Roles
+      - X-Request-Id
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: compress
+  namespace: gateway
+spec:
+  compress: {}
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: catalog-v1-lb
+  namespace: gateway
+spec:
+  loadBalancer:
+    passHostHeader: true
+    servers:
+      - url: http://catalog-v1-0.catalog-v1.svc.cluster.local:8080
+      - url: http://catalog-v1-1.catalog-v1.svc.cluster.local:8080
+    healthCheck:
+      path: /health
+      interval: 10s
+      timeout: 2s
+    responseForwarding:
+      flushInterval: 50ms
+    circuitBreaker:
+      expression: ResponseCodeRatio(500,600) > 0.2 || NetworkErrorRatio() > 0.1
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: catalog-v2-lb
+  namespace: gateway
+spec:
+  loadBalancer:
+    passHostHeader: true
+    servers:
+      - url: http://catalog-v2-0.catalog-v2.svc.cluster.local:8080
+      - url: http://catalog-v2-1.catalog-v2.svc.cluster.local:8080
+    healthCheck:
+      path: /health
+      interval: 10s
+      timeout: 2s
+    responseForwarding:
+      flushInterval: 50ms
+    circuitBreaker:
+      expression: ResponseCodeRatio(500,600) > 0.2 || NetworkErrorRatio() > 0.1
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: catalog-latest
+  namespace: gateway
+spec:
+  weighted:
+    services:
+      - name: catalog-v2-lb
+        kind: TraefikService
+        weight: 90
+      - name: catalog-v1-lb
+        kind: TraefikService
+        weight: 10
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: orders-lb
+  namespace: gateway
+spec:
+  loadBalancer:
+    passHostHeader: true
+    servers:
+      - url: http://orders-0.orders.svc.cluster.local:8080
+      - url: http://orders-1.orders.svc.cluster.local:8080
+    healthCheck:
+      path: /health
+      interval: 10s
+      timeout: 3s
+    responseForwarding:
+      flushInterval: 50ms
+    circuitBreaker:
+      expression: ResponseCodeRatio(500,600) > 0.25 || NetworkErrorRatio() > 0.1 || LatencyAtQuantileMS(50.0) > 300
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: TraefikService
+metadata:
+  name: bff-lb
+  namespace: gateway
+spec:
+  loadBalancer:
+    passHostHeader: true
+    servers:
+      - url: http://bff-0.bff.svc.cluster.local:8080
+      - url: http://bff-1.bff.svc.cluster.local:8080
+    healthCheck:
+      path: /health
+      interval: 10s
+      timeout: 2s
+    responseForwarding:
+      flushInterval: 50ms
+    circuitBreaker:
+      expression: ResponseCodeRatio(500,600) > 0.25 || NetworkErrorRatio() > 0.1
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: catalog-api
+  namespace: gateway
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: PathPrefix(`/api/v1/catalog`)
+      kind: Rule
+      middlewares:
+        - name: request-identity
+        - name: jwt-auth
+        - name: rate-limit
+        - name: compress
+      services:
+        - name: catalog-v1-lb
+          kind: TraefikService
+    - match: PathPrefix(`/api/v2/catalog`) || PathPrefix(`/api/latest/catalog`)
+      kind: Rule
+      middlewares:
+        - name: request-identity
+        - name: jwt-auth
+        - name: rate-limit
+        - name: compress
+      services:
+        - name: catalog-latest
+          kind: TraefikService
+  tls:
+    secretName: gateway-tls
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: orders-api
+  namespace: gateway
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: PathPrefix(`/api/v1/orders`)
+      kind: Rule
+      middlewares:
+        - name: request-identity
+        - name: jwt-auth
+        - name: rate-limit
+        - name: compress
+      services:
+        - name: orders-lb
+          kind: TraefikService
+  tls:
+    secretName: gateway-tls
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: bff-api
+  namespace: gateway
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: PathPrefix(`/api/v1/bff`)
+      kind: Rule
+      middlewares:
+        - name: request-identity
+        - name: jwt-auth
+        - name: compress
+      services:
+        - name: bff-lb
+          kind: TraefikService
+  tls:
+    secretName: gateway-tls
