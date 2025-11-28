@@ -136,10 +136,10 @@ export class DifferentialPrivacy {
     const noisyMeasures: Record<string, number | null> = {};
 
     for (const measure of query.measures) {
-      const key = measure.alias || measure.field;
+      const key = measure.alias || `${measure.aggregation}_${measure.field}`;
       const originalValue = row.measures[key];
 
-      if (originalValue === null) {
+      if (originalValue === null || originalValue === undefined) {
         noisyMeasures[key] = null;
         continue;
       }
