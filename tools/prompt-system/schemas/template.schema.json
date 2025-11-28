@@ -1,0 +1,189 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://intelgraph.io/schemas/prompt-template.schema.json",
+  "title": "AI Dev Assistant Prompt Template",
+  "description": "Schema for AI assistant prompt templates in the IntelGraph platform",
+  "type": "object",
+  "required": ["id", "name", "version", "category", "content"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique identifier for the template (kebab-case)"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 100,
+      "description": "Human-readable template name"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version (e.g., 1.0.0)"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "core",
+        "specialized",
+        "meta",
+        "custom"
+      ],
+      "description": "Template category"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "ui-ux-fix",
+        "feature",
+        "bug-fix",
+        "refactor",
+        "security-fix",
+        "performance",
+        "db-migration",
+        "graphql-schema",
+        "testing",
+        "architecture",
+        "planning",
+        "code-review",
+        "custom"
+      ],
+      "description": "Specific template type"
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Template description"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Searchable tags"
+    },
+    "author": {
+      "type": "string",
+      "description": "Template author"
+    },
+    "lastUpdated": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/variable"
+      },
+      "description": "Template variables"
+    },
+    "content": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Template content (Handlebars/Markdown)"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "priority": {
+          "type": "string",
+          "enum": ["P0", "P1", "P2", "P3", "P4"]
+        },
+        "estimatedTokens": {
+          "type": "number",
+          "minimum": 0
+        },
+        "complexity": {
+          "type": "string",
+          "enum": ["minimal", "moderate", "maximal"]
+        },
+        "successRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "usageCount": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "mixins": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Template mixins to compose"
+    },
+    "extends": {
+      "type": "string",
+      "description": "Base template to extend"
+    },
+    "validationRules": {
+      "type": "object",
+      "properties": {
+        "requiredVariables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maxLength": {
+          "type": "number"
+        },
+        "minLength": {
+          "type": "number"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "variable": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "array", "object", "code", "multiline"]
+        },
+        "description": {
+          "type": "string"
+        },
+        "default": {
+          "description": "Default value"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false
+        },
+        "validation": {
+          "type": "object",
+          "properties": {
+            "pattern": {
+              "type": "string"
+            },
+            "min": {
+              "type": "number"
+            },
+            "max": {
+              "type": "number"
+            },
+            "enum": {
+              "type": "array"
+            }
+          }
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Interactive prompt text"
+        }
+      }
+    }
+  }
+}
