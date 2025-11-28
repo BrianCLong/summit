@@ -1,9 +1,11 @@
 import { jwtVerify, type JWTPayload } from 'jose';
 import type { Request, Response, NextFunction } from 'express';
+import { context } from '@opentelemetry/api';
 import pino from 'pino';
 import { getPublicKey } from './keys';
 import { authorize } from './policy';
 import { log } from './audit';
+import { attachAuthorizationBaggage } from './observability';
 import type { AttributeService } from './attribute-service';
 import type {
   AuthorizationInput,
@@ -135,7 +137,15 @@ export function requireAuth(
       req.user = payload;
       req.subjectAttributes = subject;
       req.resourceAttributes = resource;
-      return next();
+      const baggageContext = attachAuthorizationBaggage({
+        subjectId: subject.id,
+        tenantId: subject.tenantId,
+        resourceId: resource.id,
+        action: options.action,
+        classification: resource.classification,
+        residency: resource.residency,
+      });
+      return context.with(baggageContext, () => next());
     } catch (error) {
       if (process.env.NODE_ENV !== 'test') {
         logger.error({ err: error }, 'Authorization error');
