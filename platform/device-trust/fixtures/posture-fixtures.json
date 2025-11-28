@@ -1,0 +1,22 @@
+[
+  {
+    "name": "macOS Safari non-compliant",
+    "userAgent": { "platform": "macOS", "browser": "Safari", "device": "MacBook" },
+    "localChecks": [
+      { "name": "disk_encryption", "passed": true },
+      { "name": "screen_lock", "passed": false }
+    ],
+    "webauthn": { "transport": "internal", "credentialId": "mac-webauthn", "signCount": 0 },
+    "deviceIdentifier": "mac-123"
+  },
+  {
+    "name": "Windows Edge remediated",
+    "userAgent": { "platform": "Windows", "browser": "Edge", "device": "Surface" },
+    "localChecks": [
+      { "name": "disk_encryption", "passed": true },
+      { "name": "screen_lock", "passed": true }
+    ],
+    "webauthn": { "transport": "usb", "credentialId": "win-webauthn", "signCount": 5 },
+    "deviceIdentifier": "win-456"
+  }
+]
