@@ -1,0 +1,15 @@
+{
+  "title": "Vulnerability Burn-Down",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "CVSS >= 7.0 (blocked)",
+      "query": "sum by (service) (increase(sca_vuln_blocked_total{cvss>='7.0'}[$__range]))"
+    },
+    {
+      "type": "stat",
+      "title": "Open High/Critical",
+      "query": "sum(sca_vuln_open{severity=~'high|critical'})"
+    }
+  ]
+}

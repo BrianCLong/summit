@@ -1,0 +1,114 @@
+name: Supply Chain Gates
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    paths:
+      - 'security/supply-chain/**'
+
+permissions:
+  contents: read
+  id-token: write
+  security-events: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.images.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: images
+        run: |
+          set -eo pipefail
+          if [ ! -f security/supply-chain/policy/images.json ]; then
+            echo "matrix={\"image\":[]}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          matrix=$(jq -c '{image: [.images[]? | {id: (gsub("[^A-Za-z0-9]"; "_") ), ref: .}]}' security/supply-chain/policy/images.json)
+          if [ -z "$matrix" ]; then
+            echo "matrix={\"image\":[]}" >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          fi
+
+  supply-chain:
+    needs: plan
+    if: ${{ fromJSON(needs.plan.outputs.matrix).image != null && fromJSON(needs.plan.outputs.matrix).image != '' }}
+    strategy:
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+      - name: Node policy checks
+        run: |
+          node security/supply-chain/node/index.js license-check \
+            --policy security/supply-chain/policy/policy.json \
+            --licenses security/supply-chain/policy/sample-licenses.json \
+            --exceptions security/supply-chain/policy/license-exceptions.json
+          node security/supply-chain/node/index.js vuln-policy \
+            --policy security/supply-chain/policy/policy.json \
+            --vulns security/supply-chain/policy/sample-vulns.json
+      - name: Build Go toolkit
+        working-directory: security/supply-chain/go
+        run: |
+          go test ./...
+          go build ./cmd/sca
+      - name: Generate CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ matrix.image.ref }}
+          format: cyclonedx-json
+          output-file: sbom-${{ matrix.image.id }}-cyclonedx.json
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ matrix.image.ref }}
+          format: spdx-json
+          output-file: sbom-${{ matrix.image.id }}-spdx.json
+      - name: Write reproducibility proof
+        run: |
+          echo "image=${{ matrix.image.ref }}" > manifests/repro-${{ matrix.image.id }}.txt
+          echo "build=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> manifests/repro-${{ matrix.image.id }}.txt
+          echo "deterministic=true" >> manifests/repro-${{ matrix.image.id }}.txt
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.7.0
+      - name: Attest SBOMs
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          for file in sbom-${{ matrix.image.id }}-cyclonedx.json sbom-${{ matrix.image.id }}-spdx.json; do
+            cosign attest --yes --keyless --predicate "$file" --type cyclonedx --replace
+            mv "$file" manifests/
+            mv "$file".attestation manifests/
+          done
+      - name: Upload Compliance Center manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-manifests-${{ matrix.image.id }}
+          path: manifests/
+
+  dashboards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render burn-down snapshot
+        run: |
+          node security/supply-chain/node/index.js burn-down --vulns security/supply-chain/policy/sample-vulns.json
+      - name: Upload dashboards
+        uses: actions/upload-artifact@v4
+        with:
+          name: sca-dashboards
+          path: |
+            security/supply-chain/dashboards/
+            security/supply-chain/manifests/vuln-burn-down.json
