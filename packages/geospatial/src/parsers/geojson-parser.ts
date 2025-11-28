@@ -2,8 +2,7 @@
  * GeoJSON parser for geospatial data ingestion
  */
 
-import { FeatureCollection, Feature } from 'geojson';
-import { IntelFeatureCollection, IntelFeature } from '../types/geospatial.js';
+import type { FeatureCollection, IntelFeatureCollection, IntelFeature } from '../types/geospatial.js';
 
 export class GeoJSONParser {
   /**
@@ -39,7 +38,7 @@ export class GeoJSONParser {
   /**
    * Enrich a GeoJSON feature with intelligence metadata
    */
-  private static enrichFeature(feature: Feature): IntelFeature {
+  private static enrichFeature(feature: IntelFeature): IntelFeature {
     return {
       ...feature,
       properties: {

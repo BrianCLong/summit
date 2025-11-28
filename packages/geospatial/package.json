@@ -19,15 +19,7 @@
   ],
   "author": "IntelGraph Team",
   "license": "MIT",
-  "dependencies": {
-    "@turf/turf": "^7.1.0",
-    "@types/geojson": "^7946.0.14",
-    "geojson": "^0.5.0",
-    "shpjs": "^6.0.0",
-    "xml2js": "^0.6.2",
-    "proj4": "^2.12.1",
-    "fast-xml-parser": "^4.5.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",

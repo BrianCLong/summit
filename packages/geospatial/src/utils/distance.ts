@@ -212,6 +212,8 @@ export function centroid(points: GeoPoint[]): GeoPoint {
   };
 }
 
+export const centroidFromPoints = centroid;
+
 /**
  * Convert degrees to radians
  */
