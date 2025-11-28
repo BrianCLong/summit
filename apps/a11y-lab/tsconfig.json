@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./",
+    "module": "ESNext",
+    "target": "ES2022",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "moduleResolution": "Bundler",
+    "types": ["node", "@playwright/test"]
+  },
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "playwright.config.ts"]
+}

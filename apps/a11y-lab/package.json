@@ -1,0 +1,19 @@
+{
+  "name": "@summit/a11y-lab",
+  "version": "0.1.0",
+  "description": "Accessibility lab with Playwright + axe-core gates, keyboard trap detection, contrast budgeting, and SR tooling.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "pnpm exec playwright test",
+    "test:report": "pnpm exec playwright show-report",
+    "ci:gate": "node ./scripts/ci-gate.mjs",
+    "heatmap:build": "node ./scripts/emit-heatmap-snippet.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@playwright/test": "^1.56.1",
+    "axe-core": "^4.10.0",
+    "colord": "^2.9.3"
+  }
+}
