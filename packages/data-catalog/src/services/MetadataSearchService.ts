@@ -27,9 +27,9 @@ export enum SearchEntityType {
 }
 
 /**
- * Search Filter
+ * Metadata Search Filter
  */
-export interface SearchFilter {
+export interface MetadataSearchFilter {
   entityTypes?: SearchEntityType[];
   dataSourceTypes?: DataSourceType[];
   datasetStatuses?: DatasetStatus[];
@@ -51,11 +51,11 @@ export interface SearchSort {
 }
 
 /**
- * Search Request
+ * Metadata Search Request
  */
 export interface MetadataSearchRequest {
   query: string;
-  filters?: SearchFilter;
+  filters?: MetadataSearchFilter;
   sort?: SearchSort[];
   offset?: number;
   limit?: number;
@@ -63,9 +63,9 @@ export interface MetadataSearchRequest {
 }
 
 /**
- * Search Result
+ * Metadata Search Result
  */
-export interface SearchResult {
+export interface MetadataSearchResult {
   entityId: string;
   entityType: SearchEntityType;
   name: string;
@@ -78,21 +78,21 @@ export interface SearchResult {
 }
 
 /**
- * Search Response
+ * Metadata Search Response
  */
 export interface MetadataSearchResponse {
-  results: SearchResult[];
+  results: MetadataSearchResult[];
   total: number;
   offset: number;
   limit: number;
   took: number;
-  facets: SearchFacet[];
+  facets: MetadataSearchFacet[];
 }
 
 /**
- * Search Facet
+ * Metadata Search Facet
  */
-export interface SearchFacet {
+export interface MetadataSearchFacet {
   field: string;
   values: Array<{
     value: string;
@@ -171,7 +171,7 @@ export class MetadataSearchService {
     request: MetadataSearchRequest,
   ): Promise<MetadataSearchResponse> {
     const startTime = Date.now();
-    const results: SearchResult[] = [];
+    const results: MetadataSearchResult[] = [];
 
     const entityTypes = request.filters?.entityTypes || [SearchEntityType.ALL];
     const includeAll = entityTypes.includes(SearchEntityType.ALL);
@@ -234,9 +234,9 @@ export class MetadataSearchService {
    */
   private async searchDataSources(
     request: MetadataSearchRequest,
-  ): Promise<SearchResult[]> {
+  ): Promise<MetadataSearchResult[]> {
     const query = request.query.toLowerCase();
-    const results: SearchResult[] = [];
+    const results: MetadataSearchResult[] = [];
 
     for (const ds of this.dataSources.values()) {
       // Apply filters
@@ -301,9 +301,9 @@ export class MetadataSearchService {
    */
   private async searchDatasets(
     request: MetadataSearchRequest,
-  ): Promise<SearchResult[]> {
+  ): Promise<MetadataSearchResult[]> {
     const query = request.query.toLowerCase();
-    const results: SearchResult[] = [];
+    const results: MetadataSearchResult[] = [];
 
     for (const ds of this.datasets.values()) {
       // Apply filters
@@ -378,9 +378,9 @@ export class MetadataSearchService {
    */
   private async searchFields(
     request: MetadataSearchRequest,
-  ): Promise<SearchResult[]> {
+  ): Promise<MetadataSearchResult[]> {
     const query = request.query.toLowerCase();
-    const results: SearchResult[] = [];
+    const results: MetadataSearchResult[] = [];
 
     for (const field of this.fields.values()) {
       // Apply filters
@@ -445,9 +445,9 @@ export class MetadataSearchService {
    */
   private async searchMappings(
     request: MetadataSearchRequest,
-  ): Promise<SearchResult[]> {
+  ): Promise<MetadataSearchResult[]> {
     const query = request.query.toLowerCase();
-    const results: SearchResult[] = [];
+    const results: MetadataSearchResult[] = [];
 
     for (const mapping of this.mappings.values()) {
       const score = this.calculateRelevanceScore(
@@ -488,9 +488,9 @@ export class MetadataSearchService {
    */
   private async searchSchemas(
     request: MetadataSearchRequest,
-  ): Promise<SearchResult[]> {
+  ): Promise<MetadataSearchResult[]> {
     const query = request.query.toLowerCase();
-    const results: SearchResult[] = [];
+    const results: MetadataSearchResult[] = [];
 
     for (const schema of this.schemas.values()) {
       // Apply filters
@@ -545,9 +545,9 @@ export class MetadataSearchService {
    */
   async searchFieldsAdvanced(
     request: FieldSearchRequest,
-  ): Promise<SearchResult[]> {
+  ): Promise<MetadataSearchResult[]> {
     const query = request.query.toLowerCase();
-    const results: SearchResult[] = [];
+    const results: MetadataSearchResult[] = [];
 
     for (const field of this.fields.values()) {
       // Apply filters
@@ -758,8 +758,8 @@ export class MetadataSearchService {
   /**
    * Calculate search facets
    */
-  private calculateFacets(results: SearchResult[]): SearchFacet[] {
-    const facets: SearchFacet[] = [];
+  private calculateFacets(results: MetadataSearchResult[]): MetadataSearchFacet[] {
+    const facets: MetadataSearchFacet[] = [];
 
     // Entity type facet
     const entityTypeCounts = new Map<string, number>();

@@ -9,7 +9,7 @@ import {
   DatasetStatus,
   DataClassification,
   MappingStatus,
-  TransformationType,
+  MappingTransformationType,
   LicenseType,
 } from '../../types/dataSourceTypes';
 
@@ -479,7 +479,7 @@ describe('DataSourceService', () => {
         sourceFieldId: field.id,
         canonicalSchemaId: 'canonical-person-schema-id',
         canonicalFieldId: 'canonical-name-field-id',
-        transformationType: TransformationType.DIRECT,
+        transformationType: MappingTransformationType.DIRECT,
         transformationLogic: null,
         transformationLanguage: null,
         validationRules: [],
@@ -492,7 +492,7 @@ describe('DataSourceService', () => {
 
       expect(mapping).toBeDefined();
       expect(mapping.id).toBeDefined();
-      expect(mapping.transformationType).toBe(TransformationType.DIRECT);
+      expect(mapping.transformationType).toBe(MappingTransformationType.DIRECT);
       expect(mapping.status).toBe(MappingStatus.ACTIVE);
 
       // Verify it's linked to the field

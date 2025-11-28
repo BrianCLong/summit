@@ -213,7 +213,7 @@ export interface Mapping {
   canonicalFieldId: string;
 
   // Transformation
-  transformationType: TransformationType;
+  transformationType: MappingTransformationType;
   transformationLogic: string | null;
   transformationLanguage: string | null;
 
@@ -240,7 +240,7 @@ export interface Mapping {
 /**
  * Transformation Type
  */
-export enum TransformationType {
+export enum MappingTransformationType {
   DIRECT = 'DIRECT',
   CAST = 'CAST',
   CONCATENATE = 'CONCATENATE',
@@ -450,7 +450,7 @@ export const MappingSchema = z.object({
   sourceFieldId: z.string().uuid(),
   canonicalSchemaId: z.string().uuid(),
   canonicalFieldId: z.string().uuid(),
-  transformationType: z.nativeEnum(TransformationType),
+  transformationType: z.nativeEnum(MappingTransformationType),
   transformationLogic: z.string().nullable(),
   status: z.nativeEnum(MappingStatus),
   version: z.string(),
