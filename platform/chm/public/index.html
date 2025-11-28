@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CHM Controls</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <style>
+      body { padding: 1.5rem; }
+      .banner { border: 2px solid #b00020; padding: 0.75rem; margin-bottom: 1rem; background: #ffe8e8; }
+      .ribbon { background: linear-gradient(45deg, #b00020, #e65100); color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-weight: bold; }
+      .stamp { border: 2px dashed #0f766e; padding: 0.5rem; display: inline-block; margin-top: 0.5rem; text-transform: uppercase; font-weight: 700; }
+      .disclaimer { font-size: 0.95rem; color: #4b5563; }
+      #derived-label { display: none; }
+    </style>
+  </head>
+  <body>
+    <section class="banner">
+      <div class="ribbon">Controlled Handling & Markings</div>
+      <p class="disclaimer">Exports require residency and license conformance. Unauthorized export attempts are recorded.</p>
+      <p id="derived-label" class="stamp">Derived from controlled source</p>
+    </section>
+
+    <article>
+      <h2>Document Controls</h2>
+      <p>Toggle derived-from lineage to visually stamp exports and embeds.</p>
+      <label>
+        <input id="derived-toggle" type="checkbox" />
+        Mark as derived from controlled source
+      </label>
+
+      <div class="grid">
+        <div>
+          <h3>Export Disclaimers</h3>
+          <ul>
+            <li>Residency enforcement checks destinations against policy.</li>
+            <li>License tier must be exportable for the chosen jurisdiction.</li>
+            <li>Dual-control downgrade receipts are attached to export packages.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Live Status</h3>
+          <p id="status" class="stamp">No export initiated</p>
+        </div>
+      </div>
+    </article>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+      $(function () {
+        $('#derived-toggle').on('change', function () {
+          const checked = $(this).is(':checked');
+          $('#derived-label').toggle(checked);
+          $('#status').text(checked ? 'Derived-from marking applied' : 'No export initiated');
+        });
+      });
+    </script>
+  </body>
+</html>
