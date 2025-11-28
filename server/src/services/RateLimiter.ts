@@ -13,9 +13,10 @@ export interface RateLimitResult {
 
 export class RateLimiter {
   private metrics: PrometheusMetrics;
-  private readonly namespace = 'rate_limit';
+  private readonly namespace: string;
 
-  constructor() {
+  constructor(namespace = 'rate_limit') {
+    this.namespace = namespace;
     this.metrics = new PrometheusMetrics('rate_limiter');
     this.metrics.createCounter('hits_total', 'Total rate limit checks', ['status']);
     this.metrics.createCounter('blocked_total', 'Total blocked requests', ['key_prefix']);
@@ -30,8 +31,14 @@ export class RateLimiter {
    * @param windowMs Window size in milliseconds
    * @returns RateLimitResult
    */
-  async checkLimit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
-    const redisKey = `${this.namespace}:${key}`;
+  async checkLimit(
+    key: string,
+    limit: number,
+    windowMs: number,
+    options: { prefix?: string } = {},
+  ): Promise<RateLimitResult> {
+    const redisKeyPrefix = options.prefix ? `${this.namespace}:${options.prefix}` : this.namespace;
+    const redisKey = `${redisKeyPrefix}:${key}`;
     const now = Date.now();
     const redisClient = getRedisClient();
 
@@ -59,7 +66,12 @@ export class RateLimiter {
         return {current, ttl}
       `;
 
-      const result = await redisClient.eval(script, 1, redisKey, windowMs) as [number, number];
+      const result = (await redisClient.eval(
+        script,
+        1,
+        redisKey,
+        windowMs,
+      )) as [number, number];
       const current = result[0];
       const ttl = result[1]; // TTL in ms
 
@@ -70,9 +82,9 @@ export class RateLimiter {
       this.metrics.incrementCounter('hits_total', { status: allowed ? 'allowed' : 'blocked' });
 
       if (!allowed) {
-          // Identify prefix for metrics (e.g. "ip" or "user")
-          const prefix = key.split(':')[0] || 'unknown';
-          this.metrics.incrementCounter('blocked_total', { key_prefix: prefix });
+        // Identify prefix for metrics (e.g. "ip" or "user")
+        const prefix = key.split(':')[0] || 'unknown';
+        this.metrics.incrementCounter('blocked_total', { key_prefix: prefix });
       }
 
       return {
@@ -92,6 +104,22 @@ export class RateLimiter {
         reset: now + windowMs,
       };
     }
+  }
+
+  /**
+   * Convenience helper for background processing throttles.
+   * Returns retryAfterMs to allow callers to enqueue with delay instead of rejecting.
+   */
+  async throttle(
+    key: string,
+    limit: number,
+    windowMs: number,
+    options: { prefix?: string } = {},
+  ): Promise<RateLimitResult & { retryAfterMs: number }> {
+    const result = await this.checkLimit(key, limit, windowMs, options);
+    const retryAfterMs = Math.max(result.reset - Date.now(), 0);
+
+    return { ...result, retryAfterMs };
   }
 }
 

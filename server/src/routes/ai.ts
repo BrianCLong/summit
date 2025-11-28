@@ -5,7 +5,6 @@
 
 import express, { Request, Response } from 'express';
 import { body, query, validationResult } from 'express-validator';
-import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import EntityLinkingService from '../services/EntityLinkingService.js';
 import { Queue, Worker } from 'bullmq';
@@ -22,16 +21,65 @@ import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constr
 import { randomUUID } from 'crypto'; // Use Node's built-in UUID for job IDs
 import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
 import { MediaType } from '../services/MediaUploadService.js'; // Import MediaType from MediaUploadService
+import { createRateLimitMiddleware } from '../middleware/rateLimit.js';
+import { cfg } from '../config.js';
+import { rateLimiter } from '../services/RateLimiter.js';
 
 const logger = pino();
 const router = express.Router();
 
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
 const connection = getRedisClient(); // Use existing Redis client for BullMQ
-const videoAnalysisQueue = new Queue('videoAnalysisQueue', { connection });
+if (!connection) {
+  throw new Error('Redis connection is required for AI queue rate limiting');
+}
+const videoAnalysisQueue = new Queue('videoAnalysisQueue', {
+  connection,
+  limiter: {
+    max: cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
+    duration: cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
+  },
+});
+
+const buildBackgroundKey = (req: Request, scope: string) => {
+  // @ts-ignore - req.user is injected by auth middleware when available
+  const user = req.user;
+  if (user) return `user:${user.id || user.sub}:${scope}`;
+  return `ip:${req.ip}:${scope}`;
+};
+
+const enforceBackgroundThrottle = async (
+  req: Request,
+  scope: string,
+): Promise<void> => {
+  const key = buildBackgroundKey(req, scope);
+  const result = await rateLimiter.throttle(
+    key,
+    cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
+    cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
+    { prefix: 'bg' },
+  );
+
+  if (!result.allowed) {
+    const retryAfterSeconds = Math.max(Math.ceil(result.retryAfterMs / 1000), 0);
+    const error = new Error('Background rate limit exceeded') as Error & {
+      status?: number;
+      retryAfter?: number;
+    };
+    error.status = 429;
+    error.retryAfter = retryAfterSeconds;
+    throw error;
+  }
+};
 
 // Feedback Queue for AI insights
-const feedbackQueue = new Queue('aiFeedbackQueue', { connection });
+const feedbackQueue = new Queue('aiFeedbackQueue', {
+  connection,
+  limiter: {
+    max: cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
+    duration: cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
+  },
+});
 
 // WAR-GAMED SIMULATION - Initialize ExtractionEngine (assuming a dummy PG Pool for now)
 // In a real app, the PG Pool would be passed from the main app initialization
@@ -90,15 +138,16 @@ videoAnalysisWorker.on('failed', (job, err) => {
 });
 
 // Rate limiting for AI endpoints (more restrictive due to computational cost)
-const aiRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit each IP to 50 requests per windowMs
-  message: {
-    error: 'Too many AI requests, please try again later',
-    retryAfter: '15 minutes',
+const aiRateLimit = createRateLimitMiddleware({
+  scope: 'ai',
+  windowMs: cfg.AI_RATE_LIMIT_WINDOW_MS,
+  max: cfg.AI_RATE_LIMIT_MAX_REQUESTS,
+  keyGenerator: (req) => {
+    // @ts-ignore - req.user is injected by auth middleware when available
+    const user = req.user;
+    if (user) return `user:${user.id || user.sub}`;
+    return `ip:${req.ip}`;
   },
-  standardHeaders: true,
-  legacyHeaders: false,
 });
 
 // Apply rate limiting to all AI routes
@@ -458,6 +507,8 @@ router.post(
     const jobId = randomUUID(); // Generate a unique job ID
 
     try {
+      await enforceBackgroundThrottle(req, 'video-analysis');
+
       // Add job to the queue
       await videoAnalysisQueue.add(
         'video-analysis-job',
@@ -484,6 +535,15 @@ router.post(
         `Error submitting video analysis job: ${error.message}`,
         error,
       );
+
+      if (error?.status === 429) {
+        res.status(429).json({
+          error: 'Too many video analysis requests',
+          retryAfter: error.retryAfter,
+        });
+        return;
+      }
+
       res.status(500).json({
         error: 'Failed to submit video analysis job',
         message: error.message,
@@ -590,6 +650,8 @@ router.post(
         originalPrediction,
       });
 
+      await enforceBackgroundThrottle(req, 'ai-feedback');
+
       // Add feedback to the queue for asynchronous processing by ML services
       await feedbackQueue.add('logFeedback', {
         insight,
@@ -603,10 +665,17 @@ router.post(
         success: true,
         message: 'Feedback received successfully and queued for processing',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+      if (error?.status === 429) {
+        res.status(429).json({
+          error: 'Too many feedback events submitted',
+          retryAfter: error.retryAfter,
+        });
+        return;
+      }
       res.status(500).json({
         error: 'Failed to process feedback',
         message: 'Internal server error',
@@ -622,6 +691,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { text, label, user, timestamp, deceptionScore } = req.body;
+      await enforceBackgroundThrottle(req, 'ai-feedback');
       await feedbackQueue.add('logDeceptionFeedback', {
         insight: { text, deceptionScore },
         feedbackType: label,
@@ -630,10 +700,17 @@ router.post(
         originalPrediction: { deceptionScore },
       });
       res.status(200).json({ success: true, message: 'Feedback received' });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing deception feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+      if (error?.status === 429) {
+        res.status(429).json({
+          error: 'Too many deception feedback events submitted',
+          retryAfter: error.retryAfter,
+        });
+        return;
+      }
       res.status(500).json({
         error: 'Failed to process feedback',
         message: 'Internal server error',

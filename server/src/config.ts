@@ -18,6 +18,10 @@ const Env = z
     RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60000),
     RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(100),
     RATE_LIMIT_MAX_AUTHENTICATED: z.coerce.number().default(1000),
+    AI_RATE_LIMIT_WINDOW_MS: z.coerce.number().default(15 * 60 * 1000),
+    AI_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(50),
+    BACKGROUND_RATE_LIMIT_WINDOW_MS: z.coerce.number().default(60_000),
+    BACKGROUND_RATE_LIMIT_MAX_REQUESTS: z.coerce.number().default(120),
     CACHE_ENABLED: z.coerce.boolean().default(true),
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
     L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
@@ -31,6 +35,10 @@ const ENV_VAR_HELP: Record<string, string> = {
   RATE_LIMIT_WINDOW_MS: 'Window size for rate limiting in milliseconds (default: 60000)',
   RATE_LIMIT_MAX_REQUESTS: 'Max requests per window per user/IP (default: 100)',
   RATE_LIMIT_MAX_AUTHENTICATED: 'Max requests per window for authenticated users (default: 1000)',
+  AI_RATE_LIMIT_WINDOW_MS: 'Window size for AI endpoints (default: 15 minutes)',
+  AI_RATE_LIMIT_MAX_REQUESTS: 'Max requests for AI endpoints per window (default: 50)',
+  BACKGROUND_RATE_LIMIT_WINDOW_MS: 'Window size for Redis-backed background throttles (default: 60s)',
+  BACKGROUND_RATE_LIMIT_MAX_REQUESTS: 'Max background jobs per window per identifier (default: 120)',
   CACHE_ENABLED: 'Enable or disable caching (default: true)',
   CACHE_TTL_DEFAULT: 'Default cache TTL in seconds (default: 300)',
   NEO4J_URI: 'Neo4j bolt URI (e.g., bolt://localhost:7687)',
