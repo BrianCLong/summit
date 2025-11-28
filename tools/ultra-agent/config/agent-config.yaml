@@ -1,0 +1,29 @@
+mode: universal
+llm_provider: openai   # or: anthropic
+llm_model: gpt-4
+prompt_file: prompts/PROMPTS.md
+tools:
+  - file.write
+  - file.read
+  - repo.create_pr
+  - repo.merge_pr
+  - tests.run
+  - formatter.run
+  - linter.run
+modules:
+  - interpreter
+  - planner
+  - executor
+  - verifier
+  - documenter
+  - devops
+  - pr_manager
+pr:
+  branch: feat/auto-generated
+  autoMerge: false
+  reviewChecklist:
+    - All tests passing
+    - CI green
+    - Docs complete
+    - Commit history clean
+    - Architecture fully justified

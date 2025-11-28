@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  ultra-agent:
+    build: .
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+    command: >
+      "Design and scaffold a small CRUD service for tasks, with tests and docs."
+    volumes:
+      - ./:/app
