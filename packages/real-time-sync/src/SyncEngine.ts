@@ -11,6 +11,10 @@ import {
 } from './types';
 import { OperationalTransform } from './OperationalTransform';
 
+export interface SyncEngineOptions {
+  conflictResolution?: ConflictResolution;
+}
+
 export interface SyncStore {
   // Document operations
   getDocumentState(documentId: string): Promise<DocumentState | null>;
@@ -40,10 +44,13 @@ export class SyncEngine extends EventEmitter {
   private ot: OperationalTransform;
   private pendingOperations: Map<string, Operation[]> = new Map();
   private processingQueue: Map<string, Promise<void>> = new Map();
+  private defaultResolution: ConflictResolution;
 
-  constructor(private store: SyncStore) {
+  constructor(private store: SyncStore, options: SyncEngineOptions = {}) {
     super();
     this.ot = new OperationalTransform();
+    this.defaultResolution =
+      options.conflictResolution ?? ({ strategy: 'last_write_wins' } as ConflictResolution);
   }
 
   /**
@@ -92,10 +99,14 @@ export class SyncEngine extends EventEmitter {
 
     // Add to pending queue
     const docId = session.documentId;
+    const queuedOperation: Operation = {
+      ...operation,
+      baseVersion: operation.baseVersion ?? operation.version
+    };
     if (!this.pendingOperations.has(docId)) {
       this.pendingOperations.set(docId, []);
     }
-    this.pendingOperations.get(docId)!.push(operation);
+    this.pendingOperations.get(docId)!.push(queuedOperation);
 
     // Process queue
     await this.processOperationQueue(docId);
@@ -121,74 +132,102 @@ export class SyncEngine extends EventEmitter {
   }
 
   private async processQueueInternal(documentId: string): Promise<void> {
-    const pending = this.pendingOperations.get(documentId) || [];
-    if (pending.length === 0) return;
+    while (true) {
+      const pending = this.dequeuePendingOperations(documentId);
+      if (pending.length === 0) return;
 
-    // Get current document state
-    const state = await this.store.getDocumentState(documentId);
-    if (!state) {
-      throw new Error('Document not found');
-    }
+      // Get current document state
+      const state = await this.store.getDocumentState(documentId);
+      if (!state) {
+        throw new Error('Document not found');
+      }
 
-    // Get all operations since the oldest pending operation's version
-    const oldestVersion = Math.min(...pending.map(op => op.version));
-    const existingOps = await this.store.getOperations(documentId, oldestVersion);
+      // Get all operations since the oldest pending operation's version
+      const oldestVersion = Math.min(...pending.map(op => op.version));
+      const existingOps = await this.store.getOperations(documentId, oldestVersion);
 
-    // Transform pending operations against existing operations
-    const transformedOps: Operation[] = [];
-    for (const pendingOp of pending) {
-      let transformedOp = pendingOp;
+      // Ensure deterministic ordering when transforming
+      existingOps.sort((a, b) => a.version - b.version || a.timestamp - b.timestamp);
 
-      // Transform against all concurrent operations
-      for (const existingOp of existingOps) {
-        if (existingOp.version >= pendingOp.version && existingOp.id !== pendingOp.id) {
-          const [transformed] = this.ot.transform(transformedOp, existingOp);
-          transformedOp = transformed;
+      const appliedOps: Operation[] = [];
+      let currentVersion = state.version;
+
+      for (const pendingOp of pending) {
+        const transformedOp = this.transformAgainstHistory(
+          pendingOp,
+          existingOps,
+          appliedOps
+        );
+
+        const conflictingApplied = this.findConflicts(transformedOp, appliedOps);
+
+        let resolutionWinner = transformedOp;
+        if (conflictingApplied.length > 0) {
+          resolutionWinner = await this.resolveConflict(
+            documentId,
+            [transformedOp, ...conflictingApplied],
+            this.defaultResolution
+          );
+
+          this.emit('conflicts:resolved', {
+            documentId,
+            winner: resolutionWinner,
+            losers: [transformedOp, ...conflictingApplied].filter(
+              op => op.id !== resolutionWinner.id
+            )
+          });
         }
+
+        if (resolutionWinner.id !== transformedOp.id) {
+          // Conflict resolution discarded the incoming operation in favor of history
+          this.emit('operation:skipped', {
+            documentId,
+            operation: { ...transformedOp, attributes: { ...transformedOp.attributes, overridden: true } }
+          });
+          continue;
+        }
+
+        const opWithVersion: Operation = {
+          ...resolutionWinner,
+          version: currentVersion + 1,
+          baseVersion: resolutionWinner.baseVersion ?? resolutionWinner.version
+        };
+
+        // Apply operation to document
+        if (typeof state.content === 'string') {
+          state.content = this.ot.apply(state.content, opWithVersion);
+        } else {
+          // For non-string content, apply custom logic
+          state.content = this.applyOperationToObject(state.content, opWithVersion);
+        }
+
+        currentVersion = opWithVersion.version;
+        state.version = currentVersion;
+        state.lastModified = new Date();
+        state.modifiedBy = opWithVersion.userId;
+
+        // Save operation and state
+        await this.store.appendOperation(documentId, opWithVersion);
+        await this.store.saveDocumentState(state);
+
+        appliedOps.push(opWithVersion);
+
+        // Emit operation to other clients
+        this.emit('operation:applied', {
+          documentId,
+          operation: opWithVersion,
+          state
+        });
       }
 
-      // Update version
-      transformedOp = {
-        ...transformedOp,
-        version: state.version + 1
-      };
-
-      // Apply operation to document
-      if (typeof state.content === 'string') {
-        state.content = this.ot.apply(state.content, transformedOp);
-      } else {
-        // For non-string content, apply custom logic
-        state.content = this.applyOperationToObject(state.content, transformedOp);
+      // Check for conflicts in the applied set to surface combined clashes
+      const conflicts = this.detectConflicts(appliedOps);
+      if (conflicts.length > 0) {
+        this.emit('conflicts:detected', {
+          documentId,
+          conflicts
+        });
       }
-
-      state.version++;
-      state.lastModified = new Date();
-      state.modifiedBy = transformedOp.userId;
-
-      // Save operation and state
-      await this.store.appendOperation(documentId, transformedOp);
-      await this.store.saveDocumentState(state);
-
-      transformedOps.push(transformedOp);
-
-      // Emit operation to other clients
-      this.emit('operation:applied', {
-        documentId,
-        operation: transformedOp,
-        state
-      });
-    }
-
-    // Clear processed operations
-    this.pendingOperations.set(documentId, []);
-
-    // Check for conflicts
-    const conflicts = this.detectConflicts(transformedOps);
-    if (conflicts.length > 0) {
-      this.emit('conflicts:detected', {
-        documentId,
-        conflicts
-      });
     }
   }
 
@@ -307,6 +346,40 @@ export class SyncEngine extends EventEmitter {
   }
 
   /**
+   * Transform an incoming operation against historical and already-applied operations
+   * to preserve intent when rebasing onto the latest state.
+   */
+  private transformAgainstHistory(
+    operation: Operation,
+    history: Operation[],
+    applied: Operation[]
+  ): Operation {
+    const baseVersion = operation.baseVersion ?? operation.version;
+    let transformed = { ...operation };
+
+    for (const historical of history) {
+      if (historical.id === transformed.id) continue;
+      if (historical.version >= baseVersion) {
+        [transformed] = this.ot.transform(transformed, historical);
+      }
+    }
+
+    for (const committed of applied) {
+      if (committed.id === transformed.id) continue;
+      [transformed] = this.ot.transform(transformed, committed);
+    }
+
+    return transformed;
+  }
+
+  /**
+   * Locate already-applied operations that conflict with the provided operation.
+   */
+  private findConflicts(operation: Operation, applied: Operation[]): Operation[] {
+    return applied.filter(appliedOp => this.ot.hasConflict(operation, appliedOp));
+  }
+
+  /**
    * Detect conflicts in operations
    */
   private detectConflicts(operations: Operation[]): Array<{ ops: Operation[]; reason: string }> {
@@ -363,5 +436,24 @@ export class SyncEngine extends EventEmitter {
       merged = this.ot.compose(merged, operations[i]);
     }
     return merged;
+  }
+
+  private dequeuePendingOperations(documentId: string): Operation[] {
+    const queue = this.pendingOperations.get(documentId) || [];
+    if (queue.length === 0) {
+      return [];
+    }
+
+    const batch = [...queue];
+    this.pendingOperations.set(documentId, []);
+
+    return batch.sort((a, b) => {
+      if (a.version !== b.version) return a.version - b.version;
+      const aBase = a.baseVersion ?? a.version;
+      const bBase = b.baseVersion ?? b.version;
+      if (aBase !== bBase) return aBase - bBase;
+      if (a.timestamp !== b.timestamp) return a.timestamp - b.timestamp;
+      return a.id.localeCompare(b.id);
+    });
   }
 }
