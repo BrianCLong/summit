@@ -81,6 +81,9 @@ const DisclosurePackagerPage = React.lazy(() =>
 const OrchestratorDashboard = React.lazy(() =>
   import('./features/orchestrator/OrchestratorDashboard')
 );
+const AdminDashboard = React.lazy(() =>
+  import('./components/admin/AdminDashboard')
+);
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -670,7 +673,7 @@ function MainLayout() {
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
               <Route element={<ProtectedRoute roles={['ADMIN']} />}>
-                <Route path="/system" element={<InvestigationsPage />} />
+                <Route path="/system" element={<AdminDashboard />} />
                 <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
                 <Route
                   path="/wargame-dashboard"
