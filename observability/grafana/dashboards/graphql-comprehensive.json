@@ -1,0 +1,317 @@
+{
+  "dashboard": {
+    "title": "GraphQL API - Comprehensive Observability",
+    "uid": "graphql-api-comprehensive",
+    "version": 1,
+    "timezone": "browser",
+    "editable": true,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Request Rate (QPS)",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum(rate(graphql_requests_total[5m])) by (operation)",
+            "legendFormat": "{{ operation }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "showPoints": "never"
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Error Rate (%)",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "(sum(rate(graphql_requests_total{status=\"error\"}[5m])) by (operation) / sum(rate(graphql_requests_total[5m])) by (operation)) * 100",
+            "legendFormat": "{{ operation }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 2, "color": "yellow" },
+                { "value": 5, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Latency Percentiles",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le, operation))",
+            "legendFormat": "{{ operation }} - p50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le, operation))",
+            "legendFormat": "{{ operation }} - p95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le, operation))",
+            "legendFormat": "{{ operation }} - p99",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Golden Path Success Rate",
+        "type": "gauge",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "(sum(rate(golden_path_success_total[5m])) by (step) / (sum(rate(golden_path_success_total[5m])) by (step) + sum(rate(golden_path_errors_total[5m])) by (step))) * 100",
+            "legendFormat": "{{ step }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 95, "color": "yellow" },
+                { "value": 98, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Golden Path Latency by Step",
+        "type": "timeseries",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(golden_path_duration_ms_bucket[5m])) by (le, step))",
+            "legendFormat": "{{ step }} - p95",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Query Complexity",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "avg(graphql_query_complexity) by (operation)",
+            "legendFormat": "{{ operation }}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Cache Hit Rate",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 24, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "(sum(rate(graphql_cache_hits_total[5m])) / (sum(rate(graphql_cache_hits_total[5m])) + sum(rate(graphql_cache_misses_total[5m])))) * 100",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 50, "color": "yellow" },
+                { "value": 80, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Total Requests (5m)",
+        "type": "stat",
+        "gridPos": { "x": 6, "y": 24, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(increase(graphql_requests_total[5m]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Error Count (5m)",
+        "type": "stat",
+        "gridPos": { "x": 12, "y": 24, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(increase(graphql_errors_total[5m]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 10, "color": "yellow" },
+                { "value": 50, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Active Traces",
+        "type": "stat",
+        "gridPos": { "x": 18, "y": 24, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "sum(rate(traces_total[5m]))",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "decimals": 0
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Error Types Breakdown",
+        "type": "piechart",
+        "gridPos": { "x": 0, "y": 28, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum(increase(graphql_errors_total[1h])) by (errorType)",
+            "legendFormat": "{{ errorType }}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Top 10 Slowest Operations (p95)",
+        "type": "table",
+        "gridPos": { "x": 12, "y": 28, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "topk(10, histogram_quantile(0.95, sum(rate(graphql_query_duration_ms_bucket[5m])) by (le, operation)))",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": { "Time": true },
+              "indexByName": {},
+              "renameByName": {
+                "operation": "Operation",
+                "Value": "p95 Latency (ms)"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "templating": {
+      "list": [
+        {
+          "name": "operation",
+          "type": "query",
+          "query": "label_values(graphql_requests_total, operation)",
+          "refresh": 1,
+          "multi": true,
+          "includeAll": true
+        }
+      ]
+    },
+    "annotations": {
+      "list": [
+        {
+          "name": "Deployments",
+          "datasource": "Prometheus",
+          "expr": "changes(process_start_time_seconds{job=\"graphql-gateway\"}[5m]) > 0",
+          "step": "60s",
+          "tagKeys": "instance",
+          "textFormat": "Deployment on {{ instance }}",
+          "titleFormat": "Deployment"
+        }
+      ]
+    }
+  }
+}
