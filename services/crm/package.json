@@ -28,6 +28,7 @@
   "author": "Summit Team",
   "license": "MIT",
   "dependencies": {
+    "@intelgraph/types": "workspace:*",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

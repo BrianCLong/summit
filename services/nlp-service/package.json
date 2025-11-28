@@ -17,7 +17,7 @@
     "@intelgraph/entity-extraction": "workspace:*",
     "@intelgraph/text-analytics": "workspace:*",
     "@intelgraph/language-models": "workspace:*",
-    "express": "^5.1.1",
+    "express": "^4.21.2",
     "cors": "^2.8.5",
     "helmet": "^8.0.0",
     "express-rate-limit": "8.1.0",
@@ -25,7 +25,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
-    "@types/express": "^5.0.1",
+    "@types/express": "^4.17.21",
     "@types/cors": "^2.8.17",
     "@types/node": "^24.10.1",
     "tsx": "^4.19.2",

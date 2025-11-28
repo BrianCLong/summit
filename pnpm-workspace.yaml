@@ -9,3 +9,4 @@ packages:
 exclude:
   - 'archive/**'
   - 'apps/mobile-native'
+  - 'apps/desktop-electron'

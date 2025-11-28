@@ -1,7 +1,7 @@
 {
-  "name": "@summit/query-optimizer",
+  "name": "@intelgraph/types",
   "version": "1.0.0",
-  "description": "Query optimizer for database operations",
+  "description": "Shared TypeScript types and interfaces for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
