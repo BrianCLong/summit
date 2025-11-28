@@ -1,0 +1,52 @@
+{
+  "name": "@intelgraph/anomaly-time-warp",
+  "version": "1.0.0",
+  "description": "Anomaly Time-Warp Engine - Predictive anomaly detection with precursor signal analysis",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.9.5",
+    "graphql": "^16.8.1",
+    "graphql-tag": "^2.12.6",
+    "pg": "^8.11.3",
+    "redis": "^4.6.10",
+    "winston": "^3.11.0",
+    "date-fns": "^2.30.0",
+    "mathjs": "^12.0.0",
+    "ml-matrix": "^6.11.0",
+    "fft.js": "^4.0.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "@types/pg": "^8.10.9",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "anomaly-detection",
+    "predictive-analytics",
+    "time-series",
+    "precursor-signals",
+    "temporal-analysis",
+    "timescaledb"
+  ],
+  "author": "IntelGraph Team",
+  "license": "PROPRIETARY"
+}

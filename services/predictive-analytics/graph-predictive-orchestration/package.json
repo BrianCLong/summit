@@ -1,0 +1,63 @@
+{
+  "name": "@intelgraph/graph-predictive-orchestration",
+  "version": "1.0.0",
+  "description": "Graph-Native Predictive Orchestration - Bind predictions to graph nodes and trigger autonomous workflows",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
+    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "body-parser": "^1.20.2",
+    "neo4j-driver": "^6.0.1",
+    "ioredis": "^5.4.1",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.12",
+    "@graphql-tools/schema": "^10.0.6",
+    "graphql": "^16.9.0",
+    "graphql-subscriptions": "^2.0.0",
+    "eventemitter3": "^5.0.1",
+    "pino": "^9.8.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "@types/body-parser": "^1.19.5",
+    "@types/jest": "^30.0.0",
+    "typescript": "^5.9.3",
+    "tsx": "^4.19.2",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "supertest": "^7.1.4",
+    "@types/supertest": "^6.0.3",
+    "eslint": "^9.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.19.1",
+    "@typescript-eslint/parser": "^8.19.1"
+  },
+  "keywords": [
+    "predictive-analytics",
+    "graph-orchestration",
+    "neo4j",
+    "workflow-automation",
+    "policy-enforcement"
+  ],
+  "author": "Summit Intelligence Platform",
+  "license": "PROPRIETARY"
+}

@@ -1,0 +1,275 @@
+"""
+Collective Intelligence Future Weaving Schema
+Merges signals from distributed intelligence sources into unified predictive futures
+"""
+
+scalar JSON
+scalar DateTime
+
+"""Intelligence source providing predictive signals"""
+type IntelligenceSource {
+  id: ID!
+  name: String!
+  type: SourceType!
+  trustScore: Float!
+  reliability: Float!
+  latency: Float!
+  lastSignal: DateTime
+  metadata: JSON
+}
+
+enum SourceType {
+  AGENT
+  HUMAN
+  SENSOR
+  SUBSYSTEM
+  EXTERNAL_API
+  ML_MODEL
+}
+
+"""Individual predictive signal from a source"""
+type PredictiveSignal {
+  id: ID!
+  sourceId: ID!
+  source: IntelligenceSource!
+  prediction: JSON!
+  confidence: Float!
+  timestamp: DateTime!
+  horizon: Int!
+  domain: String!
+  evidence: [String!]
+}
+
+"""Braided collection of signals forming a prediction strand"""
+type SignalBraid {
+  id: ID!
+  signals: [PredictiveSignal!]!
+  coherence: Float!
+  conflicts: [ConflictResolution!]!
+  temporalSpan: TemporalSpan!
+  domains: [String!]!
+}
+
+"""Temporal span of a prediction"""
+type TemporalSpan {
+  start: DateTime!
+  end: DateTime!
+  granularity: String!
+}
+
+"""Unified predictive fabric woven from multiple braids"""
+type FutureFabric {
+  id: ID!
+  braids: [SignalBraid!]!
+  harmonizedPrediction: JSON!
+  overallConfidence: Float!
+  consensusLevel: Float!
+  divergenceZones: [DivergenceZone!]!
+  createdAt: DateTime!
+  validUntil: DateTime!
+}
+
+"""Zone where predictions diverge significantly"""
+type DivergenceZone {
+  id: ID!
+  domain: String!
+  conflictingSources: [IntelligenceSource!]!
+  divergenceScore: Float!
+  recommendedAction: String!
+}
+
+"""Trust score for an intelligence source"""
+type TrustScore {
+  sourceId: ID!
+  source: IntelligenceSource!
+  overallScore: Float!
+  accuracyScore: Float!
+  consistencyScore: Float!
+  timelinessScore: Float!
+  history: [TrustEvent!]!
+}
+
+"""Historical trust event"""
+type TrustEvent {
+  timestamp: DateTime!
+  event: String!
+  impact: Float!
+  reason: String
+}
+
+"""Resolution of conflicting predictions"""
+type ConflictResolution {
+  id: ID!
+  conflictingSignals: [PredictiveSignal!]!
+  resolvedValue: JSON!
+  resolutionMethod: ResolutionMethod!
+  confidence: Float!
+  reasoning: String!
+}
+
+enum ResolutionMethod {
+  TRUST_WEIGHTED_AVERAGE
+  MAJORITY_VOTE
+  BAYESIAN_FUSION
+  EXPERT_OVERRIDE
+  TEMPORAL_PRIORITY
+  DOMAIN_AUTHORITY
+}
+
+"""Weaving configuration"""
+type WeavingConfig {
+  id: ID!
+  name: String!
+  fusionMethod: FusionMethod!
+  conflictThreshold: Float!
+  minSourcesRequired: Int!
+  trustDecayRate: Float!
+  temporalWeight: Float!
+}
+
+enum FusionMethod {
+  DEMPSTER_SHAFER
+  KALMAN_FILTER
+  BAYESIAN_NETWORK
+  ENSEMBLE_VOTING
+  ATTENTION_WEIGHTED
+}
+
+# Queries
+type Query {
+  """Get the unified future fabric for a domain"""
+  getFutureFabric(
+    domain: String!
+    horizon: Int
+    minConfidence: Float
+  ): FutureFabric!
+
+  """Get a specific signal braid"""
+  getBraid(braidId: ID!): SignalBraid!
+
+  """Get all braids for a domain"""
+  getBraids(
+    domain: String!
+    limit: Int
+    offset: Int
+  ): [SignalBraid!]!
+
+  """Get trust scores for all sources"""
+  getTrustScores(
+    sourceType: SourceType
+    minScore: Float
+  ): [TrustScore!]!
+
+  """Get trust score for a specific source"""
+  getSourceTrust(sourceId: ID!): TrustScore!
+
+  """Get conflicts between sources"""
+  getConflicts(
+    domain: String
+    minDivergence: Float
+    unresolved: Boolean
+  ): [ConflictResolution!]!
+
+  """Get all registered intelligence sources"""
+  getSources(
+    type: SourceType
+    minTrust: Float
+  ): [IntelligenceSource!]!
+
+  """Get divergence zones in the fabric"""
+  getDivergenceZones(
+    fabricId: ID!
+    minDivergence: Float
+  ): [DivergenceZone!]!
+
+  """Get weaving configuration"""
+  getWeavingConfig(configId: ID!): WeavingConfig!
+}
+
+# Mutations
+type Mutation {
+  """Register a new intelligence source"""
+  registerSource(input: RegisterSourceInput!): IntelligenceSource!
+
+  """Submit a predictive signal from a source"""
+  submitSignal(input: SubmitSignalInput!): PredictiveSignal!
+
+  """Resolve a conflict between signals"""
+  resolveConflict(input: ResolveConflictInput!): ConflictResolution!
+
+  """Weave a new future fabric from available signals"""
+  weaveFuture(input: WeaveFutureInput!): FutureFabric!
+
+  """Update trust score for a source"""
+  updateTrust(
+    sourceId: ID!
+    adjustment: Float!
+    reason: String!
+  ): TrustScore!
+
+  """Create or update weaving configuration"""
+  setWeavingConfig(input: WeavingConfigInput!): WeavingConfig!
+
+  """Deregister an intelligence source"""
+  deregisterSource(sourceId: ID!): Boolean!
+
+  """Invalidate a signal"""
+  invalidateSignal(signalId: ID!, reason: String!): Boolean!
+}
+
+# Subscriptions
+type Subscription {
+  """Subscribe to new signals in a domain"""
+  onSignal(domain: String!): PredictiveSignal!
+
+  """Subscribe to fabric updates"""
+  onFabricUpdate(domain: String!): FutureFabric!
+
+  """Subscribe to new conflicts"""
+  onConflict(domain: String): ConflictResolution!
+
+  """Subscribe to trust score changes"""
+  onTrustChange(sourceId: ID): TrustScore!
+}
+
+# Input Types
+input RegisterSourceInput {
+  name: String!
+  type: SourceType!
+  metadata: JSON
+  initialTrust: Float
+}
+
+input SubmitSignalInput {
+  sourceId: ID!
+  prediction: JSON!
+  confidence: Float!
+  horizon: Int!
+  domain: String!
+  evidence: [String!]
+}
+
+input ResolveConflictInput {
+  conflictId: ID!
+  method: ResolutionMethod!
+  resolvedValue: JSON
+  reasoning: String
+  expertOverride: Boolean
+}
+
+input WeaveFutureInput {
+  domains: [String!]!
+  horizon: Int!
+  minSources: Int
+  fusionMethod: FusionMethod
+  configId: ID
+}
+
+input WeavingConfigInput {
+  name: String!
+  fusionMethod: FusionMethod!
+  conflictThreshold: Float!
+  minSourcesRequired: Int!
+  trustDecayRate: Float
+  temporalWeight: Float
+}

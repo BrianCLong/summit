@@ -1,0 +1,381 @@
+"""
+Anomaly Time-Warp Engine GraphQL Schema
+Predictive anomaly detection with precursor signal analysis
+"""
+
+scalar DateTime
+scalar Duration
+scalar JSON
+
+type AnomalyPrediction {
+  id: ID!
+  entityId: ID!
+  predictedOnsetTime: DateTime!
+  onsetWindow: OnsetWindow!
+  expectedSeverity: Severity!
+  confidence: Float!
+  contributingFactors: [String!]!
+  precursorSignals: [PrecursorSignal!]!
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type OnsetWindow {
+  earliest: DateTime!
+  latest: DateTime!
+  confidence: Float!
+  timeUntilOnsetMs: Int!
+}
+
+type PrecursorSignal {
+  id: ID!
+  anomalyPredictionId: ID!
+  signalName: String!
+  leadTimeMs: Int!
+  reliability: Float!
+  currentValue: Float
+  characteristicPattern: SignalPattern!
+  thresholds: SignalThresholds!
+  detectedAt: DateTime!
+}
+
+type SignalPattern {
+  shape: PatternShape!
+  typicalDurationMs: Int!
+  description: String!
+  confidenceScore: Float!
+}
+
+type SignalThresholds {
+  warning: Float!
+  critical: Float!
+  currentStatus: ThresholdStatus!
+}
+
+type WarpedTimeline {
+  id: ID!
+  entityId: ID!
+  referenceAnomalyId: ID!
+  originalTimeline: TimeSeries!
+  warpedTimeline: TimeSeries!
+  warpingPath: [WarpingPoint!]!
+  alignmentScore: Float!
+  temporalLandmarks: [TemporalLandmark!]!
+  createdAt: DateTime!
+}
+
+type TimeSeries {
+  metricName: String!
+  dataPoints: [DataPoint!]!
+  startTime: DateTime!
+  endTime: DateTime!
+  sampleCount: Int!
+}
+
+type DataPoint {
+  timestamp: DateTime!
+  value: Float!
+  metadata: JSON
+}
+
+type WarpingPoint {
+  originalTime: DateTime!
+  warpedTime: DateTime!
+  stretchFactor: Float!
+}
+
+type TemporalLandmark {
+  time: DateTime!
+  eventType: String!
+  significance: Float!
+  description: String!
+}
+
+type PreventiveIntervention {
+  id: ID!
+  anomalyPrediction: AnomalyPrediction!
+  actionWindow: ActionWindow!
+  recommendedActions: [InterventionAction!]!
+  estimatedPreventionProbability: Float!
+  status: InterventionStatus!
+  executionResults: [ActionResult!]!
+  createdAt: DateTime!
+  executedAt: DateTime
+  completedAt: DateTime
+}
+
+type ActionWindow {
+  start: DateTime!
+  end: DateTime!
+  durationMs: Int!
+  remainingTimeMs: Int!
+  urgencyLevel: UrgencyLevel!
+}
+
+type InterventionAction {
+  actionType: String!
+  priority: Int!
+  estimatedDurationMs: Int!
+  prerequisites: [String!]!
+  successCriteria: [String!]!
+  status: ActionStatus!
+  automatable: Boolean!
+}
+
+type ActionResult {
+  actionType: String!
+  status: ActionStatus!
+  durationMs: Int!
+  message: String!
+  success: Boolean!
+  startedAt: DateTime
+  completedAt: DateTime
+}
+
+type MonitoringSession {
+  id: ID!
+  entityId: ID!
+  config: MonitoringConfig!
+  status: MonitoringStatus!
+  predictionsGenerated: Int!
+  lastPredictionAt: DateTime
+  startedAt: DateTime!
+  stoppedAt: DateTime
+}
+
+type MonitoringConfig {
+  lookaheadMs: Int!
+  minConfidence: Float!
+  enableAutomaticIntervention: Boolean!
+  notificationChannels: [String!]!
+  updateIntervalMs: Int!
+}
+
+type InterventionExecution {
+  interventionId: ID!
+  executionId: ID!
+  status: InterventionStatus!
+  startedAt: DateTime!
+  completedAt: DateTime
+  results: [ActionResult!]!
+  successRate: Float!
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum PatternShape {
+  INCREASING
+  DECREASING
+  OSCILLATING
+  STEP
+  SPIKE
+  PLATEAU
+  SAWTOOTH
+}
+
+enum ThresholdStatus {
+  NORMAL
+  WARNING
+  CRITICAL
+  UNKNOWN
+}
+
+enum InterventionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+  PARTIALLY_COMPLETED
+}
+
+enum ActionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+  CANCELLED
+}
+
+enum MonitoringStatus {
+  ACTIVE
+  PAUSED
+  STOPPED
+  ERROR
+}
+
+enum UrgencyLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type Query {
+  """
+  Predict upcoming anomalies for an entity within a time window
+  """
+  predictAnomalies(
+    entityId: ID!
+    lookaheadMs: Int!
+    minConfidence: Float = 0.5
+  ): [AnomalyPrediction!]!
+
+  """
+  Get a specific anomaly prediction by ID
+  """
+  getAnomalyPrediction(id: ID!): AnomalyPrediction
+
+  """
+  Get precursor signals for a predicted anomaly
+  """
+  getPrecursors(
+    anomalyPredictionId: ID!
+    minReliability: Float = 0.6
+  ): [PrecursorSignal!]!
+
+  """
+  Generate time-warped timeline aligning current pattern with historical anomalies
+  """
+  getWarpedTimeline(
+    entityId: ID!
+    referenceAnomalyId: ID!
+    timeWindowMs: Int!
+  ): WarpedTimeline
+
+  """
+  Get intervention plan for a predicted anomaly
+  """
+  planIntervention(
+    anomalyPredictionId: ID!
+  ): PreventiveIntervention
+
+  """
+  Get active interventions requiring attention
+  """
+  getActiveInterventions(
+    status: InterventionStatus
+    urgencyLevel: UrgencyLevel
+  ): [PreventiveIntervention!]!
+
+  """
+  Get monitoring session by ID
+  """
+  getMonitoringSession(id: ID!): MonitoringSession
+
+  """
+  Get all active monitoring sessions
+  """
+  getActiveMonitoringSessions: [MonitoringSession!]!
+
+  """
+  Get historical intervention outcomes for learning
+  """
+  getInterventionHistory(
+    entityId: ID
+    startTime: DateTime
+    endTime: DateTime
+    limit: Int = 100
+  ): [PreventiveIntervention!]!
+}
+
+type Mutation {
+  """
+  Start monitoring an entity for anomalies
+  """
+  monitorForAnomalies(
+    entityId: ID!
+    monitoringConfig: MonitoringConfigInput!
+  ): MonitoringSession!
+
+  """
+  Stop monitoring session
+  """
+  stopMonitoring(sessionId: ID!): MonitoringSession!
+
+  """
+  Update detection window parameters
+  """
+  setDetectionWindow(
+    sessionId: ID!
+    lookaheadMs: Int!
+    minConfidence: Float!
+  ): MonitoringSession!
+
+  """
+  Execute a planned intervention
+  """
+  executeIntervention(
+    interventionId: ID!
+    actions: [String!]
+    forceExecution: Boolean = false
+  ): InterventionExecution!
+
+  """
+  Cancel a pending intervention
+  """
+  cancelIntervention(
+    interventionId: ID!
+    reason: String
+  ): PreventiveIntervention!
+
+  """
+  Record intervention outcome for learning
+  """
+  recordInterventionOutcome(
+    interventionId: ID!
+    outcome: InterventionOutcomeInput!
+  ): PreventiveIntervention!
+
+  """
+  Manually trigger anomaly prediction for an entity
+  """
+  triggerPrediction(
+    entityId: ID!
+    lookaheadMs: Int!
+  ): [AnomalyPrediction!]!
+}
+
+input MonitoringConfigInput {
+  lookaheadMs: Int!
+  minConfidence: Float!
+  enableAutomaticIntervention: Boolean!
+  notificationChannels: [String!]!
+  updateIntervalMs: Int = 300000
+}
+
+input InterventionOutcomeInput {
+  success: Boolean!
+  anomalyPrevented: Boolean!
+  actualSeverity: Severity
+  actualOnsetTime: DateTime
+  notes: String
+  executedActions: [String!]
+}
+
+"""
+Subscription support for real-time monitoring
+"""
+type Subscription {
+  """
+  Subscribe to anomaly predictions for an entity
+  """
+  anomalyPredicted(entityId: ID!): AnomalyPrediction!
+
+  """
+  Subscribe to precursor signal detections
+  """
+  precursorDetected(entityId: ID!): PrecursorSignal!
+
+  """
+  Subscribe to intervention status updates
+  """
+  interventionUpdated(interventionId: ID!): PreventiveIntervention!
+}

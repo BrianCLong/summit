@@ -1,0 +1,52 @@
+{
+  "name": "@intelgraph/uncertainty-field-mapping",
+  "version": "1.0.0",
+  "description": "Spatial representation of predictive uncertainty across time, domains, and potential futures",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "uncertainty",
+    "predictive-analytics",
+    "field-mapping",
+    "visualization",
+    "intelligence-analysis"
+  ],
+  "author": "IntelGraph Team",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "@apollo/server": "^4.9.5",
+    "graphql": "^16.8.1",
+    "winston": "^3.11.0",
+    "date-fns": "^2.30.0",
+    "uuid": "^9.0.1",
+    "lodash-es": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.10",
+    "@types/node": "^20.10.4",
+    "@types/uuid": "^9.0.7",
+    "@types/lodash-es": "^4.17.12",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint": "^8.55.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.6.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.18.0",
+    "pnpm": ">=9.12.0"
+  }
+}

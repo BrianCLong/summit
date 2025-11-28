@@ -1,0 +1,311 @@
+scalar JSON
+scalar DateTime
+
+# Weak signal detected in graph
+type WeakSignal {
+  id: ID!
+  type: String!
+  strength: Float!
+  location: JSON!
+  timestamp: DateTime!
+  metadata: JSON
+}
+
+# Condition for pattern emergence
+type Condition {
+  id: ID!
+  description: String!
+  type: String!
+  required: Boolean!
+  currentStatus: String!
+  probability: Float
+}
+
+# Evolution trajectory of a pattern
+type Trajectory {
+  id: ID!
+  simulationRun: Int!
+  timeSteps: [TrajectoryStep!]!
+  finalState: JSON!
+  probability: Float!
+  convergenceTime: Int
+}
+
+# Single step in trajectory
+type TrajectoryStep {
+  time: Int!
+  state: JSON!
+  strength: Float!
+  completeness: Float!
+}
+
+# Proto-pattern: emerging pattern not yet fully formed
+type ProtoPattern {
+  id: ID!
+  patternId: String!
+  confidence: Float!
+  completeness: Float!
+  detectedAt: DateTime!
+  partialMotif: JSON!
+  weakSignals: [WeakSignal!]!
+  expectedPattern: JSON
+  evolutionTrajectories: [Trajectory!]!
+  status: String!
+  metadata: JSON
+}
+
+# Future motif: predicted pattern structure
+type FutureMotif {
+  id: ID!
+  predictedStructure: JSON!
+  probability: Float!
+  timeToExpression: Int!
+  predictedAt: DateTime!
+  conditions: [Condition!]!
+  relatedProtoPatterns: [ProtoPattern!]!
+  dominanceScore: Float
+  metadata: JSON
+}
+
+# Competition outcome prediction
+enum CompetitionOutcome {
+  COEXISTENCE
+  EXCLUSION
+  DOMINANCE
+  OSCILLATION
+  UNCERTAIN
+}
+
+# Pattern competition analysis
+type PatternCompetition {
+  id: ID!
+  competitors: [ProtoPattern!]!
+  competitionMatrix: [[Float!]!]!
+  predictedOutcome: CompetitionOutcome!
+  equilibriumState: JSON!
+  timeToEquilibrium: Int
+  dominantPattern: ProtoPattern
+  metadata: JSON
+}
+
+# Dominance score for a pattern
+type DominanceScore {
+  patternId: String!
+  protoPattern: ProtoPattern
+  score: Float!
+  growthRate: Float!
+  fitnessScore: Float!
+  resilienceScore: Float!
+  networkScore: Float!
+  rank: Int!
+  confidence: Float!
+  factors: [DominanceFactor!]!
+}
+
+# Factor contributing to dominance
+type DominanceFactor {
+  name: String!
+  value: Float!
+  weight: Float!
+  contribution: Float!
+}
+
+# Pattern expression: simulated outcome
+type PatternExpression {
+  id: ID!
+  protoPatternId: String!
+  structure: JSON!
+  probability: Float!
+  timeToExpression: Int!
+  confidence: Float!
+  metadata: JSON
+}
+
+# Detection statistics
+type DetectionStats {
+  totalProtoPatterns: Int!
+  activeProtoPatterns: Int!
+  avgConfidence: Float!
+  detectionRate: Float!
+  lastDetectionTime: DateTime
+}
+
+# Evolution statistics
+type EvolutionStats {
+  totalSimulations: Int!
+  avgConvergenceTime: Float!
+  trajectoryDiversity: Float!
+  successRate: Float!
+}
+
+# Competition statistics
+type CompetitionStats {
+  activeCompetitions: Int!
+  avgCompetitionIntensity: Float!
+  coexistenceRate: Float!
+  exclusionRate: Float!
+}
+
+# System statistics
+type SystemStats {
+  detection: DetectionStats!
+  evolution: EvolutionStats!
+  competition: CompetitionStats!
+  uptime: Int!
+  lastUpdate: DateTime!
+}
+
+# Input for seeding a proto-pattern
+input SeedPatternInput {
+  partialMotif: JSON!
+  confidence: Float!
+  patternId: String
+  weakSignals: [WeakSignalInput!]
+  metadata: JSON
+}
+
+# Input for weak signal
+input WeakSignalInput {
+  type: String!
+  strength: Float!
+  location: JSON!
+  metadata: JSON
+}
+
+# Input for evolution constraints
+input EvolutionConstraints {
+  maxNodes: Int
+  maxEdges: Int
+  allowedNodeTypes: [String!]
+  allowedEdgeTypes: [String!]
+  temporalConstraints: JSON
+  domainRules: JSON
+}
+
+# Input for competition configuration
+input CompetitionConfig {
+  resourceModel: String
+  cooperationAllowed: Boolean
+  inhibitionEnabled: Boolean
+  timeHorizon: Int
+  iterations: Int
+}
+
+type Query {
+  # Detect proto-patterns in current graph
+  detectProtoPatterns(
+    sensitivity: Float = 0.7
+    patternLibrary: [String!]
+    timeWindow: Int
+    minCompleteness: Float = 0.3
+  ): [ProtoPattern!]!
+
+  # Get a specific proto-pattern
+  getProtoPattern(id: ID!): ProtoPattern
+
+  # List all proto-patterns
+  listProtoPatterns(
+    status: String
+    minConfidence: Float
+    limit: Int = 100
+    offset: Int = 0
+  ): [ProtoPattern!]!
+
+  # Predict future motifs
+  predictMotifs(
+    timeHorizon: Int!
+    confidence: Float = 0.8
+    maxResults: Int = 10
+    protoPatternIds: [ID!]
+  ): [FutureMotif!]!
+
+  # Get a specific future motif
+  getFutureMotif(id: ID!): FutureMotif
+
+  # Get pattern competitions
+  getCompetitions(
+    protoPatternIds: [ID!]
+    includeAllActive: Boolean = true
+    minIntensity: Float = 0.1
+  ): [PatternCompetition!]!
+
+  # Get a specific competition
+  getCompetition(id: ID!): PatternCompetition
+
+  # Get dominant patterns
+  getDominantPatterns(
+    topK: Int = 5
+    timeHorizon: Int = 30
+    minScore: Float = 0.5
+  ): [DominanceScore!]!
+
+  # Get evolution trajectories for a proto-pattern
+  getEvolutionTrajectories(
+    protoPatternId: ID!
+    simulations: Int = 1000
+    timeSteps: Int = 30
+  ): [Trajectory!]!
+
+  # Get system statistics
+  getSystemStats: SystemStats!
+
+  # Health check
+  health: String!
+}
+
+type Mutation {
+  # Seed a proto-pattern manually
+  seedPattern(input: SeedPatternInput!): ProtoPattern!
+
+  # Run competition simulation
+  runCompetition(
+    protoPatternIds: [ID!]!
+    config: CompetitionConfig
+  ): PatternCompetition!
+
+  # Evolve a proto-pattern
+  evolvePattern(
+    protoPatternId: ID!
+    timeSteps: Int!
+    simulations: Int = 1000
+    constraints: EvolutionConstraints
+  ): [PatternExpression!]!
+
+  # Update proto-pattern status
+  updateProtoPatternStatus(
+    id: ID!
+    status: String!
+  ): ProtoPattern!
+
+  # Delete proto-pattern
+  deleteProtoPattern(id: ID!): Boolean!
+
+  # Refresh detection
+  refreshDetection(
+    sensitivity: Float
+    timeWindow: Int
+  ): DetectionStats!
+}
+
+# Subscriptions for real-time updates
+type Subscription {
+  # Subscribe to new proto-pattern detections
+  protoPatternDetected(
+    minConfidence: Float
+  ): ProtoPattern!
+
+  # Subscribe to pattern evolution events
+  patternEvolved(
+    protoPatternId: ID
+  ): PatternExpression!
+
+  # Subscribe to competition updates
+  competitionUpdated(
+    competitionId: ID
+  ): PatternCompetition!
+
+  # Subscribe to dominance changes
+  dominanceChanged(
+    topK: Int = 5
+  ): [DominanceScore!]!
+}
