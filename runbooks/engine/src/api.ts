@@ -366,6 +366,147 @@ export function createRunbookAPI(engine: RunbookEngine): Router {
   });
 
   /**
+   * POST /executions/:id/pause
+   * Pause a running execution
+   *
+   * Body:
+   * {
+   *   userId: string
+   * }
+   */
+  router.post('/executions/:id/pause', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        res.status(400).json({
+          error: 'Missing required field: userId',
+        });
+        return;
+      }
+
+      await engine.pauseExecution(req.params.id, userId);
+
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        status: 'paused',
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to pause execution',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
+   * POST /executions/:id/resume
+   * Resume a paused execution
+   *
+   * Body:
+   * {
+   *   userId: string
+   * }
+   */
+  router.post('/executions/:id/resume', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.body;
+      if (!userId) {
+        res.status(400).json({
+          error: 'Missing required field: userId',
+        });
+        return;
+      }
+
+      await engine.resumeExecution(req.params.id, userId);
+
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        status: 'resumed',
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to resume execution',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
+   * POST /executions/:id/cancel
+   * Cancel a running or paused execution
+   *
+   * Body:
+   * {
+   *   userId: string,
+   *   reason?: string
+   * }
+   */
+  router.post('/executions/:id/cancel', async (req: Request, res: Response) => {
+    try {
+      const { userId, reason } = req.body;
+      if (!userId) {
+        res.status(400).json({
+          error: 'Missing required field: userId',
+        });
+        return;
+      }
+
+      await engine.cancelExecution(req.params.id, userId, reason);
+
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        status: 'cancelled',
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to cancel execution',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
+   * POST /executions/:id/steps/:stepId/retry
+   * Retry a failed step
+   *
+   * Body:
+   * {
+   *   userId: string
+   * }
+   */
+  router.post(
+    '/executions/:id/steps/:stepId/retry',
+    async (req: Request, res: Response) => {
+      try {
+        const { userId } = req.body;
+        if (!userId) {
+          res.status(400).json({
+            error: 'Missing required field: userId',
+          });
+          return;
+        }
+
+        await engine.retryFailedStep(req.params.id, req.params.stepId, userId);
+
+        res.json({
+          version: API_VERSION,
+          executionId: req.params.id,
+          stepId: req.params.stepId,
+          status: 'retried',
+        });
+      } catch (error) {
+        res.status(500).json({
+          error: 'Failed to retry step',
+          message: (error as Error).message,
+        });
+      }
+    }
+  );
+
+  /**
    * GET /health
    * Health check
    */

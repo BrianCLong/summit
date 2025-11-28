@@ -7,3 +7,4 @@ export * from './engine';
 export * from './dag-executor';
 export * from './state-manager';
 export * from './api';
+export * from './executors';
