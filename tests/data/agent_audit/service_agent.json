@@ -1,0 +1,12 @@
+{
+  "name": "intelgraph-curator",
+  "type": "workflow",
+  "credentials": {
+    "static_token": "abc123",
+    "owner": "ops-team"
+  },
+  "permissions": ["graph:write", "s3:read"],
+  "triggers": ["cron:0 */6 * * *"],
+  "data_domains": ["intelgraph", "blob-storage"],
+  "notes": "curates intelgraph data ingest"
+}

@@ -1,0 +1,20 @@
+name: PR Agent
+on:
+  pull_request:
+    types: [opened, synchronize]
+  schedule:
+    - cron: '0 5 * * *'
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run agent
+        env:
+          AGENT_TOKEN: ${{ secrets.AGENT_TOKEN }}
+          GRAPH_HOST: https://intelgraph.summit
+        run: |
+          echo "running"
