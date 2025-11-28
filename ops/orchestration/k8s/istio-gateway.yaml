@@ -1,0 +1,68 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: summit-gateway
+  namespace: summit-platform
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - api.summit.example.com
+        - summit.example.com
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: summit-gateway-tls
+      hosts:
+        - api.summit.example.com
+        - summit.example.com
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: summit-api
+  namespace: summit-platform
+spec:
+  hosts:
+    - api.summit.example.com
+  gateways:
+    - summit-gateway
+  http:
+    - name: api-routes
+      timeout: 15s
+      route:
+        - destination:
+            host: summit-api.summit-platform.svc.cluster.local
+            subset: v1
+            port:
+              number: 80
+          weight: 100
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: summit-web
+  namespace: summit-platform
+spec:
+  hosts:
+    - summit.example.com
+  gateways:
+    - summit-gateway
+  http:
+    - name: web-routes
+      timeout: 15s
+      route:
+        - destination:
+            host: summit-web.summit-platform.svc.cluster.local
+            subset: v1
+            port:
+              number: 80
+          weight: 100

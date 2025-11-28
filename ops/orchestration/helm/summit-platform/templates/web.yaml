@@ -1,0 +1,119 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-web
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-web
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "summit-platform.labels" . | nindent 4 }}
+    component: web
+spec:
+  replicas: {{ .Values.web.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: {{ include "summit-platform.fullname" . }}-web
+      component: web
+  template:
+    metadata:
+      labels:
+        app: {{ include "summit-platform.fullname" . }}-web
+        component: web
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "{{ ternary "true" "false" .Values.serviceMesh.enabled }}"
+    spec:
+      serviceAccountName: {{ include "summit-platform.fullname" . }}-web
+      containers:
+        - name: web
+          image: "{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+          imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: VITE_API_URL
+              value: {{ .Values.web.env.apiUrl }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.web.port }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.web.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-web
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "summit-platform.labels" . | nindent 4 }}
+    component: web
+spec:
+  selector:
+    app: {{ include "summit-platform.fullname" . }}-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: {{ .Values.web.port }}
+  type: ClusterIP
+{{- if .Values.web.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-web
+  namespace: {{ .Values.namespace }}
+spec:
+  minReplicas: {{ .Values.web.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.web.autoscaling.maxReplicas }}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "summit-platform.fullname" . }}-web
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.web.autoscaling.cpu.targetPercentage }}
+{{- end }}
+{{- if .Values.serviceMesh.enabled }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-web
+  namespace: {{ .Values.namespace }}
+spec:
+  host: {{ include "summit-platform.fullname" . }}-web.{{ .Values.namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: {{ .Values.serviceMesh.mtlsMode }}
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+{{- end }}

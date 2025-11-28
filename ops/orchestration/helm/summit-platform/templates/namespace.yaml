@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.namespace }}
+  labels:
+    istio-injection: {{ ternary "enabled" "disabled" .Values.serviceMesh.enabled }}
+{{- if .Values.resourceQuota.enabled }}
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: summit-resource-quota
+  namespace: {{ .Values.namespace }}
+spec:
+  hard:
+    requests.cpu: "{{ .Values.resourceQuota.requestsCpu }}"
+    requests.memory: {{ .Values.resourceQuota.requestsMemory }}
+    limits.cpu: "{{ .Values.resourceQuota.limitsCpu }}"
+    limits.memory: {{ .Values.resourceQuota.limitsMemory }}
+    pods: "{{ .Values.resourceQuota.pods }}"
+    services.loadbalancers: "{{ .Values.resourceQuota.loadBalancers }}"
+{{- end }}
+{{- if .Values.limitRange.enabled }}
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: summit-default-limits
+  namespace: {{ .Values.namespace }}
+spec:
+  limits:
+    - default:
+        cpu: {{ .Values.limitRange.defaultCpu }}
+        memory: {{ .Values.limitRange.defaultMemory }}
+      defaultRequest:
+        cpu: {{ .Values.limitRange.defaultRequestCpu }}
+        memory: {{ .Values.limitRange.defaultRequestMemory }}
+      type: Container
+{{- end }}
