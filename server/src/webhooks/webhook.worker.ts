@@ -12,25 +12,43 @@ const connection = new IORedis(process.env.REDIS_URL || 'redis://localhost:6379'
 interface WebhookJobData {
   deliveryId: string;
   webhookId: string;
+  tenantId: string;
   url: string;
   secret: string;
   payload: any;
   eventType: string;
+  triggerType?: 'event' | 'test';
 }
 
 export const webhookWorker = new Worker<WebhookJobData>(
   'webhooks',
   async (job: Job<WebhookJobData>) => {
-    const { deliveryId, url, secret, payload, eventType } = job.data;
+    const { deliveryId, url, secret, payload, eventType, tenantId } = job.data;
 
-    const signature = webhookService.generateSignature(payload, secret);
+    const { signature, timestamp } = webhookService.generateSignature(payload, secret);
     const startTime = Date.now();
+    const attemptNumber = (job.attemptsMade || 0) + 1;
+    const maxAttempts = job.opts.attempts || 1;
+    const baseDelay =
+      typeof job.opts.backoff === 'object' && job.opts.backoff
+        ? job.opts.backoff.delay || 1000
+        : 1000;
+
+    const truncateBody = (body: any) => {
+      if (body === undefined || body === null) return body as any;
+      try {
+        return JSON.stringify(body).substring(0, 10000);
+      } catch {
+        return String(body).substring(0, 10000);
+      }
+    };
 
     try {
       const response = await axios.post(url, payload, {
         headers: {
           'Content-Type': 'application/json',
           'X-Webhook-Signature': signature,
+          'X-Webhook-Timestamp': timestamp,
           'X-Webhook-Event': eventType,
           'X-Webhook-Delivery': deliveryId,
           'User-Agent': 'Summit-Webhook-Service/1.0',
@@ -41,6 +59,12 @@ export const webhookWorker = new Worker<WebhookJobData>(
 
       const duration = Date.now() - startTime;
       const success = response.status >= 200 && response.status < 300;
+      const willRetry = !success && attemptNumber < maxAttempts;
+      const nextRetryAt =
+        !success && willRetry
+          ? new Date(Date.now() + baseDelay * Math.pow(2, attemptNumber - 1))
+          : null;
+      const status = success ? 'success' : willRetry ? 'pending' : 'failed';
 
       await pg.oneOrNone(
         `UPDATE webhook_deliveries
@@ -48,42 +72,98 @@ export const webhookWorker = new Worker<WebhookJobData>(
              response_status = $2,
              response_body = $3,
              attempt_count = $4,
+             next_retry_at = $5,
+             last_attempt_at = NOW(),
+             last_error = $6,
              updated_at = NOW()
-         WHERE id = $5`,
+         WHERE id = $7`,
         [
-          success ? 'success' : 'failed',
+          status,
           response.status,
-          JSON.stringify(response.data).substring(0, 10000), // Truncate large bodies
-          job.attemptsMade, // This is the attempt number (1-based?) Check bullmq docs. attemptsMade is incremented before processing?
-          // BullMQ: attemptsMade is 1 for first attempt, etc.
-          // Actually, let's just use job.attemptsMade.
-          deliveryId
-        ]
+          truncateBody(response.data),
+          attemptNumber,
+          nextRetryAt,
+          success ? null : `HTTP ${response.status}`,
+          deliveryId,
+        ],
+        { tenantId }
+      );
+
+      await pg.oneOrNone(
+        `INSERT INTO webhook_delivery_attempts
+         (delivery_id, webhook_id, tenant_id, attempt_number, status, response_status, response_body, duration_ms)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING id`,
+        [
+          deliveryId,
+          job.data.webhookId,
+          tenantId,
+          attemptNumber,
+          status,
+          response.status,
+          truncateBody(response.data),
+          duration,
+        ],
+        { tenantId }
       );
 
       if (!success) {
         throw new Error(`Webhook failed with status ${response.status}`);
       }
-
     } catch (error: any) {
-        // Network error or timeout
-        const errorMessage = error.message || 'Unknown error';
+      const duration = Date.now() - startTime;
+      const errorMessage = error?.message || 'Unknown error';
+      const responseStatus = error.response?.status;
+      const responseBody = truncateBody(error.response?.data || errorMessage);
+      const willRetry = attemptNumber < maxAttempts;
+      const nextRetryAt = willRetry
+        ? new Date(Date.now() + baseDelay * Math.pow(2, attemptNumber - 1))
+        : null;
+      const status = willRetry ? 'pending' : 'failed';
 
-        await pg.oneOrNone(
-            `UPDATE webhook_deliveries
-             SET status = 'failed',
-                 response_body = $1,
-                 attempt_count = $2,
-                 updated_at = NOW()
-             WHERE id = $3`,
-            [
-              `Error: ${errorMessage}`,
-              job.attemptsMade,
-              deliveryId
-            ]
-          );
+      await pg.oneOrNone(
+        `UPDATE webhook_deliveries
+         SET status = $1,
+             response_status = $2,
+             response_body = $3,
+             attempt_count = $4,
+             next_retry_at = $5,
+             last_attempt_at = NOW(),
+             last_error = $6,
+             updated_at = NOW()
+         WHERE id = $7`,
+        [
+          status,
+          responseStatus,
+          responseBody,
+          attemptNumber,
+          nextRetryAt,
+          errorMessage,
+          deliveryId,
+        ],
+        { tenantId }
+      );
 
-        throw error; // Rethrow to trigger retry
+      await pg.oneOrNone(
+        `INSERT INTO webhook_delivery_attempts
+         (delivery_id, webhook_id, tenant_id, attempt_number, status, response_status, response_body, error_message, duration_ms)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+         RETURNING id`,
+        [
+          deliveryId,
+          job.data.webhookId,
+          tenantId,
+          attemptNumber,
+          status,
+          responseStatus,
+          responseBody,
+          errorMessage,
+          duration,
+        ],
+        { tenantId }
+      );
+
+      throw error; // Rethrow to trigger retry
     }
   },
   {
