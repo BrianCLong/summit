@@ -15,6 +15,7 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { createCollaborationHub } from './realtime/collaborationHub.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -97,6 +98,7 @@ const startServer = async () => {
 
   // Initialize Socket.IO
   const io = initSocket(httpServer);
+  createCollaborationHub(io);
 
   const { closeNeo4jDriver } = await import('./db/neo4j.js');
   const { closePostgresPool } = await import('./db/postgres.js');
