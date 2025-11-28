@@ -1,0 +1,33 @@
+{
+  "title": "SummitQAF ROI Dashboard",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Velocity Gain (%)",
+      "targets": [
+        { "expr": "summit_qaf_velocity_gain", "legendFormat": "Velocity Gain" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Compliance Score",
+      "targets": [
+        { "expr": "summit_qaf_compliance_score", "legendFormat": "Score" }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Quantum Secure Agents",
+      "targets": [
+        { "expr": "summit_qaf_secure_agents / summit_qaf_total_agents", "legendFormat": "Secure %" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Context Switches Reduced",
+      "targets": [
+        { "expr": "summit_qaf_context_switch_reduction", "legendFormat": "Reduction %" }
+      ]
+    }
+  ]
+}
