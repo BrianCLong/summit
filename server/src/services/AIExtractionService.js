@@ -726,7 +726,7 @@ class AIExtractionService extends EventEmitter {
       quality: mediaSource.quality || 'MEDIUM',
     };
 
-    const embeddingBundle = this.fusionLayer.generateEntityEmbeddings(
+    const embeddingBundle = await this.fusionLayer.generateEntityEmbeddings(
       {
         id: mediaSource.id,
         label: mediaSource.filename || `${mediaSource.mediaType} signal`,

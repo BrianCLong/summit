@@ -58,3 +58,21 @@ backlog:
       - story: UI clutter dimming for focus (cognitive load guardrails)
         priority: P2 - Fearsome Delight
         sprint: Sprint 3
+
+  - epic: Frontier AI Mission Gaps (J)
+    stories:
+      - story: Multimodal ingestion (Text/Image/Signal) with real embeddings
+        priority: P0 - Must
+        sprint: Sprint 1
+        notes: "Fuse into PR epics per Summit Alignment Check. Use #next: graphrag-hypothesis branch."
+      - story: Neo4j/pgvector graph fusion
+        priority: P0 - Must
+        sprint: Sprint 1
+        notes: "Enable p95<2s queries on adversarial OSINT."
+      - story: Edge-first Agentic Assurance (OPA/SLSA/Cosign)
+        priority: P1 - Must
+        sprint: Sprint 2
+        notes: "Deliver auditable, air-gapped agents."
+      - story: OSINT Scaling & Veracity Scoring (Adaptive Graph + MoE)
+        priority: P1 - Love
+        sprint: Sprint 2
