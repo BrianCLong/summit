@@ -7,6 +7,7 @@ import {
   checkLicenses,
   getProvenance,
   recordTransform,
+  getEvidence,
 } from './ledger';
 import tar from 'tar-stream';
 import { createGzip } from 'zlib';
