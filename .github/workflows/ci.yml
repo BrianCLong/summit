@@ -115,10 +115,9 @@ jobs:
             node_modules/.cache
           retention-days: 1
 
-  # Security lane: Run security scans (non-blocking on PR)
+  # Security lane: Run security scans (block on findings)
   security-scan:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Generate SBOM (SPDX)
@@ -138,8 +137,80 @@ jobs:
           format: table
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '0'
+          exit-code: '1'
           vuln-type: 'os,library'
+
+  owasp-zap:
+    name: OWASP ZAP baseline
+    needs: build-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+
+      - name: Configure pnpm store
+        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+
+      - name: Install dependencies for ZAP target
+        run: pnpm install --frozen-lockfile
+
+      - name: Start application stack for ZAP
+        run: |
+          docker compose -f docker-compose.yml up -d api ui
+
+          for i in {1..60}; do
+            if curl -fsS http://localhost:3000 >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+
+          echo "Application did not become ready for ZAP scan" >&2
+          docker compose -f docker-compose.yml logs --tail=200
+          exit 1
+
+      - name: Run ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: 'http://localhost:3000'
+          rules_file_name: '.zap/rules.tsv'
+          cmd_options: '-a -j -m 5 -l WARN'
+          fail_action: true
+          allow_issue_writing: false
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-baseline-report-${{ github.sha }}
+          path: |
+            report_html.html
+            report_json.json
+            report_md.md
+
+      - name: Tear down application stack
+        if: always()
+        run: docker compose -f docker-compose.yml down -v
 
   # Integration lane: Golden path smoke tests
   golden-path:
