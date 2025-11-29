@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Price plan change request",
+  "type": "object",
+  "required": ["subject", "plan_before", "plan_after", "tenant", "context"],
+  "properties": {
+    "subject": {
+      "type": "object",
+      "required": ["id", "role", "level"],
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "level": { "type": "string" }
+      }
+    },
+    "plan_before": {
+      "type": "object",
+      "description": "Price plan prior to change",
+      "properties": {
+        "prices": { "type": "object", "additionalProperties": { "type": "number" } },
+        "discounts": { "type": "object", "additionalProperties": { "type": "number" } },
+        "effective_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "plan_after": {
+      "type": "object",
+      "description": "Proposed price plan",
+      "properties": {
+        "prices": { "type": "object", "additionalProperties": { "type": "number" } },
+        "discounts": { "type": "object", "additionalProperties": { "type": "number" } },
+        "effective_at": { "type": "string", "format": "date-time" },
+        "tenant_overrides": { "type": "object", "additionalProperties": { "type": "number" } }
+      }
+    },
+    "tenant": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" },
+        "segment": { "type": "string" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["reason", "requested_at"],
+      "properties": {
+        "reason": { "type": "string" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "source": { "type": "string" }
+      }
+    }
+  }
+}

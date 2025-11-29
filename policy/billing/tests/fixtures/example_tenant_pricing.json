@@ -1,0 +1,21 @@
+{
+  "tenant_id": "tenant-123",
+  "plan": {
+    "prices": {
+      "cpu_hour": 0.14,
+      "storage_gb": 0.22
+    },
+    "discounts": {
+      "default": 0.10
+    }
+  },
+  "override_plan": {
+    "prices": {
+      "cpu_hour": 0.11,
+      "storage_gb": 0.18
+    },
+    "discounts": {
+      "default": 0.15
+    }
+  }
+}

@@ -1,0 +1,26 @@
+name: billing
+version: 0.1.0
+service: summit
+roots:
+  - rego
+entrypoints:
+  - billing.price_plan_changes.decision
+  - billing.invoice_actions.decision
+  - billing.credits_and_discounts.decision
+  - billing.cost_model_changes.decision
+schemas:
+  inputs:
+    price_plan_change: schemas/input/price_plan_change.json
+    invoice_action: schemas/input/invoice_action.json
+    credit_memo: schemas/input/credit_memo.json
+    cost_model_change: schemas/input/cost_model_change.json
+  decisions:
+    price_plan_change: schemas/decision/price_plan_change_decision.json
+    invoice_action: schemas/decision/invoice_action_decision.json
+    credit_memo: schemas/decision/credit_memo_decision.json
+    cost_model_change: schemas/decision/cost_model_change_decision.json
+fixtures:
+  pricing_internal: tests/fixtures/summit_internal_pricing.json
+  pricing_tenant: tests/fixtures/example_tenant_pricing.json
+  invoices: tests/fixtures/sample_invoices.json
+  credits: tests/fixtures/sample_credits.json
