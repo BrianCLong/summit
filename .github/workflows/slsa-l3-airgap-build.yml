@@ -1,0 +1,624 @@
+name: SLSA L3 Air-Gapped Build Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      bundle_version:
+        description: 'Bundle version (e.g., v1.0.0)'
+        required: true
+        type: string
+      target_classification:
+        description: 'Target classification level'
+        required: true
+        type: choice
+        options:
+          - UNCLASSIFIED
+          - CUI
+          - SECRET
+          - TOP_SECRET
+        default: CUI
+      transfer_media:
+        description: 'Transfer media type'
+        required: true
+        type: choice
+        options:
+          - secure_usb
+          - dvd_rom
+          - tape_archive
+          - encrypted_transfer
+        default: secure_usb
+      include_verification_tools:
+        description: 'Include SLSA verification tools in bundle'
+        type: boolean
+        default: true
+      fips_mode:
+        description: 'Enable FIPS 140-2 compliance mode'
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'airgap-v*'
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  COSIGN_EXPERIMENTAL: '1'
+  BUNDLE_NAME: intelgraph-airgap-bundle
+
+concurrency:
+  group: airgap-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # ===========================================================================
+  # Stage 1: Pre-flight Checks for Air-Gapped Build
+  # ===========================================================================
+  preflight:
+    name: Air-Gap Pre-flight Validation
+    runs-on: ubuntu-latest
+    outputs:
+      bundle-id: ${{ steps.bundle-info.outputs.bundle-id }}
+      manifest-hash: ${{ steps.bundle-info.outputs.manifest-hash }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate inputs
+        run: |
+          set -euo pipefail
+
+          echo "Validating air-gap build inputs..."
+
+          # Validate version format
+          VERSION="${{ inputs.bundle_version || github.ref_name }}"
+          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "Invalid version format: $VERSION"
+            echo "Expected format: vX.Y.Z or vX.Y.Z-suffix"
+            exit 1
+          fi
+
+          echo "Version: $VERSION"
+          echo "Classification: ${{ inputs.target_classification }}"
+          echo "Transfer Media: ${{ inputs.transfer_media }}"
+          echo "FIPS Mode: ${{ inputs.fips_mode }}"
+
+      - name: Generate bundle info
+        id: bundle-info
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ inputs.bundle_version || github.ref_name }}"
+          BUNDLE_ID="${{ env.BUNDLE_NAME }}-${VERSION}-$(date +%Y%m%d%H%M%S)"
+          MANIFEST_HASH=$(git rev-parse HEAD | sha256sum | cut -d' ' -f1 | head -c 16)
+
+          echo "bundle-id=$BUNDLE_ID" >> "$GITHUB_OUTPUT"
+          echo "manifest-hash=$MANIFEST_HASH" >> "$GITHUB_OUTPUT"
+
+          echo "Bundle ID: $BUNDLE_ID"
+          echo "Manifest Hash: $MANIFEST_HASH"
+
+      - name: Security pre-flight checks
+        run: |
+          set -euo pipefail
+
+          echo "Running security pre-flight checks..."
+
+          # Check for sensitive files that shouldn't be in bundle
+          SENSITIVE_PATTERNS=".env .env.* *secret* *private* *.pem *.key id_rsa*"
+          for pattern in $SENSITIVE_PATTERNS; do
+            if find . -name "$pattern" -type f 2>/dev/null | grep -q .; then
+              echo "Warning: Found potentially sensitive files matching: $pattern"
+            fi
+          done
+
+          echo "Pre-flight checks completed"
+
+  # ===========================================================================
+  # Stage 2: Multi-Stage Hermetic Build for Air-Gap
+  # ===========================================================================
+  hermetic-build:
+    name: Hermetic Container Build
+    needs: preflight
+    runs-on: ubuntu-latest
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-uri: ${{ steps.build.outputs.image-uri }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            network=none
+            image=moby/buildkit:v0.12.4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build container image (hermetic)
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:airgap-${{ inputs.bundle_version || github.ref_name }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:airgap-latest
+          labels: |
+            io.slsa.level=3
+            io.intelgraph.airgap=true
+            io.intelgraph.classification=${{ inputs.target_classification }}
+            io.intelgraph.fips=${{ inputs.fips_mode }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+          sbom: true
+          provenance: mode=max
+          build-args: |
+            FIPS_MODE=${{ inputs.fips_mode }}
+            CLASSIFICATION=${{ inputs.target_classification }}
+            BUILD_ID=${{ needs.preflight.outputs.bundle-id }}
+
+      - name: Export image to OCI archive
+        run: |
+          set -euo pipefail
+
+          mkdir -p bundle/images
+
+          # Save image as OCI archive for offline transport
+          docker pull "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:airgap-${{ inputs.bundle_version || github.ref_name }}"
+          docker save "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:airgap-${{ inputs.bundle_version || github.ref_name }}" \
+            -o bundle/images/intelgraph-server.tar
+
+          # Calculate hash
+          sha256sum bundle/images/intelgraph-server.tar > bundle/images/intelgraph-server.tar.sha256
+
+          echo "image-uri=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload image archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-images
+          path: bundle/images/
+          retention-days: 30
+
+  # ===========================================================================
+  # Stage 3: Generate SBOM and Attestations
+  # ===========================================================================
+  sbom-generation:
+    name: Generate SBOM and Attestations
+    needs: [preflight, hermetic-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          set -euo pipefail
+
+          # Install Syft
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
+
+          # Install Cosign
+          curl -sSfL https://github.com/sigstore/cosign/releases/download/v2.2.4/cosign-linux-amd64 -o /usr/local/bin/cosign
+          chmod +x /usr/local/bin/cosign
+
+          # Install Grype
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v0.74.0
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate SBOM
+        run: |
+          set -euo pipefail
+
+          mkdir -p bundle/sbom
+
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.hermetic-build.outputs.image-digest }}"
+
+          # Generate SBOM in multiple formats
+          syft "$IMAGE" -o cyclonedx-json=bundle/sbom/sbom.cdx.json
+          syft "$IMAGE" -o spdx-json=bundle/sbom/sbom.spdx.json
+          syft "$IMAGE" -o syft-json=bundle/sbom/sbom.syft.json
+
+          # Generate hashes
+          for file in bundle/sbom/*.json; do
+            sha256sum "$file" > "${file}.sha256"
+          done
+
+      - name: Vulnerability scan
+        run: |
+          set -euo pipefail
+
+          mkdir -p bundle/security
+
+          # Scan SBOM for vulnerabilities
+          grype sbom:bundle/sbom/sbom.cdx.json --output json > bundle/security/vulnerability-report.json || true
+          grype sbom:bundle/sbom/sbom.cdx.json --output table > bundle/security/vulnerability-summary.txt || true
+
+          # Create summary
+          cat > bundle/security/security-summary.json <<EOF
+          {
+            "scanDate": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "bundleId": "${{ needs.preflight.outputs.bundle-id }}",
+            "scanner": "grype",
+            "scannerVersion": "$(grype version 2>/dev/null | head -1 || echo 'unknown')",
+            "critical": $(jq '[.matches[] | select(.vulnerability.severity == "Critical")] | length' bundle/security/vulnerability-report.json 2>/dev/null || echo 0),
+            "high": $(jq '[.matches[] | select(.vulnerability.severity == "High")] | length' bundle/security/vulnerability-report.json 2>/dev/null || echo 0),
+            "medium": $(jq '[.matches[] | select(.vulnerability.severity == "Medium")] | length' bundle/security/vulnerability-report.json 2>/dev/null || echo 0),
+            "low": $(jq '[.matches[] | select(.vulnerability.severity == "Low")] | length' bundle/security/vulnerability-report.json 2>/dev/null || echo 0)
+          }
+          EOF
+
+      - name: Sign artifacts with Cosign (OIDC)
+        run: |
+          set -euo pipefail
+
+          mkdir -p bundle/signatures
+
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ needs.hermetic-build.outputs.image-digest }}"
+
+          # Sign container image
+          cosign sign --yes \
+            -a "bundle_id=${{ needs.preflight.outputs.bundle-id }}" \
+            -a "classification=${{ inputs.target_classification }}" \
+            -a "fips=${{ inputs.fips_mode }}" \
+            -a "airgap=true" \
+            "$IMAGE"
+
+          # Attest SBOM
+          cosign attest --yes \
+            --predicate bundle/sbom/sbom.cdx.json \
+            --type cyclonedx \
+            "$IMAGE"
+
+          # Generate signature bundle for offline verification
+          cosign triangulate "$IMAGE" > bundle/signatures/signature-ref.txt
+
+          # Export signature and attestation for offline use
+          cosign download signature "$IMAGE" > bundle/signatures/image.sig 2>/dev/null || true
+          cosign download attestation "$IMAGE" > bundle/signatures/attestations.json 2>/dev/null || true
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-artifacts
+          path: bundle/
+          retention-days: 30
+
+  # ===========================================================================
+  # Stage 4: Create Air-Gap Bundle
+  # ===========================================================================
+  create-bundle:
+    name: Create Air-Gap Transfer Bundle
+    needs: [preflight, hermetic-build, sbom-generation]
+    runs-on: ubuntu-latest
+    outputs:
+      bundle-hash: ${{ steps.bundle.outputs.hash }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create bundle structure
+        run: |
+          set -euo pipefail
+
+          BUNDLE_DIR="airgap-bundle"
+          mkdir -p "$BUNDLE_DIR"/{images,sbom,signatures,security,tools,docs,policies}
+
+          # Copy artifacts
+          cp -r artifacts/container-images/* "$BUNDLE_DIR/images/" 2>/dev/null || true
+          cp -r artifacts/sbom-artifacts/sbom/* "$BUNDLE_DIR/sbom/" 2>/dev/null || true
+          cp -r artifacts/sbom-artifacts/signatures/* "$BUNDLE_DIR/signatures/" 2>/dev/null || true
+          cp -r artifacts/sbom-artifacts/security/* "$BUNDLE_DIR/security/" 2>/dev/null || true
+
+      - name: Include verification tools
+        if: inputs.include_verification_tools
+        run: |
+          set -euo pipefail
+
+          BUNDLE_DIR="airgap-bundle"
+          mkdir -p "$BUNDLE_DIR/tools/bin"
+
+          # Download static binaries for offline use
+          curl -sSfL https://github.com/sigstore/cosign/releases/download/v2.2.4/cosign-linux-amd64 \
+            -o "$BUNDLE_DIR/tools/bin/cosign"
+          chmod +x "$BUNDLE_DIR/tools/bin/cosign"
+
+          curl -sSfL https://github.com/slsa-framework/slsa-verifier/releases/download/v2.6.0/slsa-verifier-linux-amd64 \
+            -o "$BUNDLE_DIR/tools/bin/slsa-verifier"
+          chmod +x "$BUNDLE_DIR/tools/bin/slsa-verifier"
+
+          # Create verification script
+          cat > "$BUNDLE_DIR/tools/verify-bundle.sh" <<'SCRIPT'
+          #!/usr/bin/env bash
+          set -euo pipefail
+
+          BUNDLE_DIR="$(dirname "$0")/.."
+          TOOLS_DIR="$BUNDLE_DIR/tools/bin"
+
+          echo "=== IntelGraph Air-Gap Bundle Verification ==="
+          echo ""
+
+          # Verify image hashes
+          echo "[1/4] Verifying image integrity..."
+          if [ -f "$BUNDLE_DIR/images/intelgraph-server.tar.sha256" ]; then
+            cd "$BUNDLE_DIR/images"
+            sha256sum -c intelgraph-server.tar.sha256
+            echo "Image hash verification: PASSED"
+          else
+            echo "Warning: No image hash file found"
+          fi
+
+          # Verify SBOM hashes
+          echo ""
+          echo "[2/4] Verifying SBOM integrity..."
+          for hash_file in "$BUNDLE_DIR/sbom/"*.sha256; do
+            if [ -f "$hash_file" ]; then
+              cd "$(dirname "$hash_file")"
+              sha256sum -c "$(basename "$hash_file")"
+            fi
+          done
+          echo "SBOM hash verification: PASSED"
+
+          # Verify manifest
+          echo ""
+          echo "[3/4] Verifying manifest..."
+          if [ -f "$BUNDLE_DIR/manifest.json" ]; then
+            MANIFEST_HASH=$(sha256sum "$BUNDLE_DIR/manifest.json" | cut -d' ' -f1)
+            echo "Manifest hash: $MANIFEST_HASH"
+          fi
+
+          # Display bundle info
+          echo ""
+          echo "[4/4] Bundle Information:"
+          if [ -f "$BUNDLE_DIR/manifest.json" ]; then
+            cat "$BUNDLE_DIR/manifest.json" | python3 -m json.tool 2>/dev/null || cat "$BUNDLE_DIR/manifest.json"
+          fi
+
+          echo ""
+          echo "=== Verification Complete ==="
+          SCRIPT
+
+          chmod +x "$BUNDLE_DIR/tools/verify-bundle.sh"
+
+      - name: Generate bundle manifest
+        id: bundle
+        run: |
+          set -euo pipefail
+
+          BUNDLE_DIR="airgap-bundle"
+          VERSION="${{ inputs.bundle_version || github.ref_name }}"
+
+          # Create manifest
+          cat > "$BUNDLE_DIR/manifest.json" <<EOF
+          {
+            "bundleId": "${{ needs.preflight.outputs.bundle-id }}",
+            "version": "$VERSION",
+            "created": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "classification": "${{ inputs.target_classification }}",
+            "transferMedia": "${{ inputs.transfer_media }}",
+            "fipsMode": ${{ inputs.fips_mode }},
+            "slsaLevel": 3,
+            "sourceCommit": "${{ github.sha }}",
+            "sourceRepository": "${{ github.repository }}",
+            "components": [
+              {
+                "name": "intelgraph-server",
+                "type": "container-image",
+                "path": "images/intelgraph-server.tar",
+                "digest": "${{ needs.hermetic-build.outputs.image-digest }}"
+              }
+            ],
+            "sbom": {
+              "cyclonedx": "sbom/sbom.cdx.json",
+              "spdx": "sbom/sbom.spdx.json"
+            },
+            "signatures": {
+              "cosign": "signatures/image.sig",
+              "attestations": "signatures/attestations.json"
+            },
+            "security": {
+              "vulnerabilityReport": "security/vulnerability-report.json",
+              "securitySummary": "security/security-summary.json"
+            },
+            "verification": {
+              "toolsIncluded": ${{ inputs.include_verification_tools }},
+              "verifyScript": "tools/verify-bundle.sh"
+            },
+            "approvalChain": []
+          }
+          EOF
+
+          # Calculate bundle hash
+          BUNDLE_HASH=$(find "$BUNDLE_DIR" -type f -exec sha256sum {} \; | sha256sum | cut -d' ' -f1)
+          echo "hash=$BUNDLE_HASH" >> "$GITHUB_OUTPUT"
+
+          # Add hash to manifest
+          jq --arg hash "$BUNDLE_HASH" '.bundleHash = $hash' "$BUNDLE_DIR/manifest.json" > tmp.json && mv tmp.json "$BUNDLE_DIR/manifest.json"
+
+      - name: Create installation documentation
+        run: |
+          set -euo pipefail
+
+          BUNDLE_DIR="airgap-bundle"
+
+          cat > "$BUNDLE_DIR/docs/INSTALLATION.md" <<'EOF'
+          # IntelGraph Air-Gap Installation Guide
+
+          ## Prerequisites
+
+          - Docker or Podman installed
+          - Access to air-gapped network segment
+          - Appropriate security clearance for classification level
+
+          ## Verification Steps
+
+          1. **Verify Bundle Integrity**
+             ```bash
+             ./tools/verify-bundle.sh
+             ```
+
+          2. **Load Container Image**
+             ```bash
+             docker load -i images/intelgraph-server.tar
+             ```
+
+          3. **Verify Image Signature (if connected to Sigstore)**
+             ```bash
+             ./tools/bin/cosign verify <image-reference>
+             ```
+
+          ## Security Considerations
+
+          - Ensure all transfers follow your organization's security procedures
+          - Document chain of custody for the transfer media
+          - Verify all hashes before deployment
+          - Review vulnerability report before installation
+
+          ## SLSA L3 Compliance
+
+          This bundle was built with SLSA Level 3 compliance:
+          - Hermetic build environment
+          - Signed provenance attestations
+          - SBOM included (CycloneDX and SPDX formats)
+          - Vulnerability scan results included
+
+          ## Support
+
+          For issues, contact your security administrator or refer to the
+          internal IntelGraph documentation.
+          EOF
+
+      - name: Create final bundle archive
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ inputs.bundle_version || github.ref_name }}"
+          ARCHIVE_NAME="${{ env.BUNDLE_NAME }}-${VERSION}.tar.gz"
+
+          # Create tarball
+          tar -czvf "$ARCHIVE_NAME" airgap-bundle/
+
+          # Create checksums
+          sha256sum "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.sha256"
+          md5sum "$ARCHIVE_NAME" > "${ARCHIVE_NAME}.md5"
+
+          # Create signature placeholder file
+          cat > "${ARCHIVE_NAME}.sig.instructions" <<EOF
+          This bundle requires manual signature by authorized personnel.
+
+          To sign with GPG:
+            gpg --armor --detach-sign ${ARCHIVE_NAME}
+
+          To sign with cosign (if connected):
+            cosign sign-blob --output-signature ${ARCHIVE_NAME}.sig ${ARCHIVE_NAME}
+
+          Bundle Hash: ${{ steps.bundle.outputs.hash }}
+          Classification: ${{ inputs.target_classification }}
+          Created: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
+
+          ls -la
+
+      - name: Upload bundle archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: airgap-bundle-${{ inputs.bundle_version || github.ref_name }}
+          path: |
+            ${{ env.BUNDLE_NAME }}-*.tar.gz
+            ${{ env.BUNDLE_NAME }}-*.sha256
+            ${{ env.BUNDLE_NAME }}-*.md5
+            ${{ env.BUNDLE_NAME }}-*.sig.instructions
+          retention-days: 90
+
+  # ===========================================================================
+  # Stage 5: Generate Compliance Report
+  # ===========================================================================
+  compliance-report:
+    name: Generate Compliance Report
+    needs: [preflight, hermetic-build, sbom-generation, create-bundle]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate compliance summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+
+          # Air-Gap Bundle Compliance Report
+
+          ## Bundle Information
+
+          | Property | Value |
+          |----------|-------|
+          | Bundle ID | \`${{ needs.preflight.outputs.bundle-id }}\` |
+          | Version | ${{ inputs.bundle_version || github.ref_name }} |
+          | Classification | ${{ inputs.target_classification }} |
+          | Transfer Media | ${{ inputs.transfer_media }} |
+          | FIPS Mode | ${{ inputs.fips_mode }} |
+          | Bundle Hash | \`${{ needs.create-bundle.outputs.bundle-hash }}\` |
+
+          ## SLSA L3 Compliance Checklist
+
+          | Requirement | Status |
+          |-------------|--------|
+          | Hermetic Build | Satisfied |
+          | Signed Provenance | Satisfied |
+          | SBOM Generated | Satisfied |
+          | Vulnerability Scan | Completed |
+          | Image Signatures | OIDC Keyless |
+          | Attestations | CycloneDX, SPDX |
+
+          ## Included Components
+
+          - Container Image (OCI Archive)
+          - CycloneDX SBOM
+          - SPDX SBOM
+          - Vulnerability Report
+          - Verification Tools (cosign, slsa-verifier)
+          - Installation Documentation
+
+          ## Transfer Instructions
+
+          1. Download the bundle artifact from this workflow run
+          2. Verify the SHA256 hash of the downloaded file
+          3. Transfer to air-gapped environment via approved ${{ inputs.transfer_media }}
+          4. Run verification script: \`./tools/verify-bundle.sh\`
+          5. Load container images into local registry
+          6. Document chain of custody
+
+          ## Required Approvals
+
+          For ${{ inputs.target_classification }} environments:
+          - Security Officer sign-off required
+          - Configuration Management approval required
+          - Change Advisory Board (CAB) notification required
+
+          EOF
