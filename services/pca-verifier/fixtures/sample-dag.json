@@ -1,0 +1,36 @@
+{
+  "transforms": [
+    {
+      "id": "parse-1",
+      "type": "parse",
+      "version": "1.0.0",
+      "params": {
+        "delimiter": ",",
+        "hasHeader": true
+      }
+    },
+    {
+      "id": "dedupe-1",
+      "type": "dedupe",
+      "version": "1.0.0",
+      "params": {
+        "key": "id"
+      }
+    },
+    {
+      "id": "aggregate-1",
+      "type": "aggregate",
+      "version": "1.0.0",
+      "params": {
+        "groupBy": "category",
+        "aggregateField": "value",
+        "operation": "sum"
+      }
+    }
+  ],
+  "dependencies": {
+    "parse-1": [],
+    "dedupe-1": ["parse-1"],
+    "aggregate-1": ["dedupe-1"]
+  }
+}
