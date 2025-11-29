@@ -2,6 +2,8 @@ const fs = require('fs');
 
 // Configure JSDOM environment for client tests
 if (typeof window !== 'undefined') {
+  require('@testing-library/jest-dom');
+
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn().mockImplementation((query) => ({
