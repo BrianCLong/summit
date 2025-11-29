@@ -1,5 +1,13 @@
 # Repository Guidelines
 
+## 🌟 VISION ALIGNMENT (MANDATORY)
+
+**All agents and contributors must align with the [Vision Charter](docs/VISION_CHARTER.md).**
+
+*   **Implicit Purpose**: Understand *why* you are building this (Human Amplification, Provable Truth).
+*   **Behavioral Mandate**: Act with precision, foresight, and ethical rigor.
+*   **Decision Filter**: Ask "Does this move the ecosystem toward its ideal state?" before committing.
+
 ## Project Structure & Module Organization
 
 - Apps: `server/` (Node/Express/GraphQL), `client/` (React/Vite).
