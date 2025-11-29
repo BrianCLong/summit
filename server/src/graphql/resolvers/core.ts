@@ -299,8 +299,12 @@ export const coreResolvers = {
     },
 
     updateEntity: async (_: any, { input }: any, context: any) => {
+      const effectiveTenantId = context.tenantId || context.user?.tenantId;
+      if (!effectiveTenantId) {
+        throw new Error('Tenant ID is required for update');
+      }
       const parsed = EntityUpdateZ.parse(input);
-      return await entityRepo.update(parsed);
+      return await entityRepo.update(parsed, effectiveTenantId);
     },
 
     deleteEntity: async (_: any, { id, tenantId }: any, context: any) => {
@@ -315,7 +319,7 @@ export const coreResolvers = {
         return false;
       }
 
-      return await entityRepo.delete(id);
+      return await entityRepo.delete(id, effectiveTenantId);
     },
 
     // Relationship mutations
@@ -369,7 +373,11 @@ export const coreResolvers = {
     },
 
     updateInvestigation: async (_: any, { input }: any, context: any) => {
-      return await investigationRepo.update(input);
+      const effectiveTenantId = context.tenantId || context.user?.tenantId;
+      if (!effectiveTenantId) {
+        throw new Error('Tenant ID is required for update');
+      }
+      return await investigationRepo.update(input, effectiveTenantId);
     },
 
     deleteInvestigation: async (
@@ -391,7 +399,7 @@ export const coreResolvers = {
         return false;
       }
 
-      return await investigationRepo.delete(id);
+      return await investigationRepo.delete(id, effectiveTenantId);
     },
   },
 
