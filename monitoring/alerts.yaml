@@ -1,0 +1,20 @@
+alerting_rules:
+  - alert: HighErrorRate
+    expr: rate(summit_errors_total[5m]) > 0.05
+    for: 2m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Error rate exceeding 5%"
+
+  - alert: PerformanceDegradation
+    expr: summit_request_duration_seconds{p99="0.1"} > 0.15
+    for: 5m
+    labels:
+      severity: warning
+
+  - alert: ConfigReloadFailure
+    expr: summit_config_reload_failures_total > 0
+    for: 1m
+    labels:
+      severity: critical
