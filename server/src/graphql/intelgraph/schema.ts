@@ -312,6 +312,377 @@ export const typeDefs = gql`
     insightGenerated(entityIds: [ID!]): GraphInsight!
   }
 
-  # Note: Mutations are intentionally limited for Sprint 0 baseline
-  # They will be enabled in subsequent sprints with proper RBAC
+  """
+  Policy label for compliance and data governance
+  """
+  type PolicyLabel {
+    """
+    Origin classification
+    """
+    origin: String
+    """
+    Sensitivity level
+    """
+    sensitivity: String
+    """
+    Legal basis for processing
+    """
+    legalBasis: String
+    """
+    Data residency requirement
+    """
+    residency: String
+    """
+    Retention tier
+    """
+    retentionTier: String
+    """
+    Additional policy metadata
+    """
+    metadata: JSON
+  }
+
+  """
+  Input for policy labels
+  """
+  input PolicyLabelInput {
+    origin: String
+    sensitivity: String
+    legalBasis: String
+    residency: String
+    retentionTier: String
+    metadata: JSON
+  }
+
+  """
+  Claim entity representing assertions or statements
+  """
+  type Claim {
+    id: ID!
+    """
+    Claim type category
+    """
+    claimType: String!
+    """
+    The claim statement
+    """
+    statement: String!
+    """
+    Claim subject(s)
+    """
+    subjects: [JSON!]!
+    """
+    Claim source(s)
+    """
+    sources: [JSON!]!
+    """
+    Verification details
+    """
+    verification: JSON
+    """
+    Policy labels for compliance
+    """
+    policyLabels: PolicyLabel
+    """
+    Related claims
+    """
+    relatedClaims: [JSON!]
+    """
+    Context (case ID, investigation ID, etc.)
+    """
+    context: JSON
+    """
+    Creation timestamp
+    """
+    createdAt: DateTime!
+    """
+    Last update timestamp
+    """
+    updatedAt: DateTime!
+    """
+    Additional properties
+    """
+    properties: JSON
+  }
+
+  """
+  Evidence entity representing supporting artifacts
+  """
+  type Evidence {
+    id: ID!
+    """
+    Evidence title/name
+    """
+    title: String!
+    """
+    Description of the evidence
+    """
+    description: String
+    """
+    Evidence type
+    """
+    evidenceType: String!
+    """
+    Evidence sources
+    """
+    sources: [JSON!]!
+    """
+    Evidence blobs/artifacts
+    """
+    blobs: [JSON!]!
+    """
+    Policy labels for compliance
+    """
+    policyLabels: PolicyLabel!
+    """
+    Context linking
+    """
+    context: JSON
+    """
+    Verification status
+    """
+    verification: JSON
+    """
+    Tags for categorization
+    """
+    tags: [String!]
+    """
+    Creation timestamp
+    """
+    createdAt: DateTime!
+    """
+    Last update timestamp
+    """
+    updatedAt: DateTime!
+    """
+    Additional properties
+    """
+    properties: JSON
+  }
+
+  """
+  Decision entity representing decisions made with evidence
+  """
+  type Decision {
+    id: ID!
+    """
+    Decision title/summary
+    """
+    title: String!
+    """
+    Detailed decision description
+    """
+    description: String
+    """
+    Decision context (case, investigation, maestro run, etc.)
+    """
+    context: JSON!
+    """
+    Options considered
+    """
+    options: [JSON!]
+    """
+    Selected option ID
+    """
+    selectedOption: String
+    """
+    Decision rationale
+    """
+    rationale: String
+    """
+    Is this decision reversible?
+    """
+    reversible: Boolean!
+    """
+    Decision status
+    """
+    status: String!
+    """
+    Who made the decision
+    """
+    decidedBy: JSON
+    """
+    When the decision was made
+    """
+    decidedAt: DateTime
+    """
+    Who approved the decision
+    """
+    approvedBy: [JSON!]
+    """
+    Evidence supporting this decision
+    """
+    evidence: [Evidence!]
+    """
+    Related claims
+    """
+    claims: [Claim!]
+    """
+    Policy labels for compliance
+    """
+    policyLabels: PolicyLabel!
+    """
+    Risk assessment
+    """
+    risks: [JSON!]
+    """
+    Owners responsible for implementation
+    """
+    owners: [JSON!]
+    """
+    Checks/gates before implementation
+    """
+    checks: [JSON!]
+    """
+    Tags for categorization
+    """
+    tags: [String!]
+    """
+    Creation timestamp
+    """
+    createdAt: DateTime!
+    """
+    Last update timestamp
+    """
+    updatedAt: DateTime!
+    """
+    Additional properties
+    """
+    properties: JSON
+  }
+
+  """
+  Input for creating a Claim
+  """
+  input CreateClaimInput {
+    claimType: String!
+    statement: String!
+    subjects: [JSON!]!
+    sources: [JSON!]!
+    verification: JSON
+    policyLabels: PolicyLabelInput
+    relatedClaims: [JSON!]
+    context: JSON
+    properties: JSON
+  }
+
+  """
+  Input for creating Evidence
+  """
+  input CreateEvidenceInput {
+    title: String!
+    description: String
+    evidenceType: String!
+    sources: [JSON!]!
+    blobs: [JSON!]!
+    policyLabels: PolicyLabelInput!
+    context: JSON
+    verification: JSON
+    tags: [String!]
+    properties: JSON
+  }
+
+  """
+  Input for creating a Decision
+  """
+  input CreateDecisionInput {
+    title: String!
+    description: String
+    context: JSON!
+    options: [JSON!]
+    selectedOption: String
+    rationale: String
+    reversible: Boolean!
+    status: String!
+    decidedBy: JSON
+    decidedAt: DateTime
+    approvedBy: [JSON!]
+    evidenceIds: [ID!]
+    claimIds: [ID!]
+    policyLabels: PolicyLabelInput!
+    risks: [JSON!]
+    owners: [JSON!]
+    checks: [JSON!]
+    tags: [String!]
+    properties: JSON
+  }
+
+  extend type Query {
+    """
+    Get Claim by ID
+    """
+    claimById(id: ID!): Claim
+
+    """
+    Get Evidence by ID
+    """
+    evidenceById(id: ID!): Evidence
+
+    """
+    Get Decision by ID
+    """
+    decisionById(id: ID!): Decision
+
+    """
+    Search Claims
+    """
+    searchClaims(
+      query: String!
+      filter: EntityFilter
+      pagination: PaginationInput
+    ): [Claim!]!
+
+    """
+    Search Evidence
+    """
+    searchEvidence(
+      query: String!
+      filter: EntityFilter
+      pagination: PaginationInput
+    ): [Evidence!]!
+
+    """
+    Search Decisions
+    """
+    searchDecisions(
+      query: String!
+      filter: EntityFilter
+      pagination: PaginationInput
+    ): [Decision!]!
+  }
+
+  """
+  Mutation root type (Sprint 1)
+  """
+  type Mutation {
+    """
+    Create a new Claim
+    """
+    createClaim(input: CreateClaimInput!): Claim!
+
+    """
+    Create new Evidence
+    """
+    createEvidence(input: CreateEvidenceInput!): Evidence!
+
+    """
+    Create a new Decision
+    """
+    createDecision(input: CreateDecisionInput!): Decision!
+
+    """
+    Update a Claim
+    """
+    updateClaim(id: ID!, input: CreateClaimInput!): Claim!
+
+    """
+    Update Evidence
+    """
+    updateEvidence(id: ID!, input: CreateEvidenceInput!): Evidence!
+
+    """
+    Update a Decision
+    """
+    updateDecision(id: ID!, input: CreateDecisionInput!): Decision!
+  }
 `;

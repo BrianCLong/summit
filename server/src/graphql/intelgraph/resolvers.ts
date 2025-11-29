@@ -545,4 +545,818 @@ export const resolvers = {
       return false;
     }
   },
+
+  // New resolvers for Claim, Evidence, and Decision
+
+  Mutation: {
+    async createClaim(
+      _: unknown,
+      { input }: { input: any },
+      context: ResolverContext,
+    ): Promise<any> {
+      const span = tracer.startSpan('create-claim');
+
+      try {
+        // ABAC policy check
+        const policyInput = {
+          user: context.user,
+          resource: {
+            type: 'claim',
+            tenant: context.user?.tenant,
+          },
+          operation_type: 'create',
+        };
+
+        const allowed = await context.opa.evaluate(
+          'intelgraph.abac.allow',
+          policyInput,
+        );
+        if (!allowed) {
+          throw new GraphQLError('Access denied by policy', {
+            extensions: { code: 'FORBIDDEN' },
+          });
+        }
+
+        // Use ClaimRepo if available, otherwise fallback to direct Neo4j
+        if (context.claimRepo) {
+          const claim = await context.claimRepo.upsertClaim(
+            input.context?.caseId || 'default',
+            input.statement,
+            1.0,
+            [],
+          );
+          return {
+            ...claim,
+            ...input,
+            createdAt: new Date(claim.createdAt || Date.now()),
+            updatedAt: new Date(claim.createdAt || Date.now()),
+          };
+        }
+
+        // Fallback to direct Neo4j
+        const session = context.neo4j.session();
+        try {
+          const result = await session.run(
+            `CREATE (c:Claim {
+              id: randomUUID(),
+              claimType: $claimType,
+              statement: $statement,
+              subjects: $subjects,
+              sources: $sources,
+              verification: $verification,
+              policyLabels: $policyLabels,
+              relatedClaims: $relatedClaims,
+              context: $context,
+              properties: $properties,
+              createdAt: timestamp(),
+              updatedAt: timestamp(),
+              tenant: $tenant
+            })
+            RETURN c`,
+            {
+              ...input,
+              subjects: JSON.stringify(input.subjects),
+              sources: JSON.stringify(input.sources),
+              verification: JSON.stringify(input.verification || null),
+              policyLabels: JSON.stringify(input.policyLabels || null),
+              relatedClaims: JSON.stringify(input.relatedClaims || []),
+              context: JSON.stringify(input.context || {}),
+              properties: JSON.stringify(input.properties || {}),
+              tenant: context.user?.tenant || 'default',
+            },
+          );
+
+          const node = result.records[0]?.get('c').properties;
+          return {
+            ...node,
+            subjects: JSON.parse(node.subjects),
+            sources: JSON.parse(node.sources),
+            verification: JSON.parse(node.verification || 'null'),
+            policyLabels: JSON.parse(node.policyLabels || 'null'),
+            relatedClaims: JSON.parse(node.relatedClaims || '[]'),
+            context: JSON.parse(node.context || '{}'),
+            properties: JSON.parse(node.properties || '{}'),
+            createdAt: new Date(node.createdAt),
+            updatedAt: new Date(node.updatedAt),
+          };
+        } finally {
+          await session.close();
+        }
+      } catch (error) {
+        span.recordException?.(error as Error);
+        throw error;
+      } finally {
+        span.end?.();
+      }
+    },
+
+    async createEvidence(
+      _: unknown,
+      { input }: { input: any },
+      context: ResolverContext,
+    ): Promise<any> {
+      const span = tracer.startSpan('create-evidence');
+
+      try {
+        // ABAC policy check
+        const policyInput = {
+          user: context.user,
+          resource: {
+            type: 'evidence',
+            tenant: context.user?.tenant,
+          },
+          operation_type: 'create',
+        };
+
+        const allowed = await context.opa.evaluate(
+          'intelgraph.abac.allow',
+          policyInput,
+        );
+        if (!allowed) {
+          throw new GraphQLError('Access denied by policy', {
+            extensions: { code: 'FORBIDDEN' },
+          });
+        }
+
+        // Use EvidenceRepo if available
+        if (context.evidenceRepo) {
+          return await context.evidenceRepo.upsertEvidence(input);
+        }
+
+        // Fallback to direct Neo4j
+        const session = context.neo4j.session();
+        try {
+          const result = await session.run(
+            `CREATE (e:Evidence {
+              id: randomUUID(),
+              title: $title,
+              description: $description,
+              evidenceType: $evidenceType,
+              sources: $sources,
+              blobs: $blobs,
+              policyLabels: $policyLabels,
+              context: $context,
+              verification: $verification,
+              tags: $tags,
+              properties: $properties,
+              createdAt: timestamp(),
+              updatedAt: timestamp(),
+              tenant: $tenant
+            })
+            RETURN e`,
+            {
+              ...input,
+              sources: JSON.stringify(input.sources),
+              blobs: JSON.stringify(input.blobs),
+              policyLabels: JSON.stringify(input.policyLabels),
+              context: JSON.stringify(input.context || null),
+              verification: JSON.stringify(input.verification || null),
+              tags: JSON.stringify(input.tags || []),
+              properties: JSON.stringify(input.properties || {}),
+              tenant: context.user?.tenant || 'default',
+            },
+          );
+
+          const node = result.records[0]?.get('e').properties;
+          return {
+            ...node,
+            sources: JSON.parse(node.sources),
+            blobs: JSON.parse(node.blobs),
+            policyLabels: JSON.parse(node.policyLabels),
+            context: JSON.parse(node.context || 'null'),
+            verification: JSON.parse(node.verification || 'null'),
+            tags: JSON.parse(node.tags || '[]'),
+            properties: JSON.parse(node.properties || '{}'),
+            createdAt: new Date(node.createdAt),
+            updatedAt: new Date(node.updatedAt),
+          };
+        } finally {
+          await session.close();
+        }
+      } catch (error) {
+        span.recordException?.(error as Error);
+        throw error;
+      } finally {
+        span.end?.();
+      }
+    },
+
+    async createDecision(
+      _: unknown,
+      { input }: { input: any },
+      context: ResolverContext,
+    ): Promise<any> {
+      const span = tracer.startSpan('create-decision');
+
+      try {
+        // ABAC policy check
+        const policyInput = {
+          user: context.user,
+          resource: {
+            type: 'decision',
+            tenant: context.user?.tenant,
+          },
+          operation_type: 'create',
+        };
+
+        const allowed = await context.opa.evaluate(
+          'intelgraph.abac.allow',
+          policyInput,
+        );
+        if (!allowed) {
+          throw new GraphQLError('Access denied by policy', {
+            extensions: { code: 'FORBIDDEN' },
+          });
+        }
+
+        // Use DecisionRepo if available
+        if (context.decisionRepo) {
+          const { evidenceIds, claimIds, ...decisionData } = input;
+          const decision = await context.decisionRepo.upsertDecision(decisionData);
+
+          // Link evidence and claims
+          if (evidenceIds && evidenceIds.length > 0) {
+            await context.decisionRepo.linkEvidence(decision.id, evidenceIds);
+          }
+          if (claimIds && claimIds.length > 0) {
+            await context.decisionRepo.linkClaims(decision.id, claimIds);
+          }
+
+          // Load linked entities
+          const [evidence, claims] = await Promise.all([
+            evidenceIds && evidenceIds.length > 0
+              ? context.decisionRepo.getLinkedEvidence(decision.id)
+              : [],
+            claimIds && claimIds.length > 0
+              ? context.decisionRepo.getLinkedClaims(decision.id)
+              : [],
+          ]);
+
+          return {
+            ...decision,
+            evidence,
+            claims,
+            createdAt: new Date(decision.createdAt || Date.now()),
+            updatedAt: new Date(decision.updatedAt || Date.now()),
+          };
+        }
+
+        // Fallback to direct Neo4j
+        const session = context.neo4j.session();
+        try {
+          const result = await session.run(
+            `CREATE (d:Decision {
+              id: randomUUID(),
+              title: $title,
+              description: $description,
+              context: $context,
+              options: $options,
+              selectedOption: $selectedOption,
+              rationale: $rationale,
+              reversible: $reversible,
+              status: $status,
+              decidedBy: $decidedBy,
+              decidedAt: $decidedAt,
+              approvedBy: $approvedBy,
+              policyLabels: $policyLabels,
+              risks: $risks,
+              owners: $owners,
+              checks: $checks,
+              tags: $tags,
+              properties: $properties,
+              createdAt: timestamp(),
+              updatedAt: timestamp(),
+              tenant: $tenant
+            })
+            RETURN d`,
+            {
+              title: input.title,
+              description: input.description,
+              context: JSON.stringify(input.context),
+              options: JSON.stringify(input.options || []),
+              selectedOption: input.selectedOption,
+              rationale: input.rationale,
+              reversible: input.reversible,
+              status: input.status,
+              decidedBy: JSON.stringify(input.decidedBy || null),
+              decidedAt: input.decidedAt ? input.decidedAt.getTime() : null,
+              approvedBy: JSON.stringify(input.approvedBy || []),
+              policyLabels: JSON.stringify(input.policyLabels),
+              risks: JSON.stringify(input.risks || []),
+              owners: JSON.stringify(input.owners || []),
+              checks: JSON.stringify(input.checks || []),
+              tags: JSON.stringify(input.tags || []),
+              properties: JSON.stringify(input.properties || {}),
+              tenant: context.user?.tenant || 'default',
+            },
+          );
+
+          const node = result.records[0]?.get('d').properties;
+
+          // Link evidence and claims if provided
+          if (input.evidenceIds && input.evidenceIds.length > 0) {
+            await session.run(
+              `MATCH (d:Decision {id: $decisionId})
+               UNWIND $evidenceIds as evidenceId
+               MATCH (e:Evidence {id: evidenceId})
+               MERGE (d)-[:SUPPORTED_BY]->(e)`,
+              { decisionId: node.id, evidenceIds: input.evidenceIds },
+            );
+          }
+
+          if (input.claimIds && input.claimIds.length > 0) {
+            await session.run(
+              `MATCH (d:Decision {id: $decisionId})
+               UNWIND $claimIds as claimId
+               MATCH (c:Claim {id: claimId})
+               MERGE (d)-[:BASED_ON]->(c)`,
+              { decisionId: node.id, claimIds: input.claimIds },
+            );
+          }
+
+          return {
+            ...node,
+            context: JSON.parse(node.context),
+            options: JSON.parse(node.options || '[]'),
+            decidedBy: JSON.parse(node.decidedBy || 'null'),
+            approvedBy: JSON.parse(node.approvedBy || '[]'),
+            policyLabels: JSON.parse(node.policyLabels),
+            risks: JSON.parse(node.risks || '[]'),
+            owners: JSON.parse(node.owners || '[]'),
+            checks: JSON.parse(node.checks || '[]'),
+            tags: JSON.parse(node.tags || '[]'),
+            properties: JSON.parse(node.properties || '{}'),
+            createdAt: new Date(node.createdAt),
+            updatedAt: new Date(node.updatedAt),
+            evidence: [],
+            claims: [],
+          };
+        } finally {
+          await session.close();
+        }
+      } catch (error) {
+        span.recordException?.(error as Error);
+        throw error;
+      } finally {
+        span.end?.();
+      }
+    },
+
+    async updateClaim(
+      _: unknown,
+      { id, input }: { id: string; input: any },
+      context: ResolverContext,
+    ): Promise<any> {
+      // Implementation similar to createClaim but with UPDATE
+      const session = context.neo4j.session();
+      try {
+        const result = await session.run(
+          `MATCH (c:Claim {id: $id})
+           SET c.claimType = $claimType,
+               c.statement = $statement,
+               c.subjects = $subjects,
+               c.sources = $sources,
+               c.verification = $verification,
+               c.policyLabels = $policyLabels,
+               c.relatedClaims = $relatedClaims,
+               c.context = $context,
+               c.properties = $properties,
+               c.updatedAt = timestamp()
+           RETURN c`,
+          {
+            id,
+            ...input,
+            subjects: JSON.stringify(input.subjects),
+            sources: JSON.stringify(input.sources),
+            verification: JSON.stringify(input.verification || null),
+            policyLabels: JSON.stringify(input.policyLabels || null),
+            relatedClaims: JSON.stringify(input.relatedClaims || []),
+            context: JSON.stringify(input.context || {}),
+            properties: JSON.stringify(input.properties || {}),
+          },
+        );
+
+        const node = result.records[0]?.get('c').properties;
+        return {
+          ...node,
+          subjects: JSON.parse(node.subjects),
+          sources: JSON.parse(node.sources),
+          verification: JSON.parse(node.verification || 'null'),
+          policyLabels: JSON.parse(node.policyLabels || 'null'),
+          relatedClaims: JSON.parse(node.relatedClaims || '[]'),
+          context: JSON.parse(node.context || '{}'),
+          properties: JSON.parse(node.properties || '{}'),
+          createdAt: new Date(node.createdAt),
+          updatedAt: new Date(node.updatedAt),
+        };
+      } finally {
+        await session.close();
+      }
+    },
+
+    async updateEvidence(
+      _: unknown,
+      { id, input }: { id: string; input: any },
+      context: ResolverContext,
+    ): Promise<any> {
+      // Implementation similar to createEvidence but with UPDATE
+      const session = context.neo4j.session();
+      try {
+        const result = await session.run(
+          `MATCH (e:Evidence {id: $id})
+           SET e.title = $title,
+               e.description = $description,
+               e.evidenceType = $evidenceType,
+               e.sources = $sources,
+               e.blobs = $blobs,
+               e.policyLabels = $policyLabels,
+               e.context = $context,
+               e.verification = $verification,
+               e.tags = $tags,
+               e.properties = $properties,
+               e.updatedAt = timestamp()
+           RETURN e`,
+          {
+            id,
+            ...input,
+            sources: JSON.stringify(input.sources),
+            blobs: JSON.stringify(input.blobs),
+            policyLabels: JSON.stringify(input.policyLabels),
+            context: JSON.stringify(input.context || null),
+            verification: JSON.stringify(input.verification || null),
+            tags: JSON.stringify(input.tags || []),
+            properties: JSON.stringify(input.properties || {}),
+          },
+        );
+
+        const node = result.records[0]?.get('e').properties;
+        return {
+          ...node,
+          sources: JSON.parse(node.sources),
+          blobs: JSON.parse(node.blobs),
+          policyLabels: JSON.parse(node.policyLabels),
+          context: JSON.parse(node.context || 'null'),
+          verification: JSON.parse(node.verification || 'null'),
+          tags: JSON.parse(node.tags || '[]'),
+          properties: JSON.parse(node.properties || '{}'),
+          createdAt: new Date(node.createdAt),
+          updatedAt: new Date(node.updatedAt),
+        };
+      } finally {
+        await session.close();
+      }
+    },
+
+    async updateDecision(
+      _: unknown,
+      { id, input }: { id: string; input: any },
+      context: ResolverContext,
+    ): Promise<any> {
+      // Implementation similar to createDecision but with UPDATE
+      if (context.decisionRepo) {
+        return await context.decisionRepo.updateStatus(id, input.status);
+      }
+
+      const session = context.neo4j.session();
+      try {
+        const result = await session.run(
+          `MATCH (d:Decision {id: $id})
+           SET d.title = $title,
+               d.description = $description,
+               d.context = $context,
+               d.options = $options,
+               d.selectedOption = $selectedOption,
+               d.rationale = $rationale,
+               d.reversible = $reversible,
+               d.status = $status,
+               d.decidedBy = $decidedBy,
+               d.decidedAt = $decidedAt,
+               d.approvedBy = $approvedBy,
+               d.policyLabels = $policyLabels,
+               d.risks = $risks,
+               d.owners = $owners,
+               d.checks = $checks,
+               d.tags = $tags,
+               d.properties = $properties,
+               d.updatedAt = timestamp()
+           RETURN d`,
+          {
+            id,
+            title: input.title,
+            description: input.description,
+            context: JSON.stringify(input.context),
+            options: JSON.stringify(input.options || []),
+            selectedOption: input.selectedOption,
+            rationale: input.rationale,
+            reversible: input.reversible,
+            status: input.status,
+            decidedBy: JSON.stringify(input.decidedBy || null),
+            decidedAt: input.decidedAt ? input.decidedAt.getTime() : null,
+            approvedBy: JSON.stringify(input.approvedBy || []),
+            policyLabels: JSON.stringify(input.policyLabels),
+            risks: JSON.stringify(input.risks || []),
+            owners: JSON.stringify(input.owners || []),
+            checks: JSON.stringify(input.checks || []),
+            tags: JSON.stringify(input.tags || []),
+            properties: JSON.stringify(input.properties || {}),
+          },
+        );
+
+        const node = result.records[0]?.get('d').properties;
+        return {
+          ...node,
+          context: JSON.parse(node.context),
+          options: JSON.parse(node.options || '[]'),
+          decidedBy: JSON.parse(node.decidedBy || 'null'),
+          approvedBy: JSON.parse(node.approvedBy || '[]'),
+          policyLabels: JSON.parse(node.policyLabels),
+          risks: JSON.parse(node.risks || '[]'),
+          owners: JSON.parse(node.owners || '[]'),
+          checks: JSON.parse(node.checks || '[]'),
+          tags: JSON.parse(node.tags || '[]'),
+          properties: JSON.parse(node.properties || '{}'),
+          createdAt: new Date(node.createdAt),
+          updatedAt: new Date(node.updatedAt),
+        };
+      } finally {
+        await session.close();
+      }
+    },
+  },
+
+  // Add Query resolvers for the new types
+  claimById: async (
+    _: unknown,
+    { id }: { id: string },
+    context: ResolverContext,
+  ): Promise<any> => {
+    if (context.claimRepo) {
+      return await context.claimRepo.getClaimById(id);
+    }
+
+    const session = context.neo4j.session();
+    try {
+      const result = await session.run(
+        `MATCH (c:Claim {id: $id}) WHERE c.tenant = $tenant RETURN c`,
+        { id, tenant: context.user?.tenant || 'default' },
+      );
+
+      if (result.records.length === 0) {
+        return null;
+      }
+
+      const node = result.records[0].get('c').properties;
+      return {
+        ...node,
+        subjects: JSON.parse(node.subjects || '[]'),
+        sources: JSON.parse(node.sources || '[]'),
+        verification: JSON.parse(node.verification || 'null'),
+        policyLabels: JSON.parse(node.policyLabels || 'null'),
+        relatedClaims: JSON.parse(node.relatedClaims || '[]'),
+        context: JSON.parse(node.context || '{}'),
+        properties: JSON.parse(node.properties || '{}'),
+        createdAt: new Date(node.createdAt),
+        updatedAt: new Date(node.updatedAt),
+      };
+    } finally {
+      await session.close();
+    }
+  },
+
+  evidenceById: async (
+    _: unknown,
+    { id }: { id: string },
+    context: ResolverContext,
+  ): Promise<any> => {
+    if (context.evidenceRepo) {
+      return await context.evidenceRepo.getEvidenceById(id);
+    }
+
+    const session = context.neo4j.session();
+    try {
+      const result = await session.run(
+        `MATCH (e:Evidence {id: $id}) WHERE e.tenant = $tenant RETURN e`,
+        { id, tenant: context.user?.tenant || 'default' },
+      );
+
+      if (result.records.length === 0) {
+        return null;
+      }
+
+      const node = result.records[0].get('e').properties;
+      return {
+        ...node,
+        sources: JSON.parse(node.sources || '[]'),
+        blobs: JSON.parse(node.blobs || '[]'),
+        policyLabels: JSON.parse(node.policyLabels),
+        context: JSON.parse(node.context || 'null'),
+        verification: JSON.parse(node.verification || 'null'),
+        tags: JSON.parse(node.tags || '[]'),
+        properties: JSON.parse(node.properties || '{}'),
+        createdAt: new Date(node.createdAt),
+        updatedAt: new Date(node.updatedAt),
+      };
+    } finally {
+      await session.close();
+    }
+  },
+
+  decisionById: async (
+    _: unknown,
+    { id }: { id: string },
+    context: ResolverContext,
+  ): Promise<any> => {
+    if (context.decisionRepo) {
+      const decision = await context.decisionRepo.getDecisionById(id);
+      if (!decision) return null;
+
+      const [evidence, claims] = await Promise.all([
+        context.decisionRepo.getLinkedEvidence(id),
+        context.decisionRepo.getLinkedClaims(id),
+      ]);
+
+      return {
+        ...decision,
+        evidence,
+        claims,
+        createdAt: new Date(decision.createdAt || Date.now()),
+        updatedAt: new Date(decision.updatedAt || Date.now()),
+      };
+    }
+
+    const session = context.neo4j.session();
+    try {
+      const result = await session.run(
+        `MATCH (d:Decision {id: $id}) WHERE d.tenant = $tenant
+         OPTIONAL MATCH (d)-[:SUPPORTED_BY]->(e:Evidence)
+         OPTIONAL MATCH (d)-[:BASED_ON]->(c:Claim)
+         RETURN d, collect(DISTINCT e) as evidence, collect(DISTINCT c) as claims`,
+        { id, tenant: context.user?.tenant || 'default' },
+      );
+
+      if (result.records.length === 0) {
+        return null;
+      }
+
+      const node = result.records[0].get('d').properties;
+      const evidence = result.records[0].get('evidence').map((e: any) => e.properties);
+      const claims = result.records[0].get('claims').map((c: any) => c.properties);
+
+      return {
+        ...node,
+        context: JSON.parse(node.context),
+        options: JSON.parse(node.options || '[]'),
+        decidedBy: JSON.parse(node.decidedBy || 'null'),
+        approvedBy: JSON.parse(node.approvedBy || '[]'),
+        policyLabels: JSON.parse(node.policyLabels),
+        risks: JSON.parse(node.risks || '[]'),
+        owners: JSON.parse(node.owners || '[]'),
+        checks: JSON.parse(node.checks || '[]'),
+        tags: JSON.parse(node.tags || '[]'),
+        properties: JSON.parse(node.properties || '{}'),
+        createdAt: new Date(node.createdAt),
+        updatedAt: new Date(node.updatedAt),
+        evidence,
+        claims,
+      };
+    } finally {
+      await session.close();
+    }
+  },
+
+  searchClaims: async (
+    _: unknown,
+    { query, filter, pagination = { limit: 25, offset: 0 } }: any,
+    context: ResolverContext,
+  ): Promise<any[]> => {
+    const session = context.neo4j.session();
+    try {
+      const result = await session.run(
+        `MATCH (c:Claim)
+         WHERE c.tenant = $tenant
+         AND (toLower(c.statement) CONTAINS toLower($query) OR toLower(c.claimType) CONTAINS toLower($query))
+         RETURN c
+         ORDER BY c.createdAt DESC
+         SKIP $offset
+         LIMIT $limit`,
+        {
+          query,
+          tenant: context.user?.tenant || 'default',
+          offset: pagination.offset,
+          limit: pagination.limit,
+        },
+      );
+
+      return result.records.map((r) => {
+        const node = r.get('c').properties;
+        return {
+          ...node,
+          subjects: JSON.parse(node.subjects || '[]'),
+          sources: JSON.parse(node.sources || '[]'),
+          verification: JSON.parse(node.verification || 'null'),
+          policyLabels: JSON.parse(node.policyLabels || 'null'),
+          relatedClaims: JSON.parse(node.relatedClaims || '[]'),
+          context: JSON.parse(node.context || '{}'),
+          properties: JSON.parse(node.properties || '{}'),
+          createdAt: new Date(node.createdAt),
+          updatedAt: new Date(node.updatedAt),
+        };
+      });
+    } finally {
+      await session.close();
+    }
+  },
+
+  searchEvidence: async (
+    _: unknown,
+    { query, filter, pagination = { limit: 25, offset: 0 } }: any,
+    context: ResolverContext,
+  ): Promise<any[]> => {
+    const session = context.neo4j.session();
+    try {
+      const result = await session.run(
+        `MATCH (e:Evidence)
+         WHERE e.tenant = $tenant
+         AND (toLower(e.title) CONTAINS toLower($query) OR toLower(e.description) CONTAINS toLower($query))
+         RETURN e
+         ORDER BY e.createdAt DESC
+         SKIP $offset
+         LIMIT $limit`,
+        {
+          query,
+          tenant: context.user?.tenant || 'default',
+          offset: pagination.offset,
+          limit: pagination.limit,
+        },
+      );
+
+      return result.records.map((r) => {
+        const node = r.get('e').properties;
+        return {
+          ...node,
+          sources: JSON.parse(node.sources || '[]'),
+          blobs: JSON.parse(node.blobs || '[]'),
+          policyLabels: JSON.parse(node.policyLabels),
+          context: JSON.parse(node.context || 'null'),
+          verification: JSON.parse(node.verification || 'null'),
+          tags: JSON.parse(node.tags || '[]'),
+          properties: JSON.parse(node.properties || '{}'),
+          createdAt: new Date(node.createdAt),
+          updatedAt: new Date(node.updatedAt),
+        };
+      });
+    } finally {
+      await session.close();
+    }
+  },
+
+  searchDecisions: async (
+    _: unknown,
+    { query, filter, pagination = { limit: 25, offset: 0 } }: any,
+    context: ResolverContext,
+  ): Promise<any[]> => {
+    if (context.decisionRepo) {
+      return await context.decisionRepo.searchDecisions(query, filter, pagination.limit, pagination.offset);
+    }
+
+    const session = context.neo4j.session();
+    try {
+      const result = await session.run(
+        `MATCH (d:Decision)
+         WHERE d.tenant = $tenant
+         AND (toLower(d.title) CONTAINS toLower($query) OR toLower(d.description) CONTAINS toLower($query))
+         RETURN d
+         ORDER BY d.createdAt DESC
+         SKIP $offset
+         LIMIT $limit`,
+        {
+          query,
+          tenant: context.user?.tenant || 'default',
+          offset: pagination.offset,
+          limit: pagination.limit,
+        },
+      );
+
+      return result.records.map((r) => {
+        const node = r.get('d').properties;
+        return {
+          ...node,
+          context: JSON.parse(node.context),
+          options: JSON.parse(node.options || '[]'),
+          decidedBy: JSON.parse(node.decidedBy || 'null'),
+          approvedBy: JSON.parse(node.approvedBy || '[]'),
+          policyLabels: JSON.parse(node.policyLabels),
+          risks: JSON.parse(node.risks || '[]'),
+          owners: JSON.parse(node.owners || '[]'),
+          checks: JSON.parse(node.checks || '[]'),
+          tags: JSON.parse(node.tags || '[]'),
+          properties: JSON.parse(node.properties || '{}'),
+          createdAt: new Date(node.createdAt),
+          updatedAt: new Date(node.updatedAt),
+        };
+      });
+    } finally {
+      await session.close();
+    }
+  },
 };
