@@ -1,60 +1,164 @@
 backlog:
-  - epic: Collaboration (E)
+  - epic: "EPIC-1: Identity, Tenants, Cases"
+    owner: "Tech Lead (Platform/Backend)"
     stories:
-      - story: Case spaces with immutable audit + SLA timers
-        priority: P0 - Must
-        sprint: Sprint 1
-      - story: Comment threads bound to graph nodes
-        priority: P0 - Must
-        sprint: Sprint 1
-      - story: Live co-editing of link charts
-        priority: P1 - Love
-        sprint: Sprint 2
-      - story: '@Mentions with inline entity previews'
-        priority: P1 - Love
-        sprint: Sprint 2
+      - story: "Implement Basic Auth & Session Management (OIDC/Password)"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "User can sign in, receive session token/cookie, and access protected routes."
+      - story: "Create Tenant Management API"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "API to create a new Tenant and isolate data."
+      - story: "Implement Case Management API (CRUD)"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Create Case, List Cases, Get Case Details. Case is linked to Tenant."
+      - story: "Implement Case Membership (Assign Users)"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Admin can assign users to a specific Case."
+      - story: "Tenant & User Context Middleware"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Middleware correctly extracts TenantID and UserID from request and injects into context."
 
-  - epic: Integrations (G)
+  - epic: "EPIC-2: Canonical Graph & Storage"
+    owner: "Tech Lead (Platform/Backend)"
     stories:
-      - story: STIX/TAXII + MISP bi-directional connectors
-        priority: P0 - Must
-        sprint: Sprint 1
-      - story: Slack/Teams + Jira/ServiceNow integration
-        priority: P0 - Must
-        sprint: Sprint 1
-      - story: Push graph updates into chat with visual snippets
-        priority: P1 - Love
-        sprint: Sprint 2
-      - story: Magic paste (auto-entity creation from raw text/CSV/URL)
-        priority: P2 - Delight
-        sprint: Sprint 3
+      - story: "Define Canonical Data Model (Neo4j Schema)"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Schema defined for Indicator, Asset, Org, Campaign, Document, Case with constraints/indexes."
+      - story: "Implement Entity Upsert Resolvers"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "GraphQL/REST API to create or update entities with idempotent merge logic."
+      - story: "Implement Edge Creation Resolvers"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "API to connect two nodes with a specific relationship type."
+      - story: "Implement 'Fetch Neighborhood' Query"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Query to fetch nodes and edges connected to a starting set within a Case."
+      - story: "Graph Stitching Logic (Infra Linking)"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Background job to link Indicators sharing IPs/Domains into subgraphs."
 
-  - epic: Ops & Reliability (H)
+  - epic: "EPIC-3: Ingest (CSV + STIX/TAXII) & Provenance v1"
+    owner: "Tech Lead (Platform/Backend)"
     stories:
-      - story: Metrics/Prometheus + DR/BCP baseline
-        priority: P0 - Must
-        sprint: Sprint 1
-      - story: Smart query budgeter with optimization hints
-        priority: P1 - Love
-        sprint: Sprint 2
-      - story: Predictive latency heatmaps
-        priority: P2 - Fearsome Delight
-        sprint: Sprint 3
+      - story: "CSV Ingestion Service (Indicators)"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Parse CSV upload and upsert entities into Graph linked to the Case."
+      - story: "Provenance Ledger: Source Stubs"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Every ingested node/edge has a provenance record indicating Source (CSV) and Timestamp."
+      - story: "STIX/TAXII Connector Framework"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Service to poll a configured STIX/TAXII feed."
+      - story: "STIX to Canonical Model Normalizer"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Transform STIX objects into internal Indicator/Asset/Campaign types."
+      - story: "Automated Provenance Recording for Feed Data"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Feed ingestion automatically writes detailed provenance records."
 
-  - epic: Frontend Experience (I)
+  - epic: "EPIC-4: Analyst Workbench (Tri-pane UI)"
+    owner: "Design Lead"
     stories:
-      - story: Tri-pane Timeline + Map + Graph view
-        priority: P0 - Must
-        sprint: Sprint 1
-      - story: Undo/Redo + Explain-this-view panel
-        priority: P0 - Must
-        sprint: Sprint 1
-      - story: Drag-and-drop narrative builder
-        priority: P1 - Love
-        sprint: Sprint 2
-      - story: Beautiful graph expansion animations
-        priority: P2 - Delight
-        sprint: Sprint 3
-      - story: UI clutter dimming for focus (cognitive load guardrails)
-        priority: P2 - Fearsome Delight
-        sprint: Sprint 3
+      - story: "UI Shell & Navigation (Case List/Detail)"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Application shell with navigation, Case List view, and empty Case Workspace."
+      - story: "Graph Visualization Component (v0)"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Render nodes and edges from mocked API in force-directed graph."
+      - story: "Tri-pane Layout Implementation"
+        priority: "P0 - Must"
+        sprint: "Weeks 1-2"
+        acceptance_criteria: "Implement resizable three-pane layout (Graph, Timeline, Map)."
+      - story: "Interactive Graph (Pan, Zoom, Select)"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "User can manipulate graph view and select nodes to inspect details."
+      - story: "Timeline Visualization & Brushing"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Render temporal events; brushing on timeline filters the graph view."
+      - story: "Map Visualization (Coarse Geolocation)"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Display entities with geo-coordinates on a map; sync selection with graph."
+
+  - epic: "EPIC-5: Copilot Core (NL→Query, GraphRAG)"
+    owner: "Tech Lead (AI/Analytics)"
+    stories:
+      - story: "LLM Service Integration (Prompt Registry)"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Backend service to handle LLM requests using centralized prompt templates."
+      - story: "NL to Query Preview (Intents: Show Indicators/Infra)"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Convert natural language to graph query for specific intents; return preview."
+      - story: "Execute User-Confirmed Query"
+        priority: "P1 - Must"
+        sprint: "Weeks 3-4"
+        acceptance_criteria: "Execute the generated query against the graph after user approval."
+      - story: "Evidence-First GraphRAG Retrieval"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "RAG pipeline that restricts retrieval to Case context and Graph neighborhood."
+      - story: "Citation & Link Formatter"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "LLM responses include structured citations linking back to specific Graph Nodes/Docs."
+
+  - epic: "EPIC-6: R1 Rapid Attribution Runbook"
+    owner: "Tech Lead (AI/Analytics)"
+    stories:
+      - story: "Runbook Orchestrator Engine (State Machine)"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Backend engine to execute a sequence of predefined steps for R1 workflow."
+      - story: "Runbook Step: TTP Tagging & Key Node Computation"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Automated analysis step to tag TTPs and calculate centrality metrics."
+      - story: "Runbook Step: Narrative Draft Generation"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Final step utilizing Copilot to generate the attribution text."
+      - story: "Runbook Execution Logging"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Persist inputs and outputs of every runbook step for audit."
+
+  - epic: "EPIC-7: Audit, Governance, Export"
+    owner: "Security/Governance Rep"
+    stories:
+      - story: "Comprehensive Audit Logging (AI & Data Access)"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Log all queries and AI prompts with User, Case, Time, and Data Scope."
+      - story: "Policy Enforcement (OPA) on Read"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Check OPA policies against entity labels before returning data to UI/LLM."
+      - story: "Attribution Brief Template (PDF Export)"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Generate PDF from runbook output with strict section formatting."
+      - story: "Markdown Export with Links"
+        priority: "P1 - Must"
+        sprint: "Weeks 5-6"
+        acceptance_criteria: "Export brief as Markdown with hyperlinks to internal Case entities."
