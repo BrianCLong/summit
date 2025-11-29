@@ -1,185 +1,144 @@
-# Sprint Plan — Dec 1–12, 2025 (America/Denver)
+# Sprint 14 — “Copilot & Controls” (Dec 1–12, 2025, America/Denver)
 
-> **Context:** Seventh sprint. Post‑holiday cadence; stabilize and push analyst efficiency. Emphasis on _policy intelligence_, _graph‑assisted investigations_, _automation governance_, and _model quality_.
-
----
-
-## 1) Sprint Goal (SMART)
-
-Ship **Policy Intelligence v1.1** (learned weights + rule suggestions), **Graph UI v1.1** (attack‑path scoring + remediation hints), **SOAR v1.5** (graph‑aware batching, per‑tenant quotas, HITL dashboard), and **Intel v4.1** (active‑learning cadence + annotator quality) to drive **MTTC P50 ≤ 12 min / P90 ≤ 30 min** and **Analyst Action Adoption ≥ 85%** — **by Dec 12, 2025**.
-
-**Key outcomes**
-
-- Policy change‑risk scoring upgraded with learned weights; assistant suggests guardrails before apply.
-- Graph panel ranks attack paths and proposes remediations with owner handoffs.
-- SOAR enforces per‑tenant quotas + batching; live HITL queue for approvals; improved safety metrics.
-- Intel v4.1 standardizes weekly retraining cadence; annotator agreement ≥ 0.8 (Cohen’s κ) on samples.
+> **Window:** Mon, Dec 1 → Fri, Dec 12, 2025 (10 business days)
+> **Theme:** Ship the first analyst-visible **NL Graph Querying** MVP, a **one-path CSV Ingest Wizard** with license/PII guardrails, and core **Audit/Governance** hooks (reason-for-access + OPA/ABAC). These align with the near-term roadmap (Core GA: ingest/graph/analytics/copilot; ABAC/OPA; audit) and keep tri-pane UI as a stretch.
 
 ---
 
-## 2) Success Metrics & Verification
+## 1) Sprint Goals
 
-- **MTTC:** P50 ≤ 12 min; P90 ≤ 30 min (rolling 7‑day).  
-  _Verify:_ Incident dashboard; export.
-- **Policy safety:** Backtest AUC ≥ 0.82; suggestion acceptance ≥ 60%; 0 critical misconfigs.  
-  _Verify:_ Change logs; offline eval.
-- **Graph effectiveness:** Analysts use remediation hints in ≥ 60% of P1/P2 cases; mean time‑to‑context ↓ 35%.  
-  _Verify:_ UI telemetry; survey.
-- **Automation governance:** Quota breaches = 0; SOAR success ≥ 93%; approvals SLA P95 ≤ 5 min.  
-  _Verify:_ SOAR run logs; HITL dashboard.
-- **Intel quality:** κ ≥ 0.8 on inter‑annotator; Brier ≤ 0.15; override rate ≤ 9%.  
-  _Verify:_ Label audits; eval report.
+- **NL Graph Querying (MVP):** prompt → generated **Cypher preview** with row/cost estimates; sandboxed execution; undo/rollback. **Acceptance:** ≥95% syntactic validity on test prompts; rollback supported.
+- **Ingest Wizard (CSV happy-path):** map flat CSV→canonical entities with **AI mapping hints**, **PII classification**, and **license rules**; record lineage. **Acceptance:** CSV/JSON mapped ≤10 min; PII flags; blocked fields show policy reasons.
+- **Data License Registry (MVP):** track license on source; **block export** with human-readable reason + appeal path. **Acceptance:** blocked export shows clause/owner/override workflow.
+- **Audit & Governance Hooks:** ABAC/RBAC + externalized **OPA** policies; **reason-for-access prompts** in UI; log who/what/why/when.
+- **Observability & Cost Guard (instrumentation):** OTEL traces, Prom metrics, latency heatmap scaffolding; enable query budgeter/slow-query killer flags.
+
+**Out of scope (tracked as next):** Graph-XAI overlays, predictive suite alpha, multi-graph federation; adhere to “Won’t Build” ethics gate.
 
 ---
 
-## 3) Scope
+## 2) Epics → Stories (Definition of Done included)
 
-**Must‑have (commit):**
+### Epic A — NL Graph Querying (Copilot)
 
-- **Policy Intelligence v1.1:** learned weights (logistic/GBM) over risk factors; what‑if simulator; rule suggestions; pre‑commit checks; rollback.
-- **Graph UI v1.1:** attack‑path scoring (risk weighted); remediation hints library; owner/contact inline; export action to ticket.
-- **SOAR v1.5:** graph‑aware batching (grouping by entity/tenant), per‑tenant quotas, HITL reviewer dashboard (queue, SLAs), safety counters.
-- **Intel v4.1:** weekly active‑learning cadence, annotator quality metrics (κ, disagreement), sampling UI improvements; gated deploy.
-- **Operational analytics:** adoption widgets (quick actions, hints usage), quota dashboards, policy risk trend.
+- **A1. Prompt → Cypher generator service (Node/Apollo):** deterministic templates; returns `cypher`, `rowEstimate`, `costHint`.
+  - **DoD:** 50 gold prompts → ≥95% syntactic pass; failing prompts surface fix hints.
+- **A2. Sandbox executor:** read-only, result row cap, timed cancel, **undo/rollback** for any write classes (guarded off for MVP).
+  - **DoD:** killing long queries works; budget hints logged.
+- **A3. Web UI panel (React 18 + MUI + Cytoscape.js + jQuery for interactions):** left = prompt, middle = **Cypher preview**, right = results/row estimates; **diff vs manual** query.
+  - **DoD:** keyboard-first; accessible labels; preview must match executed query.
+- **A4. Unit/contract tests:** prompt fixtures; Cypher schema safety checks; cost hint bounds.
+  - **DoD:** Jest ≥90% statements, golden fixtures in repo.
 
-**Stretch:**
+### Epic B — Ingest Wizard (CSV Happy-Path)
 
-- **Responder Copilot (alpha):** promptable runbooks for top 3 incident types (read‑only suggestions).
-- **Graph UI: path diffing** between time ranges.
-- **SOAR: multi‑region runners** (standby failover).
+- **B1. Upload→Schema map step:** AI field suggestions; manual overrides; **PII classifier** tags; DPIA checklist saved.
+  - **DoD:** demo CSV (people/orgs/events) maps in ≤10 minutes; lineage captured.
+- **B2. License attach & enforcement:** source select → license bound to dataset; blocked fields explain **why**.
+  - **DoD:** export attempt from licensed dataset shows clear reason/appeal path.
+- **B3. ETL enrichers (scaffold):** GeoIP + hash + OCR stub wired; EXIF scrub.
+  - **DoD:** enrich steps recorded in lineage; toggles visible.
 
-**Out‑of‑scope:**
+### Epic C — Audit, Access & Governance
 
-- Online training in prod; destructive SOAR actions default‑on; customer‑facing policy editor.
+- **C1. ABAC/RBAC + OPA integration:** policy labels + case roles; **step-up auth** hooks (stub).
+  - **DoD:** policy unit tests; blocking paths verified in stage.
+- **C2. Reason-for-access prompt (UI modal + API):** capture purpose string; write to immutable audit.
+  - **DoD:** audit shows who/what/**why**/when; search by purpose.
+- **C3. Export blocker (License/Authority):** **authority/permit** required at export; refusal returns actionable message + appeal link.
+  - **DoD:** simulated export without proper basis fails with readable rationale.
 
----
+### Stretch — Tri-Pane UX scaffold
 
-## 4) Team & Capacity
-
-- Same roster; **commit 40 pts** (≈50 nominal × 0.8 focus).
-
----
-
-## 5) Backlog (Ready for Sprint)
-
-### Epic AF — Policy Intelligence v1.1 (12 pts)
-
-- **AF1 — Learned weights + calibration** (5 pts)  
-  _AC:_ model registry; AUC ≥ 0.82; reliability diagram; rollback.
-- **AF2 — What‑if simulator & pre‑commit checks** (4 pts)  
-  _AC:_ show blast radius; conflicting rules; required approvals.
-- **AF3 — Suggestion engine** (3 pts)  
-  _AC:_ top‑N guardrails; acceptance telemetry; audit.
-
-### Epic AG — Graph UI v1.1 (10 pts)
-
-- **AG1 — Attack‑path scoring** (4 pts)  
-  _AC:_ weighted by exposure/criticality; top‑3 surfaced.
-- **AG2 — Remediation hints + owner handoff** (4 pts)  
-  _AC:_ hint library; owner lookup; ticket export.
-- **AG3 — UX polish** (2 pts)  
-  _AC:_ loading states; freshness banner; PNG export.
-
-### Epic AH — SOAR v1.5 (12 pts)
-
-- **AH1 — Graph‑aware batching + quotas** (5 pts)  
-  _AC:_ per‑tenant limits; queue saturation tests; alerts.
-- **AH2 — HITL reviewer dashboard** (4 pts)  
-  _AC:_ SLA timers; filters; audit trail.
-- **AH3 — Safety counters & reports** (3 pts)  
-  _AC:_ false‑allow = 0; per‑action metrics; weekly report.
-
-### Epic AI — Intel v4.1 (6 pts)
-
-- **AI1 — Active‑learning cadence + sampling** (3 pts)  
-  _AC:_ weekly schedule; stratified sampling; drift checks.
-- **AI2 — Annotator quality & disagreement** (3 pts)  
-  _AC:_ κ ≥ 0.8; disagreement review queue; coach marks.
-
-> **Planned:** 40 pts commit + 6 pts stretch bucket.
+- Sync **timeline + map + graph** cursors; save/pin views; “Explain this view” placeholder.
+  - **Acceptance basis:** synchronized brushing + usability metrics tracked.
 
 ---
 
-## 6) Dependencies & Assumptions
+## 3) Engineering Plan (by layer)
 
-- Policy logs + attributes available; legal review for suggestions that affect access.
-- Owner directory authoritative (CMDB/HRIS); ticketing integration available.
-- SOAR vendor quotas documented; queue store reliable; on‑call bandwidth for HITL.
-- Sufficient labeled intel data; privacy review complete.
+**Frontend (React 18 + MUI + Cytoscape.js; jQuery for DOM/events)**
 
----
+- Copilot panel & schema-mapper wizard; accessible forms; keyboard-first; jQuery `$.ajax` wrappers for executor calls.
+- Guard any data export buttons with license/authority checks and reason-for-access prompt.
 
-## 7) Timeline & Ceremonies (MT)
+**Graph/Backend (Node 18, Apollo GraphQL, Neo4j driver)**
 
-- **Mon Dec 1** — Planning & Kickoff; policy model review (30m).
-- **Fri Dec 5** — Mid‑sprint demo/checkpoint (30m).
-- **Wed Dec 10** — Grooming for next sprint (45m).
-- **Fri Dec 12** — Demo (45m) + Retro (45m) + Release cut.
+- Services: `/copilot/generateCypher`, `/query/sandbox`, `/audit/log`, `/license/check`.
+- Policy middleware: OPA evaluation pre-query; attach **purpose** to context; record immutable audit.
 
----
+**ETL/Enrichers**
 
-## 8) Definition of Ready (DoR)
+- CSV parser with mapping presets; PII classifier stub + flags; enrichers (GeoIP/hash/EXIF scrub) chained with provenance nodes.
 
-- Model features and risk factors documented; datasets ready.
-- Integration points (ticketing, owner directory) validated; flags/telemetry named.
+**Security/Governance**
 
-## 9) Definition of Done (DoD)
+- ABAC policy schema + role matrix; start warrant/authority fields on queries; export refusals show clause/owner/review path.
 
-- Tests pass (unit/integration); dashboards live; approvals configured.
-- Runbooks updated; enablement notes posted; rollback paths tested.
+**Observability & Cost**
+
+- OTEL tracing, Prom metrics; latency heatmap endpoint; flip on **query budgeter/slow-query killer** (feature-flag).
 
 ---
 
-## 10) QA & Validation Plan
+## 4) Acceptance & Demo Plan
 
-- **Policy:** offline AUC; reliability plots; change simulations; 10 prod‑like dry‑runs.
-- **Graph:** sampled path accuracy; hint usefulness survey; ticket export e2e test.
-- **SOAR:** quota breach simulations; queue soak test; reviewer SLA timing.
-- **Intel:** κ measurement on blind set; canary comparison v3/v4.1; override rate tracking.
+**Demo script (Fri, Dec 12):**
 
----
-
-## 11) Risk Register (RAID)
-
-| Risk                        | Prob. | Impact | Owner | Mitigation                                     |
-| --------------------------- | ----- | -----: | ----- | ---------------------------------------------- |
-| Learned weights overfit     | Med   |    Med | AF1   | Cross‑val; regularization; rollback            |
-| Owner mapping stale         | Med   |    Med | AG2   | Freshness banner; manual override; sync alerts |
-| Quotas block urgent actions | Low   |   High | AH1   | Break‑glass bypass; on‑call escalation         |
-| Reviewer SLA misses         | Med   |    Med | AH2   | Paging; load balancing; secondary reviewer     |
-| Annotation quality dips     | Med   |    Med | AI2   | Training; consensus; spot checks               |
+1. Load sample CSV → map fields with AI suggestions; see **PII flags**; run DPIA checklist; import completes ≤10 minutes.
+2. Ask Copilot: “Show orgs within 2 hops of *X* active in 2024” → preview **Cypher & row/cost**; execute sandbox; undo. **Pass if** syntactic validity ≥95% on the gold set.
+3. Attempt export on licensed data **without authority** → export blocked with human-readable reason and appeal path.
+4. Show **reason-for-access** audit for a sensitive view.
 
 ---
 
-## 12) Communications & Status
+## 5) Risks & Mitigations
 
-- **Channels:** #sprint‑room (daily), #analyst‑ops (enablement), Exec update (Fri).
-- **Reports:** Burnup, policy risk trend, graph adoption, quota incidents, κ & Brier, MTTC.
-
----
-
-## 13) Compliance/Security Guardrails
-
-- Signed policy changes; immutable audit; least privilege; no PII in model features.
-- SOAR approvals enforced; destructive actions require HITL; simulation before prod.
-- Graph remains read‑only; export sanitized.
+- **Prompt→Cypher hallucinations** → start with constrained templates & fixtures; non-passing prompts fall back to manual query diff.
+- **Export compliance complexity** → keep MVP to license/authority gates only; appeals logged for ombuds.
+- **Performance regressions** → enable cost guard + SLO dashboards early.
 
 ---
 
-## 14) Release & Rollback
+## 6) Tracking Artifacts (proposed)
 
-- **Staged rollout:** Internal cohort → all analysts → select tenants (if applicable).
-- **Rollback:** Disable learned weights & suggestions; hide Graph hints; revert SOAR quotas/batching; pin Intel v4.0.
-- **Docs:** Release notes; analyst changelog; customer comms as needed.
-
----
-
-## 15) Next Sprint Seeds (Dec 15–23)
-
-- **Holiday mode:** capacity‑aware maintenance sprint; reliability, debt burn‑down, docs sprint.
-- **Responder Copilot v0.2:** playbook reasoning + trace; safe command generation (no auto‑exec).
-- **Graph UI v1.2:** path diffing, chokepoint detection, recommended controls.
+- **Branches:**
+  - `feature/copilot-nl-cypher`, `feature/ingest-wizard-csv`, `feature/audit-opa`
+- **PR labels:** `area:copilot`, `area:ingest`, `area:audit`, `type:feature`, `needs:security-review`
+- **CI gates:** unit tests; GraphQL contract tests; schema migration check; axe-core accessibility scan.
 
 ---
 
-_Prepared by: Covert Insights — last updated Sep 7, 2025 (America/Denver)._
+## 7) Metrics (sprint exit)
+
+- **Copilot validity:** ≥95% syntactic pass on 50 prompts.
+- **Ingest time:** CSV→entities ≤10 minutes; lineage present.
+- **Audit coverage:** 100% of sensitive queries capture **reason-for-access**.
+- **Ops:** latency heatmap visible; cost guard flags enabled.
+
+---
+
+## 8) Stretch Goals (if ahead)
+
+- **Provenance/Claim Ledger (beta)** export manifest for the CSV import.
+- **Tri-pane sync** (timeline/map/graph) with minimal brushing.
+
+---
+
+## 9) Definition of Done (global)
+
+- Meets stated acceptance criteria; passes security & ethics gate (**no “won’t build” violations**); artifacts logged in immutable audit; docs updated; demo delivered.
+
+---
+
+### Revised prompt (for next time)
+
+> “Plan a 2-week IntelGraph sprint (Dec 1–12, 2025) to ship NL Graph Querying MVP, CSV Ingest Wizard with PII & license enforcement, and audit/OPA hooks. Include epics→stories with DoD, demo plan, risks, metrics, and citations to the Council Wishbooks.”
+
+### Quick questions to sharpen execution
+
+1. Which sample CSV schema should we standardize on for the demo (people/orgs/events or different)?
+2. Any must-have gold prompts beyond basic 2–3 hop and time-slice queries?
+3. Do you want the tri-pane sync as stretch or move it into core this sprint?
+
+*(All planning choices above trace directly to the Council backlogs and acceptance criteria for NL Querying, Ingest Wizard, License/Authority enforcement, Audit/OPA, and Ops/Cost Guard.)*
