@@ -58,3 +58,83 @@ backlog:
       - story: UI clutter dimming for focus (cognitive load guardrails)
         priority: P2 - Fearsome Delight
         sprint: Sprint 3
+
+  - epic: Observability
+    team: DevOps
+    stories:
+      - story: Unified dashboards - Create Grafana panels for AI/ML, orchestration, and frontend services
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Tracing integration - Add OpenTelemetry spans to Airflow DAGs and ML pipelines
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Alerting rules - Configure Prometheus + Alertmanager for anomaly detection
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Log aggregation - Centralize logs with Loki/Elastic for cross-service debugging
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+
+  - epic: Security Compliance Automation
+    team: Security
+    stories:
+      - story: RBAC expansion - Define fine-grained roles for orchestration and frontend modules
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: OPA policy library - Build reusable compliance policies for Kubernetes and Terraform
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: CI/CD enforcement - Integrate policy-fuzzer outputs into GitHub Actions
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Audit trail - Automate compliance reporting with immutable logs
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+
+  - epic: Data Pipeline Optimization
+    team: Data Engineering
+    stories:
+      - story: Airflow DAG refactor - Simplify dependencies and improve retry logic
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Lineage tracking - Implement OpenLineage for end-to-end dataset visibility
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Throughput tuning - Optimize ingestion jobs with parallelization
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Resilience testing - Chaos tests for pipeline fault tolerance
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+
+  - epic: Frontend/UI Modernization
+    team: Frontend
+    stories:
+      - story: Framework upgrade - Migrate conductor-ui and dashboard to React 18 + Vite
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Accessibility improvements - Add WCAG-compliant components and ARIA roles
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Performance tuning - Optimize bundle size and lazy-load heavy modules
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Developer experience - Introduce Storybook for UI component testing
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+
+  - epic: AI/ML Evaluation Framework
+    team: ML Research
+    stories:
+      - story: Benchmark suite - Extend eval module with reproducible benchmarks
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Dataset integration - Use GOLDEN/datasets for standardized evaluation
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Pipeline automation - Automate model evaluation runs in CI/CD
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
+      - story: Analytics dashboard - Visualize evaluation metrics in Grafana
+        priority: P0 - Must
+        sprint: Parallel Sprint 1
