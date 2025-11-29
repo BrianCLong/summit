@@ -37,6 +37,15 @@ scrape_configs:
           service: 'gateway'
           tier: 'backend'
 
+  # SLO Exporter
+  - job_name: slo-exporter
+    metrics_path: /metrics
+    static_configs:
+      - targets: ['slo-exporter:9092']
+        labels:
+          service: 'slo-exporter'
+          tier: 'observability'
+
   # Health checks
   - job_name: summit-health
     metrics_path: /health
