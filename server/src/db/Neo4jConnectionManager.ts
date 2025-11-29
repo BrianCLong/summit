@@ -533,12 +533,30 @@ export function initializeNeo4jConnectionManager(config: Neo4jPoolConfig): Neo4j
 
 export function getNeo4jConnectionManager(): Neo4jConnectionManager {
   if (!connectionManager) {
+    const password = process.env.NEO4J_PASSWORD;
+    if (process.env.NODE_ENV === 'production') {
+      if (!password) {
+        throw new Error(
+          'NEO4J_PASSWORD environment variable is required in production',
+        );
+      }
+      if (password === 'devpassword') {
+        throw new Error(
+          'Security Error: NEO4J_PASSWORD cannot be "devpassword" in production',
+        );
+      }
+    }
+
     // Initialize with defaults from environment
     connectionManager = new Neo4jConnectionManager({
       uri: process.env.NEO4J_URI || 'bolt://neo4j:7687',
-      username: process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j',
-      password: process.env.NEO4J_PASSWORD || 'devpassword',
-      maxConnectionPoolSize: parseInt(process.env.NEO4J_MAX_POOL_SIZE || '50', 10),
+      username:
+        process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j',
+      password: password || 'devpassword',
+      maxConnectionPoolSize: parseInt(
+        process.env.NEO4J_MAX_POOL_SIZE || '50',
+        10,
+      ),
     });
   }
 

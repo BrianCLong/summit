@@ -19,6 +19,15 @@ type Neo4jSession = neo4j.Session;
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER =
   process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';
+
+if (
+  process.env.NODE_ENV === 'production' &&
+  (!process.env.NEO4J_PASSWORD || process.env.NEO4J_PASSWORD === 'devpassword')
+) {
+  throw new Error(
+    'Security Error: NEO4J_PASSWORD must be set and cannot be "devpassword" in production',
+  );
+}
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
 const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(

@@ -57,4 +57,41 @@ const config = {
   },
 };
 
+if (config.env === 'production') {
+  const requiredEnvVars = [
+    'NEO4J_URI',
+    'NEO4J_USERNAME',
+    'NEO4J_PASSWORD',
+    'POSTGRES_HOST',
+    'POSTGRES_USER',
+    'POSTGRES_PASSWORD',
+    'REDIS_HOST',
+  ];
+
+  const missing = requiredEnvVars.filter((key) => !process.env[key]);
+  if (missing.length > 0) {
+    console.error(`❌ Production mode missing env vars: ${missing.join(', ')}`);
+    process.exit(1);
+  }
+
+  const devPasswords = [
+    'devpassword',
+    'dev_jwt_secret_12345',
+    'dev_refresh_secret_67890',
+  ];
+
+  if (
+    devPasswords.includes(config.neo4j.password) ||
+    devPasswords.includes(config.postgres.password) ||
+    devPasswords.includes(config.jwt.secret) ||
+    devPasswords.includes(config.redis.password) ||
+    devPasswords.includes(config.jwt.refreshSecret)
+  ) {
+    console.error(
+      '❌ Production mode using default dev passwords. Set proper secrets.',
+    );
+    process.exit(1);
+  }
+}
+
 module.exports = config;

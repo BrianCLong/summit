@@ -232,10 +232,26 @@ function parseConnectionConfig(): PoolConfig {
     return { connectionString: process.env.DATABASE_URL };
   }
 
+  const isProduction = process.env.NODE_ENV === 'production';
+  const password = process.env.POSTGRES_PASSWORD;
+
+  if (isProduction) {
+    if (!password) {
+      throw new Error(
+        'POSTGRES_PASSWORD environment variable is required in production',
+      );
+    }
+    if (password === 'devpassword') {
+      throw new Error(
+        'Security Error: POSTGRES_PASSWORD cannot be the default "devpassword" in production',
+      );
+    }
+  }
+
   return {
     host: process.env.POSTGRES_HOST || 'postgres',
     user: process.env.POSTGRES_USER || 'intelgraph',
-    password: process.env.POSTGRES_PASSWORD || 'devpassword',
+    password: password || 'devpassword',
     database: process.env.POSTGRES_DB || 'intelgraph_dev',
     port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
   };
