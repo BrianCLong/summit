@@ -5,9 +5,9 @@
     "outDir": "dist",
     "declaration": true,
     "allowImportingTsExtensions": false,
-    "emitDeclarationOnly": false
+    "emitDeclarationOnly": false,
     "types": []
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["dist"]
 }
