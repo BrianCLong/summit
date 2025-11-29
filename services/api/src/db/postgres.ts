@@ -292,6 +292,9 @@ class PostgreSQLConnection {
   }
 }
 
+// Export class for testing
+export { PostgreSQLConnection };
+
 // Export singleton instance
 export const postgresConnection = new PostgreSQLConnection();
 export const postgresPool = postgresConnection;

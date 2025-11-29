@@ -518,6 +518,9 @@ class RedisConnection {
   }
 }
 
+// Export class for testing
+export { RedisConnection };
+
 // Export singleton instance
 export const redisConnection = new RedisConnection();
 export const redisClient = redisConnection;

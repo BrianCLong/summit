@@ -72,8 +72,7 @@ describe('RedisConnection', () => {
     });
 
     // Create a fresh instance for each test
-    const RedisConnectionClass = require('../redis.js').default;
-    connection = new (RedisConnectionClass || class RedisConnection {})();
+    connection = new RedisConnection();
 
     jest.clearAllMocks();
   });
@@ -240,8 +239,7 @@ describe('RedisConnection', () => {
     });
 
     it('should throw error when client not initialized', async () => {
-      const uninitializedConnection = new (require('../redis.js').default ||
-        class {})();
+      const uninitializedConnection = new RedisConnection();
 
       await expect(uninitializedConnection.get('key')).rejects.toThrow(
         'Redis client not initialized',
@@ -288,8 +286,7 @@ describe('RedisConnection', () => {
     });
 
     it('should throw error when client not initialized', async () => {
-      const uninitializedConnection = new (require('../redis.js').default ||
-        class {})();
+      const uninitializedConnection = new RedisConnection();
 
       await expect(uninitializedConnection.set('key', 'value')).rejects.toThrow(
         'Redis client not initialized',
@@ -537,8 +534,7 @@ describe('RedisConnection', () => {
     });
 
     it('should return disconnected status when not connected', async () => {
-      const uninitializedConnection = new (require('../redis.js').default ||
-        class {})();
+      const uninitializedConnection = new RedisConnection();
 
       const health = await uninitializedConnection.healthCheck();
 

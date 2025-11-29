@@ -41,9 +41,7 @@ describe('PostgreSQLConnection', () => {
     (Pool as jest.MockedClass<typeof Pool>).mockImplementation(() => mockPool);
 
     // Create a fresh instance for each test
-    const PostgreSQLConnectionClass = require('../postgres.js').default;
-    connection = new (PostgreSQLConnectionClass ||
-      class PostgreSQLConnection {})();
+    connection = new PostgreSQLConnection();
 
     jest.clearAllMocks();
   });
@@ -181,8 +179,7 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should throw error when pool not initialized', async () => {
-      const uninitializedConnection = new (require('../postgres.js').default ||
-        class {})();
+      const uninitializedConnection = new PostgreSQLConnection();
 
       await expect(uninitializedConnection.query('SELECT 1')).rejects.toThrow(
         'PostgreSQL pool not initialized',
@@ -226,8 +223,7 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should throw error when pool not initialized', async () => {
-      const uninitializedConnection = new (require('../postgres.js').default ||
-        class {})();
+      const uninitializedConnection = new PostgreSQLConnection();
 
       await expect(uninitializedConnection.getClient()).rejects.toThrow(
         'PostgreSQL pool not initialized',
@@ -509,8 +505,7 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should return disconnected status when pool not initialized', async () => {
-      const uninitializedConnection = new (require('../postgres.js').default ||
-        class {})();
+      const uninitializedConnection = new PostgreSQLConnection();
 
       const health = await uninitializedConnection.healthCheck();
 
