@@ -1,0 +1,40 @@
+version: '3.9'
+
+# Extension for docker-compose.ai.yml to add streaming-ingest service
+
+services:
+  streaming-ingest:
+    build:
+      context: ./services/streaming-ingest
+      dockerfile: Dockerfile
+    container_name: summit-streaming-ingest
+    restart: unless-stopped
+    ports:
+      - '8080:8080'
+    environment:
+      PORT: 8080
+      HOST: 0.0.0.0
+      NODE_ENV: ${NODE_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      KAFKA_BROKERS: kafka:9092
+      KAFKA_TOPICS: events,analytics,audit
+      KAFKA_CONSUMER_GROUP: streaming-ingest
+      BATCH_MODE: ${BATCH_MODE:-false}
+      BATCH_SIZE: ${BATCH_SIZE:-100}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-summit_dev}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - summit
+
+networks:
+  summit:
+    external: true
