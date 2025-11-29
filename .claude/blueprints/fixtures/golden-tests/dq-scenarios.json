@@ -1,0 +1,183 @@
+{
+  "$schema": "./dq-scenarios.schema.json",
+  "version": "1.0.0",
+  "description": "Golden test scenarios for Data Quality Dashboard (DQ-001)",
+  "scenarios": [
+    {
+      "id": "scenario-001",
+      "name": "High quality dataset - all metrics excellent",
+      "dataset": {
+        "id": "test-dataset-001",
+        "name": "High Quality Entities",
+        "type": "entity_collection",
+        "recordCount": 1000
+      },
+      "expected": {
+        "completeness": 0.95,
+        "consistency": 0.92,
+        "timeliness": 0.88,
+        "duplication": 0.02,
+        "provenanceCoverage": 0.98
+      },
+      "records": [
+        {
+          "id": "e-001",
+          "name": "Complete Entity",
+          "type": "Person",
+          "attributes": {
+            "nationality": "US",
+            "dob": "1990-01-01",
+            "occupation": "Analyst"
+          },
+          "provenanceId": "prov-001",
+          "lastUpdated": "2025-11-25T10:00:00Z"
+        }
+      ],
+      "notes": "All records complete with provenance, recent updates, no contradictions"
+    },
+    {
+      "id": "scenario-002",
+      "name": "Low completeness - many missing fields",
+      "dataset": {
+        "id": "test-dataset-002",
+        "name": "Incomplete Entities",
+        "type": "entity_collection",
+        "recordCount": 500
+      },
+      "expected": {
+        "completeness": 0.60,
+        "consistency": 0.85,
+        "timeliness": 0.75,
+        "duplication": 0.05,
+        "provenanceCoverage": 0.50
+      },
+      "records": [
+        {
+          "id": "e-002",
+          "name": "Incomplete Entity",
+          "type": "Person",
+          "attributes": {
+            "nationality": null,
+            "dob": null,
+            "occupation": "Unknown"
+          },
+          "provenanceId": null,
+          "lastUpdated": "2025-10-01T10:00:00Z"
+        }
+      ],
+      "notes": "Many null fields, missing provenance, stale data"
+    },
+    {
+      "id": "scenario-003",
+      "name": "High duplication - many duplicates",
+      "dataset": {
+        "id": "test-dataset-003",
+        "name": "Duplicate Entities",
+        "type": "entity_collection",
+        "recordCount": 300
+      },
+      "expected": {
+        "completeness": 0.90,
+        "consistency": 0.88,
+        "timeliness": 0.92,
+        "duplication": 0.25,
+        "provenanceCoverage": 0.95
+      },
+      "records": [
+        {
+          "id": "e-003a",
+          "name": "John Doe",
+          "type": "Person",
+          "attributes": {
+            "nationality": "US",
+            "dob": "1985-03-15"
+          },
+          "provenanceId": "prov-003a"
+        },
+        {
+          "id": "e-003b",
+          "name": "John Doe",
+          "type": "Person",
+          "attributes": {
+            "nationality": "US",
+            "dob": "1985-03-15"
+          },
+          "provenanceId": "prov-003b"
+        }
+      ],
+      "notes": "Many exact and fuzzy duplicates, should be deduplicated"
+    },
+    {
+      "id": "scenario-004",
+      "name": "Contradictions - conflicting data",
+      "dataset": {
+        "id": "test-dataset-004",
+        "name": "Contradictory Entities",
+        "type": "entity_collection",
+        "recordCount": 200
+      },
+      "expected": {
+        "completeness": 0.85,
+        "consistency": 0.40,
+        "timeliness": 0.80,
+        "duplication": 0.10,
+        "provenanceCoverage": 0.90
+      },
+      "records": [
+        {
+          "id": "e-004",
+          "name": "Jane Smith",
+          "type": "Person",
+          "attributes": {
+            "nationality": "US"
+          },
+          "validFrom": "2020-01-01",
+          "provenanceId": "prov-004a"
+        },
+        {
+          "id": "e-004",
+          "name": "Jane Smith",
+          "type": "Person",
+          "attributes": {
+            "nationality": "UK"
+          },
+          "validFrom": "2020-01-01",
+          "provenanceId": "prov-004b"
+        }
+      ],
+      "notes": "Same entity, overlapping validity periods, conflicting attributes"
+    }
+  ],
+  "stewardWorkflows": [
+    {
+      "issueId": "dq-issue-001",
+      "datasetId": "test-dataset-002",
+      "dimension": "completeness",
+      "severity": "medium",
+      "workflow": [
+        {
+          "step": 1,
+          "role": "owner",
+          "action": "review",
+          "outcome": "assign_to_custodian",
+          "timestamp": "2025-11-26T09:00:00Z"
+        },
+        {
+          "step": 2,
+          "role": "custodian",
+          "action": "investigate",
+          "finding": "Source API intermittently returns incomplete records",
+          "outcome": "propose_fix",
+          "timestamp": "2025-11-26T10:30:00Z"
+        },
+        {
+          "step": 3,
+          "role": "ombuds",
+          "action": "approve",
+          "outcome": "resolved",
+          "timestamp": "2025-11-26T11:00:00Z"
+        }
+      ]
+    }
+  ]
+}
