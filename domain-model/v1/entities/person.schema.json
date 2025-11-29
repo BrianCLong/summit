@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./person.schema.json",
+  "title": "Person (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Person" },
+    "name": { "type": "string" },
+    "givenName": { "type": "string" },
+    "familyName": { "type": "string" },
+    "dateOfBirth": { "type": "string", "format": "date" },
+    "nationalities": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "roles": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "employerId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "contact": {
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}

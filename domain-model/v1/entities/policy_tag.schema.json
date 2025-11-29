@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./policy_tag.schema.json",
+  "title": "PolicyTag (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "PolicyTag" },
+    "label": { "type": "string" },
+    "description": { "type": "string" },
+    "appliesTo": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" }
+  },
+  "required": ["id", "schemaVersion", "entityType", "label"],
+  "additionalProperties": false
+}

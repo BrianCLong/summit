@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./organization.schema.json",
+  "title": "Organization (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Organization" },
+    "name": { "type": "string" },
+    "legalName": { "type": "string" },
+    "industry": { "type": "string" },
+    "registration": {
+      "type": "object",
+      "properties": {
+        "country": { "type": "string" },
+        "number": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "hqLocationId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "parentOrganizationId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}

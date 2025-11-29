@@ -1,0 +1,15 @@
+{
+  "id": "rel-2",
+  "schemaVersion": "v1",
+  "relationshipType": "derivedFrom",
+  "sourceId": "claim-300",
+  "targetId": "evidence-900",
+  "sourceType": "Claim",
+  "targetType": "Evidence",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "copilot-analyst",
+    "ingestedAt": "2025-02-01T14:21:00Z",
+    "confidence": 0.88
+  }
+}

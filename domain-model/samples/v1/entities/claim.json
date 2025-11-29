@@ -1,0 +1,16 @@
+{
+  "id": "claim-300",
+  "schemaVersion": "v1",
+  "entityType": "Claim",
+  "statement": "Credential leak originated from unmanaged asset",
+  "subjectId": "asset-9001",
+  "evidenceIds": ["evidence-900"],
+  "support": "supports",
+  "confidence": 0.74,
+  "issuedAt": "2025-02-01T14:20:00Z",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "copilot-analyst",
+    "ingestedAt": "2025-02-01T14:20:00Z"
+  }
+}

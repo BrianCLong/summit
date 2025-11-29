@@ -1,0 +1,18 @@
+{
+  "id": "org-42",
+  "schemaVersion": "v1",
+  "entityType": "Organization",
+  "name": "Northwind Analytics",
+  "legalName": "Northwind Analytics LLC",
+  "industry": "analytics",
+  "registration": {
+    "country": "US",
+    "number": "NA-778899"
+  },
+  "hqLocationId": "loc-1",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "crm",
+    "ingestedAt": "2025-01-05T10:00:00Z"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "id": "rel-3",
+  "schemaVersion": "v1",
+  "relationshipType": "locatedIn",
+  "sourceId": "org-42",
+  "targetId": "loc-1",
+  "sourceType": "Organization",
+  "targetType": "Location",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "crm",
+    "ingestedAt": "2025-01-05T10:00:00Z"
+  }
+}
