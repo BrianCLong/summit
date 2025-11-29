@@ -5,6 +5,8 @@ on:
   workflow_run:
     workflows: ['🚢 Release Captain']
     types: [completed]
+  repository_dispatch:
+    types: [slo-breach]
   workflow_dispatch: # Allow manual runs during stabilization
   # Disabled scheduled trigger until production environment is configured
   # schedule:
@@ -32,13 +34,18 @@ permissions:
 jobs:
   detect-deployment-failure:
     name: 🔍 Detect Deployment Issues
-    if: github.event.deployment_status.state == 'failure' || github.event.workflow_run.conclusion == 'failure'
+    if: |
+      (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'failure') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') ||
+      (github.event_name == 'repository_dispatch' && github.event.action == 'slo-breach')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
       should_rollback: ${{ steps.analyze.outputs.should_rollback }}
       rollback_target: ${{ steps.analyze.outputs.rollback_target }}
       failure_type: ${{ steps.analyze.outputs.failure_type }}
+      slo_context: ${{ steps.analyze.outputs.slo_context }}
+      environment: ${{ steps.analyze.outputs.environment }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,6 +58,12 @@ jobs:
         run: |
           echo "🔍 Analyzing deployment failure..."
 
+          DEPLOYMENT_SHA=""
+          ENVIRONMENT="production"
+          PREFERRED_ROLLBACK=""
+          FAILURE_TYPE="unknown"
+          SLO_CONTEXT=""
+
           # Get current deployment info
           if [[ "${{ github.event_name }}" == "deployment_status" ]]; then
             DEPLOYMENT_ID="${{ github.event.deployment.id }}"
@@ -59,10 +72,22 @@ jobs:
           elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
             DEPLOYMENT_SHA="${{ github.event.workflow_run.head_sha }}"
             ENVIRONMENT="production"
+            FAILURE_TYPE="pipeline"
+          elif [[ "${{ github.event_name }}" == "repository_dispatch" ]]; then
+            DEPLOYMENT_SHA="${{ github.event.client_payload.deployment_sha }}"
+            PREFERRED_ROLLBACK="${{ github.event.client_payload.rollback_target }}"
+            ENVIRONMENT="${{ github.event.client_payload.environment }}"
+            FAILURE_TYPE="slo_breach"
+            SLO_CONTEXT="${{ github.event.client_payload.failing_slos }}"
           fi
 
-          echo "Deployment SHA: $DEPLOYMENT_SHA"
+          if [[ -z "$ENVIRONMENT" ]]; then
+            ENVIRONMENT="production"
+          fi
+
+          echo "Deployment SHA: ${DEPLOYMENT_SHA:-unknown}"
           echo "Environment: $ENVIRONMENT"
+          echo "environment=$ENVIRONMENT" >> $GITHUB_OUTPUT
 
           # Check if this is a production environment
           if [[ "$ENVIRONMENT" != "production" && "$ENVIRONMENT" != "staging" ]]; then
@@ -72,9 +97,29 @@ jobs:
           fi
 
           # Find last successful deployment
-          LAST_SUCCESS=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
-            --jq '.[] | select(.environment == "'$ENVIRONMENT'" and .created_at < "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'") | .sha' \
-            | head -1)
+          LAST_SUCCESS="$PREFERRED_ROLLBACK"
+          if [[ -z "$LAST_SUCCESS" ]]; then
+            DEPLOYMENTS=$(gh api "/repos/$GITHUB_REPOSITORY/deployments?environment=$ENVIRONMENT&per_page=10" 2>/dev/null || true)
+            if [[ -n "$DEPLOYMENTS" && "$DEPLOYMENTS" != "[]" ]]; then
+              while read -r sha id; do
+                STATUS=$(gh api "/repos/$GITHUB_REPOSITORY/deployments/$id/statuses?per_page=1" --jq '.[0].state' 2>/dev/null || echo "unknown")
+
+                if [[ "$STATUS" == "success" ]]; then
+                  if [[ -z "$DEPLOYMENT_SHA" ]]; then
+                    DEPLOYMENT_SHA="$sha"
+                    continue
+                  fi
+
+                  if [[ "$sha" == "$DEPLOYMENT_SHA" ]]; then
+                    continue
+                  fi
+
+                  LAST_SUCCESS="$sha"
+                  break
+                fi
+              done < <(echo "$DEPLOYMENTS" | jq -r '.[] | "\(.sha) \(.id)"')
+            fi
+          fi
 
           if [[ -z "$LAST_SUCCESS" ]]; then
             echo "No previous successful deployment found"
@@ -83,7 +128,6 @@ jobs:
           fi
 
           # Analyze failure type
-          FAILURE_TYPE="unknown"
           if [[ "${{ github.event.deployment_status.description }}" == *"health check"* ]]; then
             FAILURE_TYPE="health_check"
           elif [[ "${{ github.event.deployment_status.description }}" == *"smoke test"* ]]; then
@@ -95,6 +139,7 @@ jobs:
           echo "should_rollback=true" >> $GITHUB_OUTPUT
           echo "rollback_target=$LAST_SUCCESS" >> $GITHUB_OUTPUT
           echo "failure_type=$FAILURE_TYPE" >> $GITHUB_OUTPUT
+          echo "slo_context=$SLO_CONTEXT" >> $GITHUB_OUTPUT
 
           echo "🎯 Rollback target: $LAST_SUCCESS"
           echo "💥 Failure type: $FAILURE_TYPE"
@@ -214,10 +259,26 @@ jobs:
         run: |
           echo "↩️ Preparing rollback operation..."
 
+          ROLLBACK_ENV="${{ needs.detect-deployment-failure.outputs.environment || 'production' }}"
+          if [[ -z "$ROLLBACK_ENV" ]]; then
+            ROLLBACK_ENV="production"
+          fi
+
           # Determine rollback target
           if [[ "${{ needs.detect-deployment-failure.outputs.rollback_target }}" != "" ]]; then
             ROLLBACK_TARGET="${{ needs.detect-deployment-failure.outputs.rollback_target }}"
-            ROLLBACK_REASON="Deployment failure: ${{ needs.detect-deployment-failure.outputs.failure_type }}"
+            FAILURE_KIND="${{ needs.detect-deployment-failure.outputs.failure_type }}"
+            SLO_CONTEXT="${{ needs.detect-deployment-failure.outputs.slo_context }}"
+
+            if [[ "$FAILURE_KIND" == "slo_breach" ]]; then
+              if [[ -n "$SLO_CONTEXT" ]]; then
+                ROLLBACK_REASON="SLO breach detected: $SLO_CONTEXT"
+              else
+                ROLLBACK_REASON="SLO breach detected by automated guardrail"
+              fi
+            else
+              ROLLBACK_REASON="Deployment failure: $FAILURE_KIND"
+            fi
           else
             # Health monitor triggered rollback - find last known good deployment
             ROLLBACK_TARGET=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
@@ -233,6 +294,7 @@ jobs:
 
           echo "🎯 Rolling back to: $ROLLBACK_TARGET"
           echo "📝 Reason: $ROLLBACK_REASON"
+          echo "🌎 Environment: $ROLLBACK_ENV"
 
           echo "rollback_target=$ROLLBACK_TARGET" >> $GITHUB_OUTPUT
           echo "rollback_reason=$ROLLBACK_REASON" >> $GITHUB_OUTPUT
@@ -246,12 +308,16 @@ jobs:
 
           ROLLBACK_TARGET="${{ steps.prepare.outputs.rollback_target }}"
           ROLLBACK_REASON="${{ steps.prepare.outputs.rollback_reason }}"
+          ROLLBACK_ENV="${{ needs.detect-deployment-failure.outputs.environment || 'production' }}"
+          if [[ -z "$ROLLBACK_ENV" ]]; then
+            ROLLBACK_ENV="production"
+          fi
 
           # Create deployment
           DEPLOYMENT_ID=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
             --method POST \
             --field ref="$ROLLBACK_TARGET" \
-            --field environment="production" \
+            --field environment="$ROLLBACK_ENV" \
             --field description="Auto-rollback: $ROLLBACK_REASON" \
             --field auto_merge=false \
             --jq '.id')
@@ -316,12 +382,15 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ROLLBACK_ENV: ${{ needs.detect-deployment-failure.outputs.environment }}
+          SLO_CONTEXT: ${{ needs.detect-deployment-failure.outputs.slo_context }}
         run: |
           echo "📢 Notifying stakeholders of rollback..."
 
           ROLLBACK_STATUS="${{ job.status }}"
           ROLLBACK_TARGET="${{ steps.prepare.outputs.rollback_target }}"
           ROLLBACK_REASON="${{ steps.prepare.outputs.rollback_reason }}"
+          ENVIRONMENT="${ROLLBACK_ENV:-production}"
 
           # Create incident issue
           ISSUE_BODY="## 🚨 Auto-Rollback Executed
@@ -329,6 +398,8 @@ jobs:
           **Status**: $ROLLBACK_STATUS
           **Target**: $ROLLBACK_TARGET
           **Reason**: $ROLLBACK_REASON
+          **Environment**: $ENVIRONMENT
+          **SLO Context**: ${SLO_CONTEXT:-n/a}
           **Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
           ### Actions Taken
