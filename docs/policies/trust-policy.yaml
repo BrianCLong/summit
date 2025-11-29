@@ -1,0 +1,15 @@
+freeze_windows:
+  - name: "End-of-quarter"
+    cron: "0 0 29-31 * *"
+    allowed_changes: ["hotfix", "security"]
+
+high_risk_actions:
+  require_webauthn_step_up: true
+
+change_management:
+  critical_services:
+    - "auth-service"
+    - "payment-service"
+  approval_requirements:
+    standard: 1
+    critical: 2
