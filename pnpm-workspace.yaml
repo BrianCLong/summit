@@ -3,6 +3,7 @@ packages:
   - 'packages/*'
   - 'services/*'
   - 'contracts/*'
+  - 'companyos/services/*'
   - 'server'
   - 'client'
   - 'tools/*'
