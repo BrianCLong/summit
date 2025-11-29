@@ -35,6 +35,10 @@ make smoke              # golden path automation against seeded data
 **Service Endpoints:**
 - **Frontend**: http://localhost:3000 (React Application)
 - **GraphQL API**: http://localhost:4000/graphql (Apollo Playground)
+- **API Documentation**: http://localhost:4000/api/docs (Swagger UI - REST API)
+  - **ReDoc**: http://localhost:4000/api/docs/redoc (Alternative REST API docs)
+  - **GraphQL Playground**: http://localhost:4000/api/docs/graphql-playground (Interactive GraphQL IDE)
+  - **OpenAPI Spec**: http://localhost:4000/api/docs/openapi.json
 - **Neo4j Browser**: http://localhost:7474 (Graph Database UI)
 - **Adminer**: http://localhost:8080 (Database Admin)
 - **Prometheus**: http://localhost:9090 (Metrics)
@@ -55,6 +59,7 @@ make smoke              # golden path automation against seeded data
 - `packages/` and `services/` – shared libraries, workers, ingestion pipelines.
 - `archive/` – gigabytes of historical evidence moved out of the hot path and excluded from CI caches.
 - `docs/ONBOARDING.md` – day-one onboarding.
+- `docs/API_DOCUMENTATION.md` – comprehensive API documentation guide (OpenAPI/Swagger + GraphQL).
 - `docs/README.md` – documentation index, policies, and archived plans.
 
 ### Production Secrets & Guardrails
