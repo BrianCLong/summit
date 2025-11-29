@@ -3,6 +3,7 @@
  */
 
 import pino from 'pino';
+import type { ExplanationEvidence, QueryExplanation } from './types';
 
 const logger = pino({ name: 'cypher-explainer' });
 
@@ -112,6 +113,69 @@ export function explainQuery(cypher: string, verbose: boolean = false): string {
   }
 
   return parts.join('\n');
+}
+
+/**
+ * Build a structured explanation bundle with rationale, evidence, and confidence.
+ */
+export function buildQueryExplanation(
+  cypher: string,
+  options: { warnings: string[]; estimatedCost: string; verbose?: boolean },
+): QueryExplanation {
+  const rationale: string[] = [];
+  const evidence: ExplanationEvidence[] = [];
+
+  const matchClauses = extractMatchClauses(cypher);
+  matchClauses.forEach((clause, idx) => {
+    rationale.push(`Identifying graph pattern ${idx + 1} to satisfy the request.`);
+    evidence.push({
+      source: 'MATCH clause',
+      snippet: clause,
+      reason: 'Defines the core entities and relationships to investigate.',
+    });
+  });
+
+  const where = explainWhereClause(cypher);
+  if (where) {
+    rationale.push('Applying filters to narrow the candidate set.');
+    evidence.push({
+      source: 'WHERE clause',
+      snippet: where,
+      reason: 'Controls scope and protects against unbounded traversal.',
+    });
+  }
+
+  const returnClause = explainReturnClause(cypher);
+  if (returnClause) {
+    rationale.push('Selecting outputs relevant to the investigative question.');
+    evidence.push({
+      source: 'RETURN clause',
+      snippet: returnClause,
+      reason: 'Specifies which fields will be returned to the analyst.',
+    });
+  }
+
+  const parameters = extractParameters(cypher);
+  if (parameters.length > 0) {
+    rationale.push('Parameterizing inputs to keep execution safe and repeatable.');
+    evidence.push({
+      source: 'Parameters',
+      snippet: parameters.join(', '),
+      reason: 'Ensures sensitive values are bound safely at execution time.',
+    });
+  }
+
+  const summary = summarizeQuery(cypher);
+
+  const warningPenalty = Math.min(options.warnings.length * 0.07, 0.35);
+  const confidence = Math.max(0.5, 0.92 - warningPenalty);
+
+  return {
+    summary,
+    rationale,
+    evidence,
+    confidence: Number(confidence.toFixed(2)),
+  };
 }
 
 /**
