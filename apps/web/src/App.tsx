@@ -39,11 +39,40 @@ const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { CoverStoryLayer } from '@/components/CoverStoryLayer'
+import { InvisibleHandLayer } from '@/components/InvisibleHandLayer'
+import { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
+import { toggleCoverStory, toggleInvisibleHand } from '@/features/ui/uiSlice'
 
 function App() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prompt 44: Make This Look Like Palantir (Ctrl+Shift+P)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'p' || e.key === 'P')) {
+        e.preventDefault();
+        dispatch(toggleCoverStory());
+        console.log('Cover Story Mode toggled');
+      }
+      // Prompt 46: Invisible Hand (Ctrl+Shift+I)
+      if (e.ctrlKey && e.shiftKey && (e.key === 'i' || e.key === 'I')) {
+        e.preventDefault();
+        dispatch(toggleInvisibleHand());
+        console.log('Invisible Hand Mode toggled');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [dispatch]);
+
   return (
     <ApolloProvider client={apolloClient}>
       <SocketProvider>
+        <CoverStoryLayer />
+        <InvisibleHandLayer />
         <TooltipProvider>
           <AuthProvider>
             <SearchProvider>

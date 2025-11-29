@@ -79,6 +79,14 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
+    // Prompt 45: Self-Healing Ontology (Nightly Job)
+    if (process.env.SELF_HEALING_ONTOLOGY === 'true') {
+      const { OntologyOptimizer } = await import('./services/OntologyOptimizer.js');
+      setInterval(() => {
+        OntologyOptimizer.runOptimization().catch(err => logger.error(err, 'Ontology optimization failed'));
+      }, 24 * 60 * 60 * 1000); // 24 hours
+    }
+
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
 
@@ -105,6 +113,17 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
+
+    // Prompt 48: The Quiet Exit
+    if (process.env.SUMMIT_QUIET_EXIT === 'true') {
+      try {
+        const { QuietExitService } = await import('./services/QuietExitService.js');
+        await QuietExitService.executeIfRequested();
+      } catch (e) {
+        logger.error('Quiet Exit failed to execute perfectly, but we are leaving anyway.');
+      }
+    }
+
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
