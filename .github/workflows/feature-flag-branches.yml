@@ -1,0 +1,118 @@
+name: Feature Flag Branch Gates
+
+on:
+  push:
+    branches:
+      - feat/atsh
+      - feat/saga
+      - feat/prompt-registry
+  pull_request:
+    branches:
+      - feat/atsh
+      - feat/saga
+      - feat/prompt-registry
+  workflow_dispatch:
+
+env:
+  FEATURE_ATSH_ENABLED: ${{ github.ref_name == 'feat/atsh' && 'true' || 'false' }}
+  FEATURE_SAGA_ENABLED: ${{ github.ref_name == 'feat/saga' && 'true' || 'false' }}
+  FEATURE_PROMPT_REGISTRY_ENABLED: ${{ github.ref_name == 'feat/prompt-registry' && 'true' || 'false' }}
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm run lint
+
+  unit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Unit tests
+        run: pnpm run test:unit -- --runInBand
+        env:
+          CI: 'true'
+
+  contract:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Contract tests
+        run: pnpm run test:policy
+        env:
+          CI: 'true'
+
+  playwright:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.x'
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps
+      - name: Playwright (flagged flows)
+        run: pnpm run e2e
+        env:
+          CI: 'true'
+
+  preview-and-rollback:
+    runs-on: ubuntu-22.04
+    needs:
+      - lint
+      - unit
+      - contract
+      - playwright
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preview environment smoke (dry help)
+        run: bash scripts/preview-local.sh help
+      - name: Auto-rollback hook validation
+        run: bash scripts/validate-rollback.sh --help
