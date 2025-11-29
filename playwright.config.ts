@@ -7,7 +7,7 @@ export default defineConfig({
   testMatch: [
     'e2e/maestro.spec.ts',
     'e2e/**/*.a11y.spec.ts',
-    'tests/e2e/**/*.spec.ts',
+    'tests/e2e/**/*.spec.ts', 'e2e/*.spec.ts',
   ],
   timeout: 30_000,
   retries: 2,

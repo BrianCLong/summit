@@ -2,6 +2,7 @@ import React from 'react'
 import { Outlet, Navigate } from 'react-router-dom'
 import { Navigation } from './Navigation'
 import { GlobalSearch } from './GlobalSearch'
+import { SystemHUD } from '@/hud/SystemHUD'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/Skeleton'
 
@@ -45,6 +46,7 @@ export function Layout() {
 
             {/* Search trigger - actual search modal is rendered globally */}
             <div className="flex items-center gap-4">
+              <SystemHUD />
               <div className="text-sm text-muted-foreground">
                 Welcome back, {user?.name}
               </div>
