@@ -1,0 +1,32 @@
+groups:
+  - name: {{ service }}-slo-alerts
+    rules:
+      - alert: {{ service | upperCamel }}HighErrorRate
+        expr: {{ service }}:error_rate:ratio5m > 0.01
+        for: 15m
+        labels:
+          severity: warning
+          service: {{ service }}
+        annotations:
+          summary: "High error rate on {{ service }}"
+          description: "Error rate over 1% for 15m. Check recent deployments or incidents."
+
+      - alert: {{ service | upperCamel }}SevereErrorRate
+        expr: {{ service }}:error_rate:ratio5m > 0.02
+        for: 10m
+        labels:
+          severity: critical
+          service: {{ service }}
+        annotations:
+          summary: "Severe error rate on {{ service }}"
+          description: "Error rate over 2% for 10m. Consider rollback."
+
+      - alert: {{ service | upperCamel }}HighLatencyP95
+        expr: {{ service }}:latency_p95:seconds5m > 0.3
+        for: 15m
+        labels:
+          severity: warning
+          service: {{ service }}
+        annotations:
+          summary: "High latency (p95) on {{ service }}"
+          description: "p95 latency > 300ms for 15m. Investigate recent changes."
