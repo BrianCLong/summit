@@ -1,6 +1,10 @@
 import { recordAudit } from './audit';
 
 export type GoldenPathStep =
+  | 'signup'
+  | 'tenant_created'
+  | 'first_ingest'
+  | 'first_export'
   | 'investigation_created'
   | 'entities_viewed'
   | 'relationships_explored'
