@@ -1,0 +1,107 @@
+groups:
+  - name: approvals-observability
+    interval: 30s
+    rules:
+      - record: service:http_request_duration_seconds:p95
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (service, route, le) (
+              rate(
+                http_request_duration_seconds_bucket{
+                  service="approvals",
+                  route=~"/approvals|/approvals/.*/decision"
+                }[5m]
+              )
+            )
+          )
+
+      - record: service:http_requests:rate5m
+        expr: |
+          sum by (service, route) (
+            rate(
+              http_requests_total{
+                service="approvals",
+                route=~"/approvals|/approvals/.*/decision"
+              }[5m]
+            )
+          )
+
+      - record: service:http_requests_errors:rate5m
+        expr: |
+          sum by (service, route) (
+            rate(
+              http_requests_total{
+                service="approvals",
+                route=~"/approvals|/approvals/.*/decision",
+                code!~"2..|3.."
+              }[5m]
+            )
+          )
+
+      - record: service:http_requests_error_ratio:5m
+        expr: |
+          service:http_requests_errors:rate5m
+          /
+          service:http_requests:rate5m
+
+      - record: synthetic:approvals_error_ratio:5m
+        expr: |
+          sum(rate(synthetic_approvals_failure_total[5m]))
+          /
+          sum(
+            rate(synthetic_approvals_failure_total[5m])
+            + rate(synthetic_approvals_success_total[5m])
+          )
+
+      - alert: ApprovalsLatencyFastBurn
+        expr: |
+          (service:http_request_duration_seconds:p95{service="approvals"} > 1.5)
+          and
+          sum(
+            rate(
+              http_requests_total{
+                service="approvals",
+                route=~"/approvals|/approvals/.*/decision"
+              }[5m]
+            )
+          ) > 0
+        for: 15m
+        labels:
+          severity: page
+          service: approvals
+        annotations:
+          summary: "Approvals latency p95 > 1.5s"
+          description: "p95 latency for approvals endpoints has exceeded 1.5s for 15m."
+
+      - alert: ApprovalsErrorRateHigh
+        expr: |
+          service:http_requests_error_ratio:5m{service="approvals"} > 0.005
+        for: 10m
+        labels:
+          severity: page
+          service: approvals
+        annotations:
+          summary: "Approvals error rate > 0.5%"
+          description: "Non-2xx/3xx error ratio on approvals endpoints > 0.5% over 10m."
+
+      - alert: ProvenanceWriteFailures
+        expr: |
+          rate(companyos_provenance_writes_total{status="error"}[5m]) > 0
+        for: 5m
+        labels:
+          severity: page
+          service: provenance
+        annotations:
+          summary: "Provenance writes failing"
+          description: "Errors writing evidence/receipts; approvals may not be recorded correctly."
+
+      - alert: SyntheticApprovalsFailing
+        expr: synthetic:approvals_error_ratio:5m > 0
+        for: 15m
+        labels:
+          severity: warning
+          service: approvals
+        annotations:
+          summary: "Synthetic approvals journey failing"
+          description: "Happy-path synthetic for approvals has reported failures for 15 minutes."
