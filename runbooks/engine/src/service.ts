@@ -16,6 +16,8 @@ import {
   LoopExecutor,
 } from './executors';
 import { EngineConfig } from './types';
+import { PostgresStorage, PostgresConfig } from './storage/postgres';
+import { MemoryStorage } from './state-manager';
 
 /**
  * Service configuration
@@ -40,10 +42,10 @@ export class RunbookService {
   private server: any;
   private config: ServiceConfig;
 
-  constructor(config: ServiceConfig) {
+  constructor(config: ServiceConfig, engine?: RunbookEngine) {
     this.config = config;
     this.app = express();
-    this.engine = new RunbookEngine(config.engine);
+    this.engine = engine || new RunbookEngine(config.engine);
 
     // Register standard executors
     this.registerStandardExecutors();
@@ -206,39 +208,69 @@ export class RunbookService {
  * Create and start service from environment variables
  */
 export async function createServiceFromEnv(): Promise<RunbookService> {
+  const storageBackend = (process.env.STORAGE_BACKEND as 'memory' | 'postgres' | 'redis') || 'memory';
+
+  const engineConfig: EngineConfig = {
+    maxConcurrentSteps: parseInt(process.env.MAX_CONCURRENT_STEPS || '5', 10),
+    defaultRetryPolicy: {
+      maxAttempts: parseInt(process.env.DEFAULT_MAX_RETRIES || '3', 10),
+      initialDelayMs: parseInt(process.env.DEFAULT_INITIAL_DELAY_MS || '1000', 10),
+      maxDelayMs: parseInt(process.env.DEFAULT_MAX_DELAY_MS || '10000', 10),
+      backoffMultiplier: parseFloat(process.env.DEFAULT_BACKOFF_MULTIPLIER || '2'),
+    },
+    storageBackend,
+    storageConfig: process.env.DATABASE_URL
+      ? { connectionString: process.env.DATABASE_URL }
+      : undefined,
+    detailedLogging: process.env.DETAILED_LOGGING === 'true',
+  };
+
+  // Create storage backend
+  let storage: MemoryStorage | PostgresStorage;
+  if (storageBackend === 'postgres') {
+    if (!process.env.DATABASE_URL && !process.env.DB_HOST) {
+      throw new Error('PostgreSQL backend requires DATABASE_URL or DB_HOST environment variable');
+    }
+
+    const postgresConfig: PostgresConfig = process.env.DATABASE_URL
+      ? { connectionString: process.env.DATABASE_URL }
+      : {
+          host: process.env.DB_HOST,
+          port: parseInt(process.env.DB_PORT || '5432', 10),
+          database: process.env.DB_NAME || 'runbooks',
+          user: process.env.DB_USER,
+          password: process.env.DB_PASSWORD,
+          ssl: process.env.DB_SSL === 'true',
+          max: parseInt(process.env.DB_POOL_MAX || '20', 10),
+        };
+
+    storage = new PostgresStorage(postgresConfig);
+    console.log('Initializing PostgreSQL storage backend...');
+    await storage.initialize();
+    console.log('PostgreSQL storage initialized');
+  } else {
+    storage = new MemoryStorage();
+    console.log('Using in-memory storage backend');
+  }
+
+  // Create engine with storage
+  const { StateManager } = await import('./state-manager');
+  const stateManager = new StateManager(storage);
+  const { RunbookEngine } = await import('./engine');
+  const engine = new RunbookEngine(engineConfig);
+  // Replace the engine's state manager with our configured one
+  (engine as any).stateManager = stateManager;
+
   const config: ServiceConfig = {
     port: parseInt(process.env.PORT || '3000', 10),
-    engine: {
-      maxConcurrentSteps: parseInt(
-        process.env.MAX_CONCURRENT_STEPS || '5',
-        10
-      ),
-      defaultRetryPolicy: {
-        maxAttempts: parseInt(process.env.DEFAULT_MAX_RETRIES || '3', 10),
-        initialDelayMs: parseInt(
-          process.env.DEFAULT_INITIAL_DELAY_MS || '1000',
-          10
-        ),
-        maxDelayMs: parseInt(process.env.DEFAULT_MAX_DELAY_MS || '10000', 10),
-        backoffMultiplier: parseFloat(
-          process.env.DEFAULT_BACKOFF_MULTIPLIER || '2'
-        ),
-      },
-      storageBackend:
-        (process.env.STORAGE_BACKEND as 'memory' | 'postgres' | 'redis') ||
-        'memory',
-      storageConfig: process.env.DATABASE_URL
-        ? { connectionString: process.env.DATABASE_URL }
-        : undefined,
-      detailedLogging: process.env.DETAILED_LOGGING === 'true',
-    },
+    engine: engineConfig,
     enableCors: process.env.ENABLE_CORS !== 'false',
     corsOrigins: process.env.CORS_ORIGINS
       ? process.env.CORS_ORIGINS.split(',')
       : ['*'],
   };
 
-  const service = new RunbookService(config);
+  const service = new RunbookService(config, engine);
   await service.start();
 
   // Handle graceful shutdown
