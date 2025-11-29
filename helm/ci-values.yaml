@@ -1,0 +1,37 @@
+# Sample values shared by Helm CI steps to keep template rendering deterministic.
+global:
+  domain: example.local
+  imagePullSecrets: []
+
+image:
+  repository: ghcr.io/example/placeholder
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ''
+  hosts:
+    - host: chart.example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+persistence:
+  enabled: false
+
+hpa:
+  enabled: false
