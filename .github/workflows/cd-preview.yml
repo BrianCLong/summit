@@ -33,8 +33,49 @@ jobs:
           mkdir -p /tmp/$ENV_NAME
           cp docker-compose.dev.yml /tmp/$ENV_NAME/docker-compose.yml
 
+          cat > /tmp/$ENV_NAME/docker-compose.resources.yml <<'EOF'
+          version: '3.9'
+          services:
+            api:
+              deploy:
+                resources:
+                  limits:
+                    cpus: '1.0'
+                    memory: 1g
+                  reservations:
+                    cpus: '0.25'
+                    memory: 256m
+            web:
+              deploy:
+                resources:
+                  limits:
+                    cpus: '0.5'
+                    memory: 768m
+                  reservations:
+                    cpus: '0.2'
+                    memory: 256m
+            postgres:
+              deploy:
+                resources:
+                  limits:
+                    cpus: '0.5'
+                    memory: 1g
+                  reservations:
+                    cpus: '0.2'
+                    memory: 256m
+            redis:
+              deploy:
+                resources:
+                  limits:
+                    cpus: '0.25'
+                    memory: 512m
+                  reservations:
+                    cpus: '0.1'
+                    memory: 128m
+          EOF
+
           # Bring up services
-          docker compose -f /tmp/$ENV_NAME/docker-compose.yml up -d --build
+          docker compose --compatibility -f /tmp/$ENV_NAME/docker-compose.yml -f /tmp/$ENV_NAME/docker-compose.resources.yml up -d --build --remove-orphans
 
           # Wait for server to be healthy
           SERVER_URL="http://localhost:4000"

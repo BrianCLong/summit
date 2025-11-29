@@ -100,6 +100,43 @@ jobs:
           NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
           kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Enforce resource guardrails
+        run: |
+          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          cat <<'EOF' | kubectl apply -n ${NAMESPACE} -f -
+          apiVersion: v1
+          kind: ResourceQuota
+          metadata:
+            name: preview-quota
+          spec:
+            hard:
+              requests.cpu: "2"
+              requests.memory: 4Gi
+              limits.cpu: "4"
+              limits.memory: 8Gi
+              pods: "10"
+          ---
+          apiVersion: v1
+          kind: LimitRange
+          metadata:
+            name: preview-defaults
+          spec:
+            limits:
+              - type: Container
+                default:
+                  cpu: 500m
+                  memory: 512Mi
+                defaultRequest:
+                  cpu: 200m
+                  memory: 256Mi
+                max:
+                  cpu: "1"
+                  memory: 1Gi
+                min:
+                  cpu: 100m
+                  memory: 128Mi
+          EOF
+
       - name: Deploy preview environment
         run: |
           NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
