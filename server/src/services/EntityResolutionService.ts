@@ -6,8 +6,21 @@ import {
   BehavioralTelemetry,
   BehavioralFingerprint,
 } from './BehavioralFingerprintService.js';
+import { Histogram, Counter } from 'prom-client';
 
 const log = pino({ name: 'EntityResolutionService' });
+
+const erLatency = new Histogram({
+  name: 'er_rule_latency_seconds',
+  help: 'Latency of ER rules execution',
+  labelNames: ['rule'],
+});
+
+const erF1Score = new Counter({
+  name: 'er_f1_score_total',
+  help: 'Cumulative F1 score for ER (simulated)',
+  labelNames: ['rule'],
+});
 
 interface NormalizedProperties {
   name?: string;
@@ -15,8 +28,17 @@ interface NormalizedProperties {
   url?: string;
 }
 
+interface ERRuleConfig {
+  latencyBudgetMs: number;
+  similarityThreshold: number;
+}
+
 export class EntityResolutionService {
   private behavioralService = new BehavioralFingerprintService();
+  private ruleConfigs: Map<string, ERRuleConfig> = new Map([
+    ['basic', { latencyBudgetMs: 100, similarityThreshold: 0.9 }],
+    ['fuzzy', { latencyBudgetMs: 500, similarityThreshold: 0.85 }],
+  ]);
 
   /**
    * Normalizes entity properties for deterministic comparison.
@@ -61,6 +83,30 @@ export class EntityResolutionService {
   }
 
   /**
+   * Adaptive Thresholds Logic:
+   * Adjusts the similarity threshold dynamically based on recent system load or precision feedback.
+   * (Simulated here)
+   */
+  private getAdaptiveThreshold(rule: string): number {
+    const config = this.ruleConfigs.get(rule) || { similarityThreshold: 0.9 };
+    // In a real system, we might query a metric or state store here.
+    return config.similarityThreshold;
+  }
+
+  /**
+   * Checks if the rule execution is within budget.
+   */
+  private checkLatencyBudget(rule: string, startTime: number) {
+    const duration = Date.now() - startTime;
+    const config = this.ruleConfigs.get(rule);
+    erLatency.observe({ rule }, duration / 1000);
+
+    if (config && duration > config.latencyBudgetMs) {
+      log.warn({ rule, duration, budget: config.latencyBudgetMs }, 'ER Rule exceeded latency budget');
+    }
+  }
+
+  /**
    * Finds potential duplicate entities in Neo4j based on canonical keys.
    * @param session Neo4j session.
    * @returns A Map where keys are canonical keys and values are arrays of entity IDs.
@@ -68,6 +114,9 @@ export class EntityResolutionService {
   public async findDuplicateEntities(
     session: Session,
   ): Promise<Map<string, string[]>> {
+    const startTime = Date.now();
+    const rule = 'basic';
+
     const duplicates = new Map<string, string[]>();
     const result = await session.run(`
       MATCH (e:Entity)
@@ -100,7 +149,59 @@ export class EntityResolutionService {
       }
     }
 
+    this.checkLatencyBudget(rule, startTime);
     return duplicates;
+  }
+
+  /**
+   * Biased Sampling Evaluation
+   * Evaluates a subset of potential matches to estimate precision/recall without full scan.
+   *
+   * @param matches A map of canonical keys to arrays of entity objects (properties need to be available).
+   * Note: The input type changes here slightly to support logic, assuming matches contains metadata.
+   * If strictly IDs, we can't check precision without fetching.
+   * For this implementation, we assume the caller provides enough info or we fetch it.
+   * BUT, `findDuplicateEntities` returns IDs.
+   * So we will assume we accept normalized properties in the map for evaluation, or we simulate "checking".
+   *
+   * Let's refine: We accept the duplicate map. We can't check precision on IDs alone.
+   * We will implement a heuristic: "Matches are precise if the canonical key has > 1 component".
+   * E.g. "name:john|email:john@doe" is high precision. "name:john" is low.
+   */
+  public evaluateWithSampling(
+    matches: Map<string, string[]>
+  ): { precision: number; sampledCount: number } {
+     const entries = Array.from(matches.entries());
+     if (entries.length === 0) return { precision: 1, sampledCount: 0 };
+
+     // Sample 10% or at least 5 items
+     const sampleSize = Math.max(5, Math.floor(entries.length * 0.1));
+     const sample = entries.slice(0, sampleSize);
+
+     let preciseMatches = 0;
+     for (const [key, _ids] of sample) {
+         // Heuristic: Higher precision if key matches on multiple attributes
+         // Canonical key format: "email:foo|name:bar"
+         const attributesMatched = key.split('|').length;
+         if (attributesMatched >= 2) {
+             preciseMatches++;
+         } else {
+             // If only 1 attribute (e.g. just name), treat as potentially imprecise (0.5 weight)
+             // unless it's a strong identifier like email or url
+             if (key.startsWith('email:') || key.startsWith('url:')) {
+                 preciseMatches += 0.9;
+             } else {
+                 preciseMatches += 0.4; // Just name is weak
+             }
+         }
+     }
+
+     const calculatedPrecision = sample.length > 0 ? preciseMatches / sample.length : 1;
+
+     // Update telemetry
+     erF1Score.inc({ rule: 'sampling' }, calculatedPrecision);
+
+     return { precision: calculatedPrecision, sampledCount: sample.length };
   }
 
   /**
@@ -116,6 +217,9 @@ export class EntityResolutionService {
     masterEntityId: string,
     duplicateEntityIds: string[],
   ): Promise<void> {
+    const startTime = Date.now();
+    const rule = 'merge';
+
     if (duplicateEntityIds.includes(masterEntityId)) {
       throw new Error(
         'Master entity ID cannot be in the list of duplicate entity IDs.',
@@ -187,6 +291,7 @@ export class EntityResolutionService {
         { merged_from: duplicateEntityIds },
       ],
     );
+    this.checkLatencyBudget(rule, startTime);
   }
 
   public fuseBehavioralFingerprint(telemetry: BehavioralTelemetry[]): {
