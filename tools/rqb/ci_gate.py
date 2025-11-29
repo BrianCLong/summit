@@ -24,8 +24,18 @@ def _assert_thresholds(
     baseline_summary: MetricDict = baseline["summary"]  # type: ignore[assignment]
     candidate_summary: MetricDict = candidate["summary"]  # type: ignore[assignment]
     for metric in metrics:
-        baseline_value = float(baseline_summary.get(metric, 0.0))
-        candidate_value = float(candidate_summary.get(metric, 0.0))
+        if metric not in baseline_summary:
+            raise SystemExit(f"Metric '{metric}' missing from baseline scorecard")
+        if metric not in candidate_summary:
+            raise SystemExit(f"Metric '{metric}' missing from candidate scorecard")
+
+        try:
+            baseline_value = float(baseline_summary[metric])
+            candidate_value = float(candidate_summary[metric])
+        except (TypeError, ValueError):
+            raise SystemExit(
+                f"Metric '{metric}' contains non-numeric values in baseline or candidate scorecards"
+            )
         drop = baseline_value - candidate_value
         if drop > max_drop + 1e-9:
             raise SystemExit(
