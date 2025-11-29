@@ -12,10 +12,11 @@
  * 5. See live results
  */
 
-const axios = require('axios');
-const { WebSocket } = require('ws');
 const fs = require('fs');
 const path = require('path');
+
+let axios;
+let WebSocket;
 
 // Configuration
 const defaultApiBase = process.env.API_BASE_URL || 'http://localhost:4000';
@@ -33,7 +34,7 @@ const config = {
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3000',
   neo4jUrl: process.env.NEO4J_URL || 'http://localhost:7474',
   metricsUrl: process.env.METRICS_URL || `${defaultApiBase}/metrics`,
-  timeout: 30000,
+  timeout: parseInt(process.env.SMOKE_TIMEOUT || '60000', 10),
   maxRetries: 3,
   retryDelay: 2000,
   datasetPath: path.resolve(
@@ -278,6 +279,7 @@ class SmokeTest {
     await this.log(`Frontend URL: ${config.frontendUrl}`, 'info');
     await this.log(`Neo4j URL: ${config.neo4jUrl}`, 'info');
     await this.log(`Dataset: ${this.datasetPath}`, 'info');
+    await this.log(`Timeout: ${config.timeout}ms`, 'info');
 
     let investigationId = null;
     let entityIds = [];
@@ -584,12 +586,16 @@ class SmokeTest {
 // Install axios if not available
 async function ensureDependencies() {
   try {
-    require('axios');
-    require('ws');
+    axios = require('axios');
+    const wsModule = require('ws');
+    WebSocket = wsModule.WebSocket;
   } catch (error) {
     console.log('Installing required dependencies...');
     const { execSync } = require('child_process');
     execSync('npm install axios ws', { stdio: 'inherit' });
+    axios = require('axios');
+    const wsModule = require('ws');
+    WebSocket = wsModule.WebSocket;
   }
 }
 
