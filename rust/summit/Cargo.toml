@@ -1,0 +1,27 @@
+[package]
+name = "summit"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["full"] }
+semver = "1.0"
+reqwest = { version = "0.11", features = ["json"] }
+tracing = "0.1"
+uuid = { version = "1.0", features = ["v4"] }
+anyhow = "1.0"
+futures = "0.3"
+schemars = "0.8"
+async-trait = "0.1"
+opentelemetry = "0.21"
+summit-macros = { path = "../summit-macros" }
+thiserror = "2.0.17"
+
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "distributed_bench"
+harness = false

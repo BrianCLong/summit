@@ -1,0 +1,11 @@
+[package]
+name = "summit-operator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+anyhow = "1.0"
+# For now, we just use basic dependencies, assuming mock implementation of K8s logic as no k8s-openapi/kube crate was specified in snippets, but usually needed.
+# I will add them to be safe if I need to implement real structs.
