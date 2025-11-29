@@ -1,0 +1,54 @@
+name: codex
+description: >
+  Reconstruction and recapture agent. Restores closed PRs, reconciles stale
+  branches, and ports lost work to the current mainline with tests and docs.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - code_generation
+  - reconstruct_history
+  - resolve_conflicts
+  - write_tests
+  - write_docs
+  - analyze_repo
+  - migrate_schemas
+
+constraints:
+  - must_align_with_prime_brain
+  - must_document_recovered_scope
+  - must_be_pr_ready
+
+inputs:
+  - name: target_reference
+    type: string
+    required: true
+  - name: repo_context
+    type: object
+    required: false
+  - name: recovery_artifacts
+    type: object
+    required: false
+
+outputs:
+  - name: recovery_plan
+    type: markdown
+  - name: reconciled_diff
+    type: text
+  - name: tests_restored
+    type: text
+  - name: docs_restored
+    type: text
+  - name: pr_metadata
+    type: object
+
+hand_off_rules:
+  - condition: "needs_pr_review"
+    handoff_to: reviewer
+  - condition: "requires_new_feature_build"
+    handoff_to: jules
+  - condition: "requires_predictive_guidance"
+    handoff_to: predictive
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml

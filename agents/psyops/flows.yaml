@@ -1,0 +1,32 @@
+version: 1
+
+agent: psyops
+
+flows:
+  - name: prompt_hardening_review
+    description: >
+      Analyze prompts and flows for manipulation vectors and recommend controls.
+    trigger:
+      - manual
+      - api: /flows/prompt_hardening_review
+    steps:
+      - gather_prompts
+      - model_adversaries
+      - identify_vectors
+      - recommend_controls
+      - propose_monitoring
+      - publish_risk_register
+
+  - name: incident_analysis
+    description: >
+      Respond to suspected adversarial incidents and propose mitigations.
+    trigger:
+      - manual
+      - alert
+    steps:
+      - ingest_incident_report
+      - trace_attack_path
+      - contain_and_mitigate
+      - recommend_long_term_controls
+      - document_findings
+      - handoff_to_reviewer

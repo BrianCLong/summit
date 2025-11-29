@@ -1,0 +1,36 @@
+version: 1
+
+agent: codex
+
+flows:
+  - name: recapture_closed_pr
+    description: >
+      Recover a closed or abandoned PR and adapt it to current mainline.
+    trigger:
+      - manual
+      - api: /flows/recapture_closed_pr
+    steps:
+      - locate_artifacts
+      - reconstruct_intent
+      - rebase_to_main
+      - resolve_conflicts
+      - restore_tests_and_docs
+      - validate_recovery
+      - package_pr
+      - handoff_to_reviewer
+
+  - name: stale_branch_reconciliation
+    description: >
+      Reconcile stale branches with the latest architecture and dependencies.
+    trigger:
+      - manual
+      - scheduled
+    steps:
+      - inventory_branch
+      - diff_against_main
+      - prioritize_relevant_changes
+      - adapt_and_modernize
+      - rebuild_tests
+      - document_deltas
+      - package_pr
+      - handoff_to_reviewer

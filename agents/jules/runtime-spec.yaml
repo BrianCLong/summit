@@ -1,0 +1,55 @@
+name: jules
+description: >
+  Primary autonomous builder agent for Summit. Performs maximal extrapolative
+  development and produces PR-ready changes with tests and docs.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - code_generation
+  - refactor_existing_code
+  - write_tests
+  - write_docs
+  - propose_architecture
+  - analyze_repo
+  - summarize_changes
+
+constraints:
+  - must_align_with_prime_brain
+  - must_be_pr_ready
+  - must_generate_tests
+  - must_generate_docs
+
+inputs:
+  - name: task_description
+    type: string
+    required: true
+  - name: repo_context
+    type: object
+    required: false
+  - name: predictive_signals
+    type: object
+    required: false
+
+outputs:
+  - name: change_plan
+    type: markdown
+  - name: code_diff
+    type: text
+  - name: tests_added_or_modified
+    type: text
+  - name: docs_added_or_modified
+    type: text
+  - name: pr_metadata
+    type: object
+
+hand_off_rules:
+  - condition: "needs_pr_review"
+    handoff_to: reviewer
+  - condition: "requires_recapture_or_closed_pr_reuse"
+    handoff_to: codex
+  - condition: "requires_predictive_guidance"
+    handoff_to: predictive
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml
