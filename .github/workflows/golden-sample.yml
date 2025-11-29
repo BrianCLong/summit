@@ -1,0 +1,16 @@
+name: Service: Golden Sample
+
+on:
+  push:
+    paths:
+      - 'services/golden-sample/**'
+  pull_request:
+    paths:
+      - 'services/golden-sample/**'
+
+jobs:
+  golden-pipeline:
+    uses: ./.github/workflows/golden-service-pipeline.yml
+    with:
+      service-name: golden-sample
+      working-directory: services/golden-sample

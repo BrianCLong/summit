@@ -1,0 +1,20 @@
+{
+  "title": "Golden Service Dashboard",
+  "panels": [
+    {
+      "title": "Request Rate",
+      "type": "graph",
+      "targets": [{ "expr": "rate(http_request_duration_seconds_count[1m])" }]
+    },
+    {
+      "title": "Error Rate",
+      "type": "graph",
+      "targets": [{ "expr": "rate(http_request_duration_seconds_count{code=~\"5..\"}[1m])" }]
+    },
+    {
+      "title": "Latency (p99)",
+      "type": "graph",
+      "targets": [{ "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))" }]
+    }
+  ]
+}
