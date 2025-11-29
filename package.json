@@ -74,6 +74,7 @@
     "health": "chmod +x scripts/health-check.sh && scripts/health-check.sh",
     "install:pm": "node scripts/select-pm.js",
     "e2e": "playwright test",
+    "test:golden-path": "playwright test e2e/golden-path.spec.ts",
     "perf:snapshot": "bash scripts/perf/snapshot.sh",
     "screenshots": "npx playwright test scripts/playwright/capture_screenshots.spec.ts --reporter=line",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
