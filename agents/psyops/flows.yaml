@@ -1,0 +1,13 @@
+version: 1
+agent: psyops
+
+flows:
+  - name: safety_review
+    description: Threat model and harden a target document.
+    trigger:
+      - manual
+      - api: /flows/safety_review
+    steps:
+      - identify_attack_surface
+      - analyze_risks
+      - propose_mitigations

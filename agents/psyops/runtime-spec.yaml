@@ -1,0 +1,28 @@
+name: psyops
+description: >
+  Narrative, adversarial, and safety-framing agent that helps harden
+  Summit prompts, flows, and governance.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - threat_modeling
+  - narrative_analysis
+  - safety_review
+
+inputs:
+  - name: target_document
+    type: markdown
+    required: true
+  - name: context
+    type: object
+    required: false
+
+outputs:
+  - name: risk_assessment
+    type: markdown
+  - name: mitigation_suggestions
+    type: markdown
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml

@@ -1,0 +1,46 @@
+name: codex
+description: >
+  Recapture & reintegration agent. Finds valuable past work (closed PRs,
+  stale branches, experiments) and re-integrates it into the current codebase.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - analyze_git_history
+  - reconstruct_diffs
+  - resolve_conflicts
+  - modernize_code
+  - write_tests
+  - write_docs
+
+constraints:
+  - must_align_with_prime_brain
+  - must_not_reintroduce_known_bugs
+  - must_produce_pr_ready_output
+
+inputs:
+  - name: target_scope
+    type: string
+    required: true
+  - name: repo_context
+    type: object
+    required: false
+
+outputs:
+  - name: recapture_plan
+    type: markdown
+  - name: code_diff
+    type: text
+  - name: tests_added_or_modified
+    type: text
+  - name: docs_added_or_modified
+    type: text
+  - name: pr_metadata
+    type: object
+
+hand_off_rules:
+  - condition: "needs_pr_review"
+    handoff_to: reviewer
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml

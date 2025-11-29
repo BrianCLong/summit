@@ -1,0 +1,14 @@
+models:
+  - id: risk_hotspots
+    input_signals:
+      - cyclomatic_complexity
+      - churn_rate
+      - flaky_tests
+    output:
+      description: "Ranked list of high-risk modules."
+  - id: tech_debt_forecast
+    input_signals:
+      - TODO_count
+      - PR_age
+    output:
+      description: "Forecast of where tech debt will cause issues soon."
