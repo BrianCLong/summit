@@ -118,6 +118,46 @@ export interface Case {
 
 export type CaseStatus = 'open' | 'in_progress' | 'resolved' | 'closed'
 
+// Extended types for case management
+export interface CaseTask {
+  id: string
+  caseId: string
+  title: string
+  description?: string
+  status: 'pending' | 'in_progress' | 'completed' | 'blocked'
+  priority: Priority
+  assignedTo?: string
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+  dueDate?: string
+  requiresFourEyes?: boolean
+  reviewedBy?: string
+}
+
+export interface Watchlist {
+  id: string
+  caseId: string
+  name: string
+  description?: string
+  entityIds: string[]
+  alertOnChange: boolean
+  createdBy: string
+  createdAt: string
+}
+
+export interface CaseComment {
+  id: string
+  caseId: string
+  content: string
+  author: string
+  createdAt: string
+  editedAt?: string
+  mentions: string[] // User IDs mentioned in comment
+  auditMarker: string // Immutable audit trail marker
+  replyToId?: string // For threaded comments
+}
+
 export interface User {
   id: string
   name: string
