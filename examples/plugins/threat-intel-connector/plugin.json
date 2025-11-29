@@ -1,0 +1,26 @@
+{
+  "id": "threat-intel-connector",
+  "name": "Threat Intelligence Connector",
+  "version": "1.0.0",
+  "description": "Connects to external threat intelligence feeds and imports indicators",
+  "author": {
+    "name": "IntelGraph Team",
+    "email": "connectors@intelgraph.io"
+  },
+  "homepage": "https://github.com/intelgraph/plugins/threat-intel-connector",
+  "license": "MIT",
+  "category": "integration",
+  "main": "./dist/index.js",
+  "engineVersion": "^1.0.0",
+  "permissions": [
+    "network:access",
+    "write:data",
+    "read:data"
+  ],
+  "resources": {
+    "maxMemoryMB": 384,
+    "maxCpuPercent": 40,
+    "maxStorageMB": 200,
+    "maxNetworkMbps": 20
+  }
+}

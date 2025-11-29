@@ -1,0 +1,20 @@
+{
+  "name": "@summit-plugins/threat-intel-connector",
+  "version": "1.0.0",
+  "description": "Threat intelligence connector plugin for external feeds",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["connector", "threat-intelligence", "osint"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@summit/plugin-system": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

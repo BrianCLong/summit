@@ -1,0 +1,26 @@
+{
+  "id": "network-visualization",
+  "name": "Network Graph Visualization",
+  "version": "1.0.0",
+  "description": "Interactive network graph visualization using force-directed layout",
+  "author": {
+    "name": "IntelGraph Team",
+    "email": "ui@intelgraph.io"
+  },
+  "homepage": "https://github.com/intelgraph/plugins/network-visualization",
+  "license": "MIT",
+  "category": "visualization",
+  "main": "./dist/index.js",
+  "icon": "https://example.com/icons/network.svg",
+  "engineVersion": "^1.0.0",
+  "permissions": [
+    "ui:extensions",
+    "read:data"
+  ],
+  "resources": {
+    "maxMemoryMB": 256,
+    "maxCpuPercent": 30,
+    "maxStorageMB": 50,
+    "maxNetworkMbps": 5
+  }
+}
