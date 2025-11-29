@@ -22,6 +22,7 @@ const Env = z
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
     L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
+    SIGNING_PRIVATE_KEY: z.string().min(1),
   })
   .passthrough(); // Allow extra env vars
 

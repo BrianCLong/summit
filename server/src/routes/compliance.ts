@@ -1,165 +1,88 @@
-import express from 'express';
-import { execFile } from 'node:child_process';
-import { promises as fs } from 'fs';
-import { putLocked } from '../audit/worm';
-import { wormAuditChain } from '../federal/worm-audit-chain';
+import { Router } from 'express';
+import { SOC2ComplianceService } from '../services/SOC2ComplianceService';
+import { ComplianceMonitoringService } from '../services/ComplianceMonitoringService';
+import { EventSourcingService } from '../services/EventSourcingService';
+import { UserRepository } from '../data/UserRepository';
+import { getPostgresPool } from '../config/database';
+import { generatePdfFromPacket } from '../utils/pdfGenerator';
+import { SigningService } from '../services/SigningService';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth';
 
-const router = express.Router();
+const router = Router();
+const pgPool = getPostgresPool();
 
-router.get('/controls', async (_req, res) => {
-  const rows = [
-    {
-      id: 'SOC2-CC2.1',
-      status: 'green',
-      evidenceUri: '/docs/compliance/soc2-cc2.1.pdf',
-    },
-    {
-      id: 'NIST-AC-2',
-      status: 'green',
-      evidenceUri: '/docs/compliance/nist-ac-2.json',
-    },
-  ];
-  res.json(rows);
-});
+// Instantiate the services
+const userRepository = new UserRepository();
+const eventSourcingService = new EventSourcingService(pgPool);
+const complianceMonitoringService = new ComplianceMonitoringService(pgPool);
+const soc2ComplianceService = new SOC2ComplianceService(
+  complianceMonitoringService,
+  eventSourcingService,
+  userRepository
+);
+const signingService = new SigningService();
 
-// Export control pack as JSON or minimal PDF
-router.get('/export', async (req, res) => {
-  const framework = (req.query.framework as string) || 'soc2';
-  const format = (req.query.format as string) || 'json';
-  const controls = [
-    {
-      id: 'SOC2-CC2.1',
-      title: 'Communications and Information',
-      status: 'green',
-      evidenceUri: '/docs/compliance/soc2-cc2.1.pdf',
-    },
-    {
-      id: 'SOC2-CC7.2',
-      title: 'Change Management',
-      status: 'green',
-      evidenceUri: '/docs/compliance/soc2-cc7.2.json',
-    },
-    {
-      id: 'FedRAMP-AC-2',
-      title: 'Account Management',
-      status: 'green',
-      evidenceUri: '/docs/compliance/fedramp-ac-2.json',
-    },
-  ];
-  const pack = {
-    framework,
-    generatedAt: new Date().toISOString(),
-    summary: {
-      mustControlsGreen: controls.filter((c) => c.status === 'green').length,
-      total: controls.length,
-    },
-    controls,
-  };
+/**
+ * GET /api/compliance/soc2-packet
+ * @summary Generates and returns a SOC2 Type II evidence packet.
+ * @description This endpoint is protected and requires the 'compliance-officer' role.
+ * It generates a snapshot of compliance evidence for a given time period.
+ * @tags Compliance
+ * @param {string} startDate.query.required - The start date for the audit period (ISO 8601 format).
+ * @param {string} endDate.query.required - The end date for the audit period (ISO 8601 format).
+ * @return {object} 200 - The SOC2 evidence packet.
+ * @return {object} 400 - Bad request if date parameters are invalid.
+ * @return {object} 403 - Forbidden if user does not have the required role.
+ */
+router.get(
+  '/soc2-packet',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'compliance-officer']),
+  async (req, res) => {
+    const { startDate, endDate, format } = req.query;
 
-  if (format === 'json') {
-    res.setHeader('content-type', 'application/json');
-    return res.send(JSON.stringify(pack, null, 2));
+    if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
+    return res.status(400).json({ error: 'startDate and endDate query parameters are required.' });
   }
 
-  if (format === 'pdf') {
-    const pdf = minimalPdfFromText(
-      `IntelGraph Control Pack\nFramework: ${framework}\nGenerated: ${pack.generatedAt}\n\n` +
-        controls.map((c) => `${c.id} - ${c.title} [${c.status}]`).join('\n'),
-    );
-    res.setHeader('content-type', 'application/pdf');
-    return res.send(pdf);
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return res.status(400).json({ error: 'Invalid date format. Please use ISO 8601 format.' });
   }
 
-  return res
-    .status(406)
-    .json({ error: 'unsupported format', supported: ['json', 'pdf'] });
-});
-
-// Signed export with WORM/Merkle evidence (JSON + .sig)
-router.get('/export/signed', async (req, res) => {
   try {
-    const framework = (req.query.framework as string) || 'soc2';
-    const base = new URL(req.protocol + '://' + req.get('host'));
-    // reuse JSON pack
-    const uri = new URL(
-      `/api/compliance/export?framework=${encodeURIComponent(framework)}&format=json`,
-      base,
-    );
-    const pack = {
-      ...(await (await fetch(uri)).json()),
-      merkle: await wormAuditChain.generateComplianceReport(),
-    } as any;
-    const body = Buffer.from(JSON.stringify(pack, null, 2));
-    const tmp = `/tmp/control-pack-${Date.now()}.json`;
-    await fs.writeFile(tmp, body);
-    let sig: Buffer | null = null;
-    try {
-      const out = await new Promise<Buffer>((resolve, reject) =>
-        execFile('cosign', ['sign-blob', '--yes', tmp], (err, stdout) =>
-          err ? reject(err) : resolve(Buffer.from(stdout)),
-        ),
-      );
-      sig = out;
-    } catch {
-      // cosign not available; return unsigned
+    const packet = await soc2ComplianceService.generateSOC2Packet(start, end);
+
+    if (format === 'pdf') {
+      const pdfBuffer = await generatePdfFromPacket(packet);
+      const signature = signingService.sign(pdfBuffer);
+      res.setHeader('X-Evidence-Signature', signature);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="SOC2_Evidence_Packet_${start.toISOString()}_-_${end.toISOString()}.pdf"`);
+      res.send(pdfBuffer);
+    } else {
+      const jsonPacket = JSON.stringify(packet);
+      const signature = signingService.sign(jsonPacket);
+      res.setHeader('X-Evidence-Signature', signature);
+      res.setHeader('Content-Type', 'application/json');
+      res.send(jsonPacket);
     }
-    // If WORM bucket configured, upload both artifacts with Object Lock
-    const bucket = process.env.AUDIT_WORM_BUCKET;
-    const uris: { packUri?: string; sigUri?: string } = {};
-    if (bucket) {
-      const ts = new Date().toISOString().replace(/[:.]/g, '-');
-      const baseKey = `control-packs/${framework}/${ts}`;
-      uris.packUri = await putLocked(bucket, `${baseKey}.json`, body);
-      if (sig)
-        uris.sigUri = await putLocked(bucket, `${baseKey}.json.sig`, sig);
-    }
-    res.setHeader('content-type', 'application/json');
-    res.json({ pack, signature: sig ? sig.toString('utf8') : null, ...uris });
-  } catch (e: any) {
-    res
-      .status(500)
-      .json({ error: e?.message || 'failed to sign control pack' });
+  } catch (error) {
+    console.error('Failed to generate SOC2 packet:', error);
+    res.status(500).json({ error: 'An internal server error occurred.' });
   }
 });
 
-function minimalPdfFromText(text: string): Buffer {
-  // Very small single-page PDF with plain text content.
-  // This avoids external deps (pdfkit/puppeteer) for basic export.
-  const esc = (s: string) =>
-    s.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-  const lines = esc(text)
-    .split('\n')
-    .map((l, i) => `(${l}) Tj 0 -14 Td`)
-    .join('\n');
-  const content = `BT /F1 12 Tf 50 750 Td ${lines} ET`;
-  const contentBytes = Buffer.from(content, 'utf8');
-  const objects: string[] = [];
-  objects.push('1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj');
-  objects.push('2 0 obj << /Type /Pages /Kids [3 0 R] /Count 1 >> endobj');
-  objects.push(
-    '3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >> endobj',
-  );
-  objects.push(
-    '4 0 obj << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> endobj',
-  );
-  objects.push(
-    `5 0 obj << /Length ${contentBytes.length} >> stream\n${content}\nendstream endobj`,
-  );
-  // Assemble xref
-  let pdf = '%PDF-1.4\n';
-  const offsets: number[] = [];
-  for (const obj of objects) {
-    offsets.push(Buffer.byteLength(pdf, 'utf8'));
-    pdf += obj + '\n';
-  }
-  const xrefPos = Buffer.byteLength(pdf, 'utf8');
-  pdf += 'xref\n0 ' + (objects.length + 1) + '\n';
-  pdf += '0000000000 65535 f \n';
-  for (const off of offsets) {
-    pdf += (off + '').padStart(10, '0') + ' 00000 n \n';
-  }
-  pdf += `trailer << /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
-  return Buffer.from(pdf, 'utf8');
-}
+/**
+ * GET /api/compliance/public-key
+ * @summary Retrieves the public key for verifying evidence packet signatures.
+ * @tags Compliance
+ */
+router.get('/public-key', (req, res) => {
+  res.setHeader('Content-Type', 'application/pem-certificate-chain');
+  res.send(signingService.getPublicKey());
+});
 
 export default router;
