@@ -1,0 +1,133 @@
+name: post-deploy-verification
+
+on:
+  workflow_run:
+    workflows:
+      - Deploy Dev (AWS)
+      - Deploy to Staging
+      - Deploy to Production
+      - Manual Deploy
+    types:
+      - completed
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  smoke-and-load:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      PROD_UI_URL: ${{ secrets.PROD_UI_URL }}
+      PROD_API_URL: ${{ secrets.PROD_API_URL }}
+      STAGE_UI_URL: ${{ secrets.STAGE_UI_URL }}
+      STAGE_API_URL: ${{ secrets.STAGE_API_URL }}
+      DEV_UI_URL: ${{ secrets.DEV_UI_URL }}
+      DEV_API_URL: ${{ secrets.DEV_API_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve deployment target
+        id: target
+        run: |
+          workflow="${{ github.event.workflow_run.name }}"
+          target="dev"
+          if [ "$workflow" = "Deploy to Production" ]; then
+            target="prod"
+          elif [ "$workflow" = "Deploy to Staging" ]; then
+            target="staging"
+          elif [ "$workflow" = "Manual Deploy" ] && [ -n "${{ github.event.workflow_run.inputs.environment }}" ]; then
+            target="${{ github.event.workflow_run.inputs.environment }}"
+          fi
+          echo "target=$target" >> $GITHUB_OUTPUT
+
+      - name: Map endpoints
+        id: endpoints
+        run: |
+          target="${{ steps.target.outputs.target }}"
+          case "$target" in
+            prod|production)
+              ui="$PROD_UI_URL"; api="$PROD_API_URL";;
+            staging)
+              ui="$STAGE_UI_URL"; api="$STAGE_API_URL";;
+            *)
+              ui="${DEV_UI_URL:-$STAGE_UI_URL}"; api="${DEV_API_URL:-$STAGE_API_URL}";;
+          esac
+          if [ -z "$ui" ] || [ -z "$api" ]; then
+            echo "Missing endpoint configuration for target $target" >&2
+            exit 1
+          fi
+          echo "ui_url=$ui" >> $GITHUB_OUTPUT
+          echo "api_url=$api" >> $GITHUB_OUTPUT
+          echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run smoke test
+        id: smoke
+        continue-on-error: true
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: .github/k6/smoke.js
+        env:
+          UI_URL: ${{ steps.endpoints.outputs.ui_url }}
+          API_URL: ${{ steps.endpoints.outputs.api_url }}
+
+      - name: Run load probe
+        id: load
+        continue-on-error: true
+        env:
+          COS_GQL_URL: ${{ steps.endpoints.outputs.gql_url }}
+        run: k6 run tests/load/graphql_read_p95.js
+
+      - name: Summarize outcomes
+        id: summary
+        run: |
+          smoke="${{ steps.smoke.outcome }}"
+          load="${{ steps.load.outcome }}"
+          status="success"
+          if [ "$smoke" != "success" ] || [ "$load" != "success" ]; then
+            status="failure"
+          fi
+          echo "smoke=$smoke" >> $GITHUB_OUTPUT
+          echo "load=$load" >> $GITHUB_OUTPUT
+          echo "status=$status" >> $GITHUB_OUTPUT
+
+      - name: Comment results on PR
+        if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.workflow_run.pull_requests[0];
+            if (!pr) {
+              core.info('No PR associated with deployment run.');
+              return;
+            }
+            const smoke = '${{ steps.summary.outputs.smoke }}';
+            const load = '${{ steps.summary.outputs.load }}';
+            const target = '${{ steps.target.outputs.target }}';
+            const icon = (value) => (value === 'success' ? '✅' : '❌');
+            const runUrl = context.payload.workflow_run.html_url;
+            const body = [
+              `Post-deploy verification for **${target}**`,
+              `- Smoke: ${icon(smoke)} (${smoke})`,
+              `- Load: ${icon(load)} (${load})`,
+              `- Run: ${runUrl}`,
+            ].join('\n');
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              body,
+            });
+
+      - name: Fail if checks failed
+        if: steps.summary.outputs.status == 'failure'
+        run: |
+          echo "Smoke/load verification failed." >&2
+          exit 1
