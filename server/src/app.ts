@@ -55,14 +55,33 @@ export const createApp = async () => {
 
   const app = express();
   const logger = pino();
+  const isProduction = cfg.NODE_ENV === 'production';
+  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
 
-  app.use(helmet());
-  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+  app.use(
+    helmet({
+      contentSecurityPolicy: isProduction
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              objectSrc: ["'none'"],
+              imgSrc: ["'self'", 'data:'],
+              scriptSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              connectSrc: ["'self'", ...allowedOrigins],
+            },
+          }
+        : false,
+      referrerPolicy: { policy: 'no-referrer' },
+      hsts: isProduction ? undefined : false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.use(
     cors({
       origin: (origin, callback) => {
