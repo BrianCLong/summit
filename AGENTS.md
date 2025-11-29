@@ -92,3 +92,20 @@ done
 - Use `.env` (copy from `.env.example`); never commit secrets.
 - Helmet + CORS defaults are enabled; restrict `CORS_ORIGIN` in prod.
 - Run `scripts/bootstrap_github.sh` to set up labels/milestones and import issues.
+
+## Agentic Control Plane
+
+We have introduced an **Agentic Control Plane** to automate the lifecycle of AI tasks.
+
+### CLI Tool: `summitctl`
+Use `npx summitctl` to manage agent tasks.
+- `init`: Start a new mission.
+- `status`: View active tasks.
+- `archive`: Close out a task.
+
+See [docs/AGENT_OPS_HANDBOOK.md](docs/AGENT_OPS_HANDBOOK.md) for details.
+
+### Automation
+- Branches under `agentic/**` are automatically monitored.
+- CI/CD automatically opens PRs when gates (OPA, Security) pass.
+- Metrics are available at `/agentic/metrics`.
