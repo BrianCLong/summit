@@ -1,3 +1,6 @@
+/**
+ * @deprecated Use @intelgraph/feature-flags instead.
+ */
 import Flagsmith from 'flagsmith-nodejs';
 
 export const flagsmith = new Flagsmith({

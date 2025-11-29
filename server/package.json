@@ -34,6 +34,7 @@
     "@graphql-tools/merge": "^9.1.1",
     "@graphql-tools/schema": "10.0.29",
     "@graphql-tools/utils": "^10.10.3",
+    "@intelgraph/feature-flags": "workspace:*",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.67.0",
     "@opentelemetry/exporter-jaeger": "2.2.0",
