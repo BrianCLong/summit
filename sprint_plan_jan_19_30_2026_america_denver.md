@@ -1,193 +1,145 @@
-# Sprint Plan — Jan 19–30, 2026 (America/Denver)
+# Sprint: Jan 19–30, 2026 (America/Denver) — "Design Partner Onboarding"
 
-> **Context:** Second sprint of 2026. U.S. **MLK Day (Mon Jan 19)** reduces capacity. Build on v1.2/2.0 foundations: _policy safety assistant_, _graph scenarios_, _SOAR v2.0 beta_, and _intel v5.1_.
-
----
-
-## 1) Sprint Goal (SMART)
-
-Release **Policy Intelligence v1.3** (assistant + drift prevention rules), **Graph UI v2.1** (scenario saving, lateral‑movement heatmap, chokepoint remediation templates), **SOAR v2.0 Beta** (autoscaling runners, Queues v2, approval dashboard integration), and **Intel v5.1** (active‑learning cadence + annotator scoring + federation expansion) to achieve **MTTC P50 ≤ 9 min / P90 ≤ 22 min** and **auto‑approved actions ≥ 30%** (low‑risk only) — **by Jan 30, 2026**.
-
-**Key outcomes**
-
-- Policy assistant proposes safe guardrails with human‑readable **risk explanations**; drift‑prevention rules block unsafe merges.
-- Graph supports saved **investigation scenarios**, **lateral‑movement heatmap**, and out‑of‑the‑box **remediation templates**.
-- SOAR v2.0 Beta delivers **runner autoscaling**, **Queues v2** with idempotency, and **approval dashboard** (HITL) integration.
-- Intel v5.1 scales **active‑learning cadence**, adds **annotator quality scoring**, and expands partner federation to **15% sample** under guardrails.
+**Sprint Goal:** Make it dead-simple for external design partners to try the golden path safely. Focus on onboarding flows, sandboxed tenancy, auditability, and “getting started” assets so a new org can: import data → run NL graph queries → compile a brief → export with provenance, all without hand-holding.
 
 ---
 
-## 2) Success Metrics & Verification
+## Sprint Backlog (stories, AC, estimate)
 
-- **Incident response:** MTTC P50 ≤ 9 min; P90 ≤ 22 min (7‑day rolling).  
-  _Verify:_ Incident dashboard; export.
-- **Policy safety:** Drift‑prevention rules catch ≥ 80% of high‑risk changes in backtests; **zero** critical authz escapes.  
-  _Verify:_ Backtests; CI gate logs; audit.
-- **Automation adoption:** ≥ 30% of eligible actions auto‑approved (low‑risk); **false‑allow = 0** in prod.  
-  _Verify:_ SOAR logs; simulation reports.
-- **Graph effectiveness:** ≥ 70% of P1/P2 investigations use scenarios or heatmap; remediation templates invoked in ≥ 50% of those.  
-  _Verify:_ UI telemetry; ticket linkage.
-- **Intel quality:** κ (inter‑annotator) ≥ 0.82; Brier ≤ 0.14 on canary; override rate ≤ 8%.  
-  _Verify:_ Eval reports; sampling.
+1. **Tenant Bootstrap Wizard (MVP)** — *8 pts*
+   As an admin, I can create a tenant in <10 min with defaults for RBAC, data retention, and redaction presets.
+   **AC:** Guided steps, validation, idempotent; emits an audit event trail; rollback deletes all artifacts cleanly.
 
----
+2. **Self-Serve Ingest Samples & Fixtures** — *5 pts*
+   As a new analyst, I can load sample datasets (CSV/JSON) + a prebuilt graph fixture to complete the golden path in <20 min.
+   **AC:** One-click load, clear docs, teardown script; works in fresh tenants.
 
-## 3) Scope
+3. **Getting Started Tour (Product Tours)** — *5 pts*
+   As a first-time user, I get inline tips across ingest → NL→Cypher → Authority Compiler → export.
+   **AC:** Dismissible, persisted; re-openable from Help; no impact on keyboard nav.
 
-**Must‑have (commit):**
+4. **Audit Log v1 (Search + Export)** — *8 pts*
+   As compliance, I can query audit events by actor, object, and time, and export a signed log bundle.
+   **AC:** 10 event families logged (auth, ingest, query, compile, export, overrides); export includes hash and manifest.
 
-- **Policy Intelligence v1.3:** natural‑language risk explanations; drift‑prevention ruleset (deny patterns + safe defaults); assistant suggestions inline with acceptance telemetry; simulator updates.
-- **Graph UI v2.1:** scenario saving/loading; lateral‑movement heatmap from identity/asset graph; remediation templates (owner handoffs, SOAR links).
-- **SOAR v2.0 Beta:** runner autoscaling (HPA/queue‑driven), Queues v2 (exactly‑once semantics), approval dashboard integration (HITL with SLAs), safety counters.
-- **Intel v5.1:** weekly AL cadence; annotator quality scoring & coaching; partner federation expansion (15% sample) with isolation and cost caps; export to detections (gated).
-- **Operational analytics:** adoption widgets for assistant, scenarios, approvals; automation reliability; intel calibration.
+5. **Sandboxed Tenancy Guardrails** — *5 pts*
+   As an operator, each partner runs in an isolated namespace with quotas and safe defaults (no external egress by default).
+   **AC:** Quotas enforced; cross-tenant tests = 0 leakage; egress allowlist.
 
-**Stretch:**
+6. **Authority Compiler: Templates Pack + Share Link** — *5 pts*
+   As an author, I can start from 5 curated templates and share a read-only link inside the tenant.
+   **AC:** Template gallery; share link respects RBAC; link revocation works.
 
-- **Responder Copilot v0.4 (alpha):** tie policy assistant + graph scenarios to suggest next steps (read‑only).
-- **SOAR cost dashboard:** per‑action/vendor cost estimates; budget alerts.
-- **Graph what‑if ACL changes:** show risk delta before policy merges.
+7. **Export UX Polish + Failure Explainability** — *3 pts*
+   As a user, if export fails (license/provenance), I see a human-readable reason and “fix-it” link.
+   **AC:** Reasons mapped to policy, owner, and next action; copy reviewed.
 
-**Out‑of‑scope:**
+**Stretch (time-boxed):**
+8. **Billing/Metering (Shadow Mode)** — *3 pts*
+   Track usage by tenant (queries, tokens/rows, exports) without enforcement.
+   **AC:** Daily rollups; basic dashboard.
 
-- Destructive actions default‑on; customer‑visible ABAC editor; cross‑tenant playbooks.
-
----
-
-## 4) Team & Capacity (holiday‑adjusted)
-
-- **Working days:** 9 (MLK Day observed Mon Jan 19).
-- **Focus factor:** 0.8.
-- **Nominal ~50 pts → commit ≈ **36 pts** (+ up to 6 pts stretch).**
+*Total forecast: 39 pts (stretch optional).* 
 
 ---
 
-## 5) Backlog (Ready for Sprint)
+## Definition of Done (DoD)
 
-### Epic AT — Policy Intelligence v1.3 (11 pts)
+* All AC met; behind flags where applicable; stage demo updated; user and ops docs merged.
+* Unit + contract tests; one recorded E2E from *fresh tenant* through export.
+* Security: tenancy isolation tests, audit log coverage documented; no critical findings.
+* Observability: dashboards include audit-log ingest rate, bootstrap success, and export failure reasons.
 
-- **AT1 — Risk explanations + UX** (4 pts)  
-  _AC:_ highlight blast radius, precedent incidents; copy reviewed.
-- **AT2 — Drift‑prevention ruleset** (5 pts)  
-  _AC:_ deny patterns; safe defaults; CI gate; kill‑switch.
-- **AT3 — Assistant acceptance telemetry** (2 pts)  
-  _AC:_ capture accept/modify/reject; dashboard.
+## Definition of Ready (DoR)
 
-### Epic AU — Graph UI v2.1 (10 pts)
-
-- **AU1 — Scenario saving/loading** (4 pts)  
-  _AC:_ name, share, permissions; freshness banner.
-- **AU2 — Lateral‑movement heatmap** (4 pts)  
-  _AC:_ hop limit; identity edges; export.
-- **AU3 — Remediation templates** (2 pts)  
-  _AC:_ top chokepoint fixes; owner handoff; ticket export.
-
-### Epic AV — SOAR v2.0 Beta (11 pts)
-
-- **AV1 — Runner autoscaling** (4 pts)  
-  _AC:_ queue‑driven scale; SLOs; soak test.
-- **AV2 — Queues v2 (exactly‑once)** (4 pts)  
-  _AC:_ idempotency keys; retries; poison queue.
-- **AV3 — Approval dashboard integration** (3 pts)  
-  _AC:_ SLAs; audit trail; filters.
-
-### Epic AW — Intel v5.1 (6 pts)
-
-- **AW1 — Active‑learning cadence + scoring** (3 pts)  
-  _AC:_ per‑annotator metrics; coaching prompts; weekly loop.
-- **AW2 — Federation expansion (15% sample)** (3 pts)  
-  _AC:_ isolation; PII filters; cost caps; canary.
-
-### Epic AX — Operational Analytics (2 pts)
-
-- **AX1 — Adoption & reliability panels** (2 pts)  
-  _AC:_ assistant/scenario/auto‑approve widgets; intel calibration; export.
-
-> **Planned:** 40 pts total — **commit 36 pts**, hold 4 pts buffer; + up to 6 pts stretch.
+* Each story has AC, dependencies, flags, sample data, and rollback notes; UI stories include wire or copy doc.
 
 ---
 
-## 6) Dependencies & Assumptions
+## Capacity & Calendar
 
-- CI gate for drift rules wired; approver groups defined.
-- Graph data (identity + asset) fresh ≤ 24h; permissions enforced.
-- Queue store supports exactly‑once semantics; autoscaling infra ready.
-- Partner legal/compliance sign‑off for 15% sample; budget alerts configured.
-
----
-
-## 7) Timeline & Ceremonies (MT)
-
-- **Tue Jan 20** — Planning & Kickoff; safety review (30m).
-- **Fri Jan 23** — Mid‑sprint demo/checkpoint (30m).
-- **Wed Jan 28** — Grooming for next sprint (45m).
-- **Fri Jan 30** — Demo (45m) + Retro (45m) + Release cut.
+* **Capacity:** ~40 pts.
+* **Ceremonies:**
+  * Sprint Planning: Mon Jan 19, 09:30–11:00
+  * Daily Stand-up: 09:15–09:30
+  * Mid-sprint Refinement: Thu Jan 22, 14:00–14:45
+  * Sprint Review (live partner demo): Fri Jan 30, 10:00–11:00
+  * Retro: Fri Jan 30, 11:15–12:00
 
 ---
 
-## 8) Definition of Ready (DoR)
+## Environments, Flags, Data
 
-- Policy rules cataloged; datasets available; flags/telemetry named.
-- Queue/autoscaling quotas approved; dashboard integration points validated.
-
-## 9) Definition of Done (DoD)
-
-- Tests pass; dashboards live; approvals configured; audits wired.
-- Runbooks updated; enablement notes posted; rollback verified.
+* **Envs:** dev → stage (partner sandboxes).
+* **Flags:** `tenantBootstrapWizard`, `sampleDataPacks`, `productToursV1`, `auditLogV1`, `tenantGuardrails`, `authorityTemplatesPack`, `exportExplainV1`, (`billingShadowV0` stretch).
+* **Test Data:** Sample CSV/JSON bundles, prebuilt graph fixture, canned evidence sets, two license models for negative tests.
 
 ---
 
-## 10) QA & Validation Plan
+## QA Plan
 
-- **Policy:** backtests; CI gate simulation; human review of top 20 suggested guardrails.
-- **Graph:** scenario correctness sampling; heatmap sanity checks; remediation export e2e.
-- **SOAR:** autoscaling load test; exactly‑once chaos test; approval SLA timing.
-- **Intel:** κ tracking; canary metrics vs v4.1; cost monitor alerts.
+**Functional:**
 
----
+* Bootstrap wizard happy/rollback paths; default RBAC & retention applied.
+* Sample data one-click load; teardown leaves no residue.
+* Tours appear only for first-time users; accessibility pass (keyboard/screen reader).
+* Audit search by actor/object/time; export signed and verifiable.
+* Tenant quotas & egress allowlist enforced; cross-tenant leakage tests.
+* Authority templates pack; read-only share link honors RBAC.
+* Export failures show reason + fix path.
 
-## 11) Risk Register (RAID)
+**E2E:** Fresh tenant → sample load → ask NL question (see Cypher preview) → compile brief (template) → export (PASS) and audit export.
 
-| Risk                                 | Prob. | Impact | Owner | Mitigation                               |
-| ------------------------------------ | ----- | -----: | ----- | ---------------------------------------- |
-| Drift rules block legitimate changes | Med   |    Med | AT2   | Previews; exception path; audit          |
-| Scenario sharing leaks data          | Low   |   High | AU1   | Permissions; redaction; audit            |
-| Queue bugs cause duplicates          | Low   |   High | AV2   | Idempotency; poison queue; alarms        |
-| Federation expansion costs spike     | Med   |    Med | AW2   | Rate caps; budget alerts; off‑peak       |
-| Approval SLAs missed                 | Med   |    Med | AV3   | Paging; load balancing; backup reviewers |
+**Non-functional:**
 
----
-
-## 12) Communications & Status
-
-- **Channels:** #sprint‑room (daily), #analyst‑ops (enablement), Exec update (Fri).
-- **Reports:** Burnup; MTTC; auto‑approve rate; intel calibration; approval SLAs.
+* p95 onboarding flow (<10 min bootstrap, <20 min golden path).
+* Audit log write/read SLO and index size checks.
 
 ---
 
-## 13) Compliance/Security Guardrails
+## Risks & Mitigations
 
-- Signed policy changes; immutable audit; least privilege; no PII in model features.
-- Scenario artifacts scrubbed on export; tenant boundaries enforced.
-- SOAR destructive steps always HITL; approvals logged with reason codes.
-
----
-
-## 14) Release & Rollback
-
-- **Staged rollout:** Internal cohort → all analysts → select tenants (if applicable).
-- **Rollback:** Disable drift rules; hide scenarios/heatmap; revert Queues v2; scale runners to safe baseline; pin intel to v5.0.
-- **Docs:** Release notes; analyst changelog; change tickets.
+* **Bootstrap complexity across envs** → idempotent scripts + teardown verified in CI.
+* **Tour fatigue** → dismiss persistence + Help relaunch; limit to 5 concise steps.
+* **Audit log cost/volume** → partitioned storage + retention policy defaults.
+* **Isolation edge cases** → add fuzz tests for headers/claims; egress allowlist by default.
 
 ---
 
-## 15) Next Sprint Seeds (Feb 2–13, 2026)
+## Reporting Artifacts (to produce this sprint)
 
-- **Policy v1.4:** policy suggestion assistant GA; risk explanations with examples.
-- **Graph v2.2:** scenario diffs + recommended controls rollout; exposure time series.
-- **SOAR v2.0 GA prep:** throughput targets, quota policies, blue/green runners.
-- **Intel v5.2:** disagreement detection; reviewer routing; expanded federation.
+* Partner onboarding runbook, 10-minute quickstart, demo script, risk register, burndown & throughput, SLO snapshots (start/end).
 
 ---
 
-_Prepared by: Covert Insights — last updated Sep 11, 2025 (America/Denver)._
+## Demo Script (review)
+
+1. **Admin:** Run Tenant Bootstrap Wizard → defaults applied, audit trail visible.
+2. **Analyst:** One-click load of samples → NL question → Cypher preview → sandbox run.
+3. **Author:** Open Authority Compiler → select template → add/edit → share read-only link.
+4. **Compliance:** Trigger export → PASS badge; show audit log search; simulate failure to show reason + fix link.
+5. **Ops:** Show quotas and egress allowlist; (if enabled) peek at shadow usage dashboard.
+
+---
+
+## Jira-ready ticket matrix (copy/paste)
+
+| ID      | Title                                           | Owner  | Est | Dependencies | Acceptance Criteria (summary)                                            |
+| ------- | ----------------------------------------------- | ------ | --: | ------------ | ------------------------------------------------------------------------ |
+| ONB-101 | Tenant Bootstrap Wizard (MVP)                   | BE+FE  |   8 | —            | Create tenant with defaults; rollback cleans fully; audit events emitted |
+| ONB-111 | Sample Data Packs (Load/Teardown)               | BE     |   3 | —            | One-click load & teardown; works on fresh tenants                        |
+| ONB-112 | Graph Fixture for Golden Path                   | BE     |   2 | ONB-111      | Fixture loads; NL→Cypher demo queries pass                               |
+| ONB-121 | Product Tours Framework                         | FE     |   3 | —            | Step-by-step hints; dismiss & relaunch; a11y pass                        |
+| ONB-122 | Tours Content (Golden Path)                     | PM+FE  |   2 | ONB-121      | Copy reviewed; metrics on completion                                     |
+| ONB-131 | Audit Log v1 (Ingest & Query)                   | BE     |   3 | —            | Events persisted & queryable                                             |
+| ONB-132 | Audit Log v1 (Compile & Export + Signed Bundle) | BE     |   5 | ONB-131      | Export bundle signed; manifest included                                  |
+| ONB-141 | Tenancy Guardrails (Quotas & Egress)            | BE+Ops |   5 | —            | Quotas enforced; allowlist default; tests green                          |
+| ONB-151 | Templates Pack + Read-only Share                | FE+BE  |   5 | —            | Gallery, share link, revoke; RBAC respected                              |
+| ONB-161 | Export Failure Explainability                   | FE     |   3 | —            | Reasons mapped; fix-it links; copy reviewed                              |
+| ONB-171 | Shadow Billing/Metering (Stretch)               | BE+Ops |   3 | —            | Daily rollups; dashboard tiles                                           |
+
+---
+
+### Outcome of this sprint
+
+A fully **onboardable** product: clean tenant bootstrap, safe isolation, clear tours, auditable actions, and a frictionless path for design partners to generate real value (and for us to observe it). Ready for scaled partner invites the following sprint.
