@@ -1,0 +1,33 @@
+{
+  "name": "service-template",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "pino": "^9.0.0",
+    "pino-http": "^10.0.0",
+    "prom-client": "^15.1.0",
+    "@opentelemetry/api": "^1.8.0",
+    "@opentelemetry/sdk-node": "^0.51.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.47.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "tsx": "^4.7.2",
+    "typescript": "^5.4.5",
+    "vitest": "^1.5.0",
+    "eslint": "^8.57.0",
+    "pino-pretty": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0"
+  }
+}
