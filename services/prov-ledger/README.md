@@ -66,13 +66,129 @@ POLICY_DRY_RUN=false                # Dry-run mode for policy enforcement
 
 ## API Reference
 
+The service provides both **REST** and **GraphQL** APIs for flexibility.
+
 ### Authentication
 
 All requests require policy enforcement headers:
 - `x-authority-id`: Identifier for the requesting authority
 - `x-reason-for-access`: Justification for the request
 
-### Endpoints
+### GraphQL API
+
+**Endpoint**: `http://localhost:4010/graphql`
+
+The GraphQL API provides a strongly-typed, flexible interface with comprehensive introspection support.
+
+#### Example Queries
+
+##### Create a Claim
+```graphql
+mutation CreateClaim {
+  createClaim(input: {
+    content: {
+      title: "Evidence Analysis"
+      findings: "Detailed findings..."
+    }
+    sourceRef: "file://report.pdf"
+    policyLabels: ["confidential", "investigation"]
+  }) {
+    id
+    hash
+    createdAt
+  }
+}
+```
+
+##### Register Evidence with Transform Chain
+```graphql
+mutation RegisterEvidence {
+  createEvidence(input: {
+    caseId: "case-001"
+    sourceRef: "file://document.pdf"
+    content: "Base64 or JSON content"
+    transformChain: [
+      {
+        transformType: "ocr"
+        actorId: "system-ocr-v1"
+        timestamp: "2025-01-20T10:00:00Z"
+        config: { method: "tesseract" }
+      }
+    ]
+    policyLabels: ["evidence"]
+  }) {
+    id
+    checksum
+    transformChain {
+      transformType
+      actorId
+      timestamp
+    }
+  }
+}
+```
+
+##### Get Case with All Evidence and Disclosure Bundle
+```graphql
+query GetCaseDetails {
+  case(id: "case-001") {
+    id
+    title
+    status
+    evidence {
+      id
+      sourceRef
+      checksum
+      transformChain {
+        transformType
+        actorId
+      }
+    }
+    disclosureBundle {
+      merkleRoot
+      hashTree
+      evidence {
+        id
+        checksum
+      }
+    }
+  }
+}
+```
+
+##### Verify Transform Chain
+```graphql
+query VerifyEvidence {
+  verifyTransformChain(evidenceId: "evidence-001") {
+    valid
+    transformChainValid
+    checksumValid
+    issues
+  }
+}
+```
+
+##### Get Export Manifest
+```graphql
+query ExportManifest {
+  exportManifest {
+    version
+    claims {
+      id
+      hash
+      transforms
+    }
+    hashChain
+    generatedAt
+  }
+}
+```
+
+**GraphQL Playground**: When running in development mode, visit `http://localhost:4010/graphql` in your browser for an interactive API explorer with autocomplete and documentation.
+
+---
+
+### REST Endpoints
 
 #### Health Check
 
@@ -280,6 +396,79 @@ Content-Type: application/json
   "verified_at": "2025-01-20T10:00:00.000Z"
 }
 ```
+
+---
+
+## CLI Tools
+
+The service includes powerful CLI tools for offline verification.
+
+### prov-verify
+
+Basic provenance bundle verifier:
+
+```bash
+# Install globally
+npm install -g @intelgraph/prov-ledger-lib
+
+# Verify a bundle
+prov-verify ./bundle-dir ./public-key.pem
+```
+
+**Output:**
+```
+✅ Provenance bundle verified successfully
+```
+
+### prov-verify-detailed
+
+Enhanced verifier with comprehensive reporting:
+
+```bash
+# Verify with detailed report
+prov-verify-detailed ./bundle-dir ./public-key.pem
+```
+
+**Output:**
+```
+========================================
+  Provenance Verification Report
+========================================
+
+Bundle: ./bundle-dir
+Timestamp: 2025-01-20T10:00:00.000Z
+Overall Status: ✅ VALID
+
+Component Status:
+  Manifest: ✅
+  Signature: ✅
+  Chain: ✅
+  Checksums: ✅
+
+Summary:
+  Total Steps: 5
+  Valid Steps: 5
+  Failed Steps: 0
+  Missing Artifacts: 0
+
+Step-by-Step Results:
+
+  ✅ Step: ingest-001
+     Type: ingest
+     Artifact Present: ✅
+     Input Hash Valid: ✅
+     Output Hash Valid: ✅
+
+  ✅ Step: transform-001
+     Type: transform
+     Artifact Present: ✅
+     Input Hash Valid: ✅
+     Output Hash Valid: ✅
+
+📄 Detailed report saved to: ./bundle-dir/verification-report.json
+```
+
+The detailed verifier generates a JSON report that can be integrated into automated workflows.
 
 ---
 
