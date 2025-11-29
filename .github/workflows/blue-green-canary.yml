@@ -1,0 +1,214 @@
+name: Blue-Green with Progressive Canary
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Container image tag/version to deploy'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        default: staging
+        options:
+          - staging
+          - production
+
+permissions:
+  contents: read
+  deployments: write
+  packages: read
+
+concurrency:
+  group: blue-green-canary-${{ inputs.environment }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_NAME: intelgraph
+  SERVICE_NAME: intelgraph-service
+  NAMESPACE_PREFIX: intelgraph
+  CHART_PATH: infra/helm/intelgraph
+
+jobs:
+  create-deployment-record:
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_id: ${{ steps.create.outputs.deployment_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create deployment record
+        id: create
+        uses: actions/github-script@v7
+        env:
+          TARGET_ENV: ${{ inputs.environment }}
+          DEPLOY_VERSION: ${{ inputs.version }}
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.ref,
+              environment: process.env.TARGET_ENV,
+              description: `Blue-green with progressive canary for ${process.env.DEPLOY_VERSION}`,
+              auto_merge: false,
+              required_contexts: [],
+              production_environment: process.env.TARGET_ENV === 'production',
+            });
+
+            core.setOutput('deployment_id', deployment.data.id);
+
+  blue-green:
+    name: Blue-Green rollout
+    runs-on: ubuntu-latest
+    needs: create-deployment-record
+    environment: ${{ inputs.environment }}
+    outputs:
+      active_env: ${{ steps.traffic-state.outputs.active }}
+      standby_env: ${{ steps.traffic-state.outputs.standby }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Execute blue-green deployment
+        id: bluegreen
+        env:
+          NAMESPACE: ${{ env.NAMESPACE_PREFIX }}-${{ inputs.environment }}
+          RELEASE_NAME: ${{ env.RELEASE_NAME }}
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+        run: |
+          ./scripts/blue-green-deploy.sh "${{ inputs.environment }}" "${{ inputs.version }}"
+
+      - name: Capture active/standby environments
+        id: traffic-state
+        env:
+          NAMESPACE: ${{ env.NAMESPACE_PREFIX }}-${{ inputs.environment }}
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+        run: |
+          ACTIVE=$(kubectl get service "$SERVICE_NAME" -n "$NAMESPACE" -o jsonpath='{.spec.selector.environment}')
+          if [ "$ACTIVE" = "blue" ]; then
+            STANDBY="green"
+          else
+            STANDBY="blue"
+          fi
+
+          echo "active=$ACTIVE" >> "$GITHUB_OUTPUT"
+          echo "standby=$STANDBY" >> "$GITHUB_OUTPUT"
+
+      - name: Update deployment status (blue-green complete)
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ needs.create-deployment-record.outputs.deployment_id }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: process.env.DEPLOYMENT_ID,
+              state: 'in_progress',
+              description: 'Blue-green switch completed; starting canary ramp',
+            });
+
+  canary-progressive:
+    name: Progressive canary (10% → 100%)
+    runs-on: ubuntu-latest
+    needs: [create-deployment-record, blue-green]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Progressive canary rollout
+        env:
+          NAMESPACE: ${{ env.NAMESPACE_PREFIX }}-${{ inputs.environment }}
+          RELEASE_NAME: ${{ env.RELEASE_NAME }}
+          SERVICE_NAME: ${{ env.SERVICE_NAME }}
+          IMAGE_TAG: ${{ inputs.version }}
+          CHART_PATH: ${{ env.CHART_PATH }}
+        run: |
+          ./scripts/canary/deploy-canary.sh
+
+      - name: Update deployment status (canary complete)
+        if: success()
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ needs.create-deployment-record.outputs.deployment_id }}
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: process.env.DEPLOYMENT_ID,
+              state: 'success',
+              description: 'Canary promoted to 100% traffic',
+            });
+
+      - name: Automatic rollback
+        if: failure()
+        env:
+          ENVIRONMENT: ${{ inputs.environment }}
+          STANDBY_ENV: ${{ needs.blue-green.outputs.standby_env }}
+        run: |
+          echo "Canary gate failed; rolling traffic back to $STANDBY_ENV"
+          ./scripts/rollback-blue-green.sh "$ENVIRONMENT" "$STANDBY_ENV"
+
+  finalize-status:
+    name: Finalize deployment status
+    runs-on: ubuntu-latest
+    needs: [create-deployment-record, blue-green, canary-progressive]
+    if: always()
+    steps:
+      - name: Mark deployment result
+        uses: actions/github-script@v7
+        env:
+          DEPLOYMENT_ID: ${{ needs.create-deployment-record.outputs.deployment_id }}
+          CANARY_RESULT: ${{ needs.canary-progressive.result }}
+        with:
+          script: |
+            const state = process.env.CANARY_RESULT === 'success' ? 'success' : 'failure';
+            const description = state === 'success'
+              ? 'Blue-green + canary rollout healthy'
+              : 'Deployment failed; rollback executed';
+
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: process.env.DEPLOYMENT_ID,
+              state,
+              description,
+            });
