@@ -237,9 +237,7 @@ describe('validateData', () => {
 
       expect(validateData(schema, { username: 'john' })).toBeNull();
       expect(validateData(schema, { username: 'ab' })).not.toBeNull();
-      expect(
-        validateData(schema, { username: 'a'.repeat(21) }),
-      ).not.toBeNull();
+      expect(validateData(schema, { username: 'a'.repeat(21) })).not.toBeNull();
     });
 
     it('should validate minItems/maxItems for arrays', () => {
@@ -257,7 +255,9 @@ describe('validateData', () => {
 
       expect(validateData(schema, { tags: ['a', 'b'] })).toBeNull();
       expect(validateData(schema, { tags: [] })).not.toBeNull();
-      expect(validateData(schema, { tags: ['a', 'b', 'c', 'd', 'e', 'f'] })).not.toBeNull();
+      expect(
+        validateData(schema, { tags: ['a', 'b', 'c', 'd', 'e', 'f'] }),
+      ).not.toBeNull();
     });
 
     it('should validate pattern for strings', () => {
@@ -301,7 +301,9 @@ describe('validateData', () => {
         validateData(schema, { name: 'John', email: 'john@example.com' }),
       ).toBeNull();
       expect(validateData(schema, { name: 'John' })).not.toBeNull();
-      expect(validateData(schema, { email: 'john@example.com' })).not.toBeNull();
+      expect(
+        validateData(schema, { email: 'john@example.com' }),
+      ).not.toBeNull();
     });
 
     it('should allow optional fields to be missing', () => {

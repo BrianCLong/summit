@@ -303,9 +303,7 @@ describe('Rate Limit Configuration', () => {
         await handler();
       }
 
-      expect(logger.info).toHaveBeenCalledWith(
-        'Shutting down rate limiter...',
-      );
+      expect(logger.info).toHaveBeenCalledWith('Shutting down rate limiter...');
     });
   });
 });

@@ -142,10 +142,19 @@ describe('RedisConnection', () => {
         'reconnecting',
         expect.any(Function),
       );
-      expect(mockClient.on).toHaveBeenCalledWith('connect', expect.any(Function));
+      expect(mockClient.on).toHaveBeenCalledWith(
+        'connect',
+        expect.any(Function),
+      );
 
-      expect(mockSubscriber.on).toHaveBeenCalledWith('error', expect.any(Function));
-      expect(mockPublisher.on).toHaveBeenCalledWith('error', expect.any(Function));
+      expect(mockSubscriber.on).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function),
+      );
+      expect(mockPublisher.on).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function),
+      );
     });
 
     it('should skip connection if already connected', async () => {
@@ -231,9 +240,8 @@ describe('RedisConnection', () => {
     });
 
     it('should throw error when client not initialized', async () => {
-      const uninitializedConnection = new (
-        require('../redis.js').default || class {}
-      )();
+      const uninitializedConnection = new (require('../redis.js').default ||
+        class {})();
 
       await expect(uninitializedConnection.get('key')).rejects.toThrow(
         'Redis client not initialized',
@@ -280,13 +288,12 @@ describe('RedisConnection', () => {
     });
 
     it('should throw error when client not initialized', async () => {
-      const uninitializedConnection = new (
-        require('../redis.js').default || class {}
-      )();
+      const uninitializedConnection = new (require('../redis.js').default ||
+        class {})();
 
-      await expect(
-        uninitializedConnection.set('key', 'value'),
-      ).rejects.toThrow('Redis client not initialized');
+      await expect(uninitializedConnection.set('key', 'value')).rejects.toThrow(
+        'Redis client not initialized',
+      );
     });
 
     it('should return false on error', async () => {
@@ -491,7 +498,9 @@ describe('RedisConnection', () => {
     it('should return false when publish fails', async () => {
       mockPublisher.publish.mockRejectedValue(new Error('Publish failed'));
 
-      const result = await connection.publish('error-channel', { data: 'test' });
+      const result = await connection.publish('error-channel', {
+        data: 'test',
+      });
 
       expect(result).toBe(false);
     });
@@ -528,9 +537,8 @@ describe('RedisConnection', () => {
     });
 
     it('should return disconnected status when not connected', async () => {
-      const uninitializedConnection = new (
-        require('../redis.js').default || class {}
-      )();
+      const uninitializedConnection = new (require('../redis.js').default ||
+        class {})();
 
       const health = await uninitializedConnection.healthCheck();
 

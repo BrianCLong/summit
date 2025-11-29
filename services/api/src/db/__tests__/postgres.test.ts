@@ -42,7 +42,8 @@ describe('PostgreSQLConnection', () => {
 
     // Create a fresh instance for each test
     const PostgreSQLConnectionClass = require('../postgres.js').default;
-    connection = new (PostgreSQLConnectionClass || class PostgreSQLConnection {})();
+    connection = new (PostgreSQLConnectionClass ||
+      class PostgreSQLConnection {})();
 
     jest.clearAllMocks();
   });
@@ -147,14 +148,16 @@ describe('PostgreSQLConnection', () => {
 
       mockPool.query.mockResolvedValue(mockResult as any);
 
-      const result = await connection.query('SELECT * FROM users WHERE id = $1', [
-        1,
-      ]);
+      const result = await connection.query(
+        'SELECT * FROM users WHERE id = $1',
+        [1],
+      );
 
       expect(result).toEqual(mockResult);
-      expect(mockPool.query).toHaveBeenCalledWith('SELECT * FROM users WHERE id = $1', [
-        1,
-      ]);
+      expect(mockPool.query).toHaveBeenCalledWith(
+        'SELECT * FROM users WHERE id = $1',
+        [1],
+      );
     });
 
     it('should log slow queries', async () => {
@@ -178,13 +181,12 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should throw error when pool not initialized', async () => {
-      const uninitializedConnection = new (
-        require('../postgres.js').default || class {}
-      )();
+      const uninitializedConnection = new (require('../postgres.js').default ||
+        class {})();
 
-      await expect(
-        uninitializedConnection.query('SELECT 1'),
-      ).rejects.toThrow('PostgreSQL pool not initialized');
+      await expect(uninitializedConnection.query('SELECT 1')).rejects.toThrow(
+        'PostgreSQL pool not initialized',
+      );
     });
 
     it('should handle query errors', async () => {
@@ -224,9 +226,8 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should throw error when pool not initialized', async () => {
-      const uninitializedConnection = new (
-        require('../postgres.js').default || class {}
-      )();
+      const uninitializedConnection = new (require('../postgres.js').default ||
+        class {})();
 
       await expect(uninitializedConnection.getClient()).rejects.toThrow(
         'PostgreSQL pool not initialized',
@@ -253,7 +254,9 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should rollback transaction on error', async () => {
-      const callback = jest.fn().mockRejectedValue(new Error('Transaction failed'));
+      const callback = jest
+        .fn()
+        .mockRejectedValue(new Error('Transaction failed'));
 
       await expect(connection.transaction(callback)).rejects.toThrow(
         'Transaction failed',
@@ -306,7 +309,10 @@ describe('PostgreSQLConnection', () => {
     it('should handle multiple conditions', async () => {
       mockPool.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
 
-      await connection.findOne('users', { email: 'test@example.com', is_active: true });
+      await connection.findOne('users', {
+        email: 'test@example.com',
+        is_active: true,
+      });
 
       expect(mockPool.query).toHaveBeenCalledWith(
         expect.stringContaining('WHERE email = $1 AND is_active = $2'),
@@ -438,7 +444,10 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should handle multiple update fields and conditions', async () => {
-      mockPool.query.mockResolvedValue({ rows: [{ id: 1 }], rowCount: 1 } as any);
+      mockPool.query.mockResolvedValue({
+        rows: [{ id: 1 }],
+        rowCount: 1,
+      } as any);
 
       await connection.update(
         'users',
@@ -500,9 +509,8 @@ describe('PostgreSQLConnection', () => {
     });
 
     it('should return disconnected status when pool not initialized', async () => {
-      const uninitializedConnection = new (
-        require('../postgres.js').default || class {}
-      )();
+      const uninitializedConnection = new (require('../postgres.js').default ||
+        class {})();
 
       const health = await uninitializedConnection.healthCheck();
 
