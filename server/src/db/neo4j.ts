@@ -15,6 +15,7 @@ const logger: ReturnType<typeof pino> = pino();
 
 type Neo4jDriver = neo4j.Driver;
 type Neo4jSession = neo4j.Session;
+type CircuitState = 'closed' | 'half-open' | 'open';
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER =
@@ -29,6 +30,18 @@ let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
 let connectivityTimer: NodeJS.Timeout | null = null;
 let isMockMode = true;
+let neo4jFailureCount = 0;
+let neo4jCircuitOpenUntil = 0;
+let neo4jLastError: string | undefined;
+
+const NEO4J_FAILURE_THRESHOLD = parseInt(
+  process.env.NEO4J_FAILURE_THRESHOLD ?? '3',
+  10,
+);
+const NEO4J_COOLDOWN_MS = parseInt(
+  process.env.NEO4J_COOLDOWN_MS ?? '30000',
+  10,
+);
 
 const driverFacade: Neo4jDriver = createDriverFacade();
 
@@ -134,6 +147,33 @@ export async function closeNeo4jDriver(): Promise<void> {
   await teardownRealDriver();
 }
 
+function getNeo4jCircuitState(): CircuitState {
+  if (neo4jCircuitOpenUntil === 0) {
+    return 'closed';
+  }
+
+  if (Date.now() >= neo4jCircuitOpenUntil) {
+    return 'half-open';
+  }
+
+  return 'open';
+}
+
+function recordNeo4jSuccess(): void {
+  neo4jFailureCount = 0;
+  neo4jCircuitOpenUntil = 0;
+  neo4jLastError = undefined;
+}
+
+function recordNeo4jFailure(error: Error): void {
+  neo4jFailureCount += 1;
+  neo4jLastError = error.message;
+
+  if (neo4jFailureCount >= NEO4J_FAILURE_THRESHOLD) {
+    neo4jCircuitOpenUntil = Date.now() + NEO4J_COOLDOWN_MS;
+  }
+}
+
 export class Neo4jService {
   constructor(private readonly _driver: Neo4jDriver = getNeo4jDriver()) {}
 
@@ -235,6 +275,58 @@ async function teardownRealDriver(): Promise<void> {
 
   isMockMode = true;
   neo4jConnectivityUp.set(0);
+}
+
+export type Neo4jHealth = {
+  healthy: boolean;
+  circuitState: CircuitState;
+  latencyMs?: number;
+  lastError?: string;
+};
+
+export async function checkNeo4jHealth(): Promise<Neo4jHealth> {
+  const circuitState = getNeo4jCircuitState();
+
+  if (circuitState === 'open') {
+    return {
+      healthy: false,
+      circuitState,
+      lastError: neo4jLastError,
+    };
+  }
+
+  const start = Date.now();
+
+  try {
+    await ensureInitialization();
+    const driver = getNeo4jDriver();
+    await driver.verifyConnectivity();
+    recordNeo4jSuccess();
+
+    return {
+      healthy: true,
+      circuitState: getNeo4jCircuitState(),
+      latencyMs: Date.now() - start,
+    };
+  } catch (error) {
+    recordNeo4jFailure(error as Error);
+
+    try {
+      await teardownRealDriver();
+      await ensureInitialization();
+    } catch (reconnectError) {
+      logger.warn(
+        'Neo4j reinitialization failed during health check',
+        reconnectError,
+      );
+    }
+
+    return {
+      healthy: false,
+      circuitState: getNeo4jCircuitState(),
+      lastError: (error as Error).message,
+    };
+  }
 }
 
 function createDriverFacade(): Neo4jDriver {
