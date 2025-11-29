@@ -164,7 +164,7 @@ Located in `/docs/sprints/`
 | **Sprint 2026-01-19** | Jan 19-30 | `sprint_plan_jan_19_30_2026_america_denver.md` | Federation v2 |
 | **Sprint 2026-02-02** | Feb 2-13 | `sprint_plan_feb_2_13_2026_america_denver.md` | Privacy enhancements |
 | **Sprint 2026-02-16** | Feb 16-27 | `sprint_plan_feb_16_27_2026_america_denver.md` | Policy Intelligence v1.5 |
-| **Sprint 2026-03-02** | Mar 2-13 | `sprint_plan_mar_2_13_2026_america_denver.md` | Graph UI v2.3 |
+| **Sprint 2026-03-02** | Mar 2-13 | `sprint_plan_mar_2_13_2026_america_denver.md` | Early Access Launch |
 
 **Key Themes:** Advanced federation, privacy, policy maturity
 

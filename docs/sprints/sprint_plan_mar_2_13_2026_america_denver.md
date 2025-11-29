@@ -1,193 +1,146 @@
-# Sprint Plan — Mar 2–13, 2026 (America/Denver)
+# Sprint: Mar 2–13, 2026 (America/Denver) — “Early Access **Launch**”
 
-> **Context:** Fifth sprint of 2026. Consolidate GA releases from February and push toward proactive prevention, cheaper/safer automation, and repeatable investigation workflows.
-
----
-
-## 1) Sprint Goal (SMART)
-
-Release **Policy Intelligence v1.6 (Proactive Prevention GA)**, **Graph UI v2.4** (scenario templates, control rollout tracking, exposure KPI pages), **SOAR v2.2** (dry‑run simulator GA + quota‑by‑risk + cost v1.1), and **Intel v5.4** (semi‑supervised uplift + federation 50%) to reach **MTTC P50 ≤ 7.0 min / P90 ≤ 17 min** and **auto‑approved low‑risk actions ≥ 50%** with **false‑allow = 0** — **by Mar 13, 2026**.
-
-**Key outcomes**
-
-- Policy prevention blocks risky merges pre‑commit with clear explanations and safe alternatives.
-- Graph provides reusable **scenario templates** and **control rollout trackers** tied to remediation SLAs; exposure KPIs by entity/team.
-- SOAR dry‑run simulator GA enables cost/impact previews; quotas enforced **by risk level** with budget/cost telemetry v1.1.
-- Intel v5.4 improves precision/recall with semi‑supervised learning; partner federation broadened to **50% sample** under guardrails.
+**Sprint Goal:** Open the gates to a controlled Early Access (EA) cohort. Ship trust & readiness: (1) tenant backup/restore, (2) incident & status comms, (3) SOC-2 lite controls & audit packs, (4) plan-based feature gating end-to-end, (5) in-app announcements & changelog, (6) DR drill.
 
 ---
 
-## 2) Success Metrics & Verification
+## Sprint Backlog (stories, AC, estimate)
 
-- **Incident response:** MTTC **P50 ≤ 7.0 min**, **P90 ≤ 17 min** (7‑day rolling).  
-  _Verify:_ Incident dashboard; weekly export.
-- **Policy prevention efficacy:** Blocks **≥ 85%** of high‑risk changes in backtests; suggestion acceptance **≥ 70%**; **0** critical authz escapes.  
-  _Verify:_ CI gate logs; audit; offline eval.
-- **Automation adoption & safety:** **≥ 50%** of eligible actions auto‑approved (low‑risk only); **false‑allow = 0** in prod.  
-  _Verify:_ SOAR logs; simulation reports.
-- **Graph adoption:** **≥ 80%** of P1/P2 investigations use templates or rollout tracking; KPI pages viewed weekly by **≥ 75%** of analysts.  
-  _Verify:_ UI telemetry; ticket linkage.
-- **Intel quality:** κ **≥ 0.85**; Brier **≤ 0.12** on canary; override rate **≤ 7%**.  
-  _Verify:_ Eval reports; sampling.
-- **Cost governance:** Cost captured for **≥ 95%** automated actions; budget breach alerts **= 0**.  
-  _Verify:_ Cost dashboard; alert logs.
+1. **Tenant Backup/Restore (MVP)** — *8 pts*
+   As an admin, I can snapshot a tenant (config + policy + graph + evidence bundles) and restore to a fresh sandbox.
+   **AC:** Snapshot completes <15 min on golden tenant; restore idempotent; cryptographic manifest; RBAC preserved.
 
----
+2. **Incident Comms & Status Page** — *5 pts*
+   As an operator, I publish incidents/maintenance with tenant impact, timelines, and RCA notes.
+   **AC:** Public status page + in-app banner; templated comms; webhook for partner Slack.
 
-## 3) Scope
+3. **SOC-2 Lite Control Pack** — *5 pts*
+   As a prospect, I can request a downloadable control pack (change mgmt, access, backup, audit logging).
+   **AC:** Generated PDF/HTML pack; evidence links to audit queries; date-stamped.
 
-**Must‑have (commit):**
+4. **Plan-Based Feature Gating (E2E)** — *5 pts*
+   As PM/FE/BE, features are gated by plan (Free/Pro/Ent) across UI, API, and export.
+   **AC:** Central policy; 10 contract tests; “blocked by plan” UX consistent.
 
-- **Policy v1.6 (Prevention GA):** pre‑commit simulations on submit; proactive guardrails default‑on; example‑based explanations; exception workflow with approvals; safety/kill‑switch; telemetry.
-- **Graph v2.4:** reusable scenario **templates**; **control rollout tracking** (ticket status, SLA timers); **exposure KPI pages** (entity/team); performance tuning; permissions/audit.
-- **SOAR v2.2:** **dry‑run simulator GA** (cost + impact preview per playbook); **quota‑by‑risk** policies; **cost dashboard v1.1** (accuracy sampling, per‑action/vendor/tenant trends); resiliency polish.
-- **Intel v5.4:** semi‑supervised improvements (consistency regularization/weak‑label voting); disagreement detection v2; reviewer routing refinements; **federation 50%** sample (guarded); calibration monitoring.
-- **Operational analytics:** exec weekly snapshot automations; adoption widgets; SLA panels (policy reviews, control rollouts, approvals).
+5. **In-App Announcements & Changelog** — *5 pts*
+   As a user, I see a non-intrusive announcement center and a versioned changelog tied to flags/releases.
+   **AC:** Dismissible; per-tenant targeting; permalink to release notes.
 
-**Stretch:**
+6. **Disaster Recovery Drill (Tabletop + Sim)** — *5 pts*
+   As ops, we run a DR play: simulate region outage; restore two tenants from latest backups; RTO/RPO recorded.
+   **AC:** Tabletop doc + simulated drill; RTO≤4h, RPO≤24h on test tenants; follow-ups logged.
 
-- **Responder Copilot v0.6 (alpha):** guided next steps combining prevention + graph templates (read‑only).
-- **SOAR cost optimizer (proto):** recommend cheaper equivalent actions when risk allows.
-- **Graph KPI exports:** scheduled PDF/email to owners.
+7. **Support Escalation & On-Call Runbooks** — *3 pts*
+   As support, I have clear L1→L2→Eng escalation, with APIs/queries for common diagnostics.
+   **AC:** Playbooks published; escalation SLAs; one live drill.
 
-**Out‑of‑scope:**
+**Stretch (time-boxed):**
+8) **Data Residency Selector (EU/US Beta)** — *3 pts*
+Tenant can be pinned to EU/US data plane at create time.
+**AC:** Residency label enforced in storage & compute; cross-region export blocked unless allowed.
 
-- Destructive automation default‑on; cross‑tenant playbooks; external policy editor.
-
----
-
-## 4) Team & Capacity
-
-- Same roster; **10 working days**; focus factor **0.8** → **commit 40 pts** (≈50 nominal); keep ~10% slack for interrupts.
+*Total forecast: 36–39 pts (stretch optional).*
 
 ---
 
-## 5) Backlog (Ready for Sprint)
+## Definition of Done (DoD)
 
-### Epic BI — Policy Intelligence v1.6 (Prevention GA) — **12 pts**
+* All AC met; feature flags controllable per plan and per tenant; stage demo updated.
+* Tests: unit + contract; recorded E2E covering backup→restore→export; plan-gating contracts.
+* Security/GRC: SOC-2 lite pack generated; access reviews run; audit queries captured.
+* Observability: dashboards include snapshot duration, restore success, incident publish SLA, DR RTO/RPO.
 
-- **BI1 — Pre‑commit simulation & guardrails default‑on** (5 pts)  
-  _AC:_ risk preview; block unsafe; exception flow; audit; kill‑switch.
-- **BI2 — Example‑based explanations** (4 pts)  
-  _AC:_ past incident links; expected blast radius; copy reviewed.
-- **BI3 — Telemetry & governance** (3 pts)  
-  _AC:_ acceptance/override metrics; owner dashboards; alerts.
+## Definition of Ready (DoR)
 
-### Epic BJ — Graph UI v2.4 — **10 pts**
-
-- **BJ1 — Scenario templates** (4 pts)  
-  _AC:_ create/share; permissions; freshness banner; export.
-- **BJ2 — Control rollout tracking** (4 pts)  
-  _AC:_ ticket linkage; SLA timers; status board.
-- **BJ3 — Exposure KPI pages** (2 pts)  
-  _AC:_ entity/team trends; CSV/PDF export.
-
-### Epic BK — SOAR v2.2 — **12 pts**
-
-- **BK1 — Dry‑run simulator GA** (5 pts)  
-  _AC:_ cost/impact preview; safety checks; replay mode; logs.
-- **BK2 — Quota‑by‑risk + policies** (4 pts)  
-  _AC:_ thresholds per risk; breach handling; reports.
-- **BK3 — Cost v1.1 + resiliency** (3 pts)  
-  _AC:_ accuracy sampling; trend panels; alarms.
-
-### Epic BL — Intel v5.4 — **6 pts**
-
-- **BL1 — Semi‑supervised uplift** (3 pts)  
-  _AC:_ method docs; eval lift vs v5.2; registry v5.4.
-- **BL2 — Federation 50% (guarded)** (3 pts)  
-  _AC:_ isolation; PII filters; budget caps; canary→GA; calibration.
-
-### Epic BM — Operational Analytics & Enablement — **2 pts**
-
-- **BM1 — Exec snapshot + dashboards** (2 pts)  
-  _AC:_ weekly PDF/email; KPIs; drill‑downs.
-
-> **Planned:** 42 pts total — **commit 40 pts**, hold ~2 pts buffer.
+* Each story has AC, dependencies, rollback, test data/tenants, and comms templates (where applicable).
 
 ---
 
-## 6) Dependencies & Assumptions
+## Capacity & Calendar
 
-- CI gate active with exception workflow; approver groups staffed.
-- Graph data fresh ≤ 24h; permissions enforced; ticketing integration reliable.
-- Queue store/idempotency solid; autoscaling quotas approved; cost telemetry mapped.
-- Partner legal/privacy approvals current; budget alerts set; federation traffic isolated.
+* **Capacity:** ~38–42 pts.
+* **Ceremonies:**
 
----
-
-## 7) Timeline & Ceremonies (MT)
-
-- **Mon Mar 2** — Planning & Kickoff; prevention GA safety review (30m).
-- **Fri Mar 6** — Mid‑sprint demo/checkpoint (30m).
-- **Wed Mar 11** — Grooming for next sprint (45m).
-- **Fri Mar 13** — Demo (45m) + Retro (45m) + Release cut.
+  * Sprint Planning: Mon Mar 2, 09:30–11:00
+  * Daily Stand-up: 09:15–09:30
+  * Mid-sprint Refinement: Thu Mar 5, 14:00–14:45
+  * Sprint Review (EA go/no-go): Fri Mar 13, 10:00–11:00
+  * Retro: Fri Mar 13, 11:15–12:00
 
 ---
 
-## 8) Definition of Ready (DoR)
+## Environments, Flags, Data
 
-- Policy catalogs & risk factors documented; datasets ready; flags/telemetry named.
-- Template set defined; ticket fields mapped; SLA targets agreed.
-
-## 9) Definition of Done (DoD)
-
-- Tests pass; dashboards live; audits wired; approvals enforced.
-- Runbooks updated; enablement notes posted; rollback paths tested.
+* **Envs:** dev → stage (EA cohort tenants) with canary + auto-rollback; offsite snapshot bucket.
+* **Flags:** `tenantBackupRestore`, `incidentComms`, `soc2LitePack`, `planGatingE2E`, `announcementsChangelog`, `drDrillV1` (+ `residencySelectorEUUS` stretch).
+* **Test Data:** Two golden tenants (Pro/Ent), seeded graphs/evidence, synthetic outages, sample incident templates.
 
 ---
 
-## 10) QA & Validation Plan
+## QA Plan
 
-- **Policy:** A/B acceptance; backtests; CI gate simulations; exception flow audit.
-- **Graph:** template correctness sampling; rollout tracker e2e (tickets/SLA); KPI calculations spot‑checks.
-- **SOAR:** simulator accuracy sampling; quota breach drills; chaos on queues/runners; cost accuracy vs invoices.
-- **Intel:** κ/Brier monitoring; override rate; reviewer SLA; budget alerts.
+**Functional:**
 
----
+* Backup creates verifiable snapshot; restore preserves RBAC/policies.
+* Status page + banners; webhooks post to test Slack; comms templates render.
+* SOC-2 pack builds with live evidence links; timestamps correct.
+* Plan gating: UI/API/export consistent; negative tests show humane block + upgrade path.
+* Announcements center targets tenants; changelog entries link to release notes.
+* DR drill: restore 2 tenants; RTO/RPO captured; follow-ups filed.
+* Support runbooks accessible; escalation drill completes within SLA.
 
-## 11) Risk Register (RAID)
+**E2E:** Create snapshot → simulate incident → publish status → restore tenant → verify export PASS → annc/changelog entry published.
 
-| Risk                                 | Prob. | Impact | Owner | Mitigation                                  |
-| ------------------------------------ | ----- | -----: | ----- | ------------------------------------------- |
-| Prevention blocks legitimate changes | Med   |    Med | BI1   | Previews; exception path; audits            |
-| Template misuse leaks data           | Low   |   High | BJ1   | Permissions; redaction; audit               |
-| Cost telemetry inaccuracies          | Med   |    Med | BK3   | Reconciliation; thresholds; alerts          |
-| Federation privacy/cost issues       | Low   |    Med | BL2   | Isolation; PII filters; budget caps         |
-| Auto‑approve rate plateaus           | Med   |    Med | BK2   | Expand low‑risk catalog; education; metrics |
+**Non-functional:**
 
----
-
-## 12) Communications & Status
-
-- **Channels:** #sprint‑room (daily), #analyst‑ops (enablement), Exec update (Fri).
-- **Reports:** Burnup; MTTC; assistant acceptance; auto‑approve rate; graph adoption; κ/Brier; SOAR cost.
+* Snapshot duration p95; restore success rate; incident publish SLA (<15 min); DR drill RTO/RPO; status page uptime.
 
 ---
 
-## 13) Compliance/Security Guardrails
+## Risks & Mitigations
 
-- Signed policy changes; immutable audit; least privilege; no PII in model features.
-- Template exports sanitized; tenant boundaries enforced; encryption in transit/at rest.
-- SOAR destructive steps always HITL; blue/green rollouts; reason codes required.
-
----
-
-## 14) Release & Rollback
-
-- **Staged rollout:** Internal cohort → all analysts → selected tenants (if applicable).
-- **Rollback:** Disable prevention; hide templates/trackers/KPIs; revert quota‑by‑risk; scale runners to baseline; pin intel to v5.3.
-- **Docs:** Release notes; analyst changelog; change tickets.
+* **Snapshot size/time bloat** → dedupe + delta strategy; off-peak scheduling; progress UI.
+* **Inconsistent plan gating** → central policy layer + contract tests at API boundary.
+* **Incident comms latency** → canned templates + on-call guard; automation to prefill tenant impact.
+* **DR drill gaps** → tabletop before sim; capture blameless follow-ups with owners/dates.
+* **SOC-2 evidence drift** → nightly job to verify links; pack shows build date and versions.
 
 ---
 
-## 15) Next Sprint Seeds (Mar 16–27, 2026)
+## Reporting Artifacts (produce this sprint)
 
-- **Policy v1.7:** prevention explainability and policy drift prediction GA; suggested guardrails auto‑PRs.
-- **Graph v2.5:** KPI drill‑downs by team/service; recommended controls backlog burn‑down.
-- **SOAR v2.3:** cost optimizer beta; multi‑region active‑active runners.
-- **Intel v5.5:** selective online learning (shadow); federation 60%.
+* EA launch checklist, DR drill report (RTO/RPO), incident/RCA templates, SOC-2 lite control pack, release notes & changelog, burndown/throughput, SLO snapshots.
 
 ---
 
-_Prepared by: Covert Insights — last updated Sep 11, 2025 (America/Denver)._
+## Demo Script (review)
+
+1. Trigger **snapshot** on a Pro tenant → verify manifest + duration.
+2. Flip **incident** to “degraded” → status page + in-app banner + Slack webhook fire.
+3. Run **restore** into sandbox → RBAC/policies intact → complete export with PASS badge.
+4. Open **SOC-2 Lite Pack** → show evidence-linked sections (access, backup, audit).
+5. Toggle **plan gating** on a feature from Pro→Free to show consistent block UX.
+6. Post **announcement** and **changelog** entry → targeted tenant sees banner + permalink.
+7. Review **DR drill** metrics (RTO/RPO) and support escalation runbook.
+
+---
+
+## Jira-ready ticket matrix (copy/paste)
+
+| ID       | Title                                       | Owner       | Est | Dependencies | Acceptance Criteria (summary)                   |
+| -------- | ------------------------------------------- | ----------- | --: | ------------ | ----------------------------------------------- |
+| EA-101   | Tenant Snapshot (Create/Verify)             | BE          |   5 | —            | Snapshot with manifest; duration metric         |
+| EA-102   | Tenant Restore (Sandbox)                    | BE          |   3 | EA-101       | Idempotent; RBAC/policy preserved               |
+| REL-111  | Status Page + Incident Banners              | FE+Ops      |   5 | —            | Publish incidents; Slack webhook; templates     |
+| GRC-121  | SOC-2 Lite Control Pack                     | PM+BE       |   5 | —            | Pack generated; evidence links; timestamped     |
+| PLAN-131 | Plan-Based Feature Gating (E2E)             | BE+FE       |   5 | —            | Central policy; UI/API/export consistent        |
+| COM-141  | Announcements Center + Changelog            | FE          |   5 | —            | Dismissible; targeted; permalink                |
+| OPS-151  | DR Drill (Tabletop + Sim)                   | Ops         |   5 | EA-101/102   | RTO≤4h; RPO≤24h; report published               |
+| SUP-161  | Support Escalation Runbooks + Drill         | Support+Ops |   3 | —            | Playbooks live; drill passes SLA                |
+| RES-171  | Data Residency Selector (EU/US) *(Stretch)* | BE+Ops      |   3 | —            | Residency enforced; cross-region export blocked |
+
+---
+
+### Outcome of this sprint
+
+We exit with **EA-ready** fundamentals: trustworthy backups/restores, crisp incident communications, a downloadable control pack, consistent plan gating, clear announcements/changelog, and a practiced DR motion—unlocking a safe, confident Early Access launch.
