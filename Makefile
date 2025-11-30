@@ -44,7 +44,8 @@ preflight:
 	    echo "ERROR: Node.js $$node_ver found, but >= $(NODE_VERSION) required"; \
 	    exit 1; \
 	  fi
-	@echo "Preflight: OK (Docker running, Node >= $(NODE_VERSION))"
+	@bash scripts/dev-preflight.sh
+	@echo "Preflight: OK (Docker running, Node >= $(NODE_VERSION), Ports free)"
 
 bootstrap: preflight
 	@echo "==> bootstrap: node, python, envs"

@@ -23,7 +23,13 @@ function log_warn() {
 
 function ping_url() {
   local target=$1
-  curl -fsS --max-time 5 "$target" >/dev/null 2>&1
+  # Use -w %{http_code} to get status, check if it's 2xx or 3xx
+  local status
+  status=$(curl -fsS -o /dev/null -w "%{http_code}" --max-time 5 "$target" 2>/dev/null || echo "failed")
+  if [[ "$status" =~ ^[23] ]]; then
+    return 0
+  fi
+  return 1
 }
 
 function check_ports() {
@@ -89,20 +95,33 @@ function diagnose_failure() {
 }
 
 log "Waiting for stack to be healthy (max ${MAX_ATTEMPTS} attempts, ${SLEEP_SECONDS}s between checks)..."
+start_time=$(date +%s)
 
 for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
-  # Check HTTP health endpoints
-  if ping_url "$HEALTH_URL" && ping_url "$READY_URL" && ping_url "$DETAILED_URL" && ping_url "$METRICS_URL"; then
+  # Check HTTP health endpoints individually to report which one is pending
+  failed_check=""
+
+  if ! ping_url "$HEALTH_URL"; then failed_check="$HEALTH_URL";
+  elif ! ping_url "$READY_URL"; then failed_check="$READY_URL";
+  elif ! ping_url "$DETAILED_URL"; then failed_check="$DETAILED_URL";
+  elif ! ping_url "$METRICS_URL"; then failed_check="$METRICS_URL";
+  fi
+
+  if [ -z "$failed_check" ]; then
     # Check port connectivity
     if check_ports; then
-      log "Stack healthy after ${attempt} attempt(s) ✓"
+      end_time=$(date +%s)
+      duration=$((end_time - start_time))
+      log "Stack healthy after ${attempt} attempt(s) (${duration}s) ✓"
       exit 0
+    else
+      failed_check="ports"
     fi
   fi
 
-  # Progress indicator every 5 attempts
+  # Progress indicator every 5 attempts or if verbose
   if [ $((attempt % 5)) -eq 0 ] || [ "$attempt" -eq 1 ]; then
-    log "Waiting for services... (attempt ${attempt}/${MAX_ATTEMPTS})"
+    log "Waiting for services... (attempt ${attempt}/${MAX_ATTEMPTS}) - Pending: $failed_check"
   fi
 
   sleep "$SLEEP_SECONDS"

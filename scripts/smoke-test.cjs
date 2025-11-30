@@ -34,7 +34,7 @@ const config = {
   neo4jUrl: process.env.NEO4J_URL || 'http://localhost:7474',
   metricsUrl: process.env.METRICS_URL || `${defaultApiBase}/metrics`,
   timeout: 30000,
-  maxRetries: 3,
+  maxRetries: process.env.SMOKE_MAX_RETRIES ? parseInt(process.env.SMOKE_MAX_RETRIES) : 3,
   retryDelay: 2000,
   datasetPath: path.resolve(
     process.env.GOLDEN_PATH_DATASET || defaultDataset,
@@ -144,21 +144,25 @@ class SmokeTest {
 
   async test(name, testFn) {
     this.results.total++;
+    const startTime = Date.now();
 
     try {
       await this.log(`🧪 Running: ${name}`);
       await testFn();
+      const duration = Date.now() - startTime;
       this.results.passed++;
-      this.results.details.push({ name, status: 'PASSED' });
-      await this.log(`✅ PASSED: ${name}`, 'success');
+      this.results.details.push({ name, status: 'PASSED', duration });
+      await this.log(`✅ PASSED: ${name} (${duration}ms)`, 'success');
     } catch (error) {
+      const duration = Date.now() - startTime;
       this.results.failed++;
       this.results.details.push({
         name,
         status: 'FAILED',
         error: error.message,
+        duration,
       });
-      await this.log(`❌ FAILED: ${name} - ${error.message}`, 'error');
+      await this.log(`❌ FAILED: ${name} (${duration}ms) - ${error.message}`, 'error');
     }
   }
 
