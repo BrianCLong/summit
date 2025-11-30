@@ -248,6 +248,9 @@ export class AuditSink extends EventEmitter {
     // Use pipeline for efficiency
     const pipeline = this.redis.pipeline();
     const enrichedEvents: Array<{ eventId: string; event: unknown }> = [];
+    const priorityEvents: Array<{ eventId: string; event: unknown }> = [];
+    let queueSize = await this.redis.llen(this.config.queueName);
+    let pipelineHasCommands = false;
 
     for (const input of inputs) {
       const eventId = randomUUID();
@@ -263,20 +266,78 @@ export class AuditSink extends EventEmitter {
         continue;
       }
 
+      const isCritical = this.isCriticalEvent(input);
+
+      if (queueSize >= this.config.maxQueueSize && !isCritical) {
+        if (!this.backpressureActive) {
+          this.backpressureActive = true;
+          await this.redis.publish(
+            this.config.backpressureChannel,
+            JSON.stringify({ active: true, queueSize }),
+          );
+          this.emit('backpressure', true);
+        }
+
+        results.push({
+          success: false,
+          eventId,
+          queued: false,
+          error: 'Queue full - backpressure active',
+        });
+        continue;
+      }
+
       const enrichedEvent = this.enrichEvent(eventId, input);
-      enrichedEvents.push({ eventId, event: enrichedEvent });
-      pipeline.rpush(this.config.queueName, JSON.stringify(enrichedEvent));
+      const serializedEvent = JSON.stringify(enrichedEvent);
+
+      if (queueSize >= this.config.maxQueueSize && isCritical) {
+        priorityEvents.push({ eventId, event: enrichedEvent });
+        pipeline.rpush(`${this.config.queueName}:priority`, serializedEvent);
+        pipelineHasCommands = true;
+      } else {
+        enrichedEvents.push({ eventId, event: enrichedEvent });
+        pipeline.rpush(this.config.queueName, serializedEvent);
+        queueSize += 1;
+        pipelineHasCommands = true;
+      }
     }
 
     try {
-      await pipeline.exec();
+      if (pipelineHasCommands) {
+        await pipeline.exec();
+      }
 
       for (const { eventId } of enrichedEvents) {
         results.push({ success: true, eventId, queued: true });
       }
+
+      for (const { eventId } of priorityEvents) {
+        results.push({ success: true, eventId, queued: true });
+      }
+
+      if (
+        this.backpressureActive &&
+        queueSize < this.config.maxQueueSize * 0.5
+      ) {
+        this.backpressureActive = false;
+        await this.redis.publish(
+          this.config.backpressureChannel,
+          JSON.stringify({ active: false, queueSize }),
+        );
+        this.emit('backpressure', false);
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       for (const { eventId } of enrichedEvents) {
+        results.push({
+          success: false,
+          eventId,
+          queued: false,
+          error: errorMessage,
+        });
+      }
+
+      for (const { eventId } of priorityEvents) {
         results.push({
           success: false,
           eventId,

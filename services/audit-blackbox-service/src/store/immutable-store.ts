@@ -128,15 +128,23 @@ export class ImmutableAuditStore extends EventEmitter {
       await client.query('LOCK TABLE audit_chain IN EXCLUSIVE MODE');
 
       const chainEntries: HashChainEntry[] = [];
+      let workingSequence = this.currentSequence;
+      let workingLastEntry = this.lastChainEntry;
 
       for (const event of events) {
-        const chainEntry = await this.appendEventInternal(client, event);
+        const chainEntry = await this.appendEventInternal(client, event, {
+          currentSequence: workingSequence,
+          lastChainEntry: workingLastEntry,
+        });
         chainEntries.push(chainEntry);
-        this.lastChainEntry = chainEntry;
-        this.currentSequence = chainEntry.sequence;
+        workingSequence = chainEntry.sequence;
+        workingLastEntry = chainEntry;
       }
 
       await client.query('COMMIT');
+
+      this.lastChainEntry = workingLastEntry;
+      this.currentSequence = workingSequence;
 
       // Check for checkpoint
       const lastEntry = chainEntries[chainEntries.length - 1];
@@ -174,6 +182,7 @@ export class ImmutableAuditStore extends EventEmitter {
   private async appendEventInternal(
     client: PoolClient,
     event: AuditEvent,
+    state?: { currentSequence: bigint; lastChainEntry: HashChainEntry | null },
   ): Promise<HashChainEntry> {
     // Ensure event has ID and timestamp
     if (!event.id) {
@@ -186,9 +195,12 @@ export class ImmutableAuditStore extends EventEmitter {
       event.createdAt = new Date();
     }
 
-    const nextSequence = this.currentSequence + 1n;
+    const baseSequence = state?.currentSequence ?? this.currentSequence;
+    const nextSequence = baseSequence + 1n;
     const previousHash =
-      this.lastChainEntry?.chainHash || ImmutableAuditStore.GENESIS_HASH;
+      state?.lastChainEntry?.chainHash ||
+      this.lastChainEntry?.chainHash ||
+      ImmutableAuditStore.GENESIS_HASH;
 
     // Calculate event hash
     const eventHash = this.calculateEventHash(event);

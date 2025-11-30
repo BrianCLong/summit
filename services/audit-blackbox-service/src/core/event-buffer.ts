@@ -160,6 +160,7 @@ export class AuditEventBuffer extends EventEmitter {
     try {
       // Prioritize critical events
       const eventsToFlush: AuditEvent[] = [];
+      const itemsToRequeue: BufferedItem[] = [];
 
       // Take all critical events first
       while (
@@ -168,6 +169,7 @@ export class AuditEventBuffer extends EventEmitter {
       ) {
         const item = this.criticalQueue.shift();
         if (item) {
+          itemsToRequeue.push(item);
           eventsToFlush.push(item.event);
         }
       }
@@ -179,6 +181,7 @@ export class AuditEventBuffer extends EventEmitter {
       ) {
         const item = this.normalQueue.shift();
         if (item) {
+          itemsToRequeue.push(item);
           eventsToFlush.push(item.event);
         }
       }
@@ -220,6 +223,15 @@ export class AuditEventBuffer extends EventEmitter {
     } catch (error) {
       // On failure, re-add events to front of queues
       // Note: In production, you might want more sophisticated retry logic
+      for (let i = itemsToRequeue.length - 1; i >= 0; i--) {
+        const item = itemsToRequeue[i];
+        if (item.priority === 'critical') {
+          this.criticalQueue.unshift(item);
+        } else {
+          this.normalQueue.unshift(item);
+        }
+      }
+
       this.emit('error', error);
       throw error;
     } finally {
