@@ -6,12 +6,12 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
 import pino from 'pino';
-import pinoHttp from 'pino-http';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { loggingMiddleware } from './middleware/logging.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
@@ -79,19 +79,7 @@ export const createApp = async () => {
   );
 
   // Enhanced Pino HTTP logger with correlation and trace context
-  app.use(
-    pinoHttp({
-      logger,
-      redact: ['req.headers.authorization', 'req.headers.cookie'],
-      customProps: (req: any) => ({
-        correlationId: req.correlationId,
-        traceId: req.traceId,
-        spanId: req.spanId,
-        userId: req.user?.sub || req.user?.id,
-        tenantId: req.user?.tenant_id,
-      }),
-    }),
-  );
+  app.use(loggingMiddleware);
 
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
