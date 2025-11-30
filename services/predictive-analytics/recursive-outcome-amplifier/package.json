@@ -1,0 +1,52 @@
+{
+  "name": "@intelgraph/recursive-outcome-amplifier",
+  "version": "1.0.0",
+  "description": "Recursive Outcome Amplifier™ - Predicts cascading consequences through multi-order propagation",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -b",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.9.5",
+    "graphql": "^16.8.1",
+    "neo4j-driver": "^5.14.0",
+    "pino": "^8.16.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "eslint": "^8.53.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "predictive-analytics",
+    "cascade-analysis",
+    "outcome-prediction",
+    "graph-analysis",
+    "intelligence-analysis"
+  ],
+  "author": "Summit/IntelGraph Team",
+  "license": "PROPRIETARY"
+}

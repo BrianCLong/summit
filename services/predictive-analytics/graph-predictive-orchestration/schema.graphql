@@ -1,0 +1,320 @@
+scalar JSON
+scalar DateTime
+
+# Prediction Binding Types
+type PredictionBinding {
+  id: ID!
+  nodeId: String!
+  edgeId: String
+  predictionType: PredictionType!
+  modelId: String!
+  modelVersion: String!
+  prediction: Prediction!
+  triggerRules: [TriggerRule!]!
+  status: BindingStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Prediction {
+  value: JSON!
+  confidence: Float!
+  timestamp: DateTime!
+  expiresAt: DateTime
+  metadata: JSON
+}
+
+type TriggerRule {
+  id: ID!
+  condition: RuleCondition!
+  workflowTemplate: String!
+  parameters: JSON!
+  policyCheck: String!
+  priority: Int!
+}
+
+type RuleCondition {
+  field: String!
+  operator: ConditionOperator!
+  threshold: JSON!
+}
+
+enum PredictionType {
+  FORECAST
+  RISK_SCORE
+  ANOMALY
+  CLASSIFICATION
+}
+
+enum BindingStatus {
+  ACTIVE
+  TRIGGERED
+  EXPIRED
+}
+
+enum ConditionOperator {
+  GT
+  LT
+  EQ
+  IN
+  BETWEEN
+}
+
+# Decision Flow Types
+type DecisionFlow {
+  id: ID!
+  bindingId: String!
+  triggeredBy: TriggerRule!
+  workflowTemplate: String!
+  status: FlowStatus!
+  context: FlowContext!
+  policyDecision: PolicyDecision!
+  execution: FlowExecution
+  createdAt: DateTime!
+}
+
+type FlowContext {
+  prediction: Prediction!
+  graphContext: GraphContext!
+}
+
+type GraphContext {
+  nodeProperties: JSON!
+  neighborhoodSize: Int!
+  pathways: [String!]!
+}
+
+type PolicyDecision {
+  allowed: Boolean!
+  reason: String
+  policy: String!
+}
+
+type FlowExecution {
+  startedAt: DateTime!
+  completedAt: DateTime
+  steps: [ExecutionStep!]!
+  outcome: ExecutionOutcome!
+}
+
+type ExecutionStep {
+  id: ID!
+  name: String!
+  status: StepStatus!
+  startedAt: DateTime!
+  completedAt: DateTime
+  result: JSON
+}
+
+enum FlowStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum StepStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+enum ExecutionOutcome {
+  SUCCESS
+  FAILURE
+  PARTIAL
+}
+
+# Operational Pathway Types
+type OperationalPathway {
+  id: ID!
+  name: String!
+  type: PathwayType!
+  topology: PathwayTopology!
+  status: PathwayStatus!
+  metrics: PathwayMetrics!
+  rewiringHistory: [RewiringEvent!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PathwayTopology {
+  startNodeId: String!
+  endNodeId: String!
+  intermediateNodes: [String!]!
+  edges: [PathwayEdge!]!
+}
+
+type PathwayEdge {
+  from: String!
+  to: String!
+  weight: Float!
+  properties: JSON!
+}
+
+type PathwayMetrics {
+  throughput: Float!
+  latency: Float!
+  cost: Float!
+  reliability: Float!
+}
+
+type RewiringEvent {
+  id: ID!
+  timestamp: DateTime!
+  reason: String!
+  predictionId: String
+  oldTopology: JSON!
+  newTopology: JSON!
+  impact: JSON!
+}
+
+enum PathwayType {
+  SUPPLY_CHAIN
+  DATA_FLOW
+  INVESTIGATION
+  RESPONSE
+}
+
+enum PathwayStatus {
+  ACTIVE
+  DEPRECATED
+  REWIRED
+}
+
+# Inputs
+input BindPredictionInput {
+  nodeId: String!
+  edgeId: String
+  predictionType: PredictionType!
+  modelId: String!
+  modelVersion: String!
+  prediction: PredictionInput!
+  triggerRules: [TriggerRuleInput!]!
+}
+
+input PredictionInput {
+  value: JSON!
+  confidence: Float!
+  expiresAt: DateTime
+  metadata: JSON
+}
+
+input TriggerRuleInput {
+  condition: RuleConditionInput!
+  workflowTemplate: String!
+  parameters: JSON!
+  policyCheck: String!
+  priority: Int!
+}
+
+input RuleConditionInput {
+  field: String!
+  operator: ConditionOperator!
+  threshold: JSON!
+}
+
+input CreateFlowInput {
+  bindingId: String!
+  triggeredBy: String!
+  context: JSON!
+}
+
+input RewirePathwayInput {
+  pathwayId: String!
+  strategy: RewiringStrategy!
+  predictionId: String!
+  constraints: JSON
+}
+
+enum RewiringStrategy {
+  BYPASS
+  PARALLEL
+  CONSOLIDATE
+  OPTIMIZE
+}
+
+type RewiringSimulation {
+  originalMetrics: PathwayMetrics!
+  projectedMetrics: PathwayMetrics!
+  impact: JSON!
+  recommendation: String!
+}
+
+# Queries
+extend type Query {
+  """Get prediction binding by ID"""
+  predictionBinding(id: ID!): PredictionBinding
+
+  """Get all bindings for a node"""
+  nodeBindings(nodeId: String!): [PredictionBinding!]!
+
+  """Get active bindings across graph"""
+  activeBindings(
+    predictionType: PredictionType
+    minConfidence: Float
+    limit: Int
+    offset: Int
+  ): [PredictionBinding!]!
+
+  """Get decision flow by ID"""
+  decisionFlow(id: ID!): DecisionFlow
+
+  """Get active decision flows"""
+  activeFlows(
+    status: FlowStatus
+    workflowTemplate: String
+    limit: Int
+    offset: Int
+  ): [DecisionFlow!]!
+
+  """Get operational pathway by ID"""
+  operationalPathway(id: ID!): OperationalPathway
+
+  """Get all pathways"""
+  operationalPathways(
+    type: PathwayType
+    status: PathwayStatus
+  ): [OperationalPathway!]!
+
+  """Evaluate trigger rules against a binding"""
+  evaluateTriggers(bindingId: ID!): [TriggerRule!]!
+
+  """Simulate pathway rewiring"""
+  simulateRewiring(input: RewirePathwayInput!): RewiringSimulation!
+}
+
+# Mutations
+extend type Mutation {
+  """Bind a prediction to a graph node/edge"""
+  bindPrediction(input: BindPredictionInput!): PredictionBinding!
+
+  """Manually trigger a decision flow"""
+  createDecisionFlow(input: CreateFlowInput!): DecisionFlow!
+
+  """Rewire an operational pathway"""
+  rewirePathway(input: RewirePathwayInput!): OperationalPathway!
+
+  """Execute a decision (with policy check)"""
+  executeDecision(flowId: ID!): FlowExecution!
+
+  """Cancel a running flow"""
+  cancelFlow(flowId: ID!): Boolean!
+
+  """Expire a prediction binding"""
+  expireBinding(bindingId: ID!): Boolean!
+}
+
+# Subscriptions
+extend type Subscription {
+  """Subscribe to new prediction bindings"""
+  predictionBound(nodeId: String): PredictionBinding!
+
+  """Subscribe to flow status changes"""
+  flowUpdated(flowId: ID): DecisionFlow!
+
+  """Subscribe to pathway rewiring events"""
+  pathwayRewired(pathwayId: ID): OperationalPathway!
+}

@@ -1,0 +1,254 @@
+scalar JSON
+scalar DateTime
+
+type UncertaintyField {
+  id: ID!
+  investigationId: ID!
+  dimensions: [FieldDimension!]!
+  points: [FieldPoint!]!
+  resolution: FieldResolution!
+  generatedAt: DateTime!
+  metadata: FieldMetadata!
+  turbulentZones: [TurbulentZone!]!
+}
+
+type FieldDimension {
+  name: String!
+  type: DimensionType!
+  range: DimensionRange!
+  unit: String
+}
+
+enum DimensionType {
+  TEMPORAL
+  SPATIAL
+  CATEGORICAL
+  CONTINUOUS
+}
+
+type DimensionRange {
+  min: Float
+  max: Float
+  categories: [String!]
+}
+
+type FieldPoint {
+  coordinates: JSON!
+  uncertainty: Float!
+  source: PointSource!
+  confidence: Float!
+  contributors: [ID!]!
+}
+
+enum PointSource {
+  MEASURED
+  INTERPOLATED
+  EXTRAPOLATED
+}
+
+type FieldResolution {
+  gridSize: Int!
+  adaptiveRefinement: Boolean!
+  minPointDensity: Float!
+}
+
+type FieldMetadata {
+  totalPoints: Int!
+  measuredPoints: Int!
+  interpolatedPoints: Int!
+  extrapolatedPoints: Int!
+  averageUncertainty: Float!
+  maxUncertainty: Float!
+  minUncertainty: Float!
+  generationTimeMs: Int!
+}
+
+type UncertaintySurface {
+  id: ID!
+  fieldId: ID!
+  dimensions: [String!]!
+  grid: SurfaceGrid!
+  contours: [ContourLevel!]!
+  gradients: [GradientVector!]!
+  peaks: [SurfacePeak!]!
+}
+
+type SurfaceGrid {
+  xDimension: String!
+  yDimension: String!
+  xResolution: Int!
+  yResolution: Int!
+  values: [[Float!]!]!
+}
+
+type ContourLevel {
+  value: Float!
+  path: [Coordinate!]!
+  enclosed: Boolean!
+}
+
+type Coordinate {
+  x: Float!
+  y: Float!
+}
+
+type GradientVector {
+  position: Coordinate!
+  magnitude: Float!
+  direction: [Float!]!
+}
+
+type SurfacePeak {
+  position: Coordinate!
+  height: Float!
+  prominence: Float!
+  surrounding: [Coordinate!]!
+}
+
+type TurbulentZone {
+  id: ID!
+  fieldId: ID!
+  bounds: ZoneBounds!
+  intensity: Float!
+  volume: Float!
+  persistence: Float!
+  drivers: [UncertaintyDriver!]!
+  recommendations: [StabilizationStrategy!]!
+  markedBy: String
+  markedAt: DateTime
+  notes: String
+}
+
+type ZoneBounds {
+  dimensions: JSON!
+  center: JSON!
+  extent: JSON!
+}
+
+type UncertaintyDriver {
+  factor: String!
+  contribution: Float!
+  trend: DriverTrend!
+  source: String!
+  description: String
+}
+
+enum DriverTrend {
+  INCREASING
+  DECREASING
+  STABLE
+}
+
+type StabilizationStrategy {
+  id: ID!
+  zoneId: ID!
+  type: StrategyType!
+  priority: Float!
+  expectedReduction: Float!
+  effort: EffortLevel!
+  actions: [StabilizationAction!]!
+  estimatedCost: Float
+  estimatedTimeWeeks: Float
+}
+
+enum StrategyType {
+  DATA_COLLECTION
+  MODEL_REFINEMENT
+  CONSTRAINT_ADDITION
+  SCENARIO_PRUNING
+}
+
+enum EffortLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+type StabilizationAction {
+  description: String!
+  target: String!
+  method: String!
+  estimatedImpact: Float!
+  details: JSON
+}
+
+type StabilizationResult {
+  success: Boolean!
+  strategyId: ID!
+  appliedAt: DateTime!
+  actualReduction: Float
+  message: String
+}
+
+# Inputs
+input FieldConfig {
+  dimensions: [FieldDimensionInput!]!
+  resolution: FieldResolutionInput!
+  interpolationMethod: InterpolationMethod
+  threshold: Float
+}
+
+input FieldDimensionInput {
+  name: String!
+  type: DimensionType!
+  range: DimensionRangeInput!
+  unit: String
+}
+
+input DimensionRangeInput {
+  min: Float
+  max: Float
+  categories: [String!]
+}
+
+input FieldResolutionInput {
+  gridSize: Int!
+  adaptiveRefinement: Boolean
+  minPointDensity: Float
+}
+
+enum InterpolationMethod {
+  RBF_GAUSSIAN
+  RBF_MULTIQUADRIC
+  KRIGING
+  NEAREST_NEIGHBOR
+}
+
+input ZoneBoundsInput {
+  dimensions: JSON!
+  center: JSON!
+  extent: JSON!
+}
+
+# Queries
+type Query {
+  """Get uncertainty field for an investigation"""
+  getUncertaintyField(investigationId: ID!, config: FieldConfig): UncertaintyField
+
+  """Get 2D/3D surface representation of uncertainty field"""
+  getSurface(fieldId: ID!, dimensions: [String!]!): UncertaintySurface
+
+  """Get turbulent zones (high uncertainty regions) in a field"""
+  getTurbulentZones(fieldId: ID!, threshold: Float): [TurbulentZone!]!
+
+  """Get stabilization plan for a turbulent zone"""
+  getStabilizationPlan(zoneId: ID!): [StabilizationStrategy!]!
+
+  """List all uncertainty fields for an investigation"""
+  listFields(investigationId: ID!): [UncertaintyField!]!
+}
+
+# Mutations
+type Mutation {
+  """Generate a new uncertainty field from predictions"""
+  generateField(investigationId: ID!, config: FieldConfig!): UncertaintyField!
+
+  """Manually mark a turbulent zone of interest"""
+  markZone(fieldId: ID!, bounds: ZoneBoundsInput!, notes: String): TurbulentZone!
+
+  """Apply a stabilization strategy to reduce uncertainty"""
+  applyStabilization(strategyId: ID!): StabilizationResult!
+
+  """Delete an uncertainty field"""
+  deleteField(fieldId: ID!): Boolean!
+}

@@ -1,0 +1,342 @@
+"""
+Causal Horizon Engine Schema
+Provides causal inference and counterfactual reasoning capabilities
+"""
+
+scalar JSON
+scalar DateTime
+
+"""Causal graph representing cause-effect relationships"""
+type CausalGraph {
+  id: ID!
+  investigationId: String!
+  nodes: [CausalNode!]!
+  edges: [CausalEdge!]!
+  metadata: CausalGraphMetadata!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Metadata about the causal graph"""
+type CausalGraphMetadata {
+  nodeCount: Int!
+  edgeCount: Int!
+  source: String!
+  confidence: Float!
+  isAcyclic: Boolean!
+  hasLatentVariables: Boolean!
+}
+
+"""Node in the causal graph"""
+type CausalNode {
+  id: ID!
+  name: String!
+  type: NodeType!
+  domain: DomainType!
+  description: String
+  incomingEdges: [CausalEdge!]!
+  outgoingEdges: [CausalEdge!]!
+  ancestors: [CausalNode!]!
+  descendants: [CausalNode!]!
+}
+
+"""Type of causal node"""
+enum NodeType {
+  OBSERVABLE
+  LATENT
+  INTERVENTION
+}
+
+"""Domain type for variable values"""
+enum DomainType {
+  CONTINUOUS
+  DISCRETE
+  BINARY
+  CATEGORICAL
+}
+
+"""Edge in the causal graph representing causal relationship"""
+type CausalEdge {
+  id: ID!
+  from: CausalNode!
+  to: CausalNode!
+  type: EdgeType!
+  strength: Float!
+  confidence: Float!
+  mechanism: String
+  metadata: JSON
+}
+
+"""Type of causal edge"""
+enum EdgeType {
+  DIRECT_CAUSE
+  CONFOUNDER
+  MEDIATOR
+  COLLIDER
+  SELECTION_BIAS
+}
+
+"""Intervention on a variable"""
+type Intervention {
+  variable: String!
+  value: JSON!
+  type: InterventionType!
+  cost: Float
+  feasibility: Float
+}
+
+"""Type of intervention"""
+enum InterventionType {
+  HARD
+  SOFT
+}
+
+"""Set of interventions with total cost"""
+type InterventionSet {
+  interventions: [Intervention!]!
+  totalCost: Float!
+  expectedEffect: Float!
+  confidence: Float!
+  rank: Int
+}
+
+"""Counterfactual scenario specification"""
+type CounterfactualScenario {
+  id: ID!
+  name: String!
+  description: String
+  graphId: ID!
+  interventions: [Intervention!]!
+  target: Target!
+  evidence: JSON
+  createdAt: DateTime!
+}
+
+"""Target variable and desired outcome"""
+type Target {
+  variable: String!
+  desiredValue: JSON
+  threshold: Float
+}
+
+"""Result of counterfactual simulation"""
+type CounterfactualResult {
+  scenario: CounterfactualScenario!
+  outcome: Outcome!
+  causalPaths: [CausalPath!]!
+  comparisonToFactual: Comparison!
+  sensitivity: SensitivityAnalysis
+}
+
+"""Outcome of intervention"""
+type Outcome {
+  variable: String!
+  value: JSON!
+  probability: Float!
+  confidenceInterval: [Float!]!
+  distribution: JSON
+}
+
+"""Causal path between variables"""
+type CausalPath {
+  nodes: [String!]!
+  edges: [CausalEdge!]!
+  type: PathType!
+  strength: Float!
+  contribution: Float!
+  isActive: Boolean!
+}
+
+"""Type of causal path"""
+enum PathType {
+  DIRECT
+  MEDIATED
+  CONFOUNDED
+  BLOCKED
+}
+
+"""Comparison between factual and counterfactual outcomes"""
+type Comparison {
+  factualValue: JSON!
+  counterfactualValue: JSON!
+  absoluteDifference: Float!
+  percentChange: Float!
+  causalEffect: Float!
+}
+
+"""Sensitivity analysis for robustness to unmeasured confounding"""
+type SensitivityAnalysis {
+  robustnessValue: Float!
+  confoundingStrengthRequired: Float!
+  isRobust: Boolean!
+  explanation: String!
+}
+
+"""Analysis of causal paths between variables"""
+type PathAnalysis {
+  source: String!
+  target: String!
+  directPaths: [CausalPath!]!
+  indirectPaths: [CausalPath!]!
+  totalEffect: Float!
+  directEffect: Float!
+  indirectEffect: Float!
+}
+
+"""Identifiability result for causal effect"""
+type IdentifiabilityResult {
+  isIdentifiable: Boolean!
+  method: String
+  adjustmentSet: [String!]
+  explanation: String!
+}
+
+# Queries
+type Query {
+  """Get causal graph for an investigation"""
+  getCausalGraph(investigationId: ID!): CausalGraph
+
+  """Get causal graph by ID"""
+  getCausalGraphById(graphId: ID!): CausalGraph
+
+  """Simulate intervention and predict outcome"""
+  simulateIntervention(
+    graphId: ID!
+    interventions: [InterventionInput!]!
+    target: TargetInput!
+    evidence: JSON
+  ): CounterfactualResult!
+
+  """Find optimal intervention sets to achieve goal"""
+  findOptimalInterventions(
+    graphId: ID!
+    target: TargetInput!
+    constraints: ConstraintsInput
+  ): [InterventionSet!]!
+
+  """Analyze causal paths between variables"""
+  getCausalPaths(
+    graphId: ID!
+    source: String!
+    target: String!
+  ): PathAnalysis!
+
+  """Check if causal effect is identifiable"""
+  isIdentifiable(
+    graphId: ID!
+    intervention: String!
+    outcome: String!
+  ): IdentifiabilityResult!
+
+  """Get counterfactual scenario by ID"""
+  getCounterfactualScenario(scenarioId: ID!): CounterfactualScenario
+
+  """List all causal graphs"""
+  listCausalGraphs(limit: Int, offset: Int): [CausalGraph!]!
+
+  """List counterfactual scenarios for a graph"""
+  listScenarios(graphId: ID!): [CounterfactualScenario!]!
+}
+
+# Mutations
+type Mutation {
+  """Create causal model from Neo4j data"""
+  createCausalModel(
+    investigationId: ID!
+    config: CausalModelConfigInput
+  ): CausalGraph!
+
+  """Add intervention to scenario"""
+  addIntervention(
+    scenarioId: ID!
+    intervention: InterventionInput!
+  ): CounterfactualScenario!
+
+  """Run counterfactual analysis"""
+  runCounterfactual(
+    scenario: CounterfactualScenarioInput!
+  ): CounterfactualResult!
+
+  """Update causal graph structure"""
+  updateCausalGraph(
+    graphId: ID!
+    updates: CausalGraphUpdatesInput!
+  ): CausalGraph!
+
+  """Delete causal graph"""
+  deleteCausalGraph(graphId: ID!): Boolean!
+
+  """Create counterfactual scenario"""
+  createScenario(
+    graphId: ID!
+    name: String!
+    description: String
+    interventions: [InterventionInput!]!
+    target: TargetInput!
+    evidence: JSON
+  ): CounterfactualScenario!
+
+  """Delete counterfactual scenario"""
+  deleteScenario(scenarioId: ID!): Boolean!
+}
+
+# Input Types
+input InterventionInput {
+  variable: String!
+  value: JSON!
+  type: InterventionType!
+  cost: Float
+}
+
+input TargetInput {
+  variable: String!
+  desiredValue: JSON
+  threshold: Float
+}
+
+input ConstraintsInput {
+  maxCost: Float
+  maxInterventions: Int
+  requiredVariables: [String!]
+  forbiddenVariables: [String!]
+}
+
+input CausalModelConfigInput {
+  edgeConfidenceThreshold: Float
+  includeLatentVariables: Boolean
+  temporalOrdering: Boolean
+  maxNodes: Int
+}
+
+input CausalGraphUpdatesInput {
+  addNodes: [CausalNodeInput!]
+  removeNodes: [String!]
+  addEdges: [CausalEdgeInput!]
+  removeEdges: [String!]
+  updateMetadata: JSON
+}
+
+input CausalNodeInput {
+  name: String!
+  type: NodeType!
+  domain: DomainType!
+  description: String
+}
+
+input CausalEdgeInput {
+  from: String!
+  to: String!
+  type: EdgeType!
+  strength: Float!
+  confidence: Float
+  mechanism: String
+}
+
+input CounterfactualScenarioInput {
+  graphId: ID!
+  name: String!
+  description: String
+  interventions: [InterventionInput!]!
+  target: TargetInput!
+  evidence: JSON
+}

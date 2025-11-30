@@ -1,0 +1,417 @@
+"""
+Synthetic Future Persona Models - Digital twins that evolve over time based on predicted futures
+"""
+
+scalar DateTime
+
+"""
+A synthetic persona representing a possible future evolution of an entity
+"""
+type SyntheticPersona {
+  """Unique identifier for this synthetic persona"""
+  id: ID!
+
+  """The source entity this persona is derived from"""
+  sourceEntityId: ID!
+
+  """Baseline behavioral profile at T0"""
+  baselineProfile: BehavioralProfile!
+
+  """All simulated trajectories for this persona"""
+  trajectories: [FutureTrajectory!]!
+
+  """Rate at which behaviors mutate under pressure (0.0 - 1.0)"""
+  mutationRate: Float!
+
+  """Resistance to behavioral change (0.0 - 1.0)"""
+  stabilityCoefficient: Float!
+
+  """Confidence in persona accuracy (0.0 - 1.0)"""
+  confidence: Float!
+
+  """When this persona was generated"""
+  createdAt: DateTime!
+
+  """When this persona should be regenerated"""
+  validUntil: DateTime!
+
+  """Version of the generator algorithm used"""
+  generatorVersion: String!
+}
+
+"""
+A simulated future trajectory showing how a persona evolves over time
+"""
+type FutureTrajectory {
+  """Unique identifier for this trajectory"""
+  id: ID!
+
+  """The persona being simulated"""
+  personaId: ID!
+
+  """The scenario applied during simulation"""
+  scenarioId: String!
+
+  """Time horizon in months"""
+  timeHorizon: Int!
+
+  """Individual evolution steps through time"""
+  steps: [EvolutionStep!]!
+
+  """Final behavioral state at end of trajectory"""
+  finalState: BehavioralProfile!
+
+  """Likelihood score for this trajectory (0.0 - 1.0)"""
+  likelihood: Float!
+
+  """When this trajectory was simulated"""
+  simulatedAt: DateTime!
+
+  """Time offset where this trajectory branched (if branched)"""
+  branchPoint: Int
+
+  """Parent trajectory if this is a branch"""
+  parentTrajectoryId: ID
+}
+
+"""
+A single step in a future trajectory
+"""
+type EvolutionStep {
+  """Time offset in months from baseline"""
+  time: Int!
+
+  """Behavioral state at this time"""
+  state: BehavioralProfile!
+
+  """Pressures applied during this step"""
+  pressuresApplied: [PressureVector!]!
+
+  """Delta from baseline profile"""
+  deltaFromBaseline: BehavioralDelta!
+
+  """Simulated events that occurred during this step"""
+  events: [SimulatedEvent!]!
+}
+
+"""
+Quantified behavioral characteristics of an entity
+"""
+type BehavioralProfile {
+  """Activity frequency (0.0 - 1.0)"""
+  activityLevel: Float!
+
+  """Events per month"""
+  operationalTempo: Float!
+
+  """Willingness to take risks (0.0 - 1.0)"""
+  riskTolerance: Float!
+
+  """Alignment shift: -1.0 (opposed) to 1.0 (aligned)"""
+  alignmentShift: Float!
+
+  """Resource acquisition intensity (0.0 - 1.0)"""
+  resourceSeeking: Float!
+
+  """Rate of new capability adoption"""
+  capabilityAcquisition: Float!
+
+  """Rate of forming new connections"""
+  networkExpansion: Float!
+
+  """Size of trusted network"""
+  trustRadius: Float!
+
+  """Desire for influence (0.0 - 1.0)"""
+  influenceSeeking: Float!
+
+  """Rate of tactical behavior change"""
+  tacticalInnovation: Float!
+
+  """Resistance to change (0.0 - 1.0)"""
+  stabilityCoefficient: Float!
+}
+
+"""
+Change in behavioral profile relative to baseline
+"""
+type BehavioralDelta {
+  """Change in activity level"""
+  activityLevel: Float!
+
+  """Change in operational tempo"""
+  operationalTempo: Float!
+
+  """Change in risk tolerance"""
+  riskTolerance: Float!
+
+  """Change in alignment"""
+  alignmentShift: Float!
+
+  """Change in resource seeking"""
+  resourceSeeking: Float!
+
+  """Change in capability acquisition"""
+  capabilityAcquisition: Float!
+
+  """Change in network expansion"""
+  networkExpansion: Float!
+
+  """Change in trust radius"""
+  trustRadius: Float!
+
+  """Change in influence seeking"""
+  influenceSeeking: Float!
+
+  """Change in tactical innovation"""
+  tacticalInnovation: Float!
+}
+
+"""
+Environmental pressure that influences behavioral evolution
+"""
+type PressureVector {
+  """Type of pressure"""
+  type: PressureType!
+
+  """Magnitude of pressure (0.0 - 1.0)"""
+  strength: Float!
+
+  """Duration in months"""
+  duration: Int!
+
+  """Rate of pressure dissipation (0.0 - 1.0)"""
+  decay: Float!
+
+  """Entity or event causing pressure"""
+  source: String
+
+  """When pressure begins (months from T0)"""
+  onset: Int!
+}
+
+"""
+Types of environmental pressures
+"""
+enum PressureType {
+  ECONOMIC
+  POLITICAL
+  SOCIAL
+  TECHNOLOGICAL
+  OPERATIONAL
+}
+
+"""
+A simulated event during trajectory evolution
+"""
+type SimulatedEvent {
+  """Event type"""
+  type: String!
+
+  """Event description"""
+  description: String!
+
+  """Time offset when event occurs"""
+  time: Int!
+
+  """Probability of this event (0.0 - 1.0)"""
+  probability: Float!
+
+  """Entities involved in event"""
+  involvedEntities: [ID!]!
+}
+
+"""
+Comparison of multiple trajectories
+"""
+type TrajectoryComparison {
+  """Persona being compared"""
+  personaId: ID!
+
+  """Scenarios being compared"""
+  scenarios: [String!]!
+
+  """Trajectories for each scenario"""
+  trajectories: [FutureTrajectory!]!
+
+  """Divergence metrics"""
+  divergence: DivergenceMetrics!
+}
+
+"""
+Metrics measuring trajectory divergence
+"""
+type DivergenceMetrics {
+  """Maximum behavioral distance between any two trajectories"""
+  maxDivergence: Float!
+
+  """Time offset where trajectories diverge most"""
+  maxDivergenceTime: Int!
+
+  """Average distance across all trajectory pairs"""
+  avgDivergence: Float!
+
+  """Specific dimension with most divergence"""
+  primaryDivergenceDimension: String!
+}
+
+"""
+Likelihood assessment for a trajectory
+"""
+type TrajectoryLikelihood {
+  """Trajectory being assessed"""
+  trajectoryId: ID!
+
+  """Overall likelihood score (0.0 - 1.0)"""
+  overallLikelihood: Float!
+
+  """Historical similarity component"""
+  historicalScore: Float!
+
+  """Internal coherence component"""
+  coherenceScore: Float!
+
+  """Pressure-response realism component"""
+  realismScore: Float!
+
+  """Divergence penalty component"""
+  divergencePenalty: Float!
+
+  """Last updated timestamp"""
+  lastUpdated: DateTime!
+}
+
+"""
+Input for creating a new synthetic persona
+"""
+input PersonaInput {
+  """Source entity ID"""
+  sourceEntityId: ID!
+
+  """Mutation rate (0.0 - 1.0)"""
+  mutationRate: Float
+
+  """Branching factor (number of divergent trajectories)"""
+  branchingFactor: Int
+
+  """Validity window in months"""
+  validityWindow: Int
+}
+
+"""
+Input for defining a simulation scenario
+"""
+input ScenarioInput {
+  """Scenario identifier"""
+  id: String!
+
+  """Scenario name"""
+  name: String!
+
+  """Time horizon in months"""
+  timeHorizon: Int!
+
+  """Pressure vectors to apply"""
+  pressures: [PressureInput!]!
+}
+
+"""
+Input for defining a pressure vector
+"""
+input PressureInput {
+  """Type of pressure"""
+  type: PressureType!
+
+  """Strength (0.0 - 1.0)"""
+  strength: Float!
+
+  """Duration in months"""
+  duration: Int!
+
+  """Decay rate (0.0 - 1.0)"""
+  decay: Float
+
+  """Source of pressure"""
+  source: String
+
+  """Onset time in months"""
+  onset: Int!
+}
+
+"""
+Input for updating likelihoods with new evidence
+"""
+input EvidenceInput {
+  """Observed behavioral data"""
+  observedBehavior: BehavioralProfileInput!
+
+  """Time of observation (months from T0)"""
+  observationTime: Int!
+
+  """Confidence in observation (0.0 - 1.0)"""
+  confidence: Float!
+}
+
+"""
+Input for behavioral profile data
+"""
+input BehavioralProfileInput {
+  activityLevel: Float!
+  operationalTempo: Float!
+  riskTolerance: Float!
+  alignmentShift: Float!
+  resourceSeeking: Float!
+  capabilityAcquisition: Float!
+  networkExpansion: Float!
+  trustRadius: Float!
+  influenceSeeking: Float!
+  tacticalInnovation: Float!
+  stabilityCoefficient: Float!
+}
+
+type Query {
+  """Get a synthetic persona by ID"""
+  getPersona(id: ID!): SyntheticPersona
+
+  """Get all synthetic personas for an entity"""
+  getPersonasForEntity(entityId: ID!): [SyntheticPersona!]!
+
+  """Get a specific trajectory by ID"""
+  getTrajectory(id: ID!): FutureTrajectory
+
+  """Get all trajectories for a persona"""
+  getTrajectoriesForPersona(personaId: ID!): [FutureTrajectory!]!
+
+  """Compare multiple scenario trajectories"""
+  compareFutures(personaId: ID!, scenarios: [String!]!): TrajectoryComparison!
+
+  """Get likelihood assessments for all trajectories of a persona"""
+  getLikelihoods(personaId: ID!): [TrajectoryLikelihood!]!
+
+  """Find personas with trajectories matching criteria"""
+  searchTrajectories(
+    minLikelihood: Float
+    maxTimeHorizon: Int
+    pressureTypes: [PressureType!]
+  ): [FutureTrajectory!]!
+}
+
+type Mutation {
+  """Create a new synthetic persona from an entity"""
+  createPersona(input: PersonaInput!): SyntheticPersona!
+
+  """Simulate a future trajectory for a persona"""
+  simulateFuture(personaId: ID!, scenario: ScenarioInput!): FutureTrajectory!
+
+  """Apply additional pressure to an existing trajectory"""
+  applyPressure(trajectoryId: ID!, pressure: PressureInput!): FutureTrajectory!
+
+  """Update trajectory likelihoods based on new evidence"""
+  updateLikelihoods(personaId: ID!, evidence: EvidenceInput!): [TrajectoryLikelihood!]!
+
+  """Delete a synthetic persona and all its trajectories"""
+  deletePersona(personaId: ID!): Boolean!
+
+  """Regenerate persona with updated baseline"""
+  regeneratePersona(personaId: ID!): SyntheticPersona!
+}

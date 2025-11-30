@@ -1,0 +1,298 @@
+# Cross-System Entanglement Detector GraphQL Schema
+
+scalar DateTime
+scalar JSON
+
+# ============================================================================
+# Enums
+# ============================================================================
+
+enum SignatureType {
+  TEMPORAL
+  CAUSAL
+  RESOURCE
+  DATA_LINEAGE
+}
+
+enum CouplingType {
+  BIDIRECTIONAL
+  UNIDIRECTIONAL
+  CASCADE
+}
+
+enum CouplingDirection {
+  FORWARD
+  REVERSE
+  MUTUAL
+}
+
+enum EventType {
+  STATE_CHANGE
+  PERFORMANCE_SHIFT
+  FAILURE_CASCADE
+}
+
+# ============================================================================
+# Core Types
+# ============================================================================
+
+type EntanglementSignature {
+  id: ID!
+  systems: [String!]!
+  couplingStrength: Float!
+  synchronizationDepth: Int!
+  signatureType: SignatureType!
+  confidence: Float!
+  detectedAt: DateTime!
+  lastObserved: DateTime!
+  metadata: EntanglementMetadata!
+}
+
+type EntanglementMetadata {
+  correlationCoefficient: Float!
+  lagTime: Int!
+  observationWindow: Int!
+  sampleCount: Int!
+}
+
+type SystemCoupling {
+  id: ID!
+  sourceSystem: String!
+  targetSystem: String!
+  couplingType: CouplingType!
+  strength: Float!
+  direction: CouplingDirection!
+  detectionMethod: String!
+  evidenceCount: Int!
+  riskScore: Float!
+  metadata: CouplingMetadata!
+}
+
+type CouplingMetadata {
+  failureCorrelation: Float!
+  latencyCorrelation: Float!
+  throughputCorrelation: Float!
+}
+
+type SynchronizationEvent {
+  id: ID!
+  systems: [String!]!
+  timestamp: DateTime!
+  eventType: EventType!
+  synchronizationScore: Float!
+  timeWindow: Int!
+  metrics: JSON!
+}
+
+type RiskScore {
+  systemId: String!
+  overallRisk: Float!
+  cascadeRisk: Float!
+  impactRadius: Int!
+  criticalPaths: [CriticalPath!]!
+  recommendations: [String!]!
+}
+
+type CriticalPath {
+  path: [String!]!
+  propagationProbability: Float!
+  estimatedLatency: Int!
+}
+
+type EntanglementMap {
+  signatures: [EntanglementSignature!]!
+  couplings: [SystemCoupling!]!
+  systems: [System!]!
+  detectedAt: DateTime!
+  observationWindowMs: Int!
+  totalSignatures: Int!
+  totalCouplings: Int!
+}
+
+type System {
+  id: ID!
+  name: String!
+  domain: String!
+  subsystem: String
+  metricEndpoints: [String!]!
+  registeredAt: DateTime!
+  lastSeen: DateTime
+  couplings: [SystemCoupling!]!
+  entanglements: [EntanglementSignature!]!
+  riskScore: RiskScore
+}
+
+type ScanResult {
+  success: Boolean!
+  scannedSystems: Int!
+  signaturesFound: Int!
+  couplingsFound: Int!
+  duration: Int!
+  errors: [String!]
+}
+
+# ============================================================================
+# Input Types
+# ============================================================================
+
+input MetricDataPoint {
+  timestamp: DateTime!
+  name: String!
+  value: Float!
+}
+
+input SystemMetrics {
+  systemId: String!
+  metrics: [MetricDataPoint!]!
+}
+
+input RegisterSystemInput {
+  systemId: String!
+  name: String!
+  domain: String!
+  subsystem: String
+  metricEndpoints: [String!]!
+}
+
+# ============================================================================
+# Queries
+# ============================================================================
+
+type Query {
+  """
+  Detect entanglements across specified systems
+  """
+  detectEntanglements(
+    systemIds: [String!]!
+    observationWindowMs: Int = 300000
+    minCouplingStrength: Float = 0.7
+    signatureTypes: [SignatureType!]
+  ): EntanglementMap!
+
+  """
+  Get full entanglement map for visualization
+  """
+  getEntanglementMap(
+    includeWeak: Boolean = false
+    domainFilter: [String!]
+  ): EntanglementMap!
+
+  """
+  Get couplings for a specific system
+  """
+  getCouplings(
+    systemId: String!
+    minStrength: Float = 0.5
+  ): [SystemCoupling!]!
+
+  """
+  Get risk scores for specified systems
+  """
+  getRiskScores(
+    systemIds: [String!]
+    includePaths: Boolean = true
+  ): [RiskScore!]!
+
+  """
+  Get synchronization events within time range
+  """
+  getSynchronizationEvents(
+    startTime: DateTime!
+    endTime: DateTime!
+    systemIds: [String!]
+    minScore: Float = 0.7
+  ): [SynchronizationEvent!]!
+
+  """
+  Get registered systems
+  """
+  getSystems(
+    domainFilter: [String!]
+  ): [System!]!
+
+  """
+  Get specific system by ID
+  """
+  getSystem(id: String!): System
+
+  """
+  Find critical paths from source to target
+  """
+  findCriticalPaths(
+    sourceSystemId: String!
+    targetSystemId: String
+    maxDepth: Int = 3
+    minProbability: Float = 0.5
+  ): [CriticalPath!]!
+
+  """
+  Discover cross-domain correlations
+  """
+  discoverCrossDomainCorrelations(
+    domains: [String!]
+    minCorrelation: Float = 0.7
+  ): [EntanglementSignature!]!
+}
+
+# ============================================================================
+# Mutations
+# ============================================================================
+
+type Mutation {
+  """
+  Register a new system for entanglement monitoring
+  """
+  registerSystem(input: RegisterSystemInput!): System!
+
+  """
+  Trigger entanglement scan across all or specified systems
+  """
+  scanForEntanglements(
+    systemIds: [String!]
+    forceRescan: Boolean = false
+  ): ScanResult!
+
+  """
+  Ingest metrics from systems
+  """
+  ingestMetrics(metrics: [SystemMetrics!]!): Boolean!
+
+  """
+  Remove a system from monitoring
+  """
+  unregisterSystem(systemId: String!): Boolean!
+
+  """
+  Clear all entanglement data (for testing)
+  """
+  clearEntanglementData: Boolean!
+}
+
+# ============================================================================
+# Subscriptions
+# ============================================================================
+
+type Subscription {
+  """
+  Subscribe to new entanglement signatures
+  """
+  entanglementDetected(
+    systemIds: [String!]
+    minStrength: Float
+  ): EntanglementSignature!
+
+  """
+  Subscribe to synchronization events
+  """
+  synchronizationEventOccurred(
+    systemIds: [String!]
+  ): SynchronizationEvent!
+
+  """
+  Subscribe to risk score changes
+  """
+  riskScoreChanged(
+    systemId: String!
+    threshold: Float = 0.8
+  ): RiskScore!
+}
