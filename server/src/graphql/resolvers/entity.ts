@@ -118,6 +118,7 @@ const entityResolvers = {
         limit: number;
         offset: number;
       },
+      context: any,
     ) => {
       const pgPool = getPostgresPool();
       const neo4jSession = driver.session();

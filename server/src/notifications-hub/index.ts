@@ -11,6 +11,9 @@
  * @module notifications-hub
  */
 
+import { NotificationHub } from './NotificationHub.js';
+import { AdapterRegistry } from './adapters/EventAdapters.js';
+
 // Core exports
 export { NotificationHub, type NotificationHubConfig } from './NotificationHub.js';
 
