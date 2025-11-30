@@ -44,6 +44,8 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -126,6 +128,9 @@ export const createApp = async () => {
   // Health endpoints (exempt from rate limiting)
   const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
+
+  // Swagger UI
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
   // Note: /graphql has its own rate limiting chain above
