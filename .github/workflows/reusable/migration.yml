@@ -1,0 +1,15 @@
+name: Reusable Migration Gate
+
+on:
+  workflow_call:
+
+jobs:
+  plan_and_verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Plan & shadow verify
+        run: |
+          chmod +x ops/db/migrate ops/db/verify
+          ./ops/db/migrate --plan --no-apply
+          ./ops/db/verify --shadow

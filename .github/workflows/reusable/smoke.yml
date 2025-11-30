@@ -1,0 +1,91 @@
+name: Reusable Smoke Test
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        required: false
+        type: string
+        default: '20.x'
+      pnpm_cache_folder:
+        required: false
+        type: string
+        default: '~/.pnpm-store'
+
+jobs:
+  golden-path:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_BUILDKIT: '1'
+      COMPOSE_DOCKER_CLI_BUILD: '1'
+      PNPM_CACHE_FOLDER: ${{ inputs.pnpm_cache_folder }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.pnpm_cache_folder }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - name: Configure pnpm store
+        run: pnpm config set store-dir ${{ inputs.pnpm_cache_folder }}
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+        continue-on-error: true
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Bootstrap repo (make bootstrap)
+        run: make bootstrap
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml', 'server/package.json', 'client/package.json') }}
+          restore-keys: ${{ runner.os }}-buildx-
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build API image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile.dev
+          tags: summit/api:ci
+          push: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      - name: Build client image (cached)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          file: ./client/Dockerfile.dev
+          tags: summit/web:ci
+          push: false
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+      # Move cache to prevent unbounded growth
+      - name: Rotate Docker cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+      - name: Bring up stack (make up)
+        run: make up
+      - name: Golden path smoke tests
+        run: make smoke
+      - name: Compose logs on failure
+        if: failure()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
+      - name: Tear down stack
+        if: always()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
