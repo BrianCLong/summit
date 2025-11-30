@@ -49,6 +49,13 @@ Root Key (Summit Master Key - stored in HSM, per region)
 4. **Revocation**: Compromise triggers KEK disable + DEK re-encryption pipeline (`scripts/crypto/rekey.mjs`).
 5. **Monitoring**: CloudWatch metrics for key usage anomalies; SIEM ingest of KMS CloudTrail logs.
 
+## BYOK/HSM Orchestration Layer
+
+- **Customer Managed Keys**: `ByokHsmOrchestrator` binds tenant-owned keys (AWS KMS, Azure, GCP, dedicated HSM) without storing private material.
+- **Envelope Encryption**: Data keys are generated per payload, wrapped with the customer public key, and tagged with AAD for audit context.
+- **Zero-Trust Rotation**: Rotations require dual approvals, non-expired attestation tokens, and ticketed change context before a new active version is minted.
+- **Rotation Health**: `getRotationReadiness` surfaces `healthy`/`due`/`overdue` to feed compliance dashboards and SRE alerts.
+
 ## Secret Management
 
 * Operational secrets stored in Vault; short-lived tokens (1 hour) retrieved via OIDC auth method.
