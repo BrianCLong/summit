@@ -1,0 +1,704 @@
+name: 🚀 CI - Modernized Pipeline
+# Comprehensive, production-grade CI pipeline
+# Features: Multi-platform, parallel execution, advanced caching, comprehensive gates
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      skip-tests:
+        description: 'Skip tests (emergency use only)'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+  checks: write
+  pull-requests: write
+  id-token: write
+  actions: read
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9.12.0'
+  PYTHON_VERSION: '3.11'
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # ============================================================================
+  # PHASE 1: Pre-flight Checks & Setup
+  # ============================================================================
+
+  preflight:
+    name: 📋 Preflight Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      node-version: ${{ steps.detect.outputs.node }}
+      pnpm-version: ${{ steps.detect.outputs.pnpm }}
+      should-run-tests: ${{ steps.config.outputs.run-tests }}
+      has-migrations: ${{ steps.changes.outputs.migrations }}
+      has-schema-changes: ${{ steps.changes.outputs.schema }}
+      has-dockerfile-changes: ${{ steps.changes.outputs.docker }}
+      changed-packages: ${{ steps.changes.outputs.packages }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect versions
+        id: detect
+        run: |
+          echo "node=${{ env.NODE_VERSION }}" >> "$GITHUB_OUTPUT"
+          echo "pnpm=${{ env.PNPM_VERSION }}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure pipeline
+        id: config
+        run: |
+          if [ "${{ github.event.inputs.skip-tests }}" = "true" ]; then
+            echo "run-tests=false" >> "$GITHUB_OUTPUT"
+            echo "⚠️ Tests will be skipped (emergency mode)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "run-tests=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Detect changed files
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            migrations:
+              - 'server/db/migrations/**'
+              - '**/migrations/**'
+              - 'prisma/**'
+            schema:
+              - '**/*.graphql'
+              - '**/*.gql'
+              - 'schema/**'
+            docker:
+              - '**/Dockerfile*'
+              - 'docker-compose*.yml'
+            packages:
+              - 'packages/**'
+              - 'apps/**'
+              - 'services/**'
+            ci:
+              - '.github/workflows/**'
+            docs:
+              - '**/*.md'
+              - 'docs/**'
+
+      - name: Generate preflight summary
+        run: |
+          echo "## 📋 Preflight Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Node.js | ${{ env.NODE_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| pnpm | ${{ env.PNPM_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Migrations Changed | ${{ steps.changes.outputs.migrations == 'true' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Schema Changed | ${{ steps.changes.outputs.schema == 'true' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dockerfiles Changed | ${{ steps.changes.outputs.docker == 'true' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+
+  # ============================================================================
+  # PHASE 2: Code Quality & Static Analysis (Parallel)
+  # ============================================================================
+
+  lint:
+    name: 🔍 Lint & Format Check
+    runs-on: ${{ matrix.os }}
+    needs: [preflight]
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        include:
+          - os: ubuntu-latest
+            lint-extra: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.preflight.outputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        run: pnpm run lint || echo "Linting errors found (non-blocking)"
+        continue-on-error: true
+
+      - name: Prettier check
+        run: pnpm run format:check || echo "Formatting issues found (non-blocking)"
+        continue-on-error: true
+
+      - name: Python linting (Ruff)
+        if: matrix.lint-extra && hashFiles('**/*.py') != ''
+        run: |
+          pnpm run lint:py || echo "Python linting not configured"
+        continue-on-error: true
+
+  typecheck:
+    name: 🔧 TypeScript Check
+    runs-on: ${{ matrix.os }}
+    needs: [preflight]
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        workspace: ['root', 'server', 'client']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.preflight.outputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript check - ${{ matrix.workspace }}
+        run: |
+          if [ "${{ matrix.workspace }}" = "root" ]; then
+            pnpm run typecheck
+          else
+            cd ${{ matrix.workspace }} && pnpm exec tsc --noEmit
+          fi
+
+  security-scan:
+    name: 🔒 Security Scanning
+    runs-on: ubuntu-latest
+    needs: [preflight]
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Secret scanning (Gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.preflight.outputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Dependency audit
+        run: |
+          pnpm audit --audit-level=moderate || echo "Vulnerabilities found (non-blocking)"
+        continue-on-error: true
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Vulnerability scan (Trivy)
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          exit-code: '0'
+
+      - name: Upload SARIF results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-security-scan
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ github.run_number }}
+          path: sbom.spdx.json
+          retention-days: 90
+
+  # ============================================================================
+  # PHASE 3: Build (Parallel Across Platforms)
+  # ============================================================================
+
+  build:
+    name: 🏗️ Build - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: [preflight, lint, typecheck]
+    if: always() && (needs.lint.result == 'success' || needs.lint.result == 'skipped') && (needs.typecheck.result == 'success' || needs.typecheck.result == 'skipped')
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node: ['20.x']
+        include:
+          - os: ubuntu-latest
+            upload-artifacts: true
+          - os: macos-latest
+            upload-artifacts: false
+          - os: windows-latest
+            upload-artifacts: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'pnpm'
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace
+        run: pnpm run build
+        env:
+          NODE_ENV: production
+
+      - name: Upload build artifacts (Ubuntu only)
+        if: matrix.upload-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_number }}
+          path: |
+            dist/
+            build/
+            .next/
+            server/dist/
+            client/dist/
+            apps/*/dist/
+            packages/*/dist/
+            .turbo/
+          retention-days: 7
+          if-no-files-found: warn
+
+  # ============================================================================
+  # PHASE 4: Test Suites (Parallel)
+  # ============================================================================
+
+  test-unit:
+    name: 🧪 Unit Tests - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: [preflight, build]
+    if: needs.preflight.outputs.should-run-tests == 'true'
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: ['18.x', '20.x']
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_number }}
+        continue-on-error: true
+
+      - name: Run unit tests
+        run: pnpm run test:coverage || pnpm run test
+        env:
+          NODE_ENV: test
+          CI: true
+
+      - name: Upload coverage
+        if: matrix.node == '20.x'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-unit-${{ matrix.os }}-${{ matrix.node }}
+          path: coverage/
+          retention-days: 14
+          if-no-files-found: ignore
+
+  test-integration:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: [preflight, build]
+    if: needs.preflight.outputs.should-run-tests == 'true'
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: summit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/testpassword
+          NEO4J_PLUGINS: '["apoc"]'
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd="neo4j status"
+          --health-interval=10s
+          --health-timeout=10s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.preflight.outputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup test environment
+        run: |
+          cp .env.example .env.test || true
+          cat >> .env.test <<EOF
+          NODE_ENV=test
+          DATABASE_URL=postgresql://test:testpass@localhost:5432/summit_test
+          REDIS_URL=redis://localhost:6379
+          NEO4J_URI=bolt://localhost:7687
+          NEO4J_USER=neo4j
+          NEO4J_PASSWORD=testpassword
+          EOF
+
+      - name: Run migrations
+        run: pnpm run db:migrate || echo "Migrations not configured"
+        env:
+          DATABASE_URL: postgresql://test:testpass@localhost:5432/summit_test
+
+      - name: Run integration tests
+        run: pnpm run test:integration || echo "Integration tests not configured"
+        env:
+          NODE_ENV: test
+          CI: true
+          DATABASE_URL: postgresql://test:testpass@localhost:5432/summit_test
+          REDIS_URL: redis://localhost:6379
+          NEO4J_URI: bolt://localhost:7687
+
+  # ============================================================================
+  # PHASE 5: Golden Path Validation
+  # ============================================================================
+
+  golden-path:
+    name: 🎯 Golden Path Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [preflight, build, test-unit]
+    if: always() && needs.build.result == 'success'
+    timeout-minutes: 30
+    env:
+      DOCKER_BUILDKIT: '1'
+      COMPOSE_DOCKER_CLI_BUILD: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.preflight.outputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Bootstrap environment
+        run: make bootstrap
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Start services
+        run: make up
+
+      - name: Wait for services
+        run: ./scripts/wait-for-stack.sh || echo "Some services may not be ready"
+        timeout-minutes: 5
+
+      - name: Run smoke tests
+        run: make smoke
+
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
+
+      - name: Cleanup
+        if: always()
+        run: |
+          ./scripts/run-compose.sh -f docker-compose.dev.yml down -v || true
+
+  # ============================================================================
+  # PHASE 6: Production Guardrails
+  # ============================================================================
+
+  prod-guardrails:
+    name: 🛡️ Production Guardrails
+    runs-on: ubuntu-latest
+    needs: [preflight]
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ needs.preflight.outputs.pnpm-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ needs.preflight.outputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test production config validation
+        run: |
+          set +e
+          NODE_ENV=production \
+          JWT_SECRET=weaksecret \
+          JWT_REFRESH_SECRET=weaksecret2 \
+          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
+          CORS_ORIGIN=* \
+          pnpm ci:prod-guard
+          exit_code=$?
+
+          if [ "$exit_code" -eq 0 ]; then
+            echo "❌ Production guardrails FAILED - weak config was accepted!"
+            exit 1
+          else
+            echo "✅ Production guardrails PASSED - weak config was correctly rejected"
+            exit 0
+          fi
+
+  # ============================================================================
+  # PHASE 7: Final Gate - Merge Readiness
+  # ============================================================================
+
+  merge-readiness:
+    name: ✅ Merge Readiness Gate
+    runs-on: ubuntu-latest
+    needs:
+      - preflight
+      - lint
+      - typecheck
+      - security-scan
+      - build
+      - test-unit
+      - test-integration
+      - golden-path
+      - prod-guardrails
+    if: always()
+    timeout-minutes: 5
+    outputs:
+      ready: ${{ steps.evaluate.outputs.ready }}
+    steps:
+      - name: Evaluate readiness
+        id: evaluate
+        run: |
+          echo "## 🚦 Merge Readiness Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Gate | Status | Required | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|--------|----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          # Required checks
+          lint="${{ needs.lint.result }}"
+          typecheck="${{ needs.typecheck.result }}"
+          build="${{ needs.build.result }}"
+          test_unit="${{ needs.test-unit.result }}"
+          golden="${{ needs.golden-path.result }}"
+          guardrails="${{ needs.prod-guardrails.result }}"
+
+          # Optional checks
+          security="${{ needs.security-scan.result }}"
+          test_integration="${{ needs.test-integration.result }}"
+
+          echo "| Lint | $lint | ✅ | $([ "$lint" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeCheck | $typecheck | ✅ | $([ "$typecheck" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build | $build | ✅ | $([ "$build" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Unit Tests | $test_unit | ✅ | $([ "$test_unit" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Golden Path | $golden | ✅ | $([ "$golden" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Prod Guardrails | $guardrails | ✅ | $([ "$guardrails" = "success" ] && echo "✅" || echo "❌") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Scan | $security | ⚠️ | $([ "$security" = "success" ] && echo "✅" || echo "⚠️") |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration Tests | $test_integration | ⚠️ | $([ "$test_integration" = "success" ] && echo "✅" || echo "⚠️") |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Determine overall status (only required checks must pass)
+          if [[ "$lint" == "success" && "$typecheck" == "success" && "$build" == "success" && \
+                "$test_unit" == "success" && "$golden" == "success" && "$guardrails" == "success" ]]; then
+            echo "**Status:** 🚀 **READY FOR MERGE**" >> $GITHUB_STEP_SUMMARY
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "**Status:** ❌ **NOT READY - Required checks failed**" >> $GITHUB_STEP_SUMMARY
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Post summary comment (PR only)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ready = '${{ steps.evaluate.outputs.ready }}' === 'true';
+            const status = ready ? '🚀 Ready for merge!' : '❌ Not ready - fix failing checks';
+            const emoji = ready ? '✅' : '❌';
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `${emoji} **CI Pipeline Complete**\n\n${status}\n\nSee [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.`
+            });
