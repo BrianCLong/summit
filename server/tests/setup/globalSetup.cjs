@@ -20,6 +20,10 @@ module.exports = async () => {
       process.env.NEO4J_PASSWORD = 'testpassword';
     }
 
+    if (!process.env.DATABASE_URL) {
+      process.env.DATABASE_URL = 'postgresql://postgres:testpassword@localhost:5432/intelgraph_test';
+    }
+
     if (!process.env.POSTGRES_HOST) {
       process.env.POSTGRES_HOST = 'localhost';
       process.env.POSTGRES_PORT = '5432';
@@ -33,6 +37,9 @@ module.exports = async () => {
     }
 
     process.env.JWT_SECRET = 'test-jwt-secret-for-testing-only';
+    process.env.JWT_REFRESH_SECRET =
+      process.env.JWT_REFRESH_SECRET || 'test-jwt-refresh-secret-for-testing-only';
+    process.env.CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:3000';
 
     const testDirs = [
       path.join(__dirname, '../../tmp'),
