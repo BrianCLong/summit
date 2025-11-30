@@ -1,0 +1,21 @@
+{
+  "name": "@intelgraph/maas",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/governance-kernel": "workspace:*",
+    "@intelgraph/maestro-core": "workspace:*",
+    "@intelgraph/core": "workspace:*",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2"
+  }
+}
