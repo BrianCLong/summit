@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "prov-verify": "dist/cli/verify.js"
+    "prov-verify": "dist/cli/verify.js",
+    "prov-verify-detailed": "dist/cli/verify-detailed.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
