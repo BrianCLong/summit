@@ -1,116 +1,56 @@
-name: k6 SLO Gates
+name: K6 Performance Gates
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    - cron: '0 */6 * * *'
   workflow_dispatch:
 
-concurrency:
-  group: k6-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: read
-
 jobs:
-  smoke:
-    name: k6 Smoke SLO Gate
-    if: github.event_name != 'schedule'
+  k6-smoke:
     runs-on: ubuntu-latest
     env:
-      BASE_URL: http://127.0.0.1:3000
+      PNPM_CACHE_FOLDER: ~/.pnpm-store
+      NODE_VERSION: '20.x'
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20.11.1'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-      - name: Setup k6
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Bootstrap repo
+        run: make bootstrap
+
+      - name: Setup K6
         uses: grafana/setup-k6-action@v1
 
-      - name: Start mock Maestro surface
+      - name: Bring up stack
+        run: make up
+
+      - name: Wait for health
         run: |
-          node scripts/ci/mock-maestro-server.mjs &
-          echo "MOCK_PID=$!" >> $GITHUB_ENV
+          # Simple wait loop
+          timeout 120s bash -c 'until curl -s http://localhost:3000/health > /dev/null; do sleep 5; done'
 
-      - name: Wait for health endpoint
+      - name: Run K6 Smoke
         run: |
-          for i in {1..30}; do
-            if curl -fsS "$BASE_URL/health" >/dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Mock Maestro surface did not become healthy" >&2
-          exit 1
+          k6 run -e TARGET_HOST=http://localhost:3000 tests/perf/smoke.js
 
-      - name: Run k6 smoke test
-        run: k6 run tests/k6-smoke.js
-
-      - name: Upload smoke results
-        if: always() && hashFiles('smoke-test-results.json') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: k6-smoke-${{ github.run_id }}
-          path: smoke-test-results.json
-
-      - name: Stop mock Maestro surface
+      - name: Tear down
         if: always()
-        run: |
-          if [ -n "${MOCK_PID:-}" ]; then
-            kill $MOCK_PID || true
-          fi
-
-  baseline:
-    name: k6 Baseline Trend
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    env:
-      BASE_URL: http://127.0.0.1:3000
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.1'
-
-      - name: Setup k6
-        uses: grafana/setup-k6-action@v1
-
-      - name: Start mock Maestro surface
-        run: |
-          node scripts/ci/mock-maestro-server.mjs &
-          echo "MOCK_PID=$!" >> $GITHUB_ENV
-
-      - name: Wait for health endpoint
-        run: |
-          for i in {1..30}; do
-            if curl -fsS "$BASE_URL/health" >/dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Mock Maestro surface did not become healthy" >&2
-          exit 1
-
-      - name: Run k6 baseline profile
-        run: k6 run tests/k6-smoke.js --summary-export baseline-smoke-results.json
-
-      - name: Upload baseline results
-        if: always() && hashFiles('baseline-smoke-results.json') != ''
-        uses: actions/upload-artifact@v4
-        with:
-          name: k6-baseline-${{ github.run_id }}
-          path: baseline-smoke-results.json
-
-      - name: Stop mock Maestro surface
-        if: always()
-        run: |
-          if [ -n "${MOCK_PID:-}" ]; then
-            kill $MOCK_PID || true
-          fi
+        run: make down || true
