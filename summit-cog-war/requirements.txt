@@ -1,0 +1,20 @@
+# Core Application
+streamlit
+
+# Testing
+pytest
+playwright
+
+# AI/ML
+# Using legacy on purpose
+tensorflow==2.11.0
+torch
+transformers
+# For NeuroGraph/LLM hybrids
+dgl
+networkx
+spacy
+# For EvoForge
+numpy
+pandas
+scikit-learn
