@@ -1,0 +1,75 @@
+{
+  "epic": "NL Graph Querying Copilot (Plugin)",
+  "key": "NLQ-EPIC",
+  "archiveName": "nlq-copilot-epic.zip",
+  "repo": "plugins/nlq-copilot/",
+  "description": "NL -> Cypher preview with cost/row estimates, sandbox run, diff vs manual query; >=95% syntactic validity on test corpus.",
+  "stories": [
+    {
+      "key": "NLQ-1",
+      "summary": "Side-panel UI via module federation",
+      "description": "Implement side-panel UI using module federation; no core UI edits required."
+    },
+    {
+      "key": "NLQ-2",
+      "summary": "/nlq/compile service endpoint",
+      "description": "Implement /nlq/compile service: prompt -> {cypher, estimates, safety}. Read-only queries only."
+    },
+    {
+      "key": "NLQ-3",
+      "summary": "Evidence-first mode with provenance",
+      "description": "Show provenance snippets; block publish without citations."
+    },
+    {
+      "key": "NLQ-4",
+      "summary": "Explain this view extension point",
+      "description": "Wire 'Explain this view' extension point for integration with other UI components."
+    },
+    {
+      "key": "NLQ-5",
+      "summary": "Corpus and evaluation harness",
+      "description": "Create test corpus and pass@k evaluation; regression harness for syntactic validity."
+    },
+    {
+      "key": "NLQ-6",
+      "summary": "Undo/redo and diff against baseline",
+      "description": "Implement undo/redo functionality and diff view against baseline queries."
+    }
+  ],
+  "definitionOfDone": [
+    "Plugin self-registers; can be disabled independently",
+    "95% syntactic validity; zero write queries allowed",
+    "Screenshots + snapshot tests check UI determinism"
+  ],
+  "acceptanceTests": [
+    {
+      "name": "NL to Cypher compilation",
+      "expected": "Given NL prompt -> valid Cypher + non-empty estimate"
+    },
+    {
+      "name": "Citation enforcement",
+      "expected": "Citation missing -> blocked with rationale"
+    },
+    {
+      "name": "Diff view",
+      "expected": "Shows AST/plan differences correctly"
+    }
+  ],
+  "testEvidence": [
+    {
+      "type": "unit",
+      "path": "plugins/nlq-copilot/src/__tests__/",
+      "artifact": "test-results/unit/nlq-copilot.xml"
+    },
+    {
+      "type": "snapshot",
+      "path": "plugins/nlq-copilot/src/__snapshots__/",
+      "artifact": "test-results/snapshots/nlq-copilot.json"
+    },
+    {
+      "type": "e2e",
+      "path": "tests/e2e/nlq-copilot.spec.ts",
+      "artifact": "test-results/e2e/nlq-copilot-report.json"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "epic": "License/Authority Policy Engine",
+  "key": "POLICY-EPIC",
+  "archiveName": "policy-engine-epic.zip",
+  "repo": "services/policy-engine/",
+  "description": "Evaluate queries/exports against data licenses and authority/warrant bindings; block unsafe actions with clear 'why'.",
+  "stories": [
+    {
+      "key": "POL-1",
+      "summary": "/policy/evaluate endpoint",
+      "description": "Implement /policy/evaluate: plan -> allow|deny + reasons + obligations."
+    },
+    {
+      "key": "POL-2",
+      "summary": "/license/check endpoint",
+      "description": "Implement /license/check: dataset, purpose -> decision + clause refs."
+    },
+    {
+      "key": "POL-3",
+      "summary": "Override workflow and audit",
+      "description": "Implement override workflow with complete audit entries."
+    },
+    {
+      "key": "POL-4",
+      "summary": "Gateway adapter for reasoner messages",
+      "description": "Create read-only gateway adapter for reasoner messages."
+    },
+    {
+      "key": "POL-5",
+      "summary": "Simulation mode",
+      "description": "Implement simulation mode showing diff impact of policy changes."
+    }
+  ],
+  "definitionOfDone": [
+    "Full audit chain on denies/overrides",
+    "Adapter-only gateway integration; no core edits",
+    "Simulation produces before/after metric deltas"
+  ],
+  "acceptanceTests": [
+    {
+      "name": "Blocked export",
+      "expected": "Returns license clause, owner, and remediation"
+    },
+    {
+      "name": "Purpose change",
+      "expected": "Purpose change flips allow/deny deterministically"
+    },
+    {
+      "name": "Simulation stability",
+      "expected": "Simulation produces stable diff on fixture suite"
+    }
+  ],
+  "testEvidence": [
+    {
+      "type": "unit",
+      "path": "services/policy-engine/src/__tests__/",
+      "artifact": "test-results/unit/policy-engine.xml"
+    },
+    {
+      "type": "integration",
+      "path": "services/policy-engine/tests/integration/",
+      "artifact": "test-results/integration/policy-engine.json"
+    },
+    {
+      "type": "e2e",
+      "path": "tests/e2e/policy-engine.spec.ts",
+      "artifact": "test-results/e2e/policy-engine-report.json"
+    }
+  ]
+}
