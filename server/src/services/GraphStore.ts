@@ -1,11 +1,14 @@
 import { Driver, Node, Relationship as Neo4jRelationship } from 'neo4j-driver';
 import { getNeo4jDriver } from '../db/neo4j';
+import { provLedgerClient } from '../lib/prov-ledger.js';
+import logger from '../utils/logger.js';
 
 export interface Entity {
   id: string;
   type: string;
   value: string;
   label?: string;
+  provenanceId?: string;
 }
 
 export interface Relationship {
@@ -15,6 +18,7 @@ export interface Relationship {
   type: string;
   since?: string;
   until?: string;
+  provenanceId?: string;
 }
 
 export interface GraphStore {
@@ -35,6 +39,7 @@ function nodeToEntity(node: Node): Entity {
     type: props.type,
     value: props.value,
     label: props.label,
+    provenanceId: props.provenanceId,
   };
 }
 
@@ -47,6 +52,7 @@ function relToRelationship(rel: Neo4jRelationship): Relationship {
     type: props.type,
     since: props.since,
     until: props.until,
+    provenanceId: props.provenanceId,
   };
 }
 
@@ -90,14 +96,39 @@ export function createGraphStore(
 
     async upsertEntity(e: Entity) {
       const session = driver.session();
+      let provenanceId = e.provenanceId;
+
+      if (!provenanceId) {
+        try {
+          const claim = await provLedgerClient.createClaim({
+            content: {
+              type: e.type,
+              value: e.value,
+              label: e.label,
+              entityId: e.id,
+            },
+            metadata: {
+              source: 'GraphStore.upsertEntity',
+            },
+          });
+          provenanceId = claim.id;
+        } catch (err) {
+          logger.error('Failed to create claim for entity', { error: err, entityId: e.id });
+          // Fallback: proceed without provenance ID if ledger is down (or should we block?)
+          // For RC, we should probably proceed but log.
+        }
+      }
+
+      const entityWithProv = { ...e, provenanceId };
+
       try {
         const res = await session.writeTransaction((tx) =>
           tx.run(
             `MERGE (n:Entity {id: $id})
-             ON CREATE SET n.type=$type, n.value=$value, n.label=$label, n.createdAt=timestamp()
-             ON MATCH SET n.type=$type, n.value=$value, n.label=$label, n.updatedAt=timestamp()
+             ON CREATE SET n.type=$type, n.value=$value, n.label=$label, n.provenanceId=$provenanceId, n.createdAt=timestamp()
+             ON MATCH SET n.type=$type, n.value=$value, n.label=$label, n.provenanceId=$provenanceId, n.updatedAt=timestamp()
              RETURN n`,
-            e,
+            entityWithProv,
           ),
         );
         return nodeToEntity(res.records[0].get('n'));
@@ -108,15 +139,38 @@ export function createGraphStore(
 
     async upsertRelationship(r: Relationship) {
       const session = driver.session();
+      let provenanceId = r.provenanceId;
+
+      if (!provenanceId) {
+        try {
+          const claim = await provLedgerClient.createClaim({
+            content: {
+              type: r.type,
+              fromId: r.fromId,
+              toId: r.toId,
+              relationshipId: r.id,
+            },
+            metadata: {
+              source: 'GraphStore.upsertRelationship',
+            },
+          });
+          provenanceId = claim.id;
+        } catch (err) {
+          logger.error('Failed to create claim for relationship', { error: err, relId: r.id });
+        }
+      }
+
+      const relWithProv = { ...r, provenanceId };
+
       try {
         const res = await session.writeTransaction((tx) =>
           tx.run(
             `MATCH (a:Entity {id: $fromId}), (b:Entity {id: $toId})
              MERGE (a)-[rel:RELATIONSHIP {id: $id}]->(b)
-             ON CREATE SET rel.type=$type, rel.fromId=$fromId, rel.toId=$toId, rel.since=$since, rel.until=$until, rel.createdAt=timestamp()
-             ON MATCH SET rel.type=$type, rel.since=$since, rel.until=$until, rel.updatedAt=timestamp()
+             ON CREATE SET rel.type=$type, rel.fromId=$fromId, rel.toId=$toId, rel.since=$since, rel.until=$until, rel.provenanceId=$provenanceId, rel.createdAt=timestamp()
+             ON MATCH SET rel.type=$type, rel.since=$since, rel.until=$until, rel.provenanceId=$provenanceId, rel.updatedAt=timestamp()
              RETURN rel`,
-            r,
+            relWithProv,
           ),
         );
         return relToRelationship(res.records[0].get('rel'));
