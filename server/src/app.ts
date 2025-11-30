@@ -14,6 +14,7 @@ import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { createGraphqlPersistedAllowlistMiddleware } from './middleware/graphqlPersistedAllowlist.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -294,9 +295,18 @@ export const createApp = async () => {
           next();
         };
 
+  const persistedAllowlistMiddleware =
+    createGraphqlPersistedAllowlistMiddleware({
+      enforceInProduction: cfg.NODE_ENV === 'production',
+      allowDevFallback:
+        cfg.NODE_ENV !== 'production' ||
+        process.env.ALLOW_NON_PERSISTED_QUERIES === 'true',
+    });
+
   app.use(
     '/graphql',
     express.json(),
+    persistedAllowlistMiddleware,
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
     rateLimitMiddleware, // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, { context: getContext }),
