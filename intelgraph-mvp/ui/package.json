@@ -8,21 +8,21 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "next": "14.0.0",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
     "@tanstack/react-query": "4.36.1",
+    "cytoscape": "3.26.0",
     "dayjs": "1.11.9",
-    "tailwindcss": "3.3.2",
     "maplibre-gl": "3.3.1",
-    "cytoscape": "3.26.0"
+    "next": "^14.2.33",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwindcss": "3.3.2"
   },
   "devDependencies": {
-    "typescript": "5.0.4",
-    "@types/react": "18.2.8",
+    "@playwright/test": "1.39.0",
     "@types/node": "20.2.5",
+    "@types/react": "18.2.8",
     "eslint": "8.40.0",
     "prettier": "2.8.8",
-    "@playwright/test": "1.39.0"
+    "typescript": "5.0.4"
   }
 }
