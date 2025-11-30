@@ -1,5 +1,18 @@
-"""Autonomous investigator service package."""
+"""Autonomous investigator package exports."""
 
-from .main import app
+from .analysis import (
+    EvidenceAnalysisPipeline,
+    EvidenceAnalysisReport,
+    EvidenceArtifact,
+    Relationship,
+)
+from .engine import InvestigatorEngine, InnovationCoefficients
 
-__all__ = ["app"]
+__all__ = [
+    "EvidenceAnalysisPipeline",
+    "EvidenceAnalysisReport",
+    "EvidenceArtifact",
+    "InnovationCoefficients",
+    "InvestigatorEngine",
+    "Relationship",
+]
