@@ -71,6 +71,9 @@ class LLMService {
           case 'local':
             response = await this.localCompletion(params);
             break;
+          case 'mock':
+            response = await this.mockCompletion(params);
+            break;
           default:
             throw new Error(
               `Unsupported LLM provider: ${this.config.provider}`,
@@ -279,6 +282,49 @@ class LLMService {
    */
   async localCompletion(params) {
     throw new Error('Local provider not yet implemented');
+  }
+
+  /**
+   * Mock completion for testing
+   */
+  async mockCompletion(params) {
+    const { prompt } = params;
+    this.logger.info('Generating mock LLM response');
+
+    // Simulate latency
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    return {
+      content: JSON.stringify({
+        title: "Summit OS Growth Playbook",
+        summary: "A customized growth strategy based on your company health assessment.",
+        score: 85,
+        strengths: ["Strong engineering culture", "High retention"],
+        weaknesses: ["Marketing funnel undefined", "Sales cycle too long"],
+        strategic_initiatives: [
+          {
+            title: "Implement EOS L10 Meetings",
+            description: "Standardize weekly execution meetings to improve accountability.",
+            timeline: "Immediate"
+          },
+          {
+            title: "Revamp Sales Compensation",
+            description: "Align incentives with 3-year growth targets.",
+            timeline: "Q2"
+          }
+        ],
+        tactical_actions: [
+          "Set up weekly scorecard",
+          "Define 1-year goals",
+          "Hire VP of Sales"
+        ]
+      }, null, 2),
+      usage: {
+        prompt_tokens: 50,
+        completion_tokens: 200,
+        total_tokens: 250
+      }
+    };
   }
 
   /**

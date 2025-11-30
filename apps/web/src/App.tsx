@@ -35,6 +35,7 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const GrowthPlaybookPage = React.lazy(() => import('@/pages/GrowthPlaybookPage'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -77,6 +78,12 @@ function App() {
                       <Route
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
+                      />
+
+                      {/* Growth Playbook */}
+                      <Route
+                        path="growth/playbook"
+                        element={<GrowthPlaybookPage />}
                       />
 
                       {/* Alerts */}
