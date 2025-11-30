@@ -7,3 +7,5 @@ This directory contains a minimal real-time ingestion and alerting pipeline comp
 - **alerts-api** – Fastify server that streams alerts to clients via Server-Sent Events.
 
 These services showcase the end-to-end flow described in the IntelGraph advisory report.
+
+For a full platform blueprint that layers Apache Kafka with Apache Pulsar, adds exactly-once Kafka Streams processing, and documents partitioning + consumer-group strategy, see `streaming/platform/README.md`.
