@@ -39,6 +39,12 @@ export interface APQOptions {
    * @default 'apq:'
    */
   keyPrefix?: string;
+
+  /**
+   * Whether to enforce allowlisting (only pre-registered queries allowed)
+   * @default false
+   */
+  allowlistEnabled?: boolean;
 }
 
 // In-memory cache for development (not suitable for production with multiple instances)
@@ -60,6 +66,7 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
     ttl = 86400, // 24 hours
     enabled = true,
     keyPrefix = 'apq:',
+    allowlistEnabled = false,
   } = options;
 
   if (!enabled) {
@@ -110,7 +117,17 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
           const persistedQuery = extensions?.persistedQuery;
 
           if (!persistedQuery) {
-            // Not an APQ request, continue normally
+            // Not an APQ request.
+            // If allowlist is enabled, we should BLOCK standard queries unless they are somehow exempted
+            // or if allowlisting strictly applies to APQ flow.
+            // Usually, strict security means "No arbitrary queries at all".
+            if (allowlistEnabled) {
+                 throw new GraphQLError('Only persisted queries are allowed', {
+                    extensions: {
+                        code: 'PERSISTED_QUERY_REQUIRED',
+                    }
+                 });
+            }
             return;
           }
 
@@ -125,7 +142,7 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
             });
           }
 
-          // If query is provided, verify hash and cache it
+          // If query is provided...
           if (source && source.body) {
             const computedHash = hashQuery(source.body);
 
@@ -138,7 +155,22 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
               });
             }
 
-            // Cache the query
+            // If allowlisting is enabled, clients CANNOT register new queries at runtime.
+            // The query must already exist in the cache (preloaded).
+            if (allowlistEnabled) {
+                const exists = await getQuery(sha256Hash);
+                if (!exists) {
+                     throw new GraphQLError('Query not found in allowlist', {
+                        extensions: {
+                            code: 'PERSISTED_QUERY_NOT_ALLOWED',
+                        }
+                     });
+                }
+                // If it exists, we are good. We don't need to set it again.
+                return;
+            }
+
+            // Normal APQ: Cache the query
             await setQuery(sha256Hash, source.body);
 
             logger.debug(
@@ -177,6 +209,27 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
       };
     },
   };
+}
+
+/**
+ * Preload allowlist of queries
+ */
+export async function preloadAllowlist(
+    queries: Record<string, string>,
+    redis?: Redis,
+    keyPrefix: string = 'apq:'
+): Promise<void> {
+    const promises = [];
+    for (const [hash, query] of Object.entries(queries)) {
+        if (redis) {
+            // Persist indefinitely or long TTL
+            promises.push(redis.set(`${keyPrefix}${hash}`, query));
+        } else {
+            memoryCache.set(hash, query);
+        }
+    }
+    if (promises.length > 0) await Promise.all(promises);
+    logger.info({ count: Object.keys(queries).length }, 'Preloaded APQ allowlist');
 }
 
 /**
