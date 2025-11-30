@@ -60,6 +60,7 @@
     "ciPassRate": 0,
     "coverage": 0,
     "deploymentMinutes": 0,
-    "productionIncidents": 0
+    "productionIncidents": 0,
+    "prsMerged": 0
   }
 }

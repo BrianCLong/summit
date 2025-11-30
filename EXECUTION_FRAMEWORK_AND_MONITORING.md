@@ -11,6 +11,13 @@ This document summarizes the operational framework for driving the five-batch pr
 | Batch 4: AI/ML | P1 | ⚪ Queued | 0% | Week 7–8 | Batch 3 |
 | Batch 5: Observability | P2 | ⚪ Queued | 0% | Week 9–10 | Batch 4 |
 
+Generate this table and the weekly report scaffold directly from the plan via the CLI:
+
+```bash
+node tools/execution/batchTracker.js dashboard
+node tools/execution/batchTracker.js weekly "Week 1"
+```
+
 ## Immediate Next Actions (Week 1)
 - **CI/CD Emergency Fix (Day 1–2):** Investigate failing workflows, run `npm run test:ci` locally, stabilize service dependencies, and unblock merging.
 - **Security Scan Review:** Triage OWASP ZAP findings by severity and open sub-issues; remediate critical/high items immediately.

@@ -2,27 +2,71 @@ import fs from 'fs';
 import path from 'path';
 
 const VALID_STATUSES = ['not-started', 'queued', 'in-progress', 'blocked', 'done'];
+const DEFAULT_PLAN = 'execution-plan.json';
 
-function resolvePlanPath(planPath = 'execution-plan.json') {
+function resolvePlanPath(planPath = DEFAULT_PLAN) {
   return path.isAbsolute(planPath) ? planPath : path.join(process.cwd(), planPath);
 }
 
-export function loadPlan(planPath = 'execution-plan.json') {
+function requireString(value, field) {
+  if (typeof value !== 'string' || !value.trim()) {
+    throw new Error(`${field} must be a non-empty string`);
+  }
+}
+
+function requireProgress(value) {
+  if (!Number.isFinite(value) || value < 0 || value > 100) {
+    throw new Error('Progress must be between 0 and 100');
+  }
+}
+
+export function validatePlan(plan) {
+  if (!plan || typeof plan !== 'object') {
+    throw new Error('Plan must be an object');
+  }
+  if (!Array.isArray(plan.batches) || plan.batches.length === 0) {
+    throw new Error('Plan file is missing a non-empty batches array');
+  }
+
+  const ids = new Set();
+  plan.batches.forEach((batch) => {
+    requireString(batch.id, 'Batch id');
+    if (ids.has(batch.id)) {
+      throw new Error(`Duplicate batch id detected: ${batch.id}`);
+    }
+    ids.add(batch.id);
+    requireString(batch.name, 'Batch name');
+    requireString(batch.priority, 'Batch priority');
+    if (!VALID_STATUSES.includes(batch.status)) {
+      throw new Error(`Invalid status '${batch.status}' in plan. Allowed: ${VALID_STATUSES.join(', ')}`);
+    }
+    requireProgress(batch.progress);
+    if (!Array.isArray(batch.blockers)) {
+      throw new Error(`Blockers for ${batch.id} must be an array`);
+    }
+  });
+
+  if (!plan.metrics || typeof plan.metrics !== 'object') {
+    plan.metrics = {};
+  }
+
+  return plan;
+}
+
+export function loadPlan(planPath = DEFAULT_PLAN) {
   const fullPath = resolvePlanPath(planPath);
   if (!fs.existsSync(fullPath)) {
     throw new Error(`Plan file not found at ${fullPath}`);
   }
   const raw = fs.readFileSync(fullPath, 'utf8');
   const data = JSON.parse(raw);
-  if (!Array.isArray(data.batches)) {
-    throw new Error('Plan file is missing a batches array');
-  }
-  return data;
+  return validatePlan(data);
 }
 
-export function savePlan(plan, planPath = 'execution-plan.json') {
+export function savePlan(plan, planPath = DEFAULT_PLAN) {
+  const validated = validatePlan(plan);
   const fullPath = resolvePlanPath(planPath);
-  const payload = JSON.stringify(plan, null, 2);
+  const payload = JSON.stringify(validated, null, 2);
   fs.writeFileSync(fullPath, `${payload}\n`, 'utf8');
 }
 
@@ -41,9 +85,7 @@ export function updateBatch(plan, batchId, updates) {
   }
 
   if (typeof updates.progress === 'number') {
-    if (updates.progress < 0 || updates.progress > 100) {
-      throw new Error('Progress must be between 0 and 100');
-    }
+    requireProgress(updates.progress);
     next.progress = updates.progress;
   }
 
@@ -59,24 +101,37 @@ export function updateBatch(plan, batchId, updates) {
     next.notes = updates.notes;
   }
 
+  if (updates.targetDate) {
+    requireString(updates.targetDate, 'targetDate');
+    next.targetDate = updates.targetDate;
+  }
+
   const batches = [...plan.batches];
   batches[idx] = next;
-  return { ...plan, batches };
+  return validatePlan({ ...plan, batches });
 }
 
 export function updateMetrics(plan, metrics) {
-  const nextMetrics = { ...plan.metrics, ...metrics };
-  return { ...plan, metrics: nextMetrics };
+  const sanitized = { ...plan.metrics };
+  Object.entries(metrics).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
+      throw new Error(`Metric '${key}' must be a non-negative number`);
+    }
+    sanitized[key] = value;
+  });
+  return { ...plan, metrics: sanitized };
 }
 
 export function generateDashboard(plan) {
-  const headers = ['Batch', 'Priority', 'Status', 'Progress', 'Target Date', 'Blockers'];
+  const headers = ['Batch', 'Priority', 'Status', 'Progress', 'Target Date', 'Owner', 'Blockers'];
   const rows = plan.batches.map((batch) => [
     `${batch.name}`,
     batch.priority,
     statusEmoji(batch.status),
     `${batch.progress}%`,
     batch.targetDate,
+    batch.owner || 'Unassigned',
     batch.blockers.length ? batch.blockers.join(', ') : 'None',
   ]);
   return buildTable(headers, rows);
@@ -92,7 +147,7 @@ export function generateWeeklyReport(plan, weekLabel) {
     '',
     `### 🎯 Current Batch: ${currentBatch.name}`,
     '',
-    `**Overall Progress:** ${currentBatch.progress}% complete`,
+    `**Overall Progress:** ${currentBatch.progress}% complete (Owner: ${currentBatch.owner || 'unassigned'})`,
     '',
     '### ✅ Completed This Week',
     ...formatChecklist(completed, 'No batches completed'),
@@ -159,15 +214,41 @@ function buildTable(headers, rows) {
   return `${headerLine}\n${separator}\n${body}`;
 }
 
+function parseKeyValuePairs(pairs) {
+  const updates = {};
+  pairs.forEach((pair) => {
+    const [key, value] = pair.split('=');
+    if (value === undefined) return;
+    if (key === 'progress') {
+      updates.progress = Number.parseInt(value, 10);
+    } else if (key === 'status') {
+      updates.status = value;
+    } else if (key === 'owner') {
+      updates.owner = value;
+    } else if (key === 'notes') {
+      updates.notes = value;
+    } else if (key === 'blockers') {
+      updates.blockers = value ? value.split(',').map((item) => item.trim()).filter(Boolean) : [];
+    } else if (key === 'targetDate') {
+      updates.targetDate = value;
+    } else if (['ciPassRate', 'coverage', 'deploymentMinutes', 'productionIncidents', 'prsMerged'].includes(key)) {
+      updates[key] = Number.parseFloat(value);
+    }
+  });
+  return updates;
+}
+
 export function cli(argv = process.argv.slice(2)) {
   const [command, ...rest] = argv;
-  const planPath = process.env.EXECUTION_PLAN_PATH || 'execution-plan.json';
+  const planPath = process.env.EXECUTION_PLAN_PATH || DEFAULT_PLAN;
   if (!command || command === 'help') {
     console.log('Usage: node tools/execution/batchTracker.js <command> [options]');
     console.log('Commands:');
-    console.log('  dashboard                 Print markdown dashboard table');
-    console.log('  weekly <label>            Print weekly report with the provided label');
-    console.log('  update <batchId> key=val  Update batch status/progress/owner/notes');
+    console.log('  dashboard                        Print markdown dashboard table');
+    console.log('  weekly <label>                   Print weekly report with the provided label');
+    console.log('  update <batchId> key=val [...]   Update batch status/progress/owner/notes/blockers/targetDate');
+    console.log('  metrics key=val [...]            Update aggregated metrics (ciPassRate, coverage, prsMerged, etc.)');
+    console.log('  validate                         Validate plan structure without writing changes');
     process.exit(0);
   }
 
@@ -192,22 +273,24 @@ export function cli(argv = process.argv.slice(2)) {
     if (!batchId) {
       throw new Error('Update command requires a batch id');
     }
-    const updates = {};
-    pairs.forEach((pair) => {
-      const [key, value] = pair.split('=');
-      if (key === 'progress') {
-        updates.progress = Number.parseInt(value, 10);
-      } else if (key === 'status') {
-        updates.status = value;
-      } else if (key === 'owner') {
-        updates.owner = value;
-      } else if (key === 'notes') {
-        updates.notes = value;
-      }
-    });
+    const updates = parseKeyValuePairs(pairs);
     const updated = updateBatch(plan, batchId, updates);
     savePlan(updated, planPath);
     console.log(`Updated ${batchId}`);
+    return;
+  }
+
+  if (command === 'metrics') {
+    const metricUpdates = parseKeyValuePairs(rest);
+    const updated = updateMetrics(plan, metricUpdates);
+    savePlan(updated, planPath);
+    console.log('Metrics updated');
+    return;
+  }
+
+  if (command === 'validate') {
+    validatePlan(plan);
+    console.log('Plan is valid');
     return;
   }
 
