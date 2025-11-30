@@ -39,28 +39,6 @@ module.exports = {
     '!**/salvage/**',
     '!**/pull/**',
   ],
-  // Coverage thresholds - PR quality gate enforcement
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-    // Critical paths require 85% coverage
-    './server/src/middleware/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-    './server/src/services/**/*.ts': {
-      branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
-    },
-  },
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
@@ -75,7 +53,7 @@ module.exports = {
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
-  // Coverage thresholds - enforced globally
+  // Coverage thresholds - consolidated and enforced
   coverageThreshold: {
     global: {
       branches: 50,
@@ -83,18 +61,40 @@ module.exports = {
       lines: 50,
       statements: 50,
     },
-    // Stricter thresholds for security-critical services
-    './server/src/security/**/*.ts': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+    // Critical middleware paths require 85% coverage
+    './server/src/middleware/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
     },
-    './server/src/services/AuthService.ts': {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
+    // Core services require 85% coverage
+    './server/src/services/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+    // Security-critical paths require 85% coverage
+    './server/src/security/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+    // API services require 75% coverage
+    './services/api/**/*.ts': {
+      branches: 75,
+      functions: 75,
+      lines: 75,
+      statements: 75,
+    },
+    // Graph services require 75% coverage
+    './services/graph-api/**/*.ts': {
+      branches: 75,
+      functions: 75,
+      lines: 75,
+      statements: 75,
     },
   },
   // Test timeout
