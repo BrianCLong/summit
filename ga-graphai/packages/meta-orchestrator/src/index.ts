@@ -723,3 +723,19 @@ export {
   type GenerativeActionTranslatorOptions,
   type OrchestrationIntent,
 } from './gen-actions/intentTranslator.js';
+export {
+  AgentMarketplace,
+  ConsensusProtocol,
+  SwarmOrchestrator,
+  TaskDecomposer,
+  buildDefaultSwarm,
+  type AgentBid,
+  type AgentOutcome,
+  type AgentProfile,
+  type Capability,
+  type CommunicationMessage,
+  type ConsensusCandidate,
+  type ConsensusResult,
+  type SwarmExecutionTelemetry,
+  type TaskDefinition,
+} from './swarm.js';
