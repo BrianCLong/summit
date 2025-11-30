@@ -67,3 +67,5 @@ export async function searchAll(input: SearchInput) {
   await driver.close();
   return { results: base.rows, graph };
 }
+
+export { AdvancedSearchEngine, createAdvancedSearchEngine } from './advanced-search-engine';
