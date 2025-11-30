@@ -5,6 +5,7 @@
  */
 
 import { BaseCanonicalEntity, CanonicalEntityMetadata } from '../types';
+import { PolicyLabel } from './Decision';
 
 export interface ClaimSubject {
   /** Subject entity ID */
@@ -128,6 +129,9 @@ export interface CanonicalClaim extends BaseCanonicalEntity, CanonicalEntityMeta
     investigationId?: string;
     reportId?: string;
   };
+
+  /** Policy labels for compliance */
+  policyLabels?: PolicyLabel;
 
   /** Risk indicators */
   riskFlags?: {
