@@ -1,0 +1,751 @@
+"""
+Graph Core Canonical Model GraphQL Schema
+
+This schema defines the canonical graph model for the IntelGraph platform.
+All entities and relationships follow a consistent pattern with:
+- Bitemporal support (validFrom/validTo + observedAt/recordedAt)
+- Policy labels (7 mandatory fields)
+- Provenance tracking
+- Version control
+
+Version: v1.0.0
+"""
+
+# =============================================================================
+# SCALARS
+# =============================================================================
+
+scalar DateTime
+scalar JSON
+scalar UUID
+
+# =============================================================================
+# ENUMS - Entity Types (21 types)
+# =============================================================================
+
+"""Canonical entity types covering the intelligence domain"""
+enum EntityType {
+  Person
+  Organization
+  Asset
+  Account
+  Location
+  Event
+  Document
+  Communication
+  Device
+  Vehicle
+  Infrastructure
+  FinancialInstrument
+  Indicator
+  Claim
+  Case
+  Narrative
+  Campaign
+  InfrastructureService
+  Sensor
+  Runbook
+  Authority
+  License
+}
+
+# =============================================================================
+# ENUMS - Relationship Types (30 types)
+# =============================================================================
+
+"""Canonical relationship types covering all relationship patterns"""
+enum RelationshipType {
+  # Structure (7)
+  CONNECTED_TO
+  OWNS
+  WORKS_FOR
+  LOCATED_AT
+  MEMBER_OF
+  MANAGES
+  REPORTS_TO
+
+  # Network (4)
+  COMMUNICATES_WITH
+  TRANSACTED_WITH
+  SIMILAR_TO
+  RELATED_TO
+
+  # Hierarchy (3)
+  SUBSIDIARY_OF
+  PARTNER_OF
+  COMPETITOR_OF
+
+  # Actions (4)
+  ACCESSED
+  CREATED
+  MODIFIED
+  MENTIONS
+
+  # Evidence & Provenance (4)
+  SUPPORTS
+  CONTRADICTS
+  DERIVED_FROM
+  CITES
+
+  # Authority & Governance (3)
+  AUTHORIZED_BY
+  GOVERNED_BY
+  REQUIRES
+
+  # Temporal Sequences (3)
+  PRECEDES
+  FOLLOWS
+  CONCURRENT_WITH
+
+  # Hypothesis (3)
+  EXPLAINS
+  ALTERNATIVE_TO
+  REFUTES
+}
+
+# =============================================================================
+# ENUMS - Policy Labels
+# =============================================================================
+
+"""Data sensitivity classification levels"""
+enum SensitivityLevel {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+  TOP_SECRET
+}
+
+"""Clearance levels for access control"""
+enum ClearanceLevel {
+  PUBLIC
+  AUTHORIZED
+  CONFIDENTIAL
+  SECRET
+  TOP_SECRET
+}
+
+"""Data lifecycle retention classes"""
+enum RetentionClass {
+  """30 days"""
+  TRANSIENT
+  """1 year"""
+  SHORT_TERM
+  """5 years"""
+  MEDIUM_TERM
+  """10 years"""
+  LONG_TERM
+  """Indefinite"""
+  PERMANENT
+  """Immutable until released"""
+  LEGAL_HOLD
+}
+
+"""Verification status for provenance"""
+enum VerificationStatus {
+  UNVERIFIED
+  PARTIAL
+  VERIFIED
+  DISPUTED
+  INVALIDATED
+}
+
+"""Provenance action types"""
+enum ProvenanceAction {
+  INGEST
+  TRANSFORM
+  ENRICH
+  MERGE
+  SPLIT
+  VALIDATE
+}
+
+# =============================================================================
+# POLICY LABELS TYPE
+# =============================================================================
+
+"""
+Policy Labels - 7 mandatory fields for governance
+
+Every entity and relationship MUST have these labels populated.
+Legal basis is required when sensitivity > INTERNAL.
+"""
+type PolicyLabels {
+  """Source attribution - where this data originated"""
+  origin: String!
+  """Data classification level"""
+  sensitivity: SensitivityLevel!
+  """Minimum clearance required to access"""
+  clearance: ClearanceLevel!
+  """Legal authority for processing (required if sensitivity > INTERNAL)"""
+  legalBasis: String!
+  """Compartmentation tags - additional access restrictions"""
+  needToKnow: [String!]!
+  """Allowable purposes for this data"""
+  purposeLimitation: [String!]!
+  """Data lifecycle tier"""
+  retentionClass: RetentionClass!
+}
+
+input PolicyLabelsInput {
+  origin: String!
+  sensitivity: SensitivityLevel!
+  clearance: ClearanceLevel!
+  legalBasis: String!
+  needToKnow: [String!]!
+  purposeLimitation: [String!]!
+  retentionClass: RetentionClass!
+}
+
+# =============================================================================
+# PROVENANCE TYPES
+# =============================================================================
+
+"""Single provenance assertion in the chain"""
+type ProvenanceAssertion {
+  id: UUID!
+  timestamp: DateTime!
+  actor: String!
+  action: ProvenanceAction!
+  input: [String!]!
+  output: [String!]!
+  method: String!
+  parameters: JSON!
+  modelVersion: String
+  confidence: Float!
+  evidence: [String!]
+}
+
+"""Full provenance chain for an entity/relationship"""
+type ProvenanceChain {
+  sourceId: String!
+  assertions: [ProvenanceAssertion!]!
+  verificationStatus: VerificationStatus!
+  trustScore: Float!
+}
+
+input ProvenanceAssertionInput {
+  id: UUID
+  timestamp: DateTime
+  actor: String!
+  action: ProvenanceAction!
+  input: [String!]!
+  output: [String!]!
+  method: String!
+  parameters: JSON
+  modelVersion: String
+  confidence: Float!
+  evidence: [String!]
+}
+
+input ProvenanceChainInput {
+  sourceId: String!
+  assertions: [ProvenanceAssertionInput!]
+  verificationStatus: VerificationStatus
+  trustScore: Float
+}
+
+# =============================================================================
+# ENTITY TYPE
+# =============================================================================
+
+"""
+Canonical Entity
+
+Base type for all entities in the graph with:
+- Bitemporal support (validFrom/validTo + observedAt/recordedAt)
+- Policy labels (7 mandatory fields)
+- Provenance tracking
+"""
+type Entity {
+  """UUID primary key"""
+  id: UUID!
+
+  """ER master entity ID (for resolved duplicates)"""
+  canonicalId: UUID
+
+  """Multi-tenant isolation"""
+  tenantId: String!
+
+  """Entity type discriminator"""
+  entityType: EntityType!
+
+  """Display name"""
+  label: String!
+
+  """Human-readable description"""
+  description: String
+
+  """Type-specific properties"""
+  properties: JSON!
+
+  """User-defined extensions"""
+  customMetadata: JSON
+
+  """Confidence score (0.0-1.0)"""
+  confidence: Float!
+
+  """Source system/connector"""
+  source: String!
+
+  """Full provenance chain"""
+  provenance: ProvenanceChain!
+
+  """7 mandatory policy labels"""
+  policyLabels: PolicyLabels!
+
+  # Bitemporal fields
+  """When this fact became true in the real world"""
+  validFrom: DateTime
+  """When this fact stopped being true"""
+  validTo: DateTime
+  """When this fact was observed/discovered"""
+  observedAt: DateTime
+  """When this record was created in the system (immutable)"""
+  recordedAt: DateTime!
+
+  # Audit fields
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  updatedBy: String
+
+  """Optimistic locking version"""
+  version: Int!
+
+  """Tags for categorization"""
+  tags: [String!]!
+
+  """Investigation context"""
+  investigationId: String
+
+  """Case association"""
+  caseId: String
+
+  # Graph navigation
+  """Outgoing relationships from this entity"""
+  outgoingRelationships(
+    types: [RelationshipType!]
+    limit: Int = 20
+    offset: Int = 0
+  ): [Relationship!]!
+
+  """Incoming relationships to this entity"""
+  incomingRelationships(
+    types: [RelationshipType!]
+    limit: Int = 20
+    offset: Int = 0
+  ): [Relationship!]!
+
+  """All versions of this entity"""
+  versions: [Entity!]!
+}
+
+# =============================================================================
+# RELATIONSHIP TYPE
+# =============================================================================
+
+"""
+Canonical Relationship
+
+Represents a connection between two entities with:
+- Bitemporal support
+- Policy labels
+- Provenance tracking
+"""
+type Relationship {
+  """UUID primary key"""
+  id: UUID!
+
+  """Multi-tenant isolation"""
+  tenantId: String!
+
+  """Relationship type"""
+  type: RelationshipType!
+
+  """Optional display label"""
+  label: String
+
+  """Human-readable description"""
+  description: String
+
+  """Source entity ID"""
+  fromEntityId: UUID!
+
+  """Target entity ID"""
+  toEntityId: UUID!
+
+  """Source entity"""
+  fromEntity: Entity
+
+  """Target entity"""
+  toEntity: Entity
+
+  """Whether the relationship is directed"""
+  directed: Boolean!
+
+  """Relationship weight/strength (0.0-1.0)"""
+  weight: Float
+
+  """Relationship-specific properties"""
+  properties: JSON!
+
+  """User-defined extensions"""
+  customMetadata: JSON
+
+  """Confidence score (0.0-1.0)"""
+  confidence: Float!
+
+  """Source system/connector"""
+  source: String!
+
+  """Full provenance chain"""
+  provenance: ProvenanceChain!
+
+  """7 mandatory policy labels"""
+  policyLabels: PolicyLabels!
+
+  # Bitemporal fields
+  validFrom: DateTime
+  validTo: DateTime
+  observedAt: DateTime
+  recordedAt: DateTime!
+
+  """Business start of relationship"""
+  since: DateTime
+
+  """Business end of relationship"""
+  until: DateTime
+
+  # Audit fields
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  updatedBy: String
+
+  version: Int!
+
+  investigationId: String
+  caseId: String
+
+  """All versions of this relationship"""
+  versions: [Relationship!]!
+}
+
+# =============================================================================
+# INPUT TYPES
+# =============================================================================
+
+"""Input for creating or updating an entity"""
+input EntityInput {
+  id: UUID
+  canonicalId: UUID
+  tenantId: String
+  entityType: EntityType!
+  label: String!
+  description: String
+  properties: JSON
+  customMetadata: JSON
+  confidence: Float
+  source: String
+  provenance: ProvenanceChainInput
+  policyLabels: PolicyLabelsInput
+  validFrom: DateTime
+  validTo: DateTime
+  observedAt: DateTime
+  createdBy: String
+  tags: [String!]
+  investigationId: String
+  caseId: String
+}
+
+"""Input for creating or updating a relationship"""
+input RelationshipInput {
+  id: UUID
+  tenantId: String
+  type: RelationshipType!
+  label: String
+  description: String
+  fromEntityId: UUID!
+  toEntityId: UUID!
+  directed: Boolean
+  weight: Float
+  properties: JSON
+  customMetadata: JSON
+  confidence: Float
+  source: String
+  provenance: ProvenanceChainInput
+  policyLabels: PolicyLabelsInput
+  validFrom: DateTime
+  validTo: DateTime
+  observedAt: DateTime
+  since: DateTime
+  until: DateTime
+  createdBy: String
+  investigationId: String
+  caseId: String
+}
+
+"""Temporal query parameters for time-travel queries"""
+input TemporalQueryInput {
+  """Point in time for snapshot query (business time)"""
+  asOf: DateTime
+  """Point in time for system time query"""
+  recordedAsOf: DateTime
+  """Start of validity window filter"""
+  validFrom: DateTime
+  """End of validity window filter"""
+  validTo: DateTime
+}
+
+"""Pagination parameters"""
+input PaginationInput {
+  """Number of items per page (max 100)"""
+  limit: Int = 20
+  """Offset for pagination"""
+  offset: Int = 0
+  """Cursor for cursor-based pagination"""
+  cursor: String
+}
+
+"""Filter options for entity queries"""
+input EntityFilterInput {
+  """Filter by entity types"""
+  entityTypes: [EntityType!]
+  """Filter by tenant"""
+  tenantId: String
+  """Minimum confidence threshold"""
+  minConfidence: Float
+  """Required clearance level"""
+  clearance: ClearanceLevel
+  """Filter by tags"""
+  tags: [String!]
+  """Filter by investigation"""
+  investigationId: String
+  """Filter by case"""
+  caseId: String
+  """Temporal filter"""
+  temporal: TemporalQueryInput
+}
+
+"""Filter options for relationship queries"""
+input RelationshipFilterInput {
+  """Filter by relationship types"""
+  types: [RelationshipType!]
+  """Filter by tenant"""
+  tenantId: String
+  """Minimum confidence threshold"""
+  minConfidence: Float
+  """Required clearance level"""
+  clearance: ClearanceLevel
+  """Temporal filter"""
+  temporal: TemporalQueryInput
+}
+
+"""Neighborhood query parameters"""
+input NeighborhoodQueryInput {
+  """Starting entity ID"""
+  entityId: UUID!
+  """Maximum depth to traverse (1-5)"""
+  depth: Int = 2
+  """Filter by entity types"""
+  entityTypes: [EntityType!]
+  """Filter by relationship types"""
+  relationshipTypes: [RelationshipType!]
+  """Minimum confidence threshold"""
+  minConfidence: Float
+  """Required clearance level"""
+  clearance: ClearanceLevel
+  """Temporal filter"""
+  temporal: TemporalQueryInput
+  """Pagination"""
+  pagination: PaginationInput
+}
+
+# =============================================================================
+# RESULT TYPES
+# =============================================================================
+
+"""Query cost estimation result"""
+type QueryCost {
+  """Estimated node count scanned"""
+  estimatedNodes: Int!
+  """Estimated edge count scanned"""
+  estimatedEdges: Int!
+  """Estimated execution time in ms"""
+  estimatedTimeMs: Int!
+  """Whether query exceeds cost limits"""
+  exceedsLimit: Boolean!
+  """Cost limit message if exceeded"""
+  limitMessage: String
+}
+
+"""Neighborhood query result"""
+type NeighborhoodResult {
+  """Center entity"""
+  center: Entity!
+  """Entities by depth level"""
+  entitiesByDepth: [[Entity!]!]!
+  """All relationships in the neighborhood"""
+  relationships: [Relationship!]!
+  """Total entity count"""
+  totalEntities: Int!
+  """Total relationship count"""
+  totalRelationships: Int!
+  """Whether results were truncated due to limits"""
+  truncated: Boolean!
+  """Query cost metrics"""
+  cost: QueryCost!
+}
+
+"""Time snapshot result"""
+type TimeSnapshot {
+  """Timestamp of the snapshot"""
+  asOf: DateTime!
+  """Entities valid at this time"""
+  entities: [Entity!]!
+  """Relationships valid at this time"""
+  relationships: [Relationship!]!
+}
+
+"""Paginated entity result"""
+type EntityConnection {
+  """List of entities"""
+  nodes: [Entity!]!
+  """Total count (before pagination)"""
+  totalCount: Int!
+  """Has more results"""
+  hasMore: Boolean!
+}
+
+"""Paginated relationship result"""
+type RelationshipConnection {
+  """List of relationships"""
+  nodes: [Relationship!]!
+  """Total count (before pagination)"""
+  totalCount: Int!
+  """Has more results"""
+  hasMore: Boolean!
+}
+
+"""Store statistics"""
+type StoreStats {
+  entityCount: Int!
+  relationshipCount: Int!
+  entitiesByType: JSON!
+  relationshipsByType: JSON!
+  tenants: [String!]!
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+type Query {
+  """Get entity by ID"""
+  entity(id: UUID!): Entity
+
+  """Get entity at a specific point in time (bitemporal query)"""
+  entityAt(
+    id: UUID!
+    """Business time point"""
+    asOf: DateTime!
+    """Optional system time point"""
+    recordedAsOf: DateTime
+  ): Entity
+
+  """Get all versions of an entity"""
+  entityVersions(id: UUID!): [Entity!]!
+
+  """List entities with filtering and pagination"""
+  entities(
+    filter: EntityFilterInput
+    pagination: PaginationInput
+  ): EntityConnection!
+
+  """Get relationship by ID"""
+  relationship(id: UUID!): Relationship
+
+  """Get relationship at a specific point in time"""
+  relationshipAt(
+    id: UUID!
+    asOf: DateTime!
+    recordedAsOf: DateTime
+  ): Relationship
+
+  """List relationships with filtering and pagination"""
+  relationships(
+    filter: RelationshipFilterInput
+    pagination: PaginationInput
+  ): RelationshipConnection!
+
+  """Get a snapshot of the graph at a specific point in time"""
+  snapshot(
+    """Business time point"""
+    asOf: DateTime!
+    """Optional system time point"""
+    recordedAsOf: DateTime
+  ): TimeSnapshot!
+
+  """Query neighborhood with time-travel support"""
+  neighborhood(query: NeighborhoodQueryInput!): NeighborhoodResult!
+
+  """Get store statistics"""
+  stats: StoreStats!
+
+  """Validate policy labels"""
+  validatePolicyLabels(input: PolicyLabelsInput!): ValidationResult!
+}
+
+"""Validation result"""
+type ValidationResult {
+  valid: Boolean!
+  errors: [String!]!
+  warnings: [String!]
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+type Mutation {
+  """Create or update an entity"""
+  upsertEntity(input: EntityInput!): Entity!
+
+  """Create or update a relationship"""
+  upsertRelationship(input: RelationshipInput!): Relationship!
+
+  """Delete an entity (soft delete by setting validTo)"""
+  deleteEntity(
+    id: UUID!
+    """When the entity became invalid (defaults to now)"""
+    validTo: DateTime
+  ): Entity
+
+  """Delete a relationship (soft delete by setting validTo)"""
+  deleteRelationship(
+    id: UUID!
+    validTo: DateTime
+  ): Relationship
+
+  """Update policy labels for an entity"""
+  updateEntityPolicyLabels(
+    id: UUID!
+    policyLabels: PolicyLabelsInput!
+  ): Entity!
+
+  """Update policy labels for a relationship"""
+  updateRelationshipPolicyLabels(
+    id: UUID!
+    policyLabels: PolicyLabelsInput!
+  ): Relationship!
+}
+
+# =============================================================================
+# SCHEMA
+# =============================================================================
+
+schema {
+  query: Query
+  mutation: Mutation
+}
