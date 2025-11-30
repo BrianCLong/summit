@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true,
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src", "scripts", "tests", ".storybook"],
+  "exclude": ["dist", "build"]
+}

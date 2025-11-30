@@ -1,0 +1,133 @@
+:root {
+  color-scheme: light;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background: #f6f8fb;
+  color: #0f172a;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  background: linear-gradient(145deg, #f8fbff, #eef2ff);
+}
+
+.app-shell {
+  margin: 1.5rem auto;
+  padding: 1.5rem;
+  width: min(1100px, 100%);
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 80px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  background: #f8fafc;
+}
+
+.card h3 {
+  margin: 0 0 0.35rem;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #0ea5e9;
+  color: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.button.secondary {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.button:focus-visible {
+  outline: 3px solid #fb7185;
+  outline-offset: 3px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0c4a6e;
+  font-weight: 600;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+}
+
+.table th,
+.table td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  text-align: left;
+}
+
+.table th {
+  background: #f1f5f9;
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 10px;
+  color: #9a3412;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
