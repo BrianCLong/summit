@@ -50,18 +50,51 @@ export {
   type CohortAnalysis,
 } from './types.js';
 
-/**
- * Create a complete wellbeing prediction pipeline
- */
-export function createWellbeingPipeline(config?: {
-  domainWeights?: Partial<Record<string, number>>;
-  interventionValidityDays?: number;
-  allocationReservePercent?: number;
-}) {
-  const { WellbeingPredictor } = require('./WellbeingPredictor.js');
-  const { InterventionRecommender } = require('./InterventionRecommender.js');
-  const { ResourceAllocator } = require('./ResourceAllocator.js');
+// Import classes for pipeline factory
+import { WellbeingPredictor } from './WellbeingPredictor.js';
+import { InterventionRecommender } from './InterventionRecommender.js';
+import { ResourceAllocator } from './ResourceAllocator.js';
 
+/**
+ * Configuration options for creating a wellbeing prediction pipeline.
+ */
+export interface WellbeingPipelineConfig {
+  /** Custom weights for wellbeing domains (0-1 scale) */
+  domainWeights?: Partial<Record<string, number>>;
+  /** Number of days intervention recommendations remain valid */
+  interventionValidityDays?: number;
+  /** Percentage of budget to hold in reserve (0-1 scale, default 0.10) */
+  allocationReservePercent?: number;
+}
+
+/**
+ * A complete wellbeing prediction pipeline containing predictor, recommender, and allocator.
+ */
+export interface WellbeingPipeline {
+  /** Generates wellbeing predictions for citizen profiles */
+  predictor: WellbeingPredictor;
+  /** Recommends interventions based on predictions */
+  recommender: InterventionRecommender;
+  /** Optimizes resource allocation across wellbeing domains */
+  allocator: ResourceAllocator;
+}
+
+/**
+ * Create a complete wellbeing prediction pipeline with optional configuration.
+ *
+ * @example
+ * ```typescript
+ * import { createWellbeingPipeline } from '@intelgraph/ai-wellbeing-predictors';
+ *
+ * const pipeline = createWellbeingPipeline({
+ *   allocationReservePercent: 0.15,
+ * });
+ *
+ * const predictions = pipeline.predictor.predictBatch(profiles);
+ * const allocation = pipeline.allocator.allocate(predictions, budget, region);
+ * ```
+ */
+export function createWellbeingPipeline(config?: WellbeingPipelineConfig): WellbeingPipeline {
   return {
     predictor: new WellbeingPredictor(config?.domainWeights),
     recommender: new InterventionRecommender(config?.interventionValidityDays),

@@ -20,7 +20,67 @@ const DEFAULT_CONFIG: AllocationConfig = {
 };
 
 /**
- * AI-driven resource allocation optimizer for citizen wellbeing programs
+ * Domain-specific cost per citizen served (in currency units).
+ * These are average costs based on typical intervention programs.
+ * NOTE: In production, these would be configurable per-region and updated periodically.
+ */
+const DOMAIN_COST_PER_CITIZEN: Record<WellbeingDomain, number> = {
+  health: 2500,           // Healthcare interventions are expensive
+  economic: 1200,         // Financial counseling, benefits enrollment
+  educational: 800,       // Training programs, tutoring
+  social: 400,            // Community programs, group activities
+  housing: 5000,          // Housing assistance is most expensive
+  mental_health: 1800,    // Therapy, counseling services
+  food_security: 600,     // Food assistance programs
+  employment: 1000,       // Job training, placement services
+};
+
+/**
+ * Base improvement rate per domain (percentage points per $1000 allocated per citizen).
+ * Higher values mean more cost-effective interventions.
+ */
+const DOMAIN_IMPROVEMENT_RATE: Record<WellbeingDomain, number> = {
+  health: 2.0,
+  economic: 3.5,
+  educational: 4.0,
+  social: 5.0,
+  housing: 2.5,
+  mental_health: 3.0,
+  food_security: 6.0,
+  employment: 3.5,
+};
+
+/**
+ * AI-driven resource allocation optimizer for citizen wellbeing programs.
+ *
+ * This allocator implements a severity-weighted budget distribution algorithm that:
+ * - Analyzes domain-level wellbeing scores across a population
+ * - Calculates severity scores based on average scores and at-risk counts
+ * - Applies min/max constraints with proper rebalancing to ensure budget integrity
+ * - Projects impact using domain-specific cost and improvement models
+ *
+ * ## Important Limitations (In-Memory Simulation)
+ *
+ * This implementation is a **simulation model** suitable for:
+ * - Demonstrating allocation logic and algorithms
+ * - Testing business rules and edge cases
+ * - Prototyping resource distribution strategies
+ *
+ * For **production deployment**, the following would be required:
+ * - Persistent storage for allocation decisions and historical outcomes
+ * - Real-time budget tracking and reconciliation
+ * - Integration with actual program enrollment systems
+ * - Historical outcome data to calibrate improvement projections
+ * - Audit trail for allocation decisions
+ * - Multi-region conflict resolution
+ *
+ * ## Cost Model Notes
+ *
+ * Domain costs (DOMAIN_COST_PER_CITIZEN) and improvement rates (DOMAIN_IMPROVEMENT_RATE)
+ * are illustrative defaults. Production implementations should:
+ * - Source costs from actual program data
+ * - Apply regional cost-of-living adjustments
+ * - Update rates based on measured outcomes
  */
 export class ResourceAllocator {
   private config: AllocationConfig;
@@ -30,16 +90,33 @@ export class ResourceAllocator {
   }
 
   /**
-   * Generate optimal resource allocation for a region
+   * Generate optimal resource allocation for a region.
+   *
+   * NOTE: This is an in-memory simulation. In production, allocation decisions
+   * would be persisted to a database and tracked over time. The projections
+   * are estimates based on domain-specific cost models and historical averages.
+   *
+   * @throws {Error} If totalBudget is negative or predictions array is empty
    */
   allocate(
     predictions: WellbeingPrediction[],
     totalBudget: number,
     region: string
   ): ResourceAllocation {
+    // Input validation
+    if (totalBudget < 0) {
+      throw new Error('Total budget cannot be negative');
+    }
+    if (!predictions || predictions.length === 0) {
+      throw new Error('Predictions array cannot be empty');
+    }
+    if (!region || region.trim() === '') {
+      throw new Error('Region must be specified');
+    }
+
     const availableBudget = totalBudget * (1 - this.config.reservePercent);
     const domainNeeds = this.calculateDomainNeeds(predictions);
-    const allocations = this.optimizeAllocation(domainNeeds, availableBudget);
+    const allocations = this.optimizeAllocation(domainNeeds, availableBudget, predictions.length);
     const populationAtRisk = predictions.filter(
       (p) => p.riskLevel === 'critical' || p.riskLevel === 'high'
     ).length;
@@ -59,12 +136,18 @@ export class ResourceAllocator {
   }
 
   /**
-   * Analyze a cohort of citizens
+   * Analyze a cohort of citizens.
+   *
+   * @throws {Error} If predictions array is empty
    */
   analyzeCohort(
     predictions: WellbeingPrediction[],
     criteria: Record<string, unknown>
   ): CohortAnalysis {
+    if (!predictions || predictions.length === 0) {
+      throw new Error('Predictions array cannot be empty for cohort analysis');
+    }
+
     const avgScore =
       predictions.reduce((sum, p) => sum + p.overallWellbeingScore, 0) /
       predictions.length;
@@ -128,27 +211,68 @@ export class ResourceAllocator {
     return result;
   }
 
+  /**
+   * Optimize allocation across domains ensuring budget balance.
+   *
+   * The algorithm:
+   * 1. Calculate raw allocation percentages based on severity
+   * 2. Apply min/max constraints
+   * 3. CRITICAL: Rebalance to ensure allocations sum to available budget
+   * 4. Distribute any remainder proportionally
+   */
   private optimizeAllocation(
     needs: Map<WellbeingDomain, { avgScore: number; atRiskCount: number; severity: number }>,
-    budget: number
+    budget: number,
+    totalPopulation: number
   ): ResourceAllocation['allocations'] {
+    if (budget === 0 || needs.size === 0) {
+      return [];
+    }
+
     const totalSeverity = Array.from(needs.values()).reduce((sum, n) => sum + n.severity, 0);
-    const allocations: ResourceAllocation['allocations'] = [];
+
+    // Phase 1: Calculate clamped percentages
+    const clampedPercentages = new Map<WellbeingDomain, { percent: number; stats: typeof needs extends Map<WellbeingDomain, infer T> ? T : never }>();
+    let totalClampedPercent = 0;
 
     for (const [domain, stats] of needs) {
+      // If all domains have zero severity, distribute equally
       const rawPercent = totalSeverity > 0 ? stats.severity / totalSeverity : 1 / needs.size;
-      const percent = Math.max(
+      const clampedPercent = Math.max(
         this.config.minAllocationPercent,
         Math.min(this.config.maxAllocationPercent, rawPercent)
       );
-      const amount = Math.round(budget * percent);
+      clampedPercentages.set(domain, { percent: clampedPercent, stats });
+      totalClampedPercent += clampedPercent;
+    }
+
+    // Phase 2: Normalize to ensure percentages sum to 1.0 (or as close as constraints allow)
+    // This is the critical fix - without normalization, budget doesn't balance
+    const allocations: ResourceAllocation['allocations'] = [];
+    let allocatedTotal = 0;
+
+    for (const [domain, { percent, stats }] of clampedPercentages) {
+      // Normalize the clamped percentage to sum to 1.0
+      const normalizedPercent = totalClampedPercent > 0 ? percent / totalClampedPercent : 0;
+      const amount = Math.floor(budget * normalizedPercent);
+      allocatedTotal += amount;
 
       allocations.push({
         domain,
         amount,
-        rationale: this.generateAllocationRationale(domain, stats, percent),
-        expectedOutcomes: this.generateExpectedOutcomes(domain, stats.atRiskCount),
+        rationale: this.generateAllocationRationale(domain, stats, normalizedPercent),
+        expectedOutcomes: this.generateExpectedOutcomes(domain, stats.atRiskCount, amount),
       });
+    }
+
+    // Phase 3: Distribute rounding remainder to highest-severity domains
+    const remainder = Math.round(budget - allocatedTotal);
+    if (remainder > 0 && allocations.length > 0) {
+      // Sort by severity (via amount) and add remainder to top domains
+      allocations.sort((a, b) => b.amount - a.amount);
+      for (let i = 0; i < remainder && i < allocations.length; i++) {
+        allocations[i].amount += 1;
+      }
     }
 
     return allocations.sort((a, b) => b.amount - a.amount);
@@ -163,7 +287,11 @@ export class ResourceAllocator {
       `based on avg score of ${Math.round(stats.avgScore)}% and ${stats.atRiskCount} citizens at risk.`;
   }
 
-  private generateExpectedOutcomes(domain: WellbeingDomain, atRiskCount: number): string[] {
+  /**
+   * Generate expected outcomes based on actual allocation amount and domain costs.
+   * The number of citizens served is calculated from allocation / domain cost.
+   */
+  private generateExpectedOutcomes(domain: WellbeingDomain, atRiskCount: number, allocationAmount: number): string[] {
     const outcomes: Record<WellbeingDomain, string[]> = {
       health: ['Improved healthcare access', 'Reduced emergency visits', 'Better chronic disease management'],
       economic: ['Increased financial stability', 'Reduced debt burden', 'Improved credit scores'],
@@ -174,24 +302,116 @@ export class ResourceAllocator {
       food_security: ['Reduced food insecurity', 'Improved nutrition', 'Stable food access'],
       employment: ['Reduced unemployment', 'Higher job retention', 'Increased income levels'],
     };
-    return outcomes[domain].slice(0, 2).map((o) => `${o} for ~${Math.round(atRiskCount * 0.6)} citizens`);
+
+    // Calculate citizens that can be served based on domain-specific cost
+    const costPerCitizen = DOMAIN_COST_PER_CITIZEN[domain];
+    const citizensServable = Math.floor(allocationAmount / costPerCitizen);
+    // Cap at actual at-risk count - can't serve more than need help
+    const citizensServed = Math.min(citizensServable, atRiskCount);
+
+    return outcomes[domain].slice(0, 2).map((o) => `${o} for ~${citizensServed} citizens`);
   }
 
+  /**
+   * Estimate total citizens served using domain-specific cost models.
+   * Each domain has different costs per citizen served, so we calculate
+   * per-domain capacity and aggregate.
+   */
   private estimateCitizensServed(
     predictions: WellbeingPrediction[],
     allocations: ResourceAllocation['allocations']
   ): number {
-    const totalAllocation = allocations.reduce((sum, a) => sum + a.amount, 0);
-    const avgCostPerCitizen = 1500;
-    return Math.min(predictions.length, Math.round(totalAllocation / avgCostPerCitizen));
+    if (allocations.length === 0) {
+      return 0;
+    }
+
+    // Calculate citizens served per domain based on domain-specific costs
+    let totalCitizensServed = 0;
+    const citizenCountByDomain = this.calculateDomainNeeds(predictions);
+
+    for (const allocation of allocations) {
+      const domainCost = DOMAIN_COST_PER_CITIZEN[allocation.domain];
+      const domainNeeds = citizenCountByDomain.get(allocation.domain);
+      const atRiskInDomain = domainNeeds?.atRiskCount ?? 0;
+
+      // Citizens servable = allocation / cost, but capped at at-risk count
+      const citizensServable = Math.floor(allocation.amount / domainCost);
+      const citizensServed = Math.min(citizensServable, atRiskInDomain);
+      totalCitizensServed += citizensServed;
+    }
+
+    // A citizen may have multiple domain needs - deduplicate by capping at total population
+    // In reality, this is a simplification; true deduplication would require tracking individuals
+    const atRiskPopulation = predictions.filter(
+      (p) => p.riskLevel === 'critical' || p.riskLevel === 'high' || p.riskLevel === 'moderate'
+    ).length;
+
+    return Math.min(totalCitizensServed, atRiskPopulation);
   }
 
+  /**
+   * Estimate wellbeing improvement based on actual allocation amounts.
+   *
+   * The improvement model considers:
+   * - Current average wellbeing score (baseline)
+   * - Allocation amounts per domain
+   * - Domain-specific improvement rates
+   * - Diminishing returns at higher allocations
+   *
+   * NOTE: This is a simplified model. Production implementations would use
+   * historical outcome data to calibrate improvement projections.
+   */
   private estimateWellbeingImprovement(
     predictions: WellbeingPrediction[],
-    _allocations: ResourceAllocation['allocations']
+    allocations: ResourceAllocation['allocations']
   ): number {
+    if (predictions.length === 0 || allocations.length === 0) {
+      return 0;
+    }
+
     const currentAvg = predictions.reduce((sum, p) => sum + p.overallWellbeingScore, 0) / predictions.length;
-    return Math.round(Math.min(100, currentAvg * 1.15) * 100) / 100;
+    const citizenCountByDomain = this.calculateDomainNeeds(predictions);
+
+    // Calculate weighted improvement across all domains
+    let totalWeightedImprovement = 0;
+    let totalWeight = 0;
+
+    for (const allocation of allocations) {
+      const domainNeeds = citizenCountByDomain.get(allocation.domain);
+      if (!domainNeeds || domainNeeds.atRiskCount === 0) continue;
+
+      const domainCost = DOMAIN_COST_PER_CITIZEN[allocation.domain];
+      const improvementRate = DOMAIN_IMPROVEMENT_RATE[allocation.domain];
+
+      // Calculate coverage: what % of at-risk citizens can be served
+      const citizensServable = Math.floor(allocation.amount / domainCost);
+      const coverage = Math.min(1, citizensServable / domainNeeds.atRiskCount);
+
+      // Calculate improvement potential: how much can this domain improve
+      // Domains with lower scores have more room to improve
+      const roomToImprove = 100 - domainNeeds.avgScore;
+      const improvementPotential = roomToImprove * (improvementRate / 10);
+
+      // Apply diminishing returns using logarithmic scaling
+      // Higher allocations have less marginal impact
+      const allocationEfficiency = Math.log10(1 + allocation.amount / 10000) / 2;
+
+      // Weight by coverage and at-risk count
+      const domainImprovement = improvementPotential * coverage * allocationEfficiency;
+      const weight = domainNeeds.atRiskCount;
+
+      totalWeightedImprovement += domainImprovement * weight;
+      totalWeight += weight;
+    }
+
+    if (totalWeight === 0) {
+      return currentAvg;
+    }
+
+    const avgImprovement = totalWeightedImprovement / totalWeight;
+    const projectedScore = Math.min(100, currentAvg + avgImprovement);
+
+    return Math.round(projectedScore * 100) / 100;
   }
 
   private calculateRiskDistribution(
