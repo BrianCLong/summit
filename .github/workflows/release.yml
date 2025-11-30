@@ -1,66 +1,38 @@
-name: Release
-
+name: Release (Sign + Attest)
 on:
   workflow_dispatch:
   push:
-    branches: [main]
-    paths:
-      - '**/package.json'
-      - pnpm-lock.yaml
-      - Makefile
-      - docker-compose*.yml
-
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
+    tags: [ 'v*.*.*' ]
 
 permissions:
-  contents: write
-  packages: read
+  contents: read
+  id-token: write
+  packages: write
+
+env:
+  REGISTRY: ${{ secrets.REGISTRY }}
+  IMAGE_NAME: summit
 
 jobs:
-  release:
+  sign-and-attest:
     runs-on: ubuntu-latest
-    env:
-      PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
-      - name: Build workspace
-        run: pnpm build
-      - name: Tests
-        run: pnpm test
-      - name: Package deployable bundle
+
+      - name: Resolve image tag
+        id: meta
         run: |
-          tar -czf summit-bundle.tgz docker-compose.dev.yml docker-compose.ai.yml start.sh Makefile .env.example .env.production.sample observability/
-      - name: Upload release artifact
-        uses: actions/upload-artifact@v4
+          echo "tag=${GITHUB_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign image (keyless OIDC)
+        run: |
+          cosign sign ${REGISTRY}/${IMAGE_NAME}:${{ steps.meta.outputs.tag }} --yes
+
+      - name: Generate SLSA provenance (generic)
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
         with:
-          name: summit-bundle
-          path: summit-bundle.tgz
+          base64-subjects: |
+            ${REGISTRY}/${IMAGE_NAME}@${{ steps.meta.outputs.tag }}

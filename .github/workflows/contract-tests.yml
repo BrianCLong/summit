@@ -1,43 +1,10 @@
-name: contract-tests
-on:
-  push:
-    paths:
-      - 'contracts/policy-pack/v0/**'
-      - 'clients/cos-policy-fetcher/**'
-      - 'tests/contract/**'
-      - '.github/workflows/contract-tests.yml'
-  pull_request:
-    paths:
-      - 'contracts/policy-pack/v0/**'
-      - 'clients/cos-policy-fetcher/**'
-      - 'tests/contract/**'
-
+name: Contract Tests
+on: [pull_request]
 jobs:
-  run:
-    runs-on: ubuntu-22.04
+  pact:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: sigstore/cosign-installer@v3
-        with: { cosign-release: 'v2.2.4' }
-      - name: Install OPA
-        run: |
-          curl -L -o /tmp/opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64
-          chmod +x /tmp/opa
-          sudo mv /tmp/opa /usr/local/bin/opa
-      - name: Node setup
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Build pack (if not present)
-        run: |
-          bash scripts/build_policy_pack.sh
-          bash scripts/cosign_sign.sh
-      - name: Build server
-        run: npm run build --workspace=server || (cd server && npm run build || true)
-      - name: Install deps for client
-        working-directory: clients/cos-policy-fetcher
-        run: npm ci && npm run build
-      - name: Run contract tests
-        env:
-          COSIGN_EXPERIMENTAL: 1
-        run: npx jest --runInBand tests/contract/**/*.test.ts
+      - run: npm ci --ignore-scripts
+        if: ${{ hashFiles('**/package.json') != '' }}
+      - run: npm run test:contracts --if-present

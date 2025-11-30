@@ -1,0 +1,13 @@
+{{- if .Values.prometheus.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "summit.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "summit.fullname" . }}
+  endpoints:
+    - port: http
+      interval: {{ .Values.prometheus.serviceMonitor.interval }}
+{{- end }}

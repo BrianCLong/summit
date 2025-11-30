@@ -1,0 +1,16 @@
+name: Policy Tests
+on:
+  pull_request:
+    paths: [ 'policies/rego/**' ]
+
+jobs:
+  conftest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install conftest
+        run: |
+          curl -L https://github.com/open-policy-agent/conftest/releases/latest/download/conftest_Linux_x86_64.tar.gz | tar xz
+          sudo mv conftest /usr/local/bin/
+      - name: Run tests
+        run: conftest test policies/rego --all-namespaces

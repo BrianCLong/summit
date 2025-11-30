@@ -1,17 +1,20 @@
-## 🧠 Copilot Review Tasks
-- [ ] `/explain-changes`
-- [ ] `/generate-tests`
-- [ ] `/risk-callouts`
-- [ ] `/summarize-diff`
+## Summary
 
-## ✅ Checklist
-- [ ] Code compiles & passes CI
-- [ ] Tests added/updated
-- [ ] Documentation updated
-- [ ] OPA policies verified
-- [ ] Grafana dashboards updated if applicable
+- What does this change do?
 
----
+## Risk & Rollback
 
-**Context**
-Describe what this change achieves and link related issues or ADRs.
+- Risk level: Low / Medium / High
+- Rollback plan: (exact command/workflow)
+- Migration impact: (schema/contract?)
+
+## Delivery Plan
+
+- Canary plan:
+- Feature flags:
+- Observability additions (metrics, traces, logs):
+
+## Testing
+
+- Unit/Integration/E2E results:
+- Load (k6) summary:

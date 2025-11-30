@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "summit.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "summit.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "summit.fullname" . }}
+      track: stable
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "summit.fullname" . }}
+        track: stable
+      annotations:
+        {{- if .Values.otel.enabled }}
+        {{- toYaml .Values.otel.annotations | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "summit.fullname" . }}
+      containers:
+        - name: summit
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: "{{ $v }}"
+            {{- end }}
+---
+{{- if .Values.canary.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "summit.fullname" . }}-canary
+  labels:
+    app.kubernetes.io/name: {{ include "summit.fullname" . }}
+spec:
+  replicas: {{ .Values.canary.replicas }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "summit.fullname" . }}
+      track: canary
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "summit.fullname" . }}
+        track: canary
+      annotations:
+        {{- if .Values.otel.enabled }}
+        {{- toYaml .Values.otel.annotations | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "summit.fullname" . }}
+      containers:
+        - name: summit
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.targetPort }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            {{- range $k, $v := .Values.env }}
+            - name: {{ $k }}
+              value: "{{ $v }}"
+            {{- end }}
+{{- end }}

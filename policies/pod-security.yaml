@@ -1,0 +1,25 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: baseline-hardening
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-security-context
+      match:
+        any:
+          - resources:
+              kinds: [Pod, Deployment, StatefulSet, DaemonSet, Job, CronJob]
+      validate:
+        message: Must set non-root user, read-only rootfs, drop CAP_SYS_ADMIN
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  capabilities:
+                    drop: ["ALL"]

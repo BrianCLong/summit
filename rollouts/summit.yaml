@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: summit
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      steps:
+        - setWeight: 10
+        - pause: { duration: 300 }
+        - setWeight: 50
+        - pause: { duration: 600 }
+      analysis:
+        templates:
+          - templateName: summit-slo-check
+        startingStep: 0
+  selector:
+    matchLabels: { app: summit }
+  template:
+    metadata:
+      labels: { app: summit }
+    spec:
+      containers:
+        - name: summit
+          image: ghcr.io/BrianCLong/summit:latest
+          ports: [{ containerPort: 4000 }]
