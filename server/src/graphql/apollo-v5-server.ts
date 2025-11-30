@@ -28,6 +28,7 @@ import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/q
 import { createAPQPlugin } from './plugins/apqPlugin.js';
 import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
+import { licenseRuleValidationMiddleware } from './middleware/licenseRuleValidationMiddleware.js';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
@@ -76,7 +77,7 @@ function createSecureSchema() {
   });
 
   // Apply security middleware
-  return applyMiddleware(baseSchema, permissions);
+  return applyMiddleware(baseSchema, permissions, licenseRuleValidationMiddleware);
 }
 
 // Context function for Apollo v5
