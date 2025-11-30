@@ -11,6 +11,7 @@
     "cleanup": "chmod +x scripts/cleanup-repository.sh && scripts/cleanup-repository.sh",
     "prepare": "husky install",
     "dev": "turbo run dev --parallel --cache-dir=.turbo",
+    "companyos:new-service": "node companyos/scripts/companyos-cli.mjs new-service",
     "server:dev": "npm run --workspace=apps/server dev",
     "client:dev": "cd client && npm run dev",
     "devkit:seed": "node scripts/devkit/seed-fixtures.js",
