@@ -4,7 +4,14 @@ Node-based authentication and authorization reverse proxy that issues JWTs, expo
 
 ## Observability
 
-The gateway emits structured logs via Pino, exports Prometheus metrics on `/metrics`, and initializes OpenTelemetry tracing.
+- **Logs & Metrics:** Structured logs via Pino and Prometheus metrics on `/metrics`.
+- **Tracing backends:** OpenTelemetry is enabled with multi-exporter support. Configure Jaeger and/or Zipkin alongside OTLP:
+  - `TRACING_EXPORTERS=otlp,jaeger,zipkin`
+  - `OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://otel-collector:4318/v1/traces`
+  - `JAEGER_ENDPOINT=http://jaeger:14268/api/traces` (UI at `http://jaeger:16686`)
+  - `ZIPKIN_ENDPOINT=http://zipkin:9411/api/v2/spans` (UI at `http://zipkin:9411`)
+- **Sampling:** Use `TRACE_SAMPLE_RATIO` (0–1) or `OTEL_TRACES_SAMPLER` to control rate; defaults to parent-based ratio sampling.
+- **Propagation & baggage:** The gateway sets W3C + Jaeger + B3 propagators, injects `traceparent`/`baggage` headers on proxied calls, and enriches baggage with subject, tenant, resource, and action identifiers to correlate spans across services.
 
 ## Development
 
