@@ -1,0 +1,30 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: server-slo-burn
+  labels:
+    app: server
+    role: alert-rules
+    release: kube-prom
+spec:
+  groups:
+  - name: slo-burn
+    rules:
+    - alert: HighErrorRate
+      expr: |
+        sum(rate(http_request_duration_seconds_count{job="server", status=~"5.."}[1m]))
+        /
+        sum(rate(http_request_duration_seconds_count{job="server"}[1m])) > 0.05
+      for: 2m
+      labels:
+        severity: page
+      annotations:
+        summary: High error rate on server (> 5%)
+    - alert: HighLatency
+      expr: |
+        histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="server"}[1m])) by (le)) > 1.5
+      for: 5m
+      labels:
+        severity: ticket
+      annotations:
+        summary: High latency on server (p95 > 1.5s)
