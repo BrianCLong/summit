@@ -1,0 +1,78 @@
+name: Preview Environment
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+  deploy-preview:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment:
+      name: preview-${{ github.event.pull_request.number }}
+      url: https://pr-${{ github.event.pull_request.number }}.dev.intelgraph.io
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.11.1'
+
+      - name: Create Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_DEV_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to Preview Namespace
+        env:
+          NAMESPACE: pr-${{ github.event.pull_request.number }}
+          HOST: pr-${{ github.event.pull_request.number }}.dev.intelgraph.io
+        run: |
+          kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+          helm upgrade --install server ./charts/server \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ github.sha }} \
+            --set ingress.hosts[0].host=$HOST \
+            --set ingress.tls[0].hosts[0]=$HOST \
+            --wait
+
+      - name: Comment PR
+        uses: tholman/github-action-comment-search-replace@v1
+        with:
+          message: |
+            🚀 Preview environment deployed!
+            URL: https://pr-${{ github.event.pull_request.number }}.dev.intelgraph.io
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

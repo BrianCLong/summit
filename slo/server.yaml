@@ -1,0 +1,53 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: server-availability
+  labels:
+    app: server
+    team: platform
+spec:
+  service: server
+  slo: 99.9
+  window: 30d
+  slos:
+    - name: requests-availability
+      objective: 99.9
+      description: "Common availability SLO for server requests"
+      sli:
+        events:
+          errorQuery: sum(rate(http_request_duration_seconds_count{job="server", status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_request_duration_seconds_count{job="server"}[5m]))
+      alerting:
+        name: ServerAvailabilityBurnRate
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate on server
+          description: "Error budget is burning too fast."
+---
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusSLO
+metadata:
+  name: server-latency
+  labels:
+    app: server
+    team: platform
+spec:
+  service: server
+  slo: 99.0
+  window: 30d
+  slos:
+    - name: requests-latency
+      objective: 99.0
+      description: "Common latency SLO for server requests"
+      sli:
+        events:
+          errorQuery: sum(rate(http_request_duration_seconds_bucket{job="server", le="+Inf"}[5m])) - sum(rate(http_request_duration_seconds_bucket{job="server", le="0.5"}[5m]))
+          totalQuery: sum(rate(http_request_duration_seconds_bucket{job="server", le="+Inf"}[5m]))
+      alerting:
+        name: ServerLatencyBurnRate
+        labels:
+          severity: warning
+        annotations:
+          summary: High latency on server
+          description: "Latency budget is burning too fast."
