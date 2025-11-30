@@ -1,6 +1,5 @@
 import EventEmitter from 'eventemitter3';
 import { pino, type Logger } from 'pino';
-import type { SyncQueueItem } from '@intelgraph/edge-computing';
 
 export interface SyncConfig {
   endpoint: string;
