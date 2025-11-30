@@ -1,0 +1,37 @@
+{
+  "name": "@intelgraph/decision-api",
+  "version": "0.1.0",
+  "description": "Decision Graph API service for IntelGraph",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@intelgraph/decision-graph": "workspace:*",
+    "fastify": "^4.24.0",
+    "@fastify/cors": "^8.4.1",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/swagger": "^8.12.0",
+    "@fastify/swagger-ui": "^2.0.0",
+    "zod": "^3.22.4",
+    "pg": "^8.11.3",
+    "pino": "^8.16.0",
+    "pino-pretty": "^10.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.3.3",
+    "tsx": "^4.6.0",
+    "vitest": "^1.0.0"
+  },
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}
