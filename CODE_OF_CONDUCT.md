@@ -30,9 +30,13 @@ Project maintainers are responsible for clarifying the standards of acceptable b
 
 This Code of Conduct applies within project spaces and in public spaces when an individual is representing the project or its community.
 
+Community spaces include GitHub Issues/Discussions, the Summit Discord server, live streams, and conference talks. Moderators may remove content or temporarily restrict access when behavior risks community safety or derails collaboration.
+
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the maintainers at support@intelgraph.com. All complaints will be reviewed and investigated promptly and fairly.
+
+For urgent moderation in chat spaces, ping `@core-moderators` in Discord or email community@summit.com with links and context. Reports are kept confidential whenever possible.
 
 ## Attribution
 

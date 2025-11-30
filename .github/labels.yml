@@ -39,3 +39,24 @@
 - name: security
   color: '6610f2'
   description: 'Security-related tasks'
+
+# Quality & Triage
+- name: bug
+  color: 'd73a4a'
+  description: 'User-visible defects or regressions'
+
+- name: feature
+  color: 'a2eeef'
+  description: 'Net-new user-facing capability requests'
+
+- name: performance
+  color: 'fbca04'
+  description: 'Latency, throughput, or scaling improvements'
+
+- name: ai/observability
+  color: '0052cc'
+  description: 'AI pipelines, GPU ops, and model monitoring'
+
+- name: community
+  color: '0e8a16'
+  description: 'Community programs, docs, and engagement initiatives'

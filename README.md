@@ -152,6 +152,10 @@ make down
 - [Security](#-security)
 - [Testing](#-testing)
 - [Contributing](#-contributing)
+- [Extending Summit](#-extending-summit)
+- [Success Stories](#-success-stories)
+- [Community](#-community)
+- [Additional Resources](#-additional-resources)
 - [Support](#-support)
 
 **📚 Additional Documentation:**
@@ -954,6 +958,26 @@ Access Grafana dashboards at http://localhost:3100:
 - Request review from core maintainers
 - Squash commits before merging
 
+## 🧭 Extending Summit
+
+- **Custom plugins:** See [`examples/plugins/elasticsearch`](examples/plugins/elasticsearch) for wiring Summit investigations into Elasticsearch with index templates and credentials.
+- **API ingestion:** [`examples/ingestion/json-api`](examples/ingestion/json-api) demonstrates batching REST payloads into GraphQL mutations with backpressure controls.
+- **Operations playbooks:** Consult [`docs/SCALING.md`](docs/SCALING.md) for multi-node Kubernetes overlays and [`docs/AI-PRODUCTION.md`](docs/AI-PRODUCTION.md) for GPU-ready AI deployment patterns.
+- **Contribution runway:** Follow [`CONTRIBUTING.md`](CONTRIBUTING.md) and use the issue templates to keep triage predictable.
+
+## 🏆 Success Stories
+
+- **Financial intelligence teams** use Summit to flag anomalous payment rings by marrying Neo4j path analysis with Elasticsearch enrichment pipelines.
+- **Public safety analysts** deploy Summit on Kubernetes with HPAs and Redis Cluster to process streaming telemetry while staying under p95 latency SLOs.
+- **Research labs** run the AI extraction gateway on GPU pools and track experiments with MLflow to keep academic models reproducible.
+
+## 🤝 Community
+
+- **Discord**: Join real-time chats, pairing sessions, and release watch parties at https://discord.gg/summit-platform (request a fresh invite in Discussions if expired).
+- **GitHub Discussions**: Ask questions, propose RFCs, and share demos in [Discussions](https://github.com/BrianCLong/summit/discussions) with the `Show & Tell` and `Help` categories.
+- **Issue templates**: Use [Bug Report](https://github.com/BrianCLong/summit/issues/new?template=bug_report.yml) and [Feature Request](https://github.com/BrianCLong/summit/issues/new?template=feature_request.yml) templates; include `make smoke` output and screenshots.
+- **Community calls**: Monthly roadmap syncs are announced in Discussions and pinned in Discord #announcements.
+
 ## 📚 Additional Resources
 
 ### Documentation
@@ -964,11 +988,12 @@ Access Grafana dashboards at http://localhost:3100:
 - [Troubleshooting Guide](docs/troubleshooting/README.md)
 - [Archived Documents](docs/archive/README.md)
 
-### Community
+### Tutorials & Videos
 
-- [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
-- [Issue Tracker](https://github.com/BrianCLong/summit/issues)
-- [Release Notes](CHANGELOG.md)
+- [Neo4j GraphAcademy: Neo4j Fundamentals](https://graphacademy.neo4j.com/courses/neo4j-fundamentals/)
+- [Apollo Odyssey: Lift-off Series](https://odyssey.apollographql.com/)
+- [Grafana & Prometheus fundamentals (YouTube)](https://www.youtube.com/watch?v=Nfap7bEVQ-0)
+- [Kubernetes HPA Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
 
 ### Learning Resources
 
