@@ -14,6 +14,10 @@ export interface ApplicationConfiguration {
   auth: AuthenticationConfiguration;
   services?: ServicesConfiguration;
   features?: FeatureFlagsConfiguration;
+  security?: SecurityConfiguration;
+  environments?: {
+    [k: string]: Partial<ApplicationConfiguration>;
+  };
   [k: string]: unknown;
 }
 export interface DatabaseConfiguration {
@@ -52,5 +56,44 @@ export interface ServicesConfiguration {
 export interface FeatureFlagsConfiguration {
   enableNewDashboard?: boolean;
   enableExperimentalFeatures?: boolean;
+  flags?: {
+    [k: string]: {
+      description?: string;
+      enabled: boolean;
+      environments?: {
+        [k: string]: boolean;
+      };
+      rolloutPercentage?: number;
+      salt?: string;
+      [k: string]: unknown;
+    };
+  };
+  [k: string]: unknown;
+}
+export interface SecurityConfiguration {
+  secrets: {
+    providerPreference: ("vault" | "awsSecretsManager" | "environment" | "file")[];
+    cacheTtlSeconds: number;
+    rotation?: {
+      enabled?: boolean;
+      intervalSeconds?: number;
+      [k: string]: unknown;
+    };
+    encryptionKeyEnv?: string;
+    auditLogPath?: string;
+    fileBasePath?: string;
+    vault?: {
+      address: string;
+      tokenEnv: string;
+      kvMountPath?: string;
+      [k: string]: unknown;
+    };
+    aws?: {
+      region?: string;
+      endpoint?: string;
+      [k: string]: unknown;
+    };
+    [k: string]: unknown;
+  };
   [k: string]: unknown;
 }
