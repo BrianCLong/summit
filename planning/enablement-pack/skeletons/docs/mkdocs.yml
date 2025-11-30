@@ -1,0 +1,15 @@
+site_name: Project Documentation
+theme:
+  name: material
+
+nav:
+  - Home: index.md
+  - Guide:
+      - Getting Started: guides/getting-started.md
+      - Developer Guide: guides/developer-guide.md
+  - API:
+      - Reference: api/reference.md
+
+plugins:
+  - search
+  - mermaid2
