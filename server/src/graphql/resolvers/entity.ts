@@ -9,8 +9,9 @@ import {
   tenantEvent,
 } from '../subscriptions.js';
 import { getPostgresPool } from '../../db/postgres.js';
-import axios from 'axios'; // For calling ML service
+import axios from 'axios';
 import { GraphQLError } from 'graphql';
+import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
 
 const logger = pino();
 const driver = getNeo4jDriver();
@@ -474,96 +475,5 @@ const entityResolvers = {
     },
   },
 };
-
-// Mock data for development when database is not available
-function getMockEntities(
-  type?: string,
-  q?: string,
-  limit: number = 25,
-  offset: number = 0,
-) {
-  const mockEntities = [
-    {
-      id: 'mock-entity-1',
-      type: 'PERSON',
-      props: {
-        name: 'John Smith',
-        email: 'john.smith@example.com',
-        phone: '+1-555-0101',
-        location: 'New York, NY',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-2',
-      type: 'ORGANIZATION',
-      props: {
-        name: 'Tech Corp Industries',
-        industry: 'Technology',
-        headquarters: 'San Francisco, CA',
-        website: 'https://techcorp.example.com',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-3',
-      type: 'EVENT',
-      props: {
-        name: 'Data Breach Incident',
-        date: '2024-08-01',
-        severity: 'HIGH',
-        status: 'INVESTIGATING',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-4',
-      type: 'LOCATION',
-      props: {
-        name: 'Corporate Headquarters',
-        address: '100 Market Street, San Francisco, CA 94105',
-        coordinates: { lat: 37.7749, lng: -122.4194 },
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-5',
-      type: 'ASSET',
-      props: {
-        name: 'Database Server DB-01',
-        type: 'SERVER',
-        ip_address: '192.168.1.100',
-        status: 'ACTIVE',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-  ];
-
-  let filtered = mockEntities;
-
-  if (type) {
-    filtered = filtered.filter((entity) => entity.type === type);
-  }
-
-  if (q) {
-    filtered = filtered.filter(
-      (entity) =>
-        JSON.stringify(entity.props).toLowerCase().includes(q.toLowerCase()) ||
-        entity.type.toLowerCase().includes(q.toLowerCase()),
-    );
-  }
-
-  return filtered.slice(offset, offset + limit);
-}
-
-function getMockEntity(id: string) {
-  const entities = getMockEntities();
-  return entities.find((entity) => entity.id === id) || null;
-}
 
 export default entityResolvers;
