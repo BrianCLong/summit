@@ -1,7 +1,11 @@
+// Initialize OpenTelemetry BEFORE importing other modules
+import './instrumentation';
+
 import { ApolloServer } from '@apollo/server';
 import { ApolloGateway, IntrospectAndCompose } from '@apollo/gateway';
 import { persistedOnlyPlugin } from './plugins/persistedOnly';
 import { costLimitPlugin } from './plugins/costLimit';
+import { metricsPlugin } from './plugins/metricsPlugin';
 
 function rateLimitPlugin() {
   return {
@@ -22,5 +26,10 @@ const gateway = new ApolloGateway({
 export const server = new ApolloServer({
   gateway,
   includeStacktraceInErrorResponses: false,
-  plugins: [rateLimitPlugin(), persistedOnlyPlugin(), costLimitPlugin()],
+  plugins: [
+    metricsPlugin({ enableComplexityTracking: true }),
+    rateLimitPlugin(),
+    persistedOnlyPlugin(),
+    costLimitPlugin(),
+  ],
 });
