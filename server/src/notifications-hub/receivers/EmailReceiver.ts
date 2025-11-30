@@ -11,6 +11,7 @@ import {
   ReceiverConfig,
 } from './ReceiverInterface.js';
 import { CanonicalEvent, EventSeverity } from '../events/EventSchema.js';
+import { RenderedTemplate } from '../templates/TemplateRenderer.js';
 
 export interface EmailReceiverConfig extends ReceiverConfig {
   smtp?: {
@@ -28,6 +29,21 @@ export interface EmailReceiverConfig extends ReceiverConfig {
   };
   replyTo?: string;
   templatePath?: string;
+  simulation?: {
+    enabled?: boolean;
+    /**
+     * Probability (0-1) to simulate a transient delivery failure. Default: 0.05 when enabled.
+     */
+    failureRate?: number;
+    /**
+     * Minimum latency to simulate in milliseconds when enabled. Default: 100.
+     */
+    minLatencyMs?: number;
+    /**
+     * Maximum latency to simulate in milliseconds when enabled. Default: 300.
+     */
+    maxLatencyMs?: number;
+  };
 }
 
 export interface EmailMessage {
@@ -63,7 +79,13 @@ export class EmailReceiver extends BaseReceiver {
     options?: Record<string, unknown>,
   ): Promise<DeliveryResult> {
     try {
-      const emailMessage = this.buildEmailMessage(event, recipient, options);
+      const template = options?.template as RenderedTemplate | undefined;
+      const emailMessage = this.buildEmailMessage(
+        event,
+        recipient,
+        template,
+        options,
+      );
 
       // Send email (mock implementation - replace with actual email service)
       const messageId = await this.sendEmail(emailMessage);
@@ -91,11 +113,12 @@ export class EmailReceiver extends BaseReceiver {
   private buildEmailMessage(
     event: CanonicalEvent,
     recipient: string,
+    template?: RenderedTemplate,
     options?: Record<string, unknown>,
   ): EmailMessage {
-    const subject = this.buildSubject(event);
-    const text = this.buildTextContent(event);
-    const html = this.buildHtmlContent(event);
+    const subject = template?.subject || this.buildSubject(event);
+    const text = template?.message || this.buildTextContent(event);
+    const html = this.buildHtmlContent(event, template);
 
     return {
       to: recipient,
@@ -160,9 +183,14 @@ export class EmailReceiver extends BaseReceiver {
     return text;
   }
 
-  private buildHtmlContent(event: CanonicalEvent): string {
+  private buildHtmlContent(
+    event: CanonicalEvent,
+    template?: RenderedTemplate,
+  ): string {
     const severityColor = this.getSeverityColor(event.severity);
     const severityBadge = this.getSeverityBadge(event.severity);
+    const messageBody = template?.message || event.message;
+    const callToAction = template?.callToAction || event.subject.url;
 
     let html = `
 <!DOCTYPE html>
@@ -189,9 +217,9 @@ export class EmailReceiver extends BaseReceiver {
       <h2 style="margin: 10px 0 0 0;">${this.escapeHtml(event.title)}</h2>
     </div>
     <div class="content">
-      <p>${this.escapeHtml(event.message)}</p>
+      <p>${this.escapeHtml(messageBody)}</p>
 
-      ${event.subject.url ? `<p><a href="${event.subject.url}" class="button">View Details</a></p>` : ''}
+      ${callToAction ? `<p><a href="${callToAction}" class="button">View Details</a></p>` : ''}
 
       ${this.buildLinksHtml(event)}
 
@@ -258,14 +286,20 @@ export class EmailReceiver extends BaseReceiver {
   private async sendEmail(message: EmailMessage): Promise<string> {
     // Mock implementation - replace with actual email service
     // In production, this would use nodemailer, SendGrid, AWS SES, etc.
+    const simulate = this.emailConfig.simulation?.enabled ?? true;
+    const failureRate = this.emailConfig.simulation?.failureRate ?? 0.05;
+    const minLatency = this.emailConfig.simulation?.minLatencyMs ?? 100;
+    const maxLatency = this.emailConfig.simulation?.maxLatencyMs ?? 300;
 
     return await this.retryWithBackoff(async () => {
-      // Simulate email sending
-      await this.sleep(100 + Math.random() * 200);
+      if (simulate) {
+        const latency =
+          minLatency + Math.random() * Math.max(0, maxLatency - minLatency);
+        await this.sleep(latency);
 
-      // Simulate occasional failures
-      if (Math.random() < 0.05) {
-        throw new Error('SMTP connection timeout');
+        if (Math.random() < failureRate) {
+          throw new Error('SMTP connection timeout');
+        }
       }
 
       // Return mock message ID
