@@ -34,7 +34,38 @@ const getTenantId = (req: any) => {
 
 // --- New Webhook Management Routes ---
 
-// Create Webhook
+/**
+ * @openapi
+ * /api/webhooks:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Create webhook
+ *     description: Create a new webhook.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - url
+ *               - events
+ *             properties:
+ *               url:
+ *                 type: string
+ *               events:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *     responses:
+ *       201:
+ *         description: Webhook created
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/', validate(CreateWebhookSchema), async (req, res) => {
   try {
     const tenantId = getTenantId(req);
@@ -45,7 +76,20 @@ router.post('/', validate(CreateWebhookSchema), async (req, res) => {
   }
 });
 
-// List Webhooks
+/**
+ * @openapi
+ * /api/webhooks:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: List webhooks
+ *     description: List all webhooks for the tenant.
+ *     responses:
+ *       200:
+ *         description: List of webhooks
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/', async (req, res) => {
   try {
     const tenantId = getTenantId(req);
@@ -56,7 +100,28 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get Webhook
+/**
+ * @openapi
+ * /api/webhooks/{id}:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: Get webhook
+ *     description: Get a webhook by ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Webhook details
+ *       404:
+ *         description: Webhook not found
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/:id', async (req, res) => {
   try {
     const tenantId = getTenantId(req);
@@ -70,7 +135,43 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Update Webhook
+/**
+ * @openapi
+ * /api/webhooks/{id}:
+ *   patch:
+ *     tags:
+ *       - Webhooks
+ *     summary: Update webhook
+ *     description: Update a webhook by ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               url:
+ *                 type: string
+ *               events:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               active:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Webhook updated
+ *       404:
+ *         description: Webhook not found
+ *       500:
+ *         description: Internal server error
+ */
 router.patch('/:id', validate(UpdateWebhookSchema), async (req, res) => {
   try {
     const tenantId = getTenantId(req);
@@ -84,7 +185,28 @@ router.patch('/:id', validate(UpdateWebhookSchema), async (req, res) => {
   }
 });
 
-// Delete Webhook
+/**
+ * @openapi
+ * /api/webhooks/{id}:
+ *   delete:
+ *     tags:
+ *       - Webhooks
+ *     summary: Delete webhook
+ *     description: Delete a webhook by ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: Webhook deleted
+ *       404:
+ *         description: Webhook not found
+ *       500:
+ *         description: Internal server error
+ */
 router.delete('/:id', async (req, res) => {
   try {
     const tenantId = getTenantId(req);
@@ -98,7 +220,34 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-// Get Deliveries
+/**
+ * @openapi
+ * /api/webhooks/{id}/deliveries:
+ *   get:
+ *     tags:
+ *       - Webhooks
+ *     summary: Get webhook deliveries
+ *     description: Get delivery history for a webhook.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: offset
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: List of deliveries
+ *       500:
+ *         description: Internal server error
+ */
 router.get('/:id/deliveries', async (req, res) => {
   try {
     const tenantId = getTenantId(req);
@@ -111,7 +260,36 @@ router.get('/:id/deliveries', async (req, res) => {
   }
 });
 
-// Test Trigger
+/**
+ * @openapi
+ * /api/webhooks/trigger-test:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Trigger test event
+ *     description: Trigger a test webhook event.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - eventType
+ *               - payload
+ *             properties:
+ *               eventType:
+ *                 type: string
+ *               payload:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Event triggered
+ *       400:
+ *         description: Missing parameters
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/trigger-test', async (req, res) => {
     try {
         const tenantId = getTenantId(req);
@@ -129,7 +307,20 @@ router.post('/trigger-test', async (req, res) => {
 // --- Existing Webhook Routes (GitHub, Jira, Lifecycle) ---
 
 /**
- * GitHub webhook handler for issue and PR events
+ * @openapi
+ * /api/webhooks/github:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: GitHub webhook
+ *     description: Handle GitHub webhook events.
+ *     responses:
+ *       200:
+ *         description: Processed
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/github',
@@ -208,7 +399,20 @@ router.post(
 );
 
 /**
- * Jira webhook handler for issue events
+ * @openapi
+ * /api/webhooks/jira:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Jira webhook
+ *     description: Handle Jira webhook events.
+ *     responses:
+ *       200:
+ *         description: Processed
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/jira',
@@ -273,8 +477,37 @@ router.post(
 );
 
 /**
- * Generic webhook for run/deployment lifecycle events
- * This can be called by CI/CD systems or the application itself
+ * @openapi
+ * /api/webhooks/lifecycle:
+ *   post:
+ *     tags:
+ *       - Webhooks
+ *     summary: Lifecycle webhook
+ *     description: Handle run/deployment lifecycle events.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - event_type
+ *               - id
+ *             properties:
+ *               event_type:
+ *                 type: string
+ *                 enum: [run_created, run_completed, run_failed, deployment_started, deployment_completed, deployment_failed]
+ *               id:
+ *                 type: string
+ *               metadata:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Processed
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/lifecycle',
