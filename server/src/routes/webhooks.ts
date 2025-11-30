@@ -11,6 +11,12 @@ import { z } from 'zod/v4';
 
 const router = Router();
 
+const TestWebhookSchema = z.object({
+  eventType: z.string().default('webhook.test'),
+  payload: z.record(z.any()).optional(),
+  webhookId: z.string().optional(),
+});
+
 // Helper for validation (for new routes)
 const validate = (schema: any) => (req: any, res: any, next: any) => {
   try {
@@ -111,19 +117,100 @@ router.get('/:id/deliveries', async (req, res) => {
   }
 });
 
-// Test Trigger
-router.post('/trigger-test', async (req, res) => {
-    try {
-        const tenantId = getTenantId(req);
-        const { eventType, payload } = req.body;
-        if (!eventType || !payload) {
-            return res.status(400).json({ error: 'eventType and payload required'});
-        }
-        await webhookService.triggerEvent(tenantId, eventType, payload);
-        res.json({ message: 'Event triggered' });
-    } catch (error: any) {
-        res.status(500).json({ error: error.message });
+// Delivery attempts for a webhook
+router.get('/:id/attempts', async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const limit = parseInt(req.query.limit as string) || 50;
+    const attempts = await webhookService.getDeliveryAttempts(tenantId, req.params.id, undefined, limit);
+    res.json(attempts);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delivery attempts for a specific delivery
+router.get('/:id/deliveries/:deliveryId/attempts', async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const limit = parseInt(req.query.limit as string) || 50;
+    const attempts = await webhookService.getDeliveryAttempts(
+      tenantId,
+      req.params.id,
+      req.params.deliveryId,
+      limit
+    );
+    res.json(attempts);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Test Trigger (broadcast or targeted)
+router.post('/trigger-test', validate(TestWebhookSchema), async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const { eventType, payload, webhookId } = req.body as z.infer<typeof TestWebhookSchema>;
+
+    if (webhookId) {
+      const delivery = await webhookService.triggerWebhook(
+        tenantId,
+        webhookId,
+        eventType,
+        payload || {
+          type: 'webhook.test',
+          timestamp: new Date().toISOString(),
+        },
+        'test'
+      );
+
+      if (!delivery) {
+        return res.status(404).json({ error: 'Webhook not found or inactive' });
+      }
+
+      return res.json({ message: 'Test delivery enqueued', deliveryId: delivery.id });
     }
+
+    await webhookService.triggerEvent(
+      tenantId,
+      eventType,
+      payload || { type: 'webhook.test', timestamp: new Date().toISOString() }
+    );
+    res.json({ message: 'Broadcast test enqueued' });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Targeted test trigger for a single webhook
+router.post('/:id/test', async (req, res) => {
+  try {
+    const tenantId = getTenantId(req);
+    const eventType = req.body.eventType || 'webhook.test';
+    const payload =
+      req.body.payload ||
+      ({
+        type: 'webhook.test',
+        timestamp: new Date().toISOString(),
+        message: 'Subscriber test delivery',
+      } as any);
+
+    const delivery = await webhookService.triggerWebhook(
+      tenantId,
+      req.params.id,
+      eventType,
+      payload,
+      'test'
+    );
+
+    if (!delivery) {
+      return res.status(404).json({ error: 'Webhook not found or inactive' });
+    }
+
+    res.json({ message: 'Test delivery queued', deliveryId: delivery.id });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // --- Existing Webhook Routes (GitHub, Jira, Lifecycle) ---
