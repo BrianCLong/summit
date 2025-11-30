@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/global-integration",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Zero-Click Multi-Language Global Integration Service - Autonomous partner integration across languages and compliance frameworks",
   "type": "module",
   "main": "dist/index.js",

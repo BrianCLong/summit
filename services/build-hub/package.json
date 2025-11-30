@@ -1,6 +1,6 @@
 {
   "name": "maestro-build-hub",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Maestro Build Plane WebSocket hub for real-time build status",
   "type": "module",
   "main": "dist/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/stream-processing",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Stream processing framework with windowing, watermarking, and stateful operations",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

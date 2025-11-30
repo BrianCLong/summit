@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/alert-engine",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Real-time alerting engine with rule-based triggers and multi-channel notifications",
   "main": "dist/index.js",
   "scripts": {

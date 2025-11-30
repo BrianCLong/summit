@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/federated-learning",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Federated learning infrastructure with privacy-preserving techniques",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

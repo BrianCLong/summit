@@ -1,6 +1,6 @@
 {
   "name": "@summit/post-quantum-crypto",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "NIST post-quantum cryptography implementation for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

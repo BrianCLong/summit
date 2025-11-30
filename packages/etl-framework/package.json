@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/etl-framework",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Comprehensive ETL/ELT framework for data pipelines",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

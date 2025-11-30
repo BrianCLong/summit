@@ -1,6 +1,6 @@
 {
   "name": "@summit/dpec",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Deterministic Prompt Execution Cache with attestable artifacts and client adapters",
   "license": "Apache-2.0",
   "type": "module",

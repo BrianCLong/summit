@@ -1,6 +1,6 @@
 {
   "name": "@summit/kkp-client",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Keyless KMS Proxy TypeScript client",
   "type": "module",
   "main": "dist/index.js",

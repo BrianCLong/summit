@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/no-code-builder",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "No-code/Low-code builder for forms and workflows",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

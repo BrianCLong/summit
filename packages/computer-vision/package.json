@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/computer-vision",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Core computer vision types, utilities, and base classes for the IntelGraph platform",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

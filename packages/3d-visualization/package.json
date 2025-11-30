@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/3d-visualization",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "3D and immersive visualization library for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

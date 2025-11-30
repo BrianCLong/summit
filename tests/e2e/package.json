@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/e2e-tests",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Cross-browser E2E tests for IntelGraph Maestro platform",
   "scripts": {
     "test": "playwright test",

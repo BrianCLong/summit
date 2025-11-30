@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/battle-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "GraphQL API for battle management and multidomain data fusion",
   "type": "module",
   "main": "dist/index.js",

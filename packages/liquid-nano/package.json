@@ -1,6 +1,6 @@
 {
   "name": "@summit/liquid-nano",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "description": "Liquid Nano pilot runtime with sample applications and deployment tooling.",

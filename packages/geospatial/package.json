@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/geospatial",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Geospatial intelligence data structures and ingestion for IntelGraph",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

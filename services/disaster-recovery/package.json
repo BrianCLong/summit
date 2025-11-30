@@ -1,6 +1,6 @@
 {
   "name": "@summit/disaster-recovery",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Multi-cloud disaster recovery and backup automation service",
   "main": "dist/index.js",
   "scripts": {
