@@ -1,0 +1,35 @@
+name: cdis
+
+on:
+  pull_request:
+    paths:
+      - 'ai/cdis/**'
+  push:
+    branches: [main, work, feat/cdis]
+    paths:
+      - 'ai/cdis/**'
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r ai/cdis/requirements-dev.txt
+      - name: Lint
+        run: |
+          cd ai/cdis
+          ruff check cdis
+      - name: Tests (unit + contract)
+        env:
+          CDIS_FEATURE_ENABLED: 'true'
+        run: |
+          cd ai/cdis
+          pytest -m "not e2e"

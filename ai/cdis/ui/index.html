@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Causal Lab</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: #0b1021;
+        color: #eef1ff;
+        margin: 0;
+        padding: 0;
+      }
+      header {
+        background: #11162b;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #1e2848;
+      }
+      main {
+        padding: 20px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 16px;
+      }
+      section {
+        background: #121732;
+        border: 1px solid #1f2750;
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+      h2 {
+        margin-top: 0;
+        font-size: 18px;
+      }
+      textarea, input[type="number"] {
+        width: 100%;
+        background: #0b1021;
+        border: 1px solid #27305f;
+        color: #eef1ff;
+        border-radius: 8px;
+        padding: 10px;
+        font-family: 'Inter', sans-serif;
+      }
+      button {
+        background: linear-gradient(135deg, #6ee7ff, #7c3aed);
+        border: none;
+        color: #0b1021;
+        font-weight: 700;
+        border-radius: 8px;
+        padding: 10px 14px;
+        cursor: pointer;
+        margin-top: 8px;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .slider-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .effect-bar {
+        height: 10px;
+        background: #1f2750;
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+      }
+      .effect-bar span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #10b981, #34d399);
+        width: 0;
+      }
+      .card-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .status {
+        font-size: 12px;
+        color: #9ca3af;
+      }
+      .paths {
+        font-size: 12px;
+        color: #cbd5f5;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <strong>Causal Lab</strong>
+        <div class="status">Feature flag: <span id="flag-status">checking...</span></div>
+      </div>
+      <button id="share">Share state</button>
+    </header>
+    <main>
+      <section>
+        <div class="card-title">
+          <h2>Discover</h2>
+          <span class="status">Algorithms: notears · pc · granger</span>
+        </div>
+        <textarea id="dataset" rows="8">[{"treatment":0,"outcome":0,"mediator":0},{"treatment":1,"outcome":0.9,"mediator":0.4}]</textarea>
+        <button id="discover">Discover</button>
+        <div class="status" id="discover-status"></div>
+      </section>
+      <section>
+        <div class="card-title">
+          <h2>Intervene</h2>
+          <span class="status">Adjust strengths with sliders</span>
+        </div>
+        <div id="interventions"></div>
+        <div id="strength-controls"></div>
+        <button id="intervene" disabled>Run intervention</button>
+        <div class="status" id="intervene-status"></div>
+      </section>
+      <section>
+        <div class="card-title">
+          <h2>Effects & Paths</h2>
+          <span class="status">Top-k contributions</span>
+        </div>
+        <div id="effects"></div>
+        <div id="paths" class="paths"></div>
+      </section>
+    </main>
+    <script>
+      let simId = null;
+      let discoveredGraph = {};
+      let featureEnabled = false;
+
+      function renderInterventions(graph) {
+        const container = $('#interventions');
+        const sliderHost = $('#strength-controls');
+        container.empty();
+        sliderHost.empty();
+        Object.keys(graph).forEach((node) => {
+          const block = $(`<div class="slider-row"><label>${node}</label><input type="number" step="0.1" value="0" data-node="${node}" class="intervention-input" /></div>`);
+          container.append(block);
+          const slider = $(`<div class="slider-row"><span>${node}</span><input type="range" min="-2" max="2" step="0.1" value="0" data-node="${node}" class="strength-slider" /><span class="slider-value">0</span></div>`);
+          slider.find('input').on('input', (e) => {
+            const v = e.target.value;
+            slider.find('.slider-value').text(v);
+            container.find(`input[data-node="${node}"]`).val(v);
+          });
+          sliderHost.append(slider);
+        });
+      }
+
+      function renderEffects(delta) {
+        const effects = $('#effects');
+        effects.empty();
+        Object.entries(delta).forEach(([node, value]) => {
+          const bar = $('<div class="effect-bar"><span></span></div>');
+          const percent = Math.min(100, Math.abs(value) * 50);
+          bar.find('span').css({ width: `${percent}%`, background: value >= 0 ? '#10b981' : '#f97316' });
+          effects.append(`<div>${node}: ${value.toFixed(3)}</div>`);
+          effects.append(bar);
+        });
+      }
+
+      function renderPaths(paths) {
+        const host = $('#paths');
+        if (!paths.length) {
+          host.text('No path contributions available.');
+          return;
+        }
+        host.html(paths.map(p => `${p.path.join(' → ')} (${p.contribution.toFixed(3)})`).join('<br />'));
+      }
+
+      function checkHealth() {
+        fetch('/health').then(r => r.json()).then(data => {
+          featureEnabled = data.feature === 'enabled';
+          $('#flag-status').text(featureEnabled ? 'enabled' : 'disabled');
+          $('#discover').prop('disabled', !featureEnabled);
+        }).catch(() => {
+          $('#flag-status').text('unreachable');
+        });
+      }
+
+      $('#discover').on('click', () => {
+        if (!featureEnabled) return;
+        const records = JSON.parse($('#dataset').val());
+        $('#discover-status').text('Running discovery...');
+        $.ajax({
+          url: '/discover',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ records }),
+        }).done((res) => {
+          simId = res.simId;
+          discoveredGraph = res.graph;
+          renderInterventions(discoveredGraph);
+          $('#intervene').prop('disabled', false);
+          $('#discover-status').text(`Graph learned. Confidence ${res.confidence.toFixed(3)}`);
+        }).fail((err) => {
+          $('#discover-status').text(err.responseJSON?.detail || 'Discovery failed');
+        });
+      });
+
+      $('#intervene').on('click', () => {
+        const interventions = {};
+        $('.intervention-input').each((_, el) => {
+          interventions[$(el).data('node')] = parseFloat($(el).val());
+        });
+        $('#intervene-status').text('Simulating...');
+        $.ajax({
+          url: '/intervene',
+          method: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({ simId, interventions }),
+        }).done((res) => {
+          renderEffects(res.delta);
+          renderPaths(res.paths || []);
+          $('#intervene-status').text(`Counterfactual delta computed (confidence ${res.confidence.toFixed(3)})`);
+        }).fail((err) => {
+          $('#intervene-status').text(err.responseJSON?.detail || 'Intervention failed');
+        });
+      });
+
+      $('#share').on('click', () => {
+        if (!simId) {
+          alert('Discover first to generate a shareable simulation.');
+          return;
+        }
+        navigator.clipboard.writeText(`${window.location.origin}/explain/${simId}`).then(() => {
+          $('#discover-status').text('Share link copied.');
+        });
+      });
+
+      checkHealth();
+    </script>
+  </body>
+</html>

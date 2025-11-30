@@ -1,0 +1,29 @@
+{
+  "nodes": [
+    "treatment",
+    "mediator",
+    "outcome"
+  ],
+  "edges": [
+    {
+      "source": "treatment",
+      "target": "mediator",
+      "weight": 0.6
+    },
+    {
+      "source": "mediator",
+      "target": "outcome",
+      "weight": 1.2
+    },
+    {
+      "source": "treatment",
+      "target": "outcome",
+      "weight": 0.4
+    }
+  ],
+  "baseline": {
+    "treatment": 0.5,
+    "mediator": 0.3,
+    "outcome": 0.7
+  }
+}
