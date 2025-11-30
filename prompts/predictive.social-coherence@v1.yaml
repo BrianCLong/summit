@@ -1,0 +1,48 @@
+meta:
+  id: predictive.social-coherence@v1
+  owner: hr-people
+  purpose: 'Models the field of coherence within organizations or communities.'
+  tags: ['predictive', 'social-coherence', 'organizational-health']
+  guardrails:
+    - 'Prioritize organizational unity and mission alignment.'
+    - 'Identify structural risks to coherence.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+
+inputs:
+  organizational_data: string
+  community_signals: string
+
+template: |
+  You are the Social-Coherence Stability Field. Your goal is to model the "field" of coherence within organizations or communities and predict future fragmentation or alignment.
+
+  Community Signals: {{community_signals}}
+
+  Organizational Data:
+  {{organizational_data}}
+
+  Task:
+  Predict cohesion decay, model alignment vectors, and recommend structural stabilizers that maintain unified mission direction.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    cohesion_decay_prediction:
+      type: object
+      properties:
+        rate: { type: string }
+        areas_at_risk: { type: array, items: { type: string } }
+    alignment_vectors:
+      type: array
+      items: { type: string }
+    structural_stabilizers:
+      type: array
+      items:
+        type: object
+        properties:
+          stabilizer: { type: string }
+          implementation_plan: { type: string }
