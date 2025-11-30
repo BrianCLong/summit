@@ -12,6 +12,7 @@ import type {
   TransformInput,
   EvidenceInput,
   ClaimInput,
+  ClaimEvidenceLinkInput,
   LicenseInput,
   BundleCreateInput,
   ClaimQueryFilters,
@@ -386,6 +387,110 @@ router.get('/claims', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * POST /api/provenance-beta/claims/:claimId/evidence
+ * Link evidence to a claim
+ */
+router.post(
+  '/claims/:claimId/evidence',
+  async (req: Request, res: Response) => {
+    try {
+      const input: ClaimEvidenceLinkInput = {
+        claim_id: req.params.claimId,
+        ...req.body,
+      };
+
+      const link = await provenanceLedger.linkClaimToEvidence(input);
+
+      res.status(201).json({
+        success: true,
+        data: link,
+      });
+    } catch (error) {
+      logger.error({
+        message: 'Failed to link claim to evidence',
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to link claim to evidence',
+      });
+    }
+  },
+);
+
+/**
+ * GET /api/provenance-beta/claims/:claimId/evidence
+ * Get all evidence linked to a claim
+ */
+router.get(
+  '/claims/:claimId/evidence',
+  async (req: Request, res: Response) => {
+    try {
+      const links = await provenanceLedger.getClaimEvidenceLinks(
+        req.params.claimId,
+      );
+
+      res.json({
+        success: true,
+        data: links,
+        count: links.length,
+      });
+    } catch (error) {
+      logger.error({
+        message: 'Failed to get claim evidence links',
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get claim evidence links',
+      });
+    }
+  },
+);
+
+/**
+ * GET /api/provenance-beta/evidence/:evidenceId/claims
+ * Get all claims linked to evidence
+ */
+router.get(
+  '/evidence/:evidenceId/claims',
+  async (req: Request, res: Response) => {
+    try {
+      const links = await provenanceLedger.getEvidenceClaimLinks(
+        req.params.evidenceId,
+      );
+
+      res.json({
+        success: true,
+        data: links,
+        count: links.length,
+      });
+    } catch (error) {
+      logger.error({
+        message: 'Failed to get evidence claim links',
+        error: error instanceof Error ? error.message : String(error),
+      });
+
+      res.status(500).json({
+        success: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : 'Failed to get evidence claim links',
+      });
+    }
+  },
+);
+
 // ============================================================================
 // PROVENANCE CHAIN ENDPOINTS
 // ============================================================================
@@ -525,6 +630,44 @@ router.post('/ingest', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       error: error instanceof Error ? error.message : 'Document ingestion failed',
+    });
+  }
+});
+
+// ============================================================================
+// AUDIT CHAIN VERIFICATION ENDPOINT
+// ============================================================================
+
+/**
+ * POST /api/provenance-beta/audit/verify
+ * Verify the integrity of the audit chain
+ */
+router.post('/audit/verify', async (req: Request, res: Response) => {
+  try {
+    const options = {
+      startDate: req.body.startDate ? new Date(req.body.startDate) : undefined,
+      endDate: req.body.endDate ? new Date(req.body.endDate) : undefined,
+      limit: req.body.limit ? parseInt(req.body.limit) : undefined,
+    };
+
+    const result = await provenanceLedger.verifyAuditChain(options);
+
+    res.json({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    logger.error({
+      message: 'Failed to verify audit chain',
+      error: error instanceof Error ? error.message : String(error),
+    });
+
+    res.status(500).json({
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : 'Audit chain verification failed',
     });
   }
 });
