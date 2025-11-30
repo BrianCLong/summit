@@ -1,0 +1,9 @@
+{
+  "hello_world_minutes": 8,
+  "loc_add_tool": 6,
+  "loc_add_rag": 9,
+  "loc_add_policy": 4,
+  "latency_overhead_ms": 12,
+  "trace_completeness": 0.95,
+  "error_observability_notes": "Structured spans include policy decisions and tool outcomes."
+}

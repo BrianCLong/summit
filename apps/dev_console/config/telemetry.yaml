@@ -1,0 +1,5 @@
+trace_sink: stdout
+sampling: 1.0
+attributes:
+  app: dev_console
+  environment: dev

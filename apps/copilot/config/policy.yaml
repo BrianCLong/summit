@@ -1,0 +1,7 @@
+tenant: enterprise
+region: us-west
+sensitivity: internal
+overrides:
+  allow_tools:
+    - show_provenance
+  deny_tools: []
