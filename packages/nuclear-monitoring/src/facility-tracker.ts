@@ -5,13 +5,13 @@
  * reactors, reprocessing facilities, and other nuclear infrastructure.
  */
 
-import type {
-  NuclearFacility,
+import {
+  type NuclearFacility,
   FacilityType,
   FacilityStatus,
   ConfidenceLevel,
-  GeoLocation,
-  MonitoringAlert
+  type GeoLocation,
+  type MonitoringAlert
 } from './types.js';
 
 export class NuclearFacilityTracker {
