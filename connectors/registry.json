@@ -1,7 +1,7 @@
 {
   "$schema": "./registry.schema.json",
-  "version": "1.0.0",
-  "generatedAt": "2025-11-21T00:00:00Z",
+  "version": "1.1.0",
+  "generatedAt": "2025-11-27T00:00:00Z",
   "connectors": [
     {
       "id": "stix-taxii",
@@ -10,10 +10,45 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "threat-intelligence",
-      "capabilities": ["pull", "stream", "incremental"],
-      "entityTypes": ["ThreatActor", "Indicator", "Campaign", "Malware", "AttackPattern"],
-      "relationshipTypes": ["INDICATES", "USES", "TARGETS", "ATTRIBUTED_TO"],
-      "authentication": ["api-key", "certificate"],
+      "capabilities": [
+        "pull",
+        "stream",
+        "incremental"
+      ],
+      "certificationBadges": [
+        {
+          "id": "threat-model-certified",
+          "label": "Threat model coverage verified",
+          "status": "certified",
+          "issuedBy": "trust-office",
+          "issuedAt": "2025-11-15",
+          "evidenceUrl": "https://summit.dev/certifications/stix-taxii/threat-model"
+        },
+        {
+          "id": "stix-mapping-complete",
+          "label": "STIX object and relationship mapping complete",
+          "status": "certified",
+          "issuedBy": "graph-data",
+          "issuedAt": "2025-11-18"
+        }
+      ],
+      "entityTypes": [
+        "ThreatActor",
+        "Indicator",
+        "Campaign",
+        "Malware",
+        "AttackPattern"
+      ],
+      "relationshipTypes": [
+        "INDICATES",
+        "USES",
+        "TARGETS",
+        "ATTRIBUTED_TO"
+      ],
+      "authentication": [
+        "api-key",
+        "certificate"
+      ],
       "rateLimit": {
         "requestsPerMinute": 60,
         "burstLimit": 10
@@ -30,10 +65,42 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "search-analytics",
-      "capabilities": ["pull", "query", "incremental"],
-      "entityTypes": ["Document", "Event", "LogEntry"],
-      "relationshipTypes": ["CONTAINS", "REFERENCES"],
-      "authentication": ["basic", "api-key", "certificate"],
+      "capabilities": [
+        "pull",
+        "query",
+        "incremental"
+      ],
+      "certificationBadges": [
+        {
+          "id": "schema-mapping-verified",
+          "label": "Canonical field mapping verified",
+          "status": "certified",
+          "issuedBy": "data-platform",
+          "issuedAt": "2025-11-16",
+          "evidenceUrl": "https://summit.dev/certifications/elasticsearch/schema"
+        },
+        {
+          "id": "throughput-benchmark",
+          "label": "1k rps query benchmark",
+          "status": "certified",
+          "issuedBy": "perf-lab",
+          "issuedAt": "2025-11-19"
+        }
+      ],
+      "entityTypes": [
+        "Document",
+        "Event",
+        "LogEntry"
+      ],
+      "relationshipTypes": [
+        "CONTAINS",
+        "REFERENCES"
+      ],
+      "authentication": [
+        "basic",
+        "api-key",
+        "certificate"
+      ],
       "rateLimit": {
         "requestsPerMinute": 1000,
         "burstLimit": 100
@@ -50,10 +117,35 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "file-import",
-      "capabilities": ["pull", "batch"],
-      "entityTypes": ["*"],
-      "relationshipTypes": ["*"],
-      "authentication": ["none"],
+      "capabilities": [
+        "pull",
+        "batch"
+      ],
+      "certificationBadges": [
+        {
+          "id": "data-contract-ready",
+          "label": "Data contract templates available",
+          "status": "in-review",
+          "issuedBy": "ingestion-guild",
+          "issuedAt": "2025-11-20"
+        },
+        {
+          "id": "validation-hooks",
+          "label": "Schema validation hooks enabled",
+          "status": "certified",
+          "issuedBy": "quality-office",
+          "issuedAt": "2025-11-19"
+        }
+      ],
+      "entityTypes": [
+        "*"
+      ],
+      "relationshipTypes": [
+        "*"
+      ],
+      "authentication": [
+        "none"
+      ],
       "rateLimit": null,
       "license": "MIT",
       "maintainer": "summit-core",
@@ -67,10 +159,36 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "database",
-      "capabilities": ["pull", "query"],
-      "entityTypes": ["*"],
-      "relationshipTypes": ["*"],
-      "authentication": ["none", "file-path"],
+      "capabilities": [
+        "pull",
+        "query"
+      ],
+      "certificationBadges": [
+        {
+          "id": "query-surface-stabilized",
+          "label": "SQL surface compatible with analytics guide",
+          "status": "certified",
+          "issuedBy": "analytics-foundation",
+          "issuedAt": "2025-11-17"
+        },
+        {
+          "id": "resource-safety",
+          "label": "Resource guardrails validated",
+          "status": "in-review",
+          "issuedBy": "sre",
+          "issuedAt": "2025-11-21"
+        }
+      ],
+      "entityTypes": [
+        "*"
+      ],
+      "relationshipTypes": [
+        "*"
+      ],
+      "authentication": [
+        "none",
+        "file-path"
+      ],
       "rateLimit": null,
       "license": "MIT",
       "maintainer": "summit-core",
@@ -84,10 +202,37 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "geospatial",
-      "capabilities": ["enrich", "geocode"],
-      "entityTypes": ["Location", "Address"],
-      "relationshipTypes": ["LOCATED_AT", "NEAR"],
-      "authentication": ["api-key"],
+      "capabilities": [
+        "enrich",
+        "geocode"
+      ],
+      "certificationBadges": [
+        {
+          "id": "geo-accuracy",
+          "label": "Geocoding accuracy validated",
+          "status": "certified",
+          "issuedBy": "geo-practice",
+          "issuedAt": "2025-11-16"
+        },
+        {
+          "id": "key-rotation",
+          "label": "API key rotation enforced",
+          "status": "certified",
+          "issuedBy": "secops",
+          "issuedAt": "2025-11-17"
+        }
+      ],
+      "entityTypes": [
+        "Location",
+        "Address"
+      ],
+      "relationshipTypes": [
+        "LOCATED_AT",
+        "NEAR"
+      ],
+      "authentication": [
+        "api-key"
+      ],
       "rateLimit": {
         "requestsPerMinute": 600,
         "burstLimit": 50
@@ -104,10 +249,42 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "siem",
-      "capabilities": ["pull", "stream", "incremental"],
-      "entityTypes": ["Event", "Alert", "Asset", "User"],
-      "relationshipTypes": ["TRIGGERED", "ACCESSED", "DETECTED"],
-      "authentication": ["oauth2", "service-account"],
+      "capabilities": [
+        "pull",
+        "stream",
+        "incremental"
+      ],
+      "certificationBadges": [
+        {
+          "id": "siem-content-verified",
+          "label": "Chronicle rule + UDM mapping verified",
+          "status": "certified",
+          "issuedBy": "threat-research",
+          "issuedAt": "2025-11-18"
+        },
+        {
+          "id": "soar-tested",
+          "label": "SOAR playbook triggers exercised",
+          "status": "in-review",
+          "issuedBy": "automation-practice",
+          "issuedAt": "2025-11-22"
+        }
+      ],
+      "entityTypes": [
+        "Event",
+        "Alert",
+        "Asset",
+        "User"
+      ],
+      "relationshipTypes": [
+        "TRIGGERED",
+        "ACCESSED",
+        "DETECTED"
+      ],
+      "authentication": [
+        "oauth2",
+        "service-account"
+      ],
       "rateLimit": {
         "requestsPerMinute": 100,
         "burstLimit": 20
@@ -124,10 +301,40 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "siem",
-      "capabilities": ["pull", "query", "stream"],
-      "entityTypes": ["Event", "Alert", "LogEntry"],
-      "relationshipTypes": ["TRIGGERED", "CONTAINS"],
-      "authentication": ["basic", "token"],
+      "capabilities": [
+        "pull",
+        "query",
+        "stream"
+      ],
+      "certificationBadges": [
+        {
+          "id": "search-compatibility",
+          "label": "SPL search compatibility validated",
+          "status": "certified",
+          "issuedBy": "siem-guild",
+          "issuedAt": "2025-11-16"
+        },
+        {
+          "id": "replay-tested",
+          "label": "Historical replay path tested",
+          "status": "certified",
+          "issuedBy": "qa",
+          "issuedAt": "2025-11-21"
+        }
+      ],
+      "entityTypes": [
+        "Event",
+        "Alert",
+        "LogEntry"
+      ],
+      "relationshipTypes": [
+        "TRIGGERED",
+        "CONTAINS"
+      ],
+      "authentication": [
+        "basic",
+        "token"
+      ],
       "rateLimit": {
         "requestsPerMinute": 200,
         "burstLimit": 30
@@ -144,10 +351,39 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "siem",
-      "capabilities": ["pull", "incremental"],
-      "entityTypes": ["Alert", "Incident", "Entity"],
-      "relationshipTypes": ["RELATED_TO", "TRIGGERED"],
-      "authentication": ["oauth2", "managed-identity"],
+      "capabilities": [
+        "pull",
+        "incremental"
+      ],
+      "certificationBadges": [
+        {
+          "id": "azure-hardening",
+          "label": "Azure security center controls applied",
+          "status": "certified",
+          "issuedBy": "cloud-foundation",
+          "issuedAt": "2025-11-17"
+        },
+        {
+          "id": "managed-identity-ready",
+          "label": "Managed identity path validated",
+          "status": "certified",
+          "issuedBy": "secops",
+          "issuedAt": "2025-11-18"
+        }
+      ],
+      "entityTypes": [
+        "Alert",
+        "Incident",
+        "Entity"
+      ],
+      "relationshipTypes": [
+        "RELATED_TO",
+        "TRIGGERED"
+      ],
+      "authentication": [
+        "oauth2",
+        "managed-identity"
+      ],
       "rateLimit": {
         "requestsPerMinute": 100,
         "burstLimit": 20
@@ -164,10 +400,40 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "geospatial",
-      "capabilities": ["pull", "query"],
-      "entityTypes": ["Location", "Feature", "Boundary"],
-      "relationshipTypes": ["WITHIN", "INTERSECTS", "ADJACENT"],
-      "authentication": ["api-key", "oauth2"],
+      "capabilities": [
+        "pull",
+        "query"
+      ],
+      "certificationBadges": [
+        {
+          "id": "gis-layer-support",
+          "label": "Core GIS layer support validated",
+          "status": "certified",
+          "issuedBy": "geo-practice",
+          "issuedAt": "2025-11-19"
+        },
+        {
+          "id": "projection-coverage",
+          "label": "Projection and CRS coverage tested",
+          "status": "in-review",
+          "issuedBy": "geo-practice",
+          "issuedAt": "2025-11-22"
+        }
+      ],
+      "entityTypes": [
+        "Location",
+        "Feature",
+        "Boundary"
+      ],
+      "relationshipTypes": [
+        "WITHIN",
+        "INTERSECTS",
+        "ADJACENT"
+      ],
+      "authentication": [
+        "api-key",
+        "oauth2"
+      ],
       "rateLimit": {
         "requestsPerMinute": 100,
         "burstLimit": 20
@@ -184,10 +450,37 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "file-import",
-      "capabilities": ["pull", "batch"],
-      "entityTypes": ["*"],
-      "relationshipTypes": ["*"],
-      "authentication": ["none", "api-key", "bearer"],
+      "capabilities": [
+        "pull",
+        "batch"
+      ],
+      "certificationBadges": [
+        {
+          "id": "schema-flexible",
+          "label": "Flexible schema parsing validated",
+          "status": "certified",
+          "issuedBy": "ingestion-guild",
+          "issuedAt": "2025-11-19"
+        },
+        {
+          "id": "validation-hooks",
+          "label": "JSON validation hooks enabled",
+          "status": "certified",
+          "issuedBy": "quality-office",
+          "issuedAt": "2025-11-21"
+        }
+      ],
+      "entityTypes": [
+        "*"
+      ],
+      "relationshipTypes": [
+        "*"
+      ],
+      "authentication": [
+        "none",
+        "api-key",
+        "bearer"
+      ],
       "rateLimit": null,
       "license": "MIT",
       "maintainer": "summit-core",
@@ -201,10 +494,38 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "cloud-storage",
-      "capabilities": ["pull", "batch", "incremental"],
-      "entityTypes": ["*"],
-      "relationshipTypes": ["*"],
-      "authentication": ["aws-credentials", "iam-role"],
+      "capabilities": [
+        "pull",
+        "batch",
+        "incremental"
+      ],
+      "certificationBadges": [
+        {
+          "id": "iam-boundary-reviewed",
+          "label": "IAM boundary reviewed for S3 access",
+          "status": "certified",
+          "issuedBy": "cloud-foundation",
+          "issuedAt": "2025-11-16",
+          "evidenceUrl": "https://summit.dev/certifications/s3csv/iam"
+        },
+        {
+          "id": "large-file-benchmark",
+          "label": "Multi-GB ingestion benchmarked",
+          "status": "certified",
+          "issuedBy": "perf-lab",
+          "issuedAt": "2025-11-20"
+        }
+      ],
+      "entityTypes": [
+        "*"
+      ],
+      "relationshipTypes": [
+        "*"
+      ],
+      "authentication": [
+        "aws-credentials",
+        "iam-role"
+      ],
       "rateLimit": {
         "requestsPerMinute": 1000,
         "burstLimit": 100
@@ -221,10 +542,39 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "compliance",
-      "capabilities": ["pull", "batch"],
-      "entityTypes": ["Person", "Organization", "Vessel", "Aircraft"],
-      "relationshipTypes": ["ALIAS_OF", "ASSOCIATED_WITH"],
-      "authentication": ["none"],
+      "capabilities": [
+        "pull",
+        "batch"
+      ],
+      "certificationBadges": [
+        {
+          "id": "compliance-audited",
+          "label": "Compliance and sanctions audit passed",
+          "status": "certified",
+          "issuedBy": "compliance-office",
+          "issuedAt": "2025-11-15"
+        },
+        {
+          "id": "watchlist-freshness",
+          "label": "Watchlist freshness SLA validated",
+          "status": "certified",
+          "issuedBy": "intel-ops",
+          "issuedAt": "2025-11-19"
+        }
+      ],
+      "entityTypes": [
+        "Person",
+        "Organization",
+        "Vessel",
+        "Aircraft"
+      ],
+      "relationshipTypes": [
+        "ALIAS_OF",
+        "ASSOCIATED_WITH"
+      ],
+      "authentication": [
+        "none"
+      ],
       "rateLimit": {
         "requestsPerMinute": 10,
         "burstLimit": 2
@@ -241,10 +591,40 @@
       "version": "1.0.0",
       "status": "stable",
       "category": "osint",
-      "capabilities": ["pull", "stream", "incremental"],
-      "entityTypes": ["Document", "Article", "Event"],
-      "relationshipTypes": ["MENTIONS", "REFERENCES"],
-      "authentication": ["none", "api-key"],
+      "capabilities": [
+        "pull",
+        "stream",
+        "incremental"
+      ],
+      "certificationBadges": [
+        {
+          "id": "feed-de-duplication",
+          "label": "Feed de-duplication validated",
+          "status": "certified",
+          "issuedBy": "osint-practice",
+          "issuedAt": "2025-11-21"
+        },
+        {
+          "id": "content-safety",
+          "label": "Content safety filters tuned",
+          "status": "in-review",
+          "issuedBy": "trust-office",
+          "issuedAt": "2025-11-23"
+        }
+      ],
+      "entityTypes": [
+        "Document",
+        "Article",
+        "Event"
+      ],
+      "relationshipTypes": [
+        "MENTIONS",
+        "REFERENCES"
+      ],
+      "authentication": [
+        "none",
+        "api-key"
+      ],
       "rateLimit": {
         "requestsPerMinute": 60,
         "burstLimit": 10
