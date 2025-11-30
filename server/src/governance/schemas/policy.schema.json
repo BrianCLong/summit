@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "description": { "type": "string" },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "stages": {
+          "type": "array",
+          "items": { "enum": ["data", "train", "alignment", "runtime"] }
+        },
+        "tenants": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["stages", "tenants"]
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": { "type": "string" },
+          "operator": { "enum": ["eq", "neq", "lt", "gt", "in", "not_in", "contains"] },
+          "value": {}
+        },
+        "required": ["field", "operator", "value"]
+      }
+    },
+    "action": { "enum": ["ALLOW", "DENY", "ESCALATE"] }
+  },
+  "required": ["id", "scope", "rules", "action"]
+}
