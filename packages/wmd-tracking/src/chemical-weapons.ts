@@ -2,13 +2,13 @@
  * Chemical Weapons Tracking
  */
 
-import type {
-  ChemicalWeapon,
-  ChemicalFacility,
-  ChemicalAgentType,
+import {
+  type ChemicalWeapon,
+  type ChemicalFacility,
+  type ChemicalAgentType,
   StorageCondition,
-  ConfidenceLevel,
-  WMDIncident
+  type ConfidenceLevel,
+  type WMDIncident
 } from './types.js';
 
 export class ChemicalWeaponsTracker {
