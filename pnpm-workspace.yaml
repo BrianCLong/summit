@@ -3,6 +3,7 @@ packages:
   - 'packages/*'
   - 'services/*'
   - 'contracts/*'
+  - 'platform/*'
   - 'server'
   - 'client'
   - 'tools/*'

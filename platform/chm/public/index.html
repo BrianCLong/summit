@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controlled Handling Module</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .banner {
+        color: #fff;
+        padding: 12px;
+        text-align: center;
+        font-weight: bold;
+      }
+      .ribbon {
+        background: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.2) 10px, transparent 10px, transparent 20px);
+        padding: 6px;
+        text-align: center;
+        font-size: 12px;
+      }
+      .card {
+        margin: 16px;
+        padding: 16px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+      }
+      .stamp {
+        display: inline-block;
+        padding: 6px 10px;
+        border: 2px solid #555;
+        border-radius: 4px;
+        font-weight: bold;
+      }
+      .disclaimer {
+        color: #b22222;
+        font-size: 13px;
+        margin-top: 8px;
+      }
+      .derived-label {
+        background: #ffe4b5;
+        padding: 4px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-left: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="top-banner" class="banner" style="background-color: #8b0000">TOP SECRET // SCI</div>
+    <div class="ribbon">Export restricted. Residency + license validation enforced at point of release.</div>
+
+    <div class="card">
+      <h2>Document Stamp</h2>
+      <div class="stamp" id="stamp">TS//SCI</div>
+      <div class="disclaimer">Unapproved export attempts will be blocked and audited.</div>
+      <label style="display: block; margin-top: 12px">
+        <input type="checkbox" id="derived-toggle" /> Derived from higher classification
+      </label>
+      <div id="derived-warning" class="derived-label" style="display: none">Derived-from marking applied</div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        $('#derived-toggle').on('change', function () {
+          if ($(this).is(':checked')) {
+            $('#derived-warning').fadeIn(200);
+            $('#stamp').text('TS//SCI//DERIVED');
+            $('.ribbon').text('Derived content present. Additional review required before downgrade/export.');
+          } else {
+            $('#derived-warning').fadeOut(200);
+            $('#stamp').text('TS//SCI');
+            $('.ribbon').text('Export restricted. Residency + license validation enforced at point of release.');
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
