@@ -1,0 +1,38 @@
+{
+  "name": "@summit/plugin-host",
+  "version": "1.0.0",
+  "description": "Plugin host service for managing plugin runtime and execution",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["plugin", "host", "runtime", "microservices"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@summit/plugin-system": "workspace:*",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "zod": "^3.22.4",
+    "eventemitter3": "^5.0.1",
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  }
+}
