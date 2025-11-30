@@ -12,6 +12,7 @@
  */
 
 import { z } from 'zod';
+import { sanitizeHtml } from '../utils/htmlSanitizer.js';
 
 // Base validation schemas
 export const TenantIdSchema = z
@@ -640,13 +641,7 @@ export class SanitizationUtils {
    * Sanitize HTML to prevent XSS
    */
   static sanitizeHTML(input: string): string {
-    return input
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;')
-      .replace(/\//g, '&#x2F;');
+    return sanitizeHtml(String(input));
   }
 
   /**
