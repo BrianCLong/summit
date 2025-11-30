@@ -1,0 +1,22 @@
+{
+  "name": "@summit/digital-twin-brain",
+  "version": "0.1.0",
+  "description": "Composable multi-agent cognition layer for digital twins with continual learning and compliance-aware control.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.9.3"
+  },
+  "license": "MIT"
+}
