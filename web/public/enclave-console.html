@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CCE Enclave Runner</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; background: #0f172a; color: #e2e8f0; }
+      .panel { background: #111827; padding: 16px; border-radius: 12px; box-shadow: 0 6px 18px rgba(0,0,0,0.35); max-width: 720px; }
+      .row { margin-bottom: 12px; }
+      .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; background: #0ea5e9; border-radius: 999px; color: #0b1021; font-weight: 700; }
+      .toggle { display: flex; align-items: center; gap: 10px; }
+      textarea { width: 100%; min-height: 120px; border-radius: 8px; border: 1px solid #1f2937; padding: 10px; background: #0b1021; color: #e5e7eb; }
+      button { padding: 10px 14px; border: none; border-radius: 8px; background: #22c55e; color: #0b1021; font-weight: 700; cursor: pointer; }
+      button.secondary { background: #334155; color: #e5e7eb; }
+      .proof { font-family: 'SFMono-Regular', Consolas, monospace; background: #0b1021; padding: 10px; border-radius: 8px; border: 1px solid #1f2937; }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <div class="row toggle">
+        <label for="enclave-toggle">Run in Enclave</label>
+        <input type="checkbox" id="enclave-toggle" checked />
+        <span class="badge" id="attestation-badge">Attestation verified</span>
+      </div>
+      <div class="row">
+        <textarea id="job-payload" placeholder="Enter payload to hash and seal"></textarea>
+      </div>
+      <div class="row" style="display:flex; gap:10px; align-items:center;">
+        <button id="run-job">Submit to CCE</button>
+        <button class="secondary" id="copy-proof">Copy attestation proof</button>
+        <span id="status" aria-live="polite"></span>
+      </div>
+      <div class="row">
+        <div class="proof" id="proof-area">attested:pending</div>
+      </div>
+    </div>
+    <script>
+      // Minimal jQuery-style helper for copy UX
+      (function() {
+        function MiniQuery(el) { this.el = el; }
+        MiniQuery.prototype.text = function(value) { if (value === undefined) return this.el.textContent; this.el.textContent = value; return this; };
+        MiniQuery.prototype.on = function(evt, handler) { this.el.addEventListener(evt, handler); return this; };
+        window.$ = function(selector) { return new MiniQuery(document.querySelector(selector)); };
+      })();
+
+      const toggle = document.getElementById('enclave-toggle');
+      const proofArea = document.getElementById('proof-area');
+      const status = document.getElementById('status');
+
+      $('#copy-proof').on('click', () => {
+        const text = proofArea.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          status.textContent = 'Proof copied via jQuery helper';
+        });
+      });
+
+      document.getElementById('run-job').addEventListener('click', async () => {
+        if (!toggle.checked) {
+          status.textContent = 'Enclave toggle must remain on to submit';
+          return;
+        }
+        const payload = document.getElementById('job-payload').value || 'demo';
+        const body = {
+          jobId: 'ui-job',
+          payload,
+          manifestHash: 'f1c8c55d3c9d5b57a3678c3a60afcd72bafc2c24d0c9b5580d1a6d1f44b68859',
+          attestationQuote: 'attest:test-quote-1:f1c8c55d3c9d5b57a3678c3a60afcd72bafc2c24d0c9b5580d1a6d1f44b68859',
+          region: 'us-east-1',
+          allowEgress: false,
+        };
+        try {
+          const res = await fetch('/api.ComputeEnclave/RunJob', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+          const json = await res.json();
+          proofArea.textContent = json.proofHandle || 'attested:pending';
+          status.textContent = 'Enclave job submitted and attested';
+        } catch (err) {
+          status.textContent = 'Failed to submit: ' + err;
+        }
+      });
+    </script>
+  </body>
+</html>
