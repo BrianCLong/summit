@@ -1,0 +1,108 @@
+name: Reusable Build & Test
+
+on:
+  workflow_call:
+    inputs:
+      node_version:
+        required: false
+        type: string
+        default: '20.x'
+      pnpm_cache_folder:
+        required: false
+        type: string
+        default: '~/.pnpm-store'
+
+jobs:
+  fast-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.pnpm_cache_folder }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - name: Configure pnpm store
+        run: pnpm config set store-dir ${{ inputs.pnpm_cache_folder }}
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Lint
+        run: pnpm -w run lint
+      - name: Typecheck
+        run: pnpm -w run typecheck
+      - name: Production guardrails
+        run: |
+          set +e
+          NODE_ENV=production \
+          JWT_SECRET=weaksecret \
+          JWT_REFRESH_SECRET=weaksecret2 \
+          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
+          NEO4J_URI=bolt://localhost:7687 \
+          NEO4J_USERNAME=neo4j \
+          NEO4J_PASSWORD=devpassword \
+          REDIS_HOST=localhost \
+          REDIS_PORT=6379 \
+          REDIS_PASSWORD=devpassword \
+          CORS_ORIGIN=* \
+          pnpm ci:prod-guard
+          status=$?
+          if [ "$status" -eq 0 ]; then
+            echo "Prod guardrails command succeeded unexpectedly"
+            exit 1
+          fi
+          echo "Prod guardrails correctly blocked unsafe config"
+
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: 'pnpm'
+      - name: Enable corepack
+        run: corepack enable
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.pnpm_cache_folder }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - name: Configure pnpm store
+        run: pnpm config set store-dir ${{ inputs.pnpm_cache_folder }}
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build workspace
+        run: pnpm -w run build
+      - name: Unit & integration tests
+        run: pnpm -w run test
+      - name: Upload build artifacts for golden path
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            .turbo
+            node_modules/.cache
+          retention-days: 1

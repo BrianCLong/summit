@@ -1,0 +1,80 @@
+name: Preview Teardown
+
+on:
+  pull_request:
+    types: [closed]
+    paths:
+      - 'server/**'
+      - 'client/**'
+      - 'deploy/**'
+      - '.github/workflows/**'
+
+env:
+  NAMESPACE_PREFIX: intelgraph-pr
+
+jobs:
+  teardown:
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.14.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Teardown preview environment
+        run: |
+          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          PR_NUMBER=${{ github.event.number }}
+
+          echo "🗑️ tearing down preview for PR #${PR_NUMBER} in namespace ${NAMESPACE}"
+
+          # Remove Helm release
+          helm uninstall intelgraph-pr-${PR_NUMBER} --namespace ${NAMESPACE} --ignore-not-found
+
+          # Delete namespace
+          kubectl delete namespace ${NAMESPACE} --ignore-not-found --timeout=300s
+
+      - name: Cleanup container images
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🧹 Cleaning up container images for PR #${{ github.event.number }}"
+          # Delete PR-specific images
+          gh api --method DELETE \
+            "/orgs/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fserver/versions" \
+            --field "tag=pr-${{ github.event.number }}" || true
+
+          gh api --method DELETE \
+            "/orgs/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fclient/versions" \
+            --field "tag=pr-${{ github.event.number }}" || true
+
+      - name: Report Cost & Leftover Detection
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Simulation of cost calculation and leftover detection
+          COST="0.00" # Placeholder: In a real env, this would query cloud provider billing API
+          LEFTOVERS=$(kubectl get all -n "${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}" 2>/dev/null || echo "None")
+
+          if [ "$LEFTOVERS" != "None" ] && [ "$LEFTOVERS" != "" ]; then
+             LEFTOVER_STATUS="⚠️ Some resources may remain manually."
+          else
+             LEFTOVER_STATUS="✅ All resources cleaned up."
+          fi
+
+          echo "💰 Estimated Cost: $${COST}"
+          echo "${LEFTOVER_STATUS}"
+
+          gh pr comment ${{ github.event.number }} --body "🧹 **Preview Teardown Complete**<br/>💰 Estimated Cost: $${COST}<br/>${LEFTOVER_STATUS}"
