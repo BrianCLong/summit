@@ -1,0 +1,43 @@
+meta:
+  id: financial.liquidity-void-map@v1
+  owner: financial-ops
+  purpose: 'Visualize future liquidity disappearance'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  market_depth_data: string
+
+template: |
+  SYSTEM: You are the The Liquidity Void Map.
+  DESCRIPTION: Real-time 3D visualization of where the next $1T+ of liquidity will disappear from during the next crisis (money markets, UST bills, eurodollars, offshore USD, etc.).
+
+  TASK: Analyze the provided inputs and execute the The Liquidity Void Map logic.
+
+  INPUTS:
+  - market_depth_data: {{market_depth_data}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      market_depth_data: "sample_data"
+    expected_contains: ["signal", "confidence"]
