@@ -1,0 +1,241 @@
+_format_version: "3.0"
+_transform: true
+info:
+  select_tags:
+    - summit
+  description: Summit Kong gateway declarative config for routing, auth, load balancing, and circuit breaking.
+plugins:
+  - name: prometheus
+  - name: correlation-id
+    config:
+      header_name: x-request-id
+      generator: uuid
+      echo_downstream: true
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 2
+      require_content_length: true
+
+services:
+  - name: catalog-service-v1
+    host: catalog-v1
+    port: 8080
+    protocol: http
+    connect_timeout: 1500
+    read_timeout: 5000
+    write_timeout: 5000
+    retries: 3
+    routes:
+      - name: catalog-v1-route
+        paths:
+          - /api/v1/catalog
+        strip_path: true
+        methods:
+          - GET
+          - POST
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - https://app.example.com
+          methods:
+            - GET
+            - POST
+          headers:
+            - Authorization
+            - Content-Type
+          exposed_headers:
+            - Link
+          max_age: 86400
+          credentials: true
+  - name: catalog-service-v2
+    host: catalog-v2
+    port: 8080
+    protocol: http
+    connect_timeout: 1500
+    read_timeout: 5000
+    write_timeout: 5000
+    retries: 2
+    routes:
+      - name: catalog-v2-route
+        paths:
+          - /api/v2/catalog
+          - /api/latest/catalog
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PUT
+    plugins:
+      - name: jwt
+        config:
+          claims_to_verify:
+            - exp
+          key_claim_name: kid
+          secret_is_base64: false
+          run_on_preflight: false
+      - name: rate-limiting
+        config:
+          minute: 1200
+          policy: local
+          fault_tolerant: true
+      - name: request-transformer
+        config:
+          add:
+            headers:
+              - x-api-version: v2
+  - name: orders-service
+    host: orders
+    port: 8080
+    protocol: http
+    connect_timeout: 2000
+    read_timeout: 6000
+    write_timeout: 6000
+    retries: 2
+    routes:
+      - name: orders-route
+        paths:
+          - /api/v1/orders
+        strip_path: true
+        methods:
+          - GET
+          - POST
+          - PATCH
+    plugins:
+      - name: acl
+        config:
+          allow:
+            - orders-role
+      - name: request-termination
+        config:
+          status_code: 503
+          message: "Orders temporarily unavailable"
+          trigger:
+            fail_on_unhealthy: true
+  - name: bff-service
+    host: bff
+    port: 8080
+    protocol: http
+    routes:
+      - name: bff-route
+        paths:
+          - /api/v1/bff
+        strip_path: true
+        methods:
+          - GET
+          - POST
+    plugins:
+      - name: response-transformer
+        config:
+          add:
+            headers:
+              - x-api-gateway: kong
+
+upstreams:
+  - name: catalog-v1
+    hash_on: ip
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        healthy:
+          successes: 2
+          interval: 10
+        unhealthy:
+          http_failures: 3
+          tcp_failures: 3
+          timeouts: 2
+          interval: 5
+      passive:
+        healthy:
+          http_statuses:
+            - 200
+            - 201
+          successes: 3
+        unhealthy:
+          http_statuses:
+            - 429
+            - 500
+            - 502
+            - 503
+          http_failures: 2
+          tcp_failures: 2
+          timeouts: 2
+    targets:
+      - target: catalog-v1-0.catalog-v1.svc.cluster.local:8080
+      - target: catalog-v1-1.catalog-v1.svc.cluster.local:8080
+  - name: catalog-v2
+    slots: 10000
+    hash_on: ip
+    healthchecks:
+      active:
+        type: http
+        http_path: /health
+        timeout: 3
+        healthy:
+          successes: 2
+          interval: 15
+        unhealthy:
+          http_failures: 2
+          tcp_failures: 2
+          timeouts: 2
+          interval: 5
+      passive:
+        healthy:
+          http_statuses:
+            - 200
+            - 201
+          successes: 1
+        unhealthy:
+          http_failures: 2
+          http_statuses:
+            - 500
+            - 502
+            - 503
+            - 504
+          tcp_failures: 2
+          timeouts: 2
+    targets:
+      - target: catalog-v2-0.catalog-v2.svc.cluster.local:8080
+      - target: catalog-v2-1.catalog-v2.svc.cluster.local:8080
+  - name: orders
+    healthchecks:
+      active:
+        type: https
+        https_sni: orders.default.svc.cluster.local
+        http_path: /health
+        healthy:
+          interval: 10
+          successes: 2
+        unhealthy:
+          interval: 5
+          http_failures: 2
+          timeouts: 2
+      passive:
+        healthy:
+          http_statuses:
+            - 200
+          successes: 1
+        unhealthy:
+          http_statuses:
+            - 429
+            - 500
+            - 502
+            - 503
+            - 504
+          http_failures: 2
+          timeouts: 2
+    targets:
+      - target: orders-0.orders.svc.cluster.local:8080
+      - target: orders-1.orders.svc.cluster.local:8080
+  - name: degraded
+    healthchecks:
+      passive:
+        unhealthy:
+          http_statuses:
+            - 500
+            - 502
+            - 503
+          http_failures: 1
+    targets:
+      - target: cache-fallback.cache.svc.cluster.local:8080
