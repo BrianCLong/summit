@@ -15,6 +15,7 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { ensurePerformanceIndexes } from './db/optimization/performanceIndexes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -40,6 +41,7 @@ const startServer = async () => {
   const httpServer = http.createServer(app);
 
   await initializeNeo4jDriver();
+  await ensurePerformanceIndexes();
 
   // Subscriptions with Persisted Query validation
 
