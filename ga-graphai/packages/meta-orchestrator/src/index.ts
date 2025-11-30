@@ -701,6 +701,17 @@ export {
   type RSIPRunResult
 } from './prompt/rsip.js';
 export {
+  AutonomousEvolutionOrchestrator,
+  type AutonomousEvolutionOptions,
+  type BoundaryViolation,
+  type CapabilityEmergence,
+  type CapabilitySignal,
+  type EthicalBoundaryRule,
+  type EvolutionCycleReport,
+  type EvolutionOutcome,
+  type EvolutionStopReason
+} from './prompt/autonomousEvolution.js';
+export {
   SelfConsensusEngine,
   type CandidateGenerationOptions,
   type ConsensusCluster,
