@@ -12,5 +12,9 @@
     "outDir": "dist"
   },
   "include": ["src", "tests"],
-  "references": [{ "path": "../common-types" }, { "path": "../prov-ledger" }]
+  "references": [
+    { "path": "../common-types" },
+    { "path": "../prov-ledger" },
+    { "path": "../cost-guard" }
+  ]
 }
