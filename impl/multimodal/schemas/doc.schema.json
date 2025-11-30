@@ -1,0 +1,70 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DocumentSample",
+  "description": "Schema for PDFs/slides with layout, text, and graph projections.",
+  "type": "object",
+  "required": ["id", "uri", "modality", "mime_type", "layout"],
+  "properties": {
+    "id": {"type": "string"},
+    "tenant_id": {"type": "string"},
+    "uri": {"type": "string", "description": "Location of the document"},
+    "modality": {"const": "document"},
+    "mime_type": {"type": "string", "description": "application/pdf|application/pptx|application/vnd.ms-powerpoint"},
+    "title": {"type": "string"},
+    "language": {"type": "string"},
+    "pages": {"type": "integer", "minimum": 1},
+    "layout": {"$ref": "layout.schema.json"},
+    "text": {
+      "type": "string",
+      "description": "Full extracted text for fallback text-only processing"
+    },
+    "graphs": {
+      "type": "array",
+      "description": "IntelGraph-ready projections of the document",
+      "items": {
+        "type": "object",
+        "required": ["root_id", "nodes", "edges"],
+        "properties": {
+          "root_id": {"type": "string"},
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "type"],
+              "properties": {
+                "id": {"type": "string"},
+                "type": {"type": "string"},
+                "ref": {"type": "string", "description": "Reference to layout element id"},
+                "metadata": {"type": "object", "additionalProperties": true}
+              }
+            }
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["source", "target", "type"],
+              "properties": {
+                "source": {"type": "string"},
+                "target": {"type": "string"},
+                "type": {"type": "string"},
+                "weight": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Versioning, detector details, hashes, timestamps",
+      "additionalProperties": true
+    },
+    "security_tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Redaction/classification tags by document"
+    }
+  },
+  "additionalProperties": false
+}

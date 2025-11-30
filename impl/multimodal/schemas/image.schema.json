@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ImageSample",
+  "description": "Schema for multimodal image samples with metadata, regions, and embeddings.",
+  "type": "object",
+  "required": ["id", "uri", "modality", "mime_type"],
+  "properties": {
+    "id": {"type": "string", "description": "Stable image identifier"},
+    "tenant_id": {"type": "string", "description": "Owning tenant for isolation"},
+    "uri": {"type": "string", "description": "Location of the image (path, URL, or object storage)"},
+    "modality": {"const": "image"},
+    "mime_type": {"type": "string", "description": "MIME type such as image/png"},
+    "width": {"type": "integer", "minimum": 1},
+    "height": {"type": "integer", "minimum": 1},
+    "captions": {
+      "type": "array",
+      "description": "Optional captions or scene descriptions",
+      "items": {
+        "type": "object",
+        "required": ["text"],
+        "properties": {
+          "text": {"type": "string"},
+          "source": {"type": "string", "description": "detector|human|model"},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "regions": {
+      "type": "array",
+      "description": "Detected regions, objects, or chart areas",
+      "items": {
+        "type": "object",
+        "required": ["id", "bbox"],
+        "properties": {
+          "id": {"type": "string"},
+          "label": {"type": "string", "description": "Object/category label"},
+          "bbox": {
+            "type": "object",
+            "required": ["x", "y", "w", "h"],
+            "properties": {
+              "x": {"type": "number", "minimum": 0},
+              "y": {"type": "number", "minimum": 0},
+              "w": {"type": "number", "exclusiveMinimum": 0},
+              "h": {"type": "number", "exclusiveMinimum": 0}
+            }
+          },
+          "text": {"type": "string", "description": "OCR text if available"},
+          "embeddings": {
+            "type": "array",
+            "items": {"type": "number"},
+            "description": "Visual embedding vector for the region"
+          },
+          "relations": {
+            "type": "array",
+            "description": "Relations to other regions (e.g., part-of, near) for IntelGraph projection",
+            "items": {
+              "type": "object",
+              "required": ["target_id", "type"],
+              "properties": {
+                "target_id": {"type": "string"},
+                "type": {"type": "string"},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "embeddings": {
+      "type": "array",
+      "items": {"type": "number"},
+      "description": "Global image embedding for retrieval"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary metadata (hashes, detector versions, capture time)",
+      "additionalProperties": true
+    },
+    "security_tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Redaction or classification tags applied to the image"
+    }
+  },
+  "additionalProperties": false
+}

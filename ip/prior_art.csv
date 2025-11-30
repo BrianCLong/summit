@@ -1,0 +1,6 @@
+category,reference,notes,differentiator
+vision-language,BLIP-2 / LLaVA,"image-text pretraining, chat VLM","graph projection + tool-native curriculum"
+doc_qa,LayoutLM / DocVQA,"layout-aware text tokens","IntelGraph mapping + telemetry-driven sampling"
+chart_qa,UniChart / ChartLLM,"chart-specific question answering","tool-orchestrated parsers + numeric verification traces"
+ui_understanding,Screen2Words / NLSA,"UI captioning/navigation","UI graph schema with action affordances and safety guardrails"
+multimodal_rag,MM-RAG (various),"retrieval over images/docs","graph-indexed retrieval with region-level provenance"
