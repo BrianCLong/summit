@@ -42,6 +42,11 @@ class ComprehensiveTelemetry {
 
   // Request/response timing
   public readonly requestDuration: Histogram;
+  public readonly ingestionDuration: Histogram;
+
+  // Query Cost Guard Metrics
+  public readonly queryCostEstimated: Histogram;
+  public readonly slowQueriesKilled: Counter;
 
   // Resource utilization
   private cpuUsage: ObservableGauge;
@@ -61,7 +66,13 @@ class ComprehensiveTelemetry {
     this.meter = meterProvider.getMeter('intelgraph-server-telemetry');
 
     this.requestDuration = this.createHistogram('request_duration_seconds', 'Request duration in seconds');
+    this.ingestionDuration = this.createHistogram('ingestion_duration_seconds', 'End-to-end duration of data ingestion in seconds');
     this.activeConnections = this.createUpDownCounter('active_connections', 'Number of active connections');
+
+    // Initialize Query Cost Guard metrics
+    this.queryCostEstimated = this.createHistogram('query_cost_estimated', 'Estimated cost of database queries');
+    this.slowQueriesKilled = this.createCounter('slow_queries_killed_total', 'Total number of slow queries terminated');
+
 
     this.setupResourceUtilizationMetrics();
   }
