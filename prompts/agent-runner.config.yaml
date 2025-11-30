@@ -1,0 +1,41 @@
+version: 1.0.0
+profile: summit-agent
+prompt_pack:
+  universal: ./prompts/PROMPTS.md#universal-prompt-all-agents
+  summit: ./prompts/PROMPTS.md#summit-in-house-agent-prompt
+  spec: ./prompts/agent-spec.md
+safety:
+  disallow_secrets: true
+  redact_outputs: true
+  enforce_instruction_hierarchy: true
+  deny_binary_writes: true
+  max_output_tokens: 2048
+execution:
+  planning_required: true
+  prefer_small_commits: true
+  enforce_conventional_commits: true
+  respect_agents_files: true
+  test_commands:
+    - npm test
+  lint_commands:
+    - npm run lint
+reporting:
+  require_citations: true
+  test_status_emojis: true
+  include_risks: true
+  include_followups: true
+telemetry:
+  enable_structured_logs: true
+  metrics:
+    - task_duration_ms
+    - commands_run
+    - tests_executed
+    - warnings
+    - failures
+tools:
+  search: rg
+  shell: bash
+  vcs: git
+  formatting:
+    - prettier
+    - eslint
