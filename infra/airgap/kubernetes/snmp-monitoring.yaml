@@ -1,0 +1,493 @@
+# SNMP Health Monitoring System
+# Provides comprehensive health monitoring for air-gapped environment
+# Part of Air-Gapped Deployment for Summit IntelGraph
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: snmp-exporter-config
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/component: monitoring
+data:
+  snmp.yml: |
+    # SNMP Exporter Configuration for Air-Gapped Monitoring
+    # Monitors network devices, servers, and OT sensors
+
+    modules:
+      # Default module for standard devices
+      default:
+        walk:
+          - 1.3.6.1.2.1.1        # system
+          - 1.3.6.1.2.1.2.2      # interfaces
+          - 1.3.6.1.2.1.25.1     # hrSystem
+          - 1.3.6.1.2.1.25.2     # hrStorage
+          - 1.3.6.1.2.1.25.3     # hrDevice
+        metrics:
+          - name: sysUpTime
+            oid: 1.3.6.1.2.1.1.3.0
+            type: gauge
+          - name: sysDescr
+            oid: 1.3.6.1.2.1.1.1.0
+            type: DisplayString
+          - name: ifHCInOctets
+            oid: 1.3.6.1.2.1.31.1.1.1.6
+            type: counter
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+          - name: ifHCOutOctets
+            oid: 1.3.6.1.2.1.31.1.1.1.10
+            type: counter
+            indexes:
+              - labelname: ifIndex
+                type: gauge
+
+      # Network switches and routers
+      network_device:
+        walk:
+          - 1.3.6.1.2.1.1        # system
+          - 1.3.6.1.2.1.2        # interfaces
+          - 1.3.6.1.2.1.4        # ip
+          - 1.3.6.1.2.1.17       # dot1dBridge
+          - 1.3.6.1.4.1.9.9.109  # Cisco CPU/memory
+        metrics:
+          - name: cpmCPUTotal5minRev
+            oid: 1.3.6.1.4.1.9.9.109.1.1.1.1.8
+            type: gauge
+            help: "5 minute CPU utilization"
+          - name: cpmCPUMemoryUsed
+            oid: 1.3.6.1.4.1.9.9.109.1.1.1.1.12
+            type: gauge
+            help: "Memory used by CPU"
+
+      # Linux servers
+      linux_server:
+        walk:
+          - 1.3.6.1.2.1.1        # system
+          - 1.3.6.1.2.1.2.2      # interfaces
+          - 1.3.6.1.2.1.25       # host resources
+          - 1.3.6.1.4.1.2021     # UCD-SNMP-MIB
+        metrics:
+          - name: hrProcessorLoad
+            oid: 1.3.6.1.2.1.25.3.3.1.2
+            type: gauge
+            indexes:
+              - labelname: hrDeviceIndex
+                type: gauge
+          - name: hrStorageUsed
+            oid: 1.3.6.1.2.1.25.2.3.1.6
+            type: gauge
+            indexes:
+              - labelname: hrStorageIndex
+                type: gauge
+          - name: memTotalReal
+            oid: 1.3.6.1.4.1.2021.4.5.0
+            type: gauge
+          - name: memAvailReal
+            oid: 1.3.6.1.4.1.2021.4.6.0
+            type: gauge
+          - name: laLoad
+            oid: 1.3.6.1.4.1.2021.10.1.3
+            type: DisplayString
+            indexes:
+              - labelname: laIndex
+                type: gauge
+
+      # OT/ICS devices
+      ot_sensor:
+        walk:
+          - 1.3.6.1.2.1.1        # system
+          - 1.3.6.1.4.1.99999    # Custom OT MIB (placeholder)
+        metrics:
+          - name: otSensorStatus
+            oid: 1.3.6.1.4.1.99999.1.1.0
+            type: gauge
+            help: "OT sensor operational status"
+          - name: otSensorTemperature
+            oid: 1.3.6.1.4.1.99999.1.2.0
+            type: gauge
+            help: "OT sensor temperature reading"
+          - name: otSensorLastSync
+            oid: 1.3.6.1.4.1.99999.1.3.0
+            type: gauge
+            help: "Timestamp of last data sync"
+
+      # Storage devices
+      storage:
+        walk:
+          - 1.3.6.1.2.1.1        # system
+          - 1.3.6.1.2.1.25.2     # hrStorage
+          - 1.3.6.1.4.1.674      # Dell EMC
+        metrics:
+          - name: hrStorageSize
+            oid: 1.3.6.1.2.1.25.2.3.1.5
+            type: gauge
+            indexes:
+              - labelname: hrStorageIndex
+                type: gauge
+          - name: hrStorageUsed
+            oid: 1.3.6.1.2.1.25.2.3.1.6
+            type: gauge
+            indexes:
+              - labelname: hrStorageIndex
+                type: gauge
+
+  targets.yml: |
+    # SNMP Targets for Air-Gapped Environment
+    # Targets are organized by security zone
+
+    targets:
+      # Production zone servers
+      production:
+        - name: intelgraph-server-1
+          address: 10.100.1.10
+          module: linux_server
+          labels:
+            zone: production
+            tier: application
+        - name: intelgraph-server-2
+          address: 10.100.1.11
+          module: linux_server
+          labels:
+            zone: production
+            tier: application
+        - name: neo4j-primary
+          address: 10.100.1.20
+          module: linux_server
+          labels:
+            zone: production
+            tier: database
+        - name: postgres-primary
+          address: 10.100.1.21
+          module: linux_server
+          labels:
+            zone: production
+            tier: database
+
+      # Network infrastructure
+      network:
+        - name: core-switch-1
+          address: 10.100.0.1
+          module: network_device
+          labels:
+            zone: network
+            device_type: switch
+        - name: firewall-internal
+          address: 10.100.0.2
+          module: network_device
+          labels:
+            zone: network
+            device_type: firewall
+
+      # OT sensors
+      ot_sensors:
+        - name: ot-sensor-zone-a
+          address: 10.100.40.10
+          module: ot_sensor
+          labels:
+            zone: ot
+            sensor_type: industrial
+        - name: ot-sensor-zone-b
+          address: 10.100.40.11
+          module: ot_sensor
+          labels:
+            zone: ot
+            sensor_type: industrial
+
+      # Storage
+      storage:
+        - name: nas-primary
+          address: 10.100.1.30
+          module: storage
+          labels:
+            zone: production
+            tier: storage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snmp-exporter
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: snmp-exporter
+    app.kubernetes.io/component: monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: snmp-exporter
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: snmp-exporter
+        snmp.intelgraph.io/enabled: "true"
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9116"
+    spec:
+      serviceAccountName: snmp-exporter
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: snmp-exporter
+          image: prom/snmp-exporter:v0.25.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - --config.file=/config/snmp.yml
+            - --log.level=info
+          ports:
+            - name: http
+              containerPort: 9116
+              protocol: TCP
+          env:
+            - name: SNMP_COMMUNITY
+              valueFrom:
+                secretKeyRef:
+                  name: snmp-credentials
+                  key: community
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+      volumes:
+        - name: config
+          configMap:
+            name: snmp-exporter-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snmp-exporter
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: snmp-exporter
+spec:
+  selector:
+    app.kubernetes.io/name: snmp-exporter
+  ports:
+    - name: http
+      port: 9116
+      targetPort: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: snmp-exporter
+  namespace: intelgraph-monitoring
+---
+# SNMP Trap Receiver for async alerts
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: snmptrapd
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: snmptrapd
+    app.kubernetes.io/component: trap-receiver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: snmptrapd
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: snmptrapd
+    spec:
+      serviceAccountName: snmp-exporter
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: snmptrapd
+          image: ${ECR_REGISTRY}/snmptrapd:v1.0.0
+          imagePullPolicy: Always
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: snmp-trap
+              containerPort: 162
+              protocol: UDP
+            - name: metrics
+              containerPort: 9162
+              protocol: TCP
+          env:
+            - name: SIEM_ENDPOINT
+              value: http://siem-collector.intelgraph-siem:5044
+            - name: ALERTMANAGER_ENDPOINT
+              value: http://alertmanager.intelgraph-monitoring:9093
+          volumeMounts:
+            - name: trapd-config
+              mountPath: /etc/snmp
+              readOnly: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+
+      volumes:
+        - name: trapd-config
+          configMap:
+            name: snmptrapd-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: snmptrapd
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: snmptrapd
+spec:
+  selector:
+    app.kubernetes.io/name: snmptrapd
+  ports:
+    - name: snmp-trap
+      port: 162
+      targetPort: snmp-trap
+      protocol: UDP
+    - name: metrics
+      port: 9162
+      targetPort: metrics
+  type: ClusterIP
+---
+# Prometheus rules for SNMP alerts
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: snmp-alerts
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: snmp-monitoring
+    prometheus: main
+spec:
+  groups:
+    - name: snmp.alerts
+      interval: 30s
+      rules:
+        - alert: SNMPTargetDown
+          expr: up{job="snmp"} == 0
+          for: 5m
+          labels:
+            severity: critical
+            zone: "{{ $labels.zone }}"
+          annotations:
+            summary: "SNMP target {{ $labels.instance }} is down"
+            description: "SNMP target {{ $labels.instance }} has been unreachable for 5 minutes"
+
+        - alert: HighCPUUsage
+          expr: hrProcessorLoad > 90
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High CPU usage on {{ $labels.instance }}"
+            description: "CPU usage on {{ $labels.instance }} has been above 90% for 10 minutes"
+
+        - alert: HighMemoryUsage
+          expr: (1 - (memAvailReal / memTotalReal)) * 100 > 90
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High memory usage on {{ $labels.instance }}"
+            description: "Memory usage on {{ $labels.instance }} has been above 90% for 10 minutes"
+
+        - alert: StorageSpaceLow
+          expr: (hrStorageUsed / hrStorageSize) * 100 > 85
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Low storage space on {{ $labels.instance }}"
+            description: "Storage usage on {{ $labels.instance }} is above 85%"
+
+        - alert: OTSensorOffline
+          expr: otSensorStatus != 1
+          for: 2m
+          labels:
+            severity: critical
+            zone: ot
+          annotations:
+            summary: "OT Sensor {{ $labels.instance }} is offline"
+            description: "OT sensor {{ $labels.instance }} has reported non-operational status"
+
+        - alert: OTSensorSyncStale
+          expr: time() - otSensorLastSync > 300
+          for: 5m
+          labels:
+            severity: warning
+            zone: ot
+          annotations:
+            summary: "OT Sensor {{ $labels.instance }} sync is stale"
+            description: "OT sensor {{ $labels.instance }} has not synced data for 5+ minutes"
+---
+# ServiceMonitor for Prometheus Operator
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: snmp-exporter
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: snmp-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: snmp-exporter
+  endpoints:
+    - port: http
+      interval: 30s
+      scrapeTimeout: 25s
+      path: /snmp
+      params:
+        module: [default]
+      relabelings:
+        - sourceLabels: [__address__]
+          targetLabel: __param_target
+        - sourceLabels: [__param_target]
+          targetLabel: instance
+        - targetLabel: __address__
+          replacement: snmp-exporter:9116

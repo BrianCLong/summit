@@ -1,0 +1,480 @@
+# OT Sensor Backup to Isolated SIEM
+# Provides secure, isolated storage for OT sensor data with chain of custody
+# Part of Air-Gapped Deployment for Summit IntelGraph
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: siem-collector-config
+  namespace: intelgraph-siem
+  labels:
+    app.kubernetes.io/name: siem-collector
+    app.kubernetes.io/component: ot-backup
+data:
+  filebeat.yml: |
+    # Filebeat configuration for OT sensor data collection
+    filebeat.inputs:
+      - type: tcp
+        host: "0.0.0.0:5044"
+        max_message_size: 10MiB
+        ssl:
+          enabled: true
+          certificate: /certs/tls.crt
+          key: /certs/tls.key
+          certificate_authorities:
+            - /certs/ca.crt
+          client_authentication: required
+        fields:
+          source_type: ot_sensor
+        fields_under_root: true
+        processors:
+          - decode_json_fields:
+              fields: ["message"]
+              target: "ot_data"
+              overwrite_keys: true
+
+      - type: udp
+        host: "0.0.0.0:514"
+        max_message_size: 64KiB
+        fields:
+          source_type: syslog
+        fields_under_root: true
+
+      - type: tcp
+        host: "0.0.0.0:6514"
+        max_message_size: 64KiB
+        ssl:
+          enabled: true
+          certificate: /certs/tls.crt
+          key: /certs/tls.key
+          certificate_authorities:
+            - /certs/ca.crt
+        fields:
+          source_type: syslog_tls
+        fields_under_root: true
+
+    processors:
+      - add_host_metadata: ~
+      - add_cloud_metadata: ~
+      - add_fields:
+          target: ingest
+          fields:
+            timestamp: '${@timestamp}'
+            pipeline: ot-sensor-backup
+            environment: air-gapped
+
+      - script:
+          lang: javascript
+          source: |
+            function process(event) {
+              // Calculate hash for integrity verification
+              var msg = JSON.stringify(event.Get());
+              event.Put("integrity.hash", hashMessage(msg));
+              event.Put("integrity.algorithm", "SHA-256");
+              event.Put("chain_of_custody.ingestion_time", new Date().toISOString());
+              return event;
+            }
+
+    output.elasticsearch:
+      enabled: false  # Air-gapped: no external ES
+
+    output.file:
+      enabled: true
+      path: "/data/ot-backup"
+      filename: "ot-sensor"
+      rotate_every_kb: 102400  # 100MB
+      number_of_files: 100
+      codec.json:
+        pretty: false
+        escape_html: false
+
+    # Secondary output to local syslog for SIEM
+    output.logstash:
+      enabled: true
+      hosts: ["logstash.intelgraph-siem:5045"]
+      ssl.enabled: true
+      ssl.certificate: /certs/tls.crt
+      ssl.key: /certs/tls.key
+      ssl.certificate_authorities:
+        - /certs/ca.crt
+
+    logging:
+      level: info
+      to_files: true
+      files:
+        path: /var/log/filebeat
+        name: filebeat
+        keepfiles: 7
+        permissions: 0640
+
+  logstash.conf: |
+    # Logstash pipeline for OT sensor data processing
+    input {
+      beats {
+        port => 5045
+        ssl => true
+        ssl_certificate => "/certs/tls.crt"
+        ssl_key => "/certs/tls.key"
+        ssl_certificate_authorities => ["/certs/ca.crt"]
+        ssl_verify_mode => "force_peer"
+      }
+    }
+
+    filter {
+      # Parse OT sensor data
+      if [source_type] == "ot_sensor" {
+        mutate {
+          add_field => {
+            "[@metadata][target_index]" => "ot-sensors-%{+YYYY.MM.dd}"
+          }
+        }
+
+        # Validate required fields
+        if ![ot_data][sensor_id] {
+          drop { }
+        }
+
+        # Calculate backup integrity hash
+        ruby {
+          code => '
+            require "digest"
+            msg = event.to_json
+            event.set("[backup][integrity_hash]", Digest::SHA256.hexdigest(msg))
+            event.set("[backup][timestamp]", Time.now.utc.iso8601)
+            event.set("[backup][retention_class]", "regulatory-7yr")
+          '
+        }
+      }
+
+      # Add chain of custody metadata
+      mutate {
+        add_field => {
+          "[chain_of_custody][collector]" => "siem-collector"
+          "[chain_of_custody][zone]" => "isolated-siem"
+          "[chain_of_custody][compliance]" => "air-gapped"
+        }
+      }
+
+      # Redact sensitive fields
+      mutate {
+        gsub => [
+          "[ot_data][credentials]", ".*", "[REDACTED]",
+          "[ot_data][auth_token]", ".*", "[REDACTED]"
+        ]
+      }
+    }
+
+    output {
+      # Primary output: Local file storage (air-gapped)
+      file {
+        path => "/data/siem-archive/ot-sensors/%{+YYYY}/%{+MM}/%{+dd}/sensor-%{[ot_data][sensor_id]}-%{+HH}.json"
+        codec => json_lines
+      }
+
+      # Metrics for monitoring
+      statsd {
+        host => "statsd.intelgraph-monitoring"
+        port => 8125
+        namespace => "siem"
+        sender => "ot-backup"
+        increment => ["events.total"]
+        gauge => {
+          "events.size" => "%{[message][bytes]}"
+        }
+      }
+
+      # Stdout for debugging (will be captured by container logs)
+      stdout {
+        codec => dots
+      }
+    }
+
+  backup-policy.yaml: |
+    # OT Sensor Backup Policy
+    policy:
+      version: "1.0"
+      name: ot-sensor-backup
+
+      retention:
+        default: 7years
+        categories:
+          - name: safety-critical
+            retention: 10years
+            immutable: true
+          - name: operational
+            retention: 7years
+            immutable: true
+          - name: diagnostic
+            retention: 2years
+            immutable: false
+
+      integrity:
+        hashAlgorithm: SHA-256
+        verificationInterval: 24h
+        alertOnMismatch: true
+
+      replication:
+        enabled: true
+        copies: 3
+        locations:
+          - local-primary
+          - local-secondary
+          - offline-archive
+
+      encryption:
+        atRest: true
+        algorithm: AES-256-GCM
+        keyRotation: 90days
+
+      compliance:
+        regulations:
+          - NERC-CIP
+          - IEC-62443
+          - NIST-800-82
+        auditLog: true
+        tamperEvident: true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: siem-collector
+  namespace: intelgraph-siem
+  labels:
+    app.kubernetes.io/name: siem-collector
+    app.kubernetes.io/component: ot-backup
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: siem-collector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: siem-collector
+        app.kubernetes.io/component: ot-backup
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9198"
+    spec:
+      serviceAccountName: siem-collector
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: filebeat
+          image: docker.elastic.co/beats/filebeat:8.11.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - -c
+            - /config/filebeat.yml
+            - -e
+          ports:
+            - name: beats
+              containerPort: 5044
+              protocol: TCP
+            - name: syslog-udp
+              containerPort: 514
+              protocol: UDP
+            - name: syslog-tls
+              containerPort: 6514
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+            - name: data
+              mountPath: /data/ot-backup
+            - name: logs
+              mountPath: /var/log/filebeat
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          livenessProbe:
+            exec:
+              command:
+                - filebeat
+                - test
+                - config
+                - -c
+                - /config/filebeat.yml
+            initialDelaySeconds: 30
+            periodSeconds: 60
+
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:8.11.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          ports:
+            - name: logstash
+              containerPort: 5045
+              protocol: TCP
+            - name: metrics
+              containerPort: 9198
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/logstash/pipeline
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+            - name: archive
+              mountPath: /data/siem-archive
+            - name: logstash-data
+              mountPath: /usr/share/logstash/data
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 4Gi
+
+      volumes:
+        - name: config
+          configMap:
+            name: siem-collector-config
+        - name: certs
+          secret:
+            secretName: siem-collector-certs
+        - name: data
+          persistentVolumeClaim:
+            claimName: ot-backup-data-pvc
+        - name: archive
+          persistentVolumeClaim:
+            claimName: siem-archive-pvc
+        - name: logs
+          emptyDir: {}
+        - name: logstash-data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: siem-collector
+  namespace: intelgraph-siem
+  labels:
+    app.kubernetes.io/name: siem-collector
+spec:
+  selector:
+    app.kubernetes.io/name: siem-collector
+  ports:
+    - name: beats
+      port: 5044
+      targetPort: beats
+      protocol: TCP
+    - name: syslog-udp
+      port: 514
+      targetPort: syslog-udp
+      protocol: UDP
+    - name: syslog-tls
+      port: 6514
+      targetPort: syslog-tls
+      protocol: TCP
+    - name: logstash
+      port: 5045
+      targetPort: logstash
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: siem-collector
+  namespace: intelgraph-siem
+---
+# PVCs for SIEM storage
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ot-backup-data-pvc
+  namespace: intelgraph-siem
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Gi
+  storageClassName: gp3-encrypted
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: siem-archive-pvc
+  namespace: intelgraph-siem
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Ti
+  storageClassName: gp3-encrypted
+---
+# CronJob for backup verification
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup-integrity-check
+  namespace: intelgraph-siem
+spec:
+  schedule: "0 */4 * * *"  # Every 4 hours
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: siem-collector
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          containers:
+            - name: integrity-check
+              image: ${ECR_REGISTRY}/backup-verifier:v1.0.0
+              imagePullPolicy: Always
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+              env:
+                - name: BACKUP_PATH
+                  value: /data/siem-archive
+                - name: ALERT_ENDPOINT
+                  value: http://alertmanager.intelgraph-monitoring:9093
+              volumeMounts:
+                - name: archive
+                  mountPath: /data/siem-archive
+                  readOnly: true
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+          restartPolicy: OnFailure
+          volumes:
+            - name: archive
+              persistentVolumeClaim:
+                claimName: siem-archive-pvc

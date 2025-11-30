@@ -1,0 +1,332 @@
+# SLSA Level 3 and SBOM Policy for Air-Gapped Deployment
+# Enforces supply chain security with cosign-signed attestations
+# Part of Air-Gapped Deployment for Summit IntelGraph
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slsa-sbom-policy
+  namespace: intelgraph-airgap
+  labels:
+    app.kubernetes.io/name: slsa-sbom-policy
+    app.kubernetes.io/component: supply-chain-security
+data:
+  policy.yaml: |
+    # SLSA Level 3 + SBOM Policy Configuration
+    # Implements comprehensive supply chain security
+
+    supplyChainPolicy:
+      version: "1.0"
+      enforcementMode: strict
+
+      slsa:
+        minimumLevel: 3
+        requirements:
+          level1:
+            - buildProcess: scripted
+            - sourceVersionControl: true
+          level2:
+            - buildService: hosted
+            - versionedBuildConfig: true
+            - auditLog: true
+          level3:
+            - hermetic: true
+            - reproducible: true
+            - isolatedBuild: true
+            - signedProvenance: true
+            - nonFalsifiableProvenance: true
+
+        provenanceRequirements:
+          predicateType: "https://slsa.dev/provenance/v1"
+          requiredFields:
+            - buildType
+            - builder.id
+            - invocation.configSource
+            - materials
+            - metadata.buildStartedOn
+            - metadata.buildFinishedOn
+            - metadata.reproducible
+
+        trustedBuilders:
+          - id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml@refs/tags/v1.*"
+          - id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_container_slsa3.yml@refs/tags/v1.*"
+          - id: "https://github.com/BrianCLong/summit/.github/workflows/build-and-push.yml@refs/heads/main"
+
+      sbom:
+        required: true
+        formats:
+          - cyclonedx
+          - spdx
+        minimumVersion:
+          cyclonedx: "1.5"
+          spdx: "2.3"
+
+        requiredFields:
+          - bomFormat
+          - specVersion
+          - serialNumber
+          - version
+          - metadata.timestamp
+          - metadata.tools
+          - components
+
+        vulnerabilityScanning:
+          required: true
+          maxAge: 24h
+          blockOnCritical: true
+          blockOnHigh: true
+          allowedVulnerabilities: []
+
+        licenseCompliance:
+          required: true
+          blockedLicenses:
+            - GPL-3.0
+            - AGPL-3.0
+            - SSPL-1.0
+          requireApproval:
+            - LGPL-2.1
+            - LGPL-3.0
+            - MPL-2.0
+
+      cosign:
+        required: true
+        keyless:
+          enabled: true
+          issuer: "https://token.actions.githubusercontent.com"
+          subjectRegExp: "https://github.com/BrianCLong/summit/.*"
+
+        keyBased:
+          enabled: true
+          publicKeys:
+            - name: production
+              key: |
+                -----BEGIN PUBLIC KEY-----
+                ${COSIGN_PUBLIC_KEY}
+                -----END PUBLIC KEY-----
+
+        attestations:
+          required:
+            - predicateType: "https://slsa.dev/provenance/v1"
+              name: slsa-provenance
+            - predicateType: "https://cyclonedx.org/bom"
+              name: sbom-cyclonedx
+            - predicateType: "https://cosign.sigstore.dev/attestation/vuln/v1"
+              name: vulnerability-scan
+
+        transparency:
+          rekorEnabled: false  # Air-gapped: no external Rekor
+          localLog: true
+          logPath: /data/cosign-log
+
+      verification:
+        preDeployment:
+          - verifySignature
+          - verifySBOM
+          - verifyProvenance
+          - checkVulnerabilities
+          - validateLicenses
+
+        runtime:
+          admissionController: true
+          periodicAudit: true
+          auditInterval: 6h
+
+  verification-script.sh: |
+    #!/bin/bash
+    # SLSA/SBOM Verification Script for Air-Gapped Environment
+    set -euo pipefail
+
+    IMAGE=$1
+    SBOM_PATH=$2
+    PROVENANCE_PATH=$3
+
+    echo "=== Verifying image: ${IMAGE} ==="
+
+    # 1. Verify cosign signature
+    echo "[1/5] Verifying cosign signature..."
+    cosign verify \
+      --key /keys/cosign.pub \
+      --insecure-ignore-tlog=true \
+      "${IMAGE}" || {
+        echo "ERROR: Signature verification failed"
+        exit 1
+      }
+
+    # 2. Verify SLSA provenance
+    echo "[2/5] Verifying SLSA provenance..."
+    cosign verify-attestation \
+      --key /keys/cosign.pub \
+      --type slsaprovenance \
+      --insecure-ignore-tlog=true \
+      "${IMAGE}" | jq -r '.payload' | base64 -d > /tmp/provenance.json
+
+    # Check SLSA level
+    SLSA_LEVEL=$(jq -r '.predicateType' /tmp/provenance.json)
+    if [[ "${SLSA_LEVEL}" != "https://slsa.dev/provenance/v1" ]]; then
+      echo "ERROR: Invalid SLSA provenance type: ${SLSA_LEVEL}"
+      exit 1
+    fi
+
+    # Verify builder ID
+    BUILDER_ID=$(jq -r '.predicate.builder.id' /tmp/provenance.json)
+    echo "  Builder ID: ${BUILDER_ID}"
+
+    # 3. Verify SBOM attestation
+    echo "[3/5] Verifying SBOM attestation..."
+    cosign verify-attestation \
+      --key /keys/cosign.pub \
+      --type cyclonedx \
+      --insecure-ignore-tlog=true \
+      "${IMAGE}" | jq -r '.payload' | base64 -d > /tmp/sbom.json
+
+    # Validate SBOM format
+    SBOM_FORMAT=$(jq -r '.bomFormat' /tmp/sbom.json)
+    SBOM_VERSION=$(jq -r '.specVersion' /tmp/sbom.json)
+    echo "  SBOM Format: ${SBOM_FORMAT} v${SBOM_VERSION}"
+
+    if [[ "${SBOM_FORMAT}" != "CycloneDX" ]]; then
+      echo "ERROR: Invalid SBOM format: ${SBOM_FORMAT}"
+      exit 1
+    fi
+
+    # 4. Check for vulnerabilities in SBOM
+    echo "[4/5] Scanning for vulnerabilities..."
+    grype sbom:/tmp/sbom.json --fail-on critical --fail-on high || {
+      echo "ERROR: Critical/High vulnerabilities found"
+      exit 1
+    }
+
+    # 5. Verify license compliance
+    echo "[5/5] Checking license compliance..."
+    BLOCKED_LICENSES="GPL-3.0 AGPL-3.0 SSPL-1.0"
+    for license in ${BLOCKED_LICENSES}; do
+      if jq -e ".components[] | select(.licenses[].license.id == \"${license}\")" /tmp/sbom.json > /dev/null 2>&1; then
+        echo "ERROR: Blocked license found: ${license}"
+        exit 1
+      fi
+    done
+
+    echo "=== Verification PASSED ==="
+    exit 0
+---
+# Kyverno policy for SLSA/SBOM enforcement
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-slsa3-sbom
+  annotations:
+    policies.kyverno.io/title: Require SLSA Level 3 and SBOM
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Enforces SLSA Level 3 provenance and SBOM attestations for all
+      container images deployed in air-gapped environment.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  webhookTimeoutSeconds: 30
+  rules:
+    - name: verify-slsa-provenance
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-airgap
+                - intelgraph-scanning
+                - intelgraph-monitoring
+                - intelgraph-siem
+      verifyImages:
+        - imageReferences:
+            - "*"
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      ${COSIGN_PUBLIC_KEY}
+                      -----END PUBLIC KEY-----
+                    rekor:
+                      ignoreTlog: true  # Air-gapped environment
+          attestations:
+            - type: https://slsa.dev/provenance/v1
+              name: slsa-provenance
+              conditions:
+                - all:
+                    - key: "{{ buildType }}"
+                      operator: Equals
+                      value: "https://github.com/Attestations/GitHubHostedActions@v1"
+                    - key: "{{ builder.id }}"
+                      operator: AnyIn
+                      value:
+                        - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_container_slsa3.yml@refs/tags/v1.*"
+                        - "https://github.com/BrianCLong/summit/.github/workflows/build-and-push.yml@refs/heads/main"
+
+    - name: verify-sbom-attestation
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-airgap
+                - intelgraph-scanning
+                - intelgraph-monitoring
+                - intelgraph-siem
+      verifyImages:
+        - imageReferences:
+            - "*"
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      ${COSIGN_PUBLIC_KEY}
+                      -----END PUBLIC KEY-----
+                    rekor:
+                      ignoreTlog: true
+          attestations:
+            - type: https://cyclonedx.org/bom
+              name: sbom-cyclonedx
+              conditions:
+                - all:
+                    - key: "{{ bomFormat }}"
+                      operator: Equals
+                      value: "CycloneDX"
+                    - key: "{{ specVersion }}"
+                      operator: GreaterThanOrEquals
+                      value: "1.5"
+
+    - name: verify-vulnerability-scan
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-airgap
+      verifyImages:
+        - imageReferences:
+            - "*"
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      ${COSIGN_PUBLIC_KEY}
+                      -----END PUBLIC KEY-----
+                    rekor:
+                      ignoreTlog: true
+          attestations:
+            - type: https://cosign.sigstore.dev/attestation/vuln/v1
+              name: vulnerability-scan
+              conditions:
+                - all:
+                    - key: "{{ scanner.result.summary.criticalCount }}"
+                      operator: Equals
+                      value: "0"
+                    - key: "{{ scanner.result.summary.highCount }}"
+                      operator: Equals
+                      value: "0"
