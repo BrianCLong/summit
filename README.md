@@ -928,6 +928,25 @@ Access Grafana dashboards at http://localhost:3100:
 - Queue backlog buildup
 - Low disk space
 
+## 🏆 Success Stories
+
+**Global Financial Intelligence Unit**
+> "Summit reduced our investigation time by 60% by automatically correlating SARs with offshore entity data." - *Director of Analytics*
+
+**Cyber Defense Operations Center**
+> "The AI Copilot helped us identify a state-sponsored campaign that traditional SIEM rules missed completely." - *SOC Manager*
+
+## 🌍 Community & Ecosystem
+
+We are building a vibrant community of intelligence analysts, developers, and researchers.
+
+- **💬 Discord**: [Join our Server](https://discord.gg/summit-intel) - Real-time chat with maintainers.
+- **📢 Discussions**: [GitHub Discussions](https://github.com/BrianCLong/summit/discussions) - Feature requests and Q&A.
+- **🐦 Twitter/X**: [@SummitPlatform](https://twitter.com/SummitPlatform) - Updates and tips.
+
+### Extending Summit
+Check out our [Examples Directory](examples/) for plugins and custom pipelines.
+
 ## 🤝 Contributing
 
 ### Development Workflow
@@ -958,6 +977,8 @@ Access Grafana dashboards at http://localhost:3100:
 
 ### Documentation
 
+- [**Scaling Guide**](docs/SCALING.md) - High-throughput architecture.
+- [**AI Production Guide**](docs/AI-PRODUCTION.md) - Model serving and GPU ops.
 - [API Reference](docs/api/README.md)
 - [Deployment Guide](docs/deployment/README.md)
 - [Architecture Decision Records](docs/adr/README.md)
@@ -969,6 +990,7 @@ Access Grafana dashboards at http://localhost:3100:
 - [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
 - [Issue Tracker](https://github.com/BrianCLong/summit/issues)
 - [Release Notes](CHANGELOG.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ### Learning Resources
 

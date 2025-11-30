@@ -33,6 +33,8 @@ make up && make smoke
 - **Services:** `make up` / `make down`
 - **AI Services:** `make up-ai` / `make down`
 
+> **Note:** Check out the [Examples Directory](examples/) for plugins and custom pipelines.
+
 ## Branch & Pull Request Workflow
 
 ### Branch Naming
