@@ -30,6 +30,8 @@ interface PoolHealthSnapshot {
   activeConnections: number;
   idleConnections: number;
   queuedRequests: number;
+  consecutiveHealthFailures: number;
+  lastRecoveryAt?: number;
 }
 
 export interface ManagedPostgresPool {
@@ -55,14 +57,6 @@ type CircuitState = 'closed' | 'half-open' | 'open';
 
 const logger = baseLogger.child({ name: 'postgres-pool' });
 
-const DEFAULT_WRITE_POOL_SIZE = parseInt(
-  process.env.PG_WRITE_POOL_SIZE ?? '24',
-  10,
-);
-const DEFAULT_READ_POOL_SIZE = parseInt(
-  process.env.PG_READ_POOL_SIZE ?? '60',
-  10,
-);
 const MAX_RETRIES = parseInt(process.env.PG_QUERY_MAX_RETRIES ?? '3', 10);
 const RETRY_BASE_DELAY_MS = parseInt(
   process.env.PG_RETRY_BASE_DELAY_MS ?? '40',
@@ -93,20 +87,16 @@ const MAX_SLOW_QUERY_ENTRIES = parseInt(
   process.env.PG_SLOW_QUERY_ANALYSIS_ENTRIES ?? '200',
   10,
 );
-const CIRCUIT_BREAKER_FAILURE_THRESHOLD = parseInt(
-  process.env.PG_CIRCUIT_BREAKER_FAILURE_THRESHOLD ?? '5',
-  10,
-);
-const CIRCUIT_BREAKER_COOLDOWN_MS = parseInt(
-  process.env.PG_CIRCUIT_BREAKER_COOLDOWN_MS ?? '30000',
-  10,
-);
 
 interface PoolWrapper {
   name: string;
   type: 'write' | 'read';
   pool: Pool;
   circuitBreaker: CircuitBreaker;
+  config: PoolConfig;
+  maxConnections: number;
+  consecutiveHealthFailures: number;
+  lastRecoveryAt?: number;
 }
 
 interface PoolConfig {
@@ -254,14 +244,57 @@ function parseReadReplicaUrls(): string[] {
   return [...new Set([...explicit, ...legacy])];
 }
 
+function getPoolSizes(): { write: number; read: number } {
+  return {
+    write: parseInt(process.env.PG_WRITE_POOL_SIZE ?? '24', 10),
+    read: parseInt(process.env.PG_READ_POOL_SIZE ?? '60', 10),
+  };
+}
+
+function getCircuitBreakerConfig(): {
+  failureThreshold: number;
+  cooldownMs: number;
+} {
+  return {
+    failureThreshold: parseInt(
+      process.env.PG_CIRCUIT_BREAKER_FAILURE_THRESHOLD ?? '5',
+      10,
+    ),
+    cooldownMs: parseInt(
+      process.env.PG_CIRCUIT_BREAKER_COOLDOWN_MS ?? '30000',
+      10,
+    ),
+  };
+}
+
+function getPoolRecoveryConfig(): {
+  failureThreshold: number;
+  recoveryBackoffMs: number;
+  healthCheckQuery: string;
+} {
+  return {
+    failureThreshold: parseInt(
+      process.env.PG_POOL_HEALTH_FAILURE_THRESHOLD ?? '2',
+      10,
+    ),
+    recoveryBackoffMs: parseInt(
+      process.env.PG_POOL_RECOVERY_BACKOFF_MS ?? '120000',
+      10,
+    ),
+    healthCheckQuery: process.env.PG_HEALTH_CHECK_QUERY ?? 'SELECT 1',
+  };
+}
+
 function createPool(
   config: PoolConfig,
   name: string,
   type: 'write' | 'read',
   max: number,
 ): PoolWrapper {
+  const circuitBreakerConfig = getCircuitBreakerConfig();
+  const normalizedConfig = { ...config };
   const pool = new Pool({
-    ...config,
+    ...normalizedConfig,
     max,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
@@ -280,10 +313,13 @@ function createPool(
     name,
     type,
     pool,
+    config: normalizedConfig,
+    maxConnections: max,
+    consecutiveHealthFailures: 0,
     circuitBreaker: new CircuitBreaker(
       name,
-      CIRCUIT_BREAKER_FAILURE_THRESHOLD,
-      CIRCUIT_BREAKER_COOLDOWN_MS,
+      circuitBreakerConfig.failureThreshold,
+      circuitBreakerConfig.cooldownMs,
     ),
   };
 }
@@ -294,17 +330,18 @@ function initializePools(): void {
   }
 
   const baseConfig = parseConnectionConfig();
+  const poolSizes = getPoolSizes();
   writePoolWrapper = createPool(
     baseConfig,
     'write-primary',
     'write',
-    DEFAULT_WRITE_POOL_SIZE,
+    poolSizes.write,
   );
 
   const replicaUrls = parseReadReplicaUrls();
   if (replicaUrls.length === 0) {
     readPoolWrappers = [
-      createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE),
+      createPool(baseConfig, 'read-default', 'read', poolSizes.read),
     ];
   } else {
     readPoolWrappers = replicaUrls.map((url, idx) =>
@@ -312,7 +349,7 @@ function initializePools(): void {
         { connectionString: url },
         `read-replica-${idx + 1}`,
         'read',
-        DEFAULT_READ_POOL_SIZE,
+        poolSizes.read,
       ),
     );
   }
@@ -378,37 +415,7 @@ function createManagedPool(
     const pools = [writePool, ...readPools];
 
     const checks = await Promise.all(
-      pools.map(async (wrapper) => {
-        const snapshot: PoolHealthSnapshot = {
-          name: wrapper.name,
-          type: wrapper.type,
-          circuitState: wrapper.circuitBreaker.getState(),
-          healthy: true,
-          activeConnections:
-            (wrapper.pool.totalCount ?? 0) - (wrapper.pool.idleCount ?? 0),
-          idleConnections: wrapper.pool.idleCount ?? 0,
-          queuedRequests: wrapper.pool.waitingCount ?? 0,
-        };
-
-        try {
-          const client = await wrapper.pool.connect();
-          try {
-            await client.query('SELECT 1');
-          } finally {
-            client.release();
-          }
-        } catch (error) {
-          snapshot.healthy = false;
-          snapshot.lastError = (error as Error).message;
-        }
-
-        const breakerError = wrapper.circuitBreaker.getLastError();
-        if (breakerError && !snapshot.lastError) {
-          snapshot.lastError = breakerError.message;
-        }
-
-        return snapshot;
-      }),
+      pools.map(async (wrapper) => performHealthCheck(wrapper)),
     );
 
     return checks;
@@ -438,6 +445,110 @@ function createManagedPool(
     healthCheck,
     slowQueryInsights,
   };
+}
+
+async function performHealthCheck(
+  wrapper: PoolWrapper,
+): Promise<PoolHealthSnapshot> {
+  const poolRecoveryConfig = getPoolRecoveryConfig();
+  const snapshot: PoolHealthSnapshot = {
+    name: wrapper.name,
+    type: wrapper.type,
+    circuitState: wrapper.circuitBreaker.getState(),
+    healthy: true,
+    activeConnections:
+      (wrapper.pool.totalCount ?? 0) - (wrapper.pool.idleCount ?? 0),
+    idleConnections: wrapper.pool.idleCount ?? 0,
+    queuedRequests: wrapper.pool.waitingCount ?? 0,
+    consecutiveHealthFailures: wrapper.consecutiveHealthFailures,
+    lastRecoveryAt: wrapper.lastRecoveryAt,
+  };
+
+  try {
+    const client = await wrapper.pool.connect();
+    try {
+      await client.query(poolRecoveryConfig.healthCheckQuery);
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    snapshot.healthy = false;
+    snapshot.lastError = (error as Error).message;
+  }
+
+  const breakerError = wrapper.circuitBreaker.getLastError();
+  if (breakerError && !snapshot.lastError) {
+    snapshot.lastError = breakerError.message;
+  }
+
+  await evaluatePoolRecovery(wrapper, snapshot, poolRecoveryConfig);
+
+  snapshot.consecutiveHealthFailures = wrapper.consecutiveHealthFailures;
+  snapshot.lastRecoveryAt = wrapper.lastRecoveryAt;
+
+  return snapshot;
+}
+
+async function evaluatePoolRecovery(
+  wrapper: PoolWrapper,
+  snapshot: PoolHealthSnapshot,
+  poolRecoveryConfig: ReturnType<typeof getPoolRecoveryConfig>,
+): Promise<void> {
+  if (snapshot.healthy) {
+    wrapper.consecutiveHealthFailures = 0;
+    return;
+  }
+
+  wrapper.consecutiveHealthFailures += 1;
+
+  const withinRecoveryCooldown =
+    wrapper.lastRecoveryAt !== undefined &&
+    Date.now() - wrapper.lastRecoveryAt < poolRecoveryConfig.recoveryBackoffMs;
+
+  if (
+    wrapper.consecutiveHealthFailures < poolRecoveryConfig.failureThreshold ||
+    withinRecoveryCooldown
+  ) {
+    return;
+  }
+
+  await recyclePool(wrapper, snapshot.lastError);
+}
+
+async function recyclePool(
+  wrapper: PoolWrapper,
+  reason?: string,
+): Promise<void> {
+  const previousPool = wrapper.pool;
+  const replacement = createPool(
+    wrapper.config,
+    wrapper.name,
+    wrapper.type,
+    wrapper.maxConnections,
+  );
+
+  wrapper.pool = replacement.pool;
+  wrapper.circuitBreaker = replacement.circuitBreaker;
+  wrapper.lastRecoveryAt = Date.now();
+  wrapper.consecutiveHealthFailures = 0;
+
+  try {
+    await previousPool.end();
+  } catch (error) {
+    logger.warn(
+      { pool: wrapper.name, err: error },
+      'Failed to gracefully end previous PostgreSQL pool during recovery',
+    );
+  }
+
+  logger.warn(
+    {
+      pool: wrapper.name,
+      reason,
+      recoveredAt: wrapper.lastRecoveryAt,
+    },
+    'Recycled PostgreSQL pool after health check failures',
+  );
 }
 
 async function executeManagedQuery({
