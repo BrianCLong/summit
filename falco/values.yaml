@@ -1,0 +1,22 @@
+falco:
+  json_output: true
+  http_output:
+    enabled: true
+    url: "http://falco-sidekick:2801/"
+
+customRules:
+  user-rules.yaml: |-
+    - rule: Terminal shell in container
+      desc: A shell was used as the entrypoint for a container.
+      condition: >
+        spawned_process and container and shell_procs and not user_known_shell_activities
+      output: >
+        Shell spawned in a container (user=%user.name container_id=%container.id container_name=%container.name shell=%proc.name parent=%proc.pname cmdline=%proc.cmdline)
+      priority: NOTICE
+      tags: [container, shell, mitre_execution]
+
+    - rule: Crypto miner process
+      desc: Detects crypto miners
+      condition: spawned_process and proc.name in (minerd, cpuminer, xmrig)
+      output: "Crypto miner detected: %proc.name"
+      priority: CRITICAL
