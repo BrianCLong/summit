@@ -1,0 +1,299 @@
+meta:
+  id: plan.accessibility-automation@v1
+  owner: 'platform-engineering'
+  purpose: 'Expand accessibility automation to documentation and API docs'
+  tags:
+    - accessibility
+    - a11y
+    - documentation
+    - automation
+    - wcag
+  guardrails:
+    - 'WCAG 2.1 AA compliance minimum'
+    - 'Automation must not create false sense of security'
+    - 'Manual testing still required for UX'
+    - 'All public-facing content must be checked'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  documentation_types: string
+  api_documentation: string
+  current_a11y_tooling: string
+  compliance_target: string
+  content_volume: string
+
+template: |
+  You are an Accessibility Engineer automating a11y checks for Summit/IntelGraph.
+
+  **Objective:** Expand a11y checks to documentation and APIs.
+
+  **Documentation Types:**
+  {{documentation_types}}
+
+  **API Documentation:**
+  {{api_documentation}}
+
+  **Current A11y Tooling:**
+  {{current_a11y_tooling}}
+
+  **Compliance Target:**
+  {{compliance_target}}
+
+  **Content Volume:**
+  {{content_volume}}
+
+  ## Deliverables
+
+  ### 1. Documentation Accessibility Checks
+  ```yaml
+  doc_checks:
+    markdown:
+      - rule: alt_text_for_images
+        check: All images have alt text
+        tool: markdownlint + custom rule
+        severity: error
+
+      - rule: heading_hierarchy
+        check: H1 → H2 → H3 (no skipping)
+        tool: markdownlint
+        severity: warning
+
+      - rule: link_text_descriptive
+        check: No "click here" or bare URLs
+        tool: custom linter
+        severity: warning
+
+      - rule: code_blocks_labeled
+        check: Code blocks have language specified
+        tool: markdownlint
+        severity: info
+
+      - rule: table_headers
+        check: Tables have header rows
+        tool: custom linter
+        severity: warning
+
+    rendered_html:
+      - rule: wcag_2_1_aa
+        check: Full WCAG 2.1 AA compliance
+        tool: axe-core / pa11y
+        scope: Built documentation site
+
+      - rule: color_contrast
+        check: 4.5:1 for text, 3:1 for large text
+        tool: axe-core
+        severity: error
+
+      - rule: keyboard_navigation
+        check: All interactive elements keyboard accessible
+        tool: pa11y
+        severity: error
+
+      - rule: screen_reader_landmarks
+        check: Proper ARIA landmarks
+        tool: axe-core
+        severity: warning
+  ```
+
+  ### 2. API Documentation A11y Lint
+  ```yaml
+  api_docs:
+    openapi_checks:
+      - rule: description_present
+        check: All endpoints have descriptions
+        tool: spectral + custom rule
+        severity: warning
+
+      - rule: example_responses
+        check: Examples provided for key responses
+        tool: spectral
+        severity: info
+
+      - rule: schema_descriptions
+        check: All schema properties documented
+        tool: spectral
+        severity: warning
+
+    graphql_checks:
+      - rule: field_descriptions
+        check: All fields have descriptions
+        tool: graphql-schema-linter
+        severity: warning
+
+      - rule: deprecated_marked
+        check: Deprecated fields clearly marked
+        tool: custom linter
+        severity: error
+
+    rendered_api_docs:
+      - rule: swagger_ui_a11y
+        check: Interactive docs are accessible
+        tool: axe-core on /docs
+        severity: error
+
+      - rule: code_samples_accessible
+        check: Code samples have proper markup
+        tool: custom check
+        severity: warning
+
+    content_guidelines:
+      - Use plain language
+      - Explain technical terms
+      - Provide context for examples
+      - Include error handling guidance
+  ```
+
+  ### 3. CI Integration
+  ```yaml
+  ci_integration:
+    pre_commit:
+      - name: markdown-a11y
+        files: "*.md"
+        command: markdownlint --config .markdownlint.json
+
+    pr_check:
+      - name: docs-a11y
+        trigger: Changes to docs/**
+        steps:
+          - Build documentation
+          - Run axe-core on built site
+          - Report findings
+        blocking: errors only
+
+      - name: api-docs-a11y
+        trigger: Changes to openapi.yaml, schema.graphql
+        steps:
+          - Validate with spectral
+          - Check for missing descriptions
+          - Report findings
+        blocking: errors only
+
+    scheduled:
+      - name: full-a11y-audit
+        schedule: weekly
+        scope: All documentation
+        output: a11y-report.html
+        notify: #accessibility channel
+
+    configuration:
+      axe_config: |
+        {
+          "rules": {
+            "color-contrast": { "enabled": true },
+            "image-alt": { "enabled": true },
+            "link-name": { "enabled": true },
+            "heading-order": { "enabled": true }
+          },
+          "disableRules": ["region"]
+        }
+
+      spectral_rules: |
+        extends: spectral:oas
+        rules:
+          operation-description: warn
+          operation-operationId: error
+          info-description: error
+  ```
+
+  ### 4. Remediation Workflow
+  ```yaml
+  remediation:
+    on_violation:
+      - Log issue with location and rule
+      - Suggest fix in PR comment
+      - Link to accessibility guidelines
+
+    common_fixes:
+      missing_alt_text: |
+        Before: ![](image.png)
+        After: ![Description of the image](image.png)
+
+      heading_skip: |
+        Before: # Title → ### Subtitle
+        After: # Title → ## Subtitle
+
+      link_text: |
+        Before: [click here](url)
+        After: [View the documentation](url)
+
+      color_only: |
+        Before: Red = error
+        After: Red X icon = error (with text label)
+
+    documentation:
+      guide: docs/accessibility-guidelines.md
+      examples: docs/a11y-examples/
+      training: quarterly workshops
+  ```
+
+  ### 5. Reporting
+  ```yaml
+  reporting:
+    dashboard:
+      metrics:
+        - Total issues by severity
+        - Trend over time
+        - Issues by category
+        - Pages with most issues
+
+      filters:
+        - By documentation section
+        - By rule type
+        - By status (open/fixed)
+
+    weekly_report:
+      recipients: #docs-team
+      contents:
+        - New issues found
+        - Issues fixed
+        - Top problem areas
+        - Improvement recommendations
+
+    audit_report:
+      format: HTML + PDF
+      contents:
+        - Executive summary
+        - Detailed findings
+        - WCAG mapping
+        - Remediation priority
+        - Historical comparison
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Doc accessibility checks in CI
+  - [ ] API doc linting active
+  - [ ] Issues surfaced in PRs
+  - [ ] Weekly audit running
+  - [ ] Remediation guide documented
+
+  ## Rollback Plan
+  - Checks can be set to warn-only
+  - Specific rules can be disabled
+  - Manual override for exceptions
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'docs-a11y'
+    inputs:
+      documentation_types: 'Markdown docs, MkDocs site, Storybook'
+      api_documentation: 'OpenAPI 3.0, GraphQL schema'
+      current_a11y_tooling: 'axe-core for React components only'
+      compliance_target: 'WCAG 2.1 AA'
+      content_volume: '200+ pages, 50+ API endpoints'
+    expected_contains:
+      - 'Documentation Checks'
+      - 'API Documentation'
+      - 'CI Integration'
+      - 'Remediation'

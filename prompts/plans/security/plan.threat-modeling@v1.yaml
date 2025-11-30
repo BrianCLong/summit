@@ -1,0 +1,217 @@
+meta:
+  id: plan.threat-modeling@v1
+  owner: 'security-engineering'
+  purpose: 'Extend threat modeling to additional subsystems with attack surface mapping'
+  tags:
+    - security
+    - threat-modeling
+    - risk-assessment
+    - stride
+    - mitigations
+  guardrails:
+    - 'Focus on realistic, high-impact threats'
+    - 'Prioritize based on exploitability and impact'
+    - 'Document mitigations with implementation details'
+    - 'Review with security team before implementation'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 5000
+
+inputs:
+  subsystems: string
+  data_flows: string
+  trust_boundaries: string
+  existing_controls: string
+  threat_intelligence: string
+
+template: |
+  You are a Security Architect performing threat modeling for Summit/IntelGraph.
+
+  **Objective:** Extend threat modeling to additional subsystems.
+
+  **Subsystems:**
+  {{subsystems}}
+
+  **Data Flows:**
+  {{data_flows}}
+
+  **Trust Boundaries:**
+  {{trust_boundaries}}
+
+  **Existing Controls:**
+  {{existing_controls}}
+
+  **Threat Intelligence:**
+  {{threat_intelligence}}
+
+  ## Deliverables
+
+  ### 1. Attack Surface Mapping
+  ```yaml
+  attack_surface:
+    external:
+      - entry_point: GraphQL API
+        exposed_to: Internet
+        authentication: JWT + API key
+        data_classification: Sensitive
+        attack_vectors:
+          - Injection attacks
+          - Authentication bypass
+          - Authorization flaws
+          - Rate limit bypass
+
+      - entry_point: Web Application
+        exposed_to: Internet
+        authentication: Session-based
+        data_classification: Public + Sensitive
+        attack_vectors:
+          - XSS
+          - CSRF
+          - Clickjacking
+          - Session hijacking
+
+    internal:
+      - entry_point: Service Mesh (gRPC)
+        exposed_to: Internal network
+        authentication: mTLS
+        data_classification: Internal
+        attack_vectors:
+          - Lateral movement
+          - Service impersonation
+          - Data exfiltration
+
+      - entry_point: Database connections
+        exposed_to: Internal network
+        authentication: Credentials + IP allowlist
+        data_classification: Sensitive
+        attack_vectors:
+          - SQL/Cypher injection
+          - Credential theft
+          - Data exfiltration
+  ```
+
+  ### 2. STRIDE Analysis
+  ```yaml
+  stride_analysis:
+    spoofing:
+      threats:
+        - T1: Attacker impersonates legitimate user via stolen JWT
+        - T2: Service impersonation in mesh
+      mitigations:
+        - M1: Short-lived tokens + refresh rotation
+        - M2: mTLS with certificate pinning
+
+    tampering:
+      threats:
+        - T3: API request modification
+        - T4: Database record tampering
+      mitigations:
+        - M3: Request signing
+        - M4: Audit logging + integrity checks
+
+    repudiation:
+      threats:
+        - T5: User denies actions
+        - T6: Attacker covers tracks
+      mitigations:
+        - M5: Comprehensive audit logging
+        - M6: Immutable log storage
+
+    information_disclosure:
+      threats:
+        - T7: Sensitive data in logs
+        - T8: Error messages reveal internals
+        - T9: Data exfiltration via API
+      mitigations:
+        - M7: PII masking in logs
+        - M8: Generic error messages
+        - M9: DLP controls
+
+    denial_of_service:
+      threats:
+        - T10: API exhaustion
+        - T11: Database query bombs
+      mitigations:
+        - M10: Rate limiting + circuit breakers
+        - M11: Query complexity limits
+
+    elevation_of_privilege:
+      threats:
+        - T12: Horizontal privilege escalation
+        - T13: Vertical privilege escalation
+      mitigations:
+        - M12: Resource-level authorization
+        - M13: Role validation on every request
+  ```
+
+  ### 3. Asset Criticality Ranking
+  | Asset | Criticality | CIA Impact | Data Classification | Controls |
+  |-------|-------------|------------|---------------------|----------|
+  | User credentials | Critical | C:High I:High A:Med | PII | Encryption, hashing |
+  | Investigation data | High | C:High I:High A:High | Sensitive | Encryption, RBAC |
+  | Graph relationships | High | C:Med I:High A:Med | Internal | Audit logging |
+  | API keys | Critical | C:High I:Med A:High | Secret | Vault, rotation |
+  | Audit logs | High | C:Med I:High A:High | Compliance | Immutable storage |
+
+  ### 4. Mitigations Catalog
+  ```yaml
+  mitigations:
+    - id: MIT-001
+      threat: T1 - Token theft
+      control: Token binding + short TTL
+      implementation:
+        - Bind tokens to client fingerprint
+        - Access token TTL: 15 minutes
+        - Refresh token rotation
+      status: planned
+      owner: auth-team
+      priority: high
+
+    - id: MIT-002
+      threat: T9 - Data exfiltration
+      control: Query result limits + DLP
+      implementation:
+        - Max 1000 records per query
+        - Sensitive field masking in bulk exports
+        - Anomaly detection on data access patterns
+      status: in_progress
+      owner: api-team
+      priority: critical
+  ```
+
+  ### 5. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] All critical assets identified
+  - [ ] STRIDE analysis complete for key flows
+  - [ ] At least one critical risk mitigated
+  - [ ] Mitigations catalog maintained
+  - [ ] Threat model reviewed by security team
+
+  ## Rollback Plan
+  - Threat modeling is documentation
+  - Mitigations can be rolled back individually
+  - Emergency exceptions documented
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'summit-threat-model'
+    inputs:
+      subsystems: 'API Gateway, Graph Engine, Auth Service, ML Pipeline, Databases'
+      data_flows: 'User → API → Graph → Database, API → ML → Results'
+      trust_boundaries: 'Internet | DMZ | Internal | Database tier'
+      existing_controls: 'TLS, JWT auth, RBAC, basic logging'
+      threat_intelligence: 'APT groups targeting similar platforms, credential stuffing'
+    expected_contains:
+      - 'Attack Surface'
+      - 'STRIDE'
+      - 'Asset Criticality'
+      - 'Mitigations Catalog'

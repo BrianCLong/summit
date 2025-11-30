@@ -1,0 +1,293 @@
+meta:
+  id: plan.dx-feedback@v1
+  owner: 'platform-engineering'
+  purpose: 'Capture developer feedback to continuously improve tooling and workflows'
+  tags:
+    - dx
+    - feedback
+    - developer-experience
+    - tooling
+    - surveys
+  guardrails:
+    - 'Feedback must be actionable'
+    - 'Developer time must be respected'
+    - 'Responses must remain anonymous if desired'
+    - 'Insights must drive actual improvements'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  team_size: string
+  current_pain_points: string
+  feedback_channels: string
+  improvement_areas: string
+  existing_tooling: string
+
+template: |
+  You are a DX Engineer creating a feedback system for Summit/IntelGraph.
+
+  **Objective:** Capture developer feedback to improve tooling.
+
+  **Team Size:**
+  {{team_size}}
+
+  **Current Pain Points:**
+  {{current_pain_points}}
+
+  **Feedback Channels:**
+  {{feedback_channels}}
+
+  **Improvement Areas:**
+  {{improvement_areas}}
+
+  **Existing Tooling:**
+  {{existing_tooling}}
+
+  ## Deliverables
+
+  ### 1. Feedback Collector Design
+  ```yaml
+  collector:
+    channels:
+      - type: in_tool_feedback
+        location: CLI, IDE extensions
+        trigger: After significant actions
+        method: Quick rating + optional comment
+
+      - type: periodic_survey
+        frequency: Monthly
+        length: 5 minutes max
+        method: Email / Slack link
+
+      - type: friction_log
+        trigger: Developer-initiated
+        method: Structured form
+        captures: Pain point, context, impact
+
+      - type: passive_telemetry
+        consent: Opt-in
+        data: Build times, error rates, tool usage
+
+    components:
+      api:
+        endpoint: POST /api/dx/feedback
+        schema:
+          type: enum [rating, comment, friction, suggestion]
+          context: string
+          rating: 1-5 (optional)
+          message: string
+          anonymous: boolean
+          metadata: object
+
+      storage:
+        database: PostgreSQL
+        table: dx_feedback
+        retention: 2 years
+
+      privacy:
+        anonymization: Optional
+        no_pii_in_metadata: Enforced
+        data_access: DX team only
+  ```
+
+  ### 2. Survey Templates
+  ```yaml
+  surveys:
+    monthly_pulse:
+      title: "Developer Experience Pulse"
+      questions:
+        - id: overall_satisfaction
+          type: nps
+          question: "How likely are you to recommend our dev environment to a colleague?"
+
+        - id: build_experience
+          type: rating
+          question: "How would you rate the build/test experience this month?"
+          scale: 1-5
+
+        - id: documentation
+          type: rating
+          question: "How helpful is the documentation?"
+          scale: 1-5
+
+        - id: biggest_friction
+          type: open_text
+          question: "What caused the most friction for you this month?"
+          optional: true
+
+        - id: one_improvement
+          type: open_text
+          question: "If you could change one thing, what would it be?"
+          optional: true
+
+    onboarding_followup:
+      timing: 2 weeks after start
+      questions:
+        - How long until you made your first commit?
+        - What was the most confusing part of setup?
+        - What documentation would have helped?
+        - Rate: Setup experience (1-5)
+
+    quarterly_deep_dive:
+      length: 15 minutes
+      topics:
+        - Tooling satisfaction
+        - CI/CD experience
+        - Code review process
+        - Testing experience
+        - Documentation quality
+  ```
+
+  ### 3. Insights Dashboard
+  ```yaml
+  dashboard:
+    metrics:
+      - name: Developer NPS
+        calculation: % promoters - % detractors
+        target: > 50
+        trend: Monthly
+
+      - name: Build Satisfaction
+        calculation: Average rating
+        target: > 4.0
+        breakdown: By team
+
+      - name: Friction Reports
+        calculation: Count per week
+        trend: Should decrease
+
+      - name: Time to First Commit
+        calculation: Median onboarding time
+        target: < 1 day
+        source: Onboarding survey
+
+    visualizations:
+      - type: trend_chart
+        metrics: [NPS, satisfaction_scores]
+        period: 12 months
+
+      - type: word_cloud
+        source: open_text_responses
+        update: Weekly
+
+      - type: bar_chart
+        metric: friction_categories
+        grouping: By area (CI, docs, setup, etc.)
+
+      - type: table
+        content: Top 10 requested improvements
+        sortable: By votes, recency
+
+    exports:
+      - Weekly summary email
+      - Monthly report PDF
+      - Raw data CSV (for analysis)
+  ```
+
+  ### 4. Action Tracking
+  ```yaml
+  action_tracking:
+    workflow:
+      1. Feedback collected
+      2. Categorized by area
+      3. Prioritized by impact + frequency
+      4. Assigned to owner
+      5. Implemented
+      6. Closed loop with feedback giver
+
+    status_tracking:
+      states:
+        - new: Just received
+        - triaged: Categorized and prioritized
+        - planned: On roadmap
+        - in_progress: Being worked on
+        - completed: Improvement shipped
+        - wont_do: Explained why not
+
+    visibility:
+      public_board: |
+        # DX Improvements Board
+        | Request | Status | ETA |
+        |---------|--------|-----|
+        | Faster CI builds | In Progress | Q1 |
+        | Better error messages | Completed | - |
+        | IDE plugin | Planned | Q2 |
+
+    closed_loop:
+      on_completion:
+        - Notify original requester
+        - Update public board
+        - Announce in team channel
+  ```
+
+  ### 5. Integration Points
+  ```yaml
+  integrations:
+    slack:
+      bot: @dx-feedback-bot
+      commands:
+        - /friction: Log friction point
+        - /suggest: Submit improvement idea
+        - /dx-status: View current DX metrics
+
+    cli:
+      command: summit feedback
+      options:
+        - --rate: Quick rating
+        - --friction: Log pain point
+        - --suggest: Improvement idea
+
+    ide:
+      extension: Summit DX Helper
+      features:
+        - Quick feedback button
+        - Error context capture
+        - Inline docs rating
+
+    github:
+      label: dx-feedback
+      template: |
+        ## DX Feedback
+        **Area**: [CI/Build/Docs/Setup/Other]
+        **Description**: ...
+        **Impact**: [High/Medium/Low]
+        **Suggestion**: ...
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Feedback collector deployed
+  - [ ] Monthly survey running
+  - [ ] Dashboard accessible
+  - [ ] Action tracking visible
+  - [ ] Integration working
+
+  ## Rollback Plan
+  - Feedback system is additive
+  - Surveys can be paused
+  - Data retained for analysis
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'dx-feedback-system'
+    inputs:
+      team_size: '25 developers across 5 teams'
+      current_pain_points: 'Slow CI, outdated docs, complex setup'
+      feedback_channels: 'Slack, ad-hoc conversations'
+      improvement_areas: 'Build times, onboarding, documentation'
+      existing_tooling: 'GitHub, Slack, internal wiki'
+    expected_contains:
+      - 'Feedback Collector'
+      - 'Survey Templates'
+      - 'Insights Dashboard'
+      - 'Action Tracking'

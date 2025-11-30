@@ -1,0 +1,287 @@
+meta:
+  id: plan.log-management@v1
+  owner: 'platform-engineering'
+  purpose: 'Manage log volume, retention, and archival cost-effectively'
+  tags:
+    - observability
+    - logging
+    - retention
+    - cost
+    - compliance
+  guardrails:
+    - 'PII must never appear in logs'
+    - 'Log volume must be cost-conscious'
+    - 'Retention must meet compliance requirements'
+    - 'Logs must remain queryable for investigations'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  current_volume: string
+  log_sources: string
+  retention_requirements: string
+  cost_constraints: string
+  query_patterns: string
+
+template: |
+  You are a Platform Engineer optimizing log management for Summit/IntelGraph.
+
+  **Objective:** Manage log volume and retention cost-effectively.
+
+  **Current Volume:**
+  {{current_volume}}
+
+  **Log Sources:**
+  {{log_sources}}
+
+  **Retention Requirements:**
+  {{retention_requirements}}
+
+  **Cost Constraints:**
+  {{cost_constraints}}
+
+  **Query Patterns:**
+  {{query_patterns}}
+
+  ## Deliverables
+
+  ### 1. Log Sampling Strategy
+  ```yaml
+  sampling:
+    rules:
+      - source: health_checks
+        action: drop
+        reason: High volume, low value
+
+      - source: debug_logs
+        environment: production
+        action: sample
+        rate: 1%
+        reason: Only needed for deep debugging
+
+      - source: info_logs
+        action: sample
+        rate: 10%
+        reason: Volume reduction
+
+      - source: warn_logs
+        action: keep_all
+        reason: Important signals
+
+      - source: error_logs
+        action: keep_all
+        add_context: true
+        reason: Critical for debugging
+
+      - source: audit_logs
+        action: keep_all
+        immutable: true
+        reason: Compliance requirement
+
+    implementation:
+      vector:
+        transforms:
+          sample_debug:
+            type: sample
+            inputs: ["source"]
+            rate: 0.01
+            key_field: "trace_id"  # Sample by trace
+
+      fluent_bit:
+        filters:
+          - Name: grep
+            Match: "*"
+            Exclude: "path /health"
+  ```
+
+  ### 2. Retention Windows
+  ```yaml
+  retention:
+    tiers:
+      hot:
+        storage: Elasticsearch / Loki
+        duration: 7 days
+        query_speed: < 1s
+        cost: $$$
+
+      warm:
+        storage: Reduced replicas / S3 Glacier IR
+        duration: 30 days
+        query_speed: < 30s
+        cost: $$
+
+      cold:
+        storage: S3 Glacier / Archive
+        duration: 365 days
+        query_speed: hours
+        cost: $
+
+      archive:
+        storage: S3 Glacier Deep Archive
+        duration: 7 years
+        query_speed: 12+ hours
+        cost: minimal
+        reason: Legal/compliance hold
+
+    by_log_type:
+      application_logs:
+        hot: 7d
+        warm: 23d
+        cold: 335d
+        total: 365d
+
+      audit_logs:
+        hot: 30d
+        warm: 60d
+        cold: 275d
+        archive: 6+ years
+        total: 7 years
+
+      access_logs:
+        hot: 3d
+        warm: 27d
+        total: 30d
+
+      debug_logs:
+        hot: 1d
+        total: 1d
+  ```
+
+  ### 3. Archival Pipeline
+  ```yaml
+  archival:
+    pipeline:
+      1. Logs ingested to hot tier
+      2. After hot TTL, compress and move to warm
+      3. After warm TTL, archive to cold storage
+      4. Maintain searchable index/catalog
+      5. Delete after total TTL
+
+    compression:
+      format: gzip | zstd
+      ratio: 10:1 typical
+
+    indexing:
+      catalog: Log metadata in database
+      searchable_fields:
+        - timestamp
+        - service
+        - level
+        - trace_id
+      full_text: Only in hot/warm
+
+    restoration:
+      process:
+        1. Query catalog for log location
+        2. Initiate restoration from cold
+        3. Wait for availability (minutes to hours)
+        4. Load into temporary hot index
+        5. Query and analyze
+        6. Delete temporary data
+  ```
+
+  ### 4. Cost Optimization
+  ```yaml
+  cost_optimization:
+    current_estimate:
+      ingestion: $X/GB
+      storage_hot: $Y/GB/month
+      storage_cold: $Z/GB/month
+      query: $W/query
+
+    reduction_strategies:
+      - strategy: Sampling debug logs
+        reduction: 30% volume
+        savings: $X/month
+
+      - strategy: Drop health check logs
+        reduction: 20% volume
+        savings: $Y/month
+
+      - strategy: Shorter hot retention
+        reduction: 50% hot storage
+        savings: $Z/month
+
+      - strategy: Better compression
+        reduction: 20% storage
+        savings: $W/month
+
+    targets:
+      current_cost: $X/month
+      target_cost: $Y/month
+      reduction: 40%
+  ```
+
+  ### 5. Log Pipeline Changes
+  ```yaml
+  pipeline:
+    current:
+      app -> stdout -> container runtime -> log driver -> aggregator -> storage
+
+    proposed:
+      app -> structured JSON -> Vector/Fluent Bit -> filtering -> sampling ->
+        -> hot storage (7d)
+        -> warm storage (30d)
+        -> cold archive (365d)
+
+    components:
+      collector:
+        tool: Vector | Fluent Bit
+        features:
+          - Sampling
+          - Filtering
+          - Enrichment
+          - Multi-destination
+
+      hot_storage:
+        tool: Loki | Elasticsearch
+        features:
+          - Fast queries
+          - Full-text search
+          - Retention policies
+
+      cold_storage:
+        tool: S3 + Parquet
+        features:
+          - Cost-effective
+          - Queryable with Athena
+          - Long-term retention
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Log volume reduced by target %
+  - [ ] Retention policy implemented
+  - [ ] Cost within budget
+  - [ ] Compliance requirements met
+  - [ ] Query performance acceptable
+
+  ## Rollback Plan
+  - Sampling can be disabled
+  - Retention can be extended
+  - Archive pipeline can be paused
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'log-cost-reduction'
+    inputs:
+      current_volume: '500 GB/day, $5000/month storage'
+      log_sources: 'API servers, workers, databases, load balancers'
+      retention_requirements: 'Audit: 7 years, App: 1 year, Debug: 7 days'
+      cost_constraints: 'Reduce to $3000/month'
+      query_patterns: 'Error investigation, audit queries, metric debugging'
+    expected_contains:
+      - 'Sampling Strategy'
+      - 'Retention Windows'
+      - 'Cost Optimization'
+      - 'Pipeline Changes'

@@ -1,0 +1,252 @@
+meta:
+  id: plan.data-lineage@v1
+  owner: 'data-engineering'
+  purpose: 'Trace data flows across subsystems with lineage graphs and contracts'
+  tags:
+    - data
+    - lineage
+    - governance
+    - provenance
+    - contracts
+  guardrails:
+    - 'Lineage must be complete and accurate'
+    - 'Sensitive data flows must be highlighted'
+    - 'Breaking changes must trigger alerts'
+    - 'Documentation must be auto-generated where possible'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  data_sources: string
+  data_sinks: string
+  transformation_stages: string
+  sensitive_data_types: string
+  compliance_requirements: string
+
+template: |
+  You are a Data Engineer implementing data lineage for Summit/IntelGraph.
+
+  **Objective:** Trace data flows across subsystems.
+
+  **Data Sources:**
+  {{data_sources}}
+
+  **Data Sinks:**
+  {{data_sinks}}
+
+  **Transformation Stages:**
+  {{transformation_stages}}
+
+  **Sensitive Data Types:**
+  {{sensitive_data_types}}
+
+  **Compliance Requirements:**
+  {{compliance_requirements}}
+
+  ## Deliverables
+
+  ### 1. Data Lineage Graph
+  ```yaml
+  lineage_graph:
+    sources:
+      - id: src_user_input
+        type: api
+        endpoint: POST /api/entities
+        schema: EntityCreateInput
+        classification: user_generated
+
+      - id: src_external_api
+        type: external
+        provider: data_vendor_x
+        schema: ExternalEntityResponse
+        classification: third_party
+
+      - id: src_database
+        type: database
+        connection: neo4j_main
+        query: MATCH (e:Entity) RETURN e
+        classification: internal
+
+    transformations:
+      - id: transform_normalize
+        type: function
+        name: normalizeEntity
+        inputs: [src_user_input, src_external_api]
+        outputs: [normalized_entity]
+        logic: "Standardize fields, validate schema"
+
+      - id: transform_enrich
+        type: pipeline
+        name: entityEnrichment
+        inputs: [normalized_entity]
+        outputs: [enriched_entity]
+        logic: "Add metadata, resolve references"
+
+      - id: transform_index
+        type: loader
+        name: indexToGraph
+        inputs: [enriched_entity]
+        outputs: [sink_neo4j, sink_elasticsearch]
+
+    sinks:
+      - id: sink_neo4j
+        type: database
+        target: neo4j_main
+        operation: MERGE
+        classification: persistent
+
+      - id: sink_elasticsearch
+        type: search_index
+        target: entity_index
+        operation: UPSERT
+        classification: derived
+
+      - id: sink_analytics
+        type: warehouse
+        target: bigquery.entities
+        operation: APPEND
+        classification: analytical
+  ```
+
+  ### 2. Source-to-Consumer Mapping
+  | Source | Transformations | Consumers | Latency | Classification |
+  |--------|-----------------|-----------|---------|----------------|
+  | User API | normalize → enrich → index | Graph DB, Search | < 1s | User data |
+  | External API | normalize → validate → store | Graph DB | < 5s | Third party |
+  | Batch Import | parse → validate → bulk load | Graph DB, Warehouse | < 1h | Bulk data |
+  | Copilot Query | context → LLM → format | API Response | < 30s | AI-generated |
+
+  ### 3. Data Contracts
+  ```yaml
+  contracts:
+    - name: EntityContract
+      version: "1.0"
+      owner: entity-team
+      consumers: [graph-service, search-service, analytics]
+
+      schema:
+        type: object
+        required: [id, type, name, created_at]
+        properties:
+          id:
+            type: string
+            format: uuid
+          type:
+            type: string
+            enum: [Person, Organization, Location, Event]
+          name:
+            type: string
+            maxLength: 255
+          created_at:
+            type: string
+            format: date-time
+
+      sla:
+        availability: 99.9%
+        latency_p99: 100ms
+        freshness: 5 minutes
+
+      validation:
+        on_produce: strict
+        on_consume: loose
+
+      evolution:
+        breaking_changes: notify consumers 30 days ahead
+        additions: backwards compatible
+  ```
+
+  ### 4. Lineage Visualization
+  ```yaml
+  visualization:
+    tool: OpenLineage + Marquez | DataHub | custom
+
+    views:
+      - name: full_lineage
+        description: Complete data flow graph
+        interactive: true
+        features:
+          - Zoom to subsystem
+          - Filter by classification
+          - Time-travel (historical lineage)
+
+      - name: impact_analysis
+        description: What happens if source changes?
+        query: "upstream_of(sink_analytics)"
+        result: [src_user_input, transform_normalize, ...]
+
+      - name: sensitive_data_flow
+        description: Track PII through system
+        filter: classification=pii
+        highlight: red
+
+    export:
+      - format: GraphML
+      - format: JSON-LD
+      - format: PNG/SVG
+  ```
+
+  ### 5. Lineage Capture
+  ```yaml
+  capture:
+    automatic:
+      - sql_parser: Extract lineage from queries
+      - spark_listener: Capture Spark job lineage
+      - dbt_integration: Parse dbt models
+
+    manual:
+      - decorators: @lineage(inputs=[...], outputs=[...])
+      - config: lineage.yaml per service
+
+    openlineage:
+      emit: |
+        {
+          "eventType": "COMPLETE",
+          "eventTime": "2024-01-15T10:00:00Z",
+          "job": { "namespace": "summit", "name": "entity_enrichment" },
+          "inputs": [{ "namespace": "summit", "name": "raw_entities" }],
+          "outputs": [{ "namespace": "summit", "name": "enriched_entities" }]
+        }
+
+    storage:
+      backend: Marquez | DataHub
+      retention: 2 years
+      queryable: true
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Lineage graph covers critical data flows
+  - [ ] Data contracts defined for key entities
+  - [ ] Visualization available
+  - [ ] Sensitive data flows highlighted
+  - [ ] Documentation generated
+
+  ## Rollback Plan
+  - Lineage is observational, no rollback needed
+  - Can disable capture if performance impact
+  - Manual documentation fallback
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'entity-lineage'
+    inputs:
+      data_sources: 'User API, External APIs, Batch imports, Copilot'
+      data_sinks: 'Neo4j, Elasticsearch, BigQuery, API responses'
+      transformation_stages: 'Normalization, Validation, Enrichment, Indexing'
+      sensitive_data_types: 'PII (names, emails), Investigation data'
+      compliance_requirements: 'GDPR right to erasure, audit trail'
+    expected_contains:
+      - 'Lineage Graph'
+      - 'Data Contracts'
+      - 'Source-to-Consumer'
+      - 'Visualization'
