@@ -2,6 +2,20 @@
 
 from .batching import AdaptiveBatcher, BatchPlan
 from .benchmark import BenchmarkResult, BenchmarkSuite
+from .ml_benchmarking import (
+    ABTestResult,
+    ABTestRunner,
+    BenchmarkingSummary,
+    DeploymentDecision,
+    DeploymentManager,
+    HyperparameterOptimizer,
+    ModelBenchmarkingSuite,
+    ModelRegistry,
+    ModelVersion,
+    RegressionDetector,
+    RegressionReport,
+    TrialResult,
+)
 from .monitoring import PipelineDashboard, PipelineMetrics, PipelineMonitor
 from .pipeline_optimizer import PipelineOptimizer, PipelineTask, RetryPolicy
 from .queue import PriorityJobQueue, QueuedJob
@@ -13,6 +27,18 @@ __all__ = [
     "BatchPlan",
     "BenchmarkResult",
     "BenchmarkSuite",
+    "ABTestResult",
+    "ABTestRunner",
+    "BenchmarkingSummary",
+    "DeploymentDecision",
+    "DeploymentManager",
+    "HyperparameterOptimizer",
+    "ModelBenchmarkingSuite",
+    "ModelRegistry",
+    "ModelVersion",
+    "RegressionDetector",
+    "RegressionReport",
+    "TrialResult",
     "CircuitBreaker",
     "PipelineDashboard",
     "PipelineMetrics",
