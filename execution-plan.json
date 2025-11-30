@@ -1,0 +1,65 @@
+{
+  "batches": [
+    {
+      "id": "batch-1",
+      "name": "Critical Blockers",
+      "priority": "P0",
+      "status": "not-started",
+      "progress": 0,
+      "targetDate": "Week 1–2",
+      "blockers": [],
+      "owner": "",
+      "notes": "CI/CD emergency fixes, OWASP remediation, enable quality gates"
+    },
+    {
+      "id": "batch-2",
+      "name": "Infrastructure",
+      "priority": "P1",
+      "status": "queued",
+      "progress": 0,
+      "targetDate": "Week 3–4",
+      "blockers": ["batch-1"],
+      "owner": "",
+      "notes": "Database pooling, websocket resilience, backups, Neo4j optimization"
+    },
+    {
+      "id": "batch-3",
+      "name": "Security",
+      "priority": "P1",
+      "status": "queued",
+      "progress": 0,
+      "targetDate": "Week 5–6",
+      "blockers": ["batch-2"],
+      "owner": "",
+      "notes": "Audit logging, persisted queries, caching, query cost control"
+    },
+    {
+      "id": "batch-4",
+      "name": "AI/ML",
+      "priority": "P1",
+      "status": "queued",
+      "progress": 0,
+      "targetDate": "Week 7–8",
+      "blockers": ["batch-3"],
+      "owner": "",
+      "notes": "Inference optimization, collaboration OT, error boundaries"
+    },
+    {
+      "id": "batch-5",
+      "name": "Observability",
+      "priority": "P2",
+      "status": "queued",
+      "progress": 0,
+      "targetDate": "Week 9–10",
+      "blockers": ["batch-4"],
+      "owner": "",
+      "notes": "Structured logging, OpenAPI, rate limiting, integration tests"
+    }
+  ],
+  "metrics": {
+    "ciPassRate": 0,
+    "coverage": 0,
+    "deploymentMinutes": 0,
+    "productionIncidents": 0
+  }
+}
