@@ -1,0 +1,12 @@
+[
+  {
+    "action": "update_plan",
+    "tenant": "TENANT_A",
+    "timestamp": "2025-11-29T05:18:27.094Z"
+  },
+  {
+    "action": "request_residency",
+    "tenant": "TENANT_B",
+    "timestamp": "2025-11-29T05:18:27.094Z"
+  }
+]
