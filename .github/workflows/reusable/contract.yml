@@ -1,0 +1,10 @@
+name: Reusable contract
+on:
+  workflow_call:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for contract
+        run: echo "Running contract workflow placeholder"

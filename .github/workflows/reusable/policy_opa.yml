@@ -1,0 +1,10 @@
+name: Reusable policy_opa
+on:
+  workflow_call:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for policy_opa
+        run: echo "Running policy_opa workflow placeholder"
