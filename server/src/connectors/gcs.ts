@@ -337,6 +337,55 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
+  async downloadStream(
+    objectName: string,
+    options: DownloadOptions = {},
+  ): Promise<Readable> {
+    return tracer.startActiveSpan('gcs.download_stream', async (span: any) => {
+      span.setAttributes({
+        tenant_id: this.tenantId,
+        bucket: this.config.bucketName,
+        object_name: objectName,
+      });
+
+      try {
+        const file = this.bucket.file(objectName);
+        const [exists] = await file.exists();
+        if (!exists) {
+          throw new Error(`Object ${objectName} not found`);
+        }
+
+        const stream = file.createReadStream({
+          validation: options.validation !== false,
+          decompress: options.decompress !== false,
+          start: options.start,
+          end: options.end,
+        });
+
+        gcsOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download_stream',
+          bucket: this.config.bucketName,
+          result: 'success',
+        });
+
+        return stream;
+      } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: 2, message: (error as Error).message });
+        gcsOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download_stream',
+          bucket: this.config.bucketName,
+          result: 'error',
+        });
+        throw error;
+      } finally {
+        span.end();
+      }
+    });
+  }
+
   async deleteObject(objectName: string): Promise<void> {
     return tracer.startActiveSpan('gcs.delete_object', async (span: any) => {
       span.setAttributes({

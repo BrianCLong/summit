@@ -113,7 +113,10 @@
     "uuid": "13.0.0",
     "winston": "3.18.3",
     "ws": "8.18.3",
-    "zod": "4.1.12"
+    "zod": "4.1.12",
+    "@summit/connector-sdk": "workspace:*",
+    "p-limit": "^6.1.0",
+    "csv-parse": "^5.5.3"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
