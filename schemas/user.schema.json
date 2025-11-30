@@ -1,0 +1,23 @@
+{
+  "$id": "https://companyos/schemas/user.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "User",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "email": { "type": "string", "format": "email" },
+    "display_name": { "type": "string" },
+    "status": { "type": "string", "enum": ["active", "inactive", "locked"] },
+    "region": { "type": "string" },
+    "created_at": { "type": "string", "format": "date-time" }
+  },
+  "required": ["id", "tenant_id", "email", "status", "created_at"],
+  "additionalProperties": false,
+  "x-classification": {
+    "email": "PII",
+    "display_name": "PII",
+    "region": "sensitive"
+  },
+  "x-version": "1.0.0"
+}
