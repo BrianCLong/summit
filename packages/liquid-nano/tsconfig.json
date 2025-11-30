@@ -10,7 +10,6 @@
     "moduleResolution": "NodeNext",
     "types": ["node", "jest"],
     "resolveJsonModule": true
-    "types": []
   },
   "include": ["src", "examples", "scripts", "__tests__"],
   "exclude": ["dist", "deploy", "docs", "monitoring", "dashboards"]
