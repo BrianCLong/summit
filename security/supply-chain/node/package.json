@@ -1,0 +1,16 @@
+{
+  "name": "supply-chain-suite",
+  "version": "0.1.0",
+  "description": "SBOM generation, vulnerability scanning, license governance, and Sigstore attestations",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "scripts": {
+    "sbom": "node index.js sbom",
+    "scan": "node index.js scan",
+    "licenses": "node index.js licenses",
+    "attest": "node index.js attest"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}
