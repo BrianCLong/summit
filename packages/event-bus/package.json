@@ -1,0 +1,37 @@
+{
+  "name": "@intelgraph/event-bus",
+  "version": "1.0.0",
+  "description": "Enterprise-grade distributed event bus with pub-sub, queuing, and message routing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "event-bus",
+    "message-bus",
+    "pub-sub",
+    "queue",
+    "message-routing",
+    "distributed-systems"
+  ],
+  "dependencies": {
+    "ioredis": "^5.3.2",
+    "uuid": "^10.0.0",
+    "pino": "^9.0.0",
+    "kafkajs": "^2.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "ts-jest": "^29.4.5"
+  }
+}
