@@ -1,0 +1,10 @@
+{
+  "alert_id": "AuthenticationFailureSpike",
+  "alert_name": "Authentication failure spike detected",
+  "severity": "critical",
+  "service": "unknown",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "Authentication failures at {{ $value }} per second over the last 5 minutes"
+}
