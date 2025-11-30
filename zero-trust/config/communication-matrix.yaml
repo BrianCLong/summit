@@ -1,0 +1,473 @@
+# Service Communication Matrix
+# Defines allowed service-to-service communication patterns
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: communication-matrix
+  namespace: intelgraph-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: communication-matrix
+data:
+  matrix.yaml: |
+    # Communication Matrix Version
+    version: "1.0.0"
+    lastUpdated: "2025-11-25T00:00:00Z"
+
+    # Default policy: DENY all traffic not explicitly allowed
+    defaultPolicy: DENY
+
+    # Communication Rules
+    # Format: source -> destination with allowed methods/paths
+    rules:
+      #############################################
+      # INGRESS RULES (External -> Internal)
+      #############################################
+
+      - name: ingress-to-gateway
+        source:
+          type: external
+          selector:
+            namespace: ingress-nginx
+        destination:
+          service: api-gateway
+          namespace: intelgraph-ga
+        allow:
+          ports: [4000, 4001]
+          methods: [GET, POST, PUT, DELETE, OPTIONS]
+          paths: ["/*"]
+        rateLimit:
+          requestsPerSecond: 1000
+          burstSize: 2000
+
+      - name: ingress-to-client
+        source:
+          type: external
+          selector:
+            namespace: ingress-nginx
+        destination:
+          service: client
+          namespace: intelgraph-ga
+        allow:
+          ports: [80, 8080]
+          methods: [GET, HEAD, OPTIONS]
+          paths: ["/*"]
+
+      #############################################
+      # API GATEWAY RULES
+      #############################################
+
+      - name: gateway-to-api
+        source:
+          service: api-gateway
+          namespace: intelgraph-ga
+        destination:
+          service: api-server
+          namespace: intelgraph-ga
+        allow:
+          ports: [4001]
+          methods: [GET, POST, PUT, DELETE, PATCH]
+          paths: ["/api/*", "/graphql", "/health/*"]
+
+      - name: gateway-to-adminsec
+        source:
+          service: api-gateway
+          namespace: intelgraph-ga
+        destination:
+          service: adminsec
+          namespace: intelgraph-ga
+        allow:
+          ports: [3000, 3001]
+          methods: [GET, POST, PUT, DELETE]
+          paths: ["/auth/*", "/users/*", "/policies/*", "/sessions/*"]
+
+      - name: gateway-to-graphai
+        source:
+          service: api-gateway
+          namespace: intelgraph-ga
+        destination:
+          service: graphai
+          namespace: intelgraph-ga
+        allow:
+          ports: [8000]
+          methods: [GET, POST]
+          paths: ["/feature/*", "/embed/*", "/er/*", "/lp/*", "/community/*"]
+
+      - name: gateway-to-forensics
+        source:
+          service: api-gateway
+          namespace: intelgraph-ga
+        destination:
+          service: forensics-service
+          namespace: intelgraph-ga
+        allow:
+          ports: [9000]
+          methods: [GET, POST]
+          paths: ["/evidence/*", "/custody/*", "/integrity/*"]
+
+      - name: gateway-to-intelligence-verticals
+        source:
+          service: api-gateway
+          namespace: intelgraph-ga
+        destination:
+          services: [osint-service, fintel-service, cyber-service, tradecraft-service]
+          namespace: intelgraph-ga
+        allow:
+          ports: [8080]
+          methods: [GET, POST]
+          paths: ["/intel/*", "/analysis/*", "/synthesis/*"]
+
+      #############################################
+      # API SERVER RULES
+      #############################################
+
+      - name: api-to-authz
+        source:
+          service: api-server
+          namespace: intelgraph-ga
+        destination:
+          service: authz-gateway
+          namespace: intelgraph-ga
+        allow:
+          ports: [8080, 9091]
+          methods: [POST]
+          paths: ["/v1/data/*", "/v1/query"]
+
+      - name: api-to-databases
+        source:
+          service: api-server
+          namespace: intelgraph-ga
+        destination:
+          services: [postgresql, neo4j, redis]
+          namespace: intelgraph-data
+        allow:
+          ports: [5432, 7687, 6379]
+
+      - name: api-to-audit
+        source:
+          service: api-server
+          namespace: intelgraph-ga
+        destination:
+          service: audit-service
+          namespace: intelgraph-system
+        allow:
+          ports: [8080, 50051]
+          methods: [POST]
+          paths: ["/audit/*", "/events/*"]
+
+      - name: api-to-prov-ledger
+        source:
+          service: api-server
+          namespace: intelgraph-ga
+        destination:
+          service: prov-ledger
+          namespace: intelgraph-system
+        allow:
+          ports: [8080, 50051]
+          methods: [GET, POST]
+          paths: ["/provenance/*", "/chain/*"]
+
+      #############################################
+      # INTELLIGENCE VERTICAL RULES
+      #############################################
+
+      - name: intel-verticals-cross-communication
+        source:
+          services: [osint-service, fintel-service, cyber-service, tradecraft-service]
+          namespace: intelgraph-ga
+        destination:
+          services: [osint-service, fintel-service, cyber-service, tradecraft-service]
+          namespace: intelgraph-ga
+        allow:
+          ports: [8080]
+          methods: [GET, POST]
+          paths: ["/intel/*", "/analysis/*", "/synthesis/*", "/correlate/*"]
+
+      - name: intel-to-graphai
+        source:
+          services: [osint-service, fintel-service, cyber-service, tradecraft-service]
+          namespace: intelgraph-ga
+        destination:
+          service: graphai
+          namespace: intelgraph-ga
+        allow:
+          ports: [8000]
+          methods: [GET, POST]
+          paths: ["/feature/*", "/embed/*", "/er/*"]
+
+      - name: intel-to-nlp
+        source:
+          services: [osint-service, fintel-service, cyber-service, tradecraft-service]
+          namespace: intelgraph-ga
+        destination:
+          service: nlp-service
+          namespace: intelgraph-ai
+        allow:
+          ports: [8080, 50051]
+          methods: [POST]
+          paths: ["/analyze/*", "/extract/*", "/summarize/*"]
+
+      - name: intel-to-databases
+        source:
+          services: [osint-service, fintel-service, cyber-service, tradecraft-service]
+          namespace: intelgraph-ga
+        destination:
+          services: [neo4j, postgresql, redis]
+          namespace: intelgraph-data
+        allow:
+          ports: [7687, 5432, 6379]
+
+      #############################################
+      # DATA SERVICE RULES
+      #############################################
+
+      - name: graph-core-to-neo4j
+        source:
+          service: graph-core
+          namespace: intelgraph-data
+        destination:
+          service: neo4j
+          namespace: intelgraph-data
+        allow:
+          ports: [7687, 7474]
+
+      - name: neo4j-cluster-communication
+        source:
+          service: neo4j
+          namespace: intelgraph-data
+        destination:
+          service: neo4j
+          namespace: intelgraph-data
+        allow:
+          ports: [5000, 6000, 7000, 7687]
+
+      - name: redis-sentinel-communication
+        source:
+          service: redis
+          namespace: intelgraph-data
+        destination:
+          service: redis
+          namespace: intelgraph-data
+        allow:
+          ports: [6379, 26379]
+
+      - name: kafka-internal-communication
+        source:
+          service: kafka
+          namespace: intelgraph-data
+        destination:
+          service: kafka
+          namespace: intelgraph-data
+        allow:
+          ports: [9092, 9093, 9094]
+
+      #############################################
+      # ANALYTICS & AI RULES
+      #############################################
+
+      - name: analytics-to-databases
+        source:
+          services: [analytics-engine, stream-processor]
+          namespace: intelgraph-analytics
+        destination:
+          services: [postgresql, neo4j, redis, kafka]
+          namespace: intelgraph-data
+        allow:
+          ports: [5432, 7687, 6379, 9092]
+
+      - name: ai-services-to-model-serving
+        source:
+          services: [ai-service-platform, prediction-service, nlp-service, copilot]
+          namespace: intelgraph-ai
+        destination:
+          service: model-serving
+          namespace: intelgraph-ai
+        allow:
+          ports: [8080, 8081]
+          methods: [POST]
+          paths: ["/v1/models/*", "/v2/models/*"]
+
+      - name: copilot-to-graphai
+        source:
+          service: copilot
+          namespace: intelgraph-ai
+        destination:
+          service: graphai
+          namespace: intelgraph-ga
+        allow:
+          ports: [8000]
+          methods: [GET, POST]
+          paths: ["/*"]
+
+      #############################################
+      # WORKER RULES
+      #############################################
+
+      - name: worker-to-api
+        source:
+          service: worker
+          namespace: intelgraph-ga
+        destination:
+          service: api-server
+          namespace: intelgraph-ga
+        allow:
+          ports: [4001]
+          methods: [GET, POST, PUT]
+          paths: ["/api/*", "/internal/*"]
+
+      - name: worker-to-databases
+        source:
+          service: worker
+          namespace: intelgraph-ga
+        destination:
+          services: [postgresql, neo4j, redis, kafka]
+          namespace: intelgraph-data
+        allow:
+          ports: [5432, 7687, 6379, 9092]
+
+      - name: worker-to-ai
+        source:
+          service: worker
+          namespace: intelgraph-ga
+        destination:
+          services: [ai-service-platform, nlp-service]
+          namespace: intelgraph-ai
+        allow:
+          ports: [8080, 50051]
+          methods: [POST]
+
+      #############################################
+      # OBSERVABILITY RULES
+      #############################################
+
+      - name: prometheus-scraping
+        source:
+          service: prometheus
+          namespace: monitoring
+        destination:
+          type: all-services
+          namespaces:
+            - intelgraph-ga
+            - intelgraph-data
+            - intelgraph-analytics
+            - intelgraph-ai
+            - intelgraph-system
+        allow:
+          ports: [9090, 9091, 9187, 9121, 8889]
+          methods: [GET]
+          paths: ["/metrics", "/health", "/ready", "/live"]
+
+      - name: otel-collector-receive
+        source:
+          type: all-services
+          namespaces:
+            - intelgraph-ga
+            - intelgraph-data
+            - intelgraph-analytics
+            - intelgraph-ai
+            - intelgraph-system
+        destination:
+          service: otel-collector
+          namespace: observability
+        allow:
+          ports: [4317, 4318]
+
+      - name: grafana-to-prometheus
+        source:
+          service: grafana
+          namespace: monitoring
+        destination:
+          service: prometheus
+          namespace: monitoring
+        allow:
+          ports: [9090]
+          methods: [GET, POST]
+          paths: ["/api/*"]
+
+      #############################################
+      # DNS RULES (Required for all services)
+      #############################################
+
+      - name: dns-resolution
+        source:
+          type: all-services
+        destination:
+          service: kube-dns
+          namespace: kube-system
+        allow:
+          ports: [53]
+          protocols: [TCP, UDP]
+
+      #############################################
+      # EXTERNAL EGRESS RULES
+      #############################################
+
+      - name: worker-external-apis
+        source:
+          services: [worker, osint-service]
+          namespace: intelgraph-ga
+        destination:
+          type: external
+          allowList:
+            - "*.googleapis.com"
+            - "api.openai.com"
+            - "api.anthropic.com"
+            - "*.amazonaws.com"
+        allow:
+          ports: [443]
+          protocols: [TCP]
+
+      - name: ai-external-models
+        source:
+          services: [ai-service-platform, model-serving, copilot]
+          namespace: intelgraph-ai
+        destination:
+          type: external
+          allowList:
+            - "api.openai.com"
+            - "api.anthropic.com"
+            - "huggingface.co"
+        allow:
+          ports: [443]
+          protocols: [TCP]
+
+    # Circuit Breaker Configuration
+    circuitBreakers:
+      defaults:
+        maxConnections: 100
+        maxPendingRequests: 100
+        maxRequests: 100
+        maxRetries: 3
+        consecutiveErrors: 5
+        interval: 10s
+        baseEjectionTime: 30s
+        maxEjectionPercent: 10
+
+      overrides:
+        neo4j:
+          maxConnections: 50
+          consecutiveErrors: 3
+        redis:
+          maxConnections: 200
+          consecutiveErrors: 10
+        kafka:
+          maxConnections: 100
+          consecutiveErrors: 5
+
+    # Retry Policy Configuration
+    retryPolicies:
+      defaults:
+        attempts: 3
+        perTryTimeout: 5s
+        retryOn: ["5xx", "reset", "connect-failure", "retriable-4xx"]
+
+      overrides:
+        database:
+          attempts: 5
+          perTryTimeout: 10s
+          retryOn: ["5xx", "reset", "connect-failure"]
+        external:
+          attempts: 2
+          perTryTimeout: 30s
+          retryOn: ["5xx", "reset"]

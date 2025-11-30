@@ -1,0 +1,273 @@
+# Default Deny Network Policies
+# Implements zero-trust default-deny posture for all namespaces
+
+---
+# Default deny all ingress and egress for intelgraph-ga namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# Default deny all for intelgraph-data namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# Default deny all for intelgraph-analytics namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: intelgraph-analytics
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# Default deny all for intelgraph-ai namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# Default deny all for intelgraph-system namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: intelgraph-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# Default deny all for conductor namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: conductor
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# Allow DNS resolution for all namespaces (required baseline)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: intelgraph-analytics
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: intelgraph-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: conductor
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: baseline
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+        - podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
