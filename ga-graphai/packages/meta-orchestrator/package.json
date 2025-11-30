@@ -5,7 +5,9 @@
   "exports": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:smoke": "vitest run tests/referenceWorkflows.test.ts --filter Hello-World",
+    "test:load": "vitest run tests/referenceWorkflows.test.ts --filter Hello-Case --threads false"
   },
   "dependencies": {
     "@ga-graphai/common-types": "file:../common-types",
