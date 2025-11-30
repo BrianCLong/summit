@@ -1,0 +1,170 @@
+schema_version: 1.0.0
+metadata:
+  namespace: authority
+  owner: platform-auth
+  description: >-
+    Canonical schema for describing authorities, their inherited parents,
+    reusable role templates, and attribute-based access control conditions.
+attribute_catalog:
+  principal:
+    - key: id
+      type: string
+      required: true
+      description: Stable subject identifier used across authorities.
+    - key: status
+      type: enum
+      allowed: [active, suspended]
+      default: active
+      description: Lifecycle status gate for every permission evaluation.
+    - key: department
+      type: string
+      description: Organizational grouping for ABAC checks and inheritance filters.
+    - key: clearance_level
+      type: integer
+      description: Numeric clearance used in high-sensitivity controls.
+    - key: attributes
+      type: object
+      description: Free-form extension point for team-specific ABAC keys.
+  resource:
+    - key: type
+      type: enum
+      allowed: [dataset, model, service, secret]
+      description: Category used by templates to scope allowed actions.
+    - key: tags
+      type: array
+      description: Arbitrary resource labels used in ABAC conditions.
+    - key: sensitivity
+      type: enum
+      allowed: [public, internal, confidential, regulated]
+      description: Required for aligning access with governance tiers.
+  context:
+    - key: environment
+      type: enum
+      allowed: [dev, staging, prod]
+      description: Runtime environment to segment progressive delivery access.
+    - key: tenant
+      type: string
+      description: Multi-tenant boundary used to prevent cross-tenant access.
+condition_language:
+  syntax: cel
+  description: Common expression language to keep ABAC rules consistent.
+role_templates:
+  - id: role:viewer
+    description: Read-only access for general visibility.
+    parameters:
+      resource_scope: string
+    grants:
+      - effect: allow
+        actions: [read, list]
+        resources: ["{{resource_scope}}"]
+    conditions:
+      - expression: principal.status == "active"
+        based_on: [principal.status]
+  - id: role:editor
+    description: Change-level access with audit obligations.
+    parameters:
+      resource_scope: string
+    grants:
+      - effect: allow
+        actions: [create, update]
+        resources: ["{{resource_scope}}"]
+    conditions:
+      - expression: principal.status == "active" && context.environment != "prod"
+        based_on: [principal.status, context.environment]
+    obligations:
+      - type: audit_log
+        payload:
+          reason: "editor-change"
+          capture: [principal.id, context.environment, resource.type]
+  - id: role:maintainer
+    description: Full control with explicit safety rails.
+    parameters:
+      resource_scope: string
+    grants:
+      - effect: allow
+        actions: [create, update, delete, delegate]
+        resources: ["{{resource_scope}}"]
+    conditions:
+      - expression: principal.clearance_level >= 3
+        based_on: [principal.clearance_level]
+      - expression: resource.sensitivity in ["internal", "confidential"]
+        based_on: [resource.sensitivity]
+    obligations:
+      - type: break_glass
+        payload:
+          expires_after: 3600
+          approvers: [security-duty-officer]
+authorities:
+  - id: authority:org-default
+    description: Baseline authority granted to all authenticated principals.
+    decision_strategy: permit-overrides
+    inherits: []
+    bindings:
+      - template: role:viewer
+        with:
+          resource_scope: "dataset:*"
+        subjects:
+          - type: group
+            id: everyone
+        conditions:
+          - expression: principal.status == "active"
+          - expression: principal.department != "terminated"
+    abac_controls:
+      - expression: resource.sensitivity != "regulated"
+        effect: allow
+        when:
+          - principal.status == "active"
+      - expression: resource.sensitivity == "regulated"
+        effect: deny
+        when:
+          - principal.clearance_level < 3
+  - id: authority:engineering
+    description: Engineering-specific authority building on the org baseline.
+    decision_strategy: deny-overrides
+    inherits:
+      - authority:org-default
+    bindings:
+      - template: role:editor
+        with:
+          resource_scope: "service:eng/*"
+        subjects:
+          - type: group
+            id: engineering
+        conditions:
+          - expression: principal.department == "engineering"
+          - expression: context.environment in ["dev", "staging"]
+      - template: role:maintainer
+        with:
+          resource_scope: "service:eng/critical/*"
+        subjects:
+          - type: role
+            id: sre-oncall
+        conditions:
+          - expression: principal.clearance_level >= 4
+          - expression: resource.tags.exists(tag, tag == "pci")
+    abac_controls:
+      - expression: resource.sensitivity == "confidential"
+        effect: allow
+        when:
+          - principal.department == "engineering"
+          - context.environment != "prod" || principal.clearance_level >= 4
+      - expression: context.environment == "prod"
+        effect: allow
+        when:
+          - principal.clearance_level >= 4
+          - principal.status == "active"
+      - expression: context.environment == "prod" && resource.tags.exists(tag, tag == "pci")
+        effect: deny
+        when:
+          - principal.clearance_level < 5
+          - principal.attributes.mfa_verified != true
+inheritance_rules:
+  precedence: child-overrides
+  merge_strategy:
+    grants: append
+    obligations: append
+    conditions: and
+  notes: >-
+    Child authorities inherit templates, bindings, and ABAC controls from parents
+    unless explicitly overridden. The merge strategy keeps parent obligations while
+    allowing child-specific conditions to narrow access.
