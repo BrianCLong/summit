@@ -1,5 +1,6 @@
 import click
-import pandas as pd
+import json
+
 import requests
 
 MAPPING = {
@@ -28,21 +29,17 @@ MAPPING = {
 @click.option("--sensitivity", default="T")
 @click.option("--clearance", default="analyst")
 def main(file_path, tenant, case, token, api_url, source, license, sensitivity, clearance):
-    df = pd.read_csv(file_path)
-    rows = df.to_dict(orient="records")
-    payload = {
-        "tenant_id": tenant,
-        "case_id": case,
-        "mapping": MAPPING,
-        "data": rows,
-        "provenance": {"source": source, "license": license},
-        "policy": {
-            "sensitivity": sensitivity,
-            "clearance": [c.strip() for c in clearance.split(",")],
-        },
-    }
     headers = {"Authorization": f"Bearer {token}", "X-Tenant-ID": tenant, "X-Case-ID": case}
-    resp = requests.post(f"{api_url}/ingest/csv", json=payload, headers=headers)
+    data = {
+        "mapping": json.dumps(MAPPING),
+        "provenance": json.dumps({"source": source, "license": license}),
+        "policy": json.dumps(
+            {"sensitivity": sensitivity, "clearance": [c.strip() for c in clearance.split(",")]}
+        ),
+    }
+    with open(file_path, "rb") as handle:
+        files = {"file": handle}
+        resp = requests.post(f"{api_url}/ingest/csv", files=files, data=data, headers=headers)
     click.echo(resp.status_code)
     if resp.text:
         click.echo(resp.text)
