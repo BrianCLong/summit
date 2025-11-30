@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/database-sharding",
+  "version": "1.0.0",
+  "description": "Horizontal database sharding with routing and query distribution",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pg": "^8.16.3",
+    "ioredis": "^5.8.2",
+    "murmurhash": "^2.0.1",
+    "consistent-hash": "^1.0.2",
+    "@opentelemetry/api": "^1.9.0",
+    "pino": "^10.1.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.16.0",
+    "typescript": "^5.7.2",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}

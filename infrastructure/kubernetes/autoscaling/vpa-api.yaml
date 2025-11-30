@@ -1,0 +1,70 @@
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: intelgraph-api-vpa
+  namespace: intelgraph
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: intelgraph-api
+  updatePolicy:
+    updateMode: "Auto" # Can be "Off", "Initial", "Recreate", or "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: api
+      minAllowed:
+        cpu: 100m
+        memory: 256Mi
+      maxAllowed:
+        cpu: 8
+        memory: 16Gi
+      controlledResources: ["cpu", "memory"]
+      mode: Auto
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: intelgraph-worker-vpa
+  namespace: intelgraph
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: intelgraph-worker
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+    - containerName: worker
+      minAllowed:
+        cpu: 500m
+        memory: 512Mi
+      maxAllowed:
+        cpu: 16
+        memory: 32Gi
+      controlledResources: ["cpu", "memory"]
+      mode: Auto
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: postgres-vpa
+  namespace: intelgraph
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: postgres
+  updatePolicy:
+    updateMode: "Initial" # Only set on creation, not update
+  resourcePolicy:
+    containerPolicies:
+    - containerName: postgres
+      minAllowed:
+        cpu: 2
+        memory: 4Gi
+      maxAllowed:
+        cpu: 32
+        memory: 128Gi
+      controlledResources: ["cpu", "memory"]

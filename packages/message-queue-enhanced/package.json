@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/message-queue-enhanced",
+  "version": "1.0.0",
+  "description": "Enhanced message queue with Kafka, RabbitMQ, dead letter queues, and event sourcing",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4",
+    "amqplib": "^0.10.4",
+    "@opentelemetry/api": "^1.9.0",
+    "pino": "^10.1.0",
+    "zod": "^3.24.1",
+    "bullmq": "^5.63.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/amqplib": "^0.10.0",
+    "typescript": "^5.7.2",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  }
+}
