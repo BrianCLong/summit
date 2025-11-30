@@ -1,3 +1,6 @@
+// Must be first import to ensure auto-instrumentation works
+import { stopOTEL } from './instrumentation.js';
+
 import http from 'http';
 import express from 'express';
 import { useServer } from 'graphql-ws/use/ws';
@@ -15,6 +18,7 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -113,6 +117,7 @@ const startServer = async () => {
       closeNeo4jDriver(),
       closePostgresPool(),
       closeRedisClient(),
+      stopOTEL(),
     ]);
     httpServer.close((err) => {
       if (err) {

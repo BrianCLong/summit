@@ -24,9 +24,16 @@
     "seed": "ts-node scripts/seed-data.ts",
     "seed:demo": "ts-node scripts/seed-demo.ts",
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
-    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts"
+    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts",
+    "docs:generate": "npx tsx scripts/generate-openapi.ts"
   },
   "dependencies": {
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
+    "pino-socket": "^6.0.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.51.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.51.0",
+    "@opentelemetry/sdk-metrics": "^1.24.0",
     "@apollo/server": "5.1.0",
     "@as-integrations/express4": "1.1.2",
     "@bull-board/api": "6.14.2",

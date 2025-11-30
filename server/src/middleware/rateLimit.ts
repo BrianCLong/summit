@@ -8,19 +8,25 @@ interface RateLimitConfig {
   message: string;
 }
 
+const TIER_LIMITS = {
+  FREE: 100,      // 100/hr
+  PRO: 1000,      // 1000/hr
+  ENTERPRISE: 10000 // 10000/hr
+};
+
 /**
  * Rate limiting middleware.
  * Prioritizes authenticated user limits over IP limits.
  */
 export const rateLimitMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   // Skip if it's a health check (usually handled before, but safe to check)
-  if (req.path === '/health' || req.path === '/ping') {
+  if (req.path === '/health' || req.path === '/ping' || req.path === '/health/detailed' || req.path === '/health/ready' || req.path === '/health/live') {
     return next();
   }
 
   let key: string;
   let limit: number;
-  let windowMs = cfg.RATE_LIMIT_WINDOW_MS;
+  let windowMs = 3600 * 1000; // 1 hour window as per tiers (100/hr)
 
   // Determine key and limit
   // @ts-ignore - req.user is populated by auth middleware
@@ -28,23 +34,33 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
 
   if (user) {
     key = `user:${user.id || user.sub}`;
-    // Higher limit for authenticated users
-    limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+
+    // Determine limit based on tier
+    // Assuming user object has a 'tier' property or defaulting to FREE
+    const userTier = (user.tier || 'FREE').toUpperCase();
+    limit = TIER_LIMITS[userTier as keyof typeof TIER_LIMITS] || TIER_LIMITS.FREE;
+
   } else {
     key = `ip:${req.ip}`;
-    limit = cfg.RATE_LIMIT_MAX_REQUESTS;
+    // Unauthenticated users get the Free tier limit or stricter
+    limit = TIER_LIMITS.FREE;
   }
 
   // Custom limits for expensive operations
   // Note: When mounted on a path, req.path is relative. Use originalUrl or check baseUrl.
   if (req.originalUrl.includes('/graphql') || req.baseUrl.endsWith('/graphql')) {
-      // Basic check, ideally we parse query complexity, but we can set a separate bucket
       key += ':graphql';
-      // Maybe stricter or separate limit?
-      // For now we use the same limit but separate bucket to avoid starving other API calls
+      // Search/Graph ops: 20/min = 1200/hr.
+      // If we keep 1hr window, we can just use the tier limit.
+      // Or we can switch to a shorter window for these specific endpoints.
+      // Let's stick to the prompt's "Search: 20/min"
+      windowMs = 60 * 1000;
+      limit = 20;
   } else if (req.path.startsWith('/api/ai')) {
       key += ':ai';
-      limit = Math.floor(limit / 5); // 5x stricter for AI endpoints
+      // AI: 5/min
+      windowMs = 60 * 1000;
+      limit = 5;
   }
 
   const result = await rateLimiter.checkLimit(key, limit, windowMs);
@@ -55,6 +71,7 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
   res.set('X-RateLimit-Reset', String(Math.ceil(result.reset / 1000)));
 
   if (!result.allowed) {
+    res.set('Retry-After', String(Math.ceil((result.reset - Date.now()) / 1000)));
     res.status(429).json({
       error: 'Too many requests, please try again later',
       retryAfter: Math.ceil((result.reset - Date.now()) / 1000)

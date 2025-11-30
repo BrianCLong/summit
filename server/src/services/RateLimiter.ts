@@ -22,18 +22,19 @@ export class RateLimiter {
   }
 
   /**
-   * Check if a key has exceeded the rate limit.
-   * Uses a sliding window counter (fixed window with Redis expiration).
+   * Check if a key has exceeded the rate limit using Token Bucket algorithm.
    *
-   * @param key Unique key for the limit (e.g., user ID or IP)
-   * @param limit Max requests allowed
-   * @param windowMs Window size in milliseconds
-   * @returns RateLimitResult
+   * @param key Unique key for the limit
+   * @param limit Max tokens (capacity)
+   * @param windowMs Time window for the limit in ms (used to calculate rate)
+   * @param cost Cost of the operation (default 1)
    */
-  async checkLimit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
-    const redisKey = `${this.namespace}:${key}`;
-    const now = Date.now();
+  async checkLimit(key: string, limit: number, windowMs: number, cost: number = 1): Promise<RateLimitResult> {
     const redisClient = getRedisClient();
+    const now = Date.now();
+
+    // Calculate rate: tokens per second
+    const rate = limit / (windowMs / 1000);
 
     if (!redisClient) {
       // Fail open if Redis is not available
@@ -42,44 +43,77 @@ export class RateLimiter {
         allowed: true,
         total: limit,
         remaining: limit,
-        reset: now + windowMs,
+        reset: now,
       };
     }
 
+    const tokensKey = `${this.namespace}:${key}:tokens`;
+    const timestampKey = `${this.namespace}:${key}:ts`;
+
     try {
-      // Lua script to increment and set expiry atomically
-      // Returns [current_count, ttl_ms]
+      // Lua script for Token Bucket
+      // KEYS[1]: tokens key
+      // KEYS[2]: timestamp key
+      // ARGV[1]: refill rate (tokens/sec)
+      // ARGV[2]: capacity (max tokens)
+      // ARGV[3]: current timestamp (ms)
+      // ARGV[4]: requested tokens (cost)
       const script = `
-        local current = redis.call("INCR", KEYS[1])
-        local ttl = redis.call("PTTL", KEYS[1])
-        if tonumber(current) == 1 then
-          redis.call("PEXPIRE", KEYS[1], ARGV[1])
-          ttl = ARGV[1]
+        local tokens_key = KEYS[1]
+        local ts_key = KEYS[2]
+        local rate = tonumber(ARGV[1])
+        local capacity = tonumber(ARGV[2])
+        local now = tonumber(ARGV[3])
+        local requested = tonumber(ARGV[4])
+
+        local fill_time = capacity / rate
+        local ttl = math.ceil(fill_time * 2)
+
+        local last_tokens = tonumber(redis.call("get", tokens_key))
+        if last_tokens == nil then
+          last_tokens = capacity
         end
-        return {current, ttl}
+
+        local last_refill = tonumber(redis.call("get", ts_key))
+        if last_refill == nil then
+          last_refill = 0
+        end
+
+        local delta = math.max(0, now - last_refill) / 1000
+        local filled_tokens = math.min(capacity, last_tokens + (delta * rate))
+
+        local allowed = 0
+        local new_tokens = filled_tokens
+
+        if filled_tokens >= requested then
+          allowed = 1
+          new_tokens = filled_tokens - requested
+          redis.call("setex", tokens_key, ttl, new_tokens)
+          redis.call("setex", ts_key, ttl, now)
+        end
+
+        return {allowed, new_tokens}
       `;
 
-      const result = await redisClient.eval(script, 1, redisKey, windowMs) as [number, number];
-      const current = result[0];
-      const ttl = result[1]; // TTL in ms
+      const result = await redisClient.eval(script, 2, tokensKey, timestampKey, rate, limit, now, cost) as [number, number];
+      const isAllowed = result[0] === 1;
+      const currentTokens = result[1];
 
-      const allowed = current <= limit;
-      const remaining = Math.max(0, limit - current);
-      const reset = now + (ttl > 0 ? ttl : windowMs);
+      this.metrics.incrementCounter('hits_total', { status: isAllowed ? 'allowed' : 'blocked' });
 
-      this.metrics.incrementCounter('hits_total', { status: allowed ? 'allowed' : 'blocked' });
-
-      if (!allowed) {
-          // Identify prefix for metrics (e.g. "ip" or "user")
+      if (!isAllowed) {
           const prefix = key.split(':')[0] || 'unknown';
           this.metrics.incrementCounter('blocked_total', { key_prefix: prefix });
       }
 
+      // Calculate pseudo-reset time (time until full) - optional estimation
+      const timeToFull = ((limit - currentTokens) / rate) * 1000;
+
       return {
-        allowed,
+        allowed: isAllowed,
         total: limit,
-        remaining,
-        reset,
+        remaining: Math.floor(currentTokens),
+        reset: now + timeToFull,
       };
 
     } catch (error) {
@@ -89,7 +123,7 @@ export class RateLimiter {
         allowed: true,
         total: limit,
         remaining: limit,
-        reset: now + windowMs,
+        reset: now,
       };
     }
   }
