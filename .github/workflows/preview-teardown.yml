@@ -1,0 +1,29 @@
+name: Preview Teardown
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login cloud
+        run: |
+          echo "$CLOUD_AUTH" | base64 -d > /tmp/creds.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/creds.json
+      - name: Destroy namespace
+        run: |
+          kubectl delete ns pr-${{ github.event.number }} --ignore-not-found
+      - name: Terraform destroy (if used)
+        working-directory: infra/preview
+        run: |
+          # terraform init -input=false
+          # terraform destroy -auto-approve -input=false -var pr=${{ github.event.number }}
+          echo "Terraform destroy placeholder"
+      - name: Post cost + drift summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.summary.addHeading('Preview Teardown')
+            core.summary.addRaw('Destroyed pr-${{github.event.number}}')
+            await core.summary.write()

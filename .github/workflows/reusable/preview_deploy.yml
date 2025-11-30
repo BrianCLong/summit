@@ -1,0 +1,10 @@
+name: Reusable preview_deploy
+on:
+  workflow_call:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for preview_deploy
+        run: echo "Running preview_deploy workflow placeholder"

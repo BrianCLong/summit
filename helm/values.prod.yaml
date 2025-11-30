@@ -1,0 +1,3 @@
+replicaCount: 3
+featureFlags:
+  someRiskyPath: true  # only after canary passes

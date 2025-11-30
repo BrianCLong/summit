@@ -1,0 +1,10 @@
+name: Reusable migrations_gate
+on:
+  workflow_call:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for migrations_gate
+        run: echo "Running migrations_gate workflow placeholder"

@@ -1,0 +1,10 @@
+name: Reusable iac_plan
+on:
+  workflow_call:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for iac_plan
+        run: echo "Running iac_plan workflow placeholder"
