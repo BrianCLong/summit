@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DPIC Onboarding Wizard</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        background: linear-gradient(120deg, #f6f7fb, #eef2ff);
+        color: #1f2937;
+        margin: 0;
+        padding: 2rem;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1.5rem;
+      }
+      .card {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 1.25rem 1.5rem;
+      }
+      .wizard-steps {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .wizard-step {
+        flex: 1;
+        padding: 0.75rem;
+        border-radius: 10px;
+        text-align: center;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        font-weight: 600;
+        color: #6b7280;
+      }
+      .wizard-step.active {
+        border-color: #4f46e5;
+        color: #111827;
+        background: #eef2ff;
+      }
+      .wizard-content {
+        min-height: 240px;
+      }
+      .actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1rem;
+      }
+      button {
+        padding: 0.65rem 1.25rem;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .secondary {
+        background: #e5e7eb;
+        color: #111827;
+      }
+      .primary {
+        background: #4f46e5;
+        color: #fff;
+      }
+      .diff-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .diff-list li {
+        padding: 0.5rem 0.75rem;
+        border-bottom: 1px solid #f3f4f6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .badge {
+        border-radius: 999px;
+        padding: 0.2rem 0.6rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+      }
+      .badge.added {
+        background: #ecfdf3;
+        color: #166534;
+      }
+      .badge.changed {
+        background: #fef9c3;
+        color: #92400e;
+      }
+      .badge.removed {
+        background: #fef2f2;
+        color: #991b1b;
+      }
+      .audit-log {
+        font-family: 'SFMono-Regular', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          'Liberation Mono', 'Courier New', monospace;
+        font-size: 0.85rem;
+        background: #0b1224;
+        color: #c7d2fe;
+        border-radius: 12px;
+        padding: 1rem;
+        min-height: 180px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Data Producer Integration Control (DPIC) Onboarding</h1>
+    <p>Fixture-backed wizard for certifying producers, reviewing drift, and issuing signed ingest certificates.</p>
+    <div class="layout">
+      <div class="card">
+        <div class="wizard-steps" id="wizard-steps"></div>
+        <div class="wizard-content" id="wizard-content"></div>
+        <div class="actions">
+          <button class="secondary" id="prev-step">Back</button>
+          <button class="primary" id="next-step">Next</button>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Contract Drift Viewer (jQuery)</h3>
+        <ul class="diff-list" id="diff-viewer"></ul>
+        <div style="margin-top: 1rem;">
+          <strong>Signed Cert Preview</strong>
+          <pre id="cert-preview" style="background:#f3f4f6;padding:0.75rem;border-radius:8px;"></pre>
+        </div>
+        <div style="margin-top: 1rem;">
+          <strong>Append-only Audit Log</strong>
+          <div class="audit-log" id="audit-log"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const steps = ['Producer', 'Contract', 'Certification', 'Webhook'];
+      let currentStep = 0;
+      let fixtures = null;
+      const auditEntries = [];
+
+      async function loadFixtures() {
+        const response = await fetch('./fixtures/onboarding-fixture.json');
+        fixtures = await response.json();
+      }
+
+      function renderSteps() {
+        const container = $('#wizard-steps');
+        container.empty();
+        steps.forEach((step, index) => {
+          const el = $('<div/>')
+            .addClass('wizard-step')
+            .toggleClass('active', index === currentStep)
+            .text(`${index + 1}. ${step}`);
+          container.append(el);
+        });
+      }
+
+      function renderAudit(action, details) {
+        const entry = {
+          id: `audit-${crypto.randomUUID()}`,
+          timestamp: new Date().toISOString(),
+          action,
+          details,
+        };
+        auditEntries.push(entry);
+        const log = auditEntries
+          .map((event) => `${event.timestamp} ${event.id} ${event.action} ${JSON.stringify(event.details)}`)
+          .join('\n');
+        $('#audit-log').text(log);
+      }
+
+      function diffContracts() {
+        const base = fixtures.contracts.baseline.fields;
+        const cand = fixtures.contracts.candidate.fields;
+        const diff = [];
+        const baseMap = new Map(base.map((f) => [f.name, f]));
+        const candMap = new Map(cand.map((f) => [f.name, f]));
+        baseMap.forEach((field, name) => {
+          if (!candMap.has(name)) {
+            diff.push({ label: `Removed ${name}`, badge: 'removed' });
+            return;
+          }
+          const updated = candMap.get(name);
+          if (field.unit !== updated.unit) diff.push({ label: `${name} unit ${field.unit} → ${updated.unit}`, badge: 'changed' });
+          if (field.nullable !== updated.nullable)
+            diff.push({ label: `${name} nullability ${field.nullable} → ${updated.nullable}`, badge: 'changed' });
+        });
+        candMap.forEach((field, name) => {
+          if (!baseMap.has(name)) diff.push({ label: `Added ${name} (${field.type})`, badge: 'added' });
+        });
+        const container = $('#diff-viewer');
+        container.empty();
+        diff.forEach((item) => {
+          const row = $('<li/>');
+          row.text(item.label);
+          row.append($('<span/>').addClass(`badge ${item.badge}`).text(item.badge.toUpperCase()));
+          container.append(row);
+        });
+      }
+
+      async function buildCertPreview() {
+        const payload = JSON.stringify(fixtures.contracts.baseline);
+        const data = new TextEncoder().encode(`secret:${payload}`);
+        const hash = await crypto.subtle.digest('SHA-256', data);
+        const signature = Array.from(new Uint8Array(hash))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+        const cert = {
+          issuer: fixtures.cert.issuer,
+          contractId: fixtures.contracts.baseline.id,
+          version: fixtures.contracts.baseline.version,
+          validUntil: fixtures.cert.validUntil,
+          signature,
+        };
+        $('#cert-preview').text(JSON.stringify(cert, null, 2));
+        renderAudit('certified', { cert });
+      }
+
+      function renderStepContent() {
+        const content = $('#wizard-content');
+        content.empty();
+        if (currentStep === 0) {
+          content.append(
+            `<h3>Producer</h3><p>${fixtures.producer.name}</p><p>${fixtures.producer.contact}</p><p>Webhook: ${fixtures.producer.webhook}</p>`,
+          );
+        } else if (currentStep === 1) {
+          const fields = fixtures.contracts.baseline.fields
+            .map((f) => `<li>${f.name} — ${f.type} (${f.unit}) [PII:${f.pii} DP:${f.dp}]</li>`)
+            .join('');
+          content.append(`<h3>Contract ${fixtures.contracts.baseline.id}</h3><ul>${fields}</ul>`);
+          renderAudit('contract-reviewed', { version: fixtures.contracts.baseline.version });
+        } else if (currentStep === 2) {
+          content.append(`<h3>Certification</h3><p>Issuer: ${fixtures.cert.issuer}</p><p>Valid until: ${fixtures.cert.validUntil}</p>`);
+          renderAudit('cert-review', { issuer: fixtures.cert.issuer });
+        } else if (currentStep === 3) {
+          content.append(`<h3>Webhook Delivery</h3><p>Endpoint: ${fixtures.producer.webhook}</p><p>Headers: X-DPIC-Cert: signed</p>`);
+          renderAudit('webhook-ready', { url: fixtures.producer.webhook });
+        }
+      }
+
+      $('#next-step').on('click', async () => {
+        if (currentStep < steps.length - 1) currentStep += 1;
+        renderSteps();
+        renderStepContent();
+      });
+
+      $('#prev-step').on('click', async () => {
+        if (currentStep > 0) currentStep -= 1;
+        renderSteps();
+        renderStepContent();
+      });
+
+      (async () => {
+        await loadFixtures();
+        renderSteps();
+        renderStepContent();
+        diffContracts();
+        await buildCertPreview();
+      })();
+    </script>
+  </body>
+</html>

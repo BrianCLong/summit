@@ -1,0 +1,12 @@
+{
+  "name": "ingestion-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Contract specification toolkit for ingestion with certification and quarantine workflows",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.json && node --test tests/*.test.js",
+    "lint": "eslint src --ext .ts"
+  }
+}
