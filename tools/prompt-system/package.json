@@ -1,0 +1,61 @@
+{
+  "name": "@intelgraph/prompt-system",
+  "version": "1.0.0",
+  "description": "AI Dev Assistant Prompt Template System for Summit/IntelGraph",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "prompt": "./dist/cli/index.js",
+    "ig-prompt": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest --config jest.config.js",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "cli": "node dist/cli/index.js",
+    "validate": "node dist/cli/index.js validate",
+    "metrics": "node dist/cli/index.js metrics",
+    "generate": "node dist/cli/index.js generate"
+  },
+  "keywords": [
+    "ai",
+    "prompts",
+    "templates",
+    "dev-tools",
+    "cli",
+    "automation"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.0.0",
+    "enquirer": "^2.4.1",
+    "js-yaml": "^4.1.0",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "handlebars": "^4.7.8",
+    "simple-git": "^3.22.0",
+    "dotenv": "^17.2.3",
+    "dayjs": "^1.11.10"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@typescript-eslint/eslint-plugin": "^8.47.0",
+    "@typescript-eslint/parser": "^8.47.0",
+    "eslint": "9.39.1",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

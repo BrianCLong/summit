@@ -4,7 +4,8 @@
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "bin": {
-    "docforge": "./tools/docforge/cli.js"
+    "docforge": "./tools/docforge/cli.js",
+    "ig-prompt": "./tools/prompt-system/dist/cli/index.js"
   },
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
@@ -112,7 +113,12 @@
     "security:audit:fix": "pnpm audit --fix",
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",
     "security:scan": "pnpm run security:audit && pnpm run security:lint",
-    "security:outdated": "pnpm outdated"
+    "security:outdated": "pnpm outdated",
+    "prompt": "node tools/prompt-system/dist/cli/index.js",
+    "prompt:build": "cd tools/prompt-system && pnpm build",
+    "prompt:test": "cd tools/prompt-system && pnpm test",
+    "prompt:list": "node tools/prompt-system/dist/cli/index.js list",
+    "prompt:stats": "node tools/prompt-system/dist/cli/index.js stats"
   },
   "keywords": [
     "intelligence-analysis",
