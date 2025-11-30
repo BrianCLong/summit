@@ -20,6 +20,7 @@ import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
+import agenticRouter from './routes/agentic-telemetry.js';
 import rbacRouter from './routes/rbacRoutes.js';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
@@ -152,6 +153,7 @@ export const createApp = async () => {
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+  app.use('/agentic', agenticRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
