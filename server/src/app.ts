@@ -15,6 +15,8 @@ import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
+import governanceRouter from './routes/governance.js';
+import controlPlaneRouter from './routes/control-plane.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
@@ -136,6 +138,8 @@ export const createApp = async () => {
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
+  app.use('/api/governance', governanceRouter);
+  app.use('/api/control-plane', controlPlaneRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
