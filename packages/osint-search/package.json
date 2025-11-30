@@ -1,0 +1,18 @@
+{
+  "name": "@intelgraph/osint-search",
+  "version": "1.0.0",
+  "description": "Advanced search engine for OSINT data with faceted search and alerting",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "elasticsearch": "^16.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
