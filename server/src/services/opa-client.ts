@@ -372,3 +372,92 @@ export class OPAClient {
 
 // Singleton instance
 export const opaClient = new OPAClient();
+
+/**
+ * Tenant Graph Slice v0 - Helper Functions
+ * ABAC enforcement for multi-tenant graph queries
+ */
+
+export interface User {
+  id: string;
+  tenantId?: string;
+  purposes?: string[];
+  scopes?: string[];
+}
+
+/**
+ * Verify user has access to tenant and specific action
+ * Throws error if denied
+ */
+export async function verifyTenantAccess(
+  user: User | undefined,
+  tenantId: string,
+  action: string,
+): Promise<void> {
+  if (!user) {
+    throw new Error('Unauthorized: No user context');
+  }
+
+  // Check tenant isolation
+  if (user.tenantId && user.tenantId !== tenantId) {
+    logger.warn(
+      { userId: user.id, userTenant: user.tenantId, requestedTenant: tenantId },
+      'Tenant isolation violation attempt',
+    );
+    throw new Error(
+      `Forbidden: User tenant ${user.tenantId} cannot access tenant ${tenantId}`,
+    );
+  }
+
+  // Check action permission via OPA
+  const allowed = await opaClient.checkDataAccess(
+    user.id,
+    tenantId,
+    'entity',
+    action,
+  );
+
+  if (!allowed) {
+    logger.warn(
+      { userId: user.id, tenantId, action },
+      'OPA denied tenant action',
+    );
+    throw new Error(`Forbidden: Action ${action} denied by policy`);
+  }
+}
+
+/**
+ * Check if user has one of the required purposes
+ * Returns true if user has proper purpose tag
+ */
+export async function checkPurpose(
+  user: User | undefined,
+  requiredPurposes: string[],
+): Promise<boolean> {
+  if (!user || !user.purposes) {
+    return false;
+  }
+
+  return user.purposes.some((p) => requiredPurposes.includes(p));
+}
+
+/**
+ * Check if user can access PII fields
+ * Requires proper purpose AND scope
+ */
+export async function canAccessPII(user: User | undefined): Promise<boolean> {
+  if (!user) {
+    return false;
+  }
+
+  // Must have investigation or threat-intel purpose
+  const hasValidPurpose = await checkPurpose(user, [
+    'investigation',
+    'threat-intel',
+  ]);
+
+  // Must have pii:read scope
+  const hasScope = user.scopes?.includes('pii:read') || false;
+
+  return hasValidPurpose && hasScope;
+}
