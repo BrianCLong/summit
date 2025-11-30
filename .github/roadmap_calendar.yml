@@ -1,7 +1,194 @@
-# If present, these dates override “next Monday” logic for v1.1.
+# Roadmap Calendar Configuration
+# Defines execution timeline for the 96-Prompt Engineering Roadmap
+
+# Legacy v1.1 dates (retained for backwards compatibility)
 v1_1:
-  start: 2025-09-01 # YYYY-MM-DD (W1 starts)
+  start: 2025-09-01
   w12_due: 2025-09-14
   w34_due: 2025-09-28
   w5_due: 2025-10-05
   w6_due: 2025-10-12
+
+# 96-Prompt Engineering Roadmap Calendar
+engineering_roadmap_96:
+  version: '1.0.0'
+  start_date: 2025-12-01
+
+  # Wave 1: Foundation (Prompts 1-8)
+  wave_1:
+    name: 'Foundation'
+    start: 2025-12-01
+    end: 2025-12-14
+    duration_weeks: 2
+    milestones:
+      kickoff: 2025-12-01
+      midpoint_review: 2025-12-08
+      completion: 2025-12-14
+    prompts:
+      P1: { start: 2025-12-01, due: 2025-12-14 }
+      P2: { start: 2025-12-01, due: 2025-12-14 }
+      P3: { start: 2025-12-01, due: 2025-12-14 }
+      P4: { start: 2025-12-01, due: 2025-12-14 }
+      P5: { start: 2025-12-01, due: 2025-12-14 }
+      P6: { start: 2025-12-01, due: 2025-12-14 }
+      P7: { start: 2025-12-01, due: 2025-12-14 }
+      P8: { start: 2025-12-01, due: 2025-12-14 }
+
+  # Wave 2: Expansion (Prompts 9-16)
+  wave_2:
+    name: 'Expansion'
+    start: 2025-12-15
+    end: 2025-12-28
+    duration_weeks: 2
+    milestones:
+      kickoff: 2025-12-15
+      midpoint_review: 2025-12-22
+      completion: 2025-12-28
+    prompts:
+      P9: { start: 2025-12-15, due: 2025-12-28 }
+      P10: { start: 2025-12-15, due: 2025-12-28 }
+      P11: { start: 2025-12-15, due: 2025-12-28 }
+      P12: { start: 2025-12-15, due: 2025-12-28 }
+      P13: { start: 2025-12-15, due: 2025-12-28 }
+      P14: { start: 2025-12-15, due: 2025-12-28 }
+      P15: { start: 2025-12-15, due: 2025-12-28 }
+      P16: { start: 2025-12-15, due: 2025-12-28 }
+
+  # Wave 3: Resilience (Prompts 17-24)
+  wave_3:
+    name: 'Resilience'
+    start: 2025-12-29
+    end: 2026-01-11
+    duration_weeks: 2
+    milestones:
+      kickoff: 2025-12-29
+      midpoint_review: 2026-01-05
+      completion: 2026-01-11
+    prompts:
+      P17: { start: 2025-12-29, due: 2026-01-11 }
+      P18: { start: 2025-12-29, due: 2026-01-11 }
+      P19: { start: 2025-12-29, due: 2026-01-11 }
+      P20: { start: 2025-12-29, due: 2026-01-11 }
+      P21: { start: 2025-12-29, due: 2026-01-11 }
+      P22: { start: 2025-12-29, due: 2026-01-11 }
+      P23: { start: 2025-12-29, due: 2026-01-11 }
+      P24: { start: 2025-12-29, due: 2026-01-11 }
+
+  # Wave 4: Advanced (Prompts 25-48)
+  wave_4:
+    name: 'Advanced'
+    start: 2026-01-12
+    end: 2026-02-08
+    duration_weeks: 4
+    milestones:
+      kickoff: 2026-01-12
+      week2_review: 2026-01-26
+      midpoint_review: 2026-02-01
+      completion: 2026-02-08
+    prompts:
+      P25: { start: 2026-01-12, due: 2026-02-08 }
+      P26: { start: 2026-01-12, due: 2026-02-08 }
+      P27: { start: 2026-01-12, due: 2026-02-08 }
+      P28: { start: 2026-01-12, due: 2026-02-08 }
+      P29: { start: 2026-01-12, due: 2026-02-08 }
+      P30: { start: 2026-01-12, due: 2026-02-08 }
+      P31: { start: 2026-01-12, due: 2026-02-08 }
+      P32: { start: 2026-01-12, due: 2026-02-08 }
+      P33: { start: 2026-01-12, due: 2026-02-08 }
+      P34: { start: 2026-01-12, due: 2026-02-08 }
+      P35: { start: 2026-01-12, due: 2026-02-08 }
+      P36: { start: 2026-01-12, due: 2026-02-08 }
+      P37: { start: 2026-01-12, due: 2026-02-08 }
+      P38: { start: 2026-01-12, due: 2026-02-08 }
+      P39: { start: 2026-01-12, due: 2026-02-08 }
+      P40: { start: 2026-01-12, due: 2026-02-08 }
+      P41: { start: 2026-01-12, due: 2026-02-08 }
+      P42: { start: 2026-01-12, due: 2026-02-08 }
+      P43: { start: 2026-01-12, due: 2026-02-08 }
+      P44: { start: 2026-01-12, due: 2026-02-08 }
+      P45: { start: 2026-01-12, due: 2026-02-08 }
+      P46: { start: 2026-01-12, due: 2026-02-08 }
+      P47: { start: 2026-01-12, due: 2026-02-08 }
+      P48: { start: 2026-01-12, due: 2026-02-08 }
+
+  # Wave 5: Innovation (Prompts 49-72)
+  wave_5:
+    name: 'Innovation'
+    start: 2026-02-09
+    end: 2026-03-08
+    duration_weeks: 4
+    milestones:
+      kickoff: 2026-02-09
+      week2_review: 2026-02-23
+      midpoint_review: 2026-03-01
+      completion: 2026-03-08
+    prompts:
+      P49: { start: 2026-02-09, due: 2026-03-08 }
+      P50: { start: 2026-02-09, due: 2026-03-08 }
+      P51: { start: 2026-02-09, due: 2026-03-08 }
+      P52: { start: 2026-02-09, due: 2026-03-08 }
+      P53: { start: 2026-02-09, due: 2026-03-08 }
+      P54: { start: 2026-02-09, due: 2026-03-08 }
+      P55: { start: 2026-02-09, due: 2026-03-08 }
+      P56: { start: 2026-02-09, due: 2026-03-08 }
+      P57: { start: 2026-02-09, due: 2026-03-08 }
+      P58: { start: 2026-02-09, due: 2026-03-08 }
+      P59: { start: 2026-02-09, due: 2026-03-08 }
+      P60: { start: 2026-02-09, due: 2026-03-08 }
+      P61: { start: 2026-02-09, due: 2026-03-08 }
+      P62: { start: 2026-02-09, due: 2026-03-08 }
+      P63: { start: 2026-02-09, due: 2026-03-08 }
+      P64: { start: 2026-02-09, due: 2026-03-08 }
+      P65: { start: 2026-02-09, due: 2026-03-08 }
+      P66: { start: 2026-02-09, due: 2026-03-08 }
+      P67: { start: 2026-02-09, due: 2026-03-08 }
+      P68: { start: 2026-02-09, due: 2026-03-08 }
+      P69: { start: 2026-02-09, due: 2026-03-08 }
+      P70: { start: 2026-02-09, due: 2026-03-08 }
+      P71: { start: 2026-02-09, due: 2026-03-08 }
+      P72: { start: 2026-02-09, due: 2026-03-08 }
+
+  # Wave 6: Excellence (Prompts 73-96)
+  wave_6:
+    name: 'Excellence'
+    start: 2026-03-09
+    end: 2026-04-05
+    duration_weeks: 4
+    milestones:
+      kickoff: 2026-03-09
+      week2_review: 2026-03-23
+      midpoint_review: 2026-03-29
+      completion: 2026-04-05
+    prompts:
+      P73: { start: 2026-03-09, due: 2026-04-05 }
+      P74: { start: 2026-03-09, due: 2026-04-05 }
+      P75: { start: 2026-03-09, due: 2026-04-05 }
+      P76: { start: 2026-03-09, due: 2026-04-05 }
+      P77: { start: 2026-03-09, due: 2026-04-05 }
+      P78: { start: 2026-03-09, due: 2026-04-05 }
+      P79: { start: 2026-03-09, due: 2026-04-05 }
+      P80: { start: 2026-03-09, due: 2026-04-05 }
+      P81: { start: 2026-03-09, due: 2026-04-05 }
+      P82: { start: 2026-03-09, due: 2026-04-05 }
+      P83: { start: 2026-03-09, due: 2026-04-05 }
+      P84: { start: 2026-03-09, due: 2026-04-05 }
+      P85: { start: 2026-03-09, due: 2026-04-05 }
+      P86: { start: 2026-03-09, due: 2026-04-05 }
+      P87: { start: 2026-03-09, due: 2026-04-05 }
+      P88: { start: 2026-03-09, due: 2026-04-05 }
+      P89: { start: 2026-03-09, due: 2026-04-05 }
+      P90: { start: 2026-03-09, due: 2026-04-05 }
+      P91: { start: 2026-03-09, due: 2026-04-05 }
+      P92: { start: 2026-03-09, due: 2026-04-05 }
+      P93: { start: 2026-03-09, due: 2026-04-05 }
+      P94: { start: 2026-03-09, due: 2026-04-05 }
+      P95: { start: 2026-03-09, due: 2026-04-05 }
+      P96: { start: 2026-03-09, due: 2026-04-05 }
+
+  # Summary
+  summary:
+    total_duration_weeks: 18
+    total_prompts: 96
+    estimated_completion: 2026-04-05
+    review_cadence: weekly
+    retrospective_cadence: end_of_wave
