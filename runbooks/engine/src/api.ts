@@ -366,6 +366,96 @@ export function createRunbookAPI(engine: RunbookEngine): Router {
   });
 
   /**
+   * POST /executions/:id/pause
+   * Pause a running execution
+   */
+  router.post('/executions/:id/pause', async (req: Request, res: Response) => {
+    try {
+      await engine.pauseExecution(req.params.id);
+
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        status: 'paused',
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to pause execution',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
+   * POST /executions/:id/resume
+   * Resume a paused execution
+   */
+  router.post('/executions/:id/resume', async (req: Request, res: Response) => {
+    try {
+      await engine.resumeExecution(req.params.id);
+
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        status: 'resumed',
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to resume execution',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
+   * POST /executions/:id/cancel
+   * Cancel a running execution
+   *
+   * Body (optional):
+   * {
+   *   reason?: string
+   * }
+   */
+  router.post('/executions/:id/cancel', async (req: Request, res: Response) => {
+    try {
+      const { reason } = req.body;
+      await engine.cancelExecution(req.params.id, reason);
+
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        status: 'cancelled',
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to cancel execution',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
+   * GET /executions/:id/stats
+   * Get execution statistics and progress
+   */
+  router.get('/executions/:id/stats', async (req: Request, res: Response) => {
+    try {
+      const stats = await engine.getExecutionStats(req.params.id);
+
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        stats,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to get execution stats',
+        message: (error as Error).message,
+      });
+    }
+  });
+
+  /**
    * GET /health
    * Health check
    */
