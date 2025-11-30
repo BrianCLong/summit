@@ -5,7 +5,6 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
-import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
@@ -21,11 +20,13 @@ import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import rbacRouter from './routes/rbacRoutes.js';
+import logAggregationRouter from './routes/logs.js';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
+import { appLogger } from './logging/structuredLogger.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
@@ -54,7 +55,7 @@ export const createApp = async () => {
   await tracer.initialize();
 
   const app = express();
-  const logger = pino();
+  const logger = appLogger;
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
@@ -136,6 +137,7 @@ export const createApp = async () => {
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
+  app.use('/observability/logs', logAggregationRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
