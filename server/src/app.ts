@@ -5,13 +5,13 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
-import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { requestContextMiddleware, appLogger } from './observability/request-context.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
@@ -26,6 +26,7 @@ import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
+import { httpMetricsMiddleware } from './observability/http-metrics-middleware.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
@@ -54,10 +55,10 @@ export const createApp = async () => {
   await tracer.initialize();
 
   const app = express();
-  const logger = pino();
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+  app.use(requestContextMiddleware);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -81,7 +82,7 @@ export const createApp = async () => {
   // Enhanced Pino HTTP logger with correlation and trace context
   app.use(
     pinoHttp({
-      logger,
+      logger: appLogger,
       redact: ['req.headers.authorization', 'req.headers.cookie'],
       customProps: (req: any) => ({
         correlationId: req.correlationId,
@@ -96,6 +97,7 @@ export const createApp = async () => {
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
   app.use(httpCacheMiddleware);
+  app.use(httpMetricsMiddleware);
 
   // Telemetry middleware
   app.use((req, res, next) => {
