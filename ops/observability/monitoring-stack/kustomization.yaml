@@ -8,14 +8,21 @@ configMapGenerator:
     files:
       - prometheus.yml=../../prometheus/prometheus.yml
       - prometheus-rule-slo.yaml=../../prometheus/prometheus-rule-slo.yaml
+      - prometheus-rule-sla.yaml=../../prometheus/prometheus-rule-sla.yaml
       - rules-business.yaml=../../prometheus/rules-business.yaml
   - name: grafana-dashboards
     files:
       - monitoring-platform.json=../../grafana/dashboards/monitoring-platform.json
+      - observability-sla.json=../../grafana/dashboards/observability-sla.json
+  - name: grafana-provisioning
+    files:
       - dashboards.yaml=../../grafana/provisioning/dashboards/dashboards.yml
   - name: alertmanager-config
     files:
       - alertmanager.yml=alertmanager.yml
+  - name: otel-collector-config
+    files:
+      - otel-collector-config.yaml=../../otel/otel-collector-config.yaml
 secretGenerator:
   - name: grafana-admin
     literals:
