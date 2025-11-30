@@ -1,0 +1,229 @@
+---
+# Data Plane Network Policies
+# Controls traffic for mesh-data namespace (agent execution, sandboxes)
+
+# Allow DNS resolution for all pods in data plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: mesh-data
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Allow agent-runtime ingress from mesh-orchestrator (control plane)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: agent-runtime-ingress
+  namespace: mesh-data
+spec:
+  podSelector:
+    matchLabels:
+      app: agent-runtime
+  policyTypes:
+    - Ingress
+  ingress:
+    # From mesh-orchestrator to dispatch tasks
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: mesh-orchestrator
+      ports:
+        - protocol: TCP
+          port: 8085
+
+    # From ops zone for monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 9091  # Metrics
+
+---
+# Allow tool executors ingress from agent runtimes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tool-executor-ingress
+  namespace: mesh-data
+spec:
+  podSelector:
+    matchLabels:
+      app: tool-executor
+  policyTypes:
+    - Ingress
+  ingress:
+    # From agent runtimes within data plane
+    - from:
+        - podSelector:
+            matchLabels:
+              app: agent-runtime
+      ports:
+        - protocol: TCP
+          port: 8086
+
+---
+# Allow agent runtimes to communicate with control plane (for results)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-control-plane
+  namespace: mesh-data
+spec:
+  podSelector:
+    matchLabels:
+      app: agent-runtime
+  policyTypes:
+    - Egress
+  egress:
+    # To mesh-orchestrator for task updates/results
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: mesh-orchestrator
+      ports:
+        - protocol: TCP
+          port: 9090  # gRPC
+
+    # To policy-enforcer for authorization checks
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: policy-enforcer
+      ports:
+        - protocol: TCP
+          port: 8081
+
+---
+# Allow data plane to access storage (limited to read-only for most workloads)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-to-storage
+  namespace: mesh-data
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # PostgreSQL (for reading provenance, configuration)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-storage
+          podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Redis (for caching, session state)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-storage
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+---
+# Allow controlled egress to external APIs (allowlisted per tool)
+# This is a template - in production, create per-tool policies
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-egress-external-allowlisted
+  namespace: mesh-data
+spec:
+  podSelector:
+    matchLabels:
+      external-access: "allowed"
+  policyTypes:
+    - Egress
+  egress:
+    # Allow HTTPS to external destinations
+    # In production, use egress gateway with domain filtering
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
+
+    # Example: Allow specific IP blocks for known APIs
+    # - to:
+    #     - ipBlock:
+    #         cidr: 1.2.3.4/32  # Specific API endpoint
+    #   ports:
+    #     - protocol: TCP
+    #       port: 443
+
+---
+# Block all other egress from sandboxed workloads by default
+# (default-deny already applied, this is explicit for documentation)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sandbox-strict-isolation
+  namespace: mesh-data
+spec:
+  podSelector:
+    matchLabels:
+      workload-type: sandbox
+  policyTypes:
+    - Ingress
+    - Egress
+  # No ingress or egress rules = complete isolation
+  # Sandboxes should only communicate via agent-runtime parent
+
+---
+# Allow health check probes from Kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: mesh-data
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8085
+        - protocol: TCP
+          port: 8086

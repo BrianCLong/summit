@@ -1,0 +1,265 @@
+---
+# Agentic Mesh Zero-Trust Namespaces
+# These namespaces implement trust zone segmentation for the mesh
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh-edge
+  labels:
+    name: mesh-edge
+    trust-zone: edge
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Edge zone for external-facing ingress and API gateway"
+    security-tier: "dmz"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh-control
+  labels:
+    name: mesh-control
+    trust-zone: control-plane
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Control plane for orchestration, routing, and policy enforcement"
+    security-tier: "trusted"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh-data
+  labels:
+    name: mesh-data
+    trust-zone: data-plane
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Data plane for agent execution and tool invocation (sandboxed)"
+    security-tier: "sandboxed"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh-storage
+  labels:
+    name: mesh-storage
+    trust-zone: storage-plane
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Storage plane for databases, caches, and object storage"
+    security-tier: "data"
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mesh-ops
+  labels:
+    name: mesh-ops
+    trust-zone: operations
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Operations zone for observability and operator console"
+    security-tier: "privileged"
+
+---
+# Resource quotas for each namespace to prevent resource exhaustion
+
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mesh-edge-quota
+  namespace: mesh-edge
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 20Gi
+    limits.cpu: "20"
+    limits.memory: 40Gi
+    persistentvolumeclaims: "5"
+    services.loadbalancers: "2"
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mesh-control-quota
+  namespace: mesh-control
+spec:
+  hard:
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    limits.cpu: "40"
+    limits.memory: 80Gi
+    persistentvolumeclaims: "10"
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mesh-data-quota
+  namespace: mesh-data
+spec:
+  hard:
+    requests.cpu: "50"
+    requests.memory: 100Gi
+    limits.cpu: "100"
+    limits.memory: 200Gi
+    persistentvolumeclaims: "5"
+    # Limit pods for safety (agent/tool sandboxes)
+    pods: "500"
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mesh-storage-quota
+  namespace: mesh-storage
+spec:
+  hard:
+    requests.cpu: "30"
+    requests.memory: 60Gi
+    limits.cpu: "60"
+    limits.memory: 120Gi
+    persistentvolumeclaims: "20"
+    requests.storage: "500Gi"
+
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: mesh-ops-quota
+  namespace: mesh-ops
+spec:
+  hard:
+    requests.cpu: "15"
+    requests.memory: 30Gi
+    limits.cpu: "30"
+    limits.memory: 60Gi
+    persistentvolumeclaims: "10"
+
+---
+# Limit ranges to enforce pod-level resource constraints
+
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mesh-edge-limits
+  namespace: mesh-edge
+spec:
+  limits:
+    - max:
+        cpu: "4"
+        memory: 8Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: "1"
+        memory: 2Gi
+      defaultRequest:
+        cpu: 250m
+        memory: 512Mi
+      type: Container
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mesh-control-limits
+  namespace: mesh-control
+spec:
+  limits:
+    - max:
+        cpu: "8"
+        memory: 16Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: "2"
+        memory: 4Gi
+      defaultRequest:
+        cpu: 500m
+        memory: 1Gi
+      type: Container
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mesh-data-limits
+  namespace: mesh-data
+spec:
+  limits:
+    - max:
+        cpu: "4"
+        memory: 8Gi
+      min:
+        cpu: 50m
+        memory: 64Mi
+      default:
+        cpu: "1"
+        memory: 2Gi
+      defaultRequest:
+        cpu: 250m
+        memory: 512Mi
+      type: Container
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mesh-storage-limits
+  namespace: mesh-storage
+spec:
+  limits:
+    - max:
+        cpu: "16"
+        memory: 32Gi
+      min:
+        cpu: 250m
+        memory: 512Mi
+      default:
+        cpu: "4"
+        memory: 8Gi
+      defaultRequest:
+        cpu: "1"
+        memory: 2Gi
+      type: Container
+
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mesh-ops-limits
+  namespace: mesh-ops
+spec:
+  limits:
+    - max:
+        cpu: "8"
+        memory: 16Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: "2"
+        memory: 4Gi
+      defaultRequest:
+        cpu: 500m
+        memory: 1Gi
+      type: Container
