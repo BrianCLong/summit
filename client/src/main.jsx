@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom/client';
 import App from './App.router.jsx';
 import './styles/globals.css';
 import { initWebVitals } from './utils/webVitals.js';
+import ErrorBoundary, {
+  ErrorFallback as ErrorBoundaryFallback,
+} from './components/common/ErrorBoundary';
 
 console.log('🚀 Starting Full IntelGraph Router App...');
 
@@ -25,7 +28,18 @@ if (!root) {
 
     ReactDOM.createRoot(root).render(
       <React.StrictMode>
-        <App />
+        <ErrorBoundary
+          fallback={(error, _errorInfo, resetErrorBoundary) => (
+            <ErrorBoundaryFallback
+              error={error}
+              resetErrorBoundary={resetErrorBoundary}
+              title="IntelGraph experienced an unexpected error"
+            />
+          )}
+          onReset={() => console.info('Error boundary reset triggered')}
+        >
+          <App />
+        </ErrorBoundary>
       </React.StrictMode>,
     );
 
