@@ -27,15 +27,26 @@ type NLPEntity {
   end: Int
   confidence: Float
 }
+type LinkProvenance {
+  source: String!
+  context: String
+  model: String
+  observedAt: String
+  notes: String
+}
 type ERLink {
   a: ID!
   b: ID!
   score: Float!
+  confidence: Float
+  provenance: LinkProvenance
 }
 type LinkPrediction {
   u: ID!
   v: ID!
   score: Float!
+  confidence: Float
+  provenance: LinkProvenance
 }
 type Community {
   communityId: ID!
