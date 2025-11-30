@@ -44,6 +44,10 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import { initializeCacheWarmers } from './cache/warmers.js';
+import { startCacheInvalidationListener } from './cache/invalidation.js';
+import { connectPostgres, connectRedis } from './config/database.js';
+import cacheAnalyticsRouter from './routes/cache-analytics.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -55,6 +59,26 @@ export const createApp = async () => {
 
   const app = express();
   const logger = pino();
+
+  let warmersAllowed = true;
+  try {
+    await connectPostgres();
+  } catch (error) {
+    warmersAllowed = false;
+    logger.warn(
+      { err: error },
+      'PostgreSQL unavailable; cache warmers will be skipped',
+    );
+  }
+
+  // Ensure Redis is connected before wiring cache listeners and warmers
+  await connectRedis();
+  startCacheInvalidationListener();
+  if (warmersAllowed) {
+    await initializeCacheWarmers();
+  } else {
+    logger.info('Skipping cache warmer initialization because PostgreSQL is not connected');
+  }
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
@@ -136,6 +160,7 @@ export const createApp = async () => {
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
+  app.use('/monitoring/cache', cacheAnalyticsRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);

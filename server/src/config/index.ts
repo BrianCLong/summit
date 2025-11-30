@@ -23,6 +23,9 @@ interface Config {
     port: number;
     password: string;
     db: number;
+    useCluster: boolean;
+    clusterNodes: string[];
+    tls: boolean;
   };
   jwt: {
     secret: string;
@@ -43,6 +46,20 @@ interface Config {
   features: {
     GRAPH_EXPAND_CACHE: boolean;
     AI_REQUEST_ENABLED: boolean;
+  };
+  cache: {
+    defaultTtlSeconds: number;
+    queryTtlSeconds: number;
+    warmersEnabled: boolean;
+    warmerIntervalSeconds: number;
+    staleWhileRevalidateSeconds: number;
+  };
+  cdn: {
+    enabled: boolean;
+    provider: 'cloudflare' | 'fastly' | 'generic';
+    surrogateKeyNamespace: string;
+    edgeTtlSeconds: number;
+    browserTtlSeconds: number;
   };
 }
 
@@ -74,6 +91,12 @@ const config: Config = {
     port: parseInt(process.env.REDIS_PORT || '6379'),
     password: process.env.REDIS_PASSWORD || 'devpassword',
     db: parseInt(process.env.REDIS_DB || '0'),
+    useCluster: process.env.REDIS_USE_CLUSTER === 'true',
+    clusterNodes:
+      process.env.REDIS_CLUSTER_NODES?.split(',')
+        .map((node) => node.trim())
+        .filter(Boolean) || [],
+    tls: process.env.REDIS_TLS === 'true',
   },
 
   // JWT configuration
@@ -106,6 +129,27 @@ const config: Config = {
   features: {
     GRAPH_EXPAND_CACHE: process.env.GRAPH_EXPAND_CACHE !== '0',
     AI_REQUEST_ENABLED: process.env.AI_REQUEST_ENABLED !== '0',
+  },
+
+  cache: {
+    defaultTtlSeconds: parseInt(process.env.CACHE_DEFAULT_TTL || '300'),
+    queryTtlSeconds: parseInt(process.env.CACHE_QUERY_TTL || '180'),
+    warmersEnabled: process.env.CACHE_WARMERS_ENABLED !== '0',
+    warmerIntervalSeconds: parseInt(process.env.CACHE_WARMER_INTERVAL || '300'),
+    staleWhileRevalidateSeconds: parseInt(
+      process.env.CACHE_STALE_WHILE_REVALIDATE || '30',
+    ),
+  },
+
+  cdn: {
+    enabled: process.env.CDN_ENABLED === 'true',
+    provider:
+      (process.env.CDN_PROVIDER as 'cloudflare' | 'fastly' | 'generic') ||
+      'generic',
+    surrogateKeyNamespace:
+      process.env.CDN_SURROGATE_KEY_NAMESPACE || 'summit-edge-cache',
+    edgeTtlSeconds: parseInt(process.env.CDN_EDGE_TTL || '120'),
+    browserTtlSeconds: parseInt(process.env.CDN_BROWSER_TTL || '60'),
   },
 };
 
