@@ -1,0 +1,13 @@
+{
+  "id": "dpic-001",
+  "dataset": "producer-alpha",
+  "version": "1.0.0",
+  "owner": "alpha-labs",
+  "license": { "name": "CC-BY-4.0", "url": "https://creativecommons.org/licenses/by/4.0/" },
+  "termsHash": "",
+  "fields": [
+    { "name": "user_id", "type": "string", "nullable": false, "classification": "pii" },
+    { "name": "region", "type": "string", "nullable": false },
+    { "name": "device_score", "type": "number", "nullable": true, "unit": "points" }
+  ]
+}
