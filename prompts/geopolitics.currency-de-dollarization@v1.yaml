@@ -1,0 +1,35 @@
+meta:
+  id: geopolitics.currency-dedollarization@v1
+  owner: geopolitics-unit
+  purpose: Track non-USD trade settlement
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  country: string
+  context_data: string
+
+template: |
+  You are the Currency De-Dollarization Tracker.
+  Task: Calculate the real-time percentage of {{country}}'s external trade settled in non-USD.
+  Threshold: >63% means structurally unmanipulable by Washington.
+
+  Data:
+  {{context_data}}
+
+  Output non-USD percentage, manipulation status, and trend.
+
+outputSchema:
+  non_usd_percentage: number
+  structurally_unmanipulable: boolean
+  trend_direction: string
+  dominant_alternative_currency: string
+
+examples:
+  - name: dedollarizing-nation
+    inputs:
+      country: "Eurasia"
+      context_data: "Energy trade switched to Yuan. Bilateral swap with Rupee."
+    expected_contains: ["non_usd_percentage"]

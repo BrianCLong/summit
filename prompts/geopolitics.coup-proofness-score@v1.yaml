@@ -1,0 +1,35 @@
+meta:
+  id: geopolitics.coup-proofness-score@v1
+  owner: geopolitics-unit
+  purpose: Calculate coup likelihood score
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.2
+
+inputs:
+  country: string
+  context_data: string
+
+template: |
+  You are the Coup-Proofness Score system.
+  Task: Specify a 0–100 score for the military of {{country}}.
+  Reference: Below 40 = coup likely within 12 months.
+
+  Data:
+  {{context_data}}
+
+  Output coup-proofness score, risk level, and time horizon.
+
+outputSchema:
+  coup_proofness_score: number
+  coup_risk_level: string
+  likely_within_12_months: boolean
+  weakest_branch: string
+
+examples:
+  - name: loyal-military
+    inputs:
+      country: "Stability Land"
+      context_data: "Generals well paid. Political commissars embedded in every unit."
+    expected_contains: ["coup_proofness_score"]
