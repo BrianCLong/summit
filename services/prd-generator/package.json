@@ -1,0 +1,11 @@
+{
+  "name": "@intelgraph/prd-generator",
+  "version": "0.1.0",
+  "description": "PRD Generator & Acceptance-Pack Scaffolder",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": { "prd-init": "dist/cli.js" },
+  "scripts": { "build": "tsc", "cli": "tsx src/cli.ts" },
+  "dependencies": { "commander": "^11.1.0" },
+  "devDependencies": { "@types/node": "^20.10.6", "tsx": "^4.7.0", "typescript": "^5.3.3" }
+}

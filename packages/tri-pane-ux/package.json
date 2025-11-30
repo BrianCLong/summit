@@ -1,0 +1,10 @@
+{
+  "name": "@intelgraph/tri-pane-ux",
+  "version": "0.1.0",
+  "description": "Tri-pane analyst UX (Graph + Timeline + Map)",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": { "build": "tsc", "test": "jest" },
+  "dependencies": { "react": "^18.2.0", "react-dom": "^18.2.0" },
+  "devDependencies": { "@types/react": "^18.2.0", "@types/node": "^20.10.6", "typescript": "^5.3.3" }
+}
