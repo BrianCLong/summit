@@ -117,6 +117,48 @@ class STIXImportService {
   }
 
   /**
+   * Start STIX bundle import from JSON object
+   */
+  async startStixJsonImport(options) {
+    const {
+      bundleJson,
+      investigationId,
+      userId,
+      tenantId = 'default',
+    } = options;
+
+    const jobId = uuid();
+    const job = {
+      id: jobId,
+      type: 'STIX_JSON',
+      status: 'pending',
+      investigationId,
+      userId,
+      tenantId,
+      stats: {
+        totalObjects: 0,
+        processedObjects: 0,
+        createdNodes: 0,
+        updatedNodes: 0,
+        createdRelationships: 0,
+        errors: 0,
+        skippedObjects: 0,
+      },
+      errors: [],
+      createdAt: new Date().toISOString(),
+      startedAt: null,
+      finishedAt: null,
+    };
+
+    await this.saveJob(job);
+    this.activeJobs.set(jobId, job);
+
+    setImmediate(() => this.processStixJson(job, bundleJson));
+
+    return job;
+  }
+
+  /**
    * Process TAXII collection with pagination
    */
   async processTaxiiCollection(job) {
@@ -198,6 +240,47 @@ class STIXImportService {
       job.finishedAt = new Date().toISOString();
       job.errors.push({
         type: 'BUNDLE_ERROR',
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      });
+      await this.updateJob(job);
+      await this.emitProgress(job);
+    } finally {
+      await session.close();
+      this.activeJobs.delete(job.id);
+    }
+  }
+
+  /**
+   * Process STIX bundle from JSON
+   */
+  async processStixJson(job, bundleData) {
+    const session = this.neo4j.session();
+
+    try {
+      job.status = 'running';
+      job.startedAt = new Date().toISOString();
+      await this.updateJob(job);
+      await this.emitProgress(job);
+
+      if (bundleData.type !== 'bundle') {
+        throw new Error('Invalid STIX bundle: missing type "bundle"');
+      }
+
+      if (bundleData.objects && Array.isArray(bundleData.objects)) {
+        job.stats.totalObjects = bundleData.objects.length;
+        await this.processStixObjects(bundleData.objects, job, session);
+      }
+
+      job.status = 'completed';
+      job.finishedAt = new Date().toISOString();
+      await this.updateJob(job);
+      await this.emitProgress(job);
+    } catch (error) {
+      job.status = 'failed';
+      job.finishedAt = new Date().toISOString();
+      job.errors.push({
+        type: 'JSON_BUNDLE_ERROR',
         message: error.message,
         timestamp: new Date().toISOString(),
       });
