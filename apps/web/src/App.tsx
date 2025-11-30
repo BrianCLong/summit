@@ -35,6 +35,7 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const SecuriteyesDashboard = React.lazy(() => import('@/securiteyes/pages/Dashboard').then(module => ({ default: module.SecuriteyesDashboard })))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -78,6 +79,9 @@ function App() {
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
                       />
+
+                      {/* Securiteyes */}
+                      <Route path="securiteyes" element={<SecuriteyesDashboard />} />
 
                       {/* Alerts */}
                       <Route path="alerts" element={<AlertsPage />} />
