@@ -6,6 +6,7 @@ global:
 rule_files:
   - prometheus-rule-slo.yaml
   - rules-business.yaml
+  - approvals-observability-rules.yaml
 
 alerting:
   alertmanagers:

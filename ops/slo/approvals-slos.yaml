@@ -1,0 +1,71 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: approvals-latency-slo
+spec:
+  service: approvals
+  slos:
+    - name: approvals-latency-p95
+      objective: 99.0
+      description: "p95 latency for create and decision < 1.5s"
+      labels:
+        tier: critical
+        flow: grant_elevated_access
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(http_request_duration_seconds_bucket{
+              service="approvals",
+              route=~"/approvals|/approvals/.*/decision",
+              le="+Inf"
+            }[5m]))
+            -
+            sum(rate(http_request_duration_seconds_bucket{
+              service="approvals",
+              route=~"/approvals|/approvals/.*/decision",
+              le="1.5"
+            }[5m]))
+          totalQuery: |
+            sum(rate(http_request_duration_seconds_count{
+              service="approvals",
+              route=~"/approvals|/approvals/.*/decision"
+            }[5m]))
+      alerting:
+        name: approvals-latency-slo-alerts
+        labels:
+          severity: page
+        annotations:
+          summary: "Approvals latency SLO is being violated"
+---
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: approvals-error-slo
+spec:
+  service: approvals
+  slos:
+    - name: approvals-error-rate
+      objective: 99.5
+      description: "Error rate for approvals endpoints < 0.5%"
+      labels:
+        tier: critical
+        flow: grant_elevated_access
+      sli:
+        events:
+          errorQuery: |
+            sum(rate(http_requests_total{
+              service="approvals",
+              route=~"/approvals|/approvals/.*/decision",
+              code!~"2..|3.."
+            }[5m]))
+          totalQuery: |
+            sum(rate(http_requests_total{
+              service="approvals",
+              route=~"/approvals|/approvals/.*/decision"
+            }[5m]))
+      alerting:
+        name: approvals-error-slo-alerts
+        labels:
+          severity: page
+        annotations:
+          summary: "Approvals error-rate SLO is being violated"
