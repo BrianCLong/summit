@@ -1,0 +1,10 @@
+{
+  "alert": "ApprovalBottleneck",
+  "description": "{{ $value }} mutations pending approval for 30+ minutes",
+  "expr": "approval_pending_total > 50",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/approval-bottleneck",
+  "service": "intelgraph-api",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Large backlog of pending approvals"
+}

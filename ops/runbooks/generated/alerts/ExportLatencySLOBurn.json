@@ -1,0 +1,10 @@
+{
+  "alert": "ExportLatencySLOBurn",
+  "description": "95th percentile export latency is {{ $value }}s (threshold: 1.2s)",
+  "expr": "histogram_quantile(0.95,\n  sum(rate(export_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le)\n) > 1.2\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/export-latency",
+  "service": "api",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Data export latency SLO breach"
+}

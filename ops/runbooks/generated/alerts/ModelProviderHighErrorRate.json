@@ -1,0 +1,10 @@
+{
+  "alert": "ModelProviderHighErrorRate",
+  "description": "Error rate for {{ $labels.provider }}/{{ $labels.model }} is {{ $value | humanizePercentage }}",
+  "expr": "(\n  sum(rate(model_requests_total{status=\"error\"}[5m])) by (provider, model) /\n  sum(rate(model_requests_total[5m])) by (provider, model)\n) > 0.1\n",
+  "runbook_url": "https://runbooks.intelgraph.io/model/error-rate",
+  "service": "model_orchestration",
+  "severity": "critical",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Model provider error rate high"
+}

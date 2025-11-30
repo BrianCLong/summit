@@ -1,0 +1,10 @@
+{
+  "alert": "PlatformCostGuardrailCritical",
+  "description": "Monthly spend is {{ $value | humanizePercentage }} of budget. Freeze deploys and trigger cost rollback.",
+  "expr": "(intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd) > 0.9",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/observability-sre#finops-guardrail",
+  "service": "finops",
+  "severity": "critical",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Platform costs exceeded 90% of budget"
+}

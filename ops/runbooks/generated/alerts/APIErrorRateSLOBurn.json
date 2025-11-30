@@ -1,0 +1,10 @@
+{
+  "alert": "APIErrorRateSLOBurn",
+  "description": "API error rate is {{ $value | humanizePercentage }} (threshold: 1%) over the last 5 minutes",
+  "expr": "(\n  sum(rate(http_requests_total{job=\"intelgraph-api\",status=~\"5..\"}[5m])) /\n  sum(rate(http_requests_total{job=\"intelgraph-api\"}[5m]))\n) > 0.01\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/api-error-rate",
+  "service": "api",
+  "severity": "critical",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "API error rate SLO breach"
+}

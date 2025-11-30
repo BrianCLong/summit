@@ -1,0 +1,10 @@
+{
+  "alert": "CanaryDailyBudgetApproaching",
+  "description": "Tenant {{ $labels.tenant }} at {{ $value | humanizePercentage }} of daily budget",
+  "expr": "(intelgraph_daily_spend_usd{tenant=~\"demo|test|maestro-internal\"} / \n intelgraph_daily_limit_usd{tenant=~\"demo|test|maestro-internal\"}) > 0.8\n",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/canary-budget-limits",
+  "service": "intelgraph-api",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Canary tenant approaching daily budget limit"
+}

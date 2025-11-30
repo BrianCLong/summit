@@ -1,0 +1,10 @@
+{
+  "alert": "HighFalsePositiveDenials",
+  "description": "{{ $value | humanizePercentage }} of mutations falsely denied (target: <0.1%)",
+  "expr": "rate(budget_denials_total{reason=\"misconfig\"}[7d]) / rate(mutation_requests_total[7d]) > 0.005",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/false-positive-denials",
+  "service": "intelgraph-api",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "High rate of false-positive budget denials"
+}
