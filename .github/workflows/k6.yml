@@ -1,0 +1,30 @@
+name: Load Test Gate
+on:
+  pull_request:
+    paths:
+      - 'server/**'
+      - 'client/**'
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Spin up Environment
+        run: |
+          # Simplified for CI
+          docker compose -f docker-compose.minimal.yml up -d
+          ./scripts/health-check.sh --retry 10
+
+      - name: Run k6 Load Test
+        uses: grafana/k6-action@v0.3.1
+        with:
+          filename: load/k6-smoke.js
+        env:
+          BASE_URL: http://localhost:3000
+
+      - name: Clean up
+        if: always()
+        run: docker compose -f docker-compose.minimal.yml down

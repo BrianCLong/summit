@@ -1,0 +1,16 @@
+opencost:
+  exporter:
+    enabled: true
+  prometheus:
+    external:
+      enabled: true
+      url: "http://prometheus-operated.monitoring:9090"
+  ui:
+    enabled: true
+    ingress:
+      enabled: true
+      hosts:
+        - host: cost.internal.example.com
+          paths:
+            - path: /
+              pathType: ImplementationSpecific

@@ -1,0 +1,23 @@
+apiVersion: openslo/v1
+kind: SLO
+metadata:
+  name: global-availability
+  displayName: Global Availability
+spec:
+  service: gateway
+  description: "99.5% availability across all public APIs"
+  budgetingMethod: Occurrences
+  objectives:
+    - ratioMetrics:
+        good:
+          source: prometheus
+          queryType: promql
+          query: sum(rate(http_requests_total{status!~"5.."}[5m]))
+        total:
+          source: prometheus
+          queryType: promql
+          query: sum(rate(http_requests_total[5m]))
+      target: 0.995
+      timeWindow:
+        - duration: 28d
+          isRolling: true

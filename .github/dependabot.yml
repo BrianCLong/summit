@@ -4,6 +4,10 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     open-pull-requests-limit: 10
     commit-message:
       prefix: "deps(npm)"
@@ -12,6 +16,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      actions:
+        patterns:
+          - "*"
     commit-message:
       prefix: "deps(actions)"
 
@@ -19,6 +27,10 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      images:
+        patterns:
+          - "*"
     commit-message:
       prefix: "deps(docker)"
 
@@ -26,5 +38,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      go-deps:
+        patterns:
+          - "*"
     commit-message:
       prefix: "deps(go)"

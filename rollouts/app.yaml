@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: intelgraph-backend
+  namespace: production
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: intelgraph-backend
+  strategy:
+    canary:
+      # Blue-Green-ish Canary with analysis
+      steps:
+      - setWeight: 5
+      - pause: {duration: 2m}
+      - analysis:
+          templates:
+          - templateName: success-rate
+          args:
+          - name: service-name
+            value: intelgraph-backend-canary
+      - setWeight: 20
+      - pause: {duration: 5m}
+      - setWeight: 50
+      - pause: {duration: 30s}
+      - setWeight: 100
+  template:
+    metadata:
+      labels:
+        app: intelgraph-backend
+    spec:
+      containers:
+      - name: server
+        image: ghcr.io/intelgraph/server:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
