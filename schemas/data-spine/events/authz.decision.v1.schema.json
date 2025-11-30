@@ -1,0 +1,83 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/data-spine/authz.decision.v1.schema.json",
+  "title": "CompanyOS Authorization Decision Event v1",
+  "description": "Event emitted for every authorization decision produced by the shared authz gateway.",
+  "allOf": [
+    { "$ref": "./base-envelope.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": { "const": "authz.decision.v1" },
+        "event_version": { "const": "v1" },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "resource": {
+              "description": "Resource the subject attempted to access.",
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "type": { "type": "string" },
+                "id": { "type": "string" },
+                "owner_tenant_id": { "type": ["string", "null"] }
+              },
+              "required": ["type", "id"]
+            },
+            "action": {
+              "description": "Action attempted on the resource (e.g., read, write, delete).",
+              "type": "string"
+            },
+            "decision": {
+              "description": "Final decision returned to the caller.",
+              "type": "string",
+              "enum": ["allow", "deny"]
+            },
+            "policy_id": { "type": "string" },
+            "policy_version": { "type": "string" },
+            "policy_bundle_hash": {
+              "description": "Immutable hash of the policy bundle to support lineage.",
+              "type": "string"
+            },
+            "reason": { "type": "string" },
+            "roles": {
+              "description": "Roles evaluated for the subject (hashed as needed).",
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "attributes": {
+              "description": "Safe, non-sensitive attributes used for ABAC decisions.",
+              "type": "object",
+              "additionalProperties": true
+            },
+            "evaluation_ms": {
+              "description": "Latency in milliseconds for the decision evaluation.",
+              "type": "number",
+              "minimum": 0
+            },
+            "location": { "type": ["string", "null"] },
+            "client_ip_hash": {
+              "description": "Hashed client IP for audit without storing PII.",
+              "type": ["string", "null"]
+            },
+            "flag_state": {
+              "description": "Feature flag snapshot that influenced the decision.",
+              "type": "object",
+              "additionalProperties": {
+                "type": ["string", "number", "boolean", "null"]
+              }
+            }
+          },
+          "required": [
+            "resource",
+            "action",
+            "decision",
+            "policy_id",
+            "policy_version"
+          ]
+        }
+      }
+    }
+  ]
+}

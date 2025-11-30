@@ -1,0 +1,28 @@
+{
+  "event_id": "c5b0c815-8d93-4e43-b5b5-4fa1d3ef69b9",
+  "event_type": "authz.decision.v1",
+  "event_version": "v1",
+  "occurred_at": "2025-01-10T18:22:13Z",
+  "recorded_at": "2025-01-10T18:22:13Z",
+  "tenant_id": "tenant-acme",
+  "subject_id": "user-123",
+  "source_service": "authz-gateway",
+  "trace_id": "trace-abc-123",
+  "correlation_id": "req-789",
+  "region": "us-east-1",
+  "data": {
+    "resource": { "type": "document", "id": "doc-55", "owner_tenant_id": "tenant-acme" },
+    "action": "read",
+    "decision": "allow",
+    "policy_id": "policy-documents",
+    "policy_version": "2025.01.10",
+    "policy_bundle_hash": "sha256:e3b0c44298fc1c149afbf4c8996fb924",
+    "reason": "role:editor matched",
+    "roles": ["editor", "beta"],
+    "attributes": { "department": "legal", "risk_tier": "low" },
+    "evaluation_ms": 12,
+    "location": "denver",
+    "client_ip_hash": "3d3f4c1a4d6a7b0d",
+    "flag_state": { "rollout_authz_engine": "v2" }
+  }
+}
