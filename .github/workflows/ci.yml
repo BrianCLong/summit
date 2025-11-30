@@ -17,6 +17,7 @@ env:
 permissions:
   contents: read
   security-events: write
+  id-token: write
 
 jobs:
   # Fast lane: Quick feedback on code quality (no build required)
@@ -102,6 +103,18 @@ jobs:
             ${{ runner.os }}-turbo-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # OIDC Configuration Step (Standard Scope)
+      # Uses secrets.AWS_ROLE_ARN if available, effectively hardening the workflow
+      # while allowing it to run without the secret (if step logic supports it) or failing properly if misconfigured.
+      - name: Configure cloud credentials via OIDC
+        if: ${{ secrets.AWS_ROLE_ARN != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: ci-build
+          aws-region: us-east-1
+
       - name: Build workspace
         run: pnpm -w run build
       - name: Unit & integration tests
@@ -121,16 +134,34 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v4
-      - name: Generate SBOM (SPDX)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # SBOM Generation (Standard Scope)
+      - name: Generate SBOM (CycloneDX)
         uses: anchore/sbom-action@v0
         with:
           path: .
-          output-file: sbom.spdx.json
+          format: cyclonedx-json
+          output-file: sbom.cdx.json
+
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sbom-spdx
-          path: sbom.spdx.json
+          name: sbom.cdx.json
+          path: sbom.cdx.json
+
+      # Secret Scanning (Standard Scope)
+      - name: Run secret scanner
+        uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        with:
+          args: --no-banner --redact
+
       - name: Trivy vulnerability scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
