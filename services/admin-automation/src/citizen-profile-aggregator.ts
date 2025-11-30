@@ -88,6 +88,8 @@ export class CitizenProfileAggregator {
       personal: data.personal || { firstName: '', lastName: '', dateOfBirth: '' },
       contact: data.contact || { email: '', phone: '' },
       address: data.address || { street: '', city: '', state: '', zipCode: '', country: 'US' },
+      employment: data.employment,
+      household: data.household,
       documents: data.documents || [],
       submissions: data.submissions || [],
       lastUpdated: new Date().toISOString(),
