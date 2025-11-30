@@ -33,6 +33,12 @@ Our mission: **supercharge development of the MVP** while **always keeping a dep
 git clone https://github.com/BrianCLong/summit.git
 cd summit
 
+# 2. Run the Golden Path (bootstraps, starts stack, runs smoke tests)
+./start.sh
+```
+
+**Alternative (Manual Steps):**
+```bash
 # 2. Bootstrap dependencies + env (seeds .env from .env.example)
 make bootstrap
 
@@ -46,11 +52,20 @@ make smoke
 make up-ai
 ```
 
-- 💡 **Shortcut:** `./start.sh [--ai]` wraps `make bootstrap && make up && make smoke` with health/ready polling; add `--skip-smoke` only when debugging startup issues.
+- 💡 **Shortcut:** `./start.sh [--ai]` wraps `make bootstrap && make up && make smoke` with health/ready polling.
 - ✅ If all green → you’re ready to develop.
 - ❌ If red → fix before coding. No broken builds allowed.
 
 ---
+
+## 🟢 Golden Path Status
+
+The Golden Path is our "Canary in the Coal Mine".
+
+- **Command**: `make smoke` (or `./start.sh`)
+- **Success**: All tests pass, success rate 100%.
+- **Dashboard**: Grafana "Summit Golden Path" (http://localhost:3001) shows green health checks and p95 latency.
+- **Troubleshooting**: If it fails, check `scripts/smoke-test.js` logs or the Grafana dashboard.
 
 ## 📋 Golden Path Workflow
 
