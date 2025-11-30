@@ -10,6 +10,8 @@ import {
 } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
+import { trackGoldenPathStep } from '@/telemetry/metrics'
+import { markStepComplete } from '@/lib/activation'
 
 export default function SignInPage() {
   const { login, isAuthenticated, loading } = useAuth()
@@ -30,6 +32,9 @@ export default function SignInPage() {
 
     try {
       await login(email, password)
+      // Track signup/signin as the first step
+      trackGoldenPathStep('signup')
+      markStepComplete('signup')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {

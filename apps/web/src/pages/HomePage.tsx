@@ -18,6 +18,7 @@ import { KPIStrip } from '@/components/panels/KPIStrip'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { ActivationProgressTile } from '@/components/activation/ActivationProgressTile'
 import mockData from '@/mock/data.json'
 import type { KPIMetric, Investigation, Alert, Case } from '@/types'
 
@@ -139,6 +140,8 @@ export default function HomePage() {
           })}
         </div>
       </div>
+
+      <ActivationProgressTile />
 
       {/* KPI Metrics */}
       <div>
