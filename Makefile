@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight intelgraph-test intelgraph-api
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -20,6 +20,10 @@ help:
 	@echo "  make migrate      - Run database migrations (PostgreSQL + Neo4j)"
 	@echo "  make smoke        - Run smoke tests (validates golden path)"
 	@echo "  make down         - Stop all services"
+	@echo ""
+	@echo "IntelGraph (minimal decision & claims slice):"
+	@echo "  make intelgraph-test  - Run IntelGraph test suite"
+	@echo "  make intelgraph-api   - Start IntelGraph API server (port 8000)"
 	@echo ""
 	@echo "Quick start: ./start.sh (runs bootstrap + up + migrate + smoke)"
 	@echo ""
@@ -206,3 +210,41 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+intelgraph-test:
+	@echo "==> intelgraph-test: Running IntelGraph test suite..."
+	@if [ ! -d .venv ]; then \
+	  echo "ERROR: Python virtual environment not found. Run 'make bootstrap' first."; \
+	  exit 1; \
+	fi
+	@. .venv/bin/activate && \
+	  cd intelgraph && \
+	  pip install -q -e ".[dev]" && \
+	  cd .. && \
+	  pytest tests/intelgraph/ -v --tb=short || { \
+	    echo ""; \
+	    echo "ERROR: IntelGraph tests failed."; \
+	    echo "Check test output above for details."; \
+	    exit 1; \
+	  }
+	@echo ""
+	@echo "intelgraph-test: DONE ✓"
+	@echo "All IntelGraph tests passed!"
+
+intelgraph-api:
+	@echo "==> intelgraph-api: Starting IntelGraph API server..."
+	@if [ ! -d .venv ]; then \
+	  echo "ERROR: Python virtual environment not found. Run 'make bootstrap' first."; \
+	  exit 1; \
+	fi
+	@echo "Installing IntelGraph dependencies..."
+	@. .venv/bin/activate && \
+	  cd intelgraph && \
+	  pip install -q -e ".[dev]" && \
+	  echo "" && \
+	  echo "Starting API server on http://localhost:8000" && \
+	  echo "  - Interactive docs: http://localhost:8000/docs" && \
+	  echo "  - ReDoc: http://localhost:8000/redoc" && \
+	  echo "  - Health check: http://localhost:8000/health" && \
+	  echo "" && \
+	  uvicorn api:app --reload
