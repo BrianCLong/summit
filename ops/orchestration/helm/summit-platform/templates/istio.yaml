@@ -1,0 +1,70 @@
+{{- if .Values.serviceMesh.enabled }}
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-gateway
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - {{ .Values.ingress.hosts.api }}
+        - {{ .Values.ingress.hosts.web }}
+    - port:
+        number: 443
+        name: https
+        protocol: HTTPS
+      tls:
+        mode: SIMPLE
+        credentialName: {{ .Values.ingress.tls.credentialName }}
+      hosts:
+        - {{ .Values.ingress.hosts.api }}
+        - {{ .Values.ingress.hosts.web }}
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-api
+  namespace: {{ .Values.namespace }}
+spec:
+  hosts:
+    - {{ .Values.ingress.hosts.api }}
+  gateways:
+    - {{ include "summit-platform.fullname" . }}-gateway
+  http:
+    - name: api-routes
+      timeout: 15s
+      route:
+        - destination:
+            host: {{ include "summit-platform.fullname" . }}-api.{{ .Values.namespace }}.svc.cluster.local
+            subset: v1
+            port:
+              number: 80
+          weight: 100
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-web
+  namespace: {{ .Values.namespace }}
+spec:
+  hosts:
+    - {{ .Values.ingress.hosts.web }}
+  gateways:
+    - {{ include "summit-platform.fullname" . }}-gateway
+  http:
+    - name: web-routes
+      timeout: 15s
+      route:
+        - destination:
+            host: {{ include "summit-platform.fullname" . }}-web.{{ .Values.namespace }}.svc.cluster.local
+            subset: v1
+            port:
+              number: 80
+          weight: 100
+{{- end }}
