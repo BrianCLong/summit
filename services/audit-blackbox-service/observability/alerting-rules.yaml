@@ -1,0 +1,232 @@
+# Audit Black Box Service - Prometheus Alerting Rules
+#
+# Critical alerts for audit system integrity and compliance.
+---
+groups:
+  - name: audit-blackbox-critical
+    interval: 30s
+    rules:
+      # Chain Integrity Alerts
+      - alert: AuditChainIntegrityFailure
+        expr: |
+          sum(rate(audit_verifications_total{success="false"}[5m])) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: security
+          compliance: soc2
+        annotations:
+          summary: "Audit chain integrity verification failed"
+          description: "Hash chain integrity verification is failing. This may indicate tampering or corruption. Immediate investigation required."
+          runbook_url: "https://runbooks.intelgraph.io/audit/chain-integrity-failure"
+
+      - alert: AuditChainGapDetected
+        expr: |
+          increase(audit_chain_gaps_total[5m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "Gap detected in audit chain sequence"
+          description: "A gap was detected in the audit chain sequence numbers. This may indicate missing events or data corruption."
+          runbook_url: "https://runbooks.intelgraph.io/audit/chain-gap"
+
+      # Service Health Alerts
+      - alert: AuditServiceDown
+        expr: |
+          up{job="audit-blackbox-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Audit Black Box Service is down"
+          description: "The audit service {{ $labels.instance }} has been down for more than 1 minute."
+          runbook_url: "https://runbooks.intelgraph.io/audit/service-down"
+
+      - alert: AuditServiceHighErrorRate
+        expr: |
+          (sum(rate(audit_errors_total[5m])) / sum(rate(audit_events_ingested_total[5m]))) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate in audit service"
+          description: "Error rate is {{ $value | humanizePercentage }}, exceeding 5% threshold."
+          runbook_url: "https://runbooks.intelgraph.io/audit/high-error-rate"
+
+  - name: audit-blackbox-warning
+    interval: 60s
+    rules:
+      # Performance Alerts
+      - alert: AuditHighIngestionLatency
+        expr: |
+          histogram_quantile(0.95, sum(rate(audit_event_ingest_latency_ms_bucket[5m])) by (le)) > 100
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High audit event ingestion latency"
+          description: "P95 ingestion latency is {{ $value | humanize }}ms, exceeding 100ms threshold."
+          runbook_url: "https://runbooks.intelgraph.io/audit/high-latency"
+
+      - alert: AuditBackpressureHigh
+        expr: |
+          audit_backpressure_level > 0.7
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High backpressure in audit event buffer"
+          description: "Backpressure level is {{ $value | humanizePercentage }}. Event processing may be delayed."
+          runbook_url: "https://runbooks.intelgraph.io/audit/backpressure"
+
+      - alert: AuditEventBufferNearFull
+        expr: |
+          audit_events_in_buffer > 8000
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Audit event buffer is near capacity"
+          description: "{{ $value }} events in buffer (max 10000). Risk of event loss if buffer fills."
+          runbook_url: "https://runbooks.intelgraph.io/audit/buffer-full"
+
+      # Verification Alerts
+      - alert: AuditVerificationLatencyHigh
+        expr: |
+          histogram_quantile(0.95, sum(rate(audit_verification_latency_ms_bucket[5m])) by (le)) > 5000
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High chain verification latency"
+          description: "P95 verification latency is {{ $value | humanize }}ms. Chain may be growing too large."
+          runbook_url: "https://runbooks.intelgraph.io/audit/verification-latency"
+
+      # Resource Alerts
+      - alert: AuditHighMemoryUsage
+        expr: |
+          container_memory_usage_bytes{container="audit-blackbox"} / container_spec_memory_limit_bytes{container="audit-blackbox"} > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High memory usage in audit service"
+          description: "Memory usage is {{ $value | humanizePercentage }} of limit."
+          runbook_url: "https://runbooks.intelgraph.io/audit/high-memory"
+
+      - alert: AuditHighCPUUsage
+        expr: |
+          rate(container_cpu_usage_seconds_total{container="audit-blackbox"}[5m]) / container_spec_cpu_quota{container="audit-blackbox"} * 100000 > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage in audit service"
+          description: "CPU usage is {{ $value | humanize }}% of limit."
+          runbook_url: "https://runbooks.intelgraph.io/audit/high-cpu"
+
+  - name: audit-blackbox-security
+    interval: 30s
+    rules:
+      # Security Alerts
+      - alert: AuditAnomalyDetected
+        expr: |
+          sum(rate(audit_anomalies_detected_total{severity=~"high|critical"}[5m])) > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Security anomaly detected in audit events"
+          description: "{{ $value }} high/critical anomalies detected in the last 5 minutes."
+          runbook_url: "https://runbooks.intelgraph.io/audit/anomaly-detected"
+
+      - alert: AuditUnauthorizedAccessAttempt
+        expr: |
+          sum(rate(audit_events_ingested_total{outcome="unauthorized"}[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High rate of unauthorized access attempts"
+          description: "{{ $value }} unauthorized access attempts per second detected."
+          runbook_url: "https://runbooks.intelgraph.io/audit/unauthorized-access"
+
+      - alert: AuditMassRedactionRequest
+        expr: |
+          sum(rate(audit_redactions_total[1h])) > 100
+        for: 0m
+        labels:
+          severity: warning
+          team: security
+          team: legal
+        annotations:
+          summary: "Unusually high number of redaction requests"
+          description: "{{ $value }} redaction requests in the last hour. May require review."
+          runbook_url: "https://runbooks.intelgraph.io/audit/mass-redaction"
+
+      - alert: AuditCriticalEventSpike
+        expr: |
+          sum(rate(audit_events_ingested_total{is_critical="true"}[5m])) >
+          sum(rate(audit_events_ingested_total{is_critical="true"}[1h] offset 1h)) * 3
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Spike in critical audit events"
+          description: "Critical event rate is 3x higher than the previous hour average."
+          runbook_url: "https://runbooks.intelgraph.io/audit/critical-spike"
+
+  - name: audit-blackbox-compliance
+    interval: 300s  # 5 minutes
+    rules:
+      # Compliance Alerts
+      - alert: AuditRetentionPolicyViolation
+        expr: |
+          (time() - audit_oldest_event_timestamp) / 86400 > 2555
+        for: 1h
+        labels:
+          severity: warning
+          team: compliance
+          compliance: soc2
+        annotations:
+          summary: "Audit events may exceed retention policy"
+          description: "Oldest audit events are approaching 7-year retention limit."
+          runbook_url: "https://runbooks.intelgraph.io/audit/retention-policy"
+
+      - alert: AuditNoEventsReceived
+        expr: |
+          sum(rate(audit_events_ingested_total[30m])) == 0
+        for: 30m
+        labels:
+          severity: warning
+          team: platform
+          compliance: soc2
+        annotations:
+          summary: "No audit events received"
+          description: "No audit events have been received in the last 30 minutes. Check upstream services."
+          runbook_url: "https://runbooks.intelgraph.io/audit/no-events"
+
+      - alert: AuditDatabaseConnectionFailure
+        expr: |
+          audit_database_connection_errors_total > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Audit database connection failure"
+          description: "Unable to connect to the audit database. Events may be lost."
+          runbook_url: "https://runbooks.intelgraph.io/audit/database-connection"
