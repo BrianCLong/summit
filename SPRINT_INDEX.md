@@ -122,6 +122,18 @@ Located in repository root (`/SPRINT_*.md`)
 - Consistency validation
 - Performance benchmarking
 
+### Governance & Platform Series
+
+| Sprint | File | Focus | Status |
+|--------|------|-------|--------|
+| **Paved Road + Governance** | `docs/sprints/SPRINT_PAVED_ROAD_GOVERNANCE.md` | Service Templates + OPA/SBOM | 🔄 In Progress |
+
+**Key Deliverables:**
+- Paved-Road Service Template (Node/TS)
+- SBOM & Signing in CI
+- OPA Policy Gates
+- Evidence Pack v0.1
+
 ---
 
 ## Chronological Sprint Timeline
