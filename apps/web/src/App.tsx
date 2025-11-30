@@ -35,6 +35,7 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -77,6 +78,10 @@ function App() {
                       <Route
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
+                      />
+                      <Route
+                        path="geoint"
+                        element={<GeoIntPane />}
                       />
 
                       {/* Alerts */}
