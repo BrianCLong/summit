@@ -1,3 +1,5 @@
+import '../types/testing';
+
 export interface NodeData {
   id: string;
   label: string;
@@ -29,5 +31,8 @@ const mockGraph: GraphData = {
 };
 
 export async function fetchGraph(): Promise<GraphData> {
+  if (typeof window !== 'undefined' && window.__E2E_GRAPH__) {
+    return window.__E2E_GRAPH__;
+  }
   return Promise.resolve(mockGraph);
 }

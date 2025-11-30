@@ -1,48 +1,65 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useSelector } from 'react-redux';
 import { fetchGraph, GraphData } from '../data/mockGraph';
 import type { RootState } from '../store';
+import type { MapboxTestStub } from '../types/testing';
 
 mapboxgl.accessToken = 'no-token';
 
+function getTestStub(): MapboxTestStub | undefined {
+  if (typeof window === 'undefined') return undefined;
+  return window.__MAPBOX_STUB__;
+}
+
 export function MapPane() {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapRef = useRef<any>(null);
+  const markerFactoryRef = useRef<(() => any) | null>(null);
   const selectedNode = useSelector(
     (s: RootState) => s.selection.selectedNodeId,
   );
-  const graphDataRef = useRef<GraphData | null>(null);
+  const [graphData, setGraphData] = useState<GraphData | null>(null);
 
   useEffect(() => {
-    const map = new mapboxgl.Map({
-      container: mapContainer.current!,
-      style: 'https://demotiles.maplibre.org/style.json',
-      center: [0, 0],
-      zoom: 1,
-    });
+    const stub = getTestStub();
+    const map =
+      stub?.createMap?.(mapContainer.current!) ||
+      new mapboxgl.Map({
+        container: mapContainer.current!,
+        style: 'https://demotiles.maplibre.org/style.json',
+        center: [0, 0],
+        zoom: 1,
+      });
     mapRef.current = map;
+    markerFactoryRef.current =
+      stub?.createMarker || (() => new mapboxgl.Marker());
     fetchGraph().then((data) => {
-      graphDataRef.current = data;
+      setGraphData(data);
     });
+
+    return () => {
+      (map as any).__marker?.remove?.();
+      map.remove?.();
+    };
   }, []);
 
   useEffect(() => {
-    if (!mapRef.current || !graphDataRef.current) return;
+    if (!mapRef.current || !graphData || !markerFactoryRef.current) return;
     const map = mapRef.current;
-    (map as any).__marker?.remove();
+    const stub = getTestStub();
+    (map as any).__marker?.remove?.();
     if (selectedNode) {
-      const node = graphDataRef.current.nodes.find(
-        (n) => n.id === selectedNode,
-      );
+      const node = graphData.nodes.find((n) => n.id === selectedNode);
       if (node) {
-        (map as any).__marker = new mapboxgl.Marker()
-          .setLngLat(node.coords)
-          .addTo(map);
-        map.flyTo({ center: node.coords, zoom: 3 });
+        const marker = markerFactoryRef.current();
+        marker.setLngLat(node.coords).addTo(map);
+        (map as any).__marker = marker;
+        map.flyTo?.({ center: node.coords, zoom: 3 });
+        stub?.onNodeFocused?.(selectedNode);
       }
     }
-  }, [selectedNode]);
+  }, [selectedNode, graphData]);
 
   return <div ref={mapContainer} style={{ width: '100%', height: '100%' }} />;
 }
