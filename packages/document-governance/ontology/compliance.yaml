@@ -1,0 +1,312 @@
+version: '1.0.0'
+description: Compliance standards and document mappings
+
+standards:
+  - id: SOC2
+    name: SOC 2
+    authority: AICPA
+    description: Service Organization Control 2 - Trust Service Criteria
+    categories:
+      - Security
+      - Availability
+      - Processing Integrity
+      - Confidentiality
+      - Privacy
+    applicable_document_types:
+      - doc.security_policy
+      - doc.access_control_policy
+      - doc.incident_response_plan
+      - doc.incident_postmortem
+      - doc.business_continuity_plan
+      - doc.disaster_recovery_plan
+      - doc.vulnerability_assessment
+      - doc.penetration_test_report
+      - doc.risk_assessment
+      - doc.audit_report
+      - doc.change_request
+
+  - id: ISO27001
+    name: ISO/IEC 27001
+    authority: ISO
+    description: Information Security Management System
+    categories:
+      - Information Security Policies
+      - Organization of Information Security
+      - Human Resource Security
+      - Asset Management
+      - Access Control
+      - Cryptography
+      - Physical and Environmental Security
+      - Operations Security
+      - Communications Security
+      - System Acquisition, Development and Maintenance
+      - Supplier Relationships
+      - Information Security Incident Management
+      - Business Continuity
+      - Compliance
+    applicable_document_types:
+      - doc.security_policy
+      - doc.access_control_policy
+      - doc.incident_response_plan
+      - doc.incident_postmortem
+      - doc.business_continuity_plan
+      - doc.disaster_recovery_plan
+      - doc.vulnerability_assessment
+      - doc.penetration_test_report
+      - doc.risk_assessment
+
+  - id: GDPR
+    name: General Data Protection Regulation
+    authority: European Union
+    description: EU regulation on data protection and privacy
+    categories:
+      - Lawfulness of Processing
+      - Consent
+      - Data Subject Rights
+      - Data Protection by Design
+      - Data Protection Impact Assessment
+      - Data Breach Notification
+      - International Transfers
+    applicable_document_types:
+      - doc.privacy_policy
+      - doc.dpa
+      - doc.incident_response_plan
+      - doc.dataset_card
+
+  - id: CCPA
+    name: California Consumer Privacy Act / CPRA
+    authority: State of California
+    description: California privacy law for consumer data protection
+    categories:
+      - Consumer Rights
+      - Business Obligations
+      - Service Provider Requirements
+      - Sale of Personal Information
+    applicable_document_types:
+      - doc.privacy_policy
+      - doc.dpa
+
+  - id: SOX
+    name: Sarbanes-Oxley Act
+    authority: United States
+    description: Financial reporting and auditing requirements
+    categories:
+      - Financial Reporting
+      - Internal Controls
+      - Audit Requirements
+      - Record Retention
+    applicable_document_types:
+      - doc.general_ledger
+      - doc.financial_statement
+      - doc.audit_report
+
+  - id: HIPAA
+    name: Health Insurance Portability and Accountability Act
+    authority: US HHS
+    description: Healthcare data protection requirements
+    categories:
+      - Privacy Rule
+      - Security Rule
+      - Breach Notification Rule
+      - Enforcement Rule
+    applicable_document_types:
+      - doc.privacy_policy
+      - doc.security_policy
+      - doc.incident_response_plan
+      - doc.dpa
+
+  - id: PCI_DSS
+    name: Payment Card Industry Data Security Standard
+    authority: PCI Security Standards Council
+    description: Payment card data security requirements
+    categories:
+      - Build and Maintain a Secure Network
+      - Protect Cardholder Data
+      - Maintain a Vulnerability Management Program
+      - Implement Strong Access Control Measures
+      - Regularly Monitor and Test Networks
+      - Maintain an Information Security Policy
+    applicable_document_types:
+      - doc.security_policy
+      - doc.access_control_policy
+      - doc.vulnerability_assessment
+      - doc.penetration_test_report
+
+  - id: NIST_CSF
+    name: NIST Cybersecurity Framework
+    authority: NIST
+    description: Framework for improving critical infrastructure cybersecurity
+    categories:
+      - Identify
+      - Protect
+      - Detect
+      - Respond
+      - Recover
+    applicable_document_types:
+      - doc.security_policy
+      - doc.risk_assessment
+      - doc.incident_response_plan
+      - doc.business_continuity_plan
+      - doc.sbom
+
+  - id: NIST_800_53
+    name: NIST Special Publication 800-53
+    authority: NIST
+    description: Security and Privacy Controls for Information Systems
+    categories:
+      - Access Control
+      - Awareness and Training
+      - Audit and Accountability
+      - Configuration Management
+      - Contingency Planning
+      - Identification and Authentication
+      - Incident Response
+      - Maintenance
+      - Media Protection
+      - Physical and Environmental Protection
+      - Planning
+      - Personnel Security
+      - Risk Assessment
+      - System and Services Acquisition
+      - System and Communications Protection
+      - System and Information Integrity
+    applicable_document_types:
+      - doc.security_policy
+      - doc.access_control_policy
+      - doc.incident_response_plan
+
+  - id: FedRAMP
+    name: Federal Risk and Authorization Management Program
+    authority: US GSA
+    description: Standardized approach to security for cloud services
+    categories:
+      - Security Assessment
+      - Authorization
+      - Continuous Monitoring
+    applicable_document_types:
+      - doc.security_policy
+      - doc.risk_assessment
+      - doc.compliance_attestation
+
+  - id: EU_AI_Act
+    name: EU Artificial Intelligence Act
+    authority: European Union
+    description: Regulation on artificial intelligence systems
+    categories:
+      - Risk Classification
+      - Transparency Requirements
+      - Human Oversight
+      - Data Governance
+      - Technical Documentation
+    applicable_document_types:
+      - doc.model_card
+      - doc.dataset_card
+      - doc.model_evaluation_report
+
+# Document-to-standard mappings with required sections
+mappings:
+  - document: doc.security_policy
+    standards:
+      - ISO27001
+      - SOC2
+      - NIST_CSF
+    required_sections:
+      - Purpose and Scope
+      - Roles and Responsibilities
+      - Information Classification
+      - Access Control
+      - Incident Response
+      - Compliance
+    review_frequency: annual
+
+  - document: doc.access_control_policy
+    standards:
+      - ISO27001
+      - SOC2
+      - NIST_800_53
+    required_sections:
+      - Access Control Principles
+      - User Access Management
+      - System Access Control
+      - Privileged Access
+      - Review Procedures
+    review_frequency: annual
+
+  - document: doc.incident_response_plan
+    standards:
+      - ISO27001
+      - SOC2
+      - GDPR
+      - NIST_CSF
+    required_sections:
+      - Incident Classification
+      - Response Team
+      - Detection and Analysis
+      - Containment and Eradication
+      - Recovery
+      - Post-Incident Activity
+      - Communication Plan
+    review_frequency: annual
+
+  - document: doc.incident_postmortem
+    standards:
+      - SOC2
+      - ISO27001
+    required_sections:
+      - Executive Summary
+      - Timeline
+      - Root Cause Analysis
+      - Impact Assessment
+      - Remediation Actions
+      - Lessons Learned
+    review_frequency: per_incident
+
+  - document: doc.general_ledger
+    standards:
+      - SOX
+    required_sections:
+      - Account Structure
+      - Transaction Records
+      - Reconciliation
+      - Audit Trail
+    review_frequency: continuous
+
+  - document: doc.privacy_policy
+    standards:
+      - GDPR
+      - CCPA
+    required_sections:
+      - Data Collection
+      - Purpose of Processing
+      - Legal Basis
+      - Data Sharing
+      - Data Subject Rights
+      - Data Retention
+      - Security Measures
+      - Contact Information
+    review_frequency: annual
+
+  - document: doc.model_card
+    standards:
+      - EU_AI_Act
+    required_sections:
+      - Model Details
+      - Intended Use
+      - Training Data
+      - Evaluation Data
+      - Performance Metrics
+      - Ethical Considerations
+      - Limitations
+      - Recommendations
+    review_frequency: per_release
+
+  - document: doc.sbom
+    standards:
+      - NIST_CSF
+    required_sections:
+      - Component Inventory
+      - Version Information
+      - License Information
+      - Dependency Graph
+      - Known Vulnerabilities
+    review_frequency: per_release

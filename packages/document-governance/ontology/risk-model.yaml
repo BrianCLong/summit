@@ -1,0 +1,190 @@
+version: '1.0.0'
+description: Risk scoring model configuration
+
+risk_model:
+  name: Document Risk Assessment Model
+  version: '1.0.0'
+  description: Multi-dimensional risk scoring for business documents
+
+  dimensions:
+    - id: legal
+      name: Legal Risk
+      description: Risk of legal liability, litigation, or regulatory penalties
+      weight: 0.20
+      factors:
+        - Contractual obligations exposure
+        - Regulatory compliance requirements
+        - Intellectual property implications
+        - Litigation potential
+
+    - id: financial
+      name: Financial Risk
+      description: Risk of financial loss or misstatement
+      weight: 0.20
+      factors:
+        - Material financial impact
+        - Audit implications
+        - Revenue recognition impact
+        - Tax implications
+
+    - id: security
+      name: Security Risk
+      description: Risk to information security and data protection
+      weight: 0.25
+      factors:
+        - Data sensitivity level
+        - Access control requirements
+        - Encryption requirements
+        - Breach notification obligations
+
+    - id: operational
+      name: Operational Risk
+      description: Risk to business operations and continuity
+      weight: 0.15
+      factors:
+        - Business process dependency
+        - Recovery time requirements
+        - Operational complexity
+        - Change management impact
+
+    - id: regulatory
+      name: Regulatory Risk
+      description: Risk of regulatory non-compliance
+      weight: 0.10
+      factors:
+        - Number of applicable regulations
+        - Audit frequency
+        - Reporting requirements
+        - Certification dependencies
+
+    - id: reputational
+      name: Reputational Risk
+      description: Risk to company reputation and stakeholder trust
+      weight: 0.10
+      factors:
+        - Public exposure
+        - Customer impact
+        - Partner relationship impact
+        - Media attention potential
+
+  scale:
+    min: 0
+    max: 10
+    precision: 2
+
+  thresholds:
+    - level: Low
+      min: 0
+      max: 3
+      color: '#22c55e'
+      description: Minimal risk, standard handling procedures
+      actions:
+        - Standard document management
+        - Regular review cycle
+
+    - level: Medium
+      min: 3
+      max: 6
+      color: '#f59e0b'
+      description: Moderate risk, enhanced controls recommended
+      actions:
+        - Enhanced access controls
+        - More frequent reviews
+        - Stakeholder notification
+
+    - level: High
+      min: 6
+      max: 8
+      color: '#ef4444'
+      description: Significant risk, strict controls required
+      actions:
+        - Restricted access
+        - Executive oversight
+        - Audit trail requirements
+        - Legal review
+
+    - level: Critical
+      min: 8
+      max: 10
+      color: '#dc2626'
+      description: Severe risk, maximum controls and monitoring
+      actions:
+        - C-level approval required
+        - Continuous monitoring
+        - Immediate escalation procedures
+        - Board notification if applicable
+
+  # Default risk scores by document type
+  default_scores:
+    doc.articles_of_incorporation:
+      legal: 9
+      financial: 7
+      security: 5
+      operational: 8
+      regulatory: 8
+      reputational: 7
+      overall: High
+
+    doc.penetration_test_report:
+      legal: 6
+      financial: 4
+      security: 10
+      operational: 7
+      regulatory: 8
+      reputational: 9
+      overall: Critical
+
+    doc.employment_agreement:
+      legal: 8
+      financial: 5
+      security: 6
+      operational: 4
+      regulatory: 7
+      reputational: 5
+      overall: High
+
+    doc.prd:
+      legal: 3
+      financial: 4
+      security: 4
+      operational: 6
+      regulatory: 2
+      reputational: 3
+      overall: Medium
+
+    doc.invoice_customer:
+      legal: 4
+      financial: 6
+      security: 3
+      operational: 5
+      regulatory: 5
+      reputational: 2
+      overall: Medium
+
+  # Risk modifiers based on document attributes
+  modifiers:
+    classification_level:
+      Public: -1.0
+      Internal: 0
+      Confidential: 0.5
+      Restricted: 1.0
+      HighlyRestricted: 1.5
+      Classified_Internal: 2.0
+      Classified_Regulated: 2.5
+
+    retention_period:
+      Permanent: 0.5
+      '7y_plus': 0.3
+      '5y': 0.1
+      '3y': 0
+      '1y': -0.2
+
+    signature_count:
+      '0': -0.5
+      '1': 0
+      '2': 0.2
+      '3+': 0.5
+
+    external_facing:
+      'true': 0.5
+      'false': 0
