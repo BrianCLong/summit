@@ -1,0 +1,576 @@
+meta:
+  id: implement.offline-edge-kit@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build offline/edge expedition kit with local ingest, basic analytics, CRDT sync, and conflict-aware merges'
+  tags: ['offline', 'edge-computing', 'crdt', 'sync', 'field-ops']
+  guardrails:
+    - 'Zero data loss during disconnected operations'
+    - 'Conflict resolution must be deterministic and logged'
+    - 'Sync logs must be cryptographically signed'
+    - 'Merge proofs verifiable on server'
+    - '72-hour disconnected scenario must pass tests'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 7000
+
+inputs:
+  desktop_framework: string
+  crdt_algorithm: string
+  max_offline_hours: string
+
+template: |
+  You are implementing the **Offline/Edge Expedition Kit** for IntelGraph.
+
+  ## Objective
+
+  Build a desktop application for field operations with local data ingest, basic analytics, CRDT-based case edits, signed sync logs, and conflict-aware server merges—ensuring zero data loss during {{max_offline_hours}}-hour disconnected scenarios.
+
+  ## Target Paths
+
+  ```
+  apps/edge-kit/
+    ├── src/
+    │   ├── main/ ({{desktop_framework}} main process)
+    │   ├── renderer/ (UI)
+    │   ├── local-db/
+    │   │   ├── SQLiteStore.ts
+    │   │   ├── CRDTState.ts
+    │   │   └── MigrationManager.ts
+    │   ├── ingest/
+    │   │   ├── LocalIngest.ts
+    │   │   ├── FieldValidator.ts
+    │   │   └── OfflineQueue.ts
+    │   ├── analytics/
+    │   │   ├── LocalGraphAnalyzer.ts
+    │   │   ├── BasicQueries.ts
+    │   │   └── CachingLayer.ts
+    │   ├── crdt/
+    │   │   ├── {{crdt_algorithm}}CRDT.ts
+    │   │   ├── OperationLog.ts
+    │   │   ├── VectorClock.ts
+    │   │   └── ConflictResolver.ts
+    │   ├── sync/
+    │   │   ├── SyncEngine.ts
+    │   │   ├── DeltaComputer.ts
+    │   │   ├── MergeProofGenerator.ts
+    │   │   └── SignedSyncLog.ts
+    │   └── offline/
+    │       ├── OfflineDetector.ts
+    │       └── ReconnectionHandler.ts
+    ├── tests/
+    │   ├── e2e/
+    │   │   └── 72h-disconnected.spec.ts
+    │   └── scenarios/
+    │       └── conflict-resolution.spec.ts
+    └── README.md
+
+  services/sync/
+    ├── src/
+    │   ├── api/
+    │   │   └── SyncController.ts
+    │   ├── merge/
+    │   │   ├── ConflictDetector.ts
+    │   │   ├── ThreeWayMerger.ts
+    │   │   └── MergeProofVerifier.ts
+    │   └── reconciliation/
+    │       ├── CRDTReconciler.ts
+    │       └── DeltaApplier.ts
+    └── README.md
+  ```
+
+  ## Desktop App ({{desktop_framework}})
+
+  ### Local Database (SQLite + CRDT)
+
+  **SQLiteStore.ts:**
+
+  ```typescript
+  interface LocalCase {
+    id: string;
+    name: string;
+    createdAt: string;
+    lastModifiedAt: string;
+    crdtState: CRDTState;
+    syncStatus: 'synced' | 'pending' | 'conflict';
+    version: number;
+  }
+
+  class SQLiteStore {
+    private db: Database;
+
+    async init(): Promise<void> {
+      this.db = new Database('edge-kit.db');
+
+      await this.db.exec(`
+        CREATE TABLE IF NOT EXISTS cases (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          created_at TEXT,
+          last_modified_at TEXT,
+          crdt_state TEXT,
+          sync_status TEXT,
+          version INTEGER
+        );
+
+        CREATE TABLE IF NOT EXISTS entities (
+          id TEXT PRIMARY KEY,
+          case_id TEXT,
+          type TEXT,
+          properties TEXT,
+          crdt_ops TEXT,
+          FOREIGN KEY (case_id) REFERENCES cases(id)
+        );
+
+        CREATE TABLE IF NOT EXISTS sync_log (
+          id TEXT PRIMARY KEY,
+          timestamp TEXT,
+          delta TEXT,
+          signature TEXT
+        );
+      `);
+    }
+
+    async saveCase(caseData: LocalCase): Promise<void> {
+      await this.db.run(
+        `INSERT OR REPLACE INTO cases
+         (id, name, created_at, last_modified_at, crdt_state, sync_status, version)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [
+          caseData.id,
+          caseData.name,
+          caseData.createdAt,
+          caseData.lastModifiedAt,
+          JSON.stringify(caseData.crdtState),
+          caseData.syncStatus,
+          caseData.version,
+        ]
+      );
+    }
+  }
+  ```
+
+  ### CRDT Implementation ({{crdt_algorithm}})
+
+  **{{crdt_algorithm}}CRDT.ts:**
+
+  ```typescript
+  interface CRDTState {
+    vectorClock: VectorClock;
+    operations: Operation[];
+    tombstones: Set<string>; // Deleted entities
+  }
+
+  interface Operation {
+    id: string;
+    type: 'insert' | 'update' | 'delete';
+    entityId: string;
+    timestamp: string;
+    actorId: string;
+    payload: any;
+    vectorClock: VectorClock;
+  }
+
+  type VectorClock = Record<string, number>; // actor -> counter
+
+  class {{crdt_algorithm}}CRDT {
+    private state: CRDTState;
+
+    constructor(actorId: string) {
+      this.state = {
+        vectorClock: { [actorId]: 0 },
+        operations: [],
+        tombstones: new Set(),
+      };
+    }
+
+    // Apply local operation (user edit)
+    applyLocalOp(type: string, entityId: string, payload: any): Operation {
+      const actorId = this.getActorId();
+
+      // Increment vector clock
+      this.state.vectorClock[actorId] = (this.state.vectorClock[actorId] || 0) + 1;
+
+      const op: Operation = {
+        id: generateOpId(),
+        type: type as any,
+        entityId,
+        timestamp: new Date().toISOString(),
+        actorId,
+        payload,
+        vectorClock: { ...this.state.vectorClock },
+      };
+
+      this.state.operations.push(op);
+
+      if (type === 'delete') {
+        this.state.tombstones.add(entityId);
+      }
+
+      return op;
+    }
+
+    // Apply remote operation (from sync)
+    applyRemoteOp(op: Operation): void {
+      // Update vector clock
+      this.mergeVectorClock(op.vectorClock);
+
+      // Check if already applied (idempotency)
+      if (this.state.operations.some(existing => existing.id === op.id)) {
+        return;
+      }
+
+      // Add operation
+      this.state.operations.push(op);
+
+      if (op.type === 'delete') {
+        this.state.tombstones.add(op.entityId);
+      }
+    }
+
+    // Merge two CRDT states (conflict-free)
+    merge(otherState: CRDTState): void {
+      // Merge vector clocks
+      this.mergeVectorClock(otherState.vectorClock);
+
+      // Merge operations (deduplicate by ID)
+      for (const op of otherState.operations) {
+        this.applyRemoteOp(op);
+      }
+
+      // Merge tombstones
+      for (const tomb of otherState.tombstones) {
+        this.state.tombstones.add(tomb);
+      }
+    }
+
+    private mergeVectorClock(other: VectorClock): void {
+      for (const [actor, counter] of Object.entries(other)) {
+        this.state.vectorClock[actor] = Math.max(
+          this.state.vectorClock[actor] || 0,
+          counter
+        );
+      }
+    }
+
+    // Resolve conflicts (Last-Write-Wins using vector clocks)
+    resolveConflicts(entityId: string): any {
+      const ops = this.state.operations.filter(op => op.entityId === entityId);
+
+      if (ops.length === 0) return null;
+
+      // Sort by vector clock (causal order)
+      ops.sort((a, b) => this.compareVectorClocks(a.vectorClock, b.vectorClock));
+
+      // Last operation wins
+      const winner = ops[ops.length - 1];
+
+      return winner.payload;
+    }
+
+    private compareVectorClocks(a: VectorClock, b: VectorClock): number {
+      // Returns -1 if a < b, 0 if concurrent, 1 if a > b
+      const allActors = new Set([...Object.keys(a), ...Object.keys(b)]);
+
+      let aGreater = false;
+      let bGreater = false;
+
+      for (const actor of allActors) {
+        const aVal = a[actor] || 0;
+        const bVal = b[actor] || 0;
+
+        if (aVal > bVal) aGreater = true;
+        if (bVal > aVal) bGreater = true;
+      }
+
+      if (aGreater && !bGreater) return 1;
+      if (bGreater && !aGreater) return -1;
+      return 0; // Concurrent
+    }
+  }
+  ```
+
+  ### Local Ingest
+
+  **LocalIngest.ts:**
+
+  ```typescript
+  class LocalIngest {
+    async ingestCSV(filePath: string, caseId: string): Promise<IngestResult> {
+      // 1. Parse CSV
+      const rows = await parseCSV(filePath);
+
+      // 2. Validate (offline mode: relaxed validation)
+      const validRows = rows.filter(row => this.validateRow(row));
+
+      // 3. Store in SQLite
+      for (const row of validRows) {
+        const entity = {
+          id: generateId(),
+          caseId,
+          type: 'Entity',
+          properties: row,
+          crdtOps: [],
+        };
+
+        await this.db.saveEntity(entity);
+
+        // Record CRDT operation
+        const op = this.crdt.applyLocalOp('insert', entity.id, entity.properties);
+        await this.db.saveCRDTOp(op);
+      }
+
+      // 4. Queue for sync when online
+      await this.offlineQueue.enqueue({
+        type: 'ingest',
+        caseId,
+        entityCount: validRows.length,
+      });
+
+      return {
+        success: true,
+        entityCount: validRows.length,
+        queuedForSync: true,
+      };
+    }
+  }
+  ```
+
+  ### Sync Engine
+
+  **SyncEngine.ts:**
+
+  ```typescript
+  interface SyncDelta {
+    caseId: string;
+    operations: Operation[];
+    vectorClock: VectorClock;
+    baseVersion: number;
+    signature: Signature;
+  }
+
+  class SyncEngine {
+    async sync(): Promise<SyncResult> {
+      // 1. Detect if online
+      const online = await this.offlineDetector.isOnline();
+      if (!online) {
+        return { status: 'offline', message: 'No network connection' };
+      }
+
+      // 2. Compute delta (unsent operations)
+      const delta = await this.computeDelta();
+
+      // 3. Sign delta
+      const signature = await this.signDelta(delta);
+
+      // 4. Send to server
+      const response = await this.api.post('/sync', {
+        delta,
+        signature,
+      });
+
+      // 5. Apply server changes
+      if (response.serverDelta) {
+        await this.applyServerDelta(response.serverDelta);
+      }
+
+      // 6. Mark synced
+      await this.markSynced(delta.operations);
+
+      return {
+        status: 'success',
+        operationsSent: delta.operations.length,
+        operationsReceived: response.serverDelta?.operations.length || 0,
+        conflicts: response.conflicts || [],
+      };
+    }
+
+    private async computeDelta(): Promise<SyncDelta> {
+      const unsyncedOps = await this.db.getUnsyncedOps();
+
+      return {
+        caseId: this.currentCaseId,
+        operations: unsyncedOps,
+        vectorClock: this.crdt.getVectorClock(),
+        baseVersion: await this.db.getCurrentVersion(),
+        signature: null, // Filled by signDelta
+      };
+    }
+
+    private async signDelta(delta: SyncDelta): Promise<Signature> {
+      const message = canonicalize({
+        operations: delta.operations,
+        vectorClock: delta.vectorClock,
+      });
+
+      return await this.crypto.sign(message);
+    }
+  }
+  ```
+
+  ### Server-Side Merge
+
+  **services/sync/ConflictDetector.ts:**
+
+  ```typescript
+  interface ConflictDetectionResult {
+    hasConflicts: boolean;
+    conflicts: Conflict[];
+    mergedState: CRDTState;
+  }
+
+  interface Conflict {
+    entityId: string;
+    localOp: Operation;
+    serverOp: Operation;
+    resolution: 'local_wins' | 'server_wins' | 'merge';
+  }
+
+  class ConflictDetector {
+    async detectConflicts(
+      clientDelta: SyncDelta,
+      serverState: CRDTState
+    ): Promise<ConflictDetectionResult> {
+      const conflicts: Conflict[] = [];
+
+      for (const clientOp of clientDelta.operations) {
+        // Find conflicting server operations
+        const serverOps = serverState.operations.filter(
+          op => op.entityId === clientOp.entityId && op.id !== clientOp.id
+        );
+
+        for (const serverOp of serverOps) {
+          const relation = this.compareOps(clientOp, serverOp);
+
+          if (relation === 'concurrent') {
+            // Conflict! Both modified same entity concurrently
+            const resolution = this.resolveConflict(clientOp, serverOp);
+
+            conflicts.push({
+              entityId: clientOp.entityId,
+              localOp: clientOp,
+              serverOp,
+              resolution,
+            });
+          }
+        }
+      }
+
+      // Merge using CRDT
+      const mergedState = this.crdt.merge(serverState, clientDelta);
+
+      return {
+        hasConflicts: conflicts.length > 0,
+        conflicts,
+        mergedState,
+      };
+    }
+
+    private resolveConflict(clientOp: Operation, serverOp: Operation): string {
+      // Last-Write-Wins using vector clocks
+      const cmp = this.compareVectorClocks(clientOp.vectorClock, serverOp.vectorClock);
+
+      if (cmp > 0) return 'local_wins';
+      if (cmp < 0) return 'server_wins';
+
+      // Concurrent: use timestamp tiebreaker
+      return clientOp.timestamp > serverOp.timestamp ? 'local_wins' : 'server_wins';
+    }
+  }
+  ```
+
+  ## Testing Requirements
+
+  ### 72-Hour Disconnected Scenario
+
+  **tests/e2e/72h-disconnected.spec.ts:**
+
+  ```typescript
+  describe('72-Hour Disconnected Scenario', () => {
+    it('should preserve all data during 72-hour offline period', async () => {
+      const kit = await EdgeKit.launch();
+
+      // 1. Go offline
+      await kit.setNetworkState('offline');
+
+      // 2. Create case
+      const caseId = await kit.createCase('Expedition Alpha');
+
+      // 3. Ingest data over 72 hours (simulated)
+      for (let hour = 0; hour < {{max_offline_hours}}; hour++) {
+        await kit.ingestCSV(`data/hour_${hour}.csv`, caseId);
+        await kit.editEntity(`entity_${hour}`, { notes: `Hour ${hour}` });
+      }
+
+      // 4. Verify local data
+      const localEntities = await kit.getEntities(caseId);
+      expect(localEntities.length).toBeGreaterThan(0);
+
+      // 5. Go online
+      await kit.setNetworkState('online');
+
+      // 6. Sync
+      const syncResult = await kit.sync();
+      expect(syncResult.status).toBe('success');
+      expect(syncResult.operationsSent).toBeGreaterThan(0);
+
+      // 7. Verify server has all data
+      const serverEntities = await api.getEntities(caseId);
+      expect(serverEntities.length).toBe(localEntities.length);
+
+      // 8. Verify merge proof
+      const mergeProof = await api.getMergeProof(caseId);
+      expect(mergeProof.valid).toBe(true);
+      expect(mergeProof.conflicts).toEqual([]);
+    });
+  });
+  ```
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Desktop app ({{desktop_framework}}) runs on Windows/Mac/Linux
+  - [ ] Local SQLite database stores cases, entities, CRDT state
+  - [ ] Offline ingest supports CSV/JSON with validation
+  - [ ] Basic analytics work offline (queries, filters)
+  - [ ] CRDT ({{crdt_algorithm}}) enables conflict-free edits
+  - [ ] Sync engine computes deltas and sends signed sync logs
+  - [ ] Server merges client changes with conflict detection
+  - [ ] 72-hour disconnected scenario passes with zero data loss
+  - [ ] Conflict resolution is deterministic and logged
+  - [ ] Merge proofs verifiable on server
+  - [ ] Unit test coverage ≥80%
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for app and service
+  - Follow CLAUDE.md coding standards
+  - Include golden path smoke test
+
+  Remember: **Zero data loss is non-negotiable.** Field operators rely on this.
+
+examples:
+  - name: 'tauri-yjs-72h'
+    inputs:
+      desktop_framework: 'Tauri'
+      crdt_algorithm: 'Yjs'
+      max_offline_hours: '72'
+    expected_contains:
+      - 'Tauri'
+      - 'Yjs'
+      - '72'
+      - 'CRDT'
+      - 'zero data loss'
+
+  - name: 'electron-automerge-168h'
+    inputs:
+      desktop_framework: 'Electron'
+      crdt_algorithm: 'Automerge'
+      max_offline_hours: '168'
+    expected_contains:
+      - 'Electron'
+      - 'Automerge'
+      - 'sync'
+      - 'conflict'

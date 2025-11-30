@@ -1,0 +1,559 @@
+meta:
+  id: implement.cost-guard-budgeter@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build budget-aware query planner with cost estimation, slow-query killer, and alternative plan suggestions'
+  tags: ['cost-control', 'query-optimization', 'budget', 'performance', 'observability']
+  guardrails:
+    - 'All queries must show cost estimates before execution'
+    - 'Budget limits enforced at tenant level'
+    - 'Slow queries automatically killed at timeout threshold'
+    - 'Alternative cheaper plans must be suggested when available'
+    - 'Cost savings tracked and reported'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 7000
+
+inputs:
+  cost_model: string
+  optimization_target: string
+  default_budget_usd: string
+
+template: |
+  You are implementing the **Cost-Guard Query Budgeter** for IntelGraph.
+
+  ## Objective
+
+  Build a budget-aware query planner that estimates costs, suggests cheaper alternatives, enforces tenant budgets, and automatically kills slow queries to achieve 20-40% cost reduction with equivalent analytical conclusions.
+
+  ## Target Paths
+
+  ```
+  services/cost-guard/
+    ├── src/
+    │   ├── api/
+    │   │   └── CostGuardController.ts
+    │   ├── estimator/
+    │   │   ├── CostEstimator.ts
+    │   │   ├── CostModel.ts
+    │   │   └── ResourcePredictor.ts
+    │   ├── optimizer/
+    │   │   ├── QueryOptimizer.ts
+    │   │   ├── PlanGenerator.ts
+    │   │   ├── PlanComparator.ts
+    │   │   └── IndexAdvisor.ts
+    │   ├── budget/
+    │   │   ├── BudgetManager.ts
+    │   │   ├── TenantLimits.ts
+    │   │   └── CostTracker.ts
+    │   ├── killer/
+    │   │   ├── SlowQueryKiller.ts
+    │   │   └── TimeoutMonitor.ts
+    │   └── observability/
+    │       ├── CostMetrics.ts
+    │       └── HeatmapGenerator.ts
+    ├── benchmarks/
+    │   └── graph-queries/
+    │       ├── baseline-suite.cypher
+    │       └── optimized-suite.cypher
+    └── README.md
+
+  apps/ops-console/
+    └── src/
+        └── panels/
+            ├── CostHeatmap.tsx
+            ├── BudgetDashboard.tsx
+            ├── SlowQueryLog.tsx
+            └── OptimizationSuggestions.tsx
+  ```
+
+  ## Cost Model ({{cost_model}})
+
+  ### CostModel.ts
+
+  ```typescript
+  interface QueryCost {
+    cpu: number; // CPU-seconds
+    memory: number; // GB-seconds
+    io: number; // I/O operations
+    network: number; // GB transferred
+    totalUSD: number; // Estimated cost in USD
+    breakdown: CostBreakdown;
+  }
+
+  interface CostBreakdown {
+    database: number; // Neo4j/PostgreSQL cost
+    compute: number; // Worker/Lambda cost
+    cache: number; // Redis cost
+    storage: number; // S3/disk cost
+  }
+
+  class CostModel {
+    // Pricing (example rates)
+    private static readonly RATES = {
+      cpu: 0.02, // $0.02 per CPU-second
+      memory: 0.005, // $0.005 per GB-second
+      io: 0.0001, // $0.0001 per 1000 I/O ops
+      network: 0.10, // $0.10 per GB
+      neo4j_dbhit: 0.00001, // $0.01 per 1M dbHits
+    };
+
+    async estimateCost(query: Query, planEstimate: any): Promise<QueryCost> {
+      const cpu = this.estimateCPU(planEstimate);
+      const memory = this.estimateMemory(planEstimate);
+      const io = this.estimateIO(planEstimate);
+      const network = this.estimateNetwork(planEstimate);
+
+      const totalUSD =
+        cpu * CostModel.RATES.cpu +
+        memory * CostModel.RATES.memory +
+        io * CostModel.RATES.io / 1000 +
+        network * CostModel.RATES.network;
+
+      return {
+        cpu,
+        memory,
+        io,
+        network,
+        totalUSD,
+        breakdown: this.computeBreakdown(cpu, memory, io, network),
+      };
+    }
+
+    private estimateCPU(planEstimate: any): number {
+      // Heuristic: 1 CPU-second per 100,000 dbHits
+      const dbHits = planEstimate.dbHits || 0;
+      return dbHits / 100_000;
+    }
+
+    private estimateMemory(planEstimate: any): number {
+      // Heuristic: 1 GB-second per 10,000 rows in memory
+      const estimatedRows = planEstimate.estimatedRows || 0;
+      return (estimatedRows / 10_000) * (planEstimate.timeMs / 1000 || 1);
+    }
+
+    private estimateIO(planEstimate: any): number {
+      // I/O ops ≈ dbHits for simplicity
+      return planEstimate.dbHits || 0;
+    }
+
+    private estimateNetwork(planEstimate: any): number {
+      // Network transfer: assume 1 KB per row
+      const estimatedRows = planEstimate.estimatedRows || 0;
+      return (estimatedRows * 1024) / (1024 * 1024 * 1024); // Convert to GB
+    }
+  }
+  ```
+
+  ## Query Optimizer ({{optimization_target}})
+
+  ### QueryOptimizer.ts
+
+  ```typescript
+  interface OptimizationResult {
+    originalQuery: string;
+    originalCost: QueryCost;
+    optimizedQuery: string;
+    optimizedCost: QueryCost;
+    savings: number; // Percentage
+    transformations: Transformation[];
+    equivalenceGuarantee: 'exact' | 'approximate';
+  }
+
+  interface Transformation {
+    type: string;
+    description: string;
+    impact: string;
+  }
+
+  class QueryOptimizer {
+    async optimize(
+      query: string,
+      target: 'cost' | 'latency' | 'throughput'
+    ): Promise<OptimizationResult> {
+      const originalCost = await this.estimator.estimateCost(query);
+
+      const transformations: Transformation[] = [];
+
+      // 1. Add LIMIT if missing (huge impact)
+      let optimized = this.addLimitIfMissing(query);
+      if (optimized !== query) {
+        transformations.push({
+          type: 'add_limit',
+          description: 'Added LIMIT 1000 to unbounded query',
+          impact: 'High',
+        });
+      }
+
+      // 2. Push filters down (earlier WHERE clauses)
+      optimized = this.pushFiltersDown(optimized);
+      if (optimized !== query) {
+        transformations.push({
+          type: 'push_filters',
+          description: 'Moved WHERE clauses before expensive operations',
+          impact: 'Medium',
+        });
+      }
+
+      // 3. Use indexes (rewrite to use indexed properties)
+      optimized = this.useIndexes(optimized);
+      if (optimized !== query) {
+        transformations.push({
+          type: 'use_indexes',
+          description: 'Rewrote to use indexed properties',
+          impact: 'High',
+        });
+      }
+
+      // 4. Materialize expensive subqueries
+      optimized = this.materializeSubqueries(optimized);
+
+      // 5. Parallelize independent branches
+      optimized = this.parallelizeQueries(optimized);
+
+      const optimizedCost = await this.estimator.estimateCost(optimized);
+
+      const savings = ((originalCost.totalUSD - optimizedCost.totalUSD) / originalCost.totalUSD) * 100;
+
+      return {
+        originalQuery: query,
+        originalCost,
+        optimizedQuery: optimized,
+        optimizedCost,
+        savings,
+        transformations,
+        equivalenceGuarantee: this.determineEquivalence(transformations),
+      };
+    }
+
+    private addLimitIfMissing(query: string): string {
+      if (!query.toUpperCase().includes('LIMIT')) {
+        return query.trim() + ' LIMIT 1000';
+      }
+      return query;
+    }
+
+    private pushFiltersDown(query: string): string {
+      // Use Cypher AST to push WHERE clauses earlier
+      // (simplified example)
+      return query.replace(
+        /MATCH (.*) WHERE (.*) MATCH (.*)/,
+        'MATCH $1 WHERE $2 MATCH $3'
+      );
+    }
+
+    private useIndexes(query: string): string {
+      // Suggest using indexed properties
+      // Example: MATCH (p:Person {name: ...}) → use index on Person.name
+      return query;
+    }
+  }
+  ```
+
+  ### IndexAdvisor.ts
+
+  ```typescript
+  interface IndexRecommendation {
+    label: string;
+    property: string;
+    type: 'btree' | 'fulltext' | 'composite';
+    estimatedSavings: number; // % cost reduction
+    createStatement: string;
+  }
+
+  class IndexAdvisor {
+    async recommendIndexes(query: string): Promise<IndexRecommendation[]> {
+      const ast = parseCypher(query);
+      const recommendations: IndexRecommendation[] = [];
+
+      // Find WHERE clauses on non-indexed properties
+      for (const whereClause of ast.whereClauses) {
+        const { label, property } = whereClause;
+
+        const indexed = await this.isIndexed(label, property);
+        if (!indexed) {
+          const estimatedSavings = await this.estimateSavings(label, property);
+
+          recommendations.push({
+            label,
+            property,
+            type: 'btree',
+            estimatedSavings,
+            createStatement: `CREATE INDEX ON :${label}(${property})`,
+          });
+        }
+      }
+
+      return recommendations.sort((a, b) => b.estimatedSavings - a.estimatedSavings);
+    }
+  }
+  ```
+
+  ## Budget Manager
+
+  ### BudgetManager.ts
+
+  ```typescript
+  interface TenantBudget {
+    tenantId: string;
+    dailyLimitUSD: number;
+    monthlyLimitUSD: number;
+    currentDailySpend: number;
+    currentMonthlySpend: number;
+    alertThreshold: number; // e.g., 0.8 = 80%
+  }
+
+  class BudgetManager {
+    async checkBudget(tenantId: string, estimatedCost: number): Promise<BudgetCheckResult> {
+      const budget = await this.getBudget(tenantId);
+
+      const wouldExceedDaily = budget.currentDailySpend + estimatedCost > budget.dailyLimitUSD;
+      const wouldExceedMonthly = budget.currentMonthlySpend + estimatedCost > budget.monthlyLimitUSD;
+
+      if (wouldExceedDaily || wouldExceedMonthly) {
+        return {
+          allowed: false,
+          reason: wouldExceedDaily ? 'Daily budget exceeded' : 'Monthly budget exceeded',
+          currentSpend: wouldExceedDaily ? budget.currentDailySpend : budget.currentMonthlySpend,
+          limit: wouldExceedDaily ? budget.dailyLimitUSD : budget.monthlyLimitUSD,
+        };
+      }
+
+      // Alert if approaching threshold
+      const dailyPercent = (budget.currentDailySpend + estimatedCost) / budget.dailyLimitUSD;
+      if (dailyPercent >= budget.alertThreshold) {
+        await this.sendBudgetAlert(tenantId, 'daily', dailyPercent);
+      }
+
+      return {
+        allowed: true,
+        remainingDaily: budget.dailyLimitUSD - budget.currentDailySpend,
+        remainingMonthly: budget.monthlyLimitUSD - budget.currentMonthlySpend,
+      };
+    }
+
+    async trackSpend(tenantId: string, actualCost: number): Promise<void> {
+      await this.incrementSpend(tenantId, actualCost);
+      await this.recordCostMetric(tenantId, actualCost);
+    }
+  }
+  ```
+
+  ## Slow Query Killer
+
+  ### SlowQueryKiller.ts
+
+  ```typescript
+  interface SlowQueryConfig {
+    maxExecutionTimeMs: number; // e.g., 30000 = 30s
+    checkIntervalMs: number; // e.g., 1000 = 1s
+    killOnTimeout: boolean;
+  }
+
+  class SlowQueryKiller {
+    private runningQueries: Map<string, QueryExecution> = new Map();
+
+    async monitorQuery(
+      queryId: string,
+      promise: Promise<any>,
+      config: SlowQueryConfig
+    ): Promise<any> {
+      const execution: QueryExecution = {
+        queryId,
+        startTime: Date.now(),
+        killed: false,
+      };
+
+      this.runningQueries.set(queryId, execution);
+
+      // Start timeout monitor
+      const timeout = setTimeout(() => {
+        if (config.killOnTimeout) {
+          this.killQuery(queryId);
+        }
+      }, config.maxExecutionTimeMs);
+
+      try {
+        const result = await promise;
+        clearTimeout(timeout);
+        this.runningQueries.delete(queryId);
+        return result;
+      } catch (error) {
+        clearTimeout(timeout);
+        this.runningQueries.delete(queryId);
+        throw error;
+      }
+    }
+
+    async killQuery(queryId: string): Promise<void> {
+      const execution = this.runningQueries.get(queryId);
+      if (!execution) return;
+
+      execution.killed = true;
+
+      // Send KILL signal to Neo4j
+      await this.neo4j.run(`CALL dbms.killQuery($queryId)`, { queryId });
+
+      // Log slow query
+      await this.logSlowQuery(execution);
+
+      // Alert ops team
+      await this.alertSlowQuery(execution);
+    }
+  }
+  ```
+
+  ## Benchmarking
+
+  ### benchmarks/graph-queries/
+
+  **baseline-suite.cypher:**
+
+  ```cypher
+  // Baseline queries (unoptimized)
+
+  // Q1: All persons (unbounded)
+  MATCH (p:Person) RETURN p;
+
+  // Q2: Expensive traversal
+  MATCH (p:Person)-[*1..5]-(other) RETURN p, other;
+
+  // Q3: No index usage
+  MATCH (p:Person {email: 'alice@example.com'}) RETURN p;
+  ```
+
+  **optimized-suite.cypher:**
+
+  ```cypher
+  // Optimized queries
+
+  // Q1: All persons (bounded)
+  MATCH (p:Person) RETURN p LIMIT 1000;
+
+  // Q2: Bounded traversal with filter
+  MATCH (p:Person {name: 'Alice'})-[*1..3]-(other:Person)
+  RETURN p, other LIMIT 100;
+
+  // Q3: Use index
+  CREATE INDEX person_email IF NOT EXISTS FOR (p:Person) ON (p.email);
+  MATCH (p:Person {email: 'alice@example.com'}) RETURN p;
+  ```
+
+  **Benchmark Script:**
+
+  ```bash
+  #!/bin/bash
+  # Run baseline and optimized suites, compare costs
+
+  echo "Running baseline suite..."
+  baseline_cost=$(run_cypher_suite baseline-suite.cypher | compute_total_cost)
+
+  echo "Running optimized suite..."
+  optimized_cost=$(run_cypher_suite optimized-suite.cypher | compute_total_cost)
+
+  savings=$(echo "scale=2; ($baseline_cost - $optimized_cost) / $baseline_cost * 100" | bc)
+
+  echo "Cost Savings: $savings%"
+
+  # Assert 20-40% savings
+  if (( $(echo "$savings >= 20" | bc -l) )); then
+    echo "✓ Target savings achieved"
+  else
+    echo "✗ Target savings NOT achieved"
+    exit 1
+  fi
+  ```
+
+  ## Frontend UI
+
+  ### CostHeatmap.tsx
+
+  ```tsx
+  <CostHeatmap>
+    <HeatmapGrid
+      data={queryData}
+      x="hour"
+      y="tenant"
+      value="costUSD"
+      colorScale="YlOrRd"
+    />
+
+    <CostTrendChart
+      data={costTrends}
+      showOptimizationOpportunities
+    />
+  </CostHeatmap>
+  ```
+
+  ### BudgetDashboard.tsx
+
+  ```tsx
+  <BudgetDashboard>
+    {tenants.map(tenant => (
+      <BudgetCard key={tenant.id} tenant={tenant}>
+        <LinearProgress
+          variant="determinate"
+          value={(tenant.currentDailySpend / tenant.dailyLimitUSD) * 100}
+        />
+        <Typography>
+          ${tenant.currentDailySpend.toFixed(2)} / ${tenant.dailyLimitUSD.toFixed(2)}
+        </Typography>
+
+        {tenant.optimizationSuggestions.length > 0 && (
+          <Alert severity="info">
+            {tenant.optimizationSuggestions.length} cost-saving opportunities
+          </Alert>
+        )}
+      </BudgetCard>
+    ))}
+  </BudgetDashboard>
+  ```
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Cost estimator predicts query costs (CPU, memory, I/O, network)
+  - [ ] Budget manager enforces tenant daily/monthly limits
+  - [ ] Query optimizer suggests cheaper alternatives (20-40% savings)
+  - [ ] Slow query killer terminates queries exceeding timeout
+  - [ ] Index advisor recommends indexes with estimated savings
+  - [ ] Benchmark harness shows 20-40% cost reduction with equivalent conclusions
+  - [ ] Cost heatmap visualizes spending by tenant and time
+  - [ ] Alerts sent when budgets approach threshold (e.g., 80%)
+  - [ ] Unit test coverage ≥80%
+  - [ ] Documentation includes cost model and optimization techniques
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for service and React for UI
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Include golden path smoke test
+
+  Remember: **Cost control = margin protection.** Every dollar saved is a dollar earned.
+
+examples:
+  - name: 'dbhits-cost-50usd'
+    inputs:
+      cost_model: 'dbHits + rows'
+      optimization_target: 'cost'
+      default_budget_usd: '50'
+    expected_contains:
+      - 'dbHits'
+      - 'cost estimate'
+      - '20-40% savings'
+      - 'slow query killer'
+      - '$50'
+
+  - name: 'cpu-latency-100usd'
+    inputs:
+      cost_model: 'CPU + memory'
+      optimization_target: 'latency'
+      default_budget_usd: '100'
+    expected_contains:
+      - 'CPU'
+      - 'latency'
+      - 'budget'
+      - 'optimizer'

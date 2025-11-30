@@ -1,0 +1,523 @@
+meta:
+  id: implement.zk-deconflict@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build zero-knowledge overlap detection for multi-tenant deconfliction without revealing selector values'
+  tags: ['zero-knowledge', 'privacy', 'deconfliction', 'multi-tenant', 'cryptography']
+  guardrails:
+    - 'Never reveal selector values across tenant boundaries'
+    - 'Only return True/False overlap result + signed attestation'
+    - 'Salted hashes must use tenant-specific salts'
+    - 'Include leakage analysis in documentation'
+    - 'Transcripts must be cryptographically verifiable'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.1
+  maxTokens: 6000
+
+inputs:
+  zk_protocol: string
+  hash_function: string
+  set_cardinality_limit: string
+
+template: |
+  You are implementing **Zero-Knowledge Deconfliction** for IntelGraph.
+
+  ## Objective
+
+  Build a system that enables multi-tenant overlap detection for hashed selectors (e.g., phone numbers, IDs) using zero-knowledge proofs, returning only True/False + attestation without revealing selector values.
+
+  ## Target Paths
+
+  ```
+  services/zk-deconflict/
+    ├── src/
+    │   ├── api/
+    │   │   └── DeconflictController.ts
+    │   ├── zk/
+    │   │   ├── SetHasher.ts
+    │   │   ├── OverlapProver.ts
+    │   │   ├── OverlapVerifier.ts
+    │   │   └── RangeProver.ts
+    │   ├── crypto/
+    │   │   ├── SaltGenerator.ts
+    │   │   └── CommitmentScheme.ts
+    │   └── audit/
+    │       └── TranscriptLogger.ts
+    ├── tests/
+    │   ├── unit/
+    │   ├── integration/
+    │   └── leakage/
+    │       └── leakage-analysis.test.ts
+    └── README.md
+
+  packages/crypto/
+    ├── src/
+    │   ├── zkproofs/
+    │   │   ├── SetMembershipProof.ts
+    │   │   ├── SetIntersectionProof.ts
+    │   │   └── CardinalityProof.ts
+    │   └── primitives/
+    │       ├── Hash.ts
+    │       ├── Commitment.ts
+    │       └── BlindSignature.ts
+    └── tests/
+  ```
+
+  ## Protocol Overview ({{zk_protocol}})
+
+  ### Use Case: Coalition Deconfliction
+
+  **Scenario:** Two intelligence agencies want to know if they're investigating the same person without revealing their targets.
+
+  - **Agency A** has selectors: `{phone_A1, phone_A2, ...}`
+  - **Agency B** has selectors: `{phone_B1, phone_B2, ...}`
+
+  **Goal:** Determine if `Set_A ∩ Set_B ≠ ∅` without revealing specific selectors.
+
+  ### Protocol Steps
+
+  1. **Commitment Phase**
+     - Each party hashes their selectors with tenant-specific salt
+     - Commit to hash set (Merkle root or cryptographic commitment)
+     - Share commitments
+
+  2. **Proof Generation**
+     - Prover generates ZK proof that overlap exists (or doesn't)
+     - Proof includes set membership proofs for intersection elements
+     - No selector values revealed
+
+  3. **Verification**
+     - Verifier checks proof validity
+     - Result: `{ overlap: true/false, attestation: {...} }`
+     - No information leaked beyond overlap boolean
+
+  ## Core Components
+
+  ### 1. Set Hasher
+
+  **SetHasher.ts:**
+
+  ```typescript
+  interface HashedSet {
+    tenantId: string;
+    salt: string; // Tenant-specific salt
+    hashes: string[]; // SHA-256(salt || selector)
+    merkleRoot: string;
+    commitment: Commitment;
+  }
+
+  function hashSet(
+    selectors: string[],
+    tenantId: string,
+    options: HashOptions
+  ): HashedSet {
+    // 1. Get or generate tenant salt
+    const salt = getTenantSalt(tenantId);
+
+    // 2. Hash each selector
+    const hashes = selectors.map(sel =>
+      {{hash_function}}(salt + sel)
+    );
+
+    // 3. Build Merkle tree
+    const merkleRoot = buildMerkleTree(hashes).root;
+
+    // 4. Create cryptographic commitment
+    const commitment = commit(hashes, options.randomness);
+
+    return {
+      tenantId,
+      salt: '[REDACTED]', // Never expose salt
+      hashes,
+      merkleRoot,
+      commitment,
+    };
+  }
+  ```
+
+  ### 2. Overlap Prover
+
+  **OverlapProver.ts:**
+
+  ```typescript
+  interface OverlapProof {
+    protocol: string; // e.g., "zk-SNARK", "Pedersen-Set-Proof"
+    statement: {
+      claim: 'overlap_exists' | 'no_overlap';
+      setACommitment: string;
+      setBCommitment: string;
+    };
+    proof: string; // ZK proof bytes (base64)
+    publicInputs: string[];
+    transcript: ProofTranscript;
+  }
+
+  async function proveOverlap(
+    setA: HashedSet,
+    setB: HashedSet
+  ): Promise<OverlapProof> {
+    // 1. Compute intersection (privately)
+    const intersection = setA.hashes.filter(h => setB.hashes.includes(h));
+
+    const claim = intersection.length > 0 ? 'overlap_exists' : 'no_overlap';
+
+    // 2. Generate ZK proof
+    const { proof, publicInputs } = await generateZKProof({
+      circuit: 'set_intersection',
+      privateInputs: {
+        setA: setA.hashes,
+        setB: setB.hashes,
+        intersection,
+      },
+      publicInputs: {
+        commitmentA: setA.commitment,
+        commitmentB: setB.commitment,
+        claim,
+      },
+    });
+
+    // 3. Generate transcript for auditability
+    const transcript = generateTranscript(setA, setB, claim);
+
+    return {
+      protocol: '{{zk_protocol}}',
+      statement: {
+        claim,
+        setACommitment: setA.commitment.value,
+        setBCommitment: setB.commitment.value,
+      },
+      proof: Buffer.from(proof).toString('base64'),
+      publicInputs,
+      transcript,
+    };
+  }
+  ```
+
+  ### 3. Overlap Verifier
+
+  **OverlapVerifier.ts:**
+
+  ```typescript
+  interface VerificationResult {
+    valid: boolean;
+    claim: 'overlap_exists' | 'no_overlap';
+    confidence: number; // Cryptographic security level
+    attestation: Attestation;
+    transcript: ProofTranscript;
+  }
+
+  async function verifyOverlap(
+    proof: OverlapProof
+  ): Promise<VerificationResult> {
+    // 1. Verify ZK proof
+    const valid = await verifyZKProof({
+      circuit: 'set_intersection',
+      proof: Buffer.from(proof.proof, 'base64'),
+      publicInputs: proof.publicInputs,
+    });
+
+    if (!valid) {
+      return {
+        valid: false,
+        claim: proof.statement.claim,
+        confidence: 0,
+        attestation: null,
+        transcript: proof.transcript,
+      };
+    }
+
+    // 2. Generate signed attestation
+    const attestation = signAttestation({
+      claim: proof.statement.claim,
+      commitmentsVerified: [
+        proof.statement.setACommitment,
+        proof.statement.setBCommitment,
+      ],
+      proofValid: true,
+      timestamp: new Date().toISOString(),
+    });
+
+    return {
+      valid: true,
+      claim: proof.statement.claim,
+      confidence: 128, // bits of security
+      attestation,
+      transcript: proof.transcript,
+    };
+  }
+  ```
+
+  ### 4. Range Proofs (Cardinality)
+
+  **RangeProver.ts:**
+
+  ```typescript
+  interface CardinalityProof {
+    claim: string; // e.g., "intersection_size_in_range_1_10"
+    lowerBound: number;
+    upperBound: number;
+    proof: string;
+  }
+
+  async function proveCardinalityRange(
+    intersection: string[],
+    lowerBound: number,
+    upperBound: number
+  ): Promise<CardinalityProof> {
+    const size = intersection.length;
+
+    // Prove: lowerBound <= size <= upperBound (without revealing size)
+    const proof = await generateRangeProof({
+      value: size,
+      lowerBound,
+      upperBound,
+    });
+
+    return {
+      claim: `intersection_size_in_range_${lowerBound}_${upperBound}`,
+      lowerBound,
+      upperBound,
+      proof: Buffer.from(proof).toString('base64'),
+    };
+  }
+  ```
+
+  ## API Endpoints
+
+  ### POST /api/zk-deconflict/hash-set
+
+  **Request:**
+  ```json
+  {
+    "tenantId": "agency_a",
+    "selectors": ["555-1234", "555-5678"],
+    "metadata": {
+      "investigationId": "inv_001"
+    }
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "setId": "set_abc123",
+    "merkleRoot": "a1b2c3...",
+    "commitment": "d4e5f6...",
+    "expiresAt": "2025-12-01T00:00:00Z"
+  }
+  ```
+
+  ### POST /api/zk-deconflict/check-overlap
+
+  **Request:**
+  ```json
+  {
+    "setAId": "set_abc123",
+    "setBId": "set_def456",
+    "options": {
+      "includeCardinalityProof": true,
+      "cardinalityRange": { "lower": 1, "upper": 10 }
+    }
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "overlap": true,
+    "proof": {
+      "protocol": "{{zk_protocol}}",
+      "statement": {
+        "claim": "overlap_exists",
+        "setACommitment": "...",
+        "setBCommitment": "..."
+      },
+      "proof": "base64...",
+      "valid": true
+    },
+    "cardinalityProof": {
+      "claim": "intersection_size_in_range_1_10",
+      "lowerBound": 1,
+      "upperBound": 10
+    },
+    "attestation": {
+      "signature": "...",
+      "timestamp": "2025-11-22T10:00:00Z"
+    }
+  }
+  ```
+
+  ## Security Analysis
+
+  ### Leakage Analysis
+
+  **File:** `tests/leakage/leakage-analysis.test.ts`
+
+  **Threat Model:**
+
+  1. **Honest-but-Curious Adversary**
+     - Can see: commitments, proofs, True/False result
+     - Cannot see: selector values, set sizes, intersection elements
+
+  2. **Collusion Attack**
+     - If adversary controls one party, can they learn about the other?
+     - Mitigation: Tenant-specific salts prevent cross-tenant correlation
+
+  3. **Timing Attack**
+     - Does response time leak information about set size or intersection size?
+     - Mitigation: Constant-time operations, randomized delays
+
+  4. **Replay Attack**
+     - Can an old proof be reused?
+     - Mitigation: Proofs include timestamps and nonces
+
+  **Leakage Tests:**
+
+  ```typescript
+  describe('Leakage Analysis', () => {
+    it('should not leak selector values from commitments', () => {
+      const selectors = ['555-1234', '555-5678'];
+      const hashed = hashSet(selectors, 'tenant_a', {});
+
+      // Adversary sees commitment
+      const commitment = hashed.commitment.value;
+
+      // Try to reverse-engineer selectors
+      const recovered = attemptReverse(commitment, commonSelectorDictionary);
+
+      expect(recovered).toEqual([]); // Should not recover any selectors
+    });
+
+    it('should not leak set size from proof', () => {
+      const setA = hashSet(Array(100).fill('x'), 'tenant_a', {});
+      const setB = hashSet(Array(10).fill('y'), 'tenant_b', {});
+
+      const proof = proveOverlap(setA, setB);
+
+      // Proof should not reveal set sizes
+      expect(proof.publicInputs).not.toContainEqual(100);
+      expect(proof.publicInputs).not.toContainEqual(10);
+    });
+
+    it('should have constant-time verification', () => {
+      // Measure verification time for various set sizes
+      const timings = [];
+      for (const size of [10, 100, 1000, {{set_cardinality_limit}}]) {
+        const start = Date.now();
+        verifyOverlap(generateProof(size));
+        const elapsed = Date.now() - start;
+        timings.push(elapsed);
+      }
+
+      // Variance should be < 10%
+      const variance = computeVariance(timings);
+      expect(variance).toBeLessThan(0.1);
+    });
+  });
+  ```
+
+  ## Audit Transcript
+
+  **TranscriptLogger.ts:**
+
+  ```typescript
+  interface ProofTranscript {
+    requestId: string;
+    timestamp: string;
+    parties: string[]; // Tenant IDs
+    commitments: string[];
+    claim: string;
+    proofHash: string; // Hash of proof for non-repudiation
+    verificationResult: boolean;
+  }
+
+  function generateTranscript(
+    setA: HashedSet,
+    setB: HashedSet,
+    claim: string
+  ): ProofTranscript {
+    return {
+      requestId: generateRequestId(),
+      timestamp: new Date().toISOString(),
+      parties: [setA.tenantId, setB.tenantId],
+      commitments: [setA.commitment.value, setB.commitment.value],
+      claim,
+      proofHash: '[computed after proof generation]',
+      verificationResult: null, // Filled by verifier
+    };
+  }
+  ```
+
+  ## Documentation Requirements
+
+  ### README.md
+
+  - Protocol overview (with diagrams)
+  - Security guarantees
+  - Leakage analysis summary
+  - API usage examples
+  - Integration guide
+
+  ### Security Guarantees
+
+  Document:
+  - **Zero-Knowledge**: Only overlap boolean revealed
+  - **Soundness**: Cannot prove false overlap
+  - **Completeness**: Valid overlap always provable
+  - **Privacy**: No selector values leaked
+  - **Non-Repudiation**: Transcripts are signed and auditable
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] ZK proofs generate for set overlap detection
+  - [ ] Salted hashes use tenant-specific salts (never shared)
+  - [ ] Verification returns only True/False + attestation
+  - [ ] No selector values revealed in proofs or transcripts
+  - [ ] Cardinality range proofs work (e.g., 1-10 overlap)
+  - [ ] Leakage analysis tests pass (no info leakage)
+  - [ ] Transcripts verifiable and tamper-proof
+  - [ ] Demonstrated overlap detection without revealing selectors
+  - [ ] Unit test coverage ≥80%
+  - [ ] Security analysis documented
+
+  ## Performance Targets
+
+  - Proof generation: <5s for sets up to {{set_cardinality_limit}} elements
+  - Verification: <1s
+  - Set hashing: <1s for {{set_cardinality_limit}} selectors
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for service
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Include golden path smoke test
+
+  Remember: **Privacy is paramount.** Any selector value leak is a critical vulnerability.
+
+examples:
+  - name: 'zksnark-sha256-1000'
+    inputs:
+      zk_protocol: 'zk-SNARK'
+      hash_function: 'SHA-256'
+      set_cardinality_limit: '1000'
+    expected_contains:
+      - 'zk-SNARK'
+      - 'SHA-256'
+      - 'salted hash'
+      - 'leakage analysis'
+      - 'True/False'
+
+  - name: 'bulletproofs-blake3-10000'
+    inputs:
+      zk_protocol: 'Bulletproofs'
+      hash_function: 'BLAKE3'
+      set_cardinality_limit: '10000'
+    expected_contains:
+      - 'Bulletproofs'
+      - 'BLAKE3'
+      - 'set intersection'
+      - 'transcript'
