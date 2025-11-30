@@ -8,6 +8,8 @@ import evidenceOkResolvers from './evidenceOk.js';
 import trustRiskResolvers from './trust-risk.js';
 import provenanceResolvers from './provenance.js';
 import supportTicketResolvers from './supportTicket.js';
+import { crudResolvers } from './crudResolvers.js';
+import multimodalResolvers from './multimodalResolvers.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040';
@@ -64,6 +66,10 @@ const resolvers = {
       wargameResolver.updateCrisisScenario.bind(wargameResolver),
     deleteCrisisScenario:
       wargameResolver.deleteCrisisScenario.bind(wargameResolver),
+  },
+  Subscription: {
+    ...(crudResolvers.Subscription || {}),
+    ...(multimodalResolvers.Subscription || {}),
   },
   SupportTicket: supportTicketResolvers.SupportTicket,
 };

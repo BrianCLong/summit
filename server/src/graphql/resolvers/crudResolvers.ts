@@ -1,4 +1,3 @@
-import { PubSub } from 'graphql-subscriptions';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import {
   getNeo4jDriver,
@@ -13,8 +12,12 @@ import {
   getCustomSchema,
 } from '../../services/CustomSchemaService.js';
 import { NeighborhoodCache } from '../../services/neighborhood-cache.js';
+import {
+  subscriptionEngine,
+  type SubscriptionEnvelope,
+  type SubscriptionMetadata,
+} from '../subscriptionEngine.js';
 
-const pubsub = new PubSub();
 const nbhdCache = new NeighborhoodCache(getRedisClient());
 
 interface User {
@@ -30,7 +33,6 @@ interface User {
 interface Context {
   user?: User;
   req?: any;
-  pubsub?: PubSub;
 }
 
 interface Provenance {
@@ -89,6 +91,62 @@ interface GraphDataArgs {
   investigationId: string;
   filter?: GraphDataFilter;
 }
+
+const GRAPH_EVENTS = 'GRAPH_EVENTS';
+
+const buildMetadata = (
+  user: User | undefined,
+  investigationId: string | undefined,
+  type: string,
+): SubscriptionMetadata => ({
+  tenantId: user?.tenantId,
+  userId: user?.id,
+  investigationId,
+  type,
+});
+
+const emitGraphEvent = async <T>(
+  trigger: string,
+  payload: T,
+  metadata: SubscriptionMetadata,
+) => {
+  await Promise.all([
+    subscriptionEngine.publish(trigger, payload, metadata),
+    subscriptionEngine.publish(GRAPH_EVENTS, payload, metadata),
+  ]);
+};
+
+export const buildGraphEventFilter = (
+  user: User | undefined,
+  investigationId?: string,
+  types?: string[],
+) =>
+  (event: SubscriptionEnvelope<any>) => {
+    if (!user?.tenantId) {
+      return false;
+    }
+
+    const matchesTenant = event.metadata?.tenantId === user.tenantId;
+    if (!matchesTenant) {
+      return false;
+    }
+
+    const matchesInvestigation =
+      !investigationId ||
+      event.metadata?.investigationId === investigationId ||
+      (event.payload as any)?.investigationId === investigationId;
+
+    if (!matchesInvestigation) {
+      return false;
+    }
+
+    if (types?.length) {
+      const eventType = event.metadata?.type || '';
+      return types.includes(eventType);
+    }
+
+    return true;
+  };
 
 const crudResolvers = {
   Query: {
@@ -701,10 +759,14 @@ const crudResolvers = {
         ]);
 
         // Publish subscription
-        pubsub.publish('ENTITY_CREATED', {
-          entityCreated: entity,
-          investigationId: input.investigationId,
-        });
+        await emitGraphEvent(
+          'ENTITY_CREATED',
+          {
+            entityCreated: entity,
+            investigationId: input.investigationId,
+          },
+          buildMetadata(user, input.investigationId, 'ENTITY_CREATED'),
+        );
 
         logger.info(`Entity created: ${id} by user ${user.id}`);
         await nbhdCache.invalidate(user.tenantId, input.investigationId, [id]);
@@ -806,10 +868,14 @@ const crudResolvers = {
       }
 
       for (const entity of created) {
-        pubsub.publish('ENTITY_CREATED', {
-          entityCreated: entity,
-          investigationId: entity.investigationId,
-        });
+        await emitGraphEvent(
+          'ENTITY_CREATED',
+          {
+            entityCreated: entity,
+            investigationId: entity.investigationId,
+          },
+          buildMetadata(user, entity.investigationId, 'ENTITY_CREATED'),
+        );
         await nbhdCache.invalidate(user.tenantId, entity.investigationId, [
           entity.id,
         ]);
@@ -900,10 +966,14 @@ const crudResolvers = {
 
         const entity = result.records[0].get('e').properties;
 
-        pubsub.publish('ENTITY_UPDATED', {
-          entityUpdated: entity,
-          investigationId: entity.investigationId,
-        });
+        await emitGraphEvent(
+          'ENTITY_UPDATED',
+          {
+            entityUpdated: entity,
+            investigationId: entity.investigationId,
+          },
+          buildMetadata(user, entity.investigationId, 'ENTITY_UPDATED'),
+        );
 
         logger.info(`Entity updated: ${id} by user ${user.id}`);
         await nbhdCache.invalidate(user.tenantId, entity.investigationId, [id]);
@@ -934,10 +1004,14 @@ const crudResolvers = {
 
         const investigationId = result.records[0].get('investigationId');
 
-        pubsub.publish('ENTITY_DELETED', {
-          entityDeleted: id,
-          investigationId,
-        });
+        await emitGraphEvent(
+          'ENTITY_DELETED',
+          {
+            entityDeleted: id,
+            investigationId,
+          },
+          buildMetadata(user, investigationId, 'ENTITY_DELETED'),
+        );
 
         logger.info(`Entity deleted: ${id} by user ${user.id}`);
         await nbhdCache.invalidate(user.tenantId, investigationId, [id]);
@@ -1026,10 +1100,14 @@ const crudResolvers = {
           toEntity: record.get('to').properties,
         };
 
-        pubsub.publish('RELATIONSHIP_CREATED', {
-          relationshipCreated: relationship,
-          investigationId: input.investigationId,
-        });
+        await emitGraphEvent(
+          'RELATIONSHIP_CREATED',
+          {
+            relationshipCreated: relationship,
+            investigationId: input.investigationId,
+          },
+          buildMetadata(user, input.investigationId, 'RELATIONSHIP_CREATED'),
+        );
 
         logger.info(`Relationship created: ${id} by user ${user.id}`);
         await nbhdCache.invalidate(user.tenantId, input.investigationId, [
@@ -1149,10 +1227,14 @@ const crudResolvers = {
       }
 
       for (const rel of created) {
-        pubsub.publish('RELATIONSHIP_CREATED', {
-          relationshipCreated: rel,
-          investigationId: rel.investigationId,
-        });
+        await emitGraphEvent(
+          'RELATIONSHIP_CREATED',
+          {
+            relationshipCreated: rel,
+            investigationId: rel.investigationId,
+          },
+          buildMetadata(user, rel.investigationId, 'RELATIONSHIP_CREATED'),
+        );
         await nbhdCache.invalidate(user.tenantId, rel.investigationId, [
           rel.fromEntity.id,
           rel.toEntity.id,
@@ -1254,10 +1336,14 @@ const crudResolvers = {
           toEntity: record.get('to').properties,
         };
 
-        pubsub.publish('RELATIONSHIP_UPDATED', {
-          relationshipUpdated: relationship,
-          investigationId: relationship.investigationId,
-        });
+        await emitGraphEvent(
+          'RELATIONSHIP_UPDATED',
+          {
+            relationshipUpdated: relationship,
+            investigationId: relationship.investigationId,
+          },
+          buildMetadata(user, relationship.investigationId, 'RELATIONSHIP_UPDATED'),
+        );
 
         logger.info(`Relationship updated: ${id} by user ${user.id}`);
         await nbhdCache.invalidate(
@@ -1299,10 +1385,14 @@ const crudResolvers = {
         const fromId = record.get('fromId');
         const toId = record.get('toId');
 
-        pubsub.publish('RELATIONSHIP_DELETED', {
-          relationshipDeleted: id,
-          investigationId,
-        });
+        await emitGraphEvent(
+          'RELATIONSHIP_DELETED',
+          {
+            relationshipDeleted: id,
+            investigationId,
+          },
+          buildMetadata(user, investigationId, 'RELATIONSHIP_DELETED'),
+        );
 
         logger.info(`Relationship deleted: ${id} by user ${user.id}`);
         await nbhdCache.invalidate(user.tenantId, investigationId, [
@@ -1444,109 +1534,174 @@ const crudResolvers = {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        if (investigationId) {
-          return pubsub.asyncIterator([`ENTITY_CREATED_${investigationId}`]);
-        }
-        return pubsub.asyncIterator(['ENTITY_CREATED']);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          'ENTITY_CREATED',
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) =>
+        (event.payload as any).entityCreated ?? event.payload,
     },
 
     entityUpdated: {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        if (investigationId) {
-          return pubsub.asyncIterator([`ENTITY_UPDATED_${investigationId}`]);
-        }
-        return pubsub.asyncIterator(['ENTITY_UPDATED']);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          'ENTITY_UPDATED',
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) =>
+        (event.payload as any).entityUpdated ?? event.payload,
     },
 
     entityDeleted: {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        if (investigationId) {
-          return pubsub.asyncIterator([`ENTITY_DELETED_${investigationId}`]);
-        }
-        return pubsub.asyncIterator(['ENTITY_DELETED']);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          'ENTITY_DELETED',
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) =>
+        (event.payload as any).entityDeleted ?? event.payload,
     },
 
     relationshipCreated: {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        if (investigationId) {
-          return pubsub.asyncIterator([
-            `RELATIONSHIP_CREATED_${investigationId}`,
-          ]);
-        }
-        return pubsub.asyncIterator(['RELATIONSHIP_CREATED']);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          'RELATIONSHIP_CREATED',
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) =>
+        (event.payload as any).relationshipCreated ?? event.payload,
     },
 
     relationshipUpdated: {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        if (investigationId) {
-          return pubsub.asyncIterator([
-            `RELATIONSHIP_UPDATED_${investigationId}`,
-          ]);
-        }
-        return pubsub.asyncIterator(['RELATIONSHIP_UPDATED']);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          'RELATIONSHIP_UPDATED',
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) =>
+        (event.payload as any).relationshipUpdated ?? event.payload,
     },
 
     relationshipDeleted: {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        if (investigationId) {
-          return pubsub.asyncIterator([
-            `RELATIONSHIP_DELETED_${investigationId}`,
-          ]);
-        }
-        return pubsub.asyncIterator(['RELATIONSHIP_DELETED']);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          'RELATIONSHIP_DELETED',
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) =>
+        (event.payload as any).relationshipDeleted ?? event.payload,
     },
 
     investigationUpdated: {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        if (investigationId) {
-          return pubsub.asyncIterator([
-            `INVESTIGATION_UPDATED_${investigationId}`,
-          ]);
-        }
-        return pubsub.asyncIterator(['INVESTIGATION_UPDATED']);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          'INVESTIGATION_UPDATED',
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) =>
+        (event.payload as any).investigationUpdated ?? event.payload,
     },
 
     graphUpdated: {
       subscribe: (
         _: any,
         { investigationId }: { investigationId?: string },
+        { user }: Context,
       ) => {
-        return pubsub.asyncIterator([`GRAPH_UPDATED_${investigationId}`]);
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createFilteredAsyncIterator(
+          GRAPH_EVENTS,
+          buildGraphEventFilter(user, investigationId),
+        );
       },
-      resolve: (event: any) => event.payload,
+      resolve: (event: SubscriptionEnvelope<any>) => event.payload,
+    },
+
+    graphEvents: {
+      subscribe: (
+        _: any,
+        {
+          investigationId,
+          types,
+          batchSize,
+          flushIntervalMs,
+        }:
+          | {
+              investigationId?: string;
+              types?: string[];
+              batchSize?: number;
+              flushIntervalMs?: number;
+            }
+          | undefined,
+        { user }: Context,
+      ) => {
+        if (!user) throw new Error('Not authenticated');
+
+        return subscriptionEngine.createBatchedAsyncIterator(
+          GRAPH_EVENTS,
+          buildGraphEventFilter(user, investigationId, types),
+          { batchSize: batchSize ?? 20, flushIntervalMs: flushIntervalMs ?? 250 },
+        );
+      },
+      resolve: (batch: SubscriptionEnvelope<any>[]) => ({
+        cursor: batch[batch.length - 1]?.id ?? uuidv4(),
+        events: batch.map((event) => ({
+          id: event.id,
+          type: event.metadata?.type || 'UNKNOWN',
+          investigationId: event.metadata?.investigationId,
+          tenantId: event.metadata?.tenantId,
+          timestamp: new Date(event.timestamp).toISOString(),
+          payload: event.payload,
+        })),
+      }),
     },
   },
 

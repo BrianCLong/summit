@@ -4,6 +4,7 @@ const { graphTypeDefs } = require('./schema.graphops.js');
 const { aiTypeDefs } = require('./schema.ai.js');
 const { annotationsTypeDefs } = require('./schema.annotations.js');
 const graphragTypes = require('./types/graphragTypes.js');
+const { subscriptionTypeDefs } = require('./schema.subscriptions.js');
 
 const base = gql`
   scalar JSON
@@ -26,4 +27,5 @@ export const typeDefs = [
   graphragTypes,
   aiTypeDefs,
   annotationsTypeDefs,
+  subscriptionTypeDefs,
 ];
