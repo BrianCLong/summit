@@ -39,11 +39,11 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile=false
       - name: Lint
-        run: pnpm run lint || true
+        run: pnpm run lint
       - name: Typecheck
-        run: pnpm run typecheck || true
+        run: pnpm run typecheck
       - name: Test
-        run: pnpm run test || true
+        run: pnpm run test
       - name: Build
         run: |
           if [ -x scripts/build-workspaces.sh ]; then
