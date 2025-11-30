@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Lead Routing Decision",
+  "type": "object",
+  "required": ["allowed", "reason", "assignee", "sla"],
+  "properties": {
+    "allowed": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "assignee": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["user", "team", "none"] },
+        "id": { "type": "string" }
+      }
+    },
+    "sla": {
+      "type": "object",
+      "properties": {
+        "first_touch_hours": { "type": "number" }
+      }
+    },
+    "segment": { "type": "string" },
+    "flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "additionalProperties": false
+}
