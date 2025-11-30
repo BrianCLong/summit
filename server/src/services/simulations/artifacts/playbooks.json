@@ -1,0 +1,22 @@
+[
+  {
+    "id": "PB-IDENTITY-001",
+    "name": "Identity Compromise Response",
+    "steps": [
+      "Verify user activity with user via out-of-band communication",
+      "Reset user password in AD and Okta",
+      "Revoke all Okta sessions",
+      "Check for MFA enrollments added recently",
+      "Isolate workstation CrowdStrike"
+    ]
+  },
+  {
+    "id": "PB-CLOUD-002",
+    "name": "Azure AD Suspicious Sync",
+    "steps": [
+      "Disable AAD Connect Sync Account",
+      "Review AAD Audit Logs for new Global Admins",
+      "Initiate Global Password Reset for Admins"
+    ]
+  }
+]
