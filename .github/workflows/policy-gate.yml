@@ -35,3 +35,34 @@ jobs:
         with: { version: 9 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true
+
+  opa-policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: OPA Test
+        run: opa test policy/rego/ -v
+
+      - name: OPA Check
+        run: opa check policy/rego/
+
+      - name: OPA Eval Access Control
+        # Verify core access control policy evaluates successfully
+        run: |
+          opa eval -d policy/rego/ 'data.access_control' > /dev/null
+
+      - name: OPA Eval Conductor
+        # Verify conductor policy evaluates successfully
+        run: |
+          opa eval -d policy/rego/ 'data.conductor' > /dev/null
+
+      - name: OPA Eval Governance
+        # Verify governance policy evaluates successfully
+        run: |
+          opa eval -d policy/rego/ 'data.governance' > /dev/null
