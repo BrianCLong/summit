@@ -27,7 +27,12 @@ function signChallenge(challenge: string) {
 async function stepUp(app: express.Express, token: string) {
   const challengeRes = await request(app)
     .post('/auth/webauthn/challenge')
-    .set('Authorization', `Bearer ${token}`);
+    .set('Authorization', `Bearer ${token}`)
+    .send({
+      action: 'dataset:read',
+      resourceId: 'dataset-alpha',
+      classification: 'confidential',
+    });
   const signature = signChallenge(challengeRes.body.challenge);
   const step = await request(app)
     .post('/auth/step-up')
