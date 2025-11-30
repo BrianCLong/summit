@@ -29,6 +29,54 @@
     }
   },
   "flags": {
+    "atsh-enabled": {
+      "key": "atsh-enabled",
+      "name": "Autonomous Test Safety Harness",
+      "description": "Gate ATSH harness execution, preview-only rollout, and rollback hooks",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["qa", "preview", "atsh"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "branch": "feat/atsh",
+        "label": "feature:ATSH_ENABLED"
+      }
+    },
+    "saga-enabled": {
+      "key": "saga-enabled",
+      "name": "Saga Orchestration Platform",
+      "description": "Gate saga orchestration workflows, compensations, and preview smoke paths",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["platform", "preview", "saga"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "branch": "feat/saga",
+        "label": "feature:SAGA_ENABLED"
+      }
+    },
+    "prompt-registry-enabled": {
+      "key": "prompt-registry-enabled",
+      "name": "Prompt Registry",
+      "description": "Gate governed prompt registry features, evaluations, and rollout events",
+      "type": "boolean",
+      "defaultValue": false,
+      "tags": ["ai", "preview", "prompts"],
+      "rollout": {
+        "type": "gradual",
+        "percentage": 0
+      },
+      "metadata": {
+        "branch": "feat/prompt-registry",
+        "label": "feature:PROMPT_REGISTRY_ENABLED"
+      }
+    },
     "new-ui-dashboard": {
       "key": "new-ui-dashboard",
       "name": "New UI Dashboard",
