@@ -1,0 +1,34 @@
+{
+  "name": "@intelgraph/tri-pane-explain",
+  "version": "1.0.0",
+  "description": "Tri-Pane UI with synchronized timeline/map/graph views, XAI overlays, and provenance tooltips",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "test": "vitest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "@apollo/client": "^3.8.0",
+    "d3": "^7.9.0",
+    "leaflet": "^1.9.4",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/d3": "^7.4.0",
+    "@types/leaflet": "^1.9.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "vitest": "^2.0.0",
+    "eslint": "^9.39.1"
+  },
+  "type": "module"
+}
