@@ -339,6 +339,8 @@ export interface RTBFJob {
       bucket?: string;
       prefix?: string;
       query?: string;
+      filterColumn?: string;
+      filterValue?: string;
     };
     parameters?: Record<string, any>;
   };

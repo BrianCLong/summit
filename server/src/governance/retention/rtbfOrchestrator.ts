@@ -605,7 +605,8 @@ export class RTBFOrchestrator {
       const table = tableTags[0]?.replace('postgres:table:', '');
       return {
         table,
-        query: `dataset_id = '${datasetId}'`,
+        filterColumn: 'dataset_id',
+        filterValue: datasetId,
       };
     } else if (storageSystem === 'neo4j') {
       const labelTags = record.metadata.tags.filter((tag) =>
@@ -657,14 +658,28 @@ export class RTBFOrchestrator {
    * Execute PostgreSQL job
    */
   private async executePostgresJob(job: RTBFJob): Promise<void> {
-    const { table, query } = job.operation.targets;
-    if (!table || !query) {
-      throw new Error('Missing table or query for Postgres job');
+    const { table, filterColumn = 'dataset_id', filterValue } =
+      job.operation.targets;
+    if (!table) {
+      throw new Error('Missing table for Postgres job');
+    }
+
+    const safeTable = this.assertSafeIdentifier(table, 'postgres table');
+    const safeFilterColumn = this.assertSafeIdentifier(
+      filterColumn,
+      'postgres filter column',
+    );
+    const resolvedFilterValue =
+      filterValue ?? job.operation.parameters?.datasetId ?? null;
+
+    if (!resolvedFilterValue) {
+      throw new Error('Missing filter value for Postgres job');
     }
 
     if (job.operation.type === 'delete') {
       const result = await this.pool.query(
-        `DELETE FROM ${table} WHERE ${query}`,
+        `DELETE FROM ${safeTable} WHERE ${safeFilterColumn} = $1`,
+        [resolvedFilterValue],
       );
       job.execution.recordsAffected = result.rowCount ?? 0;
     } else if (job.operation.type === 'redact') {
@@ -676,7 +691,10 @@ export class RTBFOrchestrator {
       const rules = policy?.rules ?? [];
 
       // Fetch records to redact
-      const result = await this.pool.query(`SELECT id FROM ${table} WHERE ${query}`);
+      const result = await this.pool.query(
+        `SELECT id FROM ${safeTable} WHERE ${safeFilterColumn} = $1`,
+        [resolvedFilterValue],
+      );
       const recordIds = result.rows.map((r) => r.id);
 
       // Perform redaction
@@ -718,6 +736,15 @@ export class RTBFOrchestrator {
       // Implementation would fetch nodes and apply redaction rules
       job.execution.recordsAffected = 0;
     }
+  }
+
+  private assertSafeIdentifier(identifier: string, context: string): string {
+    const identifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/;
+    if (!identifierPattern.test(identifier)) {
+      throw new Error(`Invalid identifier provided for ${context}`);
+    }
+
+    return identifier;
   }
 
   /**

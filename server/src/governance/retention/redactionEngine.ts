@@ -38,6 +38,15 @@ export class RedactionEngine {
     params?: Record<string, any>,
   ) => Promise<any>;
 
+  private assertSafeIdentifier(identifier: string, context: string): string {
+    const identifierPattern = /^[a-zA-Z_][a-zA-Z0-9_]*(\.[a-zA-Z_][a-zA-Z0-9_]*)?$/;
+    if (!identifierPattern.test(identifier)) {
+      throw new Error(`Invalid identifier provided for ${context}`);
+    }
+
+    return identifier;
+  }
+
   // Pseudonym mapping for consistent pseudonymization
   private readonly pseudonymCache = new Map<string, string>();
 
@@ -513,11 +522,15 @@ export class RedactionEngine {
     rules: RedactionRule[],
     options: { idColumn?: string; preserveProvenance?: boolean } = {},
   ): Promise<RecordRedactionResult[]> {
-    const idColumn = options.idColumn ?? 'id';
+    const tableName = this.assertSafeIdentifier(table, 'postgres table');
+    const idColumn = this.assertSafeIdentifier(
+      options.idColumn ?? 'id',
+      'postgres identifier column',
+    );
     const results: RecordRedactionResult[] = [];
 
     // Fetch records
-    const query = `SELECT * FROM ${table} WHERE ${idColumn} = ANY($1::text[])`;
+    const query = `SELECT * FROM ${tableName} WHERE ${idColumn} = ANY($1::text[])`;
     const result = await this.pool.query(query, [recordIds]);
 
     // Redact each record
@@ -530,12 +543,18 @@ export class RedactionEngine {
 
       // Build UPDATE query
       const setClause = redactionResult.fields
-        .map((f, idx) => `${f.fieldName} = $${idx + 2}`)
+        .map((f, idx) => {
+          const safeFieldName = this.assertSafeIdentifier(
+            f.fieldName,
+            'postgres field name',
+          );
+          return `${safeFieldName} = $${idx + 2}`;
+        })
         .join(', ');
       const values = redactionResult.fields.map((f) => f.redactedValue);
 
       await this.pool.query(
-        `UPDATE ${table} SET ${setClause} WHERE ${idColumn} = $1`,
+        `UPDATE ${tableName} SET ${setClause} WHERE ${idColumn} = $1`,
         [row[idColumn], ...values],
       );
 
