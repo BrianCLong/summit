@@ -64,8 +64,8 @@
     "compression": "1.8.1",
     "cors": "2.8.5",
     "dataloader": "^2.2.2",
-    "etag": "^1.8.1",
     "dotenv": "17.2.3",
+    "etag": "^1.8.1",
     "express": "^5.1.0",
     "express-rate-limit": "8.2.1",
     "express-validator": "7.3.0",
@@ -111,7 +111,7 @@
     "socket.io-client": "4.8.1",
     "tesseract.js": "6.0.1",
     "uuid": "13.0.0",
-    "winston": "3.18.3",
+    "winston": "^3.18.3",
     "ws": "8.18.3",
     "zod": "4.1.12"
   },
