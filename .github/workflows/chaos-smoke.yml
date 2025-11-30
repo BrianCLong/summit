@@ -1,0 +1,16 @@
+name: Chaos Smoke (Stage)
+on:
+  workflow_dispatch: {}
+jobs:
+  kill-one-pod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/setup-kubectl@v4
+      - run: |
+          echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+        env: { KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_STAGE_B64 }} }
+      - run: |
+          pod=$(kubectl -n stage get po -l app.kubernetes.io/name=summit -o jsonpath='{.items[0].metadata.name}')
+          kubectl -n stage delete pod "$pod"
+      - name: Smoke
+        run: bash scripts/smoke.sh https://summit-stage.example.com

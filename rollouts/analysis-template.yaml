@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-slo-check
+spec:
+  metrics:
+    - name: error-rate
+      interval: 1m
+      successCondition: result < 0.02
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: |
+            sum(rate(http_requests_total{app="summit",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{app="summit"}[5m]))

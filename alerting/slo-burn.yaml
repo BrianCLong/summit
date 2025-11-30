@@ -1,0 +1,11 @@
+groups:
+  - name: slo-burn
+    rules:
+      - alert: AppErrorBudgetBurn
+        expr: |
+          (sum(rate(http_requests_total{app="summit",status=~"5.."}[5m])) / sum(rate(http_requests_total{app="summit"}[5m]))) > 0.02
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error budget burn for app"

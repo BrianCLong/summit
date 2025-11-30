@@ -1,0 +1,10 @@
+permissions:
+  id-token: write
+  contents: read
+
+steps:
+  - name: Configure AWS creds via OIDC
+    uses: aws-actions/configure-aws-credentials@v4
+    with:
+      role-to-assume: arn:aws:iam::123456789012:role/summit-gha-deploy
+      aws-region: us-east-1

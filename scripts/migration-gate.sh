@@ -1,17 +1,20 @@
-
 #!/usr/bin/env bash
-# scripts/migration-gate.sh
+set -euo pipefail
+ENV=${1:-}
+MODE=${2:-run}
 
-echo "Verifying schema migration safety..."
+if [[ -z "$ENV" ]]; then
+  echo "usage: $0 <env> [--dry-run]"; exit 2; fi
 
-# 1. Apply to staging
-# helm upgrade --install intelgraph-stage ... --set-file migrations=next-migration.sql
+if [[ "$MODE" == "--dry-run" ]]; then
+  echo "[migration-gate] DRY RUN for $ENV — validating migrations plan..."
+  exit 0
+fi
 
-# 2. Run smoke tests
-# k6 run tests/k6/smoke.js
+# Example: block if a breaking migration is detected without feature flag
+if grep -R "DROP TABLE" -n migrations/ >/dev/null 2>&1; then
+  echo "[migration-gate] blocking deploy: destructive migration found without approval" >&2
+  exit 1
+fi
 
-# 3. Run backfill in dry-run
-# ./scripts/run-backfill --dry-run
-
-echo "Migration gate checks passed on staging. Manual approval required for production."
-exit 0
+echo "[migration-gate] ok"

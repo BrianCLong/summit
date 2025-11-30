@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mask-pii
+  namespace: stage
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: masker
+          image: ghcr.io/BrianCLong/db-tools:latest
+          envFrom:
+            - secretRef: { name: app-creds }
+          command: ["sh","-c"]
+          args:
+            - |
+              psql "$DB_URL" -v ON_ERROR_STOP=1 <<'SQL'
+              UPDATE users SET email = concat('user+', id, '@example.test'), name = 'Redacted' WHERE is_internal = false;
+              UPDATE payments SET card_last4 = '0000', card_brand = 'REDACTED';
+              SQL

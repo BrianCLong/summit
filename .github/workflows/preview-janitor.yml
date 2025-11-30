@@ -1,0 +1,15 @@
+name: Preview Janitor
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch: {}
+jobs:
+  janitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/setup-kubectl@v4
+      - run: |
+          mkdir -p ~/.kube && echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DEV_B64 }}
+      - run: bash scripts/preview-janitor.sh 7
