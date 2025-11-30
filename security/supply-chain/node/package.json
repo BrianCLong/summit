@@ -1,0 +1,9 @@
+{
+  "name": "supply-chain-toolkit",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test": "node index.js --help"
+  }
+}
