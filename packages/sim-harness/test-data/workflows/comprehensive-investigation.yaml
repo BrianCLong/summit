@@ -1,0 +1,133 @@
+name: comprehensive-fraud-investigation
+description: Complete fraud investigation workflow testing all major features
+
+steps:
+  - name: create-investigation
+    action: graphql-mutation
+    query: |
+      mutation CreateInvestigation($input: CreateInvestigationInput!) {
+        createInvestigation(input: $input) {
+          id
+          name
+          status
+          createdAt
+        }
+      }
+    variables:
+      input:
+        name: "{{scenario.name}} - Automated Investigation"
+        description: "{{scenario.description}}"
+        type: "FRAUD_ANALYSIS"
+    assertions:
+      - createInvestigation.id
+      - createInvestigation.status == "ACTIVE"
+
+  - name: batch-add-entities
+    action: graphql-mutation
+    query: |
+      mutation AddEntity($input: CreateEntityInput!) {
+        createEntity(input: $input) {
+          id
+          type
+          name
+          properties
+        }
+      }
+    variables:
+      input:
+        investigationId: "{{steps.create-investigation.result.createInvestigation.id}}"
+        type: "PERSON"
+        name: "John Doe"
+        properties:
+          role: "suspect"
+          risk_score: 85
+          sim_harness: true
+
+  - name: search-high-risk-entities
+    action: graphql-query
+    query: |
+      query SearchHighRisk($investigationId: ID!) {
+        investigation(id: $investigationId) {
+          entities(filter: { properties: { risk_score: { gte: 70 }}}) {
+            id
+            name
+            type
+            properties
+          }
+        }
+      }
+    variables:
+      investigationId: "{{steps.create-investigation.result.createInvestigation.id}}"
+    assertions:
+      - investigation.entities
+
+  - name: analyze-network-connections
+    action: graphql-query
+    query: |
+      query NetworkAnalysis($investigationId: ID!) {
+        investigation(id: $investigationId) {
+          relationships {
+            id
+            type
+            fromEntityId
+            toEntityId
+            properties
+          }
+        }
+      }
+    variables:
+      investigationId: "{{steps.create-investigation.result.createInvestigation.id}}"
+
+  - name: start-copilot-analysis
+    action: graphql-mutation
+    query: |
+      mutation StartCopilot($goal: String!, $investigationId: ID!) {
+        startCopilotRun(goal: $goal, investigationId: $investigationId) {
+          id
+          status
+          goal
+          createdAt
+        }
+      }
+    variables:
+      goal: "Identify the central figures in this fraud network and trace money flows through shell companies"
+      investigationId: "{{steps.create-investigation.result.createInvestigation.id}}"
+
+  - name: wait-for-copilot-completion
+    action: poll
+    endpoint: "/api/copilot/runs/{{steps.start-copilot-analysis.result.startCopilotRun.id}}"
+    until: "status == COMPLETED"
+    timeout: 120000
+    interval: 3000
+
+  - name: retrieve-copilot-findings
+    action: graphql-query
+    query: |
+      query GetCopilotRun($runId: ID!) {
+        copilotRun(id: $runId) {
+          id
+          status
+          findings
+          recommendations
+        }
+      }
+    variables:
+      runId: "{{steps.start-copilot-analysis.result.startCopilotRun.id}}"
+    assertions:
+      - copilotRun.status == "COMPLETED"
+
+  - name: verify-investigation-completeness
+    action: graphql-query
+    query: |
+      query VerifyInvestigation($id: ID!) {
+        investigation(id: $id) {
+          id
+          entities { id }
+          relationships { id }
+        }
+      }
+    variables:
+      id: "{{steps.create-investigation.result.createInvestigation.id}}"
+    assertions:
+      - investigation.entities.length >= 1
+      - investigation.relationships.length >= 0

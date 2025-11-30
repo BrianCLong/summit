@@ -1,0 +1,106 @@
+name: corruption-network
+type: government-corruption
+description: Government corruption network with bribes and shell companies
+params:
+  nodeCount: 40
+  edgeDensity: 0.28
+  noiseLevel: 0.12
+  seed: 456
+
+entities:
+  - type: PERSON
+    distribution:
+      count: 15
+      attributes:
+        role:
+          - official
+          - businessman
+          - intermediary
+          - lawyer
+        corruption_risk:
+          distribution: normal
+          mean: 75
+          stddev: 18
+
+  - type: ORGANIZATION
+    distribution:
+      count: 15
+      attributes:
+        org_type:
+          - shell_company
+          - contractor
+          - lobbying_firm
+          - law_firm
+        risk_score:
+          distribution: normal
+          mean: 68
+          stddev: 22
+
+  - type: LOCATION
+    distribution:
+      count: 10
+      attributes:
+        country:
+          - USA
+          - UK
+          - Cyprus
+          - Malta
+          - UAE
+
+relationships:
+  - type: BRIBES
+    from: PERSON
+    to: PERSON
+    probability: 0.25
+    attributes:
+      amount:
+        distribution: lognormal
+        mean: 12.0
+        stddev: 1.2
+      date:
+        distribution: daterange
+        start: "2020-01-01"
+        end: "2024-12-31"
+
+  - type: OWNS
+    from: PERSON
+    to: ORGANIZATION
+    probability: 0.35
+    attributes:
+      stake:
+        distribution: uniform
+        min: 25
+        max: 100
+      beneficial_owner:
+        - true
+        - false
+
+  - type: AWARDS_CONTRACT
+    from: PERSON
+    to: ORGANIZATION
+    probability: 0.3
+    attributes:
+      value:
+        distribution: lognormal
+        mean: 14.0
+        stddev: 1.5
+      date:
+        distribution: daterange
+        start: "2021-01-01"
+        end: "2024-12-31"
+
+  - type: LOCATED_IN
+    from: ORGANIZATION
+    to: LOCATION
+    probability: 0.6
+
+signals:
+  - type: anomaly
+    entities:
+      - kickback-pattern
+      - circular-ownership
+      - suspicious-contract-award
+    count: 4
+
+  - type: conflicting_evidence
+    count: 3

@@ -1,0 +1,69 @@
+name: basic-investigation-workflow
+description: Standard investigation workflow for testing core functionality
+
+steps:
+  - name: create-investigation
+    action: graphql-mutation
+    query: |
+      mutation CreateInvestigation($input: CreateInvestigationInput!) {
+        createInvestigation(input: $input) {
+          id
+          name
+          status
+        }
+      }
+    variables:
+      input:
+        name: "{{scenario.name}}"
+        description: "{{scenario.description}}"
+        type: "INTELLIGENCE_ANALYSIS"
+
+  - name: add-entities
+    action: graphql-mutation
+    query: |
+      mutation AddEntity($input: CreateEntityInput!) {
+        createEntity(input: $input) {
+          id
+          type
+          name
+        }
+      }
+    variables:
+      input:
+        investigationId: "{{steps.create-investigation.result.createInvestigation.id}}"
+        type: "PERSON"
+        name: "Test Entity"
+        properties:
+          sim_harness: true
+
+  - name: search-high-risk-entities
+    action: graphql-query
+    query: |
+      query SearchEntities($investigationId: ID!) {
+        investigation(id: $investigationId) {
+          entities {
+            id
+            type
+            name
+            properties
+          }
+        }
+      }
+    variables:
+      investigationId: "{{steps.create-investigation.result.createInvestigation.id}}"
+    assertions:
+      - investigation.entities.length >= 1
+
+  - name: copilot-analysis
+    action: graphql-mutation
+    query: |
+      mutation StartCopilot($goal: String!, $investigationId: ID!) {
+        startCopilotRun(goal: $goal, investigationId: $investigationId) {
+          id
+          status
+          goal
+        }
+      }
+    variables:
+      goal: "Analyze the investigation and identify key patterns"
+      investigationId: "{{steps.create-investigation.result.createInvestigation.id}}"
