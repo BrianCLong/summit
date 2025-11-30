@@ -44,6 +44,7 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import { SummitInvestigate } from './services/SummitInvestigate.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -153,6 +154,9 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
+
+  // Initialize SummitInvestigate Platform Routes
+  SummitInvestigate.initialize(app);
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;

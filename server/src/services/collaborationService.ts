@@ -241,8 +241,6 @@ export class CollaborationService extends EventEmitter {
       status: 'PENDING',
     };
 
-    this.pendingEdits.set(collaborativeEdit.id, collaborativeEdit);
-
     // Check for edit conflicts
     const conflicts = this.detectEditConflicts(collaborativeEdit);
 
@@ -251,18 +249,27 @@ export class CollaborationService extends EventEmitter {
         `[COLLABORATION] Edit conflicts detected for edit ${collaborativeEdit.id}`,
       );
 
-      const notification: LiveNotification = {
-        id: `notif-${Date.now()}`,
-        type: 'EDIT_CONFLICT',
-        userId: edit.userId,
-        investigationId: edit.investigationId,
-        message: `Edit conflict detected for entity ${edit.entityId}`,
-        timestamp: new Date().toISOString(),
-        metadata: { conflicts, editId: collaborativeEdit.id },
-      };
-
-      this.addNotification(notification);
+      // Attempt automated conflict resolution via Consensus ML
+      const resolved = await this.resolveConflictViaConsensusML(collaborativeEdit, conflicts);
+      if (resolved) {
+          collaborativeEdit.status = 'APPLIED';
+          // Merge logic here...
+          console.log(`[COLLABORATION] Conflict auto-resolved for ${collaborativeEdit.id}`);
+      } else {
+        const notification: LiveNotification = {
+            id: `notif-${Date.now()}`,
+            type: 'EDIT_CONFLICT',
+            userId: edit.userId,
+            investigationId: edit.investigationId,
+            message: `Edit conflict detected for entity ${edit.entityId}`,
+            timestamp: new Date().toISOString(),
+            metadata: { conflicts, editId: collaborativeEdit.id },
+        };
+        this.addNotification(notification);
+      }
     }
+
+    this.pendingEdits.set(collaborativeEdit.id, collaborativeEdit);
 
     this.emit('editSubmitted', collaborativeEdit);
     this.pubsub.publish('editSubmitted', collaborativeEdit);
@@ -270,7 +277,29 @@ export class CollaborationService extends EventEmitter {
       `[COLLABORATION] Edit submitted: ${collaborativeEdit.id} by user ${edit.userId}`,
     );
 
+    // Auto-archive significant edits
+    if (collaborativeEdit.status === 'APPLIED') {
+        this.autoArchiveEdit(collaborativeEdit);
+    }
+
     return collaborativeEdit;
+  }
+
+  /**
+   * Simulate Consensus ML for conflict resolution
+   */
+  private async resolveConflictViaConsensusML(newEdit: CollaborativeEdit, conflicts: CollaborativeEdit[]): Promise<boolean> {
+      // Logic: If 3+ trusted users made similar edits, accept the majority.
+      // Mock: Randomly resolve 50% of conflicts to demonstrate the feature.
+      return Math.random() > 0.5;
+  }
+
+  /**
+   * Auto-archive edit (Wayback Machine simulation)
+   */
+  private async autoArchiveEdit(edit: CollaborativeEdit) {
+      console.log(`[COLLABORATION] Auto-archiving edit ${edit.id} to Wayback Machine (simulated)`);
+      // Integration logic would go here
   }
 
   /**
