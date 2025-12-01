@@ -5,7 +5,6 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
-import pino from 'pino';
 import pinoHttp from 'pino-http';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
@@ -44,6 +43,7 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import logger from './config/logger.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -54,7 +54,6 @@ export const createApp = async () => {
   await tracer.initialize();
 
   const app = express();
-  const logger = pino();
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
