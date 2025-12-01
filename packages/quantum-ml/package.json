@@ -1,6 +1,6 @@
 {
   "name": "@summit/quantum-ml",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Quantum machine learning and hybrid quantum-classical models",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

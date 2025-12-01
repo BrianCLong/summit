@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/feature-flags",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Comprehensive feature flag system with provider abstraction, caching, and analytics",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -1,6 +1,6 @@
 {
   "name": "@summit/dimensional-modeling",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Dimensional modeling with star/snowflake schemas and SCD support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

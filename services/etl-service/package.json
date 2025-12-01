@@ -1,6 +1,6 @@
 {
   "name": "@summit/etl-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Comprehensive ETL/ELT service with data pipeline management API",
   "main": "dist/index.js",
   "type": "module",

@@ -1,6 +1,6 @@
 {
   "name": "intelgraph-load-testing",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Load testing suite for IntelGraph Maestro Conductor",
   "scripts": {
     "test:load": "k6 run --vus 50 --duration 300s maestro-load-test.js",

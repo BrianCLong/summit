@@ -1,6 +1,6 @@
 {
   "name": "@summit/mcc",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Model Card Compiler (MCC) converts YAML model cards into signed JSON artifacts with enforcement hooks.",
   "type": "module",
   "main": "dist/index.js",

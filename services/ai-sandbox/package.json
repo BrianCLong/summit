@@ -1,6 +1,6 @@
 {
   "name": "@summit/ai-sandbox",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Secure AI experimentation sandbox for government AI system testing and validation",
   "type": "module",
   "main": "dist/index.js",

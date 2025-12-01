@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/knowledge-graph",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Advanced knowledge graph construction with semantic understanding",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

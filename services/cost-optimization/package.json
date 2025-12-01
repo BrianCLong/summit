@@ -1,6 +1,6 @@
 {
   "name": "@summit/cost-optimization",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Multi-cloud cost optimization and FinOps automation service",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
