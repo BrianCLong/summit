@@ -67,15 +67,16 @@ describe('ProactiveServiceResolver', () => {
 
     it('should detect annual submission patterns', async () => {
       const now = new Date();
-      const oneYearAgo = new Date(now);
-      oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-      const twoYearsAgo = new Date(now);
-      twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+      // Set last submission to ~350 days ago so next due is ~15 days from now
+      const lastSubmission = new Date(now);
+      lastSubmission.setDate(lastSubmission.getDate() - 350);
+      const previousSubmission = new Date(lastSubmission);
+      previousSubmission.setFullYear(previousSubmission.getFullYear() - 1);
 
-      // Next due would be ~now, so within 45 days
+      // Next due would be ~15 days from now, within 45 days window
       const submissions = [
-        { formId: 'annual-report', submittedAt: twoYearsAgo.toISOString(), status: 'completed' },
-        { formId: 'annual-report', submittedAt: oneYearAgo.toISOString(), status: 'completed' },
+        { formId: 'annual-report', submittedAt: previousSubmission.toISOString(), status: 'completed' },
+        { formId: 'annual-report', submittedAt: lastSubmission.toISOString(), status: 'completed' },
       ];
 
       await aggregator.createProfile({
