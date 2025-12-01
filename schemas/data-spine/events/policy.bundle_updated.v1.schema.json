@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/data-spine/policy.bundle_updated.v1.schema.json",
+  "title": "CompanyOS Policy Bundle Updated Event v1",
+  "description": "Event emitted whenever a policy bundle is published or rolled back.",
+  "allOf": [
+    { "$ref": "./base-envelope.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": { "const": "policy.bundle_updated.v1" },
+        "event_version": { "const": "v1" },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "bundle_id": { "type": "string" },
+            "version": { "type": "string" },
+            "checksum": { "type": "string" },
+            "change_type": {
+              "type": "string",
+              "enum": ["publish", "rollback", "deprecate"]
+            },
+            "previous_version": { "type": ["string", "null"] },
+            "changed_by": { "type": "string" },
+            "notes": { "type": ["string", "null"] },
+            "artifact_uri": { "type": ["string", "null"] },
+            "review_state": {
+              "type": "string",
+              "enum": ["draft", "approved", "rejected", "expired"],
+              "description": "Governance gate result for the bundle publication."
+            }
+          },
+          "required": [
+            "bundle_id",
+            "version",
+            "checksum",
+            "change_type",
+            "changed_by"
+          ]
+        }
+      }
+    }
+  ]
+}
