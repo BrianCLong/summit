@@ -7,6 +7,15 @@ export * from './types';
 export * from './facial/facial-detector';
 export * from './voice/voice-detector';
 export * from './video/video-analyzer';
+export * from './neural/fingerprinting-engine';
+export * from './adversarial/adversarial-detector';
+export * from './streaming/streaming-engine';
+export * from './explainable/explainable-ai';
+export * from './ensemble/meta-learner';
+export * from './multimodal/fusion-engine';
+export * from './zero-shot/zero-shot-detector';
+export * from './active-learning/active-learner';
+export * from './federated/federated-learning';
 
 import { FacialDeepfakeDetector } from './facial/facial-detector';
 import { VoiceDeepfakeDetector } from './voice/voice-detector';
