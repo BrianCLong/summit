@@ -17,36 +17,78 @@ function sign(challenge: string) {
 describe('StepUpManager', () => {
   it('verifies challenge and prevents replay', () => {
     const manager = new StepUpManager({ ttlMs: 1000 });
-    const challenge = manager.createChallenge('alice');
+    const challenge = manager.createChallenge('alice', {
+      sessionId: 'session-1',
+      requestedAction: 'dataset:read',
+      resourceId: 'dataset-alpha',
+      classification: 'confidential',
+      tenantId: 'tenantA',
+    });
     const signature = sign(challenge.challenge);
-    expect(
-      manager.verifyResponse('alice', {
+    const elevation = manager.verifyResponse(
+      'alice',
+      {
         credentialId: challenge.allowCredentials[0].id,
         challenge: challenge.challenge,
         signature,
-      }),
-    ).toBe(true);
+      },
+      'session-1',
+    );
+    expect(elevation.requestedAction).toBe('dataset:read');
+    expect(elevation.sessionId).toBe('session-1');
+    expect(Date.parse(elevation.expiresAt)).toBeGreaterThan(Date.now());
     expect(() =>
-      manager.verifyResponse('alice', {
-        credentialId: challenge.allowCredentials[0].id,
-        challenge: challenge.challenge,
-        signature,
-      }),
+      manager.verifyResponse(
+        'alice',
+        {
+          credentialId: challenge.allowCredentials[0].id,
+          challenge: challenge.challenge,
+          signature,
+        },
+        'session-1',
+      ),
     ).toThrow('challenge_already_used');
   });
 
   it('expires challenges', () => {
     let now = Date.now();
     const manager = new StepUpManager({ ttlMs: 10, now: () => now });
-    const challenge = manager.createChallenge('alice');
+    const challenge = manager.createChallenge('alice', {
+      sessionId: 'session-1',
+      requestedAction: 'dataset:read',
+    });
     now += 20;
     const signature = sign(challenge.challenge);
     expect(() =>
-      manager.verifyResponse('alice', {
-        credentialId: challenge.allowCredentials[0].id,
-        challenge: challenge.challenge,
-        signature,
-      }),
+      manager.verifyResponse(
+        'alice',
+        {
+          credentialId: challenge.allowCredentials[0].id,
+          challenge: challenge.challenge,
+          signature,
+        },
+        'session-1',
+      ),
     ).toThrow('challenge_expired');
+  });
+
+  it('rejects session mismatches to preserve provenance', () => {
+    const manager = new StepUpManager({ ttlMs: 1000 });
+    const challenge = manager.createChallenge('alice', {
+      sessionId: 'session-1',
+      requestedAction: 'dataset:read',
+    });
+    const signature = sign(challenge.challenge);
+    expect(() =>
+      manager.verifyResponse(
+        'alice',
+        {
+          credentialId: challenge.allowCredentials[0].id,
+          challenge: challenge.challenge,
+          signature,
+        },
+        'session-2',
+      ),
+    ).toThrow('session_mismatch');
   });
 });

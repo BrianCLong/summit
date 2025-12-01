@@ -27,6 +27,22 @@ export interface DecisionContext {
   currentAcr: string;
 }
 
+export interface ElevationContext {
+  sessionId: string;
+  requestedAction: string;
+  resourceId?: string;
+  tenantId?: string;
+  classification?: string;
+  currentAcr?: string;
+}
+
+export interface ElevationGrant extends ElevationContext {
+  grantedAt: string;
+  expiresAt: string;
+  mechanism: string;
+  challengeId: string;
+}
+
 export interface DecisionObligation {
   type: string;
   requirement?: string;
