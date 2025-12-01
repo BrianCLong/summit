@@ -131,9 +131,9 @@ export class FormAutocomplete {
     };
   }
 
-  private getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+  private getNestedValue(obj: unknown, path: string): unknown {
     return path.split('.').reduce((current: unknown, key) => {
-      if (current && typeof current === 'object' && key in current) {
+      if (current && typeof current === 'object' && current !== null) {
         return (current as Record<string, unknown>)[key];
       }
       return undefined;
