@@ -9,12 +9,17 @@ import type {
   StoryArc,
   TimeVariantParameter,
   SimulationEntity,
+  Negotiation,
+  ScenarioDefinition,
+  ScenarioResult,
+  TelemetryInput,
 } from './types.js';
 import {
   LLMDrivenNarrativeGenerator,
   NarrativeGenerator,
   RuleBasedNarrativeGenerator,
 } from './generators.js';
+import { PredictivePsyOpsLayer } from './psyops-layer.js';
 
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
@@ -22,7 +27,9 @@ const MOMENTUM_SENSITIVITY = 0.05;
 export class NarrativeSimulationEngine {
   private state: NarrativeState;
   private generator: NarrativeGenerator;
+  private psyOpsLayer: PredictivePsyOpsLayer;
   private readonly eventQueue: NarrativeEvent[] = [];
+  private readonly scenarioDefinitions: Map<string, ScenarioDefinition> = new Map();
 
   constructor(private readonly config: SimulationConfig) {
     const start = new Date();
@@ -52,6 +59,9 @@ export class NarrativeSimulationEngine {
       parameters,
       arcs: [],
       recentEvents: [],
+      negotiations: {},
+      scenarios: [],
+      psyOpsForecasts: [],
       narrative: {
         mode: 'rule-based',
         summary: 'Simulation initialized.',
@@ -63,6 +73,7 @@ export class NarrativeSimulationEngine {
     };
 
     this.generator = this.createGenerator(config.generatorMode, config);
+    this.psyOpsLayer = new PredictivePsyOpsLayer(this);
     this.state.arcs = this.computeArcs();
   }
 
@@ -92,6 +103,24 @@ export class NarrativeSimulationEngine {
     });
   }
 
+  registerScenario(definition: ScenarioDefinition): void {
+    this.scenarioDefinitions.set(definition.id, definition);
+  }
+
+  ingestTelemetry(input: TelemetryInput): void {
+    const event: NarrativeEvent = {
+      id: randomUUID(),
+      type: 'telemetry',
+      theme: 'system',
+      intensity: Math.min(Math.abs(input.value), 1), // Normalize roughly
+      description: `Telemetry update from ${input.source}: ${input.metric} = ${input.value}`,
+      metadata: { ...input.metadata, telemetry: input },
+      // Map to entity if provided
+      actorId: input.entityMapping,
+    };
+    this.queueEvent(event);
+  }
+
   queueEvent(event: NarrativeEvent): void {
     const scheduledTick = event.scheduledTick ?? this.state.tick + 1;
     this.eventQueue.push({ ...event, scheduledTick });
@@ -100,12 +129,24 @@ export class NarrativeSimulationEngine {
   async tick(steps = 1): Promise<NarrativeState> {
     for (let index = 0; index < steps; index += 1) {
       this.advanceClock();
+
+      this.processNegotiations();
+
       const ready = this.dequeueReadyEvents();
       ready.forEach((event) => this.applyEvent(event));
+
+      this.evaluateScenarios();
+
       this.state.recentEvents = [...this.state.recentEvents, ...ready].slice(
         -HISTORY_LIMIT,
       );
       this.state.arcs = this.computeArcs();
+
+      // Run PsyOps forecast every 5 ticks to save resources
+      if (this.state.tick % 5 === 0) {
+        this.state.psyOpsForecasts = this.psyOpsLayer.generateForecast(10);
+      }
+
       await this.refreshNarrative(ready);
       this.applyNaturalDynamics();
     }
@@ -136,11 +177,104 @@ export class NarrativeSimulationEngine {
     this.queueEvent(action);
   }
 
+  startNegotiation(initiatorId: string, targetIds: string[], topic: string): string {
+    const id = randomUUID();
+    const negotiation: Negotiation = {
+      id,
+      initiatorId,
+      targetIds,
+      topic,
+      status: 'proposed',
+      startTick: this.state.tick,
+      lastUpdateTick: this.state.tick,
+      turns: 0,
+      currentOffers: {},
+    };
+    this.state.negotiations[id] = negotiation;
+    return id;
+  }
+
   updateEntityProfile(entity: SimulationEntity): void {
     this.state.entities[entity.id] = {
       ...this.bootstrapEntityState(entity),
       history: this.state.entities[entity.id]?.history ?? [],
     };
+  }
+
+  private processNegotiations(): void {
+    Object.values(this.state.negotiations).forEach((neg) => {
+      if (neg.status === 'active' || neg.status === 'proposed') {
+        neg.turns += 1;
+        neg.lastUpdateTick = this.state.tick;
+
+        // Simple simulation logic: random chance to progress or fail
+        // In a real system, this would use agent logic or LLM calls
+        if (neg.turns > 10) {
+           neg.status = 'stalemate';
+        } else {
+           // Simulate offer updates
+           const entities = [neg.initiatorId, ...neg.targetIds];
+           entities.forEach(eid => {
+               const ent = this.state.entities[eid];
+               const currentOffer = neg.currentOffers[eid] || 0.5;
+               // Stance affects offer delta
+               let delta = 0;
+               if (ent.negotiationStance === 'aggressive') delta = 0.05;
+               else if (ent.negotiationStance === 'cooperative') delta = -0.05;
+
+               neg.currentOffers[eid] = this.clamp(currentOffer + (Math.random() * 0.1 - 0.05) + delta, 0, 1);
+           });
+
+           // Check for agreement (convergence of offers)
+           const offers = Object.values(neg.currentOffers);
+           if (offers.length > 1) {
+             const min = Math.min(...offers);
+             const max = Math.max(...offers);
+             if (max - min < 0.1) {
+               neg.status = 'agreement';
+               this.queueEvent({
+                 id: randomUUID(),
+                 type: 'social',
+                 theme: 'negotiation',
+                 intensity: 0.8,
+                 description: `Negotiation on ${neg.topic} reached agreement.`,
+                 actorId: neg.initiatorId,
+                 targetIds: neg.targetIds,
+                 sentimentShift: 0.2,
+               });
+             }
+           }
+        }
+      }
+    });
+  }
+
+  private evaluateScenarios(): void {
+    for (const def of this.scenarioDefinitions.values()) {
+      try {
+        if (def.condition(this.state)) {
+           // Check if already triggered recently to avoid spam?
+           // For now, just record it.
+           const result: ScenarioResult = {
+             scenarioId: def.id,
+             triggered: true,
+             tick: this.state.tick,
+           };
+           this.state.scenarios.push(result);
+
+           // Also trigger a system event
+           this.queueEvent({
+             id: randomUUID(),
+             type: 'system',
+             theme: 'scenario',
+             intensity: 1.0,
+             description: `Scenario triggered: ${def.name}`,
+           });
+        }
+      } catch (e) {
+        console.error(`Error evaluating scenario ${def.id}:`, e);
+      }
+    }
   }
 
   private async refreshNarrative(recent: NarrativeEvent[]): Promise<void> {
@@ -215,6 +349,7 @@ export class NarrativeSimulationEngine {
   }
 
   private applyEvent(event: NarrativeEvent): void {
+    // Primary application
     if (event.actorId && this.state.entities[event.actorId]) {
       this.adjustEntityState(this.state.entities[event.actorId], event, 1);
     }
@@ -226,6 +361,7 @@ export class NarrativeSimulationEngine {
       }
     });
 
+    // Parameter adjustments
     if (event.parameterAdjustments?.length) {
       event.parameterAdjustments.forEach((param) => {
         const existing =
@@ -238,23 +374,33 @@ export class NarrativeSimulationEngine {
       });
     }
 
+    // Propagation (Multi-agent influence)
     if (event.actorId) {
       const actor = this.state.entities[event.actorId];
       if (actor) {
         actor.relationships.forEach((edge) => {
           const related = this.state.entities[edge.targetId];
           if (!related) return;
-          const propagatedEvent: NarrativeEvent = {
-            ...event,
-            id: `${event.id}:${edge.targetId}`,
-            actorId: related.id,
-            targetIds: [],
-            intensity: event.intensity * edge.strength * 0.5,
-            sentimentShift:
-              (event.sentimentShift ?? 0) * edge.strength * related.resilience,
-            influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
-          };
-          this.adjustEntityState(related, propagatedEvent, edge.strength * 0.5);
+
+          // Enhanced propagation logic
+          const decay = 0.5;
+          const propagatedIntensity = event.intensity * edge.strength * decay;
+
+          if (propagatedIntensity > 0.1) { // Threshold to prevent infinite ripple of tiny events
+             const propagatedEvent: NarrativeEvent = {
+               ...event,
+               id: `${event.id}:${edge.targetId}`,
+               actorId: related.id,
+               targetIds: [], // Don't propagate further targeting from here automatically to avoid loops in this simple model
+               intensity: propagatedIntensity,
+               sentimentShift: (event.sentimentShift ?? 0) * edge.strength * related.resilience,
+               influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
+               description: `(Ripple) ${event.description}`,
+             };
+             // Add to recentEvents to ensure it is detectable in tests/history
+             this.state.recentEvents.push(propagatedEvent);
+             this.adjustEntityState(related, propagatedEvent, edge.strength * decay);
+          }
         });
       }
     }
