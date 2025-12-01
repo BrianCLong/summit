@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 /**
  * Privacy-Preserving AI Module for Elections
@@ -200,24 +200,25 @@ export class DifferentialPrivacyEngine {
 
 /**
  * Homomorphic encryption stub for vote tallying
- * In production, use libraries like SEAL or HElib
+ * In production, use libraries like Microsoft SEAL or HElib
+ *
+ * NOTE: This is a demonstration stub using simple additive encoding.
+ * Real homomorphic encryption provides security guarantees this does not.
  */
 export class HomomorphicTallying {
-  private readonly publicKey: string;
-  private readonly privateKey: string;
+  private readonly key: number;
 
   constructor() {
-    // Simplified key generation
-    this.publicKey = crypto.randomBytes(32).toString('hex');
-    this.privateKey = crypto.randomBytes(32).toString('hex');
+    // Simple key for demonstration (NOT cryptographically secure)
+    this.key = Math.floor(Math.random() * 1000) + 1;
   }
 
   /**
-   * Encrypt a vote count (additive homomorphic)
+   * Encrypt a vote count (additive homomorphic simulation)
    */
   encrypt(value: number): string {
-    const noise = crypto.randomBytes(8).readBigInt64BE();
-    const encoded = BigInt(value) * BigInt(1e10) + noise;
+    // Simple encoding: value * multiplier + offset
+    const encoded = value * 1000000 + this.key;
     return encoded.toString(16);
   }
 
@@ -225,8 +226,10 @@ export class HomomorphicTallying {
    * Add encrypted values (homomorphic addition)
    */
   addEncrypted(ciphertext1: string, ciphertext2: string): string {
-    const v1 = BigInt('0x' + ciphertext1);
-    const v2 = BigInt('0x' + ciphertext2);
+    const v1 = parseInt(ciphertext1, 16);
+    const v2 = parseInt(ciphertext2, 16);
+    // Adding ciphertexts: (a*M + k) + (b*M + k) = (a+b)*M + 2k
+    // We account for the extra key in decrypt
     return (v1 + v2).toString(16);
   }
 
@@ -234,7 +237,17 @@ export class HomomorphicTallying {
    * Decrypt final tally
    */
   decrypt(ciphertext: string): number {
-    const value = BigInt('0x' + ciphertext);
-    return Number(value / BigInt(1e10));
+    const value = parseInt(ciphertext, 16);
+    // Remove key offset and divide by multiplier
+    return Math.round((value - this.key) / 1000000);
+  }
+
+  /**
+   * Decrypt sum of multiple encrypted values
+   */
+  decryptSum(ciphertext: string, count: number): number {
+    const value = parseInt(ciphertext, 16);
+    // Account for multiple key additions: sum*M + count*k
+    return Math.round((value - count * this.key) / 1000000);
   }
 }

@@ -3,8 +3,13 @@
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src",
-    "declaration": true
+    "declaration": true,
+    "types": [],
+    "skipLibCheck": true,
+    "allowImportingTsExtensions": false,
+    "moduleResolution": "NodeNext",
+    "module": "NodeNext"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "tests"]
 }

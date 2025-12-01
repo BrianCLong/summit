@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { EventEmitter } from 'events';
 import type { Election, VoteSelection } from '../types/election.js';
 
