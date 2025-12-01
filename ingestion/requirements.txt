@@ -1,6 +1,6 @@
-kafka-python==2.0.2
-feedparser
+boto3
+pyyaml
 redis
-sentence-transformers
-hdbscan
-prometheus-client
+neo4j
+pandas
+prometheus_client

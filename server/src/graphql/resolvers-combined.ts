@@ -6,6 +6,7 @@ const aiResolvers = require('./resolvers.ai.js');
 const annotationsResolvers = require('./resolvers.annotations.js');
 import { v040Resolvers } from './resolvers/v040/index';
 import { activityResolvers } from './resolvers/activity.js';
+import { entitiesResolvers } from '../resolvers/entities.js';
 import { randomUUID } from 'node:crypto';
 
 interface User {
@@ -62,6 +63,7 @@ export const resolvers = {
     ...(annotationsResolvers.Query || {}),
     ...(v040Resolvers.Query || {}),
     ...(activityResolvers.Query || {}),
+    ...(entitiesResolvers.Query || {}),
     me: async (_: any, __: any, { user }: Context): Promise<User> => {
       if (!user) throw new Error('Not authenticated');
       return user;
@@ -136,6 +138,7 @@ export const resolvers = {
 
   Entity: {
     ...(annotationsResolvers.Entity || {}),
+    ...(entitiesResolvers.Entity || {}),
   },
   Investigation: {
     ...(annotationsResolvers.Investigation || {}),
