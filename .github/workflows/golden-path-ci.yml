@@ -1,0 +1,104 @@
+name: Golden Path CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+      - name: Run Unit Tests
+        run: pnpm test
+
+  test-e2e:
+    needs: test-unit
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.45.0-jammy # Includes browsers for Playwright & Cypress deps
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Build Application
+        run: pnpm build
+
+      - name: Start Application
+        run: pnpm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for App
+        run: npx wait-on http://localhost:3000
+
+      - name: Run Cypress E2E Tests
+        run: npx cypress run
+        continue-on-error: false
+
+      - name: Upload Cypress Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+  performance-baseline:
+    needs: test-unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install chromium
+
+      - name: Build Application
+        run: pnpm build
+
+      - name: Start Application
+        run: pnpm start &
+        env:
+          PORT: 3000
+
+      - name: Wait for App
+        run: npx wait-on http://localhost:3000
+
+      - name: Run Performance Tests
+        run: pnpm exec playwright test tests/performance.spec.ts
+
+      - name: Check Performance Baseline
+        run: |
+          if [ -f metrics.json ]; then
+            cat metrics.json
+            # Add logic here to compare against a stored baseline if needed
+          else
+            echo "metrics.json not found!"
+            exit 1
+          fi
+
+      - name: Upload Metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: metrics.json
