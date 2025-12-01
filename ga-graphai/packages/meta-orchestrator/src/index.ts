@@ -678,7 +678,15 @@ export {
   type DecomposedContext,
   type SalientSegment
 } from './prompt/contextDecomposer.js';
-export { CollaborativeContextBroker, type AgentAssignment, type BrokerOptions, type ContextDiff, type ContextState } from './prompt/collaboration.js';
+export {
+  CollaborativeContextBroker,
+  CollaborativeWorkspace,
+  type AgentAssignment,
+  type BrokerOptions,
+  type CollaborativeWorkspaceOptions,
+  type ContextDiff,
+  type ContextState,
+} from './prompt/collaboration.js';
 export {
   HierarchicalSummarizer,
   type HierarchicalSummarizerOptions,
