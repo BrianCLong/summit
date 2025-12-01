@@ -1,5 +1,5 @@
 import express from 'express';
-import z from 'zod';
+import { z } from 'zod/v4';
 import { randomUUID } from 'node:crypto';
 import { narrativeSimulationManager } from '../narrative/manager.js';
 import { ScenarioSimulator } from '../narrative/scenario.js';
