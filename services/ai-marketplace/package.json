@@ -13,9 +13,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@intelgraph/extensions": "workspace:*",
-    "@intelgraph/i18n": "workspace:*",
-    "@intelgraph/graph-ai-core": "workspace:*",
     "zod": "^3.22.4",
     "uuid": "^9.0.0"
   },
