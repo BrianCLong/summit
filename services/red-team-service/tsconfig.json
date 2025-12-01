@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "composite": true,
+    "types": [],
+    "noEmit": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "**/*.test.ts"],
+  "references": [
+    { "path": "../../packages/adversarial-ai" },
+    { "path": "../../packages/red-team" },
+    { "path": "../../packages/vulnerability-intelligence" },
+    { "path": "../../packages/purple-team" },
+    { "path": "../../packages/threat-emulation" }
+  ]
+}

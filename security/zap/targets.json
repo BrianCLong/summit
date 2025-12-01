@@ -1,0 +1,11 @@
+{
+  "services": [
+    {
+      "name": "web-app",
+      "description": "Frontend/API stack exposed through docker-compose",
+      "target": "http://localhost:3000",
+      "rules": ".zap/rules.tsv",
+      "accepted_alerts": []
+    }
+  ]
+}

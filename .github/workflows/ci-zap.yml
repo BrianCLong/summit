@@ -1,33 +1,276 @@
 name: CI Security (OWASP ZAP)
+
 on:
   pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
-  zap-baseline:
+  prepare-matrix:
+    name: Build ZAP target matrix
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    outputs:
+      matrix: ${{ steps.targets.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load target configuration
+        id: targets
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          config_path = Path("security/zap/targets.json")
+          config = json.loads(config_path.read_text())
+          services = config.get("services", [])
+          if not services:
+            raise SystemExit("No ZAP services configured in security/zap/targets.json")
+
+          matrix = {"include": []}
+          for service in services:
+            matrix["include"].append(
+              {
+                "name": service["name"],
+                "target": service["target"],
+                "rules": service.get("rules", ".zap/rules.tsv"),
+                "accepted": [str(item) for item in service.get("accepted_alerts", [])],
+              }
+            )
+
+          matrix_json = json.dumps(matrix)
+          Path("zap-matrix.json").write_text(matrix_json)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+            handle.write(f"matrix={matrix_json}\n")
+          PY
+
+  zap-baseline:
+    name: Run ZAP baseline
+    needs: prepare-matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.prepare-matrix.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Boot stack
         run: |
           docker compose -f docker-compose.yml up -d server client
-          for i in {1..60}; do
-            curl -fsS http://localhost:3000 && exit 0 || true
+          for _ in {1..60}; do
+            if curl -fsS "${{ matrix.target }}" >/dev/null 2>&1; then
+              echo "Target ${matrix.target} is reachable"
+              exit 0
+            fi
             sleep 5
           done
+          echo "Target ${matrix.target} did not become ready in time"
+          exit 1
 
-      - name: ZAP Baseline
+      - name: Run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.14.0
         with:
-          target: 'http://localhost:3000'
-          rules_file_name: '.zap/rules.tsv'
-          cmd_options: '-a -m 5'
-      - name: Upload ZAP report
+          target: ${{ matrix.target }}
+          rules_file_name: ${{ matrix.rules }}
+          cmd_options: '-a -j -m 5'
+          allow_issue_writing: false
+          fail_action: false
+
+      - name: Evaluate high and critical findings
+        id: evaluate
+        env:
+          SERVICE_NAME: ${{ matrix.name }}
+          TARGET_URL: ${{ matrix.target }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report_path = Path("report_json.json")
+          if not report_path.exists():
+            raise SystemExit("ZAP report_json.json not found")
+
+          data = json.loads(report_path.read_text())
+
+          config = json.loads(Path("security/zap/targets.json").read_text())
+          allowed = set()
+          for service in config.get("services", []):
+            if service.get("name") == os.environ["SERVICE_NAME"]:
+              allowed = {str(item) for item in service.get("accepted_alerts", [])}
+              break
+
+          alerts = []
+          for site in data.get("site", []):
+            alerts.extend(site.get("alerts", []))
+
+          blocking = []
+          baseline = []
+          for alert in alerts:
+            plugin_id = str(alert.get("pluginid"))
+            risk_code = int(alert.get("riskcode", 0))
+            alert_details = {
+              "id": plugin_id,
+              "name": alert.get("alert", "Unknown"),
+              "risk": alert.get("riskdesc", "n/a"),
+              "url": (alert.get("instances") or [{}])[0].get("uri", "n/a"),
+              "solution": (alert.get("solution") or "").strip() or "See full report for remediation guidance.",
+            }
+
+            if risk_code >= 3:
+              if plugin_id in allowed:
+                baseline.append(alert_details)
+              else:
+                blocking.append(alert_details)
+
+          summary_lines = [
+            f"### ZAP summary for {os.environ['SERVICE_NAME']}",
+            f"- Target: {os.environ['TARGET_URL']}",
+            f"- Blocking high/critical findings: {len(blocking)}",
+            f"- Baseline exceptions: {len(baseline)}",
+            "",
+          ]
+
+          if blocking:
+            summary_lines.append("**Blocking findings**")
+            for finding in blocking[:10]:
+              summary_lines.append(
+                f"- [{finding['risk']}] {finding['name']} (`{finding['id']}`) at {finding['url']}"
+              )
+            if len(blocking) > 10:
+              summary_lines.append(f"- ...and {len(blocking) - 10} more")
+          else:
+            summary_lines.append("No high/critical findings detected outside the approved baseline.")
+
+          if baseline:
+            summary_lines.append("")
+            summary_lines.append("Baseline-accepted alerts (not blocking):")
+            for finding in baseline:
+              summary_lines.append(
+                f"- [{finding['risk']}] {finding['name']} (`{finding['id']}`)"
+              )
+
+          summary = "\n".join(summary_lines)
+          Path(f"zap-summary-{os.environ['SERVICE_NAME']}.md").write_text(summary)
+          Path(f"zap-status-{os.environ['SERVICE_NAME']}.json").write_text(
+            json.dumps(
+              {
+                "blocking": blocking,
+                "baseline": baseline,
+                "service": os.environ["SERVICE_NAME"],
+                "target": os.environ["TARGET_URL"],
+              },
+              indent=2,
+            )
+          )
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as handle:
+            handle.write(f"blocking_count={len(blocking)}\n")
+            handle.write(f"has_blockers={'true' if blocking else 'false'}\n")
+          PY
+
+      - name: Upload ZAP artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: zap-report
+          name: zap-${{ matrix.name }}-report
           path: |
             report_html.html
             report_json.json
+            zap-summary-${{ matrix.name }}.md
+            zap-status-${{ matrix.name }}.json
+
+      - name: Comment on PR with ZAP summary
+        if: github.event_name == 'pull_request'
+        env:
+          SERVICE_NAME: ${{ matrix.name }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync(`zap-summary-${process.env.SERVICE_NAME}.md`, 'utf8');
+            const { owner, repo } = context.repo;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+      - name: Update remediation tracker
+        if: steps.evaluate.outputs.has_blockers == 'true'
+        env:
+          SERVICE_NAME: ${{ matrix.name }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync(`zap-summary-${process.env.SERVICE_NAME}.md`, 'utf8');
+            const title = `ZAP findings: ${process.env.SERVICE_NAME} (high/critical)`;
+            const { owner, repo } = context.repo;
+            const search = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} "${title}" state:open in:title`
+            });
+            const existing = search.data.items.find(item => item.title === title && item.state === 'open');
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                body,
+                labels: ['security', 'zap', 'needs-remediation'],
+              });
+            } else {
+              await github.rest.issues.create({
+                owner,
+                repo,
+                title,
+                body,
+                labels: ['security', 'zap', 'needs-remediation'],
+              });
+            }
+
+      - name: Close resolved remediation tracker
+        if: steps.evaluate.outputs.has_blockers != 'true'
+        env:
+          SERVICE_NAME: ${{ matrix.name }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const title = `ZAP findings: ${process.env.SERVICE_NAME} (high/critical)`;
+            const search = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} "${title}" state:open in:title`
+            });
+            const existing = search.data.items.find(item => item.title === title && item.state === 'open');
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                state: 'closed',
+                state_reason: 'completed',
+              });
+            }
+
+      - name: Block on high/critical findings
+        if: steps.evaluate.outputs.has_blockers == 'true'
+        run: |
+          echo "Blocking high/critical OWASP ZAP findings detected. See summary for remediation details."
+          exit 1

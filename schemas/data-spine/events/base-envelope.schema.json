@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/data-spine/base-envelope.schema.json",
+  "title": "CompanyOS Data Spine Envelope v1",
+  "description": "Canonical envelope for all CompanyOS Data Spine events.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "event_id": {
+      "description": "Stable, unique identifier for the emitted event (UUIDv4 recommended).",
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "description": "Fully-qualified event type including domain and version (e.g., authz.decision.v1).",
+      "type": "string",
+      "pattern": "^[a-z0-9_.]+\.v[0-9]+$"
+    },
+    "event_version": {
+      "description": "Semantic version for the event payload schema.",
+      "type": "string",
+      "pattern": "^v[0-9]+$"
+    },
+    "occurred_at": {
+      "description": "Timestamp when the action happened at the source (ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "recorded_at": {
+      "description": "Timestamp when the event was recorded on the Data Spine transport (ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "tenant_id": {
+      "description": "Tenant that owns the resource or request context.",
+      "type": "string"
+    },
+    "subject_id": {
+      "description": "Authenticated subject id (user/service); may be null for system-originated events.",
+      "type": ["string", "null"]
+    },
+    "source_service": {
+      "description": "Canonical name of the producing service (e.g., authz-gateway).",
+      "type": "string"
+    },
+    "trace_id": {
+      "description": "Distributed trace identifier for correlating with APM traces.",
+      "type": ["string", "null"]
+    },
+    "correlation_id": {
+      "description": "Client-provided correlation id for tying related events together.",
+      "type": ["string", "null"]
+    },
+    "region": {
+      "description": "Region or cell in which the event originated (useful for multi-region ops).",
+      "type": ["string", "null"]
+    },
+    "data": {
+      "description": "Event-specific payload defined by the event_type schema.",
+      "type": "object"
+    }
+  },
+  "required": [
+    "event_id",
+    "event_type",
+    "event_version",
+    "occurred_at",
+    "recorded_at",
+    "tenant_id",
+    "source_service",
+    "data"
+  ]
+}
