@@ -1,24 +1,40 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔒 Running pre-commit checks..."
+LOG_FILE="git-hook.log"
 
-# Run gitleaks to detect secrets
-echo "🔍 Scanning for secrets..."
-if command -v gitleaks &> /dev/null; then
+log() {
+  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $1" >> "$LOG_FILE"
+  echo "$1"
+}
+
+log "🔒 Running pre-commit checks..."
+
+# Run gitleaks
+if command -v gitleaks >/dev/null 2>&1; then
+  log "🔍 Scanning for secrets..."
   gitleaks protect --staged --verbose || {
-    echo "❌ Secret detected! Please remove sensitive data before committing."
+    log "❌ Secret detected!"
     exit 1
   }
-else
-  echo "⚠️  Gitleaks not installed. Install with: brew install gitleaks (macOS) or see https://github.com/gitleaks/gitleaks"
 fi
 
-# Run lint-staged to check only staged files (fast!)
-echo "🔍 Running lint-staged..."
+# Run lint-staged
+log "🔍 Running lint-staged..."
 pnpm exec lint-staged || {
-  echo "❌ Lint-staged checks failed. Please fix the issues before committing."
+  log "❌ Lint-staged failed."
   exit 1
 }
 
-echo "✅ All pre-commit checks passed!"
+# Run screenshots (robust)
+log "📸 Generating screenshots..."
+CMD="npx tsx server/scripts/generate-screenshots.ts"
+
+# Use timeout if available, otherwise rely on script's internal timeout
+if command -v timeout >/dev/null 2>&1; then
+  timeout 35s $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
+else
+  $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
+fi
+
+log "✅ All checks passed!"

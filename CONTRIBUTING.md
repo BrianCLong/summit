@@ -33,6 +33,22 @@ make up && make smoke
 - **Services:** `make up` / `make down`
 - **AI Services:** `make up-ai` / `make down`
 
+## Pre-commit Hooks
+
+Our pre-commit hooks ensure code quality and generate documentation artifacts.
+
+### Configuration
+
+- **Lint-staged:** Runs ESLint and Prettier on staged files.
+- **Gitleaks:** Scans for secrets.
+- **Screenshots:** Generates UI screenshots (skipped if server is down).
+
+### Troubleshooting
+
+- **Logs:** Check `git-hook.log` in the root directory for detailed output.
+- **Skipping:** Use `git commit --no-verify` to bypass hooks in emergencies.
+- **Screenshots:** Requires `npm run dev` to be running on port 3000. If the server is not running, screenshot generation is skipped automatically.
+
 ## Branch & Pull Request Workflow
 
 ### Branch Naming
