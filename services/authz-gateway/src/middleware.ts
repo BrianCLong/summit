@@ -1,9 +1,9 @@
-import { jwtVerify, type JWTPayload } from 'jose';
 import type { Request, Response, NextFunction } from 'express';
+import type { JWTPayload } from 'jose';
 import pino from 'pino';
-import { getPublicKey } from './keys';
 import { authorize } from './policy';
 import { log } from './audit';
+import { sessionManager } from './session';
 import type { AttributeService } from './attribute-service';
 import type {
   AuthorizationInput,
@@ -78,7 +78,7 @@ export function requireAuth(
     }
     try {
       const token = auth.replace('Bearer ', '');
-      const { payload } = await jwtVerify(token, getPublicKey());
+      const { payload } = await sessionManager.validate(token);
       if (options.requiredAcr && payload.acr !== options.requiredAcr) {
         return res
           .status(401)
@@ -137,6 +137,13 @@ export function requireAuth(
       req.resourceAttributes = resource;
       return next();
     } catch (error) {
+      const message = (error as Error).message;
+      if (message === 'session_expired') {
+        return res.status(401).json({ error: 'session_expired' });
+      }
+      if (message === 'session_not_found') {
+        return res.status(401).json({ error: 'invalid_session' });
+      }
       if (process.env.NODE_ENV !== 'test') {
         logger.error({ err: error }, 'Authorization error');
       }

@@ -1,0 +1,42 @@
+flow_id: authz-decisions-v1
+summary: Policy bundle to decision events to audit table to dashboard lineage path.
+version: 1
+lineage:
+  - id: policy-bundle-2025-01
+    type: Policy
+    version: 2025.01.10.1
+    checksum: sha256:aa02b4f31cbb8ba4c3f5c1f0bb4ad55f
+    outputs:
+      - policy-decisions-stream
+  - id: policy-decisions-stream
+    type: EventStream
+    event_type: authz.decision.v1
+    source_service: authz-gateway
+    inputs:
+      - policy-bundle-2025-01
+    outputs:
+      - audit-decisions-v1
+  - id: audit-decisions-v1
+    type: Process
+    job: audit-materialization
+    code_version: 1.0.0
+    inputs:
+      - policy-decisions-stream
+    outputs:
+      - audit.authz_decisions
+    metadata:
+      schedule: "*/5 * * * *"
+      owner: data-platform
+  - id: audit.authz_decisions
+    type: Dataset
+    storage: warehouse
+    partitioning: tenant_id, date
+    inputs:
+      - audit-decisions-v1
+    outputs:
+      - dashboard-access-denials-by-tenant
+  - id: dashboard-access-denials-by-tenant
+    type: Report
+    owner: security-operations
+    inputs:
+      - audit.authz_decisions
