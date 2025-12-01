@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { getPostgresPool } from '../config/database';
 import { createHash } from 'crypto';
 import { SchemaSnapshot } from './types';
@@ -44,7 +44,7 @@ export class SchemaDriftDetector {
     // Record new snapshot
     await this.pool.query(
       `INSERT INTO schema_snapshots (id, node_id, schema_definition, schema_hash) VALUES ($1, $2, $3, $4)`,
-      [uuidv4(), nodeId, currentSchema, schemaHash]
+      [randomUUID(), nodeId, currentSchema, schemaHash]
     );
 
     if (!lastSnapshot) {

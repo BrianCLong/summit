@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { getPostgresPool } from '../config/database';
 import { createHash } from 'crypto';
 
@@ -48,7 +48,7 @@ export class AuditCompactor {
       currentHash = createHash('sha256').update(currentHash + entryHash).digest('hex');
     }
 
-    const compactionId = uuidv4();
+    const compactionId = randomUUID();
     const summary = {
       rangeEnd: olderThan,
       recordCount: logsRes.rowCount,
