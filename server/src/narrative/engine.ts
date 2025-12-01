@@ -9,6 +9,7 @@ import type {
   StoryArc,
   TimeVariantParameter,
   SimulationEntity,
+  ShockDefinition,
 } from './types.js';
 import {
   LLMDrivenNarrativeGenerator,
@@ -97,6 +98,46 @@ export class NarrativeSimulationEngine {
     this.eventQueue.push({ ...event, scheduledTick });
   }
 
+  injectShock(shock: ShockDefinition): void {
+    // Identify targets
+    let targets: string[] = [];
+    if (shock.targetIds) {
+      targets = shock.targetIds;
+    } else if (shock.targetTag) {
+      targets = Object.values(this.state.entities)
+        .filter((e) => {
+          // Simple tag matching in metadata or name for MVP
+          const tags = (e.metadata?.tags as string[]) || [];
+          return tags.includes(shock.targetTag!) || e.name.toLowerCase().includes(shock.targetTag!.toLowerCase());
+        })
+        .map((e) => e.id);
+    }
+
+    if (targets.length === 0) {
+      // Fallback to random high-influence targets
+      targets = Object.values(this.state.entities)
+        .sort((a, b) => b.influence - a.influence)
+        .slice(0, 3)
+        .map(e => e.id);
+    }
+
+    const event: NarrativeEvent = {
+      id: randomUUID(),
+      type: 'shock',
+      theme: this.state.themes[0], // Default to primary theme
+      intensity: shock.intensity,
+      description: `SHOCK: ${shock.description}`,
+      targetIds: targets,
+      sentimentShift: -0.5, // Shocks usually negative
+      influenceShift: 0.2, // But increase attention
+      scheduledTick: this.state.tick + 1,
+      tags: ['shock'],
+      mutationIndex: 0,
+    };
+
+    this.queueEvent(event);
+  }
+
   async tick(steps = 1): Promise<NarrativeState> {
     for (let index = 0; index < steps; index += 1) {
       this.advanceClock();
@@ -131,6 +172,7 @@ export class NarrativeSimulationEngine {
       parameterAdjustments: overrides?.parameterAdjustments,
       scheduledTick: overrides?.scheduledTick ?? this.state.tick + 1,
       metadata: overrides?.metadata,
+      mutationIndex: 0,
     };
 
     this.queueEvent(action);
@@ -238,23 +280,55 @@ export class NarrativeSimulationEngine {
       });
     }
 
+    // Advanced Multi-Agent Propagation & Mutation Logic
     if (event.actorId) {
       const actor = this.state.entities[event.actorId];
       if (actor) {
         actor.relationships.forEach((edge) => {
           const related = this.state.entities[edge.targetId];
           if (!related) return;
+
+          // Calculate mutation factors
+          const isOpposed = actor.alignment !== 'neutral' && related.alignment !== 'neutral' && actor.alignment !== related.alignment;
+          const volatilityFactor = related.volatility;
+
+          let sentimentShift = (event.sentimentShift ?? 0) * edge.strength * related.resilience;
+          let description = event.description;
+          let intensity = event.intensity * edge.strength * 0.5;
+
+          // Mutation: Distortion based on volatility
+          if (volatilityFactor > 0.5) {
+             const noise = (Math.random() - 0.5) * volatilityFactor * 0.4;
+             sentimentShift += noise;
+             intensity *= (1 + noise);
+          }
+
+          // Mutation: Adversarial framing
+          if (isOpposed) {
+             sentimentShift = -sentimentShift * 0.8; // Flip sentiment
+             description = `Counter-narrative to: ${event.description}`;
+          }
+
+          const mutationIndex = (event.mutationIndex ?? 0) + 1;
+
+          // Stop propagation if intensity too low
+          if (intensity < 0.1) return;
+
           const propagatedEvent: NarrativeEvent = {
             ...event,
             id: `${event.id}:${edge.targetId}`,
             actorId: related.id,
-            targetIds: [],
-            intensity: event.intensity * edge.strength * 0.5,
-            sentimentShift:
-              (event.sentimentShift ?? 0) * edge.strength * related.resilience,
+            targetIds: [], // Consumed by the actor
+            intensity,
+            sentimentShift,
             influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
+            description,
+            mutationIndex,
+            parentEventId: event.id,
+            // Delay slightly for propagation effect
+            scheduledTick: this.state.tick + 1,
           };
-          this.adjustEntityState(related, propagatedEvent, edge.strength * 0.5);
+          this.queueEvent(propagatedEvent);
         });
       }
     }
