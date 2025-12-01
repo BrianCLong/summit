@@ -11,6 +11,14 @@
   color: 'b60205'
   description: 'Monthly operational hygiene tasks'
 
+- name: needs-canary-plan
+  color: '0b7285'
+  description: 'Requires a documented canary and rollback plan before merge'
+
+- name: migration-gate
+  color: 'e11d48'
+  description: 'Schema-impacting change that must clear the migration gate'
+
 - name: 'cadence:weekly'
   color: '5319e7'
   description: 'Weekly recurring tasks'
