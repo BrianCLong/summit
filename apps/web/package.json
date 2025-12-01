@@ -76,10 +76,11 @@
     "msw-storybook-addon": "^2.0.6",
     "postcss": "^8.4.31",
     "prettier": "^3.6.2",
+    "rollup-plugin-visualizer": "^6.0.5",
     "storybook": "^10.0.6",
     "tailwindcss": "^4.1.14",
     "typescript": "^5.9.3",
-    "vite": "^7.1.11",
+    "vite": "^7.2.6",
     "vitest": "^4.0.3"
   },
   "main": "dist/index.js",
