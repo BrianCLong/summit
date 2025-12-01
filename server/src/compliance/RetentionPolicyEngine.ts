@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import { getPostgresPool } from '../config/database';
 import { RetentionPolicy } from './types';
 
@@ -42,7 +42,7 @@ export class RetentionPolicyEngine {
     retentionDays: number,
     action: 'DELETE' | 'ARCHIVE'
   ): Promise<string> {
-    const id = uuidv4();
+    const id = randomUUID();
     await this.pool.query(
       `INSERT INTO retention_policies (id, target_type, retention_days, action) VALUES ($1, $2, $3, $4)`,
       [id, targetType, retentionDays, action]
