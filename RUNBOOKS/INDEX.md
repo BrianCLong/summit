@@ -37,6 +37,7 @@ Quick reference for operational procedures and incident response.
 
 - [Deploy Promote](./deploy-promote.yaml)
 - [Dev Bootstrap](./dev-bootstrap.md) — golden path startup with verification and troubleshooting
+- [CI Runbook](./ci.md) — canonical workflows, required statuses, and debugging tips
 - [MVP3 Go Live](./mvp3_go_live.md)
 - [V24 Coherence](./v24-coherence.md)
 

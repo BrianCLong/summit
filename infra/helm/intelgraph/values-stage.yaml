@@ -53,6 +53,7 @@ redis:
 
 neo4j:
   enabled: true
+  name: neo4j
   neo4j:
     password: devpassword
   volumes:

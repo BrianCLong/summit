@@ -1,0 +1,48 @@
+name: CI (Golden Path)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  golden-path:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.14.0
+          cache: 'pnpm'
+
+      - name: Bootstrap
+        run: make bootstrap
+
+      - name: Start Stack
+        run: make up
+
+      - name: Smoke Test
+        run: make smoke
+
+      - name: Upload Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: summit-validation-20.x
+          path: |
+            artifacts/golden-path.log
+            logs/
+          retention-days: 5
+
+      - name: Teardown
+        if: always()
+        run: make down

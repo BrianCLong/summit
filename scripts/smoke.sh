@@ -32,8 +32,9 @@ run_test() {
 
 echo "=== PHASE 1: CI/REPO HYGIENE ==="
 run_test "Gitleaks configuration" "test -f .gitleaks.toml"
-run_test "CI workflow" "test -f .github/workflows/ci.yml"
-run_test "Security gates" "grep -q 'gitleaks detect' .github/workflows/ci.yml"
+run_test "Lint & unit CI workflow" "test -f .github/workflows/ci-lint-and-unit.yml"
+run_test "Golden path CI workflow" "test -f .github/workflows/ci-golden-path.yml"
+run_test "Security gates" "grep -q 'gitleaks detect' .github/workflows/security.yml"
 
 echo ""
 echo "=== PHASE 2: DATA & DB FOUNDATION ==="

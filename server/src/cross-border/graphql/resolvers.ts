@@ -280,6 +280,7 @@ export const crossBorderResolvers = {
     },
 
     crossBorderMessageReceived: {
+      // eslint-disable-next-line require-yield
       subscribe: async function* (
         _: unknown,
         { sessionId }: { sessionId: string }
