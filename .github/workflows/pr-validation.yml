@@ -171,7 +171,7 @@ jobs:
           pnpm run typecheck 2>&1 | tee typecheck.log
 
           # Check for build warnings
-          if grep -i "warning" build.log;
+          if grep -i "warning" build.log; then
             echo "⚠️ Build warnings detected"
             gh pr comment ${{ github.event.pull_request.number }} --body "
             ⚠️ **Build Warnings Detected**
@@ -233,8 +233,8 @@ jobs:
           )
 
           SECRETS_FOUND=false
-          for pattern in "${{ SECRET_PATTERNS[@] }}"; do
-            if git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E "$pattern" | grep -v test;
+          for pattern in "${SECRET_PATTERNS[@]}"; do
+            if git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E "$pattern" | grep -v test; then
               echo "⚠️ Potential secret found: $pattern"
               SECRETS_FOUND=true
             fi
