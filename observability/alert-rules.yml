@@ -29,6 +29,21 @@ groups:
           description: 'The Conductor system is running in degraded mode for {{ $labels.instance }}'
           runbook_url: 'https://docs.intelgraph.com/runbooks/conductor-degraded'
 
+  # Golden Path Health Alert
+  - name: golden_path.health
+    rules:
+      - alert: GoldenPathHealthLow
+        expr: sum(rate(http_request_duration_seconds_count{path="/health/ready", status="200"}[7d])) / sum(rate(http_request_duration_seconds_count{path="/health/ready"}[7d])) < 0.995
+        for: 5m
+        labels:
+          severity: critical
+          service: api-server
+          component: health
+        annotations:
+          summary: 'Golden Path Health Availability Drop'
+          description: 'The availability of the /health/ready endpoint has dropped below 99.5% over the last 7 days.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/golden-path-health-low'
+
   # Routing performance and reliability
   - name: conductor.routing
     rules:
