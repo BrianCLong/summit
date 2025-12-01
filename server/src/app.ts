@@ -44,6 +44,7 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import authRouter from './routes/authRoutes.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -133,6 +134,10 @@ export const createApp = async () => {
       if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
       return rateLimitMiddleware(req, res, next);
   });
+
+  // Authentication routes (exempt from global auth middleware)
+  app.use('/auth', authRouter);
+  app.use('/api/auth', authRouter); // Alternative path
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
