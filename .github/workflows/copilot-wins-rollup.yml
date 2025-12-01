@@ -33,7 +33,5 @@ jobs:
             const section = body.split('## Top Contributors')[0].trim();
             await github.rest.issues.createComment({
               owner: context.repo.owner, repo: context.repo.repo, issue_number: issue.number,
-              body: `### Weekly rollup\n\n${section}\n\n_Reply with your best prompts this week:_\n- \
-- 
-- `
+              body: `### Weekly rollup\n\n${section}\n\n_Reply with your best prompts this week:_\n- \n- \n- `
             });

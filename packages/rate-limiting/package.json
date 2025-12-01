@@ -1,0 +1,27 @@
+{
+  "name": "@summit/rate-limiting",
+  "version": "1.0.0",
+  "description": "Enterprise rate limiting and throttling with distributed support",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ioredis": "^5.4.1",
+    "pino": "^8.17.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "tsx": "^4.7.0",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1"
+  }
+}

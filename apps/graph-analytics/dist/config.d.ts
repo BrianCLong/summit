@@ -1,30 +1,30 @@
 export declare const config: {
     server: {
         port: number;
-        allowedOrigins: any;
-        environment: any;
+        allowedOrigins: string[];
+        environment: string;
     };
     database: {
         postgres: {
-            host: any;
+            host: string;
             port: number;
-            user: any;
-            password: any;
-            database: any;
+            user: string;
+            password: string;
+            database: string;
             ssl: boolean | {
                 rejectUnauthorized: boolean;
             };
         };
         neo4j: {
-            uri: any;
-            user: any;
-            password: any;
+            uri: string;
+            user: string;
+            password: string;
         };
     };
     redis: {
-        host: any;
+        host: string;
         port: number;
-        password: any;
+        password: string;
         db: number;
     };
     analytics: {
@@ -38,7 +38,7 @@ export declare const config: {
     visualization: {
         maxNodesPerVisualization: number;
         maxEdgesPerVisualization: number;
-        defaultLayout: any;
+        defaultLayout: string;
         enableLayoutOptimization: boolean;
         imageExportEnabled: boolean;
         svgExportEnabled: boolean;
@@ -50,7 +50,7 @@ export declare const config: {
             dampingFactor: number;
         };
         communityDetection: {
-            algorithm: any;
+            algorithm: string;
             resolution: number;
             maxIterations: number;
         };
@@ -71,13 +71,13 @@ export declare const config: {
         };
     };
     auth: {
-        jwtSecret: any;
-        jwtExpiresIn: any;
+        jwtSecret: string;
+        jwtExpiresIn: string;
     };
     monitoring: {
         metricsEnabled: boolean;
         metricsPort: number;
-        logLevel: any;
+        logLevel: string;
         enablePerformanceLogging: boolean;
     };
 };
