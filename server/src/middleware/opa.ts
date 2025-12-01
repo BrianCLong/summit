@@ -222,6 +222,7 @@ export class OPAMiddleware {
         },
         action: `${operation}.${fieldName}`,
         resource: {
+          source: 'graphql',
           type: parentType,
           field: fieldName,
           args: this.sanitizeArgs(args),
@@ -270,6 +271,7 @@ export class OPAMiddleware {
         },
         action: `${method}.${path}`,
         resource: {
+          source: 'rest',
           type: 'REST',
           path: path,
           method: method,
