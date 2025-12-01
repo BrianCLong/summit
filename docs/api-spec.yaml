@@ -1,0 +1,267 @@
+openapi: 3.0.0
+info:
+  title: Summit API
+  description: API documentation for Summit, the AI-augmented intelligence analysis platform.
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@summit.local
+servers:
+  - url: http://localhost:4000
+    description: Local Development Server
+  - url: https://api.summit.dev
+    description: Development Environment
+  - url: https://api.summit.prod
+    description: Production Environment
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        uptime:
+          type: number
+        environment:
+          type: string
+        services:
+          type: object
+          properties:
+            neo4j:
+              type: string
+            postgres:
+              type: string
+            redis:
+              type: string
+        memory:
+          type: object
+          properties:
+            used:
+              type: number
+            total:
+              type: number
+            unit:
+              type: string
+    Case:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [ACTIVE, ARCHIVED, CLOSED]
+        compartment:
+          type: string
+        tenantId:
+          type: string
+        createdByKeyId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CaseInput:
+      type: object
+      required: [title, status]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        compartment:
+          type: string
+        policyLabels:
+          type: array
+          items:
+            type: string
+        metadata:
+          type: object
+        reason:
+          type: string
+          description: Audit reason
+        legalBasis:
+          type: string
+          description: Legal basis for creation
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+paths:
+  /health:
+    get:
+      summary: Basic Health Check
+      description: Returns 200 OK if the service is running.
+      security: []
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+  /health/detailed:
+    get:
+      summary: Detailed Health Check
+      description: Checks connections to database (Neo4j, Postgres, Redis) and returns detailed status.
+      security: []
+      responses:
+        '200':
+          description: All systems healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: One or more systems unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+  /metrics:
+    get:
+      summary: Prometheus Metrics
+      description: Returns application metrics in Prometheus text format.
+      security: []
+      responses:
+        '200':
+          description: Metrics data
+          content:
+            text/plain:
+              schema:
+                type: string
+  /api/cases:
+    get:
+      summary: List Cases
+      tags: [Cases]
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+        - in: query
+          name: compartment
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: offset
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of cases
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Case'
+    post:
+      summary: Create a Case
+      tags: [Cases]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseInput'
+      responses:
+        '201':
+          description: Case created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+  /api/cases/{id}:
+    get:
+      summary: Get Case by ID
+      tags: [Cases]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: reason
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: legalBasis
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Case details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
+        '404':
+          description: Case not found
+    put:
+      summary: Update Case
+      tags: [Cases]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/CaseInput'
+      responses:
+        '200':
+          description: Case updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Case'
