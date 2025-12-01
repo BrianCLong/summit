@@ -6,5 +6,8 @@ packages:
   - 'server'
   - 'client'
   - 'tools/*'
+  - 'platform/*'
 exclude:
   - 'archive/**'
+  - 'packages/sigint-collector'
+  - 'apps/mobile-native'
