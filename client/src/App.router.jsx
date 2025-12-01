@@ -49,6 +49,7 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -568,7 +569,9 @@ function DashboardPage() {
 function InvestigationsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InvestigationTimeline />
+      <ErrorBoundary componentName="InvestigationTimeline">
+        <InvestigationTimeline />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -576,7 +579,9 @@ function InvestigationsPage() {
 function GraphExplorerPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InteractiveGraphExplorer />
+      <ErrorBoundary componentName="InteractiveGraphExplorer">
+        <InteractiveGraphExplorer />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -584,7 +589,9 @@ function GraphExplorerPage() {
 function CopilotPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <IntelligentCopilot />
+      <ErrorBoundary componentName="IntelligentCopilot">
+        <IntelligentCopilot />
+      </ErrorBoundary>
     </Container>
   );
 }
