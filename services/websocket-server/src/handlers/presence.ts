@@ -58,11 +58,12 @@ export function registerPresenceHandlers(
     wrapHandlerWithRateLimit(
       socket,
       rateLimiter,
-      async (data: { status: PresenceStatus; metadata?: Record<string, unknown> }) => {
+      async (data: { status: PresenceStatus; metadata?: unknown }) => {
         const startTime = Date.now();
 
         try {
           const { status, metadata } = data;
+          const validMetadata = metadata as Record<string, unknown> | undefined;
 
           // Update connection manager
           connectionManager.updatePresence(socket.connectionId, status);
@@ -71,7 +72,7 @@ export function registerPresenceHandlers(
           const rooms = roomManager.getSocketRooms(socket.connectionId);
 
           for (const room of rooms) {
-            await presenceManager.updateStatus(room, socket.user.userId, status, metadata);
+            await presenceManager.updateStatus(room, socket.user.userId, status, validMetadata);
 
             // Broadcast to room
             const presence = await presenceManager.getRoomPresence(room);
