@@ -1,0 +1,63 @@
+name: iac_plan
+
+on:
+  workflow_call:
+    secrets:
+      CLOUD_AUTH:
+        required: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  iac_plan:
+    name: iac_plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect Terraform changes
+        id: changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setOutput('changed', 'true');
+              core.setOutput('paths', 'terraform');
+              return;
+            }
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+              per_page: 100,
+            });
+            const touched = files.filter(file => file.filename.match(/\\.tf$|\\.tfvars$|terraform\\//));
+            core.setOutput('changed', touched.length > 0 ? 'true' : 'false');
+            core.setOutput('paths', touched.map(f => f.filename).join(','));
+
+      - name: Set up Terraform
+        if: steps.changes.outputs.changed == 'true'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Validate infrastructure plans
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          terraform -chdir=terraform init -backend=false
+          terraform -chdir=terraform validate
+
+      - name: Report skipped status
+        if: steps.changes.outputs.changed != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.summary.addHeading('IaC Plan')
+            core.summary.addRaw('No Terraform changes detected; plan skipped.')
+            await core.summary.write()

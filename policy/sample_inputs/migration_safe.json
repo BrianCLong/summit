@@ -1,0 +1,12 @@
+{
+  "change": {
+    "contains_schema_change": true
+  },
+  "flags": {
+    "migration_gate": true
+  },
+  "tests": {
+    "backward_compat": true,
+    "forward_compat": true
+  }
+}

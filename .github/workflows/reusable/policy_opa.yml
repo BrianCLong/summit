@@ -1,0 +1,28 @@
+name: policy_opa
+
+on:
+  workflow_call:
+    secrets:
+      NODE_AUTH_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  policy_opa:
+    name: policy_opa
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up OPA
+        uses: open-policy-agent/setup-opa@v1
+        with:
+          version: v0.68.0
+
+      - name: Test release and migration policies
+        run: |
+          opa test policy/migration_gate.rego policy/release.rego
+          opa eval --fail-defined --data policy --input policy/sample_inputs/migration_safe.json "data.summit.gates.migration.allow"
