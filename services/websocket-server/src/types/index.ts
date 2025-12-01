@@ -15,7 +15,7 @@ export interface UserClaims {
   iat: number;
 }
 
-export interface AuthenticatedSocket extends Socket {
+export interface AuthenticatedSocket extends Socket<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData> {
   user: UserClaims;
   tenantId: string;
   connectionId: string;
