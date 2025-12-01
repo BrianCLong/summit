@@ -1,12 +1,12 @@
 
 import { provenanceLedger } from './ledger.js';
-import { IContext } from '../types/context.js'; // Assuming standard context type exists
+import { GraphQLContext } from '../types/context.js';
 
 export const provenanceResolvers = {
   Query: {
-    entityLineage: async (_: any, args: { id: string; limit?: number; offset?: number; order?: 'ASC' | 'DESC' }, context: IContext) => {
+    entityLineage: async (_: any, args: { id: string; limit?: number; offset?: number; order?: 'ASC' | 'DESC' }, context: GraphQLContext) => {
       // Security check: ensure tenant isolation
-      const tenantId = context.tenantId || context.user?.tenantId;
+      const tenantId = context.user?.tenantId;
       if (!tenantId) {
         throw new Error('Tenant context required for provenance queries');
       }
@@ -34,8 +34,8 @@ export const provenanceResolvers = {
       return await getEntityLineageFromDb(tenantId, args.id, args.limit, args.offset, args.order);
     },
 
-    resourceProvenance: async (_: any, args: { resourceType: string; limit?: number; offset?: number }, context: IContext) => {
-      const tenantId = context.tenantId || context.user?.tenantId;
+    resourceProvenance: async (_: any, args: { resourceType: string; limit?: number; offset?: number }, context: GraphQLContext) => {
+      const tenantId = context.user?.tenantId;
       if (!tenantId) throw new Error('Tenant context required');
 
       return await provenanceLedger.getEntries(tenantId, {
@@ -46,8 +46,8 @@ export const provenanceResolvers = {
       });
     },
 
-    verifyProvenanceChain: async (_: any, __: any, context: IContext) => {
-      const tenantId = context.tenantId || context.user?.tenantId;
+    verifyProvenanceChain: async (_: any, __: any, context: GraphQLContext) => {
+      const tenantId = context.user?.tenantId;
       if (!tenantId) throw new Error('Tenant context required');
 
       // This is a heavy operation, usually restricted to admins
