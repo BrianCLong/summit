@@ -22,7 +22,15 @@ allow {
 
 # Helpers
 has_permission(perm) {
+  # Check permissions if present
   input.user.permissions[_] == perm
+}
+
+has_permission(perm) {
+  # Fallback to scope-based mapping for legacy support
+  # scope format: "coherence:read", "coherence:write"
+  # Mapping: "read" -> "coherence:read", "write" -> "coherence:write"
+  input.user.scope[_] == sprintf("coherence:%s", [perm])
 }
 
 has_role(role) {
