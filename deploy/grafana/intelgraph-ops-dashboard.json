@@ -1,0 +1,55 @@
+{
+  "title": "IntelGraph Ops Overview",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Tariff Score Over Time (avg)",
+      "targets": [
+        {
+          "expr": "avg(rate(gateway_tariff_score_sum[5m]) / rate(gateway_tariff_score_count[5m]))",
+          "legendFormat": "avg score"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Deception Triggers / 5m",
+      "targets": [{ "expr": "increase(deception_trigger_total[5m])" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "FZTR Relay Messages (in/out)",
+      "targets": [
+        {
+          "expr": "sum(rate(fztr_relay_msgs_in[5m]))",
+          "legendFormat": "inbound"
+        },
+        {
+          "expr": "sum(rate(fztr_relay_msgs_out[5m]))",
+          "legendFormat": "outbound"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top AFL Signatures by Count",
+      "targets": [
+        {
+          "expr": "topk(10, sum by(formatSig)(rate(afl_store_count[1h])))",
+          "legendFormat": "{{formatSig}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "ACS Learner Loss / Reward",
+      "targets": [
+        { "expr": "rate(acs_learner_loss[5m])", "legendFormat": "loss" },
+        { "expr": "rate(acs_learner_reward[5m])", "legendFormat": "reward" }
+      ]
+    }
+  ],
+  "schemaVersion": 34,
+  "version": 1,
+  "refresh": "5s"
+}

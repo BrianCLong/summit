@@ -1,0 +1,27 @@
+{
+  "event_id": "4c060ca9-3ea8-4b1f-8d1a-5c2f7e9d34d9",
+  "event_type": "company.profile_changed.v1",
+  "event_version": "v1",
+  "occurred_at": "2025-01-10T18:15:30Z",
+  "recorded_at": "2025-01-10T18:15:31Z",
+  "tenant_id": "tenant-acme",
+  "subject_id": "system-cdc",
+  "source_service": "company-service",
+  "trace_id": "trace-cdc-22",
+  "correlation_id": "update-555",
+  "region": "us-east-1",
+  "data": {
+    "entity_id": "company-44",
+    "change_type": "update",
+    "previous_state": { "name": "Acme Inc", "tier": "standard", "contact_email_hash": "77aa1c" },
+    "new_state": { "name": "Acme Incorporated", "tier": "enterprise", "contact_email_hash": "77aa1c" },
+    "changed_by": "system-cdc",
+    "cdc_lsn": "1122334455",
+    "source_table": "public.company_profiles",
+    "classification": {
+      "name": "INTERNAL",
+      "tier": "INTERNAL",
+      "contact_email_hash": "CONFIDENTIAL"
+    }
+  }
+}
