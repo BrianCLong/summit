@@ -1,0 +1,440 @@
+openapi: 3.0.3
+info:
+  title: Citizen Service API
+  description: |
+    Real-time citizen-centric service automation API for personalized government services.
+
+    Key principles:
+    - **Ingest Once**: Citizens register their data once
+    - **Reuse Everywhere**: Data flows seamlessly across all service domains
+    - **Consent-Based**: Strict consent management for privacy compliance
+    - **Proactive Services**: Eligibility-based service recommendations
+  version: 1.0.0
+  contact:
+    name: IntelGraph Platform Team
+
+servers:
+  - url: http://localhost:4010
+    description: Development server
+
+tags:
+  - name: Citizens
+    description: Citizen registration and profile management
+  - name: Consent
+    description: Data sharing consent management
+  - name: Services
+    description: Government service requests
+  - name: Health
+    description: Service health and metrics
+
+paths:
+  /api/v1/citizens:
+    post:
+      tags: [Citizens]
+      summary: Register or update a citizen
+      description: Ingest citizen data once - automatically deduplicates by national ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CitizenInput'
+      responses:
+        '201':
+          description: Citizen registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CitizenProfile'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /api/v1/citizens/{id}:
+    get:
+      tags: [Citizens]
+      summary: Get unified citizen view
+      description: Returns complete citizen profile with service history and recommendations
+      parameters:
+        - $ref: '#/components/parameters/CitizenId'
+      responses:
+        '200':
+          description: Unified citizen view
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnifiedCitizenView'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/citizens/{id}/consent:
+    post:
+      tags: [Consent]
+      summary: Grant data sharing consent
+      parameters:
+        - $ref: '#/components/parameters/CitizenId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentInput'
+      responses:
+        '201':
+          description: Consent granted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataConsent'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/v1/citizens/{id}/services:
+    post:
+      tags: [Services]
+      summary: Request a government service
+      description: Automatically uses citizen data - no repeated forms needed
+      parameters:
+        - $ref: '#/components/parameters/CitizenId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceRequestInput'
+      responses:
+        '201':
+          description: Service request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceRecord'
+        '403':
+          description: Consent required for service domain
+
+  /api/v1/citizens/{id}/recommendations:
+    get:
+      tags: [Services]
+      summary: Get proactive service recommendations
+      parameters:
+        - $ref: '#/components/parameters/CitizenId'
+      responses:
+        '200':
+          description: List of eligible services
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommendations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Eligibility'
+
+  /api/v1/citizens/{id}/eligibility:
+    post:
+      tags: [Services]
+      summary: Compute eligibility for a service
+      parameters:
+        - $ref: '#/components/parameters/CitizenId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EligibilityInput'
+      responses:
+        '200':
+          description: Eligibility result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Eligibility'
+
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      responses:
+        '200':
+          description: Service healthy
+        '503':
+          description: Service unhealthy
+
+  /health/live:
+    get:
+      tags: [Health]
+      summary: Liveness probe
+      responses:
+        '200':
+          description: Service alive
+
+  /health/ready:
+    get:
+      tags: [Health]
+      summary: Readiness probe
+      responses:
+        '200':
+          description: Service ready
+        '503':
+          description: Service not ready
+
+  /metrics:
+    get:
+      tags: [Health]
+      summary: Prometheus metrics
+      responses:
+        '200':
+          description: Prometheus format metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+
+components:
+  parameters:
+    CitizenId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    CitizenInput:
+      type: object
+      required: [nationalId, firstName, lastName]
+      properties:
+        nationalId:
+          type: string
+          minLength: 1
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        middleName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          type: string
+          enum: [male, female, other, undisclosed]
+        nationality:
+          type: string
+        contact:
+          $ref: '#/components/schemas/ContactInfo'
+        source:
+          type: string
+          default: api
+
+    CitizenProfile:
+      allOf:
+        - $ref: '#/components/schemas/CitizenInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            verified:
+              type: boolean
+            verificationDate:
+              type: string
+              format: date-time
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+
+    ContactInfo:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+            city:
+              type: string
+            state:
+              type: string
+            postalCode:
+              type: string
+            country:
+              type: string
+
+    ServiceDomain:
+      type: string
+      enum:
+        - education
+        - healthcare
+        - administration
+        - taxation
+        - social_services
+        - transportation
+        - housing
+        - employment
+
+    ConsentInput:
+      type: object
+      required: [domain, scope]
+      properties:
+        domain:
+          $ref: '#/components/schemas/ServiceDomain'
+        scope:
+          type: array
+          items:
+            type: string
+        expiryDays:
+          type: integer
+
+    DataConsent:
+      type: object
+      properties:
+        citizenId:
+          type: string
+          format: uuid
+        domain:
+          $ref: '#/components/schemas/ServiceDomain'
+        consentGiven:
+          type: boolean
+        consentDate:
+          type: string
+          format: date-time
+        expiryDate:
+          type: string
+          format: date-time
+        scope:
+          type: array
+          items:
+            type: string
+
+    ServiceRequestInput:
+      type: object
+      required: [domain, serviceType]
+      properties:
+        domain:
+          $ref: '#/components/schemas/ServiceDomain'
+        serviceType:
+          type: string
+        metadata:
+          type: object
+
+    ServiceRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        citizenId:
+          type: string
+          format: uuid
+        domain:
+          $ref: '#/components/schemas/ServiceDomain'
+        serviceType:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_progress, completed, rejected]
+        requestDate:
+          type: string
+          format: date-time
+        completionDate:
+          type: string
+          format: date-time
+
+    EligibilityInput:
+      type: object
+      required: [domain, serviceType]
+      properties:
+        domain:
+          $ref: '#/components/schemas/ServiceDomain'
+        serviceType:
+          type: string
+
+    Eligibility:
+      type: object
+      properties:
+        citizenId:
+          type: string
+          format: uuid
+        domain:
+          $ref: '#/components/schemas/ServiceDomain'
+        serviceType:
+          type: string
+        eligible:
+          type: boolean
+        reason:
+          type: string
+        computedAt:
+          type: string
+          format: date-time
+        validUntil:
+          type: string
+          format: date-time
+
+    UnifiedCitizenView:
+      type: object
+      properties:
+        profile:
+          $ref: '#/components/schemas/CitizenProfile'
+        serviceHistory:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceRecord'
+        eligibleServices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Eligibility'
+        consents:
+          type: array
+          items:
+            $ref: '#/components/schemas/DataConsent'
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+
+    RateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              retryAfter:
+                type: integer
