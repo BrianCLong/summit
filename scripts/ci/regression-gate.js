@@ -3,6 +3,7 @@ import path from 'path';
 
 const METRICS_DIR = path.join(process.cwd(), 'ci-metrics');
 const BASELINE_FILE = path.join(process.cwd(), 'ci-metrics-baseline.json');
+const isStrict = process.argv.includes('--strict');
 
 // Load current metrics
 const currentMetrics = {};
@@ -61,4 +62,9 @@ if (regressions.length > 0) {
   regressions.forEach(r => {
     console.log(`- ${r.name}: ${r.current}ms vs ${r.baseline}ms (+${r.percent}%)`);
   });
+
+  if (isStrict) {
+      console.error('::error::Build failed due to strict performance regression gate.');
+      process.exit(1);
+  }
 }

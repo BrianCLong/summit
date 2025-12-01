@@ -35,6 +35,12 @@ const ERROR_CATEGORIES = {
   BUILD_ERROR: [/build failed/, /compilation error/]
 };
 
+// Basic warning patterns for ESLint, TSC, etc.
+const WARNING_PATTERNS = [
+  /warning:/i,
+  /WARNING:/
+];
+
 function classifyError(output) {
   for (const [cat, patterns] of Object.entries(ERROR_CATEGORIES)) {
     if (patterns.some(p => p.test(output))) return cat;
@@ -46,13 +52,25 @@ function isRetriable(output) {
   return RETRIABLE_PATTERNS.some(p => p.test(output));
 }
 
-function writeMetrics(name, duration, status, category, attempts) {
+function countWarnings(output) {
+  let count = 0;
+  const lines = output.split('\n');
+  for (const line of lines) {
+    if (WARNING_PATTERNS.some(p => p.test(line))) {
+      count++;
+    }
+  }
+  return count;
+}
+
+function writeMetrics(name, duration, status, category, attempts, warnings) {
   const metrics = {
     name,
     duration,
     status,
     category,
     attempts,
+    warnings,
     timestamp: new Date().toISOString()
   };
   const dir = path.join(process.cwd(), 'ci-metrics');
@@ -65,26 +83,30 @@ async function run(attempt = 1) {
   const startTime = Date.now();
 
   return new Promise((resolve) => {
+    // shell: true allows command to be a string like "pnpm run test"
     const child = spawn(command, { shell: true, stdio: 'pipe' });
 
+    // Limit buffer size to ~1MB to prevent heap overflow on massive logs
+    const MAX_BUFFER = 1024 * 1024;
     let stdout = '';
     let stderr = '';
 
     child.stdout.on('data', d => {
         process.stdout.write(d);
-        stdout += d.toString();
+        if (stdout.length < MAX_BUFFER) stdout += d.toString();
     });
     child.stderr.on('data', d => {
         process.stderr.write(d);
-        stderr += d.toString();
+        if (stderr.length < MAX_BUFFER) stderr += d.toString();
     });
 
     child.on('close', async (code) => {
       const duration = Date.now() - startTime;
       const combinedOutput = stdout + stderr;
+      const warningCount = countWarnings(combinedOutput);
 
       if (code === 0) {
-        writeMetrics(stepName, duration, 'SUCCESS', 'NONE', attempt);
+        writeMetrics(stepName, duration, 'SUCCESS', 'NONE', attempt, warningCount);
         resolve(0);
       } else {
         const category = classifyError(combinedOutput);
@@ -95,7 +117,7 @@ async function run(attempt = 1) {
           await new Promise(r => setTimeout(r, attempt * 1000));
           resolve(run(attempt + 1));
         } else {
-          writeMetrics(stepName, duration, 'FAILURE', category, attempt);
+          writeMetrics(stepName, duration, 'FAILURE', category, attempt, warningCount);
           resolve(code);
         }
       }

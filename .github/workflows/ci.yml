@@ -17,7 +17,6 @@ env:
 permissions:
   contents: read
   security-events: write
-  id-token: write # Required for SLSA attestation
 
 jobs:
   # Fast lane: Quick feedback on code quality (no build required)
@@ -92,14 +91,15 @@ jobs:
           version: 9
           run_install: false
 
-      # Metrics Baseline Cache
+      # Metrics Baseline Cache - Fixed restore/save key strategy
       - name: Restore Metrics Baseline
         uses: actions/cache@v4
         with:
           path: ci-metrics-baseline.json
-          key: ${{ runner.os }}-metrics-baseline-${{ github.ref_name }}
+          # Restore from the latest available baseline for the main branch
+          key: ${{ runner.os }}-metrics-baseline-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-metrics-baseline-main
+            ${{ runner.os }}-metrics-baseline-
 
       - name: Cache pnpm store
         uses: actions/cache@v4
@@ -126,9 +126,9 @@ jobs:
       - name: Unit & integration tests
         run: node scripts/ci/smart-runner.js --name "Tests" --command "pnpm -w run test" --retry 2
 
-      # Regression Gate
+      # Regression Gate - Now runs in STRICT mode
       - name: Check Regressions
-        run: node scripts/ci/regression-gate.js
+        run: node scripts/ci/regression-gate.js --strict
 
       # Health Dashboard
       - name: Pipeline Health Dashboard
@@ -145,7 +145,8 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: ci-metrics-baseline.json
-          key: ${{ runner.os }}-metrics-baseline-${{ github.sha }}
+          # Key includes run ID and attempt to be unique
+          key: ${{ runner.os }}-metrics-baseline-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload build artifacts for golden path
         uses: actions/upload-artifact@v4
