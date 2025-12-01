@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight check-env demo-data logs dev
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -16,12 +16,16 @@ help:
 	@echo "Common workflows:"
 	@echo "  make bootstrap    - Install dependencies (Node, Python, .env setup)"
 	@echo "  make up           - Start core services (Docker required)"
+	@echo "  make dev          - Start core services (alias for up)"
+	@echo "  make logs         - Tail logs for all services"
 	@echo "  make up-ai        - Start services with AI capabilities"
 	@echo "  make migrate      - Run database migrations (PostgreSQL + Neo4j)"
+	@echo "  make demo-data    - Load demo data (Operation Chimera)"
 	@echo "  make smoke        - Run smoke tests (validates golden path)"
+	@echo "  make check-env    - Validate local environment tools and ports"
 	@echo "  make down         - Stop all services"
 	@echo ""
-	@echo "Quick start: ./start.sh (runs bootstrap + up + migrate + smoke)"
+	@echo "Quick start: ./scripts/bootstrap-dev.sh && make up"
 	@echo ""
 	@echo "Prerequisites:"
 	@echo "  - Docker Desktop >= 4.x (8GB RAM recommended)"
@@ -32,19 +36,22 @@ help:
 	@echo "  - If 'make up' fails: Check Docker is running (docker info)"
 	@echo "  - If 'make migrate' fails: Check PostgreSQL is running (docker-compose ps)"
 	@echo "  - If smoke fails: Check logs (docker-compose logs api)"
-	@echo "  - For help: See docs/ONBOARDING.md or run ./start.sh --help"
+	@echo "  - For help: See docs/ONBOARDING.md"
 
 preflight:
-	@echo "==> Preflight: Checking prerequisites..."
-	@command -v docker >/dev/null 2>&1 || { echo "ERROR: Docker not found. Install from https://docs.docker.com/get-docker/"; exit 1; }
-	@docker info >/dev/null 2>&1 || { echo "ERROR: Docker daemon not running. Start Docker Desktop and try again."; exit 1; }
-	@command -v node >/dev/null 2>&1 || { echo "ERROR: Node.js not found. Install from https://nodejs.org/"; exit 1; }
-	@node_ver=$$(node -v | sed 's/v//;s/\..*//' ); \
-	  if [ "$$node_ver" -lt "$(NODE_VERSION)" ]; then \
-	    echo "ERROR: Node.js $$node_ver found, but >= $(NODE_VERSION) required"; \
-	    exit 1; \
-	  fi
-	@echo "Preflight: OK (Docker running, Node >= $(NODE_VERSION))"
+	@chmod +x scripts/dev/validate-env.sh
+	@./scripts/dev/validate-env.sh
+
+check-env: preflight
+
+dev: up
+
+logs:
+	@$(COMPOSE) -f $(DEV_COMPOSE_FILE) logs -f
+
+demo-data:
+	@chmod +x scripts/dev/load-demo-data.sh
+	@./scripts/dev/load-demo-data.sh
 
 bootstrap: preflight
 	@echo "==> bootstrap: node, python, envs"
