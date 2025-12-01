@@ -108,6 +108,8 @@
     "metrics:duplication": "jscpd server/src client/src --min-lines 10 --reporters html,console --output ./jscpd-report",
     "metrics:loc": "cloc server/src client/src apps packages services --exclude-dir=node_modules,dist,build,coverage,.turbo,archive",
     "metrics:all": "pnpm run metrics:report && pnpm run metrics:complexity && pnpm run metrics:loc",
+    "compliance:sbom": "bash scripts/compliance/generate_sbom.sh",
+    "compliance:licenses": "node scripts/compliance/check_licenses.cjs",
     "security:audit": "pnpm audit --audit-level=moderate",
     "security:audit:fix": "pnpm audit --fix",
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",

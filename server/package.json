@@ -2,6 +2,7 @@
   "name": "intelgraph-server",
   "version": "1.0.0",
   "description": "IntelGraph Platform Backend API",
+  "license": "MIT",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
