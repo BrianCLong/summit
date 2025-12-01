@@ -230,7 +230,8 @@ export class OPAMiddleware {
         context: {
           investigationId: args.investigationId || args.input?.investigationId,
           entityType: args.input?.type || args.type,
-          tenantId: user?.tenantId,
+          // Prioritize tenantId from args if present (for multi-tenant admin operations), else use user's tenant
+          tenantId: args.tenantId || args.input?.tenantId || user?.tenantId,
         },
       };
 
