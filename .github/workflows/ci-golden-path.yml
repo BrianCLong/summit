@@ -1,0 +1,70 @@
+name: CI - Golden Path
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  golden-path:
+    name: golden path integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Bootstrap stack
+        env:
+          CI: true
+        run: make bootstrap
+
+      - name: Start services
+        env:
+          CI: true
+        run: make up
+
+      - name: Run smoke tests
+        env:
+          CI: true
+        run: make smoke
+
+      - name: Teardown stack
+        if: always()
+        run: make down
+
+      - name: Collect docker logs
+        if: failure()
+        run: |
+          mkdir -p artifacts
+          if [ -f docker-compose.dev.yml ]; then
+            docker compose -f docker-compose.dev.yml logs --no-color > artifacts/compose.log || true
+          fi
+          docker ps -a > artifacts/docker-ps.txt || true
+
+      - name: Upload artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: golden-path-logs
+          path: artifacts

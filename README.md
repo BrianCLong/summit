@@ -38,6 +38,17 @@ make smoke              # golden path automation against seeded data
 - **Neo4j Browser**: http://localhost:7474 (Graph Database UI)
 - **Adminer**: http://localhost:8080 (Database Admin)
 - **Prometheus**: http://localhost:9090 (Metrics)
+
+## ✅ CI & Merge Policy
+
+- **Fast lane:** `CI - Lint and Unit` runs pnpm install, lint, typecheck, and `pnpm test:quick` on every PR and push to `main`.
+- **Golden path:** `CI - Golden Path` mirrors `make bootstrap && make up && make smoke` on `main`, nightly, and via manual dispatch with compose logs uploaded on failure.
+- **Security:** keep a single consolidated security gate (e.g., `security / security-scan`) on `push` to `main` and scheduled cadences.
+- **Branch protection (recommended required checks):**
+  - `CI - Lint and Unit / lint, typecheck, and unit tests`
+  - `CI - Golden Path / golden path integration`
+  - `security / security-scan`
+- **Merge automation:** label PRs `automerge-safe` when conflict-free and green; use `merge-train` to process sequentially, with auto-update jobs rebasing from `main` as needed.
 - **Grafana**: http://localhost:3001 (Observability Dashboards)
 
 **Optional AI/Kafka stack:** `./start.sh --ai` or `make up-ai` loads `docker-compose.ai.yml`.
