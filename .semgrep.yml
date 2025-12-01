@@ -1,21 +1,43 @@
-# .semgrep.yml
 rules:
-  - id: generic.secrets.security.detected-private-key.detected-private-key
-    paths:
-      exclude:
-        - '*/tests/*'
-        - '*/samples/*'
-    message: A private key was found in the repository.
-    languages:
-      - generic
+  - id: detected-eval-use
+    patterns:
+      - pattern: eval(...)
+    message: >-
+      Detected the use of 'eval()'. This is dangerous as it can allow arbitrary code execution.
+      Refactor to use a safer alternative.
+    languages: [javascript, typescript, python]
     severity: ERROR
 
-  - id: javascript.lang.security.detect-unsafe-html-construction.detect-unsafe-html-construction
-    paths:
-      include:
-        - 'conductor-ui/frontend'
-    message: Unsafe HTML construction detected. Use a sanitizing library or a safe framework-native method.
-    languages:
-      - javascript
-      - typescript
+  - id: hardcoded-secret-assignment
+    patterns:
+      - pattern-either:
+          - pattern: $X = "aws_..."
+          - pattern: $X = "ghp_..."
+          - pattern: $X = "sk_live_..."
+    message: >-
+      Hardcoded secret detected. Store secrets in environment variables or a secret manager.
+    languages: [javascript, typescript, python, go]
+    severity: ERROR
+
+  - id: dangerous-sql-execution
+    patterns:
+      - pattern-either:
+          - pattern: $DB.execute("..." + $USER_INPUT)
+          - pattern: $DB.query(f"...{$USER_INPUT}...")
+    message: >-
+      Potential SQL injection detected via string concatenation. Use parameterized queries instead.
+    languages: [python, javascript, typescript]
     severity: WARNING
+
+  - id: no-console-log-in-production
+    patterns:
+      - pattern: console.log(...)
+    paths:
+      exclude:
+        - "*.test.ts"
+        - "*.test.js"
+        - "scripts/**"
+    message: >-
+      Console.log detected. Ensure this is not logging sensitive information and remove before production.
+    languages: [javascript, typescript]
+    severity: INFO

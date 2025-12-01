@@ -68,7 +68,7 @@
     "react-native-fast-image": "^8.6.3",
     "react-native-svg": "^15.15.0",
     "react-native-share": "^12.0.2",
-    "react-native-webview": "^14.0.1",
+    "react-native-webview": "^13.16.0",
     "react-native-qrcode-scanner": "^1.6.0",
     "react-native-vector-icons": "^10.2.0",
     "@apollo/client": "^4.0.9",
@@ -81,14 +81,14 @@
     "react-native-performance": "^5.1.0",
     "react-native-background-fetch": "^4.2.0",
     "@sentry/react-native": "^5.15.2",
-    "metro-minify-terser": "^0.79.4",
+    "metro-minify-terser": "^0.80.12",
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "zod": "^4.1.12",
     "react-hook-form": "^7.54.2",
     "@hookform/resolvers": "^5.2.2",
     "react-native-paper": "^5.14.1",
-    "react-native-toast-message": "^3.3.8"
+    "react-native-toast-message": "^2.3.3"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
