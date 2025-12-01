@@ -64,8 +64,9 @@ describe('Framed Stream Parser Fuzz Test', () => {
 
     await transport.send('test', new AbortController().signal);
 
-    // Wait for all events to be processed (give it a moment for async operations)
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Use setImmediate/nextTick to ensure all queued microtasks are processed
+    // This is more reliable than arbitrary timeouts
+    await new Promise((resolve) => setImmediate(resolve));
 
     // Assertions
     expect(receivedEvents.length).toBe(6); // status, Hello, World, Foo, Bar, Baz, Incomplete, done
@@ -97,8 +98,8 @@ describe('Framed Stream Parser Fuzz Test', () => {
 
     await transport.send('test', new AbortController().signal);
 
-    // Wait for all events to be processed
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Use setImmediate to ensure all queued microtasks are processed
+    await new Promise((resolve) => setImmediate(resolve));
 
     // The incomplete frame should NOT be processed as a full event
     expect(receivedEvents.length).toBe(0);
@@ -120,8 +121,8 @@ describe('Framed Stream Parser Fuzz Test', () => {
 
     await transport.send('test', new AbortController().signal);
 
-    // Wait for all events to be processed
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    // Use setImmediate to ensure all queued microtasks are processed
+    await new Promise((resolve) => setImmediate(resolve));
 
     expect(receivedEvents.length).toBe(1);
     expect(receivedEvents[0]).toEqual({ type: 'done', cites: [] });

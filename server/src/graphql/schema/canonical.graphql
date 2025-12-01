@@ -1,0 +1,337 @@
+# Canonical Graph Schema Extensions
+# GA-ready entity types and ER pipeline
+
+# Extended entity types aligned with Council Wishbook
+enum CanonicalEntityType {
+  PERSON
+  ORGANIZATION
+  LOCATION
+  ASSET
+  ACCOUNT
+  EVENT
+  DOCUMENT
+  COMMUNICATION
+  DEVICE
+  VEHICLE
+  INFRASTRUCTURE
+  FINANCIAL_INSTRUMENT
+  INDICATOR
+  CLAIM
+  CASE
+  NARRATIVE
+  CAMPAIGN
+  LICENSE
+  AUTHORITY
+  SENSOR
+  RUNBOOK
+  EVIDENCE
+  HYPOTHESIS
+}
+
+# Policy & Governance
+enum SensitivityLevel {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+  TOP_SECRET
+}
+
+enum ClearanceLevel {
+  PUBLIC
+  AUTHORIZED
+  CONFIDENTIAL
+  SECRET
+  TOP_SECRET
+}
+
+enum RetentionClass {
+  TRANSIENT
+  SHORT_TERM
+  MEDIUM_TERM
+  LONG_TERM
+  PERMANENT
+  LEGAL_HOLD
+}
+
+type PolicyLabels {
+  origin: String!
+  sensitivity: SensitivityLevel!
+  clearance: ClearanceLevel!
+  legalBasis: String!
+  needToKnow: [String!]!
+  purposeLimitation: [String!]!
+  retentionClass: RetentionClass!
+}
+
+# Provenance
+enum VerificationStatus {
+  UNVERIFIED
+  PARTIAL
+  VERIFIED
+  DISPUTED
+  INVALIDATED
+}
+
+enum ProvenanceAction {
+  INGEST
+  TRANSFORM
+  ENRICH
+  MERGE
+  SPLIT
+  VALIDATE
+}
+
+type ProvenanceAssertion {
+  id: ID!
+  timestamp: DateTime!
+  actor: String!
+  action: ProvenanceAction!
+  input: [String!]!
+  output: [String!]!
+  method: String!
+  parameters: JSON
+  modelVersion: String
+  confidence: Float!
+  evidence: [String!]
+}
+
+type ProvenanceChain {
+  sourceId: String!
+  assertions: [ProvenanceAssertion!]!
+  verificationStatus: VerificationStatus!
+  trustScore: Float!
+}
+
+# Extended relationship types
+enum ExtendedRelationshipType {
+  # Evidence & provenance
+  SUPPORTS
+  CONTRADICTS
+  DERIVED_FROM
+  CITES
+
+  # Authority & governance
+  AUTHORIZED_BY
+  GOVERNED_BY
+  REQUIRES
+
+  # Temporal sequences
+  PRECEDES
+  FOLLOWS
+  CONCURRENT_WITH
+
+  # Hypothesis relationships
+  EXPLAINS
+  ALTERNATIVE_TO
+  REFUTES
+}
+
+# Entity Resolution Types
+type ERMatchScore {
+  candidateId: ID!
+  entityAId: ID!
+  entityBId: ID!
+  overallScore: Float!
+  method: String!
+  features: [ERFeatureScore!]!
+  confidence: Float!
+  riskScore: Float!
+  modelVersion: String!
+  timestamp: DateTime!
+}
+
+type ERFeatureScore {
+  feature: String!
+  score: Float!
+  weight: Float!
+  explanation: String!
+  evidence: JSON
+}
+
+enum ERDecisionType {
+  MERGE
+  NO_MERGE
+  DEFER
+  SPLIT
+}
+
+type ERDecision {
+  id: ID!
+  matchScore: ERMatchScore!
+  decision: ERDecisionType!
+  decisionMethod: String!
+  decidedBy: String
+  decidedAt: DateTime!
+  notes: String
+  reviewRequired: Boolean!
+  entityType: CanonicalEntityType!
+  audit: ERDecisionAudit!
+}
+
+type ERDecisionAudit {
+  traceId: String!
+  reviewedBy: [String!]
+  approvedBy: String
+  dissent: String
+}
+
+enum ERReviewStatus {
+  PENDING
+  IN_REVIEW
+  DECIDED
+  ESCALATED
+}
+
+enum ERPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type ERReviewQueueItem {
+  id: ID!
+  matchScore: ERMatchScore!
+  status: ERReviewStatus!
+  priority: ERPriority!
+  assignedTo: String
+  dueAt: DateTime
+  createdAt: DateTime!
+  entityASnapshot: JSON!
+  entityBSnapshot: JSON!
+  conflictingAttributes: [String!]!
+  sharedRelationships: Int!
+}
+
+type ERPrecisionMetrics {
+  entityType: CanonicalEntityType!
+  totalDecisions: Int!
+  mergeDecisions: Int!
+  noMergeDecisions: Int!
+  uncertainDecisions: Int!
+  precision: Float!
+  avgMergeConfidence: Float!
+  avgRiskScore: Float!
+  reviewsRequired: Int!
+  modelVersion: String!
+  lastUpdated: DateTime!
+}
+
+type ResolutionMetadata {
+  method: String!
+  algorithm: String!
+  features: [String!]!
+  threshold: Float!
+  confidence: Float!
+}
+
+type ResolutionEvidence {
+  type: String!
+  strength: Float!
+  details: JSON!
+}
+
+type AttributeConflict {
+  attribute: String!
+  values: [ConflictValue!]!
+  resolution: String!
+  resolvedValue: JSON
+}
+
+type ConflictValue {
+  entityId: ID!
+  value: JSON!
+  confidence: Float!
+}
+
+type ClusterAudit {
+  createdAt: DateTime!
+  lastUpdated: DateTime!
+  reviewedBy: String
+  approvedBy: String
+  version: Int!
+  revertible: Boolean!
+  revertedFrom: ID
+}
+
+type ResolutionCluster {
+  id: ID!
+  tenantId: String!
+  entityIds: [ID!]!
+  canonicalEntity: Entity!
+  resolution: ResolutionMetadata!
+  evidence: [ResolutionEvidence!]!
+  conflicts: [AttributeConflict!]!
+  audit: ClusterAudit!
+}
+
+# Queries
+extend type Query {
+  # ER review queue
+  erReviewQueue(
+    status: ERReviewStatus
+    entityType: CanonicalEntityType
+    assignedTo: String
+    limit: Int = 50
+    offset: Int = 0
+  ): [ERReviewQueueItem!]!
+
+  # ER decision history
+  erDecisions(
+    entityId: ID
+    entityType: CanonicalEntityType
+    fromDate: DateTime
+    toDate: DateTime
+    limit: Int = 100
+  ): [ERDecision!]!
+
+  # ER metrics
+  erPrecisionMetrics(
+    entityType: CanonicalEntityType
+    modelVersion: String
+  ): ERPrecisionMetrics!
+
+  # Resolution clusters
+  resolutionCluster(id: ID!): ResolutionCluster
+  resolutionClusters(
+    entityType: CanonicalEntityType
+    minSize: Int
+    limit: Int = 50
+  ): [ResolutionCluster!]!
+}
+
+# Mutations
+extend type Mutation {
+  # ER review actions
+  erReviewDecide(
+    reviewItemId: ID!
+    decision: ERDecisionType!
+    notes: String
+  ): ERDecision!
+
+  # Manual ER triggering
+  erResolvePair(
+    entityAId: ID!
+    entityBId: ID!
+  ): ERMatchScore!
+
+  # Cluster management
+  erMergeEntities(
+    masterEntityId: ID!
+    duplicateEntityIds: [ID!]!
+    notes: String
+  ): ResolutionCluster!
+
+  erSplitCluster(
+    clusterId: ID!
+    entityIdsToSplit: [ID!]!
+    reason: String!
+  ): [ResolutionCluster!]!
+
+  # Revert merge
+  erRevertMerge(
+    clusterId: ID!
+    reason: String!
+  ): [Entity!]!
+}

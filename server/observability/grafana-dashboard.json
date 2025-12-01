@@ -370,6 +370,96 @@
             "legendFormat": "{{service}} - {{error_type}}"
           }
         ]
+      },
+      {
+        "id": 31,
+        "title": "Product Analytics (Golden Path)",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 32,
+        "title": "Golden Path Funnel",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum by (step) (golden_path_step_total)",
+            "legendFormat": "{{step}}"
+          }
+        ],
+        "options": {
+          "graphMode": "none",
+          "justifyMode": "auto"
+        }
+      },
+      {
+        "id": 33,
+        "title": "Golden Path Trends",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(golden_path_step_total[1h])",
+            "legendFormat": "{{step}}"
+          }
+        ]
+      },
+      {
+        "id": 34,
+        "title": "Engineering Productivity (DORA)",
+        "type": "row",
+        "collapsed": false
+      },
+      {
+        "id": 35,
+        "title": "Deployment Frequency (Last 7 Days)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(rate(maestro_deployments_total[7d]) * 604800)",
+            "legendFormat": "Deploys/Week"
+          }
+        ]
+      },
+      {
+        "id": 36,
+        "title": "Lead Time for Changes (P50)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "maestro_pr_lead_time_hours",
+            "legendFormat": "Hours"
+          }
+        ]
+      },
+      {
+        "id": 37,
+        "title": "Change Failure Rate",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "maestro_change_failure_rate",
+            "legendFormat": "Failure Rate %"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "green"},
+            {"value": 10, "color": "yellow"},
+            {"value": 30, "color": "red"}
+          ]
+        }
+      },
+      {
+        "id": 38,
+        "title": "Mean Time to Recovery (P95)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(maestro_mttr_hours_bucket[30d])) by (le))",
+            "legendFormat": "Hours"
+          }
+        ]
       }
     ]
   }

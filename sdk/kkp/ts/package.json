@@ -1,0 +1,17 @@
+{
+  "name": "@summit/kkp-client",
+  "version": "0.1.0",
+  "description": "Keyless KMS Proxy TypeScript client",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@noble/ed25519": "^2.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

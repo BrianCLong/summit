@@ -4,6 +4,15 @@
 
 import type { TranslationResult } from '../types';
 
+// Export enhanced real-time translator
+export { RealTimeTranslator, realTimeTranslator } from './real-time-translator';
+export type {
+  TranslationProvider,
+  RealTimeTranslationConfig,
+  StreamingTranslationOptions,
+  TranslationContext,
+} from './real-time-translator';
+
 export class Translator {
   /**
    * Translate text

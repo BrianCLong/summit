@@ -1,0 +1,9 @@
+FIND events
+WHERE subject = "Alice" AND action = "LOGIN"
+FROM logs, ledger
+BETWEEN 2024-01-01T00:00:00Z AND 2024-01-31T23:59:59Z
+PROVENANCE JOIN ledger ON event_id
+PROVENANCE JOIN idtl ON event_id
+PROVENANCE JOIN mpc ON event_id
+WITH PROOFS
+EXPLAIN TRACE

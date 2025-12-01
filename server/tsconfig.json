@@ -20,7 +20,7 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "src/**/__tests__/**/*"],
   "exclude": [
     "node_modules",
     "dist",
@@ -105,9 +105,6 @@
     "src/resolvers/advancedML.ts",
     "src/routes/compliance.ts",
     "src/services/AdvancedMLService.ts",
-    "src/services/DoclingService.ts",
-    "src/**/__tests__/**",
-    "src/**/tests/**",
-    "src/**/__mocks__/**"
+    "src/services/DoclingService.ts"
   ]
 }

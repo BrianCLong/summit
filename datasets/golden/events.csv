@@ -1,0 +1,4 @@
+event_id,event_type,severity,occurred_at,processed_at,ingest_source,payload_hash,purpose_tags,provenance_ref
+EVT-7001,failed-login,high,2025-09-01T15:15:00Z,2025-09-01T15:15:05Z,okta-audit,3c1a4c5f9f6d8b1b07aa9c1e5b8b27d1,security-monitoring|operations,s3csv/events/2025-09-01T15:30:00Z
+EVT-7002,data-transfer,medium,2025-09-01T14:40:00Z,2025-09-01T14:40:06Z,eu-dlp,9b6f0a23aa887e2f5f67d12a8ebc5510,operations|compliance,s3csv/events/2025-09-01T15:30:00Z
+EVT-7003,build-warning,low,2025-09-01T15:50:00Z,2025-09-01T15:50:03Z,ci-pipeline,ab8c5d11923dfbb34d454107bb9876fe,security-monitoring|analytics,s3csv/events/2025-09-01T15:30:00Z

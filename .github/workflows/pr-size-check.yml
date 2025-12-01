@@ -1,0 +1,307 @@
+name: 📏 PR Size Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  check-pr-size:
+    name: 📏 Analyze PR Size
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze PR size and complexity
+        id: analyze
+        run: |
+          echo "🔍 Analyzing PR size and complexity..."
+
+          # Get changed files and stats
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          # Count files and lines changed
+          CHANGED_FILES=$(git diff --name-only $BASE_SHA..$HEAD_SHA)
+          FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l)
+
+          # Get detailed stats
+          STATS=$(git diff --numstat $BASE_SHA..$HEAD_SHA)
+          ADDITIONS=$(echo "$STATS" | awk '{sum+=$1} END {print sum+0}')
+          DELETIONS=$(echo "$STATS" | awk '{sum+=$2} END {print sum+0}')
+          TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+
+          echo "files_changed=$FILE_COUNT" >> $GITHUB_OUTPUT
+          echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
+          echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
+          echo "total_changes=$TOTAL_CHANGES" >> $GITHUB_OUTPUT
+
+          # Calculate size category
+          if [[ $TOTAL_CHANGES -lt 100 ]]; then
+            SIZE="XS"
+            SIZE_EMOJI="🟢"
+            SIZE_LABEL="size/xs"
+          elif [[ $TOTAL_CHANGES -lt 300 ]]; then
+            SIZE="S"
+            SIZE_EMOJI="🟢"
+            SIZE_LABEL="size/s"
+          elif [[ $TOTAL_CHANGES -lt 600 ]]; then
+            SIZE="M"
+            SIZE_EMOJI="🟡"
+            SIZE_LABEL="size/m"
+          elif [[ $TOTAL_CHANGES -lt 1000 ]]; then
+            SIZE="L"
+            SIZE_EMOJI="🟠"
+            SIZE_LABEL="size/l"
+          else
+            SIZE="XL"
+            SIZE_EMOJI="🔴"
+            SIZE_LABEL="size/xl"
+          fi
+
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+          echo "size_emoji=$SIZE_EMOJI" >> $GITHUB_OUTPUT
+          echo "size_label=$SIZE_LABEL" >> $GITHUB_OUTPUT
+
+          # Analyze by file type
+          echo "📊 Changes by file type:"
+          declare -A FILE_TYPES
+          while IFS= read -r file; do
+            if [[ -n "$file" ]]; then
+              ext="${file##*.}"
+              if [[ "$ext" == "$file" ]]; then
+                ext="no-ext"
+              fi
+              FILE_TYPES[$ext]=$((${FILE_TYPES[$ext]:-0} + 1))
+            fi
+          done <<< "$CHANGED_FILES"
+
+          FILE_TYPE_SUMMARY=""
+          for ext in "${!FILE_TYPES[@]}"; do
+            count=${FILE_TYPES[$ext]}
+            FILE_TYPE_SUMMARY="$FILE_TYPE_SUMMARY\n- \`.$ext\`: $count files"
+          done
+
+          # Detect potentially problematic patterns
+          ISSUES=""
+
+          # Check for large single-file changes
+          LARGE_FILES=$(echo "$STATS" | awk '$1+$2 > 500 {print $3}')
+          if [[ -n "$LARGE_FILES" ]]; then
+            LARGE_FILE_COUNT=$(echo "$LARGE_FILES" | wc -l)
+            ISSUES="$ISSUES\n- ⚠️ **$LARGE_FILE_COUNT file(s) with >500 lines changed** - Consider splitting into smaller, focused changes"
+          fi
+
+          # Check for mixed concerns
+          HAS_INFRA=$(echo "$CHANGED_FILES" | grep -E "(terraform|helm|k8s|docker-compose)" || true)
+          HAS_CODE=$(echo "$CHANGED_FILES" | grep -E "\.(ts|tsx|js|jsx|py|go|rs)$" || true)
+          HAS_DOCS=$(echo "$CHANGED_FILES" | grep -E "\.(md|txt)$" || true)
+          HAS_TESTS=$(echo "$CHANGED_FILES" | grep -E "(test|spec)\." || true)
+
+          CONCERN_COUNT=0
+          [[ -n "$HAS_INFRA" ]] && ((CONCERN_COUNT++))
+          [[ -n "$HAS_CODE" ]] && ((CONCERN_COUNT++))
+          [[ -n "$HAS_DOCS" ]] && ((CONCERN_COUNT++))
+
+          if [[ $CONCERN_COUNT -gt 1 ]]; then
+            ISSUES="$ISSUES\n- ⚠️ **Mixed concerns detected** - PR contains infrastructure, code, and/or documentation changes"
+          fi
+
+          # Check for dependency updates mixed with code changes
+          HAS_LOCK=$(echo "$CHANGED_FILES" | grep -E "(pnpm-lock.yaml|package-lock.json|yarn.lock|Cargo.lock|go.sum)" || true)
+          if [[ -n "$HAS_LOCK" && -n "$HAS_CODE" && $FILE_COUNT -gt 3 ]]; then
+            ISSUES="$ISSUES\n- ⚠️ **Dependency updates mixed with code changes** - Consider separating dependency updates into their own PR"
+          fi
+
+          # Save for later use
+          echo "issues=$ISSUES" >> $GITHUB_OUTPUT
+          echo -e "$FILE_TYPE_SUMMARY" > /tmp/file_type_summary.txt
+
+          # Generate splitting recommendations for large PRs
+          if [[ "$SIZE" == "L" || "$SIZE" == "XL" ]]; then
+            echo "Generating splitting recommendations..."
+            RECOMMENDATIONS=""
+
+            # Group by directory
+            declare -A DIR_CHANGES
+            while IFS= read -r file; do
+              if [[ -n "$file" ]]; then
+                dir=$(dirname "$file")
+                DIR_CHANGES[$dir]=$((${DIR_CHANGES[$dir]:-0} + 1))
+              fi
+            done <<< "$CHANGED_FILES"
+
+            # Find largest directories
+            LARGE_DIRS=$(for dir in "${!DIR_CHANGES[@]}"; do
+              echo "${DIR_CHANGES[$dir]} $dir"
+            done | sort -rn | head -5)
+
+            RECOMMENDATIONS="### 📦 Recommended PR Splits\n\n"
+            RECOMMENDATIONS="${RECOMMENDATIONS}Consider breaking this PR into smaller, focused changes:\n\n"
+
+            PR_NUM=1
+            while IFS= read -r line; do
+              if [[ -n "$line" ]]; then
+                count=$(echo "$line" | awk '{print $1}')
+                dir=$(echo "$line" | cut -d' ' -f2-)
+                if [[ $count -gt 3 ]]; then
+                  RECOMMENDATIONS="${RECOMMENDATIONS}**PR #$PR_NUM**: Changes in \`$dir/\` ($count files)\n"
+                  RECOMMENDATIONS="${RECOMMENDATIONS}\`\`\`bash\n"
+                  RECOMMENDATIONS="${RECOMMENDATIONS}git diff $BASE_SHA..$HEAD_SHA -- '$dir' | git apply\n"
+                  RECOMMENDATIONS="${RECOMMENDATIONS}\`\`\`\n\n"
+                  ((PR_NUM++))
+                fi
+              fi
+            done <<< "$LARGE_DIRS"
+
+            if [[ -n "$HAS_TESTS" && -n "$HAS_CODE" ]]; then
+              RECOMMENDATIONS="${RECOMMENDATIONS}**Alternative**: Separate implementation from tests:\n"
+              RECOMMENDATIONS="${RECOMMENDATIONS}- PR #1: Implementation changes only\n"
+              RECOMMENDATIONS="${RECOMMENDATIONS}- PR #2: Test additions/updates\n\n"
+            fi
+
+            echo -e "$RECOMMENDATIONS" > /tmp/recommendations.txt
+          fi
+
+          echo "✅ Analysis complete"
+
+      - name: Add size label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const sizeLabel = '${{ steps.analyze.outputs.size_label }}';
+
+            // Remove existing size labels
+            const labels = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            for (const label of labels.data) {
+              if (label.name.startsWith('size/')) {
+                await github.rest.issues.removeLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  name: label.name,
+                });
+              }
+            }
+
+            // Add new size label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [sizeLabel],
+            });
+
+      - name: Post analysis comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const size = '${{ steps.analyze.outputs.size }}';
+            const emoji = '${{ steps.analyze.outputs.size_emoji }}';
+            const filesChanged = '${{ steps.analyze.outputs.files_changed }}';
+            const additions = '${{ steps.analyze.outputs.additions }}';
+            const deletions = '${{ steps.analyze.outputs.deletions }}';
+            const totalChanges = '${{ steps.analyze.outputs.total_changes }}';
+            const issues = '${{ steps.analyze.outputs.issues }}';
+
+            let fileTypeSummary = '';
+            try {
+              fileTypeSummary = fs.readFileSync('/tmp/file_type_summary.txt', 'utf8');
+            } catch (e) {
+              fileTypeSummary = 'No file type data available';
+            }
+
+            let recommendations = '';
+            if (size === 'L' || size === 'XL') {
+              try {
+                recommendations = fs.readFileSync('/tmp/recommendations.txt', 'utf8');
+              } catch (e) {
+                recommendations = '';
+              }
+            }
+
+            let comment = `## ${emoji} PR Size Analysis\n\n`;
+            comment += `**Size**: \`${size}\` (${totalChanges} lines changed)\n\n`;
+            comment += `### 📊 Statistics\n`;
+            comment += `- **Files changed**: ${filesChanged}\n`;
+            comment += `- **Additions**: +${additions}\n`;
+            comment += `- **Deletions**: -${deletions}\n`;
+            comment += `- **Total changes**: ${totalChanges}\n\n`;
+
+            comment += `### 📁 Changes by file type\n${fileTypeSummary}\n\n`;
+
+            if (issues && issues.trim() !== '') {
+              comment += `### ⚠️ Potential Issues\n${issues}\n\n`;
+            }
+
+            if (size === 'XS' || size === 'S') {
+              comment += `### ✅ Great job!\n`;
+              comment += `This PR is well-sized and should be easy to review.\n\n`;
+            } else if (size === 'M') {
+              comment += `### 👍 Good size\n`;
+              comment += `This PR is medium-sized. Consider if it can be split further for easier review.\n\n`;
+            } else if (size === 'L') {
+              comment += `### ⚠️ Large PR\n`;
+              comment += `This PR is quite large and may be challenging to review thoroughly. `;
+              comment += `Consider breaking it into smaller, focused PRs.\n\n`;
+            } else if (size === 'XL') {
+              comment += `### 🔴 Very Large PR\n`;
+              comment += `This PR is very large and will be difficult to review effectively. `;
+              comment += `Please strongly consider breaking it into multiple smaller PRs.\n\n`;
+            }
+
+            if (recommendations) {
+              comment += recommendations + '\n';
+            }
+
+            comment += `---\n`;
+            comment += `<sub>💡 **Tip**: Smaller PRs get reviewed faster and reduce merge conflicts!</sub>\n`;
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.data.find(c =>
+              c.user.type === 'Bot' && c.body.includes('PR Size Analysis')
+            );
+
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment,
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }
+
+      - name: Check size threshold
+        if: steps.analyze.outputs.size == 'XL'
+        run: |
+          echo "::warning::This PR is very large (XL). Consider breaking it into smaller PRs for easier review."
+          # Don't fail the check, just warn
+          exit 0

@@ -1,0 +1,16 @@
+{
+  "name": "hil-review-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Policy appeals triage backend with dual-control approvals and audit trail",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0"
+  }
+}

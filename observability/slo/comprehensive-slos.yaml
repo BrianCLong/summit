@@ -1,0 +1,147 @@
+# Summit Platform Service Level Objectives (SLOs)
+#
+# This file defines SLOs for all Summit services following the
+# multi-window, multi-burn-rate methodology from the Google SRE Workbook
+#
+# Error Budget Calculation:
+# - 99.9% SLO = 0.1% error budget = 43.8 minutes/month downtime
+# - 99.95% SLO = 0.05% error budget = 21.9 minutes/month downtime
+# - 99.99% SLO = 0.01% error budget = 4.38 minutes/month downtime
+
+services:
+  # API Server SLO
+  api:
+    objective: 99.9
+    window: 30d
+    sli:
+      type: availability
+      success_metric: sum(rate(http_requests_total{service="api",code!~"5.."}[5m]))
+      total_metric: sum(rate(http_requests_total{service="api"}[5m]))
+    latency_slo:
+      objective: 99
+      threshold_ms: 500
+      sli:
+        success_metric: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service="api"}[5m])) by (le))
+
+  # Gateway SLO
+  gateway:
+    objective: 99.95
+    window: 30d
+    sli:
+      type: availability
+      success_metric: sum(rate(http_requests_total{service="gateway",code!~"5.."}[5m]))
+      total_metric: sum(rate(http_requests_total{service="gateway"}[5m]))
+    latency_slo:
+      objective: 99
+      threshold_ms: 100
+      sli:
+        success_metric: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{service="gateway"}[5m])) by (le))
+
+  # Web Frontend SLO
+  web:
+    objective: 99.9
+    window: 30d
+    sli:
+      type: availability
+      success_metric: sum(rate(http_requests_total{service="web",code!~"5.."}[5m]))
+      total_metric: sum(rate(http_requests_total{service="web"}[5m]))
+    latency_slo:
+      objective: 95
+      threshold_ms: 2000
+      sli:
+        success_metric: histogram_quantile(0.95, sum(rate(page_load_duration_seconds_bucket{service="web"}[5m])) by (le))
+
+  # Neo4j Database SLO
+  neo4j:
+    objective: 99.99
+    window: 30d
+    sli:
+      type: availability
+      success_metric: up{job="neo4j"}
+      total_metric: 1
+    latency_slo:
+      objective: 99
+      threshold_ms: 1000
+      sli:
+        success_metric: histogram_quantile(0.99, sum(rate(neo4j_cypher_query_duration_seconds_bucket[5m])) by (le))
+
+  # PostgreSQL Database SLO
+  postgres:
+    objective: 99.99
+    window: 30d
+    sli:
+      type: availability
+      success_metric: up{job="postgres"}
+      total_metric: 1
+    latency_slo:
+      objective: 99
+      threshold_ms: 1000
+      sli:
+        success_metric: histogram_quantile(0.99, sum(rate(pg_query_duration_seconds_bucket[5m])) by (le))
+
+  # Redis Cache SLO
+  redis:
+    objective: 99.99
+    window: 30d
+    sli:
+      type: availability
+      success_metric: up{job="redis"}
+      total_metric: 1
+    latency_slo:
+      objective: 99
+      threshold_ms: 10
+      sli:
+        success_metric: histogram_quantile(0.99, sum(rate(redis_command_duration_seconds_bucket[5m])) by (le))
+
+  # Background Jobs SLO
+  background_jobs:
+    objective: 99.0
+    window: 30d
+    sli:
+      type: success_rate
+      success_metric: sum(rate(bullmq_jobs_completed_total{status="success"}[5m]))
+      total_metric: sum(rate(bullmq_jobs_completed_total[5m]))
+    latency_slo:
+      objective: 99
+      threshold_ms: 300000 # 5 minutes
+      sli:
+        success_metric: histogram_quantile(0.99, sum(rate(bullmq_job_duration_seconds_bucket[5m])) by (le))
+
+# Burn Rate Thresholds
+# Based on Google SRE multi-window, multi-burn-rate methodology
+#
+# Burn rate = (Error rate) / (Error budget)
+# Example for 99.9% SLO (0.1% error budget):
+# - 14.4x burn rate = 1.44% error rate = exhausts budget in 2 days
+# - 6x burn rate = 0.6% error rate = exhausts budget in 5 days
+# - 3x burn rate = 0.3% error rate = exhausts budget in 10 days
+# - 1x burn rate = 0.1% error rate = exhausts budget in 30 days
+
+burn_rates:
+  # Page immediately (5% of budget in 1 hour)
+  critical:
+    long_window: 1h
+    short_window: 5m
+    burn_rate: 14.4
+    severity: critical
+
+  # Page during business hours (5% of budget in 6 hours)
+  high:
+    long_window: 6h
+    short_window: 30m
+    burn_rate: 6
+    severity: warning
+
+  # Ticket (10% of budget in 3 days)
+  medium:
+    long_window: 3d
+    short_window: 6h
+    burn_rate: 1
+    severity: warning
+
+  # Informational
+  low:
+    long_window: 7d
+    short_window: 1d
+    burn_rate: 0.5
+    severity: info

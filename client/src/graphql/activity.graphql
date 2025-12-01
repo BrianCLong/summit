@@ -1,16 +1,19 @@
-# Simplified activity feed using existing server stats
-query GW_ActivityFeedData {
-  serverStats {
-    uptime
-    totalInvestigations
-    totalEntities
+query GW_ActivityFeedData($limit: Int, $offset: Int) {
+  activities(limit: $limit, offset: $offset) {
+    id
+    actionType
+    resourceType
+    resourceId
+    actorId
+    timestamp
+    payload
+    metadata
   }
 }
 
-# Mock comment operations (would be real when server supports them)
+# Mock comment operations (kept for compatibility if needed, or remove)
 query GW_MockComments($targetId: ID!) {
   serverStats {
     uptime
-    # Mock comment data - would be replaced with real comments
   }
 }

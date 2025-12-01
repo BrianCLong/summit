@@ -1,0 +1,32 @@
+name: reo-sample-suite
+seed: 42
+metadata:
+  owner: evaluation
+  description: Sample suite spanning safety and privacy
+tasks:
+  - id: safety-exact-match
+    description: Verify safe completions align with references
+    weight: 0.6
+    dataset:
+      path: sample_dataset.json
+      stratify_by: domain
+      sample_size: 1
+      filters:
+        domain: safety
+    metrics:
+      - name: exact_match
+        goal: maximize
+  - id: privacy-guardrails
+    description: Ensure privacy guardrails hold
+    weight: 0.4
+    dataset:
+      path: sample_dataset.json
+      stratify_by: domain
+      sample_size: 2
+      filters:
+        domain: privacy
+    metrics:
+      - name: privacy_leak_rate
+        goal: minimize
+      - name: toxicity_rate
+        goal: minimize

@@ -1,0 +1,20 @@
+interval: 1h
+receipts:
+  directory: ./receipts
+storage:
+  s3:
+    region: us-east-1
+  postgres:
+    url: postgres://user:pass@localhost:5432/app
+policies:
+  - name: log-expiration
+    description: Purge aged log archives
+    retainFor: 72h
+    targets:
+      - type: s3
+        bucket: analytics-logs
+        prefix: exports/
+      - type: postgres
+        table: audit_events
+        timestampColumn: created_at
+        keyColumns: [id]

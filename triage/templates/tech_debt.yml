@@ -1,0 +1,30 @@
+name: Tech Debt
+description: Suggest a refactor or cleanup
+title: "[Tech Debt]: "
+labels: ["type/tech-debt", "triage"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What code or process needs improvement?
+    validations:
+      required: true
+  - type: textarea
+    id: benefit
+    attributes:
+      label: Benefit
+      description: Why should we prioritize this?
+    validations:
+      required: true
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Effort Estimate
+      options:
+        - Small
+        - Medium
+        - Large
+        - X-Large
+    validations:
+      required: true

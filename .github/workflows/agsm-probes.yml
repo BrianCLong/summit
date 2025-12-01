@@ -1,0 +1,29 @@
+name: AGSM Synthetic Probes
+
+on:
+  pull_request:
+    paths:
+      - 'services/agsm/**'
+      - 'tools/agsm-dashboard/**'
+      - '.github/workflows/agsm-probes.yml'
+
+jobs:
+  agsm:
+    name: Run AGSM probes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Run AGSM unit tests
+        working-directory: services/agsm
+        run: go test ./...
+
+      - name: Execute production probes
+        working-directory: services/agsm
+        run: go run ./cmd/agsm --profile=production --iterations=1 --exit-on-failure

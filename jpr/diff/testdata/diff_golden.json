@@ -1,0 +1,24 @@
+[
+  {
+    "jurisdiction": "US",
+    "dataClass": "sensitive",
+    "purpose": "research",
+    "action": "process",
+    "before": {
+      "allowed": false,
+      "effect": "deny",
+      "policyId": "rule-deny-us-research",
+      "evaluated": "2024-05-30T00:00:00Z",
+      "reason": "matched",
+      "matchedKey": "US|sensitive|research|process"
+    },
+    "after": {
+      "allowed": true,
+      "effect": "allow",
+      "policyId": "rule-defer",
+      "evaluated": "2024-06-02T00:00:00Z",
+      "reason": "matched",
+      "matchedKey": "US|sensitive|research|process"
+    }
+  }
+]

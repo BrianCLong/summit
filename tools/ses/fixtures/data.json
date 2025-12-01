@@ -1,0 +1,12 @@
+{
+  "tables": {
+    "customers": [
+      { "id": 1, "full_name": "Ada Lovelace", "email": "ada@example.com", "signup_date": "2024-01-12" },
+      { "id": 2, "full_name": "Grace Hopper", "email": "grace@example.com", "signup_date": "2024-01-20" }
+    ],
+    "orders": [
+      { "id": 100, "customer_id": 1, "total_amount": 25 },
+      { "id": 101, "customer_id": 2, "total_amount": 42 }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Compile OPA policy
+      run: |
+        docker run --rm -v $(pwd)/src/agent/policies:/policies openpolicyagent/opa build -t wasm -e deepagent/authz /policies/opa.rego > src/agent/policies/policy.wasm
+
+    - name: Lint
+      run: npm run lint
+
+    - name: Build
+      run: npm run build
+
+    - name: Run unit tests
+      run: npm test
+
+    - name: Run integration tests
+      env:
+        POSTGRES_USER: user
+        POSTGRES_PASSWORD: password
+        POSTGRES_DB: deepagent
+        NEO4J_USER: neo4j
+        NEO4J_PASSWORD: password
+      run: |
+        docker-compose up -d --build
+        docker-compose exec -T app npm test
+
+    - name: Run k6 smoke test
+      uses: grafana/k6-action@v0.2.0
+      with:
+        script: tests/k6/script.js
+
+    - name: Generate SBOM
+      run: |
+        npm install -g @cyclonedx/bom
+        cyclonedx-npm --output-file sbom.xml
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: sbom
+        path: sbom.xml

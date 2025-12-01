@@ -1,7 +1,10 @@
 # 🛠 Summit Developer Onboarding Brief
 
-Welcome to **Summit** — an AI-augmented intelligence analysis platform.
+Welcome to **Summit** — an AI-augmented intelligence analysis platform built for the intelligence community with deployability-first principles.
+
 Our mission: **supercharge development of the MVP** while **always keeping a deployable build foremost**.
+
+> 📚 **For AI Assistants:** See [CLAUDE.md](../CLAUDE.md) for comprehensive codebase context, conventions, and development workflows.
 
 ---
 
@@ -11,11 +14,13 @@ Our mission: **supercharge development of the MVP** while **always keeping a dep
    - If `make up` or `make smoke` fails, **stop everything** and fix it.
    - Never merge code that breaks the golden path:
      **Investigation → Entities → Relationships → Copilot → Results**.
+   - The golden path workflow uses the seeded dataset in `data/golden-path/demo-investigation.json`.
 
 2. **Supercharged MVP Delivery**
    - We move fast — but with discipline.
    - Deliver roadmap features in small, tested increments.
    - Always write code that can ship today, even if the feature is partial.
+   - All changes must maintain production readiness.
 
 ---
 
@@ -176,6 +181,19 @@ make smoke
 ```
 
 For more help, see [docs/COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) or ask in #summit-dev.
+
+---
+
+## 📚 Next Steps
+
+Once you've completed the golden path, explore these resources:
+
+- **[CLAUDE.md](../CLAUDE.md)** - Comprehensive AI assistant guide with codebase structure, conventions, and common tasks
+- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines including AI agent collaboration patterns
+- **[Multi-Agent Workflow Guide](./AI_AGENT_WORKFLOW.md)** - Learn how Jules, Claude, Codex, and GitHub Actions collaborate
+- **[Multi-Agent LLM Frameworks](./multi-agent-frameworks-2025.md)** - Reference guide for multi-agent architectures
+- **[Command Reference](./COMMAND_REFERENCE.md)** - Complete command reference for development
+- **[Documentation Index](./README.md)** - Full documentation catalog
 
 ---
 

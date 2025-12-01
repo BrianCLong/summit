@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=69.5", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "intelgraph-feed-processor"
+version = "0.2.0"
+description = "High-throughput feed processing workers with Redis batching and Jaeger tracing."
+readme = "README.md"
+authors = [{name = "Summit Data Engineering Team"}]
+requires-python = ">=3.11"
+dependencies = [
+  "redis>=5.0.1",
+  "pydantic>=2.6.0",
+  "pydantic-settings>=2.2.1",
+  "opentelemetry-sdk>=1.25.0",
+  "opentelemetry-exporter-jaeger>=1.21.0",
+  "opentelemetry-instrumentation-redis>=0.46b0",
+  "deprecated>=1.2.0",
+  "uvloop>=0.19.0; platform_system != 'Windows'"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-asyncio>=0.23.5",
+  "fakeredis>=2.23.3"
+]
+
+[project.scripts]
+feed-processor = "feed_processor.cli:main"
+feed-processor-benchmark = "feed_processor.perf.benchmark:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["feed_processor*"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+asyncio_mode = "auto"
+testpaths = ["tests"]

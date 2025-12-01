@@ -1,0 +1,316 @@
+# Explainable Defense AI GraphQL Schema
+# Transparent, auditable AI for mission-critical decisions
+
+enum SourceType {
+  SIGINT
+  HUMINT
+  OSINT
+  GEOINT
+  MASINT
+  TECHINT
+  FININT
+  INTERNAL
+}
+
+enum Classification {
+  UNCLASSIFIED
+  CONFIDENTIAL
+  SECRET
+  TOP_SECRET
+}
+
+enum Reliability {
+  A
+  B
+  C
+  D
+  E
+  F
+}
+
+enum DecisionType {
+  PRIORITIZATION
+  FUSION
+  RISK_ASSESSMENT
+  LINK_PREDICTION
+  ANOMALY_DETECTION
+  RECOMMENDATION
+}
+
+enum FusionStrategy {
+  WEIGHTED_CONSENSUS
+  BAYESIAN
+  DEMPSTER_SHAFER
+  MAJORITY_VOTE
+}
+
+enum ChainNodeType {
+  INGEST
+  TRANSFORM
+  ENRICH
+  ANALYZE
+  FUSE
+  DECIDE
+  OUTPUT
+}
+
+enum ContributionDirection {
+  positive
+  negative
+  neutral
+}
+
+enum UncertaintyImpact {
+  low
+  medium
+  high
+}
+
+input DataSourceInput {
+  id: String!
+  name: String!
+  type: SourceType!
+  classification: Classification!
+  reliability: Reliability!
+  credibility: Int!
+  timestamp: String!
+}
+
+input EvidenceInput {
+  id: String
+  sourceId: String!
+  content: String!
+  contentHash: String
+  extractedAt: String!
+  confidence: Float!
+  metadata: JSON
+}
+
+input CriteriaWeightInput {
+  name: String!
+  weight: Float!
+  field: String!
+}
+
+input PrioritizationItemInput {
+  id: String!
+  data: JSON!
+  evidence: [EvidenceInput!]!
+}
+
+input SourceWithEvidenceInput {
+  source: DataSourceInput!
+  evidence: [EvidenceInput!]!
+}
+
+type DataSource {
+  id: String!
+  name: String!
+  type: SourceType!
+  classification: Classification!
+  reliability: Reliability!
+  credibility: Int!
+  timestamp: String!
+}
+
+type EvidenceItem {
+  id: String!
+  sourceId: String!
+  content: String!
+  contentHash: String!
+  extractedAt: String!
+  confidence: Float!
+  metadata: JSON
+}
+
+type ReasoningStep {
+  id: String!
+  sequence: Int!
+  operation: String!
+  description: String!
+  inputs: [String!]!
+  outputs: [String!]!
+  algorithm: String!
+  parameters: JSON!
+  confidenceIn: Float!
+  confidenceOut: Float!
+  duration_ms: Int!
+  timestamp: String!
+  humanReadable: String!
+}
+
+type FeatureContribution {
+  feature: String!
+  value: JSON!
+  weight: Float!
+  contribution: Float!
+  direction: ContributionDirection!
+  explanation: String!
+}
+
+type AlternativeOutcome {
+  outcome: String!
+  probability: Float!
+  whyNotChosen: String!
+  conditions: String!
+}
+
+type UncertaintyFactor {
+  factor: String!
+  impact: UncertaintyImpact!
+  mitigation: String!
+}
+
+type DecisionExplanation {
+  id: String!
+  decisionType: DecisionType!
+  outcome: String!
+  confidence: Float!
+  reasoning: [ReasoningStep!]!
+  featureContributions: [FeatureContribution!]!
+  supportingEvidence: [EvidenceItem!]!
+  contraEvidence: [EvidenceItem!]!
+  alternativesConsidered: [AlternativeOutcome!]!
+  humanReadableSummary: String!
+  limitations: [String!]!
+  uncertaintyFactors: [UncertaintyFactor!]!
+}
+
+type Attestation {
+  attesterId: String!
+  attesterType: String!
+  statement: String!
+  timestamp: String!
+  signature: String!
+}
+
+type ChainOfTrustNode {
+  id: String!
+  parentId: String
+  nodeType: ChainNodeType!
+  component: String!
+  operation: String!
+  timestamp: String!
+  inputHashes: [String!]!
+  outputHash: String!
+  signature: String!
+  attestation: Attestation!
+}
+
+type IntelligenceProduct {
+  id: String!
+  title: String!
+  classification: String!
+  summary: String!
+  confidence: Float!
+  chainOfTrust: [ChainOfTrustNode!]!
+  explanation: DecisionExplanation!
+  sources: [DataSource!]!
+  createdAt: String!
+  expiresAt: String
+}
+
+type AuditRecord {
+  id: String!
+  timestamp: String!
+  actor: String!
+  action: String!
+  resource: String!
+  chainHash: String!
+  previousHash: String!
+}
+
+type ChainVerification {
+  valid: Boolean!
+  issues: [String!]!
+  verificationReport: String!
+}
+
+type IngestResult {
+  evidenceItems: [EvidenceItem!]!
+  chainNode: ChainOfTrustNode!
+}
+
+type AnalysisResult {
+  result: JSON!
+  explanation: DecisionExplanation!
+  chainNode: ChainOfTrustNode!
+}
+
+type RankedItem {
+  id: String!
+  score: Float!
+  rank: Int!
+  justification: String!
+}
+
+type PrioritizationResult {
+  ranked: [RankedItem!]!
+  explanation: DecisionExplanation!
+}
+
+type AuditManifest {
+  records: [AuditRecord!]!
+  merkleRoot: String!
+  exportedAt: String!
+  signature: String!
+}
+
+type Query {
+  """
+  Verify chain of trust for an intelligence product
+  """
+  chainOfTrust(productId: String!): ChainVerification!
+
+  """
+  Get audit trail with optional filters
+  """
+  xaiAuditTrail(actor: String, action: String, since: String): [AuditRecord!]!
+
+  """
+  Export complete audit manifest with Merkle root
+  """
+  xaiAuditManifest: AuditManifest!
+}
+
+type Mutation {
+  """
+  Ingest data with full provenance tracking
+  """
+  xaiIngestData(
+    source: DataSourceInput!
+    rawData: JSON!
+    extractedEvidence: [EvidenceInput!]!
+  ): IngestResult!
+
+  """
+  Perform analysis with full explainability
+  """
+  xaiAnalyze(
+    analysisType: DecisionType!
+    evidence: [EvidenceInput!]!
+  ): AnalysisResult!
+
+  """
+  Prioritize items with full justification
+  """
+  xaiPrioritize(
+    items: [PrioritizationItemInput!]!
+    criteriaWeights: [CriteriaWeightInput!]!
+  ): PrioritizationResult!
+
+  """
+  Fuse intelligence from multiple sources
+  """
+  xaiFuseIntelligence(
+    sources: [SourceWithEvidenceInput!]!
+    strategy: FusionStrategy!
+  ): IntelligenceProduct!
+
+  """
+  Verify chain of trust integrity
+  """
+  xaiVerifyChain(productId: String!): ChainVerification!
+}
+
+scalar JSON

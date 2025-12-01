@@ -1,0 +1,4 @@
+- C2PA bridge toolkit.
+- Use 2-space indentation for TS/JS.
+- Run `npm test` in this package after changes.
+- Document new commands in the package README.

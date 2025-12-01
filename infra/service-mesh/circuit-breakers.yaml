@@ -1,0 +1,367 @@
+# Circuit Breaker Patterns for Summit Microservices
+# Implements resilience patterns for all service-to-service communication
+#
+# Circuit breakers prevent cascading failures by:
+# - Detecting failing services and stopping requests temporarily
+# - Allowing gradual recovery through half-open states
+# - Protecting downstream services from overload
+
+---
+# Global default circuit breaker settings
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: default-circuit-breaker
+  namespace: istio-system
+spec:
+  host: "*.svc.cluster.local"
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 3s
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+        maxRetries: 3
+        idleTimeout: 300s
+    outlierDetection:
+      # Circuit breaker settings
+      consecutive5xxErrors: 5
+      consecutiveGatewayErrors: 3
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+      splitExternalLocalOriginErrors: true
+    loadBalancer:
+      simple: LEAST_REQUEST
+      localityLbSetting:
+        enabled: true
+        failover:
+          - from: us-east-1
+            to: us-west-2
+          - from: us-west-2
+            to: us-east-1
+
+---
+# API Gateway - High availability circuit breaker
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: api-gateway-circuit-breaker
+  namespace: summit
+spec:
+  host: api-gateway.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 500
+        connectTimeout: 2s
+      http:
+        http1MaxPendingRequests: 200
+        http2MaxRequests: 500
+        maxRequestsPerConnection: 5
+        maxRetries: 3
+        idleTimeout: 600s
+    outlierDetection:
+      consecutive5xxErrors: 3
+      consecutiveGatewayErrors: 2
+      interval: 20s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 30
+      minHealthPercent: 70
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-user-id"
+        minimumRingSize: 1024
+
+---
+# Graph Core Service - Critical path with strict limits
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: graph-core-circuit-breaker
+  namespace: summit
+spec:
+  host: graph-core.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 200
+        connectTimeout: 5s
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 200
+        maxRequestsPerConnection: 3
+        maxRetries: 2
+        idleTimeout: 300s
+    outlierDetection:
+      consecutive5xxErrors: 3
+      consecutiveGatewayErrors: 2
+      interval: 30s
+      baseEjectionTime: 90s
+      maxEjectionPercent: 40
+      minHealthPercent: 60
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: "x-tenant-id"
+
+---
+# Neo4j Graph Database - Conservative limits to protect DB
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: neo4j-circuit-breaker
+  namespace: summit
+spec:
+  host: neo4j.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 50
+        connectTimeout: 10s
+      http:
+        http1MaxPendingRequests: 25
+        http2MaxRequests: 50
+        maxRequestsPerConnection: 1
+        maxRetries: 1
+        idleTimeout: 900s
+    outlierDetection:
+      consecutive5xxErrors: 2
+      consecutiveGatewayErrors: 1
+      interval: 60s
+      baseEjectionTime: 300s
+      maxEjectionPercent: 20
+      minHealthPercent: 80
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+# PostgreSQL - Database connection pooling
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: postgres-circuit-breaker
+  namespace: summit
+spec:
+  host: postgres.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 5s
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 1
+        maxRetries: 1
+        idleTimeout: 600s
+    outlierDetection:
+      consecutive5xxErrors: 2
+      interval: 60s
+      baseEjectionTime: 300s
+      maxEjectionPercent: 20
+      minHealthPercent: 80
+
+---
+# Redis - Fast failing for cache misses
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: redis-circuit-breaker
+  namespace: summit
+spec:
+  host: redis.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 200
+        connectTimeout: 1s
+      http:
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 200
+        maxRequestsPerConnection: 10
+        maxRetries: 2
+        idleTimeout: 300s
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+    loadBalancer:
+      simple: LEAST_REQUEST
+
+---
+# AI/ML Services - Long-running operations
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: ai-services-circuit-breaker
+  namespace: summit
+spec:
+  host: "*.ai.summit.svc.cluster.local"
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 50
+        connectTimeout: 10s
+      http:
+        http1MaxPendingRequests: 25
+        http2MaxRequests: 50
+        maxRequestsPerConnection: 1
+        maxRetries: 1
+        idleTimeout: 3600s # 1 hour for long-running ML operations
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 60s
+      baseEjectionTime: 180s
+      maxEjectionPercent: 30
+      minHealthPercent: 70
+    loadBalancer:
+      simple: ROUND_ROBIN
+
+---
+# NLP Service
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: nlp-service-circuit-breaker
+  namespace: summit
+spec:
+  host: nlp-service.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 5s
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+        maxRetries: 2
+        idleTimeout: 600s
+    outlierDetection:
+      consecutive5xxErrors: 4
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 40
+      minHealthPercent: 60
+
+---
+# Analytics Engine - Batch processing tolerant
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: analytics-engine-circuit-breaker
+  namespace: summit
+spec:
+  host: analytics-engine.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 75
+        connectTimeout: 10s
+      http:
+        http1MaxPendingRequests: 40
+        http2MaxRequests: 75
+        maxRequestsPerConnection: 1
+        maxRetries: 1
+        idleTimeout: 1800s # 30 minutes
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 120s
+      baseEjectionTime: 300s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+
+---
+# Stream Processor - Kafka consumer services
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: stream-processor-circuit-breaker
+  namespace: summit
+spec:
+  host: stream-processor.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 150
+        connectTimeout: 3s
+      http:
+        http1MaxPendingRequests: 75
+        http2MaxRequests: 150
+        maxRequestsPerConnection: 5
+        maxRetries: 3
+        idleTimeout: 900s
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 40
+      minHealthPercent: 60
+
+---
+# Authz Gateway - Security critical with fast failover
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: authz-gateway-circuit-breaker
+  namespace: summit
+spec:
+  host: authz-gateway.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 300
+        connectTimeout: 2s
+      http:
+        http1MaxPendingRequests: 150
+        http2MaxRequests: 300
+        maxRequestsPerConnection: 10
+        maxRetries: 2
+        idleTimeout: 300s
+    outlierDetection:
+      consecutive5xxErrors: 2
+      consecutiveGatewayErrors: 1
+      interval: 15s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 20
+      minHealthPercent: 80
+    loadBalancer:
+      simple: LEAST_REQUEST
+
+---
+# Provenance Ledger - Critical audit trail
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: prov-ledger-circuit-breaker
+  namespace: summit
+spec:
+  host: prov-ledger.summit.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 5s
+      http:
+        http1MaxPendingRequests: 50
+        http2MaxRequests: 100
+        maxRequestsPerConnection: 2
+        maxRetries: 3 # Higher retry for critical audit operations
+        idleTimeout: 600s
+    outlierDetection:
+      consecutive5xxErrors: 3
+      interval: 30s
+      baseEjectionTime: 120s
+      maxEjectionPercent: 30
+      minHealthPercent: 70
+    loadBalancer:
+      simple: ROUND_ROBIN

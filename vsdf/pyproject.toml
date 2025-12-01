@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vsdf"
+version = "0.1.0"
+description = "Verifiable Synthetic Data Forge (VSDF) — constraint-first tabular synthesizer"
+readme = "README.md"
+authors = [
+    { name = "Summit AI", email = "maintainers@summitai.example" },
+]
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.24",
+    "pandas>=1.5",
+]
+
+[project.optional-dependencies]
+notebooks = [
+    "jupyter>=1.0",
+    "matplotlib>=3.7",
+]
+
+[tool.setuptools.packages.find]
+include = ["vsdf*"]

@@ -1,6 +1,41 @@
 const gql = require('graphql-tag');
 
 const typeDefs = gql`
+  type GraphAnomalySummary {
+    totalNodes: Int!
+    totalEdges: Int!
+    anomalyCount: Int!
+    modelVersion: String!
+    threshold: Float!
+    contamination: Float!
+  }
+
+  type GraphAnomalyNode {
+    id: ID!
+    score: Float!
+    isAnomaly: Boolean!
+    reason: String!
+    label: String
+    type: String
+    metrics: JSON!
+  }
+
+  type GraphAnomalyResult {
+    summary: GraphAnomalySummary!
+    nodes: [GraphAnomalyNode!]!
+    metadata: JSON
+  }
+
+  extend type Query {
+    graphTraversalAnomalies(
+      entityId: ID!
+      investigationId: ID!
+      radius: Int = 1
+      threshold: Float
+      contamination: Float
+    ): GraphAnomalyResult!
+  }
+
   extend type Entity {
     id: ID!
     label: String!

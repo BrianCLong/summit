@@ -1,0 +1,16 @@
+[
+  {
+    "id": "mpc-proof-123",
+    "timestamp": "2024-01-05T12:00:03Z",
+    "subject": "Alice",
+    "action": "PROOF",
+    "attributes": {
+      "event_id": "evt-123",
+      "proof_id": "mpc-proof-123",
+      "circuit": "login-access"
+    },
+    "provenance": [
+      { "source_connector": "ledger", "relation": "attests", "reference": "ledger-evt-123" }
+    ]
+  }
+]

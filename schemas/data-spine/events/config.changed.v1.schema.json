@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/data-spine/config.changed.v1.schema.json",
+  "title": "CompanyOS Config Changed Event v1",
+  "description": "Event emitted for configuration changes such as feature flags or service parameters.",
+  "allOf": [
+    { "$ref": "./base-envelope.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": { "const": "config.changed.v1" },
+        "event_version": { "const": "v1" },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "config_key": { "type": "string" },
+            "scope": { "type": "string", "description": "Scope of the change (global, tenant, service)." },
+            "change_type": {
+              "type": "string",
+              "enum": ["create", "update", "delete"]
+            },
+            "previous_value": {
+              "description": "Previous value with sensitive fields redacted or hashed.",
+              "type": ["string", "number", "boolean", "object", "array", "null"]
+            },
+            "new_value": {
+              "description": "New value with sensitive fields redacted or hashed.",
+              "type": ["string", "number", "boolean", "object", "array", "null"]
+            },
+            "changed_by": { "type": "string" },
+            "change_ticket": { "type": ["string", "null"] },
+            "approval_reference": { "type": ["string", "null"] }
+          },
+          "required": [
+            "config_key",
+            "scope",
+            "change_type",
+            "new_value",
+            "changed_by"
+          ]
+        }
+      }
+    }
+  ]
+}

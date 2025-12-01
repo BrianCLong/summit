@@ -1,0 +1,219 @@
+# Multi-Window, Multi-Burn-Rate SLO Alerts
+# Based on Google SRE Workbook Chapter 5
+#
+# Each alert fires when BOTH windows exceed the burn rate threshold
+# This reduces false positives while maintaining quick detection
+
+groups:
+  - name: api-slo-burn
+    interval: 30s
+    rules:
+      # Critical: 14.4x burn rate (exhausts budget in 2 days)
+      # Page immediately - 5% of monthly budget consumed in 1 hour
+      - alert: APIErrorBudgetBurnCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{service="api",code=~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total{service="api"}[1h]))
+            > (14.4 * 0.001)
+          )
+          and
+          (
+            sum(rate(http_requests_total{service="api",code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{service="api"}[5m]))
+            > (14.4 * 0.001)
+          )
+        for: 2m
+        labels:
+          severity: critical
+          service: api
+          slo: availability
+        annotations:
+          summary: "API error budget burning at critical rate"
+          description: "API is burning through error budget at 14.4x rate. At this rate, the entire monthly budget will be exhausted in 2 days. Current error rate: {{ $value | humanizePercentage }}. Investigate immediately."
+          runbook_url: "https://runbooks.summit.dev/slo/api-error-budget-burn"
+          dashboard_url: "https://grafana.summit.dev/d/api-slo"
+
+      # High: 6x burn rate (exhausts budget in 5 days)
+      # Page during business hours - 5% of budget in 6 hours
+      - alert: APIErrorBudgetBurnHigh
+        expr: |
+          (
+            sum(rate(http_requests_total{service="api",code=~"5.."}[6h]))
+            /
+            sum(rate(http_requests_total{service="api"}[6h]))
+            > (6 * 0.001)
+          )
+          and
+          (
+            sum(rate(http_requests_total{service="api",code=~"5.."}[30m]))
+            /
+            sum(rate(http_requests_total{service="api"}[30m]))
+            > (6 * 0.001)
+          )
+        for: 15m
+        labels:
+          severity: warning
+          service: api
+          slo: availability
+        annotations:
+          summary: "API error budget burning at high rate"
+          description: "API is burning through error budget at 6x rate. At this rate, the entire monthly budget will be exhausted in 5 days. Current error rate: {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.summit.dev/slo/api-error-budget-burn"
+
+      # Medium: 1x burn rate (exhausts budget in 30 days)
+      # Ticket - 10% of budget in 3 days
+      - alert: APIErrorBudgetBurnMedium
+        expr: |
+          (
+            sum(rate(http_requests_total{service="api",code=~"5.."}[3d]))
+            /
+            sum(rate(http_requests_total{service="api"}[3d]))
+            > (1 * 0.001)
+          )
+          and
+          (
+            sum(rate(http_requests_total{service="api",code=~"5.."}[6h]))
+            /
+            sum(rate(http_requests_total{service="api"}[6h]))
+            > (1 * 0.001)
+          )
+        for: 1h
+        labels:
+          severity: warning
+          service: api
+          slo: availability
+        annotations:
+          summary: "API error budget burning at sustainable rate"
+          description: "API is burning through error budget at expected rate. Monitor to ensure it doesn't increase."
+
+  - name: gateway-slo-burn
+    interval: 30s
+    rules:
+      - alert: GatewayErrorBudgetBurnCritical
+        expr: |
+          (
+            sum(rate(http_requests_total{service="gateway",code=~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total{service="gateway"}[1h]))
+            > (14.4 * 0.0005)
+          )
+          and
+          (
+            sum(rate(http_requests_total{service="gateway",code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{service="gateway"}[5m]))
+            > (14.4 * 0.0005)
+          )
+        for: 2m
+        labels:
+          severity: critical
+          service: gateway
+          slo: availability
+        annotations:
+          summary: "Gateway error budget burning at critical rate"
+          description: "Gateway (99.95% SLO) is burning error budget at 14.4x. Error rate: {{ $value | humanizePercentage }}."
+          runbook_url: "https://runbooks.summit.dev/slo/gateway-error-budget-burn"
+
+      - alert: GatewayErrorBudgetBurnHigh
+        expr: |
+          (
+            sum(rate(http_requests_total{service="gateway",code=~"5.."}[6h]))
+            /
+            sum(rate(http_requests_total{service="gateway"}[6h]))
+            > (6 * 0.0005)
+          )
+          and
+          (
+            sum(rate(http_requests_total{service="gateway",code=~"5.."}[30m]))
+            /
+            sum(rate(http_requests_total{service="gateway"}[30m]))
+            > (6 * 0.0005)
+          )
+        for: 15m
+        labels:
+          severity: warning
+          service: gateway
+          slo: availability
+        annotations:
+          summary: "Gateway error budget burning at high rate"
+          description: "Gateway burning error budget at 6x rate. Error rate: {{ $value | humanizePercentage }}."
+
+  - name: latency-slo-burn
+    interval: 30s
+    rules:
+      # API Latency SLO: P99 < 500ms
+      - alert: APILatencySLOBurn
+        expr: |
+          (
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{service="api"}[5m])) by (le)
+            ) > 0.5
+          )
+        for: 5m
+        labels:
+          severity: warning
+          service: api
+          slo: latency
+        annotations:
+          summary: "API P99 latency exceeds SLO"
+          description: "API P99 latency is {{ $value | humanizeDuration }}, exceeding 500ms SLO."
+          runbook_url: "https://runbooks.summit.dev/troubleshooting/high-latency"
+
+      # Gateway Latency SLO: P99 < 100ms
+      - alert: GatewayLatencySLOBurn
+        expr: |
+          (
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{service="gateway"}[5m])) by (le)
+            ) > 0.1
+          )
+        for: 5m
+        labels:
+          severity: warning
+          service: gateway
+          slo: latency
+        annotations:
+          summary: "Gateway P99 latency exceeds SLO"
+          description: "Gateway P99 latency is {{ $value | humanizeDuration }}, exceeding 100ms SLO."
+
+  - name: database-slo
+    interval: 30s
+    rules:
+      - alert: Neo4jDown
+        expr: up{job="neo4j"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: neo4j
+          slo: availability
+        annotations:
+          summary: "Neo4j database is down"
+          description: "Neo4j has been down for more than 1 minute."
+          runbook_url: "https://runbooks.summit.dev/databases/neo4j-down"
+
+      - alert: PostgresDown
+        expr: up{job="postgres"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: postgres
+          slo: availability
+        annotations:
+          summary: "PostgreSQL database is down"
+          description: "PostgreSQL has been down for more than 1 minute."
+          runbook_url: "https://runbooks.summit.dev/databases/postgres-down"
+
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+          slo: availability
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been down for more than 1 minute."
+          runbook_url: "https://runbooks.summit.dev/databases/redis-down"

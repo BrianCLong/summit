@@ -1,0 +1,21 @@
+{
+  "epic": "Feature Flag Governance",
+  "archiveName": "feature-flag-governance-epic.zip",
+  "description": "Runtime guardrail coverage ensuring safe rollouts and emergency controls for platform toggles.",
+  "testEvidence": [
+    {
+      "type": "integration",
+      "path": "tests/integration/feature-flags/featureFlagService.integration.test.ts",
+      "artifact": "test-results/integration/feature-flags.json"
+    },
+    {
+      "type": "unit",
+      "path": "src/utils/__tests__/featureFlagService.test.ts",
+      "artifact": "test-results/unit/feature-flag-service.xml"
+    }
+  ],
+  "expectedOutputs": [
+    "Fixture-driven rollouts exercising guardrail dependencies",
+    "Kill switch transcript proving immutable flags remain available"
+  ]
+}

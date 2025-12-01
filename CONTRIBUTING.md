@@ -1,34 +1,265 @@
-# Contributing to IntelGraph
+# Contributing to Summit (IntelGraph)
 
-## Prereqs
+> **For AI Assistants:** See [CLAUDE.md](CLAUDE.md) for comprehensive codebase context, conventions, and development workflows.
 
-- Node 20 LTS, pnpm 9 (corepack)
-- Docker (Compose) for local services
+## Prerequisites
+
+- Node 20 LTS, pnpm 9 (corepack enabled)
+- Docker Desktop with Compose for local services
+- Git with conventional commit hooks configured
+- 8GB+ RAM for full development stack
 
 ## Setup
 
-- corepack enable && corepack prepare pnpm@9.12.3 --activate
-- make bootstrap
+```bash
+# Enable corepack and install pnpm
+corepack enable && corepack prepare pnpm@9.12.3 --activate
 
-## Common Tasks
+# Bootstrap the development environment
+make bootstrap
 
-- Typecheck: `make typecheck`
-- Lint: `make lint`
-- Test: `make test`
-- E2E (smoke): `make e2e`
-- Build all: `make build`
-- Codegen (GraphQL): `make codegen`
-- Bring up services: `make up` / `make down`
+# Verify the golden path
+make up && make smoke
+```
 
-## Branch & PR
+## Common Development Tasks
 
-- Keep changes scoped; run `scripts/pr_guard.sh` before PR
-- CI must be green; merge queue enforces required checks
+- **Typecheck:** `make typecheck` or `pnpm typecheck`
+- **Lint:** `make lint` or `pnpm lint`
+- **Test:** `make test` or `pnpm test`
+- **E2E (smoke):** `make smoke` or `pnpm smoke`
+- **Build all:** `make build` or `pnpm build`
+- **GraphQL Codegen:** `make codegen` or `pnpm graphql:codegen`
+- **Services:** `make up` / `make down`
+- **AI Services:** `make up-ai` / `make down`
+
+## Branch & Pull Request Workflow
+
+### Branch Naming
+
+- Feature: `feature/<description>`
+- Fix: `fix/<description>`
+- Docs: `docs/<description>`
+- AI Agent: `claude/<session-id>`, `jules/<session-id>`, `codex/<session-id>`
+
+### Commit Messages
+
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer]
+```
+
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`
+
+**Examples:**
+```
+feat(api): add entity search endpoint
+fix(graph): resolve neo4j connection timeout
+docs(readme): update quickstart instructions
+chore(deps): update pnpm-lock.yaml
+```
+
+### Pull Request Requirements
+
+- Keep changes scoped and focused
+- Run `scripts/pr_guard.sh` before creating PR
+- Ensure CI is green (all checks must pass)
+- Include tests for new features
+- Update documentation as needed
+- Request review from core maintainers
+- Merge queue enforces required checks
 
 ## Troubleshooting
 
-- Run `scripts/green_build.sh` to self-heal and build
-- Run `node scripts/audit_workspaces.mjs --strict` for hard audit
+- **Build issues:** Run `scripts/green_build.sh` to self-heal and build
+- **Workspace audit:** Run `node scripts/audit_workspaces.mjs --strict`
+- **Golden path fails:** Run `make down && make up && make smoke`
+- **Docker issues:** `docker system prune -af` then `make up`
+
+## AI Agent Collaboration
+
+Summit embraces AI-augmented development through multi-agent collaboration. This section provides guidelines for AI agents (Claude, Jules, Codex, GitHub Copilot) and their human partners.
+
+### AI Agent Types
+
+1. **Claude (Anthropic)** - Code generation, refactoring, documentation, architectural guidance
+2. **Jules (GitHub)** - Pull request reviews, issue triage, automated workflows
+3. **GitHub Copilot** - In-editor code completions and suggestions
+4. **GitHub Actions** - Automated CI/CD, testing, deployment pipelines
+5. **CodeRabbit** - Automated PR reviews and code quality analysis
+
+### AI Agent Workflow
+
+```mermaid
+graph TD
+    A[Developer/AI Agent] -->|Create Branch| B[Feature Branch]
+    B -->|Commit Changes| C[Pre-commit Hooks]
+    C -->|Gitleaks, Lint, Format| D{Checks Pass?}
+    D -->|No| E[Fix Issues]
+    E -->|Retry| C
+    D -->|Yes| F[Push to Remote]
+    F -->|Create PR| G[GitHub Actions CI]
+    G -->|Lint, Test, Smoke| H{CI Green?}
+    H -->|No| E
+    H -->|Yes| I[CodeRabbit Review]
+    I -->|Jules Triage| J[Human Review]
+    J -->|Approved| K[Merge to Main]
+    K -->|Deploy| L[Production]
+```
+
+### Guidelines for AI Agents
+
+#### DO ✅
+
+- **Always run golden path:** `make bootstrap && make up && make smoke` before claiming success
+- **Follow existing patterns:** Read CLAUDE.md for codebase conventions
+- **Write tests:** Include unit and integration tests for new features
+- **Document changes:** Update relevant docs (README, ONBOARDING, API docs)
+- **Use TypeScript types:** Avoid `any`, prefer interfaces and types
+- **Handle errors gracefully:** Use try/catch, return error objects
+- **Reference file paths:** Use `file_path:line_number` pattern in responses
+- **Maintain security:** Check for OWASP vulnerabilities, no hardcoded secrets
+- **Verify incrementally:** Test each change before moving to the next
+- **Use conventional commits:** Follow commit message standards
+
+#### DON'T ❌
+
+- **Skip the smoke test:** Never claim completion without running `make smoke`
+- **Commit secrets:** Never commit credentials, API keys, or sensitive data
+- **Break golden path:** Ensure Investigation → Entities → Relationships → Copilot → Results workflow
+- **Use production defaults:** Never use default passwords or localhost in production config
+- **Bypass security:** Don't disable security checks or skip validation
+- **Ignore test failures:** Fix all failing tests before committing
+- **Use magic numbers:** Use named constants instead of hardcoded values
+- **Skip documentation:** Always update docs to reflect code changes
+- **Batch too much:** Keep PRs focused and reviewable (< 500 lines preferred)
+- **Commit debug code:** Remove console.log, debugger statements, and .only() tests
+
+### AI-Generated Code Review Checklist
+
+Before submitting AI-generated code:
+
+- [ ] Code follows TypeScript/ESLint conventions
+- [ ] All imports are properly ordered and grouped
+- [ ] No unused imports or variables
+- [ ] Functions have clear, descriptive names
+- [ ] Complex logic includes comments explaining "why"
+- [ ] Error handling is comprehensive
+- [ ] Tests cover new functionality (aim for 80%+ coverage)
+- [ ] No security vulnerabilities introduced
+- [ ] GraphQL schema changes are backward-compatible
+- [ ] Database migrations are reversible
+- [ ] Environment variables are documented in .env.example
+- [ ] Performance implications considered (no N+1 queries, etc.)
+- [ ] Accessibility requirements met (WCAG 2.1 AA)
+- [ ] Documentation updated (README, API docs, inline comments)
+- [ ] `make smoke` passes locally
+
+### Multi-Agent Coordination
+
+When multiple AI agents work on the same codebase:
+
+1. **Branch isolation:** Each agent works on a dedicated branch (`claude/<session-id>`, etc.)
+2. **Merge strategy:** Rebase on main frequently to avoid conflicts
+3. **Communication:** Document decisions in PR descriptions and commit messages
+4. **Handoff protocol:** Leave clear TODO comments for next agent or human
+5. **State preservation:** Use git commits to checkpoint progress frequently
+6. **Context sharing:** Reference related PRs, issues, and documentation
+
+### AI Agent Best Practices
+
+#### For Code Generation
+
+```typescript
+// ✅ Good: Typed, explicit, testable
+interface EntityInput {
+  type: string;
+  name: string;
+  properties: Record<string, unknown>;
+}
+
+async function createEntity(input: EntityInput): Promise<Entity> {
+  try {
+    const validated = await validateEntity(input);
+    const entity = await entityRepo.create(validated);
+    await auditLog.record('entity:create', entity.id);
+    return entity;
+  } catch (error) {
+    logger.error('Failed to create entity', { input, error });
+    throw new EntityCreationError('Entity creation failed', { cause: error });
+  }
+}
+
+// ❌ Bad: Untyped, implicit, hard to test
+async function createEntity(input: any) {
+  const entity = await entityRepo.create(input);
+  return entity;
+}
+```
+
+#### For Documentation
+
+- Use clear, concise language
+- Include code examples with expected output
+- Link to related documentation
+- Keep examples up-to-date with current codebase
+- Use proper markdown formatting
+- Include troubleshooting sections
+
+#### For Testing
+
+```typescript
+// ✅ Good: Descriptive, isolated, comprehensive
+describe('EntityService', () => {
+  describe('createEntity', () => {
+    it('should create entity with valid data', async () => {
+      const input = entityFactory({ type: 'Person', name: 'Test' });
+      const result = await entityService.create(input);
+
+      expect(result).toHaveProperty('id');
+      expect(result.type).toBe('Person');
+      expect(result.name).toBe('Test');
+    });
+
+    it('should throw error when entity type is invalid', async () => {
+      const input = entityFactory({ type: 'InvalidType' });
+
+      await expect(entityService.create(input))
+        .rejects.toThrow(ValidationError);
+    });
+
+    it('should audit entity creation', async () => {
+      const input = entityFactory();
+      await entityService.create(input);
+
+      expect(auditLog.record).toHaveBeenCalledWith(
+        'entity:create',
+        expect.any(String)
+      );
+    });
+  });
+});
+```
+
+### Multi-Agent Workflow Documentation
+
+For detailed multi-agent collaboration patterns, see:
+
+- **[AI Agent Workflow Guide](docs/AI_AGENT_WORKFLOW.md)** - Complete multi-agent workflow documentation
+- **[Multi-Agent LLM Innovation Roadmap](docs/ai/multi-agent-llm-innovation-roadmap.md)** - Strategic multi-agent architecture
+- **[Multi-Agent Frameworks 2025](docs/multi-agent-frameworks-2025.md)** - Framework comparison and recommendations
+
+### Getting Help
+
+- **AI Assistants:** Read [CLAUDE.md](CLAUDE.md) for complete codebase context
+- **Humans:** Check existing code, tests, and documentation for patterns
+- **Community:** Ask in #summit-dev or #ai-agents Slack channels
+- **Documentation:** See [docs/README.md](docs/README.md) for complete doc index
 
 ## Testing Guidelines
 

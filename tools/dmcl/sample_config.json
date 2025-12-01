@@ -1,0 +1,64 @@
+{
+  "seed": 2025,
+  "base_input": "samples/dmcl/base_dataset.json",
+  "gate_threshold": 0.6,
+  "artifacts_dir": "reports/dmcl/artifacts",
+  "report_dir": "reports/dmcl",
+  "scenarios": [
+    {
+      "name": "type-drift",
+      "mutation": "type_drift",
+      "expected_behaviors": ["redaction"],
+      "pipeline_command": [
+        "python3",
+        "samples/dmcl/pipeline_stub.py",
+        "--input",
+        "{input}"
+      ]
+    },
+    {
+      "name": "null-burst",
+      "mutation": "null_bursts",
+      "expected_behaviors": ["blocked"],
+      "pipeline_command": [
+        "python3",
+        "samples/dmcl/pipeline_stub.py",
+        "--input",
+        "{input}"
+      ]
+    },
+    {
+      "name": "schema-shift",
+      "mutation": "schema_shift",
+      "expected_behaviors": ["accepted"],
+      "pipeline_command": [
+        "python3",
+        "samples/dmcl/pipeline_stub.py",
+        "--input",
+        "{input}"
+      ]
+    },
+    {
+      "name": "duplicate-storm",
+      "mutation": "duplicate_storm",
+      "expected_behaviors": ["alert"],
+      "pipeline_command": [
+        "python3",
+        "samples/dmcl/pipeline_stub.py",
+        "--input",
+        "{input}"
+      ]
+    },
+    {
+      "name": "timestamp-skew",
+      "mutation": "timestamp_skew",
+      "expected_behaviors": ["fallback"],
+      "pipeline_command": [
+        "python3",
+        "samples/dmcl/pipeline_stub.py",
+        "--input",
+        "{input}"
+      ]
+    }
+  ]
+}

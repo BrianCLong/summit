@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';
 import pino from 'pino';
 import { randomUUID } from 'node:crypto';
+import { createLoaders, Loaders } from '../graphql/loaders.js';
 
 const logger = pino();
 const JWT_SECRET =
@@ -20,6 +21,7 @@ interface AuthContext {
   user?: User;
   isAuthenticated: boolean;
   requestId: string;
+  loaders: Loaders;
 }
 
 export const getContext = async ({
@@ -28,22 +30,30 @@ export const getContext = async ({
   req: any;
 }): Promise<AuthContext> => {
   const requestId = randomUUID();
+  const loaders = createLoaders();
+
   try {
+    // If user is already attached by middleware (e.g. for GraphQL route)
+    if (req.user) {
+         logger.info({ requestId, userId: req.user.id }, 'Authenticated request (middleware)');
+         return { user: req.user, isAuthenticated: true, requestId, loaders };
+    }
+
     const token = extractToken(req);
     if (!token) {
       logger.info({ requestId }, 'Unauthenticated request');
-      return { isAuthenticated: false, requestId };
+      return { isAuthenticated: false, requestId, loaders };
     }
 
     const user = await verifyToken(token);
     logger.info({ requestId, userId: user.id }, 'Authenticated request');
-    return { user, isAuthenticated: true, requestId };
+    return { user, isAuthenticated: true, requestId, loaders };
   } catch (error) {
     logger.warn(
       { requestId, error: (error as Error).message },
       'Authentication failed',
     );
-    return { isAuthenticated: false, requestId };
+    return { isAuthenticated: false, requestId, loaders };
   }
 };
 

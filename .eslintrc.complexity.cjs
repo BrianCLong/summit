@@ -15,7 +15,8 @@ module.exports = {
 
     // Maximum function length in lines
     // Current issues: Functions over 200 lines found
-    'max-lines-per-function': ['warn', {
+    // ENFORCED: Changed from 'warn' to 'error' for CI enforcement
+    'max-lines-per-function': ['error', {
       max: 100,
       skipBlankLines: true,
       skipComments: true,
@@ -24,7 +25,8 @@ module.exports = {
 
     // Maximum file length
     // Current issues: 71 files over 1000 lines, 4 files over 2000 lines
-    'max-lines': ['warn', {
+    // ENFORCED: Changed from 'warn' to 'error' for CI enforcement
+    'max-lines': ['error', {
       max: 500,
       skipBlankLines: true,
       skipComments: true,
@@ -39,13 +41,15 @@ module.exports = {
 
     // Maximum number of parameters
     // God Objects often have methods with too many parameters
-    'max-params': ['warn', { max: 5 }],
+    // ENFORCED: Changed from 'warn' to 'error' for CI enforcement
+    'max-params': ['error', { max: 5 }],
 
     // Maximum number of statements per line
     'max-statements-per-line': ['error', { max: 1 }],
 
     // Maximum number of statements in a function
-    'max-statements': ['warn', { max: 30 }, { ignoreTopLevelFunctions: false }],
+    // ENFORCED: Changed from 'warn' to 'error' for CI enforcement
+    'max-statements': ['error', { max: 30 }, { ignoreTopLevelFunctions: false }],
 
     // Cognitive Complexity - Measures how difficult code is to understand
     // More strict than cyclomatic complexity
@@ -60,14 +64,17 @@ module.exports = {
 
     // Switch statement complexity
     // Current issues: Switch statements with 32 cases found
-    'max-cases-per-switch': ['warn', 10],
+    // ENFORCED: Changed from 'warn' to 'error' for CI enforcement
+    'max-cases-per-switch': ['error', 10],
 
     // Import management
     // Current issues: Files with 33+ imports found
-    'import/max-dependencies': ['warn', { max: 20 }],
+    // ENFORCED: Changed from 'warn' to 'error' for CI enforcement
+    'import/max-dependencies': ['error', { max: 20 }],
 
     // Code organization
-    'no-magic-numbers': ['warn', {
+    // ENFORCED: Changed from 'warn' to 'error' for CI enforcement
+    'no-magic-numbers': ['error', {
       ignore: [0, 1, -1],
       ignoreArrayIndexes: true,
       enforceConst: true,

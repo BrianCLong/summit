@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { goldenPathStepTotal } from '../monitoring/metrics.js';
 
 const router = express.Router();
 
@@ -50,6 +51,12 @@ router.get('/graph', async (req, res) => {
       edgeCount: edges.length,
       tenant,
       processingTime: response.metadata.processingTime,
+    });
+
+    goldenPathStepTotal.inc({
+      step: 'relationships_explored',
+      status: 'success',
+      tenant_id: tenant,
     });
 
     res.json(response);

@@ -1,0 +1,35 @@
+{
+  "start_date": "2025-01-01",
+  "end_date": "2025-01-10",
+  "epsilon_cap": 3.0,
+  "delta_cap": 1e-5,
+  "metrics": [
+    {
+      "id": "metric-daily-critical",
+      "name": "Daily Core Metric",
+      "frequency": "daily",
+      "epsilon": 0.2,
+      "delta": 1e-6,
+      "group_size": 1,
+      "priority": "critical"
+    },
+    {
+      "id": "metric-weekly-nth",
+      "name": "Weekly Retention",
+      "frequency": "weekly",
+      "epsilon": 0.3,
+      "delta": 5e-7,
+      "group_size": 2,
+      "priority": "nice-to-have"
+    },
+    {
+      "id": "metric-monthly-critical",
+      "name": "Monthly Growth",
+      "frequency": "monthly",
+      "epsilon": 0.5,
+      "delta": 1e-6,
+      "group_size": 1,
+      "priority": "critical"
+    }
+  ]
+}

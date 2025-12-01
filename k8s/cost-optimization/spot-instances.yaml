@@ -1,0 +1,494 @@
+# Kubernetes Spot/Preemptible Instance Configuration for Cost Optimization
+# Reduces infrastructure costs by 60-80% for fault-tolerant workloads
+
+---
+# Node affinity for spot instance workloads
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spot-instance-config
+  namespace: kube-system
+data:
+  spot-enabled: "true"
+  fallback-to-on-demand: "true"
+  spot-termination-grace-period: "120"  # seconds
+
+---
+# Priority Classes for workload scheduling
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: spot-workload
+value: 100
+globalDefault: false
+description: "Workloads suitable for spot/preemptible instances"
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: guaranteed-workload
+value: 1000
+globalDefault: false
+description: "Workloads requiring guaranteed on-demand instances"
+
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: critical-workload
+value: 10000
+globalDefault: false
+description: "Critical workloads with highest priority"
+
+---
+# AWS Spot Node Group (using Karpenter or Cluster Autoscaler)
+apiVersion: karpenter.sh/v1alpha5
+kind: Provisioner
+metadata:
+  name: spot-provisioner
+spec:
+  requirements:
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["spot"]
+    - key: kubernetes.io/arch
+      operator: In
+      values: ["amd64"]
+    - key: karpenter.sh/capacity-type
+      operator: In
+      values: ["spot", "on-demand"]  # Fallback to on-demand if spot unavailable
+  limits:
+    resources:
+      cpu: 1000
+      memory: 1000Gi
+  providerRef:
+    name: spot-provider
+  # Spot instance diversification
+  ttlSecondsAfterEmpty: 30
+  ttlSecondsUntilExpired: 604800  # 7 days
+  consolidation:
+    enabled: true
+
+---
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: spot-provider
+spec:
+  subnetSelector:
+    karpenter.sh/discovery: summit-prod
+  securityGroupSelector:
+    karpenter.sh/discovery: summit-prod
+  instanceProfile: SummitSpotInstanceProfile
+
+  # Use spot instance interruption handling
+  metadataOptions:
+    httpEndpoint: enabled
+    httpProtocolIPv6: disabled
+    httpPutResponseHopLimit: 2
+    httpTokens: required
+
+  # Diversify across multiple instance types
+  amiFamily: AL2
+  userData: |
+    #!/bin/bash
+    # Configure node for spot instances
+    echo "NODE_TYPE=spot" >> /etc/environment
+
+    # Install spot termination handler
+    kubectl apply -f https://github.com/aws/aws-node-termination-handler/releases/download/v1.19.0/all-resources.yaml
+
+  tags:
+    cost-center: engineering
+    environment: production
+    node-type: spot
+    managed-by: karpenter
+
+---
+# Deployment optimized for spot instances
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-worker-spot
+  namespace: prod
+  labels:
+    app: analytics-worker
+    cost-optimization: spot-enabled
+spec:
+  replicas: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 2  # Allow more disruption for cost savings
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: analytics-worker
+  template:
+    metadata:
+      labels:
+        app: analytics-worker
+        spot-safe: "true"
+    spec:
+      # Use spot workload priority
+      priorityClassName: spot-workload
+
+      # Tolerate spot instance interruptions
+      tolerations:
+        - key: "spot"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+        - key: "karpenter.sh/capacity-type"
+          operator: "Equal"
+          value: "spot"
+          effect: "NoSchedule"
+
+      # Prefer spot instances
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: karpenter.sh/capacity-type
+                    operator: In
+                    values:
+                      - spot
+            - weight: 50
+              preference:
+                matchExpressions:
+                  - key: node.kubernetes.io/instance-type
+                    operator: In
+                    values:
+                      - c6i.xlarge
+                      - c6i.2xlarge
+                      - c5.xlarge
+                      - c5.2xlarge
+
+      # Spread across availability zones for resilience
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: analytics-worker
+
+      terminationGracePeriodSeconds: 120  # Allow time for graceful shutdown
+
+      containers:
+        - name: worker
+          image: intelgraph/analytics-worker:latest
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+
+          # Graceful shutdown handler
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    echo "Gracefully shutting down..."
+                    # Finish current work
+                    kill -SIGTERM 1
+                    # Wait for completion
+                    sleep 30
+
+          env:
+            - name: SPOT_INSTANCE
+              value: "true"
+            - name: ENABLE_CHECKPOINTING
+              value: "true"
+            - name: WORK_QUEUE_NAME
+              value: "analytics-jobs"
+
+---
+# StatefulSet with spot instance support (careful!)
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: cache-spot
+  namespace: prod
+spec:
+  serviceName: cache-spot
+  replicas: 3
+  selector:
+    matchLabels:
+      app: cache-spot
+  template:
+    metadata:
+      labels:
+        app: cache-spot
+        spot-safe: "true"
+    spec:
+      priorityClassName: spot-workload
+
+      tolerations:
+        - key: "spot"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              preference:
+                matchExpressions:
+                  - key: karpenter.sh/capacity-type
+                    operator: In
+                    values:
+                      - spot
+        # Anti-affinity to spread across nodes
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: cache-spot
+                topologyKey: kubernetes.io/hostname
+
+      containers:
+        - name: redis
+          image: redis:7-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+
+          # Enable persistence
+          volumeMounts:
+            - name: data
+              mountPath: /data
+
+          # Configure Redis for spot interruptions
+          command:
+            - redis-server
+            - --save
+            - "60"
+            - "1000"  # Save every 60s if 1000+ keys changed
+            - --appendonly
+            - "yes"
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp3  # Fast, cost-effective storage
+        resources:
+          requests:
+            storage: 10Gi
+
+---
+# CronJob on spot instances (cost-effective batch processing)
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: daily-reports-spot
+  namespace: prod
+spec:
+  schedule: "0 2 * * *"  # 2 AM daily
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        metadata:
+          labels:
+            app: daily-reports
+            spot-safe: "true"
+        spec:
+          priorityClassName: spot-workload
+          restartPolicy: OnFailure
+
+          tolerations:
+            - key: "spot"
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+
+          affinity:
+            nodeAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 100
+                  preference:
+                    matchExpressions:
+                      - key: karpenter.sh/capacity-type
+                        operator: In
+                        values:
+                          - spot
+
+          containers:
+            - name: report-generator
+              image: intelgraph/report-generator:latest
+              resources:
+                requests:
+                  cpu: "1"
+                  memory: 2Gi
+                limits:
+                  cpu: "4"
+                  memory: 8Gi
+
+              env:
+                - name: REPORT_TYPE
+                  value: "daily"
+                - name: OUTPUT_BUCKET
+                  value: "s3://summit-reports/daily"
+
+---
+# Spot Instance Termination Handler DaemonSet
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: spot-termination-handler
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: spot-termination-handler
+  template:
+    metadata:
+      labels:
+        app: spot-termination-handler
+    spec:
+      serviceAccountName: spot-termination-handler
+      hostNetwork: true
+      containers:
+        - name: handler
+          image: amazon/aws-node-termination-handler:latest
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: SPOT_INSTANCE_CHECK_INTERVAL
+              value: "5"
+            - name: WEBHOOK_URL
+              valueFrom:
+                secretKeyRef:
+                  name: spot-termination-webhook
+                  key: url
+                  optional: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          securityContext:
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+
+---
+# ServiceAccount for termination handler
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spot-termination-handler
+  namespace: kube-system
+
+---
+# RBAC for termination handler
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: spot-termination-handler
+rules:
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "patch", "update"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/eviction"]
+    verbs: ["create"]
+  - apiGroups: ["apps"]
+    resources: ["daemonsets"]
+    verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: spot-termination-handler
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: spot-termination-handler
+subjects:
+  - kind: ServiceAccount
+    name: spot-termination-handler
+    namespace: kube-system
+
+---
+# Cost savings metrics
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cost-savings-calculations
+  namespace: prod
+data:
+  calculate-savings.sh: |
+    #!/bin/bash
+    # Calculate spot instance cost savings
+
+    SPOT_INSTANCES=$(kubectl get nodes -l karpenter.sh/capacity-type=spot -o json | jq '.items | length')
+    ON_DEMAND_INSTANCES=$(kubectl get nodes -l 'karpenter.sh/capacity-type!=spot' -o json | jq '.items | length')
+
+    # Assuming 70% average savings with spot instances
+    SPOT_HOURLY_COST=0.30  # Example: $0.30/hour per spot instance
+    ON_DEMAND_HOURLY_COST=1.00  # Example: $1.00/hour per on-demand instance
+
+    SPOT_DAILY_COST=$(echo "$SPOT_INSTANCES * $SPOT_HOURLY_COST * 24" | bc)
+    ON_DEMAND_EQUIVALENT_COST=$(echo "$SPOT_INSTANCES * $ON_DEMAND_HOURLY_COST * 24" | bc)
+    DAILY_SAVINGS=$(echo "$ON_DEMAND_EQUIVALENT_COST - $SPOT_DAILY_COST" | bc)
+    MONTHLY_SAVINGS=$(echo "$DAILY_SAVINGS * 30" | bc)
+
+    echo "Spot Instances: $SPOT_INSTANCES"
+    echo "On-Demand Instances: $ON_DEMAND_INSTANCES"
+    echo "Daily Savings: \$$DAILY_SAVINGS"
+    echo "Monthly Savings: \$$MONTHLY_SAVINGS"
+
+    # Export metrics to Prometheus
+    cat <<EOF | kubectl apply -f -
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: spot-savings-metrics
+      namespace: monitoring
+      labels:
+        prometheus: "true"
+    data:
+      spot_instances_total: "$SPOT_INSTANCES"
+      spot_daily_savings_usd: "$DAILY_SAVINGS"
+      spot_monthly_savings_usd: "$MONTHLY_SAVINGS"
+    EOF

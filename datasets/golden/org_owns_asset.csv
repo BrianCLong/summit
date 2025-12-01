@@ -1,0 +1,4 @@
+org_id,asset_id,ownership_type,purpose_tags,provenance_ref
+ORG-100,ASSET-5001,custodial,operations|security-monitoring,s3csv/relationships/2025-09-01T15:30:00Z
+ORG-200,ASSET-5002,steward,operations|compliance,s3csv/relationships/2025-09-01T15:30:00Z
+ORG-300,ASSET-5001,hosted-service,operations|security-monitoring,s3csv/relationships/2025-09-01T15:30:00Z

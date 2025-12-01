@@ -1,0 +1,1081 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`AdaptiveConsentSDK rendering renders cs-CZ locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Přijmout vše",
+    "bulletPoints": [
+      "Základní funkce udržují službu bezpečnou",
+      "Analytika ukazuje, co zlepšit",
+      "Personalizace přizpůsobuje obsah",
+    ],
+    "footer": "Rozhodnutí můžete kdykoli změnit.",
+    "manageCta": "Spravovat nastavení",
+    "rejectCta": "Odmítnout doplňkové",
+    "summary": "Data používáme k poskytování, měření a přizpůsobení Summit.",
+    "title": "Vaše nastavení soukromí",
+  },
+  "locale": "cs-CZ",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders da-DK locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Accepter alt",
+    "bulletPoints": [
+      "Vigtige funktioner holder tjenesten sikker",
+      "Analyse hjælper os med at forbedre",
+      "Personalisering gør indhold relevant",
+    ],
+    "footer": "Du kan ændre dine valg når som helst.",
+    "manageCta": "Administrer indstillinger",
+    "rejectCta": "Afvis ekstra",
+    "summary": "Vi bruger data til at levere, måle og tilpasse Summit.",
+    "title": "Dine privatlivsvalg",
+  },
+  "locale": "da-DK",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders de-DE locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Alle zulassen",
+    "bulletPoints": [
+      "Essentielle Funktionen halten den Dienst sicher",
+      "Analysen zeigen Verbesserungsmöglichkeiten",
+      "Personalisierung passt Inhalte an",
+    ],
+    "footer": "Sie können Ihre Auswahl jederzeit ändern.",
+    "manageCta": "Einstellungen verwalten",
+    "rejectCta": "Nur Notwendiges",
+    "summary": "Wir verwenden Daten, um Summit bereitzustellen, zu messen und zu personalisieren.",
+    "title": "Ihre Datenschutzwahl",
+  },
+  "locale": "de-DE",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders en-GB locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Allow all",
+    "bulletPoints": [
+      "Essential cookies secure our services",
+      "Analytics helps us improve",
+      "Personalisation adapts content",
+    ],
+    "footer": "Change your decision whenever you like.",
+    "manageCta": "Review choices",
+    "rejectCta": "Decline extras",
+    "summary": "We process data to run Summit and improve the experience.",
+    "title": "Your privacy options",
+  },
+  "locale": "en-GB",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders en-US locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Accept all",
+    "bulletPoints": [
+      "Essential features keep Summit services secure",
+      "Analytics shows us what to improve",
+      "Personalization tailors content to you",
+    ],
+    "footer": "You can update preferences at any time.",
+    "manageCta": "Manage settings",
+    "rejectCta": "Reject non-essential",
+    "summary": "We use data to provide, measure, and personalize your experience.",
+    "title": "Your privacy choices",
+  },
+  "locale": "en-US",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders es-ES locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Aceptar todo",
+    "bulletPoints": [
+      "Las funciones esenciales mantienen el servicio seguro",
+      "La analítica nos ayuda a mejorar",
+      "La personalización ajusta el contenido",
+    ],
+    "footer": "Puedes cambiar tu decisión cuando quieras.",
+    "manageCta": "Administrar ajustes",
+    "rejectCta": "Rechazar lo no esencial",
+    "summary": "Usamos datos para ofrecer, medir y personalizar Summit.",
+    "title": "Tus opciones de privacidad",
+  },
+  "locale": "es-ES",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders es-MX locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Aceptar todo",
+    "bulletPoints": [
+      "Funciones esenciales protegen tu cuenta",
+      "Analítica muestra qué mejorar",
+      "Personalización crea contenido relevante",
+    ],
+    "footer": "Actualiza las preferencias en cualquier momento.",
+    "manageCta": "Gestionar opciones",
+    "rejectCta": "Rechazar adicionales",
+    "summary": "Usamos datos para operar Summit y mejorar tu experiencia.",
+    "title": "Configura tu privacidad",
+  },
+  "locale": "es-MX",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders fi-FI locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Hyväksy kaikki",
+    "bulletPoints": [
+      "Välttämättömät toiminnot pitävät palvelun turvallisena",
+      "Analytiikka kertoo mitä parantaa",
+      "Personointi tekee sisällöstä sinulle sopivaa",
+    ],
+    "footer": "Voit päivittää asetuksia milloin vain.",
+    "manageCta": "Hallinnoi asetuksia",
+    "rejectCta": "Hylkää lisätiedot",
+    "summary": "Käytämme tietoja palvelun tarjoamiseen, mittaamiseen ja personointiin.",
+    "title": "Tietosuoja-asetuksesi",
+  },
+  "locale": "fi-FI",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders fr-CA locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Accepter tout",
+    "bulletPoints": [
+      "Les fonctionnalités essentielles assurent la sécurité",
+      "Les analyses montrent quoi améliorer",
+      "La personnalisation adapte l'expérience",
+    ],
+    "footer": "Vos préférences sont modifiables en tout temps.",
+    "manageCta": "Modifier les paramètres",
+    "rejectCta": "Refuser le non essentiel",
+    "summary": "Nous utilisons des données pour offrir, mesurer et personnaliser Summit.",
+    "title": "Vos choix de confidentialité",
+  },
+  "locale": "fr-CA",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders fr-FR locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Tout accepter",
+    "bulletPoints": [
+      "Les fonctionnalités essentielles sécurisent le service",
+      "Les analyses guident nos améliorations",
+      "La personnalisation adapte le contenu",
+    ],
+    "footer": "Vous pouvez modifier vos choix à tout moment.",
+    "manageCta": "Gérer les paramètres",
+    "rejectCta": "Refuser le non-essentiel",
+    "summary": "Nous utilisons vos données pour fournir, mesurer et personnaliser Summit.",
+    "title": "Vos préférences de confidentialité",
+  },
+  "locale": "fr-FR",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders it-IT locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Accetta tutto",
+    "bulletPoints": [
+      "Le funzioni essenziali mantengono il servizio sicuro",
+      "L'analisi ci aiuta a migliorare",
+      "La personalizzazione adatta i contenuti",
+    ],
+    "footer": "Puoi aggiornare le preferenze in ogni momento.",
+    "manageCta": "Gestisci impostazioni",
+    "rejectCta": "Rifiuta il superfluo",
+    "summary": "Usiamo i dati per fornire, misurare e personalizzare Summit.",
+    "title": "Le tue scelte sulla privacy",
+  },
+  "locale": "it-IT",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders ja-JP locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "すべて許可",
+    "bulletPoints": [
+      "必要な機能がサービスを安全に保ちます",
+      "分析で改善点を把握します",
+      "パーソナライズで最適な体験を提供します",
+    ],
+    "footer": "設定はいつでも変更できます。",
+    "manageCta": "設定を管理",
+    "rejectCta": "必要最小限にする",
+    "summary": "Summit を提供・測定・パーソナライズするためにデータを利用します。",
+    "title": "プライバシー設定",
+  },
+  "locale": "ja-JP",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders ko-KR locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "모두 허용",
+    "bulletPoints": [
+      "필수 기능이 서비스를 안전하게 유지합니다",
+      "분석으로 개선점을 파악합니다",
+      "개인 맞춤으로 관련 콘텐츠를 제공합니다",
+    ],
+    "footer": "언제든지 선택을 변경할 수 있습니다.",
+    "manageCta": "설정 관리",
+    "rejectCta": "필수만 허용",
+    "summary": "Summit 서비스를 제공하고 맞춤화하기 위해 데이터를 사용합니다.",
+    "title": "개인정보 보호 설정",
+  },
+  "locale": "ko-KR",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders nl-NL locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Alles accepteren",
+    "bulletPoints": [
+      "Essentiële functies houden de dienst veilig",
+      "Analyse toont wat beter kan",
+      "Personalisatie maakt inhoud relevant",
+    ],
+    "footer": "Je kunt je keuze altijd wijzigen.",
+    "manageCta": "Voorkeuren beheren",
+    "rejectCta": "Alleen noodzakelijk",
+    "summary": "We gebruiken gegevens om Summit te leveren, meten en personaliseren.",
+    "title": "Jouw privacyvoorkeuren",
+  },
+  "locale": "nl-NL",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders no-NO locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Godta alt",
+    "bulletPoints": [
+      "Essensielle funksjoner holder tjenesten trygg",
+      "Analyse viser hva vi kan forbedre",
+      "Personalisering gjør innhold relevant",
+    ],
+    "footer": "Endre når som helst.",
+    "manageCta": "Administrer valg",
+    "rejectCta": "Avslå tillegg",
+    "summary": "Vi bruker data for å levere, måle og tilpasse Summit.",
+    "title": "Dine personvernvalg",
+  },
+  "locale": "no-NO",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders pl-PL locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Akceptuj wszystko",
+    "bulletPoints": [
+      "Niezbędne funkcje zapewniają bezpieczeństwo",
+      "Analityka pokazuje co ulepszyć",
+      "Personalizacja dostosowuje treści",
+    ],
+    "footer": "Możesz zmienić decyzję w dowolnym momencie.",
+    "manageCta": "Zarządzaj ustawieniami",
+    "rejectCta": "Odrzuć dodatkowe",
+    "summary": "Wykorzystujemy dane, aby dostarczać, mierzyć i personalizować Summit.",
+    "title": "Twoje ustawienia prywatności",
+  },
+  "locale": "pl-PL",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders pt-BR locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Aceitar tudo",
+    "bulletPoints": [
+      "Funções essenciais mantêm o serviço seguro",
+      "Métricas mostram onde melhorar",
+      "Personalização torna o conteúdo relevante",
+    ],
+    "footer": "Altere suas escolhas quando quiser.",
+    "manageCta": "Gerenciar preferências",
+    "rejectCta": "Recusar opcionais",
+    "summary": "Usamos dados para fornecer, medir e personalizar a Summit.",
+    "title": "Suas escolhas de privacidade",
+  },
+  "locale": "pt-BR",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders pt-PT locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Aceitar tudo",
+    "bulletPoints": [
+      "Funcionalidades essenciais mantêm o serviço seguro",
+      "Análises mostram o que melhorar",
+      "Personalização adapta o conteúdo",
+    ],
+    "footer": "Pode alterar a qualquer momento.",
+    "manageCta": "Gerir definições",
+    "rejectCta": "Recusar extra",
+    "summary": "Utilizamos dados para disponibilizar, medir e personalizar a Summit.",
+    "title": "As suas opções de privacidade",
+  },
+  "locale": "pt-PT",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders sv-SE locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "Godkänn allt",
+    "bulletPoints": [
+      "Viktiga funktioner håller tjänsten säker",
+      "Analys visar vad som kan förbättras",
+      "Personalisering gör innehållet relevant",
+    ],
+    "footer": "Du kan ändra när som helst.",
+    "manageCta": "Hantera inställningar",
+    "rejectCta": "Avvisa extra",
+    "summary": "Vi använder data för att leverera, mäta och anpassa Summit.",
+    "title": "Dina sekretessval",
+  },
+  "locale": "sv-SE",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;
+
+exports[`AdaptiveConsentSDK rendering renders zh-CN locale consistently 1`] = `
+{
+  "copy": {
+    "acceptCta": "全部接受",
+    "bulletPoints": [
+      "必要功能保障服务安全",
+      "分析帮助我们改进",
+      "个性化提供相关内容",
+    ],
+    "footer": "您可以随时更新偏好。",
+    "manageCta": "管理设置",
+    "rejectCta": "仅保留必要",
+    "summary": "我们使用数据来提供、衡量并个性化 Summit 服务。",
+    "title": "您的隐私选择",
+  },
+  "locale": "zh-CN",
+  "policyId": "acx-global-privacy",
+  "policyVersion": "1.0.0",
+  "purposes": [
+    {
+      "category": "core",
+      "defaultEnabled": true,
+      "description": {
+        "en-US": "Required for the service to function",
+        "fr-FR": "Nécessaire au fonctionnement du service",
+      },
+      "id": "essential",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "measurement",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Helps us understand product usage",
+        "fr-FR": "Nous aide à comprendre l'utilisation du produit",
+      },
+      "id": "analytics",
+      "legalBasis": "consent",
+    },
+    {
+      "category": "experience",
+      "defaultEnabled": false,
+      "description": {
+        "en-US": "Improves recommendations",
+        "fr-FR": "Améliore les recommandations",
+      },
+      "id": "personalization",
+      "legalBasis": "consent",
+    },
+  ],
+  "variant": "control",
+}
+`;

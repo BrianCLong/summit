@@ -1,0 +1,95 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  release:
+    types: [ published ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Log in to the Container registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+    - name: Build and Push
+      env:
+        REPO_PREFIX: ${{ env.REGISTRY }}/${{ github.repository_owner }}/summit
+        TAG: ${{ github.sha }}
+      run: |
+        chmod +x scripts/build-images.sh
+        ./scripts/build-images.sh $TAG
+        # In a real scenario, build-images.sh should handle pushing or we push explicitly here
+        # Assuming build-images.sh tags them correctly:
+        docker push $REPO_PREFIX/api:$TAG
+        docker push $REPO_PREFIX/client:$TAG
+
+  deploy-staging:
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+    - name: Set up Kubectl
+      uses: azure/setup-kubectl@v3
+
+    # - name: Azure Kubernetes Set Context
+    #   uses: azure/k8s-set-context@v3
+    #   with:
+    #     kubeconfig: ${{ secrets.KUBECONFIG_STAGING }}
+
+    - name: Deploy to Staging
+      env:
+        REPO_PREFIX: ${{ env.REGISTRY }}/${{ github.repository_owner }}/summit
+        TAG: ${{ github.sha }}
+      run: |
+        chmod +x scripts/deploy-staging.sh
+        ./scripts/deploy-staging.sh summit-staging
+
+  deploy-prod:
+    needs: build-and-push
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Helm
+      uses: azure/setup-helm@v3
+    - name: Set up Kubectl
+      uses: azure/setup-kubectl@v3
+
+    # - name: Azure Kubernetes Set Context
+    #   uses: azure/k8s-set-context@v3
+    #   with:
+    #     kubeconfig: ${{ secrets.KUBECONFIG_PROD }}
+
+    - name: Deploy to Prod
+      env:
+        REPO_PREFIX: ${{ env.REGISTRY }}/${{ github.repository_owner }}/summit
+        TAG: ${{ github.sha }}
+      run: |
+        chmod +x scripts/deploy-staging.sh
+        ./scripts/deploy-staging.sh summit-prod

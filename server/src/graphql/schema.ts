@@ -315,6 +315,93 @@ type CacheOperationResult {
   message: String!
 }
 
+# Support Ticket Types
+enum SupportTicketStatus {
+  open
+  in_progress
+  waiting
+  resolved
+  closed
+}
+
+enum SupportTicketPriority {
+  low
+  medium
+  high
+  critical
+}
+
+enum SupportTicketCategory {
+  bug
+  feature_request
+  question
+  incident
+  other
+}
+
+type SupportTicket {
+  id: ID!
+  title: String!
+  description: String!
+  status: SupportTicketStatus!
+  priority: SupportTicketPriority!
+  category: SupportTicketCategory!
+  reporter_id: String!
+  reporter_email: String
+  assignee_id: String
+  tags: [String!]!
+  metadata: JSON
+  created_at: DateTime!
+  updated_at: DateTime!
+  resolved_at: DateTime
+  closed_at: DateTime
+  comments: [SupportTicketComment!]!
+}
+
+type SupportTicketComment {
+  id: ID!
+  ticket_id: ID!
+  author_id: String!
+  author_email: String
+  content: String!
+  is_internal: Boolean!
+  created_at: DateTime!
+  updated_at: DateTime!
+}
+
+type SupportTicketList {
+  data: [SupportTicket!]!
+  total: Int!
+}
+
+input CreateSupportTicketInput {
+  title: String!
+  description: String!
+  priority: SupportTicketPriority
+  category: SupportTicketCategory
+  tags: [String!]
+  metadata: JSON
+}
+
+input UpdateSupportTicketInput {
+  title: String
+  description: String
+  status: SupportTicketStatus
+  priority: SupportTicketPriority
+  category: SupportTicketCategory
+  assignee_id: String
+  tags: [String!]
+  metadata: JSON
+}
+
+input SupportTicketFilter {
+  status: SupportTicketStatus
+  priority: SupportTicketPriority
+  category: SupportTicketCategory
+  reporter_id: String
+  assignee_id: String
+}
+
 input SemanticSearchFilter {
   source: String
   dateFrom: DateTime
@@ -394,6 +481,10 @@ input SemanticSearchFilter {
       investigationId: ID!
       filter: AuditLogFilter
     ): [AuditLog!]!
+
+    # Support Ticket Queries
+    supportTicket(id: ID!): SupportTicket
+    supportTickets(filter: SupportTicketFilter, limit: Int = 50, offset: Int = 0): SupportTicketList!
   }
   
   input EntityInput { type: String!, props: JSON }
@@ -439,6 +530,12 @@ input SemanticSearchFilter {
     Useful when investigation data has changed significantly.
     """
     clearGraphRAGCache(investigationId: ID!): CacheOperationResult!
+
+    # Support Ticket Mutations
+    createSupportTicket(input: CreateSupportTicketInput!): SupportTicket!
+    updateSupportTicket(id: ID!, input: UpdateSupportTicketInput!): SupportTicket
+    deleteSupportTicket(id: ID!): Boolean!
+    addSupportTicketComment(ticketId: ID!, content: String!, isInternal: Boolean): SupportTicketComment!
   }
   
   type Subscription {

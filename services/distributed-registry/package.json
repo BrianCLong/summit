@@ -1,0 +1,27 @@
+{
+  "name": "@intelgraph/distributed-registry",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "fastify": "^4.28.0",
+    "zod": "^3.23.0",
+    "ioredis": "^5.4.0",
+    "libp2p": "^1.0.0",
+    "@chainsafe/libp2p-gossipsub": "^13.0.0",
+    "multiformats": "^13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "tsx": "^4.7.0",
+    "vitest": "^1.6.0"
+  }
+}

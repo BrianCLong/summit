@@ -1,0 +1,4 @@
+asset_id,name,classification,storage_type,residency_zone,purpose_tags,provenance_ref
+ASSET-5001,Endpoint Telemetry Lake,sensitive,s3,us-east,security-monitoring|operations,s3csv/data_assets/2025-09-01T15:30:00Z
+ASSET-5002,EU Workforce Directory,confidential,aurora,eu-central,operations|compliance,s3csv/data_assets/2025-09-01T15:30:00Z
+ASSET-5003,Build Pipeline Metrics,internal,bigquery,us-east,analytics|operations,s3csv/data_assets/2025-09-01T15:30:00Z

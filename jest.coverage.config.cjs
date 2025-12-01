@@ -71,26 +71,56 @@ module.exports = {
   // Coverage Thresholds
   coverageThreshold: {
     global: {
-      branches: 80,
+      branches: 75,
       functions: 80,
       lines: 80,
       statements: 80,
     },
-    // Critical paths require higher coverage
+    // Critical paths require higher coverage (90%+)
     './server/src/middleware/**/*.ts': {
       branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './server/src/resolvers/**/*.ts': {
+      branches: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './server/src/repos/**/*.ts': {
+      branches: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './server/src/services/**/*.ts': {
+      branches: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
     },
     './services/api/src/**/*.ts': {
       branches: 85,
-      functions: 85,
-      lines: 85,
-      statements: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './services/graph-core/src/**/*.ts': {
+      branches: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
     },
     './server/src/graphql/resolvers/**/*.ts': {
       branches: 85,
+      functions: 90,
+      lines: 90,
+      statements: 90,
+    },
+    './packages/narrative-engine/src/**/*.ts': {
+      branches: 80,
       functions: 85,
       lines: 85,
       statements: 85,

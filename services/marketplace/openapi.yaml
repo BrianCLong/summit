@@ -1,0 +1,605 @@
+openapi: 3.0.3
+info:
+  title: Data Trading Marketplace API
+  description: |
+    Secure marketplace for public/private sector data sharing, trading, and reuse
+    with built-in consent management, privacy controls, and automated compliance/risk scoring.
+  version: 1.0.0
+  contact:
+    name: IntelGraph Team
+  license:
+    name: Proprietary
+
+servers:
+  - url: http://localhost:4100
+    description: Development server
+  - url: https://api.marketplace.intelgraph.io
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Products
+    description: Data product catalog operations
+  - name: Transactions
+    description: Purchase and licensing operations
+  - name: Consent
+    description: GDPR/CCPA consent management
+  - name: Providers
+    description: Data provider operations
+  - name: Risk
+    description: Risk assessment and compliance
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags: [Health]
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  service:
+                    type: string
+                    example: marketplace
+
+  /api/v1/products:
+    get:
+      summary: Search products
+      tags: [Products]
+      parameters:
+        - name: query
+          in: query
+          schema:
+            type: string
+          description: Search query
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/DataCategory'
+        - name: maxRiskLevel
+          in: query
+          schema:
+            $ref: '#/components/schemas/RiskLevel'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DataProduct'
+                  total:
+                    type: integer
+
+    post:
+      summary: Create product
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductInput'
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataProduct'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/v1/products/{id}:
+    get:
+      summary: Get product by ID
+      tags: [Products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataProduct'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/products/{id}/publish:
+    post:
+      summary: Publish product
+      tags: [Products]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Product published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataProduct'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/transactions:
+    post:
+      summary: Initiate transaction
+      tags: [Transactions]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateTransactionInput'
+      responses:
+        '201':
+          description: Transaction initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+
+  /api/v1/transactions/{id}:
+    get:
+      summary: Get transaction
+      tags: [Transactions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+
+  /api/v1/transactions/{id}/pay:
+    post:
+      summary: Process payment
+      tags: [Transactions]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentMethodId]
+              properties:
+                paymentMethodId:
+                  type: string
+      responses:
+        '200':
+          description: Payment processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+
+  /api/v1/consent:
+    post:
+      summary: Record consent
+      tags: [Consent]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentInput'
+      responses:
+        '201':
+          description: Consent recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRecord'
+
+  /api/v1/consent/{id}:
+    delete:
+      summary: Revoke consent
+      tags: [Consent]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Consent revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentRecord'
+
+  /api/v1/risk/assess:
+    post:
+      summary: Assess dataset risk
+      tags: [Risk]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductInput'
+      responses:
+        '200':
+          description: Risk assessment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskAssessment'
+
+  /api/v1/risk/report/{productId}:
+    get:
+      summary: Get risk report
+      tags: [Risk]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Risk report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskAssessment'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    DataCategory:
+      type: string
+      enum:
+        - financial
+        - healthcare
+        - geospatial
+        - demographic
+        - behavioral
+        - industrial
+        - environmental
+        - government
+        - research
+        - other
+
+    RiskLevel:
+      type: string
+      enum: [low, medium, high, critical]
+
+    Classification:
+      type: string
+      enum: [public, internal, confidential, restricted, top_secret]
+
+    LicenseType:
+      type: string
+      enum: [single_use, unlimited, time_limited, usage_based, enterprise]
+
+    TransactionStatus:
+      type: string
+      enum:
+        - pending_payment
+        - payment_received
+        - compliance_check
+        - preparing_data
+        - delivered
+        - completed
+        - disputed
+        - refunded
+        - cancelled
+
+    DataProduct:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        providerId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/DataCategory'
+        tags:
+          type: array
+          items:
+            type: string
+        classification:
+          $ref: '#/components/schemas/Classification'
+        riskScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+        riskLevel:
+          $ref: '#/components/schemas/RiskLevel'
+        basePriceCents:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    CreateProductInput:
+      type: object
+      required: [name, category, schemaDefinition, classification, pricingModel, basePriceCents]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        category:
+          $ref: '#/components/schemas/DataCategory'
+        tags:
+          type: array
+          items:
+            type: string
+        schemaDefinition:
+          type: object
+        classification:
+          $ref: '#/components/schemas/Classification'
+        piiFields:
+          type: array
+          items:
+            type: string
+        regulations:
+          type: array
+          items:
+            type: string
+        pricingModel:
+          type: string
+        basePriceCents:
+          type: integer
+          minimum: 0
+        currency:
+          type: string
+          default: USD
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        buyerId:
+          type: string
+          format: uuid
+        sellerId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        agreedPriceCents:
+          type: integer
+        platformFeeCents:
+          type: integer
+        sellerPayoutCents:
+          type: integer
+        currency:
+          type: string
+        licenseType:
+          $ref: '#/components/schemas/LicenseType'
+        status:
+          $ref: '#/components/schemas/TransactionStatus'
+        consentVerified:
+          type: boolean
+        complianceChecked:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    InitiateTransactionInput:
+      type: object
+      required: [productId, licenseType, usageTerms]
+      properties:
+        productId:
+          type: string
+          format: uuid
+        licenseType:
+          $ref: '#/components/schemas/LicenseType'
+        usageTerms:
+          type: object
+        durationDays:
+          type: integer
+          minimum: 1
+
+    ConsentRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        dataSubjectId:
+          type: string
+        productId:
+          type: string
+          format: uuid
+        providerId:
+          type: string
+          format: uuid
+        purposes:
+          type: array
+          items:
+            type: string
+        grantedAt:
+          type: string
+          format: date-time
+        revokedAt:
+          type: string
+          format: date-time
+        evidenceHash:
+          type: string
+
+    ConsentInput:
+      type: object
+      required: [dataSubjectId, providerId, purposes, scope, consentMethod]
+      properties:
+        dataSubjectId:
+          type: string
+        productId:
+          type: string
+          format: uuid
+        providerId:
+          type: string
+          format: uuid
+        purposes:
+          type: array
+          items:
+            type: string
+            enum: [analytics, research, marketing, ai_training, resale, internal_use]
+        scope:
+          type: object
+        consentMethod:
+          type: string
+          enum: [explicit, opt-in, contractual]
+        expiresAt:
+          type: string
+          format: date-time
+
+    RiskAssessment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+        overallScore:
+          type: integer
+          minimum: 0
+          maximum: 100
+        riskLevel:
+          $ref: '#/components/schemas/RiskLevel'
+        piiScore:
+          type: integer
+        sensitivityScore:
+          type: integer
+        regulatoryScore:
+          type: integer
+        findings:
+          type: object
+        recommendations:
+          type: array
+          items:
+            type: string
+        assessedAt:
+          type: string
+          format: date-time
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                    message:
+                      type: string
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Product not found
+
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Missing or invalid authorization header

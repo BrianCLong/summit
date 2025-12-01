@@ -1,1 +1,21 @@
-limits: { maxResults: 100 }
+version: 1
+database:
+  host: "localhost"
+  port: 5432
+  user: "user"
+  password: "password"
+  database: "intelgraph"
+auth:
+  jwt:
+    secret: "secret"
+    expiresIn: "1h"
+services:
+  redis:
+    url: "redis://localhost:6379"
+  neo4j:
+    url: "bolt://localhost:7687"
+    user: "neo4j"
+    password: "password"
+features:
+  enableNewDashboard: true
+  enableExperimentalFeatures: false

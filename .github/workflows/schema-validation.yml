@@ -1,0 +1,385 @@
+name: Schema Validation & Drift Detection
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  pull_request:
+    paths:
+      - '**/migrations/**'
+      - 'db/**'
+      - 'server/db/**'
+      - 'server/src/migrations/**'
+  workflow_dispatch:
+    inputs:
+      full_validation:
+        description: 'Run full validation (including performance analysis)'
+        required: false
+        default: 'false'
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9'
+
+jobs:
+  detect-schema-drift:
+    name: Detect Schema Drift
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: summit_validation
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/validationpass
+          NEO4J_PLUGINS: '["apoc"]'
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd="neo4j status"
+          --health-interval=10s
+          --health-timeout=10s
+          --health-retries=10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for comparison
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          sleep 10  # Wait for services
+
+      - name: Setup environment
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/summit_validation" >> $GITHUB_ENV
+          echo "NEO4J_URI=bolt://localhost:7687" >> $GITHUB_ENV
+          echo "NEO4J_USER=neo4j" >> $GITHUB_ENV
+          echo "NEO4J_PASSWORD=validationpass" >> $GITHUB_ENV
+
+      - name: Apply all migrations
+        run: |
+          echo "🔄 Applying all migrations..."
+
+          # Apply PostgreSQL migrations
+          for migration in db/migrations/*.sql; do
+            if [ -f "$migration" ]; then
+              echo "Applying $(basename $migration)..."
+              PGPASSWORD=postgres psql -h localhost -U postgres -d summit_validation -f "$migration" || {
+                echo "⚠️  Migration failed: $migration"
+              }
+            fi
+          done
+
+          echo "✅ All migrations applied"
+
+      - name: Generate schema snapshot
+        id: snapshot
+        run: |
+          echo "📸 Generating schema snapshot..."
+
+          mkdir -p snapshots
+
+          # PostgreSQL schema snapshot
+          PGPASSWORD=postgres pg_dump \
+            -h localhost \
+            -U postgres \
+            -d summit_validation \
+            --schema-only \
+            --no-owner \
+            --no-privileges \
+            > snapshots/postgres_schema.sql
+
+          # Neo4j constraints snapshot
+          if command -v cypher-shell > /dev/null; then
+            echo "SHOW CONSTRAINTS;" | cypher-shell \
+              -a bolt://localhost:7687 \
+              -u neo4j \
+              -p validationpass \
+              > snapshots/neo4j_constraints.txt || echo "⚠️  Neo4j snapshot skipped"
+
+            echo "SHOW INDEXES;" | cypher-shell \
+              -a bolt://localhost:7687 \
+              -u neo4j \
+              -p validationpass \
+              > snapshots/neo4j_indexes.txt || echo "⚠️  Neo4j indexes snapshot skipped"
+          fi
+
+          # Generate schema hash
+          SCHEMA_HASH=$(cat snapshots/postgres_schema.sql | sha256sum | cut -d' ' -f1)
+          echo "schema_hash=$SCHEMA_HASH" >> $GITHUB_OUTPUT
+
+          echo "✅ Schema snapshot generated (hash: $SCHEMA_HASH)"
+
+      - name: Detect schema drift
+        id: drift
+        run: |
+          echo "🔍 Detecting schema drift..."
+
+          DRIFT_DETECTED=false
+
+          # Compare with expected schema if it exists
+          if [ -f "db/expected_schema.sql" ]; then
+            echo "Comparing with expected schema..."
+
+            if diff -u db/expected_schema.sql snapshots/postgres_schema.sql > snapshots/schema_drift.diff; then
+              echo "✅ No schema drift detected"
+            else
+              echo "⚠️  Schema drift detected!"
+              DRIFT_DETECTED=true
+
+              # Count changes
+              ADDITIONS=$(grep "^+" snapshots/schema_drift.diff | wc -l)
+              DELETIONS=$(grep "^-" snapshots/schema_drift.diff | wc -l)
+
+              echo "  - Additions: $ADDITIONS"
+              echo "  - Deletions: $DELETIONS"
+
+              echo "drift_detected=true" >> $GITHUB_OUTPUT
+              echo "additions=$ADDITIONS" >> $GITHUB_OUTPUT
+              echo "deletions=$DELETIONS" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "ℹ️  No expected schema found, saving current as baseline..."
+            cp snapshots/postgres_schema.sql db/expected_schema.sql
+          fi
+
+          echo "drift_detected=$DRIFT_DETECTED" >> $GITHUB_OUTPUT
+
+      - name: Validate schema integrity
+        run: |
+          echo "🔍 Validating schema integrity..."
+
+          # Check for required tables
+          REQUIRED_TABLES=(
+            "schema_versions"
+            "migration_history"
+            "migration_locks"
+          )
+
+          for table in "${REQUIRED_TABLES[@]}"; do
+            COUNT=$(PGPASSWORD=postgres psql -h localhost -U postgres -d summit_validation -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_name='$table';" | xargs)
+
+            if [ "$COUNT" != "1" ]; then
+              echo "❌ Required table missing: $table"
+              exit 1
+            else
+              echo "✅ Table exists: $table"
+            fi
+          done
+
+          echo "✅ Schema integrity validated"
+
+      - name: Check for missing indexes
+        id: indexes
+        run: |
+          echo "🔍 Checking for missing indexes..."
+
+          # Query for tables with high row count but no indexes
+          MISSING_INDEXES=$(PGPASSWORD=postgres psql -h localhost -U postgres -d summit_validation -t -c "
+            SELECT
+              schemaname || '.' || tablename AS table_name,
+              pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
+            FROM pg_tables t
+            WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+              AND NOT EXISTS (
+                SELECT 1 FROM pg_indexes i
+                WHERE i.schemaname = t.schemaname
+                  AND i.tablename = t.tablename
+              )
+            ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
+          ")
+
+          if [ -n "$MISSING_INDEXES" ]; then
+            echo "⚠️  Tables without indexes found:"
+            echo "$MISSING_INDEXES"
+            echo "missing_indexes=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ All tables have indexes"
+            echo "missing_indexes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate drift report
+        if: always()
+        run: |
+          echo "📊 Generating drift report..."
+
+          cat > snapshots/drift_report.md << 'EOF'
+          # Schema Validation Report
+
+          **Generated**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow Run**: ${{ github.run_number }}
+          **Triggered By**: ${{ github.event_name }}
+
+          ## Summary
+
+          | Metric | Value |
+          |--------|-------|
+          | Schema Hash | ${{ steps.snapshot.outputs.schema_hash }} |
+          | Drift Detected | ${{ steps.drift.outputs.drift_detected }} |
+          | Missing Indexes | ${{ steps.indexes.outputs.missing_indexes }} |
+
+          ## Schema Changes
+
+          - **Additions**: ${{ steps.drift.outputs.additions || '0' }} lines
+          - **Deletions**: ${{ steps.drift.outputs.deletions || '0' }} lines
+
+          ## Details
+
+          EOF
+
+          if [ -f "snapshots/schema_drift.diff" ]; then
+            echo "### Detected Differences" >> snapshots/drift_report.md
+            echo '```diff' >> snapshots/drift_report.md
+            cat snapshots/schema_drift.diff >> snapshots/drift_report.md
+            echo '```' >> snapshots/drift_report.md
+          fi
+
+          cat snapshots/drift_report.md
+
+      - name: Upload drift artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-drift-report-${{ github.run_number }}
+          path: |
+            snapshots/
+          retention-days: 30
+
+      - name: Comment PR with drift report
+        if: github.event_name == 'pull_request' && steps.drift.outputs.drift_detected == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('snapshots/drift_report.md', 'utf8');
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## ⚠️ Schema Drift Detected\n\n${report}`
+            });
+
+      - name: Fail if critical drift detected
+        if: steps.drift.outputs.drift_detected == 'true' && github.event_name == 'pull_request'
+        run: |
+          echo "❌ Schema drift detected in PR"
+          echo "Please review the drift report and update expected schema if intentional"
+          exit 1
+
+  performance-impact-analysis:
+    name: Performance Impact Analysis
+    runs-on: ubuntu-latest
+    if: github.event.inputs.full_validation == 'true' || github.event_name == 'pull_request'
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: summit_perf
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/summit_perf" >> $GITHUB_ENV
+
+      - name: Analyze migration performance impact
+        run: |
+          echo "📊 Analyzing migration performance impact..."
+
+          # Enable query statistics
+          PGPASSWORD=postgres psql -h localhost -U postgres -d summit_perf -c "
+            CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+          "
+
+          # Get baseline query performance
+          echo "Collecting baseline metrics..."
+
+          # Apply migrations and measure time
+          START_TIME=$(date +%s)
+
+          for migration in db/migrations/*.sql; do
+            if [ -f "$migration" ]; then
+              echo "Applying $(basename $migration)..."
+              time PGPASSWORD=postgres psql -h localhost -U postgres -d summit_perf -f "$migration"
+            fi
+          done
+
+          END_TIME=$(date +%s)
+          DURATION=$((END_TIME - START_TIME))
+
+          echo "✅ Total migration time: ${DURATION}s"
+
+          # Check for slow migrations (> 30s)
+          if [ $DURATION -gt 30 ]; then
+            echo "⚠️  Migration took longer than 30 seconds"
+            echo "Consider optimizing or splitting into smaller migrations"
+          fi
+
+      - name: Generate performance report
+        if: always()
+        run: |
+          echo "## Migration Performance Report" > perf_report.md
+          echo "" >> perf_report.md
+          echo "**Total Migration Time**: ${DURATION}s" >> perf_report.md
+          echo "" >> perf_report.md
+
+          # Query for table sizes
+          PGPASSWORD=postgres psql -h localhost -U postgres -d summit_perf -c "
+            SELECT
+              schemaname,
+              tablename,
+              pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size
+            FROM pg_tables
+            WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+            ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC
+            LIMIT 10;
+          " >> perf_report.md
+
+          cat perf_report.md
+
+      - name: Upload performance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-report-${{ github.run_number }}
+          path: perf_report.md
+          retention-days: 30

@@ -13,24 +13,28 @@ import { Layout } from '@/components/Layout'
 import { apolloClient } from '@/lib/apollo'
 import { SocketProvider } from '@/contexts/SocketContext'
 
-// Pages
-import HomePage from '@/pages/HomePage'
-import ExplorePage from '@/pages/ExplorePage'
-import AlertsPage from '@/pages/AlertsPage'
-import AlertDetailPage from '@/pages/AlertDetailPage'
-import CasesPage from '@/pages/CasesPage'
-import CaseDetailPage from '@/pages/CaseDetailPage'
-import CommandCenterDashboard from '@/pages/dashboards/CommandCenterDashboard'
-import SupplyChainDashboard from '@/pages/dashboards/SupplyChainDashboard'
-import DataSourcesPage from '@/pages/DataSourcesPage'
-import ModelsPage from '@/pages/ModelsPage'
-import ReportsPage from '@/pages/ReportsPage'
-import AdminPage from '@/pages/AdminPage'
-import HelpPage from '@/pages/HelpPage'
-import ChangelogPage from '@/pages/ChangelogPage'
-import SignInPage from '@/pages/SignInPage'
-import AccessDeniedPage from '@/pages/AccessDeniedPage'
-import TriPanePage from '@/pages/TriPanePage'
+// Lazy load pages for better initial load performance
+const HomePage = React.lazy(() => import('@/pages/HomePage'))
+const ExplorePage = React.lazy(() => import('@/pages/ExplorePage'))
+const AlertsPage = React.lazy(() => import('@/pages/AlertsPage'))
+const AlertDetailPage = React.lazy(() => import('@/pages/AlertDetailPage'))
+const CasesPage = React.lazy(() => import('@/pages/CasesPage'))
+const CaseDetailPage = React.lazy(() => import('@/pages/CaseDetailPage'))
+const CommandCenterDashboard = React.lazy(
+  () => import('@/pages/dashboards/CommandCenterDashboard')
+)
+const SupplyChainDashboard = React.lazy(
+  () => import('@/pages/dashboards/SupplyChainDashboard')
+)
+const DataSourcesPage = React.lazy(() => import('@/pages/DataSourcesPage'))
+const ModelsPage = React.lazy(() => import('@/pages/ModelsPage'))
+const ReportsPage = React.lazy(() => import('@/pages/ReportsPage'))
+const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
+const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
+const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
+const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
+const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
+const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -44,53 +48,75 @@ function App() {
           <AuthProvider>
             <SearchProvider>
               <Router>
-                <Routes>
-                  {/* Auth routes */}
-                  <Route path="/signin" element={<SignInPage />} />
-                  <Route path="/access-denied" element={<AccessDeniedPage />} />
-
-                  {/* Protected routes with layout */}
-                  <Route path="/" element={<Layout />}>
-                    <Route index element={<HomePage />} />
-                    <Route path="explore" element={<ExplorePage />} />
-
-                    {/* Tri-Pane Analysis */}
-                    <Route path="analysis/tri-pane" element={<TriPanePage />} />
-
-                    {/* Alerts */}
-                    <Route path="alerts" element={<AlertsPage />} />
-                    <Route path="alerts/:id" element={<AlertDetailPage />} />
-
-                    {/* Cases */}
-                    <Route path="cases" element={<CasesPage />} />
-                    <Route path="cases/:id" element={<CaseDetailPage />} />
-
-                    {/* Dashboards */}
+                <React.Suspense
+                  fallback={
+                    <div className="flex h-screen items-center justify-center">
+                      <div className="text-center">
+                        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                        <p className="mt-4 text-sm text-muted-foreground">
+                          Loading...
+                        </p>
+                      </div>
+                    </div>
+                  }
+                >
+                  <Routes>
+                    {/* Auth routes */}
+                    <Route path="/signin" element={<SignInPage />} />
                     <Route
-                      path="dashboards/command-center"
-                      element={<CommandCenterDashboard />}
-                    />
-                    <Route
-                      path="dashboards/supply-chain"
-                      element={<SupplyChainDashboard />}
+                      path="/access-denied"
+                      element={<AccessDeniedPage />}
                     />
 
-                    {/* Data & Models */}
-                    <Route path="data/sources" element={<DataSourcesPage />} />
-                    <Route path="models" element={<ModelsPage />} />
-                    <Route path="reports" element={<ReportsPage />} />
+                    {/* Protected routes with layout */}
+                    <Route path="/" element={<Layout />}>
+                      <Route index element={<HomePage />} />
+                      <Route path="explore" element={<ExplorePage />} />
 
-                    {/* Admin */}
-                    <Route path="admin/*" element={<AdminPage />} />
+                      {/* Tri-Pane Analysis */}
+                      <Route
+                        path="analysis/tri-pane"
+                        element={<TriPanePage />}
+                      />
 
-                    {/* Support */}
-                    <Route path="help" element={<HelpPage />} />
-                    <Route path="changelog" element={<ChangelogPage />} />
+                      {/* Alerts */}
+                      <Route path="alerts" element={<AlertsPage />} />
+                      <Route path="alerts/:id" element={<AlertDetailPage />} />
 
-                    {/* Catch all */}
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Route>
-                </Routes>
+                      {/* Cases */}
+                      <Route path="cases" element={<CasesPage />} />
+                      <Route path="cases/:id" element={<CaseDetailPage />} />
+
+                      {/* Dashboards */}
+                      <Route
+                        path="dashboards/command-center"
+                        element={<CommandCenterDashboard />}
+                      />
+                      <Route
+                        path="dashboards/supply-chain"
+                        element={<SupplyChainDashboard />}
+                      />
+
+                      {/* Data & Models */}
+                      <Route
+                        path="data/sources"
+                        element={<DataSourcesPage />}
+                      />
+                      <Route path="models" element={<ModelsPage />} />
+                      <Route path="reports" element={<ReportsPage />} />
+
+                      {/* Admin */}
+                      <Route path="admin/*" element={<AdminPage />} />
+
+                      {/* Support */}
+                      <Route path="help" element={<HelpPage />} />
+                      <Route path="changelog" element={<ChangelogPage />} />
+
+                      {/* Catch all */}
+                      <Route path="*" element={<Navigate to="/" replace />} />
+                    </Route>
+                  </Routes>
+                </React.Suspense>
               </Router>
             </SearchProvider>
           </AuthProvider>

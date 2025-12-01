@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@intelgraph/hrn": "workspace:*",
-    "@intelgraph/types": "workspace:*"
+    "@intelgraph/common-types": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

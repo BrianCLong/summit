@@ -1,0 +1,29 @@
+{
+  "name": "@summit/sigint-service",
+  "version": "1.0.0",
+  "description": "SIGINT Processing Service - Training Framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@summit/sigint-collector": "workspace:*",
+    "@summit/rf-processor": "workspace:*",
+    "@summit/comint-analyzer": "workspace:*",
+    "@summit/network-interceptor": "workspace:*",
+    "@summit/cryptanalysis-engine": "workspace:*",
+    "@summit/geolocation-engine": "workspace:*",
+    "express": "^4.18.2",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -1,0 +1,45 @@
+image:
+  repository: ghcr.io/intelgraph/platform
+  tag: v0.0.0
+  pullPolicy: IfNotPresent
+
+rollout:
+  strategy: canary
+  steps:
+    - 25
+    - pause: {duration: 10m}
+    - 50
+    - pause: {duration: 10m}
+    - 100
+  analysis:
+    templates:
+      - name: api-errors-budget
+        prometheus:
+          server: http://prometheus.monitoring:9090
+          query: 1 - (sum(rate(http_requests_total{app="api",status=~"5.."}[5m])) /
+            sum(rate(http_requests_total{app="api"}[5m])))
+          threshold: 0.999
+      - name: ingest-errors-budget
+        prometheus:
+          server: http://prometheus.monitoring:9090
+          query: 1 - (sum(rate(ingest_failures_total[5m])) /
+            sum(rate(ingest_attempts_total[5m])))
+          threshold: 0.995
+    failurePolicy:
+      consecutiveErrorLimit: 1
+
+telemetry:
+  otel:
+    enabled: true
+    collectorEndpoint: http://otel-collector.monitoring:4317
+    resourceAttributes:
+      service.name: intelgraph
+      deployment.environment: canary
+  logging:
+    level: info
+
+costGuardrails:
+  enabled: true
+  budgetName: intelgraph-prod-monthly
+  maxSpendRatio: 0.8
+  alertWebhookSecret: cost_guardrail_webhook

@@ -1,0 +1,59 @@
+{
+  "name": "@summit/sigint-telemetry",
+  "version": "1.0.0",
+  "description": "Defensive SIGINT/CYBINT Telemetry Simulation Stack - Blue Team Analytics",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./schemas": {
+      "import": "./dist/schemas/index.js",
+      "types": "./dist/schemas/index.d.ts"
+    },
+    "./generators": {
+      "import": "./dist/generators/index.js",
+      "types": "./dist/generators/index.d.ts"
+    },
+    "./detections": {
+      "import": "./dist/detections/index.js",
+      "types": "./dist/detections/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "simulate": "tsx src/simulation/runner.ts",
+    "generate-data": "tsx src/generators/cli.ts"
+  },
+  "dependencies": {
+    "zod": "^3.22.4",
+    "uuid": "^9.0.0",
+    "date-fns": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "sigint",
+    "telemetry",
+    "cybersecurity",
+    "blue-team",
+    "detection",
+    "simulation"
+  ],
+  "license": "UNLICENSED"
+}

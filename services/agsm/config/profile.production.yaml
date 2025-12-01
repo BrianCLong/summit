@@ -1,0 +1,31 @@
+profile: production
+loopInterval: 1m
+alertWindow: 5m
+slo:
+  successRate: 0.99
+  alertAfterFailures: 1
+probes:
+  - name: denied-query
+    scenario: denied_query
+    description: Ensure policy engine denies disallowed graph lookups.
+    expectedOutcome: deny
+  - name: consent-change
+    scenario: consent_change
+    description: Verify downstream systems receive revocations within SLO.
+    expectedOutcome: propagated
+  - name: geo-route
+    scenario: geo_route
+    description: Confirm regional routing keeps EU data inside the region.
+    expectedOutcome: regional
+    regions:
+      - eu-central-1
+      - eu-west-1
+  - name: deletion
+    scenario: deletion
+    description: Validate delete requests purge records from retention tier.
+    expectedOutcome: purged
+  - name: hold
+    scenario: hold
+    description: Confirm holds remain in effect until explicit removal.
+    expectedOutcome: retained
+seededCanaries: {}

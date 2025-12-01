@@ -9,6 +9,10 @@ on:
   schedule:
     - cron: '0 3 * * *'
 
+concurrency:
+  group: security-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write

@@ -1,0 +1,24 @@
+[
+  {
+    "modelId": "sentiment-transformer",
+    "version": "1.2.0",
+    "description": "Transformer-based sentiment classifier tuned for customer support triage.",
+    "owner": "Responsible AI Team",
+    "riskLevel": "medium",
+    "metrics": [
+      {
+        "name": "accuracy",
+        "value": 0.934,
+        "unit": "proportion"
+      },
+      {
+        "name": "f1_macro",
+        "value": 0.918
+      }
+    ],
+    "intendedUse": [
+      "support_triage",
+      "escalation_detection"
+    ]
+  }
+]

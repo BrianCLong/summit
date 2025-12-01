@@ -1,0 +1,271 @@
+name: PR Test Coverage Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for test coverage
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              per_page: 100,
+            });
+
+            // Categorize files
+            const sourceFiles = [];
+            const testFiles = [];
+            const docFiles = [];
+            const configFiles = [];
+            const otherFiles = [];
+
+            // Patterns for different file types
+            const testPatterns = [
+              /\.test\.(ts|tsx|js|jsx)$/,
+              /\.spec\.(ts|tsx|js|jsx)$/,
+              /__tests__\//,
+              /\/tests?\//,
+              /\/e2e\//,
+              /\.e2e\./,
+              /playwright\//,
+              /cypress\//,
+            ];
+
+            const docPatterns = [
+              /\.md$/,
+              /^docs\//,
+              /^README/,
+              /^CONTRIBUTING/,
+              /^CHANGELOG/,
+              /^LICENSE/,
+            ];
+
+            const configPatterns = [
+              /^\.github\//,
+              /\.(config|rc)\.(js|ts|json|yml|yaml)$/,
+              /^(tsconfig|jest|vitest|eslint|prettier)/,
+              /package\.json$/,
+              /pnpm-lock\.yaml$/,
+              /yarn\.lock$/,
+              /Dockerfile$/,
+              /docker-compose/,
+              /Makefile$/,
+            ];
+
+            const sourcePatterns = [
+              /\.(ts|tsx|js|jsx|py|go|java|rb|php|rs)$/,
+            ];
+
+            // Categorize each file
+            files.forEach(file => {
+              const filename = file.filename;
+
+              if (testPatterns.some(pattern => pattern.test(filename))) {
+                testFiles.push(filename);
+              } else if (docPatterns.some(pattern => pattern.test(filename))) {
+                docFiles.push(filename);
+              } else if (configPatterns.some(pattern => pattern.test(filename))) {
+                configFiles.push(filename);
+              } else if (sourcePatterns.some(pattern => pattern.test(filename))) {
+                sourceFiles.push(filename);
+              } else {
+                otherFiles.push(filename);
+              }
+            });
+
+            console.log(`File categorization:
+              - Source files: ${sourceFiles.length}
+              - Test files: ${testFiles.length}
+              - Doc files: ${docFiles.length}
+              - Config files: ${configFiles.length}
+              - Other files: ${otherFiles.length}
+            `);
+
+            // Determine if tests are needed
+            const hasSourceChanges = sourceFiles.length > 0;
+            const hasTestChanges = testFiles.length > 0;
+            const isDocOnly = sourceFiles.length === 0 && docFiles.length > 0;
+            const isConfigOnly = sourceFiles.length === 0 && configFiles.length > 0;
+
+            // Skip check for doc-only or config-only PRs
+            if (isDocOnly || isConfigOnly) {
+              console.log('✅ Skipping test check (doc-only or config-only PR)');
+              return;
+            }
+
+            // Skip for dependabot PRs
+            if (context.payload.pull_request.user.login === 'dependabot[bot]') {
+              console.log('✅ Skipping test check (dependabot PR)');
+              return;
+            }
+
+            let shouldComment = false;
+            let commentBody = '';
+            let labelToAdd = null;
+
+            if (hasSourceChanges && !hasTestChanges) {
+              shouldComment = true;
+              labelToAdd = 'needs-tests';
+
+              commentBody = `⚠️ **Missing Tests**\n\n`;
+              commentBody += `This PR modifies **${sourceFiles.length} source file(s)** but doesn't include any test changes.\n\n`;
+              commentBody += `### 🧪 Test Coverage Recommendations\n\n`;
+              commentBody += `Please consider adding tests for:\n\n`;
+
+              // List up to 10 source files that might need tests
+              sourceFiles.slice(0, 10).forEach(file => {
+                commentBody += `- \`${file}\`\n`;
+              });
+
+              if (sourceFiles.length > 10) {
+                commentBody += `- _...and ${sourceFiles.length - 10} more file(s)_\n`;
+              }
+
+              commentBody += `\n### 📝 Test File Conventions\n\n`;
+              commentBody += `For a source file \`src/foo/bar.ts\`, you can add tests at:\n\n`;
+              commentBody += `- \`src/foo/bar.test.ts\` (co-located)\n`;
+              commentBody += `- \`src/foo/__tests__/bar.test.ts\` (in __tests__ directory)\n`;
+              commentBody += `- \`tests/foo/bar.test.ts\` (in tests directory)\n\n`;
+
+              commentBody += `### 🤔 Is this a test-exempt change?\n\n`;
+              commentBody += `If this PR includes changes that don't require tests (like logging, comments, or minor refactoring), you can:\n\n`;
+              commentBody += `1. Add the \`no-tests-required\` label\n`;
+              commentBody += `2. Explain in the PR description why tests aren't needed\n\n`;
+
+              commentBody += `_This is an automated check. If you believe tests are not needed, please explain in a comment._`;
+
+            } else if (hasSourceChanges && hasTestChanges) {
+              // Calculate test-to-source ratio
+              const testRatio = (testFiles.length / sourceFiles.length).toFixed(2);
+
+              console.log(`✅ PR includes tests (${testFiles.length} test files for ${sourceFiles.length} source files, ratio: ${testRatio})`);
+
+              // If ratio is very low (less than 0.3), suggest more tests
+              if (testRatio < 0.3 && sourceFiles.length > 5) {
+                shouldComment = true;
+                labelToAdd = 'needs-more-tests';
+
+                commentBody = `⚠️ **Low Test Coverage**\n\n`;
+                commentBody += `This PR modifies **${sourceFiles.length} source file(s)** but only includes **${testFiles.length} test file(s)** (ratio: ${testRatio}).\n\n`;
+                commentBody += `While tests are present, consider adding more comprehensive test coverage.\n\n`;
+                commentBody += `### 📊 Files Changed\n\n`;
+                commentBody += `**Source files (${sourceFiles.length}):**\n`;
+                sourceFiles.slice(0, 5).forEach(file => {
+                  commentBody += `- \`${file}\`\n`;
+                });
+                if (sourceFiles.length > 5) {
+                  commentBody += `- _...and ${sourceFiles.length - 5} more_\n`;
+                }
+                commentBody += `\n**Test files (${testFiles.length}):**\n`;
+                testFiles.forEach(file => {
+                  commentBody += `- \`${file}\`\n`;
+                });
+                commentBody += `\n_Aim for at least one test file per source file with business logic._`;
+              } else {
+                // Good test coverage, add positive label
+                labelToAdd = 'has-tests';
+              }
+            }
+
+            // Add label
+            if (labelToAdd) {
+              // Remove conflicting labels first
+              const labelsToRemove = ['needs-tests', 'needs-more-tests', 'has-tests', 'no-tests-required'];
+              const { data: currentLabels } = await github.rest.issues.listLabelsOnIssue({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              for (const label of currentLabels) {
+                if (labelsToRemove.includes(label.name) && label.name !== labelToAdd) {
+                  await github.rest.issues.removeLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    name: label.name,
+                  }).catch(() => {}); // Ignore errors
+                }
+              }
+
+              // Add new label
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: [labelToAdd]
+              });
+            }
+
+            // Post or update comment
+            if (shouldComment) {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+              });
+
+              const botComment = comments.find(c =>
+                c.user.type === 'Bot' &&
+                (c.body.includes('Missing Tests') || c.body.includes('Low Test Coverage'))
+              );
+
+              if (botComment) {
+                // Update existing comment
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: commentBody
+                });
+              } else {
+                // Create new comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: commentBody
+                });
+              }
+            }
+
+            // Set outputs
+            core.setOutput('has_source_changes', hasSourceChanges);
+            core.setOutput('has_test_changes', hasTestChanges);
+            core.setOutput('source_files_count', sourceFiles.length);
+            core.setOutput('test_files_count', testFiles.length);
+
+      - name: Check if no-tests-required label exists
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const hasNoTestsLabel = labels.some(l => l.name === 'no-tests-required');
+
+            if (hasNoTestsLabel) {
+              console.log('✅ PR marked as no-tests-required');
+
+              // Remove needs-tests label if present
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                name: 'needs-tests',
+              }).catch(() => {}); // Ignore if label doesn't exist
+            }

@@ -1,0 +1,89 @@
+name: Revive Closed PR Work
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_numbers:
+        description: 'Comma-separated PR numbers to revive (or "all" for batch)'
+        required: true
+        default: 'all'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  revive-prs:
+    name: Extract and Revive Closed PR Work
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get closed unmerged PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ inputs.pr_numbers }}" = "all" ]; then
+            gh pr list --state closed --limit 50 --json number,title,mergedAt,headRefName \
+              --jq '.[] | select(.mergedAt == null) | "\(.number):\(.headRefName):\(.title)"' | head -10 > closed_prs.txt
+          else
+            echo "${{ inputs.pr_numbers }}" | tr ',' '\n' | while read pr; do
+              gh pr view "$pr" --json number,title,headRefName \
+                --jq '"\(.number):\(.headRefName):\(.title)"' >> closed_prs.txt || true
+            done
+          fi
+
+          echo "Found closed PRs to revive:"
+          cat closed_prs.txt
+
+      - name: Revive closed PRs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          count=0
+          while IFS=: read -r pr_number old_branch title; do
+            echo "=== Reviving PR #$pr_number: $title ==="
+
+            new_branch="revival/${pr_number}-automated"
+
+            if ! git fetch origin "$old_branch" 2>/dev/null; then
+              echo "Branch $old_branch not found, skipping"
+              continue
+            fi
+
+            git checkout -b "$new_branch" main
+
+            git cherry-pick -m 1 "origin/$old_branch" || {
+              echo "Cherry-pick failed, trying merge"
+              git cherry-pick --abort || true
+              git merge --no-commit --no-ff "origin/$old_branch" || {
+                echo "Merge failed, creating diff-based PR"
+                git merge --abort || true
+                git checkout main
+                continue
+              }
+            }
+
+            if git push origin "$new_branch"; then
+              gh pr create --base main --head "$new_branch" \
+                --title "Revival: $title" \
+                --body "Automated revival of closed PR #$pr_number" || echo "PR creation failed"
+            fi
+
+            git checkout main
+            count=$((count + 1))
+            if [ $count -ge 5 ]; then
+              echo "Processed 5 PRs, stopping"
+              break
+            fi
+
+          done < closed_prs.txt

@@ -1,0 +1,343 @@
+# Summit reference manifest for cross-region PostgreSQL replication using Aurora-compatible settings
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: summit-postgres-config
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: config
+    replication.summit.sh/cluster-role: config
+  annotations:
+    replication.summit.sh/primary-region: "us-east-1"
+data:
+  postgresql.conf: |
+    wal_level = 'logical'
+    max_wal_senders = '20'
+    max_replication_slots = '20'
+    max_connections = '500'
+    hot_standby = 'on'
+    wal_keep_size = '4096MB'
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: summit-postgres-replication
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: replication
+stringData:
+  username: replicator
+  password: "Sup3rSecure!"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-postgres-writer
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: writer
+  annotations:
+    replication.summit.sh/global-role: writer
+spec:
+  type: ClusterIP
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+  selector:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: writer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-postgres-readers
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: replica
+  annotations:
+    replication.summit.sh/global-role: replica
+spec:
+  clusterIP: None
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: postgres
+  selector:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: replica
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-postgres-writer
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: writer
+  annotations:
+    replication.summit.sh/role: primary
+spec:
+  serviceName: summit-postgres-writer
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-postgres
+      app.kubernetes.io/component: writer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-postgres
+        app.kubernetes.io/component: writer
+        topology.kubernetes.io/region: us-east-1
+      annotations:
+        replication.summit.sh/region: "us-east-1"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - us-east-1
+      containers:
+        - name: postgres
+          image: public.ecr.aws/rds/aurora-postgresql:15.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_REPLICATION_MODE
+              value: primary
+            - name: POSTGRESQL_REPLICATION_USER
+              valueFrom:
+                secretKeyRef:
+                  name: summit-postgres-replication
+                  key: username
+            - name: POSTGRESQL_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: summit-postgres-replication
+                  key: password
+            - name: AURORA_GLOBAL_DB_ID
+              value: summit-intelgraph
+            - name: AURORA_MAX_LAG
+              value: "30"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+          args:
+            - "-c"
+            - "config_file=/conf/postgresql.conf"
+      volumes:
+        - name: config
+          configMap:
+            name: summit-postgres-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+        annotations:
+          replication.summit.sh/wal-archive-retention-hours: "24"
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 200Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-postgres-replica-us-west-2
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: replica
+    topology.kubernetes.io/region: us-west-2
+  annotations:
+    replication.summit.sh/role: read-replica
+    replication.summit.sh/upstream-region: "us-east-1"
+spec:
+  serviceName: summit-postgres-readers
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-postgres
+      app.kubernetes.io/component: replica
+      topology.kubernetes.io/region: us-west-2
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-postgres
+        app.kubernetes.io/component: replica
+        topology.kubernetes.io/region: us-west-2
+      annotations:
+        replication.summit.sh/region: "us-west-2"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - us-west-2
+      containers:
+        - name: postgres
+          image: public.ecr.aws/rds/aurora-postgresql:15.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_REPLICATION_MODE
+              value: read
+            - name: POSTGRESQL_PRIMARY_HOST
+              value: summit-postgres-writer
+            - name: POSTGRESQL_PRIMARY_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_REPLICATION_USER
+              valueFrom:
+                secretKeyRef:
+                  name: summit-postgres-replication
+                  key: username
+            - name: POSTGRESQL_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: summit-postgres-replication
+                  key: password
+            - name: AURORA_SOURCE_REGION
+              value: us-east-1
+            - name: AURORA_GLOBAL_DB_ID
+              value: summit-intelgraph
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+          args:
+            - "-c"
+            - "config_file=/conf/postgresql.conf"
+      volumes:
+        - name: config
+          configMap:
+            name: summit-postgres-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 200Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: summit-postgres-replica-eu-central-1
+  namespace: data-plane
+  labels:
+    app.kubernetes.io/name: summit-postgres
+    app.kubernetes.io/component: replica
+    topology.kubernetes.io/region: eu-central-1
+  annotations:
+    replication.summit.sh/role: read-replica
+    replication.summit.sh/upstream-region: "us-east-1"
+spec:
+  serviceName: summit-postgres-readers
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: summit-postgres
+      app.kubernetes.io/component: replica
+      topology.kubernetes.io/region: eu-central-1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: summit-postgres
+        app.kubernetes.io/component: replica
+        topology.kubernetes.io/region: eu-central-1
+      annotations:
+        replication.summit.sh/region: "eu-central-1"
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - eu-central-1
+      containers:
+        - name: postgres
+          image: public.ecr.aws/rds/aurora-postgresql:15.3
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: postgres
+              containerPort: 5432
+          env:
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_REPLICATION_MODE
+              value: read
+            - name: POSTGRESQL_PRIMARY_HOST
+              value: summit-postgres-writer
+            - name: POSTGRESQL_PRIMARY_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_REPLICATION_USER
+              valueFrom:
+                secretKeyRef:
+                  name: summit-postgres-replication
+                  key: username
+            - name: POSTGRESQL_REPLICATION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: summit-postgres-replication
+                  key: password
+            - name: AURORA_SOURCE_REGION
+              value: us-east-1
+            - name: AURORA_GLOBAL_DB_ID
+              value: summit-intelgraph
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: config
+              mountPath: /conf
+              readOnly: true
+          args:
+            - "-c"
+            - "config_file=/conf/postgresql.conf"
+      volumes:
+        - name: config
+          configMap:
+            name: summit-postgres-config
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: gp3-retained
+        resources:
+          requests:
+            storage: 200Gi

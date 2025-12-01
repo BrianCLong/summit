@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Maestro Prompt Template",
   "type": "object",
-  "required": ["meta", "inputs", "template"],
+  "required": ["meta", "modelConfig", "inputs", "template"],
   "properties": {
     "meta": {
       "type": "object",
@@ -10,69 +10,44 @@
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^[a-z-]+\\.[a-z-]+@v[0-9]+$",
+          "pattern": "^[a-z0-9-]+\\.[a-z0-9-]+@v[0-9]+$",
           "description": "Unique identifier with version (e.g. implement.fix-test@v1)"
         },
-        "owner": {
-          "type": "string",
-          "description": "Team or individual responsible for this prompt"
-        },
-        "purpose": {
-          "type": "string",
-          "description": "Brief description of what this prompt accomplishes"
-        },
-        "guardrails": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "List of safety and compliance requirements"
-        },
-        "model_requirements": {
-          "type": "object",
-          "properties": {
-            "min_context_window": { "type": "number" },
-            "preferred_models": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "max_tokens": { "type": "number" }
-          }
-        }
+        "owner": { "type": "string" },
+        "purpose": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "guardrails": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "modelConfig": {
+      "type": "object",
+      "required": ["model"],
+      "properties": {
+        "model": { "type": "string" },
+        "temperature": { "type": "number", "minimum": 0, "maximum": 2 },
+        "maxTokens": { "type": "number" },
+        "topP": { "type": "number" },
+        "stop": { "type": "array", "items": { "type": "string" } }
       }
     },
     "inputs": {
       "type": "object",
-      "description": "Required input variables and their types",
       "patternProperties": {
-        "^[a-zA-Z_][a-zA-Z0-9_]*$": {
-          "oneOf": [
-            { "const": "string" },
-            { "const": "number" },
-            { "const": "boolean" },
-            { "const": "array" },
-            { "const": "object" }
-          ]
-        }
+        "^[a-zA-Z_][a-zA-Z0-9_]*$": { "type": "string" }
       }
     },
-    "template": {
-      "type": "string",
-      "description": "Template string with {{variable}} placeholders"
-    },
+    "template": { "type": "string" },
+    "outputSchema": { "type": "object" },
     "examples": {
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["name", "inputs", "expected_contains"],
+        "required": ["name", "inputs"],
         "properties": {
           "name": { "type": "string" },
           "inputs": { "type": "object" },
-          "expected_contains": {
-            "type": "array",
-            "items": { "type": "string" },
-            "description": "Strings that should appear in the rendered output"
-          }
+          "expected_contains": { "type": "array", "items": { "type": "string" } },
+          "expected_output": { "type": "string" }
         }
       }
     }

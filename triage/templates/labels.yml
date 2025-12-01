@@ -1,0 +1,65 @@
+# Suggested Label Taxonomy
+
+# Areas
+- name: area/frontend
+  color: c2e0c6
+  description: Issues related to the Web Client / UI
+
+- name: area/backend
+  color: d4c5f9
+  description: Issues related to the API, GraphQL, or Node.js server
+
+- name: area/infra
+  color: f9d0c4
+  description: Issues related to Docker, Kubernetes, CI/CD
+
+- name: area/security
+  color: e11d21
+  description: Security vulnerabilities, Policy, and Auth
+
+- name: area/docs
+  color: 0075ca
+  description: Documentation and guides
+
+# Priority / Severity
+- name: severity/P0
+  color: b60205
+  description: Critical / Blocker. Must fix immediately.
+
+- name: severity/P1
+  color: d93f0b
+  description: Major / High. Fix in current sprint.
+
+- name: severity/P2
+  color: fbca04
+  description: Minor / Medium. Fix if time permits.
+
+- name: severity/P3
+  color: fef2c0
+  description: Trivial / Low. Backlog candidate.
+
+# Sources
+- name: source/bug-bash
+  color: 1d76db
+  description: Found during a Bug Bash
+
+- name: source/customer
+  color: 5319e7
+  description: Reported by a customer
+
+- name: source/ci
+  color: c5def5
+  description: Found by automated CI/CD
+
+# Types
+- name: type/bug
+  color: d73a4a
+  description: Something isn't working
+
+- name: type/feature
+  color: a2eeef
+  description: New functionality
+
+- name: type/tech-debt
+  color: 0e8a16
+  description: Code maintenance

@@ -68,6 +68,51 @@ experiments:
       - timeout_rate: '<10%'
       - circuit_breaker_trips: '>0'
 
+  - name: "postgres_primary_region_outage"
+    description: "Validate promotion when the us-east-1 writer disappears"
+    type: "pod_kill"
+    target:
+      service: "postgres"
+      selector:
+        replication.summit.sh/role: primary
+        topology.kubernetes.io/region: us-east-1
+
+    fault_injection:
+      type: "pod_kill"
+      duration: "2m"
+
+    expected_behavior:
+      - replica_promotion: true
+      - lag_budget_respected: "<=30s"
+      - service_endpoint_updates: true
+
+    success_criteria:
+      - rpo_seconds: "<=5"
+      - rto_minutes: "<=3"
+      - read_traffic_preserved: ">=90%"
+
+  - name: "neo4j_secondary_region_partition"
+    description: "Ensure causal cluster heals after isolating us-west-2"
+    type: "network"
+    target:
+      service: "neo4j"
+      selector:
+        topology.kubernetes.io/region: us-west-2
+
+    fault_injection:
+      type: "network_partition"
+      duration: "4m"
+
+    expected_behavior:
+      - routing_table_rebuild: true
+      - writes_redirected_to_primary: true
+      - read_queries_served_from_remaining_regions: true
+
+    success_criteria:
+      - bolt_availability: 0.95
+      - cluster_core_quorum: true
+      - replication_queue_drain: "<120s"
+
   # API Gateway resilience
   - name: 'api_gateway_overload'
     description: 'Test rate limiting and backpressure mechanisms'

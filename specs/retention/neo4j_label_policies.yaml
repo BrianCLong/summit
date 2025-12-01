@@ -1,0 +1,107 @@
+version: 1
+published: 2025-09-15
+owner: data-governance
+notes: |
+  Retention and purpose policies derived from IntelGraph governance charter.
+  Executable by jobs/retention/run.ts with `--neo4j-policy specs/retention/neo4j_label_policies.yaml`.
+
+defaults:
+  enforcement_window: PT15M
+  grace_period: P2D
+  dry_run_metric: "neo4j.retention.dry_run"
+
+labels:
+  Tenant:
+    retention:
+      tier: archive
+      keep_for: P5Y
+      purge_after: null
+    residency: tenant_region
+    purpose_tags: [CoreOps]
+  Dataset:
+    retention:
+      tier: archive
+      keep_for: P1Y
+      purge_after: P14D
+    residency: dataset.retention_region || tenant_region
+    lineage:
+      required_relationships: [HAS_RECORD, HAS_PROVENANCE]
+      freeze_on_legal_hold: true
+    purpose_tags: [IngestOps, Governance]
+  Record:
+    retention:
+      tier: hot
+      keep_for: P30D
+      purge_after: P5D
+    residency: dataset.retention_region || tenant_region
+    lineage:
+      required_relationships: [HAS_PROVENANCE]
+      cascade_delete:
+        - relationship: DERIVES
+          label: Signal
+        - relationship: DESCRIBES
+          label: Entity
+        - relationship: OBSERVED_AT
+          label: Location
+    purpose_tags: [IngestOps, FraudIntel]
+  Signal:
+    retention:
+      tier: hot
+      keep_for: P45D
+      purge_after: P7D
+    residency: tenant_region
+    lineage:
+      required_relationships: [HAS_PROVENANCE, TRIGGERS]
+      cascade_delete:
+        - relationship: TRIGGERS
+          label: Event
+    purpose_tags: [FraudIntel, ThreatHunt]
+  Event:
+    retention:
+      tier: hot
+      keep_for: P90D
+      purge_after: P14D
+    residency: tenant_region
+    lineage:
+      required_relationships: [INVOLVES]
+    purpose_tags: [FraudIntel, ThreatHunt, Compliance]
+  Entity:
+    retention:
+      tier: warm
+      keep_for: P6M
+      purge_after: P30D
+    residency: tenant_region
+    lineage:
+      required_relationships: [DESCRIBES]
+      cascade_delete:
+        - relationship: LOCATED_IN
+          label: Location
+    purpose_tags: [FraudIntel, ThreatHunt]
+  Location:
+    retention:
+      tier: warm
+      keep_for: P6M
+      purge_after: P30D
+    residency: location.country_code
+    lineage:
+      required_relationships: []
+    purpose_tags: [ThreatHunt, Compliance]
+  Indicator:
+    retention:
+      tier: warm
+      keep_for: P6M
+      purge_after: P30D
+    residency: tenant_region
+    lineage:
+      required_relationships: [MATCHES]
+    purpose_tags: [ThreatHunt]
+  Provenance:
+    retention:
+      tier: archive
+      keep_for: P1Y
+      purge_after: P30D
+    residency: provenance.region || tenant_region
+    lineage:
+      required_relationships: []
+      immutable_fields: [transform_chain, lineage_uri]
+    purpose_tags: [Governance]

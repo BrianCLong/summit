@@ -1,0 +1,72 @@
+[
+  {
+    "id": "evt-1",
+    "timestamp": "2024-08-01T00:00:00Z",
+    "actor": "user-1",
+    "action": "allow",
+    "attributes": {
+      "country": "US",
+      "content_type": "text"
+    },
+    "canary": false,
+    "latency_ms": 18,
+    "payload_hash": "hash-1",
+    "policy_version": "baseline"
+  },
+  {
+    "id": "evt-2",
+    "timestamp": "2024-08-01T00:00:01Z",
+    "actor": "user-2",
+    "action": "allow",
+    "attributes": {
+      "country": "RU",
+      "content_type": "image"
+    },
+    "canary": true,
+    "latency_ms": 20,
+    "payload_hash": "hash-2",
+    "policy_version": "baseline"
+  },
+  {
+    "id": "evt-3",
+    "timestamp": "2024-08-01T00:00:02Z",
+    "actor": "user-3",
+    "action": "redact",
+    "attributes": {
+      "country": "US",
+      "content_type": "payment"
+    },
+    "canary": false,
+    "latency_ms": 30,
+    "payload_hash": "hash-3",
+    "policy_version": "baseline"
+  },
+  {
+    "id": "evt-4",
+    "timestamp": "2024-08-01T00:00:03Z",
+    "actor": "user-4",
+    "action": "allow",
+    "attributes": {
+      "country": "BR",
+      "content_type": "text"
+    },
+    "canary": false,
+    "latency_ms": 15,
+    "payload_hash": "hash-4",
+    "policy_version": "baseline"
+  },
+  {
+    "id": "evt-5",
+    "timestamp": "2024-08-01T00:00:04Z",
+    "actor": "user-5",
+    "action": "transform",
+    "attributes": {
+      "country": "US",
+      "content_type": "image"
+    },
+    "canary": false,
+    "latency_ms": 24,
+    "payload_hash": "hash-5",
+    "policy_version": "baseline"
+  }
+]

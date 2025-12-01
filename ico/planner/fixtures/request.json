@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "generated_at": "2025-09-01T00:00:00Z",
+    "owner": "benchmark"
+  },
+  "endpoints": [
+    {
+      "model": "bert-large",
+      "endpoint": "qa",
+      "baseline_replicas": 6,
+      "baseline_latency_ms": 150,
+      "baseline_accuracy": 0.95,
+      "baseline_cost_per_replica": 3.5,
+      "qps_capacity": 6.0,
+      "slo_latency_ms": 120,
+      "slo_accuracy": 0.92,
+      "projected_qps": 30.0,
+      "metadata": {
+        "team": "nlp",
+        "quantization_notes": "INT8 validated in staging"
+      },
+      "quantization_options": [
+        {
+          "name": "fp16",
+          "latency_ms": 100,
+          "accuracy": 0.94,
+          "qps_capacity": 9.0,
+          "cost_per_replica": 3.5
+        },
+        {
+          "name": "int8",
+          "latency_ms": 80,
+          "accuracy": 0.925,
+          "qps_capacity": 12.0,
+          "cost_per_replica": 3.0
+        },
+        {
+          "name": "int4",
+          "latency_ms": 70,
+          "accuracy": 0.90,
+          "qps_capacity": 14.0,
+          "cost_per_replica": 2.6
+        }
+      ]
+    },
+    {
+      "model": "vision-transformer",
+      "endpoint": "classify",
+      "baseline_replicas": 8,
+      "baseline_latency_ms": 180,
+      "baseline_accuracy": 0.93,
+      "baseline_cost_per_replica": 4.0,
+      "qps_capacity": 7.0,
+      "slo_latency_ms": 150,
+      "slo_accuracy": 0.9,
+      "projected_qps": 42.0,
+      "metadata": {
+        "team": "vision",
+        "quantization_notes": "INT8 requires calibration dataset"
+      },
+      "quantization_options": [
+        {
+          "name": "fp16",
+          "latency_ms": 140,
+          "accuracy": 0.92,
+          "qps_capacity": 9.0,
+          "cost_per_replica": 4.0
+        },
+        {
+          "name": "bf16",
+          "latency_ms": 135,
+          "accuracy": 0.918,
+          "qps_capacity": 10.0,
+          "cost_per_replica": 3.8
+        },
+        {
+          "name": "int8",
+          "latency_ms": 110,
+          "accuracy": 0.905,
+          "qps_capacity": 12.5,
+          "cost_per_replica": 3.5
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  consul:
+    image: hashicorp/consul:1.17
+    container_name: summit-consul
+    hostname: consul
+    command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -bind=0.0.0.0
+    ports:
+      - "8500:8500"  # HTTP API and UI
+      - "8600:8600/tcp"  # DNS TCP
+      - "8600:8600/udp"  # DNS UDP
+    volumes:
+      - consul-data:/consul/data
+      - consul-config:/consul/config
+    environment:
+      - CONSUL_BIND_INTERFACE=eth0
+    networks:
+      - summit-network
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    labels:
+      - "com.summit.service=consul"
+      - "com.summit.description=Distributed configuration store"
+
+  # Configuration service that uses Consul
+  config-service:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: summit-config-service
+    depends_on:
+      consul:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - CONSUL_URL=http://consul:8500
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-summit}:${POSTGRES_PASSWORD:-devpassword}@postgres:5432/${POSTGRES_DB:-summit_dev}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-devpassword}@redis:6379/0
+      - ENABLE_CONSUL=true
+      - ENABLE_APPROVAL_WORKFLOW=true
+      - ROTATION_CHECK_INTERVAL=3600000
+    networks:
+      - summit-network
+    restart: unless-stopped
+    labels:
+      - "com.summit.service=config-service"
+      - "com.summit.description=Configuration management service"
+
+networks:
+  summit-network:
+    name: summit-network
+    driver: bridge
+
+volumes:
+  consul-data:
+    name: summit-consul-data
+  consul-config:
+    name: summit-consul-config

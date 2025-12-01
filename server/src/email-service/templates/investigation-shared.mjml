@@ -1,0 +1,71 @@
+<mjml>
+  <mj-head>
+    <mj-title>Investigation Shared With You</mj-title>
+    <mj-preview>{{sharedBy}} shared an investigation with you</mj-preview>
+    <mj-attributes>
+      <mj-all font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"></mj-all>
+      <mj-text font-size="14px" color="#555" line-height="1.6"></mj-text>
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#ffffff" padding="40px">
+      <mj-column>
+        <mj-image src="{{logoUrl}}" alt="IntelGraph Logo" width="150px" />
+        <mj-spacer height="30px" />
+        <mj-text font-size="24px" font-weight="bold" color="#333">
+          New Investigation Shared
+        </mj-text>
+        <mj-text>
+          Hi {{recipientName}},
+        </mj-text>
+        <mj-text>
+          <strong>{{sharedBy}}</strong> has shared an investigation with you on IntelGraph.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#f8f9fa" padding="30px 40px">
+      <mj-column>
+        <mj-text font-size="18px" font-weight="bold" color="#333">
+          {{investigationName}}
+        </mj-text>
+        <mj-text>
+          {{investigationDescription}}
+        </mj-text>
+        <mj-spacer height="15px" />
+        <mj-text>
+          <strong>Access Level:</strong> {{accessLevel}}
+        </mj-text>
+        <mj-text>
+          <strong>Entities:</strong> {{entityCount}}
+        </mj-text>
+        <mj-text>
+          <strong>Relationships:</strong> {{relationshipCount}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+
+    <mj-section background-color="#ffffff" padding="30px 40px">
+      <mj-column>
+        <mj-text>
+          {{message}}
+        </mj-text>
+        <mj-spacer height="20px" />
+        <mj-button background-color="#0066cc" href="{{investigationUrl}}">
+          View Investigation
+        </mj-button>
+      </mj-column>
+    </mj-section>
+
+    <mj-section padding="20px 40px">
+      <mj-column>
+        <mj-text color="#999" font-size="12px" align="center">
+          <a href="{{unsubscribeUrl}}" style="color: #999;">Unsubscribe</a> from investigation notifications | <a href="{{preferencesUrl}}" style="color: #999;">Email Preferences</a>
+        </mj-text>
+        <mj-text color="#999" font-size="12px" align="center">
+          {{companyName}} | {{companyAddress}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

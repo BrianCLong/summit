@@ -43,3 +43,22 @@ services:
         condition: service_started
     networks:
       - summit
+
+  strategic-foresight:
+    build:
+      context: ./services/strategic-foresight
+      dockerfile: Dockerfile
+    container_name: summit-strategic-foresight
+    restart: unless-stopped
+    ports:
+      - '8003:8003'
+    environment:
+      PORT: 8003
+      REDIS_URL: redis://redis:6379/2
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8003/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - summit

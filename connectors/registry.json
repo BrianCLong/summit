@@ -1,0 +1,315 @@
+{
+  "$schema": "./registry.schema.json",
+  "version": "1.0.0",
+  "generatedAt": "2025-11-21T00:00:00Z",
+  "connectors": [
+    {
+      "id": "stix-taxii",
+      "name": "STIX/TAXII Connector",
+      "description": "Ingest threat intelligence from STIX/TAXII feeds",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "threat-intelligence",
+      "capabilities": ["pull", "stream", "incremental"],
+      "entityTypes": ["ThreatActor", "Indicator", "Campaign", "Malware", "AttackPattern"],
+      "relationshipTypes": ["INDICATES", "USES", "TARGETS", "ATTRIBUTED_TO"],
+      "authentication": ["api-key", "certificate"],
+      "rateLimit": {
+        "requestsPerMinute": 60,
+        "burstLimit": 10
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/stix-taxii.md",
+      "path": "connectors/stix_taxii_connector/"
+    },
+    {
+      "id": "elasticsearch",
+      "name": "Elasticsearch Connector",
+      "description": "Query and ingest data from Elasticsearch clusters",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "search-analytics",
+      "capabilities": ["pull", "query", "incremental"],
+      "entityTypes": ["Document", "Event", "LogEntry"],
+      "relationshipTypes": ["CONTAINS", "REFERENCES"],
+      "authentication": ["basic", "api-key", "certificate"],
+      "rateLimit": {
+        "requestsPerMinute": 1000,
+        "burstLimit": 100
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/elasticsearch.md",
+      "path": "connectors/elasticsearch_connector/"
+    },
+    {
+      "id": "csv",
+      "name": "CSV Connector",
+      "description": "Import entities and relationships from CSV files",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "file-import",
+      "capabilities": ["pull", "batch"],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["none"],
+      "rateLimit": null,
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/csv.md",
+      "path": "connectors/csv_connector/"
+    },
+    {
+      "id": "duckdb",
+      "name": "DuckDB Connector",
+      "description": "Query analytical data from DuckDB databases",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "database",
+      "capabilities": ["pull", "query"],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["none", "file-path"],
+      "rateLimit": null,
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/duckdb.md",
+      "path": "connectors/duckdb_connector/"
+    },
+    {
+      "id": "mapbox",
+      "name": "Mapbox Geospatial Connector",
+      "description": "Geocoding and geospatial data enrichment",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "geospatial",
+      "capabilities": ["enrich", "geocode"],
+      "entityTypes": ["Location", "Address"],
+      "relationshipTypes": ["LOCATED_AT", "NEAR"],
+      "authentication": ["api-key"],
+      "rateLimit": {
+        "requestsPerMinute": 600,
+        "burstLimit": 50
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/mapbox.md",
+      "path": "connectors/mapbox_connector/"
+    },
+    {
+      "id": "chronicle",
+      "name": "Google Chronicle Connector",
+      "description": "Ingest security telemetry from Google Chronicle SIEM",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "siem",
+      "capabilities": ["pull", "stream", "incremental"],
+      "entityTypes": ["Event", "Alert", "Asset", "User"],
+      "relationshipTypes": ["TRIGGERED", "ACCESSED", "DETECTED"],
+      "authentication": ["oauth2", "service-account"],
+      "rateLimit": {
+        "requestsPerMinute": 100,
+        "burstLimit": 20
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/chronicle.md",
+      "path": "connectors/chronicle_connector/"
+    },
+    {
+      "id": "splunk",
+      "name": "Splunk Connector",
+      "description": "Query and stream data from Splunk Enterprise/Cloud",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "siem",
+      "capabilities": ["pull", "query", "stream"],
+      "entityTypes": ["Event", "Alert", "LogEntry"],
+      "relationshipTypes": ["TRIGGERED", "CONTAINS"],
+      "authentication": ["basic", "token"],
+      "rateLimit": {
+        "requestsPerMinute": 200,
+        "burstLimit": 30
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/splunk.md",
+      "path": "connectors/splunk_connector/"
+    },
+    {
+      "id": "sentinel",
+      "name": "Microsoft Sentinel Connector",
+      "description": "Ingest security data from Microsoft Sentinel",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "siem",
+      "capabilities": ["pull", "incremental"],
+      "entityTypes": ["Alert", "Incident", "Entity"],
+      "relationshipTypes": ["RELATED_TO", "TRIGGERED"],
+      "authentication": ["oauth2", "managed-identity"],
+      "rateLimit": {
+        "requestsPerMinute": 100,
+        "burstLimit": 20
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/sentinel.md",
+      "path": "connectors/sentinel_connector/"
+    },
+    {
+      "id": "esri",
+      "name": "ESRI ArcGIS Connector",
+      "description": "Geospatial feature services from ESRI ArcGIS",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "geospatial",
+      "capabilities": ["pull", "query"],
+      "entityTypes": ["Location", "Feature", "Boundary"],
+      "relationshipTypes": ["WITHIN", "INTERSECTS", "ADJACENT"],
+      "authentication": ["api-key", "oauth2"],
+      "rateLimit": {
+        "requestsPerMinute": 100,
+        "burstLimit": 20
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/esri.md",
+      "path": "connectors/esri_connector/"
+    },
+    {
+      "id": "json",
+      "name": "JSON Connector",
+      "description": "Import entities from JSON files and APIs",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "file-import",
+      "capabilities": ["pull", "batch"],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["none", "api-key", "bearer"],
+      "rateLimit": null,
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/json.md",
+      "path": "connectors/json_connector/"
+    },
+    {
+      "id": "s3csv",
+      "name": "S3 CSV Connector",
+      "description": "Import CSV files from Amazon S3 buckets",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "cloud-storage",
+      "capabilities": ["pull", "batch", "incremental"],
+      "entityTypes": ["*"],
+      "relationshipTypes": ["*"],
+      "authentication": ["aws-credentials", "iam-role"],
+      "rateLimit": {
+        "requestsPerMinute": 1000,
+        "burstLimit": 100
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/s3csv.md",
+      "path": "connectors/s3csv/"
+    },
+    {
+      "id": "ofac-sdn",
+      "name": "OFAC SDN Connector",
+      "description": "Import OFAC Specially Designated Nationals list",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "compliance",
+      "capabilities": ["pull", "batch"],
+      "entityTypes": ["Person", "Organization", "Vessel", "Aircraft"],
+      "relationshipTypes": ["ALIAS_OF", "ASSOCIATED_WITH"],
+      "authentication": ["none"],
+      "rateLimit": {
+        "requestsPerMinute": 10,
+        "burstLimit": 2
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/ofac-sdn.md",
+      "path": "connectors/ofac_sdn_connector/"
+    },
+    {
+      "id": "rss-news",
+      "name": "RSS News Connector",
+      "description": "Ingest news articles from RSS/Atom feeds",
+      "version": "1.0.0",
+      "status": "stable",
+      "category": "osint",
+      "capabilities": ["pull", "stream", "incremental"],
+      "entityTypes": ["Document", "Article", "Event"],
+      "relationshipTypes": ["MENTIONS", "REFERENCES"],
+      "authentication": ["none", "api-key"],
+      "rateLimit": {
+        "requestsPerMinute": 60,
+        "burstLimit": 10
+      },
+      "license": "MIT",
+      "maintainer": "summit-core",
+      "documentation": "docs/connectors/rss-news.md",
+      "path": "connectors/rss_news_connector/"
+    }
+  ],
+  "categories": [
+    {
+      "id": "threat-intelligence",
+      "name": "Threat Intelligence",
+      "description": "Connectors for threat intelligence feeds and platforms"
+    },
+    {
+      "id": "siem",
+      "name": "SIEM & Security Analytics",
+      "description": "Connectors for SIEM platforms and security monitoring tools"
+    },
+    {
+      "id": "geospatial",
+      "name": "Geospatial & Location",
+      "description": "Connectors for geospatial data and location services"
+    },
+    {
+      "id": "file-import",
+      "name": "File Import",
+      "description": "Connectors for importing data from files"
+    },
+    {
+      "id": "database",
+      "name": "Database",
+      "description": "Connectors for database systems"
+    },
+    {
+      "id": "cloud-storage",
+      "name": "Cloud Storage",
+      "description": "Connectors for cloud storage services"
+    },
+    {
+      "id": "compliance",
+      "name": "Compliance & Sanctions",
+      "description": "Connectors for compliance and sanctions data"
+    },
+    {
+      "id": "osint",
+      "name": "OSINT & Open Source",
+      "description": "Connectors for open source intelligence"
+    },
+    {
+      "id": "search-analytics",
+      "name": "Search & Analytics",
+      "description": "Connectors for search and analytics platforms"
+    }
+  ],
+  "capabilities": {
+    "pull": "Connector can fetch data on-demand",
+    "push": "Connector can receive data pushed to it",
+    "stream": "Connector supports real-time streaming",
+    "query": "Connector supports ad-hoc queries",
+    "batch": "Connector processes data in batches",
+    "incremental": "Connector supports incremental/delta updates",
+    "enrich": "Connector enriches existing entities",
+    "geocode": "Connector provides geocoding services"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@summit/sigint-collector",
+  "version": "1.0.0",
+  "description": "SIGINT collection simulation and training framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@summit/shared": "workspace:*",
+    "eventemitter3": "^5.0.1",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  }
+}

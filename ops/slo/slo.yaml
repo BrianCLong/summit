@@ -40,6 +40,42 @@ spec:
       metric: 'histogram_quantile(0.95, export_duration_seconds_bucket)'
       unit: 'seconds'
 
+    chaos_recovery_time_node:
+      name: "Node.js Chaos Recovery Time"
+      description: "Time for the Node.js backend to recover after chaos experiments"
+      metric: "histogram_quantile(0.99, chaos_experiment_recovery_seconds_bucket{service=\"intelgraph\"})"
+      unit: "seconds"
+
+    chaos_recovery_time_python:
+      name: "Python API Chaos Recovery Time"
+      description: "Time for the Python analytics API to recover after chaos experiments"
+      metric: "histogram_quantile(0.95, chaos_experiment_recovery_seconds_bucket{service=\"analytics-api\"})"
+      unit: "seconds"
+
+    chaos_recovery_time_postgres:
+      name: "PostgreSQL Chaos Recovery Time"
+      description: "Time for PostgreSQL primary to recover after chaos experiments"
+      metric: "histogram_quantile(0.99, chaos_experiment_recovery_seconds_bucket{service=\"postgres\",role=\"primary\"})"
+      unit: "seconds"
+
+    chaos_error_rate_node:
+      name: "Node.js Chaos Error Rate"
+      description: "HTTP 5xx ratio observed on the Node.js backend during chaos windows"
+      metric: "rate(http_requests_total{service=\"intelgraph\",status=~\"5..\"}[5m]) / rate(http_requests_total{service=\"intelgraph\"}[5m])"
+      unit: "percentage"
+
+    chaos_error_rate_python:
+      name: "Python API Chaos Error Rate"
+      description: "HTTP 5xx ratio observed on the Python analytics API during chaos windows"
+      metric: "rate(http_requests_total{service=\"analytics-api\",status=~\"5..\"}[5m]) / rate(http_requests_total{service=\"analytics-api\"}[5m])"
+      unit: "percentage"
+
+    chaos_error_rate_postgres:
+      name: "PostgreSQL Chaos Error Rate"
+      description: "Database error ratio observed during chaos windows"
+      metric: "rate(sql_error_total{cluster=\"postgres\"}[5m]) / rate(sql_query_total{cluster=\"postgres\"}[5m])"
+      unit: "percentage"
+
     model_cost_per_1k:
       name: 'Model Cost Per 1K Queries'
       description: 'Average cost per 1000 NL queries'
@@ -82,6 +118,48 @@ spec:
       threshold: 0.05 # $0.05 per 1K queries
       description: 'Model costs stay under $0.05 per 1K queries'
       priority: 'P2'
+
+    node_chaos_recovery_slo:
+      sli: "chaos_recovery_time_node"
+      target: 0.99   # 99% of chaos experiments recover within threshold
+      threshold: 60   # seconds
+      description: "Node.js backend recovers from chaos experiments within 60 seconds"
+      priority: "P0"
+
+    node_chaos_error_rate_slo:
+      sli: "chaos_error_rate_node"
+      target: 0.995  # 0.5% max error rate
+      threshold: 0.005
+      description: "Node.js backend error rate stays below 0.5% during chaos"
+      priority: "P0"
+
+    python_chaos_recovery_slo:
+      sli: "chaos_recovery_time_python"
+      target: 0.95   # 95% recover within threshold
+      threshold: 90   # seconds
+      description: "Python analytics API recovers from chaos experiments within 90 seconds"
+      priority: "P1"
+
+    python_chaos_error_rate_slo:
+      sli: "chaos_error_rate_python"
+      target: 0.985  # 1.5% max error rate
+      threshold: 0.015
+      description: "Python analytics API error rate stays below 1.5% during chaos"
+      priority: "P1"
+
+    postgres_chaos_recovery_slo:
+      sli: "chaos_recovery_time_postgres"
+      target: 0.99   # 99% recover within threshold
+      threshold: 120  # seconds
+      description: "PostgreSQL primary recovers within 120 seconds after chaos experiments"
+      priority: "P0"
+
+    postgres_chaos_error_rate_slo:
+      sli: "chaos_error_rate_postgres"
+      target: 0.99   # 1% max error rate
+      threshold: 0.01
+      description: "PostgreSQL error rate stays below 1% during chaos"
+      priority: "P0"
 
   # Environment-specific targets
   environments:

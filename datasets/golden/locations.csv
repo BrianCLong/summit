@@ -1,0 +1,4 @@
+location_id,name,region,country,latitude,longitude,provenance_ref
+LOC-ATL,Atlanta SOC,North America,US,33.7490,-84.3880,s3csv/locations/2025-09-01T15:30:00Z
+LOC-FRA,Frankfurt DC,Europe,DE,50.1109,8.6821,s3csv/locations/2025-09-01T15:30:00Z
+LOC-SIN,Singapore POP,APAC,SG,1.3521,103.8198,s3csv/locations/2025-09-01T15:30:00Z

@@ -356,9 +356,11 @@ describe('SchemaRegistry', () => {
     });
 
     test('should get latest version', async () => {
+      jest.useFakeTimers();
       await registry.registerSchema(schema1, 'v1.0.0', 'test@example.com');
-      await new Promise(resolve => setTimeout(resolve, 10)); // Ensure different timestamp
+      jest.advanceTimersByTime(1000); // Advance time to ensure different timestamp
       await registry.registerSchema(schema2, 'v1.1.0', 'test@example.com');
+      jest.useRealTimers();
 
       const latest = registry.getLatestVersion();
       expect(latest?.version).toBe('v1.1.0');
@@ -370,11 +372,13 @@ describe('SchemaRegistry', () => {
     });
 
     test('should get all versions sorted by timestamp', async () => {
+      jest.useFakeTimers();
       await registry.registerSchema(schema1, 'v1.0.0', 'test@example.com');
-      await new Promise(resolve => setTimeout(resolve, 10));
+      jest.advanceTimersByTime(1000);
       await registry.registerSchema(schema2, 'v1.1.0', 'test@example.com');
-      await new Promise(resolve => setTimeout(resolve, 10));
+      jest.advanceTimersByTime(1000);
       await registry.registerSchema(schema2, 'v1.2.0', 'test@example.com', 'Third', { skipDuplicateCheck: true });
+      jest.useRealTimers();
 
       const versions = registry.getAllVersions();
       expect(versions.length).toBe(3);

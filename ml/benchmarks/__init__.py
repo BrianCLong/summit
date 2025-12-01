@@ -1,1 +1,1 @@
-"""Benchmark utilities for IntelGraph GNN models."""
+"""Benchmark utilities for IntelGraph GNN models and data pipelines."""

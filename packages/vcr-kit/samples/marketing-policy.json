@@ -1,0 +1,22 @@
+{
+  "id": "policy:marketing-updates",
+  "tenant": "summit-retail",
+  "purpose": [
+    {
+      "purposeId": "marketing-updates",
+      "description": "Send product news and quarterly product digests"
+    }
+  ],
+  "scope": [
+    {
+      "resource": "email",
+      "actions": ["send", "personalize"]
+    }
+  ],
+  "retention": {
+    "policyUri": "https://policies.summit.example/privacy#retention",
+    "expiresAt": "2026-01-01T00:00:00Z"
+  },
+  "lawfulBasis": "consent",
+  "policyUri": "https://policies.summit.example/privacy"
+}

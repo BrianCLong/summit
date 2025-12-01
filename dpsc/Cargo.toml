@@ -1,0 +1,28 @@
+[package]
+name = "dpsc"
+version = "0.1.0"
+edition = "2024"
+description = "DP-SQL Compiler translating annotated SQL into privacy-preserving execution plans"
+license = "Apache-2.0"
+
+[lib]
+name = "dpsc"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dpsc"
+path = "src/main.rs"
+
+authors = ["Summit AI"]
+
+[dependencies]
+sqlparser = "0.43"
+regex = "1.11"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rand = { version = "0.8", features = ["std", "std_rng"] }
+rand_distr = "0.4"
+thiserror = "1.0"
+
+[dev-dependencies]
+insta = { version = "1.39", features = ["yaml"] }

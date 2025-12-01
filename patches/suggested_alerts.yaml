@@ -1,0 +1,41 @@
+groups:
+  - name: intelgraph-slo-suggestions
+    rules:
+      # =====================
+      # SUGGESTED AI/ML ALERTS (Gap Fill)
+      # =====================
+
+      # AI Job Latency Alert
+      # Why: Existing metrics have ai_job_duration_seconds but no alert.
+      # Target: Copilot/AI interactions should be reasonably fast.
+      - alert: AIJobLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(ai_job_duration_seconds_bucket[5m])) by (le)) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph-ai
+        annotations:
+          summary: 'AI Job processing is slow'
+          description: 'P95 AI job duration is {{ $value }}s (threshold: 30s)'
+
+      # AI Job Failure Rate
+      # Why: Need to know if background jobs are failing.
+      - alert: AIJobFailureRateHigh
+        expr: sum(rate(ai_jobs_total{status="failed"}[5m])) / sum(rate(ai_jobs_total[5m])) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+          service: intelgraph-ai
+        annotations:
+          summary: 'High AI Job failure rate'
+          description: 'AI job failure rate is {{ $value | printf "%.1f" }}% (threshold: 5%)'
+
+      # =====================
+      # SUGGESTED TUNING FOR EXISTING ALERTS
+      # =====================
+
+      # Align AvailabilityBurnRateFast with Policy (14.4x vs 20x)
+      # Current: > 0.02 (2%)
+      # Suggested: > 0.015 (1.5%) for faster paging on 99.9% SLO
+      # - alert: AvailabilityBurnRateFast
+      #   expr: ... > 0.015 ...

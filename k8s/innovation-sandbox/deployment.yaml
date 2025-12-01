@@ -1,0 +1,195 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: innovation-sandbox
+  namespace: intelgraph
+  labels:
+    app: innovation-sandbox
+    component: sandbox
+    security-tier: high
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: innovation-sandbox
+  template:
+    metadata:
+      labels:
+        app: innovation-sandbox
+        component: sandbox
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: runtime/default
+    spec:
+      serviceAccountName: innovation-sandbox
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: sandbox
+          image: intelgraph/innovation-sandbox:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3100
+              name: http
+              protocol: TCP
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "3100"
+            - name: LOG_LEVEL
+              value: "info"
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: innovation-sandbox-secrets
+                  key: redis-url
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: sandbox-workspace
+              mountPath: /sandbox
+      volumes:
+        - name: tmp
+          emptyDir:
+            medium: Memory
+            sizeLimit: 100Mi
+        - name: sandbox-workspace
+          emptyDir:
+            sizeLimit: 500Mi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: innovation-sandbox
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: innovation-sandbox
+  namespace: intelgraph
+  labels:
+    app: innovation-sandbox
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: innovation-sandbox
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: innovation-sandbox
+  namespace: intelgraph
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: innovation-sandbox-network-policy
+  namespace: intelgraph
+spec:
+  podSelector:
+    matchLabels:
+      app: innovation-sandbox
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: intelgraph
+        - podSelector:
+            matchLabels:
+              component: api-gateway
+      ports:
+        - protocol: TCP
+          port: 3100
+  egress:
+    # Allow DNS
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow Redis
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow prov-ledger for chain of custody
+    - to:
+        - podSelector:
+            matchLabels:
+              app: prov-ledger
+      ports:
+        - protocol: TCP
+          port: 3000
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: innovation-sandbox-hpa
+  namespace: intelgraph
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: innovation-sandbox
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80

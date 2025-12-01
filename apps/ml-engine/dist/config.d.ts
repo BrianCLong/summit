@@ -36,6 +36,16 @@ export declare const config: {
             maxBatchSize: number;
             trainingDataRetentionDays: number;
         };
+        autoTuning: {
+            performanceDegradationThreshold: number;
+            evaluationWindow: number;
+            minEvaluations: number;
+            checkIntervalMs: number;
+            cooldownMs: number;
+        };
+        benchmarking: {
+            realtimeWindowMinutes: number;
+        };
     };
     redis: {
         host: string;

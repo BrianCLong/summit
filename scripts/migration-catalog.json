@@ -1,0 +1,36 @@
+{
+  "catalog_version": "1.0.0",
+  "last_updated": "2025-11-20T00:00:00Z",
+  "total_migrations": 0,
+  "database_versions": {
+    "postgresql": "1.0.0",
+    "neo4j": "1.0.0",
+    "timescale": "1.0.0"
+  },
+  "migrations": [],
+  "migration_locations": {
+    "canonical": "db/migrations/",
+    "deprecated_locations": [
+      "server/db/migrations/",
+      "server/src/db/migrations/",
+      "server/src/migrations/",
+      "services/api/migrations/",
+      "packages/*/migrations/"
+    ]
+  },
+  "naming_convention": {
+    "format": "YYYYMMDD_HHMMSS_<type>_<description>.<ext>",
+    "types": ["schema", "data", "security", "perf"],
+    "extensions": {
+      "postgresql": "sql",
+      "neo4j": "cypher",
+      "timescale": "sql"
+    }
+  },
+  "notes": [
+    "This catalog tracks all database migrations across the Summit platform",
+    "Migrations should be placed in db/migrations/ for consistency",
+    "Run ./scripts/update-migration-catalog.sh to regenerate this file",
+    "See docs/DATABASE_MIGRATION_STRATEGY.md for details"
+  ]
+}

@@ -2,8 +2,7 @@
 // Applies base JS/TS rules across the monorepo; package-level configs refine further.
 import js from '@eslint/js';
 import * as tseslint from 'typescript-eslint';
-import prettier from 'eslint-config-prettier';
-import path from 'node:path';
+import globals from 'globals';
 
 const IGNORE = [
   '**/node_modules/**',
@@ -13,6 +12,7 @@ const IGNORE = [
   '**/.vite/**',
   '**/.next/**',
   '**/.cache/**',
+  '**/.turbo/**',
   '**/generated/**',
   'frontend/.vite/**', // legacy build artifacts
   '**/public/**',
@@ -21,6 +21,7 @@ const IGNORE = [
   'v4/archive/**',
   '.venv/**',
   'venv/**',
+  '**/v24_modules/**',
 ];
 
 export default [
@@ -31,6 +32,11 @@ export default [
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
+      },
       parserOptions: {
         // Avoid project-based type checking here to keep root fast
         ecmaFeatures: { jsx: true },
@@ -40,19 +46,53 @@ export default [
       react: { version: 'detect' },
     },
     rules: {
+      // Code Quality
       'no-console': 'warn',
       'no-debugger': 'error',
+      'no-alert': 'warn',
+      'no-var': 'error',
+      'prefer-const': 'warn',
+      'prefer-arrow-callback': 'warn',
+      'prefer-template': 'warn',
+      'no-nested-ternary': 'warn',
+      'no-unneeded-ternary': 'warn',
+
+      // Error Prevention
       'no-unused-vars': 'off', // handled by @typescript-eslint/no-unused-vars
+      'no-unused-expressions': 'off',
+      'no-undef': 'off', // TypeScript handles this
+      'eqeqeq': ['error', 'always', { null: 'ignore' }],
+      'no-implicit-coercion': 'warn',
+      'no-throw-literal': 'error',
+
+      // TypeScript
       '@typescript-eslint/no-unused-vars': [
         'warn',
-        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
       ],
-      '@typescript-eslint/no-explicit-any': 'off',
-      'no-unused-expressions': 'off',
-      '@typescript-eslint/no-unused-expressions': ['error', {}],
-      'no-undef': 'off',
+      '@typescript-eslint/no-explicit-any': 'off', // Pragmatic for gradual migration
+      '@typescript-eslint/no-unused-expressions': [
+        'error',
+        {
+          allowShortCircuit: true,
+          allowTernary: true,
+        },
+      ],
+      '@typescript-eslint/explicit-function-return-type': 'off',
+      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+
+      // Best Practices
+      curly: ['warn', 'all'],
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-return-await': 'warn',
+      'require-await': 'warn',
     },
   },
-  // Disable formatting-related rules in favor of Prettier
-  prettier,
 ];

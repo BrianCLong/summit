@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "resb"
+version = "0.1.0"
+description = "Rare-event synthetic booster toolkit"
+readme = "README.md"
+authors = [{name = "Summit AI"}]
+requires-python = ">=3.9"
+dependencies = [
+  "numpy>=1.24",
+  "pandas>=1.5",
+  "scikit-learn>=1.2",
+  "scipy>=1.10"
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

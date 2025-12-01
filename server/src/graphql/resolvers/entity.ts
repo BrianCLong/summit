@@ -9,8 +9,9 @@ import {
   tenantEvent,
 } from '../subscriptions.js';
 import { getPostgresPool } from '../../db/postgres.js';
-import axios from 'axios'; // For calling ML service
+import axios from 'axios';
 import { GraphQLError } from 'graphql';
+import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
 
 const logger = pino();
 const driver = getNeo4jDriver();
@@ -33,31 +34,16 @@ const entityResolvers = {
         return getMockEntity(id);
       }
 
-      const session = driver.session();
       try {
-        const tenantId = requireTenant(context);
-        const result = await session.run(
-          'MATCH (n:Entity {id: $id, tenantId: $tenantId}) RETURN n',
-          { id, tenantId },
-        );
-        if (result.records.length === 0) {
-          return null;
-        }
-        const record = result.records[0].get('n');
-        return {
-          id: record.properties.id,
-          type: record.labels[0], // Assuming the first label is the primary type
-          props: record.properties,
-          createdAt: record.properties.createdAt,
-          updatedAt: record.properties.updatedAt,
-        };
+        requireTenant(context);
+        // Use DataLoader for batched entity fetching
+        const entity = await context.loaders.entityLoader.load(id);
+        return entity;
       } catch (error) {
         logger.error({ error, id }, 'Error fetching entity by ID');
         // Fallback to mock data if database connection fails
         logger.warn('Falling back to mock entity data');
         return getMockEntity(id);
-      } finally {
-        await session.close();
       }
     },
     entities: async (
@@ -198,43 +184,27 @@ const entityResolvers = {
           return [];
         }
 
-        // 3. Fetch corresponding entities from Neo4j
-        const session = driver.session();
-        try {
-          const searchService = new (
-            await import('../../services/SemanticSearchService.js')
-          ).default();
-          const docs = await searchService.search(
-            query,
-            filters || {},
-            limit + offset,
-          );
-          const sliced = docs.slice(offset);
-          const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
+        // 3. Fetch corresponding entities from Neo4j using DataLoader
+        const searchService = new (
+          await import('../../services/SemanticSearchService.js')
+        ).default();
+        const docs = await searchService.search(
+          query,
+          filters || {},
+          limit + offset,
+        );
+        const sliced = docs.slice(offset);
+        const ids = sliced.map((d) => d.metadata.graphId).filter(Boolean);
 
-          if (ids.length === 0) return [];
+        if (ids.length === 0) return [];
 
-          const result = await session.run(
-            `MATCH (n:Entity) WHERE n.id IN $ids RETURN n`,
-            { ids },
-          );
+        // Use DataLoader to batch fetch entities - prevents N+1 queries
+        const entities = await Promise.all(
+          ids.map((id) => context.loaders.entityLoader.load(id))
+        );
 
-          const entityMap = new Map();
-          result.records.forEach((record) => {
-            const entity = record.get('n');
-            entityMap.set(entity.properties.id, {
-              id: entity.properties.id,
-              type: entity.labels[0],
-              props: entity.properties,
-              createdAt: entity.properties.createdAt,
-              updatedAt: entity.properties.updatedAt,
-            });
-          });
-
-          return ids.map((id) => entityMap.get(id)).filter(Boolean);
-        } finally {
-          await session.close();
-        }
+        // Filter out any errors (entities not found)
+        return entities.filter((entity) => !(entity instanceof Error));
       } catch (error) {
         logger.error(
           { error, query, filters },
@@ -505,96 +475,5 @@ const entityResolvers = {
     },
   },
 };
-
-// Mock data for development when database is not available
-function getMockEntities(
-  type?: string,
-  q?: string,
-  limit: number = 25,
-  offset: number = 0,
-) {
-  const mockEntities = [
-    {
-      id: 'mock-entity-1',
-      type: 'PERSON',
-      props: {
-        name: 'John Smith',
-        email: 'john.smith@example.com',
-        phone: '+1-555-0101',
-        location: 'New York, NY',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-2',
-      type: 'ORGANIZATION',
-      props: {
-        name: 'Tech Corp Industries',
-        industry: 'Technology',
-        headquarters: 'San Francisco, CA',
-        website: 'https://techcorp.example.com',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-3',
-      type: 'EVENT',
-      props: {
-        name: 'Data Breach Incident',
-        date: '2024-08-01',
-        severity: 'HIGH',
-        status: 'INVESTIGATING',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-4',
-      type: 'LOCATION',
-      props: {
-        name: 'Corporate Headquarters',
-        address: '100 Market Street, San Francisco, CA 94105',
-        coordinates: { lat: 37.7749, lng: -122.4194 },
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-    {
-      id: 'mock-entity-5',
-      type: 'ASSET',
-      props: {
-        name: 'Database Server DB-01',
-        type: 'SERVER',
-        ip_address: '192.168.1.100',
-        status: 'ACTIVE',
-      },
-      createdAt: '2024-08-15T12:00:00Z',
-      updatedAt: '2024-08-15T12:00:00Z',
-    },
-  ];
-
-  let filtered = mockEntities;
-
-  if (type) {
-    filtered = filtered.filter((entity) => entity.type === type);
-  }
-
-  if (q) {
-    filtered = filtered.filter(
-      (entity) =>
-        JSON.stringify(entity.props).toLowerCase().includes(q.toLowerCase()) ||
-        entity.type.toLowerCase().includes(q.toLowerCase()),
-    );
-  }
-
-  return filtered.slice(offset, offset + limit);
-}
-
-function getMockEntity(id: string) {
-  const entities = getMockEntities();
-  return entities.find((entity) => entity.id === id) || null;
-}
 
 export default entityResolvers;

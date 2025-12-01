@@ -20,6 +20,10 @@ node_modules/
 # Yarn Integrity file
 .yarn-integrity
 
+# DMCL build artifacts
+tools/dmcl/bin/
+reports/dmcl/
+
 # Prevent secrets / env files
 .env.*
 !.env.example
@@ -71,7 +75,7 @@ Thumbs.db
 
 # Logs
 logs/
-*.log
+# *.log
 
 # Temporary files
 tmp/
@@ -237,3 +241,8 @@ id_ed25519.*
 **/api-key.txt
 **/token.txt
 **/.token
+
+# PR Dashboard generated files
+pr-dashboard-report.json
+pr-dashboard.html
+pr-backlog-stats.json
