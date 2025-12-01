@@ -7,7 +7,8 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
 
-REQUIRED_NODE_VERSION=${NODE_VERSION:-18}
+# Minimum required Node version for the project
+REQUIRED_NODE_VERSION=18
 
 echo -e "🔍 \033[1mValidating Local Environment...\033[0m\n"
 
@@ -28,6 +29,12 @@ check_tool() {
 check_node_version() {
     if command -v node &> /dev/null; then
         local node_ver=$(node -v | sed 's/v//;s/\..*//')
+        # Ensure node_ver is a number
+        if [[ ! "$node_ver" =~ ^[0-9]+$ ]]; then
+             echo -e "${YELLOW}⚠️  Could not parse Node version ($node_ver)${NC}"
+             return
+        fi
+
         if [ "$node_ver" -lt "$REQUIRED_NODE_VERSION" ]; then
             echo -e "${RED}✗ Node.js version $node_ver found, but >= $REQUIRED_NODE_VERSION required${NC}"
             ERRORS=$((ERRORS+1))
@@ -71,7 +78,6 @@ check_tool python3 "python3 --version"
 check_tool make "make --version"
 check_tool jq "jq --version"
 check_tool curl "curl --version"
-check_tool lsof "echo lsof" # Check if lsof exists for port checking
 
 echo ""
 

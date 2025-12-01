@@ -7,11 +7,8 @@ set -e
 echo "🚀 Starting Health-Check-First Bootstrap..."
 echo "==========================================="
 
-# Ensure scripts are executable
-chmod +x scripts/dev/validate-env.sh
-
 # Run Make Bootstrap
-# This will run the validation first (via preflight) and then install dependencies
+# This includes the 'preflight' target which runs scripts/dev/validate-env.sh
 make bootstrap
 
 echo ""
