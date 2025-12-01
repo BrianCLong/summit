@@ -17,6 +17,7 @@ env:
 permissions:
   contents: read
   security-events: write
+  id-token: write # Required for SLSA attestation
 
 jobs:
   # Fast lane: Quick feedback on code quality (no build required)
@@ -44,10 +45,15 @@ jobs:
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Intelligent Runner for Lint
       - name: Lint
-        run: pnpm -w run lint
+        run: node scripts/ci/smart-runner.js --name "Lint" --command "pnpm -w run lint" --retry 0
+
+      # Intelligent Runner for Typecheck
       - name: Typecheck
-        run: pnpm -w run typecheck
+        run: node scripts/ci/smart-runner.js --name "Typecheck" --command "pnpm -w run typecheck" --retry 0
+
       - name: Production guardrails
         run: |
           set +e
@@ -85,6 +91,16 @@ jobs:
         with:
           version: 9
           run_install: false
+
+      # Metrics Baseline Cache
+      - name: Restore Metrics Baseline
+        uses: actions/cache@v4
+        with:
+          path: ci-metrics-baseline.json
+          key: ${{ runner.os }}-metrics-baseline-${{ github.ref_name }}
+          restore-keys: |
+            ${{ runner.os }}-metrics-baseline-main
+
       - name: Cache pnpm store
         uses: actions/cache@v4
         with:
@@ -102,10 +118,35 @@ jobs:
             ${{ runner.os }}-turbo-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Intelligent Runner with Retry
       - name: Build workspace
-        run: pnpm -w run build
+        run: node scripts/ci/smart-runner.js --name "Build" --command "pnpm -w run build" --retry 1
+
       - name: Unit & integration tests
-        run: pnpm -w run test
+        run: node scripts/ci/smart-runner.js --name "Tests" --command "pnpm -w run test" --retry 2
+
+      # Regression Gate
+      - name: Check Regressions
+        run: node scripts/ci/regression-gate.js
+
+      # Health Dashboard
+      - name: Pipeline Health Dashboard
+        if: always()
+        run: node scripts/ci/dashboard.js
+
+      # Save New Baseline (Main Only)
+      - name: Rotate Metrics Baseline
+        if: github.ref == 'refs/heads/main'
+        run: mv ci-metrics-new.json ci-metrics-baseline.json
+
+      - name: Save Metrics Baseline
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: ci-metrics-baseline.json
+          key: ${{ runner.os }}-metrics-baseline-${{ github.sha }}
+
       - name: Upload build artifacts for golden path
         uses: actions/upload-artifact@v4
         with:
@@ -119,6 +160,10 @@ jobs:
   security-scan:
     runs-on: ubuntu-latest
     continue-on-error: true
+    permissions:
+      contents: read
+      security-events: write
+      id-token: write # For SLSA
     steps:
       - uses: actions/checkout@v4
       - name: Generate SBOM (SPDX)
@@ -126,6 +171,13 @@ jobs:
         with:
           path: .
           output-file: sbom.spdx.json
+
+      # SLSA Compliance
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: sbom.spdx.json
+
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
@@ -211,8 +263,11 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
       - name: Bring up stack (make up)
         run: make up
+
+      # Use Smart Runner for Smoke Tests too
       - name: Golden path smoke tests
-        run: make smoke
+        run: node scripts/ci/smart-runner.js --name "Smoke Tests" --command "make smoke" --retry 1
+
       - name: Compose logs on failure
         if: failure()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
