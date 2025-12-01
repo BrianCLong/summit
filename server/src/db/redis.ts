@@ -12,6 +12,8 @@ const REDIS_PASSWORD = process.env.REDIS_PASSWORD || 'devpassword';
 
 let redisClient: Redis;
 
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
+
 export function getRedisClient(): Redis {
   if (!redisClient) {
     try {
@@ -30,6 +32,29 @@ export function getRedisClient(): Redis {
         );
         redisClient = createMockRedisClient() as any;
       });
+
+      const originalGet = redisClient.get.bind(redisClient);
+      redisClient.get = async (key: string) => {
+        const value = await originalGet(key);
+        if (value) {
+          telemetry.subsystems.cache.hits.add(1);
+        } else {
+          telemetry.subsystems.cache.misses.add(1);
+        }
+        return value;
+      };
+
+      const originalSet = redisClient.set.bind(redisClient);
+      redisClient.set = async (key: string, value: string) => {
+        telemetry.subsystems.cache.sets.add(1);
+        return await originalSet(key, value);
+      };
+
+      const originalDel = redisClient.del.bind(redisClient);
+      redisClient.del = async (key: string) => {
+        telemetry.subsystems.cache.dels.add(1);
+        return await originalDel(key);
+      };
     } catch (error) {
       logger.warn(
         `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,

@@ -5,11 +5,15 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
+import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
+import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
+import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -32,6 +36,14 @@ import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
+import { auroraRouter } from './routes/aurora.js';
+import { oracleRouter } from './routes/oracle.js';
+import { phantomLimbRouter } from './routes/phantom_limb.js';
+import { echelon2Router } from './routes/echelon2.js';
+import { mnemosyneRouter } from './routes/mnemosyne.js';
+import { necromancerRouter } from './routes/necromancer.js';
+import { zeroDayRouter } from './routes/zero_day.js';
+import { abyssRouter } from './routes/abyss.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -83,12 +95,46 @@ export const createApp = async () => {
 
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
+  app.use(httpCacheMiddleware);
+
+  // Telemetry middleware
+  app.use((req, res, next) => {
+    snapshotter.trackRequest(req);
+    const start = process.hrtime();
+    telemetry.incrementActiveConnections();
+    telemetry.subsystems.api.requests.add(1);
+
+    res.on('finish', () => {
+      snapshotter.untrackRequest(req);
+      const diff = process.hrtime(start);
+      const duration = diff[0] * 1e3 + diff[1] * 1e-6;
+      telemetry.recordRequest(duration, {
+        method: req.method,
+        route: req.route?.path ?? req.path,
+        status: res.statusCode,
+      });
+      telemetry.decrementActiveConnections();
+
+      if (res.statusCode >= 500) {
+        telemetry.subsystems.api.errors.add(1);
+      }
+    });
+
+    next();
+  });
 
   // Health endpoints (exempt from rate limiting)
   const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
 
-  // Other routes (exempt from rate limiting)
+  // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
+  // Note: /graphql has its own rate limiting chain above
+  app.use((req, res, next) => {
+      if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
+      return rateLimitMiddleware(req, res, next);
+  });
+
+  // Other routes
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
@@ -98,14 +144,15 @@ export const createApp = async () => {
   app.use('/api/webhooks', webhookRouter);
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
+  app.use('/api/aurora', auroraRouter);
+  app.use('/api/oracle', oracleRouter);
+  app.use('/api/phantom-limb', phantomLimbRouter);
+  app.use('/api/echelon2', echelon2Router);
+  app.use('/api/mnemosyne', mnemosyneRouter);
+  app.use('/api/necromancer', necromancerRouter);
+  app.use('/api/zero-day', zeroDayRouter);
+  app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
-  app.use(
-    rateLimit({
-      windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
-      max: Number(process.env.RATE_LIMIT_MAX || 600),
-      message: { error: 'Too many requests, please try again later' },
-    }),
-  );
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
@@ -183,6 +230,7 @@ export const createApp = async () => {
     './graphql/plugins/auditLogger.js'
   );
   const { depthLimit } = await import('./graphql/validation/depthLimit.js');
+  const { rateLimitAndCachePlugin } = await import('./graphql/plugins/rateLimitAndCache.js');
 
   const apollo = new ApolloServer({
     schema,
@@ -191,6 +239,7 @@ export const createApp = async () => {
       persistedQueriesPlugin as any,
       resolverMetricsPlugin as any,
       auditLoggerPlugin as any,
+      rateLimitAndCachePlugin(schema) as any,
       // Enable PBAC in production
       ...(cfg.NODE_ENV === 'production' ? [pbacPlugin() as any] : []),
     ],
@@ -249,6 +298,7 @@ export const createApp = async () => {
     '/graphql',
     express.json(),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    rateLimitMiddleware, // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, { context: getContext }),
   );
 
@@ -264,6 +314,8 @@ export const createApp = async () => {
       // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
       // though import side-effects usually suffice.
   }
+
+  logger.info('Anomaly detector activated.');
 
   return app;
 };

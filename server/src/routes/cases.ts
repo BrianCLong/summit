@@ -8,6 +8,7 @@ import { getPostgresPool } from '../db/postgres.js';
 import { CaseService } from '../cases/CaseService.js';
 import { CaseInput, CaseUpdateInput } from '../repos/CaseRepo.js';
 import { LegalBasis } from '../repos/AuditAccessLogRepo.js';
+import { goldenPathStepTotal } from '../monitoring/metrics.js';
 import logger from '../config/logger.js';
 
 const routeLogger = logger.child({ name: 'CaseRoutes' });
@@ -82,6 +83,12 @@ caseRouter.post('/', async (req, res) => {
 
     const auditContext = getAuditContext(req.body);
     const caseRecord = await service.createCase(input, userId, auditContext);
+
+    goldenPathStepTotal.inc({
+      step: 'investigation_created',
+      status: 'success',
+      tenant_id: tenantId
+    });
 
     routeLogger.info(
       { caseId: caseRecord.id, tenantId, userId },

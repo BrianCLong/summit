@@ -7,17 +7,42 @@ import Redis from 'ioredis';
 import { Message } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { randomUUID } from 'crypto';
+import { MPSCChannel } from '../../../../lib/streaming/channel-manager.js';
 
 export class MessagePersistence {
   private redis: Redis;
   private readonly ttl: number;
   private readonly maxMessages: number;
   private readonly keyPrefix = 'messages';
+  private channel: MPSCChannel<Message>;
 
   constructor(redis: Redis, ttlSeconds = 3600, maxMessages = 1000) {
     this.redis = redis;
     this.ttl = ttlSeconds;
     this.maxMessages = maxMessages;
+    this.channel = new MPSCChannel<Message>(1000);
+
+    this.processMessages();
+  }
+
+  private async processMessages(): Promise<void> {
+    for await (const message of this.channel) {
+      try {
+        const key = this.getRoomKey(message.room);
+        const value = JSON.stringify(message);
+        const score = message.timestamp;
+
+        const pipeline = this.redis.pipeline();
+        pipeline.zadd(key, score, value);
+        pipeline.zremrangebyrank(key, 0, -(this.maxMessages + 1));
+        pipeline.expire(key, message.ttl || this.ttl);
+
+        await pipeline.exec();
+        logger.debug({ messageId: message.id }, 'Persisted message from channel');
+      } catch (error) {
+        logger.error({ error, messageId: message.id }, 'Error persisting message from channel');
+      }
+    }
   }
 
   /**
@@ -29,28 +54,8 @@ export class MessagePersistence {
       ...message,
       timestamp: message.timestamp || Date.now(),
     };
-
-    const key = this.getRoomKey(message.room);
-    const value = JSON.stringify(fullMessage);
-    const score = fullMessage.timestamp;
-
-    // Use sorted set for chronological ordering
-    const pipeline = this.redis.pipeline();
-    pipeline.zadd(key, score, value);
-    pipeline.zremrangebyrank(key, 0, -(this.maxMessages + 1)); // Keep only latest N messages
-    pipeline.expire(key, fullMessage.ttl || this.ttl);
-
-    await pipeline.exec();
-
-    logger.debug(
-      {
-        messageId: fullMessage.id,
-        room: message.room,
-        from: message.from,
-      },
-      'Message stored'
-    );
-
+    await this.channel.send(fullMessage);
+    logger.debug({ messageId: fullMessage.id }, 'Message queued for persistence');
     return fullMessage;
   }
 

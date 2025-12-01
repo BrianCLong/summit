@@ -18,7 +18,8 @@ import {
   WebSocketConfig,
 } from './types/index.js';
 import { createAuthMiddleware } from './middleware/auth.js';
-import { RateLimiter, createRateLimitMiddleware } from './middleware/rateLimit.js';
+import { createRateLimitMiddleware } from './middleware/rateLimit.js';
+import { AdaptiveRateLimiter } from '../../../lib/streaming/rate-limiter.js';
 import { ConnectionManager } from './managers/ConnectionManager.js';
 import { PresenceManager } from './managers/PresenceManager.js';
 import { RoomManager } from './managers/RoomManager.js';
@@ -35,7 +36,7 @@ export class WebSocketServer {
   private redis: Redis;
   private redisSub: Redis;
   private config: WebSocketConfig;
-  private rateLimiter: RateLimiter;
+  private rateLimiter: AdaptiveRateLimiter;
   private connectionManager: ConnectionManager;
   private presenceManager: PresenceManager;
   private roomManager: RoomManager;
@@ -65,7 +66,10 @@ export class WebSocketServer {
     this.redisSub = this.redis.duplicate();
 
     // Initialize managers
-    this.rateLimiter = new RateLimiter(config.rateLimit);
+    this.rateLimiter = new AdaptiveRateLimiter({
+      maxTokens: config.rateLimit.burstSize,
+      refillRate: config.rateLimit.messageRatePerSecond,
+    });
     this.connectionManager = new ConnectionManager();
     this.presenceManager = new PresenceManager(this.redis, config.persistence.ttl);
     this.roomManager = new RoomManager();
