@@ -12,5 +12,8 @@ export * from './utils';
 // Configuration
 export * from './config';
 
+// Node Manager
+export * from './node-manager/EdgeNodeManager';
+
 // Version
 export const VERSION = '1.0.0';
