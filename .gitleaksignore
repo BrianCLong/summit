@@ -1,0 +1,17 @@
+# Gitleaks Ignore File
+# Add specific fingerprints or line hashes here to suppress false positives
+
+# Example:
+# file.ts:line_hash:fingerprint
+
+# Test files often have fake secrets
+**/*.test.ts
+**/*.spec.ts
+**/__tests__/**
+**/test/fixtures/**
+**/examples/**
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
