@@ -1,12 +1,12 @@
 /**
  * Monitoring middleware for Express and GraphQL
  */
-const { metrics } = require('./metrics');
+import * as metrics from './metrics.js';
 
 /**
  * Express middleware to track HTTP request metrics
  */
-function httpMetricsMiddleware(req, res, next) {
+export function httpMetricsMiddleware(req, res, next) {
   const start = Date.now();
 
   // Track request count
@@ -65,7 +65,7 @@ function httpMetricsMiddleware(req, res, next) {
 /**
  * GraphQL middleware to track GraphQL operation metrics
  */
-function graphqlMetricsMiddleware() {
+export function graphqlMetricsMiddleware() {
   return {
     requestDidStart() {
       return {
@@ -131,7 +131,7 @@ function graphqlMetricsMiddleware() {
 /**
  * Database query wrapper to track DB metrics
  */
-function trackDbQuery(database, operation, queryFunction) {
+export function trackDbQuery(database, operation, queryFunction) {
   return async (...args) => {
     const start = Date.now();
     let status = 'success';
@@ -159,7 +159,7 @@ function trackDbQuery(database, operation, queryFunction) {
 /**
  * AI job tracking wrapper
  */
-function trackAiJob(jobType, jobFunction) {
+export function trackAiJob(jobType, jobFunction) {
   return async (...args) => {
     const start = Date.now();
     let status = 'success';
@@ -199,7 +199,7 @@ function trackAiJob(jobType, jobFunction) {
 /**
  * Graph operation tracking wrapper
  */
-function trackGraphOperation(operation, investigationId, operationFunction) {
+export function trackGraphOperation(operation, investigationId, operationFunction) {
   return async (...args) => {
     const start = Date.now();
 
@@ -220,7 +220,7 @@ function trackGraphOperation(operation, investigationId, operationFunction) {
 /**
  * WebSocket connection tracking
  */
-function trackWebSocketConnection(io) {
+export function trackWebSocketConnection(io) {
   io.on('connection', (socket) => {
     metrics.websocketConnections.inc();
 
@@ -253,7 +253,7 @@ function trackWebSocketConnection(io) {
 /**
  * Error tracking wrapper
  */
-function trackError(module, errorType, severity = 'error') {
+export function trackError(module, errorType, severity = 'error') {
   metrics.applicationErrors.inc({
     module,
     error_type: errorType,
@@ -264,20 +264,9 @@ function trackError(module, errorType, severity = 'error') {
 /**
  * Investigation metrics tracking
  */
-function updateInvestigationMetrics(investigationId, operation, userId) {
+export function updateInvestigationMetrics(investigationId, operation, userId) {
   metrics.investigationOperations.inc({
     operation,
     user_id: userId,
   });
 }
-
-module.exports = {
-  httpMetricsMiddleware,
-  graphqlMetricsMiddleware,
-  trackDbQuery,
-  trackAiJob,
-  trackGraphOperation,
-  trackWebSocketConnection,
-  trackError,
-  updateInvestigationMetrics,
-};
