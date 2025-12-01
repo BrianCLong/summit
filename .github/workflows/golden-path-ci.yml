@@ -1,0 +1,94 @@
+name: CI Golden Path
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (if needed)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+        if: ${{ hashFiles('**/package.json') != '' }}
+
+      - name: Setup Go (if needed)
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+        if: ${{ hashFiles('**/go.mod') != '' }}
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/go-build
+            ~/go/pkg/mod
+            ~/.pnpm-store
+          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/go.sum', '**/pnpm-lock.yaml') }}
+
+      - name: Enable corepack
+        run: corepack enable
+        if: ${{ hashFiles('**/pnpm-lock.yaml') != '' }}
+
+      - name: Install deps (Node - pnpm)
+        run: pnpm install --frozen-lockfile
+        if: ${{ hashFiles('**/pnpm-lock.yaml') != '' }}
+
+      - name: Install deps (Node - npm)
+        run: npm ci --ignore-scripts
+        if: ${{ hashFiles('**/package-lock.json') != '' }}
+
+      - name: Unit tests (Node - pnpm)
+        run: pnpm test --if-present -- --ci
+        if: ${{ hashFiles('**/pnpm-lock.yaml') != '' }}
+
+      - name: Unit tests (Node - npm)
+        run: npm test --if-present -- --ci
+        if: ${{ hashFiles('**/package-lock.json') != '' }}
+
+      - name: Go tests
+        run: go test ./...
+        if: ${{ hashFiles('**/go.mod') != '' }}
+
+      - name: Lint (ESLint)
+        run: npx eslint . || true
+        if: ${{ hashFiles('**/.eslintrc*') != '' }}
+
+      - name: Static analysis (Go vet)
+        run: go vet ./...
+        if: ${{ hashFiles('**/go.mod') != '' }}
+
+      - name: Build SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          artifact-name: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.spdx.json
+
+      - name: Trivy FS scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-fs.sarif
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs.sarif

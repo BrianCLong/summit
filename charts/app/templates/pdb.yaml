@@ -1,11 +1,9 @@
-{{- if .Values.pdb.enabled }}
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: {{ include "app.fullname" . }}
 spec:
-  minAvailable: {{ .Values.pdb.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "app.name" . }}
-{{- end }}
+      app.kubernetes.io/name: {{ include "app.fullname" . }}
