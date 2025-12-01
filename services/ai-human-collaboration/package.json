@@ -1,0 +1,54 @@
+{
+  "name": "@intelgraph/ai-human-collaboration",
+  "version": "1.0.0",
+  "description": "AI-Human Collaboration Service with Commander's Control - AI teammate providing recommendations, human-in-the-loop overrides, feedback-driven learning, and full mission traceability",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./integrations": {
+      "import": "./dist/integrations/index.js",
+      "types": "./dist/integrations/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix",
+    "test": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js",
+    "test:coverage": "node --experimental-vm-modules ../../node_modules/jest/bin/jest.js --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "ai",
+    "human-in-the-loop",
+    "collaboration",
+    "recommendations",
+    "commander-control",
+    "audit-trail",
+    "traceability",
+    "agent-gateway"
+  ],
+  "author": "IntelGraph Team",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "@intelgraph/agent-gateway": ">=1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@intelgraph/agent-gateway": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
