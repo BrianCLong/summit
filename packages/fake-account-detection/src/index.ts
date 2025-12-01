@@ -3,6 +3,9 @@
  * Bot detection, sockpuppet identification, and profile authenticity scoring
  */
 
+export * from './psycholinguistics';
+export * from './graph-neural/gnn-analyzer';
+
 export interface FakeAccountAnalysis {
   isFake: boolean;
   confidence: number;

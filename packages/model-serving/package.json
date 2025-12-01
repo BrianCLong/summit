@@ -1,0 +1,44 @@
+{
+  "name": "@intelgraph/model-serving",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "Multi-framework model serving with advanced deployment strategies",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@intelgraph/mlops-platform": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "express": "^5.1.0",
+    "compression": "^1.7.4",
+    "uuid": "^13.0.0",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/compression": "^1.7.5",
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "model-serving",
+    "inference",
+    "deployment",
+    "canary",
+    "a-b-testing"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}

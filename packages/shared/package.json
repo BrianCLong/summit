@@ -1,0 +1,7 @@
+{
+  "name": "@summit/shared",
+  "version": "1.0.0",
+  "main": "provenance.js",
+  "types": "provenance.d.ts",
+  "dependencies": {}
+}
