@@ -1,0 +1,42 @@
+{
+  "name": "@intelgraph/mlops-service",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "description": "MLOps service with REST API for model lifecycle management",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@intelgraph/mlops-platform": "workspace:*",
+    "@intelgraph/model-serving": "workspace:*",
+    "@intelgraph/model-monitoring": "workspace:*",
+    "@intelgraph/model-explainability": "workspace:*",
+    "@intelgraph/training-orchestration": "workspace:*",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "compression": "^1.7.4",
+    "winston": "^3.18.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.6.2",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "mlops",
+    "api",
+    "service"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}
