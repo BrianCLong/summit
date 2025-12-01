@@ -34,6 +34,7 @@ import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
 import webhookRouter from './routes/webhooks.js';
 import { webhookWorker } from './webhooks/webhook.worker.js';
+import { startConsistencyWorker, scheduleConsistencyCheck } from './workers/consistencyWorker.js';
 import supportTicketsRouter from './routes/support-tickets.js';
 import ticketLinksRouter from './routes/ticket-links.js';
 import { auroraRouter } from './routes/aurora.js';
@@ -44,6 +45,7 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import consistencyRouter from './routes/consistency.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -152,6 +154,7 @@ export const createApp = async () => {
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+  app.use('/api/consistency', consistencyRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
@@ -314,6 +317,11 @@ export const createApp = async () => {
       // Just referencing it to prevent tree-shaking/unused variable lint errors if any,
       // though import side-effects usually suffice.
   }
+
+  // Start consistency worker
+  startConsistencyWorker();
+  // Schedule consistency check
+  await scheduleConsistencyCheck();
 
   logger.info('Anomaly detector activated.');
 
