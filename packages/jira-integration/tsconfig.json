@@ -15,8 +15,7 @@
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "target": "ES2022",
-    "allowImportingTsExtensions": false,
-    "composite": true
+    "composite": true,
     "types": []
   },
   "include": [
