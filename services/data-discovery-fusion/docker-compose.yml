@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  data-discovery-fusion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: summit-data-discovery-fusion
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 4100
+      REDIS_URL: redis://redis:6379
+      SCAN_INTERVAL: ${SCAN_INTERVAL:-60000}
+      AUTO_INGEST_THRESHOLD: ${AUTO_INGEST_THRESHOLD:-0.8}
+      AUTO_DISCOVERY: ${AUTO_DISCOVERY:-true}
+      ENABLE_LEARNING: ${ENABLE_LEARNING:-true}
+      ENABLE_EVENTS: ${ENABLE_EVENTS:-true}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - '4100:4100'
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:4100/api/v1/health']
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    networks:
+      - summit
+    depends_on:
+      redis:
+        condition: service_healthy
+
+networks:
+  summit:
+    external: true
