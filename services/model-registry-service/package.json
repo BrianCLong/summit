@@ -1,0 +1,39 @@
+{
+  "name": "@intelgraph/model-registry-service",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/server.js",
+  "description": "Dedicated model registry service with advanced versioning and lineage tracking",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@intelgraph/mlops-platform": "workspace:*",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "helmet": "^8.1.0",
+    "compression": "^1.7.4",
+    "winston": "^3.18.3",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/cors": "^2.8.17",
+    "@types/compression": "^1.7.5",
+    "@types/pg": "^8.15.6",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.6.2",
+    "typescript": "^5.9.3"
+  },
+  "keywords": [
+    "model-registry",
+    "versioning",
+    "lineage"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}
