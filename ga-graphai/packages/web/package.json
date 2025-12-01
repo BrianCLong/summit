@@ -10,12 +10,16 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ga-graphai/knowledge-graph": "file:../knowledge-graph",
     "common-types": "file:../common-types",
     "policy": "file:../policy",
-    "@ga-graphai/knowledge-graph": "file:../knowledge-graph"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
