@@ -1,15 +1,32 @@
-name: Trivy Container Scan
-on: [pull_request]
+name: Trivy Scan
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  pull_request:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
   trivy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
+
     steps:
-      - uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
-      - uses: aquasecurity/trivy-action@b95621a837499832c705591a4924e4b10b34332e # 0.16.0
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy FS Scan
+        uses: aquasecurity/trivy-action@0.20.0
         with:
           scan-type: fs
-          ignore-unfixed: true
-          severity: HIGH,CRITICAL
+          format: sarif
+          output: trivy-results.sarif
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
