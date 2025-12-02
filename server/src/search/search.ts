@@ -1,5 +1,6 @@
 import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';
+import SemanticSearchService from '../services/SemanticSearchService.js';
 
 type SearchInput = {
   q?: string;
@@ -12,6 +13,37 @@ type SearchInput = {
 
 export async function searchAll(input: SearchInput) {
   const pg = new Pool({ connectionString: process.env.DATABASE_URL });
+
+  // Semantic Search with Fallback
+  if (input.semantic && input.q) {
+    const semanticService = new SemanticSearchService();
+    try {
+      const results = await semanticService.searchCases(input.q, {
+        status: input.facets?.status,
+        dateFrom: input.time?.from,
+        dateTo: input.time?.to,
+      }, 100);
+
+      // If we got good results, return them (possibly expanding graph later)
+      if (results.length > 0) {
+        // Map to expected format
+        const rows = results.map(r => ({
+          id: r.id,
+          title: r.title,
+          status: r.status,
+          created_at: r.created_at
+        }));
+
+        await pg.end(); // close pg pool if we are done with it
+
+        return expandGraph(rows, input.graphExpand);
+      }
+    } catch (e) {
+      console.warn("Semantic search failed, falling back to keyword search", e);
+    }
+  }
+
+  // Keyword Search Fallback
   const driver = neo4j.driver(
     process.env.NEO4J_URI!,
     neo4j.auth.basic(
@@ -19,6 +51,7 @@ export async function searchAll(input: SearchInput) {
       process.env.NEO4J_PASSWORD || process.env.NEO4J_PASS || '',
     ),
   );
+
   const where: string[] = [];
   const params: any = {};
   if (input.q) {
@@ -41,29 +74,52 @@ export async function searchAll(input: SearchInput) {
   }
   const sql = `SELECT id, title, status, created_at FROM cases ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY created_at DESC LIMIT 100`;
   const base = await pg.query(sql, Object.values(params));
+  await pg.end();
 
-  // Optionally expand to graph neighborhood for returned cases
-  let graph: any[] = [];
-  if (input.graphExpand && base.rows.length) {
-    const ids = base.rows.map((r: any) => r.id);
-    const session = driver.session();
-    try {
-      const res = await session.run(
-        `MATCH (c:Case) WHERE c.id IN $ids
-         OPTIONAL MATCH (c)-[:MENTIONS]->(i:IOC)
-         RETURN c.id as id, collect({ ioc: i.value, type: i.type })[0..20] as iocs`,
-        { ids },
-      );
-      graph = res.records.map((r) => ({
-        id: r.get('id'),
-        iocs: r.get('iocs'),
-      }));
-    } finally {
-      await session.close();
-    }
+  // Keyword search expansion uses the local driver, but we want to use the helper.
+  // The helper creates its own driver.
+  await driver.close();
+
+  return expandGraph(base.rows, input.graphExpand);
+}
+
+// Separate function for graph expansion to be reused by semantic and keyword search
+async function expandGraph(rows: any[], expand: boolean | undefined) {
+  if (!expand || !rows.length) {
+    return { results: rows, graph: [] };
   }
 
-  await pg.end();
-  await driver.close();
-  return { results: base.rows, graph };
+  // NOTE: Ideally we should use a shared driver instance from config/database.ts
+  // but to minimize dependencies and keep this file self-contained as before,
+  // we create a transient driver. In high-load, this should be refactored to use a singleton.
+  const driver = neo4j.driver(
+    process.env.NEO4J_URI!,
+    neo4j.auth.basic(
+      process.env.NEO4J_USER!,
+      process.env.NEO4J_PASSWORD || process.env.NEO4J_PASS || '',
+    ),
+  );
+
+  let graph: any[] = [];
+  const ids = rows.map((r: any) => r.id);
+  const session = driver.session();
+  try {
+    const res = await session.run(
+      `MATCH (c:Case) WHERE c.id IN $ids
+        OPTIONAL MATCH (c)-[:MENTIONS]->(i:IOC)
+        RETURN c.id as id, collect({ ioc: i.value, type: i.type })[0..20] as iocs`,
+      { ids },
+    );
+    graph = res.records.map((r) => ({
+      id: r.get('id'),
+      iocs: r.get('iocs'),
+    }));
+  } catch (e) {
+    console.error("Graph expansion failed", e);
+  } finally {
+    await session.close();
+    await driver.close();
+  }
+
+  return { results: rows, graph };
 }
