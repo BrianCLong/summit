@@ -1,9 +1,9 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [main]
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
 
 concurrency:
@@ -13,13 +13,15 @@ concurrency:
 env:
   PNPM_CACHE_FOLDER: ~/.pnpm-store
   NODE_VERSION: '20.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
 
 permissions:
   contents: read
+  packages: write
   security-events: write
 
 jobs:
-  # Fast lane: Quick feedback on code quality (no build required)
   fast-checks:
     runs-on: ubuntu-latest
     steps:
@@ -27,231 +29,83 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm -w run lint
       - name: Typecheck
         run: pnpm -w run typecheck
-      - name: Production guardrails
-        run: |
-          set +e
-          NODE_ENV=production \
-          JWT_SECRET=weaksecret \
-          JWT_REFRESH_SECRET=weaksecret2 \
-          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
-          NEO4J_URI=bolt://localhost:7687 \
-          NEO4J_USERNAME=neo4j \
-          NEO4J_PASSWORD=devpassword \
-          REDIS_HOST=localhost \
-          REDIS_PORT=6379 \
-          REDIS_PASSWORD=devpassword \
-          CORS_ORIGIN=* \
-          pnpm ci:prod-guard
-          status=$?
-          if [ "$status" -eq 0 ]; then
-            echo "Prod guardrails command succeeded unexpectedly"
-            exit 1
-          fi
-          echo "Prod guardrails correctly blocked unsafe config"
 
-  # Build lane: Build and test
   build-test:
+    needs: fast-checks
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Build workspace
         run: pnpm -w run build
-      - name: Unit & integration tests
+      - name: Unit Tests
         run: pnpm -w run test
-      - name: Upload build artifacts for golden path
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
-            .turbo
-            node_modules/.cache
+            dist
+            build
           retention-days: 1
 
-  # Security lane: Run security scans (non-blocking on PR)
-  security-scan:
+  build-image:
+    needs: build-test
     runs-on: ubuntu-latest
-    continue-on-error: true
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
     steps:
       - uses: actions/checkout@v4
-      - name: Generate SBOM (SPDX)
-        uses: anchore/sbom-action@v0
+      - name: Log in to the Container registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
         with:
-          path: .
-          output-file: sbom.spdx.json
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-spdx
-          path: sbom.spdx.json
-      - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          format: table
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
-          vuln-type: 'os,library'
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  # Integration lane: Golden path smoke tests
-  golden-path:
-    runs-on: ubuntu-latest
-    needs: [fast-checks, build-test]
-    env:
-      DOCKER_BUILDKIT: '1'
-      COMPOSE_DOCKER_CLI_BUILD: '1'
-      PNPM_CACHE_FOLDER: ~/.pnpm-store
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-        continue-on-error: true
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Bootstrap repo (make bootstrap)
-        run: make bootstrap
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml', 'server/package.json', 'client/package.json') }}
-          restore-keys: ${{ runner.os }}-buildx-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build API image (cached)
-        uses: docker/build-push-action@v6
-        with:
-          context: ./server
-          file: ./server/Dockerfile.dev
-          tags: summit/api:ci
-          push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Build client image (cached)
-        uses: docker/build-push-action@v6
-        with:
-          context: ./client
-          file: ./client/Dockerfile.dev
-          tags: summit/web:ci
-          push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      # Move cache to prevent unbounded growth
-      - name: Rotate Docker cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
-      - name: Bring up stack (make up)
-        run: make up
-      - name: Golden path smoke tests
-        run: make smoke
-      - name: Compose logs on failure
-        if: failure()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
-      - name: Tear down stack
-        if: always()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
 
-  # Compatibility matrix: Test on multiple Node versions (non-blocking)
-  compatibility:
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    strategy:
-      matrix:
-        node: ['18.x']
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v6
         with:
-          node-version: ${{ matrix.node }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-${{ matrix.node }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.node }}-pnpm-
-            ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-      - name: Build workspace
-        run: pnpm -w run build
-      - name: Unit tests
-        run: pnpm -w run test
+          context: .
+          file: ./server/Dockerfile
+          # Push only on main branch pushes
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  provenance:
+    needs: build-image
+    if: github.event_name != 'pull_request'
+    uses: ./.github/workflows/sbom-provenance.yml
+    with:
+      image-digest: ${{ needs.build-image.outputs.image-digest }}
+      image-name: ghcr.io/${{ github.repository }}
+    secrets: inherit

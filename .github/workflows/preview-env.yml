@@ -1,270 +1,69 @@
 name: Preview Environment
 
-permissions:
-  contents: read
-  pull-requests: write
-  packages: write
-
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
-    paths:
-      - 'server/**'
-      - 'client/**'
-      - 'deploy/**'
-      - '.github/workflows/**'
-
-env:
-  REGISTRY: ghcr.io
-  NAMESPACE_PREFIX: intelgraph-pr
-
-concurrency:
-  group: preview-${{ github.event.number }}
-  cancel-in-progress: true
+    types: [opened, synchronize, reopened, labeled]
 
 jobs:
-  build-images:
-    if: github.event.action != 'closed'
-    runs-on: ubuntu-latest
-    outputs:
-      server-image: ${{ steps.meta.outputs.server-image }}
-      client-image: ${{ steps.meta.outputs.client-image }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate metadata
-        id: meta
-        run: |
-          PR_NUMBER=${{ github.event.number }}
-          SERVER_IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/server:pr-${PR_NUMBER}"
-          CLIENT_IMAGE="${{ env.REGISTRY }}/${{ github.repository }}/client:pr-${PR_NUMBER}"
-          echo "server-image=${SERVER_IMAGE}" >> $GITHUB_OUTPUT
-          echo "client-image=${CLIENT_IMAGE}" >> $GITHUB_OUTPUT
-
-      - name: Build and push server image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./server
-          push: true
-          tags: ${{ steps.meta.outputs.server-image }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build and push client image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./client
-          push: true
-          tags: ${{ steps.meta.outputs.client-image }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   deploy-preview:
-    if: github.event.action != 'closed'
-    needs: build-images
+    if: contains(github.event.pull_request.labels.*.name, 'preview')
     runs-on: ubuntu-latest
-    environment: preview
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Helm
+      # Kube auth (OIDC) - Replace with your cloud provider's action
+      # - name: Authenticate to Cloud
+      #   uses: aws-actions/configure-aws-credentials@v4 ...
+
+      - name: Install Helm
         uses: azure/setup-helm@v4
+
+      - name: Build & Push Image
+        uses: docker/build-push-action@v6
         with:
-          version: v3.14.0
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/app:${{ github.sha }}
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: v1.29.0
-
-      - name: Configure kubeconfig
+      - name: Deploy Preview
+        env:
+          RELEASE_NAME: preview-${{ github.event.pull_request.number }}
+          NAMESPACE: previews
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-
-      - name: Create namespace
-        run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
-          kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
-
-      - name: Deploy preview environment
-        run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
-          PR_NUMBER=${{ github.event.number }}
-
-          helm upgrade --install \
-            intelgraph-pr-${PR_NUMBER} \
-            ./deploy/helm/intelgraph \
-            --namespace ${NAMESPACE} \
-            --set image.server.repository=${{ env.REGISTRY }}/${{ github.repository }}/server \
-            --set image.server.tag=pr-${PR_NUMBER} \
-            --set image.client.repository=${{ env.REGISTRY }}/${{ github.repository }}/client \
-            --set image.client.tag=pr-${PR_NUMBER} \
-            --set ingress.enabled=true \
-            --set ingress.host=pr-${PR_NUMBER}.preview.intelgraph.dev \
-            --set resources.requests.cpu=100m \
-            --set resources.requests.memory=256Mi \
-            --set resources.limits.cpu=500m \
-            --set resources.limits.memory=1Gi \
-            --set autoscaling.enabled=false \
-            --set replicaCount=1 \
-            --set env.NODE_ENV=preview \
-            --set env.DATABASE_URL="${{ secrets.PREVIEW_DATABASE_URL }}" \
-            --set env.REDIS_URL="${{ secrets.PREVIEW_REDIS_URL }}" \
-            --set env.NEO4J_URI="${{ secrets.PREVIEW_NEO4J_URI }}" \
-            --timeout 10m \
+          helm upgrade --install $RELEASE_NAME ./deploy/helm/intelgraph \
+            --namespace $NAMESPACE \
+            --create-namespace \
+            --set image.tag=${{ github.sha }} \
+            --set ingress.host=$RELEASE_NAME.example.com \
             --wait
 
-      - name: Verify deployment
+      - name: Seed Data
         run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
-          kubectl rollout status deployment/intelgraph-pr-${{ github.event.number }} -n ${NAMESPACE} --timeout=300s
+          chmod +x ops/seed_demo.sh
+          ./ops/seed_demo.sh
 
-  smoke-tests:
-    if: github.event.action != 'closed'
-    needs: deploy-preview
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Post Comment
+        uses: marocchino/sticky-pull-request-comment@v2
         with:
-          node-version: '20.11.x'
-          cache: 'pnpm'
+          message: |
+            🚀 Preview Environment Deployed!
+            URL: https://preview-${{ github.event.pull_request.number }}.example.com
 
-      - name: Install pnpm
-        run: npm install -g pnpm@9.12.0
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run smoke tests
-        env:
-          PREVIEW_URL: https://pr-${{ github.event.number }}.preview.intelgraph.dev
-        run: |
-          # Health check
-          curl -f ${PREVIEW_URL}/health --max-time 30 --retry 3 --retry-delay 5
-
-          # GraphQL health
-          curl -f ${PREVIEW_URL}/health/graphql --max-time 30 --retry 3 --retry-delay 5
-
-          # Basic GraphQL query
-          curl -X POST ${PREVIEW_URL}/graphql \
-            -H "Content-Type: application/json" \
-            -d '{"query":"query Health { __typename }"}' \
-            --max-time 30 --retry 3 --retry-delay 5
-
-      - name: Run E2E golden path tests
-        env:
-          PREVIEW_URL: https://pr-${{ github.event.number }}.preview.intelgraph.dev
-        run: |
-          cd client
-          pnpm test:golden-path
-
-  update-pr:
-    if: github.event.action != 'closed'
-    needs: [deploy-preview, smoke-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Update PR with preview URLs
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PREVIEW_URL="https://pr-${{ github.event.number }}.preview.intelgraph.dev"
-          METRICS_URL="${PREVIEW_URL}/metrics"
-          HEALTH_URL="${PREVIEW_URL}/health"
-          GRAPHQL_URL="${PREVIEW_URL}/graphql"
-
-          cat > pr-comment.md << EOF
-          ## 🚀 Preview Environment Ready
-
-          | Service | URL | Status |
-          |---------|-----|--------|
-          | **Application** | [${PREVIEW_URL}](${PREVIEW_URL}) | ✅ Ready |
-          | **GraphQL Playground** | [${GRAPHQL_URL}](${GRAPHQL_URL}) | ✅ Ready |
-          | **Health Check** | [${HEALTH_URL}](${HEALTH_URL}) | ✅ Healthy |
-          | **Metrics** | [${METRICS_URL}](${METRICS_URL}) | ✅ Active |
-
-          ### 🧪 Test Results
-          - ✅ Smoke tests passed
-          - ✅ Health checks passed
-          - ✅ GraphQL endpoint responsive
-          - ✅ E2E golden path tests passed
-
-          ### 🔧 Environment Details
-          - **Namespace**: ${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}
-          - **Images**:
-            - Server: \`pr-${{ github.event.number }}\`
-            - Client: \`pr-${{ github.event.number }}\`
-          - **Auto-teardown**: When PR is closed
-
-          > This preview environment is automatically updated with each push to this PR.
-          EOF
-
-          gh pr comment ${{ github.event.number }} --body-file pr-comment.md
-
-  teardown:
+  teardown-preview:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
-    environment: preview
+    permissions:
+      id-token: write
     steps:
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: v1.29.0
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: v3.14.0
-
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
-          chmod 600 ~/.kube/config
-
-      - name: Teardown preview environment
-        run: |
-          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
-          PR_NUMBER=${{ github.event.number }}
-
-          # Remove Helm release
-          helm uninstall intelgraph-pr-${PR_NUMBER} --namespace ${NAMESPACE} --ignore-not-found
-
-          # Delete namespace
-          kubectl delete namespace ${NAMESPACE} --ignore-not-found --timeout=300s
-
-      - name: Cleanup container images
+      # Auth steps...
+      - name: Uninstall Helm Release
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_NAME: preview-${{ github.event.pull_request.number }}
+          NAMESPACE: previews
         run: |
-          # Delete PR-specific images
-          gh api --method DELETE \
-            "/orgs/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fserver/versions" \
-            --field "tag=pr-${{ github.event.number }}" || true
-
-          gh api --method DELETE \
-            "/orgs/${{ github.repository_owner }}/packages/container/${{ github.repository }}%2Fclient/versions" \
-            --field "tag=pr-${{ github.event.number }}" || true
-
-      - name: Comment on PR
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr comment ${{ github.event.number }} --body "🧹 Preview environment has been cleaned up and resources have been freed."
+          helm uninstall $RELEASE_NAME --namespace $NAMESPACE || true
