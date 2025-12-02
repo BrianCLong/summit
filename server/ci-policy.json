@@ -1,0 +1,16 @@
+{
+  "policies": [
+    {
+      "rule": "no_disabled_lint",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "require_tests",
+      "severity": "FAIL"
+    },
+    {
+      "rule": "trusted_authors_only",
+      "severity": "WARN"
+    }
+  ]
+}
