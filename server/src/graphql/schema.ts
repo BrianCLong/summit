@@ -315,6 +315,79 @@ type CacheOperationResult {
   message: String!
 }
 
+# Geospatial Types
+
+type GeoPoint {
+  lat: Float!
+  lon: Float!
+}
+
+type GeoObject {
+  type: String
+  confidence: Float
+  location: GeoPoint
+}
+
+type SatelliteAnalysisResult {
+  classification: String
+  objectsDetected: [GeoObject]
+  cloudCover: Float
+  timestamp: String
+}
+
+type ChangeDetectionArea {
+  type: String
+  confidence: Float
+  bounds: GeoPoint
+}
+
+type ChangeDetectionResult {
+  changeDetected: Boolean
+  percentageChange: Float
+  areas: [ChangeDetectionArea]
+}
+
+type MovementAnalysisSegment {
+  fromIndex: Int
+  toIndex: Int
+  distanceMeters: Float
+  speedMps: Float
+  bearingDegrees: Float
+}
+
+type MovementAnalysisResult {
+  totalDistanceMeters: Float
+  maxSpeedMps: Float
+  avgSpeedMps: Float
+  pattern: String
+  segments: [MovementAnalysisSegment]
+}
+
+type ElevationPoint {
+  distance: Float
+  elevation: Float
+  lat: Float
+  lon: Float
+}
+
+type CoordinateTransformResult {
+  lat: Float
+  lon: Float
+  x: Float
+  y: Float
+}
+
+input TrackPointInput {
+  lat: Float!
+  lon: Float!
+  timestamp: String
+}
+
+input GeoPointInput {
+  lat: Float!
+  lon: Float!
+}
+
 # Support Ticket Types
 enum SupportTicketStatus {
   open
@@ -460,6 +533,14 @@ input SemanticSearchFilter {
     getDataQualityInsights(
       graphId: ID
     ): DataQualityReport!
+
+    # Geospatial Queries
+    analyzeSatelliteImage(imageUrl: String!): SatelliteAnalysisResult
+    detectChange(beforeImageUrl: String!, afterImageUrl: String!): ChangeDetectionResult
+    checkGeofence(pointLat: Float!, pointLon: Float!, polygonCoords: [[Float!]!]!): Boolean
+    analyzeMovement(trackPoints: [TrackPointInput!]!): MovementAnalysisResult
+    getElevationProfile(path: [GeoPointInput!]!): [ElevationPoint]
+    transformCoordinates(lat: Float!, lon: Float!, fromSys: String!, toSys: String!): CoordinateTransformResult
 
     """
     Query the knowledge graph using explainable GraphRAG.
