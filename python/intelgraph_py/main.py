@@ -13,8 +13,9 @@ from intelgraph_py.schemas import (
     SubscriptionCreate,
     SubscriptionInDB,
     SubscriptionUpdate,
+    OSINTEnrichmentRequest,
 )
-from intelgraph_py.tasks import analyze_sentiment, run_ai_analytics_task
+from intelgraph_py.tasks import analyze_sentiment, run_ai_analytics_task, enrich_ip_task
 
 # from strawberry.fastapi import GraphQLRouter # Temporarily commented out to resolve import error
 # from intelgraph_py.graphql_schema import schema # Temporarily commented out to resolve import error
@@ -54,6 +55,12 @@ async def startup_event():
 @app.post("/analyze/sentiment")
 def analyze_sentiment_endpoint(request: SentimentRequest):
     task = analyze_sentiment.delay(request.node_id, request.text, request.node_label)
+    return {"task_id": task.id}
+
+
+@app.post("/osint/enrich")
+def trigger_osint_enrichment(request: OSINTEnrichmentRequest):
+    task = enrich_ip_task.delay(request.ip, request.actor_name)
     return {"task_id": task.id}
 
 

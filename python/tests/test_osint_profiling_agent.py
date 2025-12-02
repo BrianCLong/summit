@@ -1,6 +1,6 @@
 import pytest
-from osint_threat_actor_agent import OSINTDataFetcher
-
+from unittest.mock import MagicMock
+from intelgraph_py.connectors.osint_agent import OSINTDataFetcher, ThreatActorProfilingAgent
 
 @pytest.mark.asyncio
 async def test_gather_combines_sources(monkeypatch):
@@ -23,3 +23,24 @@ async def test_gather_combines_sources(monkeypatch):
     assert "shodan" in data
     assert "virustotal" in data
     assert "abuseipdb" not in data
+
+@pytest.mark.asyncio
+async def test_enrich_ip_writes_to_neo4j(monkeypatch):
+    mock_store = MagicMock()
+    mock_fetcher = OSINTDataFetcher()
+
+    async def fake_gather(ip: str):
+        return {"shodan": {"ports": [80]}}
+
+    monkeypatch.setattr(mock_fetcher, "gather", fake_gather)
+
+    agent = ThreatActorProfilingAgent(store=mock_store, fetcher=mock_fetcher)
+
+    result = await agent.enrich_ip("1.2.3.4", "TestActor")
+
+    assert result["status"] == "success"
+    mock_store.query.assert_called_once()
+    args, _ = mock_store.query.call_args
+    # args[0] is query string, args[1] is params dict
+    assert "MERGE (i:IP {address: $ip})" in args[0]
+    assert args[1]["ip"] == "1.2.3.4"
