@@ -1,0 +1,55 @@
+{
+  "name": "@intelgraph/esg-reporting",
+  "version": "1.0.0",
+  "description": "Shared ESG reporting types, validators, and calculation utilities",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./validators": {
+      "import": "./dist/validators/index.js",
+      "types": "./dist/validators/index.d.ts"
+    },
+    "./metrics": {
+      "import": "./dist/metrics/index.js",
+      "types": "./dist/metrics/index.d.ts"
+    },
+    "./frameworks": {
+      "import": "./dist/frameworks/index.js",
+      "types": "./dist/frameworks/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "ts-jest": "^29.1.1"
+  },
+  "keywords": [
+    "esg",
+    "environmental",
+    "social",
+    "governance",
+    "reporting",
+    "compliance"
+  ]
+}
