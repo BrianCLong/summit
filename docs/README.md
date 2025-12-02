@@ -33,6 +33,7 @@ Use this page as the fast path to the docs you need. The golden path details liv
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** – Core components, data flows, and dependencies.
 - **[DATA_MODEL.md](DATA_MODEL.md)** – Graph schema and storage expectations.
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.
+- **[EDGE_DEPLOYMENT_GUIDE.md](EDGE_DEPLOYMENT_GUIDE.md)** – Edge-first deployment, offline operations, and sync strategies.
 - **[ROADMAP.md](ROADMAP.md)** – Current objectives and sequencing (historical plans live under `docs/archived/`).
 
 ## Archived & Historical Material

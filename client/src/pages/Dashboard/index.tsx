@@ -10,6 +10,8 @@ import ResolverTop5 from '../../components/dashboard/ResolverTop5';
 import GrafanaLinkCard from '../../components/dashboard/GrafanaLinkCard';
 import LiveActivityFeed from '../../components/dashboard/LiveActivityFeed';
 import AIGovernanceWidget from '../../components/dashboard/AIGovernanceWidget';
+import EdgeFirstMetricsWidget from '../../components/dashboard/EdgeFirstMetricsWidget';
+import ICValuePropositionBanner from '../../components/dashboard/ICValuePropositionBanner';
 import {
   useDashboardPrefetch,
   useIntelligentPrefetch,
@@ -23,6 +25,11 @@ export default function Dashboard() {
   return (
     <Box p={2} aria-live="polite">
       <Grid container spacing={2}>
+        {/* IC Value Proposition Banner - Prominent display */}
+        <Grid item xs={12}>
+          <ICValuePropositionBanner />
+        </Grid>
+
         <Grid item xs={12} md={6}>
           <Paper elevation={1} sx={{ p: 2, borderRadius: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -36,6 +43,11 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} md={4}>
           <GrafanaLinkCard />
+        </Grid>
+
+        {/* Edge-First Deployment Metrics */}
+        <Grid item xs={12} md={8}>
+          <EdgeFirstMetricsWidget />
         </Grid>
 
         {/* AI Governance & Agent Fleet Dashboard */}
