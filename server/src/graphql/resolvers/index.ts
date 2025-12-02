@@ -8,6 +8,7 @@ import evidenceOkResolvers from './evidenceOk.js';
 import trustRiskResolvers from './trust-risk.js';
 import provenanceResolvers from './provenance.js';
 import supportTicketResolvers from './supportTicket.js';
+import sprint28Resolvers from './sprint28.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040';
@@ -27,6 +28,7 @@ const resolvers = {
     ...(trustRiskResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
     ...(supportTicketResolvers.Query || {}),
+    ...(sprint28Resolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -53,6 +55,7 @@ const resolvers = {
     ...(trustRiskResolvers.Mutation || {}),
     ...(provenanceResolvers.Mutation || {}),
     ...(supportTicketResolvers.Mutation || {}),
+    ...(sprint28Resolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
