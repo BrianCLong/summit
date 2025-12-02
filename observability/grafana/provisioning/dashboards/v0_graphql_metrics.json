@@ -1,0 +1,65 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 2,
+      "title": "GraphQL Query Latency (p95)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_resolver_duration_ms_bucket{resolver_name=\\"searchEntities\\"}[5m])) by (le))",
+          "legendFormat": "searchEntities p95"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(graphql_resolver_duration_ms_bucket{resolver_name=\\"neighbors\\"}[5m])) by (le))",
+          "legendFormat": "neighbors p95"
+        }
+      ]
+    },
+    {
+      "datasource": "prometheus",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 4,
+      "title": "GraphQL Error Rate",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "sum(rate(graphql_errors_total[5m])) / sum(rate(graphql_requests_total[5m]))",
+          "legendFormat": "Overall Error Rate"
+        }
+      ]
+    },
+    {
+      "datasource": "prometheus",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 8 },
+      "id": 6,
+      "title": "Ingest Throughput (rows/sec)",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "sum(rate(ingested_rows_total[5m])) by (type)",
+          "legendFormat": "{{type}}"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 16,
+  "style": "dark",
+  "tags": ["graphql", "v0"],
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "V0 GraphQL & Ingest Metrics",
+  "version": 2
+}
