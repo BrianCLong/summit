@@ -41,6 +41,11 @@ jobs:
       - name: Lint validation
         run: pnpm run lint || true
         continue-on-error: true
+      - name: Typecheck Tests
+        run: pnpm exec tsc --project server/tsconfig.test.json --noEmit || true
+        continue-on-error: true
+      - name: Run Tests
+        run: pnpm test
       # Optional: upload SARIF if your linter emits it (guard to avoid hard-fail)
       - name: Upload SARIF (if present)
         if: always() && hashFiles('**/*.sarif') != ''
