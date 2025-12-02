@@ -44,6 +44,8 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import scimRouter from './routes/scim.js';
+import privacyRouter from './routes/privacy.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -152,6 +154,8 @@ export const createApp = async () => {
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+  app.use('/scim/v2', scimRouter); // SCIM Standard Endpoint
+  app.use('/api/privacy', privacyRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
