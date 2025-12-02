@@ -110,7 +110,7 @@ const config: Config = {
 };
 
 // Validation for production readiness
-if (config.requireRealDbs) {
+if (config.requireRealDbs || config.env === 'production') {
   const requiredEnvVars = [
     'NEO4J_URI',
     'NEO4J_USERNAME',
@@ -121,22 +121,31 @@ if (config.requireRealDbs) {
     'REDIS_HOST',
   ];
 
+  // In production, we expect these to be set explicitly
   const missing = requiredEnvVars.filter((key) => !process.env[key]);
   if (missing.length > 0) {
     console.error(
-      `❌ REQUIRE_REAL_DBS=true but missing env vars: ${missing.join(', ')}`,
+      `❌ Production/RealDBs mode missing env vars: ${missing.join(', ')}`,
     );
     process.exit(1);
   }
 
   // Ensure not using default dev passwords in production
-  const devPasswords = ['devpassword', 'dev_jwt_secret_12345'];
+  const devPasswords = [
+    'devpassword',
+    'dev_jwt_secret_12345',
+    'dev_refresh_secret_67890',
+  ];
   if (
     devPasswords.includes(config.neo4j.password) ||
     devPasswords.includes(config.postgres.password) ||
-    devPasswords.includes(config.jwt.secret)
+    devPasswords.includes(config.jwt.secret) ||
+    devPasswords.includes(config.redis.password) ||
+    devPasswords.includes(config.jwt.refreshSecret)
   ) {
-    console.error('❌ REQUIRE_REAL_DBS=true but using default dev passwords');
+    console.error(
+      '❌ Production/RealDBs mode but using default dev passwords. Set proper secrets.',
+    );
     process.exit(1);
   }
 }
