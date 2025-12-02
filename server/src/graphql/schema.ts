@@ -1,4 +1,6 @@
 export const typeDefs = `
+  directive @auth(requires: String) on FIELD_DEFINITION
+
   scalar JSON
   scalar DateTime
   type Entity { id: ID!, type: String!, props: JSON, createdAt: DateTime!, updatedAt: DateTime, canonicalId: ID }
@@ -410,15 +412,15 @@ input SemanticSearchFilter {
 }
 
   type Query {
-    entity(id: ID!): Entity
-    entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]!
-    relationship(id: ID!): Relationship
-    relationships(from: ID, to: ID, type: String, limit: Int = 25, offset: Int = 0): [Relationship!]!
-    user(id: ID!): User
-    users(limit: Int = 25, offset: Int = 0): [User!]!
-    investigation(id: ID!): Investigation
-    investigations(limit: Int = 25, offset: Int = 0): [Investigation!]!
-    semanticSearch(query: String!, filters: SemanticSearchFilter, limit: Int = 10, offset: Int = 0): [Entity!]! # Enhanced query
+    entity(id: ID!): Entity @auth(requires: "entity:read")
+    entities(type: String, q: String, limit: Int = 25, offset: Int = 0): [Entity!]! @auth(requires: "entity:read")
+    relationship(id: ID!): Relationship @auth(requires: "relationship:read")
+    relationships(from: ID, to: ID, type: String, limit: Int = 25, offset: Int = 0): [Relationship!]! @auth(requires: "relationship:read")
+    user(id: ID!): User @auth(requires: "user:read")
+    users(limit: Int = 25, offset: Int = 0): [User!]! @auth(requires: "user:read")
+    investigation(id: ID!): Investigation @auth(requires: "investigation:read")
+    investigations(limit: Int = 25, offset: Int = 0): [Investigation!]! @auth(requires: "investigation:read")
+    semanticSearch(query: String!, filters: SemanticSearchFilter, limit: Int = 10, offset: Int = 0): [Entity!]! @auth(requires: "entity:read")
     
     # AI Analysis Queries
     """
@@ -428,7 +430,7 @@ input SemanticSearchFilter {
       text: String!
       extractRelationships: Boolean = false
       confidenceThreshold: Float = 0.7
-    ): EntityExtractionResult!
+    ): EntityExtractionResult! @auth(requires: "ai:request")
 
     """
     Analyze potential relationships between a list of entities within given text
@@ -436,7 +438,7 @@ input SemanticSearchFilter {
     analyzeRelationships(
       entities: [String!]!
       text: String!
-    ): [AnalyzedRelationship!]!
+    ): [AnalyzedRelationship!]! @auth(requires: "ai:request")
 
     """
     Generate AI-powered insights for a specific entity
@@ -445,27 +447,27 @@ input SemanticSearchFilter {
       entityId: ID!
       entityType: String!
       properties: JSON = {}
-    ): EntityInsights!
+    ): EntityInsights! @auth(requires: "ai:request")
 
     """
     Perform sentiment analysis on text content
     """
     analyzeSentiment(
       text: String!
-    ): SentimentAnalysis!
+    ): SentimentAnalysis! @auth(requires: "ai:request")
 
     """
     Get AI-generated insights about data quality and suggestions for improvement
     """
     getDataQualityInsights(
       graphId: ID
-    ): DataQualityReport!
+    ): DataQualityReport! @auth(requires: "ai:request")
 
     """
     Query the knowledge graph using explainable GraphRAG.
     Returns structured response with answer, confidence, citations, and why_paths.
     """
-    graphRagAnswer(input: GraphRAGQueryInput!): GraphRAGResponse!
+    graphRagAnswer(input: GraphRAGQueryInput!): GraphRAGResponse! @auth(requires: "ai:request")
     
     """
     Find entities similar to the given entity or text.
@@ -476,37 +478,37 @@ input SemanticSearchFilter {
       text: String
       topK: Int = 10
       investigationId: ID!
-    ): [SimilarEntity!]!
+    ): [SimilarEntity!]! @auth(requires: "ai:request")
     auditTrace(
       investigationId: ID!
       filter: AuditLogFilter
-    ): [AuditLog!]!
+    ): [AuditLog!]! @auth(requires: "audit:read")
 
     # Support Ticket Queries
-    supportTicket(id: ID!): SupportTicket
-    supportTickets(filter: SupportTicketFilter, limit: Int = 50, offset: Int = 0): SupportTicketList!
+    supportTicket(id: ID!): SupportTicket @auth(requires: "support:read")
+    supportTickets(filter: SupportTicketFilter, limit: Int = 50, offset: Int = 0): SupportTicketList! @auth(requires: "support:read")
   }
   
   input EntityInput { type: String!, props: JSON }
   input RelationshipInput { from: ID!, to: ID!, type: String!, props: JSON }
   
   type Mutation {
-    createEntity(input: EntityInput!): Entity!
-    updateEntity(id: ID!, input: EntityInput!): Entity!
-    deleteEntity(id: ID!): Boolean!
-    createRelationship(input: RelationshipInput!): Relationship!
-    updateRelationship(id: ID!, input: RelationshipInput!): Relationship!
-    deleteRelationship(id: ID!): Boolean!
-    createUser(input: UserInput!): User!
-    updateUser(id: ID!, input: UserInput!): User!
-    updateUserPreferences(userId: ID!, preferences: JSON!): User!
-    deleteUser(id: ID!): Boolean!
-    createInvestigation(input: InvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: InvestigationInput!): Investigation!
-    deleteInvestigation(id: ID!): Boolean!
-    linkEntities(text: String!): [LinkedEntity!]!
-    extractRelationships(text: String!, entities: [LinkedEntityInput!]!): [ExtractedRelationship!]!
-    generateEntitiesFromText(investigationId: ID!, text: String!): GeneratedEntitiesResult!
+    createEntity(input: EntityInput!): Entity! @auth(requires: "entity:create")
+    updateEntity(id: ID!, input: EntityInput!): Entity! @auth(requires: "entity:update")
+    deleteEntity(id: ID!): Boolean! @auth(requires: "entity:delete")
+    createRelationship(input: RelationshipInput!): Relationship! @auth(requires: "relationship:create")
+    updateRelationship(id: ID!, input: RelationshipInput!): Relationship! @auth(requires: "relationship:update")
+    deleteRelationship(id: ID!): Boolean! @auth(requires: "relationship:delete")
+    createUser(input: UserInput!): User! @auth(requires: "user:create")
+    updateUser(id: ID!, input: UserInput!): User! @auth(requires: "user:update")
+    updateUserPreferences(userId: ID!, preferences: JSON!): User! @auth(requires: "user:update")
+    deleteUser(id: ID!): Boolean! @auth(requires: "user:delete")
+    createInvestigation(input: InvestigationInput!): Investigation! @auth(requires: "investigation:create")
+    updateInvestigation(id: ID!, input: InvestigationInput!): Investigation! @auth(requires: "investigation:update")
+    deleteInvestigation(id: ID!): Boolean! @auth(requires: "investigation:delete")
+    linkEntities(text: String!): [LinkedEntity!]! @auth(requires: "ai:request")
+    extractRelationships(text: String!, entities: [LinkedEntityInput!]!): [ExtractedRelationship!]! @auth(requires: "ai:request")
+    generateEntitiesFromText(investigationId: ID!, text: String!): GeneratedEntitiesResult! @auth(requires: "ai:request")
 
     # AI Analysis Mutations
     """
@@ -515,7 +517,7 @@ input SemanticSearchFilter {
     applyAISuggestions(
       graphId: ID!
       suggestionIds: [ID!]!
-    ): AISuggestionResult!
+    ): AISuggestionResult! @auth(requires: "entity:update")
 
     """
     Use AI to enhance entities with additional properties, relationships, and insights
@@ -523,25 +525,25 @@ input SemanticSearchFilter {
     enhanceEntitiesWithAI(
       entityIds: [ID!]!
       enhancementTypes: [String!] = ["properties", "relationships", "insights"]
-    ): AIEnhancementResult!
+    ): AIEnhancementResult! @auth(requires: "entity:update")
 
     """
     Clear GraphRAG cache for an investigation.
     Useful when investigation data has changed significantly.
     """
-    clearGraphRAGCache(investigationId: ID!): CacheOperationResult!
+    clearGraphRAGCache(investigationId: ID!): CacheOperationResult! @auth(requires: "investigation:update")
 
     # Support Ticket Mutations
-    createSupportTicket(input: CreateSupportTicketInput!): SupportTicket!
-    updateSupportTicket(id: ID!, input: UpdateSupportTicketInput!): SupportTicket
-    deleteSupportTicket(id: ID!): Boolean!
-    addSupportTicketComment(ticketId: ID!, content: String!, isInternal: Boolean): SupportTicketComment!
+    createSupportTicket(input: CreateSupportTicketInput!): SupportTicket! @auth(requires: "support:create")
+    updateSupportTicket(id: ID!, input: UpdateSupportTicketInput!): SupportTicket @auth(requires: "support:update")
+    deleteSupportTicket(id: ID!): Boolean! @auth(requires: "support:delete")
+    addSupportTicketComment(ticketId: ID!, content: String!, isInternal: Boolean): SupportTicketComment! @auth(requires: "support:update")
   }
   
   type Subscription {
-    entityCreated: Entity!
-    entityUpdated: Entity!
-    entityDeleted: ID!
-    aiRecommendationUpdated: AIRecommendation!
+    entityCreated: Entity! @auth(requires: "entity:read")
+    entityUpdated: Entity! @auth(requires: "entity:read")
+    entityDeleted: ID! @auth(requires: "entity:read")
+    aiRecommendationUpdated: AIRecommendation! @auth(requires: "ai:request")
   }
 `;
