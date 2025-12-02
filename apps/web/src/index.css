@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 @layer base {
   :root {
@@ -51,10 +49,13 @@
 
 @layer base {
   * {
-    @apply border-border;
+    /* @apply border-border; Replaced with CSS var to avoid v4 issue */
+    border-color: hsl(var(--border));
   }
   body {
-    @apply bg-background text-foreground;
+    /* @apply bg-background text-foreground; Replaced with CSS var */
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
   }
 }
 
@@ -129,4 +130,25 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(156, 163, 175, 0.8);
+}
+
+/* Prompt 46: Invisible Hand Mode */
+body.invisible-hand-mode .ai-suggestion-badge,
+body.invisible-hand-mode [data-ai-suggestion="true"] {
+  display: none !important;
+}
+
+body.invisible-hand-mode .copilot-trigger,
+body.invisible-hand-mode .ai-confidence-score {
+  display: none !important;
+}
+
+/* Prompt 44: Cover Story Mode Extra Overrides */
+body.gotham-mode {
+  font-family: 'Roboto', 'Helvetica Neue', 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  letter-spacing: 0.02em;
+}
+
+body.gotham-mode * {
+  border-radius: 0 !important; /* Sharp edges */
 }
