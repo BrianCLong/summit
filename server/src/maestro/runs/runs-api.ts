@@ -9,6 +9,7 @@ import {
 } from '../../conductor/admission/budget-control.js'; // Import BudgetAdmissionController
 import { RequestContext } from '../../middleware/context-binding.js'; // Import RequestContext
 import Redis from 'ioredis'; // Assuming Redis is used for budget control
+import { scheduler } from '../scheduler/Scheduler.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -102,6 +103,9 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
       ...validation.data,
       tenant_id: tenantId,
     }); // Pass tenantId
+
+    // Enqueue the run in the scheduler
+    await scheduler.enqueueRun(run.id, tenantId);
 
     // Format response
     const formattedRun = {

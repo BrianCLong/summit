@@ -5,7 +5,7 @@ const config: Config = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
-    '<rootDir>/tests/setup/jest.setup.js',
+    '<rootDir>/tests/setup/jest.setup.cjs',
     'jest-extended/all',
   ],
   testMatch: [
