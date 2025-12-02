@@ -101,6 +101,7 @@
     "ci:prod-guard": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ci/prod-config-check.ts",
     "smoke": "node scripts/smoke-test.js",
     "smoke:ci": "NODE_ENV=test node scripts/smoke-test.js",
+    "summitctl": "node tools/summitctl/dist/index.js",
     "bootstrap": "make bootstrap",
     "metrics:report": "node scripts/maintainability-report.js",
     "metrics:report:json": "node scripts/maintainability-report.js --json",
