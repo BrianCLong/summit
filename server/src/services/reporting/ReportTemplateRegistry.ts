@@ -3,7 +3,7 @@
  * Manages report templates with clear separation from report generation logic
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import type { ReportTemplate, CustomTemplateRequest, TemplateExtension } from './types/Template.js';
 import { TemplateValidator } from './validators/TemplateValidator.js';
 import { TEMPLATE_DEFINITIONS } from './templates/template-definitions.js';
@@ -73,7 +73,7 @@ export class ReportTemplateRegistry {
   createCustomTemplate(data: CustomTemplateRequest): ReportTemplate {
     TemplateValidator.validateCustomTemplate(data);
 
-    const id = uuidv4();
+    const id = randomUUID();
     const template: ReportTemplate = {
       id,
       type: 'CUSTOM',
@@ -101,7 +101,7 @@ export class ReportTemplateRegistry {
       throw new Error(`Base template not found: ${baseTemplateId}`);
     }
 
-    const id = uuidv4();
+    const id = randomUUID();
     const extendedTemplate: ReportTemplate = {
       ...baseTemplate,
       id,

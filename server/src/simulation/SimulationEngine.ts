@@ -3,7 +3,7 @@
  * Runs various simulations for disaster resilience, maintenance, urban planning, and more
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import {
   SimulationScenario,
   SimulationParameters,
@@ -54,7 +54,7 @@ export class SimulationEngine {
     subtype?: DisasterSubtype | string
   ): Promise<SimulationScenario> {
     const scenario: SimulationScenario = {
-      id: uuidv4(),
+      id: randomUUID(),
       name,
       type,
       subtype,
