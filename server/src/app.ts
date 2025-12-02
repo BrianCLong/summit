@@ -44,6 +44,7 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import lineageRouter from './routes/lineage.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -150,6 +151,7 @@ export const createApp = async () => {
   app.use('/api/echelon2', echelon2Router);
   app.use('/api/mnemosyne', mnemosyneRouter);
   app.use('/api/necromancer', necromancerRouter);
+  app.use('/api/lineage', lineageRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
