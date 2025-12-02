@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import Redis, { Cluster, type ClusterNode } from 'ioredis';
 import config from './index.js';
 import logger from '../utils/logger.js';
 import {
@@ -17,7 +17,9 @@ type Neo4jDriver = ReturnType<typeof getSharedNeo4jDriver>;
 
 let neo4jDriver: Neo4jDriver | null = null;
 let postgresPool: ManagedPostgresPool | null = null;
-let redisClient: Redis | null = null;
+type RedisClient = Redis | Cluster;
+
+let redisClient: RedisClient | null = null;
 let neo4jMigrationsCompleted = false;
 let neo4jReadyHookRegistered = false;
 
@@ -274,7 +276,21 @@ async function createPostgresTables(): Promise<void> {
 }
 
 // Redis Connection
-async function connectRedis(): Promise<Redis | null> {
+function parseClusterNodes(nodes: string[]): ClusterNode[] {
+  return (nodes || [])
+    .map((node) => {
+      const [host, port] = node.split(':');
+      const parsedPort = Number(port || config.redis.port);
+      if (!host) return null;
+      return { host, port: Number.isNaN(parsedPort) ? config.redis.port : parsedPort };
+    })
+    .filter(Boolean) as ClusterNode[];
+}
+
+async function connectRedis(): Promise<RedisClient | null> {
+  if (redisClient) {
+    return redisClient;
+  }
   try {
     const redisConfig: any = {
       host: config.redis.host,
@@ -297,12 +313,21 @@ async function connectRedis(): Promise<Redis | null> {
       },
     };
 
-    // Add password if provided
     if (config.redis.password) {
       redisConfig.password = config.redis.password;
     }
+    if (config.redis.tls) {
+      redisConfig.tls = {};
+    }
 
-    redisClient = new Redis(redisConfig);
+    const clusterNodes = parseClusterNodes(config.redis.clusterNodes);
+    const shouldUseCluster =
+      config.redis.useCluster || (clusterNodes?.length ?? 0) > 0;
+
+    redisClient =
+      shouldUseCluster && clusterNodes.length
+        ? new Cluster(clusterNodes, { redisOptions: redisConfig })
+        : new Redis(redisConfig);
 
     redisClient.on('error', (error) => {
       logger.error('Redis error:', error.message);
@@ -324,10 +349,16 @@ async function connectRedis(): Promise<Redis | null> {
       logger.warn('Redis connection ended');
     });
 
-    await redisClient.connect();
+    if (typeof (redisClient as any).connect === 'function') {
+      await (redisClient as any).connect();
+    }
     await redisClient.ping();
 
-    logger.info('✅ Connected to Redis');
+    logger.info(
+      `✅ Connected to Redis${
+        shouldUseCluster && clusterNodes.length ? ' (cluster mode)' : ''
+      }`,
+    );
     return redisClient;
   } catch (error: any) {
     logger.error('❌ Failed to connect to Redis:', error.message);
@@ -347,7 +378,7 @@ function getPostgresPool(): ManagedPostgresPool {
   return postgresPool;
 }
 
-function getRedisClient(): Redis | null {
+function getRedisClient(): RedisClient | null {
   if (!redisClient) {
     logger.warn('Redis client not available');
     return null;
@@ -368,7 +399,11 @@ async function closeConnections(): Promise<void> {
     logger.info('PostgreSQL connection closed');
   }
   if (redisClient) {
-    redisClient.disconnect();
+    if (typeof (redisClient as any).quit === 'function') {
+      await (redisClient as any).quit();
+    } else if (typeof (redisClient as any).disconnect === 'function') {
+      (redisClient as any).disconnect();
+    }
     logger.info('Redis connection closed');
   }
 }
