@@ -15,6 +15,8 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import BatchJobService from './services/BatchJobService.js';
+import soc2EvidenceJob, { JOB_NAME as SOC2_JOB_NAME } from './jobs/processors/soc2EvidenceJob.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -74,6 +76,10 @@ const startServer = async () => {
   httpServer.listen(port, async () => {
     logger.info(`Server listening on port ${port}`);
 
+    // Initialize and start Batch Job Service
+    await BatchJobService.start();
+    BatchJobService.boss.work(SOC2_JOB_NAME, soc2EvidenceJob);
+
     // Initialize and start Data Retention Service
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
@@ -109,6 +115,7 @@ const startServer = async () => {
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
+    await BatchJobService.stop();
     await Promise.allSettled([
       closeNeo4jDriver(),
       closePostgresPool(),
