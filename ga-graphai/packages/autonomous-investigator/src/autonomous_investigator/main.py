@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
+from .domain import CorrelationReport as DomainCorrelationReport
 from .domain import Hypothesis as DomainHypothesis
 from .domain import Objective as DomainObjective
 from .domain import Plan as DomainPlan
@@ -28,6 +29,7 @@ class LeadModel(BaseModel):
     signal_type: str
     severity: float = Field(ge=0, le=1)
     confidence: float = Field(ge=0, le=1)
+    domain: str = Field(default="unspecified")
 
 
 class InvestigationRequest(BaseModel):
@@ -68,6 +70,37 @@ class InvestigationResponse(BaseModel):
     assurance_score: float
 
 
+class EvidenceLinkModel(BaseModel):
+    source_id: str
+    target_id: str
+    rationale: str
+    confidence: float
+
+
+class EvidenceChainModel(BaseModel):
+    chain_id: str
+    links: list[EvidenceLinkModel]
+    strength: float
+    narrative: str
+
+
+class DomainCorrelationModel(BaseModel):
+    domain: str
+    signals: list[str]
+    coverage: float
+    mean_confidence: float
+    mean_severity: float
+    dominant_types: list[str]
+
+
+class CorrelationReportModel(BaseModel):
+    case_id: str
+    summary: str
+    domain_correlations: list[DomainCorrelationModel]
+    evidence_chains: list[EvidenceChainModel]
+    overall_confidence: float
+
+
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
@@ -88,6 +121,7 @@ def _to_domain_signal(model: LeadModel) -> DomainSignal:
         signal_type=model.signal_type,
         severity=model.severity,
         confidence=model.confidence,
+        domain=model.domain,
     )
 
 
@@ -127,6 +161,27 @@ def _from_domain_plan(plan: DomainPlan) -> InvestigationResponse:
     )
 
 
+def _from_correlation_report(report: DomainCorrelationReport) -> CorrelationReportModel:
+    return CorrelationReportModel(
+        case_id=report.case_id,
+        summary=report.summary,
+        domain_correlations=[
+            DomainCorrelationModel(**correlation.__dict__)
+            for correlation in report.domain_correlations
+        ],
+        evidence_chains=[
+            EvidenceChainModel(
+                chain_id=chain.chain_id,
+                strength=chain.strength,
+                narrative=chain.narrative,
+                links=[EvidenceLinkModel(**link.__dict__) for link in chain.links],
+            )
+            for chain in report.evidence_chains
+        ],
+        overall_confidence=report.overall_confidence,
+    )
+
+
 @app.post("/investigator/plan", response_model=InvestigationResponse)
 def build_plan(request: InvestigationRequest) -> InvestigationResponse:
     objectives = [_to_domain_objective(obj) for obj in request.objectives]
@@ -139,3 +194,15 @@ def build_plan(request: InvestigationRequest) -> InvestigationResponse:
         risk_appetite=request.risk_appetite,
     )
     return _from_domain_plan(domain_plan)
+
+
+@app.post("/investigator/correlation-report", response_model=CorrelationReportModel)
+def build_correlation_report(request: InvestigationRequest) -> CorrelationReportModel:
+    objectives = [_to_domain_objective(obj) for obj in request.objectives]
+    signals = [_to_domain_signal(lead) for lead in request.leads]
+    report = engine.build_correlation_report(
+        case_id=request.case_id,
+        signals=signals,
+        objectives=objectives,
+    )
+    return _from_correlation_report(report)
