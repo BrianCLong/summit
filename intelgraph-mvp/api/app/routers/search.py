@@ -14,12 +14,13 @@ def search(
     user=Depends(require_clearance("analyst")),
 ):
     graph = request.app.state.graph
+    raw_results = graph.search_entities(q, tc["tenant_id"], tc["case_id"])
     results = []
-    for person in graph.get_nodes("Person", tc["tenant_id"], tc["case_id"]):
-        if not has_clearance(person.policy, user.clearances):
+    for entry in raw_results:
+        policy = entry.get("policy") or entry.get("properties", {}).get("policy")
+        if policy and not has_clearance(policy, user.clearances):
             continue
-        if q.lower() in person.name.lower() or any(q.lower() in e.lower() for e in person.emails):
-            results.append({"id": person.id, "type": "Person", "label": person.name})
+        results.append({"id": entry.get("id"), "type": entry.get("type"), "label": entry.get("name", "")})
     return {"results": results}
 
 
@@ -31,38 +32,36 @@ def tripane(
     user=Depends(require_clearance("analyst")),
 ):
     graph = request.app.state.graph
-    node = graph.node_by_id(entity_id)
-    if not node:
+    entity = graph.entity_by_id(entity_id) if hasattr(graph, "entity_by_id") else None
+    if not entity:
+        entity = graph.node_by_id(entity_id) if hasattr(graph, "node_by_id") else None
+    if not entity:
         return {"timeline": [], "map": [], "graph": {"nodes": [], "edges": []}}
-    # timeline and map
+
+    neighbor_graph = graph.neighbors(entity_id, max_hops=2, labels=["Event", "Location", "Org", "Person", "Document"])
+    nodes = neighbor_graph.get("nodes", [])
+    edges = neighbor_graph.get("edges", [])
+
     timeline = []
     map_points = []
-    graph_nodes = [
-        {"id": node.id, "label": getattr(node, "name", ""), "type": node.__class__.__name__}
-    ]
-    graph_edges = []
-    for edge in graph.edges:
-        if edge.source == entity_id and edge.type == "PRESENT_AT":
-            event = graph.node_by_id(edge.target)
-            if not has_clearance(event.policy, user.clearances):
-                continue
+    graph_nodes = []
+    for node in nodes:
+        graph_nodes.append({"id": node.get("id"), "label": node.get("name", ""), "type": node.get("type")})
+        props = node.get("properties", {}) or {}
+        if node.get("type") == "Event" and props.get("occurred_at"):
             timeline.append(
-                {"id": event.id, "occurred_at": str(event.occurred_at), "label": event.name}
+                {"id": node.get("id"), "occurred_at": str(props.get("occurred_at")), "label": node.get("name", "")}
             )
-            graph_nodes.append({"id": event.id, "label": event.name, "type": "Event"})
-            graph_edges.append({"source": entity_id, "target": event.id, "type": "PRESENT_AT"})
-            for edge2 in graph.edges:
-                if edge2.source == event.id and edge2.type == "OCCURRED_AT":
-                    loc = graph.node_by_id(edge2.target)
-                    if not has_clearance(loc.policy, user.clearances):
-                        continue
-                    map_points.append(
-                        {"id": loc.id, "lat": loc.lat, "lon": loc.lon, "label": loc.name}
-                    )
-                    graph_nodes.append({"id": loc.id, "label": loc.name, "type": "Location"})
-                    graph_edges.append(
-                        {"source": event.id, "target": loc.id, "type": "OCCURRED_AT"}
-                    )
+        if node.get("type") == "Location" and props.get("lat") is not None and props.get("lon") is not None:
+            map_points.append(
+                {"id": node.get("id"), "lat": props.get("lat"), "lon": props.get("lon"), "label": node.get("name", "")}
+            )
+
+    graph_edges = [
+        {"source": e.get("source"), "target": e.get("target"), "type": e.get("type")}
+        for e in edges
+    ]
+
     return {
         "timeline": timeline,
         "map": map_points,
