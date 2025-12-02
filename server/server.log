@@ -1,22 +1,9 @@
 
 > intelgraph-server@1.0.0 dev
-> tsx -r dotenv/config src/index.ts
+> cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts
 
-[dotenv@17.2.1] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
-[STARTUP] Environment validated (89 keys)
-[STARTUP] IntelGraph server starting...
-[STARTUP] HTTP server listening on :4000
-[DEPS] Initializing database connections...
-[DEPS] Redis connected
-[DEPS] PostgreSQL connected
-[DEPS] Neo4j connected
-[DEPS] All dependencies initialized successfully
-[GRAPHQL] GraphQL endpoint mounted at /graphql
-[STARTUP] Server ready - all systems operational
-npm error Lifecycle script `dev` failed with error:
-npm error code 137
-npm error path /Users/brianlong/Documents/GitHub/intelgraph/server
-npm error workspace intelgraph-server@1.0.0
-npm error location /Users/brianlong/Documents/GitHub/intelgraph/server
-npm error command failed
-npm error command sh -c tsx -r dotenv/config src/index.ts
+[33m[nodemon] 3.1.11[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): src/**/*[39m
+[33m[nodemon] watching extensions: ts,json[39m
+[32m[nodemon] starting `npx tsx src/index.ts`[39m

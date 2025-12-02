@@ -169,8 +169,36 @@ const handleValidationErrors = (
 };
 
 /**
- * POST /api/ai/predict-links
- * Predict potential links between entities using GNN model
+ * @openapi
+ * /api/ai/predict-links:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Predict potential links
+ *     description: Predict potential links between entities using GNN model.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - entityId
+ *             properties:
+ *               entityId:
+ *                 type: string
+ *               topK:
+ *                 type: integer
+ *                 default: 10
+ *               investigationId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Link prediction successful
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/predict-links',
@@ -226,8 +254,33 @@ router.post(
 );
 
 /**
- * POST /api/ai/analyze-sentiment
- * Analyze sentiment of text content or entity data
+ * @openapi
+ * /api/ai/analyze-sentiment:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Analyze sentiment
+ *     description: Analyze sentiment of text content or entity data.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               entityId:
+ *                 type: string
+ *               text:
+ *                 type: string
+ *               entityData:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Sentiment analysis successful
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/analyze-sentiment',
@@ -286,8 +339,36 @@ router.post(
 );
 
 /**
- * POST /api/ai/generate-summary
- * Generate AI-powered insights and summary for an entity
+ * @openapi
+ * /api/ai/generate-summary:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Generate summary
+ *     description: Generate AI-powered insights and summary for an entity.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - entityId
+ *             properties:
+ *               entityId:
+ *                 type: string
+ *               entityData:
+ *                 type: object
+ *               includeContext:
+ *                 type: boolean
+ *                 default: true
+ *     responses:
+ *       200:
+ *         description: Summary generation successful
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/generate-summary',
@@ -337,8 +418,18 @@ router.post(
 );
 
 /**
- * GET /api/ai/models/status
- * Get status and health of AI models
+ * @openapi
+ * /api/ai/models/status:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: AI models status
+ *     description: Get status and health of AI models.
+ *     responses:
+ *       200:
+ *         description: Models status
+ *       500:
+ *         description: Internal server error
  */
 router.get('/models/status', async (req: Request, res: Response) => {
   try {
@@ -387,8 +478,18 @@ router.get('/models/status', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/ai/capabilities
- * Get available AI capabilities and their parameters
+ * @openapi
+ * /api/ai/capabilities:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: AI capabilities
+ *     description: Get available AI capabilities and their parameters.
+ *     responses:
+ *       200:
+ *         description: AI capabilities
+ *       500:
+ *         description: Internal server error
  */
 router.get('/capabilities', async (req: Request, res: Response) => {
   try {
@@ -446,8 +547,42 @@ router.get('/capabilities', async (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/ai/extract-video
- * Submits a video for frame-by-frame AI extraction.
+ * @openapi
+ * /api/ai/extract-video:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Extract video content
+ *     description: Submits a video for frame-by-frame AI extraction.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mediaPath
+ *               - mediaType
+ *               - extractionMethods
+ *             properties:
+ *               mediaPath:
+ *                 type: string
+ *               mediaType:
+ *                 type: string
+ *                 enum: [VIDEO]
+ *               extractionMethods:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               options:
+ *                 type: object
+ *     responses:
+ *       202:
+ *         description: Video analysis job submitted
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/extract-video',
@@ -493,8 +628,26 @@ router.post(
 );
 
 /**
- * GET /api/ai/job-status/:jobId
- * Get the status of an AI extraction job.
+ * @openapi
+ * /api/ai/job-status/{jobId}:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: Job status
+ *     description: Get the status of an AI extraction job.
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Job status
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Internal server error
  */
 router.get('/job-status/:jobId', async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -571,8 +724,43 @@ const validateDeceptionFeedback = [
 ];
 
 /**
- * POST /api/ai/feedback
- * Logs user feedback on AI-generated insights for training signals.
+ * @openapi
+ * /api/ai/feedback:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Submit feedback
+ *     description: Logs user feedback on AI-generated insights for training signals.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - insight
+ *               - feedbackType
+ *               - user
+ *               - timestamp
+ *               - originalPrediction
+ *             properties:
+ *               insight:
+ *                 type: object
+ *               feedbackType:
+ *                 type: string
+ *                 enum: [accept, reject, flag]
+ *               user:
+ *                 type: string
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ *               originalPrediction:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Feedback received
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/feedback',
@@ -615,6 +803,44 @@ router.post(
   },
 );
 
+/**
+ * @openapi
+ * /api/ai/feedback/deception:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Submit deception feedback
+ *     description: Logs user feedback on deception detection for training signals.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *               - label
+ *               - user
+ *               - timestamp
+ *             properties:
+ *               text:
+ *                 type: string
+ *               label:
+ *                 type: string
+ *                 enum: [false_positive, false_negative]
+ *               user:
+ *                 type: string
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ *               deceptionScore:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Feedback received
+ *       500:
+ *         description: Internal server error
+ */
 router.post(
   '/feedback/deception',
   validateDeceptionFeedback,
@@ -795,6 +1021,37 @@ function generateScaffoldAISummary(
 
 const adversaryService = new AdversaryAgentService();
 
+/**
+ * @openapi
+ * /api/ai/adversary/generate:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Generate adversary chain
+ *     description: Generates an adversary chain based on the provided context.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - context
+ *             properties:
+ *               context:
+ *                 type: string
+ *               temperature:
+ *                 type: number
+ *               persistence:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Chain generated
+ *       400:
+ *         description: Missing context
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/adversary/generate', async (req: Request, res: Response) => {
   const { context, temperature, persistence } = req.body || {};
   if (!context) {
