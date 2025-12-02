@@ -35,6 +35,7 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const GovernanceDashboard = React.lazy(() => import('@/governance/GovernanceDashboard').then(module => ({ default: module.GovernanceDashboard })))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -111,6 +112,9 @@ function App() {
                       {/* Support */}
                       <Route path="help" element={<HelpPage />} />
                       <Route path="changelog" element={<ChangelogPage />} />
+
+                      {/* Governance */}
+                      <Route path="governance" element={<GovernanceDashboard />} />
 
                       {/* Catch all */}
                       <Route path="*" element={<Navigate to="/" replace />} />
