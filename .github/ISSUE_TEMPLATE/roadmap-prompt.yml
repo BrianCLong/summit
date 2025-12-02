@@ -1,0 +1,129 @@
+name: "🗺️ Roadmap Prompt"
+description: Track implementation of a 96-Prompt Engineering Roadmap item
+title: "[Roadmap P{prompt_number}] {title}"
+labels: ["roadmap", "engineering"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 96-Prompt Engineering Roadmap Item
+
+        Use this template to track implementation of roadmap prompts.
+        See [docs/ENGINEERING_ROADMAP_96_PROMPTS.md](../docs/ENGINEERING_ROADMAP_96_PROMPTS.md) for full details.
+
+  - type: input
+    id: prompt_number
+    attributes:
+      label: Prompt Number
+      description: The prompt number (1-96)
+      placeholder: "e.g., 1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: wave
+    attributes:
+      label: Wave
+      description: Which wave does this prompt belong to?
+      options:
+        - "Wave 1 - Foundation (P1-P8)"
+        - "Wave 2 - Expansion (P9-P16)"
+        - "Wave 3 - Resilience (P17-P24)"
+        - "Wave 4 - Advanced (P25-P48)"
+        - "Wave 5 - Innovation (P49-P72)"
+        - "Wave 6 - Excellence (P73-P96)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: Which category does this prompt belong to?
+      options:
+        - "🔧 Infrastructure & Deployment"
+        - "🧪 Quality & Testing"
+        - "🔒 Security & Compliance"
+        - "📚 Documentation & Knowledge"
+        - "🌐 APIs & Data"
+        - "⚡ Innovation & Organization"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: What is the priority of this prompt?
+      options:
+        - "P0 - Critical"
+        - "P1 - High"
+        - "P2 - Medium"
+        - "P3 - Low"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Detailed description of the prompt
+      placeholder: "Describe what this prompt aims to achieve..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: artifacts
+    attributes:
+      label: Artifacts
+      description: List of deliverables for this prompt
+      placeholder: |
+        - [ ] Artifact 1
+        - [ ] Artifact 2
+        - [ ] Artifact 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: scaffolds
+    attributes:
+      label: Scaffolds
+      description: Supporting structures needed
+      placeholder: |
+        - Template 1
+        - Configuration 2
+        - Script 3
+    validations:
+      required: false
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: How do we know when this is complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Other prompts or work this depends on
+      placeholder: |
+        - Depends on P1 (CI/CD)
+        - Parallel with P2
+    validations:
+      required: false
+
+  - type: textarea
+    id: technical_notes
+    attributes:
+      label: Technical Notes
+      description: Any technical specifications or implementation notes
+      placeholder: "Add any technical details here..."
+    validations:
+      required: false
