@@ -6,8 +6,11 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
 -- Drop tables if they exist (for development)
+-- AUDIT: ALLOW DESTRUCTIVE
 DROP TABLE IF EXISTS copilot_events CASCADE;
+-- AUDIT: ALLOW DESTRUCTIVE
 DROP TABLE IF EXISTS copilot_tasks CASCADE;
+-- AUDIT: ALLOW DESTRUCTIVE
 DROP TABLE IF EXISTS copilot_runs CASCADE;
 
 -- Create enum types for better type safety

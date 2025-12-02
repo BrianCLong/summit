@@ -109,6 +109,7 @@ DECLARE
     deleted_count INTEGER := 0;
 BEGIN
     -- Clean up CSV jobs
+    -- AUDIT: ALLOW DESTRUCTIVE
     DELETE FROM csv_import_jobs 
     WHERE status IN ('completed', 'failed', 'cancelled') 
     AND finished_at < NOW() - INTERVAL '1 day' * retention_days;
@@ -116,6 +117,7 @@ BEGIN
     GET DIAGNOSTICS deleted_count = ROW_COUNT;
     
     -- Clean up STIX jobs
+    -- AUDIT: ALLOW DESTRUCTIVE
     DELETE FROM stix_import_jobs 
     WHERE status IN ('completed', 'failed', 'cancelled') 
     AND finished_at < NOW() - INTERVAL '1 day' * retention_days;
