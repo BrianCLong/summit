@@ -4,15 +4,16 @@ import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
-import helmet from 'helmet';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
+import helmet from 'helmet';
+import mongoSanitize from 'express-mongo-sanitize';
+import hpp from 'hpp';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
-import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
@@ -44,6 +45,15 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import { cookieParserMiddleware, buildContentSecurityPolicy, createCsrfLayer, createUserIpRateLimiter, shouldBypassCsrf } from './security/http-shield.js';
+import { createRequestValidationMiddleware } from './middleware/request-validation.js';
+import sanitizeRequest from './middleware/sanitize.js';
+import { createSqlInjectionGuard, buildRequestValidator } from './middleware/request-schema-validator.js';
+import { expressValidationPipeline } from './middleware/express-validation-pipeline.js';
+import { createRedisRateLimiter } from './middleware/redisRateLimiter.js';
+import { EvidenceSearchQueryJoi, EvidenceSearchQuerySchema } from './validation/httpSchemas.js';
+
+const bodyLimitBytes = cfg.REQUEST_MAX_BODY_BYTES;
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -59,23 +69,54 @@ export const createApp = async () => {
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
 
-  app.use(helmet());
+  // Baseline hardening headers before more opinionated CSP
+  app.use(
+    helmet({
+      contentSecurityPolicy: false, // applied separately via buildContentSecurityPolicy
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
+
+  app.use(buildContentSecurityPolicy());
+  app.use(hpp());
+  app.use(cookieParserMiddleware);
+  app.use(
+    createRequestValidationMiddleware({
+      maxBodySize: bodyLimitBytes,
+      maxHeaderSize: cfg.REQUEST_MAX_HEADER_BYTES,
+      maxUrlLength: cfg.REQUEST_MAX_URL_LENGTH,
+    }),
+  );
+  app.use(express.json({ limit: bodyLimitBytes }));
+  app.use(express.urlencoded({ extended: true, limit: bodyLimitBytes }));
+  app.use(mongoSanitize({ replaceWith: '_' }));
+  app.use(sanitizeRequest);
+  app.use(expressValidationPipeline);
+  app.use(createSqlInjectionGuard());
+
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
   app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || cfg.NODE_ENV !== 'production') {
-          return callback(null, true);
+    (req, res, next) => {
+      const corsMiddleware = cors({
+        origin: (origin, callback) => {
+          if (!origin) return callback(null, true);
+          if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+          }
+          return callback(new Error(`Origin ${origin} not allowed by Summit CORS policy`));
+        },
+        credentials: true,
+      });
+
+      corsMiddleware(req, res, (err) => {
+        if (err) {
+          return res.status(403).json({ error: err.message });
         }
-        if (allowedOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(new Error(`Origin ${origin} not allowed by Summit CORS policy`));
-      },
-      credentials: true,
-    }),
+        next();
+      });
+    },
   );
 
   // Enhanced Pino HTTP logger with correlation and trace context
@@ -93,9 +134,19 @@ export const createApp = async () => {
     }),
   );
 
-  app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
   app.use(httpCacheMiddleware);
+
+  const userIpLimiter = createUserIpRateLimiter();
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/health')) return next();
+    return userIpLimiter(req, res, next);
+  });
+
+  const { middleware: csrfProtection, tokenRoute: csrfTokenRoute } =
+    createCsrfLayer(shouldBypassCsrf);
+  app.get('/csrf-token', csrfTokenRoute);
+  app.use(csrfProtection);
 
   // Telemetry middleware
   app.use((req, res, next) => {
@@ -128,11 +179,25 @@ export const createApp = async () => {
   app.use(healthRouter);
 
   // Global Rate Limiting (fallback for unauthenticated or non-specific routes)
-  // Note: /graphql has its own rate limiting chain above
-  app.use((req, res, next) => {
-      if (req.path === '/graphql') return next(); // Skip global limiter for graphql, handled in route
-      return rateLimitMiddleware(req, res, next);
+  const redisBackedLimiter = createRedisRateLimiter({
+    windowMs: cfg.RATE_LIMIT_WINDOW_MS,
+    max: (req) => {
+      // @ts-ignore
+      const user = req.user;
+      return user ? cfg.RATE_LIMIT_MAX_AUTHENTICATED : cfg.RATE_LIMIT_MAX_REQUESTS;
+    },
+    keyGenerator: (req) => {
+      // @ts-ignore
+      const user = req.user;
+      if (user?.id) return `user:${user.id}`;
+      if (user?.sub) return `user:${user.sub}`;
+      return `ip:${req.ip}`;
+    },
+    skip: (req) => req.path === '/graphql',
+    message: { error: 'Too many requests, please try again later.' },
   });
+
+  app.use(redisBackedLimiter);
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
@@ -154,12 +219,18 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
 
-  app.get('/search/evidence', async (req, res) => {
-    const { q, skip = 0, limit = 10 } = req.query;
+  const validateEvidenceSearch = buildRequestValidator({
+    target: 'query',
+    zodSchema: EvidenceSearchQuerySchema,
+    joiSchema: EvidenceSearchQueryJoi,
+  });
 
-    if (!q) {
-      return res.status(400).send({ error: "Query parameter 'q' is required" });
-    }
+  app.get('/search/evidence', validateEvidenceSearch, async (req, res) => {
+    const { q, skip, limit } = req.query as {
+      q: string;
+      skip: number;
+      limit: number;
+    };
 
     const driver = getNeo4jDriver();
     const session = driver.session();
@@ -296,9 +367,20 @@ export const createApp = async () => {
 
   app.use(
     '/graphql',
-    express.json(),
+    express.json({ limit: bodyLimitBytes }),
     authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
-    rateLimitMiddleware, // Applied AFTER authentication to enable per-user limits
+    createRedisRateLimiter({
+      windowMs: cfg.RATE_LIMIT_WINDOW_MS,
+      max: () => cfg.RATE_LIMIT_MAX_REQUESTS,
+      keyGenerator: (req) => {
+        // @ts-ignore
+        const user = req.user;
+        if (user?.id) return `graphql:user:${user.id}`;
+        if (user?.sub) return `graphql:user:${user.sub}`;
+        return `graphql:ip:${req.ip}`;
+      },
+      message: { error: 'GraphQL rate limit exceeded' },
+    }), // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, { context: getContext }),
   );
 
