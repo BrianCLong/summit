@@ -1,0 +1,3 @@
+type,sourceId,targetId,confidence
+creator,ent-1,ent-2,0.9
+referenced-in,ent-1,ent-3,0.6
