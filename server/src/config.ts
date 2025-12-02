@@ -22,6 +22,10 @@ const Env = z
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
     L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
+    ENABLE_CACHE_WARMER: z.coerce.boolean().default(true),
+    CACHE_WARMER_CONCURRENCY: z.coerce.number().default(2),
+    EVIDENCE_SEARCH_CACHE_TTL: z.coerce.number().default(300),
+    API_COMPRESSION_MIN_BYTES: z.coerce.number().default(1024),
   })
   .passthrough(); // Allow extra env vars
 
@@ -33,6 +37,10 @@ const ENV_VAR_HELP: Record<string, string> = {
   RATE_LIMIT_MAX_AUTHENTICATED: 'Max requests per window for authenticated users (default: 1000)',
   CACHE_ENABLED: 'Enable or disable caching (default: true)',
   CACHE_TTL_DEFAULT: 'Default cache TTL in seconds (default: 300)',
+  ENABLE_CACHE_WARMER: 'Toggle BullMQ-powered cache warmer workers (default: true)',
+  CACHE_WARMER_CONCURRENCY: 'Cache warmer worker concurrency (default: 2)',
+  EVIDENCE_SEARCH_CACHE_TTL: 'TTL for evidence search cache entries (seconds)',
+  API_COMPRESSION_MIN_BYTES: 'Minimum payload size (bytes) before compression (default: 1024)',
   NEO4J_URI: 'Neo4j bolt URI (e.g., bolt://localhost:7687)',
   NEO4J_USER: 'Neo4j username (default: neo4j)',
   NEO4J_PASSWORD: 'Neo4j password (set in Neo4j config)',

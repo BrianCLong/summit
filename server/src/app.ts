@@ -7,6 +7,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
+import compression from 'compression';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
@@ -44,6 +45,8 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import { responseCache, buildCacheKey } from './cache/responseCache.js';
+import { enqueueCacheWarmup, startCacheWarmupWorker } from './workers/cacheWarmupWorker.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -60,6 +63,17 @@ export const createApp = async () => {
   app.use(correlationIdMiddleware);
 
   app.use(helmet());
+  app.use(
+    compression({
+      filter: (req, res) => {
+        if (req.headers['x-no-compress']) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+      threshold: cfg.API_COMPRESSION_MIN_BYTES,
+    }),
+  );
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
@@ -161,6 +175,22 @@ export const createApp = async () => {
       return res.status(400).send({ error: "Query parameter 'q' is required" });
     }
 
+    const tenantId = (req as any).user?.tenant_id ?? 'public';
+    const cacheKey = buildCacheKey(
+      'evidence-search',
+      `${tenantId}:${q}:${skip}:${limit}`,
+    );
+
+    const cached = await responseCache.getCachedJson<any>(cacheKey, {
+      ttlSeconds: cfg.EVIDENCE_SEARCH_CACHE_TTL,
+      op: 'evidence-search',
+      tenantId,
+    });
+    if (cached) {
+      res.setHeader('X-Cache-Status', 'HIT');
+      return res.send(cached);
+    }
+
     const driver = getNeo4jDriver();
     const session = driver.session();
 
@@ -193,7 +223,7 @@ export const createApp = async () => {
 
       const total = countResult.records[0].get('total').toNumber();
 
-      res.send({
+      const payload = {
         data: evidence,
         metadata: {
           total,
@@ -201,8 +231,27 @@ export const createApp = async () => {
           limit: Number(limit),
           pages: Math.ceil(total / Number(limit)),
           currentPage: Math.floor(Number(skip) / Number(limit)) + 1,
+          query: q,
+          tenantId,
         },
+      };
+
+      await responseCache.setCachedJson(cacheKey, payload, {
+        ttlSeconds: cfg.EVIDENCE_SEARCH_CACHE_TTL,
+        op: 'evidence-search',
+        tenantId,
+        indexPrefixes: ['evidence-search', tenantId],
       });
+
+      void enqueueCacheWarmup({
+        query: String(q),
+        limit: Math.min(Number(limit) * 2, 50),
+        skip: Number(skip),
+        tenantId,
+      });
+
+      res.setHeader('X-Cache-Status', 'MISS');
+      res.send(payload);
     } catch (error) {
       logger.error(
         `Error in search/evidence: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -306,6 +355,8 @@ export const createApp = async () => {
   startTrustWorker();
   // Start retention worker if enabled
   startRetentionWorker();
+  // Start cache warmup worker for Redis-backed response caching
+  await startCacheWarmupWorker();
 
   // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
   // In a real production setup, this might be in a separate process/container.
