@@ -44,6 +44,8 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import { createCtiRouter } from './intel/cti-routes.js';
+import { getPostgresPool } from './db/postgres.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -153,6 +155,14 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
+
+  // CTI - STIX 2.1 / TAXII 2.1 Routes
+  const ctiRouter = createCtiRouter({
+    pg: getPostgresPool() as any,
+    neo4j: getNeo4jDriver(),
+    signingKey: process.env.STIX_SIGNING_KEY,
+  });
+  app.use(ctiRouter);
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
