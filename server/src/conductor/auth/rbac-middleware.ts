@@ -71,6 +71,10 @@ class RBACManager {
             'policies:read',
             'serving:read',
             'serving:execute',
+            'cti:read',
+            'cti:write',
+            'cti:export',
+            'cti:share',
           ],
         },
         analyst: {
@@ -87,6 +91,8 @@ class RBACManager {
             'policies:read',
             'serving:read',
             'serving:execute',
+            'cti:read',
+            'cti:export',
           ],
         },
         viewer: {
@@ -99,6 +105,7 @@ class RBACManager {
             'evidence:read',
             'policies:read',
             'serving:read',
+            'cti:read',
           ],
         },
       },
