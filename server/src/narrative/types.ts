@@ -50,7 +50,8 @@ export type NarrativeEventType =
   | 'political'
   | 'information'
   | 'intervention'
-  | 'system';
+  | 'system'
+  | 'shock';
 
 export interface NarrativeEvent {
   id: string;
@@ -68,6 +69,19 @@ export interface NarrativeEvent {
   description: string;
   scheduledTick?: number;
   metadata?: Record<string, unknown>;
+  // V2 fields
+  parentEventId?: string;
+  mutationIndex?: number;
+  tags?: string[];
+}
+
+export interface ShockDefinition {
+  type: string;
+  targetTag?: string; // e.g. "financial", "media"
+  targetIds?: string[];
+  intensity: number;
+  duration?: number;
+  description: string;
 }
 
 export interface StoryArc {
@@ -134,4 +148,20 @@ export interface SimulationSummary {
   themes: string[];
   activeEntities: number;
   activeEvents: number;
+}
+
+export interface ScenarioCluster {
+  label: string; // e.g., "High Volatility"
+  count: number;
+  representativeStateId: string;
+  avgSentiment: number;
+  avgInfluence: number;
+  sampleIds: string[];
+}
+
+export interface ScenarioResult {
+  scenarioId: string;
+  totalRuns: number;
+  clusters: ScenarioCluster[];
+  allStates: NarrativeState[]; // Note: might be heavy
 }
