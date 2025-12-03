@@ -114,40 +114,6 @@ const resolvers = {
         })),
       }));
     },
-
-    async graphCycles(_, args, context) {
-      ensureAuthorized(context?.user);
-      const service = getService(context);
-
-      return service.detectCycles(
-        args.investigationId,
-        args.minDepth,
-        args.maxDepth,
-        args.limit
-      );
-    },
-
-    async graphCliques(_, args, context) {
-      ensureAuthorized(context?.user);
-      const service = getService(context);
-
-      return service.detectCliques(
-        args.investigationId,
-        args.minSize,
-        args.limit
-      );
-    },
-
-    async graphPatterns(_, args, context) {
-      ensureAuthorized(context?.user);
-      const service = getService(context);
-
-      return service.detectPatterns(
-        args.investigationId,
-        args.patternType,
-        args.limit
-      );
-    },
   },
 };
 

@@ -1,14 +1,16 @@
-import logging
-from typing import List, Any
+from typing import Any
+
 from fuzzywuzzy import fuzz
-from intelgraph_py.storage.neo4j_store import Neo4jStore
+
 from intelgraph_py.logger_config import logger
+from intelgraph_py.storage.neo4j_store import Neo4jStore
+
 
 class EnrichmentService:
     def __init__(self, store: Neo4jStore):
         self.store = store
 
-    def find_matching_entity(self, external_name: str, entities: List[dict], threshold: int = 80) -> Any:
+    def find_matching_entity(self, external_name: str, entities: list[dict], threshold: int = 80) -> Any:
         """
         Finds the best matching entity from a list based on fuzzy matching.
         """
@@ -24,7 +26,7 @@ class EnrichmentService:
                 best_match = entity
         return best_match
 
-    async def enrich_with_gdelt_articles(self, gdelt_articles: List[dict]):
+    async def enrich_with_gdelt_articles(self, gdelt_articles: list[dict]):
         logger.info("Starting enrichment with GDELT articles...")
 
         # Fetch entities from Neo4j (e.g., Persons or Organizations)

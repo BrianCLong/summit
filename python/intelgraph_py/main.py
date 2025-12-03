@@ -6,6 +6,7 @@ from intelgraph_py.database import create_db_tables, get_engine, get_session_loc
 from intelgraph_py.models import AlertLog, Schedule, Subscription
 from intelgraph_py.schemas import (
     AlertLogInDB,
+    OSINTEnrichmentRequest,
     ScheduleCreate,
     ScheduleInDB,
     ScheduleUpdate,
@@ -13,9 +14,8 @@ from intelgraph_py.schemas import (
     SubscriptionCreate,
     SubscriptionInDB,
     SubscriptionUpdate,
-    OSINTEnrichmentRequest,
 )
-from intelgraph_py.tasks import analyze_sentiment, run_ai_analytics_task, enrich_ip_task
+from intelgraph_py.tasks import analyze_sentiment, enrich_ip_task, run_ai_analytics_task
 
 # from strawberry.fastapi import GraphQLRouter # Temporarily commented out to resolve import error
 # from intelgraph_py.graphql_schema import schema # Temporarily commented out to resolve import error

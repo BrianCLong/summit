@@ -5,8 +5,6 @@ export interface TenantBudgetProfile {
   concurrencyLimit: number;
 }
 
-export type CostCategory = 'infrastructure' | 'inference' | 'storage';
-
 export interface QueryPlanSummary {
   estimatedRru: number;
   estimatedLatencyMs: number;
@@ -21,41 +19,6 @@ export interface PlanBudgetInput {
   profile?: TenantBudgetProfile;
   activeQueries: number;
   recentLatencyP95: number;
-}
-
-export interface BudgetThreshold {
-  limit: number;
-  alertThreshold: number;
-}
-
-export interface BudgetPolicy {
-  categories: Record<CostCategory, BudgetThreshold>;
-  anomalyStdDevTolerance: number;
-  historyWindow: number;
-  throttleOnBreach: boolean;
-}
-
-export interface SpendObservation {
-  category: CostCategory;
-  serviceId: string;
-  feature: string;
-  cost: number;
-  timestamp: number;
-}
-
-export interface BudgetAlert {
-  category: CostCategory;
-  serviceId: string;
-  feature: string;
-  utilization: number;
-  status: 'ok' | 'alert' | 'breach';
-  action: CostGuardAction;
-  reason: string;
-  anomalies: string[];
-  totals: {
-    categorySpend: number;
-    featureSpend: number;
-  };
 }
 
 export type CostGuardAction = 'allow' | 'throttle' | 'kill';

@@ -1,18 +1,20 @@
+import asyncio
 import os
 import time
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from neo4j import GraphDatabase
-from sqlalchemy.orm import Session
 
+from intelgraph_py.analytics.explainability_engine import generate_explanation
 from intelgraph_py.celery_app import celery_app
-from intelgraph_py.database import get_db
-
-# from intelgraph_py.analytics.explainability_engine import generate_explanation # Temporarily commented out
-from intelgraph_py.models import AlertLog, ExplanationTaskResult, Schedule, Subscription
 from intelgraph_py.connectors.osint_agent import ThreatActorProfilingAgent
+from intelgraph_py.database import get_db
+from intelgraph_py.models import AlertLog, ExplanationTaskResult, Schedule, Subscription
 from intelgraph_py.storage.neo4j_store import Neo4jStore
-import asyncio
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
 
 _sentiment_pipeline = None
 
@@ -148,7 +150,7 @@ def run_ai_analytics_task(self, schedule_id: int):
 def send_alerts_to_subscribers(self, graph_id: str, alert_log_id: int):
     db: Session = next(get_db())
     alert_log = db.query(AlertLog).filter(AlertLog.id == alert_log_id).first()
-    subscriptions = db.query(Subscription).filter(Subscription.is_active == True).all()
+    subscriptions = db.query(Subscription).filter(Subscription.is_active).all()
 
     if not alert_log:
         print(f"Alert log {alert_log_id} not found. Cannot send alerts.")

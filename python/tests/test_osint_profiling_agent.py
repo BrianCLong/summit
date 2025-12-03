@@ -1,6 +1,8 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 from intelgraph_py.connectors.osint_agent import OSINTDataFetcher, ThreatActorProfilingAgent
+
 
 @pytest.mark.asyncio
 async def test_gather_combines_sources(monkeypatch):

@@ -7,9 +7,9 @@ requiring the full analytics stack.
 
 try:  # pragma: no cover - best effort if deps are missing
     from .models import Entity, Relationship
-except Exception:  # noqa: BLE001 - allow graceful degradation
+except Exception:
     Entity = Relationship = None  # type: ignore
 
 from .copilot import CopilotMemory
 
-__all__ = ["Entity", "Relationship", "CopilotMemory"]
+__all__ = ["CopilotMemory", "Entity", "Relationship"]

@@ -1,13 +1,12 @@
 import asyncio
-import os
 import json
-from typing import Any, Optional
+import os
+from typing import Any
 
 import aiohttp
 from dotenv import load_dotenv
-
-from intelgraph_py.storage.neo4j_store import Neo4jStore
 from intelgraph_py.logger_config import logger
+from intelgraph_py.storage.neo4j_store import Neo4jStore
 
 load_dotenv()
 
@@ -85,7 +84,7 @@ class OSINTDataFetcher:
 class ThreatActorProfilingAgent:
     """Enriches the graph with OSINT data about threat actors."""
 
-    def __init__(self, store: Neo4jStore, fetcher: Optional[OSINTDataFetcher] = None) -> None:
+    def __init__(self, store: Neo4jStore, fetcher: OSINTDataFetcher | None = None) -> None:
         self.store = store
         self.fetcher = fetcher or OSINTDataFetcher()
 
