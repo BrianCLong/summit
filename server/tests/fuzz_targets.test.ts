@@ -32,7 +32,8 @@ describe('Fuzz Targets', () => {
           fc.array(fc.record({
              id: fc.uuid(),
              name: fc.string(),
-             type: fc.constant('agent'),
+             type: fc.constant('actor'),
+             alignment: fc.constant('neutral'),
              sentiment: fc.float({ min: -1, max: 1, noNaN: true }),
              influence: fc.float({ min: 0, max: 1.5, noNaN: true }),
              resilience: fc.float({ min: 0, max: 1, noNaN: true }),
@@ -76,7 +77,8 @@ describe('Fuzz Targets', () => {
                 fc.array(fc.record({
                    id: fc.uuid(),
                    name: fc.string(),
-                   type: fc.constant('agent'),
+                   type: fc.constant('actor'),
+                   alignment: fc.constant('neutral'),
                    sentiment: fc.float({ min: -1, max: 1, noNaN: true }),
                    influence: fc.float({ min: 0, max: 1.5, noNaN: true }),
                    resilience: fc.float({ min: 0, max: 1, noNaN: true }),
