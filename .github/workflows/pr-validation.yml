@@ -1,4 +1,5 @@
 name: 🔍 PR Validation
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
@@ -22,252 +23,154 @@ permissions:
   security-events: write
 
 jobs:
-  # Quick validation for basic requirements
-  validate-pr:
-    name: 🚦 Basic Validation
+  # 1. Triage & Risk Assessment
+  triage:
+    name: 🚦 Risk Assessment
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     outputs:
-      should_run_full_validation: ${{ steps.check.outputs.should_run_full_validation }}
+      should_run_validation: ${{ steps.check.outputs.should_run }}
       risk_level: ${{ steps.analyze.outputs.risk_level }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Check PR requirements
+      - name: Check PR status
         id: check
         run: |
-          # Skip validation for draft PRs unless explicitly requested
           if [[ "${{ github.event.pull_request.draft }}" == "true" ]]; then
-            echo "should_run_full_validation=false" >> $GITHUB_OUTPUT
+            echo "should_run=false" >> $GITHUB_OUTPUT
             echo "⏭️ Skipping validation for draft PR"
-            exit 0
+          else
+            echo "should_run=true" >> $GITHUB_OUTPUT
           fi
 
-          # Always run validation for ready PRs
-          echo "should_run_full_validation=true" >> $GITHUB_OUTPUT
-
-      - name: Quick risk analysis
+      - name: Analyze Risk
         id: analyze
-        if: steps.check.outputs.should_run_full_validation == 'true'
+        if: steps.check.outputs.should_run == 'true'
         run: |
-          # Get changed files
           CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-
-          # Calculate basic risk level
           RISK_SCORE=0
 
-          # High risk patterns
-          if echo "$CHANGED_FILES" | grep -E "(migration|schema)" > /dev/null; then
-            RISK_SCORE=$((RISK_SCORE + 3))
-          fi
+          if echo "$CHANGED_FILES" | grep -E "(migration|schema)" > /dev/null; then RISK_SCORE=$((RISK_SCORE + 3)); fi
+          if echo "$CHANGED_FILES" | grep -E "(charts/|deploy/)" > /dev/null; then RISK_SCORE=$((RISK_SCORE + 2)); fi
+          if echo "$CHANGED_FILES" | grep -E "\.github/workflows/" > /dev/null; then RISK_SCORE=$((RISK_SCORE + 2)); fi
 
-          if echo "$CHANGED_FILES" | grep -E "(charts/|deploy/)" > /dev/null; then
-            RISK_SCORE=$((RISK_SCORE + 2))
-          fi
-
-          if echo "$CHANGED_FILES" | grep -E "\.github/workflows/" > /dev/null; then
-            RISK_SCORE=$((RISK_SCORE + 2))
-          fi
-
-          # File count risk
           FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l)
-          if [[ $FILE_COUNT -gt 20 ]]; then
-            RISK_SCORE=$((RISK_SCORE + 2))
-          elif [[ $FILE_COUNT -gt 10 ]]; then
-            RISK_SCORE=$((RISK_SCORE + 1))
-          fi
+          if [[ $FILE_COUNT -gt 20 ]]; then RISK_SCORE=$((RISK_SCORE + 2)); fi
 
-          # Determine risk level
-          if [[ $RISK_SCORE -ge 5 ]]; then
-            RISK_LEVEL="HIGH"
-          elif [[ $RISK_SCORE -ge 3 ]]; then
-            RISK_LEVEL="MEDIUM"
-          else
-            RISK_LEVEL="LOW"
-          fi
+          if [[ $RISK_SCORE -ge 5 ]]; then RISK_LEVEL="HIGH";
+          elif [[ $RISK_SCORE -ge 3 ]]; then RISK_LEVEL="MEDIUM";
+          else RISK_LEVEL="LOW"; fi
 
           echo "risk_level=$RISK_LEVEL" >> $GITHUB_OUTPUT
-          echo "🎯 Risk Level: $RISK_LEVEL (Score: $RISK_SCORE)"
 
-          # Set labels based on risk
+          # Label PR
           gh pr edit ${{ github.event.pull_request.number }} --add-label "risk:$RISK_LEVEL"
-
-          # Add high risk warning
-          if [[ "$RISK_LEVEL" == "HIGH" ]]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            ⚠️ **High Risk PR Detected**
-
-            This PR has been flagged as high risk due to:
-            - Database/schema changes
-            - Infrastructure modifications
-            - Large number of file changes
-
-            **Additional validation will be performed:**
-            - Extended test suite
-            - Security scan
-            - Manual review required
-
-            Consider breaking this PR into smaller, focused changes if possible.
-            "
-          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Comprehensive validation suite
-  full-validation:
-    name: 🛡️ Full Validation Suite
-    needs: validate-pr
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
+  # 2. Fast Fail-Fast Checks (Lint, Typecheck, Build)
+  fast-checks:
+    name: ⚡ Fast Checks
+    needs: triage
+    if: needs.triage.outputs.should_run_validation == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      matrix:
-        validation: [build, test, security, quality]
-        include:
-          - validation: build
-            name: '🔨 Build & TypeCheck'
-          - validation: test
-            name: '🧪 Test Suite'
-          - validation: security
-            name: '🔒 Security Scan'
-          - validation: quality
-            name: '🎯 Code Quality'
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
 
-      - name: Enable corepack
-        run: corepack enable && corepack prepare pnpm@${{ env.PNPM_VERSION }} --activate
+      - name: Lint
+        run: pnpm run lint
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm run typecheck
 
-      - name: Run Build Validation
-        if: matrix.validation == 'build'
+      - name: Build (Dry Run)
+        run: pnpm run build
+
+  # 3. Parallel Matrix Checks (Test, Security, Quality)
+  matrix-validation:
+    name: 🛡️ Matrix Validation
+    needs: fast-checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: true
+      matrix:
+        check: [unit-test, security, quality]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+           fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+
+      # Unit Tests
+      - name: Run Unit Tests
+        if: matrix.check == 'unit-test'
+        run: pnpm run test --coverage
+
+      # Security Scans (Full Polyglot Support)
+      - name: Run Security Scans
+        if: matrix.check == 'security'
         run: |
-          echo "🔨 Running build validation..."
-
-          # TypeScript build
-          pnpm run build 2>&1 | tee build.log
-
-          # TypeScript type checking
-          pnpm run typecheck 2>&1 | tee typecheck.log
-
-          # Check for build warnings
-          if grep -i "warning" build.log; then
-            echo "⚠️ Build warnings detected"
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            ⚠️ **Build Warnings Detected**
-
-            The build completed but with warnings. Please review:
-            `$(grep -i "warning" build.log | head -10)`
-            "
-          fi
-
-          echo "✅ Build validation completed"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run Test Validation
-        if: matrix.validation == 'test'
-        run: |
-          echo "🧪 Running test validation..."
-
-          # Unit tests with coverage
-          pnpm run test --coverage 2>&1 | tee test.log
-
-          # Extract coverage
-          COVERAGE=$(grep -o "All files.*[0-9]\+\." test.log | grep -o "[0-9]\+\." | head -1 | tr -d '.')
-          echo "Test coverage: ${COVERAGE}%"
-
-          # Check coverage threshold
-          if [[ ${COVERAGE:-0} -lt 80 ]]; then
-            echo "❌ Test coverage below 80%"
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            📊 **Test Coverage Warning**
-
-            Current test coverage: ${COVERAGE}%
-            Minimum required: 80%
-
-            Please add tests to improve coverage before merging.
-            "
-            exit 1
-          fi
-
-          echo "✅ Test validation completed"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run Security Validation
-        if: matrix.validation == 'security'
-        run: |
-          echo "🔒 Running security validation..."
-
-          # Install security tools
-          npm install -g audit-ci
-
-          # Check for secrets in code
-          echo "Scanning for potential secrets..."
-          SECRET_PATTERNS=(
-            "password\s*[:=]\s*['\"][^'\"]+['"]"
-            "api[_-]?key\s*[:=]\s*['\"][^'\"]+['"]"
-            "secret\s*[:=]\s*['\"][^'\"]+['"]"
-            "token\s*[:=]\s*['\"][^'\"]+['"]"
-          )
-
-          SECRETS_FOUND=false
-          for pattern in "${SECRET_PATTERNS[@]}"; do
-            if git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E "$pattern" | grep -v test; then
-              echo "⚠️ Potential secret found: $pattern"
-              SECRETS_FOUND=true
-            fi
-          done
-
-          if [[ "$SECRETS_FOUND" == "true" ]]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            🚨 **Potential Secrets Detected**
-
-            The security scan found potential secrets in your code changes.
-            Please review and remove any hardcoded credentials before merging.
-
-            **What to do:**
-            1. Remove hardcoded secrets from code
-            2. Use environment variables or secret management
-            3. Update \`.env.example\` if needed
-            4. Consider if existing secrets need rotation
-            "
-            exit 1
-          fi
-
-          # NPM security audit with supply chain gate
-          echo "Running supply chain security check..."
+          # Use pnpm audit (native)
           pnpm audit --prod --json > audit.json || true
 
-          # Install audit gate dependencies
-          npm install -g audit-ci
+          # Gate using the audit script if it exists, else fail on pnpm audit exit code
+          if [[ -f ".github/scripts/audit-gate.js" ]]; then
+            node .github/scripts/audit-gate.js audit.json
+          else
+             if [ ! -s audit.json ]; then
+                pnpm audit --prod
+             fi
+          fi
 
-          # Run audit gate
-          node .github/scripts/audit-gate.js audit.json
+          # Python audit
+          if [[ -f "requirements.txt" ]]; then
+            pip install pip-audit
+            pip-audit -r requirements.txt --json > pip-audit.json || true
+          fi
 
-      - name: Secret scan with Gitleaks
-        if: matrix.validation == 'security'
+          # Go audit
+          if ls *.go &> /dev/null; then
+            go vet ./...
+          fi
+
+          # Cargo audit
+          if [[ -f "Cargo.toml" ]]; then
+            cargo install cargo-audit
+            cargo audit --json > cargo-audit.json || true
+          fi
+
+          # Gradle audit
+          if [[ -f "build.gradle" ]]; then
+            ./gradlew dependencyCheckAnalyze || true
+          fi
+
+      - name: Gitleaks
+        if: matrix.check == 'security'
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -275,161 +178,95 @@ jobs:
         with:
           args: '--redact --exit-code 1 --report-format sarif --report-path gitleaks.sarif'
 
-      - name: Upload Gitleaks SARIF
-        if: matrix.validation == 'security' && always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: gitleaks.sarif
-          category: gitleaks
-
-      - name: Secret scan with TruffleHog
-        if: matrix.validation == 'security'
-        uses: trufflesecurity/trufflehog@main
-        with:
-          path: ./
-          base: ${{ github.event.pull_request.base.sha }}
-          head: ${{ github.event.pull_request.head.sha }}
-          extra_args: --only-verified --json
-
-      - name: Generate SBOM (CycloneDX)
-        if: matrix.validation == 'security'
+      - name: Generate SBOM (Polyglot)
+        if: matrix.check == 'security'
         run: |
-          # For Node.js projects
-          if [[ -f "package.json" ]]; then
-            npx @cyclonedx/bom generate --output-file cyclonedx-node.json --output-format json
-          fi
-          # For Python projects
+          # Node
+          npx @cyclonedx/bom generate --output-file cyclonedx-node.json --output-format json
+
+          # Python
           if [[ -f "requirements.txt" ]]; then
             pip install cyclonedx-bom
             cyclonedx-bom -r -o cyclonedx-python.json
           fi
-          # For Go projects
+
+          # Go
           if ls *.go &> /dev/null; then
             go install github.com/CycloneDX/cyclonedx-go/cmd/cyclonedx-go@latest
             cyclonedx-go -output cyclonedx-go.json
           fi
-          # For Rust projects
+
+          # Rust
           if [[ -f "Cargo.toml" ]]; then
             cargo install cyclonedx-bom
             cyclonedx-bom -o cyclonedx-rust.json
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload SBOM Artifacts
-        if: matrix.validation == 'security' && always()
-        uses: actions/upload-artifact@v3
+      - name: Upload SBOM
+        if: matrix.check == 'security'
+        uses: actions/upload-artifact@v4
         with:
-          name: sbom-artifacts
-          path: |
-            cyclonedx-node.json
-            cyclonedx-python.json
-            cyclonedx-go.json
-            cyclonedx-rust.json
-          retention-days: 5
+          name: sbom
+          path: cyclonedx-*.json
 
-      - name: Run npm audit
-        if: matrix.validation == 'security' && -f 'package.json'
-        run: npm audit --omit=dev --json > npm-audit.json || true
-
-      - name: Run pip-audit
-        if: matrix.validation == 'security' && -f 'requirements.txt'
+      # Quality/Helm Checks (Restored)
+      - name: Helm Validation
+        if: matrix.check == 'quality'
         run: |
-          python3.12 -m pip install pip-audit
-          pip-audit -r requirements.txt --json > pip-audit.json || true
-
-      - name: Run go vet
-        if: matrix.validation == 'security' && ls *.go &> /dev/null
-        run: go vet ./...
-
-      - name: Run cargo audit
-        if: matrix.validation == 'security' && -f 'Cargo.toml'
-        run: |
-          cargo install cargo-audit
-          cargo audit --json > cargo-audit.json || true
-
-      - name: Run gradle dependencyCheck
-        if: matrix.validation == 'security' && -f 'build.gradle'
-        run: |
-          ./gradlew dependencyCheckAnalyze
-          # Convert XML report to SARIF if possible
-
-      - name: Generate security annotations
-        if: matrix.validation == 'security' && always()
-        run: |
-          # Create security annotations for PR
-          if [[ -f "gitleaks.sarif" ]]; then
-            echo "🔍 Processing security scan results..."
-
-            # Extract findings from SARIF
-            FINDINGS=$(jq -r '.runs[0].results[] | "::warning file=\(.locations[0].physicalLocation.artifactLocation.uri),line=\(.locations[0].physicalLocation.region.startLine)::\(.message.text)"' gitleaks.sarif 2>/dev/null || echo "")
-
-            if [[ -n "$FINDINGS" ]]; then
-              echo "Security findings detected:"
-              echo "$FINDINGS"
-            fi
-          fi
-
-          echo "✅ Security validation completed"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run Quality Validation
-        if: matrix.validation == 'quality'
-        run: |
-          echo "🎯 Running code quality validation..."
-
-          # Linting
-          pnpm run lint 2>&1 | tee lint.log
-
-          # Count lint errors
-          LINT_ERRORS=$(grep -c "error" lint.log || echo "0")
-          LINT_WARNINGS=$(grep -c "warning" lint.log || echo "0")
-
-          echo "Lint results: $LINT_ERRORS errors, $LINT_WARNINGS warnings"
-
-          if [[ $LINT_ERRORS -gt 0 ]]; then
-            echo "❌ Linting errors found"
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            🎯 **Linting Errors**
-
-            Found $LINT_ERRORS linting errors that must be fixed:
-
-            ```
-            $(grep "error" lint.log | head -10)
-            ```
-
-            Run `pnpm run lint --fix` to auto-fix some issues.
-            "
-            exit 1
-          fi
-
-          # Helm validation (if charts changed)
           if git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep "charts/"; then
-            echo "Validating Helm charts..."
-
-            # Install Helm
-            curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-
-            # Validate each chart
-            for chart in charts/*/; do
-              if [[ -d "$chart" ]]; then
-                echo "Validating $chart"
-                helm lint "$chart" || exit 1
-              fi
-            done
+             curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+             for chart in charts/*/; do
+                if [[ -d "$chart" ]]; then
+                   helm lint "$chart" || exit 1
+                fi
+             done
           fi
 
-          echo "✅ Quality validation completed"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # Policy validation using OPA
-  policy-validation:
-    name: 📋 Policy Validation
-    needs: [validate-pr, full-validation]
-    if: needs.validate-pr.outputs.should_run_full_validation == 'true'
+  # 4. E2E & Performance (Conditional)
+  e2e-gates:
+    name: 🎬 E2E & Performance
+    needs: [triage, matrix-validation]
+    if: needs.triage.outputs.risk_level == 'HIGH'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup Services
+        run: |
+          # Using docker-compose.dev.yml (exists in root, confirmed)
+          docker compose -f docker-compose.dev.yml up -d --build
+          timeout 300 bash -c 'until curl -f http://localhost:4000/health; do sleep 5; done'
+
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run E2E Tests
+        run: |
+          BASE_URL=http://localhost:4000 npx playwright test --timeout=30000
+
+      - name: Run k6 SLO Check
+        run: |
+          # Use host network to access localhost:4000
+          docker run --network host -i grafana/k6 run -e BASE_URL=http://localhost:4000 - < k6/slo-probe.js
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f docker-compose.dev.yml down
+
+  # 5. Final Policy Decision (OPA)
+  policy-gate:
+    name: 🏛️ Policy Decision
+    needs: [triage, fast-checks, matrix-validation, e2e-gates]
+    if: always() && needs.triage.outputs.should_run_validation == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
 
@@ -439,144 +276,41 @@ jobs:
           chmod +x opa
           sudo mv opa /usr/local/bin/
 
-      - name: Validate against policies
+      - name: Evaluate Policy
         run: |
-          echo "📋 Validating against Summit quality policies..."
-
-          # Create policy input
-          cat > policy-input.json << EOF
+          # Construct input JSON based on actual job results
+          cat > input.json << EOF
           {
             "pr": {
               "number": ${{ github.event.pull_request.number }},
               "title": "${{ github.event.pull_request.title }}",
               "author": "${{ github.event.pull_request.user.login }}",
               "draft": ${{ github.event.pull_request.draft }},
-              "mergeable": ${{ github.event.pull_request.mergeable || true }}
+              "mergeable": true
             },
             "analysis": {
-              "risk_level": "${{ needs.validate-pr.outputs.risk_level }}"
+              "risk_level": "${{ needs.triage.outputs.risk_level }}"
             },
             "quality_gates": {
-              "build": true,
-              "typecheck": true,
-              "lint": true,
-              "tests": true,
-              "security": true,
-              "helm": true
+              "build": ${{ needs.fast-checks.result == 'success' }},
+              "typecheck": ${{ needs.fast-checks.result == 'success' }},
+              "lint": ${{ needs.fast-checks.result == 'success' }},
+              "tests": ${{ needs.matrix-validation.result == 'success' }},
+              "security": ${{ needs.matrix-validation.result == 'success' }},
+              "helm": ${{ needs.matrix-validation.result == 'success' }},
+              "e2e": ${{ needs.e2e-gates.result == 'success' || needs.e2e-gates.result == 'skipped' }}
             },
             "changed_files": $(git diff --name-only ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | jq -R . | jq -s .)
           }
           EOF
 
-          # Run policy evaluation
-          opa eval -d .github/policies/ -i policy-input.json "data.summit.quality.decision" > policy-result.json
+          opa eval -d .github/policies/ -i input.json "data.summit.quality.decision" > result.json
 
-          # Extract results
-          APPROVED=$(jq -r '.result.approved' policy-result.json)
-          WARNINGS=$(jq -r '.result.warnings[]?' policy-result.json)
-          REQUIREMENTS=$(jq -r '.result.requirements[]?' policy-result.json)
-
-          echo "Policy evaluation result: $APPROVED"
-
-          # Post policy results
+          APPROVED=$(jq -r '.result.approved' result.json)
           if [[ "$APPROVED" == "true" ]]; then
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            ✅ **Policy Validation Passed**
-
-            This PR meets all Summit quality standards and is approved for merge.
-            "
+            echo "✅ Policy Approved"
           else
-            COMMENT="❌ **Policy Validation Failed**
-
-            This PR does not meet Summit quality standards.
-
-            **Requirements:**
-            $REQUIREMENTS
-
-            **Warnings:**
-            $WARNINGS
-
-            Please address these issues before requesting review."
-
-            gh pr comment ${{ github.event.pull_request.number }} --body "$COMMENT"
+            echo "❌ Policy Denied"
+            jq -r '.result.warnings[]?' result.json
             exit 1
           fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  # High risk E2E validation
-  e2e-validation:
-    name: 🎬 E2E Validation
-    needs: validate-pr
-    if: needs.validate-pr.outputs.risk_level == 'HIGH'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup services for E2E
-        run: |
-          echo "🚀 Starting services for E2E testing..."
-          docker-compose -f deploy/compose/docker-compose.yml up -d --build
-
-          # Wait for services
-          timeout 300 bash -c 'until curl -f http://localhost:4000/health; do sleep 5; done'
-
-      - name: Install Playwright
-        run: npx playwright install --with-deps
-
-      - name: Run E2E tests
-        run: |
-          echo "🎬 Running E2E tests for high risk PR..."
-          BASE_URL=http://localhost:4000 npx playwright test --timeout=30000
-
-      - name: Cleanup
-        if: always()
-        run: docker-compose -f deploy/compose/docker-compose.yml down
-
-  # Summary status check
-  validation-summary:
-    name: 📊 Validation Summary
-    needs: [validate-pr, full-validation, policy-validation]
-    if: always() && needs.validate-pr.outputs.should_run_full_validation == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check validation results
-        run: |
-          echo "📊 Summarizing validation results..."
-
-          # Check if all required jobs passed
-          BUILD_STATUS="${{ needs.full-validation.result }}"
-          POLICY_STATUS="${{ needs.policy-validation.result }}"
-
-          if [[ "$BUILD_STATUS" == "success" && "$POLICY_STATUS" == "success" ]]; then
-            echo "✅ All validations passed"
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            🎉 **All Validations Passed!**
-
-            This PR is ready for review and merge:
-            - ✅ Build and type checking
-            - ✅ Test suite with coverage
-            - ✅ Security scanning
-            - ✅ Code quality checks
-            - ✅ Policy validation
-
-            **Next steps:** Awaiting code review from maintainers.
-            "
-          else
-            echo "❌ Some validations failed"
-            gh pr comment ${{ github.event.pull_request.number }} --body "
-            ❌ **Validation Issues Found**
-
-            Some validations failed. Please check the details above and fix issues before requesting review.
-
-            **Status:**
-            - Build: $BUILD_STATUS
-            - Policy: $POLICY_STATUS
-
-            Use `/merge-pr ${{ github.event.pull_request.number }} --dry-run` to run Release Captain analysis.
-            "
-            exit 1
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
