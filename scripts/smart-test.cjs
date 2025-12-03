@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -119,17 +120,22 @@ function run() {
 
   // Step 1: Resolve related tests for changed files without running them.
   let relatedTests = [];
+  let relatedResolutionFailed = false;
+
   if (changedFiles.length > 0) {
       console.log('🔍 Resolving related tests...');
       try {
           // --listTests returns JSON list of tests that WOULD run
-          const listOutput = exec(`${jestBin} --findRelatedTests ${changedFiles.join(' ')} --listTests --json`);
+          // Also quote files here
+          const files = changedFiles.map(f => `"${f}"`).join(' ');
+          const listOutput = exec(`${jestBin} --findRelatedTests ${files} --listTests --json`);
           if (listOutput) {
              const listData = JSON.parse(listOutput);
              relatedTests = listData || [];
           }
       } catch (e) {
           console.warn('Failed to resolve related tests via Jest. Fallback to running directly.');
+          relatedResolutionFailed = true;
       }
   }
 
@@ -154,7 +160,8 @@ function run() {
       try {
           // Pass the list of test files explicitly
           // We must be careful about command line length limits, but typically fine.
-          execSync(`${jestBin} ${tests.join(' ')} ${resultsArg} --passWithNoTests`, { stdio: 'inherit' });
+          const testList = tests.map(t => `"${t}"`).join(' ');
+          execSync(`${jestBin} ${testList} ${resultsArg} --passWithNoTests`, { stdio: 'inherit' });
           hasRun = true;
       } catch (e) {
           console.log('❌ Tests failed.');
@@ -162,16 +169,19 @@ function run() {
       }
   }
 
-  if (!hasRun) {
+  // If we ran some tests but resolution failed for changed files, we might have missed related tests.
+  // Or if we haven't run anything yet.
+  if (!hasRun || (relatedResolutionFailed && changedFiles.length > 0)) {
     if (changedFiles.length > 0) {
        // Fallback: If we failed to resolve list, run via findRelatedTests
        console.log(`\n🔍 [Fallback] Running tests related to ${changedFiles.length} changed files...`);
        try {
-         execSync(`${jestBin} --findRelatedTests ${changedFiles.join(' ')} ${resultsArg} --passWithNoTests`, { stdio: 'inherit' });
+         const files = changedFiles.map(f => `"${f}"`).join(' ');
+         execSync(`${jestBin} --findRelatedTests ${files} ${resultsArg} --passWithNoTests`, { stdio: 'inherit' });
        } catch (e) {
          process.exit(1);
        }
-    } else {
+    } else if (!hasRun) {
        console.log('\n✅ No relevant changes or failures detected.');
        console.log('   (Skipping execution. Use `npm test` for full suite)');
     }
