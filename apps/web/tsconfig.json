@@ -10,7 +10,8 @@
     },
     "skipLibCheck": true,
     "jsx": "react-jsx",
-    "allowImportingTsExtensions": false
+    "allowImportingTsExtensions": false,
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
   },
   "include": ["src", "src/**/*.json"],
   "references": []

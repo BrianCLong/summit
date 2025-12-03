@@ -6,6 +6,8 @@ import {
   ChevronRight,
   Filter,
   Zap,
+  List,
+  GitCommit, // For narrative view icon
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
@@ -13,6 +15,7 @@ import { Button } from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { formatRelativeTime } from '@/lib/utils'
 import type { TimelineEvent, PanelProps } from '@/types'
+import { cn } from '@/lib/utils'
 
 interface TimelineRailProps extends PanelProps<TimelineEvent[]> {
   onTimeRangeChange?: (range: { start: string; end: string }) => void
@@ -20,6 +23,8 @@ interface TimelineRailProps extends PanelProps<TimelineEvent[]> {
   selectedEventId?: string
   autoScroll?: boolean
 }
+
+type ViewMode = 'list' | 'narrative'
 
 export function TimelineRail({
   data: events,
@@ -39,6 +44,7 @@ export function TimelineRail({
     end: '',
   })
   const [showFilters, setShowFilters] = React.useState(false)
+  const [viewMode, setViewMode] = React.useState<ViewMode>('list')
   const timelineRef = React.useRef<HTMLDivElement>(null)
 
   // Auto-scroll to latest events
@@ -46,7 +52,7 @@ export function TimelineRail({
     if (autoScroll && timelineRef.current && events.length > 0) {
       timelineRef.current.scrollTop = timelineRef.current.scrollHeight
     }
-  }, [events, autoScroll])
+  }, [events, autoScroll, viewMode])
 
   const sortedEvents = React.useMemo(() => {
     return [...events].sort(
@@ -68,6 +74,17 @@ export function TimelineRail({
 
     return groups
   }, [sortedEvents])
+
+  // Narrative view: Identify key story points or high-priority events
+  const narrativeEvents = React.useMemo(() => {
+    if (viewMode !== 'narrative') return []
+    // Filter for "significant" events for the narrative view
+    // In a real app, this logic might be more complex or driven by an 'significance' score
+    return sortedEvents.filter(e =>
+      ['investigation_started', 'threat_detected', 'alert_triggered', 'analysis_completed'].includes(e.type) ||
+      (e.metadata as any)?.significance === 'high'
+    )
+  }, [sortedEvents, viewMode])
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -154,16 +171,37 @@ export function TimelineRail({
 
   return (
     <Card className={className}>
-      <CardHeader>
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4" />
-            Timeline
+            {viewMode === 'list' ? 'Timeline' : 'Narrative'}
             <Badge variant="secondary" className="text-xs">
-              {events.length} events
+              {viewMode === 'list' ? events.length : narrativeEvents.length} events
             </Badge>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 items-center">
+             <div className="flex bg-muted rounded-md p-0.5 mr-2">
+              <Button
+                variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setViewMode('list')}
+                title="List View"
+              >
+                <List className="h-3 w-3" />
+              </Button>
+              <Button
+                variant={viewMode === 'narrative' ? 'secondary' : 'ghost'}
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setViewMode('narrative')}
+                title="Narrative View"
+              >
+                <GitCommit className="h-3 w-3" />
+              </Button>
+            </div>
+
             <Button
               variant="ghost"
               size="icon"
@@ -192,9 +230,9 @@ export function TimelineRail({
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-0">
         {showFilters && (
-          <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+          <div className="space-y-2 p-3 bg-muted/50 rounded-lg mt-2">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Calendar className="h-4 w-4" />
               Time Range Filter
@@ -226,77 +264,131 @@ export function TimelineRail({
 
         <div
           ref={timelineRef}
-          className="relative max-h-96 overflow-y-auto scrollbar-thin space-y-6"
+          className="relative max-h-96 overflow-y-auto scrollbar-thin space-y-6 mt-4 p-1"
         >
-          {/* Timeline line */}
-          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
+          {/* Timeline line - connects events */}
+          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border z-0"></div>
 
-          {Object.entries(groupedEvents).map(([date, dayEvents]) => (
-            <div key={date} className="space-y-3">
-              <div className="sticky top-0 bg-background/90 backdrop-blur-sm py-1">
-                <div className="text-sm font-medium text-muted-foreground">
-                  {new Date(date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </div>
-              </div>
-
-              {dayEvents.map(event => (
-                <div
-                  key={event.id}
-                  className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors ${
-                    selectedEventId === event.id
-                      ? 'bg-muted ring-2 ring-primary'
-                      : ''
-                  }`}
-                  onClick={() => onEventSelect?.(event)}
-                >
-                  <div
-                    className={`relative z-10 w-2 h-2 rounded-full border-2 bg-background mt-2 ${getEventColor(event.type)}`}
-                  >
-                    {event.type === 'alert_triggered' && (
-                      <Zap className="absolute -top-1 -left-1 h-4 w-4 text-red-500 animate-pulse" />
-                    )}
+          {viewMode === 'list' ? (
+            // List View
+            Object.entries(groupedEvents).map(([date, dayEvents]) => (
+              <div key={date} className="space-y-3 relative z-10">
+                <div className="sticky top-0 bg-background/90 backdrop-blur-sm py-1 z-20">
+                  <div className="text-sm font-medium text-muted-foreground pl-8">
+                    {new Date(date).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
                   </div>
+                </div>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm">
-                        {getEventIcon(event.type)}
-                      </span>
-                      <div className="font-medium text-sm truncate">
-                        {event.title}
-                      </div>
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatRelativeTime(event.timestamp)}
-                      </div>
-                    </div>
-
-                    {event.description && (
-                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                        {event.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-1">
-                      <Badge variant="outline" className="text-xs">
-                        {event.type.replace('_', ' ')}
-                      </Badge>
-
-                      {event.entityId && (
-                        <Badge variant="secondary" className="text-xs">
-                          Entity: {event.entityId.slice(0, 8)}
-                        </Badge>
+                {dayEvents.map(event => (
+                  <div
+                    key={event.id}
+                    className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors ml-2 ${
+                      selectedEventId === event.id
+                        ? 'bg-muted ring-2 ring-primary'
+                        : ''
+                    }`}
+                    onClick={() => onEventSelect?.(event)}
+                  >
+                    <div
+                      className={`relative z-10 w-4 h-4 rounded-full border-2 bg-background mt-1 flex-shrink-0 ${getEventColor(event.type)}`}
+                    >
+                       {event.type === 'alert_triggered' && (
+                        <Zap className="absolute -top-1 -left-1 h-5 w-5 text-red-500 animate-pulse bg-background rounded-full" />
                       )}
                     </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-sm">
+                          {getEventIcon(event.type)}
+                        </span>
+                        <div className="font-medium text-sm truncate">
+                          {event.title}
+                        </div>
+                        <div className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
+                          {formatRelativeTime(event.timestamp)}
+                        </div>
+                      </div>
+
+                      {event.description && (
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-1 flex-wrap">
+                        <Badge variant="outline" className="text-[10px] h-5">
+                          {event.type.replace('_', ' ')}
+                        </Badge>
+
+                        {event.entityId && (
+                          <Badge variant="secondary" className="text-[10px] h-5">
+                            ID: {event.entityId.slice(0, 8)}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                ))}
+              </div>
+            ))
+          ) : (
+            // Narrative View
+            <div className="space-y-8 pl-2 relative z-10">
+              {narrativeEvents.length > 0 ? (
+                narrativeEvents.map((event, index) => (
+                  <div
+                    key={event.id}
+                    className={cn(
+                      "relative p-4 border rounded-lg bg-card shadow-sm transition-all hover:shadow-md cursor-pointer ml-6",
+                      selectedEventId === event.id ? "ring-2 ring-primary border-primary" : "border-border"
+                    )}
+                    onClick={() => onEventSelect?.(event)}
+                  >
+                     {/* Connector dot on the main timeline line */}
+                    <div className={cn(
+                        "absolute -left-[33px] top-6 w-5 h-5 rounded-full border-4 bg-background z-10",
+                        getEventColor(event.type)
+                      )}
+                    />
+
+                    {/* Horizontal line from main timeline to card */}
+                    <div className="absolute -left-[24px] top-[22px] w-6 h-0.5 bg-border"></div>
+
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="font-semibold text-sm flex items-center gap-2">
+                         {getEventIcon(event.type)} {event.title}
+                      </div>
+                      <Badge variant={event.type === 'threat_detected' ? 'destructive' : 'outline'}>
+                        {formatRelativeTime(event.timestamp)}
+                      </Badge>
+                    </div>
+
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {event.description || "No description available."}
+                    </p>
+
+                    {event.data && (
+                      <div className="bg-muted p-2 rounded text-xs font-mono overflow-hidden text-ellipsis whitespace-nowrap">
+                        {JSON.stringify(event.data).slice(0, 100)}
+                        {JSON.stringify(event.data).length > 100 ? '...' : ''}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                 <div className="text-center py-8 text-muted-foreground ml-6">
+                  <p className="text-sm">No major narrative events found.</p>
+                  <p className="text-xs mt-1">Try switching to List view to see all events.</p>
                 </div>
-              ))}
+              )}
             </div>
-          ))}
+          )}
 
           {events.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
