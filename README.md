@@ -78,9 +78,6 @@ pnpm smoke            # same as make smoke (Node-based E2E)
 
 ## 🚥 CI & Merge Policy
 
-<<<<<<< Updated upstream
-The `ci.yml` workflow runs on every PR + main: cached `pnpm install`, `make bootstrap`, `make up` (headless), `make smoke`, lint, typecheck, Jest, Playwright/E2E (currently proxies to the smoke test), SBOM + Trivy scans, and Docker layer caching. `security.yml` runs CodeQL analysis, dependency review, and gitleaks on a nightly schedule + PRs touching lockfiles. `release.yml` gates semantic-release with the same caches and requires a green CI status before packaging artifacts. All three workflows back the badges above and are required checks for merge.
-=======
 **Strict Branch Protection**: `main` is protected. Direct pushes are blocked.
 
 ### Required Checks
@@ -95,7 +92,6 @@ We use a "Safe Merge" label strategy to manage the PR backlog.
 *   **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
 
 **Note**: Do not use "Squash and merge" manually if the train is active. Let the bot handle it to ensure linear history and green builds.
->>>>>>> Stashed changes
 
 ---
 
@@ -358,8 +354,8 @@ This executes focused Jest suites for the engine core and REST endpoints while k
 │   React Client  │◄──►│  GraphQL API    │◄──►│    Neo4j DB     │
 │                 │    │                 │    │                 │
 │ • Investigation │    │ • Authentication│    │ • Graph Data    │
-│ • Graph Viz     │    │ • CRUD Ops      │    │ • Relationships │
-│ • Real-time UI  │    │ • Subscriptions │    │ • Analytics     │
+│ • Graph Viz     │    │ • Real-time UI  │    │ • Relationships │
+│ • Material-UI   │    │ • Rate Limiting │    │ • Analytics     │
 │ • Material-UI   │    │ • Rate Limiting │    │ • Constraints   │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 
