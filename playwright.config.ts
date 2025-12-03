@@ -13,9 +13,9 @@ export default defineConfig({
   retries: 2,
   reporter: [['html', { outputFolder: 'reports/playwright' }], ['list']],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.BASE_URL || (process.env.CI ? 'http://localhost:3000' : 'http://localhost:5173'),
     trace: 'retain-on-failure',
-    video: 'retain-on-failure',
+    video: 'on',
   },
   ...(useWebServer
     ? {
@@ -35,4 +35,15 @@ export default defineConfig({
         ],
       }
     : {}),
+  // In CI, we use docker-compose which exposes port 3000, so we just check it
+  ...((process.env.CI && !useWebServer)
+    ? {
+        webServer: {
+          command: 'echo "CI uses make up"',
+          url: 'http://localhost:3000',
+          reuseExistingServer: true,
+          timeout: 120_000,
+        }
+      }
+    : {})
 });
