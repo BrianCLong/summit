@@ -12,7 +12,7 @@ This package provides the **single source of truth** for all entity and relation
 - **30+ relationship types** including evidence chains, authority bindings, and temporal sequences
 - **Built-in provenance tracking** with full assertion chains
 - **Policy-by-default** with 7 mandatory policy labels (origin, sensitivity, clearance, legal basis, need-to-know, purpose limitation, retention class)
-- **Bitemporal support** (validFrom/validTo + recordedAt)
+- **Bitemporal support** (validFrom/validTo + observedAt/recordedAt)
 - **Entity Resolution (ER) types** with explainable scorecards and manual review queues
 
 ## Installation
@@ -69,6 +69,8 @@ const person: PersonEntity = {
     retentionClass: RetentionClass.LONG_TERM,
   },
   validFrom: new Date('2020-01-01'),
+  validTo: undefined, // Still valid
+  observedAt: new Date('2020-01-02'),
   recordedAt: new Date(),
   createdAt: new Date(),
   updatedAt: new Date(),

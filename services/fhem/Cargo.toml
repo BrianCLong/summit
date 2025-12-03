@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "fhem-core",
+    "fhem-server"
+]
+resolver = "2"
