@@ -1,6 +1,5 @@
 import csv
 import sys
-import csv
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -8,18 +7,13 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import pytest
 from app.auth.jwt import create_token
 from app.graph.neo4j_client import InMemoryGraph
-from app.services.provenance import InMemoryProvenanceStore
-from app.settings import settings
 from app.main import app
 from fastapi.testclient import TestClient
 
 
 @pytest.fixture()
 def client():
-    settings.use_in_memory_graph = True
-    settings.postgres_dsn = None
     app.state.graph = InMemoryGraph()
-    app.state.provenance_store = InMemoryProvenanceStore()
     return TestClient(app)
 
 

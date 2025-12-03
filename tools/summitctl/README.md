@@ -4,7 +4,9 @@ This tool provides a control plane workflow for task management and automated PR
 
 ## Setup
 
-The tool is located in `tools/summitctl`. To set it up:
+The tool is located in `tools/summitctl`. Since the repository uses pnpm workspaces but currently has environmental issues preventing full installation, this tool is configured to be run independently.
+
+To set it up:
 
 ```bash
 cd tools/summitctl

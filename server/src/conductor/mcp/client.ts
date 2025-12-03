@@ -3,8 +3,6 @@
 
 import WebSocket from 'ws';
 import { randomUUID as uuid } from 'crypto';
-
-type WSData = any;
 import { MCPRequest, MCPResponse, MCPServerConfig, MCPTool } from '../types';
 import logger from '../../config/logger.js';
 
@@ -89,8 +87,8 @@ export class MCPClient {
 
       ws.once('error', (error) => {
         logger.error(
-          { err: error },
-          `Failed to connect to MCP server ${serverName} (${config.url}):`
+          `Failed to connect to MCP server ${serverName} (${config.url}):`,
+          error,
         );
         reject(error);
       });
@@ -241,7 +239,7 @@ export class MCPClient {
         timeout,
       });
 
-      (ws as any).send(JSON.stringify(request), (error: Error | undefined) => {
+      ws.send(JSON.stringify(request), (error) => {
         if (error) {
           clearTimeout(timeout);
           this.pendingRequests.delete(request.id);
@@ -254,7 +252,7 @@ export class MCPClient {
   /**
    * Handle incoming WebSocket messages
    */
-  private handleMessage(data: WSData): void {
+  private handleMessage(data: WebSocket.Data): void {
     try {
       const message: MCPResponse = JSON.parse(data.toString());
 
@@ -273,7 +271,7 @@ export class MCPClient {
         pending.resolve(message.result);
       }
     } catch (error) {
-      logger.error({ err: error }, 'Failed to parse MCP message:');
+      logger.error('Failed to parse MCP message:', error);
     }
   }
 
