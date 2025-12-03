@@ -10,8 +10,7 @@
     "dev": "tsc -p tsconfig.json --watch"
   },
   "dependencies": {
-    "zod": "^4.1.12",
-    "@intelgraph/common-types": "workspace:*"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@jest/globals": "^30.0.0",
