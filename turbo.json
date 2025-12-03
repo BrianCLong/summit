@@ -4,11 +4,30 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", ".next/**", "out/**"],
+      "inputs": [
+        "src/**",
+        "public/**",
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.base.json",
+        "vite.config.ts",
+        "vite.config.js",
+        "index.html",
+        "codegen.yml"
+      ],
       "env": ["NODE_ENV"]
     },
     "test": {
       "dependsOn": ["build"],
       "outputs": ["coverage/**"],
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "__tests__/**",
+        "package.json",
+        "jest.config.*",
+        "tsconfig.json"
+      ],
       "env": ["NODE_ENV", "CI"]
     },
     "test:integration": {
@@ -19,11 +38,26 @@
     },
     "lint": {
       "outputs": [],
-      "cache": true
+      "cache": true,
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "__tests__/**",
+        ".eslintrc.*",
+        "tsconfig.json",
+        "package.json"
+      ]
     },
     "typecheck": {
-      "outputs": ["*.tsbuildinfo", "tsconfig.tsbuildinfo"],
-      "cache": true
+      "outputs": ["*.tsbuildinfo", "tsconfig.tsbuildinfo", ".tsbuildinfo"],
+      "cache": true,
+      "inputs": [
+        "src/**",
+        "types/**",
+        "package.json",
+        "tsconfig.json",
+        "tsconfig.base.json"
+      ]
     },
     "smoke": {
       "dependsOn": ["build"],
@@ -40,6 +74,7 @@
     "tsconfig.json",
     "tsconfig.base.json",
     ".eslintrc.*",
-    "jest.config.*"
+    "jest.config.*",
+    "pnpm-lock.yaml"
   ]
 }
