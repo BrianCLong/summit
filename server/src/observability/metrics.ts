@@ -16,6 +16,35 @@ export const registry = new Registry();
 // Collect default Node.js metrics
 collectDefaultMetrics({ register: registry });
 
+// RED-style HTTP metrics for compatibility with Grafana dashboards and SLO rules
+export const httpRequestsTotal = new Counter({
+  name: 'http_requests_total',
+  help: 'Total HTTP requests received',
+  labelNames: ['method', 'route', 'status_code', 'service'] as const,
+  registers: [registry],
+});
+
+export const httpRequestDurationSeconds = new Histogram({
+  name: 'http_request_duration_seconds',
+  help: 'Duration of HTTP requests in seconds',
+  labelNames: ['method', 'route', 'status_code', 'service'] as const,
+  buckets: [0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
+  registers: [registry],
+});
+
+export const sloAvailability = new Gauge({
+  name: 'slo_availability_percentage',
+  help: 'Rolling availability SLO computed from HTTP success rates',
+  labelNames: ['slo'] as const,
+  registers: [registry],
+});
+
+// Track request success/error counts for computing availability gauges
+export const httpAvailabilityTotals = {
+  total: 0,
+  errors: 0,
+};
+
 // Application-specific metrics
 export const jobsProcessed = new Counter({
   name: 'intelgraph_jobs_processed_total',
@@ -137,6 +166,9 @@ export const metrics = {
   glassBoxRunsTotal,
   glassBoxRunDurationMs,
   glassBoxCacheHits,
+  httpRequestsTotal,
+  httpRequestDurationSeconds,
+  sloAvailability,
   cacheHits: new Counter({
     name: 'intelgraph_cache_hits_total',
     help: 'Total cache hits',
@@ -149,3 +181,13 @@ export const metrics = {
     registers: [registry],
   }),
 };
+
+/**
+ * Reset metrics in the shared registry. Intended for tests to avoid
+ * cross-test contamination when asserting metric values.
+ */
+export function resetMetrics(): void {
+  registry.resetMetrics();
+  httpAvailabilityTotals.total = 0;
+  httpAvailabilityTotals.errors = 0;
+}
