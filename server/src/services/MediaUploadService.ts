@@ -13,7 +13,8 @@ import pino from 'pino';
 const logger = pino({ name: 'MediaUploadService' });
 
 // Configure FFmpeg binary paths
-ffmpeg.setFfmpegPath(require('ffmpeg-static'));
+import ffmpegStatic from 'ffmpeg-static';
+ffmpeg.setFfmpegPath(ffmpegStatic);
 ffmpeg.setFfprobePath(ffprobe.path);
 
 export interface MediaUploadConfig {
