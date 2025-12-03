@@ -1,0 +1,176 @@
+name: Promise Feature
+description: Track a feature commitment through to "totally delivered" with full Definition of Done
+labels: [feature, promise-tracked]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Promise Tracking Feature Request
+
+        This template ensures every feature commitment is tracked through to **"totally delivered"** status.
+        Complete all sections to create a well-defined, actionable item.
+
+  - type: input
+    id: title
+    attributes:
+      label: Feature Title
+      description: Concise, actionable title (verb + noun)
+      placeholder: "Implement Summit data spine lineage recorder v1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which system/initiative does this belong to?
+      options:
+        - Summit
+        - CompanyOS
+        - Maestro
+        - Switchboard
+        - IntelGraph
+        - Conductor
+        - GraphAPI
+        - Analytics
+        - Copilot
+        - Auth
+        - CI/CD
+        - Observability
+        - Infrastructure
+        - Documentation
+        - Testing
+        - Security
+        - Data
+        - UI/UX
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How critical is this?
+      options:
+        - P0-critical (unblocks core platform/revenue)
+        - P1-important (this quarter)
+        - P2-nice-to-have (later)
+        - P3-parking-lot (speculative)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope Class
+      description: Rough size estimate
+      options:
+        - tiny (< 2 hours)
+        - small (2-8 hours)
+        - medium (1-3 days)
+        - large (1-2 weeks)
+        - epic (> 2 weeks, needs breakdown)
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is this feature and why do we need it?
+      placeholder: |
+        **What**: Brief description of the feature
+        **Why**: Business/technical justification
+        **Who**: Who benefits from this?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Specific, testable conditions that must be met (3-7 items)
+      placeholder: |
+        - [ ] AC-1: User can create a new entity via the API
+        - [ ] AC-2: Entity is persisted in Neo4j with correct properties
+        - [ ] AC-3: GraphQL query returns the created entity
+        - [ ] AC-4: Audit log captures the creation event
+        - [ ] AC-5: Metrics are emitted for entity_created
+    validations:
+      required: true
+
+  - type: textarea
+    id: spec-link
+    attributes:
+      label: Specification Link
+      description: Link to RFC, PRD, or design doc (if exists)
+      placeholder: "https://github.com/BrianCLong/summit/docs/rfcs/..."
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: What must be done first? (issue numbers, external deps)
+      placeholder: |
+        - Depends on #123 (Database schema)
+        - Depends on #456 (API gateway changes)
+        - External: Waiting on vendor API access
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Definition of Done
+
+        **An item is only "totally delivered" when ALL boxes below are checked.**
+        Update this checklist as you progress.
+
+  - type: checkboxes
+    id: definition-of-done
+    attributes:
+      label: Definition of Done Checklist
+      description: All items must be completed for "totally delivered" status
+      options:
+        - label: "**Code merged** to main branch"
+        - label: "**Tests exist and pass** (unit + integration/E2E where applicable)"
+        - label: "**Feature exposed** in UI/API/CLI (user-visible surface)"
+        - label: "**Docs updated** (user-facing usage + internal runbook)"
+        - label: "**Telemetry wired** (metrics + logs + feature flag if applicable)"
+        - label: "**Deployed to staging** environment"
+        - label: "**Deployed to production** environment"
+        - label: "**Validated** with real or simulated usage (evidence recorded)"
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence of Completion
+      description: Fill this in as you complete work (PR URLs, test runs, demos, etc.)
+      placeholder: |
+        **PRs**: #789, #790
+        **Test Run**: https://github.com/...actions/runs/...
+        **Demo**: https://loom.com/...
+        **Validated by**: @username on YYYY-MM-DD via [scenario description]
+
+  - type: dropdown
+    id: source-type
+    attributes:
+      label: Source of Promise
+      description: Where did this commitment originate?
+      options:
+        - Design doc / RFC
+        - Sprint planning
+        - Chat / Discussion
+        - Code comment (TODO/FIXME)
+        - Customer request
+        - Tech debt audit
+        - Security review
+        - Performance analysis
+        - Other
+
+  - type: input
+    id: source-link
+    attributes:
+      label: Source Link
+      description: URL or file path where this was originally captured
+      placeholder: "docs/ChatOps/sprint_plan.md or https://..."

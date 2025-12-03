@@ -1,0 +1,166 @@
+name: Promise Epic
+description: Track a cross-cutting initiative with multiple child items
+labels: [epic, promise-tracked]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Promise Tracking Epic
+
+        An Epic groups related features into a deliverable outcome.
+        Use this for initiatives spanning multiple issues/PRs.
+
+  - type: input
+    id: goal
+    attributes:
+      label: Goal
+      description: One-sentence outcome to achieve
+      placeholder: "Enable real-time collaborative investigation editing"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Primary Component
+      options:
+        - Summit
+        - CompanyOS
+        - Maestro
+        - Switchboard
+        - IntelGraph
+        - Conductor
+        - GraphAPI
+        - Analytics
+        - Copilot
+        - Auth
+        - CI/CD
+        - Observability
+        - Infrastructure
+        - Documentation
+        - Testing
+        - Security
+        - Data
+        - UI/UX
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0-critical
+        - P1-important
+        - P2-nice-to-have
+        - P3-parking-lot
+    validations:
+      required: true
+
+  - type: textarea
+    id: narrative
+    attributes:
+      label: Narrative
+      description: Why now? Who benefits? What's the business case?
+      placeholder: |
+        **Context**: Current state and pain points
+        **Why now**: Urgency drivers
+        **Who benefits**: Users, teams, or systems impacted
+    validations:
+      required: true
+
+  - type: textarea
+    id: in-scope
+    attributes:
+      label: In Scope
+      description: What IS included in this epic
+      placeholder: |
+        - Real-time sync of entity edits
+        - Conflict resolution UI
+        - Presence indicators
+    validations:
+      required: true
+
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of Scope
+      description: What is explicitly NOT included
+      placeholder: |
+        - Offline editing
+        - Mobile support
+        - Video conferencing integration
+
+  - type: textarea
+    id: success-measures
+    attributes:
+      label: Success Measures
+      description: KPIs/SLIs that indicate success
+      placeholder: |
+        - Sync latency < 200ms p99
+        - Zero data loss during concurrent edits
+        - User satisfaction score > 4.5/5
+
+  - type: textarea
+    id: child-items
+    attributes:
+      label: Child Items
+      description: Break down into trackable issues (create these separately)
+      placeholder: |
+        - [ ] #001 - Implement WebSocket connection manager
+        - [ ] #002 - Build CRDT conflict resolution engine
+        - [ ] #003 - Create presence indicator component
+        - [ ] #004 - Add collaboration metrics dashboard
+        - [ ] #005 - Write integration tests for sync scenarios
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks & Mitigations
+      description: What could go wrong and how we'll handle it
+      placeholder: |
+        | Risk | Impact | Mitigation |
+        |------|--------|------------|
+        | WebSocket scalability | High | Use Redis pub/sub for horizontal scaling |
+        | Data conflicts | Medium | Implement OT/CRDT with deterministic resolution |
+
+  - type: checkboxes
+    id: links
+    attributes:
+      label: Attached Documentation
+      options:
+        - label: PRD attached or linked
+        - label: Technical spec attached or linked
+        - label: Designs/mockups attached or linked
+        - label: Architecture diagram available
+
+  - type: input
+    id: prd-link
+    attributes:
+      label: PRD Link
+      placeholder: "https://..."
+
+  - type: input
+    id: tech-spec-link
+    attributes:
+      label: Technical Spec Link
+      placeholder: "https://..."
+
+  - type: input
+    id: design-link
+    attributes:
+      label: Design/Mockup Link
+      placeholder: "https://..."
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+        ## Epic Completion Criteria
+
+        An epic is complete when:
+        1. All child items are in "validated" status
+        2. Success measures are met (with evidence)
+        3. Documentation is complete
+        4. Stakeholder sign-off obtained
