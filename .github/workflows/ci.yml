@@ -28,18 +28,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Install dependencies
@@ -79,26 +74,22 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Cache Turbo
         uses: actions/cache@v4
         with:
           path: .turbo
-          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-${{ github.event.pull_request.base.ref || github.ref_name }}
           restore-keys: |
+            ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}-
             ${{ runner.os }}-turbo-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -155,18 +146,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Download build artifacts
@@ -193,8 +179,8 @@ jobs:
           file: ./server/Dockerfile.dev
           tags: summit/api:ci
           push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          cache-from: type=gha,scope=ci-api
+          cache-to: type=gha,mode=max,scope=ci-api
       - name: Build client image (cached)
         uses: docker/build-push-action@v6
         with:
@@ -202,13 +188,8 @@ jobs:
           file: ./client/Dockerfile.dev
           tags: summit/web:ci
           push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      # Move cache to prevent unbounded growth
-      - name: Rotate Docker cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+          cache-from: type=gha,scope=ci-web
+          cache-to: type=gha,mode=max,scope=ci-web
       - name: Bring up stack (make up)
         run: make up
       - name: Golden path smoke tests
@@ -233,20 +214,13 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
       - name: Enable corepack
         run: corepack enable
       - uses: pnpm/action-setup@v4
         with:
           version: 9
           run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-${{ matrix.node }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.node }}-pnpm-
-            ${{ runner.os }}-pnpm-
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
       - name: Install dependencies
@@ -255,3 +229,73 @@ jobs:
         run: pnpm -w run build
       - name: Unit tests
         run: pnpm -w run test
+
+  ci-time-report:
+    runs-on: ubuntu-latest
+    needs: [fast-checks, build-test, golden-path, compatibility, security-scan]
+    if: always()
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Summarize CI timings
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const core = require('@actions/core');
+            const { repo, owner } = context.repo;
+            const runId = context.runId;
+
+            const jobs = await github.paginate(
+              github.rest.actions.listJobsForWorkflowRun,
+              { owner, repo, run_id: runId, per_page: 100 }
+            );
+
+            const stepDurations = [];
+            for (const job of jobs) {
+              if (job.name === 'ci-time-report') continue;
+              for (const step of job.steps || []) {
+                if (!step.started_at || !step.completed_at) continue;
+                const durationMs = new Date(step.completed_at) - new Date(step.started_at);
+                if (Number.isFinite(durationMs) && durationMs > 0) {
+                  stepDurations.push({
+                    job: job.name,
+                    step: step.name,
+                    durationMs,
+                  });
+                }
+              }
+            }
+
+            if (stepDurations.length === 0) {
+              await core.summary
+                .addHeading('CI runtime profile')
+                .addParagraph('No step timing data was available for this run.')
+                .write();
+              return;
+            }
+
+            const totalMs = stepDurations.reduce((sum, s) => sum + s.durationMs, 0);
+            const sorted = stepDurations.sort((a, b) => b.durationMs - a.durationMs);
+            const topCount = Math.max(1, Math.ceil(stepDurations.length * 0.2));
+            const topSteps = sorted.slice(0, topCount);
+
+            const formatStep = (s) => `${s.job}: ${s.step} — ${(s.durationMs / 60000).toFixed(2)}m`;
+
+            await core.summary
+              .addHeading('CI runtime profile')
+              .addTable([
+                ['Total tracked steps', String(stepDurations.length)],
+                ['Approx. cumulative runtime', `${(totalMs / 60000).toFixed(1)} minutes`],
+                ['Top slice size', `${topCount} steps (~${Math.round((topCount / stepDurations.length) * 100)}%)`],
+              ])
+              .addHeading('Longest steps (top 20%)', 2)
+              .addList(topSteps.map(formatStep))
+              .addEOL()
+              .addHeading('Optimization hints', 2)
+              .addList([
+                'Long pnpm install/build steps: verify cache hits and consider pruning unused workspaces.',
+                'Docker builds: confirm cache scopes are warm (ci-api, ci-web) and avoid cache busting changes.',
+                'Slow integration smoke: review docker-compose health checks and reuse artifacts from build lane.',
+              ])
+              .write();
