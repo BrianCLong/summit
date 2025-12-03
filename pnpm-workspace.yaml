@@ -5,6 +5,7 @@ packages:
   - 'contracts/*'
   - 'server'
   - 'client'
+  - 'cli'
   - 'tools/*'
 exclude:
   - 'archive/**'
