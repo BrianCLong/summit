@@ -1,0 +1,59 @@
+id: reasoning-001
+name: Logic Puzzle Solver
+description: Solve a multi-step logic puzzle requiring chain of thought
+category: reasoning
+difficulty: hard
+tags:
+  - reasoning
+  - logic
+  - chain-of-thought
+
+tools:
+  - name: code_interpreter
+    description: Execute calculations
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - calculate
+      - verify
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Solve this logic puzzle step by step:
+
+      Five houses in a row are painted different colors.
+      In each house lives a person of different nationality.
+      Each homeowner drinks a different beverage, smokes a different brand,
+      and keeps a different pet.
+
+      Clues:
+      1. The Brit lives in the red house
+      2. The Swede keeps dogs
+      3. The Dane drinks tea
+      4. The green house is immediately to the left of the white house
+      5. The green house owner drinks coffee
+
+      Question: Who drinks water?
+    timeout: 30000
+    allowedTools:
+      - code_interpreter
+    constraints:
+      maxTokens: 3000
+      maxLatencyMs: 25000
+
+successCriteria:
+  - type: contains
+    value: "step"
+  - type: regex
+    value: "(?:Norwegian|Brit|Swede|Dane|German)"
+
+constraints:
+  maxTotalTokens: 5000
+  maxTotalCostUsd: 0.08
+  maxToolCalls: 5
+
+metadata:
+  author: eval-platform
+  version: "1.0"

@@ -1,0 +1,21 @@
+category,name,url,license,claim_summary,delta_vs_our_approach,notes
+eval_framework,HELM (Stanford),https://crfm.stanford.edu/helm,Apache-2.0,Standardized evaluation of language models across scenarios,Single-turn focused; no integrated routing or cost optimization,Foundational benchmark framework
+eval_framework,OpenAI Evals,https://github.com/openai/evals,MIT,Extensible evaluation framework for LLMs,No built-in cost tracking or routing decisions,Good eval primitives
+eval_framework,Eleuther LM Eval Harness,https://github.com/EleutherAI/lm-evaluation-harness,MIT,Standardized evaluation across models and tasks,Batch-focused; no session-level traces or tool routing,Popular for benchmark comparisons
+eval_framework,BIG-bench,https://github.com/google/BIG-bench,Apache-2.0,Diverse benchmark tasks for language models,Static benchmarks; no dynamic routing or cost modeling,Large task collection
+eval_framework,promptfoo,https://github.com/promptfoo/promptfoo,MIT,CLI and library for LLM prompt testing,Good eval but limited to prompts; no multi-tool flows,Useful for prompt iteration
+routing,Mixtral/MoE,https://mistral.ai/news/mixtral-of-experts,Apache-2.0,Sparse mixture of experts routing,Model-level routing not tool/API routing,Different abstraction level
+routing,Gorilla,https://github.com/ShishirPatil/gorilla,Apache-2.0,LLM-based API selection and calling,API selection without cost optimization,API-focused routing
+routing,ToolFormer,https://arxiv.org/abs/2302.04761,Research,Self-supervised tool use in LLMs,Embedded in model; no external routing policy,Foundational research
+routing,AutoGPT/AgentGPT,https://github.com/Significant-Gravitas/Auto-GPT,MIT,Autonomous agent with tool orchestration,Ad-hoc tool selection; no cost-aware routing,Popular agent framework
+routing,LangChain Agents,https://python.langchain.com,MIT,Agent framework with tool routing,Basic routing; limited cost/quality optimization,Widely used framework
+telemetry,OpenTelemetry,https://opentelemetry.io,Apache-2.0,Observability framework for distributed systems,Generic tracing; not LLM-specific schema,Standard for observability
+telemetry,LangSmith,https://smith.langchain.com,Proprietary,LLM tracing and debugging platform,Proprietary; LangChain-specific,Good UX for debugging
+telemetry,Weights & Biases Prompts,https://wandb.ai/site/prompts,Proprietary,LLM experiment tracking,ML-focused; not tightly coupled to routing,Strong experiment tracking
+telemetry,Helicone,https://helicone.ai,MIT,LLM observability platform,Request logging; no integrated routing decisions,Good for cost monitoring
+telemetry,PromptLayer,https://promptlayer.com,Proprietary,Prompt management and logging,Prompt-focused; no multi-step eval traces,Simple logging solution
+cost_optimization,Claude Cost Calc,Internal,N/A,Token-based cost estimation,Basic costing; no routing integration,Utility tool
+cost_optimization,LiteLLM,https://github.com/BerriAI/litellm,MIT,Unified LLM API with cost tracking,API abstraction; no eval-aware routing,Good for multi-provider
+safety,Guardrails AI,https://github.com/guardrails-ai/guardrails,Apache-2.0,Input/output validation for LLMs,Validation focus; not integrated with routing,Good validation primitives
+safety,NeMo Guardrails,https://github.com/NVIDIA/NeMo-Guardrails,Apache-2.0,Programmable rails for LLM safety,Safety focus; no cost-aware routing,NVIDIA's safety solution
+safety,Rebuff,https://github.com/protectai/rebuff,Apache-2.0,Prompt injection detection,Specific to injection; narrower scope,Focused security tool

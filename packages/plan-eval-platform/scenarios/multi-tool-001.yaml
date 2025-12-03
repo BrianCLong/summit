@@ -1,0 +1,78 @@
+id: multi-tool-001
+name: Research and Code Pipeline
+description: Multi-step pipeline that searches, analyzes, and generates code
+category: multi_tool_pipeline
+difficulty: hard
+tags:
+  - multi-tool
+  - pipeline
+  - research
+
+tools:
+  - name: web_browse
+    description: Browse web for information
+    costPerCall: 0.002
+    avgLatencyMs: 500
+    capabilities:
+      - web_search
+      - browse
+  - name: file_search
+    description: Search local files
+    costPerCall: 0.0005
+    avgLatencyMs: 50
+    capabilities:
+      - search
+      - file_read
+  - name: code_interpreter
+    description: Execute and generate code
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - execute_code
+      - generate_code
+  - name: api_call
+    description: Call external APIs
+    costPerCall: 0.0003
+    avgLatencyMs: 200
+    capabilities:
+      - http
+      - api
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Find information about sorting algorithms, then implement
+      quicksort in Python with proper documentation.
+    timeout: 20000
+    allowedTools:
+      - web_browse
+      - file_search
+      - code_interpreter
+    constraints:
+      maxTokens: 2000
+      maxLatencyMs: 15000
+
+  - id: step-2
+    type: assertion
+    input:
+      check: code_quality
+      minLines: 10
+    expectedOutput: true
+
+successCriteria:
+  - type: contains
+    value: "def quicksort"
+  - type: contains
+    value: "pivot"
+  - type: regex
+    value: '""".*"""'
+
+constraints:
+  maxTotalTokens: 5000
+  maxTotalCostUsd: 0.1
+  maxToolCalls: 10
+
+metadata:
+  author: eval-platform
+  version: "1.0"

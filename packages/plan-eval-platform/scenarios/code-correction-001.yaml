@@ -1,0 +1,59 @@
+id: code-correction-001
+name: Fix Python Syntax Error
+description: Correct a basic syntax error in a Python function
+category: code_correction
+difficulty: easy
+tags:
+  - python
+  - syntax
+  - beginner
+
+tools:
+  - name: code_interpreter
+    description: Execute and analyze code
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - execute_code
+      - analyze_code
+  - name: file_search
+    description: Search for code patterns
+    costPerCall: 0.0005
+    avgLatencyMs: 50
+    capabilities:
+      - search
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Fix the syntax error in this Python function:
+
+      def calculate_sum(numbers)
+          total = 0
+          for num in numbers:
+              total += num
+          return total
+    expectedOutput: "def calculate_sum(numbers):"
+    timeout: 5000
+    allowedTools:
+      - code_interpreter
+    constraints:
+      maxTokens: 500
+      maxLatencyMs: 3000
+
+successCriteria:
+  - type: contains
+    value: "def calculate_sum(numbers):"
+  - type: regex
+    value: ":\\s*$"
+    threshold: 0.9
+
+constraints:
+  maxTotalTokens: 1000
+  maxTotalCostUsd: 0.01
+  maxToolCalls: 3
+
+metadata:
+  author: eval-platform
+  version: "1.0"

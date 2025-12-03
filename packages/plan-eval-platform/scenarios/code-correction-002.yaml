@@ -1,0 +1,54 @@
+id: code-correction-002
+name: Fix JavaScript Async Bug
+description: Fix a common async/await bug in JavaScript
+category: code_correction
+difficulty: medium
+tags:
+  - javascript
+  - async
+  - promises
+
+tools:
+  - name: code_interpreter
+    description: Execute and analyze code
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - execute_code
+      - analyze_code
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Fix the async bug in this code:
+
+      async function fetchAllUsers() {
+        const userIds = [1, 2, 3, 4, 5];
+        const users = userIds.map(id => {
+          return fetchUser(id);
+        });
+        return users;
+      }
+    expectedOutput: "Promise.all"
+    timeout: 10000
+    allowedTools:
+      - code_interpreter
+    constraints:
+      maxTokens: 800
+      maxLatencyMs: 5000
+
+successCriteria:
+  - type: contains
+    value: "Promise.all"
+  - type: contains
+    value: "await"
+
+constraints:
+  maxTotalTokens: 1500
+  maxTotalCostUsd: 0.02
+  maxToolCalls: 5
+
+metadata:
+  author: eval-platform
+  version: "1.0"

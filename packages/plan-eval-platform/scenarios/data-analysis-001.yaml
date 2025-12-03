@@ -1,0 +1,66 @@
+id: data-analysis-001
+name: Analyze Sales Data
+description: Perform basic analysis on sales data to identify trends
+category: data_analysis
+difficulty: medium
+tags:
+  - data
+  - analysis
+  - pandas
+
+tools:
+  - name: code_interpreter
+    description: Execute Python code for data analysis
+    costPerCall: 0.002
+    avgLatencyMs: 300
+    capabilities:
+      - execute_code
+      - data_analysis
+  - name: database_query
+    description: Query data from database
+    costPerCall: 0.0008
+    avgLatencyMs: 100
+    capabilities:
+      - sql
+      - query
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Analyze this sales data and identify:
+      1. Total revenue
+      2. Best selling product
+      3. Month with highest sales
+
+      Data:
+      | Month | Product | Units | Price |
+      |-------|---------|-------|-------|
+      | Jan   | A       | 100   | 50    |
+      | Jan   | B       | 150   | 30    |
+      | Feb   | A       | 120   | 50    |
+      | Feb   | B       | 180   | 30    |
+      | Mar   | A       | 90    | 50    |
+      | Mar   | B       | 200   | 30    |
+    timeout: 15000
+    allowedTools:
+      - code_interpreter
+      - database_query
+    constraints:
+      maxTokens: 1500
+      maxLatencyMs: 10000
+
+successCriteria:
+  - type: contains
+    value: "revenue"
+  - type: regex
+    value: "\\d+.*total"
+
+constraints:
+  maxTotalTokens: 3000
+  maxTotalCostUsd: 0.05
+  maxToolCalls: 5
+
+metadata:
+  author: eval-platform
+  version: "1.0"
