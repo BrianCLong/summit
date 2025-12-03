@@ -7,11 +7,11 @@ import {
   afterAll,
   jest,
 } from '@jest/globals';
-import { ProvenanceLedgerV2 } from '../src/provenance/ledger.js';
+import { ProvenanceLedgerV2 } from '../../src/provenance/ledger.js';
 import {
   CryptoPipeline,
   InMemoryKeyStore,
-} from '../src/security/crypto/index.js';
+} from '../../src/security/crypto/index.js';
 
 describe('ProvenanceLedgerV2 crypto integration', () => {
   beforeAll(() => {

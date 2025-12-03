@@ -15,6 +15,7 @@ import {
   NarrativeGenerator,
   RuleBasedNarrativeGenerator,
 } from './generators.js';
+import { LLMAgent, RuleBasedAgent, SimulationAgent } from './agents.js';
 
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
@@ -23,6 +24,7 @@ export class NarrativeSimulationEngine {
   private state: NarrativeState;
   private generator: NarrativeGenerator;
   private readonly eventQueue: NarrativeEvent[] = [];
+  private readonly agents: SimulationAgent[] = [];
 
   constructor(private readonly config: SimulationConfig) {
     const start = new Date();
@@ -32,6 +34,23 @@ export class NarrativeSimulationEngine {
         this.bootstrapEntityState(entity),
       ]),
     );
+
+    if (config.agents) {
+      config.agents.forEach((agentConfig) => {
+        const entity = config.initialEntities.find(
+          (e) => e.id === agentConfig.entityId,
+        );
+        if (entity) {
+          if (agentConfig.type === 'llm' && config.llmClient) {
+            this.agents.push(
+              new LLMAgent(agentConfig, entity, config.llmClient),
+            );
+          } else {
+            this.agents.push(new RuleBasedAgent(agentConfig, entity));
+          }
+        }
+      });
+    }
 
     const parameters = Object.fromEntries(
       (config.initialParameters ?? []).map((parameter) => [
@@ -99,7 +118,10 @@ export class NarrativeSimulationEngine {
 
   async tick(steps = 1): Promise<NarrativeState> {
     for (let index = 0; index < steps; index += 1) {
+      await this.resolveAgentActions();
+
       this.advanceClock();
+
       const ready = this.dequeueReadyEvents();
       ready.forEach((event) => this.applyEvent(event));
       this.state.recentEvents = [...this.state.recentEvents, ...ready].slice(
@@ -111,6 +133,22 @@ export class NarrativeSimulationEngine {
     }
 
     return this.state;
+  }
+
+  private async resolveAgentActions(): Promise<void> {
+    for (const agent of this.agents) {
+      try {
+        const event = await agent.decideAction(this.state);
+        if (event) {
+          this.queueEvent(event);
+        }
+      } catch (error) {
+        console.error(
+          `Agent ${agent.id} failed to decide action:`,
+          error instanceof Error ? error.message : error,
+        );
+      }
+    }
   }
 
   injectActorAction(
