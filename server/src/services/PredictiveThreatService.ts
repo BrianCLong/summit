@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
-import { PrometheusMetrics } from '../utils/metrics';
-import logger from '../utils/logger';
+import { PrometheusMetrics } from '../utils/metrics.js';
+import logger from '../utils/logger.js';
 
 interface ForecastPoint {
   timestamp: Date;
