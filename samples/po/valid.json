@@ -1,0 +1,8 @@
+{
+  "id": "po_ABCDEFGHIJ",
+  "amount": 1234.56,
+  "currency": "USD",
+  "vendorId": "vendor-123",
+  "createdAt": "2025-12-03T12:00:00Z",
+  "tags": ["summit", "test"]
+}

@@ -1,0 +1,117 @@
+{
+  "$id": "https://summit.dev/schemas/provenance-event",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Provenance Event",
+  "type": "object",
+  "required": [
+    "id",
+    "timestamp",
+    "actor",
+    "action",
+    "subject",
+    "context"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^prov_[a-zA-Z0-9\\-_.]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "object",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "user",
+            "service",
+            "agent",
+            "system"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "build",
+        "test",
+        "scan",
+        "sign",
+        "deploy",
+        "approve",
+        "reject",
+        "create",
+        "update",
+        "delete",
+        "read",
+        "policy_eval"
+      ]
+    },
+    "subject": {
+      "type": "object",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "artifact",
+            "service",
+            "environment",
+            "document",
+            "agent-run",
+            "other"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "commit": {
+          "type": "string"
+        },
+        "branch": {
+          "type": "string"
+        },
+        "prNumber": {
+          "type": "integer"
+        },
+        "env": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

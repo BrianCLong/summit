@@ -1,0 +1,69 @@
+{
+  "$id": "https://summit.dev/schemas/policy-decision",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Policy Decision",
+  "type": "object",
+  "required": [
+    "id",
+    "timestamp",
+    "policy",
+    "input",
+    "result"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^pdec_[a-zA-Z0-9\\-_.]+$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "package",
+        "version"
+      ],
+      "properties": {
+        "package": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "rule": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "result": {
+      "type": "object",
+      "required": [
+        "allow"
+      ],
+      "properties": {
+        "allow": {
+          "type": "boolean"
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

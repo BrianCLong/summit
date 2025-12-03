@@ -1,0 +1,113 @@
+{
+  "$id": "https://summit.dev/schemas/sbom",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Software Bill of Materials (SBOM)",
+  "type": "object",
+  "required": [
+    "id",
+    "version",
+    "createdAt",
+    "generator",
+    "components"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^sbom_[a-zA-Z0-9\\-_.]+$"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "generator": {
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "version",
+          "purl",
+          "license"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "purl": {
+            "type": "string",
+            "pattern": "^pkg:[^\\s]+$"
+          },
+          "license": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "application",
+              "library",
+              "container",
+              "os",
+              "framework",
+              "other"
+            ]
+          },
+          "vulnerabilities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "severity"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "CRITICAL"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 1
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

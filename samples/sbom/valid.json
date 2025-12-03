@@ -1,0 +1,23 @@
+{
+  "id": "sbom_api_service_1_0_0",
+  "version": "1.0.0",
+  "createdAt": "2025-12-03T12:00:00Z",
+  "generator": {
+    "name": "summit-sbom-gen",
+    "version": "0.1.0"
+  },
+  "components": [
+    {
+      "name": "express",
+      "version": "4.18.2",
+      "purl": "pkg:npm/express@4.18.2",
+      "license": "MIT",
+      "type": "library",
+      "vulnerabilities": []
+    }
+  ],
+  "metadata": {
+    "service": "api",
+    "env": "prod"
+  }
+}
