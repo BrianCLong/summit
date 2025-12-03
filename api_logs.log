@@ -1,0 +1,23 @@
+time="2025-11-30T01:47:19-07:00" level=warning msg="/Users/brianlong/Developer/summit/docker-compose.dev.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+summit-api  |
+summit-api  | > intelgraph-server@1.0.0 dev
+summit-api  | > cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts
+summit-api  |
+summit-api  | [33m[nodemon] 3.1.11[39m
+summit-api  | [33m[nodemon] to restart at any time, enter `rs`[39m
+summit-api  | [33m[nodemon] watching path(s): src/**/*[39m
+summit-api  | [33m[nodemon] watching extensions: ts,json[39m
+summit-api  | [32m[nodemon] starting `npx tsx src/index.ts`[39m
+summit-api  | npm warn exec The following package was not found and will be installed: tsx@4.20.6
+summit-api  | /app/src/observability/tracer.ts:7
+summit-api  | import { Resource } from '@opentelemetry/resources';
+summit-api  |          ^
+summit-api  |
+summit-api  | SyntaxError: The requested module '@opentelemetry/resources' does not provide an export named 'Resource'
+summit-api  |     at ModuleJob._instantiate (node:internal/modules/esm/module_job:213:21)
+summit-api  |     at async ModuleJob.run (node:internal/modules/esm/module_job:320:5)
+summit-api  |     at async ModuleLoader.import (node:internal/modules/esm/loader:606:24)
+summit-api  |     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+summit-api  |
+summit-api  | Node.js v20.19.6
+summit-api  | [31m[nodemon] app crashed - waiting for file changes before starting...[39m

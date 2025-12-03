@@ -3,16 +3,26 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Copy base config
+COPY tsconfig.base.json ./
+
+# Set up service directory
+WORKDIR /app/services/websocket-server
+
 # Copy package files
-COPY package*.json ./
-COPY tsconfig.json ./
+COPY services/websocket-server/package*.json ./
+COPY services/websocket-server/tsconfig.json ./
 
 # Install dependencies
-RUN npm ci --only=production && \
-    npm install -D typescript tsx
+ENV NODE_ENV=development
+RUN npm install --include=dev && npm install @types/node --save-dev
+
+# Debug types
+RUN npm list @types/node || echo "types not found via npm list"
+RUN ls -la node_modules/@types || echo "No types found in dir"
 
 # Copy source
-COPY src ./src
+COPY services/websocket-server/src ./src
 
 # Build
 RUN npm run build
@@ -31,12 +41,12 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init
 
 # Copy package files and install production dependencies only
-COPY package*.json ./
-RUN npm ci --only=production && \
+COPY services/websocket-server/package*.json ./
+RUN npm install --only=production && \
     npm cache clean --force
 
 # Copy built application from builder
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/services/websocket-server/dist ./dist
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \

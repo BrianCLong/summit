@@ -1,0 +1,13 @@
+{
+  "updated_at": "2025-09-01T00:00:00Z",
+  "slices": [
+    {
+      "name": "gender:female",
+      "conditions": [{ "key": "gender", "value": "female" }]
+    },
+    {
+      "name": "region:emea",
+      "conditions": [{ "key": "region", "value": "emea" }]
+    }
+  ]
+}
