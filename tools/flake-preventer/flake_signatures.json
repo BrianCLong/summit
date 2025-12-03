@@ -1,0 +1,26 @@
+[
+  {
+    "id": "sig-001",
+    "pattern": "Exceeded timeout",
+    "category": "ASYNC_RACE",
+    "description": "Test timed out, likely waiting for async operation or deadlock."
+  },
+  {
+    "id": "sig-002",
+    "pattern": "received: serializes to the same string",
+    "category": "NON_DETERMINISTIC_API",
+    "description": "Jest snapshot mismatch, often due to non-deterministic output."
+  },
+  {
+    "id": "sig-003",
+    "pattern": "ECONNREFUSED",
+    "category": "RESOURCE_CONTENTION",
+    "description": "Connection refused, likely service startup race or port collision."
+  },
+  {
+    "id": "sig-005",
+    "pattern": "deadlock detected",
+    "category": "ASYNC_RACE",
+    "description": "Database deadlock detected."
+  }
+]
