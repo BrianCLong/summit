@@ -8,6 +8,7 @@ import evidenceOkResolvers from './evidenceOk.js';
 import trustRiskResolvers from './trust-risk.js';
 import provenanceResolvers from './provenance.js';
 import supportTicketResolvers from './supportTicket.js';
+import osintFusionResolvers from './osintFusionResolvers.js';
 
 // MC Platform v0.4.0 Transcendent Intelligence Resolvers (DISABLED - incomplete)
 // import { v040Resolvers } from './v040';
@@ -27,6 +28,7 @@ const resolvers = {
     ...(trustRiskResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
     ...(supportTicketResolvers.Query || {}),
+    ...(osintFusionResolvers.Query || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Query || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -53,6 +55,7 @@ const resolvers = {
     ...(trustRiskResolvers.Mutation || {}),
     ...(provenanceResolvers.Mutation || {}),
     ...(supportTicketResolvers.Mutation || {}),
+    ...(osintFusionResolvers.Mutation || {}),
     // MC Platform v0.4.0 Transcendent Intelligence (DISABLED)
     // ...(v040Resolvers.Mutation || {}),
     // MC Platform v0.4.1 Sovereign Safeguards (DISABLED)
@@ -66,6 +69,9 @@ const resolvers = {
       wargameResolver.deleteCrisisScenario.bind(wargameResolver),
   },
   SupportTicket: supportTicketResolvers.SupportTicket,
+  // OSINT Fusion field resolvers
+  OsintEntity: osintFusionResolvers.OsintEntity || {},
+  OsintRelationship: osintFusionResolvers.OsintRelationship || {},
 };
 
 export default resolvers;

@@ -1,0 +1,561 @@
+# OSINT Fusion Engine GraphQL Schema
+# Multi-source intelligence fusion with hallucination guards
+
+scalar JSON
+scalar DateTime
+
+# ============================================================================
+# Enums
+# ============================================================================
+
+enum OsintSourceType {
+  SOCIAL_MEDIA
+  DOMAIN_REGISTRY
+  DARK_WEB
+  PUBLIC_RECORDS
+  NEWS_MEDIA
+  ACADEMIC
+  GOVERNMENT
+  COMMERCIAL
+}
+
+enum OsintEntityType {
+  PERSON
+  ORGANIZATION
+  LOCATION
+  EVENT
+  DOCUMENT
+  CYBER_ARTIFACT
+  FINANCIAL_INSTRUMENT
+  COMMUNICATION
+  INFRASTRUCTURE
+}
+
+enum OsintRelationshipType {
+  ASSOCIATED_WITH
+  LOCATED_AT
+  MEMBER_OF
+  OWNS
+  CONTROLS
+  COMMUNICATES_WITH
+  TRANSACTS_WITH
+  RELATED_TO
+  ALIAS_OF
+  PART_OF
+}
+
+enum SourceReliability {
+  A  # Completely reliable
+  B  # Usually reliable
+  C  # Fairly reliable
+  D  # Not usually reliable
+  E  # Unreliable
+  F  # Reliability cannot be judged
+}
+
+enum HallucinationRisk {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum ClassificationLevel {
+  UNCLASSIFIED
+  CONFIDENTIAL
+  SECRET
+  TOP_SECRET
+  SCI
+  SAP
+}
+
+# ============================================================================
+# Core Types
+# ============================================================================
+
+type OsintEntity {
+  id: ID!
+  type: OsintEntityType!
+  label: String!
+  description: String
+  aliases: [String!]!
+  attributes: JSON
+  confidence: Float!
+  sources: [OsintSourceReference!]!
+  embedding: [Float!]
+  validationStatus: ValidationStatus!
+  classification: ClassificationLevel!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Graph traversal
+  relationships(
+    types: [OsintRelationshipType!]
+    direction: TraversalDirection
+    limit: Int
+  ): [OsintRelationship!]!
+
+  neighborhood(
+    depth: Int
+    minConfidence: Float
+  ): EntityNeighborhood!
+}
+
+type OsintRelationship {
+  id: ID!
+  type: OsintRelationshipType!
+  sourceEntity: OsintEntity!
+  targetEntity: OsintEntity!
+  confidence: Float!
+  weight: Float!
+  attributes: JSON
+  temporalBounds: TemporalBounds
+  sources: [OsintSourceReference!]!
+  validationStatus: ValidationStatus!
+}
+
+type OsintSourceReference {
+  sourceId: String!
+  sourceType: OsintSourceType!
+  uri: String!
+  timestamp: DateTime!
+  reliability: SourceReliability!
+  credibility: Int!
+  extractedAt: DateTime!
+  checksum: String!
+}
+
+type ValidationStatus {
+  validated: Boolean!
+  validatedAt: DateTime
+  validator: String!
+  confidence: Float!
+  corroboratingSourceCount: Int!
+  conflictingSources: [String!]!
+  hallucinationRisk: HallucinationRisk!
+  notes: String
+}
+
+type TemporalBounds {
+  start: DateTime
+  end: DateTime
+}
+
+# ============================================================================
+# Fusion Result Types
+# ============================================================================
+
+type FusionResult {
+  requestId: ID!
+  timestamp: DateTime!
+  entities: [OsintEntity!]!
+  relationships: [OsintRelationship!]!
+  analysis: OsintAnalysis!
+  metrics: FusionMetrics!
+  provenance: FusionProvenance!
+}
+
+type OsintAnalysis {
+  queryId: ID!
+  timestamp: DateTime!
+  findings: [Finding!]!
+  insights: [Insight!]!
+  recommendations: [Recommendation!]!
+  confidence: Float!
+  entityGraph: EntityGraphSummary!
+  sourceCoverage: SourceCoverage!
+  temporalPatterns: [TemporalPattern!]!
+  riskIndicators: [RiskIndicator!]!
+  intelligenceGaps: [IntelligenceGap!]!
+}
+
+type Finding {
+  id: ID!
+  type: String!
+  severity: String!
+  title: String!
+  description: String!
+  evidence: JSON
+  impact: String
+}
+
+type Insight {
+  id: ID!
+  category: String!
+  summary: String!
+  details: String!
+  confidence: Float!
+  supportingData: JSON
+}
+
+type Recommendation {
+  id: ID!
+  title: String!
+  description: String!
+  reasoning: String!
+  priority: String!
+  estimatedImpact: String
+  action: JSON
+}
+
+type EntityGraphSummary {
+  nodeCount: Int!
+  edgeCount: Int!
+  connectedComponents: Int!
+  density: Float!
+  centralEntities: [CentralEntity!]!
+  clusters: [EntityCluster!]!
+}
+
+type CentralEntity {
+  entityId: ID!
+  centrality: Float!
+  type: OsintEntityType!
+}
+
+type EntityCluster {
+  id: ID!
+  size: Int!
+  dominantType: OsintEntityType!
+}
+
+type SourceCoverage {
+  sourcesQueried: [OsintSourceType!]!
+  sourcesResponded: [OsintSourceType!]!
+  sourcesFailed: [FailedSource!]!
+  dataFreshness: JSON
+  reliability: JSON
+}
+
+type FailedSource {
+  source: OsintSourceType!
+  reason: String!
+}
+
+type TemporalPattern {
+  id: ID!
+  type: String!
+  description: String!
+  startTime: DateTime!
+  endTime: DateTime
+  affectedEntities: [ID!]!
+  confidence: Float!
+}
+
+type RiskIndicator {
+  id: ID!
+  type: String!
+  severity: String!
+  description: String!
+  affectedEntities: [ID!]!
+  evidence: JSON
+  mitigations: [String!]
+}
+
+type IntelligenceGap {
+  id: ID!
+  description: String!
+  missingSourceTypes: [OsintSourceType!]!
+  recommendedActions: [String!]!
+  priority: String!
+}
+
+type FusionMetrics {
+  totalLatencyMs: Int!
+  sourceLatencies: JSON
+  entitiesExtracted: Int!
+  entitiesValidated: Int!
+  validationRate: Float!
+  hallucinationRejections: Int!
+  p95LatencyMs: Int!
+  p99LatencyMs: Int!
+  cacheHitRate: Float!
+}
+
+type FusionProvenance {
+  requestId: ID!
+  timestamp: DateTime!
+  sources: [ProvenanceSource!]!
+  transformations: [ProvenanceTransformation!]!
+  validations: [ProvenanceValidation!]!
+}
+
+type ProvenanceSource {
+  sourceId: String!
+  sourceType: OsintSourceType!
+  timestamp: DateTime!
+  checksum: String!
+  classification: ClassificationLevel!
+}
+
+type ProvenanceTransformation {
+  step: String!
+  timestamp: DateTime!
+  inputChecksum: String!
+  outputChecksum: String!
+}
+
+type ProvenanceValidation {
+  type: String!
+  timestamp: DateTime!
+  result: Boolean!
+  confidence: Float!
+}
+
+# ============================================================================
+# Graph Traversal Types
+# ============================================================================
+
+enum TraversalDirection {
+  OUTGOING
+  INCOMING
+  BOTH
+}
+
+type EntityNeighborhood {
+  nodes: [OsintEntity!]!
+  edges: [OsintRelationship!]!
+  depth: Int!
+  metrics: TraversalMetrics!
+}
+
+type ShortestPath {
+  nodes: [ID!]!
+  edges: [ID!]!
+  totalWeight: Float!
+  entities: [OsintEntity!]!
+  relationships: [OsintRelationship!]!
+}
+
+type TraversalMetrics {
+  nodesVisited: Int!
+  edgesTraversed: Int!
+  depthReached: Int!
+  latencyMs: Int!
+}
+
+type SimilarEntity {
+  entity: OsintEntity!
+  similarity: Float!
+}
+
+# ============================================================================
+# Input Types
+# ============================================================================
+
+input OsintFusionQueryInput {
+  keywords: [String!]!
+  entityTypes: [OsintEntityType!]
+  sources: [OsintSourceType!]
+  geoBounds: GeoBoundsInput
+  temporalBounds: TemporalBoundsInput
+  minConfidence: Float
+  maxResults: Int
+  includeRelationships: Boolean
+  traversalDepth: Int
+}
+
+input GeoBoundsInput {
+  lat: Float!
+  lon: Float!
+  radiusKm: Float!
+}
+
+input TemporalBoundsInput {
+  start: DateTime!
+  end: DateTime!
+}
+
+input FusionOptionsInput {
+  enableHallucinationGuard: Boolean
+  minCorroboratingSourceCount: Int
+  confidenceThreshold: Float
+  maxTraversalDepth: Int
+  enableSemanticMatching: Boolean
+  enableTemporalAnalysis: Boolean
+  airgapMode: Boolean
+  maxLatencyMs: Int
+}
+
+input GraphTraversalInput {
+  startNodeIds: [ID!]!
+  relationshipTypes: [OsintRelationshipType!]
+  direction: TraversalDirection
+  maxDepth: Int!
+  entityTypes: [OsintEntityType!]
+  minConfidence: Float
+  limit: Int
+}
+
+input EntityInput {
+  type: OsintEntityType!
+  label: String!
+  description: String
+  aliases: [String!]
+  attributes: JSON
+  classification: ClassificationLevel
+}
+
+input RelationshipInput {
+  type: OsintRelationshipType!
+  sourceEntityId: ID!
+  targetEntityId: ID!
+  attributes: JSON
+  temporalBounds: TemporalBoundsInput
+}
+
+# ============================================================================
+# Health & Status Types
+# ============================================================================
+
+type OsintFusionStatus {
+  healthy: Boolean!
+  initialized: Boolean!
+  sourceConnectors: [SourceConnectorStatus!]!
+  graphConnection: Boolean!
+  metrics: AgentMetrics!
+}
+
+type SourceConnectorStatus {
+  sourceType: OsintSourceType!
+  healthy: Boolean!
+  latencyMs: Int!
+  rateLimitRemaining: Int!
+  rateLimitResetAt: DateTime!
+}
+
+type AgentMetrics {
+  totalRequests: Int!
+  successfulRequests: Int!
+  failedRequests: Int!
+  averageResponseTime: Float!
+  p95ResponseTime: Float!
+  p99ResponseTime: Float!
+  validationRate: Float!
+}
+
+type HallucinationCheckResult {
+  entityId: ID!
+  isHallucinated: Boolean!
+  confidence: Float!
+  checks: [ValidationCheck!]!
+  recommendation: String!
+}
+
+type ValidationCheck {
+  type: String!
+  passed: Boolean!
+  details: String!
+}
+
+# ============================================================================
+# Queries
+# ============================================================================
+
+extend type Query {
+  # Fusion queries
+  osintFuse(
+    query: OsintFusionQueryInput!
+    options: FusionOptionsInput
+  ): FusionResult!
+
+  # Entity queries
+  osintEntity(id: ID!): OsintEntity
+  osintEntities(
+    ids: [ID!]
+    type: OsintEntityType
+    label: String
+    minConfidence: Float
+    limit: Int
+    offset: Int
+  ): [OsintEntity!]!
+
+  osintSearchEntities(
+    query: String!
+    entityTypes: [OsintEntityType!]
+    limit: Int
+  ): [OsintEntity!]!
+
+  osintSimilarEntities(
+    entityId: ID!
+    topK: Int
+    minSimilarity: Float
+  ): [SimilarEntity!]!
+
+  # Relationship queries
+  osintRelationship(id: ID!): OsintRelationship
+  osintRelationships(
+    entityId: ID
+    type: OsintRelationshipType
+    limit: Int
+  ): [OsintRelationship!]!
+
+  # Graph traversal
+  osintShortestPaths(
+    sourceId: ID!
+    targetId: ID!
+    maxDepth: Int
+    relationshipTypes: [OsintRelationshipType!]
+  ): [ShortestPath!]!
+
+  osintNeighborhood(
+    entityId: ID!
+    depth: Int
+    minConfidence: Float
+  ): EntityNeighborhood!
+
+  osintTraverse(input: GraphTraversalInput!): EntityNeighborhood!
+
+  # Validation
+  osintValidateEntity(entityId: ID!): HallucinationCheckResult!
+
+  # Status
+  osintFusionStatus: OsintFusionStatus!
+}
+
+# ============================================================================
+# Mutations
+# ============================================================================
+
+extend type Mutation {
+  # Entity management
+  osintCreateEntity(input: EntityInput!): OsintEntity!
+  osintUpdateEntity(id: ID!, input: EntityInput!): OsintEntity!
+  osintDeleteEntity(id: ID!): Boolean!
+
+  # Relationship management
+  osintCreateRelationship(input: RelationshipInput!): OsintRelationship!
+  osintDeleteRelationship(id: ID!): Boolean!
+
+  # Fusion operations
+  osintEnrichEntity(
+    entityId: ID!
+    sources: [OsintSourceType!]
+  ): OsintEntity!
+
+  osintRevalidateEntity(entityId: ID!): HallucinationCheckResult!
+
+  # Batch operations
+  osintBatchFuse(
+    queries: [OsintFusionQueryInput!]!
+    options: FusionOptionsInput
+  ): [FusionResult!]!
+
+  osintBatchValidate(entityIds: [ID!]!): [HallucinationCheckResult!]!
+}
+
+# ============================================================================
+# Subscriptions (for real-time updates)
+# ============================================================================
+
+extend type Subscription {
+  osintEntityUpdated(entityId: ID): OsintEntity!
+  osintFusionProgress(requestId: ID!): FusionProgress!
+}
+
+type FusionProgress {
+  requestId: ID!
+  stage: String!
+  progress: Float!
+  entitiesFound: Int!
+  message: String
+}
