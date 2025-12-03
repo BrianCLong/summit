@@ -206,3 +206,7 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+train-frontier-1.3b:
+	@echo "==> train-frontier-1.3b: Starting training run..."
+	@./experiments/run_train.sh

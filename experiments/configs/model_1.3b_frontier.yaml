@@ -1,0 +1,64 @@
+# Frontier Training Configuration - 1.3B v0.1
+
+model:
+  name: "frontier-1.3b-v0.1"
+  type: "decoder_transformer"
+  params:
+    vocab_size: 50257 # GPT-2/3 standard, or custom tokenizer
+    hidden_size: 2048
+    num_layers: 24
+    num_heads: 16
+    seq_len: 4096
+    use_flash_attn: true
+    use_rope: true
+    norm_type: "rmsnorm"
+    activation: "swiglu"
+    bias: false
+    dropout: 0.1
+
+training:
+  batch_size: 512 # Global batch size
+  micro_batch_size: 4 # Per device
+  optimizer:
+    type: "adamw"
+    lr: 3.0e-4
+    weight_decay: 0.1
+    betas: [0.9, 0.95]
+  scheduler:
+    type: "cosine_with_warmup"
+    warmup_steps: 2000
+    min_lr: 3.0e-5
+  max_steps: 50000 # Approx 100B tokens depending on BS
+  precision: "bf16"
+  gradient_clipping: 1.0
+  seed: 42
+  log_interval: 10
+  save_interval: 1000
+  eval_interval: 500
+
+data:
+  dataset_path: "./data/processed/frontier_mix_v1"
+  streaming: true
+  num_workers: 4
+  curriculum:
+    enabled: true
+    strategy: "telemetry_driven"
+    initial_mix:
+      web: 0.8
+      code: 0.2
+    target_mix:
+      web: 0.4
+      code: 0.3
+      tools: 0.2
+      graph: 0.1
+
+system:
+  distributed_backend: "nccl"
+  strategy: "fsdp" # Fully Sharded Data Parallel
+  devices: "auto"
+  mixed_precision: true
+
+telemetry:
+  project: "frontier-training"
+  tags: ["1.3b", "curriculum-v1"]
+  log_artifacts: true

@@ -1,0 +1,6 @@
+Reference,License,Delta/What's New
+General Open LLM Families (LLaMA, Mistral, Qwen),Apache 2.0 / MIT,Focus on tool/graph-native pretraining + telemetry-driven curricula vs generic web+code.
+MoE / Routing Models (DeepSeek, Mixtral),Apache 2.0,Routing conditioned on reasoning-trace or tool-usage signals, not just token patterns.
+Long-Context Transformers (ALiBi, RWKV, RingAttention),Apache 2.0 / MIT,Combine frontier context lengths with training-time curriculum and dynamic context expansion.
+Curriculum Learning for LMs (various papers),N/A (Methodology),Curricula based on live training telemetry and downstream task evals, not static heuristics.
+RLHF / DPO / Preference Optimization,N/A (Methodology),Explicit linkage of training trace telemetry + eval signals to frontier scaling decisions.
