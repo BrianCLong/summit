@@ -1,4 +1,0 @@
-- Deterministic Toolchain Hasher CLI package.
-- Use 2-space indentation for all JavaScript files.
-- Run `npm test` in this directory after making changes.
-- Document CLI usage updates in the package README.

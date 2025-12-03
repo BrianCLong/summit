@@ -193,12 +193,12 @@ def extract_entities(text: str) -> list[str]:
 
 
 __all__ = [
-    "NewsItem",
-    "Signal",
     "BaseIngestor",
-    "NewsAPIIngestor",
-    "RSSIngestor",
-    "TwitterIngestor",
     "MicroAlphaDetector",
+    "NewsAPIIngestor",
+    "NewsItem",
+    "RSSIngestor",
+    "Signal",
+    "TwitterIngestor",
     "extract_entities",
 ]
