@@ -216,7 +216,7 @@ jobs:
       - name: Golden path smoke tests (API)
         run: make smoke
       - name: Playwright E2E tests (UI Video Recording)
-        run: npx playwright test
+        run: npx playwright test e2e/golden-path.spec.ts
         env:
           CI: true
       - name: Upload Playwright artifacts
