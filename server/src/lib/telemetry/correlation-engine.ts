@@ -22,6 +22,8 @@ class CorrelationEngine {
   private static instance: CorrelationEngine;
   private logBuffer: LogEntry[] = [];
   private readonly MAX_LOGS = 5000;
+  private bufferIndex = 0;
+  private isBufferFull = false;
 
   private constructor() {}
 
@@ -46,10 +48,15 @@ class CorrelationEngine {
         message: entry.msg || entry.message || '',
     };
 
-    this.logBuffer.push(logEntry);
-    if (this.logBuffer.length > this.MAX_LOGS) {
-      this.logBuffer.shift();
+    // Ring buffer implementation
+    if (this.logBuffer.length < this.MAX_LOGS) {
+        this.logBuffer.push(logEntry);
+    } else {
+        this.logBuffer[this.bufferIndex] = logEntry;
+        this.isBufferFull = true;
     }
+
+    this.bufferIndex = (this.bufferIndex + 1) % this.MAX_LOGS;
   }
 
   private pinoLevelToString(level: number): string {
