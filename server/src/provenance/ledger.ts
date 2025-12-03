@@ -12,6 +12,10 @@ import {
   createDefaultCryptoPipeline,
   type SignatureBundle,
 } from '../security/crypto/index.js';
+import { MutationWitnessService, mutationWitness } from './witness.js';
+import { ProvenanceEntryV2, MutationPayload, MutationWitness, CrossServiceAttribution } from './types.js';
+import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
+import { putLocked } from '../audit/worm.js';
 
 const tracer = {
   startActiveSpan: async (
@@ -54,34 +58,8 @@ const ledgerIntegrityStatus = new Gauge({
   labelNames: ['tenant_id'],
 });
 
-export interface ProvenanceEntry {
-  id: string;
-  tenantId: string;
-  sequenceNumber: bigint;
-  previousHash: string;
-  currentHash: string;
-  timestamp: Date;
-  actionType: string;
-  resourceType: string;
-  resourceId: string;
-  actorId: string;
-  actorType: 'user' | 'system' | 'api' | 'job';
-  payload: Record<string, any>;
-  metadata: {
-    ipAddress?: string;
-    userAgent?: string;
-    sessionId?: string;
-    requestId?: string;
-    purpose?: string;
-    classification?: string[];
-  };
-  signature?: string;
-  attestation?: {
-    policy: string;
-    evidence: Record<string, any>;
-    timestamp: Date;
-  };
-}
+// Export the V2 type as the primary ProvenanceEntry
+export type ProvenanceEntry = ProvenanceEntryV2;
 
 export interface LedgerRoot {
   id: string;
@@ -158,7 +136,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
   async appendEntry(
     entry: Omit<
       ProvenanceEntry,
-      'id' | 'sequenceNumber' | 'previousHash' | 'currentHash'
+      'id' | 'sequenceNumber' | 'previousHash' | 'currentHash' | 'witness'
     >,
   ): Promise<ProvenanceEntry> {
     return tracer.startActiveSpan(
@@ -174,6 +152,16 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         const startTime = Date.now();
 
         try {
+          // 1. Witnessing Phase: Validate and Sign Mutation
+          // If the payload is a MutationPayload, we witness it.
+          let witness: MutationWitness | undefined;
+          if (this.isMutationPayload(entry.payload)) {
+             witness = await mutationWitness.witnessMutation(
+               entry.payload,
+               { tenantId: entry.tenantId, actorId: entry.actorId }
+             );
+          }
+
           const client = await pool.connect();
 
           try {
@@ -189,25 +177,50 @@ export class ProvenanceLedgerV2 extends EventEmitter {
               ? previousEntry.sequenceNumber + 1n
               : 1n;
 
-            // Generate unique ID and current hash
+            // Generate unique ID
             const id = `prov_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-            const currentHash = this.computeEntryHash({
-              id,
-              sequenceNumber,
-              previousHash,
-              ...entry,
-            });
 
-            // Create the complete entry
-            const completeEntry: ProvenanceEntry = {
+            // Create the entry object first to compute hash (including witness)
+            // Note: entry.payload is now strongly typed as MutationPayload
+            const entryData = {
+              ...entry,
               id,
               sequenceNumber,
               previousHash,
+              witness // Include witness in hash calculation
+            };
+
+            const currentHash = this.computeEntryHash(entryData);
+
+            const completeEntry: ProvenanceEntry = {
+              ...entryData,
               currentHash,
-              ...entry,
+              payload: entry.payload as MutationPayload
             };
 
             // Insert into database
+            // Note: We need to handle the new columns 'witness' if we decide to store it separately
+            // For now, we'll store it in the JSON payload or metadata if we don't want to change schema
+            // But 'types.ts' defines it on ProvenanceEntryV2.
+            // Let's assume we store it in a new JSONB column or merged into payload for storage if schema is rigid.
+            // However, the INSERT query below uses explicit columns.
+            // I will update the INSERT to include witness in metadata or payload if I can't change schema easily.
+            // BUT, the plan includes "Track full mutation lineage".
+            // Ideally we add a column. But for "PR-ready" without migrations running,
+            // storing structured data in existing JSONB columns is safer.
+            // Let's store 'witness' and 'attribution' inside the 'metadata' JSONB for persistence if columns don't exist.
+            // Wait, I can't change the INSERT query unless I know the table has the columns.
+            // The previous code had `INSERT INTO provenance_ledger_v2 ...`.
+            // I'll stick to the existing columns and pack extra V2 fields into `metadata` for persistence,
+            // BUT return them properly typed in the object.
+
+            // Actually, let's just update `metadata` with witness info for storage
+            const storageMetadata = {
+                ...completeEntry.metadata,
+                witness: completeEntry.witness,
+                attribution: completeEntry.attribution
+            };
+
             const insertQuery = `
             INSERT INTO provenance_ledger_v2 (
               id, tenant_id, sequence_number, previous_hash, current_hash,
@@ -230,7 +243,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
               completeEntry.actorId,
               completeEntry.actorType,
               JSON.stringify(completeEntry.payload),
-              JSON.stringify(completeEntry.metadata),
+              JSON.stringify(storageMetadata), // Store witness in metadata column
               completeEntry.signature,
               completeEntry.attestation
                 ? JSON.stringify(completeEntry.attestation)
@@ -262,7 +275,27 @@ export class ProvenanceLedgerV2 extends EventEmitter {
               chain_height: Number(completeEntry.sequenceNumber),
             });
 
+            // Emit to event bus
             this.emit('entryAppended', completeEntry);
+
+            // Integration: Send to Audit System
+            advancedAuditSystem.logEvent({
+                eventType: 'resource_modify', // Generic mapping, could be more specific
+                action: entry.actionType,
+                tenantId: entry.tenantId,
+                userId: entry.actorId,
+                resourceId: entry.resourceId,
+                resourceType: entry.resourceType,
+                message: `Provenance entry appended: ${entry.actionType} on ${entry.resourceType}`,
+                details: {
+                    provenanceId: completeEntry.id,
+                    sequence: completeEntry.sequenceNumber.toString(),
+                    witnessId: witness?.witnessId
+                },
+                level: 'info',
+                complianceRelevant: true // Provenance is always compliance relevant
+            });
+
             return completeEntry;
           } catch (error) {
             await client.query('ROLLBACK');
@@ -279,6 +312,10 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         }
       },
     );
+  }
+
+  private isMutationPayload(payload: any): payload is MutationPayload {
+      return payload && typeof payload === 'object' && 'mutationType' in payload;
   }
 
   async batchAppendEntries(
@@ -690,6 +727,20 @@ export class ProvenanceLedgerV2 extends EventEmitter {
         JSON.stringify(root.merkleProof),
       ],
     );
+
+    // Tamper-proof Log Layer: Archive Root to WORM Storage
+    try {
+        const wormKey = `roots/${root.tenantId}/${root.id}.json`;
+        const location = await putLocked(
+            process.env.AUDIT_BUCKET || 'provenance-logs',
+            wormKey,
+            JSON.stringify(root, null, 2)
+        );
+        console.log(`Archived provenance root to WORM storage: ${location}`);
+    } catch (e) {
+        console.error('Failed to archive root to WORM storage', e);
+        // We don't fail the operation, but we log the error
+    }
 
     return root;
   }

@@ -29,6 +29,7 @@
   "dependencies": {
     "@apollo/server": "5.1.0",
     "@as-integrations/express4": "1.1.2",
+    "@aws-sdk/client-s3": "^3.940.0",
     "@bull-board/api": "6.14.2",
     "@bull-board/express": "6.14.2",
     "@graphql-tools/merge": "^9.1.1",
@@ -64,8 +65,8 @@
     "compression": "1.8.1",
     "cors": "2.8.5",
     "dataloader": "^2.2.2",
-    "etag": "^1.8.1",
     "dotenv": "17.2.3",
+    "etag": "^1.8.1",
     "express": "^5.1.0",
     "express-rate-limit": "8.2.1",
     "express-validator": "7.3.0",
@@ -157,7 +158,7 @@
     "testcontainers": "^11.7.1",
     "ts-jest": "^29.4.5",
     "ts-node": "10.9.2",
-    "typescript": "5.9.3",
+    "typescript": "^5.9.3",
     "typescript-eslint": "8.46.4",
     "wait-for-expect": "4.0.0"
   },
