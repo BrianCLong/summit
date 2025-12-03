@@ -4,7 +4,9 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+// require('jest-extended');
+import 'jest-extended';
+import { jest } from '@jest/globals';
 
 // Global test timeout
 jest.setTimeout(30000);
