@@ -168,15 +168,17 @@ export class MissionMigrator {
         await this.executeTestSuite(results);
         break;
 
-      case 'Artifact Generation':
+      case 'Artifact Generation': {
         const artifacts = await this.generateArtifacts(sandboxConfig, config);
         status.artifacts.push(...artifacts);
         break;
+      }
 
-      case 'Policy Bundle Creation':
+      case 'Policy Bundle Creation': {
         const policyBundle = await this.createPolicyBundle(sandboxConfig, config);
         status.artifacts.push(policyBundle);
         break;
+      }
 
       case 'Mission Compliance Validation':
         await this.validateMissionCompliance(sandboxConfig, config);

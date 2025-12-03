@@ -244,7 +244,7 @@ export class SecureSandbox {
     return safeModules.includes(name);
   }
 
-  private loadSafeModule(name: string): unknown {
+  private loadSafeModule(_name: string): unknown {
     // In production, this would dynamically load pre-vetted modules
     return {};
   }
