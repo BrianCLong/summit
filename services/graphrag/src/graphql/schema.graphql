@@ -1,0 +1,419 @@
+"""
+GraphRAG GraphQL Schema
+Semantic RAG Knowledge Graph API
+"""
+
+scalar DateTime
+scalar JSON
+
+"""
+Citation from a document or graph source
+"""
+type Citation {
+  id: ID!
+  documentId: String!
+  documentTitle: String
+  spanStart: Int!
+  spanEnd: Int!
+  content: String!
+  confidence: Float!
+  sourceType: SourceType!
+  metadata: JSON
+}
+
+enum SourceType {
+  document
+  graph
+  external
+  derived
+}
+
+"""
+Node in a graph path
+"""
+type GraphNode {
+  id: ID!
+  type: String!
+  label: String!
+  properties: JSON!
+}
+
+"""
+Edge in a graph path
+"""
+type GraphEdge {
+  id: ID!
+  type: String!
+  sourceId: ID!
+  targetId: ID!
+  properties: JSON
+}
+
+"""
+A path through the knowledge graph
+"""
+type GraphPath {
+  id: ID!
+  nodes: [GraphNode!]!
+  edges: [GraphEdge!]!
+  pathLength: Int!
+  confidence: Float!
+  saliencyScore: Float!
+  rationale: String
+}
+
+"""
+An evidence chunk with citations and graph paths
+"""
+type EvidenceChunk {
+  id: ID!
+  content: String!
+  citations: [Citation!]!
+  graphPaths: [GraphPath!]!
+  relevanceScore: Float!
+  temporalContext: TemporalContext
+}
+
+"""
+Temporal context for evidence
+"""
+type TemporalContext {
+  validFrom: DateTime
+  validTo: DateTime
+  eventTime: DateTime
+}
+
+"""
+Tokens used in LLM operations
+"""
+type TokenUsage {
+  prompt: Int!
+  completion: Int!
+  total: Int!
+}
+
+"""
+A citation used in an answer
+"""
+type AnswerCitation {
+  index: Int!
+  source: Citation!
+  usedInAnswer: Boolean!
+}
+
+"""
+Graph evidence with explanation
+"""
+type GraphEvidence {
+  path: GraphPath!
+  explanation: String!
+}
+
+"""
+A counterfactual scenario
+"""
+type Counterfactual {
+  id: ID!
+  originalAnswer: String!
+  change: String!
+  changeType: CounterfactualType!
+  wouldFlipAnswer: Boolean!
+  alternativeAnswer: String
+  confidence: Float!
+  explanation: String!
+  affectedEvidence: [ID!]!
+}
+
+enum CounterfactualType {
+  remove_evidence
+  modify_relationship
+  add_constraint
+  temporal_shift
+}
+
+"""
+Influential evidence analysis
+"""
+type InfluentialEvidence {
+  evidenceId: ID!
+  influence: Float!
+  removalImpact: String!
+}
+
+"""
+Critical path analysis
+"""
+type CriticalPath {
+  pathId: ID!
+  criticality: Float!
+  alternativePaths: Int!
+}
+
+"""
+Sensitivity analysis for an answer
+"""
+type SensitivityAnalysis {
+  mostInfluentialEvidence: [InfluentialEvidence!]!
+  criticalPaths: [CriticalPath!]!
+  robustnessScore: Float!
+}
+
+"""
+RAG answer with citations and evidence
+"""
+type RAGAnswer {
+  id: ID!
+  query: String!
+  answer: String!
+  citations: [AnswerCitation!]!
+  graphEvidence: [GraphEvidence!]!
+  confidence: Float!
+  reasoning: String
+  counterfactuals: [Counterfactual!]
+  tokensUsed: TokenUsage!
+  modelUsed: String!
+  processingTimeMs: Float!
+  tenantId: String!
+  createdAt: DateTime!
+}
+
+"""
+Subgraph returned from retrieval
+"""
+type Subgraph {
+  nodes: [GraphNode!]!
+  edges: [GraphEdge!]!
+}
+
+"""
+Retrieval result
+"""
+type RetrievalResult {
+  id: ID!
+  query: String!
+  evidenceChunks: [EvidenceChunk!]!
+  subgraph: Subgraph!
+  totalDocumentsSearched: Int!
+  totalNodesTraversed: Int!
+  processingTimeMs: Float!
+}
+
+"""
+Conflict resolution info
+"""
+type ConflictResolution {
+  sourceA: String!
+  sourceB: String!
+  conflict: String!
+  resolution: String!
+  confidence: Float!
+}
+
+"""
+Fused context from multiple sources
+"""
+type FusedContext {
+  id: ID!
+  fusedContent: String!
+  conflictsResolved: [ConflictResolution!]!
+  totalTokens: Int!
+  compressionRatio: Float!
+}
+
+"""
+Processing metadata
+"""
+type ProcessingMetadata {
+  totalProcessingTimeMs: Float!
+  retrievalTimeMs: Float!
+  fusionTimeMs: Float!
+  generationTimeMs: Float!
+  totalCost: Float!
+}
+
+"""
+Complete GraphRAG response
+"""
+type GraphRAGResponse {
+  answer: RAGAnswer!
+  retrievalResult: RetrievalResult!
+  fusedContext: FusedContext!
+  counterfactuals: [Counterfactual!]
+  sensitivityAnalysis: SensitivityAnalysis
+  metadata: ProcessingMetadata!
+}
+
+"""
+Cypher generation result
+"""
+type CypherResult {
+  cypher: String!
+  explanation: String!
+  confidence: Float!
+  warnings: [String!]!
+}
+
+"""
+Document indexing result
+"""
+type IndexResult {
+  documentId: ID!
+  chunksIndexed: Int!
+  success: Boolean!
+}
+
+"""
+Entity filter for retrieval
+"""
+input EntityFilterInput {
+  type: String!
+  property: String
+  value: JSON
+}
+
+"""
+Temporal scope for retrieval
+"""
+input TemporalScopeInput {
+  from: DateTime
+  to: DateTime
+  pointInTime: DateTime
+  granularity: TemporalGranularity
+}
+
+enum TemporalGranularity {
+  day
+  week
+  month
+  year
+}
+
+"""
+Policy context for access control
+"""
+input PolicyContextInput {
+  userId: String!
+  roles: [String!]!
+  clearanceLevel: String
+  jurisdiction: String
+  purpose: String
+  accessGroups: [String!]
+}
+
+"""
+Query input for GraphRAG
+"""
+input GraphRAGQueryInput {
+  query: String!
+  tenantId: String!
+  userId: String
+  maxHops: Int = 3
+  maxNodes: Int = 1000
+  maxDocuments: Int = 20
+  minRelevance: Float = 0.3
+  includeCitations: Boolean = true
+  includeGraphPaths: Boolean = true
+  includeCounterfactuals: Boolean = false
+  includeSensitivityAnalysis: Boolean = false
+  temporalScope: TemporalScopeInput
+  entityFilters: [EntityFilterInput!]
+  relationshipFilters: [String!]
+  policyContext: PolicyContextInput
+  maxTokens: Int
+  temperature: Float
+}
+
+"""
+Document input for indexing
+"""
+input DocumentInput {
+  id: ID!
+  title: String
+  content: String!
+  metadata: JSON
+}
+
+type Query {
+  """
+  Health check for the GraphRAG service
+  """
+  health: HealthStatus!
+
+  """
+  Preview a natural language query as Cypher without executing
+  """
+  previewNLQuery(query: String!, tenantId: String!): CypherResult!
+}
+
+type Mutation {
+  """
+  Execute a GraphRAG query with retrieval, fusion, and generation
+  """
+  graphRAGQuery(input: GraphRAGQueryInput!): GraphRAGResponse!
+
+  """
+  Execute a natural language query and return the Cypher
+  """
+  executeNLQuery(
+    query: String!
+    tenantId: String!
+    schemaContext: JSON
+  ): CypherResult!
+
+  """
+  Generate hypotheses from evidence
+  """
+  generateHypotheses(
+    tenantId: String!
+    context: String!
+    evidenceIds: [ID!]
+  ): [Hypothesis!]!
+
+  """
+  Index a document for retrieval
+  """
+  indexDocument(
+    documentId: ID!
+    title: String
+    content: String!
+    tenantId: String!
+    metadata: JSON
+  ): IndexResult!
+
+  """
+  Batch index multiple documents
+  """
+  indexDocuments(
+    documents: [DocumentInput!]!
+    tenantId: String!
+  ): BatchIndexResult!
+}
+
+"""
+Hypothesis generated from evidence
+"""
+type Hypothesis {
+  hypothesis: String!
+  confidence: Float!
+  supportingEvidence: [String!]!
+  contradictingEvidence: [String!]!
+}
+
+"""
+Batch indexing result
+"""
+type BatchIndexResult {
+  total: Int!
+  successful: Int!
+  failed: Int!
+  results: [IndexResult!]!
+}
+
+"""
+Health status
+"""
+type HealthStatus {
+  healthy: Boolean!
+  components: JSON!
+  timestamp: DateTime!
+}
