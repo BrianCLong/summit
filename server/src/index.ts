@@ -12,7 +12,6 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
-import { GraphArchivalService } from './services/GraphArchivalService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
@@ -79,9 +78,6 @@ const startServer = async () => {
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
-
-    const graphArchivalService = new GraphArchivalService(neo4jDriver);
-    graphArchivalService.start();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
