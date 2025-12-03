@@ -1,0 +1,375 @@
+# Prometheus Alerting Rules for AI Governance Metrics
+# Implements ODNI 85% validation requirement monitoring
+# Targets p95 < 2s latency for dashboard performance
+
+groups:
+  - name: odni-compliance
+    interval: 30s
+    rules:
+      # ODNI 85% Validation Rate Alerts
+      - alert: ODNIValidationRateCritical
+        expr: |
+          (
+            sum(rate(ai_decisions_validated_total[1h])) /
+            sum(rate(ai_decisions_total[1h])) * 100
+          ) < 85
+        for: 5m
+        labels:
+          severity: critical
+          compliance: odni
+          team: governance
+        annotations:
+          summary: "ODNI Validation Rate Below 85% Requirement"
+          description: |
+            AI decision validation rate is {{ $value | printf "%.1f" }}%,
+            which is below the ODNI-mandated 85% threshold.
+            Immediate action required to restore compliance.
+          runbook_url: https://runbooks.intelgraph.io/governance/odni-validation-rate
+          dashboard_url: https://grafana.intelgraph.io/d/governance/ai-governance?orgId=1
+
+      - alert: ODNIValidationRateWarning
+        expr: |
+          (
+            sum(rate(ai_decisions_validated_total[1h])) /
+            sum(rate(ai_decisions_total[1h])) * 100
+          ) < 88 and
+          (
+            sum(rate(ai_decisions_validated_total[1h])) /
+            sum(rate(ai_decisions_total[1h])) * 100
+          ) >= 85
+        for: 15m
+        labels:
+          severity: warning
+          compliance: odni
+          team: governance
+        annotations:
+          summary: "ODNI Validation Rate Approaching Critical Threshold"
+          description: |
+            AI decision validation rate is {{ $value | printf "%.1f" }}%,
+            approaching the ODNI 85% minimum. Current buffer: {{ printf "%.1f" (sub $value 85) }}%
+          runbook_url: https://runbooks.intelgraph.io/governance/odni-validation-rate
+
+      - alert: ODNIValidationRateTrendDown
+        expr: |
+          (
+            sum(rate(ai_decisions_validated_total[1h])) /
+            sum(rate(ai_decisions_total[1h])) * 100
+          ) -
+          (
+            sum(rate(ai_decisions_validated_total[1h] offset 1d)) /
+            sum(rate(ai_decisions_total[1h] offset 1d)) * 100
+          ) < -5
+        for: 30m
+        labels:
+          severity: warning
+          compliance: odni
+          team: governance
+        annotations:
+          summary: "ODNI Validation Rate Declining"
+          description: |
+            Validation rate has dropped by {{ $value | printf "%.1f" }}% over the last 24 hours.
+            Investigate potential causes to prevent compliance breach.
+
+  - name: governance-dashboard-slo
+    interval: 30s
+    rules:
+      # Dashboard Performance SLO (p95 < 2s)
+      - alert: GovernanceDashboardLatencyHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(governance_dashboard_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+          slo: dashboard-latency
+        annotations:
+          summary: "Governance Dashboard P95 Latency Exceeds 2s SLO"
+          description: |
+            Dashboard p95 latency is {{ $value | printf "%.2f" }}s,
+            exceeding the 2s SLO target.
+          runbook_url: https://runbooks.intelgraph.io/governance/dashboard-performance
+
+      - alert: GovernanceDashboardLatencyCritical
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(governance_dashboard_request_duration_seconds_bucket[5m])) by (le)
+          ) > 5
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          slo: dashboard-latency
+        annotations:
+          summary: "Governance Dashboard P95 Latency Critical"
+          description: |
+            Dashboard p95 latency is {{ $value | printf "%.2f" }}s,
+            significantly exceeding the 2s SLO target. User experience severely impacted.
+
+      - alert: GovernanceMetricsRefreshSlow
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(governance_metrics_refresh_duration_seconds_bucket[5m])) by (le, metric_type)
+          ) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Governance Metrics Refresh Slow"
+          description: |
+            Metrics refresh for {{ $labels.metric_type }} is taking {{ $value | printf "%.2f" }}s,
+            which may impact dashboard responsiveness.
+
+  - name: compliance-gaps
+    interval: 1m
+    rules:
+      # Critical Compliance Gaps
+      - alert: CriticalComplianceGapOpen
+        expr: |
+          sum(compliance_gaps_open_total{severity="critical"}) > 0
+        for: 0m
+        labels:
+          severity: critical
+          compliance: general
+          team: governance
+        annotations:
+          summary: "Critical Compliance Gap Detected"
+          description: |
+            {{ $value }} critical compliance gap(s) require immediate attention.
+            Review and remediate to maintain compliance status.
+          runbook_url: https://runbooks.intelgraph.io/governance/compliance-gaps
+
+      - alert: HighComplianceGapCount
+        expr: |
+          sum(compliance_gaps_open_total{severity="high"}) > 5
+        for: 1h
+        labels:
+          severity: warning
+          compliance: general
+          team: governance
+        annotations:
+          summary: "High Compliance Gap Count"
+          description: |
+            {{ $value }} high-severity compliance gaps are open.
+            Schedule remediation to prevent escalation.
+
+      - alert: ComplianceGapOverdue
+        expr: |
+          sum(compliance_gaps_overdue_total) > 0
+        for: 0m
+        labels:
+          severity: warning
+          compliance: general
+          team: governance
+        annotations:
+          summary: "Overdue Compliance Gap"
+          description: |
+            {{ $value }} compliance gap(s) are past their due date.
+            Immediate attention required.
+
+  - name: incident-management
+    interval: 30s
+    rules:
+      # Incident Trend Alerts
+      - alert: GovernanceIncidentSpike
+        expr: |
+          sum(increase(governance_incidents_total[1h])) >
+          sum(increase(governance_incidents_total[1h] offset 1d)) * 2
+        for: 15m
+        labels:
+          severity: warning
+          team: governance
+        annotations:
+          summary: "Governance Incident Spike Detected"
+          description: |
+            Incident rate has doubled compared to the same time yesterday.
+            Current rate: {{ $value | printf "%.0f" }} incidents/hour.
+
+      - alert: CriticalIncidentOpen
+        expr: |
+          sum(governance_incidents_open_total{severity="critical"}) > 0
+        for: 0m
+        labels:
+          severity: critical
+          team: governance
+        annotations:
+          summary: "Critical Governance Incident Open"
+          description: |
+            {{ $value }} critical governance incident(s) require immediate response.
+          runbook_url: https://runbooks.intelgraph.io/governance/incident-response
+
+      - alert: IncidentMTTRHigh
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(governance_incident_resolution_seconds_bucket[24h])) by (le)
+          ) > 14400
+        for: 1h
+        labels:
+          severity: warning
+          team: governance
+        annotations:
+          summary: "Incident MTTR Exceeds 4 Hours"
+          description: |
+            P95 incident resolution time is {{ $value | humanizeDuration }}.
+            Review incident response procedures.
+
+  - name: risk-score
+    interval: 1m
+    rules:
+      # Risk Score Alerts
+      - alert: GovernanceRiskScoreCritical
+        expr: |
+          avg(governance_risk_score_percent) < 50
+        for: 15m
+        labels:
+          severity: critical
+          team: governance
+        annotations:
+          summary: "Governance Risk Score Critical"
+          description: |
+            Overall governance risk score is {{ $value | printf "%.0f" }}%,
+            indicating significant compliance and security risks.
+
+      - alert: GovernanceRiskScoreWarning
+        expr: |
+          avg(governance_risk_score_percent) < 70 and
+          avg(governance_risk_score_percent) >= 50
+        for: 30m
+        labels:
+          severity: warning
+          team: governance
+        annotations:
+          summary: "Governance Risk Score Warning"
+          description: |
+            Overall governance risk score is {{ $value | printf "%.0f" }}%.
+            Review risk components and implement mitigations.
+
+      - alert: RiskComponentDegraded
+        expr: |
+          governance_risk_score_percent{} < 60
+        for: 15m
+        labels:
+          severity: warning
+          team: governance
+        annotations:
+          summary: "Risk Component Degraded"
+          description: |
+            Risk component {{ $labels.component }} score is {{ $value | printf "%.0f" }}%.
+            Review and address underlying issues.
+
+  - name: model-governance
+    interval: 1m
+    rules:
+      # Model Governance Alerts
+      - alert: ModelDeploymentFailureRate
+        expr: |
+          (
+            sum(rate(ai_model_deployments_failure_total[1h])) /
+            sum(rate(ai_model_deployments_total[1h]))
+          ) * 100 > 10
+        for: 15m
+        labels:
+          severity: warning
+          team: ml-platform
+        annotations:
+          summary: "High Model Deployment Failure Rate"
+          description: |
+            Model deployment failure rate is {{ $value | printf "%.1f" }}%.
+            Investigate deployment pipeline issues.
+
+      - alert: BiasDetectionRate
+        expr: |
+          (
+            sum(increase(ai_model_bias_detections_total[7d])) /
+            sum(increase(ai_model_bias_audits_total[7d]))
+          ) * 100 > 20
+        for: 1h
+        labels:
+          severity: warning
+          team: ml-platform
+        annotations:
+          summary: "High Bias Detection Rate in Models"
+          description: |
+            {{ $value | printf "%.1f" }}% of audited models show bias.
+            Review model training and data pipelines.
+
+      - alert: PendingModelReviewBacklog
+        expr: |
+          sum(ai_models_registered_total{status="pending_review"}) > 10
+        for: 24h
+        labels:
+          severity: warning
+          team: ml-platform
+        annotations:
+          summary: "Model Review Backlog Growing"
+          description: |
+            {{ $value }} models are pending review for over 24 hours.
+            Allocate resources to clear the review backlog.
+
+  - name: audit-trail
+    interval: 1m
+    rules:
+      # Audit Trail Alerts
+      - alert: HighRiskAuditEvent
+        expr: |
+          sum(increase(governance_audit_events_total{risk_level="critical"}[5m])) > 0
+        for: 0m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High Risk Audit Event Detected"
+          description: |
+            {{ $value }} critical-risk audit event(s) occurred in the last 5 minutes.
+            Review audit trail for potential security concerns.
+
+      - alert: AuditEventVolumeSpike
+        expr: |
+          sum(rate(governance_audit_events_total[5m])) >
+          sum(rate(governance_audit_events_total[1h])) * 3
+        for: 10m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Audit Event Volume Spike"
+          description: |
+            Audit event rate has tripled compared to the hourly average.
+            May indicate unusual activity or potential attack.
+
+# Recording Rules for Dashboard Performance
+  - name: governance-recording-rules
+    interval: 30s
+    rules:
+      - record: governance:validation_rate:hourly
+        expr: |
+          sum(rate(ai_decisions_validated_total[1h])) /
+          sum(rate(ai_decisions_total[1h])) * 100
+
+      - record: governance:compliance_score:avg
+        expr: |
+          avg(compliance_requirement_score_percent)
+
+      - record: governance:risk_score:overall
+        expr: |
+          avg(governance_risk_score_percent)
+
+      - record: governance:dashboard_latency:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(governance_dashboard_request_duration_seconds_bucket[5m])) by (le)
+          )
+
+      - record: governance:incidents:active
+        expr: |
+          sum(governance_incidents_open_total)
+
+      - record: governance:gaps:critical
+        expr: |
+          sum(compliance_gaps_open_total{severity="critical"})
+
+      - record: governance:gaps:high
+        expr: |
+          sum(compliance_gaps_open_total{severity="high"})
