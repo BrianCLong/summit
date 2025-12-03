@@ -75,6 +75,21 @@ export {
   type DashboardTimeSeriesData,
 } from './dashboard/GovernanceDashboardService';
 
+// Summit Integration
+export {
+  GovernanceMetricsExporter,
+  GovernanceAuditLogger,
+  ConductorGovernanceMiddleware,
+  createGovernanceMiddleware,
+  createGovernanceDirective,
+  governanceDirectiveTypeDefs,
+  type SummitIntegrationConfig,
+  type ConductorClient,
+  type ConductorTask,
+  type ConductorTaskResult,
+  type ConductorTaskStatus,
+} from './integration/SummitIntegration';
+
 // ============================================================================
 // Factory Function
 // ============================================================================
