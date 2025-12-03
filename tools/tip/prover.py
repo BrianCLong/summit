@@ -36,6 +36,7 @@ class NetworkPolicy:
     namespace: str
     pod_selector: dict[str, Any]
     ingress: list[dict[str, Any]]
+    egress: list[dict[str, Any]]
     policy_types: Sequence[str]
 
     def selects(self, pod: Pod) -> bool:
@@ -230,12 +231,14 @@ class TenantIsolationProver:
                 spec = doc.get("spec", {})
                 policy_types = spec.get("policyTypes") or ["Ingress"]
                 ingress = spec.get("ingress", []) or []
+                egress = spec.get("egress", []) or []
                 self.network_policies.append(
                     NetworkPolicy(
                         name=name,
                         namespace=namespace,
                         pod_selector=spec.get("podSelector", {}) or {},
                         ingress=list(ingress),
+                        egress=list(egress),
                         policy_types=list(policy_types),
                     )
                 )
@@ -362,11 +365,150 @@ class TenantIsolationProver:
             )
             counterexamples.append(ce)
 
+        permissive_findings = self._detect_overly_permissive_policies()
+        for finding in permissive_findings:
+            ce = _stable_dict(
+                {
+                    "type": "network-policy-excessive-permission",
+                    "severity": finding["severity"],
+                    "description": finding["description"],
+                    "steps": [
+                        {
+                            "action": "review-policy",
+                            "policy": f"{finding['namespace']}/{finding['policy']}",
+                            "issue": finding["reason"],
+                            "direction": finding["direction"],
+                        }
+                    ],
+                }
+            )
+            counterexamples.append(ce)
+
         findings = {
             "coverage": coverage,
             "exposures": exposures,
         }
         return _stable_dict(findings), counterexamples
+
+    def _detect_overly_permissive_policies(self) -> list[dict[str, Any]]:
+        findings = []
+
+        def is_wildcard(selector: dict[str, Any]) -> bool:
+            return not selector.get("matchLabels") and not selector.get("matchExpressions")
+
+        for policy in self.network_policies:
+            # Check Ingress
+            if "Ingress" in policy.policy_types:
+                for i, rule in enumerate(policy.ingress):
+                    ports = _extract_ports(rule)
+
+                    # Missing 'from' or empty list 'from: []' means allow all sources
+                    sources = rule.get("from")
+                    if sources is None or (isinstance(sources, list) and len(sources) == 0):
+                        findings.append(
+                            self._make_permissive_finding(
+                                policy,
+                                "Ingress",
+                                i,
+                                "Allows ingress from everywhere (missing or empty 'from')",
+                                ports,
+                            )
+                        )
+                        continue
+
+                    for block in sources:
+                        if "ipBlock" in block:
+                            if block["ipBlock"].get("cidr") == "0.0.0.0/0" and not block[
+                                "ipBlock"
+                            ].get("except"):
+                                findings.append(
+                                    self._make_permissive_finding(
+                                        policy,
+                                        "Ingress",
+                                        i,
+                                        "Allows ingress from 0.0.0.0/0",
+                                        ports,
+                                    )
+                                )
+                        elif "namespaceSelector" in block:
+                            if is_wildcard(block["namespaceSelector"]):
+                                # If podSelector is also empty or missing, it's very open
+                                if "podSelector" not in block or is_wildcard(block.get("podSelector", {})):
+                                    findings.append(
+                                        self._make_permissive_finding(
+                                            policy,
+                                            "Ingress",
+                                            i,
+                                            "Allows ingress from all pods in all namespaces",
+                                            ports,
+                                        )
+                                    )
+
+            # Check Egress
+            if "Egress" in policy.policy_types:
+                for i, rule in enumerate(policy.egress):
+                    ports = _extract_ports(rule)
+
+                    # Missing 'to' or empty list 'to: []' means allow all destinations
+                    destinations = rule.get("to")
+                    if destinations is None or (isinstance(destinations, list) and len(destinations) == 0):
+                        findings.append(
+                            self._make_permissive_finding(
+                                policy,
+                                "Egress",
+                                i,
+                                "Allows egress to everywhere (missing or empty 'to')",
+                                ports,
+                            )
+                        )
+                        continue
+
+                    for block in destinations:
+                        if "ipBlock" in block:
+                            if block["ipBlock"].get("cidr") == "0.0.0.0/0" and not block[
+                                "ipBlock"
+                            ].get("except"):
+                                findings.append(
+                                    self._make_permissive_finding(
+                                        policy,
+                                        "Egress",
+                                        i,
+                                        "Allows egress to 0.0.0.0/0",
+                                        ports,
+                                    )
+                                )
+                        elif "namespaceSelector" in block:
+                            if is_wildcard(block["namespaceSelector"]):
+                                if "podSelector" not in block or is_wildcard(block.get("podSelector", {})):
+                                    findings.append(
+                                        self._make_permissive_finding(
+                                            policy,
+                                            "Egress",
+                                            i,
+                                            "Allows egress to all pods in all namespaces",
+                                            ports,
+                                        )
+                                    )
+
+        return findings
+
+    def _make_permissive_finding(
+        self,
+        policy: NetworkPolicy,
+        direction: str,
+        rule_index: int,
+        reason: str,
+        ports: list[str],
+    ) -> dict[str, Any]:
+        return {
+            "severity": "critical",
+            "policy": policy.name,
+            "namespace": policy.namespace,
+            "direction": direction,
+            "rule_index": rule_index,
+            "reason": reason,
+            "description": f"Policy {policy.namespace}/{policy.name} {direction} rule #{rule_index} {reason} on ports {ports}",
+        }
 
     def _is_cross_namespace_reachable(
         self, source_namespace: str, target_pod: Pod, policies: Sequence[NetworkPolicy]
