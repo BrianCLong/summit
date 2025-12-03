@@ -13,8 +13,7 @@ env:
 
 permissions:
   contents: write
-  pull-requests: read
-  actions: read
+  pull-requests: write # Changed to 'write' for labeling
 
 jobs:
   guard:
@@ -40,9 +39,93 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "**Manual Override:** \`gh workflow run auto-update-prs.yml\` (bypasses guard)" >> "$GITHUB_STEP_SUMMARY"
 
-  update:
+  triage-prs:
     if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
     needs: [guard]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub CLI
+        run: |
+          sudo apt-get update && sudo apt-get install -y gh
+          gh auth setup-git
+
+      - name: Triage PRs for conflicts and staleness
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          STALE_DAYS=30
+          CONFLICT_LABEL="has-conflicts"
+          STALE_LABEL="stale"
+          AUTOMERGE_LABEL="automerge-safe"
+
+          # Fetch all open PRs with relevant info
+          gh pr list --state open --json number,updatedAt,mergeStateStatus,labels > prs.json
+
+          jq -c '.[]' prs.json | while read -r pr; do
+            PR_NUMBER=$(echo "$pr" | jq -r '.number')
+            UPDATED_AT=$(echo "$pr" | jq -r '.updatedAt')
+            MERGE_STATE_STATUS=$(echo "$pr" | jq -r '.mergeStateStatus')
+            PR_LABELS=$(echo "$pr" | jq -r '.labels[].name')
+
+            IS_CONFLICTED=false
+            if [[ "$MERGE_STATE_STATUS" == "CONFLICTING" ]]; then
+              IS_CONFLICTED=true
+            fi
+
+            IS_STALE=false
+            UPDATED_TIMESTAMP=$(date -d "$UPDATED_AT" +%s)
+            CURRENT_TIMESTAMP=$(date +%s)
+            AGE_DAYS=$(( (CURRENT_TIMESTAMP - UPDATED_TIMESTAMP) / 86400 ))
+
+            if [[ "$AGE_DAYS" -gt "$STALE_DAYS" ]]; then
+              IS_STALE=true
+            fi
+
+            echo "PR #$PR_NUMBER: Conflicted=$IS_CONFLICTED, Stale=$IS_STALE, Labels=$PR_LABELS"
+
+            # Manage Conflict Label
+            if "$IS_CONFLICTED"; then
+              if ! echo "$PR_LABELS" | grep -q "$CONFLICT_LABEL"; then
+                echo "Adding $CONFLICT_LABEL to PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --add-label "$CONFLICT_LABEL"
+              fi
+            else
+              if echo "$PR_LABELS" | grep -q "$CONFLICT_LABEL"; then
+                echo "Removing $CONFLICT_LABEL from PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --remove-label "$CONFLICT_LABEL"
+              fi
+            fi
+
+            # Manage Stale Label
+            if "$IS_STALE"; then
+              if ! echo "$PR_LABELS" | grep -q "$STALE_LABEL"; then
+                echo "Adding $STALE_LABEL to PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --add-label "$STALE_LABEL"
+                gh pr comment "$PR_NUMBER" --body "This PR has been marked as stale due to inactivity. Please rebase or update to keep it active."
+              fi
+            else
+              if echo "$PR_LABELS" | grep -q "$STALE_LABEL"; then
+                echo "Removing $STALE_LABEL from PR #$PR_NUMBER"
+                gh pr edit "$PR_NUMBER" --remove-label "$STALE_LABEL"
+              fi
+            fi
+
+            # Remove automerge-safe if conflicted or stale
+            if "$IS_CONFLICTED" || "$IS_STALE"; then
+              if echo "$PR_LABELS" | grep -q "$AUTOMERGE_LABEL"; then
+                echo "Removing $AUTOMERGE_LABEL from PR #$PR_NUMBER due to conflicts or staleness"
+                gh pr edit "$PR_NUMBER" --remove-label "$AUTOMERGE_LABEL"
+                gh pr comment "$PR_NUMBER" --body "Merge Train: Removed \`$AUTOMERGE_LABEL\` label due to conflicts or staleness. Please resolve and reapply if ready."
+              fi
+            fi
+          done
+
+  update:
+    if: github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true'
+    needs: [guard, triage-prs] # Ensure triage runs first
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 2

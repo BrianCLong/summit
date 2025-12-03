@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/messaging",
+  "version": "1.0.0",
+  "description": "Async messaging patterns: saga, request-reply, event notification",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "saga",
+    "request-reply",
+    "async-messaging",
+    "orchestration",
+    "choreography"
+  ],
+  "dependencies": {
+    "@intelgraph/event-bus": "workspace:*",
+    "uuid": "^10.0.0",
+    "pino": "^9.0.0",
+    "ioredis": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "ts-jest": "^29.4.5"
+  }
+}

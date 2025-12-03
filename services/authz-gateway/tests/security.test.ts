@@ -5,10 +5,9 @@ import crypto from 'crypto';
 import { readFileSync } from 'fs';
 import { createApp } from '../src/index';
 import { stopObservability } from '../src/observability';
-import { SignJWT } from 'jose';
-import { getPrivateKey } from '../src/keys';
 import type { Server } from 'http';
 import type { AddressInfo } from 'net';
+import { sessionManager } from '../src/session';
 
 let opaServer: Server;
 let upstreamServer: Server;
@@ -124,21 +123,21 @@ describe('security', () => {
 
   it('rejects expired token', async () => {
     const app = await createApp();
-    const token = await new SignJWT({
-      sub: 'alice',
-      tenantId: 'tenantA',
-      roles: ['reader'],
-    })
-      .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
-      .setIssuedAt()
-      .setExpirationTime(Math.floor(Date.now() / 1000) - 1)
-      .sign(getPrivateKey());
+    const loginRes = await request(app)
+      .post('/auth/login')
+      .send({ username: 'alice', password: 'password123' });
+    const sid = (await request(app)
+      .post('/auth/introspect')
+      .send({ token: loginRes.body.token })).body.sid as string;
+    sessionManager.expire(String(sid));
+    const token = loginRes.body.token;
     const res = await request(app)
       .get('/protected/resource')
       .set('Authorization', `Bearer ${token}`)
       .set('x-tenant-id', 'tenantA')
       .set('x-resource-id', 'dataset-alpha');
     expect(res.status).toBe(401);
+    expect(res.body.error).toBe('session_expired');
   });
 
   it('enforces least privilege via policy deny', async () => {
