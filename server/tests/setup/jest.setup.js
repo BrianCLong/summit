@@ -4,14 +4,17 @@
  */
 
 // Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+import 'jest-extended';
 
 // Global test timeout
+import { jest } from '@jest/globals';
 jest.setTimeout(30000);
 
 // Mock console methods to reduce noise in tests unless debugging
 const originalConsole = { ...console };
 const originalConsoleError = console.error;
+
+import { beforeAll, afterAll, afterEach } from '@jest/globals';
 
 beforeAll(() => {
   if (!process.env.DEBUG_TESTS) {
