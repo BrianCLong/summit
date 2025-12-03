@@ -23,9 +23,9 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '^.*\\/lib\\/telemetry\\/comprehensive-telemetry(\\.(js|ts))?$': '<rootDir>/tests/mocks/lib/telemetry/comprehensive-telemetry.ts',
-    '^.*\\/observability\\/tracer(\\.(js|ts))?$': '<rootDir>/tests/mocks/observability/tracer.ts',
-    '^.*\\/webhooks\\/webhook\\.worker(\\.(js|ts))?$': '<rootDir>/tests/mocks/webhooks/webhook.worker.ts',
+    '.*\\/lib\\/telemetry\\/comprehensive-telemetry(\\.(js|ts))?$': '<rootDir>/tests/mocks/lib/telemetry/comprehensive-telemetry.ts',
+    '.*\\/observability\\/tracer(\\.(js|ts))?$': '<rootDir>/tests/mocks/observability/tracer.ts',
+    '.*\\/webhooks\\/webhook\\.worker(\\.(js|ts))?$': '<rootDir>/tests/mocks/webhooks/webhook.worker.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
