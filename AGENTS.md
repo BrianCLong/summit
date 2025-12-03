@@ -27,6 +27,7 @@
 - Backend: Jest (`server/tests`), run with coverage: `cd server && npm run test:coverage`.
 - Frontend: see client tests; e2e via Playwright: `npm run test:e2e`.
 - Naming: `*.spec.ts`/`*.test.js` (client), `*.test.js` (server). Target ≥80% coverage for changed code.
+- **Official CI Standard**: The `pr-quality-gate.yml` workflow is the single source of truth for PR validation. See `docs/CI_STANDARDS.md` for details.
 
 ## Commit & Pull Request Guidelines
 

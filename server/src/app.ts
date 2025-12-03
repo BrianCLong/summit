@@ -19,7 +19,6 @@ import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
-import predictiveRouter from './routes/predictive.js';
 import { metricsRoute } from './http/metricsRoute.js';
 import rbacRouter from './routes/rbacRoutes.js';
 import { typeDefs } from './graphql/schema.js';
@@ -45,9 +44,6 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
-import lineageRouter from './routes/lineage.js';
-import scenarioRouter from './routes/scenarios.js';
-import graphAdvisorRouter from './routes/graph-advisor.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -143,7 +139,6 @@ export const createApp = async () => {
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
-  app.use('/api/predictive', predictiveRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
   app.use('/api/webhooks', webhookRouter);
@@ -155,11 +150,8 @@ export const createApp = async () => {
   app.use('/api/echelon2', echelon2Router);
   app.use('/api/mnemosyne', mnemosyneRouter);
   app.use('/api/necromancer', necromancerRouter);
-  app.use('/api/lineage', lineageRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
-  app.use('/api/scenarios', scenarioRouter);
-  app.use('/api/graph/advisor', graphAdvisorRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
