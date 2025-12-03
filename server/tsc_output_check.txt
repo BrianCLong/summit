@@ -191,7 +191,6 @@ src/repos/__tests__/EntityRepo.test.ts(34,44): error TS2345: Argument of type 'a
 src/repos/__tests__/InvestigationRepo.test.ts(19,21): error TS2305: Module '"pg"' has no exported member 'PoolClient'.
 src/repos/__tests__/InvestigationRepo.test.ts(35,44): error TS2345: Argument of type 'any' is not assignable to parameter of type 'never'.
 src/routes/health.ts(3,10): error TS2614: Module '"../utils/logger.js"' has no exported member 'logger'. Did you mean to use 'import logger from "../utils/logger.js"' instead?
-src/routes/webhooks.ts(10,10): error TS2305: Module '"*"' has no exported member 'z'.
 src/security/llm-guardrails.ts(17,10): error TS2305: Module '"*"' has no exported member 'Logger'.
 src/security/llm-guardrails.ts(18,10): error TS2724: '"../observability/metrics.js"' has no exported member named 'Metrics'. Did you mean 'metrics'?
 src/security/llm-guardrails.ts(464,54): error TS2339: Property 'validate' does not exist on type 'SafetyV2Service'.
@@ -363,7 +362,6 @@ src/validation/index.ts(168,71): error TS2503: Cannot find namespace 'z'.
 src/validation/index.ts(176,15): error TS2503: Cannot find namespace 'z'.
 src/validation/index.ts(177,16): error TS2503: Cannot find namespace 'z'.
 src/validation/index.ts(182,9): error TS2503: Cannot find namespace 'z'.
-src/webhooks/webhook.service.ts(5,10): error TS2305: Module '"*"' has no exported member 'z'.
 src/webhooks/webhook.worker.ts(6,10): error TS2614: Module '"../utils/logger.js"' has no exported member 'logger'. Did you mean to use 'import logger from "../utils/logger.js"' instead?
 ../tests/factories/requestFactory.ts(8,15): error TS2305: Module '"*"' has no exported member 'Request'.
 ../tests/factories/requestFactory.ts(63,5): error TS2353: Object literal may only specify known properties, and 'get' does not exist in type 'MockRequest'.
