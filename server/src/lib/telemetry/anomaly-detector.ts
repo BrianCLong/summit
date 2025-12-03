@@ -2,6 +2,7 @@
 import { telemetry } from './comprehensive-telemetry';
 import { snapshotter } from './diagnostic-snapshotter';
 import { alertingService } from './alerting-service';
+import { correlationEngine } from './correlation-engine';
 
 class AnomalyDetector {
   private metricBaselines: Map<string, { mean: number; std: number }> = new Map();
@@ -58,7 +59,11 @@ class AnomalyDetector {
 
   private triggerAlert(metricName: string, value: number, zScore: number) {
     const alertMessage = `Anomaly detected in ${metricName}: value=${value}, z-score=${zScore}`;
-    alertingService.sendAlert(alertMessage);
+
+    // Automatically correlate logs and traces for this anomaly
+    const correlationReport = correlationEngine.analyze(metricName);
+
+    alertingService.sendAlert(alertMessage, correlationReport);
     snapshotter.triggerSnapshot(`anomaly_detected_${metricName}`);
   }
 }
