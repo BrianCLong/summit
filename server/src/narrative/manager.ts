@@ -7,6 +7,7 @@ import type {
   NarrativeEvent,
   NarrativeGeneratorMode,
 } from './types.js';
+import type { DriftEvent } from './drift.js';
 
 interface CreateSimulationInput {
   name: string;
@@ -94,6 +95,14 @@ export class NarrativeSimulationManager {
       throw new Error(`Simulation ${id} not found`);
     }
     return engine.tick(steps);
+  }
+
+  checkDrift(id: string): DriftEvent[] {
+    const engine = this.getEngine(id);
+    if (!engine) {
+      throw new Error(`Simulation ${id} not found`);
+    }
+    return engine.detectDrift();
   }
 }
 
