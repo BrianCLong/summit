@@ -158,7 +158,7 @@ export const useJIRAIntegration = (options: UseJIRAIntegrationOptions = {}) => {
     staleTime: 60000, // 1 minute
     retry: 2,
     retryDelay: 3000,
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 
   return {
@@ -260,7 +260,7 @@ export const useJIRASprintManagement = (projectKey: string) => {
     },
     refetchInterval: 300000, // 5 minutes
     staleTime: 180000, // 3 minutes
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 }
 
@@ -276,7 +276,7 @@ export const useJIRABurndown = (sprintId: number) => {
     },
     refetchInterval: 3600000, // 1 hour
     staleTime: 1800000, // 30 minutes
-    enabled: !!sprintId,
+    enabled: Boolean(sprintId),
   })
 }
 
@@ -295,7 +295,7 @@ export const useJIRAVelocity = (
     },
     refetchInterval: 21600000, // 6 hours
     staleTime: 10800000, // 3 hours
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 }
 
@@ -314,7 +314,7 @@ export const useJIRACycleTime = (
     },
     refetchInterval: 3600000, // 1 hour
     staleTime: 1800000, // 30 minutes
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 }
 
@@ -330,7 +330,7 @@ export const useJIRAQualityMetrics = (projectKey: string) => {
     },
     refetchInterval: 7200000, // 2 hours
     staleTime: 3600000, // 1 hour
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 }
 
@@ -398,7 +398,7 @@ export const useJIRASearch = (jql: string, maxResults: number = 50) => {
       })
       return response.json()
     },
-    enabled: !!jql && jql.length > 0,
+    enabled: Boolean(jql) && jql.length > 0,
     staleTime: 30000, // 30 seconds
   })
 }
@@ -415,7 +415,7 @@ export const useJIRAProjectConfig = (projectKey: string) => {
     },
     staleTime: 3600000, // 1 hour - project config doesn't change often
     refetchOnWindowFocus: false,
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 }
 
@@ -431,7 +431,7 @@ export const useJIRAWorkload = (projectKey: string) => {
     },
     refetchInterval: 1800000, // 30 minutes
     staleTime: 900000, // 15 minutes
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 }
 
@@ -450,7 +450,7 @@ export const useJIRATimeTracking = (
     },
     refetchInterval: 3600000, // 1 hour
     staleTime: 1800000, // 30 minutes
-    enabled: !!projectKey,
+    enabled: Boolean(projectKey),
   })
 }
 
@@ -465,7 +465,7 @@ export const useJIRADashboard = (dashboardId?: string) => {
       return response.json()
     },
     staleTime: 1800000, // 30 minutes
-    enabled: !!dashboardId,
+    enabled: Boolean(dashboardId),
   })
 }
 

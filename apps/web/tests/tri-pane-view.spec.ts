@@ -90,6 +90,7 @@ test.describe('Enhanced Tri-Pane View', () => {
   test.describe('Time Filtering', () => {
     test('should apply time filter and update entity count', async ({ page }) => {
       const initialCount = await getEntityCount(page)
+      expect(initialCount).toBeGreaterThan(0) // Ensure we have initial entities
 
       // Apply time filter (this would depend on your timeline UI)
       // For now, we'll test the reset button appears
@@ -427,6 +428,9 @@ test.describe('Enhanced Tri-Pane View', () => {
       // Verify dark theme classes
       const darkElement = page.locator('.dark\\:bg-slate-900')
       // Theme should be applied
+      if (await darkElement.count() > 0) {
+        await expect(darkElement.first()).toBeVisible()
+      }
       await page.waitForTimeout(500) // Allow theme transition
     })
 
@@ -457,7 +461,7 @@ test.describe('Enhanced Tri-Pane View', () => {
       const exportButton = page.locator('[aria-label="Export view"]')
 
       // Set up download listener
-      const downloadPromise = page.waitForEvent('download')
+      // const downloadPromise = page.waitForEvent('download')
 
       await exportButton.click()
 

@@ -107,7 +107,7 @@ export default function WhatIfRoutingDialog({
   }
 
   const handleExecute = async () => {
-    if (selected.length === 0) return
+    if (selected.length === 0) {return}
 
     setLoading(true)
     try {
@@ -119,7 +119,7 @@ export default function WhatIfRoutingDialog({
   }
 
   const handleApplyPin = async () => {
-    if (!selected.length) return
+    if (!selected.length) {return}
 
     // Mock policy check
     const policyOk = Math.random() > 0.3 // 70% chance of allowing
@@ -128,7 +128,7 @@ export default function WhatIfRoutingDialog({
       const proceed = confirm(
         'Policy would DENY pin. Proceed anyway (audited)?'
       )
-      if (!proceed) return
+      if (!proceed) {return}
     }
 
     // Mock pin API call
@@ -136,7 +136,7 @@ export default function WhatIfRoutingDialog({
     onClose()
   }
 
-  if (!open) return null
+  if (!open) {return null}
 
   const totalCost =
     previewData?.candidates

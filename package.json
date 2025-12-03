@@ -263,6 +263,7 @@
     "neo4j-driver": "6.0.1",
     "pg": "^8.16.3",
     "redis": "^5.8.1",
+    "rollup-plugin-visualizer": "^6.0.5",
     "ws": "^8.18.3"
   },
   "private": true,

@@ -10,9 +10,9 @@ export default function HistoryControls() {
     const $root = $(document.body)
     const onKey = (e: KeyboardEvent) => {
       const z = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'
-      if (!z) return
-      if (e.shiftKey) d({ type: 'history/redo' })
-      else d({ type: 'history/undo' })
+      if (!z) {return}
+      if (e.shiftKey) {d({ type: 'history/redo' })}
+      else {d({ type: 'history/undo' })}
       $root.trigger('intelgraph:history:key', [{ redo: e.shiftKey }])
       e.preventDefault()
     }

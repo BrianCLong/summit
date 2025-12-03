@@ -20,10 +20,10 @@ const ALLOW = new Set([
 ])
 
 export const historyMiddleware: Middleware = store => next => (action: any) => {
-  if (action.type === 'history/undo') return undo(store)
-  if (action.type === 'history/redo') return redo(store)
+  if (action.type === 'history/undo') {return undo(store)}
+  if (action.type === 'history/redo') {return redo(store)}
 
-  if (!ALLOW.has(action.type)) return next(action)
+  if (!ALLOW.has(action.type)) {return next(action)}
 
   const prev = store.getState()
   const [nextState, patches, inverse] = produceWithPatches(
@@ -62,11 +62,11 @@ function diffState(a: any, b: any): Patch[] {
     const ka = JSON.stringify(valueAt(a, p))
     const kb = JSON.stringify(valueAt(b, p))
     if (ka !== kb)
-      patches.push({
+      {patches.push({
         op: 'replace',
         path: `/${p.join('/')}`,
         value: valueAt(b, p),
-      } as any)
+      } as any)}
   }
   return patches
 }
@@ -80,7 +80,7 @@ function valueAt(obj: any, path: string[]) {
 function undo(store: any) {
   return withSpan('ui.undo.apply', () => {
     const entry = store.getState().history.undo.at(-1)
-    if (!entry) return
+    if (!entry) {return}
     store.dispatch(popUndo() as any)
     const snap = store.getState() // capture snapshot to compute inverses
     const state = applyPatches(snap, entry.inverse as any)
@@ -92,7 +92,7 @@ function undo(store: any) {
 function redo(store: any) {
   return withSpan('ui.redo.apply', () => {
     const entry = store.getState().history.redo.at(-1)
-    if (!entry) return
+    if (!entry) {return}
     store.dispatch(popRedo() as any)
     const snap = store.getState()
     const state = applyPatches(snap, entry.patches as any)

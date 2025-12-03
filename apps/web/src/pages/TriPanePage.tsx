@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { TriPaneShell } from '@/features/triPane'
 import {
   generateMockEntities,
@@ -31,7 +30,6 @@ import { Loader2 } from 'lucide-react'
  * Future teams can replace the mock data loading with real API calls.
  */
 export default function TriPanePage() {
-  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 

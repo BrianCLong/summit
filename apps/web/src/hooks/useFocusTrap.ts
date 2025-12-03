@@ -22,7 +22,7 @@ export default function useFocusTrap(
   active: boolean
 ) {
   useEffect(() => {
-    if (!active || !containerRef.current) return
+    if (!active || !containerRef.current) {return}
 
     const container = containerRef.current
     const focusableElements = container.querySelectorAll(
@@ -39,7 +39,7 @@ export default function useFocusTrap(
     }
 
     const handleTabKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return
+      if (e.key !== 'Tab') {return}
 
       if (e.shiftKey) {
         // Shift + Tab

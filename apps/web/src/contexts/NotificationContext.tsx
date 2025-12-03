@@ -91,7 +91,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
 function NotificationContainer() {
   const { notifications, removeNotification } = useNotification()
 
-  if (notifications.length === 0) return null
+  if (notifications.length === 0) {return null}
 
   return (
     <div className="fixed top-4 right-4 z-50 space-y-2">

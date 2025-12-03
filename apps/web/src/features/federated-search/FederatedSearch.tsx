@@ -10,7 +10,7 @@ export function FederatedSearch() {
 
   useEffect(() => {
     const el = matrixRef.current ? $(matrixRef.current) : null
-    if (!el) return
+    if (!el) {return}
     const handler = (e: JQuery.MouseMoveEvent) => {
       el.text(`x:${e.offsetX}, y:${e.offsetY}`)
     }

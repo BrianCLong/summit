@@ -72,7 +72,7 @@ export const ConductorDashboard: React.FC = () => {
 
   // Calculate overall system health score
   const systemHealthScore = useMemo(() => {
-    if (!metrics) return 0
+    if (!metrics) {return 0}
 
     const weights = {
       routing: 0.25,
@@ -110,19 +110,19 @@ export const ConductorDashboard: React.FC = () => {
   // Determine system status
   const systemStatus = useMemo(() => {
     if (systemHealthScore >= 90)
-      return {
+      {return {
         status: 'excellent',
         color: 'text-green-600',
         bg: 'bg-green-100',
-      }
+      }}
     if (systemHealthScore >= 80)
-      return { status: 'good', color: 'text-blue-600', bg: 'bg-blue-100' }
+      {return { status: 'good', color: 'text-blue-600', bg: 'bg-blue-100' }}
     if (systemHealthScore >= 70)
-      return {
+      {return {
         status: 'warning',
         color: 'text-yellow-600',
         bg: 'bg-yellow-100',
-      }
+      }}
     return { status: 'critical', color: 'text-red-600', bg: 'bg-red-100' }
   }, [systemHealthScore])
 

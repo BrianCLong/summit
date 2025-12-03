@@ -62,7 +62,7 @@ export function RouterDecisionPanel({
   }
 
   const handleOverride = async () => {
-    if (!selectedOverrideModel || !overrideReason.trim()) return
+    if (!selectedOverrideModel || !overrideReason.trim()) {return}
 
     try {
       const response = await fetch(
