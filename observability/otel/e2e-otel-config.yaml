@@ -1,0 +1,235 @@
+# OpenTelemetry Collector Configuration for E2E Test Observability
+# This configuration handles traces, metrics, and logs from E2E test runs
+
+receivers:
+  # OTLP receiver for Playwright and application traces
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "http://localhost:*"
+            - "http://127.0.0.1:*"
+
+  # Prometheus receiver for scraping E2E metrics
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'e2e-pushgateway'
+          scrape_interval: 15s
+          static_configs:
+            - targets: ['pushgateway:9091']
+          honor_labels: true
+
+        - job_name: 'e2e-test-runner'
+          scrape_interval: 30s
+          static_configs:
+            - targets: ['localhost:9464']
+
+  # Host metrics for resource monitoring during tests
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+        metrics:
+          system.cpu.utilization:
+            enabled: true
+      memory:
+        metrics:
+          system.memory.utilization:
+            enabled: true
+      disk:
+      network:
+      filesystem:
+
+processors:
+  # Batch processor for efficient export
+  batch:
+    timeout: 10s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+
+  # Memory limiter to prevent OOM
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 512
+    spike_limit_mib: 128
+
+  # Resource processor to add E2E-specific attributes
+  resource:
+    attributes:
+      - key: service.namespace
+        value: "e2e-tests"
+        action: upsert
+      - key: deployment.environment
+        value: "ci"
+        action: upsert
+
+  # Attributes processor for E2E test metadata
+  attributes/e2e:
+    actions:
+      - key: test.framework
+        value: "playwright"
+        action: upsert
+      - key: test.type
+        value: "e2e"
+        action: upsert
+
+  # Filter processor to drop noisy spans
+  filter/e2e:
+    error_mode: ignore
+    traces:
+      span:
+        - 'attributes["http.url"] == "/health"'
+        - 'attributes["http.url"] == "/metrics"'
+        - 'name == "healthcheck"'
+
+  # Tail sampling for intelligent trace retention
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 10000
+    expected_new_traces_per_sec: 100
+    policies:
+      # Always sample failed tests
+      - name: errors
+        type: status_code
+        status_code:
+          status_codes:
+            - ERROR
+
+      # Always sample slow tests (> 30s)
+      - name: slow-tests
+        type: latency
+        latency:
+          threshold_ms: 30000
+
+      # Sample 100% of E2E test spans
+      - name: e2e-tests
+        type: string_attribute
+        string_attribute:
+          key: test.type
+          values:
+            - e2e
+
+      # Probabilistic sampling for other traces
+      - name: probabilistic
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 10
+
+  # Span metrics connector for deriving metrics from traces
+  spanmetrics:
+    histogram_explicit_bounds: [5ms, 10ms, 25ms, 50ms, 100ms, 250ms, 500ms, 1s, 2.5s, 5s, 10s, 30s, 60s]
+    dimensions:
+      - name: test.suite
+      - name: test.name
+      - name: test.status
+      - name: http.method
+      - name: http.status_code
+    exemplars:
+      enabled: true
+    metrics_flush_interval: 30s
+
+exporters:
+  # Prometheus exporter for metrics
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: "e2e"
+    const_labels:
+      pipeline: "e2e-observability"
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # Prometheus remote write for long-term storage
+  prometheusremotewrite:
+    endpoint: "http://prometheus:9090/api/v1/write"
+    tls:
+      insecure: true
+    resource_to_telemetry_conversion:
+      enabled: true
+
+  # OTLP exporter for traces (to Jaeger/Tempo)
+  otlp/traces:
+    endpoint: "tempo:4317"
+    tls:
+      insecure: true
+
+  # Logging exporter for debugging
+  logging:
+    verbosity: normal
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+  # File exporter for local debugging
+  file/traces:
+    path: /var/log/otel/e2e-traces.json
+    rotation:
+      max_megabytes: 100
+      max_days: 7
+      max_backups: 3
+
+  file/metrics:
+    path: /var/log/otel/e2e-metrics.json
+    rotation:
+      max_megabytes: 50
+      max_days: 7
+      max_backups: 3
+
+extensions:
+  # Health check extension
+  health_check:
+    endpoint: 0.0.0.0:13133
+    path: "/health"
+
+  # Performance profiling
+  pprof:
+    endpoint: 0.0.0.0:1777
+
+  # zPages for debugging
+  zpages:
+    endpoint: 0.0.0.0:55679
+
+service:
+  extensions: [health_check, pprof, zpages]
+
+  pipelines:
+    # Traces pipeline
+    traces:
+      receivers: [otlp]
+      processors:
+        - memory_limiter
+        - resource
+        - attributes/e2e
+        - filter/e2e
+        - tail_sampling
+        - batch
+      exporters: [otlp/traces, logging, file/traces]
+
+    # Metrics pipeline
+    metrics:
+      receivers: [otlp, prometheus, hostmetrics]
+      processors:
+        - memory_limiter
+        - resource
+        - batch
+      exporters: [prometheus, prometheusremotewrite, file/metrics]
+
+    # Derived metrics from spans
+    metrics/spanmetrics:
+      receivers: [otlp]
+      processors:
+        - memory_limiter
+        - spanmetrics
+        - batch
+      exporters: [prometheus]
+
+  telemetry:
+    logs:
+      level: info
+      encoding: json
+    metrics:
+      level: detailed
+      address: 0.0.0.0:8888
