@@ -1,9 +1,10 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import yaml from 'js-yaml';
 import Ajv from 'ajv';
-import { logger } from '../utils/logger';
-import type { PromptConfig } from './types';
+import logger from '../utils/logger.js';
+import type { PromptConfig } from './types.js';
 
 export class PromptRegistry {
   private prompts: Map<string, PromptConfig> = new Map();
@@ -11,8 +12,14 @@ export class PromptRegistry {
   private ajv = new Ajv();
   private promptsDir: string;
 
-  constructor(promptsDir: string = './prompts') {
-    this.promptsDir = promptsDir;
+  constructor(promptsDir?: string) {
+    if (promptsDir) {
+      this.promptsDir = promptsDir;
+    } else {
+      const __filename = fileURLToPath(import.meta.url);
+      const __dirname = path.dirname(__filename);
+      this.promptsDir = __dirname;
+    }
   }
 
   async initialize(): Promise<void> {

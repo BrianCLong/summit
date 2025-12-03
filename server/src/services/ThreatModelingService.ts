@@ -1,8 +1,6 @@
 import { securedLLM } from './SecuredLLMService.js';
-import { promptRegistry } from '../../prompts/registry.js';
-import { Logger } from '../utils/logger.js';
-
-const logger = new Logger('ThreatModelingService');
+import { promptRegistry } from '../prompts/registry.js';
+import logger from '../utils/logger.js';
 
 export interface ThreatModelInputs {
   serviceName: string;
