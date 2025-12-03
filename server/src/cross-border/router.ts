@@ -431,3 +431,4 @@ router.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 export { router as crossBorderRouter };
+export default router;
