@@ -247,12 +247,11 @@ npm run prepare
 
 Automated security scans run on every push:
 
-- **Dependency Review**: Blocks PRs introducing high-severity vulnerabilities.
-- **Container Security**: Scans Docker images with Trivy.
-- **Trivy FS Scan**: Scans the filesystem for vulnerabilities and misconfigurations.
-- **Secret Scanning**: Gitleaks checks for committed secrets.
-- **CodeQL Analysis**: GitHub Advanced Security for JS/TS.
-- **Security Linting**: ESLint with security plugins.
+- **Dependency Scanning**: `pnpm audit`
+- **Secret Scanning**: Gitleaks
+- **Security Linting**: ESLint security plugin
+- **CodeQL Analysis**: GitHub Advanced Security
+- **SAST**: Snyk
 
 ### Manual Security Audit
 
@@ -264,7 +263,6 @@ pnpm audit --audit-level=moderate
 pnpm exec eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}'
 
 # Scan for secrets
-# (Requires gitleaks installed)
 gitleaks detect --source . --verbose
 
 # Check for known CVEs
@@ -297,6 +295,7 @@ pnpm audit --fix
 Subscribe to security advisories:
 - GitHub Security Advisories
 - npm Security Advisories
+- Snyk Vulnerability Database
 
 ## Authentication and Authorization
 

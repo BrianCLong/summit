@@ -376,6 +376,3 @@ export {
   ReflectiveLoop,
   StrategicCounterAntifragileOrchestrationNetwork,
 };
-
-// OSINT Fusion Engine
-export * from './osint-fusion';

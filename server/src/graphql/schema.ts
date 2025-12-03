@@ -485,11 +485,6 @@ input SemanticSearchFilter {
     # Support Ticket Queries
     supportTicket(id: ID!): SupportTicket
     supportTickets(filter: SupportTicketFilter, limit: Int = 50, offset: Int = 0): SupportTicketList!
-
-    """
-    Generate a causal influence graph for the investigation
-    """
-    causalGraph(investigationId: ID!): CausalGraph!
   }
   
   input EntityInput { type: String!, props: JSON }
@@ -548,27 +543,5 @@ input SemanticSearchFilter {
     entityUpdated: Entity!
     entityDeleted: ID!
     aiRecommendationUpdated: AIRecommendation!
-  }
-
-  # Causal Graph Types
-  type CausalNode {
-    id: ID!
-    label: String!
-    type: String!
-    confidence: Float
-    metadata: JSON
-  }
-
-  type CausalEdge {
-    source: ID!
-    target: ID!
-    type: String!
-    weight: Float!
-    evidence: String
-  }
-
-  type CausalGraph {
-    nodes: [CausalNode!]!
-    edges: [CausalEdge!]!
   }
 `;

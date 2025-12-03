@@ -1,0 +1,122 @@
+{
+  "tenants": [
+    {
+      "tenantId": "tenant_alpha",
+      "shards": [
+        {
+          "indexId": "alpha-hnsw",
+          "backend": "hnsw",
+          "policy": {
+            "policyHash": "alpha-policy-v1",
+            "denyFields": {
+              "vec-alpha-2": ["email"]
+            },
+            "allowedJurisdictions": ["US", "EU"],
+            "allowedPurposes": ["fraud", "support"]
+          },
+          "records": [
+            {
+              "id": "vec-alpha-1",
+              "vector": [0.1, 0.2, 0.3],
+              "fields": {
+                "email": "alpha1@example.com",
+                "name": "Ada"
+              },
+              "jurisdictions": ["US"],
+              "purposes": ["fraud", "support"]
+            },
+            {
+              "id": "vec-alpha-2",
+              "vector": [0.2, 0.1, 0.4],
+              "fields": {
+                "email": "alpha2@example.com",
+                "name": "Bea"
+              },
+              "jurisdictions": ["US", "EU"],
+              "purposes": ["support"]
+            },
+            {
+              "id": "vec-alpha-3",
+              "vector": [0.4, 0.2, 0.1],
+              "fields": {
+                "email": "alpha3@example.com",
+                "name": "Cia"
+              },
+              "jurisdictions": ["EU"],
+              "purposes": ["fraud"]
+            }
+          ]
+        },
+        {
+          "indexId": "alpha-ivf",
+          "backend": "ivf",
+          "policy": {
+            "policyHash": "alpha-policy-v2",
+            "denyFields": {},
+            "allowedJurisdictions": ["US", "EU"],
+            "allowedPurposes": ["fraud", "support"]
+          },
+          "records": [
+            {
+              "id": "vec-alpha-4",
+              "vector": [0.5, 0.1, 0.3],
+              "fields": {
+                "email": "alpha4@example.com",
+                "name": "Dia"
+              },
+              "jurisdictions": ["US"],
+              "purposes": ["fraud"]
+            },
+            {
+              "id": "vec-alpha-5",
+              "vector": [0.3, 0.3, 0.2],
+              "fields": {
+                "email": "alpha5@example.com",
+                "name": "Ena"
+              },
+              "jurisdictions": ["US"],
+              "purposes": ["support"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "tenantId": "tenant_beta",
+      "shards": [
+        {
+          "indexId": "beta-hnsw",
+          "backend": "hnsw",
+          "policy": {
+            "policyHash": "beta-policy",
+            "denyFields": {},
+            "allowedJurisdictions": ["US"],
+            "allowedPurposes": ["fraud", "analytics"]
+          },
+          "records": [
+            {
+              "id": "vec-beta-1",
+              "vector": [0.05, 0.4, 0.25],
+              "fields": {
+                "email": "beta1@example.com",
+                "name": "Fae"
+              },
+              "jurisdictions": ["US"],
+              "purposes": ["fraud"]
+            },
+            {
+              "id": "vec-beta-2",
+              "vector": [0.2, 0.2, 0.2],
+              "fields": {
+                "email": "beta2@example.com",
+                "name": "Gia"
+              },
+              "jurisdictions": ["US"],
+              "purposes": ["analytics"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
