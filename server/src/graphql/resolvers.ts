@@ -7,6 +7,7 @@ import { redactionService } from '../redaction/redact';
 import { gqlDuration, subscriptionFanoutLatency } from '../metrics';
 import { makePubSub } from '../subscriptions/pubsub';
 import Redis from 'ioredis';
+import { CausalGraphService } from '../services/CausalGraphService';
 
 const COHERENCE_EVENTS = 'COHERENCE_EVENTS';
 
@@ -106,6 +107,10 @@ export const resolvers = {
       } finally {
         end();
       }
+    },
+    async causalGraph(_: any, { investigationId }: any, _ctx: any) {
+      const causalService = new CausalGraphService();
+      return await causalService.generateCausalGraph(investigationId);
     },
   },
   Mutation: {
