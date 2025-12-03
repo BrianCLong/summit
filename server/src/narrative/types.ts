@@ -1,5 +1,19 @@
 export type NarrativeGeneratorMode = 'rule-based' | 'llm';
 
+export type AgentType = 'rule-based' | 'llm';
+
+export interface AgentConfig {
+  entityId: string;
+  type: AgentType;
+  role: string;
+  goal: string;
+  llmConfig?: {
+    model: string;
+    temperature: number;
+    promptTemplate?: string;
+  };
+}
+
 export interface RelationshipEdge {
   targetId: string;
   strength: number;
@@ -50,7 +64,8 @@ export type NarrativeEventType =
   | 'political'
   | 'information'
   | 'intervention'
-  | 'system';
+  | 'system'
+  | 'suppression';
 
 export interface NarrativeEvent {
   id: string;
@@ -113,6 +128,7 @@ export interface SimulationConfig {
   tickIntervalMinutes: number;
   initialEntities: SimulationEntity[];
   initialParameters?: Array<{ name: string; value: number }>;
+  agents?: AgentConfig[];
   generatorMode?: NarrativeGeneratorMode;
   llmClient?: LLMClient;
   metadata?: Record<string, unknown>;

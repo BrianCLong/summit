@@ -8,7 +8,6 @@ import {
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
-import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 
 dotenv.config();
 
@@ -300,16 +299,6 @@ function instrumentSession(session: any) {
     labels: { operation?: string; label?: string } = {},
   ) => {
     telemetry.subsystems.database.queries.add(1);
-
-    // Asynchronously analyze query for indexing recommendations
-    // We don't await this to avoid adding latency to the main path
-    try {
-      GraphIndexAdvisorService.getInstance().recordQuery(cypher);
-    } catch (err) {
-      // Suppress advisor errors so they don't break the app
-      logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
-    }
-
     const startTime = Date.now();
     try {
       return await originalRun(cypher, params);

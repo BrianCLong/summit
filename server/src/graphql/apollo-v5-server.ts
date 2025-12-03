@@ -25,9 +25,11 @@ import { getPostgresPool } from '../db/postgres.js';
 
 // Import performance optimization plugins
 import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/queryComplexityPlugin.js';
+import { createInputSanitizationPlugin } from './plugins/inputSanitizationPlugin.js';
 import { createAPQPlugin } from './plugins/apqPlugin.js';
 import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
+import depthLimit from 'graphql-depth-limit';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
@@ -118,6 +120,10 @@ export function createApolloV5Server(
 
   const server = new ApolloServer<GraphQLContext>({
     schema,
+    validationRules: [
+      // Recursion and Depth limiting against deep query abuse
+      depthLimit(10),
+    ],
     plugins: [
       // Graceful shutdown
       ApolloServerPluginDrainHttpServer({ httpServer }),
@@ -126,6 +132,14 @@ export function createApolloV5Server(
       ...(process.env.NODE_ENV === 'development'
         ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
         : []),
+
+      // Input Sanitization Plugin (Injection & Recursive Input Abuse)
+      createInputSanitizationPlugin({
+        maxInputDepth: 10,
+        maxStringLength: 10000,
+        trimStrings: true,
+        removeNullBytes: true,
+      }),
 
       // Performance optimization plugins
       createQueryComplexityPlugin({

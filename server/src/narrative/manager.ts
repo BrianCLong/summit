@@ -7,7 +7,6 @@ import type {
   NarrativeEvent,
   NarrativeGeneratorMode,
 } from './types.js';
-import type { DriftEvent } from './drift.js';
 
 interface CreateSimulationInput {
   name: string;
@@ -15,6 +14,7 @@ interface CreateSimulationInput {
   tickIntervalMinutes?: number;
   initialEntities: SimulationConfig['initialEntities'];
   initialParameters?: SimulationConfig['initialParameters'];
+  agents?: SimulationConfig['agents'];
   generatorMode?: NarrativeGeneratorMode;
   llmClient?: SimulationConfig['llmClient'];
   metadata?: Record<string, unknown>;
@@ -40,6 +40,7 @@ export class NarrativeSimulationManager {
       tickIntervalMinutes: input.tickIntervalMinutes ?? 60,
       initialEntities: input.initialEntities,
       initialParameters: input.initialParameters,
+      agents: input.agents,
       generatorMode: input.generatorMode,
       llmClient: input.llmClient,
       metadata: input.metadata,
@@ -95,14 +96,6 @@ export class NarrativeSimulationManager {
       throw new Error(`Simulation ${id} not found`);
     }
     return engine.tick(steps);
-  }
-
-  checkDrift(id: string): DriftEvent[] {
-    const engine = this.getEngine(id);
-    if (!engine) {
-      throw new Error(`Simulation ${id} not found`);
-    }
-    return engine.detectDrift();
   }
 }
 

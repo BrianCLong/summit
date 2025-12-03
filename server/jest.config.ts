@@ -3,7 +3,7 @@ import type { Config } from 'jest';
 const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  // extensionsToTreatAsEsm: ['.ts'],
+  extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.js',
     'jest-extended/all',
@@ -29,8 +29,8 @@ const config: Config = {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
-        useESM: false,
-        tsconfig: 'tsconfig.test.json',
+        useESM: true,
+        tsconfig: 'tsconfig.json',
       },
     ],
   },
