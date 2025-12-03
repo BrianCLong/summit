@@ -10,9 +10,6 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@intelgraph/atl": "*",
-    "@intelgraph/adc": "*",
-    "@intelgraph/crsp": "*"
   },
   "devDependencies": {
     "typescript": "^5.6.2",

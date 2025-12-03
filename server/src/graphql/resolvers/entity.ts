@@ -119,6 +119,7 @@ const entityResolvers = {
         limit: number;
         offset: number;
       },
+      context: any
     ) => {
       const pgPool = getPostgresPool();
       const neo4jSession = driver.session();
@@ -200,7 +201,7 @@ const entityResolvers = {
 
         // Use DataLoader to batch fetch entities - prevents N+1 queries
         const entities = await Promise.all(
-          ids.map((id) => context.loaders.entityLoader.load(id))
+          ids.map((id) => (context as any).loaders.entityLoader.load(id))
         );
 
         // Filter out any errors (entities not found)
