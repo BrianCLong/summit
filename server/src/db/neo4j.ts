@@ -2,13 +2,13 @@ import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
 import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
-import { QueryReplayService } from '../services/query-replay/QueryReplayService';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
+import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 
 dotenv.config();
 
@@ -25,7 +25,6 @@ const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
-const SLOW_QUERY_THRESHOLD_MS = Number(process.env.NEO4J_SLOW_QUERY_THRESHOLD_MS || 1000);
 
 let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
@@ -301,6 +300,16 @@ function instrumentSession(session: any) {
     labels: { operation?: string; label?: string } = {},
   ) => {
     telemetry.subsystems.database.queries.add(1);
+
+    // Asynchronously analyze query for indexing recommendations
+    // We don't await this to avoid adding latency to the main path
+    try {
+      GraphIndexAdvisorService.getInstance().recordQuery(cypher);
+    } catch (err) {
+      // Suppress advisor errors so they don't break the app
+      logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
+    }
+
     const startTime = Date.now();
     try {
       return await originalRun(cypher, params);
@@ -308,16 +317,7 @@ function instrumentSession(session: any) {
       telemetry.subsystems.database.errors.add(1);
       throw error;
     } finally {
-      const durationMs = Date.now() - startTime;
-      telemetry.subsystems.database.latency.record(durationMs / 1000);
-      if (durationMs > SLOW_QUERY_THRESHOLD_MS) {
-        // Asynchronously record slow query
-        // labels is defined in the arguments of the wrapper function
-        const tenantId = params?.tenantId || params?.tenant_id || undefined;
-        QueryReplayService.getInstance().recordSlowQuery(cypher, params, durationMs, tenantId, labels).catch(err => {
-            logger.error(err, 'Failed to record slow Neo4j query');
-        });
-      }
+      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
     }
   };
   return session;
