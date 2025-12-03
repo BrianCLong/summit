@@ -15,7 +15,6 @@ import {
   NarrativeGenerator,
   RuleBasedNarrativeGenerator,
 } from './generators.js';
-import { NarrativeDriftDetector, type DriftEvent } from './drift.js';
 
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
@@ -81,11 +80,6 @@ export class NarrativeSimulationEngine {
       activeEntities: Object.keys(this.state.entities).length,
       activeEvents: this.eventQueue.length,
     };
-  }
-
-  detectDrift(): DriftEvent[] {
-    const detector = new NarrativeDriftDetector();
-    return detector.detect(this.state);
   }
 
   setGeneratorMode(
