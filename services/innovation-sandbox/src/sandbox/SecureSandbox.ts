@@ -153,8 +153,25 @@ export class SecureSandbox {
     const startTime = Date.now();
     const { quotas } = this.config;
 
+    const activeTimers = new Set<NodeJS.Timeout>();
+    const managedSetTimeout = (callback: (...args: any[]) => void, ms: number, ...args: any[]) => {
+      const timer = setTimeout(() => {
+        activeTimers.delete(timer);
+        callback(...args);
+      }, ms, ...args);
+      activeTimers.add(timer);
+      return timer;
+    };
+    const managedClearTimeout = (timer: NodeJS.Timeout) => {
+      activeTimers.delete(timer);
+      clearTimeout(timer);
+    };
+
     // Create isolated context with resource limits
-    const context = this.createIsolatedContext(quotas, logs);
+    const context = this.createIsolatedContext(quotas, logs, {
+      setTimeout: managedSetTimeout as unknown as typeof setTimeout,
+      clearTimeout: managedClearTimeout as unknown as typeof clearTimeout
+    });
 
     // Transform code based on language
     const executableCode = this.prepareCode(submission);
@@ -166,16 +183,26 @@ export class SecureSandbox {
 
     const executionPromise = this.runInContext(executableCode, context, submission.inputs);
 
-    const output = await Promise.race([executionPromise, timeoutPromise]);
+    try {
+      const output = await Promise.race([executionPromise, timeoutPromise]);
 
-    const metrics = this.createMetrics(startTime, JSON.stringify(output).length);
+      const outputStr = JSON.stringify(output);
+      const metrics = this.createMetrics(startTime, outputStr ? outputStr.length : 0);
 
-    return { output, metrics };
+      return { output, metrics };
+    } finally {
+      // Clean up active timers
+      for (const timer of activeTimers) {
+        clearTimeout(timer);
+      }
+      activeTimers.clear();
+    }
   }
 
   private createIsolatedContext(
     quotas: SandboxQuota,
-    logs: string[]
+    logs: string[],
+    timers: { setTimeout: typeof setTimeout, clearTimeout: typeof clearTimeout }
   ): Record<string, unknown> {
     // Minimal safe globals based on isolation level
     const safeGlobals: Record<string, unknown> = {
@@ -195,6 +222,8 @@ export class SecureSandbox {
       Map: Map,
       Set: Set,
       Promise: Promise,
+      setTimeout: timers.setTimeout,
+      clearTimeout: timers.clearTimeout,
     };
 
     // Add allowed modules if not airgapped
@@ -242,7 +271,7 @@ export class SecureSandbox {
 
     const fn = new AsyncFunction(...contextKeys, 'inputs', `
       "use strict";
-      return ${code}(inputs);
+      return (${code})(inputs);
     `);
 
     return fn(...contextValues, inputs);
