@@ -3,7 +3,7 @@ import type { Config } from 'jest';
 const config: Config = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts'],
+  extensionsToTreatAsEsm: [],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.js',
     'jest-extended/all',
@@ -29,8 +29,9 @@ const config: Config = {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
-        useESM: true,
-        tsconfig: 'tsconfig.json',
+        tsconfig: '<rootDir>/tsconfig.test.json',
+        useESM: false,
+        isolatedModules: true,
       },
     ],
   },
@@ -78,7 +79,7 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: ['/node_modules/'],
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

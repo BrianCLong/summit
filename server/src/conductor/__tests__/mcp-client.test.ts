@@ -5,8 +5,15 @@ import WebSocket from 'ws';
 import { MCPClient, MCPServerRegistry } from '../mcp/client';
 import { MCPServerConfig } from '../types';
 
-// Mock WebSocket
-jest.mock('ws');
+// Mock WebSocket with an explicit factory so default import wiring works in ESM/CJS
+jest.mock('ws', () => {
+  const MockWebSocket = jest.fn();
+  return {
+    __esModule: true,
+    default: Object.assign(MockWebSocket, { OPEN: 1 }),
+  };
+});
+
 const MockWebSocket = WebSocket as jest.MockedClass<typeof WebSocket>;
 
 // Shared mock configuration for all tests
@@ -36,6 +43,7 @@ describe('MCPClient', () => {
   let mockWs: jest.Mocked<WebSocket>;
 
   beforeEach(() => {
+    MockWebSocket.mockClear();
     registry = new MCPServerRegistry();
     registry.register('test-server', mockServerConfig);
 
