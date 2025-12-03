@@ -9,6 +9,7 @@ import logger from '../utils/logger.js';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 import { getRedisClient } from '../db/redis.js';
 import { dlpService } from './DLPService.js';
+import { kubeBenchmarkValidator } from '../security/KubeBenchmarkValidator.js';
 import fs from 'fs/promises';
 import path from 'path';
 
@@ -376,9 +377,85 @@ class ComplianceService {
         ],
       };
 
+      // CIS K8S Framework
+      const cisK8sFramework: ComplianceFramework = {
+        id: 'cis-k8s',
+        name: 'CIS Kubernetes Benchmark',
+        version: '1.24',
+        description: 'Center for Internet Security Benchmark for Kubernetes',
+        enabled: true,
+        assessmentFrequency: 'daily',
+        nextAssessment: new Date(),
+        status: 'pending',
+        score: 0,
+        requirements: [
+          {
+            id: 'cis-k8s-benchmark',
+            frameworkId: 'cis-k8s',
+            category: 'Benchmark',
+            title: 'CIS Benchmark Execution',
+            description: 'Execute CIS Benchmark tests via kube-bench',
+            priority: 'critical',
+            status: 'partial',
+            controls: [
+              {
+                id: 'cis-k8s-ctrl-1',
+                type: 'technical',
+                description: 'Automated kube-bench execution',
+                implementation: 'KubeBenchmarkValidator',
+                automated: true,
+                effectiveness: 'high',
+              }
+            ],
+            evidence: [],
+            nextCheck: new Date(),
+            automatedCheck: true
+          }
+        ]
+      };
+
+      // NSA K8S Framework
+      const nsaK8sFramework: ComplianceFramework = {
+        id: 'nsa-k8s',
+        name: 'NSA/CISA Kubernetes Hardening',
+        version: '1.2',
+        description: 'NSA/CISA Kubernetes Hardening Guidance',
+        enabled: true,
+        assessmentFrequency: 'daily',
+        nextAssessment: new Date(),
+        status: 'pending',
+        score: 0,
+        requirements: [
+          {
+            id: 'nsa-k8s-benchmark',
+            frameworkId: 'nsa-k8s',
+            category: 'Benchmark',
+            title: 'NSA Hardening Scan',
+            description: 'Execute NSA Hardening scan via kubescape',
+            priority: 'critical',
+            status: 'partial',
+            controls: [
+              {
+                id: 'nsa-k8s-ctrl-1',
+                type: 'technical',
+                description: 'Automated kubescape execution',
+                implementation: 'KubeBenchmarkValidator',
+                automated: true,
+                effectiveness: 'high',
+              }
+            ],
+            evidence: [],
+            nextCheck: new Date(),
+            automatedCheck: true
+          }
+        ]
+      };
+
       this.frameworks.set('gdpr', gdprFramework);
       this.frameworks.set('soc2', soc2Framework);
       this.frameworks.set('iso27001', iso27001Framework);
+      this.frameworks.set('cis-k8s', cisK8sFramework);
+      this.frameworks.set('nsa-k8s', nsaK8sFramework);
 
       logger.info('Compliance frameworks initialized', {
         component: 'ComplianceService',
@@ -529,6 +606,10 @@ class ComplianceService {
           return await this.assessSOC2Requirement(requirement);
         case 'iso27001':
           return await this.assessISO27001Requirement(requirement);
+        case 'cis-k8s':
+          return await this.assessCisK8sRequirement(requirement);
+        case 'nsa-k8s':
+          return await this.assessNsaK8sRequirement(requirement);
         default:
           return await this.assessGenericRequirement(requirement);
       }
@@ -989,6 +1070,134 @@ class ComplianceService {
 
       default:
         return await this.assessGenericRequirement(requirement);
+    }
+  }
+
+  /**
+   * Assess CIS K8S requirements
+   */
+  private async assessCisK8sRequirement(
+    requirement: ComplianceRequirement,
+  ): Promise<any> {
+    try {
+      const result = await kubeBenchmarkValidator.runCisBenchmark();
+
+      const findings: ComplianceFinding[] = result.items
+        .filter(item => item.status === 'fail')
+        .map(item => ({
+          id: `cis-${item.id}`,
+          requirementId: requirement.id,
+          severity: item.severity || 'medium',
+          title: `CIS Check Failed: ${item.id}`,
+          description: item.description,
+          impact: 'Security configuration does not meet CIS benchmark',
+          likelihood: 'medium',
+          riskRating: item.severity === 'critical' ? 9 : 6,
+          detectedAt: new Date(),
+          status: 'open'
+        }));
+
+      const recommendations: ComplianceRecommendation[] = result.items
+        .filter(item => item.status === 'fail' && item.remediation)
+        .map(item => ({
+          id: `cis-${item.id}-remediation`,
+          findingId: `cis-${item.id}`,
+          title: `Remediate ${item.id}`,
+          description: item.remediation || 'Apply benchmark recommendation',
+          priority: item.severity || 'medium',
+          effort: 'medium',
+          impact: 'medium',
+          timeline: '1 week',
+          status: 'pending'
+        }));
+
+      const evidence: ComplianceEvidence[] = [{
+        id: `cis-run-${Date.now()}`,
+        type: 'log',
+        title: 'CIS Benchmark Run Result',
+        description: `Full CIS Benchmark execution result. Score: ${result.score}%`,
+        metadata: {
+          score: result.score,
+          total: result.totalChecks,
+          passed: result.passedChecks,
+          failed: result.failedChecks
+        },
+        collectedAt: new Date(),
+        automated: true
+      }];
+
+      const status = result.status === 'pass' ? 'compliant' :
+                     result.score > 90 ? 'partial' : 'non-compliant';
+
+      return { status, findings, recommendations, evidence };
+
+    } catch (error) {
+      logger.error('Failed to run CIS benchmark assessment', { error });
+      throw error;
+    }
+  }
+
+  /**
+   * Assess NSA K8S requirements
+   */
+  private async assessNsaK8sRequirement(
+    requirement: ComplianceRequirement,
+  ): Promise<any> {
+    try {
+      const result = await kubeBenchmarkValidator.runNsaBenchmark();
+
+      const findings: ComplianceFinding[] = result.items
+        .filter(item => item.status === 'fail')
+        .map(item => ({
+          id: `nsa-${item.id}`,
+          requirementId: requirement.id,
+          severity: item.severity || 'medium',
+          title: `NSA Check Failed: ${item.id}`,
+          description: item.description,
+          impact: 'Security configuration does not meet NSA/CISA guidance',
+          likelihood: 'medium',
+          riskRating: item.severity === 'critical' ? 9 : 6,
+          detectedAt: new Date(),
+          status: 'open'
+        }));
+
+      const recommendations: ComplianceRecommendation[] = result.items
+        .filter(item => item.status === 'fail' && item.remediation)
+        .map(item => ({
+          id: `nsa-${item.id}-remediation`,
+          findingId: `nsa-${item.id}`,
+          title: `Remediate ${item.id}`,
+          description: item.remediation || 'Apply hardening recommendation',
+          priority: item.severity || 'medium',
+          effort: 'medium',
+          impact: 'medium',
+          timeline: '1 week',
+          status: 'pending'
+        }));
+
+      const evidence: ComplianceEvidence[] = [{
+        id: `nsa-run-${Date.now()}`,
+        type: 'log',
+        title: 'NSA Benchmark Run Result',
+        description: `Full NSA Benchmark execution result. Score: ${result.score}%`,
+        metadata: {
+          score: result.score,
+          total: result.totalChecks,
+          passed: result.passedChecks,
+          failed: result.failedChecks
+        },
+        collectedAt: new Date(),
+        automated: true
+      }];
+
+      const status = result.status === 'pass' ? 'compliant' :
+                     result.score > 90 ? 'partial' : 'non-compliant';
+
+      return { status, findings, recommendations, evidence };
+
+    } catch (error) {
+      logger.error('Failed to run NSA benchmark assessment', { error });
+      throw error;
     }
   }
 
