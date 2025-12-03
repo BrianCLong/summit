@@ -17,6 +17,7 @@ import logger from '../utils/logger.js';
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
 import resolvers from './resolvers-combined.js';
+import { authDirectiveTransformer } from './authDirective.js';
 
 // Import DataLoaders
 import { createDataLoaders, type DataLoaders } from './dataloaders/index.js';
@@ -70,13 +71,16 @@ const permissions = shield({
 
 // Create enhanced GraphQL schema with security
 function createSecureSchema() {
-  const baseSchema = makeExecutableSchema({
+  let schema = makeExecutableSchema({
     typeDefs,
     resolvers,
   });
 
+  // Apply Auth Directive
+  schema = authDirectiveTransformer(schema);
+
   // Apply security middleware
-  return applyMiddleware(baseSchema, permissions);
+  return applyMiddleware(schema, permissions);
 }
 
 // Context function for Apollo v5

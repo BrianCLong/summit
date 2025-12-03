@@ -1,26 +1,39 @@
 import { mapSchema, getDirective, MapperKind } from '@graphql-tools/utils';
+import { defaultFieldResolver, GraphQLSchema, GraphQLError } from 'graphql';
+import AuthService from '../services/AuthService.js';
 
-export function authDirective(directiveName = 'auth') {
-  return {
-    authDirectiveTypeDefs: `directive @${directiveName}(scope:[String!]!) on FIELD_DEFINITION`,
-    authDirectiveTransformer: (schema: any) =>
-      mapSchema(schema, {
-        [MapperKind.OBJECT_FIELD]: (fieldConfig: any) => {
-          const dir = getDirective(schema, fieldConfig, directiveName)?.[0];
-          if (!dir) return fieldConfig;
-          const { scope } = dir;
-          const orig = fieldConfig.resolve;
-          fieldConfig.resolve = async (
-            src: any,
-            args: any,
-            ctx: any,
-            info: any,
-          ) => {
-            ctx.policy.assert(ctx.user, scope, { args, info });
-            return orig ? orig(src, args, ctx, info) : src[fieldConfig.name];
+const authService = new AuthService();
+
+export function authDirectiveTransformer(schema: GraphQLSchema, directiveName = 'auth') {
+  return mapSchema(schema, {
+    [MapperKind.OBJECT_FIELD]: (fieldConfig) => {
+      const authDirective = getDirective(schema, fieldConfig, directiveName)?.[0];
+      if (authDirective) {
+        const { requires } = authDirective;
+        if (requires) {
+          const { resolve = defaultFieldResolver } = fieldConfig;
+          fieldConfig.resolve = async function (source, args, context, info) {
+            const user = context.user;
+            if (!user) {
+              throw new GraphQLError('Not authenticated', {
+                extensions: { code: 'UNAUTHENTICATED' },
+              });
+            }
+
+            // Check permission
+            // user object from context matches AuthService User interface
+            if (!authService.hasPermission(user, requires)) {
+               throw new GraphQLError(`Not authorized. Requires permission: ${requires}`, {
+                extensions: { code: 'FORBIDDEN' },
+              });
+            }
+
+            return resolve(source, args, context, info);
           };
           return fieldConfig;
-        },
-      }),
-  };
+        }
+      }
+      return fieldConfig;
+    },
+  });
 }
