@@ -9,6 +9,7 @@ import ErrorPanels from '../../components/dashboard/ErrorPanels';
 import ResolverTop5 from '../../components/dashboard/ResolverTop5';
 import GrafanaLinkCard from '../../components/dashboard/GrafanaLinkCard';
 import LiveActivityFeed from '../../components/dashboard/LiveActivityFeed';
+import AIGovernanceWidget from '../../components/dashboard/AIGovernanceWidget';
 import {
   useDashboardPrefetch,
   useIntelligentPrefetch,
@@ -35,6 +36,11 @@ export default function Dashboard() {
         </Grid>
         <Grid item xs={12} md={4}>
           <GrafanaLinkCard />
+        </Grid>
+
+        {/* AI Governance & Agent Fleet Dashboard */}
+        <Grid item xs={12}>
+          <AIGovernanceWidget />
         </Grid>
 
         <Grid item xs={12}>
