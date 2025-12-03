@@ -195,6 +195,7 @@ server/test-results/
 server/junit.xml
 coverage/
 **/coverage/
+coverage-reports/
 
 # Neo4j & graph stores
 neo4j/data/
