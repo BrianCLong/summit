@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "number"
+    },
+    "data": {
+      "type": "any"
+    }
+  },
+  "required": ["id", "newRequiredField"],
+  "additionalProperties": true
+}
