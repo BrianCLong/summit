@@ -1,26 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { api } from '../lib/api';
 
-export default function SearchBar() {
+export default function SearchBar({ onSearch }: { onSearch: (q: string) => void }) {
   const [q, setQ] = useState('');
-  const router = useRouter();
-  const onSearch = async () => {
-    const res = await api(`/entities/search?q=${encodeURIComponent(q)}`);
-    if (res.results.length > 0) {
-      router.push(`/entities/${res.results[0].id}`);
-    }
+
+  const handleSearch = () => {
+    onSearch(q);
   };
+
   return (
     <div className="p-2 flex gap-2">
       <input
-        className="border"
+        className="border p-1 w-full"
         value={q}
         onChange={(e) => setQ(e.target.value)}
+        placeholder="Search entities..."
+        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
       />
-      <button onClick={onSearch}>Search</button>
+      <button className="bg-blue-500 text-white px-4 py-1 rounded" onClick={handleSearch}>
+        Search
+      </button>
     </div>
   );
 }
