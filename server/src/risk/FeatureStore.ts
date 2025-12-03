@@ -7,10 +7,13 @@ export class FeatureStore {
   /**
    * Aggregates features per entity over 24h/7d/30d.
    * Fetches data from Neo4j (Graph), Postgres (Time/Audit), and derived attributes.
+   *
+   * @param entityId - The ID of the entity to fetch features for.
+   * @param _window - The time window (unused for now as features have fixed windows).
    */
   async getFeatures(
     entityId: string,
-    window: '24h' | '7d' | '30d',
+    _window: '24h' | '7d' | '30d',
   ): Promise<FeatureVector> {
     const driver = getNeo4jDriver();
     const pool = getPostgresPool();
