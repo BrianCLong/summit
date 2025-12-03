@@ -106,7 +106,7 @@ jobs:
         run: pnpm -w run build
       - name: Unit & integration tests
         # Enforce 10 minute time budget (600s)
-        run: ./scripts/ci-test-budget.sh 600 "pnpm -w run test"
+        run: bash scripts/ci-test-budget.sh 600 "pnpm -w run test"
       - name: Upload build artifacts for golden path
         uses: actions/upload-artifact@v4
         with:
