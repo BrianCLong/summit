@@ -9,13 +9,13 @@
  * - Explainable why_paths and citations
  */
 
-import { Driver, Session } from 'neo4j-driver';
+import { Driver, Session as _Session } from 'neo4j-driver';
 import Redis from 'ioredis';
 import * as z from 'zod';
 import { createHash } from 'crypto';
 import pino from 'pino';
 import { CircuitBreaker } from '../utils/CircuitBreaker.js'; // Import CircuitBreaker
-import { rankPaths, ScoreBreakdown as PathScoreBreakdown } from './PathRankingService.js';
+import { rankPaths, ScoreBreakdown as _PathScoreBreakdown } from './PathRankingService.js';
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,

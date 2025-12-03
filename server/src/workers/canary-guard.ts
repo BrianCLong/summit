@@ -28,7 +28,7 @@ export async function runCanaryGuard(
   const rollback = async () => {
     // Emit rollback desired event; controller should revert version pointer and pause triggers
     // In practice, call a mutation or internal controller here
-    console.log(`[canary-guard] rollback triggered for ${runId}`);
+    // console.log(`[canary-guard] rollback triggered for ${runId}`);
   };
   return evaluateCanary(runId, thresholds, fetchMetrics, rollback);
 }

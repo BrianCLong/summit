@@ -87,8 +87,8 @@ export class WebSocketCore {
         sub: decoded.sub,
         exp: decoded.exp,
       };
-    } catch (error) {
-      console.warn('JWT verification failed:', error);
+    } catch (_error) {
+      // console.warn('JWT verification failed:', error);
       return null;
     }
   }
@@ -155,8 +155,8 @@ export class WebSocketCore {
       });
 
       return allowed;
-    } catch (error) {
-      console.error('OPA check failed:', error);
+    } catch (_error) {
+      // console.error('OPA check failed:', error);
       return false; // Fail closed
     } finally {
       span?.end();
@@ -199,31 +199,31 @@ export class WebSocketCore {
         try {
           const token = req.getHeader('authorization')?.replace('Bearer ', '');
           if (!token) {
-            console.warn('WebSocket upgrade failed: No token provided');
+            // console.warn('WebSocket upgrade failed: No token provided');
             res.writeStatus('401 Unauthorized').end();
             return;
           }
 
           const claims = this.verifyJWT(token);
           if (!claims) {
-            console.warn('WebSocket upgrade failed: Invalid token');
+            // console.warn('WebSocket upgrade failed: Invalid token');
             res.writeStatus('401 Unauthorized').end();
             return;
           }
 
           // Check token expiration
           if (Date.now() / 1000 > claims.exp) {
-            console.warn('WebSocket upgrade failed: Token expired');
+            // console.warn('WebSocket upgrade failed: Token expired');
             res.writeStatus('401 Unauthorized').end();
             return;
           }
 
           const meshRoute = this.getServiceMeshRoute(req);
 
-          console.log(
-            `WebSocket upgrade: ${claims.userId}@${claims.tenantId}` +
-              (meshRoute ? ` via ${meshRoute}` : ''),
-          );
+          // console.log(
+          //   `WebSocket upgrade: ${claims.userId}@${claims.tenantId}` +
+          //     (meshRoute ? ` via ${meshRoute}` : ''),
+          // );
 
           res.upgrade(
             {
@@ -244,8 +244,8 @@ export class WebSocketCore {
             'websocket.user_id': claims.userId,
             'websocket.roles': claims.roles.join(','),
           });
-        } catch (error) {
-          console.error('WebSocket upgrade error:', error);
+        } catch (_error) {
+          // console.error('WebSocket upgrade error:', error);
           res.writeStatus('500 Internal Server Error').end();
         } finally {
           span?.end();
@@ -290,7 +290,7 @@ export class WebSocketCore {
             'websocket.user_id': connection.userId,
           });
         } catch (error) {
-          console.error('WebSocket message error:', error);
+          // console.error('WebSocket message error:', error);
           const errorPayload = {
             type: 'error',
             error: 'Message processing failed',
@@ -323,10 +323,10 @@ export class WebSocketCore {
         this.connections.set(connectionId, connection);
         activeConnections.inc({ tenant: connection.tenantId });
 
-        console.log(
-          `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
-            (connection.meshRoute ? ` via ${connection.meshRoute}` : ''),
-        );
+        // console.log(
+        //   `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
+        //     (connection.meshRoute ? ` via ${connection.meshRoute}` : ''),
+        // );
 
         const welcomeMessage = {
           type: 'welcome',
@@ -343,7 +343,7 @@ export class WebSocketCore {
       },
 
       /* WebSocket close handler */
-      close: (ws: any, code, message) => {
+      close: (ws: any, code, _message) => {
         const connection = ws as WebSocketConnection;
         const connectionId = connection.userId + '@' + connection.tenantId;
 
@@ -364,9 +364,9 @@ export class WebSocketCore {
           connection.manager?.markReconnecting(`close_${code}`);
         }
 
-        console.log(
-          `WebSocket closed: ${connectionId}, code: ${code}, reason: ${message || 'n/a'}`,
-        );
+        // console.log(
+        //   `WebSocket closed: ${connectionId}, code: ${code}, reason: ${message || 'n/a'}`,
+        // );
       },
 
       /* Settings */
@@ -470,11 +470,11 @@ export class WebSocketCore {
   private setupRedisSubscriptions() {
     const subscriber = this.redis.duplicate();
 
-    subscriber.psubscribe(`${this.TOPIC_PREFIX}*`, (err, count) => {
+    subscriber.psubscribe(`${this.TOPIC_PREFIX}*`, (err, _count) => {
       if (err) {
-        console.error('Redis psubscribe error:', err);
+        // console.error('Redis psubscribe error:', err);
       } else {
-        console.log(`Subscribed to ${count} Redis patterns`);
+        // console.log(`Subscribed to ${count} Redis patterns`);
       }
     });
 
@@ -505,7 +505,7 @@ export class WebSocketCore {
         if (connection) {
           activeConnections.dec({ tenant: connection.tenantId });
         }
-        console.log(`Closing stale connection: ${connectionId}`);
+        // console.log(`Closing stale connection: ${connectionId}`);
       }
     }, this.HEARTBEAT_INTERVAL);
   }
@@ -527,17 +527,17 @@ export class WebSocketCore {
           JSON.stringify(details),
         ],
       );
-    } catch (error) {
-      console.error('WebSocket audit logging failed:', error);
+    } catch (_error) {
+      // console.error('WebSocket audit logging failed:', error);
     }
   }
 
   public listen(port: number = 9001) {
     this.app.listen(port, (token) => {
       if (token) {
-        console.log(`🚀 WebSocket Core listening on port ${port}`);
+        // console.log(`🚀 WebSocket Core listening on port ${port}`);
       } else {
-        console.error(`❌ Failed to listen to port ${port}`);
+        // console.error(`❌ Failed to listen to port ${port}`);
       }
     });
   }

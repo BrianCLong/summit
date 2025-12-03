@@ -1,5 +1,5 @@
 import promClient from 'prom-client';
-import { activeConnections } from '../observability/metrics.js';
+import { activeConnections as _activeConnections } from '../observability/metrics.js';
 
 export enum ConnectionState {
   CONNECTING = 'connecting',
@@ -36,7 +36,7 @@ interface ManagedConnectionOptions {
   maxRetryDelay?: number;
   backoffMultiplier?: number;
   jitter?: number;
-  logger?: {
+  _logger?: {
     info: (...args: any[]) => void;
     warn: (...args: any[]) => void;
     error: (...args: any[]) => void;
@@ -55,7 +55,7 @@ const DEFAULT_OPTIONS: Required<ManagedConnectionOptions> = {
   maxRetryDelay: 60_000,
   backoffMultiplier: 2,
   jitter: 0.3,
-  logger: console,
+  _logger: console,
 };
 
 interface ConnectionMetrics {
@@ -149,7 +149,7 @@ const createMetrics = (): ConnectionMetrics => ({
 });
 
 const enum TimerType {
-  QUEUE_DRAIN,
+  _QUEUE_DRAIN,
 }
 
 const READY_STATE_OPEN = 1;

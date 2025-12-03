@@ -10,7 +10,7 @@ export async function startApprovedWriter(db: any, neo4j: any) {
       const pending = await db.insights.findMany({ status: 'APPROVED' });
       if (!pending?.length) return;
 
-      console.log(`Processing ${pending.length} approved insights...`);
+      // console.log(`Processing ${pending.length} approved insights...`);
 
       const session = neo4j.session();
       try {
@@ -53,9 +53,9 @@ export async function startApprovedWriter(db: any, neo4j: any) {
             // store as node properties or separate Evidence nodes (skipping heavy writes by default)
             // Here: audit only for now, can be enhanced to create entity nodes
             for (const result of ins.payload) {
-              console.log(
-                `NLP entities found for doc ${result.doc_id}: ${result.entities.length} entities`,
-              );
+              // console.log(
+              //   `NLP entities found for doc ${result.doc_id}: ${result.entities.length} entities`,
+              // );
             }
           }
 
@@ -68,7 +68,7 @@ export async function startApprovedWriter(db: any, neo4j: any) {
           });
 
           await db.insights.markApplied(ins.id);
-          console.log(`Applied insight ${ins.id} of kind ${kind}`);
+          // console.log(`Applied insight ${ins.id} of kind ${kind}`);
         }
       } finally {
         await session.close();
