@@ -1,0 +1,89 @@
+{
+  "name": "intelgraph-base",
+  "description": "Base images required for IntelGraph platform deployment",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-15",
+  "maintainer": "platform-team@intelgraph.local",
+  "images": [
+    {
+      "ref": "docker.io/library/node:20-alpine",
+      "required": true,
+      "notes": "Base image for Node.js services",
+      "slsaRequired": true
+    },
+    {
+      "ref": "docker.io/library/node:20-bookworm-slim",
+      "required": true,
+      "notes": "Full Node.js image for development",
+      "slsaRequired": true
+    },
+    {
+      "ref": "gcr.io/distroless/nodejs20-debian12:nonroot",
+      "required": true,
+      "notes": "Minimal runtime for production Node.js",
+      "slsaRequired": true
+    },
+    {
+      "ref": "docker.io/library/postgres:15-alpine",
+      "required": true,
+      "notes": "PostgreSQL database",
+      "slsaRequired": false
+    },
+    {
+      "ref": "docker.io/library/redis:7-alpine",
+      "required": true,
+      "notes": "Redis cache and message broker",
+      "slsaRequired": false
+    },
+    {
+      "ref": "docker.io/library/nginx:1.25-alpine",
+      "required": true,
+      "notes": "Reverse proxy and static file serving",
+      "slsaRequired": false
+    },
+    {
+      "ref": "neo4j:5.15-community",
+      "required": true,
+      "notes": "Neo4j graph database",
+      "slsaRequired": false
+    },
+    {
+      "ref": "docker.io/library/alpine:3.19",
+      "required": true,
+      "notes": "Minimal base image for utilities",
+      "slsaRequired": false
+    },
+    {
+      "ref": "gcr.io/distroless/static:nonroot",
+      "required": true,
+      "notes": "Minimal static binary runtime",
+      "slsaRequired": true
+    },
+    {
+      "ref": "gcr.io/distroless/base:nonroot",
+      "required": true,
+      "notes": "Minimal runtime with libc",
+      "slsaRequired": true
+    }
+  ],
+  "groups": {
+    "runtime": [
+      "docker.io/library/node:20-alpine",
+      "gcr.io/distroless/nodejs20-debian12:nonroot"
+    ],
+    "databases": [
+      "docker.io/library/postgres:15-alpine",
+      "docker.io/library/redis:7-alpine",
+      "neo4j:5.15-community"
+    ],
+    "infrastructure": [
+      "docker.io/library/nginx:1.25-alpine",
+      "docker.io/library/alpine:3.19"
+    ]
+  },
+  "syncSchedule": "0 2 * * 0",
+  "retentionPolicy": {
+    "keepTags": 5,
+    "keepDays": 90
+  }
+}

@@ -1,0 +1,183 @@
+# Harbor Proxy Cache Configuration
+# Purpose: Configure upstream registry proxies for air-gapped sync
+#
+# This configuration defines the upstream registries that Harbor will
+# proxy and cache for offline/air-gapped deployments.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: harbor-proxy-cache-config
+  namespace: harbor
+  labels:
+    app: harbor
+    component: proxy-cache
+data:
+  # Proxy endpoints configuration
+  proxy-endpoints.yaml: |
+    # Upstream Registry Definitions
+    # These are synced during the online phase and cached for air-gapped use
+
+    upstreamRegistries:
+      # Docker Hub Official Images
+      - name: dockerhub
+        endpoint: https://registry-1.docker.io
+        description: "Docker Hub - Official and verified images"
+        enabled: true
+        syncPolicy:
+          type: scheduled
+          schedule: "0 2 * * *"  # Daily at 2 AM
+          maxConcurrent: 5
+        credentials:
+          secretRef: dockerhub-credentials
+        allowList:
+          - "library/node:18*"
+          - "library/node:20*"
+          - "library/postgres:15*"
+          - "library/redis:7*"
+          - "library/nginx:1.25*"
+          - "library/alpine:3.18*"
+          - "library/alpine:3.19*"
+        verification:
+          cosign: required
+          slsa: preferred
+          minProvenance: slsa3
+
+      # GitHub Container Registry
+      - name: ghcr
+        endpoint: https://ghcr.io
+        description: "GitHub Container Registry"
+        enabled: true
+        syncPolicy:
+          type: scheduled
+          schedule: "0 3 * * *"  # Daily at 3 AM
+          maxConcurrent: 3
+        credentials:
+          secretRef: ghcr-credentials
+        allowList:
+          - "sigstore/cosign:*"
+          - "aquasecurity/trivy:*"
+          - "grafana/grafana:*"
+          - "prometheus/prometheus:*"
+        verification:
+          cosign: required
+          slsa: required
+          minProvenance: slsa3
+
+      # Google Container Registry
+      - name: gcr
+        endpoint: https://gcr.io
+        description: "Google Container Registry"
+        enabled: true
+        syncPolicy:
+          type: scheduled
+          schedule: "0 4 * * *"  # Daily at 4 AM
+          maxConcurrent: 3
+        credentials:
+          secretRef: gcr-credentials
+        allowList:
+          - "distroless/static:*"
+          - "distroless/base:*"
+          - "distroless/nodejs:*"
+        verification:
+          cosign: required
+          slsa: required
+          minProvenance: slsa3
+
+      # Quay.io
+      - name: quay
+        endpoint: https://quay.io
+        description: "Red Hat Quay Registry"
+        enabled: true
+        syncPolicy:
+          type: scheduled
+          schedule: "0 5 * * *"  # Daily at 5 AM
+          maxConcurrent: 3
+        credentials:
+          secretRef: quay-credentials
+        allowList:
+          - "argoproj/argocd:*"
+          - "coreos/etcd:*"
+          - "prometheus/node-exporter:*"
+        verification:
+          cosign: preferred
+          slsa: preferred
+
+      # AWS ECR Public
+      - name: ecr-public
+        endpoint: https://public.ecr.aws
+        description: "AWS ECR Public Gallery"
+        enabled: true
+        syncPolicy:
+          type: manual  # Only sync on demand
+          maxConcurrent: 2
+        allowList:
+          - "aws-observability/aws-otel-collector:*"
+          - "eks-distro/kubernetes/pause:*"
+        verification:
+          cosign: preferred
+          slsa: optional
+
+    # Global Verification Settings
+    globalVerification:
+      # Require signatures for all images
+      requireSignatures: true
+
+      # Trusted signature keys
+      trustedKeys:
+        # IntelGraph organization key
+        - name: intelgraph-release
+          keyRef: cosign-keys/intelgraph-release.pub
+
+        # Sigstore public good instance
+        - name: sigstore-public
+          keylessConfig:
+            issuer: https://accounts.google.com
+            subject: keyless@sigstore.dev
+
+      # SLSA Provenance Requirements
+      slsaRequirements:
+        minLevel: 3
+        trustedBuilders:
+          - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml"
+          - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_container_slsa3.yml"
+          - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml"
+
+    # Caching Policy
+    cachePolicy:
+      # Maximum cache size (GiB)
+      maxSize: 400
+      # Cache retention (days)
+      retention: 90
+      # Cleanup policy
+      cleanup:
+        schedule: "0 1 * * 0"  # Weekly on Sunday at 1 AM
+        keepRecentTags: 10
+        keepRecentDays: 30
+
+  # Network isolation rules
+  network-rules.yaml: |
+    # Air-gap network configuration
+    airgapMode:
+      enabled: false  # Set to true when fully air-gapped
+
+    # Allowed external endpoints during sync phase
+    allowedEndpoints:
+      - registry-1.docker.io
+      - auth.docker.io
+      - ghcr.io
+      - gcr.io
+      - quay.io
+      - public.ecr.aws
+      - rekor.sigstore.dev
+      - fulcio.sigstore.dev
+      - tuf-repo-cdn.sigstore.dev
+
+    # Internal-only endpoints (always allowed)
+    internalEndpoints:
+      - harbor-core
+      - harbor-registry
+      - harbor-jobservice
+      - harbor-trivy
+      - harbor-postgresql
+      - harbor-redis

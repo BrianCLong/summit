@@ -1,0 +1,222 @@
+# Network Policies for Air-Gapped Registry
+# Enforces strict network isolation
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: harbor-registry-isolation
+  namespace: harbor
+  labels:
+    app: harbor
+    component: network-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: harbor
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # Allow ingress from within the namespace
+    - from:
+        - podSelector:
+            matchLabels:
+              app: harbor
+
+    # Allow ingress from Kubernetes API
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              component: kube-apiserver
+
+    # Allow ingress from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8443
+
+    # Allow ingress from application namespaces (pull images)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              registry-access: allowed
+      ports:
+        - protocol: TCP
+          port: 443
+
+  egress:
+    # Allow egress within the namespace
+    - to:
+        - podSelector:
+            matchLabels:
+              app: harbor
+
+    # Allow DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # Block all other egress in air-gapped mode
+    # Uncomment for full air-gap:
+    # - to: []
+
+---
+# Network policy for Trivy scanner
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: harbor-trivy-isolation
+  namespace: harbor
+spec:
+  podSelector:
+    matchLabels:
+      app: harbor
+      component: trivy
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # Only from Harbor core
+    - from:
+        - podSelector:
+            matchLabels:
+              app: harbor
+              component: core
+      ports:
+        - protocol: TCP
+          port: 8080
+
+  egress:
+    # Allow to registry for scanning
+    - to:
+        - podSelector:
+            matchLabels:
+              app: harbor
+              component: registry
+      ports:
+        - protocol: TCP
+          port: 5000
+
+    # DNS only
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+
+---
+# Network policy for sync operations
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: harbor-sync-egress
+  namespace: harbor
+  annotations:
+    description: "Allow egress for image sync - disable in full air-gap mode"
+spec:
+  podSelector:
+    matchLabels:
+      app: harbor
+      component: jobservice
+  policyTypes:
+    - Egress
+
+  egress:
+    # Allow to upstream registries during sync window
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 5000
+
+---
+# RBAC for registry access
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: registry-pull
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+    resourceNames: ["harbor-registry-creds"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: registry-pull-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: registry-pull
+subjects:
+  - kind: Group
+    name: system:serviceaccounts
+    apiGroup: rbac.authorization.k8s.io
+
+---
+# Pod Security Policy (for clusters still using PSP)
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: harbor-restricted
+  annotations:
+    seccomp.security.alpha.kubernetes.io/allowedProfiles: 'runtime/default'
+    apparmor.security.beta.kubernetes.io/allowedProfiles: 'runtime/default'
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  requiredDropCapabilities:
+    - ALL
+  volumes:
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    rule: 'MustRunAsNonRoot'
+  seLinux:
+    rule: 'RunAsAny'
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      - min: 1
+        max: 65535
+  readOnlyRootFilesystem: true

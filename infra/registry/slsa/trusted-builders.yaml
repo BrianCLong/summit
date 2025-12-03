@@ -1,0 +1,224 @@
+# SLSA Trusted Builders Configuration
+# Purpose: Define which build systems are trusted for SLSA verification
+#
+# SECURITY: Only builders meeting SLSA Level 3 requirements should be listed
+# Level 3 Requirements:
+#   - Hardened build service
+#   - Isolated build environment
+#   - Non-falsifiable provenance
+#   - Parameterless build
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: slsa-trusted-builders
+  namespace: registry-security
+  labels:
+    app: slsa-verifier
+    component: trusted-builders
+data:
+  trusted-builders.yaml: |
+    # SLSA Trusted Builders Registry
+    # Last Updated: 2025-01-15
+    #
+    # Each builder entry includes:
+    # - id: The builder ID as it appears in provenance
+    # - name: Human-readable name
+    # - slsaLevel: Certified SLSA level
+    # - organization: Managing organization
+    # - verificationUrl: Documentation/audit URL
+    # - patterns: ID patterns for matching
+    # - constraints: Additional verification constraints
+
+    trustedBuilders:
+      # =========================================================================
+      # GitHub Actions Builders (SLSA Framework)
+      # =========================================================================
+
+      - id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_go_slsa3.yml"
+        name: "SLSA Go Builder"
+        slsaLevel: 3
+        organization: "SLSA Framework"
+        verificationUrl: "https://github.com/slsa-framework/slsa-github-generator"
+        capabilities:
+          - go
+          - static-binary
+        patterns:
+          - "https://github.com/slsa-framework/slsa-github-generator/*go*"
+        constraints:
+          requireGitHubHosted: true
+          allowedOrganizations:
+            - "BrianCLong"
+            - "slsa-framework"
+            - "sigstore"
+            - "google"
+          minimumVersion: "v1.9.0"
+
+      - id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_container_slsa3.yml"
+        name: "SLSA Container Builder"
+        slsaLevel: 3
+        organization: "SLSA Framework"
+        verificationUrl: "https://github.com/slsa-framework/slsa-github-generator"
+        capabilities:
+          - container
+          - docker
+          - oci
+        patterns:
+          - "https://github.com/slsa-framework/slsa-github-generator/*container*"
+        constraints:
+          requireGitHubHosted: true
+          allowedOrganizations:
+            - "BrianCLong"
+            - "slsa-framework"
+            - "sigstore"
+            - "aquasecurity"
+            - "grafana"
+            - "prometheus"
+          minimumVersion: "v1.9.0"
+
+      - id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_nodejs_slsa3.yml"
+        name: "SLSA Node.js Builder"
+        slsaLevel: 3
+        organization: "SLSA Framework"
+        verificationUrl: "https://github.com/slsa-framework/slsa-github-generator"
+        capabilities:
+          - nodejs
+          - npm
+          - pnpm
+        patterns:
+          - "https://github.com/slsa-framework/slsa-github-generator/*nodejs*"
+        constraints:
+          requireGitHubHosted: true
+          allowedOrganizations:
+            - "BrianCLong"
+          minimumVersion: "v1.9.0"
+
+      - id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml"
+        name: "SLSA Container Generator"
+        slsaLevel: 3
+        organization: "SLSA Framework"
+        verificationUrl: "https://github.com/slsa-framework/slsa-github-generator"
+        capabilities:
+          - provenance-only
+          - container
+        patterns:
+          - "https://github.com/slsa-framework/slsa-github-generator/*generator*"
+        constraints:
+          requireGitHubHosted: true
+
+      - id: "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/builder_bazel_slsa3.yml"
+        name: "SLSA Bazel Builder"
+        slsaLevel: 3
+        organization: "SLSA Framework"
+        verificationUrl: "https://github.com/slsa-framework/slsa-github-generator"
+        capabilities:
+          - bazel
+          - multi-language
+        patterns:
+          - "https://github.com/slsa-framework/slsa-github-generator/*bazel*"
+
+      # =========================================================================
+      # Google Cloud Build
+      # =========================================================================
+
+      - id: "https://cloudbuild.googleapis.com/GoogleHostedWorker"
+        name: "Google Cloud Build"
+        slsaLevel: 3
+        organization: "Google Cloud"
+        verificationUrl: "https://cloud.google.com/build/docs/securing-builds/view-build-provenance"
+        capabilities:
+          - container
+          - multi-language
+          - custom-steps
+        patterns:
+          - "https://cloudbuild.googleapis.com/*"
+        constraints:
+          requirePrivatePool: false
+          allowedProjects:
+            - "intelgraph-prod"
+            - "intelgraph-staging"
+            - "intelgraph-dev"
+
+      # =========================================================================
+      # Tekton Chains
+      # =========================================================================
+
+      - id: "https://tekton.dev/chains/v2"
+        name: "Tekton Chains"
+        slsaLevel: 3
+        organization: "Tekton/CD Foundation"
+        verificationUrl: "https://tekton.dev/docs/chains/"
+        capabilities:
+          - container
+          - pipeline
+          - custom-tasks
+        patterns:
+          - "https://tekton.dev/*"
+        constraints:
+          requireSignedTasks: true
+
+      # =========================================================================
+      # GitLab CI/CD
+      # =========================================================================
+
+      - id: "https://gitlab.com/gitlab-org/gitlab-runner"
+        name: "GitLab Runner (SaaS)"
+        slsaLevel: 2  # Not yet L3 certified
+        organization: "GitLab"
+        verificationUrl: "https://docs.gitlab.com/ee/ci/runners/"
+        capabilities:
+          - container
+          - multi-language
+        patterns:
+          - "https://gitlab.com/*"
+        constraints:
+          # GitLab SaaS runners only
+          requireSaaSRunner: true
+
+    # =========================================================================
+    # Verification Settings
+    # =========================================================================
+
+    verificationSettings:
+      # Minimum acceptable SLSA level
+      minimumLevel: 3
+
+      # Allow images without provenance from trusted registries
+      allowUnprovenancedFromTrusted: false
+
+      # Trusted base image registries (for bootstrap)
+      trustedBaseRegistries:
+        - "gcr.io/distroless"
+        - "registry.k8s.io"
+
+      # Provenance freshness requirement
+      maxProvenanceAge: "168h"  # 7 days
+
+      # Require reproducible builds where available
+      preferReproducible: true
+
+      # Fail-closed on verification errors
+      failClosed: true
+
+    # =========================================================================
+    # Audit Settings
+    # =========================================================================
+
+    audit:
+      # Log all verification attempts
+      logVerifications: true
+
+      # Alert on untrusted builder usage
+      alertOnUntrusted: true
+
+      # Alert channels
+      alertChannels:
+        - type: webhook
+          url: "${SECURITY_WEBHOOK_URL}"
+        - type: email
+          recipients:
+            - security@intelgraph.local
+
+      # Metrics endpoint
+      metricsEnabled: true
+      metricsPath: "/metrics/slsa"
