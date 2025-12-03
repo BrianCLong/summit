@@ -1,0 +1,14 @@
+
+  VITE v7.2.6  ready in 283 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://192.168.0.2:3000/
+(!) Failed to run dependency scan. Skipping dependency pre-bundling. Error: The following dependencies are imported but could not be resolved:
+
+  jquery (imported by /app/apps/web/src/features/redaction/redaction.js)
+  @radix-ui/react-slot (imported by /app/apps/web/src/components/ui/Button.tsx)
+
+Are they installed?
+    at file:///app/apps/web/node_modules/.pnpm/vite@7.2.6_@types+node@24.10.1_jiti@2.6.1_lightningcss@1.30.2/node_modules/vite/dist/node/chunks/config.js:31896:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async file:///app/apps/web/node_modules/.pnpm/vite@7.2.6_@types+node@24.10.1_jiti@2.6.1_lightningcss@1.30.2/node_modules/vite/dist/node/chunks/config.js:34104:15

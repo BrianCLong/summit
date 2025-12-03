@@ -51,13 +51,31 @@ export function GraphCanvas({
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
 
-  // Determine rendering quality based on raw dataset size
+  // Refs for simulation state persistence
+  const simulationRef = useRef<d3.Simulation<GraphNode, GraphLink> | null>(null)
+  const nodesMapRef = useRef<Map<string, GraphNode>>(new Map())
+  const linksMapRef = useRef<Map<string, GraphLink>>(new Map())
+  const qualityRef = useRef<RenderQuality>('high') // To access current quality in closures
+
+  // Refs for D3 selections
+  const groupsRef = useRef<{
+    svg: d3.Selection<SVGSVGElement, unknown, null, undefined>
+    container: d3.Selection<SVGGElement, unknown, null, undefined>
+    nodesGroup: d3.Selection<SVGGElement, unknown, null, undefined>
+    linksGroup: d3.Selection<SVGGElement, unknown, null, undefined>
+  } | null>(null)
+
+  // Determine rendering quality
   const quality = useMemo(() => getRenderQuality(rawEntities.length), [rawEntities.length])
 
-  // Process data based on quality (sampling for critical size)
+  // Sync quality ref
+  useEffect(() => {
+    qualityRef.current = quality
+  }, [quality])
+
+  // Process data based on quality
   const { entities, relationships } = useMemo(() => {
     if (quality === 'critical') {
-      // Sample top 1500 entities by confidence
       const sortedEntities = [...rawEntities]
         .sort((a, b) => b.confidence - a.confidence)
         .slice(0, 1500)
@@ -72,259 +90,292 @@ export function GraphCanvas({
     return { entities: rawEntities, relationships: rawRelationships }
   }, [rawEntities, rawRelationships, quality])
 
-  // Update dimensions on resize
+  // Drag handlers
+  const dragStarted = (event: any, d: GraphNode) => {
+    if (!event.active) simulationRef.current?.alphaTarget(0.3).restart()
+    d.fx = d.x
+    d.fy = d.y
+  }
+
+  const dragged = (event: any, d: GraphNode) => {
+    d.fx = event.x
+    d.fy = event.y
+  }
+
+  const dragEnded = (event: any, d: GraphNode) => {
+    if (!event.active) simulationRef.current?.alphaTarget(0)
+    d.fx = null
+    d.fy = null
+  }
+
+  // 1. Initialize SVG structure and Simulation (Run Once)
   useEffect(() => {
+    if (!svgRef.current) return
+
+    const svg = d3.select(svgRef.current)
+    svg.selectAll('*').remove() // Cleanup for HMR
+
+    const container = svg.append('g')
+    const linksGroup = container.append('g').attr('class', 'links')
+    const nodesGroup = container.append('g').attr('class', 'nodes')
+
+    groupsRef.current = { svg, container, linksGroup, nodesGroup }
+
+    // Init Simulation
+    simulationRef.current = d3.forceSimulation<GraphNode, GraphLink>()
+      .force('charge', d3.forceManyBody())
+      .force('link', d3.forceLink<GraphNode, GraphLink>().id(d => d.id))
+      .force('center', d3.forceCenter(dimensions.width / 2, dimensions.height / 2))
+
+    // Zoom behavior
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.1, 4])
+      .on('zoom', (event) => {
+        container.attr('transform', event.transform)
+
+        // Semantic Zoom with access to current quality
+        const currentQuality = qualityRef.current
+        if (currentQuality !== 'high') {
+          const k = event.transform.k
+          svg.selectAll('.node-label').style('opacity', k > 1.5 ? 1 : 0)
+          svg.selectAll('.link-label').style('opacity', k > 2.0 ? 1 : 0)
+        }
+      })
+    svg.call(zoom)
+
+    // Handle window resize
     const updateDimensions = () => {
       if (svgRef.current) {
         const rect = svgRef.current.getBoundingClientRect()
         setDimensions({ width: rect.width, height: rect.height })
       }
     }
-
     updateDimensions()
     window.addEventListener('resize', updateDimensions)
-    return () => window.removeEventListener('resize', updateDimensions)
+
+    return () => {
+      simulationRef.current?.stop()
+      window.removeEventListener('resize', updateDimensions)
+    }
   }, [])
 
+  // 2. Handle Resize updates
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) return
+    if (simulationRef.current) {
+      simulationRef.current.force('center', d3.forceCenter(dimensions.width / 2, dimensions.height / 2))
+      simulationRef.current.alpha(0.3).restart()
+    }
+  }, [dimensions.width, dimensions.height])
 
-    const svg = d3.select(svgRef.current)
-    svg.selectAll('*').remove()
+  // 3. Update Simulation Data, Layout & Render
+  useEffect(() => {
+    if (!simulationRef.current || !groupsRef.current) return
 
-    const { width, height } = dimensions
+    const simulation = simulationRef.current
+    const { nodesGroup, linksGroup } = groupsRef.current
 
-    // Create nodes and links
-    const nodes: GraphNode[] = entities.map(entity => ({
-      id: entity.id,
-      entity,
-    }))
+    // --- Merge Nodes ---
+    const currentNodesMap = nodesMapRef.current
+    const nextNodesMap = new Map<string, GraphNode>()
+    const newNodes: GraphNode[] = []
 
-    const links: GraphLink[] = relationships
-      .filter(rel => {
-        const sourceNode = nodes.find(n => n.id === rel.sourceId)
-        const targetNode = nodes.find(n => n.id === rel.targetId)
-        return sourceNode && targetNode
-      })
-      .map(rel => ({
-        id: rel.id,
-        relationship: rel,
-        source: nodes.find(n => n.id === rel.sourceId)!,
-        target: nodes.find(n => n.id === rel.targetId)!,
-      }))
+    entities.forEach(entity => {
+      const existing = currentNodesMap.get(entity.id)
+      if (existing) {
+        existing.entity = entity
+        nextNodesMap.set(entity.id, existing)
+        newNodes.push(existing)
+      } else {
+        const newNode: GraphNode = {
+          id: entity.id,
+          entity,
+          x: dimensions.width / 2 + (Math.random() - 0.5) * 50,
+          y: dimensions.height / 2 + (Math.random() - 0.5) * 50
+        }
+        nextNodesMap.set(entity.id, newNode)
+        newNodes.push(newNode)
+      }
+    })
+    nodesMapRef.current = nextNodesMap
 
-    // Create simulation based on layout type and quality
-    let simulation: d3.Simulation<GraphNode, GraphLink>
+    // --- Merge Links ---
+    const currentLinksMap = linksMapRef.current
+    const nextLinksMap = new Map<string, GraphLink>()
+    const newLinks: GraphLink[] = []
 
-    // Adjust physics parameters based on quality
-    const alphaDecay = quality === 'high' ? 0.0228 : (quality === 'medium' ? 0.05 : 0.1) // Stabilize faster for large graphs
+    relationships.forEach(rel => {
+      const source = nextNodesMap.get(rel.sourceId)
+      const target = nextNodesMap.get(rel.targetId)
+      if (source && target) {
+        const existing = currentLinksMap.get(rel.id)
+        if (existing) {
+          existing.relationship = rel
+          existing.source = source
+          existing.target = target
+          nextLinksMap.set(rel.id, existing)
+          newLinks.push(existing)
+        } else {
+          const newLink: GraphLink = { id: rel.id, relationship: rel, source, target }
+          nextLinksMap.set(rel.id, newLink)
+          newLinks.push(newLink)
+        }
+      }
+    })
+    linksMapRef.current = nextLinksMap
+
+    // --- Update Simulation ---
+    simulation.nodes(newNodes)
+    simulation.force<d3.ForceLink<GraphNode, GraphLink>>('link')?.links(newLinks)
+
+    // Adjust physics parameters
+    const alphaDecay = quality === 'high' ? 0.0228 : (quality === 'medium' ? 0.05 : 0.1)
     const chargeStrength = quality === 'high' ? -300 : (quality === 'medium' ? -200 : -100)
     const collisionRadius = quality === 'high' ? 30 : 15
 
-    switch (layout.type) {
-      case 'force':
-        simulation = d3
-          .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
-          .force(
-            'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
-              .id(d => d.id)
-              .distance(quality === 'high' ? 100 : 60)
-          )
-          .force('charge', d3.forceManyBody().strength(chargeStrength))
-          .force('center', d3.forceCenter(width / 2, height / 2))
+    simulation.alphaDecay(alphaDecay)
+    simulation.force('charge', d3.forceManyBody().strength(chargeStrength))
 
-        // Disable expensive collision detection for low/critical quality
-        if (quality === 'high' || quality === 'medium') {
-          simulation.force('collision', d3.forceCollide().radius(collisionRadius))
-        }
-        break
+    // Handle Layout Types
+    if (layout.type === 'force') {
+      simulation.force('radial', null)
+      simulation.force('y', null)
+      simulation.force('x', null)
+      simulation.force('center', d3.forceCenter(dimensions.width / 2, dimensions.height / 2))
 
-      case 'radial':
-        simulation = d3
-          .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
-          .force(
-            'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
-              .id(d => d.id)
-              .distance(80)
-          )
-          .force('charge', d3.forceManyBody().strength(chargeStrength))
-          .force('radial', d3.forceRadial(Math.min(width, height) / 3, width / 2, height / 2))
-        break
+      const linkForce = simulation.force<d3.ForceLink<GraphNode, GraphLink>>('link')
+      linkForce?.distance(quality === 'high' ? 100 : 60)
 
-      case 'hierarchic':
-        simulation = d3
-          .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
-          .force(
-            'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
-              .id(d => d.id)
-              .distance(60)
-          )
-          .force('charge', d3.forceManyBody().strength(-100))
-          .force(
-            'y',
-            d3.forceY().y(d => (d.index || 0) * 80 + 100)
-          )
-          .force('x', d3.forceX(width / 2))
-        break
-
-      default:
-        simulation = d3
-          .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
-          .force(
-            'link',
-            d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id)
-          )
-          .force('charge', d3.forceManyBody())
-          .force('center', d3.forceCenter(width / 2, height / 2))
+      if (quality === 'high' || quality === 'medium') {
+        simulation.force('collision', d3.forceCollide().radius(collisionRadius))
+      } else {
+        simulation.force('collision', null)
+      }
+    } else if (layout.type === 'radial') {
+      simulation.force('radial', d3.forceRadial(Math.min(dimensions.width, dimensions.height) / 3, dimensions.width / 2, dimensions.height / 2))
+      simulation.force('y', null)
+      simulation.force('x', null)
+      simulation.force('center', null)
+      simulation.force('collision', d3.forceCollide().radius(collisionRadius)) // Keep collision to avoid overlap in rings
+    } else if (layout.type === 'hierarchic') {
+      simulation.force('radial', null)
+      simulation.force('center', null)
+      simulation.force('y', d3.forceY<GraphNode>().y(d => (d.index || 0) * 80 + 100)) // Simple vertical spread based on index
+      simulation.force('x', d3.forceX(dimensions.width / 2))
+      simulation.force('collision', d3.forceCollide().radius(collisionRadius))
     }
 
-    // Create container groups
-    const container = svg.append('g')
-    const linksGroup = container.append('g').attr('class', 'links')
-    const nodesGroup = container.append('g').attr('class', 'nodes')
+    simulation.alpha(1).restart()
 
-    // Add zoom behavior
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([0.1, 4])
-      .on('zoom', event => {
-        container.attr('transform', event.transform)
+    // --- Render Elements (D3 Join) ---
 
-        // Semantic Zoom: Show/hide labels based on zoom level for medium/low quality
-        if (quality !== 'high') {
-          const k = event.transform.k
-          svg.selectAll('.node-label').style('opacity', k > 1.5 ? 1 : 0)
-          svg.selectAll('.link-label').style('opacity', k > 2.0 ? 1 : 0)
-        }
-      })
+    // LINKS
+    const linkSelection = linksGroup.selectAll<SVGLineElement, GraphLink>('line.link')
+      .data(newLinks, d => d.id)
 
-    svg.call(zoom)
-
-    // Draw links
-    const link = linksGroup
-      .selectAll<SVGLineElement, GraphLink>('line')
-      .data(links)
-      .enter()
+    const linkEnter = linkSelection.enter()
       .append('line')
       .attr('class', 'link')
       .attr('stroke', '#999')
-      .attr('stroke-opacity', 0.6)
+      .attr('stroke-opacity', 0)
       .attr('stroke-width', d => Math.sqrt(d.relationship.confidence * 3))
 
-    // Draw link labels (only for high quality or zoomed in)
-    let linkLabel: d3.Selection<SVGTextElement, GraphLink, SVGGElement, unknown> | null = null
+    linkEnter.transition().duration(500).attr('stroke-opacity', 0.6)
 
-    if (quality === 'high' || quality === 'medium') {
-      linkLabel = linksGroup
-        .selectAll<SVGTextElement, GraphLink>('text')
-        .data(links)
-        .enter()
-        .append('text')
-        .attr('class', 'link-label')
-        .attr('font-size', '10px')
-        .attr('fill', '#666')
-        .attr('text-anchor', 'middle')
-        .style('opacity', quality === 'high' ? 1 : 0) // Hidden by default on medium
-        .text(d => d.relationship.type.replace('_', ' ').toLowerCase())
+    linkSelection.exit()
+      .transition().duration(500)
+      .attr('stroke-opacity', 0)
+      .remove()
+
+    const allLinks = linkEnter.merge(linkSelection)
+
+    // Link Labels
+    const linkLabelSelection = linksGroup.selectAll<SVGTextElement, GraphLink>('text.link-label')
+      .data((quality === 'high' || quality === 'medium') ? newLinks : [], d => d.id)
+
+    const linkLabelEnter = linkLabelSelection.enter()
+      .append('text')
+      .attr('class', 'link-label')
+      .attr('font-size', '10px')
+      .attr('fill', '#666')
+      .attr('text-anchor', 'middle')
+      .style('opacity', 0)
+      .text(d => d.relationship.type.replace('_', ' ').toLowerCase())
+
+    if (quality === 'high') {
+       linkLabelEnter.transition().duration(500).style('opacity', 1)
     }
 
-    // Entity type to color mapping
+    linkLabelSelection.exit().remove()
+
+    const allLinkLabels = linkLabelEnter.merge(linkLabelSelection)
+
+
+    // NODES
+    const nodeSelection = nodesGroup.selectAll<SVGGElement, GraphNode>('g.node')
+      .data(newNodes, d => d.id)
+
+    const nodeEnter = nodeSelection.enter()
+      .append('g')
+      .attr('class', 'node')
+      .style('cursor', 'pointer')
+      .style('opacity', 0)
+      .call(
+        d3.drag<SVGGElement, GraphNode>()
+          .on('start', dragStarted)
+          .on('drag', dragged)
+          .on('end', dragEnded)
+      )
+
+    nodeEnter.transition().duration(500).style('opacity', 1)
+
+    nodeSelection.exit()
+      .transition().duration(500)
+      .style('opacity', 0)
+      .remove()
+
+    const allNodes = nodeEnter.merge(nodeSelection)
+
+    // Helper for styles
     const getEntityColor = (type: string) => {
       const colors: Record<string, string> = {
-        PERSON: '#3b82f6',
-        ORGANIZATION: '#8b5cf6',
-        LOCATION: '#10b981',
-        IP_ADDRESS: '#f59e0b',
-        DOMAIN: '#06b6d4',
-        EMAIL: '#ec4899',
-        FILE: '#ef4444',
-        PROJECT: '#84cc16',
-        SYSTEM: '#6b7280',
+        PERSON: '#3b82f6', ORGANIZATION: '#8b5cf6', LOCATION: '#10b981',
+        IP_ADDRESS: '#f59e0b', DOMAIN: '#06b6d4', EMAIL: '#ec4899',
+        FILE: '#ef4444', PROJECT: '#84cc16', SYSTEM: '#6b7280',
       }
       return colors[type] || '#6b7280'
     }
 
-    // Entity type to icon mapping
     const getEntityIcon = (type: string) => {
       const icons: Record<string, string> = {
-        PERSON: '👤',
-        ORGANIZATION: '🏢',
-        LOCATION: '📍',
-        IP_ADDRESS: '🌐',
-        DOMAIN: '🔗',
-        EMAIL: '📧',
-        FILE: '📄',
-        PROJECT: '📊',
-        SYSTEM: '⚙️',
+        PERSON: '👤', ORGANIZATION: '🏢', LOCATION: '📍', IP_ADDRESS: '🌐',
+        DOMAIN: '🔗', EMAIL: '📧', FILE: '📄', PROJECT: '📊', SYSTEM: '⚙️',
       }
       return icons[type] || '📊'
     }
 
-    // Draw nodes
-    const node = nodesGroup
-      .selectAll<SVGGElement, GraphNode>('g')
-      .data(nodes)
-      .enter()
-      .append('g')
-      .attr('class', 'node')
-      .style('cursor', 'pointer')
-      .call(
-        d3
-          .drag<SVGGElement, GraphNode>()
-          .on('start', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0.3).restart()
-            d.fx = d.x
-            d.fy = d.y
-          })
-          .on('drag', (event, d) => {
-            d.fx = event.x
-            d.fy = event.y
-          })
-          .on('end', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0)
-            d.fx = null
-            d.fy = null
-          })
-      )
-
-    // Node circles
-    node
-      .append('circle')
+    // Join Circle
+    allNodes.selectAll<SVGCircleElement, GraphNode>('circle')
+      .data(d => [d])
+      .join('circle')
       .attr('r', d => quality === 'high' ? 15 + d.entity.confidence * 10 : 10)
       .attr('fill', d => getEntityColor(d.entity.type))
-      .attr('stroke', d =>
-        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
-      )
-      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
-      .style('filter', d =>
-        selectedEntityId === d.entity.id
-          ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
-          : 'none'
-      )
+      .attr('stroke', '#fff') // Reset, will be overridden by selection effect
+      .attr('stroke-width', 2)
 
-    // Node icons (only for high/medium quality)
-    if (quality !== 'low' && quality !== 'critical') {
-      node
-        .append('text')
-        .attr('text-anchor', 'middle')
-        .attr('dy', '.35em')
-        .attr('font-size', '12px')
-        .text(d => getEntityIcon(d.entity.type))
-    }
+    // Join Icon
+    allNodes.selectAll<SVGTextElement, GraphNode>('text.node-icon')
+      .data(d => (quality !== 'low' && quality !== 'critical') ? [d] : [])
+      .join('text')
+      .attr('class', 'node-icon')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '.35em')
+      .attr('font-size', '12px')
+      .text(d => getEntityIcon(d.entity.type))
 
-    // Node labels
-    const labelText = node
-      .append('text')
+    // Join Label
+    allNodes.selectAll<SVGTextElement, GraphNode>('text.node-label')
+      .data(d => [d])
+      .join('text')
       .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
       .attr('dy', quality === 'high' ? '25px' : '20px')
@@ -332,105 +383,84 @@ export function GraphCanvas({
       .attr('font-weight', 'bold')
       .attr('fill', '#333')
       .style('pointer-events', 'none')
-      .style('opacity', quality === 'high' ? 1 : 0) // Hidden by default on medium/low
-      .text(d =>
-        d.entity.name.length > 15
-          ? d.entity.name.slice(0, 15) + '...'
-          : d.entity.name
-      )
+      .style('opacity', quality === 'high' ? 1 : 0)
+      .text(d => d.entity.name.length > 15 ? d.entity.name.slice(0, 15) + '...' : d.entity.name)
 
-    // Confidence indicator (only high quality)
-    if (quality === 'high') {
-      node
-        .append('text')
-        .attr('text-anchor', 'middle')
-        .attr('dy', '37px')
-        .attr('font-size', '9px')
-        .attr('fill', '#666')
-        .style('pointer-events', 'none')
-        .text(d => `${Math.round(d.entity.confidence * 100)}%`)
-    }
+    // Join Confidence
+    allNodes.selectAll<SVGTextElement, GraphNode>('text.node-conf')
+      .data(d => quality === 'high' ? [d] : [])
+      .join('text')
+      .attr('class', 'node-conf')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '37px')
+      .attr('font-size', '9px')
+      .attr('fill', '#666')
+      .style('pointer-events', 'none')
+      .text(d => `${Math.round(d.entity.confidence * 100)}%`)
 
-    // Click handler for nodes
-    node.on('click', (event, d) => {
+    // Events
+    allNodes.on('click', (event, d) => {
       event.stopPropagation()
       onEntitySelect?.(d.entity)
     })
 
-    // Hover effects
-    node.on('mouseenter', function (event, d) {
-      d3.select(this)
-        .select('circle')
-        .transition()
-        .duration(200)
-        .attr('r', 20 + d.entity.confidence * 10)
+    // Hover effects (simplified, attach to group)
+    allNodes.on('mouseenter', function (event, d) {
+       d3.select(this).select('circle').transition().duration(200)
+         .attr('r', 20 + d.entity.confidence * 10)
+       d3.select(this).select('.node-label').style('opacity', 1)
 
-      // Show label on hover regardless of quality
-      d3.select(this).select('.node-label').style('opacity', 1)
+       allLinks.style('stroke-opacity', l => (l.source === d || l.target === d) ? 1 : 0.2)
+    })
+    .on('mouseleave', function (event, d) {
+       d3.select(this).select('circle').transition().duration(200)
+         .attr('r', quality === 'high' ? 15 + d.entity.confidence * 10 : 10)
 
-      // Highlight connected links
-      link.style('stroke-opacity', l =>
-        l.source === d || l.target === d ? 1 : 0.2
-      )
+       // Revert label opacity based on zoom/quality (handled by next semantic zoom trigger or reset here)
+       // Simple reset:
+       d3.select(this).select('.node-label').style('opacity', quality === 'high' ? 1 : 0)
+
+       allLinks.style('stroke-opacity', 0.6)
     })
 
-    node.on('mouseleave', function (event, d) {
-      d3.select(this)
-        .select('circle')
-        .transition()
-        .duration(200)
-        .attr('r', quality === 'high' ? 15 + d.entity.confidence * 10 : 10)
 
-      // Hide label on leave if not high quality (it will revert to zoom-based opacity)
-      // d3.select(this).select('.node-label').style('opacity', quality === 'high' ? 1 : 0)
-
-      // Reset link opacity
-      link.style('stroke-opacity', 0.6)
-    })
-
-    // Update positions on simulation tick
-    // Throttle updates for low quality to improve performance
+    // --- Tick Handler ---
     let tickCount = 0
     simulation.on('tick', () => {
       tickCount++
       if ((quality === 'low' || quality === 'critical') && tickCount % 2 !== 0) return
 
-      link
+      allLinks
         .attr('x1', d => (d.source as GraphNode).x!)
         .attr('y1', d => (d.source as GraphNode).y!)
         .attr('x2', d => (d.target as GraphNode).x!)
         .attr('y2', d => (d.target as GraphNode).y!)
 
-      if (linkLabel) {
-        linkLabel
-          .attr(
-            'x',
-            d => ((d.source as GraphNode).x! + (d.target as GraphNode).x!) / 2
-          )
-          .attr(
-            'y',
-            d => ((d.source as GraphNode).y! + (d.target as GraphNode).y!) / 2
-          )
-      }
+      allLinkLabels
+        .attr('x', d => ((d.source as GraphNode).x! + (d.target as GraphNode).x!) / 2)
+        .attr('y', d => ((d.source as GraphNode).y! + (d.target as GraphNode).y!) / 2)
 
-      node.attr('transform', d => `translate(${d.x},${d.y})`)
+      allNodes.attr('transform', d => `translate(${d.x},${d.y})`)
     })
 
-    // Cleanup
-    return () => {
-      simulation.stop()
-    }
-  }, [
-    entities,
-    relationships,
-    layout,
-    dimensions,
-    selectedEntityId,
-    onEntitySelect,
-    quality
-  ])
+  }, [entities, relationships, layout, quality, dimensions]) // Note: onEntitySelect omitted to avoid re-runs
 
-  // Performance Badge Component
+  // 4. Selection Style Updates
+  useEffect(() => {
+    if (!groupsRef.current) return
+    const { nodesGroup } = groupsRef.current
+
+    const allNodes = nodesGroup.selectAll<SVGGElement, GraphNode>('g.node')
+
+    allNodes.select('circle')
+      .transition().duration(200)
+      .attr('stroke', d => selectedEntityId === d.id ? '#fbbf24' : '#fff')
+      .attr('stroke-width', d => (selectedEntityId === d.id ? 3 : 2))
+      .style('filter', d => selectedEntityId === d.id ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))' : 'none')
+
+  }, [selectedEntityId]) // Only runs when selection changes
+
+  // ... (PerformanceBadge and Return) ...
   const PerformanceBadge = () => {
     const config = {
       high: { color: 'text-green-600', bg: 'bg-green-100', text: 'Full Detail', icon: Eye },

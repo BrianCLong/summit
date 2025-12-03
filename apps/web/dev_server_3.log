@@ -1,0 +1,7 @@
+Port 3000 is in use, trying another one...
+Port 3001 is in use, trying another one...
+
+  VITE v7.2.6  ready in 223 ms
+
+  ➜  Local:   http://localhost:3002/
+  ➜  Network: http://192.168.0.2:3002/
