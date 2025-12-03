@@ -1,0 +1,69 @@
+id: "ci.lint-build-test#2025-12-02"
+goal: "Green lint, build, and unit tests for the summit monorepo"
+inputs:
+  repo: "summit"
+  path: "."
+  constraints:
+    - "no new deps"
+    - "≤15m wall clock"
+metrics:
+  - name: "ci_green"
+    target: true
+  - name: "duration_min"
+    target: 15
+artifacts:
+  - "artifacts/build-log.txt"
+  - "artifacts/junit.xml"
+policy_refs:
+  - "OPA:build.slsa.v2"
+  - "Governance:PR.review.v3"
+
+supervisor:
+  plan: ["prep", "lint", "test", "package"]
+  dispatch: "capability_match"
+  feedback: "blocked|done|metrics"
+
+workers:
+  - name: "builder"
+    skills: ["pnpm", "tsc"]
+  - name: "tester"
+    skills: ["jest", "vitest"]
+
+critic_proposer:
+  loop:
+    proposer: "codex"
+    critic: "jules"
+    stop_when: "score>=0.9 or 5 rounds"
+  scoring:
+    checks:
+      - "lint=pass"
+      - "tests>=95%"
+      - "opa_policy=pass"
+
+auction:
+  broadcast: "task#build.summit"
+  bids:
+    fields: ["confidence", "duration_est", "risk", "cost"]
+  award: "argmin(cost + risk*0.4 - confidence*0.6)"
+
+blackboard:
+  state: "redis://blackboard:6379/0"
+  topics: ["sbom", "slsa", "opa", "ci"]
+  ops: ["post", "subscribe", "lock", "merge"]
+
+negotiation_graph:
+  graph:
+    nodes:
+      - id: "API.schema"
+      - id: "UI.contract"
+      - id: "OPA.policy"
+    edge_contract:
+      fields: ["interface", "SLA", "version", "owner", "test_vectors"]
+    negotiation: "2-phase commit: propose → accept"
+
+contest:
+  contest:
+    k: 3
+    agents: ["codex", "claude-code", "jules"]
+    arbiter: "policy+metrics ensemble"
+    blend: "best or weighted merge"
