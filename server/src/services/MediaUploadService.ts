@@ -81,13 +81,16 @@ export class MediaUploadService {
     const { createReadStream, filename, mimetype } = await upload;
     const stream = createReadStream();
 
+    // Sanitize the original filename first
+    const sanitizedOriginalName = this.sanitizeFilename(filename || 'unknown');
+
     logger.info(
-      `Starting upload for file: ${filename}, type: ${mimetype}, user: ${userId}`,
+      `Starting upload for file: ${sanitizedOriginalName}, type: ${mimetype}, user: ${userId}`,
     );
 
-    // Generate unique filename
+    // Generate unique filename with sanitized extension
     const fileId = uuidv4();
-    const ext = path.extname(filename || '');
+    const ext = path.extname(sanitizedOriginalName).toLowerCase();
     const uniqueFilename = `${fileId}${ext}`;
     const tempFilePath = path.join(
       this.config.uploadPath,
@@ -97,9 +100,18 @@ export class MediaUploadService {
     const finalFilePath = path.join(this.config.uploadPath, uniqueFilename);
 
     try {
-      // Validate file type
+      // Validate file type (MIME type check)
       if (!this.isAllowedType(mimetype)) {
         throw new Error(`File type ${mimetype} is not allowed`);
+      }
+
+      // Validate that file extension matches the declared MIME type
+      const extensionValidation = this.validateExtensionMatchesMimeType(
+        sanitizedOriginalName,
+        mimetype,
+      );
+      if (!extensionValidation.valid) {
+        throw new Error(extensionValidation.error);
       }
 
       // Stream to temporary file with size checking
@@ -141,7 +153,7 @@ export class MediaUploadService {
 
       const metadata: MediaMetadata = {
         filename: uniqueFilename,
-        originalName: filename || 'unknown',
+        originalName: sanitizedOriginalName,
         mimeType: mimetype,
         filesize: stats.size,
         checksum,
@@ -504,6 +516,190 @@ export class MediaUploadService {
           allowed.endsWith('/*') && mimeType.startsWith(allowed.slice(0, -1)),
       )
     );
+  }
+
+  /**
+   * Validate that file extension matches the declared MIME type
+   * This prevents attacks where malicious files are uploaded with fake extensions
+   */
+  private validateExtensionMatchesMimeType(
+    filename: string,
+    mimeType: string,
+  ): { valid: boolean; error?: string } {
+    const ext = path.extname(filename).toLowerCase().slice(1); // Remove the dot
+
+    if (!ext) {
+      return { valid: false, error: 'File must have an extension' };
+    }
+
+    // Map of MIME types to allowed extensions
+    const mimeToExtensions: Record<string, string[]> = {
+      // Images
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/png': ['png'],
+      'image/gif': ['gif'],
+      'image/webp': ['webp'],
+      'image/svg+xml': ['svg'],
+      'image/bmp': ['bmp'],
+      'image/tiff': ['tif', 'tiff'],
+      'image/ico': ['ico'],
+      'image/x-icon': ['ico'],
+
+      // Videos
+      'video/mp4': ['mp4', 'm4v'],
+      'video/webm': ['webm'],
+      'video/ogg': ['ogv', 'ogg'],
+      'video/quicktime': ['mov'],
+      'video/x-msvideo': ['avi'],
+      'video/x-ms-wmv': ['wmv'],
+      'video/mpeg': ['mpeg', 'mpg'],
+
+      // Audio
+      'audio/mpeg': ['mp3'],
+      'audio/mp4': ['m4a', 'mp4'],
+      'audio/ogg': ['ogg', 'oga'],
+      'audio/wav': ['wav'],
+      'audio/webm': ['webm'],
+      'audio/flac': ['flac'],
+      'audio/aac': ['aac'],
+
+      // Documents
+      'application/pdf': ['pdf'],
+      'application/msword': ['doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['docx'],
+      'application/vnd.ms-excel': ['xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['xlsx'],
+      'application/vnd.ms-powerpoint': ['ppt'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['pptx'],
+
+      // Text
+      'text/plain': ['txt', 'text', 'log'],
+      'text/csv': ['csv'],
+      'text/html': ['html', 'htm'],
+      'text/css': ['css'],
+      'text/javascript': ['js'],
+      'text/markdown': ['md', 'markdown'],
+      'text/xml': ['xml'],
+
+      // Data
+      'application/json': ['json'],
+      'application/xml': ['xml'],
+      'application/zip': ['zip'],
+      'application/gzip': ['gz', 'gzip'],
+      'application/x-tar': ['tar'],
+
+      // Geospatial
+      'application/geo+json': ['geojson'],
+      'application/vnd.google-earth.kml+xml': ['kml'],
+      'application/vnd.google-earth.kmz': ['kmz'],
+    };
+
+    // Dangerous extensions that should NEVER be allowed
+    const dangerousExtensions = [
+      'exe', 'dll', 'bat', 'cmd', 'com', 'msi', 'scr', 'pif',  // Windows executables
+      'sh', 'bash', 'zsh', 'csh',  // Shell scripts
+      'php', 'php3', 'php4', 'php5', 'phtml',  // PHP
+      'asp', 'aspx', 'ashx', 'asmx',  // ASP.NET
+      'jsp', 'jspx',  // Java Server Pages
+      'cgi', 'pl', 'py', 'pyc', 'pyo',  // Scripts
+      'rb', 'erb',  // Ruby
+      'htaccess', 'htpasswd',  // Apache config
+      'vbs', 'vbe', 'wsf', 'wsh',  // Windows scripts
+      'ps1', 'psm1',  // PowerShell
+      'jar', 'war', 'ear',  // Java archives
+      'swf', 'fla',  // Flash
+      'lnk',  // Shortcuts
+    ];
+
+    // Block dangerous extensions regardless of MIME type
+    if (dangerousExtensions.includes(ext)) {
+      logger.error(
+        { filename, extension: ext },
+        'Blocked upload of dangerous file extension',
+      );
+      return {
+        valid: false,
+        error: `File extension .${ext} is not allowed for security reasons`,
+      };
+    }
+
+    // Get allowed extensions for this MIME type
+    const allowedExtensions = mimeToExtensions[mimeType];
+
+    // If we have a specific mapping, enforce it
+    if (allowedExtensions) {
+      if (!allowedExtensions.includes(ext)) {
+        logger.warn(
+          { filename, mimeType, extension: ext, allowedExtensions },
+          'File extension does not match MIME type',
+        );
+        return {
+          valid: false,
+          error: `File extension .${ext} does not match content type ${mimeType}. Expected: .${allowedExtensions.join(', .')}`,
+        };
+      }
+    } else {
+      // For wildcard types (image/*, video/*, etc.), do basic category checking
+      const mimeCategory = mimeType.split('/')[0];
+
+      const extensionCategories: Record<string, string[]> = {
+        image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff', 'tif', 'ico', 'heic', 'heif', 'avif'],
+        video: ['mp4', 'm4v', 'webm', 'ogv', 'ogg', 'mov', 'avi', 'wmv', 'mpeg', 'mpg', 'mkv', '3gp'],
+        audio: ['mp3', 'm4a', 'ogg', 'oga', 'wav', 'webm', 'flac', 'aac', 'wma'],
+        text: ['txt', 'text', 'log', 'csv', 'html', 'htm', 'css', 'js', 'md', 'markdown', 'xml', 'json'],
+      };
+
+      const categoryExtensions = extensionCategories[mimeCategory];
+      if (categoryExtensions && !categoryExtensions.includes(ext)) {
+        logger.warn(
+          { filename, mimeType, extension: ext, category: mimeCategory },
+          'File extension does not match MIME category',
+        );
+        return {
+          valid: false,
+          error: `File extension .${ext} is not valid for ${mimeCategory} files`,
+        };
+      }
+    }
+
+    return { valid: true };
+  }
+
+  /**
+   * Sanitize filename to prevent path traversal and other attacks
+   */
+  private sanitizeFilename(filename: string): string {
+    // Remove path components
+    let sanitized = path.basename(filename);
+
+    // Remove null bytes
+    sanitized = sanitized.replace(/\0/g, '');
+
+    // Remove control characters
+    sanitized = sanitized.replace(/[\x00-\x1f\x7f]/g, '');
+
+    // Remove shell special characters
+    sanitized = sanitized.replace(/[;&|`$(){}[\]<>\\!]/g, '');
+
+    // Replace spaces and special chars with underscores
+    sanitized = sanitized.replace(/[^\w.-]/g, '_');
+
+    // Prevent double extensions that could be exploited
+    // e.g., "malicious.jpg.php" -> "malicious_jpg.php"
+    const parts = sanitized.split('.');
+    if (parts.length > 2) {
+      const ext = parts.pop();
+      sanitized = parts.join('_') + '.' + ext;
+    }
+
+    // Ensure filename is not too long
+    if (sanitized.length > 255) {
+      const ext = path.extname(sanitized);
+      const name = path.basename(sanitized, ext);
+      sanitized = name.slice(0, 255 - ext.length) + ext;
+    }
+
+    return sanitized;
   }
 
   /**
