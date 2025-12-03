@@ -30,6 +30,7 @@
     "test:unit": "npm run test",
     "test:integration": "jest -c Developer/summit-jest/jest.integration.config.cjs --runInBand --detectOpenHandles --bail=1 --silent",
     "test:coverage": "jest --config jest.coverage.config.cjs --coverage --collectCoverageFrom='[\"server/src/**/*.ts\",\"services/*/src/**/*.ts\",\"packages/*/src/**/*.ts\"]'",
+    "test:smart": "node scripts/smart-test.cjs",
     "test:coverage:html": "pnpm run test:coverage && open coverage/lcov-report/index.html",
     "test:watch": "jest --config jest.config.cjs --watch",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
