@@ -1,0 +1,4 @@
+type,name,description,labels
+Person,Ada Lovelace,Mathematician and computing pioneer,founder|person
+System,Babbage Engine,Analytical engine design,system|compute
+Dataset,Mechanized Tables,Observed calculations used for demos,dataset|public
