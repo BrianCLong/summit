@@ -215,6 +215,9 @@ export class NarrativeSimulationEngine {
   }
 
   private applyEvent(event: NarrativeEvent): void {
+    // If it is a suppression event, we might want to handle it differently.
+    // E.g. targeting an actor to reduce their influence.
+
     if (event.actorId && this.state.entities[event.actorId]) {
       this.adjustEntityState(this.state.entities[event.actorId], event, 1);
     }
@@ -238,23 +241,38 @@ export class NarrativeSimulationEngine {
       });
     }
 
-    if (event.actorId) {
+    // Propagation logic
+    // We only propagate if the event is "loud" enough.
+    // Suppression events might not propagate in the same way, or they might propagate as "censorship news".
+    // For now, allow suppression to propagate but with potentially negative effects handled in adjustEntityState.
+    if (event.actorId && event.intensity > 0.05) {
       const actor = this.state.entities[event.actorId];
       if (actor) {
         actor.relationships.forEach((edge) => {
           const related = this.state.entities[edge.targetId];
           if (!related) return;
+
+          // Decay intensity
+          const newIntensity = event.intensity * edge.strength * 0.5;
+
+          // If intensity drops below threshold, stop propagating
+          if (newIntensity < 0.01) return;
+
           const propagatedEvent: NarrativeEvent = {
             ...event,
             id: `${event.id}:${edge.targetId}`,
-            actorId: related.id,
-            targetIds: [],
-            intensity: event.intensity * edge.strength * 0.5,
+            actorId: related.id, // Neighbor becomes the "actor" of the propagated event (re-transmission)
+            targetIds: [], // Clear specific targets
+            intensity: newIntensity,
             sentimentShift:
               (event.sentimentShift ?? 0) * edge.strength * related.resilience,
             influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
+            scheduledTick: this.state.tick + 1, // Queue for NEXT tick (simulating travel time)
           };
-          this.adjustEntityState(related, propagatedEvent, edge.strength * 0.5);
+
+          // Queue the event instead of applying immediately.
+          // This enables multi-hop propagation in subsequent ticks.
+          this.queueEvent(propagatedEvent);
         });
       }
     }
@@ -265,13 +283,27 @@ export class NarrativeSimulationEngine {
     event: NarrativeEvent,
     weight: number,
   ): void {
-    const sentimentDelta =
+    let sentimentDelta =
       (event.sentimentShift ?? 0) *
       event.intensity *
       weight *
       (1 - entity.resilience * 0.5);
-    const influenceDelta =
+
+    let influenceDelta =
       (event.influenceShift ?? 0) * weight * (1 - entity.volatility * 0.5);
+
+    // Special handling for suppression events
+    if (event.type === 'suppression') {
+        // Suppression intends to reduce influence and dampen sentiment shifts.
+        // If I am targeted by suppression, my influence drops.
+        // If I am just hearing about suppression (propagated), maybe I get scared (volatility drops)?
+
+        // If I am the target of suppression:
+        if (event.targetIds?.includes(entity.id)) {
+             influenceDelta = -Math.abs(event.intensity * weight * 0.5); // Force influence down
+             sentimentDelta = 0; // Suppression doesn't necessarily change my mind, just my voice
+        }
+    }
 
     entity.sentiment = this.clamp(entity.sentiment + sentimentDelta, -1, 1);
     entity.influence = this.clamp(entity.influence + influenceDelta, 0, 1.5);
