@@ -69,6 +69,128 @@ describe('CostGuard', () => {
     guard.release(record.queryId);
     expect(guard.metrics.activeSlowQueries).toBe(0);
   });
+
+  it('tracks per-feature spend and surfaces budget alerts', () => {
+    const guard = new CostGuard(undefined, {
+      categories: {
+        infrastructure: { limit: 1000, alertThreshold: 0.8 },
+        inference: { limit: 800, alertThreshold: 0.75 },
+        storage: { limit: 500, alertThreshold: 0.8 },
+      },
+      anomalyStdDevTolerance: 2,
+      historyWindow: 8,
+      throttleOnBreach: true,
+    });
+
+    const alert = guard.trackSpend({
+      category: 'infrastructure',
+      serviceId: 'svc-api',
+      feature: 'deployments',
+      cost: 850,
+      timestamp: Date.now(),
+    });
+
+    expect(alert.status).toBe('alert');
+    expect(alert.action).toBe('allow');
+    expect(alert.utilization).toBeGreaterThan(0.8);
+    expect(guard.costAttribution.features['svc-api'].deployments).toBeCloseTo(
+      850,
+    );
+  });
+
+  it('detects spend anomalies and throttles on budget breaches', () => {
+    const guard = new CostGuard(undefined, {
+      categories: {
+        infrastructure: { limit: 1200, alertThreshold: 0.85 },
+        inference: { limit: 200, alertThreshold: 0.6 },
+        storage: { limit: 600, alertThreshold: 0.8 },
+      },
+      anomalyStdDevTolerance: 1.5,
+      historyWindow: 6,
+      throttleOnBreach: true,
+    });
+
+    [
+      { cost: 12, feature: 'embedding' },
+      { cost: 14, feature: 'embedding' },
+      { cost: 11, feature: 'embedding' },
+      { cost: 13, feature: 'embedding' },
+    ].forEach((sample, idx) =>
+      guard.trackSpend({
+        category: 'inference',
+        serviceId: 'svc-model',
+        feature: sample.feature,
+        cost: sample.cost,
+        timestamp: idx + 1,
+      }),
+    );
+
+    const spike = guard.trackSpend({
+      category: 'inference',
+      serviceId: 'svc-model',
+      feature: 'embedding',
+      cost: 180,
+      timestamp: Date.now(),
+    });
+
+    expect(spike.status).toBe('breach');
+    expect(spike.action).toBe('throttle');
+    expect(spike.anomalies.length).toBeGreaterThan(0);
+    expect(guard.metrics.budgetsExceeded).toBeGreaterThanOrEqual(1);
+    expect(spike.totals.categorySpend).toBeGreaterThan(190);
+  });
+
+  it('treats anomalies as alerts even when utilization is low', () => {
+    const guard = new CostGuard(undefined, {
+      categories: {
+        infrastructure: { limit: 5000, alertThreshold: 0.8 },
+        inference: { limit: 5000, alertThreshold: 0.8 },
+        storage: { limit: 5000, alertThreshold: 0.8 },
+      },
+      anomalyStdDevTolerance: 1,
+      historyWindow: 5,
+      throttleOnBreach: true,
+    });
+
+    [
+      { cost: 2, timestamp: 1 },
+      { cost: 2.2, timestamp: 2 },
+      { cost: 2.4, timestamp: 3 },
+    ].forEach((sample) =>
+      guard.trackSpend({
+        category: 'storage',
+        serviceId: 'svc-data',
+        feature: 'backups',
+        cost: sample.cost,
+        timestamp: sample.timestamp,
+      }),
+    );
+
+    const anomaly = guard.trackSpend({
+      category: 'storage',
+      serviceId: 'svc-data',
+      feature: 'backups',
+      cost: 25,
+      timestamp: 4,
+    });
+
+    expect(anomaly.status).toBe('alert');
+    expect(anomaly.reason).toContain('Anomaly detected');
+    expect(anomaly.action).toBe('allow');
+  });
+
+  it('rejects invalid cost observations', () => {
+    const guard = new CostGuard();
+    expect(() =>
+      guard.trackSpend({
+        category: 'inference',
+        serviceId: 'svc-ml',
+        feature: 'classification',
+        cost: -4,
+        timestamp: Date.now(),
+      }),
+    ).toThrowError('Spend observation cost must be a non-negative finite value.');
+  });
 });
 
 describe('ResourceOptimizationEngine', () => {
