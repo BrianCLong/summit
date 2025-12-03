@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom utility classes for OSINT mobile app */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Classification banner styles */
+@layer components {
+  .classification-banner {
+    @apply py-1 px-4 text-center text-xs font-bold uppercase tracking-wider;
+  }
+
+  .classification-unclassified {
+    @apply bg-classification-unclassified text-white;
+  }
+
+  .classification-confidential {
+    @apply bg-classification-confidential text-white;
+  }
+
+  .classification-secret {
+    @apply bg-classification-secret text-black;
+  }
+
+  .classification-topsecret {
+    @apply bg-classification-topsecret text-white;
+  }
+}
