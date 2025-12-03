@@ -169,8 +169,8 @@ export class SecureSandbox {
 
     // Create isolated context with resource limits
     const context = this.createIsolatedContext(quotas, logs, {
-      setTimeout: managedSetTimeout as unknown as typeof setTimeout,
-      clearTimeout: managedClearTimeout as unknown as typeof clearTimeout
+      setTimeout: managedSetTimeout as typeof setTimeout,
+      clearTimeout: managedClearTimeout as typeof clearTimeout
     });
 
     // Transform code based on language

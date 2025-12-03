@@ -69,12 +69,13 @@ export class BugReproducer {
         script,
         executionResult: result,
       };
-    } catch (err: any) {
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       return {
         reproduced: false,
         script,
         executionResult: null as any,
-        error: err.message,
+        error: errorMessage,
       };
     }
   }
