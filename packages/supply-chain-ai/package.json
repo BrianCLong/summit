@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/supply-chain-ai",
+  "version": "2.0.0",
+  "description": "Advanced AI/ML intelligence engine for supply chain with deep learning, computer vision, NLP, and reinforcement learning",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts"
+  },
+  "keywords": [
+    "ai",
+    "machine-learning",
+    "deep-learning",
+    "computer-vision",
+    "nlp",
+    "reinforcement-learning",
+    "supply-chain"
+  ],
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/supply-chain-mapper": "workspace:*",
+    "zod": "^3.22.4",
+    "@tensorflow/tfjs-node": "^4.15.0",
+    "natural": "^6.10.2",
+    "compromise": "^14.11.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11"
+  }
+}

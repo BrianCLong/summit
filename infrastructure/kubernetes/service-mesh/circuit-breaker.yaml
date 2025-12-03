@@ -1,0 +1,91 @@
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: postgres-circuit-breaker
+  namespace: intelgraph
+spec:
+  host: postgres.intelgraph.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+      http:
+        http1MaxPendingRequests: 100
+        maxRetries: 3
+    outlierDetection:
+      consecutiveErrors: 5
+      interval: 10s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50
+      minHealthPercent: 50
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: redis-circuit-breaker
+  namespace: intelgraph
+spec:
+  host: redis.intelgraph.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 500
+        connectTimeout: 5s
+    outlierDetection:
+      consecutiveErrors: 3
+      interval: 5s
+      baseEjectionTime: 15s
+      maxEjectionPercent: 30
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: neo4j-circuit-breaker
+  namespace: intelgraph
+spec:
+  host: neo4j.intelgraph.svc.cluster.local
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 200
+        connectTimeout: 10s
+      http:
+        http1MaxPendingRequests: 200
+        maxRetries: 2
+    outlierDetection:
+      consecutiveErrors: 7
+      interval: 15s
+      baseEjectionTime: 60s
+      maxEjectionPercent: 40
+---
+apiVersion: resilience.istio.io/v1alpha1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: intelgraph
+spec:
+  mtls:
+    mode: STRICT
+---
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: api-authz
+  namespace: intelgraph
+spec:
+  selector:
+    matchLabels:
+      app: intelgraph-api
+  action: ALLOW
+  rules:
+  - from:
+    - source:
+        principals: ["cluster.local/ns/intelgraph/sa/frontend"]
+        namespaces: ["intelgraph"]
+    to:
+    - operation:
+        methods: ["GET", "POST"]
+        paths: ["/graphql", "/api/*"]
+    when:
+    - key: request.headers[x-api-key]
+      notValues: [""]

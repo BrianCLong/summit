@@ -7,7 +7,6 @@
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "rootDir": "src",
-    "allowImportingTsExtensions": false
     "types": []
   },
   "include": [

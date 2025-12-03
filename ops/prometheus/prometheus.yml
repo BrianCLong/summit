@@ -6,6 +6,7 @@ global:
 rule_files:
   - prometheus-rule-slo.yaml
   - rules-business.yaml
+  - workflow-slo-rules.yaml
 
 alerting:
   alertmanagers:

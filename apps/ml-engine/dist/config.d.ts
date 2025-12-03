@@ -1,34 +1,34 @@
 export declare const config: {
     server: {
         port: number;
-        allowedOrigins: any;
-        environment: any;
+        allowedOrigins: string[];
+        environment: string;
     };
     database: {
         postgres: {
-            host: any;
+            host: string;
             port: number;
-            user: any;
-            password: any;
-            database: any;
+            user: string;
+            password: string;
+            database: string;
             ssl: boolean | {
                 rejectUnauthorized: boolean;
             };
         };
         neo4j: {
-            uri: any;
-            user: any;
-            password: any;
+            uri: string;
+            user: string;
+            password: string;
         };
     };
     ml: {
         python: {
-            scriptPath: any;
-            pythonExecutable: any;
+            scriptPath: string;
+            pythonExecutable: string;
         };
         models: {
-            defaultSentenceModel: any;
-            cacheDir: any;
+            defaultSentenceModel: string;
+            cacheDir: string;
             maxCacheSize: number;
         };
         entityResolution: {
@@ -48,14 +48,14 @@ export declare const config: {
         };
     };
     redis: {
-        host: any;
+        host: string;
         port: number;
-        password: any;
+        password: string;
         db: number;
     };
     monitoring: {
         metricsEnabled: boolean;
         metricsPort: number;
-        logLevel: any;
+        logLevel: string;
     };
 };
