@@ -284,7 +284,8 @@ export class AutoScalingPolicyGenerator {
     if (metrics.cpuUsagePercent > AutoScalingPolicyGenerator.TARGET_CPU_UTILIZATION) {
       reasons.push(`High CPU usage (${metrics.cpuUsagePercent}%)`);
     }
-    if (metrics.memoryUsageBytes > 1024 * 1024 * 500) { // > 500MB
+    // Threshold is 200MB in generateVPA, so we match that here for the reason
+    if (metrics.memoryUsageBytes > 1024 * 1024 * 200) {
       reasons.push(`High Memory usage (${(metrics.memoryUsageBytes / 1024 / 1024).toFixed(2)} MB)`);
     }
     if (metrics.requestRateRPS > 100) {
