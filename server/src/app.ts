@@ -47,6 +47,7 @@ import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
+import resourceCostsRouter from './routes/resource-costs.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -160,6 +161,7 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
+  app.use('/api/costs', resourceCostsRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {

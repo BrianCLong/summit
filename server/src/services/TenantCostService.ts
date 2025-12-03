@@ -73,6 +73,19 @@ interface TenantCostMetrics {
   costPerGB: number;
 }
 
+// Service breakdown metrics
+interface ServiceCostMetrics {
+  serviceName: string;
+  cost: number;
+  percentage: number;
+  usage: {
+    computeUnits: number;
+    storageGB: number;
+    networkGB: number;
+    apiCalls: number;
+  };
+}
+
 // Cost forecast data
 interface CostForecast {
   tenantId: string;
@@ -313,6 +326,7 @@ export class TenantCostService extends EventEmitter {
       queries?: number;
       dataIngested?: number;
     },
+    serviceName: string = 'unknown',
   ): Promise<void> {
     return tracer.startActiveSpan(
       'tenant_cost_service.record_usage',
@@ -321,6 +335,7 @@ export class TenantCostService extends EventEmitter {
           'tenant_cost.tenant_id': tenantId,
           'tenant_cost.compute_units': usage.computeUnits || 0,
           'tenant_cost.api_calls': usage.apiCalls || 0,
+          'tenant_cost.service_name': serviceName,
         });
 
         try {
@@ -329,8 +344,8 @@ export class TenantCostService extends EventEmitter {
             `
           INSERT INTO tenant_resource_usage (
             tenant_id, timestamp, compute_units, storage_gb, 
-            network_gb, api_calls, active_users, queries, data_ingested
-          ) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7, $8)
+            network_gb, api_calls, active_users, queries, data_ingested, service_name
+          ) VALUES ($1, NOW(), $2, $3, $4, $5, $6, $7, $8, $9)
         `,
             [
               tenantId,
@@ -341,6 +356,7 @@ export class TenantCostService extends EventEmitter {
               usage.activeUsers || 0,
               usage.queries || 0,
               usage.dataIngested || 0,
+              serviceName,
             ],
           );
 
@@ -464,6 +480,78 @@ export class TenantCostService extends EventEmitter {
         }
       },
     );
+  }
+
+  public async getServiceCostBreakdown(
+    tenantId: string,
+    period: 'hour' | 'day' | 'week' | 'month' = 'hour',
+  ): Promise<ServiceCostMetrics[]> {
+    let interval: string;
+    switch (period) {
+      case 'hour':
+        interval = '1 hour';
+        break;
+      case 'day':
+        interval = '1 day';
+        break;
+      case 'week':
+        interval = '7 days';
+        break;
+      case 'month':
+        interval = '30 days';
+        break;
+    }
+
+    const result = await this.db.query(
+      `
+      SELECT
+        service_name,
+        COALESCE(SUM(compute_units), 0) as compute_units,
+        COALESCE(AVG(storage_gb), 0) as storage_gb,
+        COALESCE(SUM(network_gb), 0) as network_gb,
+        COALESCE(SUM(api_calls), 0) as api_calls
+      FROM tenant_resource_usage
+      WHERE tenant_id = $1
+      AND timestamp >= NOW() - INTERVAL '${interval}'
+      GROUP BY service_name
+    `,
+      [tenantId],
+    );
+
+    const metrics: ServiceCostMetrics[] = result.rows.map((row: any) => {
+      // Calculate duration scaling for time-based costs (like storage per hour)
+      let durationHours = 1;
+      if (period === 'day') durationHours = 24;
+      if (period === 'week') durationHours = 24 * 7;
+      if (period === 'month') durationHours = 24 * 30;
+
+      const costs =
+        parseFloat(row.compute_units) * this.getCostRate('compute') +
+        parseFloat(row.storage_gb) * this.getCostRate('storage') * durationHours +
+        parseFloat(row.network_gb) * this.getCostRate('network') +
+        parseFloat(row.api_calls) * this.getCostRate('api_calls');
+
+      return {
+        serviceName: row.service_name || 'unknown',
+        cost: costs,
+        percentage: 0, // Will calculate below
+        usage: {
+          computeUnits: parseFloat(row.compute_units),
+          storageGB: parseFloat(row.storage_gb),
+          networkGB: parseFloat(row.network_gb),
+          apiCalls: parseFloat(row.api_calls),
+        },
+      };
+    });
+
+    const totalCost = metrics.reduce((sum, m) => sum + m.cost, 0);
+    if (totalCost > 0) {
+      metrics.forEach((m) => {
+        m.percentage = (m.cost / totalCost) * 100;
+      });
+    }
+
+    return metrics;
   }
 
   private async getUsageForPeriod(
@@ -907,11 +995,13 @@ export class TenantCostService extends EventEmitter {
       weekly: TenantCostMetrics[];
       monthly: TenantCostMetrics[];
     };
+    serviceBreakdown: ServiceCostMetrics[];
   }> {
     const current = await this.calculateTenantCosts(tenantId, 'hour');
     const budget = this.budgets.get(tenantId) || null;
     const forecast = this.forecasts.get(tenantId) || null;
     const optimizations = await this.identifyOptimizations(tenantId);
+    const serviceBreakdown = await this.getServiceCostBreakdown(tenantId, 'day');
 
     // Get trend data
     const dailyTrends = await this.getTrendData(tenantId, 'day', 7);
@@ -928,6 +1018,7 @@ export class TenantCostService extends EventEmitter {
         weekly: weeklyTrends,
         monthly: monthlyTrends,
       },
+      serviceBreakdown,
     };
   }
 
@@ -1086,6 +1177,17 @@ export class TenantCostService extends EventEmitter {
     if (!this.config.enabled) return;
     this.emit('doclingCost', { tenantId, amountUsd, metadata });
     logger.info('Recorded docling cost', { tenantId, amountUsd, metadata });
+    // Also record as a generic resource usage for service breakdown
+    // Subtract API call cost to avoid double counting, ensuring total matches amountUsd
+    const apiRate = this.getCostRate('api_calls');
+    const computeRate = this.getCostRate('compute');
+    const computeCost = Math.max(0, amountUsd - apiRate);
+
+    this.recordResourceUsage(
+      tenantId,
+      { apiCalls: 1, computeUnits: computeRate > 0 ? computeCost / computeRate : 0 },
+      'DoclingService'
+    ).catch(err => logger.error('Failed to record docling usage to DB', err));
   }
 
   public getCostCategories(): CostCategory[] {
