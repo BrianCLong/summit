@@ -1,0 +1,23 @@
+{
+  "name": "@intelgraph/acs-simulator",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@intelgraph/atl": "*",
+    "@intelgraph/adc": "*",
+    "@intelgraph/crsp": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2",
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "@types/node": "^22.7.4"
+  }
+}

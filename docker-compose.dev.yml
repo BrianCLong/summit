@@ -39,7 +39,7 @@ services:
       - summit
 
   neo4j:
-    image: neo4j:5.24.0-community
+    image: neo4j:5-community
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
@@ -90,8 +90,8 @@ services:
     healthcheck:
       test: ['CMD-SHELL', 'curl -f -u elastic:${ELASTICSEARCH_PASSWORD:-devpassword} http://localhost:9200/_cluster/health || exit 1']
       interval: 15s
-      timeout: 10s
-      retries: 10
+      timeout: 30s
+      retries: 20
     networks:
       - summit
     labels:
@@ -140,8 +140,8 @@ services:
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
       interval: 15s
-      timeout: 10s
-      retries: 10
+      timeout: 30s
+      retries: 20
     networks:
       - summit
     labels:
@@ -204,8 +204,8 @@ services:
 
   websocket-server:
     build:
-      context: ./services/websocket-server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/websocket-server/Dockerfile
     container_name: summit-websocket-server
     restart: unless-stopped
     env_file:
@@ -345,8 +345,8 @@ services:
 
   ai-sandbox:
     build:
-      context: ./services/ai-sandbox
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/ai-sandbox/Dockerfile
     container_name: summit-ai-sandbox
     restart: unless-stopped
     environment:

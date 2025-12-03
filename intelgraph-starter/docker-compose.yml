@@ -1,0 +1,121 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: intelgraph-postgres
+    environment:
+      POSTGRES_USER: intelgraph
+      POSTGRES_PASSWORD: intelgraph
+      POSTGRES_DB: intelgraph
+    ports:
+      - "5432:5432"
+    volumes:
+      - intelgraph-postgres:/var/lib/postgresql/data
+      - ./db/provenance.sql:/docker-entrypoint-initdb.d/10-provenance.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "intelgraph"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: intelgraph-redis
+    ports:
+      - "6379:6379"
+
+  neo4j:
+    image: neo4j:5.21-community
+    container_name: intelgraph-neo4j
+    environment:
+      NEO4J_AUTH: neo4j/letmein
+      NEO4J_dbms_security_auth__minimum__password__length: 8
+      NEO4J_server_default__listen__address: 0.0.0.0
+      NEO4J_server_default__advertised__address: intelgraph-neo4j
+      NEO4J_dbms_memory_heap_initial__size: 1G
+      NEO4J_dbms_memory_heap_max__size: 2G
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - intelgraph-neo4j:/data
+      - ./neo4j/constraints.cypher:/init/constraints.cypher:ro
+    command: ["neo4j", "start"]
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-02-18T16-25-55Z
+    container_name: intelgraph-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - intelgraph-minio:/data
+
+  opa:
+    image: openpolicyagent/opa:0.64.1
+    container_name: intelgraph-opa
+    command: ["run", "--server", "--addr=0.0.0.0:8181", "/policies"]
+    ports:
+      - "8181:8181"
+    volumes:
+      - ./opa/policies:/policies:ro
+
+  gateway:
+    build: ./gateway
+    container_name: intelgraph-gateway
+    depends_on:
+      - postgres
+      - neo4j
+      - redis
+      - opa
+    environment:
+      PORT: 4000
+      DATABASE_URL: postgres://intelgraph:intelgraph@postgres:5432/intelgraph
+      REDIS_URL: redis://redis:6379
+      NEO4J_URL: bolt://neo4j:7687
+      OPA_URL: http://opa:8181
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: intelgraph-data
+      OIDC_ISSUER: http://keycloak:8080/realms/intelgraph # optional
+      OIDC_CLIENT_ID: intelgraph-gateway # optional
+      OIDC_AUDIENCE: intelgraph-api # optional
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./gateway:/app
+    command: ["npm", "run", "dev"]
+
+  ingest:
+    build: ./ingest
+    container_name: intelgraph-ingest
+    depends_on:
+      - minio
+      - gateway
+    environment:
+      PORT: 4100
+      GATEWAY_URL: http://gateway:4000/graphql
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      MINIO_BUCKET: intelgraph-data
+    ports:
+      - "4100:4100"
+    volumes:
+      - ./ingest:/app
+      - ./sample-data:/sample-data:ro
+      - ./mapping:/mapping:ro
+    command: ["npm", "run", "dev"]
+
+volumes:
+  intelgraph-postgres:
+  intelgraph-neo4j:
+  intelgraph-minio:
