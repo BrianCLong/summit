@@ -140,29 +140,63 @@ export const createApp = async () => {
       return rateLimitMiddleware(req, res, next);
   });
 
-  // Other routes
-  app.use('/monitoring', monitoringRouter);
-  app.use('/api/ai', aiRouter);
-  app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
-  app.use('/api/narrative-sim', narrativeSimulationRouter);
-  app.use('/disclosures', disclosuresRouter);
-  app.use('/rbac', rbacRouter);
-  app.use('/api/webhooks', webhookRouter);
-  app.use('/api/support', supportTicketsRouter);
-  app.use('/api', ticketLinksRouter);
-  app.use('/api/aurora', auroraRouter);
-  app.use('/api/oracle', oracleRouter);
-  app.use('/api/phantom-limb', phantomLimbRouter);
-  app.use('/api/echelon2', echelon2Router);
-  app.use('/api/mnemosyne', mnemosyneRouter);
-  app.use('/api/necromancer', necromancerRouter);
-  app.use('/api/lineage', lineageRouter);
-  app.use('/api/zero-day', zeroDayRouter);
-  app.use('/api/abyss', abyssRouter);
-  app.use('/api/scenarios', scenarioRouter);
-  app.get('/metrics', metricsRoute);
+  // Production Authentication - Use proper JWT validation
+  const {
+    productionAuthMiddleware,
+    applyProductionSecurity,
+  } = await import('./config/production-security.js');
 
-  app.get('/search/evidence', async (req, res) => {
+  // Apply security middleware based on environment
+  if (cfg.NODE_ENV === 'production') {
+    applyProductionSecurity(app);
+  }
+
+  const authenticateToken =
+    cfg.NODE_ENV === 'production'
+      ? productionAuthMiddleware
+      : (req: Request, res: Response, next: NextFunction) => {
+          // Development mode - relaxed auth for easier testing
+          const authHeader = req.headers['authorization'];
+          const token = authHeader && authHeader.split(' ')[1];
+
+          if (!token) {
+            console.warn('Development: No token provided, allowing request');
+            (req as any).user = {
+              sub: 'dev-user',
+              email: 'dev@intelgraph.local',
+              role: 'admin',
+              id: 'dev-user-id'
+            };
+          }
+          next();
+        };
+
+  // Other routes
+  // PUBLIC ROUTES (No Auth Required)
+  app.use('/api/webhooks', webhookRouter); // Webhooks manage their own signature verification
+
+  // PROTECTED ROUTES (Auth Required)
+  app.use('/monitoring', authenticateToken, monitoringRouter);
+  app.use('/api/ai', authenticateToken, aiRouter);
+  app.use('/api/ai/nl-graph-query', authenticateToken, nlGraphQueryRouter);
+  app.use('/api/narrative-sim', authenticateToken, narrativeSimulationRouter);
+  app.use('/disclosures', authenticateToken, disclosuresRouter);
+  app.use('/rbac', authenticateToken, rbacRouter);
+  app.use('/api/support', authenticateToken, supportTicketsRouter);
+  app.use('/api', authenticateToken, ticketLinksRouter); // This mounts at /api, checking specific subpaths
+  app.use('/api/aurora', authenticateToken, auroraRouter);
+  app.use('/api/oracle', authenticateToken, oracleRouter);
+  app.use('/api/phantom-limb', authenticateToken, phantomLimbRouter);
+  app.use('/api/echelon2', authenticateToken, echelon2Router);
+  app.use('/api/mnemosyne', authenticateToken, mnemosyneRouter);
+  app.use('/api/necromancer', authenticateToken, necromancerRouter);
+  app.use('/api/lineage', authenticateToken, lineageRouter);
+  app.use('/api/zero-day', authenticateToken, zeroDayRouter);
+  app.use('/api/abyss', authenticateToken, abyssRouter);
+  app.use('/api/scenarios', authenticateToken, scenarioRouter);
+  app.get('/metrics', authenticateToken, metricsRoute);
+
+  app.get('/search/evidence', authenticateToken, async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
 
     if (!q) {
@@ -272,35 +306,6 @@ export const createApp = async () => {
   });
   await apollo.start();
 
-  // Production Authentication - Use proper JWT validation
-  const {
-    productionAuthMiddleware,
-    applyProductionSecurity,
-  } = await import('./config/production-security.js');
-
-  // Apply security middleware based on environment
-  if (cfg.NODE_ENV === 'production') {
-    applyProductionSecurity(app);
-  }
-
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
-
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
 
   app.use(
     '/graphql',
