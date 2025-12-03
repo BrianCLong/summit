@@ -5,7 +5,6 @@ import type {
 import fs from 'fs';
 import axios from 'axios';
 import _ from 'lodash';
-import { provenanceLedger } from '../../provenance/ledger.js';
 const { isEqual } = _;
 
 const ELASTIC_URL = process.env.ELASTICSEARCH_URL;
@@ -40,7 +39,6 @@ const auditLoggerPlugin: ApolloServerPlugin = {
           (operation.selectionSet.selections[0] as any)?.name?.value ||
           'unknown';
         const userId = ctx.contextValue?.user?.id ?? null;
-        const tenantId = ctx.contextValue?.user?.tenantId || 'unknown-tenant';
 
         const before = ctx.contextValue?.audit?.before;
         const after =
@@ -79,25 +77,6 @@ const auditLoggerPlugin: ApolloServerPlugin = {
           entity,
           diff,
         };
-
-        // Stamp to Provenance Ledger
-        try {
-          await provenanceLedger.appendEntry({
-            tenantId,
-            actionType: 'GRAPHQL_MUTATION',
-            resourceType: entity,
-            resourceId: entity, // We might not have specific ID easily here
-            actorId: userId || 'anonymous',
-            actorType: userId ? 'user' : 'system',
-            payload: logEntry,
-            metadata: {
-              requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
-              correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
-            },
-          });
-        } catch (error) {
-          console.error('Failed to stamp GraphQL mutation to Provenance Ledger', error);
-        }
 
         try {
           if (ELASTIC_URL) {
