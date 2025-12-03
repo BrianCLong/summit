@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""
-Deterministic Build Verification Tool
-Sprint 27C: Cross-runner reproducibility enforcement
+"""Deterministic Build Verification Tool.
+
+Sprint 27C: Cross-runner reproducibility enforcement.
 """
 
 import argparse
@@ -10,6 +10,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -22,6 +23,7 @@ class BuildArtifact:
     hash: str
     size: int
     timestamp: str | None = None
+    absolute_path: Path | None = None
 
 
 @dataclass
@@ -37,7 +39,7 @@ class SBOMComparison:
 class DeterminismChecker:
     """Verifies build determinism across runners"""
 
-    def __init__(self):
+    def __init__(self, *, analysis_limit_bytes: int = 512_000):
         # Fields to ignore when comparing (timestamps, etc)
         self.ignore_patterns = [
             r'"timestamp":\s*"[^"]*"',
@@ -56,6 +58,7 @@ class DeterminismChecker:
 
         # Compile regex patterns for performance
         self.compiled_patterns = [re.compile(pattern) for pattern in self.ignore_patterns]
+        self.analysis_limit_bytes = analysis_limit_bytes
 
     def normalize_json(self, content: str) -> str:
         """Normalize JSON by removing non-deterministic fields"""
@@ -166,7 +169,12 @@ class DeterminismChecker:
         self, artifacts1: list[BuildArtifact], artifacts2: list[BuildArtifact]
     ) -> dict[str, Any]:
         """Compare two sets of build artifacts"""
-        result = {"identical": True, "differences": [], "artifact_comparison": {}}
+        result = {
+            "identical": True,
+            "differences": [],
+            "artifact_comparison": {},
+            "nondeterministic_hints": {},
+        }
 
         # Create lookup dictionaries
         artifacts1_dict = {art.path: art for art in artifacts1}
@@ -198,6 +206,11 @@ class DeterminismChecker:
                 result["differences"].append(
                     f"Hash mismatch for {path}: {art1.hash[:12]}... vs {art2.hash[:12]}..."
                 )
+
+                suspicions = self._detect_nondeterminism(art1, art2)
+                if suspicions:
+                    comparison["suspicions"] = suspicions
+                    result["nondeterministic_hints"][path] = suspicions
             else:
                 comparison["status"] = "identical"
                 comparison["hash"] = art1.hash
@@ -229,10 +242,73 @@ class DeterminismChecker:
                             path=str(file_path.relative_to(build_dir)),
                             hash=self.hash_file(file_path),
                             size=file_path.stat().st_size,
+                            timestamp=self._format_timestamp(file_path),
+                            absolute_path=file_path,
                         )
                     )
 
         return artifacts
+
+    def _format_timestamp(self, file_path: Path) -> str:
+        """Return an ISO8601 timestamp string for the file mtime."""
+        mtime = file_path.stat().st_mtime
+        return datetime.fromtimestamp(mtime, tz=timezone.utc).isoformat(timespec="microseconds")
+
+    def _detect_nondeterminism(
+        self, art1: BuildArtifact, art2: BuildArtifact
+    ) -> list[str]:
+        """Inspect mismatching artifacts for common nondeterministic patterns."""
+
+        if not art1.absolute_path or not art2.absolute_path:
+            return []
+
+        if art1.size > self.analysis_limit_bytes or art2.size > self.analysis_limit_bytes:
+            return [
+                "File too large for inline diff analysis; consider normalizing ordering or truncating outputs.",
+            ]
+
+        try:
+            content1 = art1.absolute_path.read_text(encoding="utf-8", errors="ignore")
+            content2 = art2.absolute_path.read_text(encoding="utf-8", errors="ignore")
+        except OSError:
+            return []
+
+        suspicions: list[str] = []
+
+        if content1 and content2 and content1 != content2:
+            if sorted(content1.splitlines()) == sorted(content2.splitlines()):
+                suspicions.append("Same lines but different ordering; sort outputs for determinism.")
+
+        signature_patterns: dict[str, str] = {
+            "timestamp": r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?",
+            "uuid": r"[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}",
+            "hex_nonce": r"\b[0-9a-f]{16,64}\b",
+            "temp_path": r"/(?:tmp|var/tmp|private/tmp)/[\w.\-]+",
+            "build_id": r"build[_-]?id\s*[:=]\s*[A-Za-z0-9._-]+",
+        }
+
+        for label, pattern in signature_patterns.items():
+            matches1 = set(re.findall(pattern, content1))
+            matches2 = set(re.findall(pattern, content2))
+            only1 = matches1 - matches2
+            only2 = matches2 - matches1
+
+            if only1 or only2:
+                suspicions.append(
+                    f"{label} values differ (build1-only: {self._summarize_tokens(only1)}, build2-only: {self._summarize_tokens(only2)})"
+                )
+
+        return suspicions
+
+    @staticmethod
+    def _summarize_tokens(tokens: set[str]) -> str:
+        if not tokens:
+            return "∅"
+
+        trimmed = [token[:24] + ("…" if len(token) > 24 else "") for token in sorted(tokens)]
+        if len(trimmed) > 3:
+            return ", ".join(trimmed[:3]) + f" (+{len(trimmed) - 3} more)"
+        return ", ".join(trimmed)
 
 
 def main():
@@ -243,7 +319,9 @@ def main():
     parser.add_argument("--sbom2", help="Path to second SBOM file")
     parser.add_argument("--output", help="Output file for detailed report")
     parser.add_argument(
-        "--fail-on-diff", action="store_true", help="Exit with code 1 if differences found"
+        "--warn-only",
+        action="store_true",
+        help="Log differences but exit 0 (default behavior fails builds on drift)",
     )
 
     args = parser.parse_args()
@@ -291,7 +369,7 @@ def main():
     # Generate report
     report = {
         "determinism_check": {
-            "timestamp": "2025-09-19T00:00:00Z",
+            "timestamp": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "build1_path": str(build1_path),
             "build2_path": str(build2_path),
             "artifact_comparison": comparison,
@@ -309,12 +387,18 @@ def main():
         for diff in comparison["differences"]:
             print(f"  - {diff}")
 
+        if comparison["nondeterministic_hints"]:
+            print("\nNondeterministic signatures:")
+            for path, hints in comparison["nondeterministic_hints"].items():
+                for hint in hints:
+                    print(f"  - {path}: {hint}")
+
         if sbom_comparison and not sbom_comparison.identical:
             print("\nSBOM differences:")
             for diff in sbom_comparison.differences:
                 print(f"  - {diff}")
 
-        exit_code = 1 if args.fail_on_diff else 0
+        exit_code = 0 if args.warn_only else 1
 
     # Save detailed report
     if args.output:
