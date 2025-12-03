@@ -1,0 +1,551 @@
+# =============================================================================
+# Zero-Trust Pod Security Guards for IntelGraph
+# Comprehensive runtime pod security controls for air-gapped deployments
+# =============================================================================
+
+# =============================================================================
+# NAMESPACE CONFIGURATION WITH POD SECURITY STANDARDS
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-production
+  labels:
+    # Pod Security Standards (PSS) enforcement
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: v1.28
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/audit-version: v1.28
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/warn-version: v1.28
+    # IntelGraph security labels
+    security.intelgraph.ai/level: high
+    security.intelgraph.ai/zero-trust: enabled
+    security.intelgraph.ai/airgap: enabled
+    # Compliance labels
+    compliance.nist/800-53: AC-3,AC-6,SC-7,SI-4
+    compliance.cis/benchmark: level-2
+    compliance.fedramp/impact: high
+  annotations:
+    security.intelgraph.ai/description: "Production namespace with zero-trust security controls"
+    security.intelgraph.ai/owner: "security-team@intelgraph.ai"
+    security.intelgraph.ai/last-audit: "2025-11-29"
+
+---
+# =============================================================================
+# GATEKEEPER CONSTRAINT TEMPLATE - ZERO TRUST WORKLOAD
+# =============================================================================
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8szerotrustwoskload
+  annotations:
+    description: "Enforces zero-trust security requirements for IntelGraph workloads"
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sZeroTrustWorkload
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            labels:
+              type: array
+              items:
+                type: string
+              description: "Required security labels"
+            allowedRegistries:
+              type: array
+              items:
+                type: string
+              description: "Allowed container registries"
+            requireSignedImages:
+              type: boolean
+              description: "Require cosign/notation signed images"
+            requireSpiffeId:
+              type: boolean
+              description: "Require SPIFFE identity annotations"
+            maxPrivilegeEscalation:
+              type: boolean
+              description: "Allow privilege escalation"
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8szerotrustwoskload
+
+        import future.keywords.in
+
+        violation[{"msg": msg}] {
+          # Check required security labels
+          required_labels := input.parameters.labels
+          some label in required_labels
+          not input.review.object.metadata.labels[label]
+          msg := sprintf("Missing required security label: %v", [label])
+        }
+
+        violation[{"msg": msg}] {
+          # Check container registry
+          container := input.review.object.spec.containers[_]
+          allowed := input.parameters.allowedRegistries
+          not registry_allowed(container.image, allowed)
+          msg := sprintf("Container image '%v' is not from an allowed registry. Allowed: %v", [container.image, allowed])
+        }
+
+        violation[{"msg": msg}] {
+          # Check init container registry
+          container := input.review.object.spec.initContainers[_]
+          allowed := input.parameters.allowedRegistries
+          not registry_allowed(container.image, allowed)
+          msg := sprintf("Init container image '%v' is not from an allowed registry", [container.image])
+        }
+
+        violation[{"msg": msg}] {
+          # Check for SPIFFE ID annotation
+          input.parameters.requireSpiffeId == true
+          not input.review.object.metadata.annotations["security.intelgraph.ai/spiffe-id"]
+          msg := "Pod must have SPIFFE ID annotation (security.intelgraph.ai/spiffe-id)"
+        }
+
+        violation[{"msg": msg}] {
+          # Check privilege escalation
+          input.parameters.maxPrivilegeEscalation == false
+          container := input.review.object.spec.containers[_]
+          container.securityContext.allowPrivilegeEscalation == true
+          msg := sprintf("Container '%v' has privilege escalation enabled", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          # Check for root user
+          container := input.review.object.spec.containers[_]
+          container.securityContext.runAsUser == 0
+          msg := sprintf("Container '%v' runs as root (UID 0)", [container.name])
+        }
+
+        violation[{"msg": msg}] {
+          # Check readOnlyRootFilesystem
+          container := input.review.object.spec.containers[_]
+          not container.securityContext.readOnlyRootFilesystem == true
+          msg := sprintf("Container '%v' must have readOnlyRootFilesystem: true", [container.name])
+        }
+
+        registry_allowed(image, allowed) {
+          some registry in allowed
+          startswith(image, registry)
+        }
+
+---
+# =============================================================================
+# GATEKEEPER CONSTRAINT - ZERO TRUST WORKLOAD ENFORCEMENT
+# =============================================================================
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sZeroTrustWorkload
+metadata:
+  name: intelgraph-zero-trust-workload
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+      - apiGroups: ["apps"]
+        kinds: ["Deployment", "DaemonSet", "StatefulSet", "ReplicaSet"]
+    namespaces:
+      - intelgraph-production
+      - intelgraph-staging
+  parameters:
+    labels:
+      - "security.intelgraph.ai/verified"
+      - "app.kubernetes.io/name"
+    allowedRegistries:
+      - "registry.intelgraph.local/"
+      - "registry.intelgraph.airgap/"
+    requireSignedImages: true
+    requireSpiffeId: true
+    maxPrivilegeEscalation: false
+
+---
+# =============================================================================
+# GATEKEEPER CONSTRAINT TEMPLATE - SECRETS MANAGEMENT
+# =============================================================================
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8ssecretsmanagement
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sSecretsManagement
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            disallowedEnvSecrets:
+              type: boolean
+            requireSecretVolumes:
+              type: boolean
+            allowedSecretPrefixes:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8ssecretsmanagement
+
+        import future.keywords.in
+
+        # Disallow secrets in environment variables
+        violation[{"msg": msg}] {
+          input.parameters.disallowedEnvSecrets == true
+          container := input.review.object.spec.containers[_]
+          env := container.env[_]
+          env.valueFrom.secretKeyRef
+          msg := sprintf("Container '%v' uses secret in environment variable '%v'. Use volume mounts instead.", [container.name, env.name])
+        }
+
+        # Check for sensitive env var names with inline values
+        violation[{"msg": msg}] {
+          container := input.review.object.spec.containers[_]
+          env := container.env[_]
+          env.value != ""
+          sensitive_name(env.name)
+          msg := sprintf("Container '%v' has sensitive-looking env var '%v' with inline value. Use secrets.", [container.name, env.name])
+        }
+
+        sensitive_name(name) {
+          lower_name := lower(name)
+          contains(lower_name, "password")
+        }
+
+        sensitive_name(name) {
+          lower_name := lower(name)
+          contains(lower_name, "secret")
+        }
+
+        sensitive_name(name) {
+          lower_name := lower(name)
+          contains(lower_name, "api_key")
+        }
+
+        sensitive_name(name) {
+          lower_name := lower(name)
+          contains(lower_name, "token")
+        }
+
+        sensitive_name(name) {
+          lower_name := lower(name)
+          contains(lower_name, "private_key")
+        }
+
+---
+# =============================================================================
+# GATEKEEPER CONSTRAINT - SECRETS MANAGEMENT ENFORCEMENT
+# =============================================================================
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sSecretsManagement
+metadata:
+  name: intelgraph-secrets-management
+spec:
+  enforcementAction: deny
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+      - apiGroups: ["apps"]
+        kinds: ["Deployment", "DaemonSet", "StatefulSet"]
+    namespaces:
+      - intelgraph-production
+  parameters:
+    disallowedEnvSecrets: true
+    requireSecretVolumes: true
+    allowedSecretPrefixes:
+      - "intelgraph-"
+      - "tls-"
+
+---
+# =============================================================================
+# KYVERNO POLICY - RUNTIME SECURITY CONTEXT
+# =============================================================================
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: intelgraph-runtime-security
+  annotations:
+    policies.kyverno.io/title: IntelGraph Runtime Security
+    policies.kyverno.io/category: Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Enforces comprehensive runtime security controls for IntelGraph
+      workloads in zero-trust air-gapped deployments.
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    # Rule 1: Enforce security context
+    - name: enforce-security-context
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+                - intelgraph-staging
+      validate:
+        message: "Pod must have complete security context configuration"
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+              seccompProfile:
+                type: RuntimeDefault
+              fsGroup: ">=10000"
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
+                  runAsNonRoot: true
+                  capabilities:
+                    drop:
+                      - ALL
+
+    # Rule 2: Require resource limits
+    - name: require-resource-limits
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+      validate:
+        message: "All containers must have CPU and memory limits defined"
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  limits:
+                    memory: "?*"
+                    cpu: "?*"
+                  requests:
+                    memory: "?*"
+                    cpu: "?*"
+
+    # Rule 3: Enforce image digest
+    - name: require-image-digest
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+      validate:
+        message: "Container images must use digest (sha256) for immutability"
+        pattern:
+          spec:
+            containers:
+              - image: "*@sha256:*"
+
+    # Rule 4: Mutate to add security annotations
+    - name: add-security-annotations
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+                - intelgraph-staging
+      mutate:
+        patchStrategicMerge:
+          metadata:
+            annotations:
+              +(security.intelgraph.ai/policy-version): "v1.0.0"
+              +(security.intelgraph.ai/zero-trust-enforced): "true"
+              +(security.intelgraph.ai/admission-timestamp): "{{request.object.metadata.creationTimestamp}}"
+
+    # Rule 5: Enforce service account token projection
+    - name: enforce-token-projection
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+      validate:
+        message: "Pod must use projected service account token with audience and expiration"
+        pattern:
+          spec:
+            serviceAccountName: "?*"
+            automountServiceAccountToken: false
+            volumes:
+              - name: "?*"
+                projected:
+                  sources:
+                    - serviceAccountToken:
+                        audience: "?*"
+                        expirationSeconds: ">=3600 & <=86400"
+
+---
+# =============================================================================
+# KYVERNO POLICY - NETWORK RESTRICTIONS
+# =============================================================================
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: intelgraph-network-restrictions
+  annotations:
+    policies.kyverno.io/title: IntelGraph Network Restrictions
+    policies.kyverno.io/category: Network
+    policies.kyverno.io/severity: high
+spec:
+  validationFailureAction: Enforce
+  rules:
+    # Rule 1: Deny host network
+    - name: deny-host-network
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+                - intelgraph-staging
+      validate:
+        message: "Host network access is not allowed for zero-trust workloads"
+        pattern:
+          spec:
+            hostNetwork: false
+
+    # Rule 2: Deny host ports
+    - name: deny-host-ports
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+      validate:
+        message: "Host ports are not allowed"
+        pattern:
+          spec:
+            containers:
+              - ports:
+                  - hostPort: null
+
+    # Rule 3: Require NetworkPolicy reference
+    - name: require-network-policy-label
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-production
+      validate:
+        message: "Pods must have network policy selector label"
+        pattern:
+          metadata:
+            labels:
+              networking.intelgraph.ai/policy: "?*"
+
+---
+# =============================================================================
+# VALIDATING WEBHOOK - SPIFFE IDENTITY VERIFICATION
+# =============================================================================
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: intelgraph-spiffe-validator
+  labels:
+    security.intelgraph.ai/component: spiffe-validator
+webhooks:
+  - name: spiffe-validator.security.intelgraph.ai
+    clientConfig:
+      service:
+        name: spiffe-validator
+        namespace: security
+        path: /validate
+      caBundle: "${CA_BUNDLE}"
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+    namespaceSelector:
+      matchLabels:
+        security.intelgraph.ai/zero-trust: enabled
+    admissionReviewVersions: ["v1", "v1beta1"]
+    sideEffects: None
+    timeoutSeconds: 10
+    failurePolicy: Fail
+
+---
+# =============================================================================
+# POD DISRUPTION BUDGET - SECURITY SERVICES
+# =============================================================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: security-services-pdb
+  namespace: security
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      security.intelgraph.ai/critical: "true"
+
+---
+# =============================================================================
+# RESOURCE QUOTA - SECURITY NAMESPACE
+# =============================================================================
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: security-namespace-quota
+  namespace: security
+spec:
+  hard:
+    pods: "50"
+    requests.cpu: "20"
+    requests.memory: "40Gi"
+    limits.cpu: "40"
+    limits.memory: "80Gi"
+    secrets: "100"
+    configmaps: "50"
+    persistentvolumeclaims: "20"
+
+---
+# =============================================================================
+# LIMIT RANGE - SECURITY CONTAINERS
+# =============================================================================
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: security-container-limits
+  namespace: security
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "500m"
+        memory: "512Mi"
+      defaultRequest:
+        cpu: "100m"
+        memory: "128Mi"
+      max:
+        cpu: "2"
+        memory: "4Gi"
+      min:
+        cpu: "50m"
+        memory: "64Mi"
+    - type: PersistentVolumeClaim
+      max:
+        storage: "50Gi"
+      min:
+        storage: "1Gi"
