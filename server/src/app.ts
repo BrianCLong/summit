@@ -11,7 +11,6 @@ import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
-import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
@@ -97,10 +96,7 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
-  // Standard audit logger for basic request tracking
   app.use(auditLogger);
-  // Audit-First middleware for cryptographic stamping of sensitive operations
-  app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
 
   // Telemetry middleware
