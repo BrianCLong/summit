@@ -1,4 +1,4 @@
-import { cacheService } from '../services/CacheService.js';
+import { cacheService } from '../services/cacheService.js';
 
 /**
  * Wraps a resolver function with caching.
