@@ -2,7 +2,6 @@
  * Tests for Compliance Engine
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
 import { ComplianceEngine } from '../ComplianceEngine';
 import type { GlobalPartner, ComplianceFramework } from '../types';
 
