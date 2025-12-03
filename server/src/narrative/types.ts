@@ -64,7 +64,8 @@ export type NarrativeEventType =
   | 'political'
   | 'information'
   | 'intervention'
-  | 'system';
+  | 'system'
+  | 'suppression';
 
 export interface NarrativeEvent {
   id: string;
