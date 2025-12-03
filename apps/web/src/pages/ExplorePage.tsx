@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Filter, Settings, Download, RefreshCw } from 'lucide-react'
+import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
@@ -41,6 +41,7 @@ export default function ExplorePage() {
   const [filterPanelOpen, setFilterPanelOpen] = useState(true)
   const [timelineOpen, setTimelineOpen] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [policyOverlay, setPolicyOverlay] = useState<'none' | 'purpose' | 'retention' | 'residency'>('none')
 
   // Graph state
   const [graphLayout, setGraphLayout] = useState<GraphLayout>({
@@ -175,25 +176,74 @@ export default function ExplorePage() {
     }
   }
 
-  const handleExport = () => {
+  const handleExport = async (format: 'json' | 'csv' | 'png') => {
     trackGoldenPathStep('results_viewed')
 
-    const data = {
-      entities: filteredEntities,
-      relationships: filteredRelationships,
-      filters,
-      timestamp: new Date().toISOString(),
+    // 1. Prepare Manifest
+    const timestamp = new Date().toISOString();
+    const manifestPayload = {
+        tenant: 'CURRENT_TENANT', // Should come from context
+        filters,
+        timestamp
+    };
+
+    // 2. Sign Manifest (Simulated call to new endpoint)
+    let signature = 'mock-signature';
+    try {
+        const res = await fetch('/api/exports/sign-manifest', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(manifestPayload)
+        });
+        if (res.ok) {
+            const json = await res.json();
+            signature = json.signature;
+        }
+    } catch (e) {
+        console.warn("Failed to sign export manifest", e);
     }
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
-      type: 'application/json',
-    })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `intelgraph-export-${Date.now()}.json`
-    a.click()
-    URL.revokeObjectURL(url)
+    if (format === 'json') {
+      const data = {
+        manifest: { ...manifestPayload, signature },
+        data: {
+          entities: filteredEntities,
+          relationships: filteredRelationships,
+        }
+      }
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `intelgraph-export-${Date.now()}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } else if (format === 'csv') {
+      // Simple CSV generation
+      const headers = ['id', 'type', 'name', 'confidence', 'source'].join(',');
+      const rows = filteredEntities.map(e =>
+        [e.id, e.type, `"${e.name}"`, e.confidence, e.source].join(',')
+      );
+      const csvContent = [headers, ...rows].join('\n');
+
+      // Append manifest as comment
+      const manifestComment = `# MANIFEST: ${JSON.stringify(manifestPayload)}\n# SIGNATURE: ${signature}\n`;
+
+      const blob = new Blob([manifestComment + csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `intelgraph-export-${Date.now()}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else if (format === 'png') {
+      // Placeholder for PNG export logic
+      // In a real implementation, this would use html2canvas or similar
+      alert('PNG export requires canvas integration not available in this environment.');
+    }
   }
 
   if (error) {
@@ -228,6 +278,25 @@ export default function ExplorePage() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Policy Overlays */}
+          <div className="flex items-center gap-2 border-r pr-4 mr-2">
+              <span className="text-xs text-muted-foreground font-medium">Overlays:</span>
+              <Button
+                variant={policyOverlay === 'purpose' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setPolicyOverlay(policyOverlay === 'purpose' ? 'none' : 'purpose')}
+              >
+                  <Shield className="h-3 w-3 mr-1" /> Purpose
+              </Button>
+              <Button
+                variant={policyOverlay === 'residency' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setPolicyOverlay(policyOverlay === 'residency' ? 'none' : 'residency')}
+              >
+                  <Shield className="h-3 w-3 mr-1" /> Residency
+              </Button>
+          </div>
+
           <Button
             variant="outline"
             size="sm"
@@ -258,10 +327,16 @@ export default function ExplorePage() {
             Refresh
           </Button>
 
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          <div className="flex gap-1">
+             <Button variant="outline" size="sm" onClick={() => handleExport('json')}>
+              <Download className="h-4 w-4 mr-2" />
+              JSON
+            </Button>
+             <Button variant="outline" size="sm" onClick={() => handleExport('csv')}>
+              <Download className="h-4 w-4 mr-2" />
+              CSV
+            </Button>
+          </div>
 
           <Button variant="outline" size="sm">
             <Settings className="h-4 w-4 mr-2" />
@@ -327,7 +402,20 @@ export default function ExplorePage() {
               onEntitySelect={handleEntitySelect}
               selectedEntityId={selectedEntityId}
               className="h-full w-full"
+              // Pass overlay state to canvas if supported
+              // overlay={policyOverlay}
             />
+          )}
+          {/* Legend for Policy Overlay */}
+          {policyOverlay !== 'none' && (
+              <div className="absolute bottom-4 right-4 bg-background/90 p-4 rounded shadow border z-10">
+                  <h4 className="font-semibold mb-2 capitalize">{policyOverlay} Policy</h4>
+                  <div className="space-y-1 text-sm">
+                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-green-500 mr-2"></span> Compliant</div>
+                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></span> Review</div>
+                      <div className="flex items-center"><span className="w-3 h-3 rounded-full bg-red-500 mr-2"></span> Violation</div>
+                  </div>
+              </div>
           )}
         </div>
 
