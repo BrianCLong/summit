@@ -5,6 +5,7 @@
  * Supports LaunchDarkly for production and file-based flags for development.
  *
  * @module services/FeatureFlagService
+ * @deprecated Use '@intelgraph/feature-flags' instead. See server/src/feature-flags/setup.ts
  */
 
 import { readFileSync } from 'fs';
