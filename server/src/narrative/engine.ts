@@ -15,7 +15,6 @@ import {
   NarrativeGenerator,
   RuleBasedNarrativeGenerator,
 } from './generators.js';
-import { LLMAgent, RuleBasedAgent, SimulationAgent } from './agents.js';
 
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
@@ -24,7 +23,6 @@ export class NarrativeSimulationEngine {
   private state: NarrativeState;
   private generator: NarrativeGenerator;
   private readonly eventQueue: NarrativeEvent[] = [];
-  private readonly agents: SimulationAgent[] = [];
 
   constructor(private readonly config: SimulationConfig) {
     const start = new Date();
@@ -34,23 +32,6 @@ export class NarrativeSimulationEngine {
         this.bootstrapEntityState(entity),
       ]),
     );
-
-    if (config.agents) {
-      config.agents.forEach((agentConfig) => {
-        const entity = config.initialEntities.find(
-          (e) => e.id === agentConfig.entityId,
-        );
-        if (entity) {
-          if (agentConfig.type === 'llm' && config.llmClient) {
-            this.agents.push(
-              new LLMAgent(agentConfig, entity, config.llmClient),
-            );
-          } else {
-            this.agents.push(new RuleBasedAgent(agentConfig, entity));
-          }
-        }
-      });
-    }
 
     const parameters = Object.fromEntries(
       (config.initialParameters ?? []).map((parameter) => [
@@ -118,10 +99,7 @@ export class NarrativeSimulationEngine {
 
   async tick(steps = 1): Promise<NarrativeState> {
     for (let index = 0; index < steps; index += 1) {
-      await this.resolveAgentActions();
-
       this.advanceClock();
-
       const ready = this.dequeueReadyEvents();
       ready.forEach((event) => this.applyEvent(event));
       this.state.recentEvents = [...this.state.recentEvents, ...ready].slice(
@@ -133,22 +111,6 @@ export class NarrativeSimulationEngine {
     }
 
     return this.state;
-  }
-
-  private async resolveAgentActions(): Promise<void> {
-    for (const agent of this.agents) {
-      try {
-        const event = await agent.decideAction(this.state);
-        if (event) {
-          this.queueEvent(event);
-        }
-      } catch (error) {
-        console.error(
-          `Agent ${agent.id} failed to decide action:`,
-          error instanceof Error ? error.message : error,
-        );
-      }
-    }
   }
 
   injectActorAction(
@@ -253,9 +215,6 @@ export class NarrativeSimulationEngine {
   }
 
   private applyEvent(event: NarrativeEvent): void {
-    // If it is a suppression event, we might want to handle it differently.
-    // E.g. targeting an actor to reduce their influence.
-
     if (event.actorId && this.state.entities[event.actorId]) {
       this.adjustEntityState(this.state.entities[event.actorId], event, 1);
     }
@@ -279,38 +238,23 @@ export class NarrativeSimulationEngine {
       });
     }
 
-    // Propagation logic
-    // We only propagate if the event is "loud" enough.
-    // Suppression events might not propagate in the same way, or they might propagate as "censorship news".
-    // For now, allow suppression to propagate but with potentially negative effects handled in adjustEntityState.
-    if (event.actorId && event.intensity > 0.05) {
+    if (event.actorId) {
       const actor = this.state.entities[event.actorId];
       if (actor) {
         actor.relationships.forEach((edge) => {
           const related = this.state.entities[edge.targetId];
           if (!related) return;
-
-          // Decay intensity
-          const newIntensity = event.intensity * edge.strength * 0.5;
-
-          // If intensity drops below threshold, stop propagating
-          if (newIntensity < 0.01) return;
-
           const propagatedEvent: NarrativeEvent = {
             ...event,
             id: `${event.id}:${edge.targetId}`,
-            actorId: related.id, // Neighbor becomes the "actor" of the propagated event (re-transmission)
-            targetIds: [], // Clear specific targets
-            intensity: newIntensity,
+            actorId: related.id,
+            targetIds: [],
+            intensity: event.intensity * edge.strength * 0.5,
             sentimentShift:
               (event.sentimentShift ?? 0) * edge.strength * related.resilience,
             influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
-            scheduledTick: this.state.tick + 1, // Queue for NEXT tick (simulating travel time)
           };
-
-          // Queue the event instead of applying immediately.
-          // This enables multi-hop propagation in subsequent ticks.
-          this.queueEvent(propagatedEvent);
+          this.adjustEntityState(related, propagatedEvent, edge.strength * 0.5);
         });
       }
     }
@@ -321,27 +265,13 @@ export class NarrativeSimulationEngine {
     event: NarrativeEvent,
     weight: number,
   ): void {
-    let sentimentDelta =
+    const sentimentDelta =
       (event.sentimentShift ?? 0) *
       event.intensity *
       weight *
       (1 - entity.resilience * 0.5);
-
-    let influenceDelta =
+    const influenceDelta =
       (event.influenceShift ?? 0) * weight * (1 - entity.volatility * 0.5);
-
-    // Special handling for suppression events
-    if (event.type === 'suppression') {
-        // Suppression intends to reduce influence and dampen sentiment shifts.
-        // If I am targeted by suppression, my influence drops.
-        // If I am just hearing about suppression (propagated), maybe I get scared (volatility drops)?
-
-        // If I am the target of suppression:
-        if (event.targetIds?.includes(entity.id)) {
-             influenceDelta = -Math.abs(event.intensity * weight * 0.5); // Force influence down
-             sentimentDelta = 0; // Suppression doesn't necessarily change my mind, just my voice
-        }
-    }
 
     entity.sentiment = this.clamp(entity.sentiment + sentimentDelta, -1, 1);
     entity.influence = this.clamp(entity.influence + influenceDelta, 0, 1.5);
