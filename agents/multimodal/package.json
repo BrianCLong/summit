@@ -1,0 +1,72 @@
+{
+  "name": "@intelgraph/multimodal-fusion",
+  "version": "1.0.0",
+  "description": "Agentic multimodal fusion pipeline for OSINT text/image/video into Neo4j embeddings with CLIP/ViT and pgvector",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "multimodal",
+    "fusion",
+    "embeddings",
+    "CLIP",
+    "ViT",
+    "Neo4j",
+    "pgvector",
+    "OSINT",
+    "vision",
+    "NLP",
+    "transformer"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "neo4j-driver": "^5.x",
+    "pg": "^8.x",
+    "pino": "^8.x"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.x",
+    "@types/node": "^20.x",
+    "@types/pg": "^8.x",
+    "jest": "^29.x",
+    "ts-jest": "^29.x",
+    "typescript": "^5.x"
+  },
+  "peerDependencies": {
+    "neo4j-driver": ">=5.0.0",
+    "pg": ">=8.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit.git",
+    "directory": "agents/multimodal"
+  }
+}
