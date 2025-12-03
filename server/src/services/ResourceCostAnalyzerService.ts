@@ -1,6 +1,6 @@
 
-import { tenantCostService } from './TenantCostService';
-import { CostOptimizationService } from './CostOptimizationService';
+import { tenantCostService } from './TenantCostService.js';
+import { CostOptimizationService } from './CostOptimizationService.js';
 import logger from '../utils/logger';
 
 interface ResourceCostAnalysis {

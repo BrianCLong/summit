@@ -1,7 +1,7 @@
 
 import { Router } from 'express';
-import { resourceCostAnalyzerService } from '../services/ResourceCostAnalyzerService';
-import { ensureAuthenticated } from '../middleware/auth';
+import { resourceCostAnalyzerService } from '../services/ResourceCostAnalyzerService.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
 import { z } from 'zod/v4';
 
 const router = Router();
