@@ -923,6 +923,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       offset?: number;
       actionType?: string;
       resourceType?: string;
+      resourceId?: string;
       order?: 'ASC' | 'DESC';
     } = {},
   ): Promise<ProvenanceEntry[]> {
@@ -951,6 +952,12 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     if (options.resourceType) {
       whereConditions.push(`resource_type = $${paramIndex}`);
       params.push(options.resourceType);
+      paramIndex++;
+    }
+
+    if (options.resourceId) {
+      whereConditions.push(`resource_id = $${paramIndex}`);
+      params.push(options.resourceId);
       paramIndex++;
     }
 

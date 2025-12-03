@@ -32,186 +32,21 @@ export function sanitizeString(input: string): string {
 }
 
 /**
- * Comprehensive HTML sanitization with defense-in-depth approach
- *
- * Security features:
- * - Tag whitelist enforcement
- * - Attribute sanitization
- * - Event handler removal
- * - Script/style tag removal
- * - Data URI blocking
- * - Encoded attack prevention
+ * Sanitize HTML content (allow safe HTML tags)
  */
-export function sanitizeHTML(
-  input: string,
-  options: {
-    allowedTags?: string[];
-    allowedAttributes?: Record<string, string[]>;
-    stripAll?: boolean;
-  } = {},
-): string {
+export function sanitizeHTML(input: string, allowedTags?: string[]): string {
   if (typeof input !== 'string') {
     throw new Error('Input must be a string');
   }
 
-  const {
-    stripAll = false,
-    allowedTags = ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span'],
-    allowedAttributes = {
-      a: ['href', 'title'],
-      img: ['src', 'alt', 'title'],
-      span: ['class'],
-    },
-  } = options;
+  // Basic implementation - for production, use a library like DOMPurify or sanitize-html
+  // This is a simplified version
+  const allowed = allowedTags || ['b', 'i', 'em', 'strong', 'a', 'p', 'br'];
+  const tagPattern = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
 
-  // If stripAll is true, remove all HTML and return plain text
-  if (stripAll) {
-    return input
-      .replace(/<[^>]*>/g, '') // Remove all tags
-      .replace(/&[a-z]+;/gi, ' ') // Remove HTML entities
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim();
-  }
-
-  let sanitized = input;
-
-  // Step 1: Decode HTML entities that might be used for bypasses
-  sanitized = decodeHtmlEntities(sanitized);
-
-  // Step 2: Remove script tags and their content (highest priority)
-  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-
-  // Step 3: Remove style tags and their content
-  sanitized = sanitized.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
-
-  // Step 4: Remove all event handlers (on*) from any tag
-  sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
-  sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, '');
-
-  // Step 5: Remove javascript: and data: protocols
-  sanitized = sanitized.replace(/\s*href\s*=\s*["']?\s*javascript:[^"'>\s]*/gi, ' href="#"');
-  sanitized = sanitized.replace(/\s*src\s*=\s*["']?\s*javascript:[^"'>\s]*/gi, '');
-  sanitized = sanitized.replace(/\s*href\s*=\s*["']?\s*data:[^"'>\s]*/gi, ' href="#"');
-  sanitized = sanitized.replace(/\s*src\s*=\s*["']?\s*data:(?!image\/)[^"'>\s]*/gi, '');
-
-  // Step 6: Remove dangerous tags entirely
-  const dangerousTags = [
-    'script', 'style', 'iframe', 'object', 'embed', 'form', 'input',
-    'textarea', 'button', 'select', 'option', 'link', 'meta', 'base',
-    'applet', 'frame', 'frameset', 'layer', 'bgsound', 'xml',
-  ];
-  for (const tag of dangerousTags) {
-    const pattern = new RegExp(`<${tag}\\b[^>]*>.*?</${tag}>|<${tag}\\b[^>]*/?>`, 'gis');
-    sanitized = sanitized.replace(pattern, '');
-  }
-
-  // Step 7: Filter tags and attributes
-  sanitized = sanitized.replace(/<\/?([a-z][a-z0-9]*)\b([^>]*)>/gi, (match, tagName, attributes) => {
-    const tag = tagName.toLowerCase();
-
-    // Remove disallowed tags
-    if (!allowedTags.includes(tag)) {
-      return '';
-    }
-
-    // For self-closing or closing tags without attributes
-    if (match.startsWith('</') || !attributes.trim()) {
-      return match.startsWith('</') ? `</${tag}>` : `<${tag}>`;
-    }
-
-    // Sanitize attributes
-    const tagAllowedAttrs = allowedAttributes[tag] || [];
-    let safeAttributes = '';
-
-    // Parse attributes
-    const attrPattern = /([a-z_-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*))/gi;
-    let attrMatch;
-
-    while ((attrMatch = attrPattern.exec(attributes)) !== null) {
-      const attrName = attrMatch[1].toLowerCase();
-      const attrValue = attrMatch[2] || attrMatch[3] || attrMatch[4] || '';
-
-      // Skip event handlers
-      if (attrName.startsWith('on')) {
-        continue;
-      }
-
-      // Skip dangerous attributes
-      if (['style', 'formaction', 'action', 'xlink:href'].includes(attrName)) {
-        continue;
-      }
-
-      // Only include allowed attributes for this tag
-      if (tagAllowedAttrs.includes(attrName)) {
-        // Validate href/src values
-        if (['href', 'src'].includes(attrName)) {
-          const lowerValue = attrValue.toLowerCase().trim();
-          if (
-            lowerValue.startsWith('javascript:') ||
-            lowerValue.startsWith('vbscript:') ||
-            lowerValue.startsWith('data:text') ||
-            lowerValue.startsWith('data:application')
-          ) {
-            continue;
-          }
-        }
-
-        safeAttributes += ` ${attrName}="${htmlEscape(attrValue)}"`;
-      }
-    }
-
-    return `<${tag}${safeAttributes}>`;
+  return input.replace(tagPattern, (match, tag) => {
+    return allowed.includes(tag.toLowerCase()) ? match : '';
   });
-
-  // Step 8: Final cleanup - remove any remaining encoded attacks
-  sanitized = sanitized.replace(/&#x?[0-9a-f]+;?/gi, (match) => {
-    // Decode and check if it's a dangerous character
-    const decoded = decodeHtmlEntities(match);
-    if (/[<>"']/.test(decoded)) {
-      return '';
-    }
-    return match;
-  });
-
-  return sanitized;
-}
-
-/**
- * Decode common HTML entities (helper for sanitization)
- */
-function decodeHtmlEntities(input: string): string {
-  const entities: Record<string, string> = {
-    '&lt;': '<',
-    '&gt;': '>',
-    '&amp;': '&',
-    '&quot;': '"',
-    '&#39;': "'",
-    '&apos;': "'",
-    '&#x27;': "'",
-    '&#x2F;': '/',
-    '&#47;': '/',
-    '&#60;': '<',
-    '&#62;': '>',
-    '&#34;': '"',
-  };
-
-  let decoded = input;
-  for (const [entity, char] of Object.entries(entities)) {
-    decoded = decoded.replace(new RegExp(entity, 'gi'), char);
-  }
-
-  // Handle numeric entities
-  decoded = decoded.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
-  decoded = decoded.replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)));
-
-  return decoded;
-}
-
-/**
- * Strip all HTML tags and return plain text
- */
-export function stripHTML(input: string): string {
-  return sanitizeHTML(input, { stripAll: true });
 }
 
 /**
