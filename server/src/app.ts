@@ -45,6 +45,8 @@ import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
+import scenarioRouter from './routes/scenarios.js';
+import queryReplayRouter from './routes/query-replay.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -154,6 +156,8 @@ export const createApp = async () => {
   app.use('/api/lineage', lineageRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+  app.use('/api/scenarios', scenarioRouter);
+  app.use('/api/query-replay', queryReplayRouter);
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
