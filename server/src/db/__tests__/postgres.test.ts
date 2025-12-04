@@ -19,30 +19,61 @@ import {
   closePostgresPool,
   __private,
 } from '../postgres';
-import type { Pool, PoolClient } from 'pg';
+import type { PoolClient } from 'pg';
 
 // Mock pg module
 jest.mock('pg', () => {
-  const mockPool = {
-    query: jest.fn(),
-    connect: jest.fn(),
-    end: jest.fn(),
-    on: jest.fn(),
-    totalCount: 10,
-    idleCount: 5,
-    waitingCount: 0,
+  const mockPools: any[] = [];
+
+  const createMockPool = () => {
+    const pool = {
+      query: jest.fn(),
+      connect: jest.fn(),
+      end: jest.fn(),
+      on: jest.fn(),
+      totalCount: 10,
+      idleCount: 5,
+      waitingCount: 0,
+    };
+
+    mockPools.push(pool);
+    return pool;
+  };
+
+  const Pool = jest.fn(() => createMockPool());
+  (Pool as any).mockPools = mockPools;
+  (Pool as any).reset = () => {
+    mockPools.length = 0;
   };
 
   return {
-    Pool: jest.fn(() => mockPool),
+    Pool,
   };
 });
+
+const mockPgModule = jest.requireMock('pg') as {
+  Pool: jest.Mock & { mockPools: any[]; reset: () => void };
+};
+
+const getMockPools = () => mockPgModule.Pool.mockPools as any[];
+const resetMockPools = () => mockPgModule.Pool.reset();
+const setAllPoolClients = (client: PoolClient) => {
+  getMockPools().forEach((mockPool) => {
+    mockPool.connect.mockResolvedValue(client);
+  });
+};
+const rejectAllPoolClients = (error: Error) => {
+  getMockPools().forEach((mockPool) => {
+    mockPool.connect.mockRejectedValue(error);
+  });
+};
 
 describe('PostgreSQL Pool', () => {
   let mockClient: jest.Mocked<PoolClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resetMockPools();
 
     // Reset environment variables
     delete process.env.DATABASE_URL;
@@ -119,7 +150,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+      setAllPoolClients(mockClient);
     });
 
     it('should route SELECT queries to read pool', async () => {
@@ -368,7 +399,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+      setAllPoolClients(mockClient);
     });
 
     it('should return health status for all pools', async () => {
@@ -393,6 +424,7 @@ describe('PostgreSQL Pool', () => {
         expect(typeof snapshot.activeConnections).toBe('number');
         expect(typeof snapshot.idleConnections).toBe('number');
         expect(typeof snapshot.queuedRequests).toBe('number');
+        expect(typeof snapshot.consecutiveHealthFailures).toBe('number');
       });
     });
 
@@ -403,6 +435,48 @@ describe('PostgreSQL Pool', () => {
 
       expect(health.some((h: any) => !h.healthy)).toBe(true);
     });
+
+    it('should recycle unhealthy pools after repeated failures', async () => {
+      await closePostgresPool();
+      resetMockPools();
+
+      process.env.PG_POOL_HEALTH_FAILURE_THRESHOLD = '1';
+      process.env.PG_POOL_RECOVERY_BACKOFF_MS = '0';
+
+      pool = getPostgresPool();
+
+      const [writePool, readPool] = getMockPools();
+      writePool.connect.mockRejectedValue(new Error('Health probe failed'));
+      readPool.connect.mockResolvedValue(mockClient);
+      mockClient.query.mockResolvedValue({ rows: [{ result: 1 }] } as any);
+
+      const initialPoolCreations = mockPgModule.Pool.mock.calls.length;
+
+      const failedHealth = await pool.healthCheck();
+
+      expect(
+        failedHealth.some(
+          (snapshot: any) =>
+            snapshot.name === 'write-primary' && snapshot.consecutiveHealthFailures >= 1,
+        ),
+      ).toBe(true);
+      expect(writePool.end).toHaveBeenCalled();
+
+      const replacementPool = getMockPools()[getMockPools().length - 1];
+      replacementPool.connect.mockResolvedValue(mockClient);
+
+      const recoveredHealth = await pool.healthCheck();
+
+      expect(mockPgModule.Pool.mock.calls.length).toBeGreaterThan(
+        initialPoolCreations,
+      );
+      expect(
+        recoveredHealth.some(
+          (snapshot: any) =>
+            snapshot.name === 'write-primary' && snapshot.consecutiveHealthFailures === 0,
+        ),
+      ).toBe(true);
+    });
   });
 
   describe('Slow Query Insights', () => {
@@ -411,7 +485,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+      setAllPoolClients(mockClient);
     });
 
     it('should track slow queries', async () => {
@@ -458,7 +532,7 @@ describe('PostgreSQL Pool', () => {
         release: jest.fn(),
       } as any;
 
-      (pool.connect as jest.Mock).mockResolvedValue(mockTransactionClient);
+      setAllPoolClients(mockTransactionClient);
 
       const client = await pool.connect();
 
@@ -473,7 +547,7 @@ describe('PostgreSQL Pool', () => {
         release: jest.fn(),
       } as any;
 
-      (pool.connect as jest.Mock).mockResolvedValue(mockTransactionClient);
+      setAllPoolClients(mockTransactionClient);
 
       const client = await pool.connect();
       client.release();
@@ -499,7 +573,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+      setAllPoolClients(mockClient);
     });
 
     it('should respect custom timeout', async () => {
@@ -543,7 +617,7 @@ describe('PostgreSQL Pool', () => {
 
     beforeEach(() => {
       pool = getPostgresPool();
-      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
+      setAllPoolClients(mockClient);
     });
 
     it('should throw error on query failure', async () => {
@@ -568,9 +642,7 @@ describe('PostgreSQL Pool', () => {
     });
 
     it('should handle connection acquisition failure', async () => {
-      (pool.connect as jest.Mock).mockRejectedValue(
-        new Error('Connection pool exhausted'),
-      );
+      rejectAllPoolClients(new Error('Connection pool exhausted'));
 
       await expect(pool.query('SELECT 1')).rejects.toThrow();
     });
