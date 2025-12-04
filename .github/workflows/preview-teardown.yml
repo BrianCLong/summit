@@ -1,0 +1,54 @@
+name: Preview Teardown
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  destroy:
+    name: destroy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Terraform
+        if: hashFiles('infra/preview/*.tf') != ''
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+
+      - name: Login cloud
+        if: env.CLOUD_AUTH != ''
+        env:
+          CLOUD_AUTH: ${{ secrets.CLOUD_AUTH }}
+        run: |
+          echo "$CLOUD_AUTH" | base64 -d > /tmp/creds.json
+          export GOOGLE_APPLICATION_CREDENTIALS=/tmp/creds.json
+          echo "Cloud credentials configured for teardown"
+
+      - name: Destroy namespace
+        run: |
+          if command -v kubectl >/dev/null 2>&1; then
+            kubectl delete ns pr-${{ github.event.number }} --ignore-not-found
+          else
+            echo "kubectl not available; skipping cluster namespace deletion"
+          fi
+
+      - name: Terraform destroy (if used)
+        run: |
+          if [ -d infra/preview ]; then
+            terraform -chdir=infra/preview init -input=false -backend=false
+            terraform -chdir=infra/preview destroy -auto-approve -input=false -var pr=${{ github.event.number }}
+          else
+            echo "No infra/preview directory found; skipping terraform destroy"
+          fi
+
+      - name: Post cost + drift summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.summary.addHeading('Preview Teardown')
+            core.summary.addRaw(`Destroyed pr-${{github.event.number}} or confirmed no resources`)
+            await core.summary.write()

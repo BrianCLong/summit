@@ -1,0 +1,15 @@
+groups:
+- name: summit-slo
+  rules:
+  - alert: SummitSLONearBurn
+    expr: (sum(rate(http_request_errors_total[5m])) / sum(rate(http_requests_total[5m]))) > 0.02
+    for: 10m
+    labels: { severity: page }
+    annotations:
+      summary: Error budget burn > 2% over 5m
+  - alert: SummitLatencyP95High
+    expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.5
+    for: 10m
+    labels: { severity: page }
+    annotations:
+      summary: p95 latency > 1.5s
