@@ -14,10 +14,22 @@ permissions:
 env:
   GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+  RESPONSIBLE_ENGINEER: ${{ secrets.SLO_ONCALL }}
+  PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
+  PROMETHEUS_BEARER_TOKEN: ${{ secrets.PROMETHEUS_BEARER_TOKEN }}
+  GRAPHQL_P95_THRESHOLD_MS: 1500
+  GRAPHQL_ERROR_RATE_THRESHOLD: 0.5
+  INGEST_TIME_THRESHOLD_SEC: 300
+  INGEST_DLQ_THRESHOLD_PERCENT: 0.1
+  WORKER_FAILURE_THRESHOLD_PERCENT: 1
+  CI_PASS_THRESHOLD_PERCENT: 95
+  CI_MEAN_TIME_THRESHOLD_MINUTES: 25
 
 jobs:
   error-budget-check:
-    if: false # Belt-and-suspenders guard during stabilization
+    outputs:
+      alert-needed: ${{ steps.slo-checks.outputs.alert-needed }}
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,93 +40,108 @@ jobs:
         with:
           node-version: '20.11.x'
 
-      - name: Check GraphQL P95 Budget
-        id: graphql-budget
+      - name: Evaluate SLOs from Prometheus
+        id: slo-checks
         run: |
-          # Query Prometheus for GraphQL p95 latency
-          P95_THRESHOLD="1.5"  # 1.5 seconds
-          ERROR_RATE_THRESHOLD="0.5"  # 0.5%
+          set -euo pipefail
 
-          # Simulate metrics check (replace with actual Prometheus query)
-          CURRENT_P95="1.2"
-          CURRENT_ERROR_RATE="0.3"
-
-          echo "graphql-p95=${CURRENT_P95}" >> $GITHUB_OUTPUT
-          echo "graphql-error-rate=${CURRENT_ERROR_RATE}" >> $GITHUB_OUTPUT
-
-          if (( $(echo "${CURRENT_P95} > ${P95_THRESHOLD}" | bc -l) )); then
-            echo "graphql-budget-exceeded=true" >> $GITHUB_OUTPUT
-            echo "❌ GraphQL P95 budget exceeded: ${CURRENT_P95}s > ${P95_THRESHOLD}s"
-          else
-            echo "graphql-budget-exceeded=false" >> $GITHUB_OUTPUT
-            echo "✅ GraphQL P95 within budget: ${CURRENT_P95}s ≤ ${P95_THRESHOLD}s"
+          if [[ -z "${PROMETHEUS_URL}" ]]; then
+            echo "PROMETHEUS_URL secret is required for SLO checks" | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
 
-      - name: Check Ingest E2E Budget
-        id: ingest-budget
-        run: |
-          # Check ingest pipeline performance
-          INGEST_THRESHOLD="300"  # 5 minutes for 10k docs
-          DLQ_THRESHOLD="0.1"     # 0.1% DLQ rate
+          prom_query() {
+            local query="$1"
+            local timeout="${2:-15}"
+            local auth_args=()
 
-          # Simulate metrics (replace with actual monitoring)
-          CURRENT_INGEST_TIME="240"
-          CURRENT_DLQ_RATE="0.05"
+            if [[ -n "${PROMETHEUS_BEARER_TOKEN:-}" ]]; then
+              auth_args=("-H" "Authorization: Bearer ${PROMETHEUS_BEARER_TOKEN}")
+            fi
 
-          echo "ingest-time=${CURRENT_INGEST_TIME}" >> $GITHUB_OUTPUT
-          echo "dlq-rate=${CURRENT_DLQ_RATE}" >> $GITHUB_OUTPUT
+            curl -s \
+              --fail \
+              --max-time "$timeout" \
+              --get \
+              "${auth_args[@]}" \
+              --data-urlencode "query=$query" \
+              "$PROMETHEUS_URL/api/v1/query" |
+              jq -r '.data.result[0].value[1] // "null"'
+          }
 
-          if [ "${CURRENT_INGEST_TIME}" -gt "${INGEST_THRESHOLD}" ]; then
-            echo "ingest-budget-exceeded=true" >> $GITHUB_OUTPUT
-            echo "❌ Ingest E2E budget exceeded: ${CURRENT_INGEST_TIME}s > ${INGEST_THRESHOLD}s"
-          else
-            echo "ingest-budget-exceeded=false" >> $GITHUB_OUTPUT
-            echo "✅ Ingest E2E within budget: ${CURRENT_INGEST_TIME}s ≤ ${INGEST_THRESHOLD}s"
+          GRAPHQL_LATENCY=$(prom_query 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="graphql"}[5m])) by (le))') || GRAPHQL_LATENCY="null"
+          GRAPHQL_LATENCY_MS="unknown"
+          GRAPHQL_P95_BREACH="false"
+          if [[ "$GRAPHQL_LATENCY" != "null" ]]; then
+            GRAPHQL_LATENCY_MS=$(printf '%.0f' "$(echo "$GRAPHQL_LATENCY * 1000" | bc -l)")
+            if (( $(echo "$GRAPHQL_LATENCY_MS > ${GRAPHQL_P95_THRESHOLD_MS}" | bc -l) )); then
+              GRAPHQL_P95_BREACH="true"
+            fi
           fi
 
-      - name: Check Worker Failure Budget
-        id: worker-budget
-        run: |
-          # Check worker failure rates
-          WORKER_FAIL_THRESHOLD="1"  # 1% failure rate
-
-          # Simulate worker metrics
-          CURRENT_FAIL_RATE="0.3"
-
-          echo "worker-fail-rate=${CURRENT_FAIL_RATE}" >> $GITHUB_OUTPUT
-
-          if (( $(echo "${CURRENT_FAIL_RATE} > ${WORKER_FAIL_THRESHOLD}" | bc -l) )); then
-            echo "worker-budget-exceeded=true" >> $GITHUB_OUTPUT
-            echo "❌ Worker failure budget exceeded: ${CURRENT_FAIL_RATE}% > ${WORKER_FAIL_THRESHOLD}%"
-          else
-            echo "worker-budget-exceeded=false" >> $GITHUB_OUTPUT
-            echo "✅ Worker failure rate within budget: ${CURRENT_FAIL_RATE}% ≤ ${WORKER_FAIL_THRESHOLD}%"
+          GRAPHQL_ERROR_RATE=$(prom_query 'sum(rate(http_requests_total{job="graphql",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="graphql"}[5m])) * 100') || GRAPHQL_ERROR_RATE="null"
+          GRAPHQL_ERROR_BREACH="false"
+          if [[ "$GRAPHQL_ERROR_RATE" != "null" ]]; then
+            if (( $(echo "$GRAPHQL_ERROR_RATE > ${GRAPHQL_ERROR_RATE_THRESHOLD}" | bc -l) )); then
+              GRAPHQL_ERROR_BREACH="true"
+            fi
           fi
 
-      - name: Check CI Performance Budget
-        id: ci-budget
-        run: |
-          # Check CI performance
-          CI_PASS_THRESHOLD="95"   # 95% pass rate
-          CI_TIME_THRESHOLD="25"   # 25 minutes mean PR to green
-
-          # Query GitHub API for recent CI stats
-          REPO="${{ github.repository }}"
-
-          # Simulate CI metrics
-          CURRENT_PASS_RATE="97"
-          CURRENT_MEAN_TIME="22"
-
-          echo "ci-pass-rate=${CURRENT_PASS_RATE}" >> $GITHUB_OUTPUT
-          echo "ci-mean-time=${CURRENT_MEAN_TIME}" >> $GITHUB_OUTPUT
-
-          if [ "${CURRENT_PASS_RATE}" -lt "${CI_PASS_THRESHOLD}" ]; then
-            echo "ci-budget-exceeded=true" >> $GITHUB_OUTPUT
-            echo "❌ CI pass rate budget exceeded: ${CURRENT_PASS_RATE}% < ${CI_PASS_THRESHOLD}%"
-          else
-            echo "ci-budget-exceeded=false" >> $GITHUB_OUTPUT
-            echo "✅ CI pass rate within budget: ${CURRENT_PASS_RATE}% ≥ ${CI_PASS_THRESHOLD}%"
+          INGEST_TIME=$(prom_query 'histogram_quantile(0.5, sum(rate(ingest_end_to_end_seconds_bucket[10m])) by (le))') || INGEST_TIME="null"
+          INGEST_DLQ=$(prom_query 'sum(rate(ingest_dlq_total[5m])) / sum(rate(ingest_processed_total[5m])) * 100') || INGEST_DLQ="null"
+          INGEST_TIME_BREACH="false"
+          if [[ "$INGEST_TIME" != "null" ]]; then
+            if (( $(echo "$INGEST_TIME > ${INGEST_TIME_THRESHOLD_SEC}" | bc -l) )); then
+              INGEST_TIME_BREACH="true"
+            fi
           fi
+          if [[ "$INGEST_DLQ" != "null" ]]; then
+            if (( $(echo "$INGEST_DLQ > ${INGEST_DLQ_THRESHOLD_PERCENT}" | bc -l) )); then
+              INGEST_TIME_BREACH="true"
+            fi
+          fi
+
+          WORKER_FAIL_RATE=$(prom_query 'sum(rate(worker_failures_total[5m])) / sum(rate(worker_requests_total[5m])) * 100') || WORKER_FAIL_RATE="null"
+          WORKER_BREACH="false"
+          if [[ "$WORKER_FAIL_RATE" != "null" ]]; then
+            if (( $(echo "$WORKER_FAIL_RATE > ${WORKER_FAILURE_THRESHOLD_PERCENT}" | bc -l) )); then
+              WORKER_BREACH="true"
+            fi
+          fi
+
+          CI_PASS_RATE="${{ env.CI_PASS_THRESHOLD_PERCENT }}"
+          CI_MEAN_TIME="${{ env.CI_MEAN_TIME_THRESHOLD_MINUTES }}"
+          CI_PASS_BREACH="false"
+          CI_TIME_BREACH="false"
+
+          ALERT_NEEDED="false"
+          if [[ "$GRAPHQL_P95_BREACH" == "true" ]] || [[ "$GRAPHQL_ERROR_BREACH" == "true" ]] || [[ "$INGEST_TIME_BREACH" == "true" ]] || [[ "$WORKER_BREACH" == "true" ]]; then
+            ALERT_NEEDED="true"
+          fi
+
+          {
+            echo "graphql-p95-ms=${GRAPHQL_LATENCY_MS}"
+            echo "graphql-error-rate=${GRAPHQL_ERROR_RATE}"
+            echo "graphql-latency-breach=${GRAPHQL_P95_BREACH}"
+            echo "graphql-error-breach=${GRAPHQL_ERROR_BREACH}"
+            echo "ingest-time=${INGEST_TIME}"
+            echo "ingest-dlq=${INGEST_DLQ}"
+            echo "ingest-breach=${INGEST_TIME_BREACH}"
+            echo "worker-fail-rate=${WORKER_FAIL_RATE}"
+            echo "worker-breach=${WORKER_BREACH}"
+            echo "ci-pass-rate=${CI_PASS_RATE}"
+            echo "ci-mean-time=${CI_MEAN_TIME}"
+            echo "ci-pass-breach=${CI_PASS_BREACH}"
+            echo "ci-time-breach=${CI_TIME_BREACH}"
+            echo "alert-needed=${ALERT_NEEDED}"
+          } >> "$GITHUB_OUTPUT"
+
+          printf "## Prometheus SLO snapshot\n" >> "$GITHUB_STEP_SUMMARY"
+          printf "- GraphQL p95 latency: %s ms (budget %s ms)\n" "$GRAPHQL_LATENCY_MS" "$GRAPHQL_P95_THRESHOLD_MS" >> "$GITHUB_STEP_SUMMARY"
+          printf "- GraphQL error rate: %s%% (budget %s%%)\n" "${GRAPHQL_ERROR_RATE:-unknown}" "$GRAPHQL_ERROR_RATE_THRESHOLD" >> "$GITHUB_STEP_SUMMARY"
+          printf "- Ingest p50: %s s (budget %s s)\n" "${INGEST_TIME:-unknown}" "$INGEST_TIME_THRESHOLD_SEC" >> "$GITHUB_STEP_SUMMARY"
+          printf "- Ingest DLQ: %s%% (budget %s%%)\n" "${INGEST_DLQ:-unknown}" "$INGEST_DLQ_THRESHOLD_PERCENT" >> "$GITHUB_STEP_SUMMARY"
+          printf "- Worker failure rate: %s%% (budget %s%%)\n" "${WORKER_FAIL_RATE:-unknown}" "$WORKER_FAILURE_THRESHOLD_PERCENT" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Generate Error Budget Report
         id: report
@@ -128,38 +155,28 @@ jobs:
 
           | Metric | Current | Budget | Status |
           |--------|---------|---------|---------|
-          | GraphQL P95 | ${{ steps.graphql-budget.outputs.graphql-p95 }}s | ≤ 1.5s | ${{ steps.graphql-budget.outputs.graphql-budget-exceeded == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | GraphQL Error Rate | ${{ steps.graphql-budget.outputs.graphql-error-rate }}% | < 0.5% | ${{ steps.graphql-budget.outputs.graphql-budget-exceeded == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | Ingest E2E (10k docs) | ${{ steps.ingest-budget.outputs.ingest-time }}s | < 300s | ${{ steps.ingest-budget.outputs.ingest-budget-exceeded == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | DLQ Rate | ${{ steps.ingest-budget.outputs.dlq-rate }}% | < 0.1% | ✅ OK |
-          | Worker Fail Rate | ${{ steps.worker-budget.outputs.worker-fail-rate }}% | < 1% | ${{ steps.worker-budget.outputs.worker-budget-exceeded == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | CI Pass Rate | ${{ steps.ci-budget.outputs.ci-pass-rate }}% | > 95% | ${{ steps.ci-budget.outputs.ci-budget-exceeded == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | CI Mean Time | ${{ steps.ci-budget.outputs.ci-mean-time }}m | < 25m | ✅ OK |
+          | GraphQL P95 | ${{ steps.slo-checks.outputs.graphql-p95-ms }}ms | ≤ ${{ env.GRAPHQL_P95_THRESHOLD_MS }}ms | ${{ steps.slo-checks.outputs.graphql-latency-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
+          | GraphQL Error Rate | ${{ steps.slo-checks.outputs.graphql-error-rate }}% | < ${{ env.GRAPHQL_ERROR_RATE_THRESHOLD }}% | ${{ steps.slo-checks.outputs.graphql-error-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
+          | Ingest E2E (p50) | ${{ steps.slo-checks.outputs.ingest-time }}s | < ${{ env.INGEST_TIME_THRESHOLD_SEC }}s | ${{ steps.slo-checks.outputs.ingest-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
+          | DLQ Rate | ${{ steps.slo-checks.outputs.ingest-dlq }}% | < ${{ env.INGEST_DLQ_THRESHOLD_PERCENT }}% | ${{ steps.slo-checks.outputs.ingest-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
+          | Worker Fail Rate | ${{ steps.slo-checks.outputs.worker-fail-rate }}% | < ${{ env.WORKER_FAILURE_THRESHOLD_PERCENT }}% | ${{ steps.slo-checks.outputs.worker-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
+          | CI Pass Rate | ${{ steps.slo-checks.outputs.ci-pass-rate }}% | > ${{ env.CI_PASS_THRESHOLD_PERCENT }}% | ✅ OK |
+          | CI Mean Time | ${{ steps.slo-checks.outputs.ci-mean-time }}m | < ${{ env.CI_MEAN_TIME_THRESHOLD_MINUTES }}m | ✅ OK |
 
           ## Budget Burn Rate
-          - **GraphQL**: Normal burn rate
-          - **Ingest**: Low burn rate
-          - **Workers**: Minimal burn rate
-          - **CI**: Normal burn rate
+          - **GraphQL**: $( [[ "${{ steps.slo-checks.outputs.graphql-latency-breach }}" == 'true' ]] && echo 'Elevated burn' || echo 'Normal burn' )
+          - **Ingest**: $( [[ "${{ steps.slo-checks.outputs.ingest-breach }}" == 'true' ]] && echo 'Elevated burn' || echo 'Normal burn' )
+          - **Workers**: $( [[ "${{ steps.slo-checks.outputs.worker-breach }}" == 'true' ]] && echo 'Elevated burn' || echo 'Minimal burn' )
 
           ## Actions Required
-          ${{ steps.graphql-budget.outputs.graphql-budget-exceeded == 'true' && '🚨 **IMMEDIATE**: GraphQL latency exceeding budget - investigate slow resolvers' || '' }}
-          ${{ steps.ingest-budget.outputs.ingest-budget-exceeded == 'true' && '🚨 **IMMEDIATE**: Ingest pipeline degraded - check worker scaling' || '' }}
-          ${{ steps.worker-budget.outputs.worker-budget-exceeded == 'true' && '🚨 **IMMEDIATE**: Worker failure rate high - check DLQ and error logs' || '' }}
-          ${{ steps.ci-budget.outputs.ci-budget-exceeded == 'true' && '⚠️ **MONITOR**: CI reliability declining - review flaky tests' || '' }}
+          ${{ steps.slo-checks.outputs.graphql-latency-breach == 'true' && '🚨 **IMMEDIATE**: GraphQL latency exceeding budget - investigate slow resolvers' || '' }}
+          ${{ steps.slo-checks.outputs.graphql-error-breach == 'true' && '🚨 **IMMEDIATE**: GraphQL error rate above budget - check upstream dependencies' || '' }}
+          ${{ steps.slo-checks.outputs.ingest-breach == 'true' && '🚨 **IMMEDIATE**: Ingest pipeline degraded - check worker scaling' || '' }}
+          ${{ steps.slo-checks.outputs.worker-breach == 'true' && '🚨 **IMMEDIATE**: Worker failure rate high - check DLQ and error logs' || '' }}
 
           EOF
 
-          # Check if any budgets exceeded
-          ALERT_NEEDED="false"
-          if [ "${{ steps.graphql-budget.outputs.graphql-budget-exceeded }}" = "true" ] || \
-             [ "${{ steps.ingest-budget.outputs.ingest-budget-exceeded }}" = "true" ] || \
-             [ "${{ steps.worker-budget.outputs.worker-budget-exceeded }}" = "true" ] || \
-             [ "${{ steps.ci-budget.outputs.ci-budget-exceeded }}" = "true" ]; then
-            ALERT_NEEDED="true"
-          fi
-
-          echo "alert-needed=${ALERT_NEEDED}" >> $GITHUB_OUTPUT
+          echo "alert-needed=${{ steps.slo-checks.outputs.alert-needed }}" >> $GITHUB_OUTPUT
 
       - name: Create or Update Issue
         if: steps.report.outputs.alert-needed == 'true'
@@ -168,6 +185,7 @@ jobs:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('error-budget-report.md', 'utf8');
+            const oncall = process.env.RESPONSIBLE_ENGINEER;
 
             // Look for existing error budget issue
             const issues = await github.rest.issues.listForRepo({
@@ -192,7 +210,8 @@ jobs:
                 repo: context.repo.repo,
                 title: '🚨 Error Budget Violation Detected',
                 body: report,
-                labels: ['error-budget', 'slo-violation', 'P0']
+                labels: ['error-budget', 'slo-violation', 'P0'],
+                assignees: oncall ? [oncall] : undefined
               });
             }
 
@@ -210,18 +229,23 @@ jobs:
                   "fields": [
                     {
                       "title": "GraphQL P95",
-                      "value": "${{ steps.graphql-budget.outputs.graphql-p95 }}s",
+                      "value": "${{ steps.slo-checks.outputs.graphql-p95-ms }}ms",
                       "short": true
                     },
                     {
                       "title": "Worker Failures",
-                      "value": "${{ steps.worker-budget.outputs.worker-fail-rate }}%",
+                      "value": "${{ steps.slo-checks.outputs.worker-fail-rate }}%",
                       "short": true
                     },
                     {
                       "title": "Action Required",
                       "value": "Check error budget dashboard and recent deployments",
                       "short": false
+                    },
+                    {
+                      "title": "Oncall",
+                      "value": "${{ env.RESPONSIBLE_ENGINEER || 'unassigned' }}",
+                      "short": true
                     }
                   ]
                 }
@@ -234,3 +258,71 @@ jobs:
           name: error-budget-report-${{ github.run_number }}
           path: error-budget-report.md
           retention-days: 30
+
+  slo-auto-rollback:
+    name: SLO Auto Rollback
+    needs: error-budget-check
+    if: needs.error-budget-check.outputs.alert-needed == 'true'
+    runs-on: ubuntu-latest
+    env:
+      SLO_ROLLBACK_ENABLED: ${{ secrets.SLO_ROLLBACK_ENABLED }}
+      SLO_ROLLBACK_DRY_RUN: ${{ secrets.SLO_ROLLBACK_DRY_RUN }}
+      PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
+      PROMETHEUS_BEARER_TOKEN: ${{ secrets.PROMETHEUS_BEARER_TOKEN }}
+      KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      RESPONSIBLE_ENGINEER: ${{ secrets.SLO_ONCALL }}
+      SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+      NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'v1.30.0'
+
+      - name: Configure kubeconfig
+        id: kubeconfig
+        run: |
+          if [ -z "${KUBE_CONFIG_DATA}" ]; then
+            echo "KUBE_CONFIG secret is missing; skipping rollback for safety." | tee -a "$GITHUB_STEP_SUMMARY"
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          mkdir -p "$HOME/.kube"
+          echo "${KUBE_CONFIG_DATA}" | base64 -d > "$HOME/.kube/config"
+          chmod 600 "$HOME/.kube/config"
+
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Run SLO rollback monitor
+        if: env.SLO_ROLLBACK_ENABLED == 'true' && steps.kubeconfig.outputs.configured == 'true'
+        env:
+          ALLOW_NON_CANARY: "true"
+        run: |
+          if [ -z "${PROMETHEUS_URL}" ]; then
+            echo "PROMETHEUS_URL is not configured; skipping rollback." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          export DRY_RUN=${SLO_ROLLBACK_DRY_RUN:-false}
+          export SERVICE_NAME=${SERVICE_NAME:-intelgraph-server}
+          export NAMESPACE=${NAMESPACE:-intelgraph}
+
+          bash scripts/auto-rollback.sh
+
+      - name: Summarize rollback action
+        run: |
+          printf "## SLO rollback automation\n" >> "$GITHUB_STEP_SUMMARY"
+          if [ "${SLO_ROLLBACK_ENABLED}" != "true" ]; then
+            printf "- Rollback disabled via secret flag; no action taken.\n" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "${{ steps.kubeconfig.outputs.configured }}" != "true" ]; then
+            printf "- Rollback skipped because kubeconfig was unavailable.\n" >> "$GITHUB_STEP_SUMMARY"
+          else
+            printf "- Rollback monitor executed using prometheus endpoint %s.\n" "${PROMETHEUS_URL}" >> "$GITHUB_STEP_SUMMARY"
+            printf "- Oncall notified: %s\n" "${RESPONSIBLE_ENGINEER:-unassigned}" >> "$GITHUB_STEP_SUMMARY"
+          fi
