@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: golden-path
+spec:
+  type: ClusterIP
+  selector:
+    app: golden-path
+  ports:
+    - port: 3000
+      targetPort: {{ .Values.service.port }}
+      protocol: TCP
+      name: http
