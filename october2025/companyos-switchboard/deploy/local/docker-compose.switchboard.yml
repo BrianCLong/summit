@@ -22,10 +22,46 @@ services:
   signaling:
     image: ghcr.io/companyos/signaling:latest
     ports: ['8080:8080']
-  nats:
+    environment:
+      - NATS_URL=nats://haproxy:4222
+  nats1:
     image: nats:2
-    command: ['-js']
-    ports: ['4222:4222', '8222:8222']
+    command:
+      - '-p'
+      - '4222'
+      - '--cluster'
+      - 'nats://0.0.0.0:6222'
+      - '--routes'
+      - 'nats://rurl@nats2:6222,nats://rurl@nats3:6222'
+      - '-js'
+    ports:
+      - "8222:8222"
+  nats2:
+    image: nats:2
+    command:
+      - '-p'
+      - '4222'
+      - '--cluster'
+      - 'nats://0.0.0.0:6222'
+      - '--routes'
+      - 'nats://rurl@nats1:6222,nats://rurl@nats3:6222'
+      - '-js'
+  nats3:
+    image: nats:2
+    command:
+      - '-p'
+      - '4222'
+      - '--cluster'
+      - 'nats://0.0.0.0:6222'
+      - '--routes'
+      - 'nats://rurl@nats1:6222,nats://rurl@nats2:6222'
+      - '-js'
+  haproxy:
+    image: haproxy:latest
+    ports:
+      - "4222:4222"
+    volumes:
+      - ./haproxy:/usr/local/etc/haproxy:ro
   opa:
     image: openpolicyagent/opa:latest
     command: ['run', '--server', '/policies']
@@ -34,6 +70,6 @@ services:
   agent-gateway:
     image: ghcr.io/companyos/agent-gateway:latest
     environment:
-      - NATS_URL=nats://nats:4222
+      - NATS_URL=nats://haproxy:4222
       - OPA_URL=http://opa:8181
     ports: ['7070:7070']
