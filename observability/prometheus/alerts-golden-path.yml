@@ -1,0 +1,32 @@
+groups:
+  - name: SummitGoldenPath
+    rules:
+      - alert: GoldenPathLatencyHigh
+        expr: histogram_quantile(0.95, sum(rate(intelgraph_http_request_duration_seconds_bucket{route=~"/graphql.*"}[5m])) by (le)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Golden Path GraphQL Latency > 500ms"
+          description: "p95 latency for GraphQL is {{ $value }}s, exceeding SLO of 0.5s."
+
+      - alert: APIHealthDown
+        expr: up{job="api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "API Down"
+          description: "API instance is not reporting metrics."
+
+      - alert: GoldenPathErrorRateHigh
+        expr: sum(rate(intelgraph_http_request_duration_seconds_count{status=~"5.."}[5m])) / sum(rate(intelgraph_http_request_duration_seconds_count[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High API Error Rate"
+          description: "API error rate is > 1% (current: {{ $value }})."

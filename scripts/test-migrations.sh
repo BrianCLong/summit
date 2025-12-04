@@ -110,12 +110,12 @@ test_makefile_target() {
 test_smoke_schema_check() {
   log "Test 6: Verifying smoke test has schema verification..."
 
-  if ! grep -q "Database Schema Verification" "$SCRIPT_DIR/smoke-test.js"; then
-    log_error "smoke-test.js does not have schema verification step"
+  if ! grep -q "Database Schema Verification" "$SCRIPT_DIR/smoke-test.cjs"; then
+    log_error "smoke-test.cjs does not have schema verification step"
     return 1
   fi
 
-  log_success "smoke-test.js has schema verification"
+  log_success "smoke-test.cjs has schema verification"
   return 0
 }
 
