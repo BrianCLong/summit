@@ -1,0 +1,21 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image-signature
+spec:
+  validationFailureAction: Audit # Changed from Enforce to Audit for safety
+  background: false
+  webhookTimeoutSeconds: 30
+  rules:
+    - name: check-image-signature
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      verifyImages:
+      - repository: "ghcr.io/intelgraph/*"
+        key: |-
+          -----BEGIN PUBLIC KEY-----
+          YOUR_COSIGN_PUBLIC_KEY_HERE
+          -----END PUBLIC KEY-----

@@ -1,0 +1,26 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-pod-security-standard
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: restricted-profile
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      validate:
+        message: "Pod violates Restricted Pod Security Standard."
+        pattern:
+          spec:
+            securityContext:
+              runAsNonRoot: true
+            containers:
+              - securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop: ["ALL"]
+                  readOnlyRootFilesystem: true

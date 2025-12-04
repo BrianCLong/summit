@@ -1,0 +1,17 @@
+name: Preview Environment Janitor
+on:
+  schedule:
+    - cron: '0 * * * *' # Hourly
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Authenticate K8s
+        run: echo "Stub: Authenticate to cluster"
+      - name: Run Janitor
+        run: |
+          chmod +x scripts/preview-janitor.sh
+          ./scripts/preview-janitor.sh

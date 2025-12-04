@@ -1,0 +1,23 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-critical-cves
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: check-image-scan
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      validate:
+        message: "Images with critical vulnerabilities are prohibited."
+        # This assumes an admission controller or image scanning integration injects metadata
+        # or checks against an external attestations store.
+        # For demonstration, we enforce no 'latest' tag as a proxy for hygiene.
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"

@@ -1,0 +1,23 @@
+apiVersion: openslo/v1
+kind: SLO
+metadata:
+  name: global-latency
+  displayName: Global Latency p95
+spec:
+  service: gateway
+  description: "p95 latency < 1.5s for successful requests"
+  budgetingMethod: Occurrences
+  objectives:
+    - ratioMetrics:
+        good:
+          source: prometheus
+          queryType: promql
+          query: sum(rate(http_request_duration_seconds_bucket{le="1.5"}[5m]))
+        total:
+          source: prometheus
+          queryType: promql
+          query: sum(rate(http_request_duration_seconds_count[5m]))
+      target: 0.99
+      timeWindow:
+        - duration: 28d
+          isRolling: true

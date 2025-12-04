@@ -1,0 +1,32 @@
+groups:
+- name: SLOBurnAlerts
+  rules:
+  - alert: HighErrorBudgetBurn
+    expr: |
+      (
+        sum(rate(http_requests_total{status=~"5.."}[1h]))
+        /
+        sum(rate(http_requests_total[1h]))
+      ) > (14.4 * (1 - 0.995))
+    for: 2m
+    labels:
+      severity: critical
+      service: gateway
+    annotations:
+      summary: "High error budget burn rate (1h window)"
+      description: "We are burning error budget at >14.4x rate. Action required."
+
+  - alert: FastErrorBudgetBurn
+    expr: |
+      (
+        sum(rate(http_requests_total{status=~"5.."}[5m]))
+        /
+        sum(rate(http_requests_total[5m]))
+      ) > (14.4 * (1 - 0.995))
+    for: 2m
+    labels:
+      severity: page
+      service: gateway
+    annotations:
+      summary: "Fast error budget burn rate (5m window)"
+      description: "Immediate action required: 5m burn rate is critical."
