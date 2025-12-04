@@ -7,12 +7,15 @@ import type { PromptConfig } from './types';
 
 export class PromptRegistry {
   private prompts: Map<string, PromptConfig> = new Map();
+  private partials: Map<string, string> = new Map();
   private schema: any = null;
   private ajv = new Ajv();
   private promptsDir: string;
+  private libraryDir: string;
 
   constructor(promptsDir: string = './prompts') {
     this.promptsDir = promptsDir;
+    this.libraryDir = path.join(promptsDir, 'library');
   }
 
   async initialize(): Promise<void> {
@@ -21,6 +24,9 @@ export class PromptRegistry {
       const schemaPath = path.join(this.promptsDir, 'schema.json');
       const schemaContent = await fs.readFile(schemaPath, 'utf-8');
       this.schema = JSON.parse(schemaContent);
+
+      // Load partials first
+      await this.loadPartials();
 
       // Load all prompt templates
       const files = await fs.readdir(this.promptsDir);
@@ -32,14 +38,54 @@ export class PromptRegistry {
         await this.loadPrompt(path.join(this.promptsDir, file));
       }
 
-      logger.info(`Loaded ${this.prompts.size} prompt templates`, {
+      logger.info(`Loaded ${this.prompts.size} prompt templates and ${this.partials.size} partials`, {
         templates: Array.from(this.prompts.keys()),
+        partials: Array.from(this.partials.keys()),
       });
     } catch (error: any) {
       logger.error('Failed to initialize prompt registry', {
         error: error.message,
       });
       throw error;
+    }
+  }
+
+  private async loadPartials(): Promise<void> {
+    try {
+        // recursive scan of libraryDir
+        const files = await this.getFiles(this.libraryDir);
+        for (const file of files) {
+            // we only care about .md or .txt files for partials
+            if (!file.endsWith('.md') && !file.endsWith('.txt')) continue;
+
+            const content = await fs.readFile(file, 'utf-8');
+            // key is relative path from libraryDir, minus extension
+            const relPath = path.relative(this.libraryDir, file);
+            const key = relPath.replace(/\.(md|txt)$/, '').replace(/\\/g, '/'); // normalize slashes
+
+            this.partials.set(key, content);
+            logger.debug('Loaded partial', { key, file: path.basename(file) });
+        }
+    } catch (error: any) {
+        // It's okay if library dir doesn't exist yet
+        if (error.code !== 'ENOENT') {
+             logger.warn('Failed to load partials', { error: error.message });
+        }
+    }
+  }
+
+  // Recursive file walker
+  private async getFiles(dir: string): Promise<string[]> {
+    try {
+        const dirents = await fs.readdir(dir, { withFileTypes: true });
+        const files = await Promise.all(dirents.map((dirent) => {
+        const res = path.resolve(dir, dirent.name);
+        return dirent.isDirectory() ? this.getFiles(res) : res;
+        }));
+        return Array.prototype.concat(...(files as any)); // Flatten
+    } catch (err: any) {
+        if (err.code === 'ENOENT') return [];
+        throw err;
     }
   }
 
@@ -135,14 +181,37 @@ export class PromptRegistry {
   ): string {
     let rendered = template;
 
-    // Handle simple {{variable}} replacements
+    // 1. Resolve partials (recursive)
+    let previous;
+    let depth = 0;
+    const MAX_DEPTH = 10;
+    do {
+      previous = rendered;
+      rendered = rendered.replace(
+        /{{\s*>\s*([\w./-]+)\s*}}/g,
+        (match, partialName) => {
+            const partialContent = this.partials.get(partialName);
+            if (!partialContent) {
+                // Warning logged but we keep the tag visible so it's obvious it failed
+                // Or we can strip it. Let's strip it to avoid breaking downstream parsers,
+                // but logging is crucial.
+                logger.warn(`Partial not found: ${partialName}`);
+                return `[MISSING PARTIAL: ${partialName}]`;
+            }
+            return partialContent;
+        }
+      );
+      depth++;
+    } while (rendered !== previous && depth < MAX_DEPTH);
+
+    // 2. Handle simple {{variable}} replacements
     for (const [key, value] of Object.entries(inputs)) {
       const placeholder = new RegExp(`{{\\s*${key}\\s*}}`, 'g');
       const stringValue = this.formatValue(value);
       rendered = rendered.replace(placeholder, stringValue);
     }
 
-    // Handle array iterations {{#array}}...{{/array}}
+    // 3. Handle array iterations {{#array}}...{{/array}}
     rendered = this.renderArrays(rendered, inputs);
 
     return rendered;
@@ -253,6 +322,7 @@ export class PromptRegistry {
 
   async reloadPrompts(): Promise<void> {
     this.prompts.clear();
+    this.partials.clear();
     await this.initialize();
   }
 }

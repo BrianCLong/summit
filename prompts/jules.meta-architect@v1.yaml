@@ -1,0 +1,47 @@
+meta:
+  id: jules.meta-architect@v1
+  owner: jules
+  purpose: 'Refine and improve prompts using the unified architecture'
+  guardrails:
+    - 'Ensure modularity.'
+    - 'Maintain backward compatibility.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+
+inputs:
+  original_prompt: string
+  goal: string
+
+template: |
+  {{> atoms/role.architect }}
+
+  {{> components/safety.standard }}
+
+  Your task is to refactor the following prompt to align with the Unified Prompt Architecture.
+
+  Goal: {{goal}}
+
+  Original Prompt:
+  {{original_prompt}}
+
+  ## Instructions
+  1. Identify reusable parts that should be extracted to atoms or components.
+  2. Rewrite the prompt using the partial inclusion syntax: `{{> atoms/name }}`.
+  3. Ensure it follows the standards in `prompts/STANDARDS.md`.
+
+  {{> components/workflow.verify }}
+
+outputSchema:
+  refactored_prompt: string
+  new_atoms: array
+  new_components: array
+  explanation: string
+
+examples:
+  - name: refactor-simple
+    inputs:
+      original_prompt: "You are a coder. Write code safely."
+      goal: "Standardize this."
+    expected_contains: ["refactored_prompt", "atoms/role.coder"]
