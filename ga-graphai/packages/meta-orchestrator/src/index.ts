@@ -1165,3 +1165,13 @@ export {
   type GenerativeActionTranslatorOptions,
   type OrchestrationIntent,
 } from './gen-actions/intentTranslator.js';
+export {
+  MetaContextOrchestrator,
+  type ContextAffordance,
+  type ContextAssemblyRequest,
+  type ContextContract,
+  type ContextDelta,
+  type ContextLayer,
+  type ContextNode,
+  type ContextPacket,
+} from './metaContextOrchestrator.js';
