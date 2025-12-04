@@ -28,7 +28,7 @@
     "@opentelemetry/auto-instrumentations-node": "^0.67.0",
     "@opentelemetry/exporter-jaeger": "^2.2.0",
     "@opentelemetry/exporter-prometheus": "^0.208.0",
-    "@opentelemetry/resources": "^2.1.0",
+    "@opentelemetry/resources": "^2.2.0",
     "@opentelemetry/sdk-node": "^0.208.0",
     "@opentelemetry/semantic-conventions": "^1.38.0",
     "axios": "^1.6.0",
