@@ -1,0 +1,27 @@
+name: Migration Audit
+
+on:
+  push:
+    paths:
+      - 'server/db/migrations/postgres/**'
+  pull_request:
+    paths:
+      - 'server/db/migrations/postgres/**'
+  workflow_dispatch:
+
+jobs:
+  audit-migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (tsx)
+        run: npm install -g tsx
+
+      - name: Run Migration Audit
+        run: npx tsx server/scripts/audit_migrations.ts --check
