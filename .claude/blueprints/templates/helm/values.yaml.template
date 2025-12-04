@@ -1,0 +1,80 @@
+# Default values for {{SERVICE_NAME}}
+
+replicaCount: 2
+
+image:
+  repository: ghcr.io/brianlong/summit/{{SERVICE_NAME}}
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: {{PORT}}
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: {{SERVICE_NAME}}.summit.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+env:
+  - name: NODE_ENV
+    value: "production"
+  - name: PORT
+    value: "{{PORT}}"
+  - name: LOG_LEVEL
+    value: "info"
+
+envFrom:
+  - configMapRef:
+      name: {{SERVICE_NAME}}-config
+  - secretRef:
+      name: {{SERVICE_NAME}}-secrets
+
+livenessProbe:
+  httpGet:
+    path: /health/live
+    port: {{PORT}}
+  initialDelaySeconds: 10
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /health/ready
+    port: {{PORT}}
+  initialDelaySeconds: 5
+  periodSeconds: 5
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  path: /metrics
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "{{PORT}}"
+  prometheus.io/path: "/metrics"
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
