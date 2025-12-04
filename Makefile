@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight dev test-e2e down-dev
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -7,6 +7,7 @@ NODE_VERSION ?= 18
 PY_VERSION ?= 3.11
 COMPOSE ?= ./scripts/run-compose.sh
 DEV_COMPOSE_FILE ?= docker-compose.dev.yml
+MVP2_COMPOSE_FILE ?= deploy/compose/docker-compose.mvp2.yml
 AI_COMPOSE_FILE ?= docker-compose.ai.yml
 ENV_FILE ?= .env
 
@@ -206,3 +207,57 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+dev: preflight
+	@echo "==> dev: Starting MVP.2 services..."
+	@if [ ! -f $(ENV_FILE) ]; then \
+	  echo "ERROR: $(ENV_FILE) not found. Run 'make bootstrap' first."; \
+	  exit 1; \
+	fi
+	@if [ -f $(MVP2_COMPOSE_FILE) ]; then \
+	  echo "Building and starting containers for MVP.2..."; \
+	  $(COMPOSE) -f $(MVP2_COMPOSE_FILE) --env-file $(ENV_FILE) up -d --build --remove-orphans || { \
+	    echo ""; \
+	    echo "ERROR: Docker Compose failed to start MVP.2 services."; \
+	    exit 1; \
+	  }; \
+	  echo "Waiting for MVP.2 services to be healthy..."; \
+	  ./scripts/wait-for-stack.sh || { \
+	    echo ""; \
+	    echo "ERROR: MVP.2 services failed health checks."; \
+	    exit 1; \
+	  }; \
+	  echo ""; \
+	  echo "MVP.2 services ready! ✓"; \
+	else \
+	  echo "WARNING: $(MVP2_COMPOSE_FILE) not found; skipping"; \
+	fi
+
+down-dev:
+	@echo "==> down-dev: stopping MVP.2 stack"
+	@if [ -f $(MVP2_COMPOSE_FILE) ]; then \
+	  $(COMPOSE) -f $(MVP2_COMPOSE_FILE) down --remove-orphans || true; \
+	fi
+
+test-e2e: dev
+	@echo "==> test-e2e: Running end-to-end tests..."
+	@if [ -f package.json ]; then \
+	  if command -v pnpm >/dev/null 2>&1; then pnpm test:e2e; \
+	  else npm run test:e2e; fi || { \
+	    echo ""; \
+	    echo "ERROR: End-to-end tests failed."; \
+		$(MAKE) down-dev; \
+	    exit 1; \
+	  }; \
+	else \
+	  echo "WARNING: package.json missing; skipping end-to-end tests"; \
+	fi
+	@echo ""
+	@echo "test-e2e: DONE ✓"
+	@$(MAKE) down-dev
+
+test-opa:
+	@echo "==> test-opa: Running OPA tests..."
+	@docker run --rm -v $(pwd):/workspace -w /workspace openpolicyagent/opa:latest test -v policies/mvp2
+	@echo ""
+	@echo "test-opa: DONE ✓"
