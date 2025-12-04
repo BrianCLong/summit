@@ -1,0 +1,7 @@
+dataset: experiments/datasets/mock_math.jsonl
+metrics:
+  - exact_match
+  - trace_length
+  - tool_efficiency
+output_dir: benchmark/results
+experiment_name: math_reasoning_baseline
