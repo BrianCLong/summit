@@ -1,0 +1,10 @@
+{
+  "alert_id": "APIErrorRateSLOBurn",
+  "alert_name": "API error rate SLO breach",
+  "severity": "critical",
+  "service": "api",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "API error rate is {{ $value | humanizePercentage }} (threshold: 1%) over the last 5 minutes"
+}

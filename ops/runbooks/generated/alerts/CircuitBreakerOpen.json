@@ -1,0 +1,10 @@
+{
+  "alert_id": "CircuitBreakerOpen",
+  "alert_name": "Circuit breaker is open",
+  "severity": "critical",
+  "service": "unknown",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "Circuit breaker for {{ $labels.provider }} is open"
+}

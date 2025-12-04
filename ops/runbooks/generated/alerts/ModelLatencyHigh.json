@@ -1,0 +1,10 @@
+{
+  "alert_id": "ModelLatencyHigh",
+  "alert_name": "Model latency is high",
+  "severity": "warning",
+  "service": "unknown",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "95th percentile latency for {{ $labels.provider }}/{{ $labels.model }} is {{ $value }}s"
+}

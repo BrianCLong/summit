@@ -1,0 +1,10 @@
+{
+  "alert_id": "ModelProviderHighErrorRate",
+  "alert_name": "Model provider error rate high",
+  "severity": "critical",
+  "service": "unknown",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "Error rate for {{ $labels.provider }}/{{ $labels.model }} is {{ $value | humanizePercentage }}"
+}

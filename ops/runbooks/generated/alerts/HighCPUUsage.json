@@ -1,0 +1,10 @@
+{
+  "alert_id": "HighCPUUsage",
+  "alert_name": "High CPU usage detected",
+  "severity": "warning",
+  "service": "unknown",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "CPU usage is {{ $value }}% on instance {{ $labels.instance }}"
+}

@@ -1,0 +1,10 @@
+{
+  "alert_id": "ModelBudgetNearLimit",
+  "alert_name": "Model budget approaching limit",
+  "severity": "warning",
+  "service": "gateway",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "Model budget is {{ $value | humanizePercentage }} spent for environment {{ $labels.env }}"
+}

@@ -1,0 +1,10 @@
+{
+  "alert_id": "TestCoverageDropped",
+  "alert_name": "Test coverage dropped below threshold",
+  "severity": "warning",
+  "service": "unknown",
+  "tenant_id": null,
+  "metrics": {},
+  "timestamp": "2025-11-27T03:39:31+00:00",
+  "description": "Test coverage for {{ $labels.suite }} is {{ $value }}% (threshold: 75%)"
+}
