@@ -10,7 +10,7 @@
 import { test, expect, Page } from '@playwright/test';
 
 // Golden Path: Investigation → Entities → Relationships → Copilot → Results
-test.describe('Golden Path - Complete Investigation Flow', () => {
+test.describe('Golden Path - Complete Investigation Flow @golden-path-critical', () => {
   test.beforeEach(async ({ page }) => {
     // Ensure demo data is loaded
     await page.goto('/');
@@ -30,7 +30,12 @@ test.describe('Golden Path - Complete Investigation Flow', () => {
       await expect(page.locator('h1')).toContainText('Investigations');
 
       // Click on demo investigation
-      await page.click('[data-testid="investigation-demo-investigation-001"]');
+      const demoInvestigation = page.locator(
+        '[data-testid="investigation-demo-investigation-001"]',
+      );
+      await expect(demoInvestigation).toBeVisible();
+      await demoInvestigation.click();
+
       await expect(page.locator('h1')).toContainText(
         'Supply Chain Infiltration Demo',
       );

@@ -370,6 +370,13 @@ const goldenPathStepTotal = new client.Counter({
   labelNames: ['step', 'status', 'tenant_id'],
 });
 
+// UI Error Boundary Metrics
+const uiErrorBoundaryCatchTotal = new client.Counter({
+  name: 'ui_error_boundary_catch_total',
+  help: 'Total number of UI errors caught by the React Error Boundary',
+  labelNames: ['component', 'tenant_id'],
+});
+
 // DORA Metrics (Maestro)
 const maestroDeploymentsTotal = new client.Counter({
   name: 'maestro_deployments_total',
@@ -410,6 +417,7 @@ register.registerMetric(businessApiCallsTotal);
 register.registerMetric(businessRevenueTotal);
 register.registerMetric(serviceAutoRemediationsTotal);
 register.registerMetric(goldenPathStepTotal);
+register.registerMetric(uiErrorBoundaryCatchTotal);
 register.registerMetric(maestroDeploymentsTotal);
 register.registerMetric(maestroPrLeadTimeHours);
 register.registerMetric(maestroChangeFailureRate);
@@ -487,6 +495,7 @@ export {
   businessRevenueTotal,
   serviceAutoRemediationsTotal,
   goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
