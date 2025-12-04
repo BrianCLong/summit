@@ -528,6 +528,26 @@ class SmokeTest {
       await this.log(`API response time: ${responseTime}ms`, 'info');
     });
 
+    // Phase 7.5: Enterprise Feature Verification
+    await this.test('Verify Narrative Simulation Active', async () => {
+      try {
+        const response = await axios.get(`${config.apiBaseUrl}/simulations`, {
+          timeout: 5000,
+          validateStatus: null, // Allow handling 403 manually
+        });
+
+        if (response.status === 200) {
+          await this.log('Narrative Simulation endpoint is active (200 OK)', 'info');
+        } else if (response.status === 403) {
+           throw new Error('Narrative Simulation feature is disabled (Received 403 Forbidden)');
+        } else {
+           throw new Error(`Unexpected status from /simulations: ${response.status}`);
+        }
+      } catch (error) {
+        throw new Error(`Failed to check Narrative Simulation: ${error.message}`);
+      }
+    });
+
     // Phase 8: Clean Up (optional)
     await this.test('Environment Cleanup', async () => {
       // In a real scenario, you might want to clean up test data
