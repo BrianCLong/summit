@@ -4,6 +4,10 @@ import { SchemaValidator } from '../lib/config/schema-validator';
 import { MigrationEngine, MigrationError } from '../lib/config/migration-engine';
 import { ConfigWatcher } from '../lib/config/config-watcher';
 import * as yaml from 'js-yaml';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const TEST_CONFIG_DIR = path.join(__dirname, 'test_config');
 const SCHEMA_DIR = path.join(__dirname, '../../config/schemas');

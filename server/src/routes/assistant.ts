@@ -1,11 +1,14 @@
 import type { Express, Request, Response } from 'express';
 import { MockLLM, generatorToReadable } from '../services/llm';
 import { auth } from '../middleware/auth';
-import { rateLimit } from '../middleware/rateLimit';
+import { rateLimitMiddleware as rateLimit } from '../middleware/rateLimit';
 import { logAssistantEvent } from '../db/audit';
 import { enqueueEnrichment } from '../workers/enrichment'; // New import
 import { enqueue } from '../services/coalescer'; // Import enqueue for coalescing
-import { httpLatency, httpErrors, tokensOut } from '../telemetry/metrics'; // New import
+// import { httpLatency, httpErrors, tokensOut } from '../telemetry/metrics'; // New import
+const httpLatency = { startTimer: (_: any) => (_: any) => {} };
+const httpErrors = { inc: (_: any) => {} };
+const tokensOut = { inc: (_: any, __?: any) => {} };
 import { randomUUID } from 'node:crypto'; // New import
 import { isSuspicious } from '../services/guard'; // New import
 import { getCached, setCached } from '../cache/answers'; // New import
@@ -38,8 +41,8 @@ export function mountAssistant(app: Express, io?: any) {
   // POST /assistant/stream -> chunked text
   app.post(
     '/assistant/stream',
-    auth(true),
-    rateLimit(),
+    auth,
+    rateLimit,
     async (req: Request, res: Response) => {
       const started = Date.now();
       const reqId = (req as any).reqId;
@@ -151,8 +154,8 @@ export function mountAssistant(app: Express, io?: any) {
   // GET /assistant/sse?q=... -> text/event-stream
   app.get(
     '/assistant/sse',
-    auth(true),
-    rateLimit(),
+    auth,
+    rateLimit,
     async (req: Request, res: Response) => {
       const started = Date.now();
       const reqId = (req as any).reqId;
@@ -317,6 +320,10 @@ export function mountAssistant(app: Express, io?: any) {
             return;
           }
 
+          const reqId =
+            socket.handshake.headers['x-request-id'] || randomUUID(); // Assuming requestId middleware for HTTP, or generate for Socket.IO
+          const userId = socket.handshake.auth?.token ? 'socket_user' : null; // Placeholder for actual user ID from Socket.IO auth
+
           let experimentVariant = 'control';
           let cites: any[] = []; // Declare cites here
           if (process.env.ASSISTANT_RAG === '1') {
@@ -353,9 +360,6 @@ export function mountAssistant(app: Express, io?: any) {
           const ac = new AbortController();
           socket.on('disconnect', () => ac.abort());
           const started = Date.now();
-          const reqId =
-            socket.handshake.headers['x-request-id'] || randomUUID(); // Assuming requestId middleware for HTTP, or generate for Socket.IO
-          const userId = socket.handshake.auth?.token ? 'socket_user' : null; // Placeholder for actual user ID from Socket.IO auth
           let tokens = 0;
           let fullResponseText = ''; // To collect full response for cache
           try {

@@ -3,11 +3,103 @@
  * Provides common test utilities and matchers
  */
 
-// Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+import { jest, beforeAll, afterAll, afterEach, expect } from '@jest/globals';
+import * as matchers from 'jest-extended';
 
-// Global test timeout
-jest.setTimeout(30000);
+const { __esModule, default: defaultExport, ...actualMatchers } = matchers;
+expect.extend(actualMatchers);
+
+// Mock IORedis
+jest.mock('ioredis', () => {
+  return class Redis {
+    constructor() {}
+    on() { return this; }
+    connect() { return Promise.resolve(); }
+    get() { return Promise.resolve(null); }
+    set() { return Promise.resolve('OK'); }
+    del() { return Promise.resolve(1); }
+    quit() { return Promise.resolve('OK'); }
+    disconnect() { return Promise.resolve('OK'); }
+    duplicate() { return this; }
+    subscribe() { return Promise.resolve(); }
+    psubscribe() { return Promise.resolve(); }
+    publish() { return Promise.resolve(); }
+    scanStream() { return { on: (evt, cb) => { if (evt === 'end') cb(); } }; }
+  };
+});
+
+// Mock pg
+jest.mock('pg', () => {
+  const mClient = {
+    connect: jest.fn(),
+    query: jest.fn(),
+    end: jest.fn(),
+    release: jest.fn(),
+  };
+  return {
+    Pool: jest.fn(() => ({
+      connect: jest.fn(() => Promise.resolve(mClient)),
+      query: jest.fn(),
+      end: jest.fn(),
+      on: jest.fn(),
+    })),
+    Client: jest.fn(() => mClient),
+    types: {
+      setTypeParser: jest.fn(),
+    },
+  };
+});
+
+// Mock OpenTelemetry
+jest.mock('@opentelemetry/api', () => ({
+  metrics: {
+    getMeterProvider: jest.fn(),
+    setGlobalMeterProvider: jest.fn(),
+  },
+  Meter: jest.fn(),
+  Counter: jest.fn(),
+  Histogram: jest.fn(),
+  UpDownCounter: jest.fn(),
+  ObservableGauge: jest.fn(),
+  trace: {
+    getTracer: jest.fn(() => ({
+      startSpan: jest.fn(() => ({
+        end: jest.fn(),
+        setAttribute: jest.fn(),
+        recordException: jest.fn(),
+        setStatus: jest.fn(),
+      })),
+    })),
+  },
+  context: {
+    active: jest.fn(),
+  },
+}));
+
+jest.mock('@opentelemetry/exporter-prometheus', () => ({
+  PrometheusExporter: jest.fn(),
+}));
+
+jest.mock('@opentelemetry/sdk-metrics', () => ({
+  MeterProvider: jest.fn(() => ({
+    getMeter: jest.fn(() => ({
+      createCounter: jest.fn(() => ({ add: jest.fn() })),
+      createHistogram: jest.fn(() => ({ record: jest.fn() })),
+      createUpDownCounter: jest.fn(() => ({ add: jest.fn() })),
+      createObservableGauge: jest.fn(() => ({ addCallback: jest.fn() })),
+    })),
+    addMetricReader: jest.fn(),
+  })),
+  PeriodicExportingMetricReader: jest.fn(),
+}));
+
+jest.mock('@opentelemetry/resources', () => ({
+  Resource: jest.fn(),
+}));
+
+jest.mock('@opentelemetry/semantic-conventions', () => ({
+  SemanticResourceAttributes: { SERVICE_NAME: 'service.name' },
+}));
 
 // Mock console methods to reduce noise in tests unless debugging
 const originalConsole = { ...console };
@@ -46,10 +138,14 @@ const blockFocus = (what) => {
   );
 };
 
-Object.defineProperty(global.it, 'only', { get: () => blockFocus('it.only') });
-Object.defineProperty(global.describe, 'only', {
-  get: () => blockFocus('describe.only'),
-});
+if (global.it) {
+  Object.defineProperty(global.it, 'only', { get: () => blockFocus('it.only') });
+}
+if (global.describe) {
+  Object.defineProperty(global.describe, 'only', {
+    get: () => blockFocus('describe.only'),
+  });
+}
 
 // Global test utilities
 global.testUtils = {
