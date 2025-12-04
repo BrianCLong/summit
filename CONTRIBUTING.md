@@ -64,6 +64,13 @@ docs(readme): update quickstart instructions
 chore(deps): update pnpm-lock.yaml
 ```
 
+### Community Workflow
+
+- **Discuss ideas early:** Open a GitHub Discussion for RFCs and architecture questions before filing a large feature request.
+- **Issue templates:** Use `bug_report.yml` for defects, `feature_request.yml` for new capabilities, and `ops-weekly-release.md` for operational tasks. Include logs and exact `make smoke` output when reporting failures.
+- **Labels:** Apply `bug`, `feature`, `performance`, or `ai/observability` to help triage. New contributors can self-assign `good first issue` items after confirming in Discussions.
+- **Sync in chat:** Join the Summit Discord (`Community` section in README) for pairing sessions or to coordinate test runs when touching shared infra.
+
 ### Pull Request Requirements
 
 - Keep changes scoped and focused
