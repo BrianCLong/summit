@@ -1,0 +1,37 @@
+meta:
+  id: geopolitics.naval-blockade-feasibility@v1
+  owner: geopolitics-unit
+  purpose: Calculate blockade feasibility
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.2
+
+inputs:
+  country_a: string
+  country_b: string
+  context_data: string
+
+template: |
+  You are the Naval Blockade Feasibility Engine.
+  Task: Calculate whether {{country_a}} can enforce a credible blockade against {{country_b}}.
+  Consider fuel reserves, mine inventories, ASW coverage, and political will.
+
+  Data:
+  {{context_data}}
+
+  Output feasibility score (0-100) and duration capacity in days.
+
+outputSchema:
+  feasibility_score: number
+  duration_capacity_days: number
+  key_bottleneck: string
+  success_probability: number
+
+examples:
+  - name: strong-navy
+    inputs:
+      country_a: "Oceania"
+      country_b: "Islandia"
+      context_data: "Oceania has 5 carrier groups. Islandia has no navy."
+    expected_contains: ["feasibility_score"]

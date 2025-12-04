@@ -1,0 +1,35 @@
+meta:
+  id: geopolitics.nuclear-winter-survivors@v1
+  owner: geopolitics-unit
+  purpose: List countries surviving nuclear winter
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  context_data: string
+
+template: |
+  You are the Nuclear Winter Agricultural Survivor List.
+  Task: List which countries can still feed their populations after 18 months of nuclear winter.
+
+  Data:
+  {{context_data}}
+
+  Output list of countries, calorie per capita, and key crop.
+
+outputSchema:
+  surviving_countries:
+    type: array
+    items:
+      country_name: string
+      calories_per_capita: number
+      primary_food_source: string
+      survival_probability: number
+
+examples:
+  - name: southern-hemisphere
+    inputs:
+      context_data: "Global temp drop 10C. Northern hemisphere sterilized."
+    expected_contains: ["surviving_countries"]

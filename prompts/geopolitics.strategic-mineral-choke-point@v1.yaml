@@ -1,0 +1,37 @@
+meta:
+  id: geopolitics.mineral-choke-point@v1
+  owner: geopolitics-unit
+  purpose: Identify mineral supply cut locations
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  mineral: string
+  context_data: string
+
+template: |
+  You are the Strategic Mineral Choke Point Map.
+  Task: Identify the three physical locations where global supply of {{mineral}} can be cut with <48 hours notice.
+
+  Data:
+  {{context_data}}
+
+  Output three locations, percentage of supply affected, and notice time.
+
+outputSchema:
+  choke_points:
+    type: array
+    items:
+      location_name: string
+      supply_percentage: number
+      cut_notice_hours: number
+      coordinates: string
+
+examples:
+  - name: lithium-choke
+    inputs:
+      mineral: "Lithium"
+      context_data: "Major refinery in Port A. Mine in Region B."
+    expected_contains: ["choke_points"]

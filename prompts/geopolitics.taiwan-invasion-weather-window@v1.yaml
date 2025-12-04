@@ -1,0 +1,37 @@
+meta:
+  id: geopolitics.taiwan-invasion-window@v1
+  owner: geopolitics-unit
+  purpose: Predict invasion windows
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  context_data: string
+
+template: |
+  You are the Taiwan Invasion Weather Window system.
+  Task: Specify exact 10-day windows when cross-strait invasion is physically possible.
+  Inputs: satellite SAR, submarine acoustic signatures, hospital blood reserves, PLA leave cancellations.
+
+  Data:
+  {{context_data}}
+
+  Output invasion windows, probability score, and key constraints.
+
+outputSchema:
+  invasion_windows:
+    type: array
+    items:
+      start_date: string
+      end_date: string
+      weather_suitability: string
+      logistics_readiness: string
+  overall_probability: number
+
+examples:
+  - name: quiet-strait
+    inputs:
+      context_data: "Typhoon season active. No leave cancellations."
+    expected_contains: ["invasion_windows"]

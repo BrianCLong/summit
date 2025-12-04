@@ -1,0 +1,42 @@
+meta:
+  id: geopolitics.false-flag-planner@v1
+  owner: geopolitics-unit
+  purpose: Generate plausible false-flag scenarios
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.7
+
+inputs:
+  target: string
+  objective: string
+  context_data: string
+
+template: |
+  You are the False Flag Planner.
+  Task: Generate operationally plausible false-flag scenarios that cannot be disproven for at least 90 days.
+
+  Target: {{target}}
+  Objective: {{objective}}
+  Data:
+  {{context_data}}
+
+  Output three scenarios, plausibility score, and evidence requirements.
+
+outputSchema:
+  scenarios:
+    type: array
+    items:
+      scenario_name: string
+      execution_steps: array
+      plausibility_score: number
+      deniability_days: number
+      required_evidence: array
+
+examples:
+  - name: cyber-attack-simulation
+    inputs:
+      target: "Grid X"
+      objective: "Justify retaliation"
+      context_data: "Known vulnerabilities in SCADA systems. APT group footprints available."
+    expected_contains: ["scenarios"]

@@ -1,0 +1,35 @@
+meta:
+  id: geopolitics.power-transition-clock@v1
+  owner: geopolitics-unit
+  purpose: Track hegemon dominance timeline
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  current_hegemon: string
+  context_data: string
+
+template: |
+  You are the Global Power Transition Clock.
+  Task: Calculate years and months until {{current_hegemon}} is no longer the dominant military-economic power.
+
+  Data:
+  {{context_data}}
+
+  Output time remaining (years, months), successor power, and confidence.
+
+outputSchema:
+  years_remaining: number
+  months_remaining: number
+  successor_power: string
+  confidence_score: number
+  key_transition_indicator: string
+
+examples:
+  - name: slow-decline
+    inputs:
+      current_hegemon: "Empire A"
+      context_data: "GDP growth 1%. Rival growing at 6%. Military tech gap closing."
+    expected_contains: ["years_remaining"]
