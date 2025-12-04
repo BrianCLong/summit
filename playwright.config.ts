@@ -8,6 +8,7 @@ export default defineConfig({
     'e2e/maestro.spec.ts',
     'e2e/**/*.a11y.spec.ts',
     'tests/e2e/**/*.spec.ts',
+    'tests/integration/**/*.spec.ts',
   ],
   timeout: 30_000,
   retries: 2,
