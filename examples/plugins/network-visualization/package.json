@@ -1,0 +1,20 @@
+{
+  "name": "@summit-plugins/network-visualization",
+  "version": "1.0.0",
+  "description": "Interactive network graph visualization plugin",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["visualization", "network-graph", "d3"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@summit/plugin-system": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@summit-plugins/pattern-analytics",
+  "version": "1.0.0",
+  "description": "Pattern detection analytics plugin for IntelGraph",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["analytics", "pattern-detection", "threat-intelligence"],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@summit/plugin-system": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
