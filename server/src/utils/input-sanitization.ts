@@ -9,10 +9,13 @@
  * - NoSQL Injection
  * - LDAP Injection
  * - XML Injection
+ *
+ * Uses DOMPurify for robust HTML sanitization with regex fallback
  */
 
 import validator from 'validator';
 import { escape as htmlEscape } from 'html-escaper';
+import DOMPurify from 'isomorphic-dompurify';
 
 /**
  * Sanitize string input to prevent XSS
@@ -32,21 +35,298 @@ export function sanitizeString(input: string): string {
 }
 
 /**
- * Sanitize HTML content (allow safe HTML tags)
+ * DOMPurify configuration for different sanitization modes
  */
-export function sanitizeHTML(input: string, allowedTags?: string[]): string {
+const DOMPURIFY_CONFIGS = {
+  // Standard safe HTML with limited tags
+  standard: {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span'],
+    ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'class'],
+    ALLOW_DATA_ATTR: false,
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
+    SANITIZE_DOM: true,
+    WHOLE_DOCUMENT: false,
+    RETURN_DOM: false,
+    RETURN_DOM_FRAGMENT: false,
+  },
+  // Strict mode - only plain text with basic formatting
+  strict: {
+    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'br'],
+    ALLOWED_ATTR: [],
+    ALLOW_DATA_ATTR: false,
+    SANITIZE_DOM: true,
+  },
+  // Rich content with more tags allowed
+  rich: {
+    ALLOWED_TAGS: [
+      'b', 'i', 'em', 'strong', 'a', 'p', 'br', 'ul', 'ol', 'li', 'span',
+      'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'pre', 'code',
+      'table', 'thead', 'tbody', 'tr', 'th', 'td', 'img',
+    ],
+    ALLOWED_ATTR: ['href', 'title', 'src', 'alt', 'class', 'id', 'colspan', 'rowspan'],
+    ALLOW_DATA_ATTR: false,
+    FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'form', 'input'],
+    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'onfocus', 'onblur'],
+    SANITIZE_DOM: true,
+  },
+} as const;
+
+/**
+ * Comprehensive HTML sanitization using DOMPurify with defense-in-depth
+ *
+ * Security features:
+ * - DOMPurify as primary sanitization engine (battle-tested, regularly updated)
+ * - Tag whitelist enforcement
+ * - Attribute sanitization
+ * - Event handler removal
+ * - Script/style tag removal
+ * - Data URI blocking
+ * - Encoded attack prevention
+ * - URL protocol validation
+ */
+export function sanitizeHTML(
+  input: string,
+  options: {
+    allowedTags?: string[];
+    allowedAttributes?: Record<string, string[]>;
+    stripAll?: boolean;
+    mode?: 'standard' | 'strict' | 'rich';
+    useDOMPurify?: boolean;
+  } = {},
+): string {
   if (typeof input !== 'string') {
     throw new Error('Input must be a string');
   }
 
-  // Basic implementation - for production, use a library like DOMPurify or sanitize-html
-  // This is a simplified version
-  const allowed = allowedTags || ['b', 'i', 'em', 'strong', 'a', 'p', 'br'];
-  const tagPattern = /<\/?([a-z][a-z0-9]*)\b[^>]*>/gi;
+  const {
+    stripAll = false,
+    mode = 'standard',
+    useDOMPurify = true,
+    allowedTags,
+    allowedAttributes,
+  } = options;
 
-  return input.replace(tagPattern, (match, tag) => {
-    return allowed.includes(tag.toLowerCase()) ? match : '';
+  // If stripAll is true, remove all HTML and return plain text
+  if (stripAll) {
+    // Use DOMPurify with empty allowed tags for consistent stripping
+    if (useDOMPurify) {
+      return DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+    return input
+      .replace(/<[^>]*>/g, '')
+      .replace(/&[a-z]+;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  // Use DOMPurify as primary sanitization (recommended)
+  if (useDOMPurify) {
+    // Build config from options or use preset
+    const baseConfig = DOMPURIFY_CONFIGS[mode];
+    const config: DOMPurify.Config = {
+      ...baseConfig,
+      ...(allowedTags && { ALLOWED_TAGS: allowedTags }),
+      ...(allowedAttributes && { ALLOWED_ATTR: Object.values(allowedAttributes).flat() }),
+    };
+
+    // Add hooks for additional security
+    DOMPurify.addHook('uponSanitizeAttribute', (node, data) => {
+      // Block javascript: and data: URLs in href/src
+      if (['href', 'src', 'action', 'formaction'].includes(data.attrName)) {
+        const value = data.attrValue.toLowerCase().trim();
+        if (
+          value.startsWith('javascript:') ||
+          value.startsWith('vbscript:') ||
+          value.startsWith('data:text') ||
+          value.startsWith('data:application')
+        ) {
+          data.attrValue = '#';
+          data.keepAttr = false;
+        }
+      }
+    });
+
+    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+      // Set target="_blank" links to have rel="noopener noreferrer"
+      if (node.tagName === 'A' && node.hasAttribute('target')) {
+        node.setAttribute('rel', 'noopener noreferrer');
+      }
+    });
+
+    const sanitized = DOMPurify.sanitize(input, config);
+
+    // Remove hooks after use to prevent accumulation
+    DOMPurify.removeAllHooks();
+
+    return sanitized;
+  }
+
+  // Fallback: regex-based sanitization (defense-in-depth)
+  return sanitizeHTMLRegex(input, {
+    allowedTags: allowedTags || DOMPURIFY_CONFIGS[mode].ALLOWED_TAGS as unknown as string[],
+    allowedAttributes: allowedAttributes || {
+      a: ['href', 'title'],
+      img: ['src', 'alt', 'title'],
+      span: ['class'],
+    },
   });
+}
+
+/**
+ * Regex-based HTML sanitization (fallback/defense-in-depth)
+ * Used when DOMPurify is disabled or as additional layer
+ */
+function sanitizeHTMLRegex(
+  input: string,
+  options: {
+    allowedTags: string[];
+    allowedAttributes: Record<string, string[]>;
+  },
+): string {
+  const { allowedTags, allowedAttributes } = options;
+
+  let sanitized = input;
+
+  // Step 1: Decode HTML entities that might be used for bypasses
+  sanitized = decodeHtmlEntities(sanitized);
+
+  // Step 2: Remove script tags and their content (highest priority)
+  sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+
+  // Step 3: Remove style tags and their content
+  sanitized = sanitized.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+  // Step 4: Remove all event handlers (on*) from any tag
+  sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+  sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, '');
+
+  // Step 5: Remove javascript: and data: protocols
+  sanitized = sanitized.replace(/\s*href\s*=\s*["']?\s*javascript:[^"'>\s]*/gi, ' href="#"');
+  sanitized = sanitized.replace(/\s*src\s*=\s*["']?\s*javascript:[^"'>\s]*/gi, '');
+  sanitized = sanitized.replace(/\s*href\s*=\s*["']?\s*data:[^"'>\s]*/gi, ' href="#"');
+  sanitized = sanitized.replace(/\s*src\s*=\s*["']?\s*data:(?!image\/)[^"'>\s]*/gi, '');
+
+  // Step 6: Remove dangerous tags entirely
+  const dangerousTags = [
+    'script', 'style', 'iframe', 'object', 'embed', 'form', 'input',
+    'textarea', 'button', 'select', 'option', 'link', 'meta', 'base',
+    'applet', 'frame', 'frameset', 'layer', 'bgsound', 'xml',
+  ];
+  for (const tag of dangerousTags) {
+    const pattern = new RegExp(`<${tag}\\b[^>]*>.*?</${tag}>|<${tag}\\b[^>]*/?>`, 'gis');
+    sanitized = sanitized.replace(pattern, '');
+  }
+
+  // Step 7: Filter tags and attributes
+  sanitized = sanitized.replace(/<\/?([a-z][a-z0-9]*)\b([^>]*)>/gi, (match, tagName, attributes) => {
+    const tag = tagName.toLowerCase();
+
+    // Remove disallowed tags
+    if (!allowedTags.includes(tag)) {
+      return '';
+    }
+
+    // For self-closing or closing tags without attributes
+    if (match.startsWith('</') || !attributes.trim()) {
+      return match.startsWith('</') ? `</${tag}>` : `<${tag}>`;
+    }
+
+    // Sanitize attributes
+    const tagAllowedAttrs = allowedAttributes[tag] || [];
+    let safeAttributes = '';
+
+    // Parse attributes
+    const attrPattern = /([a-z_-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*))/gi;
+    let attrMatch;
+
+    while ((attrMatch = attrPattern.exec(attributes)) !== null) {
+      const attrName = attrMatch[1].toLowerCase();
+      const attrValue = attrMatch[2] || attrMatch[3] || attrMatch[4] || '';
+
+      // Skip event handlers
+      if (attrName.startsWith('on')) {
+        continue;
+      }
+
+      // Skip dangerous attributes
+      if (['style', 'formaction', 'action', 'xlink:href'].includes(attrName)) {
+        continue;
+      }
+
+      // Only include allowed attributes for this tag
+      if (tagAllowedAttrs.includes(attrName)) {
+        // Validate href/src values
+        if (['href', 'src'].includes(attrName)) {
+          const lowerValue = attrValue.toLowerCase().trim();
+          if (
+            lowerValue.startsWith('javascript:') ||
+            lowerValue.startsWith('vbscript:') ||
+            lowerValue.startsWith('data:text') ||
+            lowerValue.startsWith('data:application')
+          ) {
+            continue;
+          }
+        }
+
+        safeAttributes += ` ${attrName}="${htmlEscape(attrValue)}"`;
+      }
+    }
+
+    return `<${tag}${safeAttributes}>`;
+  });
+
+  // Step 8: Final cleanup - remove any remaining encoded attacks
+  sanitized = sanitized.replace(/&#x?[0-9a-f]+;?/gi, (match) => {
+    // Decode and check if it's a dangerous character
+    const decoded = decodeHtmlEntities(match);
+    if (/[<>"']/.test(decoded)) {
+      return '';
+    }
+    return match;
+  });
+
+  return sanitized;
+}
+
+/**
+ * Decode common HTML entities (helper for sanitization)
+ */
+function decodeHtmlEntities(input: string): string {
+  const entities: Record<string, string> = {
+    '&lt;': '<',
+    '&gt;': '>',
+    '&amp;': '&',
+    '&quot;': '"',
+    '&#39;': "'",
+    '&apos;': "'",
+    '&#x27;': "'",
+    '&#x2F;': '/',
+    '&#47;': '/',
+    '&#60;': '<',
+    '&#62;': '>',
+    '&#34;': '"',
+  };
+
+  let decoded = input;
+  for (const [entity, char] of Object.entries(entities)) {
+    decoded = decoded.replace(new RegExp(entity, 'gi'), char);
+  }
+
+  // Handle numeric entities
+  decoded = decoded.replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)));
+  decoded = decoded.replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCharCode(parseInt(code, 16)));
+
+  return decoded;
+}
+
+/**
+ * Strip all HTML tags and return plain text
+ */
+export function stripHTML(input: string): string {
+  return sanitizeHTML(input, { stripAll: true });
 }
 
 /**
