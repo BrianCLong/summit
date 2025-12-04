@@ -98,6 +98,7 @@
     "node-fetch": "3.3.2",
     "node-nlp": "^4.27.0",
     "nodemailer": "^7.0.11",
+    "opossum": "^9.0.0",
     "parquetjs": "0.11.2",
     "pg": "8.16.3",
     "pgvector": "0.2.1",
