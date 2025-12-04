@@ -4,7 +4,6 @@ import request from 'supertest';
 import { pg } from '../../db/pg.js';
 import { webhookQueue } from '../webhook.queue.js';
 import express from 'express';
-import webhookRouter from '../routes/webhooks.js'; // Wait, I need to export default from routes
 import { webhookService } from '../webhook.service.js';
 
 // Mock pg module
@@ -30,6 +29,10 @@ describe('Webhook API', () => {
     app = express();
     app.use(express.json());
     app.use('/api/webhooks', (await import('../../routes/webhooks.js')).default);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {
@@ -120,9 +123,45 @@ describe('Webhook API', () => {
       expect(webhookQueue.add).toHaveBeenCalledWith('deliver-webhook', expect.objectContaining({
         deliveryId: 'delivery-1',
         webhookId: 'wh-1',
+        tenantId,
         eventType: triggerData.eventType,
-        payload: triggerData.payload
+        payload: triggerData.payload,
+        triggerType: 'event'
       }));
+    });
+  });
+
+  describe('POST /api/webhooks/:id/test', () => {
+    it('queues a targeted test delivery', async () => {
+      const spy = jest
+        .spyOn(webhookService, 'triggerWebhook')
+        .mockResolvedValue({ id: 'delivery-test' } as any);
+
+      const res = await request(app)
+        .post('/api/webhooks/wh-99/test')
+        .set('x-tenant-id', tenantId)
+        .send({ payload: { ping: true } });
+
+      expect(res.status).toBe(200);
+      expect(res.body.deliveryId).toBe('delivery-test');
+      expect(spy).toHaveBeenCalledWith(
+        tenantId,
+        'wh-99',
+        'webhook.test',
+        expect.objectContaining({ ping: true }),
+        'test'
+      );
+    });
+
+    it('returns 404 when webhook is missing', async () => {
+      jest.spyOn(webhookService, 'triggerWebhook').mockResolvedValue(null as any);
+
+      const res = await request(app)
+        .post('/api/webhooks/missing/test')
+        .set('x-tenant-id', tenantId)
+        .send({});
+
+      expect(res.status).toBe(404);
     });
   });
 });

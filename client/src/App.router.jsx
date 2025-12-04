@@ -82,6 +82,9 @@ const DisclosurePackagerPage = React.lazy(() =>
 const OrchestratorDashboard = React.lazy(() =>
   import('./features/orchestrator/OrchestratorDashboard')
 );
+const WebhookDashboard = React.lazy(() =>
+  import('./pages/WebhookDashboard.jsx')
+);
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -96,6 +99,7 @@ const navigationItems = [
   { path: '/orchestrator', label: 'Orchestrator', icon: <RocketLaunch /> },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/disclosures', label: 'Disclosures', icon: <Assessment /> },
+  { path: '/webhooks', label: 'Webhooks', icon: <Timeline /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
@@ -673,6 +677,7 @@ function MainLayout() {
               <Route path="/orchestrator" element={<OrchestratorPage />} />
               <Route path="/threats" element={<ThreatsPage />} />
               <Route path="/disclosures" element={<DisclosurePackagerPage />} />
+              <Route path="/webhooks" element={<WebhookDashboard />} />
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
