@@ -13,6 +13,9 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
+import { getPostgresPool } from './db/postgres.js';
+import { getRedisClient } from './db/redis.js';
+import { initializeAuditSystem } from './audit/advanced-audit-system.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
 const __filename = fileURLToPath(import.meta.url);
@@ -20,6 +23,28 @@ const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
 
 const startServer = async () => {
+  // Initialize Audit System
+  let signingKey = process.env.AUDIT_SIGNING_KEY;
+  let encryptionKey = process.env.AUDIT_ENCRYPTION_KEY;
+
+  if (cfg.NODE_ENV === 'production') {
+    if (!signingKey || !encryptionKey) {
+      logger.error('Missing required audit keys in production. Please set AUDIT_SIGNING_KEY and AUDIT_ENCRYPTION_KEY.');
+      process.exit(1);
+    }
+  } else {
+    signingKey = signingKey || 'default-audit-signing-key';
+    encryptionKey = encryptionKey || 'default-audit-encryption-key';
+  }
+
+  initializeAuditSystem(
+    getPostgresPool().pool, // Use the raw pool from managed pool
+    getRedisClient(),
+    logger,
+    signingKey,
+    encryptionKey
+  );
+
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;
   let stopKafkaConsumer: any = null;

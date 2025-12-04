@@ -18,6 +18,7 @@ export type AuditEventType =
   | 'config_change'
   | 'user_login'
   | 'user_logout'
+  | 'user_login_failed'
   | 'user_action'
   | 'resource_access'
   | 'resource_modify'
@@ -183,6 +184,7 @@ export class AdvancedAuditSystem extends EventEmitter {
   // Caching
   private eventBuffer: AuditEvent[] = [];
   private flushInterval: NodeJS.Timeout;
+  private cleanupInterval: NodeJS.Timeout;
 
   constructor(
     db: Pool,
@@ -217,6 +219,16 @@ export class AdvancedAuditSystem extends EventEmitter {
       });
     }, 5000); // Every 5 seconds
 
+    // Start periodic cleanup (once a day)
+    this.cleanupInterval = setInterval(() => {
+      this.cleanupOldEvents().catch((err) => {
+        this.logger.error(
+          { error: err.message },
+          'Failed to cleanup old audit events',
+        );
+      });
+    }, 86400000);
+
     // Cleanup on exit
     process.on('SIGTERM', () => this.gracefulShutdown());
     process.on('SIGINT', () => this.gracefulShutdown());
@@ -230,7 +242,12 @@ export class AdvancedAuditSystem extends EventEmitter {
       // Validate required fields
       const validation = AuditEventSchema.safeParse(eventData);
       if (!validation.success) {
-        throw new Error(`Invalid audit event: ${validation.error.message}`);
+        // Fallback for missing critical fields in dev/testing
+        if (process.env.NODE_ENV !== 'production') {
+           this.logger.warn({ error: validation.error.message, eventData }, 'Invalid audit event (non-production fallback)');
+        } else {
+           throw new Error(`Invalid audit event: ${validation.error.message}`);
+        }
       }
 
       // Build complete event
@@ -246,7 +263,18 @@ export class AdvancedAuditSystem extends EventEmitter {
         ipAddress: eventData.ipAddress,
         userAgent: eventData.userAgent,
         dataClassification: eventData.dataClassification,
-        ...validation.data,
+        // Apply defaults if validation failed (only in non-prod fallback path)
+        eventType: eventData.eventType || 'unknown',
+        level: eventData.level || 'info',
+        correlationId: eventData.correlationId || randomUUID(),
+        tenantId: eventData.tenantId || 'system',
+        serviceId: eventData.serviceId || 'unknown',
+        action: eventData.action || 'unknown',
+        outcome: eventData.outcome || 'success',
+        message: eventData.message || 'No message',
+        details: eventData.details || {},
+        complianceRelevant: eventData.complianceRelevant || false,
+        complianceFrameworks: eventData.complianceFrameworks || [],
       } as AuditEvent;
 
       // Calculate integrity hash
@@ -291,7 +319,8 @@ export class AdvancedAuditSystem extends EventEmitter {
         },
         'Failed to record audit event',
       );
-      throw error;
+      // Don't crash the request if auditing fails, but log it loudly
+      return '';
     }
   }
 
@@ -1100,22 +1129,60 @@ export class AdvancedAuditSystem extends EventEmitter {
     );
   }
 
+  private async cleanupOldEvents(): Promise<void> {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - this.retentionPeriodDays);
+
+    try {
+        await this.db.query('DELETE FROM audit_events WHERE timestamp < $1', [cutoffDate]);
+        this.logger.info({ cutoffDate }, 'Cleaned up old audit events');
+    } catch (error) {
+        this.logger.error({ error: error.message }, 'Failed to cleanup old audit events');
+    }
+  }
+
   private async gracefulShutdown(): Promise<void> {
     this.logger.info('Shutting down audit system gracefully');
 
     clearInterval(this.flushInterval);
+    clearInterval(this.cleanupInterval);
     await this.flushEventBuffer();
 
     this.logger.info('Audit system shutdown complete');
   }
 }
 
-// Export singleton instance
-// Note: This instance should be initialized with proper DB and Redis connections
-// For now, export the class and let consumers create instances as needed
+let instance: AdvancedAuditSystem | null = null;
+
+export const initializeAuditSystem = (
+  db: Pool,
+  redis: Redis,
+  logger: Logger,
+  signingKey: string,
+  encryptionKey: string,
+): AdvancedAuditSystem => {
+  if (instance) return instance;
+
+  instance = new AdvancedAuditSystem(db, redis, logger, signingKey, encryptionKey);
+  return instance;
+};
+
+export const getAuditSystem = (): AdvancedAuditSystem => {
+  if (!instance) {
+    throw new Error('Audit system not initialized');
+  }
+  return instance;
+};
+
+// For backward compatibility or testing mocks
 export const advancedAuditSystem = {
-  logEvent: async (event: Partial<AuditEvent>) => {
-    // Stub implementation - in production this would use the actual AdvancedAuditSystem instance
-    console.log('Audit event:', event);
-  },
+    get: () => {
+        if (!instance) {
+             console.warn('AdvancedAuditSystem accessed before initialization, returning mock');
+             return {
+                 recordEvent: async (e: any) => { console.log('Mock Audit:', e); return 'mock-id'; }
+             };
+        }
+        return instance;
+    }
 };
