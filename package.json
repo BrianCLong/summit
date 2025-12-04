@@ -151,6 +151,9 @@
       "parse-url": "^8.1.0",
       "parse-path": "^5.0.0",
       "parse-duration": ">=2.1.3",
+      "electron": ">=35.7.5",
+      "nanoid": ">=5.0.9",
+      "body-parser": ">=2.2.1",
       "esbuild": "^0.25.0",
       "glob": "^11.1.0",
       "moment": "^2.29.4"
