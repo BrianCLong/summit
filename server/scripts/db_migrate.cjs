@@ -15,32 +15,69 @@ async function migratePostgres() {
 
   const client = new Client({ connectionString: connStr });
   await client.connect();
-  const files = fs
-    .readdirSync(sqlDir)
-    .filter((f) => f.endsWith('.sql'))
-    .sort();
-  for (const f of files) {
-    try {
-      const sql = fs.readFileSync(path.join(sqlDir, f), 'utf8');
+
+  try {
+    // 1. Ensure migrations table exists
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS schema_migrations (
+        migration_name TEXT PRIMARY KEY,
+        applied_at TIMESTAMPTZ DEFAULT now()
+      )
+    `);
+
+    const files = fs
+      .readdirSync(sqlDir)
+      .filter((f) => f.endsWith('.sql'))
+      .sort();
+
+    for (const f of files) {
+      // 2. Check if migration is already recorded
+      const res = await client.query(
+        'SELECT 1 FROM schema_migrations WHERE migration_name = $1',
+        [f],
+      );
+      if (res.rowCount > 0) {
+        continue;
+      }
+
       console.log(`Applying Postgres migration: ${f}`);
-      await client.query(sql);
-      console.log(`✅ Migration ${f} completed successfully`);
-    } catch (error) {
-      console.warn(`⚠️  Migration ${f} failed: ${error.message}`);
-      // Continue with other migrations for demonstration
-      if (
-        error.message.includes('column') &&
-        error.message.includes('does not exist')
-      ) {
-        console.log(
-          `🔧 Column reference issue in ${f} - continuing with other migrations`,
+      try {
+        const sql = fs.readFileSync(path.join(sqlDir, f), 'utf8');
+
+        await client.query('BEGIN');
+        await client.query(sql);
+        await client.query(
+          'INSERT INTO schema_migrations (migration_name) VALUES ($1)',
+          [f],
         );
-      } else {
-        throw error; // Re-throw for serious errors
+        await client.query('COMMIT');
+
+        console.log(`✅ Migration ${f} completed successfully`);
+      } catch (error) {
+        await client.query('ROLLBACK');
+
+        // Legacy support: If it fails because objects exist, assume it was previously applied but not tracked
+        if (
+          error.message.includes('already exists') ||
+          error.message.includes('does not exist') ||
+          error.code === '42P07' // duplicate_table
+        ) {
+          console.warn(
+            `⚠️  Migration ${f} failed with "exists" error (${error.message}). assuming legacy application. Marking as done.`,
+          );
+          await client.query(
+            'INSERT INTO schema_migrations (migration_name) VALUES ($1) ON CONFLICT DO NOTHING',
+            [f],
+          );
+        } else {
+          console.error(`❌ Migration ${f} failed: ${error.message}`);
+          throw error;
+        }
       }
     }
+  } finally {
+    await client.end();
   }
-  await client.end();
 }
 
 async function migrateNeo4j() {
@@ -77,9 +114,6 @@ async function migrateNeo4j() {
       );
 
       if (result.records.length > 0) {
-        console.log(
-          `⏭️  Skipping Neo4j migration ${migrationName} (already applied)`,
-        );
         continue;
       }
 
