@@ -1,0 +1,427 @@
+# Zero Trust Policy CI/CD Pipeline
+# GitOps-based policy deployment with simulation and approval gates
+name: Zero Trust Policy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/**'
+    paths:
+      - 'zero-trust/policies/**'
+      - 'zero-trust/config/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'zero-trust/policies/**'
+      - 'zero-trust/config/**'
+
+env:
+  POLICY_DIR: zero-trust/policies
+  CONFIG_DIR: zero-trust/config
+  SIMULATION_TIMEOUT: 600
+  MIN_ZERO_TRUST_SCORE: 80
+  REQUIRED_APPROVERS: 2
+
+jobs:
+  # Stage 1: Validate policy syntax and schema
+  validate:
+    name: Validate Policies
+    runs-on: ubuntu-latest
+    outputs:
+      changed-files: ${{ steps.changed.outputs.files }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            zero-trust/policies/**/*.yaml
+            zero-trust/policies/**/*.rego
+            zero-trust/config/**/*.yaml
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          npm install -g yaml-lint
+          npm install -g ajv-cli
+
+      - name: Validate YAML syntax
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          echo "Validating YAML files..."
+          for file in ${{ steps.changed.outputs.all_changed_files }}; do
+            if [[ "$file" == *.yaml || "$file" == *.yml ]]; then
+              echo "Validating: $file"
+              yamllint "$file" || exit 1
+            fi
+          done
+
+      - name: Validate Kubernetes schemas
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          echo "Validating Kubernetes manifests..."
+          kubectl apply --dry-run=client -f zero-trust/policies/network/ || true
+          kubectl apply --dry-run=client -f zero-trust/policies/istio/ || true
+
+      - name: Validate OPA policies
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          echo "Validating OPA policies..."
+          docker run --rm -v $(pwd)/zero-trust/policies/opa:/policies \
+            openpolicyagent/opa:latest check /policies/*.rego
+
+      - name: Run OPA tests
+        if: steps.changed.outputs.any_changed == 'true'
+        run: |
+          echo "Running OPA tests..."
+          docker run --rm -v $(pwd)/zero-trust/policies/opa:/policies \
+            openpolicyagent/opa:latest test /policies -v
+
+  # Stage 2: Security scanning
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy config scan
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'config'
+          scan-ref: 'zero-trust/'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+
+      - name: Run Checkov scan
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: zero-trust/
+          framework: kubernetes
+          output_format: sarif
+          output_file_path: reports/
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: reports/
+
+      - name: Run kube-score
+        run: |
+          docker run -v $(pwd)/zero-trust/policies:/policies \
+            zegl/kube-score:latest score /policies/**/*.yaml \
+            --output-format ci || true
+
+  # Stage 3: Policy simulation
+  simulate:
+    name: Policy Simulation
+    runs-on: ubuntu-latest
+    needs: [validate, security-scan]
+    environment: staging
+    outputs:
+      simulation-id: ${{ steps.simulate.outputs.simulation-id }}
+      zero-trust-score: ${{ steps.simulate.outputs.score }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup simulation environment
+        run: |
+          echo "Setting up simulation environment..."
+          # Start local k3d cluster for simulation
+          curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+          k3d cluster create policy-sim --wait
+
+      - name: Deploy baseline policies
+        run: |
+          kubectl apply -f zero-trust/policies/network/base/
+          kubectl apply -f zero-trust/policies/istio/
+
+      - name: Run policy simulation
+        id: simulate
+        run: |
+          echo "Running policy simulation..."
+
+          # Generate unique simulation ID
+          SIMULATION_ID=$(uuidgen)
+          echo "simulation-id=$SIMULATION_ID" >> $GITHUB_OUTPUT
+
+          # Run simulation (would use actual simulator in production)
+          node zero-trust/tools/validate-matrix.ts \
+            --simulation-id "$SIMULATION_ID" \
+            --timeout ${{ env.SIMULATION_TIMEOUT }} \
+            --output simulation-results.json
+
+          # Extract zero trust score
+          SCORE=$(jq '.summary.zeroTrustScore' simulation-results.json)
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+
+          echo "Simulation completed with Zero Trust Score: $SCORE"
+
+      - name: Check simulation results
+        run: |
+          SCORE=${{ steps.simulate.outputs.score }}
+          if [ "$SCORE" -lt "${{ env.MIN_ZERO_TRUST_SCORE }}" ]; then
+            echo "::error::Zero Trust Score ($SCORE) below minimum (${{ env.MIN_ZERO_TRUST_SCORE }})"
+            exit 1
+          fi
+
+          # Check for critical issues
+          CRITICAL_COUNT=$(jq '.summary.criticalCount' simulation-results.json)
+          if [ "$CRITICAL_COUNT" -gt 0 ]; then
+            echo "::error::$CRITICAL_COUNT critical issues found"
+            exit 1
+          fi
+
+      - name: Upload simulation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulation-report
+          path: simulation-results.json
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('simulation-results.json', 'utf8'));
+
+            const body = `## 🔐 Zero Trust Policy Simulation Results
+
+            **Simulation ID:** \`${{ steps.simulate.outputs.simulation-id }}\`
+            **Zero Trust Score:** ${results.summary.zeroTrustScore}/100
+
+            ### Summary
+            | Metric | Value |
+            |--------|-------|
+            | Total Connections | ${results.summary.totalConnections} |
+            | Allowed | ${results.summary.allowedConnections} (${results.summary.allowRate.toFixed(1)}%) |
+            | Denied | ${results.summary.deniedConnections} (${results.summary.denyRate.toFixed(1)}%) |
+            | New Denials | ${results.summary.newDenials} |
+
+            ### Impacted Services
+            ${results.summary.impactedServices.map(s => `- \`${s}\``).join('\n')}
+
+            ### Recommendations
+            ${results.recommendations.map(r => `- **${r.type.toUpperCase()}**: ${r.title}`).join('\n')}
+
+            ---
+            *Policy simulation completed at ${new Date().toISOString()}*
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Cleanup simulation
+        if: always()
+        run: |
+          k3d cluster delete policy-sim || true
+
+  # Stage 4: Approval gate
+  approval:
+    name: Approval Gate
+    runs-on: ubuntu-latest
+    needs: simulate
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://policy.intelgraph.io
+    steps:
+      - name: Request approval
+        uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ secrets.GITHUB_TOKEN }}
+          approvers: security-team,platform-team
+          minimum-approvals: ${{ env.REQUIRED_APPROVERS }}
+          issue-title: "Zero Trust Policy Deployment Approval"
+          issue-body: |
+            Policy changes require approval before production deployment.
+
+            **Simulation ID:** ${{ needs.simulate.outputs.simulation-id }}
+            **Zero Trust Score:** ${{ needs.simulate.outputs.zero-trust-score }}
+
+            Please review the simulation results and approve if acceptable.
+
+  # Stage 5: Deploy to staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [simulate, approval]
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.STAGING_KUBECONFIG }}
+
+      - name: Deploy network policies
+        run: |
+          echo "Deploying network policies to staging..."
+          kubectl apply -f zero-trust/policies/network/base/
+          kubectl apply -f zero-trust/policies/network/services/
+
+      - name: Deploy Istio policies
+        run: |
+          echo "Deploying Istio policies to staging..."
+          kubectl apply -f zero-trust/policies/istio/
+
+      - name: Deploy OPA policies
+        run: |
+          echo "Deploying OPA policies to staging..."
+          kubectl apply -f zero-trust/policies/opa/
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying policy deployment..."
+          kubectl get networkpolicies -A
+          kubectl get authorizationpolicies -A
+          kubectl get peerauthentications -A
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests..."
+          ./zero-trust/tests/integration/run-connectivity-tests.sh staging
+
+  # Stage 6: Deploy to production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://intelgraph.io
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.PRODUCTION_KUBECONFIG }}
+
+      - name: Deploy with canary
+        run: |
+          echo "Deploying with canary strategy..."
+
+          # Apply policies with canary annotation
+          kubectl apply -f zero-trust/policies/network/base/ \
+            --dry-run=server
+
+          # Progressive rollout
+          for ns in intelgraph observability ai-services; do
+            echo "Rolling out to namespace: $ns"
+            kubectl apply -f zero-trust/policies/network/services/ -n $ns
+
+            # Wait and verify
+            sleep 30
+            kubectl get networkpolicies -n $ns
+
+            # Check for errors
+            if kubectl logs -l app=istio-proxy -n $ns --tail=100 | grep -q "RBAC: access denied"; then
+              echo "::error::Access denied errors detected in $ns"
+              exit 1
+            fi
+          done
+
+      - name: Verify production deployment
+        run: |
+          echo "Verifying production deployment..."
+          kubectl get networkpolicies -A
+          kubectl get authorizationpolicies -A
+
+          # Health check
+          curl -sf https://intelgraph.io/health || exit 1
+
+      - name: Create deployment record
+        run: |
+          echo "Creating deployment record..."
+          curl -X POST ${{ secrets.DEPLOYMENT_API }}/records \
+            -H "Authorization: Bearer ${{ secrets.DEPLOYMENT_TOKEN }}" \
+            -d '{
+              "simulationId": "${{ needs.simulate.outputs.simulation-id }}",
+              "zeroTrustScore": ${{ needs.simulate.outputs.zero-trust-score }},
+              "deployedAt": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'",
+              "deployedBy": "${{ github.actor }}",
+              "commit": "${{ github.sha }}"
+            }'
+
+  # Rollback job (manual trigger)
+  rollback:
+    name: Rollback Policies
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.rollback-ref }}
+
+      - name: Configure kubectl
+        uses: azure/k8s-set-context@v3
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.PRODUCTION_KUBECONFIG }}
+
+      - name: Rollback policies
+        run: |
+          echo "Rolling back to ${{ github.event.inputs.rollback-ref }}..."
+          kubectl apply -f zero-trust/policies/network/
+          kubectl apply -f zero-trust/policies/istio/
+          kubectl apply -f zero-trust/policies/opa/
+
+      - name: Verify rollback
+        run: |
+          kubectl get networkpolicies -A
+          curl -sf https://intelgraph.io/health || exit 1
+
+---
+# Reusable workflow for policy validation
+name: Policy Validation
+
+on:
+  workflow_call:
+    inputs:
+      policy-path:
+        required: true
+        type: string
+    outputs:
+      valid:
+        value: ${{ jobs.validate.outputs.valid }}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate policy
+        id: validate
+        run: |
+          # Run validation
+          if ./zero-trust/tools/policy-lint.sh ${{ inputs.policy-path }}; then
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi

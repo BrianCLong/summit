@@ -1,0 +1,419 @@
+# Istio AuthorizationPolicies
+# L7 authorization rules based on SPIFFE identity
+
+---
+# Default deny all in intelgraph-ga namespace
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: default-deny
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+spec:
+  {}
+
+---
+# API Gateway Authorization
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: api-gateway-authz
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+    app.kubernetes.io/part-of: api-gateway
+spec:
+  selector:
+    matchLabels:
+      app: ga-gateway
+  action: ALLOW
+  rules:
+    # Allow from Istio ingress gateway
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+            ports: ["4000", "4001"]
+
+    # Allow from nginx ingress
+    - from:
+        - source:
+            namespaces: ["ingress-nginx"]
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
+            ports: ["4000", "4001"]
+
+    # Allow Prometheus scraping
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/monitoring/sa/prometheus
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/health/*"]
+            ports: ["9090"]
+
+---
+# API Server Authorization
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: api-server-authz
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+    app.kubernetes.io/part-of: api-server
+spec:
+  selector:
+    matchLabels:
+      app: intelgraph-api
+  action: ALLOW
+  rules:
+    # Allow from API Gateway
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-gateway
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE", "PATCH"]
+            paths: ["/api/*", "/graphql", "/health/*"]
+            ports: ["4001"]
+
+    # Allow from Workers
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-worker
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT"]
+            paths: ["/api/*", "/internal/*"]
+            ports: ["4001"]
+
+    # Allow from GraphAI for callbacks
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-graphai
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/api/callback/*"]
+            ports: ["4001"]
+
+    # Allow Prometheus scraping
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/monitoring/sa/prometheus
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/health/*"]
+            ports: ["9090"]
+
+---
+# AdminSec Authorization
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: adminsec-authz
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+    app.kubernetes.io/part-of: adminsec
+spec:
+  selector:
+    matchLabels:
+      app: ga-adminsec
+  action: ALLOW
+  rules:
+    # Allow from API Gateway for auth operations
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-gateway
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE"]
+            paths: ["/auth/*", "/users/*", "/policies/*", "/sessions/*"]
+            ports: ["3000", "3001"]
+
+    # Allow from API Server for token validation
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/intelgraph-api
+      to:
+        - operation:
+            methods: ["POST"]
+            paths: ["/auth/validate", "/auth/refresh"]
+            ports: ["3000"]
+
+    # Allow Prometheus scraping
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/monitoring/sa/prometheus
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/health/*"]
+            ports: ["9090"]
+
+---
+# GraphAI Authorization
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: graphai-authz
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+    app.kubernetes.io/part-of: graphai
+spec:
+  selector:
+    matchLabels:
+      app: ga-graphai
+  action: ALLOW
+  rules:
+    # Allow from API Gateway
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-gateway
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/feature/*", "/embed/*", "/er/*", "/lp/*", "/community/*"]
+            ports: ["8000"]
+
+    # Allow from Workers
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-worker
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/*"]
+            ports: ["8000"]
+
+    # Allow from Intelligence Verticals
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-osint
+              - cluster.local/ns/intelgraph-ga/sa/ga-fintel
+              - cluster.local/ns/intelgraph-ga/sa/ga-cyber
+              - cluster.local/ns/intelgraph-ga/sa/ga-tradecraft
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/feature/*", "/embed/*", "/er/*"]
+            ports: ["8000"]
+
+    # Allow from Copilot
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ai/sa/copilot
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/*"]
+            ports: ["8000"]
+
+    # Allow Prometheus scraping
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/monitoring/sa/prometheus
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/health/*"]
+            ports: ["9090"]
+
+---
+# Intelligence Verticals Authorization
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: intelligence-verticals-authz
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+spec:
+  selector:
+    matchLabels:
+      component: intelligence-vertical
+  action: ALLOW
+  rules:
+    # Allow from API Gateway
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-gateway
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/intel/*", "/analysis/*", "/synthesis/*"]
+            ports: ["8080"]
+
+    # Allow cross-communication between verticals
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-osint
+              - cluster.local/ns/intelgraph-ga/sa/ga-fintel
+              - cluster.local/ns/intelgraph-ga/sa/ga-cyber
+              - cluster.local/ns/intelgraph-ga/sa/ga-tradecraft
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            paths: ["/intel/*", "/analysis/*", "/synthesis/*", "/correlate/*"]
+            ports: ["8080"]
+
+    # Allow from Workers
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-worker
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            ports: ["8080"]
+
+    # Allow from Copilot
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ai/sa/copilot
+      to:
+        - operation:
+            methods: ["GET", "POST"]
+            ports: ["8080"]
+
+    # Allow Prometheus scraping
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/monitoring/sa/prometheus
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/health/*"]
+            ports: ["9090"]
+
+---
+# Database Authorization (intelgraph-data namespace)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: databases-authz
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+spec:
+  action: ALLOW
+  rules:
+    # Allow from API Server
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/intelgraph-api
+
+    # Allow from Workers
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-worker
+
+    # Allow from GraphAI
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-graphai
+
+    # Allow from Intelligence Verticals
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-ga/sa/ga-osint
+              - cluster.local/ns/intelgraph-ga/sa/ga-fintel
+              - cluster.local/ns/intelgraph-ga/sa/ga-cyber
+              - cluster.local/ns/intelgraph-ga/sa/ga-tradecraft
+
+    # Allow from Analytics services
+    - from:
+        - source:
+            namespaces: ["intelgraph-analytics"]
+
+    # Allow from Audit Service
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/intelgraph-system/sa/audit-svc
+
+    # Allow Prometheus scraping
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/monitoring/sa/prometheus
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics"]
+
+---
+# AI Services Authorization (intelgraph-ai namespace)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: ai-services-authz
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: authorization
+spec:
+  action: ALLOW
+  rules:
+    # Allow from intelgraph-ga services
+    - from:
+        - source:
+            namespaces: ["intelgraph-ga"]
+
+    # Allow internal AI service communication
+    - from:
+        - source:
+            namespaces: ["intelgraph-ai"]
+
+    # Allow from Analytics services
+    - from:
+        - source:
+            namespaces: ["intelgraph-analytics"]
+
+    # Allow Prometheus scraping
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/monitoring/sa/prometheus
+      to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/metrics", "/health/*"]

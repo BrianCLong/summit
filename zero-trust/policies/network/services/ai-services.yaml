@@ -1,0 +1,427 @@
+# Network Policies for AI Services
+# AI Service Platform, NLP, Model Serving, Prediction, Copilot
+
+---
+# AI Services Common Ingress
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ai-services-ingress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/type: ai-policy
+spec:
+  podSelector:
+    matchLabels:
+      tier: ai-service
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from intelgraph-ga namespace services
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow from analytics namespace
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-analytics
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow internal AI service communication
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: ai-service
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+        - protocol: TCP
+          port: 50051
+
+    # Allow health checks
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+
+---
+# NLP Service Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nlp-service-ingress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: nlp-service
+spec:
+  podSelector:
+    matchLabels:
+      app: nlp-service
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from Intelligence Verticals
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              component: intelligence-vertical
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow from Worker pods
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-worker
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow from Copilot
+    - from:
+        - podSelector:
+            matchLabels:
+              app: copilot
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow health checks
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nlp-service-egress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: nlp-service
+spec:
+  podSelector:
+    matchLabels:
+      app: nlp-service
+  policyTypes:
+    - Egress
+  egress:
+    # Allow to Model Serving
+    - to:
+        - podSelector:
+            matchLabels:
+              app: model-serving
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+
+    # Allow to Redis (caching)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow to OpenTelemetry
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app: otel-collector
+      ports:
+        - protocol: TCP
+          port: 4317
+
+---
+# Model Serving Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: model-serving-ingress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: model-serving
+spec:
+  podSelector:
+    matchLabels:
+      app: model-serving
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from AI services
+    - from:
+        - podSelector:
+            matchLabels:
+              tier: ai-service
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+
+    # Allow from GraphAI
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-graphai
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+
+    # Allow health checks
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: model-serving-egress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: model-serving
+spec:
+  podSelector:
+    matchLabels:
+      app: model-serving
+  policyTypes:
+    - Egress
+  egress:
+    # Allow to external model APIs (controlled via Istio egress)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Allow to OpenTelemetry
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app: otel-collector
+      ports:
+        - protocol: TCP
+          port: 4317
+
+---
+# Copilot Network Policy
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: copilot-ingress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: copilot
+spec:
+  podSelector:
+    matchLabels:
+      app: copilot
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from API Gateway (WebSocket)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-gateway
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+
+    # Allow health checks
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9090
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: copilot-egress
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: copilot
+spec:
+  podSelector:
+    matchLabels:
+      app: copilot
+  policyTypes:
+    - Egress
+  egress:
+    # Allow to GraphAI
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              app: ga-graphai
+      ports:
+        - protocol: TCP
+          port: 8000
+
+    # Allow to NLP Service
+    - to:
+        - podSelector:
+            matchLabels:
+              app: nlp-service
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow to Model Serving
+    - to:
+        - podSelector:
+            matchLabels:
+              app: model-serving
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+
+    # Allow to Intelligence Verticals
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-ga
+          podSelector:
+            matchLabels:
+              component: intelligence-vertical
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # Allow to Neo4j (graph queries)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+
+    # Allow to Redis (session state)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # Allow external LLM APIs (controlled via Istio egress)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Allow to OpenTelemetry
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app: otel-collector
+      ports:
+        - protocol: TCP
+          port: 4317

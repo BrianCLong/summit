@@ -1,0 +1,391 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "Zero-Trust Network Security Dashboard for IntelGraph Platform",
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+      "id": 1,
+      "panels": [],
+      "title": "Overview",
+      "type": "row"
+    },
+    {
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 1},
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.0",
+      "targets": [
+        {
+          "expr": "sum(up{job=~\"spire-server|spire-agent\"})",
+          "refId": "A"
+        }
+      ],
+      "title": "SPIRE Components Up",
+      "type": "stat"
+    },
+    {
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 1},
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.0",
+      "targets": [
+        {
+          "expr": "sum(rate(opa_decision_total{decision=\"allow\"}[5m])) / sum(rate(opa_decision_total[5m])) * 100",
+          "refId": "A"
+        }
+      ],
+      "title": "Policy Allow Rate %",
+      "type": "stat"
+    },
+    {
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 1},
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.0",
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total{connection_security_policy=\"mutual_tls\"}[5m])) / sum(rate(istio_requests_total[5m])) * 100",
+          "refId": "A"
+        }
+      ],
+      "title": "mTLS Coverage %",
+      "type": "stat"
+    },
+    {
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 1},
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.0.0",
+      "targets": [
+        {
+          "expr": "sum(increase(opa_decision_total{decision=\"deny\"}[24h]))",
+          "refId": "A"
+        }
+      ],
+      "title": "Policy Denials (24h)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 5},
+      "id": 6,
+      "panels": [],
+      "title": "Policy Decisions",
+      "type": "row"
+    },
+    {
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(opa_decision_total[5m])) by (decision)",
+          "legendFormat": "{{decision}}",
+          "refId": "A"
+        }
+      ],
+      "title": "OPA Policy Decisions",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "id": 8,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "topk(10, sum(rate(opa_decision_total{decision=\"deny\"}[5m])) by (source_service, destination_service))",
+          "legendFormat": "{{source_service}} → {{destination_service}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Top Policy Denials by Service Pair",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 14},
+      "id": 9,
+      "panels": [],
+      "title": "mTLS & SPIFFE",
+      "type": "row"
+    },
+    {
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 15},
+      "id": 10,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(istio_tcp_connections_opened_total[5m])) by (connection_security_policy)",
+          "legendFormat": "{{connection_security_policy}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Connections by Security Policy",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 15},
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "(spire_agent_svid_expiry_time_seconds - time()) / 3600",
+          "legendFormat": "Hours until expiry",
+          "refId": "A"
+        }
+      ],
+      "title": "SVID Certificate Time to Expiry",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 23},
+      "id": 12,
+      "panels": [],
+      "title": "Network Policies",
+      "type": "row"
+    },
+    {
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(cilium_drop_count_total{reason=\"Policy denied\"}[5m])) by (destination_namespace)",
+          "legendFormat": "{{destination_namespace}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Network Policy Drops by Namespace",
+      "type": "timeseries"
+    },
+    {
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total{response_code=~\"4..\"}[5m])) by (destination_service_name, response_code)",
+          "legendFormat": "{{destination_service_name}} ({{response_code}})",
+          "refId": "A"
+        }
+      ],
+      "title": "Authorization Errors (4xx) by Service",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 32},
+      "id": 15,
+      "panels": [],
+      "title": "Service Communication Matrix",
+      "type": "row"
+    },
+    {
+      "gridPos": {"h": 10, "w": 24, "x": 0, "y": 33},
+      "id": 16,
+      "options": {
+        "calculate": true,
+        "cellGap": 1,
+        "cellRadius": 4,
+        "color": {
+          "exponent": 0.5,
+          "fill": "dark-orange",
+          "mode": "scheme",
+          "reverse": false,
+          "scale": "exponential",
+          "scheme": "Oranges",
+          "steps": 64
+        },
+        "exemplars": {
+          "color": "rgba(255,0,255,0.7)"
+        },
+        "filterValues": {
+          "le": 1e-9
+        },
+        "legend": {
+          "show": true
+        },
+        "rowsFrame": {
+          "layout": "auto"
+        },
+        "tooltip": {
+          "show": true,
+          "yHistogram": false
+        },
+        "yAxis": {
+          "axisPlacement": "left",
+          "reverse": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(istio_requests_total[5m])) by (source_workload, destination_service_name)",
+          "format": "heatmap",
+          "legendFormat": "{{source_workload}} → {{destination_service_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Service Communication Heatmap",
+      "type": "heatmap"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["zero-trust", "security", "mtls", "spiffe"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "intelgraph-ga",
+          "value": "intelgraph-ga"
+        },
+        "datasource": "Prometheus",
+        "definition": "label_values(kube_namespace_labels, namespace)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Namespace",
+        "multi": true,
+        "name": "namespace",
+        "options": [],
+        "query": {
+          "query": "label_values(kube_namespace_labels, namespace)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "intelgraph.*",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Zero-Trust Security Dashboard",
+  "uid": "zero-trust-main",
+  "version": 1,
+  "weekStart": ""
+}

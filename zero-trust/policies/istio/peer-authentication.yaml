@@ -1,0 +1,267 @@
+# Istio PeerAuthentication Policies
+# Enforces mTLS STRICT mode across all services
+
+---
+# Global mesh-wide mTLS policy
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: istio-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# IntelGraph GA namespace - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# IntelGraph Data namespace - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# IntelGraph Analytics namespace - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: intelgraph-analytics
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# IntelGraph AI namespace - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# IntelGraph System namespace - STRICT mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: intelgraph-system
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# API Gateway - Port-level mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: api-gateway-mtls
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+    app.kubernetes.io/part-of: api-gateway
+spec:
+  selector:
+    matchLabels:
+      app: ga-gateway
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    4000:
+      mode: STRICT
+    4001:
+      mode: STRICT
+    9090:
+      mode: STRICT
+
+---
+# API Server - Port-level mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: api-server-mtls
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+    app.kubernetes.io/part-of: api-server
+spec:
+  selector:
+    matchLabels:
+      app: intelgraph-api
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    4001:
+      mode: STRICT
+    9090:
+      mode: STRICT
+
+---
+# AdminSec - Port-level mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: adminsec-mtls
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+    app.kubernetes.io/part-of: adminsec
+spec:
+  selector:
+    matchLabels:
+      app: ga-adminsec
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    3000:
+      mode: STRICT
+    3001:
+      mode: STRICT
+    9090:
+      mode: STRICT
+
+---
+# GraphAI - Port-level mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: graphai-mtls
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+    app.kubernetes.io/part-of: graphai
+spec:
+  selector:
+    matchLabels:
+      app: ga-graphai
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    8000:
+      mode: STRICT
+    9090:
+      mode: STRICT
+
+---
+# Intelligence Verticals - mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: intelligence-verticals-mtls
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  selector:
+    matchLabels:
+      component: intelligence-vertical
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    8080:
+      mode: STRICT
+    9090:
+      mode: STRICT
+
+---
+# Forensics Service - mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: forensics-mtls
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+    app.kubernetes.io/part-of: forensics
+spec:
+  selector:
+    matchLabels:
+      app: ga-forensics
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    9000:
+      mode: STRICT
+    9090:
+      mode: STRICT
+
+---
+# AI Services - mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: ai-services-mtls
+  namespace: intelgraph-ai
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  selector:
+    matchLabels:
+      tier: ai-service
+  mtls:
+    mode: STRICT
+  portLevelMtls:
+    8080:
+      mode: STRICT
+    8081:
+      mode: STRICT
+    50051:
+      mode: STRICT
+    9090:
+      mode: STRICT
+
+---
+# Database Services - mTLS
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: databases-mtls
+  namespace: intelgraph-data
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: mtls
+spec:
+  mtls:
+    mode: STRICT

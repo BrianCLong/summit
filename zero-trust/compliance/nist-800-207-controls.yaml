@@ -1,0 +1,367 @@
+# NIST SP 800-207 Zero Trust Architecture Controls
+# Automated compliance mapping and validation for IntelGraph
+apiVersion: compliance.intelgraph.io/v1
+kind: ComplianceFramework
+metadata:
+  name: nist-800-207-zero-trust
+  namespace: zero-trust-system
+  labels:
+    framework: nist
+    standard: sp-800-207
+    version: "2020"
+spec:
+  frameworkInfo:
+    name: "NIST Special Publication 800-207"
+    title: "Zero Trust Architecture"
+    version: "2020"
+    lastUpdated: "2020-08-11"
+    authority: "National Institute of Standards and Technology"
+
+  # Core ZTA Tenets from NIST 800-207
+  tenets:
+    - id: ZTA-1
+      name: "All data sources and computing services are resources"
+      description: "Every entity (user, device, application) is a resource requiring protection"
+      automated: true
+      validation:
+        - type: resource_inventory
+          check: "All services registered in service mesh"
+        - type: asset_classification
+          check: "Data classification labels applied"
+
+    - id: ZTA-2
+      name: "All communication is secured regardless of network location"
+      description: "Network location alone does not imply trust"
+      automated: true
+      validation:
+        - type: mtls_enforcement
+          check: "mTLS required for all service-to-service communication"
+        - type: encryption_transit
+          check: "TLS 1.3 minimum for all connections"
+
+    - id: ZTA-3
+      name: "Access to individual enterprise resources is granted on a per-session basis"
+      description: "Trust reevaluated for every access request"
+      automated: true
+      validation:
+        - type: session_validation
+          check: "Per-request authorization checks"
+        - type: token_expiry
+          check: "Short-lived tokens (max 1 hour)"
+
+    - id: ZTA-4
+      name: "Access to resources is determined by dynamic policy"
+      description: "Policy includes client identity, application, and behavioral attributes"
+      automated: true
+      validation:
+        - type: policy_engine
+          check: "OPA policy evaluation for all requests"
+        - type: attribute_based
+          check: "ABAC policies implemented"
+
+    - id: ZTA-5
+      name: "Enterprise monitors and measures integrity and security posture"
+      description: "Continuous monitoring of all assets"
+      automated: true
+      validation:
+        - type: continuous_monitoring
+          check: "Real-time telemetry collection"
+        - type: security_posture
+          check: "Device/workload health checks"
+
+    - id: ZTA-6
+      name: "All resource authentication and authorization are dynamic"
+      description: "Access decisions before allowing access"
+      automated: true
+      validation:
+        - type: dynamic_auth
+          check: "Just-in-time access provisioning"
+        - type: risk_scoring
+          check: "Risk-based authentication"
+
+    - id: ZTA-7
+      name: "Enterprise collects information about assets and uses it to improve security"
+      description: "Continuous improvement through data collection"
+      automated: true
+      validation:
+        - type: asset_telemetry
+          check: "Comprehensive logging and analytics"
+        - type: feedback_loop
+          check: "Automated policy tuning"
+
+  # Control families mapped to IntelGraph implementation
+  controlFamilies:
+    - family: identity
+      name: "Identity Management"
+      controls:
+        - id: ID-1
+          name: "Strong Identity Verification"
+          description: "All identities verified through SPIFFE/SPIRE"
+          implementation:
+            component: spire-server
+            evidence:
+              - "SPIFFE ID issuance for all workloads"
+              - "x509-SVID certificates with short TTL"
+              - "Attestation via node and workload attestors"
+          validation:
+            query: |
+              SELECT COUNT(*) FROM workload_identities
+              WHERE svid_expiry > NOW() AND attestation_verified = true
+            threshold: "100%"
+
+        - id: ID-2
+          name: "Multi-factor Authentication"
+          description: "MFA required for human users"
+          implementation:
+            component: auth-service
+            evidence:
+              - "OIDC with MFA requirement"
+              - "Hardware token support (FIDO2)"
+          validation:
+            query: "user_sessions WHERE mfa_completed = true"
+            threshold: "100%"
+
+        - id: ID-3
+          name: "Identity Federation"
+          description: "Cross-domain identity trust"
+          implementation:
+            component: trust-propagation-controller
+            evidence:
+              - "Trust bundle synchronization"
+              - "Cross-cluster identity mapping"
+
+    - family: device
+      name: "Device Security"
+      controls:
+        - id: DEV-1
+          name: "Device Identity"
+          description: "All devices have cryptographic identity"
+          implementation:
+            component: spire-agent
+            evidence:
+              - "Node attestation via TPM or cloud metadata"
+              - "Device certificates rotated every 24h"
+
+        - id: DEV-2
+          name: "Device Health Assessment"
+          description: "Continuous device security posture monitoring"
+          implementation:
+            component: device-trust-evaluator
+            evidence:
+              - "OS patch level verification"
+              - "Security agent presence check"
+              - "Configuration compliance scan"
+
+    - family: network
+      name: "Network Security"
+      controls:
+        - id: NET-1
+          name: "Micro-segmentation"
+          description: "Network isolated at workload level"
+          implementation:
+            component: cilium-network-policies
+            evidence:
+              - "Default deny ingress/egress"
+              - "Explicit allow rules per service pair"
+              - "L7 policy enforcement"
+          validation:
+            check: network_policy_coverage
+            threshold: "100%"
+
+        - id: NET-2
+          name: "Encrypted Communications"
+          description: "All network traffic encrypted"
+          implementation:
+            component: istio-mtls
+            evidence:
+              - "Strict mTLS mode cluster-wide"
+              - "Certificate rotation every 24h"
+              - "TLS 1.3 only"
+
+        - id: NET-3
+          name: "Network Segmentation"
+          description: "Logical network boundaries"
+          implementation:
+            component: kubernetes-namespaces
+            evidence:
+              - "Namespace isolation"
+              - "Cross-namespace policies explicit"
+
+    - family: application
+      name: "Application Security"
+      controls:
+        - id: APP-1
+          name: "Application Identity"
+          description: "Each application has unique identity"
+          implementation:
+            component: spire-workload-api
+            evidence:
+              - "Service account to SPIFFE ID mapping"
+              - "Application-level mTLS"
+
+        - id: APP-2
+          name: "API Security"
+          description: "API access controlled and monitored"
+          implementation:
+            component: api-gateway
+            evidence:
+              - "JWT validation"
+              - "Rate limiting"
+              - "Request/response logging"
+
+        - id: APP-3
+          name: "Application Authorization"
+          description: "Fine-grained application permissions"
+          implementation:
+            component: opa-gatekeeper
+            evidence:
+              - "RBAC policies per service"
+              - "ABAC for sensitive operations"
+
+    - family: data
+      name: "Data Protection"
+      controls:
+        - id: DATA-1
+          name: "Data Classification"
+          description: "All data classified and labeled"
+          implementation:
+            component: data-classification-service
+            evidence:
+              - "Automated data discovery"
+              - "Classification labels on all data stores"
+
+        - id: DATA-2
+          name: "Data Encryption"
+          description: "Data encrypted at rest and in transit"
+          implementation:
+            component: encryption-service
+            evidence:
+              - "AES-256-GCM at rest"
+              - "TLS 1.3 in transit"
+              - "Key rotation every 90 days"
+
+        - id: DATA-3
+          name: "Data Access Control"
+          description: "Access to data requires authorization"
+          implementation:
+            component: data-access-gateway
+            evidence:
+              - "Per-record access control"
+              - "Audit logging of all access"
+
+    - family: visibility
+      name: "Visibility and Analytics"
+      controls:
+        - id: VIS-1
+          name: "Comprehensive Logging"
+          description: "All access and operations logged"
+          implementation:
+            component: audit-service
+            evidence:
+              - "Immutable audit logs"
+              - "90-day retention"
+              - "Real-time streaming"
+
+        - id: VIS-2
+          name: "Security Monitoring"
+          description: "Continuous security monitoring"
+          implementation:
+            component: security-monitoring
+            evidence:
+              - "SIEM integration"
+              - "Anomaly detection"
+              - "Threat intelligence feeds"
+
+        - id: VIS-3
+          name: "Metrics and Dashboards"
+          description: "Security metrics visibility"
+          implementation:
+            component: observability-stack
+            evidence:
+              - "Zero-trust metrics dashboard"
+              - "SLO tracking"
+              - "Compliance scorecards"
+
+---
+apiVersion: compliance.intelgraph.io/v1
+kind: ComplianceAssessment
+metadata:
+  name: nist-800-207-assessment
+  namespace: zero-trust-system
+spec:
+  framework: nist-800-207-zero-trust
+  schedule: "0 2 * * *"  # Daily at 2 AM
+
+  assessmentConfig:
+    # Automated evidence collection
+    evidenceCollection:
+      enabled: true
+      sources:
+        - type: kubernetes
+          resources:
+            - networkpolicies
+            - peerauthentications
+            - authorizationpolicies
+            - destinationrules
+        - type: spire
+          endpoints:
+            - entries
+            - agents
+            - bundles
+        - type: opa
+          policies:
+            - service-authz
+            - data-access
+        - type: prometheus
+          queries:
+            - zero_trust_mtls_success_rate
+            - zero_trust_policy_denials_total
+            - zero_trust_certificate_expiry_seconds
+
+    # Validation rules
+    validationRules:
+      - name: mtls_coverage
+        query: |
+          sum(istio_requests_total{connection_security_policy="mutual_tls"}) /
+          sum(istio_requests_total) * 100
+        operator: gte
+        threshold: 99.9
+        severity: critical
+
+      - name: policy_coverage
+        query: |
+          count(kube_namespace_labels{label_zero_trust="enabled"}) /
+          count(kube_namespace_labels) * 100
+        operator: gte
+        threshold: 100
+        severity: high
+
+      - name: identity_verification
+        query: |
+          sum(spire_agent_svid_rotations_total{status="success"}) /
+          sum(spire_agent_svid_rotations_total) * 100
+        operator: gte
+        threshold: 99.99
+        severity: critical
+
+  # Reporting configuration
+  reporting:
+    format: json
+    destinations:
+      - type: s3
+        bucket: compliance-reports
+        prefix: nist-800-207/
+      - type: email
+        recipients:
+          - security@intelgraph.io
+          - compliance@intelgraph.io
+    includeEvidence: true
+    includeRemediation: true
+
+  # Alert on compliance failures
+  alerting:
+    enabled: true
+    thresholds:
+      critical: 0    # Alert immediately on critical failures
+      high: 3        # Alert after 3 high severity failures
+      medium: 10     # Alert after 10 medium severity failures
