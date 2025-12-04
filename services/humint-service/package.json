@@ -1,0 +1,38 @@
+{
+  "name": "@intelgraph/humint-service",
+  "version": "1.0.0",
+  "description": "HUMINT source management service with debrief workflows and asset tracking",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src --ext .ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "dependencies": {
+    "@intelgraph/humint-types": "workspace:*",
+    "express": "^4.18.2",
+    "ioredis": "^5.3.2",
+    "neo4j-driver": "^5.15.0",
+    "pg": "^8.11.3",
+    "pino": "^8.17.0",
+    "pino-http": "^9.0.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "@types/uuid": "^9.0.7",
+    "jest": "^29.7.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}
