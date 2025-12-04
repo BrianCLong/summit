@@ -1,0 +1,19 @@
+{
+  "name": "ops_agent",
+  "nodes": [
+    {"id": "fetch_metrics", "type": "tool", "outputs": ["metrics"]},
+    {"id": "safety_check", "type": "policy", "inputs": ["metrics"], "outputs": ["allow"]},
+    {"id": "restart_service", "type": "tool", "inputs": ["request"], "outputs": ["action"]},
+    {"id": "report", "type": "summary", "inputs": ["metrics", "action"]}
+  ],
+  "edges": [
+    {"from": "fetch_metrics", "to": "safety_check"},
+    {"from": "safety_check", "to": "restart_service", "when": "allow"},
+    {"from": "restart_service", "to": "report"}
+  ],
+  "policy_defaults": {
+    "tenant": "sre",
+    "region": "us-east",
+    "purpose": "operations"
+  }
+}
