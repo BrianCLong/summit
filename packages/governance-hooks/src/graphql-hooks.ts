@@ -112,7 +112,7 @@ export function createPIIDetectionHook(config: PIIConfig): GovernancePlugin {
 }
 
 function redactPII(data: unknown, patterns: PIIConfig['patterns'], redactionText: string): unknown {
-  if (data === null || data === undefined) return data;
+  if (data === null || data === undefined) {return data;}
 
   if (typeof data === 'string') {
     let result = data;
@@ -254,7 +254,7 @@ export function createProvenanceHook(recorder: ProvenanceRecorder): GovernancePl
 }
 
 function extractEntityIds(result: unknown): string[] {
-  if (!result) return [];
+  if (!result) {return [];}
 
   if (Array.isArray(result)) {
     return result.flatMap((item) => extractEntityIds(item));
@@ -321,7 +321,7 @@ export function createFieldRedactionHook(): GovernancePlugin {
 }
 
 function redactFields(data: unknown, fields: string[]): unknown {
-  if (data === null || data === undefined) return data;
+  if (data === null || data === undefined) {return data;}
 
   if (Array.isArray(data)) {
     return data.map((item) => redactFields(item, fields));

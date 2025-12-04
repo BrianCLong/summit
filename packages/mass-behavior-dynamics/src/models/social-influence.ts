@@ -169,7 +169,7 @@ export class SocialInfluenceSimulator {
       const newAdopters: number[] = [];
 
       for (let i = 0; i < n; i++) {
-        if (adopted.has(i)) continue;
+        if (adopted.has(i)) {continue;}
 
         // Calculate fraction of neighbors who adopted
         let adoptedNeighbors = 0;
@@ -198,7 +198,7 @@ export class SocialInfluenceSimulator {
 
       trajectory.push(adopted.size);
 
-      if (newAdopters.length === 0) break;
+      if (newAdopters.length === 0) {break;}
     }
 
     return {

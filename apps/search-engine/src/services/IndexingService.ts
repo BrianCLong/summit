@@ -1,5 +1,5 @@
-import { Pool } from 'pg';
 import { Driver as Neo4jDriver, Session as Neo4jSession } from 'neo4j-driver';
+import { Pool } from 'pg';
 import { createLogger, format, transports, Logger } from 'winston';
 
 import { ElasticsearchService } from './ElasticsearchService';

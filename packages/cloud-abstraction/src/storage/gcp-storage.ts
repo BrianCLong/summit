@@ -124,7 +124,7 @@ export class GCPStorageProvider implements IStorageProvider {
       return {
         objects,
         continuationToken: response?.nextPageToken,
-        isTruncated: !!response?.nextPageToken
+        isTruncated: Boolean(response?.nextPageToken)
       };
     } catch (error) {
       throw new StorageError(

@@ -9,7 +9,7 @@ export function useVisualizationDimensions(
   const [dimensions, setDimensions] = useState<Dimension>({ width: 0, height: 0 });
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) {return;}
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {

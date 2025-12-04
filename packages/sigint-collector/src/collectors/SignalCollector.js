@@ -58,7 +58,7 @@ class SignalCollector extends eventemitter3_1.EventEmitter {
     }
     startSimulation(task) {
         if (this.simulationInterval)
-            return;
+            {return;}
         this.simulationInterval = setInterval(() => {
             const signal = this.generateSimulatedSignal(task);
             this.collectedSignals.push(signal);
@@ -134,9 +134,9 @@ class SignalCollector extends eventemitter3_1.EventEmitter {
         ];
         const elintTypes = ['RADAR', 'NAVIGATION', 'TELEMETRY'];
         if (comintTypes.includes(signalType))
-            return 'COMINT';
+            {return 'COMINT';}
         if (elintTypes.includes(signalType))
-            return 'ELINT';
+            {return 'ELINT';}
         return 'TECHINT';
     }
     setStatus(status) {

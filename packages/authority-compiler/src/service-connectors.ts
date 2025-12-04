@@ -20,11 +20,11 @@ export function getOperationFromGraphQL(info: any): Operation {
 
   // Map GraphQL operations to policy operations
   if (operationType === 'mutation') {
-    if (fieldName.startsWith('create')) return 'CREATE';
-    if (fieldName.startsWith('update')) return 'UPDATE';
-    if (fieldName.startsWith('delete')) return 'DELETE';
-    if (fieldName.includes('export')) return 'EXPORT';
-    if (fieldName.includes('share')) return 'SHARE';
+    if (fieldName.startsWith('create')) {return 'CREATE';}
+    if (fieldName.startsWith('update')) {return 'UPDATE';}
+    if (fieldName.startsWith('delete')) {return 'DELETE';}
+    if (fieldName.includes('export')) {return 'EXPORT';}
+    if (fieldName.includes('share')) {return 'SHARE';}
     return 'UPDATE'; // Default for mutations
   }
 
@@ -33,7 +33,7 @@ export function getOperationFromGraphQL(info: any): Operation {
   }
 
   // Query operations
-  if (fieldName.includes('copilot') || fieldName.includes('ai')) return 'COPILOT';
+  if (fieldName.includes('copilot') || fieldName.includes('ai')) {return 'COPILOT';}
   return 'READ';
 }
 

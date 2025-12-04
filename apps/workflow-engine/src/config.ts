@@ -67,17 +67,15 @@ export const config = {
     slack: {
       botToken: process.env.SLACK_BOT_TOKEN,
       signingSecret: process.env.SLACK_SIGNING_SECRET,
-      enabled: !!process.env.SLACK_BOT_TOKEN,
+      enabled: Boolean(process.env.SLACK_BOT_TOKEN),
     },
     jira: {
       url: process.env.JIRA_URL,
       username: process.env.JIRA_USERNAME,
       apiToken: process.env.JIRA_API_TOKEN,
-      enabled: !!(
-        process.env.JIRA_URL &&
+      enabled: Boolean(process.env.JIRA_URL &&
         process.env.JIRA_USERNAME &&
-        process.env.JIRA_API_TOKEN
-      ),
+        process.env.JIRA_API_TOKEN),
     },
     email: {
       smtpHost: process.env.SMTP_HOST,
@@ -85,7 +83,7 @@ export const config = {
       smtpUser: process.env.SMTP_USER,
       smtpPassword: process.env.SMTP_PASSWORD,
       fromAddress: process.env.EMAIL_FROM_ADDRESS,
-      enabled: !!(process.env.SMTP_HOST && process.env.SMTP_USER),
+      enabled: Boolean(process.env.SMTP_HOST && process.env.SMTP_USER),
     },
   },
 

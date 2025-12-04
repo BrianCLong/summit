@@ -134,7 +134,7 @@ export const clearSyncQueue = async (): Promise<void> => {
 
 // Network status listeners
 export const onNetworkChange = (callback: (online: boolean) => void): (() => void) => {
-  if (typeof window === 'undefined') return () => {};
+  if (typeof window === 'undefined') {return () => {};}
 
   const handleOnline = () => callback(true);
   const handleOffline = () => callback(false);

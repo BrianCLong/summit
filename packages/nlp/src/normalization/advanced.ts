@@ -66,8 +66,8 @@ export class AdvancedNormalizer {
         let h = parseInt(hour, 10);
         const isPM = period.toLowerCase() === 'pm';
 
-        if (isPM && h !== 12) h += 12;
-        if (!isPM && h === 12) h = 0;
+        if (isPM && h !== 12) {h += 12;}
+        if (!isPM && h === 12) {h = 0;}
 
         return `${h.toString().padStart(2, '0')}:${minute}`;
       }

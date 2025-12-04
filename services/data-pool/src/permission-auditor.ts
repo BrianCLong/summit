@@ -91,15 +91,15 @@ export class PermissionAuditor {
     const entries = this.auditLog.get(poolId) || [];
 
     return entries.filter((entry) => {
-      if (from && entry.timestamp < new Date(from)) return false;
-      if (to && entry.timestamp > new Date(to)) return false;
+      if (from && entry.timestamp < new Date(from)) {return false;}
+      if (to && entry.timestamp > new Date(to)) {return false;}
       return true;
     });
   }
 
   async verifyAuditChain(poolId: string): Promise<boolean> {
     const entries = this.auditLog.get(poolId) || [];
-    if (entries.length === 0) return true;
+    if (entries.length === 0) {return true;}
 
     for (let i = 1; i < entries.length; i++) {
       if (entries[i].previousHash !== entries[i - 1].hash) {
@@ -170,8 +170,8 @@ export class PermissionAuditor {
   }
 
   private computeMerkleRoot(hashes: string[]): string {
-    if (hashes.length === 0) return '0'.repeat(64);
-    if (hashes.length === 1) return hashes[0];
+    if (hashes.length === 0) {return '0'.repeat(64);}
+    if (hashes.length === 1) {return hashes[0];}
 
     const nextLevel: string[] = [];
     for (let i = 0; i < hashes.length; i += 2) {

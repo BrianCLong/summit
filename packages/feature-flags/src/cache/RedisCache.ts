@@ -206,9 +206,9 @@ export class RedisCache implements FlagCache {
     // Use the most important context attributes for cache key
     const parts: string[] = [];
 
-    if (context.userId) parts.push(`u:${context.userId}`);
-    if (context.tenantId) parts.push(`t:${context.tenantId}`);
-    if (context.environment) parts.push(`e:${context.environment}`);
+    if (context.userId) {parts.push(`u:${context.userId}`);}
+    if (context.tenantId) {parts.push(`t:${context.tenantId}`);}
+    if (context.environment) {parts.push(`e:${context.environment}`);}
     if (context.userRole) {
       const role = Array.isArray(context.userRole)
         ? context.userRole.join(',')

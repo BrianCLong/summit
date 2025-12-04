@@ -29,7 +29,7 @@ export const LocationProvider: React.FC<{children: ReactNode}> = ({children}) =>
   }, [watchId]);
 
   const startTracking = () => {
-    if (isTracking) return;
+    if (isTracking) {return;}
 
     const id = watchLocation((loc) => {
       setLocation(loc);

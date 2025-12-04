@@ -180,8 +180,8 @@ function generateCaseId(): string {
 }
 
 function computeMerkleRoot(hashes: string[]): string {
-  if (hashes.length === 0) return '';
-  if (hashes.length === 1) return hashes[0];
+  if (hashes.length === 0) {return '';}
+  if (hashes.length === 1) {return hashes[0];}
 
   // Simple merkle tree: hash pairs recursively
   const newLevel: string[] = [];

@@ -30,7 +30,7 @@ export class SecureSandbox {
   }
 
   async initialize(): Promise<void> {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {return;}
 
     logger.info('Initializing sandbox', {
       id: this.config.id,
@@ -236,7 +236,7 @@ export class SecureSandbox {
   ): Promise<unknown> {
     // In production, use isolated-vm or similar
     // This is a simplified implementation for demonstration
-    const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
     const contextKeys = Object.keys(context);
     const contextValues = Object.values(context);
 
@@ -259,8 +259,8 @@ export class SecureSandbox {
 
   private categorizeError(error: unknown): ExecutionResult['status'] {
     if (error instanceof Error) {
-      if (error.message === 'TIMEOUT') return 'timeout';
-      if (error.message.includes('memory')) return 'resource_exceeded';
+      if (error.message === 'TIMEOUT') {return 'timeout';}
+      if (error.message.includes('memory')) {return 'resource_exceeded';}
     }
     return 'error';
   }

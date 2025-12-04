@@ -52,7 +52,7 @@ export function calculateResourceScore(capacity: ResourceCapacity): number {
  * Format bytes to human readable format
  */
 export function formatBytes(bytes: number, decimals = 2): string {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) {return '0 Bytes';}
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
@@ -60,7 +60,7 @@ export function formatBytes(bytes: number, decimals = 2): string {
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))  } ${  sizes[i]}`;
 }
 
 /**
@@ -73,10 +73,10 @@ export function formatUptime(seconds: number): string {
   const secs = Math.floor(seconds % 60);
 
   const parts: string[] = [];
-  if (days > 0) parts.push(`${days}d`);
-  if (hours > 0) parts.push(`${hours}h`);
-  if (minutes > 0) parts.push(`${minutes}m`);
-  if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+  if (days > 0) {parts.push(`${days}d`);}
+  if (hours > 0) {parts.push(`${hours}h`);}
+  if (minutes > 0) {parts.push(`${minutes}m`);}
+  if (secs > 0 || parts.length === 0) {parts.push(`${secs}s`);}
 
   return parts.join(' ');
 }
@@ -226,7 +226,7 @@ export class RoundRobinBalancer<T> {
   }
 
   next(): T | undefined {
-    if (this.items.length === 0) return undefined;
+    if (this.items.length === 0) {return undefined;}
 
     const item = this.items[this.currentIndex];
     this.currentIndex = (this.currentIndex + 1) % this.items.length;

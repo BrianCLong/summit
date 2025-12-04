@@ -212,7 +212,7 @@ export class DataTransformer {
       const casted = { ...record };
 
       for (const [field, targetType] of Object.entries(typeMapping)) {
-        if (casted[field] == null) continue;
+        if (casted[field] == null) {continue;}
 
         switch (targetType) {
           case 'string':

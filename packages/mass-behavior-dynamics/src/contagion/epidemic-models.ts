@@ -198,7 +198,7 @@ export class NetworkContagionModel {
   private countByState(state: 'S' | 'E' | 'I' | 'R'): number {
     let count = 0;
     for (const ns of this.nodeStates.values()) {
-      if (ns.state === state) count++;
+      if (ns.state === state) {count++;}
     }
     return count;
   }

@@ -387,7 +387,7 @@ export function mergeOverlappingBboxes(
       continue;
     }
 
-    let current = bboxes[i];
+    const current = bboxes[i];
     const toMerge = [current];
 
     for (let j = i + 1; j < bboxes.length; j++) {

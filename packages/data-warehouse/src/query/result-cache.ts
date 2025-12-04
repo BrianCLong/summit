@@ -307,7 +307,7 @@ export class ResultCache extends EventEmitter {
   }
 
   private isExpired(entry: CacheEntry): boolean {
-    if (!entry.ttl) return false;
+    if (!entry.ttl) {return false;}
 
     const age = Date.now() - entry.metadata.createdAt.getTime();
     return age > entry.ttl;

@@ -59,21 +59,21 @@ export class ListingManager {
     const results: StoredListing[] = [];
 
     for (const [_, listing] of this.listings) {
-      if (listing.status !== 'active') continue;
+      if (listing.status !== 'active') {continue;}
 
       if (options.query) {
         const searchText = `${listing.metadata.title} ${listing.metadata.description}`.toLowerCase();
-        if (!searchText.includes(options.query.toLowerCase())) continue;
+        if (!searchText.includes(options.query.toLowerCase())) {continue;}
       }
 
       if (options.tags?.length) {
         const hasTag = options.tags.some((t) => listing.metadata.tags.includes(t));
-        if (!hasTag) continue;
+        if (!hasTag) {continue;}
       }
 
-      if (options.minPrice && listing.price.amount < options.minPrice) continue;
-      if (options.maxPrice && listing.price.amount > options.maxPrice) continue;
-      if (options.model && listing.price.model !== options.model) continue;
+      if (options.minPrice && listing.price.amount < options.minPrice) {continue;}
+      if (options.maxPrice && listing.price.amount > options.maxPrice) {continue;}
+      if (options.model && listing.price.model !== options.model) {continue;}
 
       results.push(listing);
     }
@@ -86,7 +86,7 @@ export class ListingManager {
     updates: Partial<Listing>,
   ): Promise<StoredListing | undefined> {
     const listing = this.listings.get(listingId);
-    if (!listing) return undefined;
+    if (!listing) {return undefined;}
 
     Object.assign(listing, updates, { updatedAt: new Date() });
     return listing;
@@ -94,7 +94,7 @@ export class ListingManager {
 
   async pauseListing(listingId: string): Promise<boolean> {
     const listing = this.listings.get(listingId);
-    if (!listing) return false;
+    if (!listing) {return false;}
     listing.status = 'paused';
     return true;
   }

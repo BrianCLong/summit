@@ -222,9 +222,9 @@ export class QueryEngine {
     }
 
     // Boolean
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    if (value === 'null') return null;
+    if (value === 'true') {return true;}
+    if (value === 'false') {return false;}
+    if (value === 'null') {return null;}
 
     return value;
   }
@@ -310,7 +310,7 @@ export class QueryEngine {
             }
 
             const targetNode = this.storage.getNode(edge.targetId);
-            if (!targetNode) continue;
+            if (!targetNode) {continue;}
 
             if (pattern.targetNode.label &&
                 !targetNode.labels.includes(pattern.targetNode.label)) {
@@ -340,13 +340,13 @@ export class QueryEngine {
 
   private evaluateCondition(condition: WhereCondition, binding: Map<string, Node | Edge>): boolean {
     const entity = binding.get(condition.var);
-    if (!entity) return false;
+    if (!entity) {return false;}
 
     const value = this.isNode(entity) || this.isEdge(entity)
       ? entity.properties[condition.property]
       : undefined;
 
-    if (value === undefined) return false;
+    if (value === undefined) {return false;}
 
     switch (condition.operator) {
       case '=': return value === condition.value;
@@ -368,8 +368,8 @@ export class QueryEngine {
         const aVal = this.evaluateExpression(order.expression, a);
         const bVal = this.evaluateExpression(order.expression, b);
 
-        if (aVal < bVal) return order.direction === 'asc' ? -1 : 1;
-        if (aVal > bVal) return order.direction === 'asc' ? 1 : -1;
+        if (aVal < bVal) {return order.direction === 'asc' ? -1 : 1;}
+        if (aVal > bVal) {return order.direction === 'asc' ? 1 : -1;}
       }
       return 0;
     });
@@ -448,7 +448,7 @@ export class QueryEngine {
   }
 
   private hasProperty(item: unknown, args: unknown[]): boolean {
-    if (!this.isNode(item) && !this.isEdge(item)) return false;
+    if (!this.isNode(item) && !this.isEdge(item)) {return false;}
 
     if (args.length === 1) {
       const key = String(args[0]);
@@ -501,7 +501,7 @@ export class QueryEngine {
   }
 
   private getValues(item: unknown, args: unknown[]): unknown {
-    if (!this.isNode(item) && !this.isEdge(item)) return null;
+    if (!this.isNode(item) && !this.isEdge(item)) {return null;}
 
     if (args.length === 0) {
       return Object.values(item.properties);

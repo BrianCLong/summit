@@ -133,7 +133,7 @@ export function createRAGResultLimitHook(config: ResultLimitConfig): RAGHook {
         .map((doc) => ({
           ...doc,
           content: doc.content.length > config.maxContentLength
-            ? doc.content.substring(0, config.maxContentLength) + '...'
+            ? `${doc.content.substring(0, config.maxContentLength)  }...`
             : doc.content,
         }));
     },

@@ -32,7 +32,7 @@ export class ShortestPathAlgorithms {
       queue.sort((a, b) => a.distance - b.distance);
       const current = queue.shift()!;
 
-      if (visited.has(current.nodeId)) continue;
+      if (visited.has(current.nodeId)) {continue;}
       visited.add(current.nodeId);
 
       // Found target
@@ -44,7 +44,7 @@ export class ShortestPathAlgorithms {
       const edges = this.storage.getOutgoingEdges(current.nodeId);
 
       for (const edge of edges) {
-        if (visited.has(edge.targetId)) continue;
+        if (visited.has(edge.targetId)) {continue;}
 
         const distance = current.distance + edge.weight;
         const currentDistance = distances.get(edge.targetId) ?? Infinity;
@@ -95,7 +95,7 @@ export class ShortestPathAlgorithms {
       const edges = this.storage.getOutgoingEdges(current.nodeId);
 
       for (const edge of edges) {
-        if (closedSet.has(edge.targetId)) continue;
+        if (closedSet.has(edge.targetId)) {continue;}
 
         const tentativeGScore = (gScore.get(current.nodeId) ?? Infinity) + edge.weight;
 
@@ -220,7 +220,7 @@ export class ShortestPathAlgorithms {
 
     // Get first shortest path
     const firstPath = this.dijkstra(sourceId, targetId);
-    if (!firstPath) return [];
+    if (!firstPath) {return [];}
 
     paths.push(firstPath);
 
@@ -240,7 +240,7 @@ export class ShortestPathAlgorithms {
         }
       }
 
-      if (candidates.length === 0) break;
+      if (candidates.length === 0) {break;}
 
       // Get shortest candidate
       candidates.sort((a, b) => a.weight - b.weight);
@@ -258,7 +258,7 @@ export class ShortestPathAlgorithms {
     while (current !== sourceId) {
       path.unshift(current);
       const prev = previous.get(current);
-      if (!prev) return null;
+      if (!prev) {return null;}
       current = prev;
     }
     path.unshift(sourceId);
@@ -270,13 +270,13 @@ export class ShortestPathAlgorithms {
 
     for (let i = 0; i < path.length; i++) {
       const node = this.storage.getNode(path[i]);
-      if (!node) return null;
+      if (!node) {return null;}
       nodes.push(node);
 
       if (i < path.length - 1) {
         const outgoingEdges = this.storage.getOutgoingEdges(path[i]);
         const edge = outgoingEdges.find(e => e.targetId === path[i + 1]);
-        if (!edge) return null;
+        if (!edge) {return null;}
         edges.push(edge);
         totalWeight += edge.weight;
       }

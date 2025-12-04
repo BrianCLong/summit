@@ -65,7 +65,7 @@ export class VerificationService {
         verified,
         expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
       });
-      if (verified) trustScore += 0.1;
+      if (verified) {trustScore += 0.1;}
     }
 
     return {
@@ -90,7 +90,7 @@ export class VerificationService {
         poolId,
         accessPolicy.requiredAttestations,
       );
-      if (!result.verified) return false;
+      if (!result.verified) {return false;}
       if (accessPolicy.minTrustScore && result.trustScore < accessPolicy.minTrustScore) {
         return false;
       }
@@ -114,8 +114,8 @@ export class VerificationService {
   ): Promise<number> {
     let valid = 0;
     for (const att of attestations) {
-      if (!this.trustedIssuers.has(att.issuer)) continue;
-      if (new Date(att.expiresAt) < new Date()) continue;
+      if (!this.trustedIssuers.has(att.issuer)) {continue;}
+      if (new Date(att.expiresAt) < new Date()) {continue;}
       // In production, verify cryptographic signature
       valid++;
     }

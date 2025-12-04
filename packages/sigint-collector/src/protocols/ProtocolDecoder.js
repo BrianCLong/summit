@@ -162,7 +162,7 @@ class ProtocolDecoder {
     decodeProtocol(protocolId, _data) {
         const signature = this.signatures.get(protocolId);
         if (!signature)
-            return null;
+            {return null;}
         // Generate simulated decoded data
         return {
             protocol: signature.name,

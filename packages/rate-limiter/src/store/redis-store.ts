@@ -156,7 +156,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
    * Get token bucket state
    */
   async getTokenBucket(key: string): Promise<TokenBucketState | null> {
-    const prefixedKey = this.keyPrefix + 'tb:' + key;
+    const prefixedKey = `${this.keyPrefix  }tb:${  key}`;
 
     try {
       const data = await this.client.hgetall(prefixedKey);
@@ -190,7 +190,7 @@ export class RedisRateLimitStore implements IRateLimitStore {
     capacity: number,
     refillRate: number,
   ): Promise<TokenBucketState> {
-    const prefixedKey = this.keyPrefix + 'tb:' + key;
+    const prefixedKey = `${this.keyPrefix  }tb:${  key}`;
     const now = Date.now();
 
     try {

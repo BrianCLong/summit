@@ -511,10 +511,10 @@ export class MarketExpansionService {
 
   private scoreInfrastructure(infra: DigitalInfrastructure): number {
     let score = 0;
-    if (infra.hasXRoad) score += 25;
-    if (infra.hasEIDAS) score += 20;
-    if (infra.hasOpenBanking) score += 15;
-    if (infra.hasOpenData) score += 15;
+    if (infra.hasXRoad) {score += 25;}
+    if (infra.hasEIDAS) {score += 20;}
+    if (infra.hasOpenBanking) {score += 15;}
+    if (infra.hasOpenData) {score += 15;}
 
     const maturityScores = { nascent: 5, developing: 10, mature: 20, advanced: 25 };
     score += maturityScores[infra.apiMaturity];
@@ -531,14 +531,14 @@ export class MarketExpansionService {
 
   private scoreRegulatoryAlignment(frameworks: ComplianceFramework[]): number {
     let score = 50; // Base score for any compliance
-    if (frameworks.includes('GDPR')) score += 15;
-    if (frameworks.includes('eIDAS')) score += 15;
-    if (frameworks.includes('X-Road')) score += 20;
+    if (frameworks.includes('GDPR')) {score += 15;}
+    if (frameworks.includes('eIDAS')) {score += 15;}
+    if (frameworks.includes('X-Road')) {score += 20;}
     return Math.min(score, 100);
   }
 
   private scoreBarriers(barriers: EntryBarrier[]): number {
-    if (barriers.length === 0) return 100;
+    if (barriers.length === 0) {return 100;}
 
     let penalty = 0;
     for (const barrier of barriers) {
@@ -560,9 +560,9 @@ export class MarketExpansionService {
 
   private scoreLanguageComplexity(languages: string[]): number {
     // Fewer languages = easier = higher score
-    if (languages.length <= 2) return 100;
-    if (languages.length <= 5) return 75;
-    if (languages.length <= 10) return 50;
+    if (languages.length <= 2) {return 100;}
+    if (languages.length <= 5) {return 75;}
+    if (languages.length <= 10) {return 50;}
     return 25;
   }
 
@@ -745,10 +745,10 @@ export class MarketExpansionService {
 
   private estimateTeamSize(region: MarketRegion): number {
     const profile = this.marketProfiles.get(region);
-    if (!profile) return 2;
+    if (!profile) {return 2;}
 
-    if (profile.marketSize.potentialPartners > 10000) return 10;
-    if (profile.marketSize.potentialPartners > 1000) return 5;
+    if (profile.marketSize.potentialPartners > 10000) {return 10;}
+    if (profile.marketSize.potentialPartners > 1000) {return 5;}
     return 2;
   }
 

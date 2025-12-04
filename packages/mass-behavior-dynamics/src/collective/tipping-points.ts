@@ -212,7 +212,7 @@ export class TippingPointAnalyzer {
 
   private calculateVelocity(timeSeries: number[]): number {
     const n = timeSeries.length;
-    if (n < 2) return 0;
+    if (n < 2) {return 0;}
 
     // Use last 5 points for velocity estimate
     const window = timeSeries.slice(-5);
@@ -283,7 +283,7 @@ export class TippingPointAnalyzer {
   }
 
   private estimateCascadeLikelihood(current: number, threshold: number): number {
-    if (current >= threshold) return 0.95;
+    if (current >= threshold) {return 0.95;}
     return Math.pow(current / threshold, 2);
   }
 

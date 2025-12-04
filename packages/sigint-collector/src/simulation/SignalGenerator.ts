@@ -267,7 +267,7 @@ export class SignalGenerator {
     const pulseWidth = 50; // samples
     const pri = 500;       // samples
     const inPulse = (n % pri) < pulseWidth;
-    if (!inPulse) return { i: 0, q: 0 };
+    if (!inPulse) {return { i: 0, q: 0 };}
     const phase = 2 * Math.PI * fc * t;
     return { i: Math.cos(phase), q: Math.sin(phase) };
   }
@@ -319,7 +319,7 @@ export class SignalGenerator {
   }
 
   private inferCategory(signalType: SignalType): IntelligenceCategory {
-    if (['RADAR', 'NAVIGATION', 'TELEMETRY'].includes(signalType)) return 'ELINT';
+    if (['RADAR', 'NAVIGATION', 'TELEMETRY'].includes(signalType)) {return 'ELINT';}
     return 'COMINT';
   }
 

@@ -21,7 +21,7 @@ export class CentralityMeasures {
     const nodes = exported.nodes;
     const n = nodes.length;
 
-    if (n === 0) return new Map();
+    if (n === 0) {return new Map();}
 
     // Initialize PageRank values
     const pageRank = new Map<string, number>();
@@ -194,7 +194,7 @@ export class CentralityMeasures {
     const nodes = exported.nodes;
     const n = nodes.length;
 
-    if (n === 0) return new Map();
+    if (n === 0) {return new Map();}
 
     // Initialize
     const centrality = new Map<string, number>();

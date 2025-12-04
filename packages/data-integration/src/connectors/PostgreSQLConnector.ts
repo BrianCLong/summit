@@ -203,7 +203,7 @@ export class PostgreSQLConnector extends BaseConnector {
     }
 
     if (conditions.length > 0) {
-      sql += ' WHERE ' + conditions.join(' AND ');
+      sql += ` WHERE ${  conditions.join(' AND ')}`;
     }
 
     // Add ORDER BY for incremental extraction

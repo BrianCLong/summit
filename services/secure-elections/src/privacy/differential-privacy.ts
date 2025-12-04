@@ -225,8 +225,8 @@ export class HomomorphicTallying {
    * Add encrypted values (homomorphic addition)
    */
   addEncrypted(ciphertext1: string, ciphertext2: string): string {
-    const v1 = BigInt('0x' + ciphertext1);
-    const v2 = BigInt('0x' + ciphertext2);
+    const v1 = BigInt(`0x${  ciphertext1}`);
+    const v2 = BigInt(`0x${  ciphertext2}`);
     return (v1 + v2).toString(16);
   }
 
@@ -234,7 +234,7 @@ export class HomomorphicTallying {
    * Decrypt final tally
    */
   decrypt(ciphertext: string): number {
-    const value = BigInt('0x' + ciphertext);
+    const value = BigInt(`0x${  ciphertext}`);
     return Number(value / BigInt(1e10));
   }
 }

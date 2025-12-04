@@ -1646,7 +1646,7 @@ classification:
 
     for (const field of translatableFields) {
       for (const targetLocale of targetLocales) {
-        if (targetLocale === sourceLocale) continue;
+        if (targetLocale === sourceLocale) {continue;}
 
         mappings.push({
           sourceField: field,

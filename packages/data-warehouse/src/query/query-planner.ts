@@ -417,7 +417,7 @@ export class QueryPlanner {
 
   private extractColumns(sql: string): string[] {
     const selectMatch = sql.match(/SELECT\s+(.*?)\s+FROM/i);
-    if (!selectMatch) return ['*'];
+    if (!selectMatch) {return ['*'];}
 
     return selectMatch[1]
       .split(',')
@@ -427,7 +427,7 @@ export class QueryPlanner {
 
   private extractPredicates(sql: string): Predicate[] {
     const whereMatch = sql.match(/WHERE\s+(.*?)(\s+GROUP|\s+ORDER|\s+LIMIT|$)/i);
-    if (!whereMatch) return [];
+    if (!whereMatch) {return [];}
 
     // Simplified predicate extraction
     return [];

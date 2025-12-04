@@ -150,7 +150,7 @@ export class PhaseTransitionDetector {
 
   private calculateAutocorrelation(series: number[], lag: number): number {
     const n = series.length;
-    if (n <= lag) return 0;
+    if (n <= lag) {return 0;}
 
     const mean = series.reduce((a, b) => a + b, 0) / n;
     let numerator = 0;
@@ -179,7 +179,7 @@ export class PhaseTransitionDetector {
     const variance = this.calculateVariance(series);
     const std = Math.sqrt(variance);
 
-    if (std === 0) return 0;
+    if (std === 0) {return 0;}
 
     const m3 = series.reduce((sum, x) => sum + ((x - mean) / std) ** 3, 0) / n;
     return m3;
@@ -190,7 +190,7 @@ export class PhaseTransitionDetector {
     statFn: (s: number[]) => number
   ): number {
     const windowSize = Math.floor(series.length / 4);
-    if (windowSize < 2) return 0;
+    if (windowSize < 2) {return 0;}
 
     const stats: number[] = [];
     for (let i = 0; i <= series.length - windowSize; i += windowSize) {
@@ -198,7 +198,7 @@ export class PhaseTransitionDetector {
       stats.push(statFn(window));
     }
 
-    if (stats.length < 2) return 0;
+    if (stats.length < 2) {return 0;}
 
     // Simple slope
     const slope = (stats[stats.length - 1] - stats[0]) / stats.length;

@@ -495,9 +495,9 @@ export class TaskRouter extends EventEmitter {
           break;
 
         case 'priority-increase':
-          if (task.priority === 'low') task.priority = 'medium';
-          else if (task.priority === 'medium') task.priority = 'high';
-          else if (task.priority === 'high') task.priority = 'critical';
+          if (task.priority === 'low') {task.priority = 'medium';}
+          else if (task.priority === 'medium') {task.priority = 'high';}
+          else if (task.priority === 'high') {task.priority = 'critical';}
           break;
 
         case 'custom':

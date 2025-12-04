@@ -67,7 +67,7 @@ export class TextClassifier {
     const words = new Set(text.toLowerCase().match(/\b\w+\b/g) || []);
     const labelWords = this.model.get(label) || [];
 
-    if (labelWords.length === 0) return Math.random() * 0.5;
+    if (labelWords.length === 0) {return Math.random() * 0.5;}
 
     const matches = labelWords.filter((w) => words.has(w)).length;
     return Math.min(matches / labelWords.length, 1.0);

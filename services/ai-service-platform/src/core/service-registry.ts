@@ -43,7 +43,7 @@ export class ServiceRegistry {
 
   async getByName(name: string): Promise<RegisteredService | undefined> {
     for (const service of this.services.values()) {
-      if (service.name === name) return service;
+      if (service.name === name) {return service;}
     }
     return undefined;
   }
@@ -66,7 +66,7 @@ export class ServiceRegistry {
     updates: Partial<ServiceDefinition>,
   ): Promise<RegisteredService | undefined> {
     const service = this.services.get(id);
-    if (!service) return undefined;
+    if (!service) {return undefined;}
 
     const updated = {
       ...service,
@@ -106,7 +106,7 @@ export class ServiceRegistry {
     for (const service of this.services.values()) {
       byType[service.type] = (byType[service.type] || 0) + 1;
       for (const dep of service.deployments.values()) {
-        if (dep.status === 'running') activeDeployments++;
+        if (dep.status === 'running') {activeDeployments++;}
       }
     }
 

@@ -233,7 +233,7 @@ export const FlagEditor: React.FC<FlagEditorProps> = ({
           value={formData.key}
           onChange={(e) => setFormData({ ...formData, key: e.target.value })}
           required
-          disabled={!!flag}
+          disabled={Boolean(flag)}
         />
       </div>
 

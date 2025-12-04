@@ -256,7 +256,7 @@ export class RemediationEngine {
    */
   async approveTask(taskId: string, approver: string): Promise<void> {
     const task = this.tasks.get(taskId);
-    if (!task) throw new Error(`Task ${taskId} not found`);
+    if (!task) {throw new Error(`Task ${taskId} not found`);}
 
     task.status = 'approved';
 
@@ -343,7 +343,7 @@ export class RemediationEngine {
    * Check if vulnerability should be auto-approved
    */
   private shouldAutoApprove(vuln: Vulnerability): boolean {
-    if (!this.config.autoRemediate) return false;
+    if (!this.config.autoRemediate) {return false;}
 
     const severityOrder: SeverityLevel[] = ['info', 'low', 'medium', 'high', 'critical'];
     const maxIndex = severityOrder.indexOf(this.config.autoRemediateMaxSeverity);

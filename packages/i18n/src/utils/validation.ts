@@ -120,7 +120,7 @@ export function findDuplicateTranslations(
   const valueToKeys = new Map<string, string[]>();
 
   for (const [key, value] of Object.entries(flat)) {
-    if (!value || value.trim() === '') continue;
+    if (!value || value.trim() === '') {continue;}
 
     const normalizedValue = value.trim().toLowerCase();
     const keys = valueToKeys.get(normalizedValue) || [];
@@ -173,8 +173,8 @@ export function validateICUFormat(text: string): { valid: boolean; errors: strin
   // Check for balanced braces
   let braceCount = 0;
   for (const char of text) {
-    if (char === '{') braceCount++;
-    if (char === '}') braceCount--;
+    if (char === '{') {braceCount++;}
+    if (char === '}') {braceCount--;}
     if (braceCount < 0) {
       errors.push('Unmatched closing brace');
       break;
@@ -224,7 +224,7 @@ export function generateCoverageReport(
   const report: Record<Locale, ValidationResult> = {} as any;
 
   for (const [locale, messages] of locales.entries()) {
-    if (locale === baseLocale) continue;
+    if (locale === baseLocale) {continue;}
     report[locale] = validateTranslations(baseLocale, locale, baseMessages, messages);
   }
 

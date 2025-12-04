@@ -104,7 +104,7 @@ export class WorkflowAdaptationAgent extends EventEmitter {
       opaPolicy = this.generateAuditPolicy(regulation);
     }
 
-    if (!opaPolicy) return null;
+    if (!opaPolicy) {return null;}
 
     return {
       id: uuid(),
@@ -294,7 +294,7 @@ export class WorkflowAdaptationAgent extends EventEmitter {
     assessment: ImpactAssessment,
     area: ImpactAssessment['impactAreas'][0]
   ): Promise<WorkflowAdaptation | null> {
-    if (area.area !== 'Business Workflows') return null;
+    if (area.area !== 'Business Workflows') {return null;}
 
     const workflowChanges = area.requiredActions.map(action => ({
       changeType: 'modify' as const,

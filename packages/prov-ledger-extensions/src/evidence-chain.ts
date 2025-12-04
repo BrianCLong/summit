@@ -323,7 +323,7 @@ export class EvidenceChainBuilder {
     while (changed) {
       changed = false;
       for (const node of this.nodes.values()) {
-        if (depths.has(node.hash)) continue;
+        if (depths.has(node.hash)) {continue;}
 
         const parentDepths = node.parentHashes
           .map((h) => depths.get(h))
@@ -428,7 +428,7 @@ export class EvidenceChainVerifier {
       if (node) {
         for (const parentHash of node.parentHashes) {
           if (!visited.has(parentHash)) {
-            if (dfs(parentHash)) return true;
+            if (dfs(parentHash)) {return true;}
           } else if (recursionStack.has(parentHash)) {
             return true;
           }
@@ -441,7 +441,7 @@ export class EvidenceChainVerifier {
 
     for (const node of chain.nodes) {
       if (!visited.has(node.hash)) {
-        if (dfs(node.hash)) return true;
+        if (dfs(node.hash)) {return true;}
       }
     }
 

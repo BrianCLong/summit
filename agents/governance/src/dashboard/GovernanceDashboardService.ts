@@ -339,8 +339,8 @@ export class GovernanceDashboardService {
     // Determine overall health
     const statuses = Object.values(components).map((c) => c.status);
     let overall: 'healthy' | 'degraded' | 'unhealthy' = 'healthy';
-    if (statuses.includes('unhealthy')) overall = 'unhealthy';
-    else if (statuses.includes('degraded')) overall = 'degraded';
+    if (statuses.includes('unhealthy')) {overall = 'unhealthy';}
+    else if (statuses.includes('degraded')) {overall = 'degraded';}
 
     return { overall, components };
   }

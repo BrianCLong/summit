@@ -366,7 +366,7 @@ export class ComponentTracker {
       passed: serialValid,
       details: serialValid ? 'Valid format' : 'Invalid format',
     });
-    if (serialValid) passedChecks++;
+    if (serialValid) {passedChecks++;}
 
     // Manufacturer code check
     if (verificationData.manufacturerCode) {
@@ -376,7 +376,7 @@ export class ComponentTracker {
         passed: codeValid,
         details: codeValid ? 'Valid code' : 'Invalid or unknown code',
       });
-      if (codeValid) passedChecks++;
+      if (codeValid) {passedChecks++;}
     }
 
     // Batch number check
@@ -387,7 +387,7 @@ export class ComponentTracker {
         passed: batchValid,
         details: batchValid ? 'Valid batch' : 'Unknown batch',
       });
-      if (batchValid) passedChecks++;
+      if (batchValid) {passedChecks++;}
     }
 
     // RFID authentication
@@ -398,7 +398,7 @@ export class ComponentTracker {
         passed: rfidValid,
         details: rfidValid ? 'Authenticated' : 'Authentication failed',
       });
-      if (rfidValid) passedChecks++;
+      if (rfidValid) {passedChecks++;}
     }
 
     const confidence = (passedChecks / totalChecks) * 100;
@@ -427,7 +427,7 @@ export class ComponentTracker {
     historicalPrices: Array<{ date: Date; price: number }>,
     daysAhead: number
   ): Array<{ date: Date; predictedPrice: number; confidence: number }> {
-    if (historicalPrices.length < 2) return [];
+    if (historicalPrices.length < 2) {return [];}
 
     // Simple linear regression
     const n = historicalPrices.length;

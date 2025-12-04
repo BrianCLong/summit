@@ -59,7 +59,7 @@ export class AgentBasedSimulator {
   }
 
   private createRNG(seed?: number): () => number {
-    if (!seed) return Math.random;
+    if (!seed) {return Math.random;}
 
     // Simple seeded RNG (Mulberry32)
     let state = seed;
@@ -178,7 +178,7 @@ export class AgentBasedSimulator {
       const state = this.getState(t);
       trajectory.push(state);
 
-      if (onStep) onStep(state);
+      if (onStep) {onStep(state);}
     }
 
     return {

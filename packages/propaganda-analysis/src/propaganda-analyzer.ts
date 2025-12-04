@@ -158,7 +158,7 @@ export class PropagandaAnalyzer {
    */
   async trackRemoval(contentId: string, platform: string): Promise<void> {
     const content = this.content.get(contentId);
-    if (!content) return;
+    if (!content) {return;}
 
     const platformDist = content.distribution.platforms.find(
       p => p.platform === platform

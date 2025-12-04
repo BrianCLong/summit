@@ -66,15 +66,15 @@ export class ConsensusManager {
 
   private async checkQuorum(proposalId: string): Promise<void> {
     const proposal = this.proposals.get(proposalId);
-    if (!proposal || proposal.status !== 'pending') return;
+    if (!proposal || proposal.status !== 'pending') {return;}
 
     const totalVotes = proposal.votes.size;
     let forVotes = 0;
     let againstVotes = 0;
 
     for (const [_, v] of proposal.votes) {
-      if (v.vote) forVotes++;
-      else againstVotes++;
+      if (v.vote) {forVotes++;}
+      else {againstVotes++;}
     }
 
     // Simplified quorum check

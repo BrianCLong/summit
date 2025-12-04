@@ -138,10 +138,10 @@ export class ElectionDisruptionEngine {
   }
 
   private riskLevelFromScore(score: number): SeverityLevel {
-    if (score >= 0.8) return 'CRITICAL';
-    if (score >= 0.6) return 'HIGH';
-    if (score >= 0.4) return 'MEDIUM';
-    if (score >= 0.2) return 'LOW';
+    if (score >= 0.8) {return 'CRITICAL';}
+    if (score >= 0.6) {return 'HIGH';}
+    if (score >= 0.4) {return 'MEDIUM';}
+    if (score >= 0.2) {return 'LOW';}
     return 'INFORMATIONAL';
   }
 
@@ -150,8 +150,8 @@ export class ElectionDisruptionEngine {
       (t) => t.temporalContext.trendDirection === 'ESCALATING'
     ).length;
     const total = threats.length || 1;
-    if (escalating / total > 0.6) return 'ESCALATING';
-    if (escalating / total < 0.3) return 'DECLINING';
+    if (escalating / total > 0.6) {return 'ESCALATING';}
+    if (escalating / total < 0.3) {return 'DECLINING';}
     return 'STABLE';
   }
 
@@ -194,7 +194,7 @@ export class ElectionDisruptionEngine {
   }
 
   private calculateConfidence(threats: ElectionThreatSignal[]): number {
-    if (threats.length === 0) return 0;
+    if (threats.length === 0) {return 0;}
     return threats.reduce((sum, t) => sum + t.confidence, 0) / threats.length;
   }
 }
@@ -212,7 +212,7 @@ export class MultiModalFusionEngine {
 
     threats.forEach((t) => {
       const key = `${t.type}-${t.geospatialContext.jurisdictions.join(',')}`;
-      if (!grouped.has(key)) grouped.set(key, []);
+      if (!grouped.has(key)) {grouped.set(key, []);}
       grouped.get(key)!.push(t);
     });
 
@@ -254,7 +254,7 @@ export class AdversarialDefenseLayer {
   constructor(private config: AdversarialConfig) {}
 
   async filterAdversarialInputs(signals: RawSignal[]): Promise<RawSignal[]> {
-    if (!this.config.enabled) return signals;
+    if (!this.config.enabled) {return signals;}
     return signals.filter((s) => this.isClean(s));
   }
 

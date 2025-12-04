@@ -370,7 +370,7 @@ export function calculateCosineSimilarity(
     const simMap = new Map<string, number>();
 
     for (let j = 0; j < nodes.length; j++) {
-      if (i === j) continue;
+      if (i === j) {continue;}
 
       const nodeB = nodes[j];
       const neighborsA = adjacency.get(nodeA) || new Set();
@@ -448,7 +448,7 @@ export function calculateStructuralEquivalence(
     const eqMap = new Map<string, number>();
 
     for (const nodeB of graph.nodes) {
-      if (nodeA === nodeB) continue;
+      if (nodeA === nodeB) {continue;}
 
       const neighborsA = adjacency.get(nodeA) || new Set();
       const neighborsB = adjacency.get(nodeB) || new Set();
@@ -562,7 +562,7 @@ export function identifyRoleEquivalence(
     const featuresA = nodeFeatures.get(nodeA) || [];
 
     for (const nodeB of graph.nodes) {
-      if (nodeA === nodeB) continue;
+      if (nodeA === nodeB) {continue;}
 
       const featuresB = nodeFeatures.get(nodeB) || [];
       let distanceSquared = 0;

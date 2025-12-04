@@ -820,7 +820,7 @@ server.get('/compliance/report', async (request) => {
   }));
 
   for (const row of result.rows) {
-    if (row.event_type !== 'compliance_check') continue;
+    if (row.event_type !== 'compliance_check') {continue;}
     const triggered = normalizeJsonField<string[]>(row.triggered_controls, []);
 
     totals.checks += 1;

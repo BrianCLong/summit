@@ -21,10 +21,10 @@ export function PageTabs({ dashboardId, className = '' }: PageTabsProps) {
 
   const dashboard = getActiveDashboard();
 
-  if (!dashboard) return null;
+  if (!dashboard) {return null;}
 
   const handleAddPage = () => {
-    if (!newPageName.trim()) return;
+    if (!newPageName.trim()) {return;}
 
     createPage(dashboardId, {
       name: newPageName,

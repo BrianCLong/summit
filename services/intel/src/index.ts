@@ -97,7 +97,7 @@ export class IntelFusionService {
    * Initialize all services
    */
   async initialize(): Promise<void> {
-    if (this.initialized) return;
+    if (this.initialized) {return;}
 
     try {
       // Initialize Neo4j correlator
@@ -248,7 +248,7 @@ export class IntelFusionService {
    * Get recent alerts
    */
   async getRecentAlerts(limit: number = 100): Promise<IntelAlert[]> {
-    if (!this.alertCache) return [];
+    if (!this.alertCache) {return [];}
     return this.alertCache.getRecentAlerts(limit);
   }
 

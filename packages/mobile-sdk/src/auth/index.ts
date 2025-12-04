@@ -94,7 +94,7 @@ export const parseJWT = (token: string): any => {
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
-        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .map((c) => `%${  (`00${  c.charCodeAt(0).toString(16)}`).slice(-2)}`)
         .join('')
     );
     return JSON.parse(jsonPayload);
@@ -113,10 +113,10 @@ export const getTokenExpiration = (token: string): number | null => {
 // Check if authenticated
 export const isAuthenticated = async (): Promise<boolean> => {
   const token = await getAccessToken();
-  if (!token) return false;
+  if (!token) {return false;}
 
   const expiresAt = getTokenExpiration(token);
-  if (!expiresAt) return false;
+  if (!expiresAt) {return false;}
 
   return !isTokenExpired(expiresAt);
 };

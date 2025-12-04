@@ -597,7 +597,7 @@ export class GraphAnalyticsService {
         const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
         const severityDiff =
           severityOrder[b.severity] - severityOrder[a.severity];
-        if (severityDiff !== 0) return severityDiff;
+        if (severityDiff !== 0) {return severityDiff;}
         return b.confidence - a.confidence;
       });
 
@@ -759,8 +759,8 @@ export class GraphAnalyticsService {
       const avgGrowthRate = (nodeGrowthRate + edgeGrowthRate) / 2;
 
       let growth: 'increasing' | 'decreasing' | 'stable' = 'stable';
-      if (avgGrowthRate > 0.1) growth = 'increasing';
-      else if (avgGrowthRate < -0.1) growth = 'decreasing';
+      if (avgGrowthRate > 0.1) {growth = 'increasing';}
+      else if (avgGrowthRate < -0.1) {growth = 'decreasing';}
 
       // Calculate volatility (standard deviation of growth rates)
       const growthRates = [];

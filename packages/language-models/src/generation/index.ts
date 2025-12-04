@@ -17,7 +17,7 @@ export class TextGenerator {
     // In production, use GPT or similar models
 
     return {
-      text: prompt + ' [generated text]',
+      text: `${prompt  } [generated text]`,
       tokens: maxLength,
       finishReason: 'completed',
     };

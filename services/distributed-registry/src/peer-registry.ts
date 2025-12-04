@@ -47,8 +47,8 @@ export class PeerRegistry {
   async discoverPools(options: PoolDiscoveryOptions): Promise<DataPool[]> {
     const results: DataPool[] = [];
     for (const [_, pool] of this.pools) {
-      if (options.owner && pool.owner !== options.owner) continue;
-      if (options.accessType && pool.accessPolicy.type !== options.accessType) continue;
+      if (options.owner && pool.owner !== options.owner) {continue;}
+      if (options.accessType && pool.accessPolicy.type !== options.accessType) {continue;}
       results.push(pool);
     }
     return results;

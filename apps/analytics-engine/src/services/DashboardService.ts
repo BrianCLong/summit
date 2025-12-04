@@ -700,8 +700,8 @@ export class DashboardService {
       const aVal = a[field];
       const bVal = b[field];
 
-      if (aVal < bVal) return direction === 'asc' ? -1 : 1;
-      if (aVal > bVal) return direction === 'asc' ? 1 : -1;
+      if (aVal < bVal) {return direction === 'asc' ? -1 : 1;}
+      if (aVal > bVal) {return direction === 'asc' ? 1 : -1;}
       return 0;
     });
   }

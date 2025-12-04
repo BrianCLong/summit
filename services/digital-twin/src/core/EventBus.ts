@@ -24,7 +24,7 @@ export class EventBus {
   }
 
   async connect(): Promise<void> {
-    if (this.connected) return;
+    if (this.connected) {return;}
 
     await this.producer.connect();
     await this.consumer.connect();

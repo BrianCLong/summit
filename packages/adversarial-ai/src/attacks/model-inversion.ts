@@ -145,7 +145,7 @@ export class ModelInversionAttack {
   }
 
   private computeMean(samples: number[][]): number[] {
-    if (samples.length === 0) return [];
+    if (samples.length === 0) {return [];}
 
     const mean = new Array(samples[0].length).fill(0);
     for (const sample of samples) {
@@ -289,7 +289,7 @@ export class MembershipInferenceAttack {
       let correct = 0;
       for (let i = 0; i < confidences.length; i++) {
         const predicted = confidences[i] > threshold;
-        if (predicted === labels[i]) correct++;
+        if (predicted === labels[i]) {correct++;}
       }
       const accuracy = correct / confidences.length;
       if (accuracy > bestAccuracy) {
@@ -313,10 +313,10 @@ export class MembershipInferenceAttack {
       const predicted = confidence > threshold;
       const actual = labels[i];
 
-      if (predicted && actual) tp++;
-      else if (predicted && !actual) fp++;
-      else if (!predicted && !actual) tn++;
-      else fn++;
+      if (predicted && actual) {tp++;}
+      else if (predicted && !actual) {fp++;}
+      else if (!predicted && !actual) {tn++;}
+      else {fn++;}
     }
 
     const accuracy = (tp + tn) / (tp + tn + fp + fn);
@@ -362,7 +362,7 @@ export class MembershipInferenceAttack {
   }
 
   private computeSimilarity(features: number[], dataset: number[][]): number {
-    if (dataset.length === 0) return 0;
+    if (dataset.length === 0) {return 0;}
 
     // Compute average cosine similarity
     let totalSimilarity = 0;

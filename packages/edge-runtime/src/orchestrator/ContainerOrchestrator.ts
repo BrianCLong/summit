@@ -299,7 +299,7 @@ export class ContainerOrchestrator extends EventEmitter {
         state: data.State,
         created: new Date(data.Created),
         ports: Object.entries(data.NetworkSettings.Ports || {}).flatMap(([containerPort, bindings]) => {
-          if (!bindings) return [];
+          if (!bindings) {return [];}
           return bindings.map(binding => ({
             privatePort: parseInt(containerPort.split('/')[0]),
             publicPort: binding.HostPort ? parseInt(binding.HostPort) : undefined,

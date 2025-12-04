@@ -161,7 +161,7 @@ export class DataQualityMonitor {
     statistics: DataStatistics,
     issues: DataQualityIssue[]
   ): Promise<number> {
-    if (data.length === 0) return 100;
+    if (data.length === 0) {return 100;}
 
     const fields = Object.keys(statistics.nullCounts);
     let totalFields = 0;
@@ -208,7 +208,7 @@ export class DataQualityMonitor {
 
     for (const rule of accuracyRules) {
       const passed = await this.evaluateRule(data, rule, issues);
-      if (passed) passedRules++;
+      if (passed) {passedRules++;}
     }
 
     return (passedRules / accuracyRules.length) * 100;
@@ -231,7 +231,7 @@ export class DataQualityMonitor {
     for (const field of fields) {
       const values = data.map(r => r[field]).filter(v => v != null);
 
-      if (values.length === 0) continue;
+      if (values.length === 0) {continue;}
 
       checksPerformed++;
 
@@ -259,7 +259,7 @@ export class DataQualityMonitor {
     for (const rule of consistencyRules) {
       checksPerformed++;
       const passed = await this.evaluateRule(data, rule, issues);
-      if (!passed) consistencyScore -= 5;
+      if (!passed) {consistencyScore -= 5;}
     }
 
     return Math.max(0, consistencyScore);
@@ -301,7 +301,7 @@ export class DataQualityMonitor {
 
     for (const rule of timelinessRules) {
       const passed = await this.evaluateRule(data, rule, issues);
-      if (passed) passedRules++;
+      if (passed) {passedRules++;}
     }
 
     return (passedRules / timelinessRules.length) * 100;
@@ -325,7 +325,7 @@ export class DataQualityMonitor {
 
     for (const rule of validityRules) {
       const passed = await this.evaluateRule(data, rule, issues);
-      if (passed) passedRules++;
+      if (passed) {passedRules++;}
     }
 
     return (passedRules / validityRules.length) * 100;
@@ -339,7 +339,7 @@ export class DataQualityMonitor {
     statistics: DataStatistics,
     issues: DataQualityIssue[]
   ): Promise<number> {
-    if (data.length === 0) return 100;
+    if (data.length === 0) {return 100;}
 
     // Check for duplicates based on all fields
     const seen = new Set<string>();

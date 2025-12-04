@@ -100,7 +100,7 @@ class MetricsCollector {
   }
 
   private percentile(sorted: number[], p: number): number {
-    if (sorted.length === 0) return 0;
+    if (sorted.length === 0) {return 0;}
     const index = Math.ceil((p / 100) * sorted.length) - 1;
     return sorted[Math.max(0, index)];
   }

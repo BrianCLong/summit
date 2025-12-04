@@ -91,7 +91,7 @@ export class RelationshipExtractor {
   private parseSVO(sentence: string): Omit<Relationship, 'start' | 'end' | 'sentenceIndex'> | null {
     // Very simplified SVO parsing
     const words = sentence.match(/\b\w+\b/g) || [];
-    if (words.length < 3) return null;
+    if (words.length < 3) {return null;}
 
     return {
       subject: words[0],

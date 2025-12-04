@@ -135,7 +135,7 @@ export async function runSimulation(
     infraStats,
   });
 
-  console.log('\n' + summary);
+  console.log(`\n${  summary}`);
 
   return {
     campaign,

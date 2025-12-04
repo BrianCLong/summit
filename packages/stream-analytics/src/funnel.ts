@@ -21,10 +21,10 @@ export class FunnelAnalyzer {
    */
   trackEvent(funnelId: string, userId: string, step: string): FunnelProgress | null {
     const funnel = this.funnels.get(funnelId);
-    if (!funnel) return null;
+    if (!funnel) {return null;}
 
     const stepIndex = funnel.steps.indexOf(step);
-    if (stepIndex === -1) return null;
+    if (stepIndex === -1) {return null;}
 
     // Get or create user progress
     let progress = funnel.userProgress.get(userId);
@@ -65,7 +65,7 @@ export class FunnelAnalyzer {
    */
   getFunnelStats(funnelId: string): FunnelStats | null {
     const funnel = this.funnels.get(funnelId);
-    if (!funnel) return null;
+    if (!funnel) {return null;}
 
     const stepStats = funnel.steps.map((step, index) => {
       const count = funnel.stepCounts.get(step) || 0;

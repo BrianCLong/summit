@@ -211,7 +211,7 @@ export class NetworkAnalyzer {
     const n = network.nodes.length;
     const e = network.edges.length;
 
-    if (n <= 1) return 0;
+    if (n <= 1) {return 0;}
 
     const maxEdges = (n * (n - 1)) / 2;
     return e / maxEdges;
@@ -324,7 +324,7 @@ export class NetworkAnalyzer {
   }
 
   private calculateThreshold(values: number[]): number {
-    if (values.length === 0) return 0;
+    if (values.length === 0) {return 0;}
     const sum = values.reduce((a, b) => a + b, 0);
     return sum / values.length;
   }

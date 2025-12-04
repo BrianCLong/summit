@@ -50,7 +50,7 @@ export function GridLayout({
   }));
 
   const handleLayoutChange = useCallback((newLayout: Layout[]) => {
-    if (!editable) return;
+    if (!editable) {return;}
 
     newLayout.forEach(item => {
       const widget = widgets.find(w => w.id === item.i);

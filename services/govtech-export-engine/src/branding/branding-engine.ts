@@ -125,7 +125,7 @@ export class BrandingEngine {
 
     for (const name of originalNames) {
       // Transform Estonian naming to country-specific
-      let newName = name
+      const newName = name
         .replace(/^e-/i, `${branding.prefix}`)
         .replace(/^i-/i, `${branding.prefix}`)
         .replace(/X-Road/i, `${branding.countryName}-Road`)

@@ -26,7 +26,7 @@ export class SIEMRuleValidator {
     effectiveness: number;
   }> {
     const rule = this.rules.get(ruleId);
-    if (!rule) throw new Error('Rule not found');
+    if (!rule) {throw new Error('Rule not found');}
 
     // Simulate rule evaluation against logs
     const matchedLogs: string[] = [];
@@ -154,7 +154,7 @@ export class IOCGenerator {
     const now = new Date();
 
     for (const detection of detections) {
-      if (!detection.truePositive) continue;
+      if (!detection.truePositive) {continue;}
 
       // Extract IOCs from detection description
       const extractedIOCs = this.extractIOCsFromText(detection.description);

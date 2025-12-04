@@ -235,7 +235,7 @@ export class FinanceTracker {
     const chain: Transaction[] = [];
     const transaction = this.transactions.find(t => t.id === transactionId);
 
-    if (!transaction) return chain;
+    if (!transaction) {return chain;}
 
     chain.push(transaction);
 

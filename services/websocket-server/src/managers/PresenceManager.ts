@@ -140,7 +140,7 @@ export class PresenceManager {
     const key = this.getRoomKey(room);
     const data = await this.redis.hget(key, userId);
 
-    if (!data) return null;
+    if (!data) {return null;}
 
     try {
       return JSON.parse(data);

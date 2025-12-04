@@ -85,7 +85,7 @@ function normalize(
   max: number,
   inverse: boolean = false,
 ): number {
-  if (max === min) return 50;
+  if (max === min) {return 50;}
   const normalized = ((value - min) / (max - min)) * 100;
   const clamped = Math.max(0, Math.min(100, normalized));
   return inverse ? 100 - clamped : clamped;
@@ -349,7 +349,7 @@ function calculateDiversityScore(
   benchmark?: DiversityBenchmarks,
 ): number {
   const total = diversity.totalEmployees;
-  if (total === 0) return 50;
+  if (total === 0) {return 50;}
 
   const genderBalance =
     100 -
@@ -524,10 +524,10 @@ function calculateRiskManagementScore(
   let score = 0;
 
   // ERM in place
-  if (risk.enterpriseRiskManagementInPlace) score += 30;
+  if (risk.enterpriseRiskManagementInPlace) {score += 30;}
 
   // Climate risk assessment
-  if (risk.climateRiskAssessment) score += 20;
+  if (risk.climateRiskAssessment) {score += 20;}
 
   // Lower cyber incidents = better
   const cyberScore = normalize(
@@ -555,8 +555,8 @@ function calculateShareholderRightsScore(
 ): number {
   let score = 0;
 
-  if (rights.oneShareOneVote) score += 30;
-  if (rights.proxyAccessAvailable) score += 20;
+  if (rights.oneShareOneVote) {score += 30;}
+  if (rights.proxyAccessAvailable) {score += 20;}
 
   // Higher participation = better
   score += normalize(rights.annualMeetingParticipation, 0, 100) * 0.5;

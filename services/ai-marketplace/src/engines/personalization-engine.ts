@@ -214,10 +214,10 @@ export class PersonalizationEngine {
    * Calculate overlap between two sets
    */
   private calculateSetOverlap<T>(set1: Set<T>, set2: Set<T>): number {
-    if (set1.size === 0 || set2.size === 0) return 0;
+    if (set1.size === 0 || set2.size === 0) {return 0;}
     let overlap = 0;
     for (const item of set1) {
-      if (set2.has(item)) overlap++;
+      if (set2.has(item)) {overlap++;}
     }
     return overlap / Math.max(set1.size, set2.size);
   }
@@ -227,7 +227,7 @@ export class PersonalizationEngine {
    */
   private getExperienceEmbedding(experienceId: string): number[] | undefined {
     const experience = this.experienceCatalog.get(experienceId);
-    if (!experience) return undefined;
+    if (!experience) {return undefined;}
 
     // Generate simple content-based embedding
     const dimensions = 64;

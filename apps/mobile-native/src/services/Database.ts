@@ -37,7 +37,7 @@ export const initializeDatabase = async (): Promise<void> => {
 
 // Create tables
 const createTables = async (): Promise<void> => {
-  if (!db) return;
+  if (!db) {return;}
 
   // Pending mutations table (for offline sync)
   await db.executeSql(`
@@ -120,7 +120,7 @@ export const storePendingMutation = async (
   operation: string,
   variables: any,
 ): Promise<number> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   const result = await db.executeSql(
     'INSERT INTO pending_mutations (operation, variables, timestamp) VALUES (?, ?, ?)',
@@ -132,7 +132,7 @@ export const storePendingMutation = async (
 
 // Get pending mutations
 export const getPendingMutations = async (): Promise<any[]> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   const result = await db.executeSql('SELECT * FROM pending_mutations ORDER BY timestamp ASC');
 
@@ -154,14 +154,14 @@ export const getPendingMutations = async (): Promise<any[]> => {
 
 // Delete pending mutation
 export const deletePendingMutation = async (id: number): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.executeSql('DELETE FROM pending_mutations WHERE id = ?', [id]);
 };
 
 // Update mutation retry count
 export const updateMutationRetryCount = async (id: number, error?: string): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.executeSql(
     'UPDATE pending_mutations SET retry_count = retry_count + 1, error = ? WHERE id = ?',
@@ -171,7 +171,7 @@ export const updateMutationRetryCount = async (id: number, error?: string): Prom
 
 // Store location update
 export const storeLocationUpdate = async (location: Location): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.executeSql(
     `INSERT INTO location_history
@@ -191,7 +191,7 @@ export const storeLocationUpdate = async (location: Location): Promise<void> => 
 
 // Get unsynced location updates
 export const getUnsyncedLocations = async (): Promise<Location[]> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   const result = await db.executeSql(
     'SELECT * FROM location_history WHERE synced = 0 ORDER BY timestamp ASC LIMIT 100',
@@ -216,7 +216,7 @@ export const getUnsyncedLocations = async (): Promise<Location[]> => {
 
 // Mark locations as synced
 export const markLocationsAsSynced = async (timestamps: number[]): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   const placeholders = timestamps.map(() => '?').join(',');
   await db.executeSql(
@@ -234,7 +234,7 @@ export const addMediaToUploadQueue = async (media: {
   caseId?: string;
   metadata?: any;
 }): Promise<number> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   const result = await db.executeSql(
     `INSERT INTO media_upload_queue
@@ -256,7 +256,7 @@ export const addMediaToUploadQueue = async (media: {
 
 // Get pending media uploads
 export const getPendingMediaUploads = async (): Promise<any[]> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   const result = await db.executeSql(
     "SELECT * FROM media_upload_queue WHERE upload_status = 'pending' ORDER BY timestamp ASC LIMIT 10",
@@ -290,7 +290,7 @@ export const updateMediaUploadStatus = async (
   progress?: number,
   error?: string,
 ): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.executeSql(
     'UPDATE media_upload_queue SET upload_status = ?, upload_progress = ?, error = ? WHERE id = ?',
@@ -300,14 +300,14 @@ export const updateMediaUploadStatus = async (
 
 // Delete media upload
 export const deleteMediaUpload = async (id: number): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.executeSql('DELETE FROM media_upload_queue WHERE id = ?', [id]);
 };
 
 // Cache entity
 export const cacheEntity = async (id: string, data: any, ttl?: number): Promise<void> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.executeSql(
     'INSERT OR REPLACE INTO cached_entities (id, data, timestamp, ttl) VALUES (?, ?, ?, ?)',
@@ -317,7 +317,7 @@ export const cacheEntity = async (id: string, data: any, ttl?: number): Promise<
 
 // Get cached entity
 export const getCachedEntity = async (id: string): Promise<any | null> => {
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {throw new Error('Database not initialized');}
 
   const result = await db.executeSql('SELECT * FROM cached_entities WHERE id = ?', [id]);
 
