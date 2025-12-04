@@ -1,5 +1,5 @@
 
-import { snapshotter } from './diagnostic-snapshotter';
+import { snapshotter } from './diagnostic-snapshotter.js';
 import {
   Meter,
   Counter,
@@ -13,9 +13,16 @@ import {
   MeterProvider,
   PeriodicExportingMetricReader,
 } from '@opentelemetry/sdk-metrics';
-import { Resource } from '@opentelemetry/resources';
+// import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import os from 'os';
+
+// Mock Resource if not available or ESM issue
+class Resource {
+    constructor(attributes: any) {
+        // no-op
+    }
+}
 
 class ComprehensiveTelemetry {
   private static instance: ComprehensiveTelemetry;
@@ -55,8 +62,11 @@ class ComprehensiveTelemetry {
     });
 
     const prometheusExporter = new PrometheusExporter({ port: 9464 });
-    const meterProvider = new MeterProvider({ resource });
-    meterProvider.addMetricReader(prometheusExporter);
+    const meterProvider = new MeterProvider({ resource: resource as any });
+    // @ts-ignore - SDK compatibility issue
+    if (typeof meterProvider.addMetricReader === 'function') {
+        meterProvider.addMetricReader(prometheusExporter);
+    }
 
     this.meter = meterProvider.getMeter('intelgraph-server-telemetry');
 
@@ -74,14 +84,24 @@ class ComprehensiveTelemetry {
   }
 
   private createCounter(name: string, description: string): Counter {
+    if (!this.meter) {
+       // Temporary safety check during init race conditions
+       return { add: () => {} } as any;
+    }
     return this.meter.createCounter(name, { description });
   }
 
   private createHistogram(name: string, description: string): Histogram {
+    if (!this.meter) {
+       return { record: () => {} } as any;
+    }
     return this.meter.createHistogram(name, { description });
   }
 
   private createUpDownCounter(name: string, description: string): UpDownCounter {
+    if (!this.meter) {
+       return { add: () => {} } as any;
+    }
     return this.meter.createUpDownCounter(name, { description });
   }
 

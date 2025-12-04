@@ -43,6 +43,7 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+import { provenanceLedger } from '../provenance/ledger.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
@@ -91,6 +92,7 @@ interface User {
   fullName?: string;
   role: string;
   isActive: boolean;
+  isVerified: boolean;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt?: Date;
@@ -111,6 +113,10 @@ interface DatabaseUser {
   last_name?: string;
   role: string;
   is_active: boolean;
+  is_verified: boolean;
+  verification_token?: string;
+  verification_expires_at?: Date;
+  email_verified_at?: Date;
   last_login?: Date;
   created_at: Date;
   updated_at?: Date;
@@ -277,11 +283,18 @@ export class AuthService {
 
       const passwordHash = await argon2.hash(userData.password);
 
+      const verificationToken = uuidv4();
+      const verificationExpiresAt = new Date();
+      verificationExpiresAt.setHours(verificationExpiresAt.getHours() + 24);
+
       const userResult = await client.query(
         `
-        INSERT INTO users (email, username, password_hash, first_name, last_name, role)
-        VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, email, username, first_name, last_name, role, is_active, created_at
+        INSERT INTO users (
+          email, username, password_hash, first_name, last_name, role,
+          is_verified, verification_token, verification_expires_at
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
       `,
         [
           userData.email,
@@ -290,19 +303,51 @@ export class AuthService {
           userData.firstName,
           userData.lastName,
           userData.role || 'ANALYST',
+          false, // is_verified
+          verificationToken,
+          verificationExpiresAt,
         ],
       );
 
       const user = userResult.rows[0] as DatabaseUser;
-      const { token, refreshToken } = await this.generateTokens(user, client);
+
+      // In a real implementation, we would send the email here
+      // For now, we log it so it can be used in dev
+      logger.info('User registered. Verification URL:', {
+        email: user.email,
+        url: `${config.cors.origin}/verify-email?token=${verificationToken}`,
+      });
 
       await client.query('COMMIT');
 
+      // Audit log the registration
+      try {
+        await provenanceLedger.appendEntry({
+          tenantId: 'system', // Registration is system-wide
+          actionType: 'USER_REGISTERED',
+          resourceType: 'user',
+          resourceId: user.id,
+          actorId: user.id,
+          actorType: 'user',
+          timestamp: new Date(),
+          payload: {
+            email: user.email,
+            role: user.role,
+          },
+          metadata: {
+            classification: ['INTERNAL'],
+          },
+        });
+      } catch (err) {
+        logger.error('Failed to log registration to provenance ledger', err);
+      }
+
+      // Do NOT return tokens - force verification flow
       return {
         user: this.formatUser(user),
-        token,
-        refreshToken,
-        expiresIn: 24 * 60 * 60,
+        token: '',
+        refreshToken: '',
+        expiresIn: 0,
       };
     } catch (error) {
       await client.query('ROLLBACK');
@@ -441,6 +486,139 @@ export class AuthService {
    * }
    * ```
    */
+  /**
+   * Verify user email with token
+   */
+  async verifyEmail(token: string): Promise<AuthResponse> {
+    const client = await this.pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const userResult = await client.query(
+        `
+        SELECT * FROM users
+        WHERE verification_token = $1
+        AND verification_expires_at > CURRENT_TIMESTAMP
+        AND is_active = true
+        `,
+        [token],
+      );
+
+      if (userResult.rows.length === 0) {
+        throw new Error('Invalid or expired verification token');
+      }
+
+      const user = userResult.rows[0] as DatabaseUser;
+
+      // Update user as verified
+      const updateResult = await client.query(
+        `
+        UPDATE users
+        SET
+          is_verified = true,
+          verification_token = NULL,
+          verification_expires_at = NULL,
+          email_verified_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+        RETURNING *
+        `,
+        [user.id],
+      );
+
+      const updatedUser = updateResult.rows[0] as DatabaseUser;
+
+      // Generate new tokens (optional, but good practice to refresh session)
+      const { token: accessToken, refreshToken } = await this.generateTokens(
+        updatedUser,
+        client,
+      );
+
+      await client.query('COMMIT');
+
+      // Audit log the verification
+      try {
+        await provenanceLedger.appendEntry({
+          tenantId: 'system',
+          actionType: 'USER_VERIFIED',
+          resourceType: 'user',
+          resourceId: user.id,
+          actorId: user.id,
+          actorType: 'user',
+          timestamp: new Date(),
+          payload: {
+            email: user.email,
+          },
+          metadata: {
+            classification: ['INTERNAL'],
+          },
+        });
+      } catch (err) {
+        logger.error('Failed to log verification to provenance ledger', err);
+      }
+
+      return {
+        user: this.formatUser(updatedUser),
+        token: accessToken,
+        refreshToken,
+        expiresIn: 24 * 60 * 60,
+      };
+    } catch (error) {
+      await client.query('ROLLBACK');
+      logger.error('Error verifying email:', error);
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  /**
+   * Resend verification email
+   */
+  async resendVerification(email: string): Promise<void> {
+    const client = await this.pool.connect();
+
+    try {
+      const userResult = await client.query(
+        'SELECT * FROM users WHERE email = $1 AND is_active = true',
+        [email],
+      );
+
+      if (userResult.rows.length === 0) {
+        // Silently fail to prevent enumeration
+        return;
+      }
+
+      const user = userResult.rows[0] as DatabaseUser;
+
+      if (user.is_verified) {
+        return;
+      }
+
+      const verificationToken = uuidv4();
+      const verificationExpiresAt = new Date();
+      verificationExpiresAt.setHours(verificationExpiresAt.getHours() + 24);
+
+      await client.query(
+        `
+        UPDATE users
+        SET
+          verification_token = $1,
+          verification_expires_at = $2
+        WHERE id = $3
+        `,
+        [verificationToken, verificationExpiresAt, user.id],
+      );
+
+      logger.info('Verification email resent. URL:', {
+        email: user.email,
+        url: `${config.cors.origin}/verify-email?token=${verificationToken}`,
+      });
+    } finally {
+      client.release();
+    }
+  }
+
   async verifyToken(token: string): Promise<User | null> {
     try {
       if (!token) return null;
@@ -674,6 +852,7 @@ export class AuthService {
       fullName: `${user.first_name} ${user.last_name}`,
       role: user.role,
       isActive: user.is_active,
+      isVerified: user.is_verified || false,
       lastLogin: user.last_login,
       createdAt: user.created_at,
       updatedAt: user.updated_at,

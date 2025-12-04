@@ -33,6 +33,8 @@ const AdminPage = React.lazy(() => import('@/pages/AdminPage'))
 const HelpPage = React.lazy(() => import('@/pages/HelpPage'))
 const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
+const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
+const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 
@@ -63,6 +65,8 @@ function App() {
                   <Routes>
                     {/* Auth routes */}
                     <Route path="/signin" element={<SignInPage />} />
+                    <Route path="/signup" element={<SignupPage />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
                     <Route
                       path="/access-denied"
                       element={<AccessDeniedPage />}
