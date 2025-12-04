@@ -1,0 +1,464 @@
+name: SBOM & Vulnerability Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * *'  # Daily at 3 AM UTC
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Scan target (image, path, or SBOM file)'
+        required: false
+        default: '.'
+      auto_fix:
+        description: 'Enable auto-fix for vulnerabilities'
+        type: boolean
+        default: false
+      dry_run:
+        description: 'Dry run mode (no changes)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  security-events: write
+  id-token: write  # For keyless signing
+  pull-requests: write
+  packages: read
+
+env:
+  COSIGN_EXPERIMENTAL: '1'
+
+jobs:
+  sbom-generate:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    outputs:
+      sbom-path: ${{ steps.syft.outputs.sbom-path }}
+      sbom-digest: ${{ steps.syft.outputs.sbom-digest }}
+      component-count: ${{ steps.syft.outputs.component-count }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Generate SBOM with Syft
+        id: syft
+        run: |
+          TARGET="${{ github.event.inputs.target || '.' }}"
+          SBOM_PATH="sbom.cdx.json"
+
+          # Generate CycloneDX SBOM
+          syft "$TARGET" \
+            -o cyclonedx-json \
+            --file "$SBOM_PATH" \
+            --scope all-layers \
+            --exclude '**/node_modules/.cache/**' \
+            --exclude '**/dist/**' \
+            --exclude '**/.git/**'
+
+          # Calculate digest
+          DIGEST=$(sha256sum "$SBOM_PATH" | cut -d' ' -f1)
+
+          # Count components
+          COMPONENT_COUNT=$(jq '.components | length' "$SBOM_PATH")
+
+          echo "sbom-path=$SBOM_PATH" >> $GITHUB_OUTPUT
+          echo "sbom-digest=$DIGEST" >> $GITHUB_OUTPUT
+          echo "component-count=$COMPONENT_COUNT" >> $GITHUB_OUTPUT
+
+          echo "📦 SBOM generated with $COMPONENT_COUNT components"
+
+      - name: Sign SBOM with Cosign (keyless)
+        if: github.event_name != 'pull_request'
+        run: |
+          cosign sign-blob \
+            --yes \
+            --output-signature sbom.cdx.json.sig \
+            --output-certificate sbom.cdx.json.pem \
+            sbom.cdx.json
+
+          echo "🔐 SBOM signed with keyless signing"
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: |
+            sbom.cdx.json
+            sbom.cdx.json.sig
+            sbom.cdx.json.pem
+          retention-days: 90
+
+      - name: Upload SBOM to Dependency Graph
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: advanced-security/spdx-dependency-submission-action@v0.1.1
+        with:
+          filePath: sbom.cdx.json
+
+  vulnerability-scan:
+    name: Vulnerability Scan
+    runs-on: ubuntu-latest
+    needs: sbom-generate
+    outputs:
+      critical: ${{ steps.scan.outputs.critical }}
+      high: ${{ steps.scan.outputs.high }}
+      medium: ${{ steps.scan.outputs.medium }}
+      low: ${{ steps.scan.outputs.low }}
+      fixable: ${{ steps.scan.outputs.fixable }}
+      policy-passed: ${{ steps.policy.outputs.passed }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
+
+      - name: Run Trivy vulnerability scan
+        id: scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'sbom'
+          input: 'sbom.cdx.json'
+          format: 'json'
+          output: 'trivy-results.json'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          exit-code: '0'  # Don't fail, we'll evaluate policy separately
+
+      - name: Parse scan results
+        id: parse
+        run: |
+          # Parse vulnerability counts
+          CRITICAL=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy-results.json)
+          HIGH=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy-results.json)
+          MEDIUM=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' trivy-results.json)
+          LOW=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "LOW")] | length' trivy-results.json)
+          FIXABLE=$(jq '[.Results[]?.Vulnerabilities[]? | select(.FixedVersion != null and .FixedVersion != "")] | length' trivy-results.json)
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "medium=$MEDIUM" >> $GITHUB_OUTPUT
+          echo "low=$LOW" >> $GITHUB_OUTPUT
+          echo "fixable=$FIXABLE" >> $GITHUB_OUTPUT
+
+          echo "📊 Scan Results:"
+          echo "   Critical: $CRITICAL"
+          echo "   High: $HIGH"
+          echo "   Medium: $MEDIUM"
+          echo "   Low: $LOW"
+          echo "   Fixable: $FIXABLE"
+
+      - name: Generate SARIF report
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'sbom'
+          input: 'sbom.cdx.json'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: 'trivy-vulnerability-scan'
+
+      - name: Evaluate vulnerability policy
+        id: policy
+        run: |
+          CRITICAL=${{ steps.parse.outputs.critical }}
+          HIGH=${{ steps.parse.outputs.high }}
+
+          # Policy: Block on critical or high vulnerabilities
+          if [ "$CRITICAL" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+            echo "passed=false" >> $GITHUB_OUTPUT
+            echo "❌ Policy violation: Found $CRITICAL critical and $HIGH high vulnerabilities"
+          else
+            echo "passed=true" >> $GITHUB_OUTPUT
+            echo "✅ Policy passed"
+          fi
+
+      - name: Upload scan results
+        uses: actions/upload-artifact@v4
+        with:
+          name: vulnerability-scan
+          path: |
+            trivy-results.json
+            trivy-results.sarif
+          retention-days: 90
+
+  slsa-attestation:
+    name: SLSA Attestation
+    runs-on: ubuntu-latest
+    needs: [sbom-generate, vulnerability-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download SBOM
+        uses: actions/download-artifact@v4
+        with:
+          name: sbom
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Generate SLSA provenance
+        id: provenance
+        run: |
+          # Create SLSA v1.0 provenance
+          cat > provenance.json << EOF
+          {
+            "_type": "https://in-toto.io/Statement/v0.1",
+            "predicateType": "https://slsa.dev/provenance/v1",
+            "subject": [
+              {
+                "name": "sbom.cdx.json",
+                "digest": {
+                  "sha256": "${{ needs.sbom-generate.outputs.sbom-digest }}"
+                }
+              }
+            ],
+            "predicate": {
+              "buildDefinition": {
+                "buildType": "https://github.com/slsa-framework/slsa-github-generator/generic@v1",
+                "externalParameters": {
+                  "repository": "${{ github.repository }}",
+                  "ref": "${{ github.ref }}",
+                  "workflow": "${{ github.workflow }}"
+                },
+                "internalParameters": {
+                  "github_run_id": "${{ github.run_id }}",
+                  "github_run_attempt": "${{ github.run_attempt }}"
+                },
+                "resolvedDependencies": [
+                  {
+                    "uri": "git+https://github.com/${{ github.repository }}@${{ github.ref }}",
+                    "digest": {
+                      "sha1": "${{ github.sha }}"
+                    }
+                  }
+                ]
+              },
+              "runDetails": {
+                "builder": {
+                  "id": "https://github.com/${{ github.repository }}/.github/workflows/sbom-vuln-scan.yml"
+                },
+                "metadata": {
+                  "invocationId": "${{ github.run_id }}-${{ github.run_attempt }}",
+                  "startedOn": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                  "finishedOn": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                }
+              }
+            }
+          }
+          EOF
+
+          echo "📜 SLSA provenance generated"
+
+      - name: Sign provenance with Cosign
+        run: |
+          # Encode provenance as base64 for DSSE envelope
+          PAYLOAD=$(base64 -w0 provenance.json)
+
+          # Create DSSE envelope
+          cat > attestation-bundle.json << EOF
+          {
+            "dsseEnvelope": {
+              "payload": "$PAYLOAD",
+              "payloadType": "application/vnd.in-toto+json",
+              "signatures": []
+            }
+          }
+          EOF
+
+          # Sign the attestation
+          cosign sign-blob \
+            --yes \
+            --output-signature attestation.sig \
+            --output-certificate attestation.pem \
+            provenance.json
+
+          echo "🔐 Attestation signed"
+
+      - name: Upload attestation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: slsa-attestation
+          path: |
+            provenance.json
+            attestation-bundle.json
+            attestation.sig
+            attestation.pem
+          retention-days: 90
+
+  auto-fix:
+    name: Auto-Fix Vulnerabilities
+    runs-on: ubuntu-latest
+    needs: vulnerability-scan
+    if: |
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.auto_fix == 'true') ||
+      (github.event_name == 'schedule' && needs.vulnerability-scan.outputs.fixable > 0)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Download scan results
+        uses: actions/download-artifact@v4
+        with:
+          name: vulnerability-scan
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Apply auto-fixes
+        id: autofix
+        env:
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          BRANCH_NAME="security/auto-fix-$(date +%Y%m%d-%H%M%S)"
+
+          if [ "$DRY_RUN" == "true" ]; then
+            echo "🔍 Dry run mode - no changes will be made"
+            echo "Would create branch: $BRANCH_NAME"
+            echo "branch=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Create fix branch
+          git checkout -b "$BRANCH_NAME"
+
+          # Parse vulnerabilities and apply fixes
+          FIXED=0
+
+          # Get fixable vulnerabilities from scan results
+          VULNS=$(jq -r '.Results[]?.Vulnerabilities[]? | select(.FixedVersion != null and .FixedVersion != "") | "\(.PkgName)@\(.FixedVersion)"' trivy-results.json | sort -u | head -10)
+
+          for vuln in $VULNS; do
+            PKG=$(echo "$vuln" | cut -d'@' -f1)
+            VERSION=$(echo "$vuln" | cut -d'@' -f2)
+
+            echo "Attempting to update $PKG to $VERSION"
+
+            if pnpm update "$PKG@$VERSION" 2>/dev/null; then
+              git add -A
+              git commit -m "fix(security): update $PKG to $VERSION" || true
+              FIXED=$((FIXED + 1))
+            fi
+          done
+
+          if [ "$FIXED" -gt 0 ]; then
+            git push -u origin "$BRANCH_NAME"
+            echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+            echo "fixed=$FIXED" >> $GITHUB_OUTPUT
+          else
+            echo "No fixes applied"
+            echo "branch=" >> $GITHUB_OUTPUT
+            echo "fixed=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.autofix.outputs.branch != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FIXED=${{ steps.autofix.outputs.fixed }}
+
+          gh pr create \
+            --base main \
+            --head "${{ steps.autofix.outputs.branch }}" \
+            --title "fix(security): auto-fix $FIXED vulnerabilities" \
+            --body "## Security Auto-Fix
+
+          This PR was automatically generated to address security vulnerabilities.
+
+          ### Summary
+          - **Fixes Applied**: $FIXED
+          - **Scan Date**: $(date -u +%Y-%m-%d)
+          - **Workflow Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ### Review Checklist
+          - [ ] Verify all tests pass
+          - [ ] Check for breaking changes
+          - [ ] Review updated dependencies
+
+          ---
+          *This PR was automatically generated by the security auto-fix workflow.*" \
+            --label "security,automated"
+
+  policy-gate:
+    name: Policy Gate
+    runs-on: ubuntu-latest
+    needs: [sbom-generate, vulnerability-scan]
+    if: always()
+
+    steps:
+      - name: Check policy status
+        run: |
+          POLICY_PASSED="${{ needs.vulnerability-scan.outputs.policy-passed }}"
+          CRITICAL="${{ needs.vulnerability-scan.outputs.critical }}"
+          HIGH="${{ needs.vulnerability-scan.outputs.high }}"
+
+          echo "📋 Security Policy Evaluation"
+          echo "=============================="
+          echo "SBOM Components: ${{ needs.sbom-generate.outputs.component-count }}"
+          echo "Critical Vulnerabilities: $CRITICAL"
+          echo "High Vulnerabilities: $HIGH"
+          echo "Medium Vulnerabilities: ${{ needs.vulnerability-scan.outputs.medium }}"
+          echo "Low Vulnerabilities: ${{ needs.vulnerability-scan.outputs.low }}"
+          echo "Fixable Vulnerabilities: ${{ needs.vulnerability-scan.outputs.fixable }}"
+          echo ""
+
+          if [ "$POLICY_PASSED" == "true" ]; then
+            echo "✅ Security policy: PASSED"
+          else
+            echo "❌ Security policy: FAILED"
+            echo ""
+            echo "Action required: Address critical and high severity vulnerabilities before merging."
+            exit 1
+          fi
