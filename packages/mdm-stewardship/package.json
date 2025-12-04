@@ -1,0 +1,24 @@
+{
+  "name": "@summit/mdm-stewardship",
+  "version": "1.0.0",
+  "description": "Data stewardship workflows and approval processes for MDM",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": ["stewardship", "workflow", "approval", "mdm"],
+  "dependencies": {
+    "@summit/mdm-core": "workspace:*",
+    "zod": "^3.22.4",
+    "uuid": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.9.3"
+  }
+}

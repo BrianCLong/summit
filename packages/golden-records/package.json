@@ -1,0 +1,30 @@
+{
+  "name": "@summit/golden-records",
+  "version": "1.0.0",
+  "description": "Golden record management with entity resolution and survivorship",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "golden-records",
+    "entity-resolution",
+    "survivorship",
+    "mdm"
+  ],
+  "dependencies": {
+    "@summit/mdm-core": "workspace:*",
+    "zod": "^3.22.4",
+    "uuid": "^11.0.3",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "typescript": "^5.9.3"
+  }
+}
