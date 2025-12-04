@@ -10,7 +10,9 @@
     "lint": "ESLINT_USE_FLAT_CONFIG=false eslint --no-eslintrc --config .eslintrc.cjs \"src/**/*.{ts,tsx}\"",
     "format": "prettier --check 'src/**/*.{ts,tsx,css,html}'",
     "test": "jest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:visual": "playwright test --project=visual",
+    "test:cypress": "cypress run --browser chromium"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -38,6 +40,7 @@
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
+    "cypress": "^13.15.1",
     "@vitejs/plugin-react": "^5.0.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
