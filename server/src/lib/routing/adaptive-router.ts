@@ -118,6 +118,50 @@ class AdaptiveRouter {
     // In a real implementation, this would check the status of a circuit breaker for the backend.
     return false;
   }
+
+  /**
+   * Selects a write-capable backend (PRIMARY).
+   * @param {string} tenantId - The ID of the tenant.
+   * @returns {Backend | null} A primary backend, or null if none available.
+   */
+  public getWriteBackend(tenantId: string): Backend | null {
+    // Check feature flag - simplified mock
+    const writeShardingEnabled = this.checkFlag('WRITE_SHARDING_PILOT', tenantId);
+
+    if (!writeShardingEnabled) {
+      // Default behavior: any healthy primary
+      return this.backends.find(b => b.role === 'PRIMARY' && b.status === 'UP') || null;
+    }
+
+    // Pilot logic: For now, still return a Primary, but logic could be extended for sharding
+    // e.g., consistent hashing based on tenantId to select specific Primary shard
+    return this.backends.find(b => b.role === 'PRIMARY' && b.status === 'UP') || null;
+  }
+
+  /**
+   * Selects a read backend, preferring local replicas.
+   * @param {string} tenantId - The tenant ID.
+   * @param {string} region - The region of the request.
+   * @returns {Backend | null} A suitable backend for reading.
+   */
+  public getReadBackend(tenantId: string, region?: string): Backend | null {
+    const healthy = this.backends.filter(b => b.status === 'UP');
+    if (healthy.length === 0) return null;
+
+    if (region) {
+      const localReplica = healthy.find(b => b.role === 'REPLICA' && b.region === region);
+      if (localReplica) return localReplica;
+    }
+
+    // Fallback to Primary
+    return healthy.find(b => b.role === 'PRIMARY') || healthy[0];
+  }
+
+  private checkFlag(flag: string, context: string): boolean {
+    // Mock implementation - integrated with feature flags in real system
+    // In production, this would call FeatureFlags.isEnabled(flag, { tenantId: context })
+    return false;
+  }
 }
 
 export default AdaptiveRouter.getInstance();
