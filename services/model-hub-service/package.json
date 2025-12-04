@@ -1,0 +1,59 @@
+{
+  "name": "@intelgraph/model-hub-service",
+  "version": "1.0.0",
+  "description": "Model Hub Registry and Routing Service - centralized model management, evaluation, and routing for LLMs, embeddings, and classifiers",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@intelgraph/deep-learning-core": "workspace:*",
+    "express": "^4.19.2",
+    "zod": "^4.1.12",
+    "pg": "^8.16.3",
+    "redis": "^5.8.1",
+    "uuid": "^11.1.0",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/pg": "^8.11.6",
+    "@types/uuid": "^10.0.0",
+    "@types/node": "^24.10.1",
+    "@types/jest": "^30.0.0",
+    "@types/crypto-js": "^4.2.2",
+    "typescript": "^5.9.3",
+    "tsx": "^4.7.1",
+    "jest": "^30.2.0",
+    "@swc/jest": "^0.2.39",
+    "eslint": "^9.39.1",
+    "rimraf": "^6.0.1"
+  },
+  "engines": {
+    "node": ">=18.18"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "model-hub",
+    "llm-routing",
+    "model-registry",
+    "ai-governance",
+    "model-evaluation"
+  ]
+}
