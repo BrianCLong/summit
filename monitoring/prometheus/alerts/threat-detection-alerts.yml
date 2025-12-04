@@ -1,0 +1,214 @@
+groups:
+  - name: threat_detection_alerts
+    interval: 30s
+    rules:
+      # Critical Threat Detection Alerts
+      - alert: CriticalThreatDetected
+        expr: rate(security_events_total{severity="CRITICAL"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "Critical security threat detected"
+          description: "{{ $value }} critical threats detected in the last 5 minutes"
+
+      - alert: HighThreatVolumeDetected
+        expr: rate(security_events_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High volume of security events"
+          description: "{{ $value }} security events per second detected"
+
+      - alert: DDoSAttackInProgress
+        expr: rate(security_events_total{category="DDOS"}[1m]) > 0
+        for: 30s
+        labels:
+          severity: critical
+          team: security
+          type: ddos
+        annotations:
+          summary: "DDoS attack detected"
+          description: "DDoS attack in progress - {{ $value }} events/sec"
+
+      - alert: DataExfiltrationDetected
+        expr: rate(security_events_total{category="DATA_EXFILTRATION"}[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: security
+          type: exfiltration
+        annotations:
+          summary: "Potential data exfiltration detected"
+          description: "Data exfiltration attempts detected - immediate investigation required"
+
+      - alert: APTActivityDetected
+        expr: rate(security_events_total{category="APT"}[30m]) > 0
+        for: 5m
+        labels:
+          severity: critical
+          team: security
+          type: apt
+        annotations:
+          summary: "Advanced Persistent Threat activity detected"
+          description: "APT indicators detected - coordinated response required"
+
+      # Anomaly Detection Alerts
+      - alert: BehavioralAnomalySpike
+        expr: rate(anomaly_detections_total{anomaly_type="behavioral"}[15m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Spike in behavioral anomalies"
+          description: "{{ $value }} behavioral anomalies detected per second"
+
+      - alert: MLModelAnomalyScoreHigh
+        expr: ml_anomaly_score > 0.9
+        for: 2m
+        labels:
+          severity: high
+          team: ml-ops
+        annotations:
+          summary: "High ML anomaly score detected"
+          description: "ML model detecting anomaly score of {{ $value }}"
+
+      # Alert System Health
+      - alert: AlertManagerDown
+        expr: up{job="alertmanager"} == 0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "AlertManager is down"
+          description: "AlertManager instance {{ $labels.instance }} is down"
+
+      - alert: ThreatDetectionServiceDown
+        expr: up{job="threat-detection"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "Threat Detection service is down"
+          description: "Threat Detection service on {{ $labels.instance }} is not responding"
+
+      - alert: HighAlertQueueBacklog
+        expr: alert_queue_size > 1000
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High alert queue backlog"
+          description: "{{ $value }} alerts pending processing"
+
+      # ML Model Health
+      - alert: MLModelDriftDetected
+        expr: ml_model_drift_score > 0.3
+        for: 10m
+        labels:
+          severity: warning
+          team: ml-ops
+        annotations:
+          summary: "ML model drift detected"
+          description: "Model {{ $labels.model_id }} showing drift score of {{ $value }}"
+
+      - alert: MLModelAccuracyDegraded
+        expr: ml_model_accuracy < 0.8
+        for: 15m
+        labels:
+          severity: high
+          team: ml-ops
+        annotations:
+          summary: "ML model accuracy degraded"
+          description: "Model {{ $labels.model_id }} accuracy dropped to {{ $value }}"
+
+      - alert: MLModelRetrainingRequired
+        expr: ml_model_requires_retraining == 1
+        for: 1m
+        labels:
+          severity: warning
+          team: ml-ops
+        annotations:
+          summary: "ML model requires retraining"
+          description: "Model {{ $labels.model_id }} needs to be retrained"
+
+      # Threat Intelligence Alerts
+      - alert: ThreatIntelFeedDown
+        expr: threat_intel_feed_status{status="down"} == 1
+        for: 10m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Threat intelligence feed unavailable"
+          description: "Feed {{ $labels.feed_name }} has been down for 10+ minutes"
+
+      - alert: StaleThreaIntelligence
+        expr: time() - threat_intel_last_update > 86400
+        for: 1h
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Threat intelligence data is stale"
+          description: "Threat intel hasn't been updated in over 24 hours"
+
+      # Database Performance
+      - alert: ThreatDatabaseHighLoad
+        expr: rate(timescaledb_query_duration_seconds_sum{database="threats"}[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High load on threat detection database"
+          description: "Average query time: {{ $value }}s"
+
+      - alert: ThreatDatabaseConnectionPoolExhausted
+        expr: timescaledb_connections_active / timescaledb_connections_max > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Threat database connection pool nearly exhausted"
+          description: "{{ $value | humanizePercentage }} of connections in use"
+
+      # Response System Alerts
+      - alert: AutomatedResponseFailureRate
+        expr: rate(automated_response_failures_total[10m]) / rate(automated_response_total[10m]) > 0.1
+        for: 5m
+        labels:
+          severity: high
+          team: security
+        annotations:
+          summary: "High automated response failure rate"
+          description: "{{ $value | humanizePercentage }} of automated responses failing"
+
+      - alert: SOARIntegrationDown
+        expr: soar_integration_status == 0
+        for: 5m
+        labels:
+          severity: high
+          team: security
+        annotations:
+          summary: "SOAR integration offline"
+          description: "SOAR platform {{ $labels.platform }} is not reachable"
+
+      # Detection Coverage
+      - alert: LowDetectionCoverage
+        expr: (sum(rate(security_events_total[1h])) / sum(rate(total_network_events[1h]))) < 0.01
+        for: 30m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Unusually low threat detection coverage"
+          description: "Only {{ $value | humanizePercentage }} of events triggering detections"
