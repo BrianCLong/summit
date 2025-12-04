@@ -43,7 +43,7 @@ export default function WorkflowPanel() {
     return () => clearInterval(timer)
   }, [caseId])
 
-  if (!info) return <Typography tabIndex={0}>Select a case</Typography>
+  if (!info) {return <Typography tabIndex={0}>Select a case</Typography>}
 
   return (
     <div aria-label="workflow panel">

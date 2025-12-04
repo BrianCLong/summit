@@ -56,7 +56,7 @@ export function GraphCanvas({
   }, [])
 
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) return
+    if (!svgRef.current || entities.length === 0) {return}
 
     const svg = d3.select(svgRef.current)
     svg.selectAll('*').remove()
@@ -227,7 +227,7 @@ export function GraphCanvas({
         d3
           .drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0.3).restart()
+            if (!event.active) {simulation.alphaTarget(0.3).restart()}
             d.fx = d.x
             d.fy = d.y
           })
@@ -236,7 +236,7 @@ export function GraphCanvas({
             d.fy = event.y
           })
           .on('end', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0)
+            if (!event.active) {simulation.alphaTarget(0)}
             d.fx = null
             d.fy = null
           })
@@ -276,7 +276,7 @@ export function GraphCanvas({
       .style('pointer-events', 'none')
       .text(d =>
         d.entity.name.length > 15
-          ? d.entity.name.slice(0, 15) + '...'
+          ? `${d.entity.name.slice(0, 15)  }...`
           : d.entity.name
       )
 

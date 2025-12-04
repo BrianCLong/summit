@@ -144,9 +144,9 @@ export function ExplainViewSidebar({
   const confidenceStats = useMemo(() => {
     const buckets = { high: 0, medium: 0, low: 0 }
     entities.forEach(entity => {
-      if (entity.confidence >= 0.8) buckets.high++
-      else if (entity.confidence >= 0.5) buckets.medium++
-      else buckets.low++
+      if (entity.confidence >= 0.8) {buckets.high++}
+      else if (entity.confidence >= 0.5) {buckets.medium++}
+      else {buckets.low++}
     })
 
     const total = entities.length
@@ -168,8 +168,8 @@ export function ExplainViewSidebar({
 
     entities.forEach(entity => {
       // Mock source extraction from entity metadata
-      if (entity.properties?.source) sources.add(entity.properties.source)
-      if (entity.properties?.license) licenses.add(entity.properties.license)
+      if (entity.properties?.source) {sources.add(entity.properties.source)}
+      if (entity.properties?.license) {licenses.add(entity.properties.license)}
       avgConfidence += entity.confidence
     })
 

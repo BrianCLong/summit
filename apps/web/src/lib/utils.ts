@@ -23,10 +23,10 @@ export function formatRelativeTime(date: Date | string): string {
   const diffHours = Math.floor(diffMins / 60)
   const diffDays = Math.floor(diffHours / 24)
 
-  if (diffMins < 1) return 'just now'
-  if (diffMins < 60) return `${diffMins}m ago`
-  if (diffHours < 24) return `${diffHours}h ago`
-  if (diffDays < 7) return `${diffDays}d ago`
+  if (diffMins < 1) {return 'just now'}
+  if (diffMins < 60) {return `${diffMins}m ago`}
+  if (diffHours < 24) {return `${diffHours}h ago`}
+  if (diffDays < 7) {return `${diffDays}d ago`}
 
   return formatDate(date)
 }
@@ -36,8 +36,8 @@ export function capitalizeFirst(str: string): string {
 }
 
 export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text
-  return text.slice(0, maxLength) + '...'
+  if (text.length <= maxLength) {return text}
+  return `${text.slice(0, maxLength)  }...`
 }
 
 export function getRiskColor(level: string): string {

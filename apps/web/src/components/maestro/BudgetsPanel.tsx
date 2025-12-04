@@ -6,9 +6,9 @@ import { useBudgets } from '../../hooks/useMaestroBudgets'
 
 export default function BudgetsPanel() {
   const { data, isLoading } = useBudgets()
-  if (isLoading) return <div className="skeleton h-24 w-full" />
+  if (isLoading) {return <div className="skeleton h-24 w-full" />}
   if (!data)
-    return <div className="alert alert-error">Failed to load budgets</div>
+    {return <div className="alert alert-error">Failed to load budgets</div>}
 
   return (
     <div className="rounded-2xl border p-3 space-y-3">

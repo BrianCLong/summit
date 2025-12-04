@@ -9,7 +9,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TriPaneShell } from './TriPaneShell'
 import {
@@ -52,8 +52,8 @@ describe('TriPaneShell', () => {
         />
       )
 
-      // Check for pane headings
-      expect(screen.getByText('Timeline')).toBeInTheDocument()
+      // Check for pane headings - Timeline is a heading
+      expect(screen.getByRole('heading', { name: 'Timeline' })).toBeInTheDocument()
       expect(screen.getByText('Entity Graph')).toBeInTheDocument()
       expect(screen.getByText('Geographic View')).toBeInTheDocument()
     })
@@ -118,7 +118,7 @@ describe('TriPaneShell', () => {
       )
 
       // Initial counts
-      const initialEntityCount = mockEntities.length
+      // const initialEntityCount = mockEntities.length
 
       // Simulate time window change (this would normally come from timeline interaction)
       const timeWindow = {

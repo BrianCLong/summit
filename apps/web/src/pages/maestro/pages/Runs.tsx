@@ -15,7 +15,6 @@ import {
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  ExclamationTriangleIcon,
   CurrencyDollarIcon,
 } from '@heroicons/react/24/outline'
 import { useTenant } from '../../../contexts/TenantContext'
@@ -203,7 +202,7 @@ function RunsTable() {
   }
 
   const handleBulkAction = async (action: 'cancel' | 'retry') => {
-    if (selectedRuns.length === 0) return
+    if (selectedRuns.length === 0) {return}
 
     for (const runId of selectedRuns) {
       await handleRunAction(runId, action)

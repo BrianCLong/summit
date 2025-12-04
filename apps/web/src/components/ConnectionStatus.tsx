@@ -11,8 +11,8 @@ export function ConnectionStatus({ className }: ConnectionStatusProps) {
   const { connected, socket } = useSocket()
 
   const getStatus = () => {
-    if (!socket) return 'disconnected'
-    if (connected) return 'connected'
+    if (!socket) {return 'disconnected'}
+    if (connected) {return 'connected'}
     return 'connecting'
   }
 

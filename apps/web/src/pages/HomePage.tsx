@@ -147,8 +147,8 @@ export default function HomePage() {
           data={kpiMetrics}
           loading={loading}
           onSelect={metric => {
-            if (metric.id === 'threats') navigate('/alerts')
-            else if (metric.id === 'investigations') navigate('/explore')
+            if (metric.id === 'threats') {navigate('/alerts')}
+            else if (metric.id === 'investigations') {navigate('/explore')}
           }}
         />
       </div>

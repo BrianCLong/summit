@@ -69,7 +69,7 @@ async function getJSON<T = any>(path: string, init?: RequestInit): Promise<T> {
     headers: { 'content-type': 'application/json' },
     ...init,
   })
-  if (!r.ok) throw new Error(`${path} ${r.status}`)
+  if (!r.ok) {throw new Error(`${path} ${r.status}`)}
   return r.json()
 }
 
@@ -79,7 +79,7 @@ function useInterval(callback: () => void, delay: number) {
     savedRef.current = callback
   }, [callback])
   useEffect(() => {
-    if (delay === null) return
+    if (delay === null) {return}
     const id = setInterval(() => savedRef.current && savedRef.current(), delay)
     return () => clearInterval(id)
   }, [delay])
@@ -92,16 +92,16 @@ function useSSE(paths: string[]) {
     let closed = false
     const base = getProxyBase()
     function connect(idx = 0) {
-      if (idx >= paths.length) return
+      if (idx >= paths.length) {return}
       try {
         es = new EventSource(`${base}${paths[idx]}`)
         es.onmessage = ev => setLines(l => [...l.slice(-999), ev.data])
         es.onerror = () => {
           es?.close()
-          if (!closed) setTimeout(() => connect(idx + 1), 500)
+          if (!closed) {setTimeout(() => connect(idx + 1), 500)}
         }
       } catch {
-        if (!closed) setTimeout(() => connect(idx + 1), 500)
+        if (!closed) {setTimeout(() => connect(idx + 1), 500)}
       }
     }
     connect()
@@ -181,7 +181,7 @@ function KPIBar() {
   const p95 =
     bd?.windows?.m1?.latency_ms_p95 ?? bd?.windows?.h1?.latency_ms_p95 ?? 0
   const errRate = useMemo(() => {
-    if (!bd) return 0
+    if (!bd) {return 0}
     const w = bd.windows.m1 || bd.windows.h1
     const errors = w?.errors || 0
     const total = w?.count || 0
@@ -675,7 +675,7 @@ function MermaidTrace({ spec }: { spec: string }) {
     })
   }, [])
   useEffect(() => {
-    if (ref.current) (mermaid as any).run({ querySelector: '.mermaid' })
+    if (ref.current) {(mermaid as any).run({ querySelector: '.mermaid' })}
   }, [spec])
   return (
     <Card className="col-span-12">
@@ -718,7 +718,7 @@ function GitHubPane() {
     localStorage.setItem('gh:repo', repo)
   }
   const load = async () => {
-    if (!token || !owner || !repo) return
+    if (!token || !owner || !repo) {return}
     const r = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues?per_page=20`,
       {
@@ -728,7 +728,7 @@ function GitHubPane() {
         },
       }
     )
-    if (r.ok) setIssues(await r.json())
+    if (r.ok) {setIssues(await r.json())}
   }
   useEffect(() => {
     load()
@@ -910,7 +910,7 @@ export default function SymphonyOperatorConsole() {
   // persist proxy base
   useEffect(() => {
     if (typeof window !== 'undefined')
-      localStorage.setItem('symphony:proxyBase', proxyBase)
+      {localStorage.setItem('symphony:proxyBase', proxyBase)}
   }, [proxyBase])
 
   return (

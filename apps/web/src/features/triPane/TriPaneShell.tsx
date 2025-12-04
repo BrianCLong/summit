@@ -21,7 +21,6 @@ import {
   Download,
   Eye,
   EyeOff,
-  Maximize2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -105,7 +104,7 @@ export function TriPaneShell({
     )
 
     const filteredEntities = entities.filter(entity => {
-      if (relevantEntityIds.has(entity.id)) return true
+      if (relevantEntityIds.has(entity.id)) {return true}
 
       // Also include entities updated within the time window
       if (entity.updatedAt) {
@@ -377,8 +376,8 @@ export function TriPaneShell({
         <div className="col-span-3 flex flex-col min-h-0">
           <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4" />
+              <CardTitle className="flex items-center gap-2 text-sm" role="heading" aria-level={2}>
+                <Clock className="h-4 w-4" aria-hidden="true" />
                 Timeline
                 {syncState.globalTimeWindow && (
                   <Badge variant="secondary" className="text-xs">

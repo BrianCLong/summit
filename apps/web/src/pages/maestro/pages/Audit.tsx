@@ -21,7 +21,7 @@ export default function Audit() {
 
   const handleVerifyChain = async (artifactId: string) => {
     const artifact = artifacts.find(item => item.id === artifactId)
-    if (!artifact) return
+    if (!artifact) {return}
 
     setVerifications(prev => ({ ...prev, [artifactId]: 'pending' }))
     try {
@@ -29,7 +29,7 @@ export default function Audit() {
       const stepsValid = await Promise.all(
         manifest.steps.map(async step => {
           const payload = materials[step.id]
-          if (!payload) return false
+          if (!payload) {return false}
           const outputHash = await sha256Hex(payload.output)
           return outputHash === step.outputHash
         })

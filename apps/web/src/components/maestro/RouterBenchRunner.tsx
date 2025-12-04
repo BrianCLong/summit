@@ -147,8 +147,8 @@ export default function RouterBenchRunner() {
       setCurrentBench(benchmark)
     } catch (error) {
       alert(
-        'Benchmark failed: ' +
-          (error instanceof Error ? error.message : 'Unknown error')
+        `Benchmark failed: ${
+          error instanceof Error ? error.message : 'Unknown error'}`
       )
     } finally {
       setLoading(false)
@@ -156,7 +156,7 @@ export default function RouterBenchRunner() {
   }
 
   const getBestModel = (results: BenchResult[]) => {
-    if (results.length === 0) return null
+    if (results.length === 0) {return null}
     return results.reduce((best, current) =>
       current.score > best.score ? current : best
     )

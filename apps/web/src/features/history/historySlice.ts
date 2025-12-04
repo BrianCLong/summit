@@ -20,7 +20,7 @@ const slice = createSlice({
   reducers: {
     push(s, a: PayloadAction<HistoryEntry>) {
       s.undo.push(a.payload)
-      if (s.undo.length > s.cap) s.undo.shift()
+      if (s.undo.length > s.cap) {s.undo.shift()}
       s.redo = []
     },
     clear(s) {

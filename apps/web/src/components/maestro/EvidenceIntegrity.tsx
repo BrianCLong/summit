@@ -138,7 +138,7 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
   }, [runId])
 
   const handleExportCSV = () => {
-    if (!data) return
+    if (!data) {return}
 
     const csv = [
       'nodeId,sbom,cosignVerified,slsa',
@@ -204,7 +204,7 @@ export default function EvidenceIntegrity({ runId }: EvidenceIntegrityProps) {
     )
   }
 
-  if (!data) return null
+  if (!data) {return null}
 
   const overallStatus = data.summary.pass
 
