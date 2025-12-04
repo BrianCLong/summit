@@ -2,6 +2,9 @@ import express from 'express';
 import { z } from 'zod';
 import { TrustCenterService } from '../trust-center/trust-center-service.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
+import { ensureAuthenticated, requirePermission } from '../middleware/auth.js';
+import { Permission } from '../services/MVP1RBACService.js';
+import { writeAudit } from '../utils/audit.js';
 
 const router = express.Router();
 const trustCenter = new TrustCenterService();
@@ -43,62 +46,98 @@ const ComplianceCheckSchema = z.object({
  * POST /api/trust-center/audit-export
  * Generate comprehensive audit report with one-click export
  */
-router.post('/audit-export', async (req, res) => {
-  const span = otelService.createSpan('trust-center.audit-export');
+router.post(
+  '/audit-export',
+  ensureAuthenticated,
+  requirePermission(Permission.AUDIT_EXPORT),
+  async (req, res) => {
+    const span = otelService.createSpan('trust-center.audit-export');
 
-  try {
-    // Extract tenant from auth context (assuming middleware sets this)
-    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
+    try {
+      const actor = (req as any).user;
+      // Extract tenant from auth context (assuming middleware sets this)
+      const tenantId =
+        actor?.tenantId || (req.headers['x-tenant-id'] as string) || 'default';
 
-    const validatedData = AuditExportSchema.parse(req.body);
+      const validatedData = AuditExportSchema.parse(req.body);
 
-    const result = await trustCenter.generateComprehensiveAuditReport(
-      tenantId,
-      validatedData,
-    );
+      if (actor?.tenantId && actor.tenantId !== tenantId) {
+        return res.status(403).json({ error: 'tenant_mismatch' });
+      }
 
-    // Set appropriate headers based on format
-    if (validatedData.format === 'csv') {
-      res.setHeader('Content-Type', 'text/csv');
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${result.filename}"`,
+      const result = await trustCenter.generateComprehensiveAuditReport(
+        tenantId,
+        validatedData,
+        {
+          id: actor?.id,
+          email: actor?.email,
+          permissions: actor?.permissions,
+          role: actor?.role,
+          tenantId,
+        },
       );
-      res.send(result.data);
-    } else if (validatedData.format === 'pdf') {
-      res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename="${result.filename}"`,
-      );
-      res.send(result.data);
-    } else {
-      res.json(result);
-    }
 
-    otelService.addSpanAttributes({
-      'trust-center.tenant_id': tenantId,
-      'trust-center.format': validatedData.format || 'json',
-      'trust-center.frameworks':
-        validatedData.frameworks?.join(',') || 'SOC2,ISO27001',
-    });
-  } catch (error: any) {
-    console.error('Audit export failed:', error);
-    otelService.recordException(error);
+      // Set appropriate headers based on format
+      if (validatedData.format === 'csv') {
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${result.filename}"`,
+        );
+        res.send(result.data);
+      } else if (validatedData.format === 'pdf') {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${result.filename}"`,
+        );
+        res.send(result.data);
+      } else {
+        res.json(result);
+      }
 
-    if (error.name === 'ZodError') {
-      res
-        .status(400)
-        .json({ error: 'Invalid request data', details: error.errors });
-    } else {
-      res
-        .status(500)
-        .json({ error: 'Audit export failed', message: error.message });
+      await writeAudit({
+        userId: actor?.id,
+        action: 'trust-center:audit-export',
+        resourceType: 'trust_center_report',
+        resourceId: result?.metadata?.reportId || 'comprehensive_audit',
+        details: {
+          tenantId,
+          format: validatedData.format || 'json',
+          frameworks: validatedData.frameworks || ['SOC2', 'ISO27001'],
+          startDate: validatedData.startDate || '1970-01-01',
+          endDate:
+            validatedData.endDate || new Date().toISOString().split('T')[0],
+        },
+        actorRole: actor?.role,
+        ip: req.ip,
+        userAgent: req.get('user-agent'),
+      });
+
+      otelService.addSpanAttributes({
+        'trust-center.tenant_id': tenantId,
+        'trust-center.format': validatedData.format || 'json',
+        'trust-center.frameworks':
+          validatedData.frameworks?.join(',') || 'SOC2,ISO27001',
+      });
+    } catch (error: any) {
+      console.error('Audit export failed:', error);
+      otelService.recordException(error);
+
+      if (error.name === 'ZodError') {
+        res
+          .status(400)
+          .json({ error: 'Invalid request data', details: error.errors });
+      } else {
+        res
+          .status(500)
+          .json({ error: 'Audit export failed', message: error.message });
+      }
+    } finally {
+      span?.end();
     }
-  } finally {
-    span?.end();
-  }
-});
+  },
+);
 
 /**
  * POST /api/trust-center/slsa-attestation
