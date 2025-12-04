@@ -15,6 +15,10 @@ export enum ExecutionStatus {
   FAILED = 'failed',
   RETRYING = 'retrying',
   CANCELLED = 'cancelled',
+  PAUSED = 'paused',
+  WAITING_APPROVAL = 'waiting_approval',
+  WAITING_EVENT = 'waiting_event',
+  SKIPPED = 'skipped',
 }
 
 /**
@@ -296,4 +300,187 @@ export interface LogQuery {
   limit?: number;
   /** Offset for pagination */
   offset?: number;
+}
+
+/**
+ * Condition for conditional branching
+ */
+export interface Condition {
+  /** Left operand (can be a reference to previous step output) */
+  left: string;
+  /** Comparison operator */
+  operator: 'eq' | 'ne' | 'gt' | 'gte' | 'lt' | 'lte' | 'in' | 'not_in' | 'exists' | 'not_exists';
+  /** Right operand */
+  right?: any;
+}
+
+/**
+ * Conditional branch definition
+ */
+export interface ConditionalBranch {
+  /** Condition to evaluate */
+  condition: Condition;
+  /** Steps to execute if condition is true */
+  steps: StepDefinition[];
+}
+
+/**
+ * Loop configuration
+ */
+export interface LoopConfig {
+  /** Type of loop */
+  type: 'for_each' | 'while' | 'count';
+  /** For for_each: array to iterate over */
+  collection?: string;
+  /** For while: condition to check */
+  condition?: Condition;
+  /** For count: number of iterations */
+  count?: number;
+  /** Maximum iterations (safety limit) */
+  maxIterations: number;
+  /** Steps to execute in each iteration */
+  steps: StepDefinition[];
+}
+
+/**
+ * Approval request
+ */
+export interface ApprovalRequest {
+  /** Unique approval ID */
+  id: string;
+  /** Execution ID */
+  executionId: string;
+  /** Step ID */
+  stepId: string;
+  /** Approval message/prompt */
+  message: string;
+  /** Required approvers (user IDs or roles) */
+  requiredApprovers: string[];
+  /** Minimum number of approvals required */
+  minApprovals: number;
+  /** Timeout in milliseconds */
+  timeoutMs?: number;
+  /** Requested at */
+  requestedAt: Date;
+  /** Expires at */
+  expiresAt?: Date;
+  /** Approvals received */
+  approvals: Approval[];
+  /** Status */
+  status: 'pending' | 'approved' | 'rejected' | 'timeout';
+}
+
+/**
+ * Individual approval
+ */
+export interface Approval {
+  /** Approver user ID */
+  approverId: string;
+  /** Approval decision */
+  decision: 'approve' | 'reject';
+  /** Comment */
+  comment?: string;
+  /** Approved at */
+  approvedAt: Date;
+}
+
+/**
+ * Event to wait for
+ */
+export interface EventConfig {
+  /** Event source (service name) */
+  source: string;
+  /** Event type */
+  type: string;
+  /** Correlation ID to match events */
+  correlationId: string;
+  /** Timeout in milliseconds */
+  timeoutMs: number;
+  /** Filter conditions for event payload */
+  filter?: Record<string, any>;
+}
+
+/**
+ * Service call configuration
+ */
+export interface ServiceCallConfig {
+  /** Service name or URL */
+  service: string;
+  /** HTTP method or gRPC method */
+  method: string;
+  /** Request payload */
+  payload?: Record<string, any>;
+  /** Headers (for HTTP) */
+  headers?: Record<string, string>;
+  /** Timeout in milliseconds */
+  timeoutMs: number;
+  /** Idempotency key (for safe retries) */
+  idempotencyKey?: string;
+  /** Expected response status codes */
+  expectedStatusCodes?: number[];
+}
+
+/**
+ * Extended step definition with control flow support
+ */
+export interface ExtendedStepDefinition extends StepDefinition {
+  /** Conditional branches (if/else) */
+  branches?: ConditionalBranch[];
+  /** Loop configuration */
+  loop?: LoopConfig;
+  /** Approval configuration */
+  approval?: {
+    message: string;
+    requiredApprovers: string[];
+    minApprovals?: number;
+    timeoutMs?: number;
+  };
+  /** Event configuration */
+  event?: EventConfig;
+  /** Service call configuration */
+  serviceCall?: ServiceCallConfig;
+}
+
+/**
+ * Runbook template (reusable definition)
+ */
+export interface RunbookTemplate {
+  /** Template ID */
+  id: string;
+  /** Template name */
+  name: string;
+  /** Template version */
+  version: string;
+  /** Description */
+  description: string;
+  /** Author */
+  author?: string;
+  /** Tags for categorization */
+  tags?: string[];
+  /** Template definition */
+  definition: RunbookDefinition;
+  /** Created at */
+  createdAt: Date;
+  /** Updated at */
+  updatedAt: Date;
+  /** Is active */
+  isActive: boolean;
+}
+
+/**
+ * Runbook instance (specific execution)
+ */
+export interface RunbookInstance {
+  /** Instance ID (same as execution ID) */
+  id: string;
+  /** Template ID */
+  templateId: string;
+  /** Execution state */
+  execution: RunbookExecution;
+  /** Control operations */
+  control: {
+    canPause: boolean;
+    canResume: boolean;
+    canCancel: boolean;
+  };
 }

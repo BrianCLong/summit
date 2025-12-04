@@ -4,14 +4,54 @@ DAG-based workflow orchestration engine for IntelGraph. Executes runbooks as dir
 
 ## Features
 
+### Core Execution
 - **DAG Execution**: Execute workflows as directed acyclic graphs with automatic dependency resolution
 - **Retry Logic**: Configurable retry policies with exponential backoff
 - **State Management**: Persistent state tracking with support for memory and database backends
-- **Structured Logging**: Comprehensive logging with assumptions, data scope, and legal basis tracking
-- **Evidence Collection**: Automatic evidence collection and linking for audit trails
 - **Idempotency**: Automatic duplicate detection to prevent redundant executions
 - **Replay**: Re-run completed executions for debugging and verification
+
+### Control Flow
+- **Conditional Branching**: If/else logic based on runtime data
+- **Loops**: For-each, while, and count loops with safety limits
+- **Parallel Execution**: Automatic parallelization of independent steps
+
+### Human-in-the-Loop
+- **Approval Steps**: Require human approval for sensitive operations
+- **Timeout Handling**: Configurable timeouts for approval requests
+- **Multi-Approver**: Support for multiple approvers with quorum requirements
+
+### Event-Driven
+- **Wait for Events**: Pause execution until external events occur
+- **Event Correlation**: Match events by correlation ID and filters
+- **Timeout Support**: Configurable event wait timeouts
+
+### Service Integration
+- **Generic Service Calls**: Call external services via HTTP/gRPC
+- **Idempotency Keys**: Safe retries with idempotency guarantees
+- **Timeout and Error Handling**: Comprehensive error handling
+
+### Safety & Security
+- **Rate Limiting**: Per-tenant rate limits to prevent abuse
+- **Depth Limits**: Maximum nesting depth for control flow
+- **Resource Limits**: Limits on steps, iterations, and execution time
+- **Authorization**: Integration with OPA/authz service for step-level permissions
+- **Tenant Isolation**: Strict tenant resource isolation
+
+### Observability
+- **Structured Logging**: Comprehensive logging with assumptions, data scope, and legal basis tracking
+- **Evidence Collection**: Automatic evidence collection and linking for audit trails
+- **Execution Statistics**: Real-time progress tracking and metrics
+
+### Control Operations
+- **Pause/Resume**: Pause and resume long-running executions
+- **Cancel**: Cancel executions with reason tracking
+- **Progress Tracking**: Real-time execution statistics
+
+### API
 - **REST API**: Full REST API for managing executions
+- **Admin Operations**: Pause, resume, cancel, and monitor executions
+- **Approval Management**: Submit and track approvals
 
 ## Architecture
 
