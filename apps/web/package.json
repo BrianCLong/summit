@@ -72,7 +72,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "eslint-plugin-storybook": "^10.0.6",
     "jsdom": "^27.0.1",
-    "msw": "^2.11.6",
+    "msw": "^2.12.4",
     "msw-storybook-addon": "^2.0.6",
     "postcss": "^8.4.31",
     "prettier": "^3.6.2",
