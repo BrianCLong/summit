@@ -1,17 +1,23 @@
-## 🧠 Copilot Review Tasks
-- [ ] `/explain-changes`
-- [ ] `/generate-tests`
-- [ ] `/risk-callouts`
-- [ ] `/summarize-diff`
+## Summary
+<!-- What changed and why -->
 
-## ✅ Checklist
-- [ ] Code compiles & passes CI
-- [ ] Tests added/updated
-- [ ] Documentation updated
-- [ ] OPA policies verified
-- [ ] Grafana dashboards updated if applicable
+## Type
+- [ ] Feature
+- [ ] Fix
+- [ ] Chore
+- [ ] Mergefix (Express5)
 
----
+## Validation
+- [ ] Unit tests green
+- [ ] E2E (Playwright) green
+- [ ] Lint (ESLint 9) clean
+- [ ] GraphQL contracts unchanged or baselined
+- [ ] OPA policy sim PASS
+- [ ] SBOM + provenance generated & verified
 
-**Context**
-Describe what this change achieves and link related issues or ADRs.
+## Risk
+- Blast radius:
+- Rollback plan:
+
+## Notes for Reviewers
+- Conflict patterns addressed (link): docs/merge/express5_conflict_cookbook.md

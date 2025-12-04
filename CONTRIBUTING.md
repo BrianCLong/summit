@@ -261,6 +261,83 @@ For detailed multi-agent collaboration patterns, see:
 - **Community:** Ask in #summit-dev or #ai-agents Slack channels
 - **Documentation:** See [docs/README.md](docs/README.md) for complete doc index
 
+## Mergefix / Express 5 Changes (Fast Path)
+
+This section defines **coding rules, commit conventions, and the minimal gate** for any PR that touches the Express 5 migration or related merge conflict work. Use it for PRs labeled `mergefix`.
+
+### Coding Rules (must)
+
+1. **One global error handler** at the end of the middleware chain. No router-level error handlers.
+2. **Async handlers `throw`**; never call `next(err)` from an `async` function.
+3. **Structured errors** only:
+   ```json
+   { "error": { "code": "BAD_REQUEST", "message": "Human-readable text" } }
+   ```
+4. **Order**: routes → 404 → error handler.
+5. **Return after responding** (avoid `"headers already sent"`).
+6. **Validation**: validators may `throw` `{ statusCode, code, message }`; do not `next(err)`.
+7. **Streaming**: use `await pipeline(stream, res)`; let rejections bubble to the global error handler.
+8. **Tests**: Supertest must `await`; assert JSON errors; 404 is JSON.
+
+### Commit Message Convention
+
+Use the `mergefix` type + scope:
+
+- `mergefix(express5): centralize error handler`
+- `mergefix(router): drop next(err) in async handlers`
+- `mergefix(build): adjust Vite 7 config`
+- `mergefix(tests): update Supertest for JSON errors`
+
+If a commit is a pure conflict resolution, prefer the prefix `mergefix(express5):` and keep the diff tightly scoped.
+
+> Add formatting-only or mass-rename SHAs to `.git-blame-ignore-revs`.
+
+### Minimal Local Gate (must pass before pushing)
+
+```bash
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm test -- --ci
+pnpm -r build
+pnpm playwright install --with-deps
+pnpm e2e
+pnpm jest contracts/graphql/__tests__/schema.contract.ts --runInBand
+curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa && ./opa test policies/ -v
+pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+```
+
+Or with `make`:
+
+```bash
+make ci-check contracts policy-sim
+```
+
+### Conflict-Resolution Tips
+
+- Enable `git rerere` once:
+
+  ```bash
+  git config --global rerere.enabled true
+  git config --global rerere.autoUpdate true
+  git config --global rerere.log true
+  ```
+
+- Detect duplicates before opening your PR:
+
+  ```bash
+  git log --oneline --cherry origin/main...HEAD
+  ```
+
+### PR Checklist
+
+- [ ] No `next(err)` in async handlers
+- [ ] Single global error handler (after 404)
+- [ ] JSON error shape consistent
+- [ ] Tests updated for Express 5 semantics
+- [ ] Contracts + policy sim pass
+- [ ] SBOM + provenance generated and verified
+
 ## Testing Guidelines
 
 ### Overview
