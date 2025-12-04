@@ -40,6 +40,32 @@ export function GraphCanvas({
 }: GraphCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
+  const [fps, setFps] = useState(0)
+  const [debugMode, setDebugMode] = useState(false)
+  const frameCountRef = useRef(0)
+  const lastTimeRef = useRef(performance.now())
+
+  // Calculate FPS
+  useEffect(() => {
+    if (!debugMode) return
+
+    let animationFrameId: number
+
+    const renderLoop = (time: number) => {
+      frameCountRef.current++
+      if (time - lastTimeRef.current >= 1000) {
+        setFps(
+          Math.round((frameCountRef.current * 1000) / (time - lastTimeRef.current))
+        )
+        frameCountRef.current = 0
+        lastTimeRef.current = time
+      }
+      animationFrameId = requestAnimationFrame(renderLoop)
+    }
+
+    animationFrameId = requestAnimationFrame(renderLoop)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [debugMode])
 
   // Update dimensions on resize
   useEffect(() => {
@@ -369,13 +395,36 @@ export function GraphCanvas({
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
+          <div className="flex justify-between items-center mb-1 gap-2">
+            <div className="text-xs font-medium text-muted-foreground">
+              Graph Info
+            </div>
+            <button
+              onClick={() => setDebugMode(!debugMode)}
+              className="text-[10px] px-1.5 py-0.5 rounded border hover:bg-muted transition-colors"
+            >
+              {debugMode ? 'Debug: ON' : 'Debug'}
+            </button>
           </div>
           <div className="text-xs space-y-1">
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
+            {debugMode && (
+              <>
+                <div className="border-t my-1 pt-1 border-muted" />
+                <div className="font-mono text-[10px]">FPS: {fps}</div>
+                <div className="font-mono text-[10px]">
+                  Density:{' '}
+                  {entities.length > 1
+                    ? (
+                        (2 * relationships.length) /
+                        (entities.length * (entities.length - 1))
+                      ).toFixed(4)
+                    : '0.0000'}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
