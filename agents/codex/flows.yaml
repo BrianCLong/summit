@@ -1,0 +1,28 @@
+version: 1
+agent: codex
+
+flows:
+  - name: recapture_closed_pr
+    description: Recapture value from one or more closed PRs.
+    trigger:
+      - manual
+      - api: /flows/recapture_closed_pr
+    steps:
+      - select_closed_prs
+      - analyze_value
+      - reconstruct_diff
+      - update_tests_and_docs
+      - package_pr
+      - handoff_to_reviewer
+
+  - name: reconcile_stale_branch
+    description: Reconcile a stale branch with current main.
+    trigger:
+      - manual
+    steps:
+      - analyze_branch
+      - rebase_or_reconstruct
+      - resolve_conflicts
+      - run_or_describe_tests
+      - package_pr
+      - handoff_to_reviewer

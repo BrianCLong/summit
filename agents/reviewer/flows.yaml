@@ -1,0 +1,14 @@
+version: 1
+agent: reviewer
+
+flows:
+  - name: review_pr
+    description: Review a PR for correctness and alignment.
+    trigger:
+      - api: /flows/review_pr
+    steps:
+      - analyze_diff
+      - evaluate_tests
+      - check_architecture
+      - check_prime_brain_alignment
+      - produce_verdict

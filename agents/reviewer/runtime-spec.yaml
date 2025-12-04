@@ -1,0 +1,43 @@
+name: reviewer
+description: >
+  PR Integrity Agent. Reviews pull requests for correctness, safety,
+  architecture, and alignment with Summit Prime Brain and governance.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - analyze_diffs
+  - reason_about_code
+  - evaluate_tests
+  - enforce_architecture
+  - provide_feedback
+
+constraints:
+  - must_follow_pr_policy
+  - must_be_explicit_in_verdict
+
+inputs:
+  - name: pr_diff
+    type: text
+    required: true
+  - name: pr_description
+    type: string
+    required: false
+  - name: context
+    type: object
+    required: false
+
+outputs:
+  - name: review_report
+    type: markdown
+  - name: verdict
+    type: string  # APPROVE | REQUEST_CHANGES | REJECT
+
+hand_off_rules:
+  - condition: "approved"
+    handoff_to: executor
+  - condition: "requires_changes"
+    handoff_to: jules
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml

@@ -1,0 +1,29 @@
+name: predictive
+description: >
+  Predictive analytics agent providing forecasts, prioritization, and risk
+  assessments for Summit.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - analyze_metrics
+  - forecast_risks
+  - prioritize_work
+  - summarize_findings
+
+inputs:
+  - name: analytics_context
+    type: object
+    required: false
+  - name: question
+    type: string
+    required: true
+
+outputs:
+  - name: predictive_report
+    type: markdown
+  - name: prioritized_actions
+    type: array
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml
