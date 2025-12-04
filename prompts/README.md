@@ -1,54 +1,31 @@
-# Enterprise AI Agent Prompt System
+# Enterprise Prompt Registry
 
-Complete enterprise-grade AI agent prompt bundle for Summit, IntelGraph, Maestro Conductor, and all related systems.
+> **Authority:** Jules, Autonomous Editor-in-Chief
+> **Status:** Production
 
-## Purpose
+## 1. Overview
+This directory contains the cognitive blueprints for the Summit Agent Ecosystem. Each file represents a specialized persona or workflow designed to execute complex engineering tasks with high autonomy.
 
-Enables autonomous AI agents to deliver production-grade code with:
-- 100% requirement coverage (explicit, implicit, architectural)
-- Zero TODOs or incomplete work
-- Fully green CI on first submission
-- Merge-ready output
-- Principal engineer-level quality
+## 2. Prompt Standards
+All prompts must adhere to the `v1` schema defined in [`schema.json`](schema.json).
 
-## Agent Prompts
+### 2.1 Essential Components
+1.  **Identity:** Who is the agent? (e.g., "You are the Architect.")
+2.  **Mission:** What is the specific goal?
+3.  **Constraints:** Hard limits (budget, tools, scope).
+4.  **Output Format:** Explicit structure for the response.
 
-### Core Agents
-- **`claude-code.md`** - Deep architectural reasoning with third-order inference
-- **`codex.md`** - Deterministic zero-error build systems
-- **`jules-gemini.md`** - Cross-file schema harmonization
-- **`cursor-warp.md`** - Live devloop integration
+## 3. Directory Structure
+*   `packs/`: Grouped prompts for specific workflows (e.g., `audit-pack`).
+*   `*.md`: Text-based system prompts for LLM context.
+*   `*.yaml`: Structured executable prompts for the orchestration engine.
 
-### Enterprise Agents
-- **`summit-intelgraph.md`** - Multi-service enterprise architecture
-- **`ci-cd.md`** - Pipeline enforcement and governance
-
-### Orchestration
-- **`meta-router.md`** - Automatic agent selection
-- **`capability-matrix.md`** - Agent capability mapping
-- **`enterprise-4th-order.md`** - Governance layer
-
-## Usage
-
+## 4. Usage
+To invoke a prompt manually:
 ```bash
-# Copy template for new task
-cp prompts/claude-code.md .agentic-prompts/task-123-feature.md
-
-# Edit with requirements
-vim .agentic-prompts/task-123-feature.md
-
-# Load into AI assistant and execute
+# Example: Load the Code Critic prompt
+cat prompts/code.critic@v1.yaml | summitctl prompt exec
 ```
 
-## Target Metrics
-- 3-5 complete tasks per day
-- <2 hours time to PR
-- >95% CI pass rate
-- >90% first-time merge rate
-- Zero TODOs
-
-## Testing
-
-```bash
-pnpm test prompts/__tests__
-```
+---
+*Precision in instruction yields precision in execution.*

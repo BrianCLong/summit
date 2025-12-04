@@ -1,94 +1,53 @@
-# Repository Guidelines
+# Agent Operational Guidelines
 
-## Project Structure & Module Organization
+> **Authority:** Jules, Autonomous Editor-in-Chief
+> **Purpose:** Define protocols for AI agents operating within the Summit repository.
 
-- Apps: `server/` (Node/Express/GraphQL), `client/` (React/Vite).
-- Docs: `docs/` (guides) and `docs/generated/` (auto‑generated overviews).
-- Data: `server/db/{migrations,seeds}/{postgres,neo4j}`.
-- CI/Meta: `.github/`, `scripts/`, `project_management/`.
+## 1. Project Structure & Organization
 
-## Build, Test, and Development Commands
+*   **Apps:** `server/` (Node/Express/GraphQL), `client/` (React/Vite).
+*   **Documentation:** `docs/` (Core), `docs/generated/` (Automated).
+*   **Data:** `server/db/` (Migrations, Seeds).
+*   **Infrastructure:** `.github/` (CI/CD), `scripts/` (Automation), `deploy/` (K8s/Docker).
 
-- Install: `npm install && (cd server && npm install) && (cd client && npm install)`.
-- Dev: `npm run dev` (runs server and client concurrently).
-- Test: `npm test` (server+client), server only: `cd server && npm test`.
-- Lint/Format: `npm run lint && npm run format`.
-- DB: `npm run db:migrate` and `npm run db:seed` (from repo root or `server/`).
-- Docker: `npm run docker:dev` or `npm run docker:prod`.
+## 2. Core Operational Commands
 
-## Coding Style & Naming Conventions
+Agents must prioritize the `make` system for reliability.
 
-- JS/TS: 2‑space indent; Prettier + ESLint enforced. Conventional Commits required.
-- Filenames: `kebab-case` for files/scripts; `PascalCase` for React components.
-- Configs: `.editorconfig`, `.markdownlint.json`, `commitlint.config.js` present.
+*   **Bootstrap:** `make bootstrap` (Install deps, setup env).
+*   **Start:** `make up` (Start Docker services).
+*   **Verify:** `make smoke` (Run Golden Path tests).
+*   **Test:** `make test` (Run full suite).
+*   **Lint:** `make lint` (Enforce style).
 
-## Testing Guidelines
+## 3. Coding Standards
 
-- Backend: Jest (`server/tests`), run with coverage: `cd server && npm run test:coverage`.
-- Frontend: see client tests; e2e via Playwright: `npm run test:e2e`.
-- Naming: `*.spec.ts`/`*.test.js` (client), `*.test.js` (server). Target ≥80% coverage for changed code.
+*   **Language:** TypeScript (Strict), Python 3.11+ (Typed).
+*   **Style:** Prettier + ESLint (JS/TS), Black + Ruff (Python).
+*   **Conventions:**
+    *   Filenames: `kebab-case` (default), `PascalCase` (React components, Classes).
+    *   Commits: [Conventional Commits](https://www.conventionalcommits.org/) required (`feat:`, `fix:`, `docs:`).
 
-## Commit & Pull Request Guidelines
+## 4. Testing Protocols
 
-- Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`.
-- PRs: concise description, linked issues (`Closes #123`), screenshots for UI; CI green required.
-- Branches: `type/scope/short-desc` (e.g., `feat/ingest/rest-connector`).
+*   **Mandate:** No feature is complete without tests.
+*   **Coverage:** Target ≥80% for new logic.
+*   **Structure:**
+    *   **Unit:** `__tests__` adjacent to source.
+    *   **Integration:** `tests/integration/`.
+    *   **E2E:** `tests/e2e/` (Playwright).
 
-## Web Codex Global Guidance
+## 5. Pull Request Hygiene
 
-Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, and `feat/opa` branches:
+*   **Branching:** `type/scope/description` (e.g., `feat/ingest/csv-parser`).
+*   **Description:** Narrative structure (Context → Change → Validation).
+*   **Verification:** CI must be green. `make smoke` must pass locally.
 
-```
-set -euo pipefail
+## 6. Security & Configuration
 
-# verify required tooling up front so the workflow fails fast
-for bin in git gh bash; do
-  if ! command -v "$bin" >/dev/null 2>&1; then
-    printf 'Required dependency "%s" not found on PATH.\n' "$bin" >&2
-    exit 1
-  fi
-done
+*   **Secrets:** Never commit secrets. Use `.env` (git-ignored).
+*   **Config:** Use `server/src/config/` for centralized configuration.
+*   **Defaults:** Assume production-secure defaults (TLS, Auth enabled).
 
-# start clean
-git fetch --all --prune
-
-# branches to open first
-for BR in feat/mstc feat/trr feat/opa; do
-  if ! git show-ref --quiet --verify "refs/heads/$BR"; then
-    printf 'Skipping branch %s because it does not exist locally.\n' "$BR" >&2
-    continue
-  fi
-
-  git checkout "$BR"
-
-  # sanitize diffs so PRs never include binaries/large files
-  bash scripts/pr_sanitize.sh || true
-
-  # rebase and push safely
-  git fetch origin
-  git rebase origin/main
-
-  scope=$(printf '%s' "$BR" | cut -d/ -f2)
-  if [ -z "$scope" ]; then
-    printf 'Unable to derive scope segment from branch %s; skipping.\n' "$BR" >&2
-    continue
-  fi
-  scope_upper=$(printf '%s' "$scope" | tr '[:lower:]' '[:upper:]')
-
-  # push with lease and open PR with scoped title/labels
-  git push --force-with-lease -u origin "$BR"
-
-  gh pr create \
-    --title "[$scope_upper] Scoped CI: ready for review" \
-    --body-file docs/pr-runbook-card.md \
-    --label "ci:scoped","ready-for-ci" \
-    --base main \
-    --head "$BR" || true
-done
-```
-
-## Security & Configuration Tips
-
-- Use `.env` (copy from `.env.example`); never commit secrets.
-- Helmet + CORS defaults are enabled; restrict `CORS_ORIGIN` in prod.
-- Run `scripts/bootstrap_github.sh` to set up labels/milestones and import issues.
+---
+*Execute with precision. Document with clarity.*
