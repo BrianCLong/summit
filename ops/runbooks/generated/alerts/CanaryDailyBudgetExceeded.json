@@ -1,0 +1,10 @@
+{
+  "alert": "CanaryDailyBudgetExceeded",
+  "description": "Tenant {{ $labels.tenant }} at {{ $value | humanizePercentage }} of daily budget - mutations blocked",
+  "expr": "(intelgraph_daily_spend_usd{tenant=~\"demo|test|maestro-internal\"} / \n intelgraph_daily_limit_usd{tenant=~\"demo|test|maestro-internal\"}) >= 1.0\n",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/canary-budget-exceeded",
+  "service": "intelgraph-api",
+  "severity": "critical",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Canary tenant exceeded daily budget limit"
+}

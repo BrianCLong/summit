@@ -6,6 +6,12 @@ metadata:
 spec:
   description: PagerDuty service dedicated to ML metrics (accuracy, latency, drift).
   escalation_policy: sre-ml-primary
+  oncall_rotation:
+    name: sre-ml-rotation
+    primary_schedule: sre-ml-primary
+    backup_schedule: sre-ml-secondary
+    handoff_timezone: UTC
+    handoff_time: "09:00"
   response_play: ml-major-incident
   integrations:
     - name: Prometheus Alertmanager

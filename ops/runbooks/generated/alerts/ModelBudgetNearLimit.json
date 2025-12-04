@@ -1,0 +1,10 @@
+{
+  "alert": "ModelBudgetNearLimit",
+  "description": "Model budget is {{ $value | humanizePercentage }} spent for environment {{ $labels.env }}",
+  "expr": "(\n  model_budget_spent_dollars{env=\"demo\"} /\n  model_budget_limit_dollars{env=\"demo\"}\n) > 0.8\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/model-budget",
+  "service": "gateway",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Model budget approaching limit"
+}

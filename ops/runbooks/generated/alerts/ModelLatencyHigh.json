@@ -1,0 +1,10 @@
+{
+  "alert": "ModelLatencyHigh",
+  "description": "95th percentile latency for {{ $labels.provider }}/{{ $labels.model }} is {{ $value }}s",
+  "expr": "histogram_quantile(0.95,\n  sum(rate(model_request_duration_seconds_bucket[5m])) by (provider, model, le)\n) > 10\n",
+  "runbook_url": "https://runbooks.intelgraph.io/model/latency",
+  "service": "model_orchestration",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Model latency is high"
+}

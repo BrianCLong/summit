@@ -1,0 +1,10 @@
+{
+  "alert": "HighCPUUsage",
+  "description": "CPU usage is {{ $value }}% on instance {{ $labels.instance }}",
+  "expr": "(\n  100 - (avg by (instance) (rate(cpu_usage_idle_seconds_total[5m])) * 100)\n) > 80\n",
+  "runbook_url": null,
+  "service": "infrastructure",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "High CPU usage detected"
+}

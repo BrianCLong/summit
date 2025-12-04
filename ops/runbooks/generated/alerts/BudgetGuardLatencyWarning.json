@@ -1,0 +1,10 @@
+{
+  "alert": "BudgetGuardLatencyWarning",
+  "description": "Budget guard p95 latency is {{ $value }}ms for 15+ minutes (threshold: 60ms)",
+  "expr": "histogram_quantile(0.95, rate(mutation_latency_ms_bucket{stage=\"budget\"}[5m])) > 60",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/budget-guard-latency",
+  "service": "intelgraph-api",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Budget guard latency exceeding warning threshold"
+}

@@ -1,0 +1,10 @@
+{
+  "alert": "CircuitBreakerOpen",
+  "description": "Circuit breaker for {{ $labels.provider }} is open",
+  "expr": "circuit_breaker_state{provider=~\".+\"} == 1\n",
+  "runbook_url": "https://runbooks.intelgraph.io/model/circuit-breaker",
+  "service": "model_orchestration",
+  "severity": "critical",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Circuit breaker is open"
+}

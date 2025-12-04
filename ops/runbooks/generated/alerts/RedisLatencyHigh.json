@@ -1,0 +1,10 @@
+{
+  "alert": "RedisLatencyHigh",
+  "description": "Redis p95 latency is {{ $value }}ms (threshold: 5ms)",
+  "expr": "redis_latency_p95_ms > 5",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/redis-latency",
+  "service": "redis",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Redis latency impacting rate limiting"
+}

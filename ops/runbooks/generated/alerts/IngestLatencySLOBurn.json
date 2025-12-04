@@ -1,0 +1,10 @@
+{
+  "alert": "IngestLatencySLOBurn",
+  "description": "95th percentile ingest latency is {{ $value }}s (threshold: 1.5s)",
+  "expr": "histogram_quantile(0.95,\n  sum(rate(ingest_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le)\n) > 1.5\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/ingest-latency",
+  "service": "api",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Data ingest latency SLO breach"
+}

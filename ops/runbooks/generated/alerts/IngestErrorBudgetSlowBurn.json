@@ -1,0 +1,10 @@
+{
+  "alert": "IngestErrorBudgetSlowBurn",
+  "description": "Ingest pipeline burning >4x budget over 1h. Address backlog or pause deploys.",
+  "expr": "(1 - (sum(rate(ingest_success_total[1h])) /\n  sum(rate(ingest_attempts_total[1h])))) / 0.005 > 4\n",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/observability-sre",
+  "service": "intelgraph-ingest",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Ingest error budget sustained burn"
+}

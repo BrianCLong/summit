@@ -1,0 +1,10 @@
+{
+  "alert": "BuildTimeRegression",
+  "description": "95th percentile build time for {{ $labels.pipeline }} is {{ $value }}s (threshold: 600s)",
+  "expr": "histogram_quantile(0.95,\n  sum(rate(build_duration_seconds_bucket{status=\"success\"}[1h])) by (pipeline, le)\n) > 600\n",
+  "runbook_url": "https://runbooks.intelgraph.io/ci/build-regression",
+  "service": "ci_cd",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Build time regression detected"
+}

@@ -1,0 +1,10 @@
+{
+  "alert": "ReconciliationCritical",
+  "description": "Only {{ $value | humanizePercentage }} of ledger entries reconciled (target: 95%)",
+  "expr": "(reconciled_entries_total / ledger_entries_total) < 0.85",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/reconciliation-lag",
+  "service": "intelgraph-reconciler",
+  "severity": "critical",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Budget reconciliation critically behind"
+}

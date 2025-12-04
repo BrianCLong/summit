@@ -1,0 +1,10 @@
+{
+  "alert": "DiskSpaceLow",
+  "description": "Disk space is {{ $value }}% free on {{ $labels.instance }}:{{ $labels.mount }}",
+  "expr": "(\n  disk_free_bytes / disk_total_bytes * 100\n) < 20\n",
+  "runbook_url": null,
+  "service": "infrastructure",
+  "severity": "critical",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Disk space running low"
+}
