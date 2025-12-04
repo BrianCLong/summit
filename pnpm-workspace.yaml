@@ -4,6 +4,7 @@ packages:
   - 'services/*'
   - 'agents/*'
   - 'contracts/*'
+  - 'platform/*'
   - 'server'
   - 'client'
   - 'cli'
