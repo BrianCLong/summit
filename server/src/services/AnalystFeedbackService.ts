@@ -25,6 +25,14 @@ export interface LabelStoreEntry {
   metadata?: Record<string, any>;
 }
 
+export type CorrectionInput = {
+    alertId: string; // or investigationId/queryId
+    analystId: string;
+    correction: string;
+    evidenceLinks?: string[];
+    originalText: string;
+};
+
 export class AnalystFeedbackService {
   private prisma: PrismaClient;
   private logger: winston.Logger;
@@ -72,6 +80,38 @@ export class AnalystFeedbackService {
       });
       throw new Error('Failed to record feedback');
     }
+  }
+
+  /**
+   * Submit a correction for a hallucination
+   */
+  async submitCorrection(input: CorrectionInput): Promise<void> {
+      try {
+          const redactedCorrection = this.redactPII(input.correction);
+
+          // Store as feedback with special type or metadata
+          await this.recordFeedback({
+              alertId: input.alertId,
+              analystId: input.analystId,
+              feedbackType: 'thumbs_down',
+              reasonCode: 'hallucination_correction',
+              rationale: `Correction: ${redactedCorrection}. Original: ${this.truncateText(input.originalText, 100)}`,
+              confidence: 1.0,
+              metadata: {
+                  isCorrection: true,
+                  evidenceLinks: input.evidenceLinks,
+                  originalTextHash: this.hashText(input.originalText)
+              }
+          });
+
+          this.logger.info('Correction submitted', { alertId: input.alertId });
+
+          // Ideally, update re-ranking or trigger fine-tuning here
+          // For now, we just log/store it
+      } catch (error) {
+          this.logger.error('Failed to submit correction', { error, input });
+          throw new Error('Failed to submit correction');
+      }
   }
 
   /**
@@ -314,5 +354,16 @@ export class AnalystFeedbackService {
         alertId,
       });
     }
+  }
+
+  private truncateText(text: string, maxLength: number): string {
+    if (text.length <= maxLength) {
+        return text;
+    }
+    return text.substring(0, maxLength - 3) + '...';
+  }
+
+  private hashText(text: string): string {
+    return require('crypto').createHash('sha256').update(text).digest('hex');
   }
 }
