@@ -59,3 +59,23 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Service-specific labels
+*/}}
+{{- define "intelgraph.serviceLabels" -}}
+{{- $serviceName := .serviceName -}}
+{{- $root := .root -}}
+{{- include "intelgraph.labels" $root }}
+app: {{ $serviceName }}
+{{- end }}
+
+{{/*
+Service-specific selector labels
+*/}}
+{{- define "intelgraph.serviceSelectorLabels" -}}
+{{- $serviceName := .serviceName -}}
+{{- $root := .root -}}
+{{- include "intelgraph.selectorLabels" $root }}
+app: {{ $serviceName }}
+{{- end }}
