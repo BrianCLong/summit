@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
-use ibrs::{Engine, EngineError, EvaluationResult, Proof};
+use ibrs::runtime::{Engine, EngineError, EvaluationResult, Proof};
 use serde_json::Value;
 
 #[derive(Parser)]
