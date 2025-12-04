@@ -91,6 +91,7 @@ export class InvestigationRepo {
         actorType: 'user',
         payload: { name: input.name },
         metadata: {},
+        timestamp: new Date(),
       })
       .catch((err) =>
         repoLogger.error('Failed to record investigation creation', err),
@@ -102,10 +103,13 @@ export class InvestigationRepo {
   /**
    * Update investigation
    */
-  async update(input: InvestigationUpdateInput): Promise<Investigation | null> {
+  async update(
+    input: InvestigationUpdateInput,
+    tenantId: string,
+  ): Promise<Investigation | null> {
     const updateFields: string[] = [];
-    const params: any[] = [input.id];
-    let paramIndex = 2;
+    const params: any[] = [input.id, tenantId];
+    let paramIndex = 3;
 
     if (input.name !== undefined) {
       updateFields.push(`name = $${paramIndex}`);
@@ -132,14 +136,14 @@ export class InvestigationRepo {
     }
 
     if (updateFields.length === 0) {
-      return await this.findById(input.id);
+      return await this.findById(input.id, tenantId);
     }
 
     updateFields.push(`updated_at = now()`);
 
     const { rows } = (await this.pg.query(
       `UPDATE investigations SET ${updateFields.join(', ')}
-       WHERE id = $1
+       WHERE id = $1 AND tenant_id = $2
        RETURNING *`,
       params,
     )) as { rows: InvestigationRow[] };
@@ -156,6 +160,7 @@ export class InvestigationRepo {
           actorType: 'system',
           payload: { updates: input },
           metadata: {},
+          timestamp: new Date(),
         })
         .catch((err) =>
           repoLogger.error('Failed to record investigation update', err),
@@ -169,7 +174,7 @@ export class InvestigationRepo {
   /**
    * Delete investigation (cascade to related entities)
    */
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, tenantId: string): Promise<boolean> {
     const client = await this.pg.connect();
 
     try {
@@ -178,8 +183,8 @@ export class InvestigationRepo {
       // Note: In a full implementation, you might want to soft-delete
       // or handle related entities/relationships more carefully
       const { rows } = await client.query(
-        `DELETE FROM investigations WHERE id = $1 RETURNING tenant_id`,
-        [id],
+        `DELETE FROM investigations WHERE id = $1 AND tenant_id = $2 RETURNING tenant_id`,
+        [id, tenantId],
       );
 
       await client.query('COMMIT');
@@ -195,6 +200,7 @@ export class InvestigationRepo {
             actorType: 'system',
             payload: {},
             metadata: {},
+            timestamp: new Date(),
           })
           .catch((err) =>
             repoLogger.error('Failed to record investigation deletion', err),
