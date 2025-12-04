@@ -11,7 +11,9 @@ import { logger } from '../utils/logger';
 import { PolicyGuard } from './policyGuard';
 import { Budget } from '../ai/llmBudget';
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+});
 
 const queueOptions: QueueOptions = {
   connection: redis,
