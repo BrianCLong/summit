@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
 import { cfg } from '../config.js';
+import QuotaManager from '../lib/resources/quota-manager.js';
 
 interface RateLimitConfig {
   windowMs: number;
@@ -28,8 +29,15 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
 
   if (user) {
     key = `user:${user.id || user.sub}`;
-    // Higher limit for authenticated users
-    limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+    // Dynamic tier-based limit
+    // @ts-ignore - tenantId usually available on user or context
+    const tenantId = user.tenantId || req.headers['x-tenant-id'];
+    if (tenantId) {
+        const quota = QuotaManager.getQuotaForTenant(tenantId);
+        limit = quota.requestsPerMinute; // Assuming window is 1 minute, else adjust
+    } else {
+        limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+    }
   } else {
     key = `ip:${req.ip}`;
     limit = cfg.RATE_LIMIT_MAX_REQUESTS;
