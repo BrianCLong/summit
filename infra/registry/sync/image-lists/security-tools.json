@@ -1,0 +1,79 @@
+{
+  "name": "security-tools",
+  "description": "Security scanning and verification tools",
+  "version": "1.0.0",
+  "lastUpdated": "2025-01-15",
+  "maintainer": "security-team@intelgraph.local",
+  "images": [
+    {
+      "ref": "ghcr.io/sigstore/cosign:v2.2.2",
+      "required": true,
+      "notes": "Container image signing and verification",
+      "slsaRequired": true,
+      "minSlsaLevel": 3
+    },
+    {
+      "ref": "ghcr.io/aquasecurity/trivy:0.48.0",
+      "required": true,
+      "notes": "Vulnerability scanner",
+      "slsaRequired": true,
+      "minSlsaLevel": 3
+    },
+    {
+      "ref": "ghcr.io/slsa-framework/slsa-verifier:v2.4.1",
+      "required": true,
+      "notes": "SLSA provenance verifier",
+      "slsaRequired": true,
+      "minSlsaLevel": 3
+    },
+    {
+      "ref": "gcr.io/go-containerregistry/crane:v0.18.0",
+      "required": true,
+      "notes": "Container registry manipulation tool",
+      "slsaRequired": false
+    },
+    {
+      "ref": "ghcr.io/anchore/grype:v0.73.4",
+      "required": false,
+      "notes": "Alternative vulnerability scanner",
+      "slsaRequired": false
+    },
+    {
+      "ref": "ghcr.io/anchore/syft:v0.100.0",
+      "required": false,
+      "notes": "SBOM generator",
+      "slsaRequired": true
+    },
+    {
+      "ref": "docker.io/aquasec/kube-bench:v0.7.0",
+      "required": false,
+      "notes": "Kubernetes CIS benchmark checker",
+      "slsaRequired": false
+    },
+    {
+      "ref": "docker.io/goodwithtech/dockle:v0.4.14",
+      "required": false,
+      "notes": "Container image linter",
+      "slsaRequired": false
+    }
+  ],
+  "groups": {
+    "required": [
+      "ghcr.io/sigstore/cosign:v2.2.2",
+      "ghcr.io/aquasecurity/trivy:0.48.0",
+      "ghcr.io/slsa-framework/slsa-verifier:v2.4.1",
+      "gcr.io/go-containerregistry/crane:v0.18.0"
+    ],
+    "optional": [
+      "ghcr.io/anchore/grype:v0.73.4",
+      "ghcr.io/anchore/syft:v0.100.0",
+      "docker.io/aquasec/kube-bench:v0.7.0",
+      "docker.io/goodwithtech/dockle:v0.4.14"
+    ]
+  },
+  "syncSchedule": "0 3 * * *",
+  "retentionPolicy": {
+    "keepTags": 3,
+    "keepDays": 60
+  }
+}

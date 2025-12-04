@@ -1,0 +1,157 @@
+# Cosign Image Verification Policy
+# Purpose: Define trusted signers and verification requirements
+#
+# This policy is enforced by the admission controller and sync scripts
+# to ensure only properly signed images are allowed.
+
+apiVersion: policy.sigstore.dev/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: intelgraph-image-policy
+  namespace: cosign-system
+spec:
+  # Images this policy applies to
+  images:
+    # All images from our internal registry
+    - glob: "registry.intelgraph.local/**"
+    # Docker Hub official images
+    - glob: "docker.io/library/**"
+    - glob: "index.docker.io/library/**"
+    # GitHub Container Registry
+    - glob: "ghcr.io/**"
+    # Google Container Registry (distroless)
+    - glob: "gcr.io/distroless/**"
+
+  # Authorities (trusted signers)
+  authorities:
+    # IntelGraph Release Key
+    - name: intelgraph-release
+      key:
+        secretRef:
+          name: cosign-intelgraph-key
+          namespace: cosign-system
+      attestations:
+        - name: slsa-provenance
+          predicateType: https://slsa.dev/provenance/v1
+          policy:
+            type: cue
+            data: |
+              predicateType: "https://slsa.dev/provenance/v1"
+              predicate: {
+                buildDefinition: {
+                  buildType: =~"^https://github.com/slsa-framework/.*"
+                }
+              }
+
+    # Sigstore Keyless (GitHub Actions)
+    - name: github-actions-keyless
+      keyless:
+        url: https://fulcio.sigstore.dev
+        identities:
+          # GitHub Actions from our organization
+          - issuer: https://token.actions.githubusercontent.com
+            subjectRegExp: "^https://github.com/BrianCLong/.*"
+          # Trusted upstream projects
+          - issuer: https://token.actions.githubusercontent.com
+            subjectRegExp: "^https://github.com/sigstore/.*"
+          - issuer: https://token.actions.githubusercontent.com
+            subjectRegExp: "^https://github.com/aquasecurity/.*"
+      ctlog:
+        url: https://rekor.sigstore.dev
+      attestations:
+        - name: slsa-provenance
+          predicateType: https://slsa.dev/provenance/v1
+          policy:
+            type: cue
+            data: |
+              predicateType: "https://slsa.dev/provenance/v1"
+
+    # Sigstore Keyless (Google Accounts) for distroless
+    - name: google-keyless
+      keyless:
+        url: https://fulcio.sigstore.dev
+        identities:
+          - issuer: https://accounts.google.com
+            subjectRegExp: ".*@google.com$"
+      ctlog:
+        url: https://rekor.sigstore.dev
+
+  # Policy mode: enforce or warn
+  mode: enforce
+
+---
+# Policy for development/staging (warn-only)
+apiVersion: policy.sigstore.dev/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: intelgraph-image-policy-dev
+  namespace: cosign-system
+  labels:
+    environment: development
+spec:
+  images:
+    - glob: "**"
+
+  authorities:
+    - name: any-signature
+      keyless:
+        url: https://fulcio.sigstore.dev
+        identities:
+          - issuerRegExp: ".*"
+            subjectRegExp: ".*"
+      ctlog:
+        url: https://rekor.sigstore.dev
+
+  mode: warn
+
+---
+# Secret for IntelGraph release key
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cosign-intelgraph-key
+  namespace: cosign-system
+type: Opaque
+data:
+  # Base64-encoded public key
+  # Generate with: cosign generate-key-pair
+  # Then: cat cosign.pub | base64
+  cosign.pub: |
+    # PLACEHOLDER - Replace with actual public key
+    # LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0K...
+
+---
+# ConfigMap for additional policy settings
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cosign-policy-config
+  namespace: cosign-system
+data:
+  # Exempt namespaces from verification
+  exempt-namespaces: |
+    kube-system
+    kube-public
+    kube-node-lease
+    local-path-storage
+
+  # Exempt images (for bootstrapping)
+  exempt-images: |
+    # Pause container (required for pod sandbox)
+    registry.k8s.io/pause:3.*
+    # Metrics server
+    registry.k8s.io/metrics-server/metrics-server:*
+    # CoreDNS
+    registry.k8s.io/coredns/coredns:*
+
+  # Verification timeout
+  verification-timeout: "30s"
+
+  # Cache settings
+  cache-ttl: "1h"
+  cache-max-entries: "10000"
+
+  # Audit settings
+  audit-log-path: "/var/log/cosign/audit.log"
+  audit-log-max-size: "100Mi"
+  audit-log-retention: "30d"
