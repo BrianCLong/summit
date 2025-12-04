@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: ./companyos/services/api-svc-template
+    env_file:
+      - ./companyos/services/api-svc-template/.env.example
+    ports:
+      - "4100:4000"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: companyos
+      POSTGRES_PASSWORD: companyos
+      POSTGRES_DB: companyos
+    ports:
+      - "5435:5432"
+    volumes:
+      - companyos-db-data:/var/lib/postgresql/data
+
+volumes:
+  companyos-db-data: {}

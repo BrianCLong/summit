@@ -1,0 +1,9 @@
+{
+  "service": {
+    "name": "api-svc-template",
+    "port": 4000
+  },
+  "opa": {
+    "url": "http://opa:8181/v1/data/companyos/authz/customer/allow"
+  }
+}
