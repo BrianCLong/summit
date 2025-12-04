@@ -120,12 +120,30 @@ export class InfluenceCampaignDetector {
     const indicators = this.analyzeIndicators(data);
 
     if (indicators.confidence > 0.7) {
+      const startDate =
+        indicators.startDate instanceof Date
+          ? indicators.startDate
+          : new Date(indicators.startDate || Date.now());
+
+      const parsedStartDate = isNaN(startDate.getTime())
+        ? new Date()
+        : startDate;
+
+      const parsedEndDate = indicators.endDate
+        ? indicators.endDate instanceof Date
+          ? indicators.endDate
+          : new Date(indicators.endDate)
+        : undefined;
+
       const campaign: InfluenceCampaign = {
         id: crypto.randomUUID(),
         campaignName: indicators.name || 'Unknown Campaign',
         attributedCountry: indicators.country,
-        startDate: new Date(indicators.startDate),
-        endDate: indicators.endDate ? new Date(indicators.endDate) : undefined,
+        startDate: parsedStartDate,
+        endDate:
+          parsedEndDate && !isNaN(parsedEndDate.getTime())
+            ? parsedEndDate
+            : undefined,
         status: 'ACTIVE',
         objectives: indicators.objectives || [],
         targetAudience: indicators.audience || 'General Public',
@@ -145,15 +163,33 @@ export class InfluenceCampaignDetector {
   }
 
   private analyzeIndicators(data: any): any {
+    const startDateCandidate = data?.startDate || data?.detectedAt;
+    const parsedStartDate = startDateCandidate
+      ? new Date(startDateCandidate)
+      : new Date();
+
+    const endDateCandidate = data?.endDate;
+    const parsedEndDate = endDateCandidate
+      ? new Date(endDateCandidate)
+      : undefined;
+
     return {
       confidence: 0.8,
       name: 'Detected Campaign',
+      country: data?.country || data?.attribution?.country,
       objectives: ['Influence public opinion'],
       platforms: ['Social media'],
       tactics: ['Coordinated inauthentic behavior'],
       narratives: ['Anti-Western sentiment'],
       reach: 100000,
-      effectiveness: 45
+      effectiveness: 45,
+      startDate: !isNaN(parsedStartDate.getTime())
+        ? parsedStartDate
+        : new Date(),
+      endDate:
+        parsedEndDate && !isNaN(parsedEndDate.getTime())
+          ? parsedEndDate
+          : undefined
     };
   }
 
