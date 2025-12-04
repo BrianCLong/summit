@@ -31,6 +31,34 @@ export interface PathMetric {
 
 type Listener = (state: TriPaneState) => void;
 
+function cloneEvidence(evidence: EvidenceNode[]): EvidenceNode[] {
+  return evidence.map((item) => ({
+    ...item,
+    policies: [...item.policies],
+  }));
+}
+
+function snapshotState(
+  state: TriPaneState,
+  includeSavedViews = true,
+): TriPaneState {
+  const savedViews = includeSavedViews
+    ? Object.fromEntries(
+        Object.entries(state.savedViews).map(([name, view]) => [
+          name,
+          snapshotState(view, false),
+        ]),
+      )
+    : {};
+
+  return {
+    ...state,
+    evidence: cloneEvidence(state.evidence),
+    policyBindings: [...state.policyBindings],
+    savedViews,
+  };
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
@@ -42,7 +70,7 @@ export class TriPaneController {
 
   constructor(initialEvidence: EvidenceNode[] = []) {
     this.state = {
-      evidence: [...initialEvidence],
+      evidence: cloneEvidence(initialEvidence),
       policyBindings: [],
       confidenceOpacity: 1,
       savedViews: {},
@@ -50,11 +78,7 @@ export class TriPaneController {
   }
 
   get current(): TriPaneState {
-    return {
-      ...this.state,
-      evidence: [...this.state.evidence],
-      policyBindings: [...this.state.policyBindings],
-    };
+    return snapshotState(this.state);
   }
 
   on(panel: Panel, listener: Listener): () => void {
@@ -65,16 +89,17 @@ export class TriPaneController {
   }
 
   selectFromGraph(nodeId: string, evidence: EvidenceNode[]): void {
+    const nextEvidence = cloneEvidence(evidence);
     this.state.graphSelection = nodeId;
-    this.state.mapSelection = evidence[0]?.id;
-    this.state.timelineSelection = evidence.at(-1)?.id;
-    this.state.evidence = evidence;
+    this.state.mapSelection = nextEvidence[0]?.id;
+    this.state.timelineSelection = nextEvidence.at(-1)?.id;
+    this.state.evidence = nextEvidence;
     this.state.policyBindings = Array.from(
-      new Set(evidence.flatMap((item) => item.policies)),
+      new Set(nextEvidence.flatMap((item) => item.policies)),
     );
     this.state.confidenceOpacity = clamp(
-      evidence.reduce((acc, item) => acc + item.confidence, 0) /
-        Math.max(evidence.length, 1),
+      nextEvidence.reduce((acc, item) => acc + item.confidence, 0) /
+        Math.max(nextEvidence.length, 1),
       0,
       1,
     );
@@ -112,30 +137,30 @@ export class TriPaneController {
   }
 
   saveView(name: string): void {
-    this.state.savedViews[name] = this.current;
+    const savedView = snapshotState(this.state, false);
+    this.state.savedViews = { ...this.state.savedViews, [name]: savedView };
   }
 
   restoreView(name: string): TriPaneState | undefined {
     const view = this.state.savedViews[name];
-    if (view) {
-      this.state = {
-        ...view,
-        evidence: [...view.evidence],
-        policyBindings: [...view.policyBindings],
-        savedViews: { ...this.state.savedViews },
-      };
-      this.emit('graph');
-      this.emit('map');
-      this.emit('timeline');
-      return this.current;
+    if (!view) {
+      return undefined;
     }
-    return undefined;
+
+    this.state = {
+      ...snapshotState(view, false),
+      savedViews: { ...this.state.savedViews },
+    };
+    this.emit('graph');
+    this.emit('map');
+    this.emit('timeline');
+    return this.current;
   }
 
   explainCurrentView(): ExplainView {
     return {
       focus: this.state.graphSelection,
-      evidence: [...this.state.evidence],
+      evidence: cloneEvidence(this.state.evidence),
       policyBindings: [...this.state.policyBindings],
       confidenceOpacity: this.state.confidenceOpacity,
     };

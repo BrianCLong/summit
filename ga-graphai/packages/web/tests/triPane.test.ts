@@ -69,6 +69,52 @@ describe('TriPaneController', () => {
     expect(explain.evidence.length).toBe(3);
   });
 
+  it('restores saved views without later mutations leaking through', () => {
+    const localEvidence = evidence.map((item) => ({
+      ...item,
+      policies: [...item.policies],
+    }));
+    const controller = new TriPaneController(localEvidence);
+    controller.selectFromGraph('person-1', localEvidence);
+    controller.saveView('orion');
+
+    localEvidence[0].label = 'mutated-label';
+    controller.selectFromGraph('person-2', localEvidence);
+
+    const restored = controller.restoreView('orion');
+    expect(restored?.graphSelection).toBe('person-1');
+    expect(restored?.evidence[0]?.label).toBe('email:alice@example.com');
+  });
+
+  it('guards state against external evidence mutation after selection', () => {
+    const mutableEvidence = evidence.map((item) => ({
+      ...item,
+      policies: [...item.policies],
+    }));
+    const controller = new TriPaneController();
+
+    controller.selectFromGraph('person-1', mutableEvidence);
+    mutableEvidence[0].label = 'mutated';
+    mutableEvidence[0].policies.push('policy:tamper');
+
+    const current = controller.current;
+    expect(current.evidence[0]?.label).toBe('email:alice@example.com');
+    expect(current.evidence[0]?.policies).toEqual(['policy:export']);
+  });
+
+  it('returns explain view clones so consumers cannot mutate controller state', () => {
+    const controller = new TriPaneController();
+    controller.selectFromGraph('person-1', evidence);
+
+    const explain = controller.explainCurrentView();
+    explain.evidence[0]!.label = 'mutated';
+    explain.evidence[0]!.policies.push('policy:tamper');
+
+    const current = controller.current;
+    expect(current.evidence[0]?.label).toBe('email:alice@example.com');
+    expect(current.evidence[0]?.policies).toEqual(['policy:export']);
+  });
+
   it('tracks time-to-path metric', () => {
     const controller = new TriPaneController();
     controller.recordPathDiscovery(1200);
