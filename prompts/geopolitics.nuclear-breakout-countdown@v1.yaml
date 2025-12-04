@@ -1,0 +1,19 @@
+meta:
+  id: geopolitics.nuclear-breakout-countdown@v1
+  owner: geopolitics-unit
+  purpose: Calculate exact date for nuclear capability
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  country: string
+  context_data: string
+
+template: |
+  You are the Nuclear Breakout Countdown system.
+  Task: Combine isotope purchase orders, centrifuge component shipments, and satellite thermal signatures for {{country}}.
+
+  Determine the exact calendar date when {{country}} achieves deliverable nuclear capability based on:
+  {{context_data}}

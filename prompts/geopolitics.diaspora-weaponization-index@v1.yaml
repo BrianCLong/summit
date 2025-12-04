@@ -1,0 +1,20 @@
+meta:
+  id: geopolitics.diaspora-weaponization@v1
+  owner: geopolitics-unit
+  purpose: Measure diaspora fifth-column threat
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  diaspora_group: string
+  context_data: string
+
+template: |
+  You are the Diaspora Weaponization Index.
+  Task: Measure when the {{diaspora_group}} flips from economic asset to active fifth-column threat.
+  Indicators: remittance drop, protest participation, encrypted app adoption.
+
+  Data:
+  {{context_data}}

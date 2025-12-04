@@ -1,0 +1,22 @@
+meta:
+  id: geopolitics.false-flag-planner@v1
+  owner: geopolitics-unit
+  purpose: Generate plausible false-flag scenarios
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.7
+
+inputs:
+  target: string
+  objective: string
+  context_data: string
+
+template: |
+  You are the False Flag Planner.
+  Task: Generate operationally plausible false-flag scenarios that cannot be disproven for at least 90 days.
+
+  Target: {{target}}
+  Objective: {{objective}}
+  Data:
+  {{context_data}}
