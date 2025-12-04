@@ -6,6 +6,7 @@ import GraphVisualization from './features/graph/GraphVisualization'; // Import 
 import AnalyticsDashboardPanel from './components/AnalyticsDashboardPanel'; // Import the new panel
 import IngestWizard from './components/IngestWizard';
 import AdminPanel from './components/AdminPanel';
+import HealthScore from './components/HealthScore/HealthScore';
 import TimelineView from './features/timeline/TimelineView';
 import {
   ApolloClient,
@@ -79,6 +80,8 @@ function TestApp() {
             {import.meta.env.VITE_PERF_MODE ? null : (
               <AnalyticsDashboardPanel />
             )}
+            <div style={{ height: 12 }} />
+            <HealthScore />
           </div>
         </div>
       </Provider>
