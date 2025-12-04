@@ -30,6 +30,8 @@ jobs:
     outputs:
       should_run_full_validation: ${{ steps.check.outputs.should_run_full_validation }}
       risk_level: ${{ steps.analyze.outputs.risk_level }}
+      risk_tiers: ${{ steps.classify.outputs.risk_tiers }}
+      risk_tier_count: ${{ steps.classify.outputs.risk_tier_count }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -116,6 +118,17 @@ jobs:
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Classify PR risk tiers
+        id: classify
+        if: steps.check.outputs.should_run_full_validation == 'true'
+        run: node .github/scripts/pr-risk-classifier.cjs
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_REF: ${{ github.event.pull_request.base.sha }}
+          HEAD_REF: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
   # Comprehensive validation suite
   full-validation:
