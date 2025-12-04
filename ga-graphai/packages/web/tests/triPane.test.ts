@@ -67,6 +67,11 @@ describe('TriPaneController', () => {
     const explain = controller.explainCurrentView();
     expect(explain.focus).toBe('person-1');
     expect(explain.evidence.length).toBe(3);
+    expect(explain.activePanel).toBe('graph');
+    expect(explain.policyHighlights).toContain('policy:export');
+    expect(explain.navigationTips).toContain(
+      'Ctrl+1 Graph · Ctrl+2 Timeline · Ctrl+3 Map',
+    );
   });
 
   it('tracks time-to-path metric', () => {
@@ -74,5 +79,40 @@ describe('TriPaneController', () => {
     controller.recordPathDiscovery(1200);
     controller.recordPathDiscovery(800);
     expect(controller.averageTimeToPath()).toBe(1000);
+  });
+
+  it('builds unified layout with explain panel and command palette', () => {
+    const controller = new TriPaneController(evidence);
+    controller.selectFromGraph('person-1', evidence);
+    const layout = controller.buildUnifiedLayout('graph');
+    expect(layout.activePanel).toBe('graph');
+    expect(layout.panes.find((pane) => pane.id === 'graph')?.linkedTo).toEqual([
+      'timeline',
+      'map',
+    ]);
+    expect(layout.commandPalette.commands.some((cmd) => cmd.id === 'focus.graph'))
+      .toBe(true);
+    expect(layout.explainPanel.summary).toContain('Active pane: graph');
+    expect(layout.explainPanel.policyHighlights).toContain('policy:export');
+  });
+
+  it('supports command palette commands and keyboard shortcuts', () => {
+    const controller = new TriPaneController(evidence);
+    controller.registerCommand({
+      id: 'save.snapshot',
+      label: 'Save snapshot',
+      shortcut: 'cmd+s',
+      run: () => controller.saveView('snapshot'),
+    });
+    expect(controller.handleShortcut('ctrl+2')).toBe(true);
+    expect(controller.current.activePanel).toBe('timeline');
+    expect(
+      controller.commandPalette('snapshot').commands.find(
+        (command) => command.id === 'save.snapshot',
+      ),
+    ).toBeDefined();
+    controller.selectFromMap('ev-2');
+    expect(controller.handleShortcut('cmd+s')).toBe(true);
+    expect(controller.restoreView('snapshot')).toBeDefined();
   });
 });
