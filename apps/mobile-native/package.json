@@ -32,7 +32,7 @@
     "startup:report": "node -e \"import('./src/services/StartupOptimizer').then(m => console.log(JSON.stringify(m.startupOptimizer.getReport(), null, 2)))\""
   },
   "dependencies": {
-    "react": "^19.2.0",
+    "react": "^19.2.1",
     "react-native": "^0.76.6",
     "@react-navigation/native": "^7.0.11",
     "@react-navigation/stack": "^7.2.2",
@@ -98,7 +98,7 @@
     "@react-native/eslint-config": "^0.76.4",
     "@react-native/metro-config": "^0.76.7",
     "@react-native/typescript-config": "^0.76.7",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.7",
     "@types/react-native": "^0.73.0",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
