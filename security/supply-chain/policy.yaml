@@ -1,0 +1,16 @@
+{
+  "baseline_cvss": 7.0,
+  "blocked_licenses": ["AGPL-3.0", "BUSL-1.1", "SSPL-1.0"],
+  "allowed_licenses": ["MIT", "Apache-2.0", "BSD-3-Clause"],
+  "dual_control": {
+    "minimum_approvers": 2,
+    "approvers": ["legal@example.com", "security@example.com", "engineering-lead@example.com"]
+  },
+  "exception_window_days": 30,
+  "reproducible_builds": {
+    "attestation_required": true,
+    "provenance_format": "in-toto"
+  },
+  "vulnerability_sources": ["grype", "osv"],
+  "license_source": "licensee"
+}
