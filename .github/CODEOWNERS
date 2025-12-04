@@ -84,3 +84,4 @@
 # App-specific (examples; tweak as needed)
 # apps/web/**            @your-org/web-owners
 # apps/api/**            @your-org/api-owners
+/charts/summit/ @intelgraph-devops-team @BrianCLong

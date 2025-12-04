@@ -206,3 +206,26 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+# =============================================================================
+# Summit Golden Path - Helm & Deployment
+# =============================================================================
+
+REGISTRY ?= ghcr.io/BrianCLong
+IMAGE ?= summit
+TAG ?= $(shell git rev-parse --short=12 HEAD)
+
+.PHONY: build push deploy-dev preview kind-up
+
+build:
+	docker build -t $(REGISTRY)/$(IMAGE):$(TAG) .
+
+push:
+	docker push $(REGISTRY)/$(IMAGE):$(TAG)
+
+deploy-dev:
+	helm upgrade --install $(IMAGE) charts/summit -n dev -f charts/summit/values.dev.yaml \
+	  --set image.repository=$(REGISTRY)/$(IMAGE) --set image.tag=$(TAG)
+
+preview:
+	@echo "Use the Preview workflow to create a PR namespace."

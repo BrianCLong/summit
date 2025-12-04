@@ -1,0 +1,15 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: app-creds
+  namespace: dev
+spec:
+  secretStoreRef:
+    name: cloud-secrets
+    kind: SecretStore
+  target:
+    name: app-creds
+  data:
+    - secretKey: DB_URL
+      remoteRef:
+        key: /summit/dev/db_url

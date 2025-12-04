@@ -1,0 +1,3 @@
+opencost:
+  exporter:
+    defaultClusterId: summit-dev

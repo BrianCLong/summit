@@ -1,0 +1,6 @@
+apiVersion: v2
+name: summit
+version: 0.1.0
+appVersion: "0.0.0"
+description: Summit baseline app chart
+type: application

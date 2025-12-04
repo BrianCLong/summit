@@ -1,0 +1,6 @@
+image:
+  repository: ghcr.io/BrianCLong/summit
+  tag: dev
+ingress:
+  hosts:
+    - host: summit-dev.example.com

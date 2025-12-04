@@ -1,0 +1,18 @@
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
+metadata:
+  name: summit-availability
+spec:
+  service: summit
+  slos:
+    - name: availability
+      objective: 99.5
+      sli:
+        events:
+          errorQuery: sum(rate(http_requests_total{app="summit",status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_requests_total{app="summit"}[5m]))
+      alerting:
+        name: AppAvailability
+        labels: { severity: critical }
+        annotations:
+          summary: "App availability SLO burn"
