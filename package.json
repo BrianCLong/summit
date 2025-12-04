@@ -76,6 +76,7 @@
     "install:pm": "node scripts/select-pm.js",
     "e2e": "playwright test",
     "perf:snapshot": "bash scripts/perf/snapshot.sh",
+    "perf:golden": "k6 run k6/golden-path-benchmark.js",
     "screenshots": "npx playwright test scripts/playwright/capture_screenshots.spec.ts --reporter=line",
     "graphql:schema:check": "graphql-inspector diff packages/graphql/schema.graphql origin/main:packages/graphql/schema.graphql --fail-on-breaking",
     "graphql:codegen": "graphql-codegen",
