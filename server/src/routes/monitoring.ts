@@ -27,6 +27,7 @@ import {
   recordBusinessEvent,
   type BusinessMetricEvent,
 } from '../monitoring/businessMetrics.js';
+import { requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -35,7 +36,7 @@ router.use(express.json());
  * Prometheus metrics endpoint
  * GET /metrics
  */
-router.get('/metrics', async (req: Request, res: Response) => {
+router.get('/metrics', requirePermission('system:metrics'), async (req: Request, res: Response) => {
   try {
     res.set('Content-Type', register.contentType);
     const metrics = await register.metrics();
