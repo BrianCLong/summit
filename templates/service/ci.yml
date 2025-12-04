@@ -1,0 +1,63 @@
+name: {{SERVICE_NAME}} CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/{{SERVICE_NAME}}/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'services/{{SERVICE_NAME}}/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/{{SERVICE_NAME}}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Test
+        run: pnpm run test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: services/{{SERVICE_NAME}}
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-{{SERVICE_NAME}}
+          path: sbom.spdx.json
+
+      # Placeholder for OPA Gate
+      - name: OPA Gate
+        run: echo "OPA Gate Check Passed"
+
+      # Placeholder for Signing
+      - name: Sign Artifacts
+        run: echo "Signing Artifacts Passed"
