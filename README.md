@@ -78,24 +78,27 @@ pnpm smoke            # same as make smoke (Node-based E2E)
 
 ## 🚥 CI & Merge Policy
 
-<<<<<<< Updated upstream
-The `ci.yml` workflow runs on every PR + main: cached `pnpm install`, `make bootstrap`, `make up` (headless), `make smoke`, lint, typecheck, Jest, Playwright/E2E (currently proxies to the smoke test), SBOM + Trivy scans, and Docker layer caching. `security.yml` runs CodeQL analysis, dependency review, and gitleaks on a nightly schedule + PRs touching lockfiles. `release.yml` gates semantic-release with the same caches and requires a green CI status before packaging artifacts. All three workflows back the badges above and are required checks for merge.
-=======
 **Strict Branch Protection**: `main` is protected. Direct pushes are blocked.
 
 ### Required Checks
-1.  **CI (Lint & Unit)**: Fast lane. Runs lint, typecheck, and unit tests.
-2.  **CI (Golden Path)**: Integration lane. Boots the full stack and runs smoke tests.
-3.  **Security**: Scans for secrets and vulnerabilities.
+
+The `ci.yml` workflow runs on every PR + main with the following checks:
+
+1. **CI (Lint & Unit)**: Fast lane. Runs lint, typecheck, and unit tests.
+2. **CI (Golden Path)**: Integration lane. Boots the full stack with `make bootstrap`, `make up` (headless), and `make smoke`.
+3. **Security**: CodeQL analysis, dependency review, gitleaks, SBOM + Trivy scans.
+
+All workflows use cached `pnpm install` and Docker layer caching. These are required checks for merge.
 
 ### Merge Train
-We use a "Safe Merge" label strategy to manage the PR backlog.
-*   **Developers**: Open PR → Get Approval → Add `automerge-safe` label.
-*   **Automation**: The merge train script updates your branch from `main`, verifies CI, and merges automatically when green.
-*   **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
+
+We use a "Safe Merge" label strategy to manage the PR backlog:
+
+* **Developers**: Open PR → Get Approval → Add `automerge-safe` label.
+* **Automation**: The merge train script updates your branch from `main`, verifies CI, and merges automatically when green.
+* **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
 
 **Note**: Do not use "Squash and merge" manually if the train is active. Let the bot handle it to ensure linear history and green builds.
->>>>>>> Stashed changes
 
 ---
 
