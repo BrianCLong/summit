@@ -29,6 +29,9 @@ import { initializeTracing, getTracer } from './observability/tracer.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
+import swaggerUi from 'swagger-ui-express';
+import fs from 'fs';
+import yaml from 'js-yaml';
 import { startTrustWorker } from './workers/trustScoreWorker.js';
 import { startRetentionWorker } from './workers/retentionWorker.js';
 import { cfg } from './config.js';
@@ -153,6 +156,20 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
+
+  // API Documentation
+  try {
+    const apiSpecPath = path.join(__dirname, '../../docs/api-spec.yaml');
+    if (fs.existsSync(apiSpecPath)) {
+      const apiSpec = yaml.load(fs.readFileSync(apiSpecPath, 'utf8'));
+      app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(apiSpec as any));
+      logger.info('API documentation available at /api-docs');
+    } else {
+      logger.warn('API spec not found at ' + apiSpecPath);
+    }
+  } catch (error) {
+    logger.error('Failed to load API documentation:', error);
+  }
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;

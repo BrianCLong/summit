@@ -22,12 +22,11 @@ export class RateLimiter {
   }
 
   /**
-   * Check if a key has exceeded the rate limit.
-   * Uses a sliding window counter (fixed window with Redis expiration).
+   * Check if a key has exceeded the rate limit using Token Bucket algorithm.
    *
    * @param key Unique key for the limit (e.g., user ID or IP)
-   * @param limit Max requests allowed
-   * @param windowMs Window size in milliseconds
+   * @param limit Max tokens (capacity)
+   * @param windowMs Time window in milliseconds for full refill
    * @returns RateLimitResult
    */
   async checkLimit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
@@ -35,61 +34,116 @@ export class RateLimiter {
     const now = Date.now();
     const redisClient = getRedisClient();
 
+    // Calculate refill rate: tokens per millisecond
+    // rate = limit / windowMs
+    // but to avoid floats in Redis, we can just use the logic in Lua:
+    // new_tokens = (now - last_refill) * (limit / windowMs)
+    // if new_tokens > limit, new_tokens = limit
+
     if (!redisClient) {
-      // Fail open if Redis is not available
       logger.warn('Redis client not available for rate limiting, allowing request');
       return {
         allowed: true,
         total: limit,
         remaining: limit,
-        reset: now + windowMs,
+        reset: now,
       };
     }
 
     try {
-      // Lua script to increment and set expiry atomically
-      // Returns [current_count, ttl_ms]
+      // Lua script for Token Bucket
+      // KEYS[1]: bucket key (hash)
+      // ARGV[1]: capacity (limit)
+      // ARGV[2]: refill rate (tokens per ms)
+      // ARGV[3]: now (timestamp ms)
+      // ARGV[4]: windowMs (for expiry)
+      // ARGV[5]: cost (default 1)
       const script = `
-        local current = redis.call("INCR", KEYS[1])
-        local ttl = redis.call("PTTL", KEYS[1])
-        if tonumber(current) == 1 then
-          redis.call("PEXPIRE", KEYS[1], ARGV[1])
-          ttl = ARGV[1]
+        local key = KEYS[1]
+        local capacity = tonumber(ARGV[1])
+        local rate = tonumber(ARGV[2])
+        local now = tonumber(ARGV[3])
+        local ttl = tonumber(ARGV[4])
+        local cost = tonumber(ARGV[5])
+
+        -- Get current state
+        local bucket = redis.call("HMGET", key, "tokens", "last_refill")
+        local tokens = tonumber(bucket[1])
+        local last_refill = tonumber(bucket[2])
+
+        if not tokens then
+          tokens = capacity
+          last_refill = now
         end
-        return {current, ttl}
+
+        -- Refill tokens
+        local delta_ms = math.max(0, now - last_refill)
+        local filled_tokens = delta_ms * rate
+        tokens = math.min(capacity, tokens + filled_tokens)
+
+        -- Check if allowed
+        local allowed = 0
+        local remaining = tokens
+        local reset_ms = 0 -- Time until next token? Or full refill?
+
+        if tokens >= cost then
+          tokens = tokens - cost
+          allowed = 1
+          last_refill = now -- Update last refill time only if we consumed?
+          -- Actually standard token bucket updates timestamp on every check or lazy fill.
+          -- We updated tokens based on time passed, so we must update last_refill to now.
+        else
+          -- Calculate when we will have enough tokens
+          -- needed = cost - tokens
+          -- time = needed / rate
+          reset_ms = (cost - tokens) / rate
+        end
+
+        -- Save state
+        redis.call("HMSET", key, "tokens", tokens, "last_refill", now)
+        redis.call("PEXPIRE", key, ttl) -- Keep key alive for window duration
+
+        return {allowed, tokens, reset_ms}
       `;
 
-      const result = await redisClient.eval(script, 1, redisKey, windowMs) as [number, number];
-      const current = result[0];
-      const ttl = result[1]; // TTL in ms
+      const rate = limit / windowMs;
+      // Use 1 token cost
+      const cost = 1;
 
-      const allowed = current <= limit;
-      const remaining = Math.max(0, limit - current);
-      const reset = now + (ttl > 0 ? ttl : windowMs);
+      const result = await redisClient.eval(script, 1, redisKey, limit, rate, now, windowMs, cost) as [number, number, number];
 
-      this.metrics.incrementCounter('hits_total', { status: allowed ? 'allowed' : 'blocked' });
+      const isAllowed = result[0] === 1;
+      const currentTokens = result[1];
+      const waitMs = result[2];
 
-      if (!allowed) {
-          // Identify prefix for metrics (e.g. "ip" or "user")
+      const remaining = Math.floor(currentTokens);
+      // "reset" is usually when the limit resets. In token bucket, it's continuous.
+      // We can interpret reset as "time until full capacity" or "time until next token".
+      // Let's use "time until full capacity" which is (limit - tokens) / rate
+      const timeToFull = (limit - currentTokens) / rate;
+      const reset = now + timeToFull;
+
+      this.metrics.incrementCounter('hits_total', { status: isAllowed ? 'allowed' : 'blocked' });
+
+      if (!isAllowed) {
           const prefix = key.split(':')[0] || 'unknown';
           this.metrics.incrementCounter('blocked_total', { key_prefix: prefix });
       }
 
       return {
-        allowed,
+        allowed: isAllowed,
         total: limit,
         remaining,
-        reset,
+        reset: Math.ceil(reset),
       };
 
     } catch (error) {
       logger.error({ err: error }, 'Rate limiting error');
-      // Fail open
       return {
-        allowed: true,
+        allowed: true, // Fail open
         total: limit,
         remaining: limit,
-        reset: now + windowMs,
+        reset: now,
       };
     }
   }

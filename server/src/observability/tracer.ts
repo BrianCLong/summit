@@ -7,6 +7,9 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-http';
+import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import {
   trace,
@@ -27,6 +30,8 @@ export interface TracingConfig {
   serviceVersion: string;
   environment: string;
   jaegerEndpoint?: string;
+  otlpTracesEndpoint?: string;
+  otlpMetricsEndpoint?: string;
   enableAutoInstrumentation?: boolean;
   sampleRate?: number;
 }
@@ -59,21 +64,37 @@ export class IntelGraphTracer {
         [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'intelgraph',
       });
 
-      // Configure Jaeger exporter if endpoint provided
-      const exporters: any[] = [];
-      if (this.config.jaegerEndpoint) {
-        exporters.push(
-          new JaegerExporter({
+      // Configure Exporters
+      // Priority: OTLP > Jaeger
+      let traceExporter;
+      if (this.config.otlpTracesEndpoint) {
+          traceExporter = new OTLPTraceExporter({
+              url: this.config.otlpTracesEndpoint,
+          });
+          logger.info(`OTLP Trace exporter configured: ${this.config.otlpTracesEndpoint}`);
+      } else if (this.config.jaegerEndpoint) {
+          traceExporter = new JaegerExporter({
             endpoint: this.config.jaegerEndpoint,
-          }),
-        );
-        logger.info(`Jaeger exporter configured: ${this.config.jaegerEndpoint}`);
+          });
+          logger.info(`Jaeger exporter configured: ${this.config.jaegerEndpoint}`);
+      }
+
+      let metricReader;
+      if (this.config.otlpMetricsEndpoint) {
+          metricReader = new PeriodicExportingMetricReader({
+              exporter: new OTLPMetricExporter({
+                  url: this.config.otlpMetricsEndpoint,
+              }),
+              exportIntervalMillis: 15000,
+          });
+          logger.info(`OTLP Metric exporter configured: ${this.config.otlpMetricsEndpoint}`);
       }
 
       // Initialize OpenTelemetry SDK
       this.sdk = new NodeSDK({
         resource,
-        traceExporter: exporters.length > 0 ? exporters[0] : undefined,
+        traceExporter,
+        metricReader,
         instrumentations:
           this.config.enableAutoInstrumentation !== false
             ? [
@@ -315,6 +336,8 @@ export function initializeTracing(config?: Partial<TracingConfig>): IntelGraphTr
     serviceVersion: cfg.APP_VERSION || '1.0.0',
     environment: cfg.NODE_ENV || 'development',
     jaegerEndpoint: process.env.JAEGER_ENDPOINT,
+    otlpTracesEndpoint: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT,
+    otlpMetricsEndpoint: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT,
     enableAutoInstrumentation: process.env.OTEL_AUTO_INSTRUMENT !== 'false',
     sampleRate: parseFloat(process.env.OTEL_SAMPLE_RATE || '1.0'),
   };

@@ -1,0 +1,10 @@
+{
+  "name": "@intelgraph/extensions",
+  "version": "1.0.0",
+  "description": "Extensions",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}
