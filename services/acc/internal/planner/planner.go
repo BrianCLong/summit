@@ -8,11 +8,14 @@ import (
 	"time"
 
 	"github.com/summit/acc/internal/config"
+	"github.com/summit/acc/internal/health"
 	"github.com/summit/acc/internal/session"
+	"github.com/summit/acc/internal/telemetry"
 )
 
 type Request struct {
 	ID           string `json:"id"`
+	TenantID     string `json:"tenantId"`
 	Operation    string `json:"operation"`
 	Session      string `json:"session"`
 	DataClass    string `json:"dataClass"`
@@ -62,8 +65,10 @@ type Planner struct {
 	policies []config.PolicyRule
 	replicas []config.Replica
 
-	metrics map[string]ReplicaMetrics
-	store   *session.Store
+	metrics         map[string]ReplicaMetrics
+	store           *session.Store
+	gateKeeper      *health.GateKeeper
+	conflictTracker *telemetry.InMemoryConflictTracker
 
 	now func() time.Time
 }
@@ -74,12 +79,22 @@ func New(cfg *config.Config) *Planner {
 		metrics[r.Name] = ReplicaMetrics{LatencyMs: r.DefaultLatencyMs}
 	}
 	return &Planner{
-		policies: cfg.Policies,
-		replicas: cfg.Replicas,
-		metrics:  metrics,
-		store:    session.NewStore(),
-		now:      time.Now,
+		policies:        cfg.Policies,
+		replicas:        cfg.Replicas,
+		metrics:         metrics,
+		store:           session.NewStore(),
+		gateKeeper:      health.NewGateKeeper(health.DefaultGateConfig()),
+		conflictTracker: telemetry.NewInMemoryConflictTracker(),
+		now:             time.Now,
 	}
+}
+
+func (p *Planner) SetGateKeeper(gk *health.GateKeeper) {
+	p.gateKeeper = gk
+}
+
+func (p *Planner) SetConflictTracker(ct *telemetry.InMemoryConflictTracker) {
+	p.conflictTracker = ct
 }
 
 func (p *Planner) SetNow(now func() time.Time) {
@@ -121,11 +136,42 @@ func (p *Planner) Plan(ctx context.Context, req Request) (PlanResult, error) {
 
 	switch rule.Mode {
 	case config.ModeStrong:
-		route, explain := p.planStrong(rule)
-		plan.Route = route
-		steps = append(steps, explain...)
-		if req.Operation == "write" && req.Session != "" {
-			p.store.RecordWrite(req.Session, route.Quorum[0])
+		// Check health gate for Write Quorum (Strong Mode)
+		// If check fails, fallback to a safer mode or primary-only.
+		// For now, we assume fallback to single-primary if quorum is unhealthy.
+		allowed, reason := true, ""
+		if p.gateKeeper != nil && req.TenantID != "" {
+			allowed, reason = p.gateKeeper.Check(req.TenantID)
+		}
+
+		if !allowed {
+			steps = append(steps, ExplainStep{
+				Stage:   "health-gate",
+				Message: "quorum health gate failed; falling back to primary",
+				Meta: map[string]interface{}{
+					"reason": reason,
+				},
+			})
+			// Fallback logic: Use planStrong but modify to primary-only?
+			// Or just pick the primary.
+			// Currently planStrong builds a quorum.
+			// Let's implement a simple planPrimary fallback.
+			route, explain := p.planPrimary(rule)
+			route.FallbackToStrongMode = false // It's actually falling back FROM strong
+			plan.Route = route
+			steps = append(steps, explain...)
+		} else {
+			route, explain := p.planStrong(rule)
+			plan.Route = route
+			steps = append(steps, explain...)
+		}
+
+		if req.Operation == "write" && req.Session != "" && len(plan.Route.Quorum) > 0 {
+			p.store.RecordWrite(req.Session, plan.Route.Quorum[0])
+		}
+		// Record potential write for conflict tracking
+		if req.Operation == "write" && req.TenantID != "" && p.conflictTracker != nil {
+			p.conflictTracker.RecordWrite(req.TenantID)
 		}
 	case config.ModeBoundedStaleness:
 		route, explain := p.planBounded(rule)
@@ -162,6 +208,57 @@ func (p *Planner) matchRule(req Request) (config.PolicyRule, error) {
 
 func matchField(ruleValue, requestValue string) bool {
 	return ruleValue == "*" || ruleValue == "" || ruleValue == requestValue
+}
+
+func (p *Planner) planPrimary(rule config.PolicyRule) (RoutePlan, []ExplainStep) {
+	steps := []ExplainStep{{
+		Stage:   "mode",
+		Message: "fallback to primary-only due to health gate",
+	}}
+
+	var primary config.Replica
+	found := false
+	for _, r := range p.replicas {
+		if r.Role == "primary" {
+			primary = r
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		// If no primary found, fall back to first available (emergency)
+		if len(p.replicas) > 0 {
+			primary = p.replicas[0]
+		}
+	}
+
+	metrics := p.metrics[primary.Name]
+	target := ReplicaTarget{
+		Name:         primary.Name,
+		Region:       primary.Region,
+		Role:         primary.Role,
+		LatencyMs:    metrics.LatencyMs,
+		StalenessMs:  metrics.StalenessMs,
+		SyncRequired: primary.Synchronous,
+		IsPrimary:    primary.Role == "primary",
+		IsQuorum:     true, // Even single node is a "quorum" of 1
+	}
+
+	steps = append(steps, ExplainStep{
+		Stage:   "route",
+		Message: "selected primary",
+		Meta: map[string]interface{}{
+			"primary": primary.Name,
+		},
+	})
+
+	return RoutePlan{
+		Quorum:             []string{primary.Name},
+		Replicas:           []ReplicaTarget{target},
+		EstimatedLatencyMs: metrics.LatencyMs,
+		ConsistencyScore:   1.0,
+	}, steps
 }
 
 func (p *Planner) planStrong(rule config.PolicyRule) (RoutePlan, []ExplainStep) {
