@@ -9,6 +9,7 @@ The core components are:
 - **`rollback-engine.ts`**: Provides a mechanism to perform rollbacks. It's designed to revert a service to its previous stable version and includes hooks for coordinating database down-migrations. It also maintains an audit trail of all rollback events.
 - **`self-healing.ts`**: Implements automated recovery from common failures. It's designed to monitor services for issues like memory leaks or unresponsive processes and trigger automated restarts to restore service health.
 - **`incident-manager.ts`**: Provides a framework for automated incident response. It's designed to detect critical alerts from monitoring systems, execute pre-defined runbooks, and enforce escalation policies by notifying on-call personnel via services like PagerDuty and Slack.
+- **`gitops-sync-validator.ts`**: Detects drift between the desired state in Git (manifests) and the actual state in the Kubernetes cluster. It reports mismatches in versions, replicas, or missing/orphan resources, enabling a robust GitOps workflow.
 
 Associated shell scripts (`scripts/deploy-canary.sh`, `scripts/rollback.sh`, etc.) provide entry points for CI/CD pipelines to interact with this framework.
 
