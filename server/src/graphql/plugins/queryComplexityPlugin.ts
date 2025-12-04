@@ -8,6 +8,8 @@ import type { ApolloServerPlugin, GraphQLRequestListener } from '@apollo/server'
 import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
+import { rateLimiter } from '../../services/RateLimiter.js';
+import { cfg } from '../../config.js';
 
 const logger = pino();
 
@@ -34,6 +36,12 @@ export interface QueryComplexityOptions {
    * @default false in development, true in production
    */
   enforceComplexity?: boolean;
+
+  /**
+   * Whether to enforce cost-based rate limiting
+   * @default true
+   */
+  enforceCostLimit?: boolean;
 }
 
 const DEFAULT_MAX_COMPLEXITY = 1000;
@@ -49,6 +57,7 @@ export function createQueryComplexityPlugin(
     logComplexity = process.env.NODE_ENV !== 'production',
     getMaxComplexityForUser,
     enforceComplexity = process.env.NODE_ENV === 'production',
+    enforceCostLimit = true,
   } = options;
 
   return {
@@ -82,13 +91,13 @@ export function createQueryComplexityPlugin(
                   complexity,
                   maxComplexity,
                   user: contextValue?.user?.id,
-                  query: request.query?.substring(0, 200), // First 200 chars
+                  // query: request.query?.substring(0, 200), // First 200 chars
                 },
                 'GraphQL query complexity analyzed'
               );
             }
 
-            // Enforce complexity limit
+            // 1. Hard complexity limit (Single Request)
             if (enforceComplexity && complexity > maxComplexity) {
               logger.warn(
                 {
@@ -111,6 +120,50 @@ export function createQueryComplexityPlugin(
                 }
               );
             }
+
+            // 2. Cost-based Rate Limiting (Over Time)
+            if (enforceCostLimit) {
+              const user = contextValue?.user;
+              let key: string;
+              let limit: number;
+              // Use configured rate limit window or default to 1 minute
+              const windowMs = cfg.RATE_LIMIT_WINDOW_MS || 60000;
+
+              if (user) {
+                key = `cost:user:${user.id || user.sub}`;
+                // Allow e.g. 50,000 complexity points per window for auth users
+                // This is separate from request count limit
+                limit = cfg.RATE_LIMIT_MAX_COMPLEXITY_AUTHENTICATED || 50000;
+              } else {
+                key = `cost:ip:${contextValue?.request?.ip || 'unknown'}`;
+                limit = cfg.RATE_LIMIT_MAX_COMPLEXITY_ANONYMOUS || 5000;
+              }
+
+              const result = await rateLimiter.consume(key, complexity, limit, windowMs);
+
+              if (!result.allowed) {
+                logger.warn(
+                  {
+                    key,
+                    complexity,
+                    limit,
+                    remaining: result.remaining,
+                  },
+                  'Query exceeded complexity rate limit'
+                );
+
+                throw new GraphQLError(
+                  `Rate limit exceeded for query complexity. Try again in ${Math.ceil((result.reset - Date.now()) / 1000)}s`,
+                  {
+                    extensions: {
+                      code: 'COMPLEXITY_RATE_LIMIT_EXCEEDED',
+                      retryAfter: Math.ceil((result.reset - Date.now()) / 1000),
+                    },
+                  }
+                );
+              }
+            }
+
           } catch (error) {
             // If error is already a GraphQLError, rethrow it
             if (error instanceof GraphQLError) {
