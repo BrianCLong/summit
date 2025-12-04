@@ -59,8 +59,16 @@ const DEFAULT_WRITE_POOL_SIZE = parseInt(
   process.env.PG_WRITE_POOL_SIZE ?? '24',
   10,
 );
+const DEFAULT_WRITE_POOL_MIN = parseInt(
+  process.env.PG_WRITE_POOL_MIN ?? '2',
+  10,
+);
 const DEFAULT_READ_POOL_SIZE = parseInt(
   process.env.PG_READ_POOL_SIZE ?? '60',
+  10,
+);
+const DEFAULT_READ_POOL_MIN = parseInt(
+  process.env.PG_READ_POOL_MIN ?? '2',
   10,
 );
 const MAX_RETRIES = parseInt(process.env.PG_QUERY_MAX_RETRIES ?? '3', 10);
@@ -260,9 +268,13 @@ function createPool(
   type: 'write' | 'read',
   max: number,
 ): PoolWrapper {
+  const min =
+    type === 'write' ? DEFAULT_WRITE_POOL_MIN : DEFAULT_READ_POOL_MIN;
+
   const pool = new Pool({
     ...config,
     max,
+    min,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
     application_name: `summit-${type}-${process.env.CURRENT_REGION || 'global'}`,

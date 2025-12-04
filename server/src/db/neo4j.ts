@@ -8,6 +8,7 @@ import {
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
+import { queryOptimizer } from './queryOptimizer.js';
 
 dotenv.config();
 
@@ -23,6 +24,13 @@ const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
 const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
+);
+
+const MAX_CONNECTION_POOL_SIZE = Number(
+  process.env.NEO4J_MAX_POOL_SIZE || 100,
+);
+const CONNECTION_ACQUISITION_TIMEOUT_MS = Number(
+  process.env.NEO4J_CONNECTION_TIMEOUT_MS || 5000,
 );
 
 let realDriver: Neo4jDriver | null = null;
@@ -174,6 +182,10 @@ async function connectToNeo4j(): Promise<void> {
     candidate = neo4j.driver(
       NEO4J_URI,
       neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+      {
+        maxConnectionPoolSize: MAX_CONNECTION_POOL_SIZE,
+        connectionAcquisitionTimeout: CONNECTION_ACQUISITION_TIMEOUT_MS,
+      }
     );
 
     await candidate.verifyConnectivity();
@@ -315,6 +327,24 @@ function instrumentSession(session: any) {
 // Export a convenience object for simple queries
 export const neo = {
   run: async (cypher: string, params?: any, context?: { tenantId?: string }) => {
+    // Attempt optimization if tenantId is present
+    if (context?.tenantId) {
+      // Async optimization analysis (fire and forget)
+      queryOptimizer.optimizeQuery(cypher, params, {
+        tenantId: context.tenantId,
+        queryType: 'cypher',
+        priority: 'low'
+      }).then(plan => {
+         if (plan.optimizations.some(o => !o.applied && o.impact === 'high')) {
+            logger.info({
+               tenantId: context.tenantId,
+               optimizations: plan.optimizations.filter(o => !o.applied),
+               query: cypher.substring(0, 100)
+            }, 'Neo4j Query Optimization Recommendation');
+         }
+      }).catch(() => { /* ignore optimizer errors */ });
+    }
+
     const driver = getNeo4jDriver();
     const session = driver.session();
     try {

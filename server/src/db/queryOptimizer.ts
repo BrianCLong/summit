@@ -3,7 +3,7 @@
 
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
-import { redis } from '../subscriptions/pubsub';
+import { getRedisClient } from './redis.js';
 import crypto from 'crypto';
 
 const tracer = trace.getTracer('query-optimizer', '24.3.0');
@@ -121,22 +121,21 @@ export class QueryOptimizer {
         const startTime = Date.now();
 
         try {
-          // Check cache first
           const cacheKey = this.buildCacheKey(query, params, context);
           const cached = await this.getFromCache(cacheKey);
 
           if (cached && context.cacheEnabled !== false) {
-            optimizerCacheHits.inc({
-              tenant_id: context.tenantId,
-              query_type: context.queryType,
-              optimization_type: 'cached',
-            });
-            return cached;
+             optimizerCacheHits.inc({
+                tenant_id: context.tenantId,
+                query_type: context.queryType,
+                optimization_type: 'cached',
+             });
+             return cached;
           }
 
           optimizerCacheMisses.inc({
-            tenant_id: context.tenantId,
-            query_type: context.queryType,
+             tenant_id: context.tenantId,
+             query_type: context.queryType,
           });
 
           // Analyze query
@@ -185,7 +184,20 @@ export class QueryOptimizer {
     } else if (queryType === 'sql') {
       return this.analyzeSQLQuery(query, lowerQuery);
     } else {
-      throw new Error(`Unsupported query type: ${queryType}`);
+      // Default to basic analysis if unknown type
+      return {
+          complexity: 1,
+          nodeCount: 0,
+          relationshipCount: 0,
+          filterCount: 0,
+          aggregationCount: 0,
+          joinCount: 0,
+          hasWildcard: false,
+          isRead: true,
+          isWrite: false,
+          affectedLabels: [],
+          requiredIndexes: []
+      }
     }
   }
 
@@ -707,6 +719,9 @@ export class QueryOptimizer {
 
   private async getFromCache(cacheKey: string): Promise<QueryPlan | null> {
     try {
+      const redis = getRedisClient();
+      if (!redis) return null;
+
       const cached = await redis.get(cacheKey);
       return cached ? JSON.parse(cached) : null;
     } catch (error) {
@@ -720,7 +735,10 @@ export class QueryOptimizer {
     plan: QueryPlan,
   ): Promise<void> {
     try {
-      await redis.setWithTTL(cacheKey, JSON.stringify(plan), this.defaultTTL);
+      const redis = getRedisClient();
+      if (!redis) return;
+
+      await redis.setex(cacheKey, this.defaultTTL, JSON.stringify(plan));
     } catch (error) {
       console.error('Query optimizer cache write error:', error);
     }
@@ -736,37 +754,6 @@ export class QueryOptimizer {
   private loadOptimizationPatterns(): void {
     // Load common query optimization patterns
     // This could be loaded from a configuration file or database
-  }
-
-  async getOptimizationStats(tenantId: string): Promise<{
-    totalOptimizations: number;
-    cacheHitRate: number;
-    averageOptimizationTime: number;
-    topOptimizations: Array<{
-      name: string;
-      count: number;
-      avgImprovement: number;
-    }>;
-  }> {
-    // Return optimization statistics
-    return {
-      totalOptimizations: 0,
-      cacheHitRate: 0,
-      averageOptimizationTime: 0,
-      topOptimizations: [],
-    };
-  }
-
-  async clearOptimizationCache(
-    tenantId?: string,
-    pattern?: string,
-  ): Promise<void> {
-    const clearPattern =
-      pattern ||
-      (tenantId
-        ? `${this.cachePrefix}:${tenantId}:*`
-        : `${this.cachePrefix}:*`);
-    console.log('Clearing query optimization cache:', clearPattern);
   }
 }
 

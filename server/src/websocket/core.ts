@@ -20,7 +20,8 @@ interface WebSocketClaims {
 
 interface WebSocketConnection extends WebSocketClaims {
   ws: uWS.WebSocket;
-  subscriptions: Set<string>;
+  // Subscriptions are now managed in ManagedConnection for persistence
+  // subscriptions: Set<string>;
   lastHeartbeat: number;
   backpressure: number;
   meshRoute?: string;
@@ -228,7 +229,6 @@ export class WebSocketCore {
           res.upgrade(
             {
               ...claims,
-              subscriptions: new Set<string>(),
               lastHeartbeat: Date.now(),
               backpressure: 0,
               meshRoute,
@@ -323,6 +323,18 @@ export class WebSocketCore {
         this.connections.set(connectionId, connection);
         activeConnections.inc({ tenant: connection.tenantId });
 
+        // Restore subscriptions to Redis if reconnecting
+        if (manager.subscriptions.size > 0) {
+           for (const tenantTopic of manager.subscriptions) {
+               // manager.subscriptions already stores fully qualified "tenant.topic"
+               // We need to use connectionId to match pmessage logic
+               this.redis.sadd(
+                 `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
+                 connectionId,
+               ).catch(err => console.error('Error restoring subscription', err));
+           }
+        }
+
         console.log(
           `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
             (connection.meshRoute ? ` via ${connection.meshRoute}` : ''),
@@ -347,21 +359,62 @@ export class WebSocketCore {
         const connection = ws as WebSocketConnection;
         const connectionId = connection.userId + '@' + connection.tenantId;
 
-        // Clean up subscriptions
-        for (const topic of connection.subscriptions) {
-          this.redis.srem(
-            `${this.TOPIC_PREFIX}${topic}:subscribers`,
-            connectionId,
-          );
-        }
-
         this.connections.delete(connectionId);
         activeConnections.dec({ tenant: connection.tenantId });
 
         if (code === 1000) {
+           // Graceful close: cleanup subscriptions
+           if (connection.manager) {
+             for (const topic of connection.manager.subscriptions) {
+                // connection.manager.subscriptions stores simple topic names,
+                // but Redis needs the full key. However, we reconstruct it in 'subscribe'
+                // Wait, connection.subscriptions previously stored "tenant.topic".
+                // We should be consistent.
+                // Let's assume manager.subscriptions stores the "tenant.topic" (fully qualified in context of Redis prefix)
+                // actually the subscribe logic below adds tenantId.
+                // Re-reading 'subscribe' block below:
+                // const tenantTopic = `${connection.tenantId}.${topic}`;
+                // connection.subscriptions.add(tenantTopic);
+                // So yes, it stores tenantTopic.
+
+                this.redis.srem(
+                  `${this.TOPIC_PREFIX}${topic}:subscribers`,
+                  connectionId,
+                ).catch(err => console.error('Error removing subscription', err));
+             }
+             connection.manager.subscriptions.clear();
+           }
           this.connectionPool.removeConnection(connectionId, 'graceful_close');
         } else {
-          connection.manager?.markReconnecting(`close_${code}`);
+          // Abnormal close: keep subscriptions for potential reconnect
+          // Do NOT remove from Redis yet. If they don't reconnect, they will eventually expire from Redis?
+          // No, Redis sets don't expire members individually.
+          // We rely on 'startHeartbeatCheck' to clean up stale connections.
+          // The heartbeat check calls pool.closeIdleConnections which calls removeConnection.
+
+          // But wait, removeConnection logic needs to clean up Redis too if called by heartbeat.
+          // The heartbeat cleaner calls connection.close() then pool.removeConnection.
+          // It doesn't call this 'close' handler of the websocket because the WS is already likely dead or this IS the close handler.
+
+          // Actually, if heartbeat times out, `pool.closeIdleConnections` is called.
+          // That calls `connection.close()`.
+          // `connection.close()` calls `ws.close()`.
+          // `ws.close()` triggers this handler.
+          // So if heartbeat kills it, code might be 4000 (from closeIdleConnections).
+          // We should handle that cleanup.
+
+          if (code === 4000) { // Heartbeat timeout
+             if (connection.manager) {
+                 for (const topic of connection.manager.subscriptions) {
+                     this.redis.srem(`${this.TOPIC_PREFIX}${topic}:subscribers`, connectionId)
+                        .catch(e => console.error('Error cleaning up stale sub', e));
+                 }
+                 connection.manager.subscriptions.clear();
+             }
+             this.connectionPool.removeConnection(connectionId, 'heartbeat_timeout');
+          } else {
+             connection.manager?.markReconnecting(`close_${code}`);
+          }
         }
 
         console.log(
@@ -387,10 +440,10 @@ export class WebSocketCore {
 
     switch (msg.type) {
       case 'subscribe':
-        if (msg.topics) {
+        if (msg.topics && connection.manager) {
           for (const topic of msg.topics) {
             const tenantTopic = `${connection.tenantId}.${topic}`;
-            connection.subscriptions.add(tenantTopic);
+            connection.manager.subscriptions.add(tenantTopic);
             await this.redis.sadd(
               `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
               connectionId,
@@ -409,10 +462,10 @@ export class WebSocketCore {
         break;
 
       case 'unsubscribe':
-        if (msg.topics) {
+        if (msg.topics && connection.manager) {
           for (const topic of msg.topics) {
             const tenantTopic = `${connection.tenantId}.${topic}`;
-            connection.subscriptions.delete(tenantTopic);
+            connection.manager.subscriptions.delete(tenantTopic);
             await this.redis.srem(
               `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
               connectionId,
@@ -483,11 +536,16 @@ export class WebSocketCore {
       const subscribers = await this.redis.smembers(`${channel}:subscribers`);
 
       for (const connectionId of subscribers) {
+        // We need to find the manager, even if the specific connection object is transiently gone or replaced?
+        // this.connections holds the current active connection wrapper.
         const connection = this.connections.get(connectionId);
-        if (connection && connection.subscriptions.has(topic)) {
-          const sent = connection.manager?.sendRaw(message);
-          if (!sent && !connection.manager) {
-            connection.ws.send(message);
+
+        // If connection object exists, check manager subscriptions
+        if (connection && connection.manager && connection.manager.subscriptions.has(topic)) {
+          const sent = connection.manager.sendRaw(message);
+          if (!sent) {
+             // Fallback for direct WS if manager fails? (Unlikely if manager exists)
+             // connection.ws.send(message);
           }
         }
       }

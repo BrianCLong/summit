@@ -93,6 +93,16 @@ function createMockRedisClient() {
   };
 }
 
+export async function redisHealthCheck(): Promise<boolean> {
+  if (!redisClient) return false;
+  try {
+    await redisClient.ping();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function closeRedisClient(): Promise<void> {
   if (redisClient) {
     await redisClient.quit();
