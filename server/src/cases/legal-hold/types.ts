@@ -113,6 +113,15 @@ export interface ComplianceCheckpoint {
   timestamp: Date;
 }
 
+export interface TamperProofSeal {
+  algorithm: 'sha256';
+  hash: string;
+  signature?: string;
+  signedBy?: string;
+  publicKeyFingerprint?: string;
+  createdAt: Date;
+}
+
 export interface LegalHoldRecord {
   holdId: string;
   caseId: string;
@@ -128,6 +137,7 @@ export interface LegalHoldRecord {
   notifications: LegalHoldNotificationRecord[];
   createdAt: Date;
   updatedAt: Date;
+  tamperSeal?: TamperProofSeal;
   eDiscovery?: {
     enabled: boolean;
     latestCollections?: EDiscoveryCollectionResult[];
@@ -235,4 +245,16 @@ export interface LegalHoldOrchestratorOptions {
   chainOfCustody?: ChainOfCustodyAdapter;
   lifecyclePolicies?: LifecyclePolicyLink[];
   auditWriter?: (entry: AuditTrailEntry) => Promise<void>;
+}
+
+export interface AutomatedPreservationOptions {
+  skipExports?: boolean;
+  skipSeal?: boolean;
+}
+
+export interface AutomatedPreservationResult {
+  hold: LegalHoldRecord;
+  verifications: PreservationVerificationResult[];
+  tamperSeal?: TamperProofSeal;
+  exports?: EDiscoveryCollectionResult[];
 }

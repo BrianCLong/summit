@@ -1,9 +1,12 @@
+import { generateKeyPairSync } from 'crypto';
 import {
   LegalHoldOrchestrator,
   InMemoryLegalHoldRepository,
 } from '../src/cases/legal-hold/orchestrator';
 import {
   ChainOfCustodyAdapter,
+  EDiscoveryCollectionRequest,
+  EDiscoveryCollectionResult,
   LegalHoldInitiationInput,
   LegalHoldNotificationDispatcher,
   PreservationConnector,
@@ -12,10 +15,6 @@ import {
   PreservationHoldResult,
   PreservationVerificationResult,
 } from '../src/cases/legal-hold/types';
-
-// Type declarations for test-only types
-type EDiscoveryCollectionRequest = any;
-type EDiscoveryCollectionResult = any;
 
 describe('LegalHoldOrchestrator', () => {
   const baseScope: PreservationDataScope = {
@@ -157,6 +156,34 @@ describe('LegalHoldOrchestrator', () => {
       connectors.every((connector) => connector.releaseHoldCalls === 1),
     ).toBe(true);
   });
+
+  it('automates preservation with sealing and exports', async () => {
+    const result = await orchestrator.automatePreservation(baseInput);
+
+    expect(result.verifications.every((v) => v.verified)).toBe(true);
+    expect(result.exports?.length).toBe(2);
+    expect(result.tamperSeal?.hash).toBeDefined();
+    expect(result.tamperSeal?.signature).toBeDefined();
+    expect(chainOfCustody.appended).toBe(2);
+
+    const persisted = await repository.getById(result.hold.holdId);
+    expect(persisted?.tamperSeal?.hash).toBe(result.tamperSeal?.hash);
+    expect(persisted?.tamperSeal?.createdAt instanceof Date).toBe(true);
+    expect(persisted?.createdAt instanceof Date).toBe(true);
+  });
+
+  it('blocks e-discovery exports when the hold does not enable them', async () => {
+    const hold = await orchestrator.initiateHold({
+      ...baseInput,
+      eDiscovery: { enabled: false },
+    });
+
+    await expect(
+      orchestrator.prepareEDiscoveryExport(hold.holdId, {
+        exportFormat: 'pst',
+      }),
+    ).rejects.toThrow('eDiscovery exports are not enabled');
+  });
 });
 
 class FakeConnector implements PreservationConnector {
@@ -237,6 +264,7 @@ class MockNotificationDispatcher implements LegalHoldNotificationDispatcher {
 
 class MockChainOfCustody implements ChainOfCustodyAdapter {
   appended = 0;
+  private readonly keys = generateKeyPairSync('ed25519');
 
   async appendEvent(): Promise<string> {
     this.appended += 1;
@@ -245,5 +273,9 @@ class MockChainOfCustody implements ChainOfCustodyAdapter {
 
   async verify(): Promise<boolean> {
     return true;
+  }
+
+  getSigningKeys() {
+    return this.keys;
   }
 }
