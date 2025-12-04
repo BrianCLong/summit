@@ -1,6 +1,10 @@
 import Ajv, { ErrorObject } from 'ajv';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class SchemaValidator {
   private ajv: Ajv;
@@ -12,7 +16,7 @@ export class SchemaValidator {
   }
 
   private loadSchemas() {
-    const schemaDir = path.join(__dirname, '../../../config/schemas');
+    const schemaDir = path.join(__dirname, '../../config/schemas');
     const schemaFiles = fs.readdirSync(schemaDir).filter(file => file.endsWith('.schema.json'));
     for (const file of schemaFiles) {
       const schemaName = path.basename(file, '.schema.json');

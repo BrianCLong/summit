@@ -26,7 +26,7 @@ describe('mission tag and temporal ABAC', () => {
     const result = await resolver(
       {},
       {},
-      { user: baseUser },
+      { user: baseUser, req: {} as any },
       { fieldName: 'test', path: 'testPath' },
     );
     expect(result).toBe('ok');
@@ -45,7 +45,7 @@ describe('mission tag and temporal ABAC', () => {
       resolver(
         {},
         {},
-        { user: baseUser },
+        { user: baseUser, req: {} as any },
         { fieldName: 'test', path: 'testPath' },
       ),
     ).rejects.toThrow(ForbiddenError);
@@ -65,7 +65,7 @@ describe('mission tag and temporal ABAC', () => {
       resolver(
         {},
         {},
-        { user: baseUser },
+        { user: baseUser, req: {} as any },
         { fieldName: 'test', path: 'testPath' },
       ),
     ).rejects.toThrow(ForbiddenError);

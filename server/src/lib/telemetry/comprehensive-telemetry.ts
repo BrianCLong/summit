@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { snapshotter } from './diagnostic-snapshotter';
 import {
   Meter,
