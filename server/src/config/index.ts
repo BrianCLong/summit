@@ -86,7 +86,7 @@ const config: Config = {
 
   // Security
   bcrypt: {
-    rounds: parseInt(process.env.BCRYPT_ROUNDS || '12'),
+    rounds: parseInt(process.env.BCRYPT_ROUNDS || '14'),
   },
 
   // Rate limiting
