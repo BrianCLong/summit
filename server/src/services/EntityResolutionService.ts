@@ -1,5 +1,6 @@
 import { Session } from 'neo4j-driver';
 import pino from 'pino';
+import natural from 'natural';
 import { getPostgresPool } from '../config/database';
 import {
   BehavioralFingerprintService,
@@ -206,5 +207,72 @@ export class EntityResolutionService {
       fingerprint: this.behavioralService.computeFingerprint(i.telemetry),
     }));
     return this.behavioralService.clusterFingerprints(items);
+  }
+
+  /**
+   * Calculates similarity score between two entities.
+   * Uses Jaro-Winkler distance on normalized names.
+   */
+  public calculatePairSimilarity(entityA: any, entityB: any): number {
+    const normA = this.normalizeEntityProperties(entityA);
+    const normB = this.normalizeEntityProperties(entityB);
+
+    if (!normA.name || !normB.name) return 0;
+
+    return natural.JaroWinklerDistance(normA.name, normB.name, undefined);
+  }
+
+  /**
+   * Adds a pair of entities to the review queue if uncertainty is high.
+   */
+  public async queueForReview(
+    tenantId: string,
+    entityAId: string,
+    entityBId: string,
+    score: number,
+  ): Promise<void> {
+    const pool = getPostgresPool();
+    await pool.query(
+      `INSERT INTO er_review_queue (tenant_id, entity_a_id, entity_b_id, similarity_score)
+       VALUES ($1, $2, $3, $4)
+       ON CONFLICT DO NOTHING`, // Simplification: assume UUID is primary key and distinct pairs are unique enough or handled elsewhere
+      [tenantId, entityAId, entityBId, score],
+    );
+  }
+
+  /**
+   * Retrieves pending review items for a tenant.
+   */
+  public async getReviewQueue(tenantId: string, limit: number = 20): Promise<any[]> {
+    const pool = getPostgresPool();
+    const res = await pool.query(
+      `SELECT * FROM er_review_queue
+       WHERE tenant_id = $1 AND status = 'pending'
+       ORDER BY similarity_score DESC
+       LIMIT $2`,
+      [tenantId, limit],
+    );
+    return res.rows;
+  }
+
+  /**
+   * Submits a review decision.
+   */
+  public async submitReviewDecision(
+    reviewId: string,
+    decision: 'merge' | 'distinct' | 'skipped',
+    reviewerId: string,
+    notes?: string,
+  ): Promise<void> {
+    const pool = getPostgresPool();
+    await pool.query(
+      `UPDATE er_review_queue
+       SET status = $1, reviewer_id = $2, decision_notes = $3, updated_at = NOW()
+       WHERE id = $4`,
+      [decision === 'merge' ? 'resolved_merge' : decision === 'distinct' ? 'resolved_distinct' : 'skipped', reviewerId, notes, reviewId],
+    );
+
+    // Auto-tune hook: if we implemented auto-tuning, we would feed this result back into the model here.
+    // e.g., updateThresholds(decision, score);
   }
 }
