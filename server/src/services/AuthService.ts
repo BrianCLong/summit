@@ -445,7 +445,22 @@ export class AuthService {
     try {
       if (!token) return null;
 
-      const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
+      let decoded: TokenPayload;
+      try {
+        decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
+      } catch (err) {
+        // Token rotation support: Try the old secret if configured
+        if (config.jwt.secretOld) {
+          try {
+             decoded = jwt.verify(token, config.jwt.secretOld) as TokenPayload;
+             logger.info('Token verified using previous secret key (rotation in progress)');
+          } catch (oldErr) {
+             throw err; // Throw original error
+          }
+        } else {
+          throw err;
+        }
+      }
 
       // Check if token is blacklisted
       const blacklistCheck = await this.pool.query(
