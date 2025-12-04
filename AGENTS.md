@@ -92,3 +92,12 @@ done
 - Use `.env` (copy from `.env.example`); never commit secrets.
 - Helmet + CORS defaults are enabled; restrict `CORS_ORIGIN` in prod.
 - Run `scripts/bootstrap_github.sh` to set up labels/milestones and import issues.
+
+## Architectural North Star
+
+All agents should reference `docs/FIRST_PRINCIPLES_REDESIGN.md` when proposing major changes.
+The long-term goal is to migrate the monolithic architecture towards the "Cognitive Lattice" blueprint (Event Sourcing + Agentic Runtime).
+
+- **Strangler Pattern**: Prefer creating new logic in standalone `packages/` rather than adding to the existing `server/src/services/` monolith.
+- **Event-First**: Prioritize emitting immutable events (Provenance Ledger) over direct database mutations.
+- **Agent Independence**: Design agents as autonomous actors that react to the event stream, rather than synchronous HTTP services.
