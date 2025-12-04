@@ -30,6 +30,7 @@ interface PoolHealthSnapshot {
   activeConnections: number;
   idleConnections: number;
   queuedRequests: number;
+  totalConnections: number;
 }
 
 export interface ManagedPostgresPool {
@@ -102,6 +103,24 @@ const CIRCUIT_BREAKER_COOLDOWN_MS = parseInt(
   10,
 );
 
+// New configurations for optimized pooling
+const IDLE_TIMEOUT_MS = parseInt(
+  process.env.PG_IDLE_TIMEOUT_MS ?? '30000',
+  10,
+);
+const MAX_LIFETIME_MS = parseInt(
+  process.env.PG_MAX_LIFETIME_MS ?? '3600000', // 1 hour default
+  10,
+);
+const POOL_MONITOR_INTERVAL_MS = parseInt(
+  process.env.PG_POOL_MONITOR_INTERVAL_MS ?? '15000',
+  10,
+);
+const WAIT_QUEUE_THRESHOLD = parseInt(
+  process.env.PG_WAIT_QUEUE_THRESHOLD ?? '20',
+  10,
+);
+
 interface PoolWrapper {
   name: string;
   type: 'write' | 'read';
@@ -116,6 +135,11 @@ interface PoolConfig {
   password?: string;
   database?: string;
   port?: number;
+}
+
+// Extend PoolClient to include connectedAt
+interface ExtendedPoolClient extends PoolClient {
+  connectedAt?: number;
 }
 
 class CircuitBreaker {
@@ -193,6 +217,71 @@ class CircuitBreaker {
   }
 }
 
+class PoolMonitor {
+  private intervalId?: NodeJS.Timeout;
+  private pools: PoolWrapper[] = [];
+
+  constructor() {}
+
+  register(pool: PoolWrapper) {
+    this.pools.push(pool);
+  }
+
+  start() {
+    if (this.intervalId) return;
+    this.intervalId = setInterval(
+      () => this.check(),
+      POOL_MONITOR_INTERVAL_MS,
+    );
+    // Unref so it doesn't prevent shutdown if only monitor is running
+    this.intervalId.unref();
+  }
+
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = undefined;
+    }
+    this.pools = [];
+  }
+
+  private check() {
+    for (const wrapper of this.pools) {
+      const total = wrapper.pool.totalCount ?? 0;
+      const idle = wrapper.pool.idleCount ?? 0;
+      const waiting = wrapper.pool.waitingCount ?? 0;
+      const active = total - idle;
+
+      // Log pool stats
+      logger.debug(
+        {
+          pool: wrapper.name,
+          total,
+          idle,
+          active,
+          waiting,
+        },
+        'Pool Monitor Stats',
+      );
+
+      // Alert on exhaustion
+      if (waiting > WAIT_QUEUE_THRESHOLD) {
+        logger.warn(
+          {
+            pool: wrapper.name,
+            waiting,
+            threshold: WAIT_QUEUE_THRESHOLD,
+          },
+          'PostgreSQL Pool Exhaustion Risk',
+        );
+      }
+
+      // Proactive health check on idle connections could be implemented here
+      // But we rely on validateConnection on borrow for now to avoid storming
+    }
+  }
+}
+
 const preparedStatementCache = new Map<string, string>();
 const slowQueryStats = new Map<
   string,
@@ -203,6 +292,7 @@ let writePoolWrapper: PoolWrapper | null = null;
 let readPoolWrappers: PoolWrapper[] = [];
 let managedPool: ManagedPostgresPool | null = null;
 let readReplicaCursor = 0;
+const poolMonitor = new PoolMonitor();
 
 const transientErrorCodes = new Set([
   '57P01', // admin_shutdown
@@ -263,7 +353,7 @@ function createPool(
   const pool = new Pool({
     ...config,
     max,
-    idleTimeoutMillis: 30000,
+    idleTimeoutMillis: IDLE_TIMEOUT_MS,
     connectionTimeoutMillis: 5000,
     application_name: `summit-${type}-${process.env.CURRENT_REGION || 'global'}`,
     ssl:
@@ -274,6 +364,12 @@ function createPool(
 
   pool.on('error', (err) => {
     logger.error({ pool: name, err }, 'Unexpected PostgreSQL client error');
+  });
+
+  // Track connection lifetime
+  pool.on('connect', (client: ExtendedPoolClient) => {
+    client.connectedAt = Date.now();
+    logger.debug({ pool: name }, 'New PostgreSQL connection established');
   });
 
   return {
@@ -300,23 +396,27 @@ function initializePools(): void {
     'write',
     DEFAULT_WRITE_POOL_SIZE,
   );
+  poolMonitor.register(writePoolWrapper);
 
   const replicaUrls = parseReadReplicaUrls();
   if (replicaUrls.length === 0) {
-    readPoolWrappers = [
-      createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE),
-    ];
+    const pool = createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE);
+    readPoolWrappers = [pool];
+    poolMonitor.register(pool);
   } else {
-    readPoolWrappers = replicaUrls.map((url, idx) =>
-      createPool(
+    readPoolWrappers = replicaUrls.map((url, idx) => {
+      const pool = createPool(
         { connectionString: url },
         `read-replica-${idx + 1}`,
         'read',
         DEFAULT_READ_POOL_SIZE,
-      ),
-    );
+      );
+      poolMonitor.register(pool);
+      return pool;
+    });
   }
 
+  poolMonitor.start();
   managedPool = createManagedPool(writePoolWrapper, readPoolWrappers);
 }
 
@@ -355,10 +455,11 @@ function createManagedPool(
     });
 
   const connect = async (): Promise<PoolClient> => {
-    return writePool.pool.connect();
+    return withManagedClient(writePool, WRITE_TIMEOUT_MS, async (c) => c, { skipRelease: true });
   };
 
   const end = async (): Promise<void> => {
+    poolMonitor.stop();
     await Promise.all([
       writePool.pool.end(),
       ...readPools.map((wrapper) => wrapper.pool.end()),
@@ -388,15 +489,14 @@ function createManagedPool(
             (wrapper.pool.totalCount ?? 0) - (wrapper.pool.idleCount ?? 0),
           idleConnections: wrapper.pool.idleCount ?? 0,
           queuedRequests: wrapper.pool.waitingCount ?? 0,
+          totalConnections: wrapper.pool.totalCount ?? 0,
         };
 
         try {
-          const client = await wrapper.pool.connect();
-          try {
-            await client.query('SELECT 1');
-          } finally {
-            client.release();
-          }
+          // Use withManagedClient to leverage validation logic
+          await withManagedClient(wrapper, 1000, async (client) => {
+             await client.query('SELECT 1');
+          });
         } catch (error) {
           snapshot.healthy = false;
           snapshot.lastError = (error as Error).message;
@@ -560,12 +660,33 @@ async function executeQueryOnClient(
   return result;
 }
 
+// Validation and Lifetime check
 async function withManagedClient<T>(
   poolWrapper: PoolWrapper,
   timeoutMs: number,
   fn: (client: PoolClient) => Promise<T>,
+  options: { skipRelease?: boolean } = {}
 ): Promise<T> {
-  const client = await poolWrapper.pool.connect();
+  const startWait = performance.now();
+  let client = (await poolWrapper.pool.connect()) as ExtendedPoolClient;
+  const waitTime = performance.now() - startWait;
+
+  // Track wait times? (Could add to metrics if needed)
+
+  // Max Lifetime Check
+  if (client.connectedAt && (Date.now() - client.connectedAt > MAX_LIFETIME_MS)) {
+    logger.debug({ pool: poolWrapper.name }, 'Closing expired PostgreSQL connection');
+    client.release(true); // Destroy
+    // Retry get new connection
+    return withManagedClient(poolWrapper, timeoutMs, fn, options);
+  }
+
+  // Connection Validation (Health Check)
+  // We can do a quick check if it's been idle for a while?
+  // For now, rely on standard pg behavior + max lifetime + circuit breaker.
+  // Explicit "validate before use" would be:
+  // await client.query('SELECT 1'); // But this adds overhead.
+
   const leakTimer = setTimeout(() => {
     logger.error(
       { pool: poolWrapper.name },
@@ -577,24 +698,31 @@ async function withManagedClient<T>(
     await client.query('SET statement_timeout = $1', [timeoutMs]);
   } catch (error) {
     clearTimeout(leakTimer);
-    client.release();
+    client.release(true); // Force release on setup error
     throw error;
   }
 
   try {
-    return await fn(client);
+    const result = await fn(client);
+    if (!options.skipRelease) {
+      // release logic is handled in finally
+    }
+    return result;
   } finally {
-    try {
-      await client.query('RESET statement_timeout');
-    } catch (error) {
-      logger.warn(
-        { pool: poolWrapper.name, err: error },
-        'Failed to reset statement timeout',
-      );
+    if (!options.skipRelease) {
+       try {
+        await client.query('RESET statement_timeout');
+        client.release();
+      } catch (error) {
+        logger.warn(
+          { pool: poolWrapper.name, err: error },
+          'Failed to reset statement timeout or release',
+        );
+        client.release(true);
+      }
     }
 
     clearTimeout(leakTimer);
-    client.release();
   }
 }
 
