@@ -1,0 +1,655 @@
+# =============================================================================
+# Zero-Trust Network Guards for IntelGraph
+# Comprehensive network security policies for air-gapped deployments
+# =============================================================================
+
+# =============================================================================
+# DEFAULT DENY ALL - FOUNDATION OF ZERO TRUST
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: intelgraph-production
+  labels:
+    security.intelgraph.ai/policy-type: foundation
+    security.intelgraph.ai/zero-trust: enabled
+  annotations:
+    description: "Zero-trust foundation - deny all traffic by default"
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+---
+# =============================================================================
+# OPA POLICY DECISION POINT ACCESS
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-opa-pdp
+  namespace: intelgraph-production
+  labels:
+    security.intelgraph.ai/policy-type: zero-trust
+spec:
+  podSelector:
+    matchLabels:
+      security.intelgraph.ai/opa-client: "true"
+  policyTypes:
+    - Egress
+  egress:
+    # Allow egress to OPA Policy Decision Point
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: security
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: opa
+      ports:
+        - protocol: TCP
+          port: 8181
+        - protocol: TCP
+          port: 9443  # mTLS port
+
+---
+# =============================================================================
+# SPIRE AGENT ACCESS FOR WORKLOAD IDENTITY
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-spire-agent
+  namespace: intelgraph-production
+  labels:
+    security.intelgraph.ai/policy-type: zero-trust
+spec:
+  podSelector:
+    matchLabels:
+      security.intelgraph.ai/spiffe-enabled: "true"
+  policyTypes:
+    - Egress
+  egress:
+    # Allow egress to SPIRE agent socket (via hostPath)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: spire
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: spire-agent
+      ports:
+        - protocol: TCP
+          port: 8081  # Workload API
+
+---
+# =============================================================================
+# INTELGRAPH API SERVICE NETWORK POLICY
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: intelgraph-api-netpol
+  namespace: intelgraph-production
+  labels:
+    security.intelgraph.ai/policy-type: service
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: intelgraph-api
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # From ingress controller only
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # From internal services with mTLS
+    - from:
+        - podSelector:
+            matchLabels:
+              networking.intelgraph.ai/api-client: "true"
+      ports:
+        - protocol: TCP
+          port: 8443  # mTLS port
+
+    # Health checks from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+
+  egress:
+    # DNS resolution (internal only for air-gapped)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+    # PostgreSQL database
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Neo4j graph database
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687  # Bolt protocol
+        - protocol: TCP
+          port: 7474  # HTTP
+
+    # Redis cache
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cache
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # OPA for policy decisions
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: security
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: opa
+      ports:
+        - protocol: TCP
+          port: 8181
+
+    # OpenTelemetry collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: opentelemetry-collector
+      ports:
+        - protocol: TCP
+          port: 4317  # gRPC
+        - protocol: TCP
+          port: 4318  # HTTP
+
+---
+# =============================================================================
+# CONDUCTOR/MAESTRO ORCHESTRATOR NETWORK POLICY
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: conductor-orchestrator-netpol
+  namespace: intelgraph-production
+  labels:
+    security.intelgraph.ai/policy-type: service
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: conductor
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # From API service
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: intelgraph-api
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # From other conductor instances (HA)
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: conductor
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 5701  # Hazelcast clustering
+
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+
+    # Worker pods
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: intelgraph-worker
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # Database access
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # Kafka for event streaming
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: messaging
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: kafka
+      ports:
+        - protocol: TCP
+          port: 9092
+        - protocol: TCP
+          port: 9093  # mTLS
+
+    # OPA
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: security
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: opa
+      ports:
+        - protocol: TCP
+          port: 8181
+
+---
+# =============================================================================
+# COPILOT SERVICE NETWORK POLICY (AI WORKLOADS)
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: copilot-netpol
+  namespace: intelgraph-production
+  labels:
+    security.intelgraph.ai/policy-type: ai-workload
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: intelgraph-copilot
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # From API only
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: intelgraph-api
+      ports:
+        - protocol: TCP
+          port: 8080
+
+  egress:
+    # DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+
+    # RAG/Vector database
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: database
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: qdrant
+      ports:
+        - protocol: TCP
+          port: 6333
+        - protocol: TCP
+          port: 6334
+
+    # Local LLM inference service (air-gapped)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ai-services
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: llm-inference
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 8081
+
+    # OPA for content policy
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: security
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: opa
+      ports:
+        - protocol: TCP
+          port: 8181
+
+---
+# =============================================================================
+# SECURITY NAMESPACE - OPA & FALCO ACCESS
+# =============================================================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: security-services-netpol
+  namespace: security
+  labels:
+    security.intelgraph.ai/policy-type: infrastructure
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+  ingress:
+    # OPA policy queries from any namespace with label
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.ai/opa-enabled: "true"
+      ports:
+        - protocol: TCP
+          port: 8181
+        - protocol: TCP
+          port: 9443
+
+    # Metrics collection
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+
+  egress:
+    # DNS only
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+
+    # SIEM forwarding (internal)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: logging
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: fluentd
+      ports:
+        - protocol: TCP
+          port: 24224
+
+---
+# =============================================================================
+# CILIUM NETWORK POLICY - LAYER 7 ENFORCEMENT
+# =============================================================================
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: intelgraph-api-l7-policy
+  namespace: intelgraph-production
+spec:
+  endpointSelector:
+    matchLabels:
+      app.kubernetes.io/name: intelgraph-api
+  ingress:
+    - fromEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": ingress-nginx
+      toPorts:
+        - ports:
+            - port: "8080"
+              protocol: TCP
+          rules:
+            http:
+              # Health endpoints
+              - method: GET
+                path: "/health"
+              - method: GET
+                path: "/healthz"
+              - method: GET
+                path: "/readyz"
+              - method: GET
+                path: "/metrics"
+              # GraphQL endpoint
+              - method: POST
+                path: "/graphql"
+                headers:
+                  - "Content-Type: application/json"
+              # REST API
+              - method: GET
+                path: "/api/v1/.*"
+              - method: POST
+                path: "/api/v1/.*"
+                headers:
+                  - "Content-Type: application/json"
+              - method: PUT
+                path: "/api/v1/.*"
+                headers:
+                  - "Content-Type: application/json"
+              - method: DELETE
+                path: "/api/v1/.*"
+
+---
+# =============================================================================
+# CILIUM NETWORK POLICY - DNS RESTRICTIONS (AIR-GAPPED)
+# =============================================================================
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: airgap-dns-restriction
+  namespace: intelgraph-production
+spec:
+  endpointSelector: {}
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            "k8s:io.kubernetes.pod.namespace": kube-system
+            k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+          rules:
+            dns:
+              # Only allow internal domain resolution
+              - matchPattern: "*.intelgraph.local"
+              - matchPattern: "*.intelgraph.airgap"
+              - matchPattern: "*.svc.cluster.local"
+              - matchPattern: "*.cluster.local"
+              # Deny all external domains implicitly
+
+---
+# =============================================================================
+# CILIUM CLUSTER-WIDE NETWORK POLICY - EXTERNAL BLOCKING
+# =============================================================================
+apiVersion: cilium.io/v2
+kind: CiliumClusterwideNetworkPolicy
+metadata:
+  name: airgap-block-external
+spec:
+  description: "Block all external network access for air-gapped deployment"
+  endpointSelector:
+    matchLabels:
+      security.intelgraph.ai/airgap: "true"
+  egressDeny:
+    - toEntities:
+        - world
+    - toCIDRSet:
+        # Block all non-RFC1918 addresses
+        - cidr: "0.0.0.0/0"
+          except:
+            - "10.0.0.0/8"
+            - "172.16.0.0/12"
+            - "192.168.0.0/16"
+            - "127.0.0.0/8"
+
+---
+# =============================================================================
+# ISTIO AUTHORIZATION POLICY - SERVICE MESH
+# =============================================================================
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: intelgraph-zero-trust-authz
+  namespace: intelgraph-production
+spec:
+  # Apply to all workloads in namespace
+  selector: {}
+  action: ALLOW
+  rules:
+    # Rule 1: Allow health checks
+    - to:
+        - operation:
+            methods: ["GET"]
+            paths: ["/health", "/healthz", "/readyz", "/metrics"]
+
+    # Rule 2: Allow authenticated API requests
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/ingress-nginx/sa/ingress-nginx"
+              - "spiffe://intelgraph.airgap/ns/intelgraph-production/*"
+      to:
+        - operation:
+            methods: ["GET", "POST", "PUT", "DELETE"]
+            paths: ["/api/*", "/graphql"]
+      when:
+        - key: request.auth.claims[iss]
+          values: ["https://auth.intelgraph.local"]
+
+    # Rule 3: Allow internal service-to-service with mTLS
+    - from:
+        - source:
+            namespaces: ["intelgraph-production"]
+            principals:
+              - "spiffe://intelgraph.airgap/ns/intelgraph-production/*"
+      to:
+        - operation:
+            ports: ["8080", "8443"]
+
+---
+# =============================================================================
+# ISTIO PEER AUTHENTICATION - STRICT MTLS
+# =============================================================================
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: intelgraph-strict-mtls
+  namespace: intelgraph-production
+spec:
+  mtls:
+    mode: STRICT
+
+---
+# =============================================================================
+# ISTIO DESTINATION RULE - MTLS CONFIGURATION
+# =============================================================================
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: intelgraph-mtls-config
+  namespace: intelgraph-production
+spec:
+  host: "*.intelgraph-production.svc.cluster.local"
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 10s
+      http:
+        h2UpgradePolicy: UPGRADE
+        http1MaxPendingRequests: 100
+        http2MaxRequests: 1000
+    outlierDetection:
+      consecutive5xxErrors: 5
+      interval: 30s
+      baseEjectionTime: 30s
+      maxEjectionPercent: 50

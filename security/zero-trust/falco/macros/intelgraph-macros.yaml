@@ -1,0 +1,268 @@
+# =============================================================================
+# IntelGraph Falco Macros
+# Reusable conditions for zero-trust runtime security
+# =============================================================================
+
+# =============================================================================
+# CONTAINER IDENTIFICATION MACROS
+# =============================================================================
+
+- macro: intelgraph_api_container
+  condition: >
+    container.name startswith "intelgraph-api" or
+    container.image.repository contains "intelgraph-api"
+
+- macro: intelgraph_web_container
+  condition: >
+    container.name startswith "intelgraph-web" or
+    container.image.repository contains "intelgraph-web"
+
+- macro: intelgraph_worker_container
+  condition: >
+    container.name startswith "intelgraph-worker" or
+    container.image.repository contains "intelgraph-worker"
+
+- macro: intelgraph_conductor_container
+  condition: >
+    container.name startswith "intelgraph-conductor" or
+    container.name startswith "conductor" or
+    container.image.repository contains "conductor"
+
+- macro: intelgraph_copilot_container
+  condition: >
+    container.name startswith "intelgraph-copilot" or
+    container.name startswith "copilot" or
+    container.image.repository contains "copilot"
+
+- macro: maestro_container
+  condition: >
+    container.name startswith "maestro" or
+    container.image.repository contains "maestro"
+
+- macro: security_container
+  condition: >
+    container.name in (falco, opa, spire-agent, vault-agent, cert-manager)
+
+# =============================================================================
+# NAMESPACE MACROS
+# =============================================================================
+
+- macro: production_namespace
+  condition: k8s.ns.name = "intelgraph-production"
+
+- macro: staging_namespace
+  condition: k8s.ns.name = "intelgraph-staging"
+
+- macro: security_namespace
+  condition: k8s.ns.name in (security, kube-system, monitoring)
+
+- macro: sensitive_namespace
+  condition: >
+    k8s.ns.name in (intelgraph-production, security, kube-system, vault)
+
+# =============================================================================
+# PROCESS MACROS
+# =============================================================================
+
+- macro: nodejs_process
+  condition: proc.name in (node, npm, npx, yarn, pnpm)
+
+- macro: python_process
+  condition: proc.name in (python, python3, python3.11, pip, pip3)
+
+- macro: java_process
+  condition: proc.name in (java, javac, jar)
+
+- macro: database_process
+  condition: proc.name in (postgres, psql, neo4j, redis-server, redis-cli)
+
+- macro: monitoring_process
+  condition: proc.name in (prometheus, grafana, alertmanager, node_exporter)
+
+- macro: security_process
+  condition: proc.name in (opa, spire-agent, vault, falco)
+
+- macro: allowed_shell_parent
+  condition: >
+    proc.pname in (node, npm, yarn, pnpm, start.sh, entrypoint.sh,
+                   docker-entrypoint.sh, init.sh, healthcheck.sh)
+
+# =============================================================================
+# FILE ACCESS MACROS
+# =============================================================================
+
+- macro: kubernetes_secret_path
+  condition: fd.name startswith /var/run/secrets/kubernetes.io
+
+- macro: spiffe_socket_path
+  condition: fd.name startswith /run/spire/sockets
+
+- macro: app_config_path
+  condition: >
+    fd.name startswith /app/config or
+    fd.name startswith /etc/intelgraph
+
+- macro: app_data_path
+  condition: >
+    fd.name startswith /app/data or
+    fd.name startswith /var/lib/intelgraph
+
+- macro: temp_file_path
+  condition: >
+    fd.name startswith /tmp or
+    fd.name startswith /var/tmp
+
+- macro: log_file_path
+  condition: >
+    fd.name startswith /var/log or
+    fd.name startswith /app/logs
+
+- macro: sensitive_system_path
+  condition: >
+    fd.name startswith /etc/passwd or
+    fd.name startswith /etc/shadow or
+    fd.name startswith /etc/sudoers or
+    fd.name startswith /root
+
+# =============================================================================
+# NETWORK MACROS
+# =============================================================================
+
+- macro: internal_network
+  condition: >
+    fd.sip.name startswith "10." or
+    fd.sip.name startswith "172.16." or
+    fd.sip.name startswith "172.17." or
+    fd.sip.name startswith "172.18." or
+    fd.sip.name startswith "172.19." or
+    fd.sip.name startswith "172.20." or
+    fd.sip.name startswith "172.21." or
+    fd.sip.name startswith "172.22." or
+    fd.sip.name startswith "172.23." or
+    fd.sip.name startswith "172.24." or
+    fd.sip.name startswith "172.25." or
+    fd.sip.name startswith "172.26." or
+    fd.sip.name startswith "172.27." or
+    fd.sip.name startswith "172.28." or
+    fd.sip.name startswith "172.29." or
+    fd.sip.name startswith "172.30." or
+    fd.sip.name startswith "172.31." or
+    fd.sip.name startswith "192.168."
+
+- macro: localhost_network
+  condition: >
+    fd.sip.name = "127.0.0.1" or
+    fd.sip.name = "::1" or
+    fd.sip.name = "localhost"
+
+- macro: kubernetes_service_network
+  condition: fd.sip.name endswith ".svc.cluster.local"
+
+- macro: database_port
+  condition: fd.dport in (5432, 6379, 7474, 7687, 27017, 3306, 9042)
+
+- macro: web_port
+  condition: fd.dport in (80, 443, 8080, 8443, 3000, 4000)
+
+- macro: messaging_port
+  condition: fd.dport in (9092, 5672, 6650, 4222)
+
+# =============================================================================
+# EVENT TYPE MACROS
+# =============================================================================
+
+- macro: file_open_read
+  condition: evt.type in (open, openat, openat2) and evt.is_open_read = true
+
+- macro: file_open_write
+  condition: evt.type in (open, openat, openat2) and evt.is_open_write = true
+
+- macro: process_spawn
+  condition: evt.type in (execve, execveat) and evt.dir = <
+
+- macro: network_outbound
+  condition: >
+    (evt.type in (connect, sendto, sendmsg) and
+     evt.dir = < and
+     fd.type in (ipv4, ipv6))
+
+- macro: network_inbound
+  condition: >
+    (evt.type in (accept, accept4, recvfrom, recvmsg) and
+     fd.type in (ipv4, ipv6))
+
+# =============================================================================
+# SECURITY EVENT MACROS
+# =============================================================================
+
+- macro: privilege_change
+  condition: >
+    evt.type in (setuid, setgid, setresuid, setresgid, setfsuid, setfsgid)
+
+- macro: capability_change
+  condition: evt.type in (capset)
+
+- macro: namespace_change
+  condition: evt.type in (setns, unshare)
+
+- macro: module_load
+  condition: evt.type in (init_module, finit_module)
+
+- macro: ptrace_attach
+  condition: evt.type = ptrace and evt.arg.request in (PTRACE_ATTACH, PTRACE_SEIZE)
+
+# =============================================================================
+# COMPLIANCE MACROS
+# =============================================================================
+
+- macro: pci_dss_sensitive_access
+  condition: >
+    fd.name contains "/cardholder" or
+    fd.name contains "/payment" or
+    fd.name contains "/pan/"
+
+- macro: hipaa_phi_access
+  condition: >
+    fd.name contains "/phi/" or
+    fd.name contains "/health_records/" or
+    fd.name contains "/patient/"
+
+- macro: gdpr_pii_access
+  condition: >
+    fd.name contains "/pii/" or
+    fd.name contains "/personal_data/" or
+    fd.name contains "/gdpr/"
+
+- macro: classified_data_access
+  condition: >
+    fd.name contains "/classified/" or
+    fd.name contains "/secret/" or
+    fd.name contains "/top_secret/" or
+    fd.name contains "/fouo/"
+
+# =============================================================================
+# AIRGAP-SPECIFIC MACROS
+# =============================================================================
+
+- macro: airgap_registry
+  condition: >
+    container.image.repository startswith "registry.intelgraph.local" or
+    container.image.repository startswith "registry.intelgraph.airgap"
+
+- macro: airgap_network_violation
+  condition: >
+    not internal_network and
+    not localhost_network
+
+- macro: airgap_dns_allowed
+  condition: >
+    fd.sip.name in (coredns.kube-system.svc.cluster.local,
+                    dns.intelgraph.local,
+                    10.96.0.10)
+
+- macro: airgap_approved_destination
+  condition: >
+    fd.sip.name endswith ".intelgraph.local" or
+    fd.sip.name endswith ".intelgraph.airgap" or
+    fd.sip.name endswith ".svc.cluster.local" or
+    internal_network
