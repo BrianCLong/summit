@@ -1,0 +1,49 @@
+id: code-explanation-001
+name: Explain Recursion Algorithm
+description: Explain how a recursive fibonacci function works
+category: code_explanation
+difficulty: easy
+tags:
+  - recursion
+  - algorithms
+  - explanation
+
+tools:
+  - name: code_interpreter
+    description: Execute and analyze code
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - execute_code
+      - analyze_code
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Explain how this recursive function works step by step:
+
+      def fibonacci(n):
+          if n <= 1:
+              return n
+          return fibonacci(n - 1) + fibonacci(n - 2)
+    timeout: 8000
+    allowedTools:
+      - code_interpreter
+    constraints:
+      maxTokens: 1000
+
+successCriteria:
+  - type: contains
+    value: "base case"
+  - type: contains
+    value: "recursive"
+
+constraints:
+  maxTotalTokens: 1500
+  maxTotalCostUsd: 0.015
+  maxToolCalls: 3
+
+metadata:
+  author: eval-platform
+  version: "1.0"

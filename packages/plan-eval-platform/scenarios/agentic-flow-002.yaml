@@ -1,0 +1,70 @@
+id: agentic-flow-002
+name: Database Schema Migration
+description: Plan and execute a database schema migration autonomously
+category: agentic_flow
+difficulty: expert
+tags:
+  - agentic
+  - database
+  - migration
+
+tools:
+  - name: database_query
+    description: Execute SQL queries
+    costPerCall: 0.0008
+    avgLatencyMs: 100
+    capabilities:
+      - sql
+      - query
+  - name: file_edit
+    description: Edit migration files
+    costPerCall: 0.0008
+    avgLatencyMs: 100
+    capabilities:
+      - write
+      - edit
+  - name: code_interpreter
+    description: Generate and validate SQL
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - execute_code
+      - validate
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Migrate the users table to add:
+      1. An 'email_verified' boolean column (default false)
+      2. A 'last_login' timestamp column
+      3. An index on last_login
+
+      Generate the migration SQL and rollback script.
+    timeout: 25000
+    allowedTools:
+      - database_query
+      - file_edit
+      - code_interpreter
+    constraints:
+      maxTokens: 2500
+      maxLatencyMs: 20000
+
+successCriteria:
+  - type: contains
+    value: "ALTER TABLE"
+  - type: contains
+    value: "email_verified"
+  - type: contains
+    value: "last_login"
+  - type: regex
+    value: "CREATE INDEX|ADD INDEX"
+
+constraints:
+  maxTotalTokens: 6000
+  maxTotalCostUsd: 0.1
+  maxToolCalls: 10
+
+metadata:
+  author: eval-platform
+  version: "1.0"

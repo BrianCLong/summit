@@ -1,0 +1,68 @@
+id: multi-tool-002
+name: API Integration Pipeline
+description: Build an API integration that fetches, transforms, and stores data
+category: multi_tool_pipeline
+difficulty: hard
+tags:
+  - api
+  - integration
+  - pipeline
+
+tools:
+  - name: api_call
+    description: Call external APIs
+    costPerCall: 0.0003
+    avgLatencyMs: 200
+    capabilities:
+      - http
+      - rest
+  - name: code_interpreter
+    description: Transform data
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - execute_code
+      - transform
+  - name: database_query
+    description: Store results
+    costPerCall: 0.0008
+    avgLatencyMs: 100
+    capabilities:
+      - sql
+      - insert
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Create a pipeline that:
+      1. Fetches user data from an API endpoint
+      2. Transforms the response to extract name, email, and created_at
+      3. Generates SQL to insert the transformed data
+
+      Provide the code for each step.
+    timeout: 20000
+    allowedTools:
+      - api_call
+      - code_interpreter
+      - database_query
+    constraints:
+      maxTokens: 2000
+      maxLatencyMs: 15000
+
+successCriteria:
+  - type: contains
+    value: "fetch"
+  - type: contains
+    value: "INSERT INTO"
+  - type: regex
+    value: "name|email"
+
+constraints:
+  maxTotalTokens: 5000
+  maxTotalCostUsd: 0.08
+  maxToolCalls: 8
+
+metadata:
+  author: eval-platform
+  version: "1.0"
