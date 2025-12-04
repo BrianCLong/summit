@@ -59,3 +59,40 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Service-specific labels
+*/}}
+{{- define "intelgraph.serviceLabels" -}}
+{{- $serviceName := .serviceName -}}
+{{- $root := .root -}}
+{{- include "intelgraph.labels" $root }}
+app: {{ $serviceName }}
+{{- end }}
+
+{{/*
+Service-specific selector labels
+*/}}
+{{- define "intelgraph.serviceSelectorLabels" -}}
+{{- $serviceName := .serviceName -}}
+{{- $root := .root -}}
+{{- include "intelgraph.selectorLabels" $root }}
+app: {{ $serviceName }}
+{{- end }}
+
+{{/*
+Pod labels for services
+*/}}
+{{- define "intelgraph.podLabels" -}}
+{{- $service := .service -}}
+{{- $root := .root -}}
+{{- include "intelgraph.selectorLabels" $root }}
+app: {{ $service.name }}
+{{- end }}
+
+{{/*
+Config checksum annotation
+*/}}
+{{- define "intelgraph.configChecksum" -}}
+checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+{{- end }}

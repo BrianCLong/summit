@@ -1,5 +1,5 @@
-import crypto from 'node:crypto';
-import http from 'node:http';
+import * as crypto from 'node:crypto';
+import * as http from 'node:http';
 import { createEdgeIngestionApp } from '../applications/edgeIngestionApp.js';
 import type { EdgeIngestionOptions } from '../applications/edgeIngestionApp.js';
 import type { NanoEvent } from '../runtime/types.js';

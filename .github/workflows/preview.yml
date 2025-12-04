@@ -25,7 +25,6 @@ jobs:
           echo "SHORT_SHA=$SHORT12" >> $GITHUB_OUTPUT
 
       - uses: pnpm/action-setup@v3
-        with: { version: 9 }
       - name: Install deps
         run: pnpm -r i --frozen-lockfile
       - name: Build & unit tests (with coverage)
