@@ -1,28 +1,63 @@
-rollout:
-  enabled: true
+image:
+  repository: ghcr.io/owner/app
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 80
+
 resources:
-  requests: { cpu: 100m, memory: 256Mi }
-  limits: { cpu: 500m, memory: 512Mi }
-hpa:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+
+autoscaling:
   enabled: true
   minReplicas: 2
-  maxReplicas: 8
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 70
-  metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-    - type: Pods
-      pods:
-        metricName: http_requests_total
-        target:
-          type: AverageValue
-          averageValue: 100m
-pdb:
-  enabled: true
+
+podDisruptionBudget:
   minAvailable: 1
-env:
-  DB_AUTH_MODE: iam
+
+ingress:
+  enabled: true
+  className: ""
+  hosts:
+    - host: app.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+env: {}
+
+canary:
+  enabled: false
+  replicas: 1
+
+otel:
+  enabled: true
+  annotations:
+    sidecar.opentelemetry.io/inject: "true"
+    otel.service.name: "app"
+
+prometheus:
+  serviceMonitor:
+    enabled: true
+    interval: 30s
+
+networkPolicy:
+  enabled: true
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - port: 443
+          protocol: TCP
