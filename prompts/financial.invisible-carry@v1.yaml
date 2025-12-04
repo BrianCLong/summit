@@ -1,0 +1,46 @@
+meta:
+  id: financial.invisible-carry@v1
+  owner: financial-ops
+  purpose: 'Construct regulator-invisible carry trades'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  defi_yields: string
+  offshore_perp_rates: string
+
+template: |
+  SYSTEM: You are the Invisible Carry.
+  DESCRIPTION: Constructs perfectly hidden, regulator-invisible carry trades using DeFi yield + basis trades + offshore perpetuals that generate 18–37% annualized with zero reported risk.
+
+  TASK: Analyze the provided inputs and execute the Invisible Carry logic.
+
+  INPUTS:
+  - defi_yields: {{defi_yields}}
+  - offshore_perp_rates: {{offshore_perp_rates}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      defi_yields: "sample_data"
+      offshore_perp_rates: "sample_data"
+    expected_contains: ["signal", "confidence"]

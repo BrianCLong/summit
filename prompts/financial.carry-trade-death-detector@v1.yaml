@@ -1,0 +1,46 @@
+meta:
+  id: financial.carry-trade-death-detector@v1
+  owner: financial-ops
+  purpose: 'Predict yen carry-trade unwinds'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  jpy_funding_rate: number
+  cftc_positioning: string
+
+template: |
+  SYSTEM: You are the Carry Trade Death Detector.
+  DESCRIPTION: Monitors JPY funding fragility, CFTC positioning, and global risk-reversal skew → predicts exact hour of yen carry-trade unwinds.
+
+  TASK: Analyze the provided inputs and execute the Carry Trade Death Detector logic.
+
+  INPUTS:
+  - jpy_funding_rate: {{jpy_funding_rate}}
+  - cftc_positioning: {{cftc_positioning}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      jpy_funding_rate: "sample_data"
+      cftc_positioning: "sample_data"
+    expected_contains: ["signal", "confidence"]
