@@ -1,7 +1,9 @@
 # CLAUDE.md - AI Assistant Guide for Summit/IntelGraph Platform
 
-> **Last Updated**: 2025-11-20
+> **Last Updated**: 2025-11-23
 > **Purpose**: This document provides AI assistants with comprehensive context about the Summit/IntelGraph codebase structure, development workflows, and key conventions.
+
+> **Note**: If you're using **Claude Code CLI**, see [CLAUDE_CODE.md](CLAUDE_CODE.md) for specific guidance on using Claude Code effectively with this repository.
 
 ## Table of Contents
 
@@ -678,6 +680,8 @@ The API **refuses to boot in production** if:
 ---
 
 ## Working with AI Assistants (Claude, Copilot, etc.)
+
+> **Using Claude Code?** See [CLAUDE_CODE.md](CLAUDE_CODE.md) for comprehensive guidance on using Claude Code CLI with this repository.
 
 ### Best Practices for AI Assistance
 
