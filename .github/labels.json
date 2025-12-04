@@ -77,5 +77,15 @@
     "name": "perf:strict",
     "color": "b60205",
     "description": "Hard gate: k6 smoke"
+  },
+  {
+    "name": "needs-canary-plan",
+    "color": "0b7285",
+    "description": "Requires a documented canary and rollback path before merge"
+  },
+  {
+    "name": "migration-gate",
+    "color": "e11d48",
+    "description": "Schema-impacting change that must pass migration gate review"
   }
 ]

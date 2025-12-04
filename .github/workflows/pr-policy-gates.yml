@@ -1,0 +1,105 @@
+name: PR Policy Gates
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+      - ready_for_review
+      - labeled
+      - unlabeled
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  semantic-title:
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enforce Conventional Commit titles
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          types: |
+            build
+            chore
+            ci
+            docs
+            feat
+            fix
+            perf
+            refactor
+            revert
+            style
+            test
+          subjectPattern: ".+"
+          subjectPatternError: "PR title must use Conventional Commits (e.g., feat: add gate)."
+
+  linked-issue:
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require linked issue in PR body
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.pull_request?.body || '';
+            const pattern = /\b(?:close[sd]?|fixe[sd]?|resolve[sd]?)\s+#\d+/i;
+            if (!pattern.test(body)) {
+              core.setFailed('Add a linked issue using "Closes #<id>" (or Fixes/Resolves) in the PR description.');
+            }
+
+  merge-gates:
+    if: github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect critical path changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            canary:
+              - 'deploy/**'
+              - 'helm/**'
+              - 'charts/**'
+              - 'ops/**/rollout/**'
+              - '.github/workflows/**canary**'
+            migrations:
+              - '**/migrations/**'
+              - 'ops/db/**'
+              - 'schema/**'
+              - 'database/**'
+
+      - name: Enforce gate labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const labels = new Set(pr.labels.map(label => label.name));
+            const missing = [];
+
+            const needsCanary = '${{ steps.changes.outputs.canary }}' === 'true';
+            const needsMigrationGate = '${{ steps.changes.outputs.migrations }}' === 'true';
+
+            if (needsCanary && !labels.has('needs-canary-plan')) {
+              missing.push('needs-canary-plan');
+            }
+
+            if (needsMigrationGate && !labels.has('migration-gate')) {
+              missing.push('migration-gate');
+            }
+
+            if (missing.length) {
+              core.setFailed(`Add required gate labels before merging: ${missing.join(', ')}.`);
+            }

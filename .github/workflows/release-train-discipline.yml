@@ -1,0 +1,60 @@
+name: Release Train Discipline
+
+on:
+  schedule:
+    - cron: '0 13 * * MON'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  open-weekly-issue:
+    name: Ensure weekly release train issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or reuse weekly tracker
+        uses: actions/github-script@v7
+        with:
+          script: |
+            function isoWeek(date) {
+              const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+              const dayNum = d.getUTCDay() || 7;
+              d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+              const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+              return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            }
+
+            const now = new Date();
+            const week = isoWeek(now).toString().padStart(2, '0');
+            const year = now.getUTCFullYear();
+            const title = `Release train ${year}-W${week}`;
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const query = `repo:${owner}/${repo} "${title}" in:title is:issue is:open`;
+            const existing = await github.rest.search.issuesAndPullRequests({ q: query });
+            if (existing.data.total_count > 0) {
+              core.info('Weekly release train issue already open.');
+              return;
+            }
+
+            const body = `## Exit criteria\n\n` +
+              `- [ ] Release captain assigned and release calendar updated\n` +
+              `- [ ] Canary plan captured on risky changes (label: needs-canary-plan)\n` +
+              `- [ ] Schema changes cleared migration gate (label: migration-gate)\n` +
+              `- [ ] PR policy gates green (Conventional Commit title + linked issue)\n` +
+              `- [ ] CODEOWNERS approvals collected for critical paths\n` +
+              `- [ ] Release notes drafted and promotion checklist prepared\n` +
+              `- [ ] Rollback/SLO thresholds agreed for this train\n`;
+
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title,
+              body,
+              labels: ['release-train', 'cadence:weekly', 'hygiene']
+            });
+            core.info(`Opened ${title}`);

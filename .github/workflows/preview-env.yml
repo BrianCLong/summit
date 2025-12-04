@@ -17,6 +17,7 @@ on:
 env:
   REGISTRY: ghcr.io
   NAMESPACE_PREFIX: intelgraph-pr
+  PREVIEW_TTL_HOURS: 72
 
 concurrency:
   group: preview-${{ github.event.number }}
@@ -99,6 +100,8 @@ jobs:
         run: |
           NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
           kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl label namespace ${NAMESPACE} pr=${{ github.event.number }} ttl-hours=${{ env.PREVIEW_TTL_HOURS }} owner=${{ github.actor }} managed-by=github-actions --overwrite
+          kubectl annotate namespace ${NAMESPACE} teardown=auto reason=preview-env --overwrite
 
       - name: Deploy preview environment
         run: |
@@ -250,6 +253,14 @@ jobs:
           # Delete namespace
           kubectl delete namespace ${NAMESPACE} --ignore-not-found --timeout=300s
 
+      - name: Check for leftover resources
+        id: leftovers
+        run: |
+          touch leftovers.txt
+          kubectl get all --all-namespaces -l pr=${{ github.event.number }} -o name > leftovers.txt 2>/dev/null || true
+          COUNT=$(wc -l < leftovers.txt | tr -d ' ')
+          echo "count=${COUNT}" >> $GITHUB_OUTPUT
+
       - name: Cleanup container images
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -267,4 +278,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr comment ${{ github.event.number }} --body "🧹 Preview environment has been cleaned up and resources have been freed."
+          MESSAGE="🧹 Preview environment teardown completed."
+          MESSAGE+=$"\n- Namespace: `${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}`"
+          MESSAGE+=$"\n- TTL: ${{ env.PREVIEW_TTL_HOURS }}h labels applied to resources (managed-by=github-actions)"
+          if [ "${{ steps.leftovers.outputs.count }}" != "0" ]; then
+            MESSAGE+=$"\n\n⚠️ Detected leftover resources with `pr=${{ github.event.number }}` after teardown. Please inspect and clean manually:"
+            MESSAGE+=$"\n```"
+            cat leftovers.txt >> message_block.txt
+            MESSAGE+=$(cat message_block.txt)
+            MESSAGE+=$"\n```"
+          fi
+          MESSAGE+=$"\n\nCost note: resources are tagged for TTL enforcement; preview images were deleted for this PR."
+          gh pr comment ${{ github.event.number }} --body "$MESSAGE"
