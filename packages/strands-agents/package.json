@@ -1,0 +1,73 @@
+{
+  "name": "@intelgraph/strands-agents",
+  "version": "0.1.0",
+  "description": "Strands Agents SDK integration for IntelGraph - AI-powered graph intelligence with type-safe tools",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js"
+    },
+    "./agents": {
+      "types": "./dist/agents/index.d.ts",
+      "import": "./dist/agents/index.js"
+    },
+    "./memory": {
+      "types": "./dist/memory/index.d.ts",
+      "import": "./dist/memory/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "strands-agents",
+    "ai-agents",
+    "graph-intelligence",
+    "neo4j",
+    "investigation",
+    "entity-resolution",
+    "knowledge-graph",
+    "llm",
+    "copilot"
+  ],
+  "dependencies": {
+    "@strands-agents/sdk": "^0.1.0",
+    "zod": "^3.23.8",
+    "neo4j-driver": "^5.27.0",
+    "uuid": "^11.0.3",
+    "pino": "^9.6.0"
+  },
+  "peerDependencies": {
+    "@anthropic-ai/sdk": ">=0.30.0",
+    "@aws-sdk/client-bedrock-runtime": ">=3.600.0"
+  },
+  "peerDependenciesMeta": {
+    "@anthropic-ai/sdk": {
+      "optional": true
+    },
+    "@aws-sdk/client-bedrock-runtime": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3",
+    "eslint": "^9.39.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.4",
+    "@typescript-eslint/parser": "^8.46.4"
+  }
+}
