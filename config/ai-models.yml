@@ -1,0 +1,46 @@
+# AI Model Configuration
+# Defines dynamic batching, quantization, and caching strategies
+
+models:
+  # Object Detection
+  yolo:
+    model_id: "yolov8n.pt"
+    framework: "ultralytics"
+    batch_size: 16
+    timeout_ms: 500
+    quantization: "fp16" # "int8", "fp16", or "fp32"
+    device: "cuda:0" # or "cpu"
+    cache_ttl_seconds: 3600
+    max_batch_latency_ms: 100 # Wait up to 100ms to fill a batch
+
+  # Speech-to-Text
+  whisper:
+    model_id: "tiny" # "tiny", "base", "small"
+    framework: "whisper"
+    batch_size: 8
+    timeout_ms: 2000
+    quantization: "int8"
+    device: "cuda:0"
+    compute_type: "int8_float16"
+
+  # NLP / NER
+  spacy:
+    model_id: "en_core_web_sm"
+    framework: "spacy"
+    batch_size: 32
+    disable_pipes: ["parser", "lemmatizer"] # Optimize for NER only
+    cache_ttl_seconds: 86400 # 24 hours
+
+  # Embeddings
+  sentence_transformer:
+    model_id: "all-MiniLM-L6-v2"
+    framework: "sentence-transformers"
+    batch_size: 64
+    max_batch_latency_ms: 50
+    device: "cpu" # Efficient enough on CPU usually, use CUDA if available
+
+redis:
+  queue_name: "ai_inference_queue"
+  result_prefix: "ai_result:"
+  host: "redis"
+  port: 6379

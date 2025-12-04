@@ -16,3 +16,10 @@ prometheus_client
 langchain_community
 pytest-cov
 requests
+torch
+transformers
+onnxruntime
+spacy
+sentence-transformers
+ultralytics
+openai-whisper
