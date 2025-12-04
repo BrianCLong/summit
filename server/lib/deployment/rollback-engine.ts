@@ -10,17 +10,39 @@ const mockKubernetesClient = {
 const mockDbMigrator = {
   runDownMigrations: async (steps: number): Promise<void> => {
     console.log(`[MockDbMigrator] Running ${steps} down migration(s).`);
-    // In a real implementation, this would execute the 'down' script(s) for the latest migration(s).
+    // Execute the rollback script
+    try {
+        const { exec } = await import('child_process');
+        const path = await import('path');
+        const scriptPath = path.resolve(process.cwd(), 'server/scripts/db_rollback.cjs');
+
+        console.log(`[RollbackEngine] Executing: npx tsx ${scriptPath} --steps=${steps}`);
+
+        await new Promise<void>((resolve, reject) => {
+            exec(`npx tsx ${scriptPath} --steps=${steps}`, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`[RollbackEngine] Rollback script failed: ${error.message}`);
+                    reject(error);
+                    return;
+                }
+                if (stderr) console.error(`[RollbackEngine] stderr: ${stderr}`);
+                if (stdout) console.log(`[RollbackEngine] stdout: ${stdout}`);
+                resolve();
+            });
+        });
+    } catch (e) {
+        console.error(`[RollbackEngine] Failed to execute rollback script:`, e);
+    }
   },
 };
 
-interface RollbackOptions {
+export interface RollbackOptions {
   serviceName: string;
   migrationSteps?: number;
   reason: string;
 }
 
-interface RollbackRecord {
+export interface RollbackRecord {
   timestamp: Date;
   serviceName: string;
   reason: string;
