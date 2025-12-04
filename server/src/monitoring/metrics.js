@@ -394,6 +394,25 @@ const maestroMttrHours = new client.Histogram({
   buckets: [0.1, 0.5, 1, 4, 24],
 });
 
+// Multi-Region Metrics
+const regionProbeLatencyMs = new client.Gauge({
+  name: 'region_probe_latency_ms',
+  help: 'Latency of region probe in ms',
+  labelNames: ['region_id', 'region_name'],
+});
+
+const regionHealthStatus = new client.Gauge({
+  name: 'region_health_status',
+  help: 'Health status of region (1 = UP, 0 = DOWN)',
+  labelNames: ['region_id', 'region_name'],
+});
+
+const rollbackEventsTotal = new client.Counter({
+  name: 'rollback_events_total',
+  help: 'Total number of rollback events triggered',
+  labelNames: ['service', 'reason'],
+});
+
 register.registerMetric(graphExpandRequestsTotal);
 register.registerMetric(aiRequestTotal);
 register.registerMetric(resolverLatencyMs);
@@ -414,6 +433,9 @@ register.registerMetric(maestroDeploymentsTotal);
 register.registerMetric(maestroPrLeadTimeHours);
 register.registerMetric(maestroChangeFailureRate);
 register.registerMetric(maestroMttrHours);
+register.registerMetric(regionProbeLatencyMs);
+register.registerMetric(regionHealthStatus);
+register.registerMetric(rollbackEventsTotal);
 
 const metrics = {
   graphExpandRequestsTotal,
@@ -491,4 +513,7 @@ export {
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
   maestroMttrHours,
+  regionProbeLatencyMs,
+  regionHealthStatus,
+  rollbackEventsTotal,
 };
