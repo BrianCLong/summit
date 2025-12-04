@@ -244,7 +244,7 @@ services:
       - 'prometheus.port=9001'
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.1
     container_name: summit-prometheus
     restart: unless-stopped
     volumes:

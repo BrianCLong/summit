@@ -16,6 +16,8 @@ concurrency:
 permissions:
   contents: read
   security-events: write
+  id-token: write # For Cosign
+  packages: write # For Cosign to upload attestations
 
 jobs:
   codeql:
@@ -51,3 +53,87 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         with:
           args: detect --source=. --no-banner --redact
+
+  supply-chain:
+    name: Supply Chain (SBOM & Signing)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.4.0
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0.15.8
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@v0.2.0
+        with:
+          cache: true
+
+      # Build images for SBOM generation
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Server Image (for scanning)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./server/Dockerfile
+          tags: summit-server:latest
+          outputs: type=docker,dest=/tmp/summit-server.tar
+          push: false
+
+      - name: Build Web Image (for scanning)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/web/Dockerfile
+          tags: summit-web:latest
+          outputs: type=docker,dest=/tmp/summit-web.tar
+          push: false
+
+      # Generate SBOMs
+      - name: Generate SBOM (Server)
+        run: syft /tmp/summit-server.tar -o cyclonedx-json=sbom-server.json
+
+      - name: Generate SBOM (Web)
+        run: syft /tmp/summit-web.tar -o cyclonedx-json=sbom-web.json
+
+      # Scan with Trivy
+      - name: Scan Server Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: /tmp/summit-server.tar
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Scan Web Image
+        uses: aquasecurity/trivy-action@master
+        with:
+          input: /tmp/summit-web.tar
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+      # Upload SBOMs
+      - name: Upload SBOMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: sboms
+          path: sbom-*.json
+
+      # Sign Images (Placeholder for demonstration - requires registry login in real usage)
+      # In a real pipeline, we would push to a registry first, then sign the digest.
+      # Here we simulate the attestation step.
+      - name: Sign & Attest (Simulated)
+        if: github.event_name != 'pull_request'
+        run: |
+          echo "Simulating signing and attestation..."
+          # cosign sign --yes summit-server:latest
+          # cosign attest --yes --predicate sbom-server.json summit-server:latest
