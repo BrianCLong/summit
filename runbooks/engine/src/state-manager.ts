@@ -251,6 +251,13 @@ export class StateManager {
   }
 
   /**
+   * Get the underlying storage (for cleanup, initialization, etc.)
+   */
+  getStorage(): StateStorage {
+    return this.storage;
+  }
+
+  /**
    * Save execution state
    */
   async saveExecution(execution: RunbookExecution): Promise<void> {

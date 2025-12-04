@@ -358,4 +358,204 @@ export class RunbookEngine {
   getRunbook(runbookId: string): RunbookDefinition | undefined {
     return this.runbooks.get(runbookId);
   }
+
+  /**
+   * Pause a running execution
+   */
+  async pauseExecution(executionId: string, userId: string): Promise<void> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    if (execution.status !== ExecutionStatus.RUNNING) {
+      throw new Error(
+        `Cannot pause execution ${executionId}: status is ${execution.status}`
+      );
+    }
+
+    // Update execution status
+    execution.status = ExecutionStatus.PAUSED;
+    execution.pausedAt = new Date();
+
+    execution.logs.push({
+      id: uuidv4(),
+      timestamp: new Date(),
+      level: 'info',
+      stepId: 'engine',
+      executionId,
+      message: `Execution paused by ${userId}`,
+      metadata: { userId },
+    });
+
+    await this.stateManager.saveExecution(execution);
+  }
+
+  /**
+   * Resume a paused execution
+   */
+  async resumeExecution(executionId: string, userId: string): Promise<void> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    if (execution.status !== ExecutionStatus.PAUSED) {
+      throw new Error(
+        `Cannot resume execution ${executionId}: status is ${execution.status}`
+      );
+    }
+
+    const runbook = this.runbooks.get(execution.runbookId);
+    if (!runbook) {
+      throw new Error(`Runbook not found: ${execution.runbookId}`);
+    }
+
+    execution.logs.push({
+      id: uuidv4(),
+      timestamp: new Date(),
+      level: 'info',
+      stepId: 'engine',
+      executionId,
+      message: `Execution resumed by ${userId}`,
+      metadata: { userId, pausedDurationMs: Date.now() - (execution.pausedAt?.getTime() || 0) },
+    });
+
+    // Resume execution asynchronously
+    this.executeRunbook(
+      executionId,
+      runbook,
+      execution.context,
+      execution.input
+    ).catch((error) => {
+      console.error(`Resumed execution ${executionId} failed:`, error);
+    });
+  }
+
+  /**
+   * Cancel a running or paused execution
+   */
+  async cancelExecution(
+    executionId: string,
+    userId: string,
+    reason?: string
+  ): Promise<void> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    if (
+      execution.status !== ExecutionStatus.RUNNING &&
+      execution.status !== ExecutionStatus.PAUSED &&
+      execution.status !== ExecutionStatus.PENDING
+    ) {
+      throw new Error(
+        `Cannot cancel execution ${executionId}: status is ${execution.status}`
+      );
+    }
+
+    // Update execution status
+    execution.status = ExecutionStatus.CANCELLED;
+    execution.endTime = new Date();
+    execution.durationMs = execution.endTime.getTime() - execution.startTime.getTime();
+    execution.cancelledBy = userId;
+    execution.cancellationReason = reason;
+
+    execution.logs.push({
+      id: uuidv4(),
+      timestamp: new Date(),
+      level: 'warn',
+      stepId: 'engine',
+      executionId,
+      message: `Execution cancelled by ${userId}${reason ? `: ${reason}` : ''}`,
+      metadata: { userId, reason },
+    });
+
+    await this.stateManager.saveExecution(execution);
+  }
+
+  /**
+   * Re-run a failed step within an execution
+   */
+  async retryFailedStep(
+    executionId: string,
+    stepId: string,
+    userId: string
+  ): Promise<void> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    const stepResult = execution.stepResults.get(stepId);
+    if (!stepResult) {
+      throw new Error(`Step ${stepId} not found in execution ${executionId}`);
+    }
+
+    if (stepResult.status !== ExecutionStatus.FAILED) {
+      throw new Error(
+        `Cannot retry step ${stepId}: status is ${stepResult.status}`
+      );
+    }
+
+    const runbook = this.runbooks.get(execution.runbookId);
+    if (!runbook) {
+      throw new Error(`Runbook not found: ${execution.runbookId}`);
+    }
+
+    const stepDef = runbook.steps.find((s) => s.id === stepId);
+    if (!stepDef) {
+      throw new Error(`Step definition ${stepId} not found in runbook`);
+    }
+
+    execution.logs.push({
+      id: uuidv4(),
+      timestamp: new Date(),
+      level: 'info',
+      stepId: 'engine',
+      executionId,
+      message: `Retrying failed step ${stepId} by ${userId}`,
+      metadata: { userId, stepId },
+    });
+
+    // Collect inputs from dependencies
+    const input: Record<string, any> = {};
+    for (const depId of stepDef.dependsOn) {
+      const depResult = execution.stepResults.get(depId);
+      if (depResult && depResult.output) {
+        input[depId] = depResult.output.data;
+      }
+    }
+
+    // Execute step
+    try {
+      const result = await this.dagExecutor.executeStepWithRetry(
+        stepDef,
+        { schema: stepDef.inputSchema, data: input },
+        execution.context,
+        executionId
+      );
+
+      // Update step result
+      execution.stepResults.set(stepId, result);
+      execution.logs.push(...result.logs);
+      execution.evidence.push(...result.evidence);
+
+      await this.stateManager.saveExecution(execution);
+    } catch (error) {
+      execution.logs.push({
+        id: uuidv4(),
+        timestamp: new Date(),
+        level: 'error',
+        stepId: 'engine',
+        executionId,
+        message: `Step retry failed: ${(error as Error).message}`,
+        metadata: { error: (error as Error).stack },
+      });
+
+      await this.stateManager.saveExecution(execution);
+      throw error;
+    }
+  }
 }
