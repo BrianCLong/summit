@@ -211,6 +211,9 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
       - name: Bring up stack (make up)
         run: make up
+      - name: Run Migration Dry-Run
+        run: |
+          docker compose -f docker-compose.dev.yml exec -T api npx tsx scripts/migration_ci_dryrun.ts
       - name: Golden path smoke tests
         run: make smoke
       - name: Compose logs on failure
