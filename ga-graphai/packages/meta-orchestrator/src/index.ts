@@ -12,10 +12,22 @@ import type {
   PlannerObservation,
   PlannerRewardSignal,
   PlannerRewardWeights,
+  PolicyRule,
   PricingSignal,
   SelfHealingPolicy,
   StageFallbackStrategy,
+  StageExecutionGuardrail,
 } from '@ga-graphai/common-types';
+import {
+  OrchestrationKnowledgeGraph,
+  type CostSignalRecord,
+  type EnvironmentRecord,
+  type GraphSnapshot,
+  type IncidentRecord,
+  type PipelineRecord,
+  type PipelineStageRecord,
+  type ServiceRecord,
+} from '@ga-graphai/knowledge-graph';
 
 export interface PricingFeed {
   getPricingSignals(): Promise<PricingSignal[]>;
@@ -644,6 +656,428 @@ export class MetaOrchestrator {
       selfHealingRate,
     };
   }
+}
+
+interface ReferenceStageOverlay {
+  requiredCapabilities?: string[];
+  complianceTags?: string[];
+  minThroughputPerMinute: number;
+  slaSeconds: number;
+  guardrail?: StageExecutionGuardrail;
+  fallbackStrategies?: StageFallbackStrategy[];
+}
+
+interface ReferenceWorkflowInput {
+  pipeline: PipelineRecord;
+  services: ServiceRecord[];
+  environments: EnvironmentRecord[];
+  incidents?: IncidentRecord[];
+  policies?: PolicyRule[];
+  costSignals?: CostSignalRecord[];
+  stageOverlays: Record<string, ReferenceStageOverlay>;
+  providers: CloudProviderDescriptor[];
+  pricing: PricingSignal[];
+  executionScripts: Record<string, StageExecutionResult | StageExecutionResult[]>;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ReferenceWorkflowResult {
+  stages: PipelineStageDefinition[];
+  graphSnapshot: GraphSnapshot;
+  plan: ExplainablePlan;
+  outcome: ExecutionOutcome;
+  telemetry: MetaOrchestratorTelemetry;
+  auditTrail: AuditEntry[];
+}
+
+class StaticPricingFeed implements PricingFeed {
+  constructor(private signals: PricingSignal[]) {}
+
+  async getPricingSignals(): Promise<PricingSignal[]> {
+    return this.signals;
+  }
+}
+
+class ReferenceExecutionAdapter implements ExecutionAdapter {
+  private readonly script = new Map<string, StageExecutionResult[]>();
+
+  constructor(scenarios: Record<string, StageExecutionResult | StageExecutionResult[]>) {
+    for (const [provider, result] of Object.entries(scenarios)) {
+      const values = Array.isArray(result) ? [...result] : [result];
+      this.script.set(provider, values);
+    }
+  }
+
+  async execute(request: StageExecutionRequest): Promise<StageExecutionResult> {
+    const planned = this.script.get(request.decision.provider);
+    if (!planned || planned.length === 0) {
+      return {
+        status: 'success',
+        throughputPerMinute: Math.max(request.stage.minThroughputPerMinute, 1),
+        cost: request.decision.expectedCost,
+        errorRate: 0.01,
+        logs: ['reference-default-success'],
+      } satisfies StageExecutionResult;
+    }
+    const [result, ...remaining] = planned;
+    this.script.set(request.decision.provider, remaining);
+    return result;
+  }
+}
+
+function stageDefinitionsFromGraph(
+  snapshot: GraphSnapshot,
+  overlays: Record<string, ReferenceStageOverlay>,
+): PipelineStageDefinition[] {
+  return snapshot.nodes
+    .filter((node) => node.type === 'stage')
+    .map((node) => {
+      const stage = node.data as PipelineStageRecord;
+      const overlay = overlays[stage.id];
+      if (!overlay) {
+        throw new Error(`Missing overlay for stage ${stage.id}`);
+      }
+      return {
+        id: stage.id,
+        name: stage.name,
+        requiredCapabilities: overlay.requiredCapabilities ?? [stage.capability],
+        complianceTags: overlay.complianceTags ?? stage.complianceTags ?? [],
+        minThroughputPerMinute: overlay.minThroughputPerMinute,
+        slaSeconds: overlay.slaSeconds,
+        guardrail: overlay.guardrail,
+        fallbackStrategies: overlay.fallbackStrategies,
+      } satisfies PipelineStageDefinition;
+    });
+}
+
+async function runReferenceWorkflow(
+  input: ReferenceWorkflowInput,
+): Promise<ReferenceWorkflowResult> {
+  const graph = new OrchestrationKnowledgeGraph();
+  graph.registerPipelineConnector({
+    loadPipelines: async () => [input.pipeline],
+  });
+  graph.registerServiceConnector({
+    loadServices: async () => input.services,
+  });
+  graph.registerEnvironmentConnector({
+    loadEnvironments: async () => input.environments,
+  });
+  if (input.incidents?.length) {
+    graph.registerIncidentConnector({
+      loadIncidents: async () => input.incidents ?? [],
+    });
+  }
+  if (input.policies?.length) {
+    graph.registerPolicyConnector({
+      loadPolicies: async () => input.policies ?? [],
+    });
+  }
+  if (input.costSignals?.length) {
+    graph.registerCostSignalConnector({
+      loadCostSignals: async () => input.costSignals ?? [],
+    });
+  }
+  const graphSnapshot = await graph.refresh();
+
+  const auditTrail: AuditEntry[] = [];
+  const orchestrator = new MetaOrchestrator({
+    pipelineId: input.pipeline.id,
+    providers: input.providers,
+    pricingFeed: new StaticPricingFeed(input.pricing),
+    execution: new ReferenceExecutionAdapter(input.executionScripts),
+    auditSink: {
+      record: (entry) => {
+        auditTrail.push(entry);
+      },
+    },
+    reasoningModel: new TemplateReasoningModel(),
+  });
+
+  const stages = stageDefinitionsFromGraph(graphSnapshot, input.stageOverlays);
+  const outcome = await orchestrator.executePlan(stages, input.metadata ?? {});
+  const telemetry = orchestrator.deriveTelemetry(outcome);
+
+  return {
+    stages,
+    graphSnapshot,
+    plan: outcome.plan,
+    outcome,
+    telemetry,
+    auditTrail,
+  };
+}
+
+export async function runHelloWorldWorkflow(): Promise<ReferenceWorkflowResult> {
+  const pipeline: PipelineRecord = {
+    id: 'hello-world-pipeline',
+    name: 'Hello World Reference Pipeline',
+    stages: [
+      {
+        id: 'hello-world-stage',
+        name: 'Hello World Build',
+        pipelineId: 'hello-world-pipeline',
+        serviceId: 'service-hello-world',
+        environmentId: 'env-ref-dev',
+        capability: 'compute',
+        complianceTags: ['fedramp'],
+      },
+    ],
+  };
+
+  return runReferenceWorkflow({
+    pipeline,
+    services: [
+      {
+        id: 'service-hello-world',
+        name: 'Hello World API',
+        owningTeam: 'demo',
+        tier: 'tier-1',
+        dependencies: ['service-hello-world-db'],
+      },
+      {
+        id: 'service-hello-world-db',
+        name: 'Hello World DB',
+        tier: 'tier-2',
+      },
+    ],
+    environments: [
+      {
+        id: 'env-ref-dev',
+        name: 'Reference Dev',
+        stage: 'dev',
+        region: 'us-east-1',
+        deploymentMechanism: 'containers',
+        complianceTags: ['fedramp'],
+      },
+    ],
+    policies: [
+      {
+        id: 'policy-ref-fedramp',
+        description: 'Reference FedRAMP policy',
+        effect: 'allow',
+        actions: ['deploy'],
+        resources: ['service:service-hello-world'],
+        conditions: [],
+        obligations: [],
+        tags: ['reference'],
+      },
+    ],
+    stageOverlays: {
+      'hello-world-stage': {
+        requiredCapabilities: ['compute'],
+        complianceTags: ['fedramp'],
+        minThroughputPerMinute: 90,
+        slaSeconds: 900,
+        guardrail: { maxErrorRate: 0.05, recoveryTimeoutSeconds: 120 },
+      },
+    },
+    providers: [
+      {
+        name: 'azure',
+        regions: ['eastus'],
+        services: ['compute', 'ml'],
+        reliabilityScore: 0.96,
+        sustainabilityScore: 0.62,
+        securityCertifications: ['fedramp'],
+        maxThroughputPerMinute: 150,
+        baseLatencyMs: 65,
+        policyTags: ['fedramp'],
+      },
+      {
+        name: 'aws',
+        regions: ['us-east-1'],
+        services: ['compute', 'ml'],
+        reliabilityScore: 0.94,
+        sustainabilityScore: 0.55,
+        securityCertifications: ['fedramp'],
+        maxThroughputPerMinute: 140,
+        baseLatencyMs: 70,
+        policyTags: ['fedramp'],
+      },
+    ],
+    pricing: [
+      {
+        provider: 'azure',
+        region: 'eastus',
+        service: 'compute',
+        pricePerUnit: 0.8,
+        currency: 'USD',
+        unit: 'per-minute',
+        effectiveAt: new Date().toISOString(),
+      },
+      {
+        provider: 'aws',
+        region: 'us-east-1',
+        service: 'compute',
+        pricePerUnit: 1.1,
+        currency: 'USD',
+        unit: 'per-minute',
+        effectiveAt: new Date().toISOString(),
+      },
+    ],
+    executionScripts: {
+      azure: {
+        status: 'success',
+        throughputPerMinute: 120,
+        cost: 96,
+        errorRate: 0.01,
+        logs: ['hello-world-primary'],
+      },
+    },
+    metadata: { release: 'hello-world' },
+  });
+}
+
+export async function runHelloCaseWorkflow(): Promise<ReferenceWorkflowResult> {
+  const pipeline: PipelineRecord = {
+    id: 'hello-case-pipeline',
+    name: 'Hello Case Reference Pipeline',
+    stages: [
+      {
+        id: 'hello-case-triage',
+        name: 'Hello Case Triage',
+        pipelineId: 'hello-case-pipeline',
+        serviceId: 'service-hello-case',
+        environmentId: 'env-ref-staging',
+        capability: 'ml',
+        complianceTags: ['hipaa', 'pci'],
+      },
+    ],
+  };
+
+  return runReferenceWorkflow({
+    pipeline,
+    services: [
+      {
+        id: 'service-hello-case',
+        name: 'Hello Case API',
+        tier: 'tier-0',
+        dependencies: ['service-hello-world'],
+        soxCritical: true,
+      },
+    ],
+    environments: [
+      {
+        id: 'env-ref-staging',
+        name: 'Reference Staging',
+        stage: 'staging',
+        region: 'us-west-2',
+        zeroTrustTier: 2,
+        complianceTags: ['hipaa', 'pci'],
+      },
+    ],
+    incidents: [
+      {
+        id: 'case-incident-1',
+        serviceId: 'service-hello-case',
+        environmentId: 'env-ref-staging',
+        severity: 'high',
+        occurredAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+        status: 'open',
+        rootCauseCategory: 'dependency',
+      },
+    ],
+    policies: [
+      {
+        id: 'policy-hello-case',
+        description: 'Hello Case compliance envelope',
+        effect: 'allow',
+        actions: ['deploy', 'execute'],
+        resources: ['service:service-hello-case'],
+        conditions: [],
+        obligations: [],
+        tags: ['high-risk'],
+      },
+    ],
+    costSignals: [
+      {
+        serviceId: 'service-hello-case',
+        timeBucket: new Date().toISOString().slice(0, 13),
+        saturation: 0.8,
+        budgetBreaches: 1,
+        throttleCount: 1,
+        slowQueryCount: 2,
+      },
+    ],
+    stageOverlays: {
+      'hello-case-triage': {
+        requiredCapabilities: ['ml'],
+        complianceTags: ['hipaa', 'pci'],
+        minThroughputPerMinute: 140,
+        slaSeconds: 600,
+        guardrail: { maxErrorRate: 0.05, recoveryTimeoutSeconds: 60 },
+        fallbackStrategies: [
+          { provider: 'aws', region: 'us-west-2', trigger: 'execution-failure' },
+        ],
+      },
+    },
+    providers: [
+      {
+        name: 'azure',
+        regions: ['eastus'],
+        services: ['compute', 'ml'],
+        reliabilityScore: 0.93,
+        sustainabilityScore: 0.7,
+        securityCertifications: ['fedramp', 'hipaa', 'pci'],
+        maxThroughputPerMinute: 110,
+        baseLatencyMs: 60,
+        policyTags: ['hipaa', 'pci'],
+      },
+      {
+        name: 'aws',
+        regions: ['us-west-2'],
+        services: ['compute', 'ml'],
+        reliabilityScore: 0.97,
+        sustainabilityScore: 0.6,
+        securityCertifications: ['fedramp', 'hipaa', 'pci'],
+        maxThroughputPerMinute: 150,
+        baseLatencyMs: 72,
+        policyTags: ['hipaa', 'pci'],
+      },
+    ],
+    pricing: [
+      {
+        provider: 'azure',
+        region: 'eastus',
+        service: 'ml',
+        pricePerUnit: 0.9,
+        currency: 'USD',
+        unit: 'per-minute',
+        effectiveAt: new Date().toISOString(),
+      },
+      {
+        provider: 'aws',
+        region: 'us-west-2',
+        service: 'ml',
+        pricePerUnit: 1.05,
+        currency: 'USD',
+        unit: 'per-minute',
+        effectiveAt: new Date().toISOString(),
+      },
+    ],
+    executionScripts: {
+      azure: [
+        {
+          status: 'failure',
+          throughputPerMinute: 80,
+          cost: 140,
+          errorRate: 0.18,
+          logs: ['hello-case-primary-failure'],
+        },
+      ],
+      aws: [
+        {
+          status: 'success',
+          throughputPerMinute: 165,
+          cost: 125,
+          errorRate: 0.01,
+          logs: ['hello-case-fallback-success'],
+        },
+      ],
+    },
+    metadata: { caseId: 'HELLO-CASE-001' },
+  });
 }
 
 export type {
