@@ -1,0 +1,30 @@
+meta:
+  id: jade.campaign-tree@v1
+  owner: jules
+  purpose: Campaign Tree Artifact Template
+  tags: [jade, artifact, campaign]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.5
+  maxTokens: 2000
+inputs:
+  analysis: The preceding analysis or context
+template: |
+  Using the analysis below, output a CAMPAIGN_TREE artifact.
+
+  ANALYSIS: {{analysis}}
+
+  ARTIFACT: CAMPAIGN_TREE
+
+  1) OBJECTIVE
+  2) ROOT NODE (Initial condition)
+  3) BRANCHES
+  - Step | Adversary action | Our detection | Our response | Alternate branches
+
+  4) GAPS
+  - Missing controls
+  - Missing telemetry
+  - Missing playbooks
+
+  5) PRIORITIES
+  - Top 3 fixes by leverage.

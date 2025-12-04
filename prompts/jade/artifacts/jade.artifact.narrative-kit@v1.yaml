@@ -1,0 +1,24 @@
+meta:
+  id: jade.narrative-kit@v1
+  owner: jules
+  purpose: Narrative Defense Kit Artifact Template
+  tags: [jade, artifact, narrative]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.5
+  maxTokens: 2000
+inputs:
+  analysis: The preceding analysis or context
+template: |
+  Using the analysis below, output a NARRATIVE_KIT artifact.
+
+  ANALYSIS: {{analysis}}
+
+  ARTIFACT: NARRATIVE_KIT
+
+  1) CORE NARRATIVE
+  2) SUPPORTING MESSAGES
+  3) CLAIM-EVIDENCE TABLE
+  4) HOSTILE NARRATIVES & RESPONSES
+  5) CHANNEL & TIMING PLAN
+  6) CRISIS SNIPPETS (short, ready-to-use)

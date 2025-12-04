@@ -1,0 +1,53 @@
+meta:
+  id: jade.scenario@v1
+  owner: jules
+  purpose: Strategic Foresight Scenario Generation Playbook
+  tags: [jade, strategy, foresight, scenarios]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.7
+  maxTokens: 4000
+inputs:
+  mission: The mission description and context
+  context: Additional environment or constraint context
+template: |
+  PLAYBOOK: JADE_SCENARIO_P50_P10_P90
+
+  Using the mission and context below, generate:
+
+  MISSION: {{mission}}
+  CONTEXT: {{context}}
+
+  1) DRIVERS & UNCERTAINTIES
+  - 5–10 key drivers (tech, market, regulation, behavior).
+  - 3–5 critical uncertainties.
+
+  2) SCENARIO GRID
+  - Define 2 key axes that produce 4 quadrants of futures.
+  - Name the quadrants with short, evocative labels.
+
+  3) THREE SCENARIOS
+  - P50 (most likely baseline):
+    - Headline:
+    - 12–24 month narrative:
+    - Key risks & opportunities:
+  - P10 (optimistic upside tail):
+    - Headline:
+    - Narrative:
+    - Upside and enabling conditions:
+  - P10 (downside tail):
+    - Headline:
+    - Narrative:
+    - Failure modes and triggers:
+
+  4) OPTIONS & MOVES
+  - For each scenario, list:
+    - No-regret moves
+    - Differentiated bets
+    - Hedges
+
+  5) SIGNPOSTS & EARLY WARNINGS
+  - 5–10 observable signposts and how they push probability mass
+    - For each: what to track, where, how often.
+
+  Respect PCS: assumptions, confidence, falsifiers, residual unknowns.

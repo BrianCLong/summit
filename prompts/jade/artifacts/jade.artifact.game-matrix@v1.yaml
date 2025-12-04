@@ -1,0 +1,23 @@
+meta:
+  id: jade.game-matrix@v1
+  owner: jules
+  purpose: Game Matrix Artifact Template
+  tags: [jade, artifact, game-theory]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.5
+  maxTokens: 2000
+inputs:
+  analysis: The preceding analysis or context
+template: |
+  Using the analysis below, output a GAME_MATRIX artifact.
+
+  ANALYSIS: {{analysis}}
+
+  ARTIFACT: GAME_MATRIX
+
+  1) PLAYERS & OBJECTIVES
+  2) STRATEGY SETS (our options, their options)
+  3) PAYOFF MATRIX (qualitative is fine)
+  4) DOMINATED / DOMINANT STRATEGIES
+  5) RECOMMENDED MIXED OR ROBUST STRATEGY

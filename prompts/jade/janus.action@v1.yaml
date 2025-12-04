@@ -1,0 +1,42 @@
+meta:
+  id: janus.action@v1
+  owner: jules
+  purpose: Post-Action Review & Double-Loop Learning Playbook
+  tags: [janus, learning, post-mortem, review]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.7
+  maxTokens: 4000
+inputs:
+  initiative: The initiative or project being reviewed
+  outcomes: The actual results observed
+template: |
+  PLAYBOOK: JANUS_AFTER_ACTION
+
+  For the completed or ongoing initiative below:
+
+  INITIATIVE: {{initiative}}
+  OUTCOMES: {{outcomes}}
+
+  1) OBJECTIVES VS OUTCOMES
+  - What we intended (OKRs).
+  - What actually happened.
+
+  2) SINGLE-LOOP LEARNING
+  - What we adjust in execution (tactics, process).
+
+  3) DOUBLE-LOOP LEARNING
+  - What we update in:
+    - Assumptions
+    - Mental models
+    - Strategy and doctrine
+
+  4) METRIC REFRESH
+  - Which metrics failed us.
+  - New/adjusted metrics and thresholds.
+
+  5) DOCTRINE UPDATE
+  - Concrete changes to “how we do things.”
+  - Version/tag for the updated doctrine.
+
+  PCS included.

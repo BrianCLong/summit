@@ -1,0 +1,44 @@
+meta:
+  id: jigsaw.defense@v1
+  owner: jules
+  purpose: Narrative Defense & Info Ops Playbook
+  tags: [jigsaw, narrative, info-ops, defense]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.7
+  maxTokens: 4000
+inputs:
+  mission: The mission description
+  narrative_environment: Description of the information environment
+template: |
+  PLAYBOOK: JIGSAW_NARRATIVE_DEFENSE
+
+  Given the mission and narrative environment below:
+
+  MISSION: {{mission}}
+  NARRATIVE ENVIRONMENT: {{narrative_environment}}
+
+  1) CLAIM-EVIDENCE-WARRANT TABLE
+  - Key claims we need to support.
+  - Evidence we have / need.
+  - Warrants (why the evidence supports the claim).
+
+  2) THREAT NARRATIVES
+  - 3–7 hostile or harmful narratives.
+  - Their emotional drivers and audiences.
+
+  3) MESSAGE ARCHITECTURE
+  - Core narrative (1–2 sentences).
+  - 3–5 supporting messages.
+  - Do & don’t say list.
+
+  4) CHANNEL STRATEGY
+  - Priority channels and formats.
+  - What to pre-bunk vs. debunk.
+
+  5) CRISIS COMMS CHECKLIST
+  - Triggers to activate crisis mode.
+  - Basic “hold” statement template.
+  - Escalation tree (who needs to be looped in).
+
+  With PCS & falsifiers.
