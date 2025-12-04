@@ -8,9 +8,13 @@
     "build": "tsc",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--experimental-vm-modules' jest --forceExit",
+    "test:unit": "NODE_OPTIONS='--experimental-vm-modules' jest --testPathPattern='(sandbox|policy|types)' --forceExit",
+    "test:integration": "NODE_OPTIONS='--experimental-vm-modules' jest --testPathPattern='integration' --forceExit",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --forceExit",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src/"
+    "lint": "eslint src/",
+    "clean": "rm -rf dist coverage"
   },
   "dependencies": {
     "fastify": "^5.0.0",
