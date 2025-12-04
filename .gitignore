@@ -246,3 +246,4 @@ id_ed25519.*
 pr-dashboard-report.json
 pr-dashboard.html
 pr-backlog-stats.json
+reports/

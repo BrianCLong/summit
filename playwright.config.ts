@@ -13,7 +13,7 @@ export default defineConfig({
   retries: 2,
   reporter: [['html', { outputFolder: 'reports/playwright' }], ['list']],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.BASE_URL || 'http://localhost:3000', // Defaulting to 3000 for apps/web
     trace: 'retain-on-failure',
     video: 'retain-on-failure',
   },
@@ -21,8 +21,8 @@ export default defineConfig({
     ? {
         webServer: [
           {
-            command: 'npm run client:dev',
-            port: 5173,
+            command: 'npm run web:dev',
+            port: 3000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },

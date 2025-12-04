@@ -22,14 +22,15 @@
 ```bash
 git clone https://github.com/BrianCLong/summit.git
 cd summit
-./start.sh              # One-command bootstrap: installs deps, starts services, runs smoke test
+npm run quickstart      # Trivial setup: installs deps, starts infra, migrates DB, runs dev servers
 ```
 
-**Alternative (manual steps):**
+**Manual steps:**
 ```bash
 make bootstrap          # installs pnpm deps + venv + .env
-make up                 # docker-compose.dev.yml + migrations (API, web, dbs, observability)
-make smoke              # golden path automation against seeded data
+npm run docker:dev -- up -d postgres neo4j redis # start infrastructure
+npm run db:migrate      # setup database
+npm run dev             # start frontend and backend
 ```
 
 **Service Endpoints:**
