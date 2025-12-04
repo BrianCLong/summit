@@ -1,0 +1,171 @@
+scalar DateTime
+scalar JSON
+
+"""
+Represents a single outcome node in a cascade
+"""
+type OutcomeNode {
+  id: ID!
+  event: String!
+  order: Int!
+  probability: Float!
+  magnitude: Float!
+  timeDelay: Float!
+  domain: String!
+  confidence: Float!
+  evidenceStrength: Float!
+  parentNodes: [OutcomeNode!]!
+  childNodes: [OutcomeNode!]!
+  createdAt: DateTime!
+}
+
+"""
+Complete cascade map showing all propagated outcomes
+"""
+type CascadeMap {
+  id: ID!
+  rootEvent: String!
+  maxOrder: Int!
+  totalNodes: Int!
+  criticalPaths: [PropagationPath!]!
+  leveragePoints: [LeveragePoint!]!
+  amplificationFactor: Float!
+  createdAt: DateTime!
+  metadata: JSON!
+  nodes: [OutcomeNode!]!
+}
+
+"""
+A complete propagation path from root to leaf
+"""
+type PropagationPath {
+  nodes: [OutcomeNode!]!
+  probability: Float!
+  totalMagnitude: Float!
+  pathLength: Int!
+}
+
+"""
+A high-impact intervention point in the cascade
+"""
+type LeveragePoint {
+  nodeId: ID!
+  node: OutcomeNode!
+  leverageScore: Float!
+  centrality: Float!
+  interventionType: InterventionType!
+  downstreamImpact: Int!
+  interventionCost: Float!
+}
+
+"""
+Types of interventions that can be applied
+"""
+enum InterventionType {
+  BLOCK
+  AMPLIFY
+  REDIRECT
+  MONITOR
+}
+
+"""
+Amplification analysis showing cascade growth
+"""
+type AmplificationFactor {
+  rootMagnitude: Float!
+  totalMagnitude: Float!
+  amplificationRatio: Float!
+  orderBreakdown: [OrderAmplification!]!
+}
+
+"""
+Amplification metrics for a specific order
+"""
+type OrderAmplification {
+  order: Int!
+  nodeCount: Int!
+  totalMagnitude: Float!
+  avgProbability: Float!
+}
+
+"""
+Input for defining an event to analyze
+"""
+input EventInput {
+  description: String!
+  domain: String!
+  initialMagnitude: Float!
+  context: JSON
+}
+
+"""
+Options for cascade simulation
+"""
+input SimulationOptions {
+  maxOrder: Int = 5
+  probabilityThreshold: Float = 0.1
+  magnitudeThreshold: Float = 0.1
+  timeHorizon: Float
+  includeWeakLinks: Boolean = false
+}
+
+type Query {
+  """
+  Get a cascade map by ID
+  """
+  getCascadeMap(cascadeId: ID!): CascadeMap
+
+  """
+  Find leverage points in a cascade
+  """
+  findLeveragePoints(
+    cascadeId: ID!
+    topN: Int = 10
+  ): [LeveragePoint!]!
+
+  """
+  Get the propagation path to a specific node
+  """
+  getAmplificationPath(
+    cascadeId: ID!
+    targetNodeId: ID!
+  ): PropagationPath
+
+  """
+  List all cascade simulations
+  """
+  listCascades(
+    limit: Int = 20
+    offset: Int = 0
+  ): [CascadeMap!]!
+
+  """
+  Get amplification analysis for a cascade
+  """
+  getAmplificationAnalysis(cascadeId: ID!): AmplificationFactor
+}
+
+type Mutation {
+  """
+  Amplify outcomes for an event (main entry point)
+  """
+  amplifyOutcome(
+    event: EventInput!
+    options: SimulationOptions
+  ): CascadeMap!
+
+  """
+  Run cascade simulation for an existing event
+  """
+  runCascadeSimulation(
+    eventId: ID!
+    options: SimulationOptions
+  ): CascadeMap!
+
+  """
+  Define a new event for future analysis
+  """
+  defineEvent(
+    event: EventInput!
+  ): OutcomeNode!
+}
