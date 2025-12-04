@@ -2,7 +2,7 @@
  * Missile Capability Assessment
  */
 
-import type { MissileCapability, MissileSystem, MissileType } from './types.js';
+import { type MissileCapability, type MissileSystem, MissileType } from './types.js';
 
 export class MissileCapabilityAssessor {
   assessCountryCapability(

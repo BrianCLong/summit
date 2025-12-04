@@ -2,11 +2,11 @@
  * Missile System Tracking
  */
 
-import type {
-  MissileSystem,
+import {
+  type MissileSystem,
   MissileType,
-  LaunchFacility,
-  ReentryVehicle,
+  type LaunchFacility,
+  type ReentryVehicle,
   OperationalStatus
 } from './types.js';
 
