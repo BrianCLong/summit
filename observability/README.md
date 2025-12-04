@@ -16,6 +16,12 @@
    - HTTP request duration
    - Database query performance
 
+3. **Business Metrics** (`dashboards/business_metrics.json`)
+   - User Signups
+   - Revenue
+   - API Calls
+   - Active Investigations
+
 ### Import Instructions
 
 **One-time setup:**
@@ -36,19 +42,22 @@
 curl http://localhost:3000/metrics
 ```
 
-## Available Metrics
+## Alerting
 
-- `intelgraph_jobs_processed_total` - Jobs by queue/status
-- `intelgraph_outbox_sync_latency_seconds` - Sync operation latency
-- `intelgraph_active_connections` - WebSocket connections by tenant
-- `intelgraph_database_query_duration_seconds` - Query performance
-- `intelgraph_http_request_duration_seconds` - HTTP latency
+Alert rules are defined in `observability/alert-rules-intelgraph.yml`.
+Runbooks are located in `docs/runbooks/ALERT_RUNBOOKS.md`.
 
-Plus all default Node.js metrics (CPU, memory, event loop, GC)
+## Distributed Tracing
 
----
+OpenTelemetry is initialized in `server/src/observability/tracer.ts`.
+To enable Jaeger export, set `JAEGER_ENDPOINT` environment variable (e.g., `http://jaeger:14268/api/traces`).
 
-## Legacy: GA Core Guardrails
+## Log Aggregation
 
-> To use an attached JSON instead of the minimal one here, overwrite
-> `observability/grafana/dashboards/ga_core_dashboard.json` with your file.
+Logs are written to stdout in JSON format by Pino.
+Promtail configuration is provided in `observability/loki/promtail-config.yaml` to scrape Docker logs and push to Loki.
+
+## Synthetic Monitoring
+
+Synthetic checks are located in `monitoring/synthetic/`.
+See `monitoring/synthetic/README.md` for deployment instructions.

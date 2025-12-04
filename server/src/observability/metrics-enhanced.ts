@@ -8,20 +8,11 @@ import {
   Gauge,
   Histogram,
   Summary,
-  Registry,
-  collectDefaultMetrics,
 } from 'prom-client';
 import logger from '../utils/logger.js';
+import { register as registry } from '../monitoring/metrics.js';
 
-// Create dedicated registry
-export const registry = new Registry();
-
-// Collect default Node.js metrics (every 10s)
-collectDefaultMetrics({
-  register: registry,
-  prefix: 'intelgraph_',
-  gcDurationBuckets: [0.001, 0.01, 0.1, 1, 2, 5],
-});
+export { registry };
 
 // ==============================================================================
 // QUERY LATENCY METRICS (for heatmaps)
