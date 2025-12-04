@@ -1,0 +1,8 @@
+features:
+  dynamic_config: true
+  distributed_tracing: true
+  multi_serialization: true
+  pluggable_storage: false  # Disabled initially
+  advanced_health: true
+  intelligent_lb: false     # Disabled initially
+  performance_suite: true
