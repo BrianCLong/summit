@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight maestro-smoke check-pr
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -20,6 +20,8 @@ help:
 	@echo "  make migrate      - Run database migrations (PostgreSQL + Neo4j)"
 	@echo "  make smoke        - Run smoke tests (validates golden path)"
 	@echo "  make down         - Stop all services"
+	@echo "  make maestro-smoke- Run smoke tests via Maestro Orchestrator (Wait for completion)"
+	@echo "  make check-pr     - Validate PR via Maestro PolicyGuard"
 	@echo ""
 	@echo "Quick start: ./start.sh (runs bootstrap + up + migrate + smoke)"
 	@echo ""
@@ -206,3 +208,16 @@ smoke:
 	@echo ""
 	@echo "smoke: DONE ✓"
 	@echo "Golden path validated successfully! You're ready to develop."
+
+maestro-smoke:
+	@echo "==> maestro-smoke: Running smoke tests via Maestro Orchestrator..."
+	@if [ ! -f server/src/scripts/maestro-cli.ts ]; then \
+	  echo "ERROR: Maestro CLI not found."; \
+	  exit 1; \
+	fi
+	@echo "Enqueueing smoke test task..."
+	@cd server && npx tsx src/scripts/maestro-cli.ts run-and-wait -k tester -i "run smoke tests" -r summit --budget 0.5
+
+check-pr:
+	@echo "==> check-pr: validating PR via Maestro PolicyGuard..."
+	@cd server && npx tsx src/scripts/maestro-cli.ts check-policy -k review -i "PR check"
