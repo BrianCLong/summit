@@ -44,6 +44,7 @@ make smoke              # golden path automation against seeded data
 
 ### Observability & Health
 
+- **Security Checks:** SBOMs, Trivy scans, and SLSA attestations run nightly. See [SECURITY.md](SECURITY.md) for verification steps.
 - Health probes ship at `/health`, `/health/detailed`, `/health/ready`, `/health/live`, `/metrics`. `make smoke` curls them before executing mutations.
 - Prometheus scrapes `api:4000/metrics` using `observability/prometheus/prometheus-dev.yml`.
 - Grafana auto-provisions the **Summit Golden Path** dashboard (`observability/grafana/provisioning/dashboards/summit-golden-path.json`) with Prometheus datasource credentials from `.env`. Panels cover GraphQL p95, health-check uptime, and the lightweight dev gateway stub exposed on port `4100`.

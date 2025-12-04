@@ -477,3 +477,58 @@ exceptions:
 
 **Last Updated**: 2025-11-20
 **Next Review**: 2025-05-20 (6 months)
+
+## Supply Chain Security
+
+We enforce rigorous supply chain security measures to protect the integrity of the Summit Platform.
+
+### 1. Software Bill of Materials (SBOM)
+
+We generate CycloneDX-compliant SBOMs for all build artifacts.
+
+- **Generation**: SBOMs are generated using `syft` during the CI build process.
+- **Verification**: You can verify the SBOM against the deployed image using `syft` or `cosign`.
+
+**How to verify:**
+```bash
+# Extract SBOM from image
+syft <image> -o cyclonedx-json > sbom.json
+
+# Check for known vulnerabilities
+trivy sbom sbom.json
+```
+
+### 2. Image Signing & Attestation (SLSA)
+
+All production container images are signed using `cosign` (Keyless mode via OIDC).
+
+**How to verify signature:**
+```bash
+cosign verify \
+  --certificate-identity-regexp "https://github.com/BrianCLong/summit/.github/workflows/.*" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/brianclong/summit-server:latest
+```
+
+**How to verify attestation:**
+```bash
+cosign verify-attestation \
+  --type cyclonedx \
+  --certificate-identity-regexp "https://github.com/BrianCLong/summit/.github/workflows/.*" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/brianclong/summit-server:latest
+```
+
+### 3. Base Image Pinning
+
+All Dockerfiles use digest-pinned base images to ensure reproducibility and prevent upstream poisoning.
+
+- `node:18-alpine` pinned to `sha256:a8f88948f856683d32d459c8370b02a43e116302d142e3418c0054475009008b`
+- `node:20-alpine` pinned to `sha256:be8d32d651b3e0c9c2b28fdc1d3888408125d703232013cff955344d052027e5`
+
+### 4. Vulnerability Scanning
+
+We run nightly and on-PR vulnerability scans using `trivy` and GitHub CodeQL.
+- **CodeQL**: Scans source code for security flaws.
+- **Trivy**: Scans container images and dependencies for CVEs.
+- **Dependency Review**: Blocks PRs introducing vulnerable dependencies.
