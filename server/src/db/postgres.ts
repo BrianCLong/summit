@@ -41,6 +41,7 @@ export interface ManagedPostgresPool {
   on: Pool['on'];
   healthCheck: () => Promise<PoolHealthSnapshot[]>;
   slowQueryInsights: () => SlowQueryInsight[];
+  pool: Pool;
 }
 
 interface SlowQueryInsight {
@@ -437,6 +438,7 @@ function createManagedPool(
     on,
     healthCheck,
     slowQueryInsights,
+    pool: writePool.pool,
   };
 }
 
