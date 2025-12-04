@@ -1,0 +1,52 @@
+{
+  "name": "@intelgraph/query-language",
+  "version": "1.0.0",
+  "description": "Advanced declarative query language for Summit intelligence platform",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "query-language",
+    "parser",
+    "ast",
+    "compiler",
+    "intelligence-analysis"
+  ],
+  "dependencies": {
+    "chevrotain": "^11.0.3",
+    "ajv": "^8.12.0",
+    "date-fns": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./parser": {
+      "types": "./dist/parser/index.d.ts",
+      "import": "./dist/parser/index.js"
+    },
+    "./compiler": {
+      "types": "./dist/compiler/index.d.ts",
+      "import": "./dist/compiler/index.js"
+    },
+    "./optimizer": {
+      "types": "./dist/optimizer/index.d.ts",
+      "import": "./dist/optimizer/index.js"
+    }
+  }
+}

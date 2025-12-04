@@ -1,0 +1,50 @@
+{
+  "name": "@intelgraph/streaming-api",
+  "version": "1.0.0",
+  "description": "WebSocket and SSE streaming API for real-time intelligence data",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "websocket",
+    "sse",
+    "streaming",
+    "real-time",
+    "api"
+  ],
+  "dependencies": {
+    "ws": "^8.18.3",
+    "uuid": "^11.0.5",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.5.13",
+    "@types/uuid": "^10.0.0",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "eslint": "^9.39.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./websocket": {
+      "types": "./dist/websocket/index.d.ts",
+      "import": "./dist/websocket/index.js"
+    },
+    "./sse": {
+      "types": "./dist/sse/index.d.ts",
+      "import": "./dist/sse/index.js"
+    }
+  }
+}
