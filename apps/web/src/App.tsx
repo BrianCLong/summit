@@ -39,6 +39,7 @@ const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ErrorBoundary, NotFound } from '@/components/error'
 
 function App() {
   return (
@@ -48,20 +49,21 @@ function App() {
           <AuthProvider>
             <SearchProvider>
               <Router>
-                <React.Suspense
-                  fallback={
-                    <div className="flex h-screen items-center justify-center">
-                      <div className="text-center">
-                        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                        <p className="mt-4 text-sm text-muted-foreground">
-                          Loading...
-                        </p>
+                <ErrorBoundary>
+                  <React.Suspense
+                    fallback={
+                      <div className="flex h-screen items-center justify-center">
+                        <div className="text-center">
+                          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                          <p className="mt-4 text-sm text-muted-foreground">
+                            Loading...
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  }
-                >
-                  <Routes>
-                    {/* Auth routes */}
+                    }
+                  >
+                    <Routes>
+                      {/* Auth routes */}
                     <Route path="/signin" element={<SignInPage />} />
                     <Route
                       path="/access-denied"
@@ -113,10 +115,11 @@ function App() {
                       <Route path="changelog" element={<ChangelogPage />} />
 
                       {/* Catch all */}
-                      <Route path="*" element={<Navigate to="/" replace />} />
+                      <Route path="*" element={<NotFound />} />
                     </Route>
                   </Routes>
-                </React.Suspense>
+                  </React.Suspense>
+                </ErrorBoundary>
               </Router>
             </SearchProvider>
           </AuthProvider>
