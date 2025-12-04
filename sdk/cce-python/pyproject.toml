@@ -1,0 +1,10 @@
+[project]
+name = "summit-cce-sdk"
+version = "0.1.0"
+description = "Python helper for submitting enclave jobs"
+requires-python = ">=3.10"
+dependencies = ["grpcio>=1.64.0", "requests>=2.31.0"]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
