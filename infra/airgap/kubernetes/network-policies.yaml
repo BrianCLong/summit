@@ -1,0 +1,236 @@
+# Network Policies for Air-Gapped Deployment
+# Implements defense-in-depth network segmentation
+---
+# Default deny all ingress and egress for air-gapped namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: intelgraph-airgap
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# Allow internal communication within air-gapped namespace
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-internal
+  namespace: intelgraph-airgap
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.io/zone: air-gapped
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.io/zone: air-gapped
+    # Allow DNS
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+        - port: 53
+          protocol: TCP
+---
+# Allow SNMP monitoring traffic
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-snmp-monitoring
+  namespace: intelgraph-airgap
+spec:
+  podSelector:
+    matchLabels:
+      snmp.intelgraph.io/enabled: "true"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/component: snmp-monitoring
+      ports:
+        - port: 161
+          protocol: UDP
+        - port: 162
+          protocol: UDP
+---
+# Allow from scanning zone to production (post-scan verified artifacts)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-scanning
+  namespace: intelgraph-airgap
+spec:
+  podSelector:
+    matchLabels:
+      intelgraph.io/accepts-scanned-data: "true"
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.io/zone: data-transfer
+        - podSelector:
+            matchLabels:
+              scanning.intelgraph.io/verified: "true"
+      ports:
+        - port: 443
+          protocol: TCP
+---
+# Scanning namespace policies
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: scanning-isolation
+  namespace: intelgraph-scanning
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow ingress from removable media handling service
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: media-handler
+      ports:
+        - port: 8080
+          protocol: TCP
+  egress:
+    # Allow to air-gapped zone after verification
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.io/zone: air-gapped
+      ports:
+        - port: 443
+          protocol: TCP
+    # Allow to SIEM for logging
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.io/zone: security-operations
+      ports:
+        - port: 514
+          protocol: UDP
+        - port: 6514
+          protocol: TCP
+    # DNS
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP
+---
+# SIEM namespace isolation
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: siem-ingress-only
+  namespace: intelgraph-siem
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Accept logs from all zones
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: intelgraph
+      ports:
+        - port: 514
+          protocol: UDP
+        - port: 6514
+          protocol: TCP
+        - port: 5044  # Beats/Logstash
+          protocol: TCP
+    # Accept OT sensor data
+    - from:
+        - ipBlock:
+            cidr: 10.100.40.0/24  # OT sensor CIDR
+      ports:
+        - port: 5044
+          protocol: TCP
+    # SNMP traps
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: intelgraph
+      ports:
+        - port: 162
+          protocol: UDP
+  egress:
+    # SIEM is a sink - no egress allowed (true air-gap)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.io/zone: security-operations
+---
+# Monitoring namespace policies
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: monitoring-access
+  namespace: intelgraph-monitoring
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Prometheus scraping from SNMP exporter
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+      ports:
+        - port: 9116  # SNMP exporter
+          protocol: TCP
+  egress:
+    # SNMP polling to all zones
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/name: intelgraph
+      ports:
+        - port: 161
+          protocol: UDP
+    # Send traps to SIEM
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              security.intelgraph.io/zone: security-operations
+      ports:
+        - port: 162
+          protocol: UDP
+    # DNS
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - port: 53
+          protocol: UDP

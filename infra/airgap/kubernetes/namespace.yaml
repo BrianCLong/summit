@@ -1,0 +1,98 @@
+# Air-Gapped Deployment Namespaces
+# Summit IntelGraph Platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-airgap
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: airgap
+    security.intelgraph.io/zone: air-gapped
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-scanning
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: malware-scanning
+    security.intelgraph.io/zone: data-transfer
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/enforce-version: latest
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: snmp-monitoring
+    security.intelgraph.io/zone: monitoring
+    pod-security.kubernetes.io/enforce: restricted
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelgraph-siem
+  labels:
+    app.kubernetes.io/name: intelgraph
+    app.kubernetes.io/component: siem
+    security.intelgraph.io/zone: security-operations
+    pod-security.kubernetes.io/enforce: restricted
+---
+# ResourceQuotas for air-gapped namespaces
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: airgap-quota
+  namespace: intelgraph-airgap
+spec:
+  hard:
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    limits.cpu: "40"
+    limits.memory: 80Gi
+    pods: "100"
+    services: "20"
+    secrets: "50"
+    configmaps: "50"
+    persistentvolumeclaims: "20"
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: scanning-quota
+  namespace: intelgraph-scanning
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 20Gi
+    limits.cpu: "20"
+    limits.memory: 40Gi
+    pods: "20"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: airgap-limits
+  namespace: intelgraph-airgap
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 128Mi
+      max:
+        cpu: "4"
+        memory: 8Gi
+      min:
+        cpu: 50m
+        memory: 64Mi
