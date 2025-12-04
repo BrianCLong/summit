@@ -95,6 +95,56 @@ interface DataLocalityMetrics {
   storageLocalityScore: number;
 }
 
+interface BuildRequest {
+  repository: string;
+  entryPoint: string;
+  parameters?: Record<string, any>;
+  schemaChangePlan?: SchemaChangePlan;
+}
+
+type SchemaCheckDefinition = string | SchemaCheck;
+
+interface SchemaChangePlan {
+  id: string;
+  description: string;
+  migrations: string[];
+  preflightChecks: SchemaCheckDefinition[];
+  postMigrationValidations: SchemaCheckDefinition[];
+}
+
+interface SchemaCheck {
+  name: string;
+  command?: string;
+  expectedOutcome?: 'passed' | 'failed';
+  critical?: boolean;
+  details?: string;
+}
+
+interface SchemaCheckResult {
+  name: string;
+  status: 'passed' | 'failed';
+  details: string;
+  phase: 'preflight' | 'post-migration';
+}
+
+interface SchemaChangeValidationResult {
+  planId: string;
+  summary: string;
+  preflight: SchemaCheckResult[];
+  postMigration: SchemaCheckResult[];
+  status: 'passed' | 'failed';
+  blockedDeployment: boolean;
+  recordedAt: string;
+}
+
+interface SchemaValidationReport {
+  totalPlans: number;
+  passedPlans: number;
+  failedPlans: number;
+  lastRun?: SchemaChangeValidationResult;
+  validationHistory: SchemaChangeValidationResult[];
+}
+
 interface ReleaseStage {
   id: string;
   name: string;
@@ -122,6 +172,7 @@ class ReleaseOrchestrator extends EventEmitter {
   private zeroTrustPolicies: Map<string, ZeroTrustPolicy> = new Map();
   private dataLocalityCache: Map<string, DataLocalityMetrics> = new Map();
   private activeReleases: Map<string, ReleaseProgress> = new Map();
+  private schemaChangeValidations: SchemaChangeValidationResult[] = [];
 
   // Performance tracking
   private metrics = {
@@ -312,7 +363,7 @@ class ReleaseOrchestrator extends EventEmitter {
    */
   async generateSLSAL3Provenance(
     artifactName: string,
-    buildRequest: any,
+    buildRequest: BuildRequest,
     materials: Array<{ uri: string; digest: { [key: string]: string } }>,
   ): Promise<SLSAL3Provenance> {
     const buildInvocationId = crypto.randomUUID();
@@ -411,11 +462,11 @@ class ReleaseOrchestrator extends EventEmitter {
     );
 
     // Check cache first unless skipped
-    const cacheHit = !request.skipCacheLookup && Math.random() > 0.3;
+    const cacheHit = !request.skipCacheLookup;
 
     if (cacheHit) {
       console.log('   ✅ Cache hit - using cached result');
-      const executionTime = Date.now() - startTime + Math.random() * 200;
+      const executionTime = Date.now() - startTime + 50;
 
       return {
         success: true,
@@ -425,7 +476,7 @@ class ReleaseOrchestrator extends EventEmitter {
           cacheHitRate: 0.85,
           dataTransferBytes: 1024 * 50, // Minimal transfer for cache hit
           executionTimeMs: executionTime,
-          networkLatencyMs: Math.random() * 50,
+          networkLatencyMs: 25,
           storageLocalityScore: 0.95,
         },
       };
@@ -433,17 +484,15 @@ class ReleaseOrchestrator extends EventEmitter {
 
     // Execute actual build
     console.log('   🔨 Cache miss - executing remote build');
-    await new Promise((resolve) =>
-      setTimeout(resolve, Math.random() * 2000 + 1000),
-    );
+    await this.simulateCheckExecution();
 
     const executionTime = Date.now() - startTime;
     const dataLocalityMetrics: DataLocalityMetrics = {
       cacheHitRate: 0.72,
-      dataTransferBytes: 1024 * 1024 * Math.random() * 100 + 1024 * 1024 * 10, // 10-110 MB
+      dataTransferBytes: 1024 * 1024 * 25,
       executionTimeMs: executionTime,
-      networkLatencyMs: Math.random() * 200 + 50,
-      storageLocalityScore: Math.random() * 0.4 + 0.6, // 0.6-1.0
+      networkLatencyMs: 120,
+      storageLocalityScore: 0.82,
     };
 
     console.log(`   ⏱️  Execution completed in ${executionTime}ms`);
@@ -532,13 +581,131 @@ class ReleaseOrchestrator extends EventEmitter {
   }
 
   /**
+   * Run pre-flight checks and post-migration validation for schema changes
+   */
+  private async runSchemaChangeGuardrails(
+    plan: SchemaChangePlan,
+  ): Promise<SchemaChangeValidationResult> {
+    console.log(
+      '   🧪 Schema change validation pipeline: pre-flight and post-migration checks',
+    );
+
+    const preflight = await this.executeSchemaChecks(
+      this.normalizeChecks(plan.preflightChecks),
+      'preflight',
+    );
+    const postMigration = await this.executeSchemaChecks(
+      this.normalizeChecks(plan.postMigrationValidations),
+      'post-migration',
+    );
+
+    if (!plan.migrations || plan.migrations.length === 0) {
+      preflight.push({
+        name: 'migration-plan-present',
+        status: 'failed',
+        details:
+          'No migrations supplied for schema change plan; deployment will be blocked',
+        phase: 'preflight',
+      });
+    }
+
+    const failedChecks = [...preflight, ...postMigration].filter(
+      (check) => check.status === 'failed',
+    );
+    const status: SchemaChangeValidationResult['status'] =
+      failedChecks.length === 0 ? 'passed' : 'failed';
+
+    const summary =
+      status === 'passed'
+        ? 'Schema change guardrails satisfied'
+        : `Schema validation failed on: ${failedChecks
+            .map((check) => check.name)
+            .join(', ')}`;
+
+    const validationResult: SchemaChangeValidationResult = {
+      planId: plan.id,
+      summary,
+      preflight,
+      postMigration,
+      status,
+      blockedDeployment: status === 'failed',
+      recordedAt: new Date().toISOString(),
+    };
+
+    this.schemaChangeValidations.push(validationResult);
+
+    if (status === 'passed') {
+      console.log('   ✅ Schema change checks passed');
+    } else {
+      console.log(`   ❌ Schema change checks failed: ${summary}`);
+    }
+
+    return validationResult;
+  }
+
+  private async executeSchemaChecks(
+    checks: SchemaCheck[],
+    phase: 'preflight' | 'post-migration',
+  ): Promise<SchemaCheckResult[]> {
+    const coverageLabel = phase === 'preflight' ? 'pre-flight' : 'post-migration';
+
+    if (!checks || checks.length === 0) {
+      return [
+        {
+          name: `${phase}-coverage`,
+          status: 'failed',
+          details: `No ${coverageLabel} checks defined; deployment blocked`,
+          phase,
+        },
+      ];
+    }
+
+    const results: SchemaCheckResult[] = [];
+    for (const check of checks) {
+      console.log(
+        `     • [${phase}] ${check.name}${check.command ? ` (${check.command})` : ''}`,
+      );
+      await this.simulateCheckExecution();
+      const status = check.expectedOutcome ?? 'passed';
+      results.push({
+        name: check.name,
+        status,
+        details:
+          status === 'passed'
+            ? check.details || `${coverageLabel} verification completed successfully`
+            : check.details ||
+              `${coverageLabel} check failed${check.critical ? ' (critical)' : ''}`,
+        phase,
+      });
+    }
+
+    return results;
+  }
+
+  private normalizeChecks(checks: SchemaCheckDefinition[]): SchemaCheck[] {
+    if (!checks || checks.length === 0) {
+      return [];
+    }
+
+    return checks.map((check) =>
+      typeof check === 'string'
+        ? { name: check, expectedOutcome: 'passed' }
+        : { ...check, expectedOutcome: check.expectedOutcome ?? 'passed' },
+    );
+  }
+
+  private async simulateCheckExecution(): Promise<void> {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+
+  /**
    * Promote artifact through release pipeline
    */
   async promoteArtifact(
     artifactName: string,
     fromStage: string,
     toStage: string,
-    buildRequest: any,
+    buildRequest: BuildRequest,
   ): Promise<ReleasePromotionResult> {
     const startTime = Date.now();
     const promotionId = crypto.randomUUID();
@@ -606,13 +773,31 @@ class ReleaseOrchestrator extends EventEmitter {
       };
     }
 
+    let schemaValidation: SchemaChangeValidationResult | undefined;
+    if (buildRequest.schemaChangePlan) {
+      schemaValidation = await this.runSchemaChangeGuardrails(
+        buildRequest.schemaChangePlan,
+      );
+
+      if (schemaValidation.status === 'failed') {
+        return {
+          success: false,
+          promotionId,
+          duration: Date.now() - startTime,
+          stage: toStage,
+          violations: [schemaValidation.summary],
+          artifactSignature,
+          provenance,
+          schemaValidation,
+        };
+      }
+    }
+
     // Execute automated checks
     console.log('   🔍 Running automated checks...');
     for (const check of targetStage.automatedChecks) {
       console.log(`     • ${check}...`);
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.random() * 500 + 200),
-      );
+      await this.simulateCheckExecution();
       console.log(`     ✅ ${check} passed`);
     }
 
@@ -633,6 +818,7 @@ class ReleaseOrchestrator extends EventEmitter {
           violations: ['Artifact immutability violation detected'],
           artifactSignature,
           provenance,
+          schemaValidation,
         };
       }
       console.log('     ✅ Immutability verified');
@@ -673,6 +859,7 @@ class ReleaseOrchestrator extends EventEmitter {
       violations: [],
       artifactSignature,
       provenance,
+      schemaValidation,
       buildResult,
     };
   }
@@ -728,6 +915,21 @@ class ReleaseOrchestrator extends EventEmitter {
       (0.75 - (1 - this.metrics.cacheHitRate)) / 0.75,
     ); // 70% target
 
+    const schemaValidation: SchemaValidationReport = {
+      totalPlans: this.schemaChangeValidations.length,
+      passedPlans: this.schemaChangeValidations.filter(
+        (result) => result.status === 'passed',
+      ).length,
+      failedPlans: this.schemaChangeValidations.filter(
+        (result) => result.status === 'failed',
+      ).length,
+      lastRun:
+        this.schemaChangeValidations.length > 0
+          ? this.schemaChangeValidations[this.schemaChangeValidations.length - 1]
+          : undefined,
+      validationHistory: [...this.schemaChangeValidations],
+    };
+
     const report: ReleaseReport = {
       timestamp: new Date().toISOString(),
       totalReleases: this.metrics.totalReleases,
@@ -769,6 +971,7 @@ class ReleaseOrchestrator extends EventEmitter {
         zeroTrustViolations: this.metrics.zeroTrustViolations,
         immutableViolations: this.metrics.immutableViolations,
       },
+      schemaValidation,
     };
 
     return report;
@@ -793,6 +996,7 @@ interface ReleasePromotionResult {
   violations: string[];
   artifactSignature: ArtifactSignature;
   provenance: SLSAL3Provenance;
+  schemaValidation?: SchemaChangeValidationResult;
   buildResult?: any;
 }
 
@@ -818,6 +1022,7 @@ interface ReleaseReport {
     zeroTrustViolations: number;
     immutableViolations: number;
   };
+  schemaValidation: SchemaValidationReport;
 }
 
 // Demo execution
@@ -843,6 +1048,44 @@ async function demonstrateReleaseOrchestrator() {
       buildRequest: {
         repository: 'https://github.com/intelgraph/api',
         entryPoint: 'mvn package',
+        schemaChangePlan: {
+          id: 'api-schema-v1-5-3',
+          description:
+            'Budget ledger tables plus approval signals for high-risk mutations',
+          migrations: [
+            '20250906_budget_ledger.sql',
+            '20250906_canary_limits.sql',
+            '20250906_budget_ledger_indexes.sql',
+          ],
+          preflightChecks: [
+            {
+              name: 'Validate backward compatibility contract tests',
+              command: 'npm run contract-tests',
+            },
+            {
+              name: 'Run migration dry-run against shadow database',
+              command: 'npm run migrate:shadow',
+            },
+            {
+              name: 'Capture schema drift diff from production snapshot',
+              command: 'npm run schema:diff',
+            },
+          ],
+          postMigrationValidations: [
+            {
+              name: 'Verify foreign keys and indexes present for budget ledger tables',
+              command: 'npm run validate:indexes',
+            },
+            {
+              name: 'Replay approval workflow smoke tests',
+              command: 'npm run test:approval-smoke',
+            },
+            {
+              name: 'Inspect rollback savepoints and replication lag',
+              command: 'npm run validate:replication',
+            },
+          ],
+        },
       },
     },
     {
@@ -925,6 +1168,29 @@ async function demonstrateReleaseOrchestrator() {
   console.log(
     `   • Immutable Violations: ${report.securityMetrics.immutableViolations}`,
   );
+
+  console.log('\n🧪 SCHEMA CHANGE VALIDATION:');
+  console.log(
+    `   • Plans validated: ${report.schemaValidation.totalPlans} (passed: ${report.schemaValidation.passedPlans}, failed: ${report.schemaValidation.failedPlans})`,
+  );
+
+  if (report.schemaValidation.lastRun) {
+    console.log(
+      `   • Last plan ${report.schemaValidation.lastRun.planId}: ${report.schemaValidation.lastRun.status.toUpperCase()}`,
+    );
+    console.log(
+      `     Pre-flight: ${report.schemaValidation.lastRun.preflight
+        .map((check) => `${check.name}=${check.status}`)
+        .join(', ')}`,
+    );
+    console.log(
+      `     Post-migration: ${report.schemaValidation.lastRun.postMigration
+        .map((check) => `${check.name}=${check.status}`)
+        .join(', ')}`,
+    );
+  } else {
+    console.log('   • No schema change validations executed in this release train');
+  }
 
   console.log(
     '\n✨ vNext+5 Sprint: Release Orchestrator & Zero-Trust Supply Chain - COMPLETED',
