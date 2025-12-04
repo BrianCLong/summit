@@ -1,0 +1,28 @@
+package intelgraph.migrations
+
+default allow = false
+
+# Migrations can only be run by admin or cicd bot
+allow {
+  input.user.role == "admin"
+}
+
+allow {
+  input.user.role == "cicd"
+  input.context.environment != "production"
+}
+
+# Production migrations require explicit approval (simulated check)
+allow {
+  input.user.role == "cicd"
+  input.context.environment == "production"
+  # Validating that approval comes from a trusted source/signature
+  input.resource.approved == true
+  has_valid_approval_signature
+}
+
+has_valid_approval_signature {
+  # Mock signature verification - in production this would check input.resource.approval_signature
+  input.resource.approval_signature != ""
+  input.resource.approval_signer == "security-admin"
+}
