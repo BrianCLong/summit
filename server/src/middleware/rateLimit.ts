@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
 import { cfg } from '../config.js';
+import { logger } from '../shared/logging/index.js';
 
 interface RateLimitConfig {
   windowMs: number;
@@ -55,9 +56,22 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
   res.set('X-RateLimit-Reset', String(Math.ceil(result.reset / 1000)));
 
   if (!result.allowed) {
+    const retryAfter = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
+    res.set('Retry-After', String(retryAfter));
+
+    // Alerting hook: log warning with metadata for log-based alerts
+    logger.warn({
+      key,
+      limit,
+      remaining: result.remaining,
+      ip: req.ip,
+      path: req.originalUrl,
+      userId: user?.id || user?.sub
+    }, 'Rate limit exceeded');
+
     res.status(429).json({
       error: 'Too many requests, please try again later',
-      retryAfter: Math.ceil((result.reset - Date.now()) / 1000)
+      retryAfter
     });
     return;
   }
