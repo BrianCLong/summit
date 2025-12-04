@@ -2,6 +2,10 @@ import { recordAudit } from './audit';
 import React from 'react';
 
 export type GoldenPathStep =
+  | 'signup'
+  | 'tenant_created'
+  | 'first_ingest'
+  | 'first_export'
   | 'investigation_created'
   | 'entities_viewed'
   | 'relationships_explored'
