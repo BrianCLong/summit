@@ -1,8 +1,10 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './cacheService';
+import { advancedAuditSystem } from '../audit/advanced-audit-system';
 
 export interface Investigation {
   id: string;
+  tenantId: string;
   name: string;
   description?: string;
   status: InvestigationStatus;
@@ -323,6 +325,7 @@ export class InvestigationWorkflowService extends EventEmitter {
   async createInvestigation(
     templateId: string,
     data: {
+      tenantId: string;
       name: string;
       description?: string;
       priority: Priority;
@@ -360,6 +363,7 @@ export class InvestigationWorkflowService extends EventEmitter {
 
     const investigation: Investigation = {
       id: investigationId,
+      tenantId: data.tenantId,
       name: data.name,
       description: data.description,
       status: 'ACTIVE',
@@ -394,6 +398,25 @@ export class InvestigationWorkflowService extends EventEmitter {
       3600,
     );
 
+    // Audit Log
+    await advancedAuditSystem.logEvent({
+      eventType: 'user_action',
+      level: 'info',
+      userId: data.createdBy,
+      tenantId: data.tenantId,
+      serviceId: 'investigation-workflow',
+      resourceType: 'investigation',
+      resourceId: investigationId,
+      action: 'create_investigation',
+      outcome: 'success',
+      message: `Created investigation ${investigationId}`,
+      details: {
+        templateId,
+        priority: data.priority,
+        classification: data.classification,
+      },
+    });
+
     this.emit('investigationCreated', investigation);
     console.log(
       `[WORKFLOW] Created investigation: ${investigationId} from template: ${templateId}`,
@@ -408,11 +431,16 @@ export class InvestigationWorkflowService extends EventEmitter {
   async advanceWorkflowStage(
     investigationId: string,
     userId: string,
+    tenantId: string,
     notes?: string,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
       throw new Error(`Investigation not found: ${investigationId}`);
+    }
+
+    if (investigation.tenantId !== tenantId) {
+      throw new Error(`Unauthorized access to investigation: ${investigationId}`);
     }
 
     const currentStage = investigation.workflow.currentStage;
@@ -460,6 +488,25 @@ export class InvestigationWorkflowService extends EventEmitter {
       3600,
     );
 
+    // Audit Log
+    await advancedAuditSystem.logEvent({
+      eventType: 'user_action',
+      level: 'info',
+      userId,
+      tenantId,
+      serviceId: 'investigation-workflow',
+      resourceType: 'investigation',
+      resourceId: investigationId,
+      action: 'advance_workflow',
+      outcome: 'success',
+      message: `Advanced workflow to ${nextStage}`,
+      details: {
+        previousStage: currentStage,
+        newStage: nextStage,
+        notes,
+      },
+    });
+
     this.emit('workflowAdvanced', {
       investigation,
       previousStage: currentStage,
@@ -478,12 +525,17 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async addEvidence(
     investigationId: string,
+    tenantId: string,
     evidence: Omit<Evidence, 'id' | 'collectedAt'>,
     collectedBy: string,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
       throw new Error(`Investigation not found: ${investigationId}`);
+    }
+
+    if (investigation.tenantId !== tenantId) {
+      throw new Error(`Unauthorized access to investigation: ${investigationId}`);
     }
 
     const evidenceId = `evidence-${Date.now()}`;
@@ -514,6 +566,24 @@ export class InvestigationWorkflowService extends EventEmitter {
       3600,
     );
 
+    // Audit Log
+    await advancedAuditSystem.logEvent({
+      eventType: 'user_action',
+      level: 'info',
+      userId: collectedBy,
+      tenantId,
+      serviceId: 'investigation-workflow',
+      resourceType: 'investigation',
+      resourceId: investigationId,
+      action: 'add_evidence',
+      outcome: 'success',
+      message: `Added evidence ${evidenceId}`,
+      details: {
+        evidenceId,
+        evidenceType: evidence.type,
+      },
+    });
+
     this.emit('evidenceAdded', { investigation, evidence: newEvidence });
     console.log(
       `[WORKFLOW] Added evidence ${evidenceId} to investigation ${investigationId}`,
@@ -527,12 +597,17 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async addFinding(
     investigationId: string,
+    tenantId: string,
     finding: Omit<Finding, 'id' | 'discoveredAt'>,
     discoveredBy: string,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
       throw new Error(`Investigation not found: ${investigationId}`);
+    }
+
+    if (investigation.tenantId !== tenantId) {
+      throw new Error(`Unauthorized access to investigation: ${investigationId}`);
     }
 
     const findingId = `finding-${Date.now()}`;
@@ -554,6 +629,25 @@ export class InvestigationWorkflowService extends EventEmitter {
       3600,
     );
 
+    // Audit Log
+    await advancedAuditSystem.logEvent({
+      eventType: 'user_action',
+      level: 'info',
+      userId: discoveredBy,
+      tenantId,
+      serviceId: 'investigation-workflow',
+      resourceType: 'investigation',
+      resourceId: investigationId,
+      action: 'add_finding',
+      outcome: 'success',
+      message: `Added finding ${findingId}`,
+      details: {
+        findingId,
+        category: finding.category,
+        severity: finding.severity,
+      },
+    });
+
     this.emit('findingAdded', { investigation, finding: newFinding });
     console.log(
       `[WORKFLOW] Added finding ${findingId} to investigation ${investigationId}`,
@@ -567,11 +661,16 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async addTimelineEntry(
     investigationId: string,
+    tenantId: string,
     entry: Omit<TimelineEntry, 'id'>,
   ): Promise<Investigation> {
     const investigation = this.investigations.get(investigationId);
     if (!investigation) {
       throw new Error(`Investigation not found: ${investigationId}`);
+    }
+
+    if (investigation.tenantId !== tenantId) {
+      throw new Error(`Unauthorized access to investigation: ${investigationId}`);
     }
 
     const entryId = `timeline-${Date.now()}`;
@@ -593,6 +692,24 @@ export class InvestigationWorkflowService extends EventEmitter {
       3600,
     );
 
+    // Audit Log
+    await advancedAuditSystem.logEvent({
+      eventType: 'user_action',
+      level: 'info',
+      userId: entry.actor,
+      tenantId,
+      serviceId: 'investigation-workflow',
+      resourceType: 'investigation',
+      resourceId: investigationId,
+      action: 'add_timeline_entry',
+      outcome: 'success',
+      message: `Added timeline entry ${entryId}`,
+      details: {
+        entryId,
+        eventType: entry.eventType,
+      },
+    });
+
     this.emit('timelineEntryAdded', { investigation, entry: newEntry });
     console.log(
       `[WORKFLOW] Added timeline entry ${entryId} to investigation ${investigationId}`,
@@ -606,6 +723,7 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   async getInvestigation(
     investigationId: string,
+    tenantId: string,
   ): Promise<Investigation | null> {
     let investigation = this.investigations.get(investigationId);
 
@@ -619,25 +737,21 @@ export class InvestigationWorkflowService extends EventEmitter {
       }
     }
 
+    if (investigation && investigation.tenantId !== tenantId) {
+      // Return null or throw error depending on design choice.
+      // Returning null simulates "not found" which is safe.
+      return null;
+    }
+
     return investigation || null;
   }
 
   /**
-   * Get all investigations
+   * Get all investigations (filtered by tenant)
    */
-  getAllInvestigations(): Investigation[] {
-    return Array.from(this.investigations.values()).sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-  }
-
-  /**
-   * Get investigations by status
-   */
-  getInvestigationsByStatus(status: InvestigationStatus): Investigation[] {
+  getAllInvestigations(tenantId: string): Investigation[] {
     return Array.from(this.investigations.values())
-      .filter((inv) => inv.status === status)
+      .filter(inv => inv.tenantId === tenantId)
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
@@ -645,11 +759,23 @@ export class InvestigationWorkflowService extends EventEmitter {
   }
 
   /**
-   * Get investigations assigned to user
+   * Get investigations by status (filtered by tenant)
    */
-  getAssignedInvestigations(userId: string): Investigation[] {
+  getInvestigationsByStatus(status: InvestigationStatus, tenantId: string): Investigation[] {
     return Array.from(this.investigations.values())
-      .filter((inv) => inv.assignedTo.includes(userId))
+      .filter((inv) => inv.status === status && inv.tenantId === tenantId)
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
+  }
+
+  /**
+   * Get investigations assigned to user (filtered by tenant)
+   */
+  getAssignedInvestigations(userId: string, tenantId: string): Investigation[] {
+    return Array.from(this.investigations.values())
+      .filter((inv) => inv.assignedTo.includes(userId) && inv.tenantId === tenantId)
       .sort(
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
