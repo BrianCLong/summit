@@ -1,0 +1,47 @@
+name: Deploy to Prod (Canary + Auto-rollback)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image Tag to deploy (SHA)'
+        required: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.11.1'
+
+      - name: Create Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_PROD_B64 }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to Prod
+        env:
+          NAMESPACE: prod
+          HOST: api.intelgraph.io
+        run: |
+          # The chart has Argo Rollouts enabled, so 'helm upgrade' applies the Rollout object.
+          # Argo Rollouts controller handles the steps (10% -> 50% -> 100%).
+          helm upgrade --install server ./charts/server \
+            --namespace $NAMESPACE \
+            --set image.repository=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} \
+            --set image.tag=${{ inputs.image_tag }} \
+            --set ingress.hosts[0].host=$HOST \
+            --set ingress.tls[0].hosts[0]=$HOST \
+            --wait
