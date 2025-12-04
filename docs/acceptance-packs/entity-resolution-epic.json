@@ -1,0 +1,80 @@
+{
+  "epic": "Entity Resolution (ER) Microservice",
+  "key": "ER-EPIC",
+  "archiveName": "entity-resolution-epic.zip",
+  "repo": "services/entity-resolution/",
+  "description": "Deterministic + probabilistic ER with explainable scorecards, reversible merges, and human adjudication queues.",
+  "stories": [
+    {
+      "key": "ER-1",
+      "summary": "Define API contracts",
+      "description": "Define contracts for /er/candidates, /er/merge, /er/split, /er/explain endpoints."
+    },
+    {
+      "key": "ER-2",
+      "summary": "Candidate generation",
+      "description": "Implement candidate generation using rules + embeddings hook."
+    },
+    {
+      "key": "ER-3",
+      "summary": "Scoring and threshold policy",
+      "description": "Implement scoring with configurable thresholds; emit er.merge.v1 events."
+    },
+    {
+      "key": "ER-4",
+      "summary": "Merge graph and reversible operations",
+      "description": "Implement merge graph with fully reversible operations and complete audit trail."
+    },
+    {
+      "key": "ER-5",
+      "summary": "Explainability endpoint",
+      "description": "Implement /er/explain returning feature vectors and rationale."
+    },
+    {
+      "key": "ER-6",
+      "summary": "Adjudication queue API",
+      "description": "Implement adjudication queue API for human review (no UI)."
+    },
+    {
+      "key": "ER-7",
+      "summary": "Golden datasets and reproducible merges",
+      "description": "Create golden datasets; ensure reproducible merge outcomes."
+    }
+  ],
+  "definitionOfDone": [
+    "Canonical JSON-LD facets consistent with graph model",
+    "Every merge has an override log (user, reason, time)",
+    "Zero shared schema edits; GraphQL exposed via stitched schema adapter"
+  ],
+  "acceptanceTests": [
+    {
+      "name": "Deterministic merge",
+      "expected": "Deterministic duplicates merged; borderline routed to queue"
+    },
+    {
+      "name": "Reversible split",
+      "expected": "/er/split restores pre-merge state losslessly"
+    },
+    {
+      "name": "Explainability",
+      "expected": "Explain returns features, weights, and policy label"
+    }
+  ],
+  "testEvidence": [
+    {
+      "type": "unit",
+      "path": "services/entity-resolution/src/__tests__/",
+      "artifact": "test-results/unit/entity-resolution.xml"
+    },
+    {
+      "type": "integration",
+      "path": "services/entity-resolution/tests/integration/",
+      "artifact": "test-results/integration/entity-resolution.json"
+    },
+    {
+      "type": "e2e",
+      "path": "tests/e2e/entity-resolution.spec.ts",
+      "artifact": "test-results/e2e/entity-resolution-report.json"
+    }
+  ]
+}

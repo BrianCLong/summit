@@ -1,0 +1,75 @@
+{
+  "epic": "Tri-Pane UI + Explain This View (Frontend Extension)",
+  "key": "UI-EPIC",
+  "archiveName": "tri-pane-explain-epic.zip",
+  "repo": "plugins/tri-pane-explain/",
+  "description": "Plugin renders synchronized timeline/map/graph panes with brushing + explainer panel (XAI overlays, provenance tooltips).",
+  "stories": [
+    {
+      "key": "UI-1",
+      "summary": "registerUiExtension entry point",
+      "description": "Implement registerUiExtension('tri-pane') entry; persisted queries (read-only)."
+    },
+    {
+      "key": "UI-2",
+      "summary": "Brushing and linking across panes",
+      "description": "Implement brushing & linking across panes; undo/redo; saved views with diff."
+    },
+    {
+      "key": "UI-3",
+      "summary": "Explainer panel with provenance tooltips",
+      "description": "Implement explainer panel with provenance tooltips; integrate with NLQ (EPIC 2)."
+    },
+    {
+      "key": "UI-4",
+      "summary": "Accessibility AAA and keyboard navigation",
+      "description": "Ensure A11y AAA compliance, keyboard-first nav, command palette hooks."
+    },
+    {
+      "key": "UI-5",
+      "summary": "Instrumentation for metrics",
+      "description": "Add instrumentation for TTFI, path discovery, task-time reduction."
+    }
+  ],
+  "definitionOfDone": [
+    "Zero edits to core UI; module federation only",
+    "Accessibility audits pass; screenshots diff-stable",
+    "Metrics emitted to OPS pack"
+  ],
+  "acceptanceTests": [
+    {
+      "name": "Cross-pane selection",
+      "expected": "Select on timeline filters map/graph within 50ms budget (local)"
+    },
+    {
+      "name": "Explain functionality",
+      "expected": "'Explain' shows inputs, steps, citations; missing proof blocks publish"
+    },
+    {
+      "name": "Saved view diff",
+      "expected": "Saved view diff shows UI + query changes"
+    }
+  ],
+  "testEvidence": [
+    {
+      "type": "unit",
+      "path": "plugins/tri-pane-explain/src/__tests__/",
+      "artifact": "test-results/unit/tri-pane-explain.xml"
+    },
+    {
+      "type": "snapshot",
+      "path": "plugins/tri-pane-explain/src/__snapshots__/",
+      "artifact": "test-results/snapshots/tri-pane-explain.json"
+    },
+    {
+      "type": "a11y",
+      "path": "plugins/tri-pane-explain/tests/a11y/",
+      "artifact": "test-results/a11y/tri-pane-explain.json"
+    },
+    {
+      "type": "e2e",
+      "path": "tests/e2e/tri-pane-explain.spec.ts",
+      "artifact": "test-results/e2e/tri-pane-explain-report.json"
+    }
+  ]
+}

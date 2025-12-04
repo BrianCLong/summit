@@ -1,0 +1,70 @@
+{
+  "epic": "Zero-Knowledge Trust Exchange (ZK-TX)",
+  "key": "ZK-EPIC",
+  "archiveName": "zk-tx-epic.zip",
+  "repo": "services/zk-tx/",
+  "description": "Cross-tenant deconfliction via ZK set/overlap/range proofs; no raw PII exchanged.",
+  "stories": [
+    {
+      "key": "ZK-1",
+      "summary": "Define /zk/overlap and /zk/range",
+      "description": "Define /zk/overlap and /zk/range endpoints with proof + transcript output."
+    },
+    {
+      "key": "ZK-2",
+      "summary": "Key management",
+      "description": "Implement audited salts and hardware-backed entropy for key management."
+    },
+    {
+      "key": "ZK-3",
+      "summary": "Example CLI for two tenants",
+      "description": "Create CLI demonstrating two tenants proving overlap/no-overlap."
+    },
+    {
+      "key": "ZK-4",
+      "summary": "Leakage tests and selective disclosure",
+      "description": "Implement leakage tests; demonstrate selective disclosure examples."
+    },
+    {
+      "key": "ZK-5",
+      "summary": "Federation planner stub",
+      "description": "Create federation planner stub for future push-down optimization."
+    }
+  ],
+  "definitionOfDone": [
+    "Reproducible proofs; transcripts verifiable offline",
+    "No PII leaves tenant boundaries in tests",
+    "Authz handled internally; no edits to shared auth"
+  ],
+  "acceptanceTests": [
+    {
+      "name": "Positive overlap",
+      "expected": "Valid proof verifies"
+    },
+    {
+      "name": "Negative case",
+      "expected": "Zero-knowledge transcript passes, no info leak"
+    },
+    {
+      "name": "Key rotation",
+      "expected": "Keys rotated without breaking verification"
+    }
+  ],
+  "testEvidence": [
+    {
+      "type": "unit",
+      "path": "services/zk-tx/src/__tests__/",
+      "artifact": "test-results/unit/zk-tx.xml"
+    },
+    {
+      "type": "integration",
+      "path": "services/zk-tx/tests/integration/",
+      "artifact": "test-results/integration/zk-tx.json"
+    },
+    {
+      "type": "security",
+      "path": "services/zk-tx/tests/leakage/",
+      "artifact": "test-results/security/zk-tx-leakage.json"
+    }
+  ]
+}
