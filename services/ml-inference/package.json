@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/ml-inference",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "description": "ML model inference service for sentiment and narrative analysis",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "node --watch dist/server.js",
+    "start": "node dist/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/sentiment-analysis": "workspace:*",
+    "@intelgraph/narrative-tracking": "workspace:*",
+    "@intelgraph/influence-detection": "workspace:*",
+    "express": "^5.1.0",
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.3",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
