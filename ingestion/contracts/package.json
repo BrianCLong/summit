@@ -1,0 +1,14 @@
+{
+  "name": "ingestion-contracts",
+  "version": "0.1.0",
+  "description": "Contract specification and certification toolkit for ingestion pipeline",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test dist/tests/**/*.js",
+    "lint": "eslint src --ext .ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

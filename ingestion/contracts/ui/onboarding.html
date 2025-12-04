@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DPIC Onboarding Wizard</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; }
+      .step { display: none; border: 1px solid #ddd; padding: 16px; border-radius: 8px; }
+      .step.active { display: block; }
+      .navigation { margin-top: 12px; }
+      .diff-added { color: green; }
+      .diff-removed { color: red; }
+      .diff-changed { color: orange; }
+    </style>
+  </head>
+  <body>
+    <h1>Data Producer Intake & Certification</h1>
+    <ol id="wizard-steps">
+      <li data-step="1" class="active">Describe contract schema</li>
+      <li data-step="2">Upload license & DP/PII classification</li>
+      <li data-step="3">Review certification summary</li>
+      <li data-step="4">Drift check</li>
+    </ol>
+
+    <div id="step-1" class="step active">
+      <h2>Schema & Nullability</h2>
+      <textarea id="contract-json" rows="10" cols="80">{
+  "id": "dpic-001",
+  "dataset": "producer-alpha",
+  "version": "1.0.0",
+  "owner": "alpha-labs",
+  "license": { "name": "CC-BY-4.0" },
+  "termsHash": "",
+  "fields": [
+    { "name": "user_id", "type": "string", "nullable": false, "classification": "pii" },
+    { "name": "device_score", "type": "number", "nullable": true, "unit": "points" },
+    { "name": "region", "type": "string", "nullable": false }
+  ]
+}</textarea>
+    </div>
+
+    <div id="step-2" class="step">
+      <h2>License & Sensitivity</h2>
+      <p>Attach supporting license documentation and tag DP/PII columns. Sensitive columns must stay nullable for redaction.</p>
+    </div>
+
+    <div id="step-3" class="step">
+      <h2>Certification Preview</h2>
+      <pre id="cert-preview"></pre>
+    </div>
+
+    <div id="step-4" class="step">
+      <h2>Contract Drift Check</h2>
+      <textarea id="contract-json-next" rows="10" cols="80">{
+  "id": "dpic-001",
+  "dataset": "producer-alpha",
+  "version": "1.1.0",
+  "owner": "alpha-labs",
+  "license": { "name": "CC-BY-4.0" },
+  "termsHash": "",
+  "fields": [
+    { "name": "user_id", "type": "string", "nullable": true, "classification": "pii" },
+    { "name": "device_score", "type": "number", "nullable": true, "unit": "points" },
+    { "name": "region", "type": "string", "nullable": false },
+    { "name": "dp_score", "type": "number", "nullable": true, "unit": "epsilon", "classification": "dp" }
+  ]
+}</textarea>
+      <div id="drift-output"></div>
+    </div>
+
+    <div class="navigation">
+      <button id="prev">Previous</button>
+      <button id="next">Next</button>
+      <button id="run-drift">Diff Contracts</button>
+    </div>
+
+    <script>
+      const steps = [1, 2, 3, 4];
+      let position = 1;
+
+      function showStep(step) {
+        $('.step').removeClass('active');
+        $(`#step-${step}`).addClass('active');
+        $('#wizard-steps li').removeClass('active');
+        $(`#wizard-steps li[data-step="${step}"]`).addClass('active');
+        position = step;
+      }
+
+      function summarize() {
+        try {
+          const contract = JSON.parse($('#contract-json').val());
+          const sensitive = contract.fields.filter((f) => f.classification === 'dp' || f.classification === 'pii');
+          $('#cert-preview').text(`Contract ${contract.id} v${contract.version}\nSensitive columns: ${sensitive.length}`);
+        } catch (err) {
+          $('#cert-preview').text('Invalid JSON');
+        }
+      }
+
+      function diffContracts(current, next) {
+        const byName = (fields) => Object.fromEntries(fields.map((f) => [f.name, f]));
+        const a = byName(current.fields);
+        const b = byName(next.fields);
+        const changes = [];
+        for (const name in b) {
+          if (!a[name]) {
+            changes.push({ change: 'added', field: name });
+            continue;
+          }
+          const cur = a[name];
+          const nxt = b[name];
+          if (cur.nullable !== nxt.nullable || cur.type !== nxt.type || cur.classification !== nxt.classification) {
+            changes.push({ change: 'changed', field: name });
+          }
+        }
+        for (const name in a) {
+          if (!b[name]) {
+            changes.push({ change: 'removed', field: name });
+          }
+        }
+        return changes;
+      }
+
+      $('#next').on('click', () => {
+        const nextStep = Math.min(position + 1, steps.length);
+        if (nextStep === 3) summarize();
+        showStep(nextStep);
+      });
+      $('#prev').on('click', () => showStep(Math.max(position - 1, 1)));
+
+      $('#run-drift').on('click', () => {
+        try {
+          const current = JSON.parse($('#contract-json').val());
+          const next = JSON.parse($('#contract-json-next').val());
+          const diffs = diffContracts(current, next);
+          const html = diffs
+            .map((d) => `<div class="diff-${d.change}">${d.change.toUpperCase()}: ${d.field}</div>`)
+            .join('');
+          $('#drift-output').html(html || '<em>No drift detected</em>');
+        } catch (err) {
+          $('#drift-output').text('Unable to parse contracts');
+        }
+      });
+    </script>
+  </body>
+</html>
