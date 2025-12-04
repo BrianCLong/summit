@@ -4,6 +4,7 @@ import { Navigation } from './Navigation'
 import { GlobalSearch } from './GlobalSearch'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { SnapshotMenu } from '@/features/snapshots'
 
 export function Layout() {
   const { user, loading, isAuthenticated } = useAuth()
@@ -45,6 +46,7 @@ export function Layout() {
 
             {/* Search trigger - actual search modal is rendered globally */}
             <div className="flex items-center gap-4">
+              <SnapshotMenu />
               <div className="text-sm text-muted-foreground">
                 Welcome back, {user?.name}
               </div>

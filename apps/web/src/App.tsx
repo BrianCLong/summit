@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
 
@@ -39,6 +39,7 @@ const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { SnapshotProvider } from '@/features/snapshots'
 
 function App() {
   return (
@@ -47,7 +48,8 @@ function App() {
         <TooltipProvider>
           <AuthProvider>
             <SearchProvider>
-              <Router>
+              <SnapshotProvider>
+                <Router>
                 <React.Suspense
                   fallback={
                     <div className="flex h-screen items-center justify-center">
@@ -118,6 +120,7 @@ function App() {
                   </Routes>
                 </React.Suspense>
               </Router>
+              </SnapshotProvider>
             </SearchProvider>
           </AuthProvider>
         </TooltipProvider>

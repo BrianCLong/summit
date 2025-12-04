@@ -85,13 +85,13 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom',
-      '@apollo/client',
       'zustand',
     ],
     exclude: [
       // Exclude heavy deps from pre-bundling
       'd3',
       'framer-motion',
+      '@apollo/client',
     ],
   },
 })
