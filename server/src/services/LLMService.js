@@ -28,12 +28,39 @@ class LLMService {
       totalTokensGenerated: 0,
       averageTokensPerCompletion: 0,
     };
+    this.hasAlerted80 = false;
+  }
+
+  /**
+   * Check LLM budget
+   * Note: This uses in-memory metrics which reset on server restart.
+   * For production, metrics should be persisted to Redis/DB.
+   */
+  checkBudget() {
+    const costPerToken = parseFloat(process.env.LLM_COST_PER_TOKEN) || 0.000002;
+    const monthlyBudget = parseFloat(process.env.LLM_MONTHLY_BUDGET) || 100.0;
+    const currentSpend = this.metrics.totalTokensGenerated * costPerToken;
+
+    // Use a latch to prevent log spam, but for now simple range check is used as MVP.
+    // Ideally use Redis key `llm:alert:80` with TTL.
+    if (!this.hasAlerted80 && currentSpend >= monthlyBudget * 0.8) {
+       this.hasAlerted80 = true;
+       logger.warn({ currentSpend, monthlyBudget }, 'LLM Spend Alert: 80% of budget consumed');
+       // In a real system, send this to alerting service
+    }
+
+    if (currentSpend >= monthlyBudget) {
+       logger.error({ currentSpend, monthlyBudget }, 'LLM Spend Cap Exceeded');
+       throw new Error('LLM Spend Cap Exceeded. Please contact admin.');
+    }
   }
 
   /**
    * Generate text completion
    */
   async complete(params) {
+    this.checkBudget();
+
     const {
       prompt,
       model = this.config.model,

@@ -10,6 +10,7 @@ import evidenceTypeDefs from '../schema.evidence.js';
 import evidenceOkTypeDefs from '../schema.evidenceOk.js';
 import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
+import { adminTypeDefs } from './admin.js';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
@@ -50,6 +51,7 @@ export const typeDefs = [
   evidenceOkTypeDefs,
   trustRiskTypeDefs,
   provenanceTypeDefs,
+  adminTypeDefs,
 ];
 
 export default typeDefs;

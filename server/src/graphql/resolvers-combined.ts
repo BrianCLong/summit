@@ -7,6 +7,7 @@ const annotationsResolvers = require('./resolvers.annotations.js');
 import { v040Resolvers } from './resolvers/v040/index';
 import { activityResolvers } from './resolvers/activity.js';
 import { randomUUID } from 'node:crypto';
+import { PersistedQueryService, PersistedQueryInput } from './persisted-query-service.js';
 
 interface User {
   id: string;
@@ -15,6 +16,17 @@ interface User {
   lastName?: string;
   role?: string;
   permissions?: string[];
+}
+
+function ensureRole(user: User | undefined, allowedRoles: string[] = []) {
+  if (!user) throw new Error('Not authenticated');
+  if (allowedRoles.length === 0) return true;
+  const role = (user.role || '').toUpperCase();
+  if (!allowedRoles.map((r) => r.toUpperCase()).includes(role)) {
+    const err = new Error('Forbidden');
+    (err as any).code = 'FORBIDDEN';
+    throw err;
+  }
 }
 
 interface Context {
@@ -71,6 +83,13 @@ export const resolvers = {
         ? goals.filter((g) => g.investigationId === String(investigationId))
         : goals;
     },
+
+    // Persisted Query Admin API
+    listPersistedQueries: async (_: any, { tenantId }: { tenantId?: string }, { user }: Context) => {
+      ensureRole(user, ['ADMIN']);
+      const service = PersistedQueryService.getInstance();
+      return await service.listQueries(tenantId);
+    },
   },
 
   Mutation: {
@@ -79,6 +98,20 @@ export const resolvers = {
     ...(aiResolvers.Mutation || {}),
     ...(annotationsResolvers.Mutation || {}),
     ...(v040Resolvers.Mutation || {}),
+
+    // Persisted Query Admin API
+    upsertPersistedQuery: async (_: any, { input }: { input: PersistedQueryInput }, { user }: Context) => {
+      ensureRole(user, ['ADMIN']);
+      const service = PersistedQueryService.getInstance();
+      return await service.upsertQuery(input, user.id);
+    },
+
+    deletePersistedQuery: async (_: any, { id }: { id: string }, { user }: Context) => {
+      ensureRole(user, ['ADMIN']);
+      const service = PersistedQueryService.getInstance();
+      return await service.deleteQuery(id);
+    },
+
     login: async (
       _: any,
       { input }: { input: LoginInput },

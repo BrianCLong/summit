@@ -12,6 +12,7 @@ import { GraphQLError } from 'graphql';
 import crypto from 'crypto';
 import pino from 'pino';
 import type { Redis } from 'ioredis';
+import { PersistedQueryService } from '../persisted-query-service.js';
 
 const logger = pino();
 
@@ -74,14 +75,50 @@ export function createAPQPlugin(options: APQOptions = {}): ApolloServerPlugin {
   }
 
   /**
+   * Cache Priming: Load queries from DB on startup
+   */
+  (async () => {
+    try {
+      const service = PersistedQueryService.getInstance();
+      const queries = await service.listQueries();
+      logger.info({ count: queries.length }, 'APQ: Priming cache with persisted queries');
+      for (const q of queries) {
+        await setQuery(q.sha256, q.query);
+      }
+    } catch (err) {
+      // It's possible DB is not ready or table doesn't exist yet (first run)
+      logger.warn({ err }, 'APQ: Failed to prime cache from DB');
+    }
+  })();
+
+  /**
    * Get query from cache
    */
   async function getQuery(hash: string): Promise<string | null> {
+    // 1. Try Redis/Memory Cache
+    let query: string | null = null;
     if (redis) {
       const key = `${keyPrefix}${hash}`;
-      return await redis.get(key);
+      query = await redis.get(key);
+    } else {
+      query = memoryCache.get(hash) || null;
     }
-    return memoryCache.get(hash) || null;
+
+    // 2. Fallback to DB if not in cache (and cache it)
+    if (!query) {
+       try {
+         const service = PersistedQueryService.getInstance();
+         query = await service.getQueryByHash(hash);
+         if (query) {
+           await setQuery(hash, query);
+           logger.debug({ hash }, 'APQ: Cache miss resolved from DB');
+         }
+       } catch (err) {
+         logger.warn({ err, hash }, 'APQ: DB lookup failed');
+       }
+    }
+
+    return query;
   }
 
   /**
