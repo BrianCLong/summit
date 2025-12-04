@@ -121,19 +121,25 @@ export class ComplianceOrchestrator extends EventEmitter {
       const adaptations = await this.adaptationAgent.generateAdaptations(regulation, assessment);
       this.adaptationStore.set(regulation.id, adaptations);
 
-      // Always apply adaptations that are already approved (e.g., notifications)
+      const shouldAutoApplyLowRisk =
+        this.config.autoApplyLowRiskAdaptations &&
+        assessment.riskScore < this.config.riskThresholdForAutoApply;
+
+      // Apply approved adaptations according to risk and approval gating
       for (const adaptation of adaptations) {
-        if (!adaptation.requiresApproval && adaptation.status === 'approved') {
-          await this.adaptationAgent.applyAdaptation(adaptation.id);
+        if (adaptation.status !== 'approved') {
           continue;
         }
 
-        // Auto-apply low-risk adaptations if configured
-        if (
-          this.config.autoApplyLowRiskAdaptations &&
-          assessment.riskScore < this.config.riskThresholdForAutoApply &&
-          adaptation.status === 'approved'
-        ) {
+        const isPreApproved = !adaptation.requiresApproval;
+        let applied = false;
+
+        if (isPreApproved) {
+          await this.adaptationAgent.applyAdaptation(adaptation.id);
+          applied = true;
+        }
+
+        if (shouldAutoApplyLowRisk && !applied) {
           await this.adaptationAgent.applyAdaptation(adaptation.id);
         }
       }
