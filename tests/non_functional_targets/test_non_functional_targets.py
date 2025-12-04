@@ -10,6 +10,7 @@ from non_functional_targets.chaos_runner import (
     run_broker_kill_chaos_test,
     run_pod_kill_chaos_test,
     simulate_cross_region_failover,
+    simulate_cross_cloud_failover,
     simulate_pitr_recovery,
 )
 from non_functional_targets.ingest_compliance import apply_data_minimization, apply_policy_labels
@@ -55,6 +56,10 @@ class TestNonFunctionalTargetsStubs(unittest.TestCase):
 
     def test_simulate_cross_region_failover(self):
         self.assertTrue(simulate_cross_region_failover("us-east-1", "us-west-2"))
+
+    def test_simulate_cross_cloud_failover(self):
+        self.assertTrue(simulate_cross_cloud_failover("aws", "us-east-1", "gcp", "us-central1"))
+        self.assertTrue(simulate_cross_cloud_failover("gcp", "europe-west1", "aws", "eu-central-1"))
 
     def test_apply_data_minimization(self):
         raw_data = {"name": "John Doe", "email": "john@example.com", "age": 30}
