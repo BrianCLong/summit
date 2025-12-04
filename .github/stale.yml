@@ -1,0 +1,13 @@
+daysUntilStale: 45
+daysUntilClose: 14
+exemptLabels:
+  - ops/release-train
+  - risk/high
+staleLabel: stale
+token: ${{ secrets.GITHUB_TOKEN }}
+markComment: >
+  This item is stale due to inactivity. Please update with current status
+  or it will auto-close in 14 days. Add `risk/high` to exempt.
+closeComment: >
+  Auto-closing stale item. If still relevant, please re-open with an
+  updated canary/rollback plan and current owners.
