@@ -1,15 +1,34 @@
 const crypto = require('crypto');
 
-const DEFAULT_EMBEDDING_SIZE = 32;
+const DEFAULT_EMBEDDING_SIZE = 1536; // OpenAI text-embedding-3-small default
 
 class MultimodalFusionLayer {
   constructor(options = {}) {
     this.embeddingSize = options.embeddingSize || DEFAULT_EMBEDDING_SIZE;
     this.similarityThreshold = options.similarityThreshold || 0.72;
+    this.embeddingService = null;
+
+    // Dynamically load EmbeddingService (ESM)
+    this._initEmbeddingService();
   }
 
-  generateEntityEmbeddings(entity = {}, mediaDescriptors = []) {
+  async _initEmbeddingService() {
+    try {
+      const module = await import('./EmbeddingService.js');
+      const EmbeddingService = module.default;
+      this.embeddingService = new EmbeddingService();
+    } catch (error) {
+      console.warn('Failed to load EmbeddingService, falling back to mock vectors', error);
+    }
+  }
+
+  async generateEntityEmbeddings(entity = {}, mediaDescriptors = []) {
     const modalVectors = [];
+
+    // Ensure service is initialized if needed
+    if (!this.embeddingService) {
+        await this._initEmbeddingService();
+    }
 
     const textSources = [
       entity.label,
@@ -21,22 +40,59 @@ class MultimodalFusionLayer {
       .join(' ');
 
     if (textSources) {
-      modalVectors.push({
-        modality: 'TEXT',
-        vector: this.#vectorFromSeed(textSources),
-        confidence: entity.confidence ?? 0.6,
-      });
+      if (this.embeddingService) {
+        try {
+          const vector = await this.embeddingService.generateEmbedding({ text: textSources });
+          modalVectors.push({
+            modality: 'TEXT',
+            vector: vector,
+            confidence: entity.confidence ?? 0.6,
+          });
+        } catch (e) {
+          modalVectors.push({
+            modality: 'TEXT',
+            vector: this.#vectorFromSeed(textSources),
+            confidence: (entity.confidence ?? 0.6) * 0.5,
+          });
+        }
+      } else {
+         modalVectors.push({
+            modality: 'TEXT',
+            vector: this.#vectorFromSeed(textSources),
+            confidence: entity.confidence ?? 0.6,
+          });
+      }
     }
 
     for (const descriptor of mediaDescriptors) {
       const seed = `${descriptor.mediaType || 'UNKNOWN'}::${
         descriptor.filename || descriptor.uri || ''
       }::${JSON.stringify(descriptor.metadata || {})}`;
-      modalVectors.push({
-        modality: descriptor.mediaType || 'MULTIMODAL',
-        vector: this.#vectorFromSeed(seed),
-        confidence: this.#confidenceFromQuality(descriptor.quality),
-      });
+
+      const descText = descriptor.description || seed;
+
+      if (this.embeddingService) {
+        try {
+           const vector = await this.embeddingService.generateEmbedding({ text: descText });
+           modalVectors.push({
+            modality: descriptor.mediaType || 'MULTIMODAL',
+            vector: vector,
+            confidence: this.#confidenceFromQuality(descriptor.quality),
+          });
+        } catch (e) {
+           modalVectors.push({
+            modality: descriptor.mediaType || 'MULTIMODAL',
+            vector: this.#vectorFromSeed(seed),
+            confidence: this.#confidenceFromQuality(descriptor.quality) * 0.5,
+          });
+        }
+      } else {
+          modalVectors.push({
+            modality: descriptor.mediaType || 'MULTIMODAL',
+            vector: this.#vectorFromSeed(seed),
+            confidence: this.#confidenceFromQuality(descriptor.quality),
+          });
+      }
     }
 
     if (Array.isArray(entity.boundingBoxes) && entity.boundingBoxes.length > 0) {
@@ -229,9 +285,27 @@ class MultimodalFusionLayer {
     return this.buildTimeline(events, options);
   }
 
-  embedQuery(query, mediaTypes = []) {
+  async embedQuery(query, mediaTypes = []) {
     const seed = `${query}::${mediaTypes.sort().join('|')}`;
+
+    // Ensure service is initialized
+    if (!this.embeddingService) {
+        await this._initEmbeddingService();
+    }
+
+    if (this.embeddingService) {
+        try {
+            return await this.embeddingService.generateEmbedding({ text: query });
+        } catch (e) {
+            return this.#vectorFromSeed(seed);
+        }
+    }
     return this.#vectorFromSeed(seed);
+  }
+
+  toPgVector(vector) {
+    if (!Array.isArray(vector)) return null;
+    return `[${vector.join(',')}]`;
   }
 
   #sharedModalities(entityA, entityB) {
@@ -278,9 +352,12 @@ class MultimodalFusionLayer {
     if (!vectors.length) {
       return new Array(this.embeddingSize).fill(0);
     }
-    const combined = new Array(this.embeddingSize).fill(0);
+
+    const maxLength = Math.max(...vectors.map(v => v.length));
+
+    const combined = new Array(maxLength).fill(0);
     for (const vector of vectors) {
-      for (let i = 0; i < this.embeddingSize; i += 1) {
+      for (let i = 0; i < maxLength; i += 1) {
         combined[i] += vector[i] ?? 0;
       }
     }
