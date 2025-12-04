@@ -215,6 +215,17 @@ export {
   type GuardedEvaluationContext,
   type GuardedAuditEntry,
 } from './guarded-gateway.js';
+export {
+  AuthorityLicenseCompiler,
+  type AuthorityCompilerOptions,
+  type AuthorityPolicyRule,
+  type AuthorityPolicySelector,
+  type CompiledGuardBundle,
+  type GuardAuditRecord,
+  type LicenseVerdict,
+  type OpaGuard,
+  type PolicyBundleDocument,
+} from './authority-compiler.js';
 
 export function buildDefaultPolicyEngine(): PolicyEngine {
   const engine = new PolicyEngine([
