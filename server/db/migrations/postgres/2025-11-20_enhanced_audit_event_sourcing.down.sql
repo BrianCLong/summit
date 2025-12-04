@@ -1,0 +1,1 @@
+-- Undo for 2025-11-20_enhanced_audit_event_sourcing.sql

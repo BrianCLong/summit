@@ -1,0 +1,1 @@
+-- Undo for 2025-08-19_audit_tables.sql

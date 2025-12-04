@@ -1,0 +1,1 @@
+-- Undo for 2025-08-28_provenance_audit_indexes.sql

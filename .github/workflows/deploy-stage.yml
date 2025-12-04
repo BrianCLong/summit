@@ -1,0 +1,52 @@
+name: Deploy to Staging
+
+on:
+  workflow_run:
+    workflows: ["build-images"]
+    types:
+      - completed
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    environment: staging
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download SBOM Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          pattern: sbom-*
+          merge-multiple: true
+          path: sboms
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
+
+      - name: 🔒 Vulnerability Gate (SBOM Scan)
+        run: |
+          echo "Scanning SBOMs for Critical/High vulnerabilities..."
+          # Scan each SBOM json file found
+          for sbom in sboms/*.spdx.json; do
+            echo "Scanning $sbom..."
+            trivy sbom "$sbom" --severity CRITICAL,HIGH --exit-code 1
+          done
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.11.1
+
+      - name: Deploy to Staging
+        run: |
+          echo "Simulating deployment to staging..."
+          # helm upgrade --install intelgraph-mvp ./charts/app --namespace staging --values ./charts/app/values.yaml
