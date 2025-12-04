@@ -196,7 +196,7 @@ smoke:
 	    echo "Troubleshooting:"; \
 	    echo "  1. Check service logs: docker-compose logs api"; \
 	    echo "  2. Check health: curl http://localhost:4000/health/detailed | jq"; \
-	    echo "  3. Review test data: cat data/golden-path/demo-investigation.json"; \
+	    echo "  3. Review test data: cat data/quickstart/quickstart-investigation.json"; \
 	    echo "  4. See docs/ONBOARDING.md for the golden path workflow"; \
 	    exit 1; \
 	  }; \

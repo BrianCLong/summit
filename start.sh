@@ -6,7 +6,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+PROJECT_ROOT="$SCRIPT_DIR"
 COMPOSE_FILE="deploy/compose/docker-compose.dev.yml"
 
 # Color codes for output
@@ -35,6 +35,13 @@ log_error() {
 
 # Check prerequisites
 check_prerequisites() {
+    log_info "Running environment validator..."
+    if ! "$SCRIPT_DIR/validate-env.sh"; then
+        log_error "Environment validation failed. Please address the issues above."
+        exit 1
+    fi
+    log_success "Environment validation passed."
+
     log_info "Checking prerequisites..."
 
     # Check Docker and Docker Compose
