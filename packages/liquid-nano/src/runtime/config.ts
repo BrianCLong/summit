@@ -1,4 +1,4 @@
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import type { RuntimeConfig, RuntimeSecurityPolicy, RuntimeTelemetryConfig } from './types.js';
 
 export interface PartialRuntimeConfig extends Partial<Omit<RuntimeConfig, 'telemetry' | 'security' | 'performance' | 'auditTrail'>> {
