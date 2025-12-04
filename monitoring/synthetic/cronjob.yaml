@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: synthetic-business-check
+  namespace: monitoring
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: check
+            image: node:18-alpine
+            command: ["node", "/scripts/business_flow.js"]
+            env:
+            - name: API_URL
+              value: "http://intelgraph-server:3000"
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+          restartPolicy: OnFailure
+          volumes:
+          - name: scripts
+            configMap:
+              name: synthetic-scripts

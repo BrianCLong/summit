@@ -491,4 +491,141 @@ export {
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
   maestroMttrHours,
+  intelgraphJobsProcessed,
+  intelgraphOutboxSyncLatency,
+  intelgraphActiveConnections,
+  intelgraphDatabaseQueryDuration,
+  intelgraphHttpRequestDuration,
+  intelgraphGraphragQueryTotal,
+  intelgraphGraphragQueryDurationMs,
+  intelgraphQueryPreviewsTotal,
+  intelgraphQueryPreviewLatencyMs,
+  intelgraphQueryPreviewErrorsTotal,
+  intelgraphQueryPreviewExecutionsTotal,
+  intelgraphGlassBoxRunsTotal,
+  intelgraphGlassBoxRunDurationMs,
+  intelgraphGlassBoxCacheHits,
+  intelgraphCacheHits,
+  intelgraphCacheMisses,
 };
+
+// Legacy IntelGraph metrics (merged from observability/metrics.ts)
+const intelgraphJobsProcessed = new client.Counter({
+  name: 'intelgraph_jobs_processed_total',
+  help: 'Total jobs processed by the system',
+  labelNames: ['queue', 'status'],
+});
+
+const intelgraphOutboxSyncLatency = new client.Histogram({
+  name: 'intelgraph_outbox_sync_latency_seconds',
+  help: 'Latency of outbox to Neo4j sync operations',
+  labelNames: ['operation'],
+  buckets: [0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10],
+});
+
+const intelgraphActiveConnections = new client.Gauge({
+  name: 'intelgraph_active_connections',
+  help: 'Number of active WebSocket connections',
+  labelNames: ['tenant'],
+});
+
+const intelgraphDatabaseQueryDuration = new client.Histogram({
+  name: 'intelgraph_database_query_duration_seconds',
+  help: 'Database query execution time',
+  labelNames: ['database', 'operation'],
+  buckets: [0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1, 5],
+});
+
+const intelgraphHttpRequestDuration = new client.Histogram({
+  name: 'intelgraph_http_request_duration_seconds',
+  help: 'HTTP request duration in seconds',
+  labelNames: ['method', 'route', 'status'],
+  buckets: [0.01, 0.05, 0.1, 0.5, 1, 2, 5],
+});
+
+// GraphRAG Query Preview metrics
+const intelgraphGraphragQueryTotal = new client.Counter({
+  name: 'intelgraph_graphrag_query_total',
+  help: 'Total GraphRAG queries executed',
+  labelNames: ['status', 'hasPreview'],
+});
+
+const intelgraphGraphragQueryDurationMs = new client.Histogram({
+  name: 'intelgraph_graphrag_query_duration_ms',
+  help: 'GraphRAG query execution duration in milliseconds',
+  labelNames: ['hasPreview'],
+  buckets: [100, 500, 1000, 2000, 5000, 10000, 30000],
+});
+
+const intelgraphQueryPreviewsTotal = new client.Counter({
+  name: 'intelgraph_query_previews_total',
+  help: 'Total query previews generated',
+  labelNames: ['language', 'status'],
+});
+
+const intelgraphQueryPreviewLatencyMs = new client.Histogram({
+  name: 'intelgraph_query_preview_latency_ms',
+  help: 'Query preview generation latency in milliseconds',
+  labelNames: ['language'],
+  buckets: [50, 100, 250, 500, 1000, 2000, 5000],
+});
+
+const intelgraphQueryPreviewErrorsTotal = new client.Counter({
+  name: 'intelgraph_query_preview_errors_total',
+  help: 'Total query preview errors',
+  labelNames: ['language'],
+});
+
+const intelgraphQueryPreviewExecutionsTotal = new client.Counter({
+  name: 'intelgraph_query_preview_executions_total',
+  help: 'Total query preview executions',
+  labelNames: ['language', 'dryRun', 'status'],
+});
+
+const intelgraphGlassBoxRunsTotal = new client.Counter({
+  name: 'intelgraph_glass_box_runs_total',
+  help: 'Total glass-box runs created',
+  labelNames: ['type', 'status'],
+});
+
+const intelgraphGlassBoxRunDurationMs = new client.Histogram({
+  name: 'intelgraph_glass_box_run_duration_ms',
+  help: 'Glass-box run duration in milliseconds',
+  labelNames: ['type'],
+  buckets: [100, 500, 1000, 2000, 5000, 10000, 30000, 60000],
+});
+
+const intelgraphGlassBoxCacheHits = new client.Counter({
+  name: 'intelgraph_glass_box_cache_hits_total',
+  help: 'Total glass-box cache hits',
+  labelNames: ['operation'],
+});
+
+const intelgraphCacheHits = new client.Counter({
+  name: 'intelgraph_cache_hits_total',
+  help: 'Total cache hits',
+  labelNames: ['level'],
+});
+
+const intelgraphCacheMisses = new client.Counter({
+  name: 'intelgraph_cache_misses_total',
+  help: 'Total cache misses',
+});
+
+// Register metrics
+register.registerMetric(intelgraphJobsProcessed);
+register.registerMetric(intelgraphOutboxSyncLatency);
+register.registerMetric(intelgraphActiveConnections);
+register.registerMetric(intelgraphDatabaseQueryDuration);
+register.registerMetric(intelgraphHttpRequestDuration);
+register.registerMetric(intelgraphGraphragQueryTotal);
+register.registerMetric(intelgraphGraphragQueryDurationMs);
+register.registerMetric(intelgraphQueryPreviewsTotal);
+register.registerMetric(intelgraphQueryPreviewLatencyMs);
+register.registerMetric(intelgraphQueryPreviewErrorsTotal);
+register.registerMetric(intelgraphQueryPreviewExecutionsTotal);
+register.registerMetric(intelgraphGlassBoxRunsTotal);
+register.registerMetric(intelgraphGlassBoxRunDurationMs);
+register.registerMetric(intelgraphGlassBoxCacheHits);
+register.registerMetric(intelgraphCacheHits);
+register.registerMetric(intelgraphCacheMisses);
