@@ -19,6 +19,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
 
+/**
+ * Starts the main API server.
+ * @trace FEAT-BOOTSTRAP
+ */
 const startServer = async () => {
   // Optional Kafka consumer import - only when AI services enabled
   let startKafkaConsumer: any = null;

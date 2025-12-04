@@ -336,6 +336,8 @@ export class AuthService {
    *   console.error('Login failed:', error.message);
    * }
    * ```
+   *
+   * @trace REQ-AUTH-001
    */
   async login(
     email: string,
