@@ -337,6 +337,82 @@ export class GCSConnector extends EventEmitter {
     });
   }
 
+  /**
+   * Stream a file from GCS.
+   * Useful for large files to avoid loading the entire content into memory.
+   * Returns a Readable stream.
+   */
+  async downloadStream(
+    objectName: string,
+    options: DownloadOptions = {},
+  ): Promise<Readable> {
+    return tracer.startActiveSpan('gcs.download_stream', async (span: any) => {
+      span.setAttributes({
+        tenant_id: this.tenantId,
+        bucket: this.config.bucketName,
+        object_name: objectName,
+        validation: options.validation !== false,
+      });
+
+      try {
+        const file = this.bucket.file(objectName);
+
+        // Note: createReadStream does not verify existence by default,
+        // error will be emitted on the stream if file doesn't exist.
+
+        const downloadOptions: any = {
+          validation: options.validation !== false,
+          decompress: options.decompress !== false,
+        };
+
+        if (options.start !== undefined || options.end !== undefined) {
+          downloadOptions.start = options.start || 0;
+          downloadOptions.end = options.end;
+        }
+
+        const stream = file.createReadStream(downloadOptions);
+
+        // We can't easily measure latency or size here until the stream is consumed,
+        // but we can increment operation count.
+        gcsOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download_stream',
+          bucket: this.config.bucketName,
+          result: 'initiated',
+        });
+
+        stream.on('error', (error: Error) => {
+          span.recordException(error);
+          span.setStatus({ code: 2, message: error.message });
+          gcsOperations.inc({
+            tenant_id: this.tenantId,
+            operation: 'download_stream',
+            bucket: this.config.bucketName,
+            result: 'error',
+          });
+        });
+
+        stream.on('end', () => {
+          span.end();
+        });
+
+        return stream;
+
+      } catch (error) {
+        span.recordException(error as Error);
+        span.setStatus({ code: 2, message: (error as Error).message });
+        gcsOperations.inc({
+          tenant_id: this.tenantId,
+          operation: 'download_stream',
+          bucket: this.config.bucketName,
+          result: 'error',
+        });
+        span.end();
+        throw error;
+      }
+    });
+  }
+
   async deleteObject(objectName: string): Promise<void> {
     return tracer.startActiveSpan('gcs.delete_object', async (span: any) => {
       span.setAttributes({

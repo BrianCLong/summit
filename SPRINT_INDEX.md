@@ -1,7 +1,7 @@
 # Sprint Planning Index
 
-**Last Updated:** November 20, 2025
-**Total Sprints Documented:** 100+
+**Last Updated:** Jan 19, 2026
+**Total Sprints Documented:** 101+
 **Status:** Active Planning ✅
 
 ---
@@ -161,7 +161,7 @@ Located in `/docs/sprints/`
 
 | Sprint | Dates | File | Focus Areas |
 |--------|-------|------|-------------|
-| **Sprint 2026-01-19** | Jan 19-30 | `sprint_plan_jan_19_30_2026_america_denver.md` | Federation v2 |
+| **Sprint 27** | Jan 19-30 | `sprint_plan_jan_19_30_2026_america_denver.md` | Region Sharding, RTBF, GCS/JDBC |
 | **Sprint 2026-02-02** | Feb 2-13 | `sprint_plan_feb_2_13_2026_america_denver.md` | Privacy enhancements |
 | **Sprint 2026-02-16** | Feb 16-27 | `sprint_plan_feb_16_27_2026_america_denver.md` | Policy Intelligence v1.5 |
 | **Sprint 2026-03-02** | Mar 2-13 | `sprint_plan_mar_2_13_2026_america_denver.md` | Graph UI v2.3 |
@@ -584,6 +584,6 @@ Every sprint follows this consistent format:
 
 **End of Sprint Index**
 
-*Last Updated: November 20, 2025*
+*Last Updated: Jan 19, 2026*
 *Next Review: Sprint planning session (weekly)*
 *Maintained by: Engineering Leadership*

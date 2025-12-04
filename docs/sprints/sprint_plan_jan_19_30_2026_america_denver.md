@@ -1,193 +1,193 @@
-# Sprint Plan — Jan 19–30, 2026 (America/Denver)
+# Sprint 27 Plan — IntelGraph (Jan 19–30, 2026)
 
-> **Context:** Second sprint of 2026. U.S. **MLK Day (Mon Jan 19)** reduces capacity. Build on v1.2/2.0 foundations: _policy safety assistant_, _graph scenarios_, _SOAR v2.0 beta_, and _intel v5.1_.
-
----
-
-## 1) Sprint Goal (SMART)
-
-Release **Policy Intelligence v1.3** (assistant + drift prevention rules), **Graph UI v2.1** (scenario saving, lateral‑movement heatmap, chokepoint remediation templates), **SOAR v2.0 Beta** (autoscaling runners, Queues v2, approval dashboard integration), and **Intel v5.1** (active‑learning cadence + annotator scoring + federation expansion) to achieve **MTTC P50 ≤ 9 min / P90 ≤ 22 min** and **auto‑approved actions ≥ 30%** (low‑risk only) — **by Jan 30, 2026**.
-
-**Key outcomes**
-
-- Policy assistant proposes safe guardrails with human‑readable **risk explanations**; drift‑prevention rules block unsafe merges.
-- Graph supports saved **investigation scenarios**, **lateral‑movement heatmap**, and out‑of‑the‑box **remediation templates**.
-- SOAR v2.0 Beta delivers **runner autoscaling**, **Queues v2** with idempotency, and **approval dashboard** (HITL) integration.
-- Intel v5.1 scales **active‑learning cadence**, adds **annotator quality scoring**, and expands partner federation to **15% sample** under guardrails.
+**Cadence:** 2 weeks • **Timezone:** America/Denver • **Release cut:** Jan 30, 2026 → staging; **Prod target:** Feb 3 (pending gates & error‑budget)
 
 ---
 
-## 2) Success Metrics & Verification
+## Conductor Summary (one‑screen)
 
-- **Incident response:** MTTC P50 ≤ 9 min; P90 ≤ 22 min (7‑day rolling).  
-  _Verify:_ Incident dashboard; export.
-- **Policy safety:** Drift‑prevention rules catch ≥ 80% of high‑risk changes in backtests; **zero** critical authz escapes.  
-  _Verify:_ Backtests; CI gate logs; audit.
-- **Automation adoption:** ≥ 30% of eligible actions auto‑approved (low‑risk); **false‑allow = 0** in prod.  
-  _Verify:_ SOAR logs; simulation reports.
-- **Graph effectiveness:** ≥ 70% of P1/P2 investigations use scenarios or heatmap; remediation templates invoked in ≥ 50% of those.  
-  _Verify:_ UI telemetry; ticket linkage.
-- **Intel quality:** κ (inter‑annotator) ≥ 0.82; Brier ≤ 0.14 on canary; override rate ≤ 8%.  
-  _Verify:_ Eval reports; sampling.
+**Goal.** Stabilize and productionize the region‑sharded read path, take **GCS/JDBC connectors to GA**, land **RTBF end‑to‑end with Privacy sign‑off**, and ship **Explorer Path‑Filters v1**. Tighten SLOs with rate‑limiting and autoscale policies; reduce cost via cache and egress controls.
 
----
+**Non‑Goals.** Active‑active writes, cross‑region write quorum, advanced GDS pipelines beyond path‑finding and degree metrics.
 
-## 3) Scope
+**Assumptions.** Sprint 26 closed with no P0 carry‑over; replicas healthy; Golden datasets refreshed; budget unchanged.
 
-**Must‑have (commit):**
+**Constraints.** Org defaults (SLOs & cost) enforced as CI gates. ABAC/OPA everywhere; mTLS; immutable provenance.
 
-- **Policy Intelligence v1.3:** natural‑language risk explanations; drift‑prevention ruleset (deny patterns + safe defaults); assistant suggestions inline with acceptance telemetry; simulator updates.
-- **Graph UI v2.1:** scenario saving/loading; lateral‑movement heatmap from identity/asset graph; remediation templates (owner handoffs, SOAR links).
-- **SOAR v2.0 Beta:** runner autoscaling (HPA/queue‑driven), Queues v2 (exactly‑once semantics), approval dashboard integration (HITL with SLAs), safety counters.
-- **Intel v5.1:** weekly AL cadence; annotator quality scoring & coaching; partner federation expansion (15% sample) with isolation and cost caps; export to detections (gated).
-- **Operational analytics:** adoption widgets for assistant, scenarios, approvals; automation reliability; intel calibration.
+**Risks.** (R1) Replica lag spikes under burst; (R2) RTBF/ledger tension on derived entities; (R3) JDBC driver edge types; (R4) Alert fatigue if thresholds too tight.
 
-**Stretch:**
-
-- **Responder Copilot v0.4 (alpha):** tie policy assistant + graph scenarios to suggest next steps (read‑only).
-- **SOAR cost dashboard:** per‑action/vendor cost estimates; budget alerts.
-- **Graph what‑if ACL changes:** show risk delta before policy merges.
-
-**Out‑of‑scope:**
-
-- Destructive actions default‑on; customer‑visible ABAC editor; cross‑tenant playbooks.
+**Definition of Done.** All ACs pass; burn < 20%; CI green; Privacy approves RTBF runbook; GA docs published; evidence bundle attached.
 
 ---
 
-## 4) Team & Capacity (holiday‑adjusted)
+## Scope & Deliverables
 
-- **Working days:** 9 (MLK Day observed Mon Jan 19).
-- **Focus factor:** 0.8.
-- **Nominal ~50 pts → commit ≈ **36 pts** (+ up to 6 pts stretch).**
-
----
-
-## 5) Backlog (Ready for Sprint)
-
-### Epic AT — Policy Intelligence v1.3 (11 pts)
-
-- **AT1 — Risk explanations + UX** (4 pts)  
-  _AC:_ highlight blast radius, precedent incidents; copy reviewed.
-- **AT2 — Drift‑prevention ruleset** (5 pts)  
-  _AC:_ deny patterns; safe defaults; CI gate; kill‑switch.
-- **AT3 — Assistant acceptance telemetry** (2 pts)  
-  _AC:_ capture accept/modify/reject; dashboard.
-
-### Epic AU — Graph UI v2.1 (10 pts)
-
-- **AU1 — Scenario saving/loading** (4 pts)  
-  _AC:_ name, share, permissions; freshness banner.
-- **AU2 — Lateral‑movement heatmap** (4 pts)  
-  _AC:_ hop limit; identity edges; export.
-- **AU3 — Remediation templates** (2 pts)  
-  _AC:_ top chokepoint fixes; owner handoff; ticket export.
-
-### Epic AV — SOAR v2.0 Beta (11 pts)
-
-- **AV1 — Runner autoscaling** (4 pts)  
-  _AC:_ queue‑driven scale; SLOs; soak test.
-- **AV2 — Queues v2 (exactly‑once)** (4 pts)  
-  _AC:_ idempotency keys; retries; poison queue.
-- **AV3 — Approval dashboard integration** (3 pts)  
-  _AC:_ SLAs; audit trail; filters.
-
-### Epic AW — Intel v5.1 (6 pts)
-
-- **AW1 — Active‑learning cadence + scoring** (3 pts)  
-  _AC:_ per‑annotator metrics; coaching prompts; weekly loop.
-- **AW2 — Federation expansion (15% sample)** (3 pts)  
-  _AC:_ isolation; PII filters; cost caps; canary.
-
-### Epic AX — Operational Analytics (2 pts)
-
-- **AX1 — Adoption & reliability panels** (2 pts)  
-  _AC:_ assistant/scenario/auto‑approve widgets; intel calibration; export.
-
-> **Planned:** 40 pts total — **commit 36 pts**, hold 4 pts buffer; + up to 6 pts stretch.
+1. **Region Sharding GA**: routing stability, lag guards, autoscale policies, failover drill.
+2. **Connectors GA (GCS/JDBC)**: performance hardening, error handling/DLQ maturity, docs & examples.
+3. **RTBF E2E**: audit bundle, DPIA notes, negative tests, export proofs.
+4. **Graph Explorer Path‑Filters v1**: 2–3 hop with label/attr filters, saved views (persisted queries).
+5. **SLO/Cost Controls**: rate‑limit per tenant, cache tuning, egress caps & dashboards.
+6. **CI/CD**: perf profiles for sharded reads; SBOM/CVE sweep; policy sim for residency/purpose.
 
 ---
 
-## 6) Dependencies & Assumptions
+## Sprint Backlog (Epics → Stories → Tasks)
 
-- CI gate for drift rules wired; approver groups defined.
-- Graph data (identity + asset) fresh ≤ 24h; permissions enforced.
-- Queue store supports exactly‑once semantics; autoscaling infra ready.
-- Partner legal/compliance sign‑off for 15% sample; budget alerts configured.
+> **MoSCoW** priority • **Pts** = story points
 
----
+### E1 — Region Sharding GA (Must) — 16 pts
 
-## 7) Timeline & Ceremonies (MT)
+* **S1. Routing health & sticky reads** (5 pts, *Alice*)
 
-- **Tue Jan 20** — Planning & Kickoff; safety review (30m).
-- **Fri Jan 23** — Mid‑sprint demo/checkpoint (30m).
-- **Wed Jan 28** — Grooming for next sprint (45m).
-- **Fri Jan 30** — Demo (45m) + Retro (45m) + Release cut.
+  * Health‑aware router; sticky reads per session; fallback to primary on lag.
+* **S2. Lag guardrails & autoscale** (6 pts, *Grace*)
 
----
+  * HPA on lag/exporter metrics; alert @ 2s/5s; shed load by tenant if needed.
+* **S3. Failover drill (runbook)** (5 pts, *Kay*)
 
-## 8) Definition of Ready (DoR)
+  * 15‑min drill; metrics + postmortem; gaps ticketed.
 
-- Policy rules cataloged; datasets available; flags/telemetry named.
-- Queue/autoscaling quotas approved; dashboard integration points validated.
-
-## 9) Definition of Done (DoD)
-
-- Tests pass; dashboards live; approvals configured; audits wired.
-- Runbooks updated; enablement notes posted; rollback verified.
+**AC**: p95 for read queries within 10% baseline; lag alerting functional; drill ≤ 15 min; zero data mix across tenants.
 
 ---
 
-## 10) QA & Validation Plan
+### E2 — Connectors GA (GCS/JDBC) (Must) — 14 pts
 
-- **Policy:** backtests; CI gate simulation; human review of top 20 suggested guardrails.
-- **Graph:** scenario correctness sampling; heatmap sanity checks; remediation export e2e.
-- **SOAR:** autoscaling load test; exactly‑once chaos test; approval SLA timing.
-- **Intel:** κ tracking; canary metrics vs v4.1; cost monitor alerts.
+* **S1. Throughput tuning & backpressure** (6 pts, *Chen*)
+* **S2. DLQ & retry semantics** (4 pts, *Dana*)
+* **S3. GA docs + samples** (4 pts, *Chen*)
 
----
-
-## 11) Risk Register (RAID)
-
-| Risk                                 | Prob. | Impact | Owner | Mitigation                               |
-| ------------------------------------ | ----- | -----: | ----- | ---------------------------------------- |
-| Drift rules block legitimate changes | Med   |    Med | AT2   | Previews; exception path; audit          |
-| Scenario sharing leaks data          | Low   |   High | AU1   | Permissions; redaction; audit            |
-| Queue bugs cause duplicates          | Low   |   High | AV2   | Idempotency; poison queue; alarms        |
-| Federation expansion costs spike     | Med   |    Med | AW2   | Rate caps; budget alerts; off‑peak       |
-| Approval SLAs missed                 | Med   |    Med | AV3   | Paging; load balancing; backup reviewers |
+**AC**: GCS ≥ 50 MB/s/worker; JDBC ≥ 60k rows/min/worker; DLQ with replay tooling; GA docs published with schema mapping examples.
 
 ---
 
-## 12) Communications & Status
+### E3 — RTBF E2E + Privacy Sign‑off (Must) — 10 pts
 
-- **Channels:** #sprint‑room (daily), #analyst‑ops (enablement), Exec update (Fri).
-- **Reports:** Burnup; MTTC; auto‑approve rate; intel calibration; approval SLAs.
+* **S1. Audit bundle & proofs** (4 pts, *Elena*)
+* **S2. DPIA notes + runbook review** (3 pts, *Ivy*)
+* **S3. Negative tests (tamper/partial)** (3 pts, *Elena*)
 
----
-
-## 13) Compliance/Security Guardrails
-
-- Signed policy changes; immutable audit; least privilege; no PII in model features.
-- Scenario artifacts scrubbed on export; tenant boundaries enforced.
-- SOAR destructive steps always HITL; approvals logged with reason codes.
+**AC**: Bundle includes proof hash, decision log, redaction map; DPIA signed by Privacy; tamper tests fail with actionable errors.
 
 ---
 
-## 14) Release & Rollback
+### E4 — Explorer Path‑Filters v1 (Should) — 9 pts
 
-- **Staged rollout:** Internal cohort → all analysts → select tenants (if applicable).
-- **Rollback:** Disable drift rules; hide scenarios/heatmap; revert Queues v2; scale runners to safe baseline; pin intel to v5.0.
-- **Docs:** Release notes; analyst changelog; change tickets.
+* **S1. Filter UI + persisted queries** (5 pts, *Jay*)
+* **S2. Perf budget & a11y** (4 pts, *Jay*)
 
----
-
-## 15) Next Sprint Seeds (Feb 2–13, 2026)
-
-- **Policy v1.4:** policy suggestion assistant GA; risk explanations with examples.
-- **Graph v2.2:** scenario diffs + recommended controls rollout; exposure time series.
-- **SOAR v2.0 GA prep:** throughput targets, quota policies, blue/green runners.
-- **Intel v5.2:** disagreement detection; reviewer routing; expanded federation.
+**AC**: 2–3 hop filtered paths p95 ≤ 1,200 ms; saved views; keyboard navigation; Playwright green.
 
 ---
 
-_Prepared by: Covert Insights — last updated Sep 11, 2025 (America/Denver)._
+### E5 — SLO & Cost Controls (Must) — 9 pts
+
+* **S1. Per‑tenant rate‑limiting** (4 pts, *Bob*)
+* **S2. Cache hit‑rate ≥ 85% hot set** (3 pts, *Bob*)
+* **S3. Egress caps + dashboards** (2 pts, *Grace*)
+
+**AC**: Burst does not breach API p95/99; cache metrics show target; spend alerts @ 80% budget with links to runbooks.
+
+---
+
+### E6 — CI/CD & Security Gates (Must) — 6 pts
+
+* **S1. k6 sharded‑read profile** (2 pts, *Henry*)
+* **S2. SBOM/CVE sweep** (3 pts, *Ivy*)
+* **S3. Policy sim (residency/purpose)** (1 pt, *Ivy*)
+
+**AC**: Perf gate enforces SLOs; zero High CVEs; policy sim passes.
+
+---
+
+## Capacity & Forecast
+
+* Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4 can slip if risk materializes).
+
+---
+
+## Architecture & Contracts (Delta)
+
+```mermaid
+flowchart LR
+client[Clients]
+router[Region Router] --> rr1[(Read Replica A)]
+router --> rr2[(Read Replica B)]
+client --> apollo[Apollo Gateway] --> router
+apollo --> opa[OPA/ABAC]
+connectors[GCS/JDBC] --> kafka[(Kafka)] --> pg[(PostgreSQL)]
+rtbf[RTBF Pipeline] --> pg
+rtbf --> neo[(Neo4j)]
+explorer[Graph Explorer] --> apollo
+```
+
+**Rate‑limit contract (example)**
+
+```yaml
+limits:
+  tenant_default:
+    rpm: 6000
+    burst: 1200
+    window: 60s
+  tenant_overrides:
+    TENANT_ALPHA:
+      rpm: 12000
+      burst: 2400
+```
+
+**Persisted query (Explorer view)**
+
+```graphql
+query FilteredPaths($id: ID!, $filters: PathFilters!, $purpose: Purpose!) {
+  paths(entityId: $id, filters: $filters, purpose: $purpose) {
+    nodes { id labels }
+    edges { type weight }
+  }
+}
+```
+
+---
+
+## Security, Privacy & Policy
+
+* OIDC+JWT; mTLS; ABAC via OPA; residency & purpose checks; field‑level encryption.
+* RTBF: redaction map + tombstones; non‑PII lineage preserved; audit proof exported.
+
+---
+
+## Observability & SLOs
+
+* Metrics: API p50/95/99, cache hit‑rate, rate‑limit rejects, replica lag, connector throughput, egress spend, error‑budget.
+* Alerts: lag >2s/5s; cache miss spike; rate‑limit saturation; spend @80%.
+
+---
+
+## CI/CD & Release
+
+* Gates: lint/type/tests, e2e, perf (sharded read), SBOM/CVE, policy sim.
+* Canary: 10%/15 min; rollback on SLO breach.
+* Evidence bundle: SLO report, k6 artifacts, SBOM, policy logs, RTBF proofs, GA docs hashes.
+
+---
+
+## RACI
+
+* **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy • **I**: PM.
+
+---
+
+## Checklists
+
+**Acceptance Pack**
+
+* [ ] All story ACs green
+* [ ] SLO dashboards 24h green
+* [ ] Perf & e2e gates green
+* [ ] SBOM/CVE clear
+* [ ] Policy sim passes
+* [ ] Privacy sign‑off recorded
+* [ ] Evidence bundle attached
+
+**Backout Plan**
+
+* Disable region routing; rollback rate‑limit config; revert connector images; restore pre‑change policies; invalidate caches.

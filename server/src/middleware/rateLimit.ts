@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
 import { cfg } from '../config.js';
+import { quotaManager } from '../lib/resources/quota-manager.js';
 
 interface RateLimitConfig {
   windowMs: number;
@@ -11,6 +12,7 @@ interface RateLimitConfig {
 /**
  * Rate limiting middleware.
  * Prioritizes authenticated user limits over IP limits.
+ * Supports per-tenant quotas via QuotaManager.
  */
 export const rateLimitMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   // Skip if it's a health check (usually handled before, but safe to check)
@@ -28,8 +30,20 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
 
   if (user) {
     key = `user:${user.id || user.sub}`;
-    // Higher limit for authenticated users
-    limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+
+    // Check for tenant-specific quota
+    // We assume tenantId might be on the user object or context.
+    // Ideally it's on req.user.tenantId
+    const tenantId = user.tenantId;
+    if (tenantId) {
+      const policy = quotaManager.getRateLimitConfig(tenantId);
+      limit = policy.limit;
+      windowMs = policy.windowMs;
+    } else {
+      // Fallback to standard authenticated limit
+      limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+    }
+
   } else {
     key = `ip:${req.ip}`;
     limit = cfg.RATE_LIMIT_MAX_REQUESTS;
