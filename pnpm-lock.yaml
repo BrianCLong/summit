@@ -23,6 +23,9 @@ overrides:
   parse-url: ^8.1.0
   parse-path: ^5.0.0
   parse-duration: '>=2.1.3'
+  electron: '>=35.7.5'
+  nanoid: '>=5.0.9'
+  body-parser: '>=2.2.1'
   esbuild: ^0.25.0
   glob: ^11.1.0
   moment: ^2.29.4
@@ -335,8 +338,8 @@ importers:
         specifier: ^9.2.0
         version: 9.2.1
       electron:
-        specifier: ^34.0.0
-        version: 34.5.8
+        specifier: '>=35.7.5'
+        version: 39.2.5
       electron-builder:
         specifier: ^26.0.11
         version: 26.0.12(electron-builder-squirrel-windows@26.0.12)
@@ -1145,8 +1148,8 @@ importers:
         specifier: ^1.7.2
         version: 1.13.2
       body-parser:
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -1991,8 +1994,8 @@ importers:
   packages/aer-ledger:
     dependencies:
       body-parser:
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -2755,7 +2758,7 @@ importers:
         specifier: workspace:*
         version: link:../workspace
       nanoid:
-        specifier: ^5.0.0
+        specifier: '>=5.0.9'
         version: 5.1.6
       ws:
         specifier: ^8.14.0
@@ -2817,7 +2820,7 @@ importers:
   packages/commenting:
     dependencies:
       nanoid:
-        specifier: ^5.0.0
+        specifier: '>=5.0.9'
         version: 5.1.6
       zod:
         specifier: ^3.22.0
@@ -4238,8 +4241,8 @@ importers:
   packages/fztr-relay:
     dependencies:
       body-parser:
-        specifier: ^1.20.3
-        version: 1.20.3
+        specifier: '>=2.2.1'
+        version: 2.2.1
       crypto:
         specifier: ^1.0.1
         version: 1.0.1
@@ -4577,8 +4580,8 @@ importers:
   packages/hitl-orchestrator:
     dependencies:
       body-parser:
-        specifier: ^1.20.3
-        version: 1.20.3
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^4.19.2
         version: 4.22.1
@@ -4900,8 +4903,8 @@ importers:
   packages/kpw-media:
     dependencies:
       body-parser:
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -4944,8 +4947,8 @@ importers:
   packages/ledger-server:
     dependencies:
       body-parser:
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -5038,8 +5041,8 @@ importers:
         specifier: ^7.0.1
         version: 7.0.1
       body-parser:
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -6455,7 +6458,7 @@ importers:
   packages/real-time-sync:
     dependencies:
       nanoid:
-        specifier: ^5.0.0
+        specifier: '>=5.0.9'
         version: 5.1.6
       ws:
         specifier: ^8.14.0
@@ -7470,7 +7473,7 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0
       nanoid:
-        specifier: ^5.0.0
+        specifier: '>=5.0.9'
         version: 5.1.6
       zod:
         specifier: ^3.22.0
@@ -7664,7 +7667,7 @@ importers:
   packages/workspace:
     dependencies:
       nanoid:
-        specifier: ^5.0.0
+        specifier: '>=5.0.9'
         version: 5.1.6
       zod:
         specifier: ^3.22.0
@@ -9185,7 +9188,7 @@ importers:
         specifier: ^4.25.0
         version: 4.29.1
       nanoid:
-        specifier: ^5.0.0
+        specifier: '>=5.0.9'
         version: 5.1.6
       ws:
         specifier: ^8.14.0
@@ -9508,8 +9511,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/data-monetization-types
       body-parser:
-        specifier: ^1.20.2
-        version: 1.20.3
+        specifier: '>=2.2.1'
+        version: 2.2.1
       compression:
         specifier: ^1.7.4
         version: 1.8.1
@@ -10590,8 +10593,8 @@ importers:
   services/graph-core:
     dependencies:
       body-parser:
-        specifier: ^1.20.2
-        version: 1.20.3
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -11096,8 +11099,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/predictive-models
       body-parser:
-        specifier: ^1.20.2
-        version: 1.20.3
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -11127,8 +11130,8 @@ importers:
         specifier: ^3.0.1
         version: 3.0.1(ajv@8.17.1)
       body-parser:
-        specifier: ^2.2.0
-        version: 2.2.0
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -11389,8 +11392,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/risk-scoring
       body-parser:
-        specifier: ^1.20.2
-        version: 1.20.3
+        specifier: '>=2.2.1'
+        version: 2.2.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -12186,8 +12189,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/text-generation
       body-parser:
-        specifier: ^1.20.0
-        version: 1.20.3
+        specifier: '>=2.2.1'
+        version: 2.2.1
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -24272,12 +24275,8 @@ packages:
   bn.js@5.2.2:
     resolution: {integrity: sha512-v2YAxEmKaBLahNwE1mjp4WON6huMNeuDvagFZW+ASCuA/ku0bXR9hSMw0XpiqMoA3+rmnyck/tPRSFQkoC9Cuw==}
 
-  body-parser@1.20.3:
-    resolution: {integrity: sha512-7rAxByjUMqQ3/bHJy7D6OGXvx/MMc4IqBn/X0fcM1QUcAItpZrBEYhWGem+tzXH90c+G01ypMcYJBO9Y30203g==}
-    engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
-
-  body-parser@2.2.0:
-    resolution: {integrity: sha512-02qvAaxv8tp7fBa/mw1ga98OGm+eCbqzJOKoRt70sLmfEEi+jyBYVTDGfCL/k06/4EMk/z01gCe7HoCH/f2LTg==}
+  body-parser@2.2.1:
+    resolution: {integrity: sha512-nfDwkulwiZYQIGwxdy0RUmowMhKcFVcYXUU7m4QlKYim1rUtg83xm2yjZ40QjDuc291AJjjeSc9b++AWHSgSHw==}
     engines: {node: '>=18'}
 
   boolbase@1.0.0:
@@ -26297,8 +26296,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@34.5.8:
-    resolution: {integrity: sha512-vxLD65mabTzYmEVa9KceMHM0+zO+vqgrhcyNVlmTd0IGV5J7XZ8v/qElm0o4YQ4wPeq7olZkUjZkBQQEdr23/g==}
+  electron@39.2.5:
+    resolution: {integrity: sha512-LXlOcH3CNopcVTQWjp680fMygdNrWKdIe3hyMtlyceO+Jd0b2hdMw1iWz36I+UUXHXPH87i937gXYi0jze2fCw==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -28211,10 +28210,6 @@ packages:
     resolution: {integrity: sha512-T10qvkw0zz4wnm560lOEg0PovVqUXuOFhhHAkixw8/sycy7TJt7v/RrkEKEQnAw2viPSJu6iAkErxnzR0g8PpQ==}
     engines: {node: ^8.11.2 || >=10}
     os: [darwin]
-
-  iconv-lite@0.4.24:
-    resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
-    engines: {node: '>=0.10.0'}
 
   iconv-lite@0.6.3:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
@@ -31086,16 +31081,6 @@ packages:
   nano-time@1.0.0:
     resolution: {integrity: sha512-flnngywOoQ0lLQOTRNexn2gGSNuM9bKj9RZAWSzhQ+UJYaAFG9bac4DW9VHjUAzrOaIcajHybCTHe/bkvozQqA==}
 
-  nanoid@3.3.11:
-    resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
-  nanoid@4.0.2:
-    resolution: {integrity: sha512-7ZtY5KTCNheRGfEFxnedV5zFiORN1+Y1N6zvPTnHQd8ENUvfaDBeuJDZb2bN/oXwXxu3qkTXDzy57W5vAmDTBw==}
-    engines: {node: ^14 || ^16 || >=18}
-    hasBin: true
-
   nanoid@5.1.6:
     resolution: {integrity: sha512-c7+7RQ+dMB5dPwwCp4ee1/iV/q2P6aK1mTZcfr1BTuVlyW9hJYiMPybJCcnBlQtuSmTIWNeazm/zqNoZSSElBg==}
     engines: {node: ^18 || >=20}
@@ -32719,10 +32704,6 @@ packages:
   range-parser@1.2.1:
     resolution: {integrity: sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==}
     engines: {node: '>= 0.6'}
-
-  raw-body@2.5.2:
-    resolution: {integrity: sha512-8zGqypfENjCIqGhgXToC8aB2r7YrBX+AQAfIPs/Mlk+BtPTztOvTS01NRW/3Eh60J+a48lt8qsCzirQ6loCVfA==}
-    engines: {node: '>= 0.8'}
 
   raw-body@3.0.1:
     resolution: {integrity: sha512-9G8cA+tuMS75+6G/TzW8OtLzmBDMo8p1JRxN5AZ+LAp8uxGA8V8GZm4GQ4/N5QNQEnLmg6SS7wyuSmbKepiKqA==}
@@ -37563,7 +37544,7 @@ snapshots:
       '@apollo/utils.withrequired': 3.0.0
       '@graphql-tools/schema': 10.0.29(graphql@16.12.0)
       async-retry: 1.3.3
-      body-parser: 2.2.0
+      body-parser: 2.2.1
       cors: 2.8.5
       finalhandler: 2.1.0
       graphql: 16.12.0
@@ -47288,7 +47269,7 @@ snapshots:
       '@react-navigation/routers': 7.5.2
       escape-string-regexp: 4.0.0
       fast-deep-equal: 3.1.3
-      nanoid: 3.3.11
+      nanoid: 5.1.6
       query-string: 7.1.3
       react: 19.2.1
       react-is: 19.2.0
@@ -47326,14 +47307,14 @@ snapshots:
       '@react-navigation/core': 7.13.3(react@19.2.1)
       escape-string-regexp: 4.0.0
       fast-deep-equal: 3.1.3
-      nanoid: 3.3.11
+      nanoid: 5.1.6
       react: 19.2.1
       react-native: 0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@19.2.7)(encoding@0.1.13)(react@19.2.1)
       use-latest-callback: 0.2.6(react@19.2.1)
 
   '@react-navigation/routers@7.5.2':
     dependencies:
-      nanoid: 3.3.11
+      nanoid: 5.1.6
 
   '@react-navigation/stack@7.6.8(@react-navigation/native@7.1.22(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@19.2.7)(encoding@0.1.13)(react@19.2.1))(react@19.2.1))(react-native-gesture-handler@2.29.1(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@19.2.7)(encoding@0.1.13)(react@19.2.1))(react@19.2.1))(react-native-safe-area-context@5.6.2(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@19.2.7)(encoding@0.1.13)(react@19.2.1))(react@19.2.1))(react-native-screens@4.18.0(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@19.2.7)(encoding@0.1.13)(react@19.2.1))(react@19.2.1))(react-native@0.76.9(@babel/core@7.28.5)(@babel/preset-env@7.28.5(@babel/core@7.28.5))(@types/react@19.2.7)(encoding@0.1.13)(react@19.2.1))(react@19.2.1)':
     dependencies:
@@ -54239,7 +54220,7 @@ snapshots:
       accepts: 1.3.8
       apollo-server-core: 3.13.0(encoding@0.1.13)(graphql@16.12.0)
       apollo-server-types: 3.8.0(encoding@0.1.13)(graphql@16.12.0)
-      body-parser: 1.20.3
+      body-parser: 2.2.1
       cors: 2.8.5
       express: 4.21.2
       graphql: 16.12.0
@@ -54258,7 +54239,7 @@ snapshots:
       accepts: 1.3.8
       apollo-server-core: 3.13.0(encoding@0.1.13)(graphql@16.12.0)
       apollo-server-types: 3.8.0(encoding@0.1.13)(graphql@16.12.0)
-      body-parser: 1.20.3
+      body-parser: 2.2.1
       cors: 2.8.5
       express: 5.1.0
       graphql: 16.12.0
@@ -54996,30 +54977,13 @@ snapshots:
 
   bn.js@5.2.2: {}
 
-  body-parser@1.20.3:
-    dependencies:
-      bytes: 3.1.2
-      content-type: 1.0.5
-      debug: 2.6.9
-      depd: 2.0.0
-      destroy: 1.2.0
-      http-errors: 2.0.0
-      iconv-lite: 0.4.24
-      on-finished: 2.4.1
-      qs: 6.13.0
-      raw-body: 2.5.2
-      type-is: 1.6.18
-      unpipe: 1.0.0
-    transitivePeerDependencies:
-      - supports-color
-
-  body-parser@2.2.0:
+  body-parser@2.2.1:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
       debug: 4.4.3(supports-color@5.5.0)
       http-errors: 2.0.0
-      iconv-lite: 0.6.3
+      iconv-lite: 0.7.0
       on-finished: 2.4.1
       qs: 6.14.0
       raw-body: 3.0.1
@@ -57486,10 +57450,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@34.5.8:
+  electron@39.2.5:
     dependencies:
       '@electron/get': 2.0.3
-      '@types/node': 20.19.25
+      '@types/node': 22.19.1
       extract-zip: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -58341,7 +58305,7 @@ snapshots:
     dependencies:
       accepts: 1.3.8
       array-flatten: 1.1.1
-      body-parser: 1.20.3
+      body-parser: 2.2.1
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookie: 0.7.1
@@ -58377,7 +58341,7 @@ snapshots:
     dependencies:
       accepts: 1.3.8
       array-flatten: 1.1.1
-      body-parser: 1.20.3
+      body-parser: 2.2.1
       content-disposition: 0.5.4
       content-type: 1.0.5
       cookie: 0.7.2
@@ -58412,7 +58376,7 @@ snapshots:
   express@5.1.0:
     dependencies:
       accepts: 2.0.0
-      body-parser: 2.2.0
+      body-parser: 2.2.1
       content-disposition: 1.0.1
       content-type: 1.0.5
       cookie: 0.7.2
@@ -60036,10 +60000,6 @@ snapshots:
       node-addon-api: 1.7.2
     optional: true
 
-  iconv-lite@0.4.24:
-    dependencies:
-      safer-buffer: 2.1.2
-
   iconv-lite@0.6.3:
     dependencies:
       safer-buffer: 2.1.2
@@ -60193,7 +60153,7 @@ snapshots:
   interface-datastore@7.0.4:
     dependencies:
       interface-store: 3.0.4
-      nanoid: 4.0.2
+      nanoid: 5.1.6
       uint8arrays: 4.0.10
 
   interface-datastore@8.3.2:
@@ -60301,7 +60261,7 @@ snapshots:
       it-to-stream: 1.0.0
       merge-options: 3.0.4
       multiformats: 11.0.2
-      nanoid: 4.0.2
+      nanoid: 5.1.6
       parse-duration: 2.1.4
       timeout-abort-controller: 3.0.0
       uint8arrays: 4.0.10
@@ -60352,7 +60312,7 @@ snapshots:
       it-glob: 1.0.2
       it-to-stream: 1.0.0
       merge-options: 3.0.4
-      nanoid: 3.3.11
+      nanoid: 5.1.6
       native-fetch: 3.0.0(node-fetch@2.7.0(encoding@0.1.13))
       node-fetch: 2.7.0(encoding@0.1.13)
       react-native-fetch-api: 3.0.0
@@ -64439,10 +64399,6 @@ snapshots:
     dependencies:
       big-integer: 1.6.52
 
-  nanoid@3.3.11: {}
-
-  nanoid@4.0.2: {}
-
   nanoid@5.1.6: {}
 
   napi-build-utils@2.0.0: {}
@@ -65777,13 +65733,13 @@ snapshots:
 
   postcss@8.4.31:
     dependencies:
-      nanoid: 3.3.11
+      nanoid: 5.1.6
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
   postcss@8.5.6:
     dependencies:
-      nanoid: 3.3.11
+      nanoid: 5.1.6
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
@@ -66183,13 +66139,6 @@ snapshots:
       safe-buffer: 5.2.1
 
   range-parser@1.2.1: {}
-
-  raw-body@2.5.2:
-    dependencies:
-      bytes: 3.1.2
-      http-errors: 2.0.0
-      iconv-lite: 0.4.24
-      unpipe: 1.0.0
 
   raw-body@3.0.1:
     dependencies:
