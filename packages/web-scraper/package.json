@@ -1,0 +1,44 @@
+{
+  "name": "@intelgraph/web-scraper",
+  "version": "1.0.0",
+  "description": "Advanced web scraping with JavaScript rendering, change detection, and intelligent parsing",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w",
+    "test": "jest"
+  },
+  "keywords": [
+    "web-scraping",
+    "crawler",
+    "javascript-rendering",
+    "playwright",
+    "puppeteer"
+  ],
+  "dependencies": {
+    "axios": "^1.11.0",
+    "cheerio": "^1.0.0",
+    "puppeteer": "^23.0.0",
+    "playwright": "^1.56.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "puppeteer-extra-plugin-recaptcha": "^3.6.8",
+    "node-html-parser": "^6.1.13",
+    "robotstxt-parser": "^0.1.2",
+    "sitemap-parser": "^1.0.0",
+    "difflib": "^0.2.4",
+    "turndown": "^7.2.0",
+    "readability": "^0.5.0",
+    "wappalyzer": "^6.10.66",
+    "@mozilla/readability": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0"
+  }
+}

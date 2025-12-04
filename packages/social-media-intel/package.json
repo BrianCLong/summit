@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/social-media-intel",
+  "version": "1.0.0",
+  "description": "Social Media Intelligence (SOCMINT) - Profile analysis, sentiment analysis, network mapping",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -w",
+    "test": "jest"
+  },
+  "keywords": [
+    "socmint",
+    "social-media",
+    "osint",
+    "sentiment-analysis",
+    "network-analysis"
+  ],
+  "dependencies": {
+    "@intelgraph/osint-collector": "workspace:*",
+    "axios": "^1.11.0",
+    "natural": "^7.0.7",
+    "sentiment": "^5.0.2",
+    "compromise": "^14.13.0",
+    "face-api.js": "^0.22.2",
+    "sharp": "^0.33.5",
+    "exiftool-vendored": "^28.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0"
+  }
+}
