@@ -1165,3 +1165,11 @@ export {
   type GenerativeActionTranslatorOptions,
   type OrchestrationIntent,
 } from './gen-actions/intentTranslator.js';
+export {
+  EdgeCloudLoopController,
+  type EdgeCloudLoopConfig,
+  type ExecutionSignal,
+  type RoundEvaluation,
+  type RoundMetrics,
+  type TierDecision,
+} from './edgeCloudLoop.js';
