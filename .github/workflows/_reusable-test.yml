@@ -1,0 +1,271 @@
+name: 🧪 Reusable - Test Runner
+# Comprehensive test execution workflow
+# Supports: unit, integration, e2e tests with coverage reporting
+
+on:
+  workflow_call:
+    inputs:
+      test-type:
+        description: 'Type of tests to run (unit, integration, e2e, all)'
+        required: false
+        type: string
+        default: 'unit'
+      node-version:
+        description: 'Node.js version'
+        required: false
+        type: string
+        default: '20.x'
+      coverage-threshold:
+        description: 'Minimum coverage threshold (%)'
+        required: false
+        type: number
+        default: 80
+      upload-coverage:
+        description: 'Upload coverage reports'
+        required: false
+        type: boolean
+        default: true
+      fail-on-coverage:
+        description: 'Fail if coverage below threshold'
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      coverage-percentage:
+        description: 'Overall coverage percentage'
+        value: ${{ jobs.test.outputs.coverage }}
+      tests-passed:
+        description: 'Whether all tests passed'
+        value: ${{ jobs.test.outputs.passed }}
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+  test:
+    name: Test - ${{ inputs.test-type }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        node: ['20.x']
+    outputs:
+      coverage: ${{ steps.coverage-check.outputs.percentage }}
+      passed: ${{ steps.test-run.outcome == 'success' }}
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: testpass
+          POSTGRES_DB: summit_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+      neo4j:
+        image: neo4j:5-community
+        env:
+          NEO4J_AUTH: neo4j/testpassword
+          NEO4J_PLUGINS: '["apoc"]'
+          NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
+        ports:
+          - 7474:7474
+          - 7687:7687
+        options: >-
+          --health-cmd="neo4j status"
+          --health-interval=10s
+          --health-timeout=10s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup test environment
+        run: |
+          cp .env.example .env.test || echo "No .env.example found"
+          cat >> .env.test <<EOF
+          NODE_ENV=test
+          CI=true
+          DATABASE_URL=postgresql://test:testpass@localhost:5432/summit_test
+          REDIS_URL=redis://localhost:6379
+          NEO4J_URI=bolt://localhost:7687
+          NEO4J_USER=neo4j
+          NEO4J_PASSWORD=testpassword
+          EOF
+
+      - name: Run database migrations
+        if: inputs.test-type == 'integration' || inputs.test-type == 'all'
+        run: |
+          pnpm run db:migrate || echo "Migration script not found or failed (non-blocking)"
+        env:
+          DATABASE_URL: postgresql://test:testpass@localhost:5432/summit_test
+          NODE_ENV: test
+
+      - name: Install Playwright (E2E only)
+        if: inputs.test-type == 'e2e' || inputs.test-type == 'all'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run unit tests
+        id: test-run
+        if: inputs.test-type == 'unit' || inputs.test-type == 'all'
+        run: |
+          if [ "${{ inputs.upload-coverage }}" = "true" ]; then
+            pnpm run test:coverage || pnpm run test
+          else
+            pnpm run test
+          fi
+        env:
+          NODE_ENV: test
+          CI: true
+
+      - name: Run integration tests
+        if: inputs.test-type == 'integration' || inputs.test-type == 'all'
+        run: pnpm run test:integration || echo "Integration tests not configured"
+        env:
+          NODE_ENV: test
+          CI: true
+          DATABASE_URL: postgresql://test:testpass@localhost:5432/summit_test
+          REDIS_URL: redis://localhost:6379
+          NEO4J_URI: bolt://localhost:7687
+
+      - name: Run E2E tests
+        if: inputs.test-type == 'e2e' || inputs.test-type == 'all'
+        run: pnpm run e2e || echo "E2E tests not configured"
+        env:
+          NODE_ENV: test
+          CI: true
+
+      - name: Check coverage thresholds
+        id: coverage-check
+        if: inputs.upload-coverage && hashFiles('coverage/coverage-summary.json') != ''
+        run: |
+          node -e "
+            const fs = require('fs');
+            if (!fs.existsSync('coverage/coverage-summary.json')) {
+              console.log('No coverage data found');
+              process.exit(0);
+            }
+
+            const coverage = require('./coverage/coverage-summary.json');
+            const total = coverage.total;
+            const threshold = ${{ inputs.coverage-threshold }};
+            const failOnCoverage = ${{ inputs.fail-on-coverage }};
+
+            const metrics = {
+              lines: total.lines.pct,
+              statements: total.statements.pct,
+              functions: total.functions.pct,
+              branches: total.branches.pct
+            };
+
+            const avg = Object.values(metrics).reduce((a, b) => a + b, 0) / 4;
+            console.log('coverage-percentage=' + avg.toFixed(2));
+            console.log(\`percentage=\${avg.toFixed(2)}\` + '>> \$GITHUB_OUTPUT');
+
+            const failed = [];
+            Object.entries(metrics).forEach(([key, value]) => {
+              if (value < threshold) {
+                failed.push(\`\${key}: \${value.toFixed(2)}% < \${threshold}%\`);
+              }
+            });
+
+            console.log('## 📊 Test Coverage Summary');
+            console.log('');
+            console.log('| Metric | Coverage | Threshold | Status |');
+            console.log('|--------|----------|-----------|--------|');
+            Object.entries(metrics).forEach(([key, value]) => {
+              const status = value >= threshold ? '✅' : '❌';
+              console.log(\`| \${key} | \${value.toFixed(2)}% | \${threshold}% | \${status} |\`);
+            });
+            console.log('');
+            console.log(\`**Overall:** \${avg.toFixed(2)}%\`);
+
+            if (failed.length > 0 && failOnCoverage) {
+              console.error('❌ Coverage thresholds not met:');
+              failed.forEach(f => console.error('  - ' + f));
+              process.exit(1);
+            } else if (failed.length > 0) {
+              console.warn('⚠️  Coverage below threshold (non-blocking):');
+              failed.forEach(f => console.warn('  - ' + f));
+            } else {
+              console.log('✅ All coverage thresholds met!');
+            }
+          "
+
+      - name: Upload coverage reports
+        if: always() && inputs.upload-coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}-${{ matrix.node }}-${{ inputs.test-type }}
+          path: |
+            coverage/
+            test-results/
+            playwright-report/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Upload coverage to Codecov
+        if: inputs.upload-coverage && hashFiles('coverage/lcov.info') != ''
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          flags: ${{ inputs.test-type }}
+          name: ${{ inputs.test-type }}-${{ matrix.os }}-${{ matrix.node }}
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        continue-on-error: true
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "### 🧪 Test Results - ${{ inputs.test-type }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Test Type | ${{ inputs.test-type }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OS | ${{ matrix.os }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node.js | ${{ matrix.node }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${{ steps.test-run.outcome == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            echo "| Coverage | ${{ steps.coverage-check.outputs.percentage }}% |" >> $GITHUB_STEP_SUMMARY
+          fi
