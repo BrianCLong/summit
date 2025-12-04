@@ -9,6 +9,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **Knowledge Graph Platform** (PRIORITY-75)
+  - `@summit/knowledge-graph`: Core graph database infrastructure with Neo4j backend
+    - Graph database abstraction with connection pooling
+    - RDF/OWL triple store with SPARQL support
+    - Graph versioning and temporal queries
+    - High-performance indexing (B-tree, full-text, spatial, vector)
+    - Graph traversal algorithms (BFS, DFS, Dijkstra, k-hop)
+  - `@summit/entity-resolution`: Entity extraction and resolution engine
+    - Named Entity Recognition (NER) for Person, Organization, Location, Email, Phone, URL
+    - Fuzzy matching algorithms (Levenshtein, Jaro-Winkler, Dice, Soundex)
+    - Probabilistic record linkage with ML-based matching
+    - Entity deduplication with hierarchical and connected components clustering
+    - Relationship extraction from text (pattern and proximity-based)
+    - Entity linking to Wikidata, DBpedia, Schema.org
+  - `@summit/graph-analytics`: Graph algorithms and analytics
+    - Centrality metrics (PageRank, betweenness, degree)
+    - Community detection (Louvain algorithm)
+    - Shortest path algorithms
+    - Graph statistics and metrics
+  - `@summit/ontology-management`: Schema and ontology management
+    - OWL/RDFS ontology support
+    - Class hierarchies and type inheritance
+    - Property constraints (domain, range, cardinality)
+    - Instance validation
+  - `@summit/semantic-reasoning`: Inference and reasoning engine
+    - Rule-based reasoning
+    - Transitive closure
+    - Consistency checking
+  - `kg-service`: REST API for knowledge graph operations (port 3100)
+  - `entity-resolution-service`: REST API for entity extraction/resolution (port 3101)
+  - Comprehensive documentation (GUIDE.md, ONTOLOGY.md, QUERIES.md)
+  - Unit tests for core functionality
+
 ## [0.1.1] - 2025-01-20
 
 ### Added
