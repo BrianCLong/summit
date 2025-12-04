@@ -15,7 +15,7 @@ export function WidgetToolbar({ className = '' }: WidgetToolbarProps) {
     clearSelection,
   } = useDashboardStore();
 
-  if (selectedWidgets.size === 0) return null;
+  if (selectedWidgets.size === 0) {return null;}
 
   const selectedIds = Array.from(selectedWidgets);
 

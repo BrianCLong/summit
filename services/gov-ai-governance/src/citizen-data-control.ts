@@ -51,7 +51,7 @@ export class CitizenDataControl {
     purposes: string[],
   ): Promise<boolean> {
     const existing = this.consents.get(citizenId);
-    if (!existing) return false;
+    if (!existing) {return false;}
 
     const updated = existing.filter(
       (c) =>
@@ -72,7 +72,7 @@ export class CitizenDataControl {
     const now = new Date();
 
     return consents.filter((c) => {
-      if (!c.expiresAt) return c.consentGiven;
+      if (!c.expiresAt) {return c.consentGiven;}
       return c.consentGiven && new Date(c.expiresAt) > now;
     });
   }
@@ -95,7 +95,7 @@ export class CitizenDataControl {
     );
 
     return {
-      allowed: !!matching,
+      allowed: Boolean(matching),
       basis: matching ? 'explicit_consent' : 'no_consent',
     };
   }
@@ -133,7 +133,7 @@ export class CitizenDataControl {
     status: 'completed' | 'denied',
   ): Promise<DataAccessRequest | null> {
     const request = this.requests.get(requestId);
-    if (!request) return null;
+    if (!request) {return null;}
 
     const updated: DataAccessRequest = {
       ...request,

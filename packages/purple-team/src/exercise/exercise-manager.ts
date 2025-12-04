@@ -98,7 +98,7 @@ export class ExerciseManager {
    */
   startExercise(exerciseId: string): PurpleTeamExercise {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) throw new Error('Exercise not found');
+    if (!exercise) {throw new Error('Exercise not found');}
 
     exercise.status = ExerciseStatus.IN_PROGRESS;
     exercise.schedule.actualStart = new Date();
@@ -116,7 +116,7 @@ export class ExerciseManager {
     detection: Omit<Detection, 'id' | 'timestamp'>
   ): Detection {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) throw new Error('Exercise not found');
+    if (!exercise) {throw new Error('Exercise not found');}
 
     const newDetection: Detection = {
       id: this.generateId(),
@@ -141,7 +141,7 @@ export class ExerciseManager {
     finding: Omit<ExerciseFinding, 'id'>
   ): ExerciseFinding {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) throw new Error('Exercise not found');
+    if (!exercise) {throw new Error('Exercise not found');}
 
     const newFinding: ExerciseFinding = {
       id: this.generateId(),
@@ -159,7 +159,7 @@ export class ExerciseManager {
    */
   completeExercise(exerciseId: string): PurpleTeamExercise {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) throw new Error('Exercise not found');
+    if (!exercise) {throw new Error('Exercise not found');}
 
     exercise.status = ExerciseStatus.COMPLETED;
     exercise.schedule.actualEnd = new Date();
@@ -180,7 +180,7 @@ export class ExerciseManager {
    */
   generateAfterActionReport(exerciseId: string): AfterActionReport {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) throw new Error('Exercise not found');
+    if (!exercise) {throw new Error('Exercise not found');}
 
     // Generate timeline from detections and actions
     const timeline = this.generateTimeline(exercise);

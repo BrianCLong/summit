@@ -322,8 +322,8 @@ export class TaskService extends EventEmitter {
     results.sort((a, b) => {
       const aVal = (a as Record<string, unknown>)[sortBy] ?? '';
       const bVal = (b as Record<string, unknown>)[sortBy] ?? '';
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      if (aVal < bVal) {return sortOrder === 'asc' ? -1 : 1;}
+      if (aVal > bVal) {return sortOrder === 'asc' ? 1 : -1;}
       return 0;
     });
 
@@ -471,7 +471,7 @@ export class TaskService extends EventEmitter {
   // Reminder management
 
   private async scheduleReminder(task: Task): Promise<void> {
-    if (!task.reminderAt || task.reminderAt <= new Date()) return;
+    if (!task.reminderAt || task.reminderAt <= new Date()) {return;}
 
     const reminder: Reminder = {
       id: `rem_${task.id}`,
@@ -505,7 +505,7 @@ export class TaskService extends EventEmitter {
 
   private async triggerReminder(reminderId: string): Promise<void> {
     const reminder = this.reminders.get(reminderId);
-    if (!reminder || reminder.dismissed) return;
+    if (!reminder || reminder.dismissed) {return;}
 
     reminder.sent = true;
     reminder.sentAt = new Date();
@@ -528,7 +528,7 @@ export class TaskService extends EventEmitter {
 
     // Reschedule
     const timer = this.reminderTimers.get(reminderId);
-    if (timer) clearTimeout(timer);
+    if (timer) {clearTimeout(timer);}
 
     const newTimer = setTimeout(
       () => this.triggerReminder(reminderId),
@@ -552,7 +552,7 @@ export class TaskService extends EventEmitter {
   }
 
   private async createNextRecurrence(task: Task): Promise<Task | null> {
-    if (!task.recurrence) return null;
+    if (!task.recurrence) {return null;}
 
     let nextDueDate: Date | undefined;
     const currentDue = task.dueDate || new Date();

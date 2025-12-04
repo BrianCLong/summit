@@ -116,7 +116,7 @@ export const transactionService = {
 
   async runComplianceCheck(transactionId: string): Promise<void> {
     const tx = await this.findById(transactionId);
-    if (!tx) return;
+    if (!tx) {return;}
 
     // Update status
     await db.query(

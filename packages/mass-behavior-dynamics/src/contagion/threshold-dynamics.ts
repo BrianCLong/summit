@@ -141,9 +141,9 @@ function normalRandom(mean: number, std: number): number {
 }
 
 function categorizeEquilibrium(activation: number): string {
-  if (activation < 0.1) return 'NO_CASCADE';
-  if (activation < 0.5) return 'PARTIAL_CASCADE';
-  if (activation < 0.9) return 'MAJORITY_CASCADE';
+  if (activation < 0.1) {return 'NO_CASCADE';}
+  if (activation < 0.5) {return 'PARTIAL_CASCADE';}
+  if (activation < 0.9) {return 'MAJORITY_CASCADE';}
   return 'FULL_CASCADE';
 }
 

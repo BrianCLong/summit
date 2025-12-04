@@ -99,7 +99,7 @@ export class RightsizingService {
 
       for (const reservation of response.Reservations || []) {
         for (const instance of reservation.Instances || []) {
-          if (instance.State?.Name !== 'running') continue;
+          if (instance.State?.Name !== 'running') {continue;}
 
           // Analyze instance metrics (simplified)
           const cpuUtilization = Math.random() * 100; // Placeholder

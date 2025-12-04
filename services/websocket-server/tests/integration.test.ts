@@ -33,8 +33,8 @@ describe('WebSocket Server Integration Tests', () => {
   });
 
   afterEach(() => {
-    if (client1?.connected) client1.disconnect();
-    if (client2?.connected) client2.disconnect();
+    if (client1?.connected) {client1.disconnect();}
+    if (client2?.connected) {client2.disconnect();}
   });
 
   describe('Authentication', () => {
@@ -140,7 +140,7 @@ describe('WebSocket Server Integration Tests', () => {
       let connected = 0;
       const checkReady = () => {
         connected++;
-        if (connected === 2) done();
+        if (connected === 2) {done();}
       };
 
       client1.on('connect', checkReady);

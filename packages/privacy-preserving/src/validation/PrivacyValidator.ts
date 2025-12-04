@@ -200,9 +200,9 @@ export class PrivacyValidator {
       metrics.attributeDisclosureRisk
     );
 
-    if (maxRisk < 0.1) return 'low';
-    if (maxRisk < 0.3) return 'medium';
-    if (maxRisk < 0.6) return 'high';
+    if (maxRisk < 0.1) {return 'low';}
+    if (maxRisk < 0.3) {return 'medium';}
+    if (maxRisk < 0.6) {return 'high';}
     return 'critical';
   }
 

@@ -6,7 +6,7 @@ export function calculateOptimalLayout(
 ): Widget[] {
   // Simple algorithm to optimize widget placement
   const sorted = [...widgets].sort((a, b) => {
-    if (a.layout.y !== b.layout.y) return a.layout.y - b.layout.y;
+    if (a.layout.y !== b.layout.y) {return a.layout.y - b.layout.y;}
     return a.layout.x - b.layout.x;
   });
 

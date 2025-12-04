@@ -182,7 +182,7 @@ export class ComplianceLogger {
    * Log zero-trust context validation
    */
   async logZeroTrustValidation(context: ZeroTrustContext, decision: 'allow' | 'deny' | 'challenge'): Promise<void> {
-    if (!this.config.enableZeroTrust) return;
+    if (!this.config.enableZeroTrust) {return;}
 
     await this.addAuditEntry({
       action: 'ZERO_TRUST_VALIDATION',
@@ -228,7 +228,7 @@ export class ComplianceLogger {
    * Get audit trail for a scan
    */
   async getAuditTrail(scanId?: string): Promise<AuditEntry[]> {
-    if (!scanId) return [...this.auditChain];
+    if (!scanId) {return [...this.auditChain];}
     return this.auditChain.filter(
       (entry) => entry.target === scanId || entry.details.scanId === scanId
     );
@@ -283,9 +283,9 @@ export class ComplianceLogger {
 
     for (const entry of frameworkEntries) {
       const status = entry.details.status as string;
-      if (status === 'compliant') summary.compliant++;
-      else if (status === 'non-compliant') summary.nonCompliant++;
-      else if (status === 'remediated') summary.remediated++;
+      if (status === 'compliant') {summary.compliant++;}
+      else if (status === 'non-compliant') {summary.nonCompliant++;}
+      else if (status === 'remediated') {summary.remediated++;}
     }
 
     return {

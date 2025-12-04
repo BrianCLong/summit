@@ -94,10 +94,10 @@ export class HallucinationAuditor {
     previousOutputs?: string[];
     sources?: string[];
   }): Promise<HallucinationDetection | null> {
-    if (!this.config.enabled) return null;
+    if (!this.config.enabled) {return null;}
 
     // Apply sampling
-    if (Math.random() > this.config.samplingRate) return null;
+    if (Math.random() > this.config.samplingRate) {return null;}
 
     const context: DetectionContext = {
       agentId: params.agentId,
@@ -112,7 +112,7 @@ export class HallucinationAuditor {
 
     for (const methodId of this.config.detectionMethods) {
       const method = this.detectionMethods.get(methodId);
-      if (!method) continue;
+      if (!method) {continue;}
 
       try {
         const result = await method.detect(params.input, params.output, context);
@@ -124,7 +124,7 @@ export class HallucinationAuditor {
 
     // Combine results
     const positiveDetections = results.filter((r) => r.detected);
-    if (positiveDetections.length === 0) return null;
+    if (positiveDetections.length === 0) {return null;}
 
     // Create detection record
     const detection = this.createDetection(params, positiveDetections);
@@ -445,7 +445,7 @@ export class HallucinationAuditor {
    * Redact hallucinated content from output
    */
   private redactHallucination(output: string, hallucinatedContent: string): string {
-    if (!hallucinatedContent) return output;
+    if (!hallucinatedContent) {return output;}
     return output.replace(hallucinatedContent, '[REDACTED - Unverified Content]');
   }
 

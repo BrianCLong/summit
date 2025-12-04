@@ -249,7 +249,7 @@ export class EventBus extends EventEmitter {
 
     // Poll queue for messages
     const pollQueue = async () => {
-      if (!this.redis) return;
+      if (!this.redis) {return;}
 
       const queueKey = `queue:${queue}`;
       const prefetch = options.prefetchCount || 1;
@@ -370,7 +370,7 @@ export class EventBus extends EventEmitter {
     envelope: MessageEnvelope<T>,
     dlqName: string
   ): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     const dlqKey = `dlq:${dlqName}`;
     await this.redis.lpush(dlqKey, JSON.stringify(envelope));
@@ -387,7 +387,7 @@ export class EventBus extends EventEmitter {
    */
   private async unsubscribe(subscriptionId: string): Promise<void> {
     const subscription = this.subscriptions.get(subscriptionId);
-    if (!subscription) return;
+    if (!subscription) {return;}
 
     // Disconnect Kafka consumer
     const consumer = this.kafkaConsumers.get(subscriptionId);

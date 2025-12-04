@@ -271,14 +271,14 @@ export class ComplianceMonitor {
     const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     const valid = certifications.filter(c => {
-      if (c.status !== 'valid') return false;
-      if (!c.expirationDate) return true;
+      if (c.status !== 'valid') {return false;}
+      if (!c.expirationDate) {return true;}
       return c.expirationDate > thirtyDaysFromNow;
     });
 
     const expiring = certifications.filter(c => {
-      if (c.status !== 'valid') return false;
-      if (!c.expirationDate) return false;
+      if (c.status !== 'valid') {return false;}
+      if (!c.expirationDate) {return false;}
       return c.expirationDate > now && c.expirationDate <= thirtyDaysFromNow;
     });
 
@@ -362,7 +362,7 @@ export class ComplianceMonitor {
 
     for (const nodeId of nodeIds) {
       const node = nodes.get(nodeId);
-      if (!node) continue;
+      if (!node) {continue;}
 
       const compliance = await this.checkCompliance(node, requirements);
       if (compliance.overallCompliance === 'compliant') {

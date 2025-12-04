@@ -279,7 +279,7 @@ export class KnowledgeGraphManager {
       }
 
       if (whereClauses.length > 0) {
-        cypher += ' WHERE ' + whereClauses.join(' AND ');
+        cypher += ` WHERE ${  whereClauses.join(' AND ')}`;
       }
 
       cypher += ' RETURN r, source.id as sourceId, target.id as targetId LIMIT $limit';

@@ -157,7 +157,7 @@ export class CDCEngine extends EventEmitter {
   }
 
   private async captureTimestampChanges(): Promise<void> {
-    if (!this.pool) return;
+    if (!this.pool) {return;}
 
     const client = await this.pool.connect();
 
@@ -230,7 +230,7 @@ export class CDCEngine extends EventEmitter {
   }
 
   private async captureVersionChanges(): Promise<void> {
-    if (!this.pool) return;
+    if (!this.pool) {return;}
 
     const client = await this.pool.connect();
 
@@ -302,7 +302,7 @@ export class CDCEngine extends EventEmitter {
   }
 
   private async setupTriggerCDC(): Promise<void> {
-    if (!this.pool) return;
+    if (!this.pool) {return;}
 
     const client = await this.pool.connect();
 
@@ -362,7 +362,7 @@ export class CDCEngine extends EventEmitter {
   }
 
   private async captureTriggerChanges(): Promise<void> {
-    if (!this.pool) return;
+    if (!this.pool) {return;}
 
     const client = await this.pool.connect();
 

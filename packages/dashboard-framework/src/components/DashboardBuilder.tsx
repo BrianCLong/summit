@@ -47,7 +47,7 @@ export function DashboardBuilder({
   }
 
   const handleAddWidget = (template: WidgetTemplate) => {
-    if (!activePageId) return;
+    if (!activePageId) {return;}
 
     addWidget(activePageId, {
       type: template.type,

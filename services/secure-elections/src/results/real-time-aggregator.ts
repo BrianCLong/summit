@@ -250,7 +250,7 @@ export class RealTimeAggregator extends EventEmitter {
 
   private getReportingProgress(electionId: string): number {
     const precincts = this.precinctStatus.get(electionId);
-    if (!precincts || precincts.size === 0) return 0;
+    if (!precincts || precincts.size === 0) {return 0;}
 
     const counted = Array.from(precincts.values()).filter(Boolean).length;
     return (counted / precincts.size) * 100;
@@ -258,17 +258,17 @@ export class RealTimeAggregator extends EventEmitter {
 
   private getResultStatus(electionId: string): TallyResult['status'] {
     const election = this.elections.get(electionId);
-    if (election?.status === 'certified') return 'certified';
+    if (election?.status === 'certified') {return 'certified';}
 
     const progress = this.getReportingProgress(electionId);
-    if (progress === 100) return 'final';
-    if (progress > 0) return 'partial';
+    if (progress === 100) {return 'final';}
+    if (progress > 0) {return 'partial';}
     return 'preliminary';
   }
 
   private computeAuditHash(electionId: string): string {
     const results = this.tallies.get(electionId);
-    if (!results) return '';
+    if (!results) {return '';}
 
     const data = JSON.stringify(Array.from(results.entries()));
     return crypto.createHash('sha256').update(data).digest('hex');
@@ -295,8 +295,8 @@ export class RankedChoiceTabulator {
     rounds: Array<{ eliminated: string | null; counts: Map<string, number> }>;
   } {
     const rounds: Array<{ eliminated: string | null; counts: Map<string, number> }> = [];
-    let activeCandidates = new Set(candidates);
-    let activeBallots = ballots.map((b) => ({ ...b, currentIndex: 0 }));
+    const activeCandidates = new Set(candidates);
+    const activeBallots = ballots.map((b) => ({ ...b, currentIndex: 0 }));
 
     while (activeCandidates.size > 1) {
       // Count first-choice votes among active candidates

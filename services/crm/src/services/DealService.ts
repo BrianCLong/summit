@@ -425,8 +425,8 @@ export class DealService extends EventEmitter {
     results.sort((a, b) => {
       const aVal = (a as Record<string, unknown>)[sortBy];
       const bVal = (b as Record<string, unknown>)[sortBy];
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      if (aVal < bVal) {return sortOrder === 'asc' ? -1 : 1;}
+      if (aVal > bVal) {return sortOrder === 'asc' ? 1 : -1;}
       return 0;
     });
 
@@ -568,13 +568,13 @@ export class DealService extends EventEmitter {
     const now = Date.now();
 
     for (const deal of this.deals.values()) {
-      if (deal.status !== 'open') continue;
+      if (deal.status !== 'open') {continue;}
 
       const pipeline = this.pipelines.get(deal.pipelineId);
-      if (!pipeline || !pipeline.dealRotting.enabled) continue;
+      if (!pipeline || !pipeline.dealRotting.enabled) {continue;}
 
       const stage = pipeline.stages.find((s) => s.id === deal.stageId);
-      if (!stage || stage.rottingDays === 0) continue;
+      if (!stage || stage.rottingDays === 0) {continue;}
 
       const daysInStage = Math.floor(
         (now - deal.stageEnteredAt.getTime()) / (1000 * 60 * 60 * 24)

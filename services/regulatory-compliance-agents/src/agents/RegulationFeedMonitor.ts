@@ -50,7 +50,7 @@ export class RegulationFeedMonitor extends EventEmitter {
     logger.info({ sourceCount: this.sources.size }, 'Starting regulatory feed monitoring');
 
     for (const [id, source] of this.sources) {
-      if (!source.enabled) continue;
+      if (!source.enabled) {continue;}
 
       // Initial fetch
       this.fetchSource(source).catch(err =>

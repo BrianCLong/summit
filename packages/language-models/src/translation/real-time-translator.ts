@@ -125,7 +125,7 @@ export class RealTimeTranslator {
     // Check cache
     if (this.config.cacheEnabled) {
       const cached = this.getFromCache(cacheKey);
-      if (cached) return cached;
+      if (cached) {return cached;}
     }
 
     // Translate with fallback support
@@ -196,7 +196,7 @@ export class RealTimeTranslator {
    * Detect language of input text
    */
   async detectLanguage(text: string): Promise<string> {
-    if (!text?.trim()) return 'unknown';
+    if (!text?.trim()) {return 'unknown';}
 
     // Simple heuristic-based detection
     const patterns: Record<string, RegExp> = {
@@ -214,7 +214,7 @@ export class RealTimeTranslator {
     };
 
     for (const [lang, pattern] of Object.entries(patterns)) {
-      if (pattern.test(text)) return lang;
+      if (pattern.test(text)) {return lang;}
     }
 
     return 'en'; // Default to English
@@ -332,7 +332,7 @@ export class RealTimeTranslator {
       }
     }
 
-    if (current) chunks.push(current.trim());
+    if (current) {chunks.push(current.trim());}
     return chunks;
   }
 

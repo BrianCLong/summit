@@ -46,7 +46,7 @@ export class RobustnessTester {
       const originalConfidence = Math.max(...originalLogits);
 
       // Skip if already misclassified
-      if (originalClass !== trueLabel) continue;
+      if (originalClass !== trueLabel) {continue;}
 
       // Generate adversarial example
       let adversarialExample;
@@ -223,10 +223,10 @@ export class RobustnessTester {
     for (const { score, isOOD } of scores) {
       const predictedOOD = score < threshold;
 
-      if (predictedOOD && isOOD) tp++;
-      else if (predictedOOD && !isOOD) fp++;
-      else if (!predictedOOD && !isOOD) tn++;
-      else fn++;
+      if (predictedOOD && isOOD) {tp++;}
+      else if (predictedOOD && !isOOD) {fp++;}
+      else if (!predictedOOD && !isOOD) {tn++;}
+      else {fn++;}
     }
 
     const detectionAccuracy = (tp + tn) / scores.length;
@@ -259,7 +259,7 @@ export class RobustnessTester {
     for (let i = 0; i < cleanData.length; i++) {
       const logits = await predict(cleanData[i]);
       const predicted = this.argmax(logits);
-      if (predicted === trueLabels[i]) cleanCorrect++;
+      if (predicted === trueLabels[i]) {cleanCorrect++;}
     }
     const cleanAccuracy = cleanCorrect / cleanData.length;
 
@@ -291,7 +291,7 @@ export class RobustnessTester {
     for (const input of cleanData) {
       const logits = await predict(input);
       const maxProb = Math.max(...this.softmax(logits));
-      if (maxProb < 0.5) falsePositives++;
+      if (maxProb < 0.5) {falsePositives++;}
     }
     const falsePositiveRate = falsePositives / cleanData.length;
 
@@ -406,7 +406,7 @@ export class RobustnessTester {
   private analyzeNeuronActivations(
     activations: number[][]
   ): Array<{ mean: number; std: number; anomalyScore: number }> {
-    if (activations.length === 0) return [];
+    if (activations.length === 0) {return [];}
 
     const numNeurons = activations[0].length;
     const stats: Array<{ mean: number; std: number; anomalyScore: number }> = [];

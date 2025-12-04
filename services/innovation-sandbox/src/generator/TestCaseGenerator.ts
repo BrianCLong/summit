@@ -215,7 +215,7 @@ export class TestCaseGenerator {
   ): GeneratedTestCase[] {
     const tests: GeneratedTestCase[] = [];
 
-    if (output === null || output === undefined) return tests;
+    if (output === null || output === undefined) {return tests;}
 
     // Output type test
     tests.push({

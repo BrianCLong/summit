@@ -279,7 +279,7 @@ export class ComplianceImpactAssessor extends EventEmitter {
     const gaps: ImpactAssessment['complianceGaps'] = [];
 
     for (const requirement of analysis.keyRequirements) {
-      if (!requirement.mandatory) continue;
+      if (!requirement.mandatory) {continue;}
 
       // Simulate gap detection based on requirement type
       const reqLower = requirement.requirement.toLowerCase();
@@ -380,10 +380,10 @@ export class ComplianceImpactAssessor extends EventEmitter {
    * Determine severity from risk score
    */
   private determineSeverity(riskScore: number): ImpactAssessment['severity'] {
-    if (riskScore >= 80) return 'critical';
-    if (riskScore >= 60) return 'high';
-    if (riskScore >= 40) return 'medium';
-    if (riskScore >= 20) return 'low';
+    if (riskScore >= 80) {return 'critical';}
+    if (riskScore >= 60) {return 'high';}
+    if (riskScore >= 40) {return 'medium';}
+    if (riskScore >= 20) {return 'low';}
     return 'informational';
   }
 

@@ -214,7 +214,7 @@ router.post('/compare', async (req: Request, res: Response) => {
 function findCommonMetrics(
   frameworks: ReturnType<typeof getAllFrameworks>,
 ): string[] {
-  if (frameworks.length === 0) return [];
+  if (frameworks.length === 0) {return [];}
 
   const metricSets = frameworks.map(
     (fw) => new Set(fw.requirements.flatMap((r) => r.metrics)),

@@ -200,8 +200,8 @@ export class IncentiveGenerator {
   private identifyPersonalizationFactors(talent: TalentProfile): string[] {
     const factors: string[] = [];
 
-    if (talent.overallScore >= 90) factors.push('elite_tier');
-    if (talent.overallScore >= 80) factors.push('high_potential');
+    if (talent.overallScore >= 90) {factors.push('elite_tier');}
+    if (talent.overallScore >= 80) {factors.push('high_potential');}
 
     if (talent.signals.some((s) => s.category === 'open_source')) {
       factors.push('open_source_contributor');

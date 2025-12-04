@@ -135,7 +135,7 @@ export class RoomManager extends EventEmitter {
    */
   public leaveAll(connectionId: string): void {
     const rooms = this.socketToRooms.get(connectionId);
-    if (!rooms) return;
+    if (!rooms) {return;}
 
     for (const room of rooms) {
       const roomSockets = this.roomToSockets.get(room);

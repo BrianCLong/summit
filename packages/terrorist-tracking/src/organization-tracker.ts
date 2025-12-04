@@ -126,7 +126,7 @@ export class OrganizationTracker {
    */
   async getAffiliates(organizationId: string): Promise<TerroristOrganization[]> {
     const org = this.organizations.get(organizationId);
-    if (!org) return [];
+    if (!org) {return [];}
 
     return org.affiliates
       .map(id => this.organizations.get(id))

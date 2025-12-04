@@ -149,7 +149,7 @@ export class FighterTracker {
    */
   async assessReturneeRisk(fighterId: string): Promise<number> {
     const returnee = this.returnees.get(fighterId);
-    if (!returnee) return 0;
+    if (!returnee) {return 0;}
 
     return returnee.riskAssessment.overallRisk;
   }

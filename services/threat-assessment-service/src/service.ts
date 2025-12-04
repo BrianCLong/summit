@@ -250,9 +250,9 @@ export class ThreatAssessmentService {
    */
 
   private estimateTimeframe(probability: number): string {
-    if (probability >= 0.8) return 'IMMINENT';
-    if (probability >= 0.6) return 'NEAR_TERM';
-    if (probability >= 0.4) return 'MEDIUM_TERM';
+    if (probability >= 0.8) {return 'IMMINENT';}
+    if (probability >= 0.6) {return 'NEAR_TERM';}
+    if (probability >= 0.4) {return 'MEDIUM_TERM';}
     return 'LONG_TERM';
   }
 
@@ -274,9 +274,9 @@ export class ThreatAssessmentService {
   }
 
   private calculatePriority(riskScore: number): 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' {
-    if (riskScore >= 0.75) return 'CRITICAL';
-    if (riskScore >= 0.5) return 'HIGH';
-    if (riskScore >= 0.25) return 'MEDIUM';
+    if (riskScore >= 0.75) {return 'CRITICAL';}
+    if (riskScore >= 0.5) {return 'HIGH';}
+    if (riskScore >= 0.25) {return 'MEDIUM';}
     return 'LOW';
   }
 }

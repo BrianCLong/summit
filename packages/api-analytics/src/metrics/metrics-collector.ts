@@ -116,7 +116,7 @@ export class MetricsCollector extends EventEmitter {
   }
 
   private percentile(sorted: number[], p: number): number {
-    if (sorted.length === 0) return 0;
+    if (sorted.length === 0) {return 0;}
     const index = Math.ceil(sorted.length * p) - 1;
     return sorted[Math.max(0, index)];
   }

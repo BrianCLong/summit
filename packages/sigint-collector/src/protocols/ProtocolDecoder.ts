@@ -209,7 +209,7 @@ export class ProtocolDecoder {
     _data: Uint8Array | Float32Array
   ): DecodingResult | null {
     const signature = this.signatures.get(protocolId);
-    if (!signature) return null;
+    if (!signature) {return null;}
 
     // Generate simulated decoded data
     return {

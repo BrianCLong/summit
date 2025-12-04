@@ -135,7 +135,7 @@ async function processBatchedRequest(request: InferenceRequest): Promise<Inferen
 
 // Process batch of requests
 async function processBatch(): Promise<void> {
-  if (batchQueue.length === 0) return;
+  if (batchQueue.length === 0) {return;}
   
   const batch = batchQueue.splice(0, MAX_BATCH_SIZE);
   

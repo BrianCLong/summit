@@ -98,11 +98,11 @@ export class AdvancedTokenizer {
     const lower = word.toLowerCase();
 
     // Very simplified POS tagging
-    if (['the', 'a', 'an'].includes(lower)) return 'DET';
-    if (lower.endsWith('ing')) return 'VERB';
-    if (lower.endsWith('ly')) return 'ADV';
-    if (lower.endsWith('ed')) return 'VERB';
-    if (/^[A-Z]/.test(word)) return 'PROPN';
+    if (['the', 'a', 'an'].includes(lower)) {return 'DET';}
+    if (lower.endsWith('ing')) {return 'VERB';}
+    if (lower.endsWith('ly')) {return 'ADV';}
+    if (lower.endsWith('ed')) {return 'VERB';}
+    if (/^[A-Z]/.test(word)) {return 'PROPN';}
 
     return 'NOUN'; // Default
   }
@@ -114,9 +114,9 @@ export class AdvancedTokenizer {
     const lower = word.toLowerCase();
 
     // Very simplified lemmatization
-    if (lower.endsWith('ing')) return lower.replace(/ing$/, '');
-    if (lower.endsWith('ed')) return lower.replace(/ed$/, '');
-    if (lower.endsWith('s') && lower.length > 3) return lower.replace(/s$/, '');
+    if (lower.endsWith('ing')) {return lower.replace(/ing$/, '');}
+    if (lower.endsWith('ed')) {return lower.replace(/ed$/, '');}
+    if (lower.endsWith('s') && lower.length > 3) {return lower.replace(/s$/, '');}
 
     return lower;
   }

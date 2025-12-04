@@ -624,8 +624,8 @@ export class MassBehaviorEngine {
     currentPenetration: number,
     criticalMass: number
   ): number {
-    if (R0 < 1) return 0.1;
-    if (currentPenetration > criticalMass) return 0.9;
+    if (R0 < 1) {return 0.1;}
+    if (currentPenetration > criticalMass) {return 0.9;}
     return Math.min(0.9, R0 * currentPenetration / criticalMass);
   }
 

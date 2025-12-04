@@ -289,7 +289,7 @@ function dijkstraTraversal(
     queue.sort((a, b) => a.dist - b.dist);
     const { node: v, dist: vDist } = queue.shift()!;
 
-    if (visited.has(v)) continue;
+    if (visited.has(v)) {continue;}
     visited.add(v);
     stack.push(v);
 

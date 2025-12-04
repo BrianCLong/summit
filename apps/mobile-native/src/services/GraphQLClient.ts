@@ -71,7 +71,7 @@ const retryLink = new RetryLink({
   },
   attempts: {
     max: 3,
-    retryIf: (error, _operation) => !!error && !error.message.includes('Unauthorized'),
+    retryIf: (error, _operation) => Boolean(error) && !error.message.includes('Unauthorized'),
   },
 });
 

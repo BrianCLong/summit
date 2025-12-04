@@ -189,7 +189,7 @@ export class IncidentResponseManager {
 
     // Run all detectors
     for (const detector of this.detectors.values()) {
-      if (!detector.enabled) continue;
+      if (!detector.enabled) {continue;}
 
       const detection = await this.runDetector(detector, event);
       if (detection) {
@@ -273,8 +273,8 @@ export class IncidentResponseManager {
    */
   private eventMatchesMetric(event: GovernanceEvent, metric: string): boolean {
     const [eventType, outcome] = metric.split(':');
-    if (eventType && event.type !== eventType) return false;
-    if (outcome && event.outcome !== outcome) return false;
+    if (eventType && event.type !== eventType) {return false;}
+    if (outcome && event.outcome !== outcome) {return false;}
     return true;
   }
 
@@ -282,7 +282,7 @@ export class IncidentResponseManager {
    * Simple anomaly detection
    */
   private detectAnomaly(events: GovernanceEvent[], sensitivity: number): boolean {
-    if (events.length < 10) return false;
+    if (events.length < 10) {return false;}
 
     // Calculate simple moving average and detect spike
     const recentCount = events.filter(
@@ -328,7 +328,7 @@ export class IncidentResponseManager {
   private async escalateIncident(incident: Incident): Promise<void> {
     const escalationPath = this.config.severityEscalation[incident.severity] || [];
 
-    if (escalationPath.length === 0) return;
+    if (escalationPath.length === 0) {return;}
 
     incident.status = 'investigating';
     incident.assignees = escalationPath;
@@ -354,7 +354,7 @@ export class IncidentResponseManager {
         this.compareSeverity(incident.severity, p.severity) >= 0,
     );
 
-    if (!policy) return;
+    if (!policy) {return;}
 
     if (policy.requiresApproval) {
       // Queue for approval
@@ -567,7 +567,7 @@ export class IncidentResponseManager {
     },
   ): Promise<Incident | null> {
     const incident = this.incidents.get(incidentId);
-    if (!incident) return null;
+    if (!incident) {return null;}
 
     incident.status = 'resolved';
     incident.resolvedAt = new Date();

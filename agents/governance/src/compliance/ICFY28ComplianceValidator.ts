@@ -556,7 +556,7 @@ export class ICFY28ComplianceValidator {
    */
   async validateControl(controlId: string): Promise<ICFY28Control | null> {
     const definition = CONTROL_DEFINITIONS.find((c) => c.id === controlId);
-    if (!definition) return null;
+    if (!definition) {return null;}
 
     const context: ValidationContext = {
       policyEngine: this.policyEngine,
@@ -613,8 +613,8 @@ export class ICFY28ComplianceValidator {
         return compliant / r.controls.length;
       });
 
-      if (scores[2] > scores[0] + 0.05) trend = 'improving';
-      else if (scores[2] < scores[0] - 0.05) trend = 'declining';
+      if (scores[2] > scores[0] + 0.05) {trend = 'improving';}
+      else if (scores[2] < scores[0] - 0.05) {trend = 'declining';}
     }
 
     return { score, byCategory, trend };
@@ -624,7 +624,7 @@ export class ICFY28ComplianceValidator {
    * Get open findings
    */
   getOpenFindings(): ICFY28Finding[] {
-    if (this.validationHistory.length === 0) return [];
+    if (this.validationHistory.length === 0) {return [];}
     const latest = this.validationHistory[this.validationHistory.length - 1];
     return latest.findings.filter((f) => f.status === 'open');
   }
@@ -686,7 +686,7 @@ export class ICFY28ComplianceValidator {
    * Report to external endpoint
    */
   private async reportToEndpoint(result: ICFY28ValidationResult): Promise<void> {
-    if (!this.config.reportingEndpoint) return;
+    if (!this.config.reportingEndpoint) {return;}
 
     try {
       await fetch(this.config.reportingEndpoint, {

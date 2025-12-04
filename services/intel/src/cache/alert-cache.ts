@@ -189,12 +189,12 @@ export class AlertCache {
    * Setup pub/sub subscription
    */
   private async setupSubscription(): Promise<void> {
-    if (!this.subscriber) return;
+    if (!this.subscriber) {return;}
 
     await this.subscriber.subscribe(this.config.pubSubChannel);
 
     this.subscriber.on('message', async (channel: string, message: string) => {
-      if (channel !== this.config.pubSubChannel) return;
+      if (channel !== this.config.pubSubChannel) {return;}
 
       try {
         const alert = JSON.parse(message) as IntelAlert;
@@ -580,7 +580,7 @@ export class AlertCache {
    * Calculate latency percentiles
    */
   private calculatePercentiles(): void {
-    if (this.metrics.latencies.length === 0) return;
+    if (this.metrics.latencies.length === 0) {return;}
 
     const sorted = [...this.metrics.latencies].sort((a, b) => a - b);
     const len = sorted.length;

@@ -225,7 +225,7 @@ export class WebSocketClient extends EventEmitter<WebSocketClientEvents> {
   }
 
   private setupEventListeners(): void {
-    if (!this.socket) return;
+    if (!this.socket) {return;}
 
     // Connection events
     this.socket.on('connect', () => {
@@ -348,7 +348,7 @@ export class WebSocketClient extends EventEmitter<WebSocketClientEvents> {
   }
 
   private flushMessageQueue(): void {
-    if (!this.isConnected() || !this.socket) return;
+    if (!this.isConnected() || !this.socket) {return;}
 
     const queue = [...this.messageQueue];
     this.messageQueue = [];

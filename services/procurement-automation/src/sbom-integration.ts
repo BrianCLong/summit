@@ -261,9 +261,9 @@ export class SBOMIntegration {
     severity?: string,
   ): 'critical' | 'high' | 'medium' | 'low' {
     const s = severity?.toLowerCase();
-    if (s === 'critical') return 'critical';
-    if (s === 'high') return 'high';
-    if (s === 'medium' || s === 'moderate') return 'medium';
+    if (s === 'critical') {return 'critical';}
+    if (s === 'high') {return 'high';}
+    if (s === 'medium' || s === 'moderate') {return 'medium';}
     return 'low';
   }
 

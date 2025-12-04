@@ -43,7 +43,7 @@ export class AlertManager extends EventEmitter {
     const triggeredAlerts: Alert[] = [];
 
     for (const rule of this.rules.values()) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       try {
         if (rule.condition(event)) {
@@ -124,7 +124,7 @@ export class AlertManager extends EventEmitter {
    * Handle alert escalation
    */
   private handleEscalation(alert: Alert, rule: AlertRule): void {
-    if (!rule.escalationPolicy) return;
+    if (!rule.escalationPolicy) {return;}
 
     for (const level of rule.escalationPolicy.levels) {
       setTimeout(async () => {

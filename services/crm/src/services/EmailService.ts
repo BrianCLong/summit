@@ -215,7 +215,7 @@ export class EmailService extends EventEmitter {
    */
   private async processSend(emailId: string): Promise<void> {
     const email = this.emails.get(emailId);
-    if (!email) return;
+    if (!email) {return;}
 
     // Simulate delivery
     email.status = 'sent';
@@ -534,12 +534,12 @@ export class EmailService extends EventEmitter {
 
   private async updateTemplateStats(templateId: string): Promise<void> {
     const template = this.templates.get(templateId);
-    if (!template) return;
+    if (!template) {return;}
 
     const emails = Array.from(this.emails.values()).filter((e) => e.templateId === templateId);
 
     const sent = emails.length;
-    if (sent === 0) return;
+    if (sent === 0) {return;}
 
     const opened = emails.filter((e) => e.tracking.opens.length > 0).length;
     const clicked = emails.filter((e) => e.tracking.clicks.length > 0).length;
@@ -686,10 +686,10 @@ export class EmailService extends EventEmitter {
    */
   private async processSequenceStep(enrollmentId: string): Promise<void> {
     const enrollment = this.enrollments.get(enrollmentId);
-    if (!enrollment || enrollment.status !== 'active') return;
+    if (!enrollment || enrollment.status !== 'active') {return;}
 
     const sequence = this.sequences.get(enrollment.sequenceId);
-    if (!sequence) return;
+    if (!sequence) {return;}
 
     const step = sequence.steps[enrollment.currentStep];
     if (!step) {
@@ -748,8 +748,8 @@ export class EmailService extends EventEmitter {
   }
 
   private createSnippet(text: string, maxLength = 100): string {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+    if (text.length <= maxLength) {return text;}
+    return `${text.substring(0, maxLength)  }...`;
   }
 
   private generateId(): string {

@@ -73,7 +73,7 @@ export function findSubgraphMatches(
   const reverseMapping = new Map<string, string>(); // graph -> pattern
 
   function backtrack(patternNodeIndex: number): void {
-    if (matches.length >= maxMatches) return;
+    if (matches.length >= maxMatches) {return;}
 
     // All pattern nodes mapped - found a match
     if (patternNodeIndex >= pattern.nodes.length) {
@@ -99,11 +99,11 @@ export function findSubgraphMatches(
     // Try mapping to each graph node
     for (const graphNode of graph.nodes) {
       // Skip if already mapped
-      if (reverseMapping.has(graphNode)) continue;
+      if (reverseMapping.has(graphNode)) {continue;}
 
       // Check degree compatibility
       const graphNeighbors = graphAdj.get(graphNode) || new Set();
-      if (graphNeighbors.size < patternNeighbors.size) continue;
+      if (graphNeighbors.size < patternNeighbors.size) {continue;}
 
       // Check consistency with existing mapping
       let consistent = true;
@@ -117,7 +117,7 @@ export function findSubgraphMatches(
         }
       }
 
-      if (!consistent) continue;
+      if (!consistent) {continue;}
 
       // Add mapping and recurse
       mapping.set(patternNode, graphNode);
@@ -354,7 +354,7 @@ function canonicalizePattern(pattern: Pattern): string {
 
 function calculateDensity(pattern: Pattern): number {
   const n = pattern.nodes.length;
-  if (n < 2) return 0;
+  if (n < 2) {return 0;}
   const maxEdges = (n * (n - 1)) / 2;
   return pattern.edges.length / maxEdges;
 }

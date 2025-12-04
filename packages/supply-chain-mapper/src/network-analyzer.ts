@@ -95,7 +95,7 @@ export class NetworkAnalyzer {
 
     // Build adjacency list
     for (const rel of relationships) {
-      if (!rel.isActive) continue;
+      if (!rel.isActive) {continue;}
 
       if (!adjacencyList.has(rel.sourceNodeId)) {
         adjacencyList.set(rel.sourceNodeId, []);
@@ -157,7 +157,7 @@ export class NetworkAnalyzer {
 
     // Build relationship map
     for (const rel of relationships) {
-      if (!rel.isActive) continue;
+      if (!rel.isActive) {continue;}
       if (!relMap.has(rel.sourceNodeId)) {
         relMap.set(rel.sourceNodeId, []);
       }
@@ -183,7 +183,7 @@ export class NetworkAnalyzer {
         }
       }
 
-      if (!current || minDist === Infinity) break;
+      if (!current || minDist === Infinity) {break;}
       unvisited.delete(current);
 
       const neighbors = relMap.get(current) || [];
@@ -258,7 +258,7 @@ export class NetworkAnalyzer {
     const downstream = new Map<string, SupplyChainRelationship[]>();
 
     for (const rel of relationships) {
-      if (!rel.isActive) continue;
+      if (!rel.isActive) {continue;}
 
       if (!upstream.has(rel.targetNodeId)) {
         upstream.set(rel.targetNodeId, []);
@@ -372,7 +372,7 @@ export class NetworkAnalyzer {
     let nodeCount = 0;
 
     for (const [nodeId, neighbors] of adjacencyList) {
-      if (neighbors.length < 2) continue;
+      if (neighbors.length < 2) {continue;}
 
       let edges = 0;
       for (let i = 0; i < neighbors.length; i++) {
@@ -452,7 +452,7 @@ export class NetworkAnalyzer {
 
     for (const nodeId of path) {
       const node = nodeMap.get(nodeId);
-      if (!node) continue;
+      if (!node) {continue;}
 
       // Check for high criticality
       if (node.criticality === 'critical') {
@@ -487,7 +487,7 @@ export class NetworkAnalyzer {
     const relMap = new Map<string, SupplyChainRelationship[]>();
 
     for (const rel of relationships) {
-      if (!rel.isActive) continue;
+      if (!rel.isActive) {continue;}
       if (!relMap.has(rel.sourceNodeId)) {
         relMap.set(rel.sourceNodeId, []);
       }
@@ -545,7 +545,7 @@ export class NetworkAnalyzer {
     while (queue.length > 0) {
       const { nodeId: current, distance } = queue.shift()!;
 
-      if (visited.has(current)) continue;
+      if (visited.has(current)) {continue;}
       visited.add(current);
 
       if (current !== nodeId) {

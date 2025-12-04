@@ -39,9 +39,9 @@ export class CoherenceOptimizer {
       const hasWord1 = doc.includes(word1);
       const hasWord2 = doc.includes(word2);
 
-      if (hasWord1 && hasWord2) cooccurrence++;
-      if (hasWord1) word1Count++;
-      if (hasWord2) word2Count++;
+      if (hasWord1 && hasWord2) {cooccurrence++;}
+      if (hasWord1) {word1Count++;}
+      if (hasWord2) {word2Count++;}
     }
 
     const denominator = Math.max(word1Count, word2Count);

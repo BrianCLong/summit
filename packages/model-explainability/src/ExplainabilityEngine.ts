@@ -294,8 +294,8 @@ export class ExplainabilityEngine extends EventEmitter {
           },
         },
       ],
-      textExplanation: 'To change the prediction, you would need to modify these features: ' +
-        features.slice(0, 3).join(', '),
+      textExplanation: `To change the prediction, you would need to modify these features: ${ 
+        features.slice(0, 3).join(', ')}`,
     };
   }
 

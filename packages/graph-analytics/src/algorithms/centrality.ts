@@ -352,7 +352,7 @@ function calculateShortestPaths(
       queue.sort((a, b) => a.dist - b.dist);
       const { node: current, dist: currentDist } = queue.shift()!;
 
-      if (visited.has(current)) continue;
+      if (visited.has(current)) {continue;}
       visited.add(current);
 
       const neighbors = adjacency.get(current) || new Map();

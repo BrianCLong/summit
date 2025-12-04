@@ -375,7 +375,7 @@ export class RedTeamService {
   }
 
   private validateScope(targets: string[]): void {
-    if (!this.config.safetyEnabled) return;
+    if (!this.config.safetyEnabled) {return;}
 
     for (const target of targets) {
       const isAuthorized = this.config.authorizedScopes.some(scope =>

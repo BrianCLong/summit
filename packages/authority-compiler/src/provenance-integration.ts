@@ -108,12 +108,12 @@ export class InMemoryProvenanceRecorder implements ProvenanceRecorder {
 
   async generateAuditReport(options: AuditReportOptions): Promise<AuditReport> {
     const filtered = this.events.filter((e) => {
-      if (e.timestamp < options.startDate || e.timestamp > options.endDate) return false;
-      if (options.userId && e.userId !== options.userId) return false;
-      if (options.entityType && e.resource.type !== options.entityType) return false;
-      if (options.investigationId && e.resource.investigationId !== options.investigationId) return false;
-      if (!options.includeAllowed && e.decision.allowed) return false;
-      if (!options.includeDenied && !e.decision.allowed) return false;
+      if (e.timestamp < options.startDate || e.timestamp > options.endDate) {return false;}
+      if (options.userId && e.userId !== options.userId) {return false;}
+      if (options.entityType && e.resource.type !== options.entityType) {return false;}
+      if (options.investigationId && e.resource.investigationId !== options.investigationId) {return false;}
+      if (!options.includeAllowed && e.decision.allowed) {return false;}
+      if (!options.includeDenied && !e.decision.allowed) {return false;}
       return true;
     });
 
@@ -124,8 +124,8 @@ export class InMemoryProvenanceRecorder implements ProvenanceRecorder {
 
     for (const event of filtered) {
       uniqueUsers.add(event.userId);
-      if (event.decision.allowed) allowedCount++;
-      else deniedCount++;
+      if (event.decision.allowed) {allowedCount++;}
+      else {deniedCount++;}
       operationCounts.set(event.operation, (operationCounts.get(event.operation) || 0) + 1);
     }
 
@@ -268,8 +268,8 @@ export class ProvLedgerClient implements ProvenanceRecorder {
       startDate: options.startDate.toISOString(),
       endDate: options.endDate.toISOString(),
     });
-    if (options.userId) params.set('userId', options.userId);
-    if (options.entityType) params.set('entityType', options.entityType);
+    if (options.userId) {params.set('userId', options.userId);}
+    if (options.entityType) {params.set('entityType', options.entityType);}
 
     const response = await fetch(`${this.baseUrl}/audit/report?${params}`);
     return response.json();

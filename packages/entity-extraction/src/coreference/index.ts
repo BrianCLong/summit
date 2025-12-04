@@ -76,7 +76,7 @@ export class CoreferenceResolver {
     // Find entities before the pronoun
     const candidates = entities.filter((e) => e.start < pronoun.start);
 
-    if (candidates.length === 0) return null;
+    if (candidates.length === 0) {return null;}
 
     // Sort by distance (closest first)
     candidates.sort((a, b) => pronoun.start - b.start - (pronoun.start - a.start));

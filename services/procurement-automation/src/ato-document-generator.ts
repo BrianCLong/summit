@@ -615,7 +615,7 @@ All controls operating as intended.
     return this.controls.reduce(
       (acc, control) => {
         const family = control.family;
-        if (!acc[family]) acc[family] = [];
+        if (!acc[family]) {acc[family] = [];}
         acc[family].push(control);
         return acc;
       },

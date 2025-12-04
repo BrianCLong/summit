@@ -177,7 +177,7 @@ export class PluginManager extends EventEmitter {
    */
   async update(pluginId: string, newVersion: string): Promise<void> {
     const instance = this.plugins.get(pluginId);
-    const wasEnabled = !!instance;
+    const wasEnabled = Boolean(instance);
 
     // Disable if enabled
     if (wasEnabled) {

@@ -73,7 +73,7 @@ export class TransparencyService {
     appealInfo?: { deadline: string; process: string };
   } | null> {
     const decision = this.decisions.get(decisionId);
-    if (!decision) return null;
+    if (!decision) {return null;}
 
     return {
       summary: decision.explanation.humanReadable,
@@ -186,7 +186,7 @@ export class TransparencyService {
    */
   async publishReport(reportId: string): Promise<TransparencyReport | null> {
     const report = this.reports.get(reportId);
-    if (!report) return null;
+    if (!report) {return null;}
 
     const published: TransparencyReport = {
       ...report,

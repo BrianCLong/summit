@@ -131,7 +131,7 @@ export function simulateControls(
   let cumulativeDetectProbability = 0;
 
   for (const control of activeControls) {
-    if (!control.enabled) continue;
+    if (!control.enabled) {continue;}
 
     const mitigates =
       control.mitigates.includes(technique) || control.mitigates.includes('*');

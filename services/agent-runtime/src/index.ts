@@ -232,7 +232,7 @@ class RunbookEngine {
 
   async getExecution(id: string): Promise<RunbookExecution | null> {
     const data = await redis.get(`execution:${id}`);
-    if (!data) return null;
+    if (!data) {return null;}
 
     return RunbookExecutionSchema.parse(JSON.parse(data));
   }
@@ -280,7 +280,7 @@ class RunbookEngine {
       if (temp.has(node)) {
         throw new Error('Circular dependency detected');
       }
-      if (visited.has(node)) return;
+      if (visited.has(node)) {return;}
 
       temp.add(node);
       const dependencies = dag.get(node) || [];
@@ -308,7 +308,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
   try {
     const execution = await engine.getExecution(executionId);
-    if (!execution) throw new Error('Execution not found');
+    if (!execution) {throw new Error('Execution not found');}
 
     // Update status to running
     execution.status = 'running';
@@ -325,11 +325,11 @@ taskQueue.process('execute-runbook', 5, async (job) => {
     // Execute tasks in topological order
     for (const taskId of sortedTaskIds) {
       const task = taskMap.get(taskId) as RunbookTask;
-      if (!task) continue;
+      if (!task) {continue;}
 
       // Update task status
       const taskExecution = execution.tasks.find((t) => t.id === taskId);
-      if (!taskExecution) continue;
+      if (!taskExecution) {continue;}
 
       taskExecution.status = 'running';
       taskExecution.started_at = new Date().toISOString();
@@ -553,7 +553,7 @@ server.post<{ Body: { sourceId: string; inputs?: any } }>(
 );
 
 // WebSocket for real-time updates
-server.register(async function (fastify) {
+server.register(async (fastify) => {
   fastify.get('/ws', { websocket: true }, (connection, req) => {
     connection.on('message', (message) => {
       const data = JSON.parse(message.toString());

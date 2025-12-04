@@ -222,7 +222,7 @@ export class EthicalAIRegistry {
     biasAssessment: NonNullable<AIModelRegistration['biasAssessment']>,
   ): Promise<AIModelRegistration | null> {
     const model = this.models.get(modelId);
-    if (!model) return null;
+    if (!model) {return null;}
 
     const updated: AIModelRegistration = {
       ...model,

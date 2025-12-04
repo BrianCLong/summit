@@ -116,7 +116,7 @@ export class WellbeingPredictor {
   }
 
   private scoreHealthDomain(data?: HealthData): number {
-    if (!data) return 50;
+    if (!data) {return 50;}
     let score = 70;
 
     // Chronic conditions impact
@@ -135,13 +135,13 @@ export class WellbeingPredictor {
     }
 
     // Disability adjustment
-    if (data.disabilityStatus) score -= 10;
+    if (data.disabilityStatus) {score -= 10;}
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreEconomicDomain(data?: EconomicData): number {
-    if (!data) return 50;
+    if (!data) {return 50;}
     let score = 60;
 
     // Income level
@@ -161,15 +161,15 @@ export class WellbeingPredictor {
 
     // Debt ratio impact
     if (data.debtToIncomeRatio !== undefined) {
-      if (data.debtToIncomeRatio > 0.5) score -= 15;
-      else if (data.debtToIncomeRatio > 0.3) score -= 8;
+      if (data.debtToIncomeRatio > 0.5) {score -= 15;}
+      else if (data.debtToIncomeRatio > 0.3) {score -= 8;}
     }
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreEducationalDomain(data?: EducationalData): number {
-    if (!data) return 50;
+    if (!data) {return 50;}
     let score = 50;
 
     // Education level
@@ -193,13 +193,13 @@ export class WellbeingPredictor {
     score += digitalScores[data.digitalLiteracy];
 
     // Current enrollment bonus
-    if (data.currentEnrollment) score += 10;
+    if (data.currentEnrollment) {score += 10;}
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreSocialDomain(data?: BehavioralData): number {
-    if (!data) return 50;
+    if (!data) {return 50;}
     let score = 50;
 
     // Community participation
@@ -217,7 +217,7 @@ export class WellbeingPredictor {
   }
 
   private scoreHousingDomain(data?: EconomicData): number {
-    if (!data) return 50;
+    if (!data) {return 50;}
     const housingScores = { homeless: 0, unstable: 25, stable: 70, owned: 90 };
     return housingScores[data.housingStability];
   }
@@ -234,21 +234,21 @@ export class WellbeingPredictor {
       score -= behavioral.crisisHistoryCount * 8;
 
       // Social isolation impact
-      if (behavioral.communityParticipation === 'isolated') score -= 15;
-      if (behavioral.socialSupportNetwork === 'none') score -= 15;
+      if (behavioral.communityParticipation === 'isolated') {score -= 15;}
+      if (behavioral.socialSupportNetwork === 'none') {score -= 15;}
     }
 
     return Math.max(0, Math.min(100, score));
   }
 
   private scoreFoodSecurityDomain(data?: EconomicData): number {
-    if (!data) return 50;
+    if (!data) {return 50;}
     const foodScores = { insecure: 15, marginal: 50, secure: 90 };
     return foodScores[data.foodSecurityStatus];
   }
 
   private scoreEmploymentDomain(data?: EconomicData): number {
-    if (!data) return 50;
+    if (!data) {return 50;}
     const employmentScores = {
       employed: 85,
       unemployed: 20,
@@ -280,10 +280,10 @@ export class WellbeingPredictor {
    * Determine risk level from overall score
    */
   private determineRiskLevel(score: number): RiskLevel {
-    if (score < 25) return 'critical';
-    if (score < 40) return 'high';
-    if (score < 60) return 'moderate';
-    if (score < 80) return 'low';
+    if (score < 25) {return 'critical';}
+    if (score < 40) {return 'high';}
+    if (score < 60) {return 'moderate';}
+    if (score < 80) {return 'low';}
     return 'minimal';
   }
 
@@ -294,10 +294,10 @@ export class WellbeingPredictor {
     profile: CitizenWellbeingProfile
   ): 'declining' | 'stable' | 'improving' {
     const history = profile.historicalScores;
-    if (history.length < 2) return 'stable';
+    if (history.length < 2) {return 'stable';}
 
     const recentScores = history.slice(-5);
-    if (recentScores.length < 2) return 'stable';
+    if (recentScores.length < 2) {return 'stable';}
 
     const firstHalf = recentScores.slice(0, Math.floor(recentScores.length / 2));
     const secondHalf = recentScores.slice(Math.floor(recentScores.length / 2));
@@ -306,8 +306,8 @@ export class WellbeingPredictor {
     const avgSecond = secondHalf.reduce((sum, s) => sum + s.score, 0) / secondHalf.length;
 
     const diff = avgSecond - avgFirst;
-    if (diff > 5) return 'improving';
-    if (diff < -5) return 'declining';
+    if (diff > 5) {return 'improving';}
+    if (diff < -5) {return 'declining';}
     return 'stable';
   }
 
@@ -378,12 +378,12 @@ export class WellbeingPredictor {
    */
   private calculateConfidence(profile: CitizenWellbeingProfile): number {
     let completeness = 0;
-    let total = 4;
+    const total = 4;
 
-    if (profile.healthData) completeness++;
-    if (profile.economicData) completeness++;
-    if (profile.educationalData) completeness++;
-    if (profile.behavioralData) completeness++;
+    if (profile.healthData) {completeness++;}
+    if (profile.economicData) {completeness++;}
+    if (profile.educationalData) {completeness++;}
+    if (profile.behavioralData) {completeness++;}
 
     const dataCompleteness = completeness / total;
     const historyBonus = Math.min(profile.historicalScores.length / 10, 0.2);

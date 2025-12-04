@@ -22,7 +22,7 @@ export abstract class BaseContract {
     args: unknown[],
   ): Promise<TransactionReceipt> {
     // Simulate blockchain transaction
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
+    const txHash = `0x${  crypto.randomBytes(32).toString('hex')}`;
     const blockNumber = Math.floor(Date.now() / 1000);
 
     // In production, this would:
@@ -36,7 +36,7 @@ export abstract class BaseContract {
     return {
       txHash,
       blockNumber,
-      blockHash: '0x' + crypto.randomBytes(32).toString('hex'),
+      blockHash: `0x${  crypto.randomBytes(32).toString('hex')}`,
       gasUsed: 21000 + Math.floor(Math.random() * 100000),
       status: 'success',
       logs: this.generateEvents(method, args),
@@ -84,7 +84,7 @@ export abstract class BaseContract {
         args: { method, argsCount: args.length },
         address: this.config.address,
         blockNumber: Math.floor(Date.now() / 1000),
-        txHash: '0x' + crypto.randomBytes(32).toString('hex'),
+        txHash: `0x${  crypto.randomBytes(32).toString('hex')}`,
       },
     ];
   }
@@ -94,8 +94,8 @@ export abstract class BaseContract {
     const mocks: Record<string, () => any> = {
       getPoolState: () => ({
         poolId: args[0],
-        owner: '0x' + '1'.repeat(40),
-        merkleRoot: '0x' + crypto.randomBytes(32).toString('hex'),
+        owner: `0x${  '1'.repeat(40)}`,
+        merkleRoot: `0x${  crypto.randomBytes(32).toString('hex')}`,
         contributorCount: BigInt(10),
         totalContributions: BigInt(100),
         createdAt: BigInt(Math.floor(Date.now() / 1000) - 86400),
@@ -106,7 +106,7 @@ export abstract class BaseContract {
       getAccessGrant: () => ({
         grantId: args[0],
         poolId: args[1] || 'pool-1',
-        grantee: '0x' + '2'.repeat(40),
+        grantee: `0x${  '2'.repeat(40)}`,
         accessLevel: BigInt(1),
         expiresAt: BigInt(Math.floor(Date.now() / 1000) + 86400),
         revoked: false,
@@ -114,7 +114,7 @@ export abstract class BaseContract {
       getListing: () => ({
         listingId: args[0],
         poolId: 'pool-1',
-        seller: '0x' + '3'.repeat(40),
+        seller: `0x${  '3'.repeat(40)}`,
         price: BigInt(100),
         currency: 'USD',
         active: true,

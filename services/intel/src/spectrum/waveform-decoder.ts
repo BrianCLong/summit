@@ -593,14 +593,14 @@ export class WaveformDecoder {
    * Get spectrum band classification
    */
   static classifyBand(frequencyHz: number): SpectrumBand {
-    if (frequencyHz < 30e3) return 'VLF';
-    if (frequencyHz < 300e3) return 'LF';
-    if (frequencyHz < 3e6) return 'MF';
-    if (frequencyHz < 30e6) return 'HF';
-    if (frequencyHz < 300e6) return 'VHF';
-    if (frequencyHz < 3e9) return 'UHF';
-    if (frequencyHz < 30e9) return 'SHF';
-    if (frequencyHz < 300e9) return 'EHF';
+    if (frequencyHz < 30e3) {return 'VLF';}
+    if (frequencyHz < 300e3) {return 'LF';}
+    if (frequencyHz < 3e6) {return 'MF';}
+    if (frequencyHz < 30e6) {return 'HF';}
+    if (frequencyHz < 300e6) {return 'VHF';}
+    if (frequencyHz < 3e9) {return 'UHF';}
+    if (frequencyHz < 30e9) {return 'SHF';}
+    if (frequencyHz < 300e9) {return 'EHF';}
     return 'THF';
   }
 }

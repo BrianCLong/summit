@@ -38,7 +38,7 @@ class MockRateLimitStore implements IRateLimitStore {
 
   async get(key: string): Promise<RateLimitState | null> {
     const data = this.data.get(key);
-    if (!data) return null;
+    if (!data) {return null;}
 
     return {
       key,

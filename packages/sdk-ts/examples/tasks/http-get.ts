@@ -6,7 +6,7 @@ import {
 
 export default defineTask<{ url: string }, { status: number; body: string }>({
   async validate(input: TaskInput<{ url: string }>) {
-    if (!input.payload?.url) throw new Error('url is required');
+    if (!input.payload?.url) {throw new Error('url is required');}
   },
   async execute(ctx, input) {
     const res = await fetch(input.payload.url);

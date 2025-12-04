@@ -116,7 +116,7 @@ export class SpellChecker {
       }
 
       // Limit processing for performance
-      if (suggestions.length > 100) break;
+      if (suggestions.length > 100) {break;}
     }
 
     // Sort by edit distance
@@ -135,8 +135,8 @@ export class SpellChecker {
       .fill(null)
       .map(() => Array(n + 1).fill(0));
 
-    for (let i = 0; i <= m; i++) dp[i][0] = i;
-    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 0; i <= m; i++) {dp[i][0] = i;}
+    for (let j = 0; j <= n; j++) {dp[0][j] = j;}
 
     for (let i = 1; i <= m; i++) {
       for (let j = 1; j <= n; j++) {
@@ -189,10 +189,10 @@ export const spelling = {
    */
   isLikelyMisspelled(word: string): boolean {
     // Check for repeated characters
-    if (/(.)\1{2,}/.test(word)) return true;
+    if (/(.)\1{2,}/.test(word)) {return true;}
 
     // Check for unusual character sequences
-    if (/[qwrtpsdfghjklzxcvbnm]{5,}/i.test(word)) return true;
+    if (/[qwrtpsdfghjklzxcvbnm]{5,}/i.test(word)) {return true;}
 
     return false;
   },
@@ -207,8 +207,8 @@ export const spelling = {
       .fill(null)
       .map(() => Array(n + 1).fill(0));
 
-    for (let i = 0; i <= m; i++) dp[i][0] = i;
-    for (let j = 0; j <= n; j++) dp[0][j] = j;
+    for (let i = 0; i <= m; i++) {dp[i][0] = i;}
+    for (let j = 0; j <= n; j++) {dp[0][j] = j;}
 
     for (let i = 1; i <= m; i++) {
       for (let j = 1; j <= n; j++) {

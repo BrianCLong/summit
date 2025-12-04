@@ -182,7 +182,7 @@ export function percentile<T>(
       return accumulator;
     },
     getResult: (accumulator) => {
-      if (accumulator.length === 0) return 0;
+      if (accumulator.length === 0) {return 0;}
 
       const sorted = accumulator.slice().sort((a, b) => a - b);
       const index = Math.ceil((p / 100) * sorted.length) - 1;

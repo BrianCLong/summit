@@ -49,7 +49,7 @@ export class ProactiveServiceResolver {
    */
   async predictServiceNeeds(citizenId: string): Promise<ServiceNeed[]> {
     const profile = await this.profileAggregator.getProfile(citizenId);
-    if (!profile) return [];
+    if (!profile) {return [];}
 
     const needs: ServiceNeed[] = [];
     const now = new Date();

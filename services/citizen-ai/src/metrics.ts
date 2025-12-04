@@ -85,19 +85,19 @@ class MetricsCollector {
 
   recordTranslation(success: boolean, latencyMs: number): void {
     this.metrics.translation.calls++;
-    if (!success) this.metrics.translation.errors++;
+    if (!success) {this.metrics.translation.errors++;}
     this.metrics.translation.totalLatency += latencyMs;
   }
 
   recordNLU(success: boolean, latencyMs: number): void {
     this.metrics.nlu.calls++;
-    if (!success) this.metrics.nlu.errors++;
+    if (!success) {this.metrics.nlu.errors++;}
     this.metrics.nlu.totalLatency += latencyMs;
   }
 
   recordConversation(success: boolean, latencyMs: number): void {
     this.metrics.conversation.calls++;
-    if (!success) this.metrics.conversation.errors++;
+    if (!success) {this.metrics.conversation.errors++;}
     this.metrics.conversation.totalLatency += latencyMs;
   }
 
@@ -185,7 +185,7 @@ export async function runHealthChecks(): Promise<HealthStatus> {
     overallStatus = 'unhealthy';
   } else if (memoryPercent > 0.7) {
     checks.push({ name: 'memory', status: 'warn', message: 'Memory usage high' });
-    if (overallStatus === 'healthy') overallStatus = 'degraded';
+    if (overallStatus === 'healthy') {overallStatus = 'degraded';}
   } else {
     checks.push({ name: 'memory', status: 'pass' });
   }

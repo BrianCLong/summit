@@ -40,7 +40,7 @@ export class CacheService {
   }
 
   async getCitizen(id: string): Promise<CitizenProfile | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     try {
       const data = await this.redis.get(`${this.prefix}${id}`);
@@ -56,7 +56,7 @@ export class CacheService {
   }
 
   async setCitizen(citizen: CitizenProfile, ttl: number = this.defaultTTL): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.setex(
@@ -77,7 +77,7 @@ export class CacheService {
   }
 
   async invalidate(id: string): Promise<void> {
-    if (!this.redis) return;
+    if (!this.redis) {return;}
 
     try {
       await this.redis.del(`${this.prefix}${id}`);
@@ -88,7 +88,7 @@ export class CacheService {
   }
 
   async getByNationalId(nationalId: string): Promise<string | null> {
-    if (!this.redis) return null;
+    if (!this.redis) {return null;}
 
     try {
       return await this.redis.get(`${this.prefix}national:${nationalId}`);

@@ -158,8 +158,8 @@ export class CredentialVerifier {
     if (requirements.claims) {
       for (const claim of requirements.claims) {
         const value = credential.credentialSubject[claim.name];
-        if (value === undefined) return false;
-        if (claim.value !== undefined && value !== claim.value) return false;
+        if (value === undefined) {return false;}
+        if (claim.value !== undefined && value !== claim.value) {return false;}
       }
     }
 
@@ -176,7 +176,7 @@ export class CredentialVerifier {
   ): Promise<boolean> {
     // Resolve DID to get public key
     const didDocument = await this.didManager.resolveDID(signerDid);
-    if (!didDocument) return false;
+    if (!didDocument) {return false;}
 
     // In production, properly verify JWS signature
     // For now, simplified verification

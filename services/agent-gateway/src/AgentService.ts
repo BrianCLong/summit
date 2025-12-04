@@ -267,7 +267,7 @@ export class AgentService {
 
     // Determine event type based on what changed
     let eventType: AuditEventType = 'agent_updated';
-    if (input.status === 'suspended') eventType = 'agent_suspended';
+    if (input.status === 'suspended') {eventType = 'agent_suspended';}
     if (input.status === 'active' && currentAgent.status === 'suspended') {
       eventType = 'agent_activated';
     }

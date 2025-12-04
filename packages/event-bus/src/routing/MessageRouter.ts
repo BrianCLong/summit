@@ -90,7 +90,7 @@ export class MessageRouter {
     if (filter.headers) {
       for (const [key, value] of Object.entries(filter.headers)) {
         const headerValue = message.metadata.headers?.[key];
-        if (!headerValue) return false;
+        if (!headerValue) {return false;}
 
         const allowedValues = Array.isArray(value) ? value : [value];
         if (!allowedValues.includes(headerValue)) {
@@ -142,10 +142,10 @@ export class TopicMatcher {
    */
   static matches(topic: string, pattern: string): boolean {
     // Direct match
-    if (topic === pattern) return true;
+    if (topic === pattern) {return true;}
 
     // Multi-level wildcard
-    if (pattern === '#') return true;
+    if (pattern === '#') {return true;}
 
     const topicParts = topic.split('.');
     const patternParts = pattern.split('.');

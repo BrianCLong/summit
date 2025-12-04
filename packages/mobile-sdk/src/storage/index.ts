@@ -91,8 +91,8 @@ export const storeData = async <T>(
   data: T,
   ttl?: number
 ): Promise<void> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.put(storeName as any, {
     id,
@@ -106,12 +106,12 @@ export const getData = async <T>(
   storeName: keyof IntelGraphDB,
   id: string
 ): Promise<T | null> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   const record = await db.get(storeName as any, id);
 
-  if (!record) return null;
+  if (!record) {return null;}
 
   // Check TTL
   if (record.ttl && Date.now() - record.timestamp > record.ttl) {
@@ -126,23 +126,23 @@ export const deleteData = async (
   storeName: keyof IntelGraphDB,
   id: string
 ): Promise<void> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.delete(storeName as any, id);
 };
 
 export const clearStore = async (storeName: keyof IntelGraphDB): Promise<void> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.clear(storeName as any);
 };
 
 // Mutation queue operations
 export const addMutation = async (operation: string, variables: any): Promise<number> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   return await db.add('mutations', {
     operation,
@@ -153,22 +153,22 @@ export const addMutation = async (operation: string, variables: any): Promise<nu
 };
 
 export const getPendingMutations = async (): Promise<any[]> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   return await db.getAll('mutations');
 };
 
 export const deleteMutation = async (id: number): Promise<void> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.delete('mutations', id);
 };
 
 export const updateMutationRetry = async (id: number, error?: string): Promise<void> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   const mutation = await db.get('mutations', id);
   if (mutation) {
@@ -184,8 +184,8 @@ export const setSyncStatus = async (
   status: 'pending' | 'syncing' | 'completed' | 'failed',
   error?: string
 ): Promise<void> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   await db.put('sync', {
     key,
@@ -196,8 +196,8 @@ export const setSyncStatus = async (
 };
 
 export const getSyncStatus = async (key: string): Promise<any | null> => {
-  if (!db) await initializeStorage();
-  if (!db) throw new Error('Database not initialized');
+  if (!db) {await initializeStorage();}
+  if (!db) {throw new Error('Database not initialized');}
 
   return await db.get('sync', key);
 };
