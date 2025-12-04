@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
+import { quotaEnforcer } from '../lib/resources/QuotaEnforcer.js';
 import { cfg } from '../config.js';
 
 interface RateLimitConfig {
@@ -18,30 +19,41 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
     return next();
   }
 
-  let key: string;
-  let limit: number;
-  let windowMs = cfg.RATE_LIMIT_WINDOW_MS;
-
-  // Determine key and limit
   // @ts-ignore - req.user is populated by auth middleware
   const user = req.user;
+  const tenantId = user?.tenantId;
 
-  if (user) {
-    key = `user:${user.id || user.sub}`;
-    // Higher limit for authenticated users
-    limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
-  } else {
-    key = `ip:${req.ip}`;
-    limit = cfg.RATE_LIMIT_MAX_REQUESTS;
+  // Use QuotaEnforcer for authenticated tenants
+  if (tenantId) {
+    const quotaResult = await quotaEnforcer.checkApiQuota(tenantId);
+
+    // Set headers
+    res.set('X-RateLimit-Limit', String(quotaResult.limit));
+    res.set('X-RateLimit-Remaining', String(quotaResult.remaining));
+    res.set('X-RateLimit-Reset', String(Math.ceil(quotaResult.reset / 1000)));
+
+    if (!quotaResult.allowed) {
+      res.status(429).json({
+        error: 'Quota Exceeded',
+        message: 'You have exceeded your API request quota for this minute.',
+        retryAfter: Math.ceil((quotaResult.reset - Date.now()) / 1000),
+        reason: quotaResult.reason
+      });
+      return;
+    }
+
+    return next();
   }
 
-  // Custom limits for expensive operations
-  // Note: When mounted on a path, req.path is relative. Use originalUrl or check baseUrl.
+  // Fallback to IP-based rate limiting for unauthenticated requests
+  let key = `ip:${req.ip}`;
+  let limit = cfg.RATE_LIMIT_MAX_REQUESTS;
+  const windowMs = cfg.RATE_LIMIT_WINDOW_MS;
+
+  // Custom limits for expensive operations (Restored logic)
   if (req.originalUrl.includes('/graphql') || req.baseUrl.endsWith('/graphql')) {
-      // Basic check, ideally we parse query complexity, but we can set a separate bucket
       key += ':graphql';
-      // Maybe stricter or separate limit?
-      // For now we use the same limit but separate bucket to avoid starving other API calls
+      // Use standard limit but separate bucket
   } else if (req.path.startsWith('/api/ai')) {
       key += ':ai';
       limit = Math.floor(limit / 5); // 5x stricter for AI endpoints

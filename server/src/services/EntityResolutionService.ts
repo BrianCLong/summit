@@ -6,8 +6,39 @@ import {
   BehavioralTelemetry,
   BehavioralFingerprint,
 } from './BehavioralFingerprintService.js';
+import { createHash } from 'node:crypto';
+import { erMetrics } from './ERMetrics.js';
 
 const log = pino({ name: 'EntityResolutionService' });
+
+export interface EntityResolutionConfig {
+  blocking: {
+    enabled: boolean;
+    strategies: ('exact' | 'token' | 'phonetic')[];
+  };
+  privacy: {
+    saltedHash: boolean;
+    salt?: string;
+  };
+  thresholds: {
+    match: number; // 0.0 - 1.0
+    possible: number; // 0.0 - 1.0
+  };
+}
+
+export interface MatchExplanation {
+  ruleId: string;
+  score: number;
+  features: Record<string, any>;
+  description: string;
+}
+
+export interface ERResult {
+  isMatch: boolean;
+  score: number;
+  explanation: MatchExplanation[];
+  confidence: 'high' | 'medium' | 'low' | 'none';
+}
 
 interface NormalizedProperties {
   name?: string;
@@ -15,26 +46,59 @@ interface NormalizedProperties {
   url?: string;
 }
 
+const DEFAULT_CONFIG: EntityResolutionConfig = {
+  blocking: {
+    enabled: true,
+    strategies: ['exact'],
+  },
+  privacy: {
+    saltedHash: false,
+    salt: process.env.ER_PRIVACY_SALT, // Load from ENV, fallback handled in logic
+  },
+  thresholds: {
+    match: 0.9,
+    possible: 0.75,
+  },
+};
+
 export class EntityResolutionService {
   private behavioralService = new BehavioralFingerprintService();
+  private config: EntityResolutionConfig;
+
+  constructor(config: Partial<EntityResolutionConfig> = {}) {
+    this.config = { ...DEFAULT_CONFIG, ...config };
+
+    // Safety Check for Privacy Mode
+    if (this.config.privacy.saltedHash && !this.config.privacy.salt) {
+        throw new Error('EntityResolutionService: Salt must be provided when saltedHash privacy mode is enabled.');
+    }
+  }
 
   /**
    * Normalizes entity properties for deterministic comparison.
-   * @param entity The entity object, typically from Neo4j, with properties.
-   * @returns Normalized properties.
+   * Includes salted hash support for privacy-safe matching.
    */
-  private normalizeEntityProperties(entity: any): NormalizedProperties {
+  public normalizeEntityProperties(entity: any): NormalizedProperties {
     const normalized: NormalizedProperties = {};
+
     if (entity.name) {
       normalized.name = String(entity.name).trim().toLowerCase();
     }
+
     if (entity.email) {
-      normalized.email = String(entity.email).trim().toLowerCase();
+      let email = String(entity.email).trim().toLowerCase();
+      if (this.config.privacy.saltedHash && this.config.privacy.salt) {
+        email = createHash('sha256')
+          .update(email + this.config.privacy.salt)
+          .digest('hex');
+      }
+      normalized.email = email;
     }
+
     if (entity.url) {
       try {
         const url = new URL(String(entity.url).trim().toLowerCase());
-        normalized.url = url.hostname + url.pathname; // Basic normalization
+        normalized.url = url.hostname + url.pathname;
       } catch (e) {
         log.warn(`Invalid URL for normalization: ${entity.url}`);
       }
@@ -44,11 +108,9 @@ export class EntityResolutionService {
 
   /**
    * Generates a canonical key for an entity based on its normalized properties.
-   * This key is used to identify potential duplicates.
-   * @param normalizedProps Normalized entity properties.
-   * @returns A canonical string key.
+   * This key is used to identify potential duplicates (blocking).
    */
-  private generateCanonicalKey(normalizedProps: NormalizedProperties): string {
+  public generateCanonicalKey(normalizedProps: NormalizedProperties): string {
     const parts: string[] = [];
     if (normalizedProps.name) parts.push(`name:${normalizedProps.name}`);
     if (normalizedProps.email) parts.push(`email:${normalizedProps.email}`);
@@ -58,6 +120,60 @@ export class EntityResolutionService {
       return ''; // Cannot generate a canonical key without identifying properties
     }
     return parts.sort().join('|');
+  }
+
+  /**
+   * Evaluate match between two entities with explainability.
+   * @param entityA Source entity
+   * @param entityB Target entity
+   */
+  public evaluateMatch(entityA: any, entityB: any): ERResult {
+    const normA = this.normalizeEntityProperties(entityA);
+    const normB = this.normalizeEntityProperties(entityB);
+    const explanation: MatchExplanation[] = [];
+    let totalScore = 0;
+
+    // Rule 1: Exact Email Match (High Weight)
+    if (normA.email && normB.email && normA.email === normB.email) {
+      const score = 1.0;
+      totalScore = Math.max(totalScore, score);
+      explanation.push({
+        ruleId: 'email_exact',
+        score,
+        features: { email: normA.email },
+        description: 'Exact match on normalized email',
+      });
+    }
+
+    // Rule 2: Exact Name Match (Medium Weight)
+    if (normA.name && normB.name && normA.name === normB.name) {
+      const score = 0.8;
+      totalScore = Math.max(totalScore, score); // Simple max aggregation for now
+      explanation.push({
+        ruleId: 'name_exact',
+        score,
+        features: { name: normA.name },
+        description: 'Exact match on normalized name',
+      });
+    }
+
+    // Determine confidence
+    let confidence: ERResult['confidence'] = 'none';
+    if (totalScore >= this.config.thresholds.match) confidence = 'high';
+    else if (totalScore >= this.config.thresholds.possible) confidence = 'medium';
+    else if (totalScore > 0) confidence = 'low';
+
+    // Metric recording
+    if (totalScore > 0) {
+        erMetrics.recordMatch(confidence);
+    }
+
+    return {
+      isMatch: totalScore >= this.config.thresholds.match,
+      score: totalScore,
+      explanation,
+      confidence,
+    };
   }
 
   /**
@@ -125,12 +241,11 @@ export class EntityResolutionService {
     const allEntityIds = [masterEntityId, ...duplicateEntityIds];
 
     // Update canonicalId for all entities being merged to point to the master's canonicalId
-    // This assumes the master already has a canonicalId or will get one from the ER process
     await session.run(
       `
       MATCH (e:Entity)
       WHERE e.id IN $allEntityIds
-      SET e.canonicalId = $masterEntityId // Set all to master's ID for now, actual canonical key will be set by ER worker
+      SET e.canonicalId = $masterEntityId
     `,
       { allEntityIds, masterEntityId },
     );
@@ -174,6 +289,8 @@ export class EntityResolutionService {
     log.info(
       `Merged entities: ${duplicateEntityIds.join(', ')} into ${masterEntityId}`,
     );
+
+    erMetrics.recordMerge();
 
     // Log to audit_logs
     const pool = getPostgresPool();

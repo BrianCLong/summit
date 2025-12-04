@@ -26,11 +26,12 @@ export class RateLimiter {
    * Uses a sliding window counter (fixed window with Redis expiration).
    *
    * @param key Unique key for the limit (e.g., user ID or IP)
-   * @param limit Max requests allowed
+   * @param limit Max requests/units allowed
    * @param windowMs Window size in milliseconds
+   * @param amount Amount to increment (default 1)
    * @returns RateLimitResult
    */
-  async checkLimit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
+  async checkLimit(key: string, limit: number, windowMs: number, amount: number = 1): Promise<RateLimitResult> {
     const redisKey = `${this.namespace}:${key}`;
     const now = Date.now();
     const redisClient = getRedisClient();
@@ -50,16 +51,16 @@ export class RateLimiter {
       // Lua script to increment and set expiry atomically
       // Returns [current_count, ttl_ms]
       const script = `
-        local current = redis.call("INCR", KEYS[1])
+        local current = redis.call("INCRBY", KEYS[1], ARGV[2])
         local ttl = redis.call("PTTL", KEYS[1])
-        if tonumber(current) == 1 then
+        if tonumber(current) == tonumber(ARGV[2]) then
           redis.call("PEXPIRE", KEYS[1], ARGV[1])
           ttl = ARGV[1]
         end
         return {current, ttl}
       `;
 
-      const result = await redisClient.eval(script, 1, redisKey, windowMs) as [number, number];
+      const result = await redisClient.eval(script, 1, redisKey, windowMs, amount) as [number, number];
       const current = result[0];
       const ttl = result[1]; // TTL in ms
 

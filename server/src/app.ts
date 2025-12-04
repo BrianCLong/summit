@@ -44,6 +44,8 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
+import schemaRouter from './routes/schema.js'; // Sprint 29: Catalog API
+import { quotaEnforcer } from './lib/resources/QuotaEnforcer.js'; // Sprint 29: Egress Quota
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -96,6 +98,50 @@ export const createApp = async () => {
   app.use(express.json({ limit: '1mb' }));
   app.use(auditLogger);
   app.use(httpCacheMiddleware);
+
+  // Egress Quota Middleware (Sprint 29)
+  app.use((req, res, next) => {
+    // Only track authenticated requests with a tenant
+    const originalSend = res.send;
+
+    // @ts-ignore
+    res.send = function (body) {
+      if ((req as any).user?.tenantId) {
+        // Calculate size: Prefer Content-Length if available, else calculate
+        let size = 0;
+        const contentLength = res.get('Content-Length');
+
+        if (contentLength) {
+            size = parseInt(contentLength, 10);
+        } else {
+            // Fallback calculation
+            if (typeof body === 'string') size = Buffer.byteLength(body);
+            else if (Buffer.isBuffer(body)) size = body.length;
+            else if (typeof body === 'object') {
+                // Warning: This is expensive. In high throughput, we should avoid this.
+                // Assuming typical JSON payload, this is acceptable for now.
+                // A better approach would be to hook the stream, but for this Middleware,
+                // body is usually already fully formed.
+                try {
+                    size = Buffer.byteLength(JSON.stringify(body));
+                } catch (e) {
+                    // Ignore stringify errors (circular etc)
+                    size = 0;
+                }
+            }
+        }
+
+        // Async check
+        if (size > 0) {
+            quotaEnforcer.checkEgressQuota((req as any).user.tenantId, size).catch(err => {
+                logger.error({ err }, 'Failed to check egress quota');
+            });
+        }
+      }
+      return originalSend.apply(this, arguments as any);
+    };
+    next();
+  });
 
   // Telemetry middleware
   app.use((req, res, next) => {
@@ -152,6 +198,10 @@ export const createApp = async () => {
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
+
+  // Sprint 29: Schema Catalog API
+  app.use('/api/catalog', schemaRouter);
+
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
@@ -289,6 +339,7 @@ export const createApp = async () => {
               sub: 'dev-user',
               email: 'dev@intelgraph.local',
               role: 'admin',
+              tenantId: 'demo-tenant' // Use a default tenant for dev to enable quota checks
             };
           }
           next();
