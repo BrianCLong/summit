@@ -54,6 +54,7 @@ redis:
 neo4j:
   enabled: true
   neo4j:
+    name: intelgraph-stage
     password: devpassword
   volumes:
     data:
