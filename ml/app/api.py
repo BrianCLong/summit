@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 # Import our new ML components
+from .inference.pipeline import InferencePipeline
 from .models.accelerated_gnn import GPUAcceleratedGNN, ModelOptimizer
 from .monitoring.health import HealthCheck
 from .monitoring.metrics import MLMetrics
@@ -53,6 +54,9 @@ class InferenceRequest(BaseModel):
     node_features: list[list[float]] = Field(..., description="Node feature matrix")
     edge_index: list[list[int]] = Field(..., description="Edge connectivity")
     batch_indices: list[int] | None = Field(None, description="Batch assignment for nodes")
+    batch_size: int | None = Field(
+        None, description="Optional micro-batch size for large graphs"
+    )
 
 
 class OptimizationRequest(BaseModel):
@@ -94,21 +98,23 @@ class InferenceResponse(BaseModel):
     inference_time_ms: float
     confidence_scores: list[float] | None = None
     device: str
+    cache_hit: bool | None = None
 
 
 # Global state management
 class MLServiceState:
     def __init__(self):
+        # Initialize device early so downstream components can reference it
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        logger.info(f"ML Service initialized on device: {self.device}")
+
         self.models: dict[str, Any] = {}
         self.optimizers: dict[str, Any] = {}
         self.training_managers: dict[str, DistributedTrainingManager] = {}
         self.metrics = MLMetrics()
         self.health_check = HealthCheck()
         self.quantum_optimizer = QuantumOptimizer()
-
-        # Initialize device
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        logger.info(f"ML Service initialized on device: {self.device}")
+        self.inference_pipeline = InferencePipeline(self.device)
 
 
 # Global state instance
@@ -239,6 +245,10 @@ async def create_model(config: ModelConfig):
             "status": "ready",
         }
 
+        await ml_state.inference_pipeline.refresh_model(
+            model_id, ml_state.models[model_id]
+        )
+
         # Get memory usage
         memory_usage = model.get_memory_usage() if hasattr(model, "get_memory_usage") else None
 
@@ -311,6 +321,8 @@ async def delete_model(model_id: str):
     # Clean up model
     del ml_state.models[model_id]
 
+    await ml_state.inference_pipeline.evict_model(model_id)
+
     # Clean up associated training manager
     if model_id in ml_state.training_managers:
         del ml_state.training_managers[model_id]
@@ -331,7 +343,6 @@ async def train_model(model_id: str, request: TrainingRequest, background_tasks:
         raise HTTPException(status_code=404, detail="Model not found")
 
     model_data = ml_state.models[model_id]
-    model = model_data["model"]
 
     # Create training configuration
     training_config = TrainingConfig(**request.training_config)
@@ -397,6 +408,7 @@ async def _train_model_background(
 
         # Update model status
         ml_state.models[model_id]["status"] = "trained"
+        await ml_state.inference_pipeline.refresh_model(model_id, ml_state.models[model_id])
         logger.info(f"Training completed for model {model_id}")
 
     except Exception as e:
@@ -426,44 +438,22 @@ async def predict(model_id: str, request: InferenceRequest):
         )
 
     try:
-        start_time = datetime.now()
-
-        # Convert input to tensors
-        node_features = torch.tensor(
-            request.node_features, dtype=torch.float32, device=ml_state.device
+        inference_result = await ml_state.inference_pipeline.run_inference(
+            model_id=model_id,
+            model_data=model_data,
+            node_features=request.node_features,
+            edge_index=request.edge_index,
+            batch_indices=request.batch_indices,
+            requested_batch_size=request.batch_size,
         )
-        edge_index = torch.tensor(request.edge_index, dtype=torch.long, device=ml_state.device)
-
-        batch_indices = None
-        if request.batch_indices:
-            batch_indices = torch.tensor(
-                request.batch_indices, dtype=torch.long, device=ml_state.device
-            )
-
-        # Run inference
-        model.eval()
-        with torch.no_grad():
-            if batch_indices is not None:
-                outputs = model(node_features, edge_index, batch_indices)
-            else:
-                outputs = model(node_features, edge_index)
-
-        # Convert to probabilities
-        probabilities = torch.softmax(outputs, dim=-1)
-        predictions = probabilities.cpu().numpy().tolist()
-
-        # Calculate confidence scores
-        confidence_scores = torch.max(probabilities, dim=-1)[0].cpu().numpy().tolist()
-
-        end_time = datetime.now()
-        inference_time_ms = (end_time - start_time).total_seconds() * 1000
 
         return InferenceResponse(
             model_id=model_id,
-            predictions=predictions,
-            inference_time_ms=inference_time_ms,
-            confidence_scores=confidence_scores,
+            predictions=inference_result.predictions,
+            inference_time_ms=inference_result.duration_ms,
+            confidence_scores=inference_result.confidence_scores,
             device=str(ml_state.device),
+            cache_hit=inference_result.cache_hit,
         )
 
     except Exception as e:
@@ -521,6 +511,8 @@ async def optimize_model(model_id: str, request: OptimizationRequest):
         ml_state.models[model_id]["status"] = "optimized"
 
         logger.info(f"Model {model_id} optimized with {request.optimization_type}")
+
+        await ml_state.inference_pipeline.refresh_model(model_id, ml_state.models[model_id])
 
         return {
             "message": f"Model optimized with {request.optimization_type}",
