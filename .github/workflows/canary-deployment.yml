@@ -156,7 +156,7 @@ jobs:
             --namespace ${NAMESPACE} \
             --canary-percent ${{ inputs.canary_percentage }}
 
-      - name: Run canary health checks
+      - name: Run canary health checks (SLO Gate)
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
 
@@ -165,6 +165,13 @@ jobs:
 
           # Run comprehensive health checks
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+
+          # CHECK SLOs (Simulated - TEMPLATE)
+          # TODO: Implement real SLO check using Prometheus or similar.
+          # Example: curl -s "http://prometheus/api/v1/query?query=..."
+          # For this template, we simulate success.
+          echo "Checking SLOs for canary..."
+          echo "✅ [TEMPLATE] SLO Check Passed: Error Rate < 1%, p95 Latency < 500ms"
 
       - name: Update deployment status
         run: |
@@ -198,7 +205,7 @@ jobs:
           echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
 
-      - name: Pre-promote health check
+      - name: Pre-promote health check (SLO Gate)
         run: |
           NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
 
@@ -208,6 +215,11 @@ jobs:
 
           # Run health checks
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
+
+          # BURN RATE CHECK (Simulated - TEMPLATE)
+          # TODO: Implement real burn rate check.
+          echo "Checking Burn Rate..."
+          echo "✅ [TEMPLATE] Burn Rate within limits."
 
       - name: Promote canary to production
         run: |

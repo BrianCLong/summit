@@ -1,18 +1,37 @@
-name: Close Stale Issues
+name: Auto-Triage & Stale
+
 on:
-  schedule: [{ cron: '0 3 * * *' }]
-  workflow_dispatch: {}
+  schedule:
+    - cron: '0 0 * * *' # Daily at midnight
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
 
 jobs:
   stale:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
-      - uses: actions/stale@a4a55723a6625699a65c3ac8915a36a555890600 # v9.0.0
+      - uses: actions/stale@v9
         with:
-          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity.'
-          days-before-stale: 30
-          days-before-close: 14
-          exempt-issue-labels: 'pinned,security'
+          # Issues
+          days-before-issue-stale: 30
+          days-before-issue-close: 7
+          stale-issue-label: 'status: stale'
+          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Remove "status: stale" label or comment or this will be closed in 7 days.'
+          close-issue-message: 'This issue was closed because it has been stalled for 7 days with no activity.'
+
+          # PRs
+          days-before-pr-stale: 14
+          days-before-pr-close: 7
+          stale-pr-label: 'status: stale'
+          stale-pr-message: 'This PR is stale because it has been open 14 days with no activity. Remove "status: stale" label or comment or this will be closed in 7 days.'
+          close-pr-message: 'This PR was closed because it has been stalled for 7 days with no activity.'
+
+          # Exemptions
+          exempt-issue-labels: 'type: security,priority: critical,pinned,security'
+          exempt-pr-labels: 'type: security,priority: critical,pinned,security'
+
+          # Limits to avoid rate limiting
+          operations-per-run: 500
