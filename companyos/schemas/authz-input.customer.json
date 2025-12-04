@@ -1,0 +1,21 @@
+{
+  "$id": "https://companyos/schemas/authz-input.customer.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CustomerAuthzInput",
+  "type": "object",
+  "properties": {
+    "subject": { "type": "object" },
+    "resource": {
+      "type": "object",
+      "properties": {
+        "type": { "const": "customer" },
+        "id": { "type": "string" },
+        "tenant_id": { "type": "string" },
+        "region": { "type": "string" }
+      },
+      "required": ["type", "tenant_id"]
+    },
+    "action": { "type": "string" }
+  },
+  "required": ["subject", "resource", "action"]
+}
