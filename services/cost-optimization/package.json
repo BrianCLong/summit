@@ -30,7 +30,7 @@
     "@azure/arm-advisor": "^3.0.0",
     "@azure/arm-costmanagement": "^1.0.0-beta.1",
     "@google-cloud/billing": "^4.0.0",
-    "@google-cloud/recommender": "^5.0.0",
+    "@google-cloud/recommender": "^7.2.1",
     "express": "^4.18.2",
     "zod": "^3.22.0",
     "winston": "^3.11.0",
