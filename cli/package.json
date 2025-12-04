@@ -1,0 +1,102 @@
+{
+  "name": "@intelgraph/cli",
+  "version": "1.0.0",
+  "description": "Cross-platform CLI for IntelGraph graph queries, agent spins, and air-gapped exports",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "intelgraph": "./dist/cli.js",
+    "ig": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod +x dist/cli.js",
+    "dev": "tsx watch src/cli.ts",
+    "start": "node dist/cli.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "npm run build",
+    "pkg:linux": "pkg dist/cli.js -t node18-linux-x64 -o bin/intelgraph-linux",
+    "pkg:macos": "pkg dist/cli.js -t node18-macos-x64 -o bin/intelgraph-macos",
+    "pkg:macos-arm": "pkg dist/cli.js -t node18-macos-arm64 -o bin/intelgraph-macos-arm64",
+    "pkg:windows": "pkg dist/cli.js -t node18-win-x64 -o bin/intelgraph-win.exe",
+    "pkg:all": "npm run pkg:linux && npm run pkg:macos && npm run pkg:macos-arm && npm run pkg:windows"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "conf": "^13.0.1",
+    "dotenv": "^16.4.5",
+    "ink": "^5.0.1",
+    "ink-spinner": "^5.0.0",
+    "ink-table": "^3.1.0",
+    "ink-text-input": "^6.0.0",
+    "neo4j-driver": "^5.26.0",
+    "ora": "^8.0.1",
+    "pg": "^8.13.0",
+    "pgvector": "^0.2.0",
+    "react": "^18.3.1",
+    "uuid": "^10.0.0",
+    "yaml": "^2.5.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.9.0",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^18.3.12",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.14.0",
+    "@typescript-eslint/parser": "^8.14.0",
+    "eslint": "^9.14.0",
+    "jest": "^29.7.0",
+    "pkg": "^5.8.1",
+    "rimraf": "^6.0.1",
+    "ts-jest": "^29.2.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "keywords": [
+    "intelgraph",
+    "cli",
+    "graph",
+    "neo4j",
+    "pgvector",
+    "agent",
+    "intelligence"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit.git",
+    "directory": "cli"
+  },
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
