@@ -154,6 +154,30 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.get('/metrics', metricsRoute);
 
+  // Maestro
+  const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
+  const { Maestro } = await import('./maestro/core.js');
+  const { MaestroQueries } = await import('./maestro/queries.js');
+  const { IntelGraphClientImpl } = await import('./intelgraph/client-impl.js');
+  const { CostMeter } = await import('./maestro/cost_meter.js');
+
+  const igClient = new IntelGraphClientImpl();
+  const costMeter = new CostMeter(igClient, {
+    'openai:gpt-4.1': { inputPer1K: 0.01, outputPer1K: 0.03 },
+  });
+  // Simple LLM stub
+  const llmClient = {
+    callCompletion: async (prompt: string, model: string) => `[Stub LLM Response] for: ${prompt}`
+  };
+
+  const maestro = new Maestro(igClient, costMeter, llmClient, {
+    defaultPlannerAgent: 'openai:gpt-4.1',
+    defaultActionAgent: 'openai:gpt-4.1',
+  });
+  const maestroQueries = new MaestroQueries(igClient);
+
+  app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
+
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
 
