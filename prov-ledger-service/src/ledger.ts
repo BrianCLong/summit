@@ -15,6 +15,7 @@ export interface Evidence {
   licenseId: string;
   source: string;
   transforms: string[];
+  timestamp: Date;
 }
 
 export interface Claim {
@@ -26,6 +27,7 @@ export interface Claim {
   hash: string;
   signature: string;
   publicKey: string;
+  timestamp: Date;
 }
 
 const evidenceStore = new Map<string, Evidence>();
@@ -33,15 +35,15 @@ const claimStore = new Map<string, Claim>();
 
 const { publicKey, privateKey } = generateKeyPairSync('ed25519');
 
-export function registerEvidence(input: Omit<Evidence, 'id'>): Evidence {
+export function registerEvidence(input: Omit<Evidence, 'id' | 'timestamp'>): Evidence {
   const id = randomUUID();
-  const evid: Evidence = { id, ...input };
+  const evid: Evidence = { id, ...input, timestamp: new Date() };
   evidenceStore.set(id, evid);
   return evid;
 }
 
 export function createClaim(
-  input: Omit<Claim, 'id' | 'hash' | 'signature' | 'publicKey'>,
+  input: Omit<Claim, 'id' | 'hash' | 'signature' | 'publicKey' | 'timestamp'>,
 ): Claim {
   const id = randomUUID();
   const hash = createHash('sha256').update(input.text).digest('hex');
@@ -56,6 +58,7 @@ export function createClaim(
     publicKey: publicKey
       .export({ type: 'spki', format: 'der' })
       .toString('base64'),
+    timestamp: new Date(),
   };
   claimStore.set(id, claim);
   return claim;
@@ -284,7 +287,7 @@ export function getProvenance(id: string): ProvenanceChain | null {
             licenseId: evidence.licenseId,
             contentHash: evidence.contentHash,
           },
-          timestamp: new Date(), // TODO: Add timestamp to Evidence interface
+          timestamp: evidence.timestamp,
         },
       ],
     };
@@ -310,7 +313,7 @@ export function getProvenance(id: string): ProvenanceChain | null {
             confidence: claim.confidence,
             hash: claim.hash,
           },
-          timestamp: new Date(), // TODO: Add timestamp to Claim interface
+          timestamp: claim.timestamp,
         },
       ],
     };
