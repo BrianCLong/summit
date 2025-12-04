@@ -115,10 +115,9 @@ jobs:
             node_modules/.cache
           retention-days: 1
 
-  # Security lane: Run security scans (non-blocking on PR)
+  # Security lane: Run security scans
   security-scan:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - name: Generate SBOM (SPDX)
@@ -138,7 +137,7 @@ jobs:
           format: table
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '0'
+          exit-code: '1'
           vuln-type: 'os,library'
 
   # Integration lane: Golden path smoke tests
@@ -173,7 +172,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-        continue-on-error: true
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Bootstrap repo (make bootstrap)
@@ -220,10 +218,9 @@ jobs:
         if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
 
-  # Compatibility matrix: Test on multiple Node versions (non-blocking)
+  # Compatibility matrix: Test on multiple Node versions
   compatibility:
     runs-on: ubuntu-latest
-    continue-on-error: true
     strategy:
       matrix:
         node: ['18.x']

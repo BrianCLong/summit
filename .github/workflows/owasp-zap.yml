@@ -56,7 +56,6 @@ jobs:
           
           # Wait for app to be ready
           timeout 60 bash -c 'until curl -f http://localhost:3000/health 2>/dev/null; do sleep 2; done' || echo "Health check skipped"
-        continue-on-error: true
 
       - name: ZAP Baseline Scan - Web
         uses: zaproxy/action-baseline@v0.12.0
@@ -64,7 +63,7 @@ jobs:
           target: 'http://localhost:3000'
           rules_file_name: '.zap/rules.tsv'
           cmd_options: '-a -j -l WARN'
-          fail_action: false
+          fail_action: true
           allow_issue_writing: true
           artifact_name: 'zap-web-baseline-report'
 
@@ -109,7 +108,6 @@ jobs:
         run: |
           cd apps/mobile-interface
           pnpm run build || echo "Mobile build not configured"
-        continue-on-error: true
 
       - name: Start mobile interface
         run: |
@@ -119,17 +117,15 @@ jobs:
           
           # Wait for app to be ready
           timeout 60 bash -c 'until curl -f http://localhost:3001/health 2>/dev/null; do sleep 2; done' || echo "Health check skipped"
-        continue-on-error: true
 
       - name: ZAP Baseline Scan - Mobile
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: 'http://localhost:3001'
           cmd_options: '-a -j -l WARN'
-          fail_action: false
+          fail_action: true
           allow_issue_writing: true
           artifact_name: 'zap-mobile-baseline-report'
-        continue-on-error: true
 
       - name: Stop mobile interface
         if: always()
@@ -147,7 +143,6 @@ jobs:
             zap-mobile-baseline-report.json
             zap-mobile-baseline-report.md
           retention-days: 30
-        continue-on-error: true
 
   zap-api-scan:
     name: ZAP API Scan - GraphQL/REST
@@ -210,7 +205,7 @@ jobs:
           target: 'http://localhost:4000/graphql'
           format: 'graphql'
           cmd_options: '-a -j -l WARN'
-          fail_action: false
+          fail_action: true
           allow_issue_writing: true
           artifact_name: 'zap-api-scan-report'
 
