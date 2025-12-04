@@ -1,0 +1,48 @@
+{
+  "$id": "https://summit.dev/schemas/purchase-order",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Purchase Order",
+  "type": "object",
+  "required": [
+    "id",
+    "amount",
+    "currency",
+    "vendorId",
+    "createdAt"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^po_[a-zA-Z0-9]{10}$"
+    },
+    "amount": {
+      "type": "number",
+      "minimum": 0
+    },
+    "currency": {
+      "enum": [
+        "USD",
+        "EUR",
+        "GBP",
+        "CAD",
+        "AUD"
+      ]
+    },
+    "vendorId": {
+      "type": "string",
+      "minLength": 3
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true
+    }
+  },
+  "additionalProperties": false
+}

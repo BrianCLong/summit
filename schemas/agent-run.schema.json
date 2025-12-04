@@ -1,0 +1,62 @@
+{
+  "$id": "https://summit.dev/schemas/agent-run",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agent Run",
+  "type": "object",
+  "required": [
+    "id",
+    "agentName",
+    "sessionId",
+    "startedAt",
+    "status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^arun_[a-zA-Z0-9\\-_.]+$"
+    },
+    "agentName": {
+      "type": "string"
+    },
+    "sessionId": {
+      "type": "string"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "endedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "running",
+        "succeeded",
+        "failed",
+        "cancelled"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "governance": {
+      "type": "object",
+      "properties": {
+        "policyDecisions": {
+          "type": "array",
+          "items": {
+            "$ref": "policy-decision.schema.json"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
