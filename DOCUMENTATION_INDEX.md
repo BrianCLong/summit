@@ -75,6 +75,16 @@ Quick lookup guide for common tasks and patterns.
 - Troubleshooting issues
 - Finding monitoring endpoints
 
+### 4. **docs/multi-tenant-control-plane.md** (new)
+Operational blueprint for delivering a production-ready multi-tenant control plane with GraphRAG hardening, policy enforcement, observability guardrails, and rainbow deployment strategy.
+
+**Covers:**
+- Control plane/core service decomposition
+- GraphRAG safety + performance practices
+- Policy isolation, governance, and audit logging
+- Alerting and runbook expectations (MTTR <5 minutes)
+- Deployment safety (rings/canary/shadow) and rollback triggers
+
 ## Quick Navigation
 
 ### I want to understand...
