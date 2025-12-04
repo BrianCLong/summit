@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  companyos-api:
+    build: .
+    environment:
+      PORT: 4100
+      OPA_URL: http://companyos-opa:8181/v1/data/companyos/authz/customer/decision
+      OPA_DISCLOSURE_URL: http://companyos-opa:8181/v1/data/companyos/authz/disclosure_export/decision
+    ports:
+      - "4100:4100"
+    depends_on:
+      - companyos-opa
+  companyos-opa:
+    image: openpolicyagent/opa:latest
+    command:
+      - "run"
+      - "--server"
+      - "/policies"
+    volumes:
+      - ../../policies:/policies
+    ports:
+      - "8181:8181"
