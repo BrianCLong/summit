@@ -12,6 +12,8 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
+import { GraphConsistencyService } from './services/GraphConsistencyService.js';
+import { scheduleWeeklyGraphConsistencyCheck } from './jobs/graphConsistencyJob.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
@@ -79,8 +81,14 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
+    // Initialize Graph Consistency Jobs
+    const graphConsistencyService = new GraphConsistencyService();
+    scheduleWeeklyGraphConsistencyCheck(graphConsistencyService);
+
     // WAR-GAMED SIMULATION - Start Kafka Consumer
-    await startKafkaConsumer();
+    if (startKafkaConsumer) {
+      await startKafkaConsumer();
+    }
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
