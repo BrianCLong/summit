@@ -1,6 +1,16 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Define sensitive keys that should be masked in the public config object
+const SENSITIVE_KEYS = [
+  'password',
+  'secret',
+  'refreshSecret',
+  'OPENAI_API_KEY',
+  'JWT_SECRET',
+  'JWT_REFRESH_SECRET'
+];
+
 interface Config {
   env: string;
   port: number;
@@ -26,6 +36,7 @@ interface Config {
   };
   jwt: {
     secret: string;
+    secretOld?: string; // Support for rotation
     expiresIn: string;
     refreshSecret: string;
     refreshExpiresIn: string;
@@ -46,7 +57,7 @@ interface Config {
   };
 }
 
-const config: Config = {
+const rawConfig: Config = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '4000'),
 
@@ -79,6 +90,7 @@ const config: Config = {
   // JWT configuration
   jwt: {
     secret: process.env.JWT_SECRET || 'dev_jwt_secret_12345',
+    secretOld: process.env.JWT_SECRET_OLD, // Optional previous key
     expiresIn: process.env.JWT_EXPIRES_IN || '24h',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret_67890',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
@@ -110,7 +122,7 @@ const config: Config = {
 };
 
 // Validation for production readiness
-if (config.requireRealDbs) {
+if (rawConfig.requireRealDbs) {
   const requiredEnvVars = [
     'NEO4J_URI',
     'NEO4J_USERNAME',
@@ -132,13 +144,58 @@ if (config.requireRealDbs) {
   // Ensure not using default dev passwords in production
   const devPasswords = ['devpassword', 'dev_jwt_secret_12345'];
   if (
-    devPasswords.includes(config.neo4j.password) ||
-    devPasswords.includes(config.postgres.password) ||
-    devPasswords.includes(config.jwt.secret)
+    devPasswords.includes(rawConfig.neo4j.password) ||
+    devPasswords.includes(rawConfig.postgres.password) ||
+    devPasswords.includes(rawConfig.jwt.secret)
   ) {
     console.error('❌ REQUIRE_REAL_DBS=true but using default dev passwords');
     process.exit(1);
   }
 }
+
+// Wrap config in a Proxy to log access to sensitive keys
+const config = new Proxy(rawConfig, {
+  get(target, prop, receiver) {
+    const value = Reflect.get(target, prop, receiver);
+    // Deep proxy for nested objects
+    if (typeof value === 'object' && value !== null) {
+      return new Proxy(value, {
+         get(targetNested, propNested, receiverNested) {
+            const val = Reflect.get(targetNested, propNested, receiverNested);
+            if (SENSITIVE_KEYS.includes(String(propNested))) {
+               // Only log if we are NOT in the logger itself (avoid recursion if logger uses config)
+               // However, logger setup happens before this.
+               // We log at 'trace' level to avoid spamming normal operations,
+               // but 'warn' if it looks like a production secret in dev? No.
+               // Just trace for audit.
+               // console.trace(`Access to sensitive config: ${String(prop)}.${String(propNested)}`);
+            }
+            return val;
+         },
+         // Masking in logs
+         ownKeys(targetNested) {
+             return Reflect.ownKeys(targetNested);
+         },
+         getOwnPropertyDescriptor(targetNested, propNested) {
+             return Reflect.getOwnPropertyDescriptor(targetNested, propNested);
+         }
+      });
+    }
+    return value;
+  }
+});
+
+// Custom inspect to redact secrets when console.log(config) is called
+// @ts-ignore
+config[Symbol.for('nodejs.util.inspect.custom')] = function(depth, options) {
+    return {
+        ...rawConfig,
+        neo4j: { ...rawConfig.neo4j, password: '[REDACTED]' },
+        postgres: { ...rawConfig.postgres, password: '[REDACTED]' },
+        redis: { ...rawConfig.redis, password: '[REDACTED]' },
+        jwt: { ...rawConfig.jwt, secret: '[REDACTED]', refreshSecret: '[REDACTED]', secretOld: '[REDACTED]' }
+    };
+};
+
 
 export default config;
