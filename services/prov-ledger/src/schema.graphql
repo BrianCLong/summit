@@ -1,0 +1,293 @@
+"""
+Provenance & Claims Ledger GraphQL Schema
+Provides verifiable chain-of-custody tracking for evidence and claims
+"""
+
+scalar JSON
+scalar DateTime
+
+"""
+A claim is an assertion with cryptographic hash for integrity verification
+"""
+type Claim {
+  id: ID!
+  content: JSON!
+  hash: String!
+  signature: String
+  metadata: JSON
+  sourceRef: String
+  licenseId: String
+  policyLabels: [String!]!
+  createdAt: DateTime!
+
+  """Provenance chains associated with this claim"""
+  provenanceChains: [ProvenanceChain!]!
+
+  """License details if licenseId is set"""
+  license: License
+}
+
+"""
+A transformation step in the evidence processing pipeline
+"""
+type TransformStep {
+  transformType: String!
+  timestamp: DateTime!
+  actorId: String!
+  config: JSON
+}
+
+"""
+Evidence item with full chain-of-custody tracking
+"""
+type Evidence {
+  id: ID!
+  caseId: String
+  sourceRef: String!
+  checksum: String!
+  checksumAlgorithm: String!
+  contentType: String
+  fileSize: Int
+  transformChain: [TransformStep!]!
+  licenseId: String
+  policyLabels: [String!]!
+  authorityId: String
+  createdAt: DateTime!
+  metadata: JSON
+
+  """License details if licenseId is set"""
+  license: License
+
+  """Case this evidence belongs to"""
+  case: Case
+}
+
+"""
+Provenance chain tracking transformations and sources
+"""
+type ProvenanceChain {
+  id: ID!
+  claimId: String!
+  transforms: [String!]!
+  sources: [String!]!
+  lineage: JSON!
+  createdAt: DateTime!
+
+  """The claim this provenance chain belongs to"""
+  claim: Claim!
+}
+
+"""
+License governing data usage
+"""
+type License {
+  id: ID!
+  claimId: String
+  licenseType: String!
+  licenseText: String
+  terms: JSON
+  restrictions: JSON
+  attributionRequired: Boolean!
+  commercialUseAllowed: Boolean!
+  createdAt: DateTime!
+}
+
+"""
+Case grouping related evidence
+"""
+type Case {
+  id: ID!
+  title: String!
+  description: String
+  status: String!
+  createdBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  metadata: JSON
+
+  """All evidence associated with this case"""
+  evidence: [Evidence!]!
+
+  """Disclosure bundle for this case"""
+  disclosureBundle: DisclosureBundle
+}
+
+"""
+Merkle-tree-based disclosure bundle for case verification
+"""
+type DisclosureBundle {
+  caseId: String!
+  version: String!
+  evidence: [BundleEvidence!]!
+  hashTree: [String!]!
+  merkleRoot: String!
+  generatedAt: DateTime!
+}
+
+"""
+Evidence summary in a disclosure bundle
+"""
+type BundleEvidence {
+  id: String!
+  sourceRef: String!
+  checksum: String!
+  transformChain: [TransformStep!]!
+}
+
+"""
+Hash verification result
+"""
+type HashVerification {
+  valid: Boolean!
+  expectedHash: String!
+  actualHash: String!
+  verifiedAt: DateTime!
+}
+
+"""
+Manifest for export with hash chain
+"""
+type ExportManifest {
+  version: String!
+  claims: [ManifestClaim!]!
+  hashChain: String!
+  signature: String
+  generatedAt: DateTime!
+}
+
+"""
+Claim summary in export manifest
+"""
+type ManifestClaim {
+  id: String!
+  hash: String!
+  transforms: [String!]!
+}
+
+"""
+Chain verification result
+"""
+type ChainVerificationResult {
+  valid: Boolean!
+  evidenceId: String!
+  transformChainValid: Boolean!
+  checksumValid: Boolean!
+  issues: [String!]!
+  verifiedAt: DateTime!
+}
+
+# ============================================================================
+# Inputs
+# ============================================================================
+
+input CreateClaimInput {
+  content: JSON!
+  signature: String
+  metadata: JSON
+  sourceRef: String
+  licenseId: String
+  policyLabels: [String!]
+}
+
+input TransformStepInput {
+  transformType: String!
+  timestamp: DateTime!
+  actorId: String!
+  config: JSON
+}
+
+input CreateEvidenceInput {
+  caseId: String
+  sourceRef: String!
+  content: JSON
+  checksum: String
+  checksumAlgorithm: String
+  contentType: String
+  fileSize: Int
+  transformChain: [TransformStepInput!]
+  licenseId: String
+  policyLabels: [String!]
+  metadata: JSON
+}
+
+input CreateProvenanceChainInput {
+  claimId: String!
+  transforms: [String!]!
+  sources: [String!]!
+  lineage: JSON!
+}
+
+input VerifyHashInput {
+  content: JSON!
+  expectedHash: String!
+}
+
+input CreateCaseInput {
+  title: String!
+  description: String
+  status: String
+  metadata: JSON
+}
+
+# ============================================================================
+# Queries
+# ============================================================================
+
+type Query {
+  """Get claim by ID"""
+  claim(id: ID!): Claim
+
+  """Get all claims (paginated)"""
+  claims(limit: Int, offset: Int): [Claim!]!
+
+  """Get evidence by ID"""
+  evidence(id: ID!): Evidence
+
+  """Get all evidence (paginated)"""
+  allEvidence(limit: Int, offset: Int): [Evidence!]!
+
+  """Get evidence by case ID"""
+  evidenceByCase(caseId: String!): [Evidence!]!
+
+  """Get provenance chains for a claim"""
+  provenanceChains(claimId: String!): [ProvenanceChain!]!
+
+  """Get case by ID"""
+  case(id: ID!): Case
+
+  """Get all cases (paginated)"""
+  cases(limit: Int, offset: Int): [Case!]!
+
+  """Get disclosure bundle for a case"""
+  disclosureBundle(caseId: String!): DisclosureBundle
+
+  """Get export manifest"""
+  exportManifest: ExportManifest!
+
+  """Verify transformation chain for evidence"""
+  verifyTransformChain(evidenceId: String!): ChainVerificationResult!
+
+  """Get service health status"""
+  health: JSON!
+}
+
+# ============================================================================
+# Mutations
+# ============================================================================
+
+type Mutation {
+  """Create a new claim"""
+  createClaim(input: CreateClaimInput!): Claim!
+
+  """Register new evidence"""
+  createEvidence(input: CreateEvidenceInput!): Evidence!
+
+  """Create provenance chain for a claim"""
+  createProvenanceChain(input: CreateProvenanceChainInput!): ProvenanceChain!
+
+  """Create a new case"""
+  createCase(input: CreateCaseInput!): Case!
+
+  """Verify hash integrity"""
+  verifyHash(input: VerifyHashInput!): HashVerification!
+}

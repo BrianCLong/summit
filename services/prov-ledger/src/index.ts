@@ -9,9 +9,11 @@ import helmet from '@fastify/helmet';
 import { z } from 'zod';
 import { Pool } from 'pg';
 import crypto from 'crypto';
+import { setupGraphQL } from './graphql/server.js';
 
 const PORT = parseInt(process.env.PORT || '4010');
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const ENABLE_GRAPHQL = process.env.ENABLE_GRAPHQL !== 'false'; // Enabled by default
 
 // Database connection with retry logic
 const pool = new Pool({
@@ -753,10 +755,23 @@ server.get('/export/manifest', async (request, reply) => {
 // Start server
 const start = async () => {
   try {
+    // Setup GraphQL if enabled
+    if (ENABLE_GRAPHQL) {
+      try {
+        await setupGraphQL(server, pool);
+        server.log.info('✅ GraphQL API enabled at /graphql');
+      } catch (error) {
+        server.log.error({ error }, 'Failed to setup GraphQL, continuing with REST only');
+      }
+    }
+
     await server.listen({ port: PORT, host: '0.0.0.0' });
     server.log.info(
       `🗃️  Prov-Ledger service ready at http://localhost:${PORT}`,
     );
+    if (ENABLE_GRAPHQL) {
+      server.log.info(`📊 GraphQL Playground: http://localhost:${PORT}/graphql`);
+    }
   } catch (err) {
     server.log.error(err);
     process.exit(1);
