@@ -329,7 +329,14 @@ export const neo = {
     const driver = getNeo4jDriver();
     const session = driver.session();
     try {
-      const result = await session.run(cypher, params);
+      // If tenant context is provided, ensure parameters include it
+      // Note: This relies on the query actually using $tenantId
+      // For strict enforcement, use withTenant middleware or manual query construction
+      const finalParams = context?.tenantId
+        ? { ...params, tenantId: context.tenantId }
+        : params;
+
+      const result = await session.run(cypher, finalParams);
       return result;
     } finally {
       await session.close();

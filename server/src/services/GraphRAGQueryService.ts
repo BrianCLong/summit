@@ -208,6 +208,7 @@ export class GraphRAGQueryService {
 
       const ragRequest: GraphRAGRequest = {
         investigationId: request.investigationId,
+        tenantId: request.tenantId,
         question: request.question,
         focusEntityIds: request.focusEntityIds,
         maxHops: request.maxHops || 2,
@@ -229,7 +230,8 @@ export class GraphRAGQueryService {
 
       const enrichedCitations = await this.enrichCitations(
         ragResponse.citations.entityIds,
-        request.investigationId
+        request.investigationId,
+        request.tenantId
       );
 
       await this.glassBoxService.completeStep(run.id, enrichStepId, {
@@ -340,6 +342,7 @@ export class GraphRAGQueryService {
     // Now execute GraphRAG with the original question
     const ragRequest: GraphRAGRequest = {
       investigationId: preview.investigationId,
+      tenantId: preview.tenantId,
       question: preview.naturalLanguageQuery,
       focusEntityIds: preview.parameters.focusEntityIds as string[] | undefined,
       maxHops: preview.parameters.maxHops as number | undefined,
@@ -350,7 +353,8 @@ export class GraphRAGQueryService {
     // Enrich citations
     const enrichedCitations = await this.enrichCitations(
       ragResponse.citations.entityIds,
-      preview.investigationId
+      preview.investigationId,
+      preview.tenantId
     );
 
     const response: GraphRAGQueryResponse = {
@@ -466,12 +470,15 @@ export class GraphRAGQueryService {
    */
   private async enrichCitations(
     entityIds: string[],
-    investigationId: string
+    investigationId: string,
+    tenantId?: string
   ): Promise<EnrichedCitation[]> {
     if (entityIds.length === 0) {
       return [];
     }
 
+    // Ensure we enforce tenant isolation if tenantId is provided
+    const tenantFilter = tenantId ? 'AND e.tenant_id = $3' : '';
     const query = `
       SELECT
         e.id,
@@ -484,11 +491,15 @@ export class GraphRAGQueryService {
       FROM entities e
       WHERE e.id = ANY($1)
       AND e.props->>'investigationId' = $2
+      ${tenantFilter}
       ORDER BY array_position($1, e.id)
     `;
 
     try {
-      const result = await this.pool.query(query, [entityIds, investigationId]);
+      const params = [entityIds, investigationId];
+      if (tenantId) params.push(tenantId);
+
+      const result = await this.pool.query(query, params);
 
       return result.rows.map(row => ({
         entityId: row.id,
