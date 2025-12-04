@@ -1,6 +1,9 @@
 import pathlib
 import sys
 
+import pytest
+
+pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1] / "src"))
