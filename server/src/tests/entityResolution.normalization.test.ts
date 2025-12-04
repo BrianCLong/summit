@@ -1,4 +1,5 @@
 import { EntityResolutionService } from '../services/EntityResolutionService';
+import { describe, it, expect } from '@jest/globals';
 
 describe('EntityResolutionService normalization', () => {
   const svc = new EntityResolutionService();

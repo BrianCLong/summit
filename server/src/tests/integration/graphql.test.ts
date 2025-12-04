@@ -1,3 +1,4 @@
+import { describe, it, test, expect } from '@jest/globals';
 describe('GraphQL contract placeholder', () => {
   it('returns a stable version payload', () => {
     const response = {

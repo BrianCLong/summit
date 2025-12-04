@@ -1,6 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import router, { checkMCPHealth } from '../servers-api.js';
+import { jest, describe, it, expect } from '@jest/globals';
 
 // Mock the repo to avoid DB
 jest.unstable_mockModule('../MCPServersRepo.js', () => ({

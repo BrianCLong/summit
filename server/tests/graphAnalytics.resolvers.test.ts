@@ -1,4 +1,5 @@
 import graphAnalyticsResolvers = require('../src/graphql/resolvers.graphAnalytics');
+import { jest, describe, it, expect } from '@jest/globals';
 
 describe('graph analytics GraphQL resolvers', () => {
   const baseUser = { id: 'analyst-1', role: 'ANALYST' };

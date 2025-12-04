@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { test, expect } from '@jest/globals';
 test('similarEntities by text', async () => {
   const q = `{ similarEntities(text:"banking fraud", topK:5){ id score } }`;
   const r = await request(process.env.API_URL)

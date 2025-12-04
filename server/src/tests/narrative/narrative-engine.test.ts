@@ -1,5 +1,6 @@
 import { NarrativeSimulationEngine } from '../../narrative/engine.js';
 import type {
+import { describe, it, expect } from '@jest/globals';
   SimulationConfig,
   NarrativeEvent,
   LLMClient,

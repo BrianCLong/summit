@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { ExperimentManager } from './index.js';
+import { describe, it, test, expect, afterAll } from '@jest/globals';
 
 describe('ExperimentManager', () => {
   const logFile = path.join(process.cwd(), 'experiment-test.log');

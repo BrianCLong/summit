@@ -6,6 +6,7 @@ import { ensureAuthenticated, requirePermission } from '../auth';
 import AuthService from '../../services/AuthService';
 import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
 import { userFactory } from '../../../../tests/factories/userFactory';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 jest.mock('../../services/AuthService');
 

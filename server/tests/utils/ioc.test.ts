@@ -1,4 +1,5 @@
 import { normalizeIoC, fuse } from '@/utils/ioc';
+import { describe, it, test, expect } from '@jest/globals';
 
 describe('normalizeIoC', () => {
   it('lowercases and converts domains to punycode', () => {

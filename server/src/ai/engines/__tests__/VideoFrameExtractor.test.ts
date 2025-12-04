@@ -1,6 +1,7 @@
 import { VideoFrameExtractor } from '../VideoFrameExtractor';
 import ffmpeg from 'fluent-ffmpeg';
 import fs from 'fs/promises';
+import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock ffmpeg and fs/promises
 jest.mock('fluent-ffmpeg');

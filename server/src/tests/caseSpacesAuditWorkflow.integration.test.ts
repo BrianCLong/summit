@@ -8,6 +8,7 @@ import { Pool } from 'pg';
 import { CaseRepo } from '../repos/CaseRepo';
 import { AuditAccessLogRepo } from '../repos/AuditAccessLogRepo';
 import { CaseService } from '../cases/CaseService';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock Pool for integration testing
 class MockPool {

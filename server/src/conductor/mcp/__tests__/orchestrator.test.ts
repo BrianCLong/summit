@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MCPOrchestrator, WorkflowDefinition, WorkflowRecipes } from '../orchestrator.js';
+import { describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock MCP client
 const mockClient = {

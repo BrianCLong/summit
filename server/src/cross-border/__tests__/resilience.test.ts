@@ -3,6 +3,7 @@
  */
 
 import {
+import { describe, it, test, expect } from '@jest/globals';
   CircuitBreaker,
   CircuitBreakerOpenError,
   RateLimiter,

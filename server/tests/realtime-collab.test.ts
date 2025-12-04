@@ -1,6 +1,7 @@
 import http from 'http';
 import ioClient from 'socket.io-client';
 import { initRealtime } from '../src/realtime/collab';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
 describe('realtime collaboration basics', () => {
   let server: http.Server;

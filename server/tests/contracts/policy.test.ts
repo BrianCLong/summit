@@ -1,4 +1,5 @@
 import { OPAClient } from '../opa-client'; // Mocked
+import { describe, it, expect } from '@jest/globals';
 
 describe('GraphQL Policy Contract Tests', () => {
   const opaClient = new OPAClient();

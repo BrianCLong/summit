@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { compile } from '../../packages/sdk/nlq-js/src/index.js';
+import { describe, it, expect } from '@jest/globals';
 
 describe('nlq compile', () => {
   const fixturePath = path.join(

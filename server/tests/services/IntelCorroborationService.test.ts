@@ -1,4 +1,5 @@
 import { IntelCorroborationService } from '../../src/services/IntelCorroborationService';
+import { describe, test, expect } from '@jest/globals';
 
 describe('IntelCorroborationService', () => {
   test('computes confidence with evidence and analyst ratings', () => {

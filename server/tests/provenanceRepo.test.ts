@@ -1,4 +1,5 @@
 import { ProvenanceRepo } from '../src/repos/ProvenanceRepo.js';
+import { describe, test, expect } from '@jest/globals';
 
 class FakeClient {
   private responses: Array<{ match: RegExp; result: any; error?: boolean }> =

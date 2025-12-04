@@ -1,6 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import { router } from '../../services/nlq/src/index.js';
+import { describe, it, expect } from '@jest/globals';
 
 const app = express();
 app.use(express.json());

@@ -3,6 +3,7 @@
  */
 
 import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
+import { describe, it, test, expect } from '@jest/globals';
 
 // Mock the middleware since we need to read it first
 describe('tenantHeader middleware', () => {

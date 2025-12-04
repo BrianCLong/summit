@@ -1,6 +1,7 @@
 import { doclingResolvers } from '../docling';
 import { doclingService } from '../../../services/DoclingService';
 import { doclingRepository } from '../../../db/repositories/doclingRepository';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 jest.mock('../../../services/DoclingService');
 jest.mock('../../../db/repositories/doclingRepository');

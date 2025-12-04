@@ -1,6 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 import narrativeSimulationRouter from '../../routes/narrative-sim.js';
+import { describe, it, expect } from '@jest/globals';
 
 describe('Narrative simulation routes', () => {
   const app = express()

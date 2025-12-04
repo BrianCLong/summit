@@ -1,5 +1,6 @@
 import { generateKeyPairSync, KeyObject, verify } from 'crypto';
 import { writeCoC, verifyChain } from '../src/cases/chain-of-custody';
+import { describe, it, expect } from '@jest/globals';
 
 describe('chain of custody', () => {
   it('builds a hash-linked signed chain', async () => {

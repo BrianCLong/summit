@@ -1,4 +1,5 @@
 import { estimateCost } from '../nl2cypher/costEstimator';
+import { describe, it, expect } from '@jest/globals';
 
 describe('cost estimator', () => {
   it('assigns higher cost for filtered queries', () => {

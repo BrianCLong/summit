@@ -1,3 +1,4 @@
+import { describe, test, expect } from '@jest/globals';
 describe('evaluateCoverage', () => {
   test('passes when all changed files meet the threshold', async () => {
     const coverageModule = require('../../../scripts/ci/coverage-check.cjs');

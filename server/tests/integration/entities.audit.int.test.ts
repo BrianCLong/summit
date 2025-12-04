@@ -1,6 +1,7 @@
 // Moved from server/tests/entities.audit.test.ts
 import express from 'express';
 import request from 'supertest';
+import { jest, describe, it, test, expect } from '@jest/globals';
 
 jest.mock('../src/config/database', () => {
   const query = jest.fn().mockResolvedValue({});

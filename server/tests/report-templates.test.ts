@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { describe, it, expect } from '@jest/globals';
 
 describe('report templates', () => {
   it('matches snapshot', () => {

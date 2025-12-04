@@ -1,4 +1,5 @@
 import { add, multiply } from './mathUtils';
+import { describe, it, expect } from '@jest/globals';
 
 describe('Math Utils', () => {
   it('should add two numbers correctly', () => {

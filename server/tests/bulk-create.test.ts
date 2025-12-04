@@ -1,3 +1,4 @@
+import { jest, describe, test, expect } from '@jest/globals';
 const {
   crudResolvers: resolvers,
 } = require('../src/graphql/resolvers/crudResolvers');

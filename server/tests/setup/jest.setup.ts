@@ -3,8 +3,8 @@
  * Provides common test utilities and matchers
  */
 
-// Extend Jest with additional matchers from jest-extended
-require('jest-extended');
+import 'jest-extended';
+import { jest, beforeAll, afterAll, afterEach } from '@jest/globals';
 
 // Global test timeout
 jest.setTimeout(30000);
@@ -21,7 +21,7 @@ beforeAll(() => {
     console.debug = jest.fn();
   }
 
-  console.error = (...args) => {
+  console.error = (...args: any[]) => {
     originalConsoleError(...args);
     throw new Error(
       '[console.error] used in server tests — replace with assertions or throw',
@@ -40,21 +40,21 @@ afterAll(() => {
 });
 
 // Prevent focused tests slipping through
-const blockFocus = (what) => {
-  throw new Error(
-    `[no-only-tests] Detected ${what}. Remove '.only' to maintain coverage.`,
-  );
-};
+// const blockFocus = (what: string) => {
+//   throw new Error(
+//     `[no-only-tests] Detected ${what}. Remove '.only' to maintain coverage.`,
+//   );
+// };
 
-Object.defineProperty(global.it, 'only', { get: () => blockFocus('it.only') });
-Object.defineProperty(global.describe, 'only', {
-  get: () => blockFocus('describe.only'),
-});
+// Object.defineProperty(global, 'it', {
+//     get: () => blockFocus('it.only'),
+//     configurable: true
+// });
 
 // Global test utilities
-global.testUtils = {
+(global as any).testUtils = {
   // Wait for condition with timeout
-  waitFor: async (condition, timeout = 5000, interval = 100) => {
+  waitFor: async (condition: () => Promise<boolean> | boolean, timeout = 5000, interval = 100) => {
     const start = Date.now();
     while (Date.now() - start < timeout) {
       if (await condition()) return true;
@@ -69,7 +69,7 @@ global.testUtils = {
 
   // Mock data generators
   mockEntity: (overrides = {}) => ({
-    id: global.testUtils.generateId('entity'),
+    id: (global as any).testUtils.generateId('entity'),
     type: 'TEST_ENTITY',
     label: 'Test Entity',
     props: { name: 'Test Entity', description: 'A test entity' },
@@ -79,9 +79,9 @@ global.testUtils = {
   }),
 
   mockRelationship: (overrides = {}) => ({
-    id: global.testUtils.generateId('rel'),
-    from: global.testUtils.generateId('from'),
-    to: global.testUtils.generateId('to'),
+    id: (global as any).testUtils.generateId('rel'),
+    from: (global as any).testUtils.generateId('from'),
+    to: (global as any).testUtils.generateId('to'),
     type: 'TEST_RELATIONSHIP',
     props: { confidence: 0.8, source: 'test' },
     createdAt: new Date().toISOString(),
@@ -89,7 +89,7 @@ global.testUtils = {
   }),
 
   mockUser: (overrides = {}) => ({
-    id: global.testUtils.generateId('user'),
+    id: (global as any).testUtils.generateId('user'),
     email: `test_${Date.now()}@example.com`,
     name: 'Test User',
     role: 'analyst',

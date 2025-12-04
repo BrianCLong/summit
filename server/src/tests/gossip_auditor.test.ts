@@ -1,4 +1,5 @@
 import { GossipAuditor } from '../transparency/GossipAuditor';
+import { describe, it, expect } from '@jest/globals';
 
 describe('GossipAuditor', () => {
   it('alerts on fork', async () => {

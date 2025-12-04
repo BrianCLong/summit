@@ -4,6 +4,7 @@
 
 import { TemplateValidator } from '../../../../services/reporting/validators/TemplateValidator.js';
 import { ValidationError } from '../../../../services/reporting/validators/ReportRequestValidator.js';
+import { describe, it, expect } from '@jest/globals';
 
 describe('TemplateValidator', () => {
   describe('validateCustomTemplate', () => {

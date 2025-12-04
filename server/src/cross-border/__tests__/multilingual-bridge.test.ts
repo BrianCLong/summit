@@ -3,6 +3,7 @@
  */
 
 import { MultilingualBridge } from '../multilingual-bridge.js';
+import { describe, it, test, expect, beforeEach } from '@jest/globals';
 
 describe('MultilingualBridge', () => {
   let bridge: MultilingualBridge;

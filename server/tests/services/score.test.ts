@@ -1,4 +1,5 @@
 import { computeScore } from '../../src/services/score';
+import { describe, it, expect } from '@jest/globals';
 
 describe('computeScore', () => {
   it('should compute the weighted mean correctly', () => {

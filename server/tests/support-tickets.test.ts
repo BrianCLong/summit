@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
+import { describe, it, test, expect, beforeEach } from '@jest/globals';
   createTicket,
   getTicketById,
   listTickets,

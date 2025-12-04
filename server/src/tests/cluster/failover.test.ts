@@ -1,4 +1,5 @@
 import { Neo4jError } from 'neo4j-driver';
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 
 describe('Neo4j Causal Cluster Failover Tests', () => {
   // Placeholder for actual cluster connection and setup

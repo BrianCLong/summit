@@ -1,3 +1,4 @@
+import { describe, test, expect } from '@jest/globals';
 const { rankPaths } = require('../src/services/PathRankingService');
 
 describe('PathRankingService', () => {

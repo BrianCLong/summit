@@ -37,6 +37,7 @@ jest.mock('../../db/neo4j', () => ({
 
 // Import the router after mocks are set up
 import aiRouter from '../ai';
+import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 const app = express();
 app.use(express.json());

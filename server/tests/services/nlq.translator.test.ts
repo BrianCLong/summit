@@ -1,4 +1,5 @@
 import { translator } from '../../src/services/nlq/translator';
+import { describe, it, expect } from '@jest/globals';
 
 describe('NLQTranslator', () => {
   it('translates person queries with tenant scoping', async () => {

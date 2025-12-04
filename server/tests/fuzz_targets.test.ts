@@ -4,6 +4,7 @@ import { NarrativeSimulationEngine } from '../src/narrative/engine';
 import { nl2cypher } from '../src/nl2cypher/index';
 import { dedupeAlerts } from '../src/rules/engine.js';
 import { SimulationConfig, NarrativeEvent } from '../src/narrative/types';
+import { describe, it, test, expect } from '@jest/globals';
 
 // Determine number of runs based on environment
 const isCI = process.env.CI === 'true';

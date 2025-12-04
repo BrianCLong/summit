@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs';
 import { createHash } from 'crypto';
+import { describe, it, expect } from '@jest/globals';
 const { verify } = require('../../tools/report-cli');
 
 describe('report cli', () => {

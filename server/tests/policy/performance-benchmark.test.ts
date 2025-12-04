@@ -1,3 +1,4 @@
+import { describe, test, expect } from '@jest/globals';
 describe('performance benchmark', () => {
   test('all operations complete within the configured budgets', () => {
     const {

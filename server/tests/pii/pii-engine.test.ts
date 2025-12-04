@@ -10,6 +10,7 @@ import {
   VerificationQueue,
 } from '../../src/pii/index.js';
 import type { ClassifiedEntity } from '../../src/pii/types.js';
+import { describe, it, test, expect } from '@jest/globals';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

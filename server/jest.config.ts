@@ -1,11 +1,11 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
-    '<rootDir>/tests/setup/jest.setup.js',
+    '<rootDir>/tests/setup/jest.setup.ts',
     'jest-extended/all',
   ],
   testMatch: [
@@ -23,14 +23,14 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  resolver: '<rootDir>/tests/resolver.cjs',
   transform: {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json',
+        tsconfig: 'tsconfig.test.json',
       },
     ],
   },
@@ -78,7 +78,9 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))',
+  ],
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

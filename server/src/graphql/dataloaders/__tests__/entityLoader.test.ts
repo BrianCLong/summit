@@ -4,6 +4,7 @@
 
 import { createEntityLoader } from '../entityLoader';
 import type { DataLoaderContext } from '../index';
+import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock Neo4j driver
 const mockNeo4jSession = {
