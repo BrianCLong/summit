@@ -35,6 +35,9 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const MaestroRunConsolePage = React.lazy(
+  () => import('@/pages/MaestroRunConsolePage')
+)
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -77,6 +80,11 @@ function App() {
                       <Route
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
+                      />
+
+                      <Route
+                        path="maestro-run-console"
+                        element={<MaestroRunConsolePage />}
                       />
 
                       {/* Alerts */}
