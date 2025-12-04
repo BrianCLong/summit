@@ -9,6 +9,7 @@ import {
   ExecutionResult,
 } from './types/index.js';
 import { SecureSandbox } from './sandbox/SecureSandbox.js';
+import { BugReproducer } from './repro/BugReproducer.js';
 import { MissionMigrator } from './migration/MissionMigrator.js';
 import { SandboxRegistry } from './utils/SandboxRegistry.js';
 import { ProvLedgerClient } from './integration/ProvLedgerClient.js';
@@ -330,6 +331,22 @@ app.get('/api/v1/templates', (_req: Request, res: Response) => {
     },
   ]);
 });
+
+/**
+ * Reproduce a bug from an issue description
+ */
+app.post('/api/v1/bugs/reproduce', traced('reproduceBug', async (req: Request, res: Response) => {
+  const { issueText, sandboxConfig } = req.body;
+
+  if (!issueText) {
+    return res.status(400).json({ error: 'issueText is required' });
+  }
+
+  const reproducer = new BugReproducer(sandboxConfig);
+  const result = await reproducer.reproduce(issueText);
+
+  res.json(result);
+}));
 
 // Error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
