@@ -1,5 +1,5 @@
 import React from 'react';
-import SearchBar from '../components/SearchBar';
+import './globals.css';
 
 export default function RootLayout({
   children,
@@ -8,8 +8,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="p-4">
-        <SearchBar />
+      <body className="p-4 bg-gray-50 text-gray-900 h-screen w-screen overflow-hidden">
         {children}
       </body>
     </html>
