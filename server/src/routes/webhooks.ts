@@ -23,13 +23,13 @@ const validate = (schema: any) => (req: any, res: any, next: any) => {
 
 // Helper for tenant ID (assuming it's in req.user or req.headers)
 const getTenantId = (req: any) => {
-    // In production, strict auth is enforced and tenantId comes from req.user
-    // In dev/testing, we allow header override IF req.user is missing
-    if (req.user?.tenantId) {
-        return req.user.tenantId;
+    // Strict auth is enforced via app.ts, so req.user should always be populated
+    if (req.user?.tenantId || req.user?.tenant_id) {
+        return req.user.tenantId || req.user.tenant_id;
     }
-    // Fallback for development/testing purposes ONLY
-    return req.headers['x-tenant-id'] || 'default-tenant';
+    // Fallback only if configured for strict dev bypassing, but now we enforce auth even in dev (mock user)
+    // We throw error if tenant identification fails for security
+    throw new Error('Tenant ID not found in authenticated session');
 };
 
 // --- New Webhook Management Routes ---

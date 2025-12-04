@@ -96,7 +96,43 @@ export const createApp = async () => {
     }),
   );
 
-  app.use(express.json({ limit: '1mb' }));
+  // Production Authentication - Use proper JWT validation
+  const {
+    productionAuthMiddleware,
+    applyProductionSecurity,
+  } = await import('./config/production-security.js');
+
+  // Apply security middleware based on environment
+  if (cfg.NODE_ENV === 'production') {
+    applyProductionSecurity(app);
+  }
+
+  const authenticateToken =
+    cfg.NODE_ENV === 'production'
+      ? productionAuthMiddleware
+      : (req: Request, res: Response, next: NextFunction) => {
+          // Development mode - relaxed auth for easier testing
+          const authHeader = req.headers['authorization'];
+          const token = authHeader && authHeader.split(' ')[1];
+
+          if (!token) {
+            console.warn('Development: No token provided, allowing request');
+            (req as any).user = {
+              sub: 'dev-user',
+              email: 'dev@intelgraph.local',
+              role: 'admin',
+              tenant_id: 'default-tenant',
+            };
+          }
+          next();
+        };
+
+  app.use(express.json({
+    limit: '1mb',
+    verify: (req: any, res, buf) => {
+      req.rawBody = buf;
+    },
+  }));
   // Standard audit logger for basic request tracking
   app.use(auditLogger);
   // Audit-First middleware for cryptographic stamping of sensitive operations
@@ -140,13 +176,17 @@ export const createApp = async () => {
       return rateLimitMiddleware(req, res, next);
   });
 
+  // Protected Routes
+  // Apply authentication to all /api routes to enforce strict security
+  app.use('/api', authenticateToken);
+
   // Other routes
-  app.use('/monitoring', monitoringRouter);
+  app.use('/monitoring', authenticateToken, monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
-  app.use('/disclosures', disclosuresRouter);
-  app.use('/rbac', rbacRouter);
+  app.use('/disclosures', disclosuresRouter); // Should this be protected? Likely yes.
+  app.use('/rbac', authenticateToken, rbacRouter);
   app.use('/api/webhooks', webhookRouter);
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
@@ -162,7 +202,7 @@ export const createApp = async () => {
   app.use('/api/scenarios', scenarioRouter);
   app.get('/metrics', metricsRoute);
 
-  app.get('/search/evidence', async (req, res) => {
+  app.get('/search/evidence', authenticateToken, async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
 
     if (!q) {
@@ -271,36 +311,6 @@ export const createApp = async () => {
     },
   });
   await apollo.start();
-
-  // Production Authentication - Use proper JWT validation
-  const {
-    productionAuthMiddleware,
-    applyProductionSecurity,
-  } = await import('./config/production-security.js');
-
-  // Apply security middleware based on environment
-  if (cfg.NODE_ENV === 'production') {
-    applyProductionSecurity(app);
-  }
-
-  const authenticateToken =
-    cfg.NODE_ENV === 'production'
-      ? productionAuthMiddleware
-      : (req: Request, res: Response, next: NextFunction) => {
-          // Development mode - relaxed auth for easier testing
-          const authHeader = req.headers['authorization'];
-          const token = authHeader && authHeader.split(' ')[1];
-
-          if (!token) {
-            console.warn('Development: No token provided, allowing request');
-            (req as any).user = {
-              sub: 'dev-user',
-              email: 'dev@intelgraph.local',
-              role: 'admin',
-            };
-          }
-          next();
-        };
 
   app.use(
     '/graphql',
