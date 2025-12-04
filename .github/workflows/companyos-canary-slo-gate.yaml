@@ -1,0 +1,80 @@
+name: companyos-api canary SLO gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  companyos-deploy-canary:
+    runs-on: ubuntu-latest
+    needs: []
+    steps:
+      - uses: actions/checkout@v4
+
+      # assume you already have kubeconfig setup step here
+
+      - name: Deploy companyos-api canary
+        run: |
+          helm upgrade companyos-api charts/companyos-api \
+            -f charts/companyos-api/values.yaml \
+            -f charts/companyos-api/values-canary.yaml \
+            --set image.tag=${{ github.sha }}
+
+      - name: Wait for canary to serve traffic
+        run: |
+          # simple sleep; you can replace with richer readiness probes
+          sleep 300
+
+  companyos-canary-slo-gate:
+    runs-on: ubuntu-latest
+    needs: [companyos-deploy-canary]
+    env:
+      PROM_URL: https://prometheus.yourdomain.example/api/v1/query
+      SERVICE: companyos-api
+      CANARY_WINDOW: 10m
+      BASELINE_WINDOW: 60m
+      CANARY_ERROR_FACTOR: 2
+      CANARY_LATENCY_FACTOR: 2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: |
+          corepack enable
+          pnpm install --dir companyos
+
+      - name: Run canary SLO gate
+        run: |
+          node companyos/scripts/check-canary-slo.mjs
+
+  companyos-promote-or-rollback:
+    runs-on: ubuntu-latest
+    needs: [companyos-canary-slo-gate]
+    if: ${{ needs.companyos-canary-slo-gate.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      # Promote canary -> full rollout
+      - name: Promote companyos-api to full
+        run: |
+          helm upgrade companyos-api charts/companyos-api \
+            -f charts/companyos-api/values.yaml \
+            --set image.tag=${{ github.sha }}
+
+  companyos-rollback:
+    runs-on: ubuntu-latest
+    needs: [companyos-canary-slo-gate]
+    if: ${{ needs.companyos-canary-slo-gate.result == 'failure' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Roll back companyos-api canary
+        run: |
+          helm rollback companyos-api
