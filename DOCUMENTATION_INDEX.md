@@ -75,6 +75,21 @@ Quick lookup guide for common tasks and patterns.
 - Troubleshooting issues
 - Finding monitoring endpoints
 
+### 4. **summit-intel-evo-prompt.md** (updated)
+Operational prompt pack and runbook for running the SummitIntelEvo SEMAF/IntelGraph evolution loop in Jules/Codex.
+
+**Covers:**
+- Copy-pasteable mega-prompt for the IntelEvo workflow
+- Design highlights (EntangleEvo, KG anti-forgetting, compliance guardrails)
+- Runbook steps, metrics/telemetry logging, and halt conditions
+- Branching/merge discipline and compliance considerations for generated PRs
+- Pre-run checklist and template integration options (PR YAML vs. AI-assisted paste)
+
+**When to use:**
+- Running the self-evolving agent stack in sandboxed branches
+- Sharing the canonical prompt with collaborators or automation
+- Reviewing governance guardrails before executing large-scale runs
+
 ## Quick Navigation
 
 ### I want to understand...
