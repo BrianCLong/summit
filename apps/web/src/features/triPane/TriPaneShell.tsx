@@ -10,7 +10,7 @@
  * with clear contracts for future teams to integrate real data sources.
  */
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import {
   Layers,
   Network,
@@ -21,7 +21,6 @@ import {
   Download,
   Eye,
   EyeOff,
-  Maximize2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -30,6 +29,7 @@ import { Button } from '@/components/ui/Button'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { MapPane } from './MapPane'
+import { useShortcut } from '@/contexts/KeyboardShortcutsContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
 
@@ -256,35 +256,72 @@ export function TriPaneShell({
     }))
   }, [])
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      // Only handle shortcuts when not in an input
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      ) {
-        return
-      }
+  // Keyboard shortcuts implementation using useShortcut hook
+  useShortcut('g', () => setActivePane('graph'), {
+    id: 'pane-graph',
+    description: 'Focus Graph Pane',
+    category: 'View'
+  })
 
-      if (e.key === 'g' && !e.ctrlKey && !e.metaKey) {
-        setActivePane('graph')
-      } else if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
-        setActivePane('timeline')
-      } else if (e.key === 'm' && !e.ctrlKey && !e.metaKey) {
-        setActivePane('map')
-      } else if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
-        handleResetFilters()
-      } else if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
-        onExport?.()
-      } else if (e.key === 'p' && !e.ctrlKey && !e.metaKey) {
-        setShowProvenance(prev => !prev)
-      }
-    }
+  useShortcut('t', () => setActivePane('timeline'), {
+    id: 'pane-timeline',
+    description: 'Focus Timeline Pane',
+    category: 'View'
+  })
 
-    window.addEventListener('keydown', handleKeyPress)
-    return () => window.removeEventListener('keydown', handleKeyPress)
-  }, [handleResetFilters, onExport])
+  useShortcut('m', () => setActivePane('map'), {
+    id: 'pane-map',
+    description: 'Focus Map Pane',
+    category: 'View'
+  })
+
+  useShortcut('r', handleResetFilters, {
+    id: 'action-reset',
+    description: 'Reset Filters',
+    category: 'Actions'
+  })
+
+  useShortcut('e', () => onExport?.(), {
+    id: 'action-export',
+    description: 'Export Data',
+    category: 'Actions',
+    enabled: !!onExport
+  })
+
+  useShortcut('p', () => setShowProvenance(prev => !prev), {
+    id: 'view-provenance',
+    description: 'Toggle Provenance Overlay',
+    category: 'View'
+  })
+
+  useShortcut('=', () => {
+    setSyncState(prev => ({
+      ...prev,
+      map: {
+        ...prev.map,
+        zoom: (prev.map.zoom || 1) + 1
+      }
+    }))
+  }, {
+    id: 'map-zoom-in',
+    description: 'Zoom In (Map)',
+    category: 'View'
+  })
+
+  useShortcut('-', () => {
+    setSyncState(prev => ({
+      ...prev,
+      map: {
+        ...prev.map,
+        zoom: Math.max(0, (prev.map.zoom || 1) - 1)
+      }
+    }))
+  }, {
+    id: 'map-zoom-out',
+    description: 'Zoom Out (Map)',
+    category: 'View'
+  })
+
 
   return (
     <div
@@ -480,19 +517,6 @@ export function TriPaneShell({
           {syncState.globalTimeWindow.end.toLocaleString()}
         </div>
       )}
-
-      {/* Keyboard shortcuts helper (hidden, for screen readers) */}
-      <div className="sr-only" role="complementary" aria-label="Keyboard shortcuts">
-        <h2>Keyboard Shortcuts</h2>
-        <ul>
-          <li>G: Focus graph pane</li>
-          <li>T: Focus timeline pane</li>
-          <li>M: Focus map pane</li>
-          <li>R: Reset all filters</li>
-          <li>E: Export data</li>
-          <li>P: Toggle provenance overlay</li>
-        </ul>
-      </div>
     </div>
   )
 }

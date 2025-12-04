@@ -1,12 +1,19 @@
 import React from 'react'
-import { Outlet, Navigate } from 'react-router-dom'
+import { Outlet, Navigate, useNavigate } from 'react-router-dom'
 import { Navigation } from './Navigation'
 import { GlobalSearch } from './GlobalSearch'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/Skeleton'
+import { CommandPalette } from '@/components/CommandPalette'
+import { KeyboardShortcutsHelp } from '@/components/KeyboardShortcutsHelp'
+// import { useShortcut } from '@/contexts/KeyboardShortcutsContext'
 
 export function Layout() {
   const { user, loading, isAuthenticated } = useAuth()
+  // const navigate = useNavigate()
+
+  // Removed global 'g' shortcuts to avoid conflict with local investigation shortcuts.
+  // Users should use Cmd+K (Command Palette) for global navigation.
 
   if (loading) {
     return (
@@ -60,6 +67,12 @@ export function Layout() {
 
       {/* Global Search Modal */}
       <GlobalSearch />
+
+      {/* Command Palette */}
+      <CommandPalette />
+
+      {/* Keyboard Shortcuts Help */}
+      <KeyboardShortcutsHelp />
     </div>
   )
 }

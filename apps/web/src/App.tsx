@@ -13,6 +13,9 @@ import { Layout } from '@/components/Layout'
 import { apolloClient } from '@/lib/apollo'
 import { SocketProvider } from '@/contexts/SocketContext'
 
+// Keyboard Shortcuts
+import { KeyboardShortcutsProvider } from '@/contexts/KeyboardShortcutsContext'
+
 // Lazy load pages for better initial load performance
 const HomePage = React.lazy(() => import('@/pages/HomePage'))
 const ExplorePage = React.lazy(() => import('@/pages/ExplorePage'))
@@ -47,77 +50,82 @@ function App() {
         <TooltipProvider>
           <AuthProvider>
             <SearchProvider>
-              <Router>
-                <React.Suspense
-                  fallback={
-                    <div className="flex h-screen items-center justify-center">
-                      <div className="text-center">
-                        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                        <p className="mt-4 text-sm text-muted-foreground">
-                          Loading...
-                        </p>
+              <KeyboardShortcutsProvider>
+                <Router>
+                  <React.Suspense
+                    fallback={
+                      <div className="flex h-screen items-center justify-center">
+                        <div className="text-center">
+                          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                          <p className="mt-4 text-sm text-muted-foreground">
+                            Loading...
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  }
-                >
-                  <Routes>
-                    {/* Auth routes */}
-                    <Route path="/signin" element={<SignInPage />} />
-                    <Route
-                      path="/access-denied"
-                      element={<AccessDeniedPage />}
-                    />
-
-                    {/* Protected routes with layout */}
-                    <Route path="/" element={<Layout />}>
-                      <Route index element={<HomePage />} />
-                      <Route path="explore" element={<ExplorePage />} />
-
-                      {/* Tri-Pane Analysis */}
+                    }
+                  >
+                    <Routes>
+                      {/* Auth routes */}
+                      <Route path="/signin" element={<SignInPage />} />
                       <Route
-                        path="analysis/tri-pane"
-                        element={<TriPanePage />}
+                        path="/access-denied"
+                        element={<AccessDeniedPage />}
                       />
 
-                      {/* Alerts */}
-                      <Route path="alerts" element={<AlertsPage />} />
-                      <Route path="alerts/:id" element={<AlertDetailPage />} />
+                      {/* Protected routes with layout */}
+                      <Route path="/" element={<Layout />}>
+                        <Route index element={<HomePage />} />
+                        <Route path="explore" element={<ExplorePage />} />
 
-                      {/* Cases */}
-                      <Route path="cases" element={<CasesPage />} />
-                      <Route path="cases/:id" element={<CaseDetailPage />} />
+                        {/* Tri-Pane Analysis */}
+                        <Route
+                          path="analysis/tri-pane"
+                          element={<TriPanePage />}
+                        />
 
-                      {/* Dashboards */}
-                      <Route
-                        path="dashboards/command-center"
-                        element={<CommandCenterDashboard />}
-                      />
-                      <Route
-                        path="dashboards/supply-chain"
-                        element={<SupplyChainDashboard />}
-                      />
+                        {/* Alerts */}
+                        <Route path="alerts" element={<AlertsPage />} />
+                        <Route
+                          path="alerts/:id"
+                          element={<AlertDetailPage />}
+                        />
 
-                      {/* Data & Models */}
-                      <Route
-                        path="data/sources"
-                        element={<DataSourcesPage />}
-                      />
-                      <Route path="models" element={<ModelsPage />} />
-                      <Route path="reports" element={<ReportsPage />} />
+                        {/* Cases */}
+                        <Route path="cases" element={<CasesPage />} />
+                        <Route path="cases/:id" element={<CaseDetailPage />} />
 
-                      {/* Admin */}
-                      <Route path="admin/*" element={<AdminPage />} />
+                        {/* Dashboards */}
+                        <Route
+                          path="dashboards/command-center"
+                          element={<CommandCenterDashboard />}
+                        />
+                        <Route
+                          path="dashboards/supply-chain"
+                          element={<SupplyChainDashboard />}
+                        />
 
-                      {/* Support */}
-                      <Route path="help" element={<HelpPage />} />
-                      <Route path="changelog" element={<ChangelogPage />} />
+                        {/* Data & Models */}
+                        <Route
+                          path="data/sources"
+                          element={<DataSourcesPage />}
+                        />
+                        <Route path="models" element={<ModelsPage />} />
+                        <Route path="reports" element={<ReportsPage />} />
 
-                      {/* Catch all */}
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Route>
-                  </Routes>
-                </React.Suspense>
-              </Router>
+                        {/* Admin */}
+                        <Route path="admin/*" element={<AdminPage />} />
+
+                        {/* Support */}
+                        <Route path="help" element={<HelpPage />} />
+                        <Route path="changelog" element={<ChangelogPage />} />
+
+                        {/* Catch all */}
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                      </Route>
+                    </Routes>
+                  </React.Suspense>
+                </Router>
+              </KeyboardShortcutsProvider>
             </SearchProvider>
           </AuthProvider>
         </TooltipProvider>
