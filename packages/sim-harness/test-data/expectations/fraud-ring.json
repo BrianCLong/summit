@@ -1,0 +1,39 @@
+{
+  "scenario": "fraud-ring",
+  "seed": 42,
+  "expectedOutcomes": {
+    "criticalEntities": [
+      "Shell companies with high transaction volume",
+      "Intermediaries with multiple ownership links",
+      "High-risk jurisdictions (offshore locations)"
+    ],
+    "keyRelationships": [
+      "OWNS relationships revealing beneficial ownership",
+      "TRANSACTS_WITH patterns showing layered transactions",
+      "LOCATED_IN links to high-risk jurisdictions"
+    ],
+    "anomalies": [
+      "Circular transaction patterns",
+      "Rapid fund movement through multiple entities",
+      "Mismatched ownership structures",
+      "Unusual transaction amounts",
+      "High-frequency transactions between shell companies"
+    ],
+    "minEntitiesFound": 40,
+    "minRelationshipsFound": 35,
+    "investigationSteps": [
+      "Identify high-risk entities (risk_score > 70)",
+      "Trace ownership chains",
+      "Analyze transaction patterns",
+      "Identify offshore connections",
+      "Map network of intermediaries"
+    ],
+    "successCriteria": {
+      "entityDiscoveryRate": 0.8,
+      "relationshipDiscoveryRate": 0.7,
+      "timeToFirstInsight": 15000,
+      "maxQueryLatency": 5000,
+      "successRate": 0.95
+    }
+  }
+}
