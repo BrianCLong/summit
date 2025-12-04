@@ -39,18 +39,20 @@ const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 function App() {
   return (
-    <ApolloProvider client={apolloClient}>
-      <SocketProvider>
-        <TooltipProvider>
-          <AuthProvider>
-            <SearchProvider>
-              <Router>
-                <React.Suspense
-                  fallback={
-                    <div className="flex h-screen items-center justify-center">
+    <ErrorBoundary>
+      <ApolloProvider client={apolloClient}>
+        <SocketProvider>
+          <TooltipProvider>
+            <AuthProvider>
+              <SearchProvider>
+                <Router>
+                  <React.Suspense
+                    fallback={
+                      <div className="flex h-screen items-center justify-center">
                       <div className="text-center">
                         <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent motion-reduce:animate-[spin_1.5s_linear_infinite]" />
                         <p className="mt-4 text-sm text-muted-foreground">
@@ -60,7 +62,8 @@ function App() {
                     </div>
                   }
                 >
-                  <Routes>
+                  <ErrorBoundary>
+                    <Routes>
                     {/* Auth routes */}
                     <Route path="/signin" element={<SignInPage />} />
                     <Route
@@ -116,6 +119,7 @@ function App() {
                       <Route path="*" element={<Navigate to="/" replace />} />
                     </Route>
                   </Routes>
+                  </ErrorBoundary>
                 </React.Suspense>
               </Router>
             </SearchProvider>
@@ -123,6 +127,7 @@ function App() {
         </TooltipProvider>
       </SocketProvider>
     </ApolloProvider>
+    </ErrorBoundary>
   )
 }
 
