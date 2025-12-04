@@ -1,0 +1,42 @@
+meta:
+  id: javelin.moat@v1
+  owner: jules
+  purpose: Competitive GTM & Moat Playbook
+  tags: [javelin, strategy, gtm, moat]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.7
+  maxTokens: 4000
+inputs:
+  mission: The mission description
+  market_context: Context about the market and competition
+template: |
+  PLAYBOOK: JAVELIN_MOAT_CATEGORY
+
+  Using the mission and market context below:
+
+  MISSION: {{mission}}
+  MARKET CONTEXT: {{market_context}}
+
+  1) COMPETITIVE LANDSCAPE
+  - 3–7 key competitors / archetypes.
+  - Their primary moats and vulnerabilities.
+
+  2) CATEGORY STORY
+  - Current “default narrative” of the category.
+  - Potential new category framing favorable to us.
+
+  3) MOAT DESIGN
+  - Data/standards moats
+  - Network effects and ecosystem plays
+  - Switching costs and compliance capital
+
+  4) GTM MOVES
+  - 3–5 strategic GTM plays:
+    - ICPs, channels, pricing levers, partnerships.
+
+  5) RISKS & COUNTER-MOVES
+  - Likely competitive reactions.
+  - How to pre-empt or absorb them.
+
+  PCS as usual.

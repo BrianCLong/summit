@@ -1,0 +1,28 @@
+meta:
+  id: jade.roadmap@v1
+  owner: jules
+  purpose: 30/60/90 Day Roadmap Artifact Template
+  tags: [jade, artifact, roadmap]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.5
+  maxTokens: 2000
+inputs:
+  analysis: The preceding analysis or context
+template: |
+  Using the analysis below, output a ROADMAP_30_60_90 artifact.
+
+  ANALYSIS: {{analysis}}
+
+  ARTIFACT: ROADMAP_30_60_90
+
+  1) OUTCOME NORTH STAR
+  2) 30-DAY FOCUS
+  - Objectives
+  - Key workstreams
+  - Owners
+
+  3) 60-DAY FOCUS
+  4) 90-DAY FOCUS
+  5) RISKS & DEPENDENCIES
+  6) CHECKPOINT METRICS (per phase)
