@@ -1,0 +1,44 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "intelgraph-api.fullname" . }}
+  labels:
+    {{- include "intelgraph-api.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "intelgraph-api.selectorLabels" . | nindent 6 }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from Ingress Controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx # Adjust based on actual ingress namespace label
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.port }}
+    # Allow traffic from Prometheus (Monitoring)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: {{ .Values.service.port }} # Metric port
+  egress:
+    # Allow egress to DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow egress to Database/Neo4j (assuming they are in known namespaces/CIDRs)
+    # This is a baseline; specificity would be added per env
+    - {}

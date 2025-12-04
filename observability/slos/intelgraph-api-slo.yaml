@@ -1,0 +1,42 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: intelgraph-api-slos
+  namespace: monitoring
+  labels:
+    role: alert-rules
+    app: intelgraph-api
+spec:
+  groups:
+  - name: intelgraph-api.slos
+    rules:
+    # Availability SLO: 99.9% success rate
+    - record: job:intelgraph_api_request_success:rate5m
+      expr: |
+        sum(rate(http_request_duration_seconds_count{job="intelgraph-api", status!~"5.."}[5m]))
+        /
+        sum(rate(http_request_duration_seconds_count{job="intelgraph-api"}[5m]))
+
+    - alert: IntelGraphApiAvailabilityBurnRateFast
+      expr: |
+        (1 - job:intelgraph_api_request_success:rate5m) > (1 - 0.999) * 10
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "IntelGraph API availability is burning fast"
+        description: "Error budget burn rate is > 10x. Immediate attention required."
+
+    # Latency SLO: 99% of requests < 500ms
+    - record: job:intelgraph_api_request_latency:p99
+      expr: |
+        histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) by (le))
+
+    - alert: IntelGraphApiLatencyBreach
+      expr: job:intelgraph_api_request_latency:p99 > 0.5
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "IntelGraph API Latency High"
+        description: "P99 Latency is > 500ms for 5 minutes."

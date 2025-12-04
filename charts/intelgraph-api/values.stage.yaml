@@ -1,0 +1,42 @@
+# STAGE Environment Values
+# Guardrails: Moderate resources, canary testing enabled.
+
+image:
+  tag: latest # Overridden by CI
+
+service:
+  type: ClusterIP
+  port: 4000
+
+env:
+  NEO4J_URI: bolt://neo4j-stage.companyos-stage.svc.cluster.local:7687
+  PG_CONNECTION_SECRET: db-credentials-stage # Use secret reference
+
+ingress:
+  enabled: true
+  hosts:
+    - host: api.stage.topicality.co
+      paths: [{ path: /, pathType: Prefix }]
+  tls:
+    - secretName: api-stage-tls
+      hosts: [api.stage.topicality.co]
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi
+
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 70
+
+rollout:
+  strategy:
+    canary:
+      steps:
+        - setWeight: 50
+        - pause: { duration: 2m } # Simple wait for stage
