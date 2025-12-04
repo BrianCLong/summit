@@ -26,6 +26,29 @@ resources:
     cpu: 500m
     memory: 1Gi
 
+namespaceLimits:
+  enabled: true
+  quota:
+    pods: 8
+    requestsCpu: '1'
+    requestsMemory: '2Gi'
+    limitsCpu: '2'
+    limitsMemory: '3Gi'
+    persistentVolumeClaims: 0
+    services: 6
+    configMaps: 20
+    secrets: 30
+  limitRange:
+    defaultRequest:
+      cpu: '150m'
+      memory: '256Mi'
+    default:
+      cpu: '400m'
+      memory: '512Mi'
+    max:
+      cpu: '800m'
+      memory: '1Gi'
+
 # Scaling configuration
 replicaCount: 1
 autoscaling:

@@ -108,6 +108,7 @@ jobs:
           helm upgrade --install \
             intelgraph-pr-${PR_NUMBER} \
             ./deploy/helm/intelgraph \
+            -f ./deploy/helm/intelgraph/values-preview.yaml \
             --namespace ${NAMESPACE} \
             --set image.server.repository=${{ env.REGISTRY }}/${{ github.repository }}/server \
             --set image.server.tag=pr-${PR_NUMBER} \
