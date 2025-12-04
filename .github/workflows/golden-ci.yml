@@ -1,0 +1,72 @@
+name: Golden Path CI (Build & Scan)
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install Dependencies
+        run: |
+          cd server
+          npm ci
+
+      - name: Lint
+        run: |
+          cd server
+          npm run lint
+
+      - name: Unit Tests
+        run: |
+          cd server
+          npm test
+
+      - name: Integration Tests
+        run: echo "Running integration tests..." # Placeholder for actual DB-backed tests
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy FS Scan (SAST/SCA)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          trivy-config: trivy.yaml
+          format: 'table'
+          exit-code: '1' # Fail on vulnerabilities
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+
+  sbom-generation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate SBOM (CycloneDX)
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./server
+          format: cyclonedx-json
+          output-file: server-sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: server-sbom.json

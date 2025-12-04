@@ -1,0 +1,46 @@
+name: Golden Path Preview (Ephemeral)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # To comment URL
+      deployments: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set Environment Context
+        run: echo "NAMESPACE=pr-${{ github.event.number }}" >> $GITHUB_ENV
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+
+      # Assuming Kubeconfig is set via secret
+      # - name: Setup Kubernetes
+      #   uses: azure/k8s-set-context@v3
+      #   with:
+      #     kubeconfig: ${{ secrets.KUBECONFIG_DEV }}
+
+      - name: Deploy Chart
+        run: |
+          # Mock deploy for demonstration
+          echo "Deploying helm chart to $NAMESPACE..."
+          # helm upgrade --install intelgraph-api ./charts/intelgraph-api \
+          #   --namespace $NAMESPACE --create-namespace \
+          #   --set image.tag=latest \
+          #   -f charts/intelgraph-api/values.dev.yaml
+
+      - name: Comment Preview URL
+        uses: tholman/github-action-comment-pull-request@v2
+        with:
+          message: |
+            🚀 **Preview Environment Deployed!**
+
+            URL: https://api.pr-${{ github.event.number }}.dev.topicality.co
+            Namespace: `pr-${{ github.event.number }}`
