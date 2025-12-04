@@ -116,6 +116,12 @@ const handleValidationErrors = (
  * {
  *   queryId: string,
  *   cypher: string,
+ *   explanationDetails: {
+ *     summary: string,
+ *     rationale: string[],
+ *     evidence: { source: string, snippet: string, reason: string }[],
+ *     confidence: number
+ *   },
  *   estimatedCost: CostEstimate,
  *   explanation: string,
  *   requiredParameters: string[],
@@ -188,9 +194,11 @@ router.post(
           isSafe: result.isSafe,
           warningCount: result.warnings.length,
           requiredParamsCount: result.requiredParameters.length,
+          explanationConfidence: result.explanationDetails.confidence,
+          evidenceCount: result.explanationDetails.evidence.length,
           responseTimeMs: responseTime,
         },
-        'Query compilation successful',
+        'Query compilation successful with explanation payload',
       );
 
       return res.status(200).json({
@@ -199,6 +207,10 @@ router.post(
           compilationTimeMs: responseTime,
           service: 'nl-graph-query-copilot',
           version: '1.0.0',
+          explanation: {
+            confidence: result.explanationDetails.confidence,
+            evidenceCount: result.explanationDetails.evidence.length,
+          },
         },
       });
     } catch (error) {

@@ -74,6 +74,9 @@ export interface CompileResponse {
   /** Generated Cypher query */
   cypher: string;
 
+  /** Structured explanation payload with rationale and evidence */
+  explanationDetails: QueryExplanation;
+
   /** Estimated cost of execution */
   estimatedCost: CostEstimate;
 
@@ -94,6 +97,31 @@ export interface CompileResponse {
 
   /** Timestamp of generation */
   timestamp: Date;
+}
+
+export interface QueryExplanation {
+  /** Short, user-friendly summary of what the model will do */
+  summary: string;
+
+  /** Ordered rationale bullets that describe model intent */
+  rationale: string[];
+
+  /** Evidence snippets (query fragments, schema hints, policy tags) */
+  evidence: ExplanationEvidence[];
+
+  /** Confidence score between 0 and 1 */
+  confidence: number;
+}
+
+export interface ExplanationEvidence {
+  /** Source for the evidence (e.g., MATCH clause, policy tag, index) */
+  source: string;
+
+  /** The raw snippet supporting the rationale */
+  snippet: string;
+
+  /** Why this snippet matters */
+  reason: string;
 }
 
 export interface CompileError {
