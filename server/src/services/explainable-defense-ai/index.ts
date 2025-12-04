@@ -22,6 +22,14 @@ export {
 
 export { ExplainableDefenseAIResolvers } from './resolvers.js';
 
+export {
+  UnifiedXAIService,
+  unifiedXAI,
+  convertTraceToExplanation,
+  convertExplanationToTrace,
+  createChainNodeFromTrace,
+} from './xai-integration.js';
+
 import { ExplainableDefenseAI } from './ExplainableDefenseAI.js';
 
 // Singleton instance for service integration
