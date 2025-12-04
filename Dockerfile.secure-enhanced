@@ -4,227 +4,92 @@
 # ===================================================================
 
 # Build arguments for reproducible builds
-ARG NODE_VERSION=18.20.3
+ARG NODE_VERSION=20.10.0
 ARG ALPINE_VERSION=3.19
 ARG BUILD_DATE
 ARG BUILD_VERSION
 ARG VCS_REF
-ARG DISTROLESS_TAG=nonroot-debug
+ARG DISTROLESS_TAG=nonroot
 
 # ===== SECURITY SCANNING STAGE =====
 FROM aquasec/trivy:0.51.1 as security-scanner
 WORKDIR /scan
-COPY package*.json ./
+COPY . .
 # Scan for vulnerabilities before building
 RUN trivy fs --exit-code 1 --severity HIGH,CRITICAL --format sarif --output /scan/results.sarif .
 
 # ===== SBOM GENERATION STAGE =====
 FROM anchore/syft:v0.105.1 as sbom-generator
 WORKDIR /sbom
-COPY package*.json ./
+COPY . .
 COPY --from=security-scanner /scan/results.sarif ./
 RUN syft . -o spdx-json --file /sbom/sbom.spdx.json
 
-# ===== BASE SECURITY IMAGE =====
-FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} AS security-base
+# ===== BASE IMAGE =====
+FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} AS base
+RUN apk update && apk upgrade && apk add --no-cache dumb-init
+RUN npm install -g turbo
 
-# Install critical security updates first
-RUN apk update && \
-    apk upgrade && \
-    apk add --no-cache \
-        ca-certificates \
-        tzdata \
-        dumb-init \
-        tini && \
-    # Remove package manager caches
-    rm -rf /var/cache/apk/* /tmp/* /var/tmp/* && \
-    # Update certificates
-    update-ca-certificates
+# ===== PRUNER STAGE =====
+FROM base AS pruner
+WORKDIR /app
+COPY . .
+RUN turbo prune --scope=intelgraph-server --docker
 
-# Create secure non-root user with minimal privileges
-RUN addgroup -g 65532 -S nonroot && \
-    adduser -S -D -H -u 65532 -s /sbin/nologin -G nonroot nonroot && \
-    # Create application directories
-    mkdir -p /app /app/logs /app/cache /app/tmp && \
-    chown -R nonroot:nonroot /app
-
-# ===== DEPENDENCY BUILDER STAGE =====
-FROM security-base AS deps-builder
-
-# Install build dependencies in separate layer for cache optimization
-RUN apk add --no-cache --virtual .build-deps \
-        python3 \
-        make \
-        g++ \
-        git \
-        curl && \
-    # Create python symlink for npm packages requiring python
-    ln -sf python3 /usr/bin/python
-
+# ===== BUILDER STAGE =====
+FROM base AS builder
 WORKDIR /app
 
-# Copy package files with proper ownership
-COPY --chown=nonroot:nonroot package*.json ./
-COPY --chown=nonroot:nonroot server/package*.json ./server/
-COPY --chown=nonroot:nonroot tsconfig*.json ./
+# Install dependencies
+COPY --from=pruner /app/out/json/ .
+COPY --from=pruner /app/out/package-lock.json ./package-lock.json
+RUN npm ci
 
-# Switch to non-root for build operations
-USER nonroot
+# Build the project
+COPY --from=pruner /app/out/full/ .
+ARG API_BASE_URL
+ENV API_BASE_URL=$API_BASE_URL
+ARG GRAPHQL_SCHEMA_URL
+ENV GRAPHQL_SCHEMA_URL=$GRAPHQL_SCHEMA_URL
 
-# Audit and install dependencies with security checks
-RUN npm audit --audit-level moderate && \
-    npm ci --only=production --no-fund --no-audit --ignore-scripts && \
-    # Verify package integrity
-    npm ls --depth=0 && \
-    # Clean npm cache
-    npm cache clean --force
-
-# Switch back to root to remove build dependencies
-USER root
-RUN apk del .build-deps && \
-    rm -rf /tmp/* /var/tmp/*
-
-# ===== APPLICATION BUILDER STAGE =====
-FROM security-base AS app-builder
-
-# Install minimal build tools
-RUN apk add --no-cache --virtual .build-deps \
-        python3 \
-        make \
-        g++
-
-WORKDIR /app
-
-# Copy dependencies from previous stage
-COPY --from=deps-builder --chown=nonroot:nonroot /app/node_modules ./node_modules
-COPY --chown=nonroot:nonroot package*.json ./
-COPY --chown=nonroot:nonroot server/ ./server/
-COPY --chown=nonroot:nonroot tsconfig*.json ./
-
-# Build application
-USER nonroot
-RUN npm run build --workspace=server && \
-    # Remove source maps for security
-    find . -name "*.js.map" -delete && \
-    find . -name "*.ts" -delete
-
-# Clean up build dependencies
-USER root
-RUN apk del .build-deps && \
-    rm -rf /tmp/* /var/tmp/* ~/.npm
+RUN npm run build --workspace=server
 
 # ===== FINAL PRODUCTION STAGE =====
-FROM gcr.io/distroless/nodejs18-debian12:${DISTROLESS_TAG} AS production
+FROM gcr.io/distroless/nodejs20-debian12:${DISTROLESS_TAG} AS production
 
-# Security and build metadata labels
+# Security labels
 LABEL \
-    org.opencontainers.image.title="IntelGraph Maestro Orchestrator" \
-    org.opencontainers.image.description="Security-hardened AI orchestration platform" \
+    org.opencontainers.image.title="IntelGraph Platform" \
+    org.opencontainers.image.description="Security-hardened Graph Platform" \
     org.opencontainers.image.version="${BUILD_VERSION}" \
     org.opencontainers.image.created="${BUILD_DATE}" \
     org.opencontainers.image.revision="${VCS_REF}" \
-    org.opencontainers.image.source="https://github.com/BrianCLong/intelgraph" \
-    org.opencontainers.image.vendor="IntelGraph AI" \
-    org.opencontainers.image.licenses="Proprietary" \
     security.scan.trivy="enabled" \
     security.user.nonroot="true" \
-    security.filesystem.readonly="true" \
-    security.capabilities.dropped="ALL" \
-    security.syscalls.filtered="true" \
-    compliance.cis="level-1" \
-    compliance.nist="800-53"
+    security.filesystem.readonly="true"
 
-# Copy CA certificates from alpine stage
-COPY --from=security-base /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
-# Set secure working directory
 WORKDIR /app
 
-# Copy production artifacts with proper ownership
-COPY --from=app-builder --chown=nonroot:nonroot /app/node_modules ./node_modules
-COPY --from=app-builder --chown=nonroot:nonroot /app/server/dist ./server/dist
-COPY --from=app-builder --chown=nonroot:nonroot /app/server/package.json ./server/
-COPY --from=app-builder --chown=nonroot:nonroot /app/package.json ./
-
-# Copy SBOM for supply chain transparency
+# Copy production artifacts
+COPY --from=builder --chown=nonroot:nonroot /app/node_modules ./node_modules
+COPY --from=builder --chown=nonroot:nonroot /app/server/dist ./server/dist
+COPY --from=builder --chown=nonroot:nonroot /app/server/package.json ./server/
+COPY --from=builder --chown=nonroot:nonroot /app/package.json ./
 COPY --from=sbom-generator --chown=nonroot:nonroot /sbom/sbom.spdx.json ./security/
 
-# Create required runtime directories
-USER root
-RUN mkdir -p /app/logs /app/cache /app/tmp /app/security && \
-    chown -R nonroot:nonroot /app/logs /app/cache /app/tmp /app/security && \
-    chmod -R 755 /app/logs /app/cache /app/tmp && \
-    chmod -R 644 /app/security
-USER nonroot
-
-# Set secure environment variables
-ENV \
-    NODE_ENV=production \
-    NODE_OPTIONS="--max-old-space-size=1024 --max-http-header-size=8192 --no-warnings" \
-    # Disable npm features for security
-    NPM_CONFIG_AUDIT=false \
-    NPM_CONFIG_FUND=false \
-    NPM_CONFIG_UPDATE_NOTIFIER=false \
+# Environment setup
+ENV NODE_ENV=production \
+    PORT=4000 \
     # Security hardening
-    GENERATE_SOURCEMAP=false \
-    NODE_STRICT_MODE=true \
-    NODE_NO_WARNINGS=1 \
-    # Application settings
-    PORT=8080 \
-    LOG_LEVEL=info \
-    # Security headers
-    SECURITY_HEADERS_ENABLED=true \
-    CONTENT_SECURITY_POLICY_ENABLED=true
+    NODE_OPTIONS="--max-old-space-size=1024 --no-warnings" \
+    SECURITY_HEADERS_ENABLED=true
 
-# Health check with timeout and security considerations
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD ["node", "-e", "const http=require('http');const options={hostname:'localhost',port:process.env.PORT||8080,path:'/healthz',timeout:8000,headers:{'User-Agent':'healthcheck'}};const req=http.request(options,(res)=>{let data='';res.on('data',chunk=>data+=chunk);res.on('end',()=>{process.exit((res.statusCode===200&&data.includes('ok'))?0:1);});});req.on('error',()=>process.exit(1));req.on('timeout',()=>{req.destroy();process.exit(1);});req.end();"]
+# Expose port
+EXPOSE 4000
 
-# Expose port (documentation only)
-EXPOSE 8080
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+    CMD ["/nodejs/bin/node", "-e", "require('http').request({host:'localhost',port:4000,path:'/health'},r=>{process.exit(r.statusCode===200?0:1)}).on('error',()=>process.exit(1)).end()"]
 
-# Use tini as PID 1 for proper signal handling (included in distroless)
-CMD ["node", "server/dist/conductor/web-orchestration/server.js"]
-
-# Security: Define volumes for runtime data
-VOLUME ["/app/logs", "/app/cache", "/tmp"]
-
-# ===== DEVELOPMENT STAGE (for local development only) =====
-FROM security-base AS development
-WORKDIR /app
-
-# Install development dependencies
-RUN apk add --no-cache \
-        python3 \
-        make \
-        g++ \
-        git \
-        curl
-
-# Copy package files
-COPY --chown=nonroot:nonroot package*.json ./
-
-# Install all dependencies for development
-USER nonroot
-RUN npm install
-
-# Copy source code
-COPY --chown=nonroot:nonroot . .
-
-# Create development directories
-USER root
-RUN mkdir -p /app/coverage /app/test-reports && \
-    chown -R nonroot:nonroot /app/coverage /app/test-reports
-
-USER nonroot
-
-# Development environment
-ENV NODE_ENV=development \
-    DEBUG=* \
-    LOG_LEVEL=debug
-
-# Expose additional ports for debugging
-EXPOSE 8080 9090 9229
-
-# Development command
-CMD ["npm", "run", "dev"]
+# Run the application
+CMD ["server/dist/index.js"]
