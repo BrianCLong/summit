@@ -123,3 +123,5 @@ async function expandGraph(rows: any[], expand: boolean | undefined) {
 
   return { results: rows, graph };
 }
+
+export { AdvancedSearchEngine, createAdvancedSearchEngine } from './advanced-search-engine';
