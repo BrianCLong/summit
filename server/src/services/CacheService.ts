@@ -18,8 +18,13 @@ export class CacheService {
     this.enabled = cfg.CACHE_ENABLED;
   }
 
+  private normalizeKey(key: string): string {
+    // Basic normalization: trim, remove double colons
+    return key.trim().replace(/:{2,}/g, ':');
+  }
+
   private getKey(key: string): string {
-    return `${this.namespace}:${key}`;
+    return `${this.namespace}:${this.normalizeKey(key)}`;
   }
 
   /**
