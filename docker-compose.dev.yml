@@ -373,6 +373,26 @@ services:
       - 'prometheus.job=summit_ai_sandbox'
       - 'prometheus.port=4020'
 
+  slo-exporter:
+    build:
+      context: ./apps/slo-exporter
+      dockerfile: Dockerfile
+    container_name: summit-slo-exporter
+    restart: unless-stopped
+    environment:
+      PORT: 9099
+      PROMETHEUS_URL: http://prometheus:9090
+    ports:
+      - '9099:9099'
+    depends_on:
+      prometheus:
+        condition: service_started
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=summit_slo_exporter'
+      - 'prometheus.port=9099'
+
 volumes:
   postgres_data:
   redis_data:
