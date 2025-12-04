@@ -1,0 +1,76 @@
+roles:
+  - id: model_trainer
+    name: Model Trainer
+    description: Responsible for the minimal training stack and evaluation pipeline.
+    recommended_llm: Claude Code / GPT-5.1 Thinking
+    responsibilities:
+      - Implement training scripts.
+      - Set up evaluation harness.
+      - Maintain leaderboard.
+    prompts:
+      - 1 (Minimal training stack)
+      - 2 (Eval + leaderboard + CI smoke)
+
+  - id: graph_engineer
+    name: Graph/Backend Engineer
+    description: Responsible for IntelGraph schema design and implementation.
+    recommended_llm: GPT-5.1 Thinking / Claude Code
+    responsibilities:
+      - Define schema v1.
+      - Implement migrations.
+      - Ensure data integrity and performance.
+    prompts:
+      - 3 (IntelGraph schema v1)
+
+  - id: maestro_engineer
+    name: Maestro Orchestrator Engineer
+    description: Responsible for the Maestro pipeline orchestration and cost tracking.
+    recommended_llm: GPT-5.1 Thinking / Codex
+    responsibilities:
+      - Implement Maestro pipelines.
+      - Integrate cost metering.
+      - Ensure pipeline reliability.
+    prompts:
+      - 4 (Maestro pipeline + cost meter)
+
+  - id: ci_guardian
+    name: CI Guardian
+    description: Responsible for CI/CD health, merge trains, and policy enforcement.
+    recommended_llm: Codex / GPT-5.1
+    responsibilities:
+      - Fix CI flakes.
+      - Implement merge train.
+      - Enforce green build policies.
+    prompts:
+      - 5 (Green CI + merge train)
+
+  - id: devops_observability
+    name: DevOps / Observability
+    description: Responsible for CI observability and weekly reporting.
+    recommended_llm: Codex / GPT-5.1
+    responsibilities:
+      - Set up CI metrics.
+      - Generate weekly reports.
+    prompts:
+      - 6 (CI observability + weekly report)
+
+  - id: ui_ux_engineer
+    name: UI/UX Engineer
+    description: Responsible for the Maestro Run Console frontend.
+    recommended_llm: GPT-5.1 / Claude Code / Cursor
+    responsibilities:
+      - Build Run Console UI.
+      - Integrate with Maestro APIs.
+    prompts:
+      - 7 (Maestro Run Console UI)
+
+  - id: docs_architect
+    name: Docs & Prompt Architect
+    description: Responsible for onboarding documentation and agent role registry.
+    recommended_llm: GPT-5.1
+    responsibilities:
+      - Maintain onboarding guide.
+      - Manage agent role registry.
+      - Ensure documentation quality.
+    prompts:
+      - 8 (Onboarding + role registry)
