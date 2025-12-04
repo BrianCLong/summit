@@ -1,204 +1,198 @@
-# Sprint Plan — Apr 27–May 8, 2026 (America/Denver)
+# Sprint 34 Plan — IntelGraph (Apr 27–May 8, 2026)
 
-> **Context:** Ninth sprint of 2026. Convert Q1→Q2 concepts into first runnable alphas: unified **Policy Studio v2.0**, **Graph v3.0 Workspaces**, **SOAR v2.6** (marketplace + SLO/cost‑aware routing), and **Intel v6.0 Foundations** (active/online learning + trust calibration). Focus on safety, governance, and repeatability.
-
----
-
-## 1) Sprint Goal (SMART)
-
-Release **Policy Studio v2.0 (alpha)**, **Graph v3.0 Workspaces (alpha)**, **SOAR v2.6 (beta)** with vendor marketplace + SLO/cost‑aware routing, and **Intel v6.0 Foundations** (uncertainty & trust calibration + guarded online learning pipeline) to drive **MTTC P50 ≤ 5.2 min / P90 ≤ 13 min**, **auto‑approved low‑risk actions ≥ 63%** (false‑allow = 0), and **automation cost/action ↓ 20% vs March** — **by May 8, 2026**.
-
-**Key outcomes**
-
-- **Policy Studio v2.0 (alpha):** unified authoring + explainability + prevention with draft reviews, what‑if simulation, auto‑PR guardrails, and governance.
-- **Graph v3.0 Workspaces (alpha):** investigation workspaces with graph search, evidence capture (hash + chain‑of‑custody), timelines, and shareable narratives.
-- **SOAR v2.6 (beta):** vendor marketplace (EDR/email/proxy), SLO‑ & cost‑aware routing with health probes, and optimizer that learns from approvals (recommend‑only).
-- **Intel v6.0 Foundations:** uncertainty quantification + trust calibration layer, guarded online learning pipeline (shadow + gated writes), reviewer dashboards.
+**Cadence:** 2 weeks • **Timezone:** America/Denver • **Release cut:** May 8, 2026 → staging; **Prod target:** May 13 (pending gates & error‑budget)
 
 ---
 
-## 2) Success Metrics & Verification
+## Conductor Summary (one‑screen)
 
-- **Incident response:** MTTC **P50 ≤ 5.2 min**, **P90 ≤ 13 min** (7‑day rolling).  
-  _Verify:_ Incident dashboard; weekly export.
-- **Policy Studio adoption:** ≥ **70%** of policy changes authored via Studio alpha; prevention blocks **≥ 90%** of high‑risk in backtests; **0** critical authz escapes.  
-  _Verify:_ Studio telemetry; CI gate logs; audit.
-- **Automation & cost:** auto‑approve (low‑risk) **≥ 63%**; mean cost/action **↓ 20%** vs March; budget breaches **= 0**.  
-  _Verify:_ SOAR logs; cost dashboard; alerts.
-- **Graph effectiveness:** ≥ **80%** of P1/P2 investigations use Workspaces; evidence attached in **≥ 60%**; narrative exports in **≥ 40%**.  
-  _Verify:_ UI telemetry; ticket linkage.
-- **Intel quality:** κ **≥ 0.86**; Brier **≤ 0.11** on canary; override rate **≤ 6.2%**; trust calibration reduces over‑confidence (reliability diagram slope ≤ 1.1).  
-  _Verify:_ Eval reports; calibration plots.
+**Goal.** Graduate **write‑quorum** from staging to a **limited‑prod pilot** (flagged tenants), finalize **Residency Migrator** for controlled moves, deliver **ER v1.5 (recall lift + conflict review)**, and ship **Explorer 2.2 (share controls + export)**. Prepare the platform for mid‑year compliance by assembling **SOC2 Evidence Pack v2** and running **chaos drills** focused on network partitions. Hold org SLO/cost guardrails.
 
----
+**Non‑Goals.** Broad GA of active‑active writes; ML ER; public pricing.
 
-## 3) Scope
+**Assumptions.** S33 completed staging quorum pilot, invoice exports, and residency migrator dry‑run.
 
-**Must‑have (commit):**
+**Constraints.** Org SLOs & cost guardrails; ABAC/OPA; provenance immutable; feature flags/backout for risky paths.
 
-- **Policy Studio v2.0 (alpha):**
-  - Draft workspace (versioned edits, diffs) with simulation preview + risk explanation and blast‑radius.
-  - Auto‑PR guardrails from simulations; approver workflow; evidence links; kill‑switch.
-  - Governance: roles/approvals; audit log; change history with credit for simulations.
-- **Graph v3.0 Workspaces (alpha):**
-  - Graph search (query builder + saved searches); entity drill‑downs.
-  - Evidence capture: file/url/hash artifacts; SHA‑256 + timestamp; chain‑of‑custody.
-  - Timeline + narrative export (PDF/markdown) with cited artifacts.
-- **SOAR v2.6 (beta):**
-  - Vendor marketplace adapters (EDR/email/proxy) with capability matrix + health checks.
-  - SLO‑ & cost‑aware routing (latency/cost composite score); blue/green; failover drill.
-  - Optimizer learns from approvals (recommend‑only; human approval required); simulation link.
-- **Intel v6.0 Foundations:**
-  - Uncertainty estimates (e.g., calibrated confidence intervals) + trust calibration layer surfaced to analysts.
-  - Guarded online learning pipeline (shadow + gated writes; drift/quality gates; instant rollback).
-  - Reviewer dashboard (disagreement, routing, SLA).
-- **Operational analytics:** exec snapshot automation; Studio/Workspace/Auto‑approve/Cost/Calibration panels.
+**Risks.** (R1) Quorum latency spikes in prod; (R2) Residency migrations extend past downtime budget; (R3) ER recall lift increases merges risk; (R4) Chaos drills cause alert fatigue.
 
-**Stretch:**
-
-- **Responder Copilot v1.0 (design spec):** tie Studio policies + Workspace context for guided next steps (read‑only).
-- **SOAR cost dashboard v1.2:** per‑action/vendor trends + optimizer “why” explanations.
-- **Graph search language (DSL) draft:** advanced filters, path queries.
-
-**Out‑of‑scope:**
-
-- Destructive automation default‑on; cross‑tenant policy editing; customer‑visible Studio GA.
+**Definition of Done.** All ACs pass; burn < 20%; CI green; Finance & Privacy sign‑offs recorded where applicable; evidence bundle attached.
 
 ---
 
-## 4) Team & Capacity
+## Scope & Deliverables
 
-- Same roster; **10 working days**; focus factor **0.8** → **commit 40 pts** (≈50 nominal); ~10% slack.
-
----
-
-## 5) Backlog (Ready for Sprint)
-
-### Epic CC — Policy Studio v2.0 (Alpha) — **12 pts**
-
-- **CC1 — Drafting + diffs + simulation** (5 pts)  
-  _AC:_ versioned edits; risk preview; examples; diff view.
-- **CC2 — Auto‑PR guardrails + approvals** (5 pts)  
-  _AC:_ PRs with evidence; approver quorum; kill‑switch; logs.
-- **CC3 — Governance & audit** (2 pts)  
-  _AC:_ roles; audit trail; change history with simulation credit.
-
-### Epic CD — Graph v3.0 Workspaces (Alpha) — **10 pts**
-
-- **CD1 — Graph search + saved queries** (4 pts)  
-  _AC:_ query builder; drill‑downs; permissions.
-- **CD2 — Evidence capture + chain‑of‑custody** (4 pts)  
-  _AC:_ SHA‑256; timestamps; artifact links.
-- **CD3 — Timeline + narrative export** (2 pts)  
-  _AC:_ PDF/MD export; cited artifacts; share link.
-
-### Epic CE — SOAR v2.6 (Beta) — **12 pts**
-
-- **CE1 — Marketplace adapters & matrix** (4 pts)  
-  _AC:_ EDR/email/proxy; health checks; fallbacks.
-- **CE2 — SLO + cost‑aware routing** (5 pts)  
-  _AC:_ scoring function; blue/green; failover drill; alarms.
-- **CE3 — Optimizer learn‑from‑approvals (recommend‑only)** (3 pts)  
-  _AC:_ savings estimate; simulation link; approval required.
-
-### Epic CF — Intel v6.0 Foundations — **6 pts**
-
-- **CF1 — Uncertainty + trust calibration** (3 pts)  
-  _AC:_ reliability diagrams; UI surfacing; tests.
-- **CF2 — Guarded online learning pipeline** (3 pts)  
-  _AC:_ shadow; write gates; rollback; reviewer dashboard.
-
-### Epic CG — Operational Analytics & Enablement — **2 pts**
-
-- **CG1 — Exec snapshot + dashboards** (2 pts)  
-  _AC:_ weekly PDF/email; KPIs; drill‑downs.
-
-> **Planned:** 42 pts total — **commit 40 pts**, hold ~2 pts buffer.
+1. **Write‑Quorum Limited Prod Pilot**: 2 regions, quorum 2/2, tenant allowlist, sticky sessions, deterministic conflicts, backout < 10 min.
+2. **Residency Migrator GA**: guided cutover with pre‑checks, redaction validation, and rollback plan.
+3. **ER v1.5 (Recall Lift + Conflict Review)**: expanded blocking, reviewer conflict queue, safe merge/unmerge with audit.
+4. **Explorer 2.2**: workspace share controls (scopes/expiry), CSV/PNG export with signatures, annotation diffing.
+5. **Chaos & DR**: network partition chaos suite + multi‑region read/write drills; runbooks updated.
+6. **SOC2 Evidence Pack v2**: add access reviews, quarterly key‑rotation proof, on‑call drill records, change‑management artifacts.
+7. **Cost & SLO Optimizations**: cache normalization, LFUDA tweak, egress compression defaults tuned, quota presets refined.
 
 ---
 
-## 6) Dependencies & Assumptions
+## Sprint Backlog (Epics → Stories → Tasks)
 
-- Policy catalogs current; approver groups staffed; CI gates active.
-- Graph identity/asset data fresh ≤ 24h; permissions enforced; storage for artifacts with retention policy.
-- Multi‑vendor credentials/quotas approved; latency/cost telemetry sources wired.
-- Legal/privacy approvals for online learning pipeline; PII exclusions enforced; budget alerts set.
+> **MoSCoW** priority • **Pts** = story points
 
----
+### E1 — Write‑Quorum Limited Prod Pilot (Must) — 18 pts
 
-## 7) Timeline & Ceremonies (MT)
+* **S1. Tenant allowlist + flag controls** (6 pts, *Alice*)
+* **S2. Latency guards/HPA + dashboards** (6 pts, *Grace*)
+* **S3. Backout drill & docs** (6 pts, *Kay*)
 
-- **Mon Apr 27** — Planning & Kickoff; Studio/Workspace safety review (30m).
-- **Fri May 1** — Mid‑sprint demo/checkpoint (30m).
-- **Wed May 6** — Grooming for next sprint (45m).
-- **Fri May 8** — Demo (45m) + Retro (45m) + Release cut.
+**AC**: For pilot tenants, write p95 ≤ 700 ms / p99 ≤ 1.5 s; read p95 within +15% baseline; conflict rate < 0.5% with resolver; backout < 10 min; no cross‑tenant mix.
 
 ---
 
-## 8) Definition of Ready (DoR)
+### E2 — Residency Migrator GA (Must) — 12 pts
 
-- Studio feature list locked; risk factors/thresholds documented; datasets ready.
-- Workspace artifact schemas defined; retention/chain‑of‑custody policy reviewed.
-- Routing rules/weights drafted; rollback plans prepared; optimizer guardrails set.
+* **S1. GA checklist & preflight** (5 pts, *Ivy*)
+* **S2. Guided cutover + rollback** (5 pts, *Ivy*)
+* **S3. Privacy sign‑off & docs** (2 pts, *Kay*)
 
-## 9) Definition of Done (DoD)
-
-- Tests pass; dashboards live; audits wired; approvals enforced.
-- Runbooks updated; enablement notes posted; rollback paths tested.
+**AC**: Dry‑run finds zero PII/tag violations; cutover ≤ 30 min downtime; rollback restores service in ≤ 10 min; Privacy sign‑off recorded.
 
 ---
 
-## 10) QA & Validation Plan
+### E3 — ER v1.5 (Recall Lift + Conflict Review) (Must) — 14 pts
 
-- **Policy Studio:** backtests; CI simulations; auto‑PR diff review (20 samples); exception flow audit.
-- **Graph Workspaces:** artifact hash verification; timeline/narrative correctness checks; permission tests.
-- **SOAR:** routing decision sampling vs SLAs/cost; vendor failover drill; optimizer A/B with human reviewers.
-- **Intel:** κ/Brier monitoring; trust calibration reliability plots; online‑learning gates; drift alert tests.
+* **S1. Expanded blocking & thresholds** (6 pts, *Elena*)
+* **S2. Conflict review queue + audit** (5 pts, *Jay*)
+* **S3. Safe unmerge/merge rollback** (3 pts, *Elena*)
 
----
-
-## 11) Risk Register (RAID)
-
-| Risk                                     | Prob. | Impact | Owner | Mitigation                                 |
-| ---------------------------------------- | ----- | -----: | ----- | ------------------------------------------ |
-| Studio alpha enables risky edits         | Low   |   High | CC1   | Preview/simulation; approvals; kill‑switch |
-| Evidence handling violates retention     | Low   |   High | CD2   | Policy checks; encryption; audits          |
-| Routing misconfig increases latency/cost | Low   |   High | CE2   | Staged rollout; health checks; rollback    |
-| Optimizer recommends unsafe savings      | Low   |   High | CE3   | Recommend‑only; human approval; simulator  |
-| Online learning drifts                   | Low   |   High | CF2   | Shadow + gates; instant rollback           |
+**AC**: Golden set **recall ≥ 0.935** while **precision ≥ 0.982**; reviewer actions audited; unmerge restores prior graph in < 5 min.
 
 ---
 
-## 12) Communications & Status
+### E4 — Explorer 2.2 (Share Controls + Export) (Should) — 10 pts
 
-- **Channels:** #sprint‑room (daily), #analyst‑ops (enablement), Exec update (Fri).
-- **Reports:** Burnup; MTTC; Studio adoption; Workspace usage; auto‑approve %; cost/action; κ/Brier; vendor health.
+* **S1. Share scopes/expiry + RBAC** (5 pts, *Jay*)
+* **S2. CSV/PNG export + signatures** (3 pts, *Jay*)
+* **S3. Annotation diff view** (2 pts, *Jay*)
 
----
-
-## 13) Compliance/Security Guardrails
-
-- Signed policy changes; immutable audit; least privilege; no PII in model features.
-- Artifact storage encrypted; retention respected; chain‑of‑custody logged.
-- SOAR destructive steps always HITL; blue/green rollouts; reason codes required.
+**AC**: Share links expire/are revocable; exports verified by signature; a11y pass; Playwright smoke green.
 
 ---
 
-## 14) Release & Rollback
+### E5 — Chaos & DR (Should) — 8 pts
 
-- **Staged rollout:** Internal → all analysts → selected tenants (if applicable).
-- **Rollback:** Disable Studio alpha; hide Workspaces; revert to cost‑neutral routing; disable optimizer learning; pin intel to v5.7 static.
-- **Docs:** Release notes; analyst changelog; change tickets.
+* **S1. Network partition chaos suite** (5 pts, *Grace*)
+* **S2. Multi‑region drill + postmortem** (3 pts, *Kay*)
 
----
-
-## 15) Next Sprint Seeds (May 11–22, 2026)
-
-- **Policy Studio v2.0 (beta):** policy packs, change proposals, cross‑env promotion.
-- **Graph v3.0 (beta):** workspace templates, graph DSL, evidence diffing.
-- **SOAR v2.7:** optimizer online learning (guarded), vendor benchmarking & auto‑selection.
-- **Intel v6.1:** calibrated ensembles, reviewer incentive metrics, federation 85% target.
+**AC**: Quorum holds under partition scenarios or cleanly fails over; alerts noise ≤ 1 page/24h; postmortem with tickets.
 
 ---
 
-_Prepared by: Covert Insights — last updated Sep 11, 2025 (America/Denver)._
+### E6 — SOC2 Evidence Pack v2 (Must) — 6 pts
+
+* **S1. Evidence builder extensions** (4 pts, *Kay*)
+* **S2. Access review snapshot + key‑rotation proof** (2 pts, *Ivy*)
+
+**AC**: Bundle includes SLO reports, SBOM attestation, access reviews, key‑rotation proof, DR records; hashes recorded.
+
+---
+
+### E7 — Cost & SLO Optimizations (Should) — 6 pts
+
+* **S1. Cache/LFUDA tuning** (3 pts, *Grace*)
+* **S2. Egress compression defaults + docs** (3 pts, *Grace*)
+
+**AC**: Cache hit‑rate ≥ 90% hot set; egress reduced ≥ 10% vs. baseline; SLOs maintained.
+
+---
+
+## Capacity & Forecast
+
+* Team capacity ≈ **64 pts**; committed **~64 pts** (scope valve: E4/E7 may slip).
+
+---
+
+## Architecture & Contracts (Delta)
+
+```mermaid
+flowchart LR
+client[Clients]
+subgraph Gateway
+  apollo[Apollo]
+  ver[API v1.1]
+  opa[OPA]
+  cache[LFUDA Cache]
+end
+apollo --> writer[Write Router (Quorum, Flag)] --> neoA[(Neo4j Region A)]
+writer --> neoB[(Neo4j Region B)]
+writer -->|fallback| neoA
+migrator[Residency Migrator GA] --> regions[(Regions)]
+er[ER v1.5] --> neoA
+explorer[Explorer 2.2] --> apollo
+soc2[SOC2 Evidence Builder v2] --> bundle[(Evidence Bundle)]
+```
+
+**Quorum Pilot Config (prod)**
+
+```yaml
+write_quorum:
+  enabled: false # per-tenant flag
+  tenants: [TENANT_ALPHA, TENANT_BETA]
+  regions: [us-west, us-east]
+  quorum: 2
+  conflict_resolver: last_write_wins # pilot only
+```
+
+**Explorer Export Manifest (PNG/CSV)**
+
+```json
+{
+  "tenant": "TENANT_ALPHA",
+  "workspace_id": "wsp_123",
+  "type": "graph_png",
+  "sha256": "...",
+  "created_at": "2026-05-01T12:00:00Z"
+}
+```
+
+---
+
+## Security, Privacy & Policy
+
+* ABAC/OPA; mTLS; field‑level encryption; signed exports; reviewer actions audited; Privacy sign‑off for migrations.
+
+---
+
+## Observability & SLOs
+
+* Metrics: write p50/95/99, quorum RTT/conflicts, cache hit‑rate, ER precision/recall, migration duration, error‑budget.
+* Alerts: quorum RTT > target, conflict spike, cache miss, migration overrun, budget @80%.
+
+---
+
+## CI/CD & Release
+
+* Gates: lint/type/tests, e2e, perf (quorum), SBOM/CVE, policy sim.
+* Canary: per‑tenant flag; backout disables quorum + routes writes to Region A; migrations paused.
+* Evidence bundle: SLO report, k6 artifacts, SBOM, policy logs, signed exports, migration evidence.
+
+---
+
+## RACI
+
+* **R**: Story owners • **A**: Tech Lead (Alice) • **C**: Security (Ivy), SRE (Grace), Privacy • **I**: PM, Finance.
+
+---
+
+## Checklists
+
+**Acceptance Pack**
+
+* [ ] All story ACs green
+* [ ] SLO dashboards 24h green
+* [ ] Perf & e2e gates green
+* [ ] SBOM/CVE clear
+* [ ] Policy sim passes
+* [ ] Finance & Privacy sign‑offs recorded
+* [ ] Evidence bundle attached
+
+**Backout Plan**
+
+* Disable quorum per‑tenant flags; force writes to Region A; revert ER thresholds; turn off exports; pause/resume migrator per runbook.
