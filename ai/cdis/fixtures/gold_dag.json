@@ -1,0 +1,16 @@
+{
+  "nodes": ["treatment", "mediator", "outcome", "noise"],
+  "edges": [
+    {"source": "treatment", "target": "mediator", "weight": 0.8},
+    {"source": "mediator", "target": "outcome", "weight": 1.1},
+    {"source": "treatment", "target": "outcome", "weight": 0.4},
+    {"source": "noise", "target": "outcome", "weight": -0.2}
+  ],
+  "records": [
+    {"treatment": 0.0, "mediator": 0.0, "outcome": 0.0, "noise": 0.1},
+    {"treatment": 1.0, "mediator": 0.7, "outcome": 1.0, "noise": 0.0},
+    {"treatment": 0.5, "mediator": 0.4, "outcome": 0.7, "noise": -0.2},
+    {"treatment": -0.3, "mediator": -0.2, "outcome": -0.4, "noise": 0.1},
+    {"treatment": 1.2, "mediator": 1.0, "outcome": 1.6, "noise": -0.1}
+  ]
+}

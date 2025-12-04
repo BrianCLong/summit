@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Causal Lab</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 24px;
+        background: #0d1117;
+        color: #e6edf3;
+      }
+      .panel {
+        background: #161b22;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+      }
+      .flex {
+        display: flex;
+        gap: 24px;
+      }
+      .bar {
+        height: 12px;
+        background: linear-gradient(90deg, #58a6ff, #8b949e);
+        border-radius: 6px;
+      }
+      .effects li {
+        margin-bottom: 8px;
+      }
+      .toggle {
+        margin-right: 8px;
+      }
+      .path {
+        color: #a5d6ff;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Causal Lab</h1>
+    <div class="panel">
+      <h3>Dataset</h3>
+      <textarea id="dataset" rows="6" style="width: 100%"></textarea>
+      <label>
+        Method:
+        <select id="method">
+          <option value="notears">NOTEARS</option>
+          <option value="pc">PC</option>
+          <option value="granger">Granger</option>
+        </select>
+      </label>
+      <button id="discover">Discover</button>
+    </div>
+
+    <div class="panel">
+      <h3>Interventions</h3>
+      <div id="interventions"></div>
+      <button id="simulate">Intervene</button>
+    </div>
+
+    <div class="panel">
+      <h3>Effects</h3>
+      <ul id="effects" class="effects"></ul>
+    </div>
+
+    <script>
+      const api = "http://localhost:8080";
+      const sample = [
+        { treatment: 0.0, mediator: 0.0, outcome: 0.0, noise: 0.1 },
+        { treatment: 1.0, mediator: 0.7, outcome: 1.0, noise: 0.0 },
+        { treatment: 0.5, mediator: 0.4, outcome: 0.7, noise: -0.2 }
+      ];
+      $("#dataset").val(JSON.stringify(sample, null, 2));
+
+      let latestGraph = null;
+      let simulationId = null;
+
+      function renderInterventions(nodes) {
+        const container = $("#interventions").empty();
+        nodes.forEach((node) => {
+          const row = $(`
+            <div>
+              <input type="checkbox" class="toggle" id="${node}-toggle" />
+              <label for="${node}-toggle">${node}</label>
+              <input type="range" min="-2" max="2" step="0.1" value="0" id="${node}-slider" />
+              <span id="${node}-value">0</span>
+            </div>
+          `);
+          row.find("input[type=range]").on("input", (e) => {
+            row.find(`#${node}-value`).text(e.target.value);
+          });
+          container.append(row);
+        });
+      }
+
+      function renderEffects(effects) {
+        const list = $("#effects").empty();
+        effects.forEach((effect) => {
+          const barWidth = Math.min(100, Math.abs(effect.delta) * 40);
+          const li = $(`
+            <li>
+              <strong>${effect.node}</strong> Δ ${effect.delta.toFixed(2)} (c=${effect.confidence.toFixed(2)})
+              <div class="bar" style="width:${barWidth}%;"></div>
+              <div class="path">${effect.contributing_paths.map((p) => p.join(" → ")).join("; ")}</div>
+            </li>
+          `);
+          list.append(li);
+        });
+      }
+
+      $("#discover").on("click", async () => {
+        const records = JSON.parse($("#dataset").val());
+        const method = $("#method").val();
+        const res = await fetch(`${api}/discover`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ records, method }),
+        });
+        if (!res.ok) {
+          alert("Feature flag disabled or payload invalid");
+          return;
+        }
+        const body = await res.json();
+        latestGraph = body.graph;
+        renderInterventions(body.graph.nodes);
+      });
+
+      $("#simulate").on("click", async () => {
+        if (!latestGraph) return alert("Discover a graph first");
+        const interventions = latestGraph.nodes
+          .filter((node) => $(`#${node}-toggle`).is(":checked"))
+          .map((node) => ({ node, value: parseFloat($(`#${node}-slider`).val()) }));
+        const res = await fetch(`${api}/intervene`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ graph: latestGraph, interventions, k_paths: 3 }),
+        });
+        if (!res.ok) {
+          alert("Intervention failed");
+          return;
+        }
+        const body = await res.json();
+        simulationId = body.simulation_id;
+        renderEffects(body.effects);
+      });
+    </script>
+  </body>
+</html>
