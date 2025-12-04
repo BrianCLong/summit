@@ -1,0 +1,102 @@
+name: Preview TTL Reaper
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+env:
+  NAMESPACE_PREFIX: intelgraph-pr
+  PREVIEW_TTL_HOURS: 72
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    environment: preview
+    steps:
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: v1.29.0
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Delete expired preview namespaces
+        env:
+          NAMESPACE_PREFIX: ${{ env.NAMESPACE_PREFIX }}
+          PREVIEW_TTL_HOURS: ${{ env.PREVIEW_TTL_HOURS }}
+        run: |
+          kubectl get namespaces -l preview.summit.ai/enabled=true -o json > namespaces.json
+
+          python - <<'PYTHON'
+import datetime
+import json
+import os
+import subprocess
+
+namespace_prefix = os.environ["NAMESPACE_PREFIX"]
+ttl_hours = int(os.environ.get("PREVIEW_TTL_HOURS", "72"))
+now = datetime.datetime.now(datetime.timezone.utc)
+
+def parse_timestamp(raw: str) -> datetime.datetime | None:
+    if not raw:
+        return None
+    try:
+        return datetime.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+with open("namespaces.json", "r", encoding="utf-8") as handle:
+    payload = json.load(handle)
+
+expired = []
+for item in payload.get("items", []):
+    metadata = item.get("metadata", {})
+    name = metadata.get("name", "")
+
+    if not name.startswith(f"{namespace_prefix}-"):
+        continue
+
+    annotations = metadata.get("annotations", {})
+    expiry = parse_timestamp(annotations.get("preview.summit.ai/expiry"))
+
+    if expiry is None:
+        created = parse_timestamp(metadata.get("creationTimestamp"))
+        if created is None:
+            continue
+        expiry = created + datetime.timedelta(hours=ttl_hours)
+
+    if now >= expiry:
+        expired.append(name)
+
+summary_lines = [f"Found {len(expired)} expired preview namespaces."]
+for namespace in expired:
+    subprocess.run(
+        [
+            "kubectl",
+            "delete",
+            "namespace",
+            namespace,
+            "--ignore-not-found",
+            "--timeout=180s",
+        ],
+        check=False,
+    )
+    summary_lines.append(f"- Deleted: {namespace}")
+
+if not expired:
+    summary_lines.append("- None to delete")
+
+summary = "\n".join(summary_lines)
+print(summary)
+
+with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary_file:
+    summary_file.write(summary + "\n")
+PYTHON
