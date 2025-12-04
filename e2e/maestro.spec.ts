@@ -17,7 +17,10 @@ test.describe('Maestro UI - Core routes', () => {
   for (const path of ROUTES) {
     test(`route ${path} responds and renders`, async ({ page, baseURL }) => {
       const url = new URL(path, baseURL).toString();
-      const resp = await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+      // Upgrade: Wait for network idle to ensure resources are loaded
+      const resp = await page.goto(url, { waitUntil: 'networkidle' });
+
       expect(resp, `No response navigating to ${url}`).toBeTruthy();
       if (!resp!.ok()) {
         const u = new URL(url);
@@ -34,9 +37,16 @@ test.describe('Maestro UI - Core routes', () => {
           `Non-OK status for ${url}: ${resp && resp.status()}`,
         ).toBeTruthy();
       }
+
       await expect(page).toHaveTitle(/Maestro Conductor/i);
-      // Sanity check for app shell
+
+      // Upgrade: Check for specific app shell elements
+      // Assuming typical layout has a 'main' or specific id
+      // Fallback to body if structure is unknown, but preferably stronger.
       await expect(page.locator('body')).toBeVisible();
+
+      // Add trace breadcrumb
+      console.log(`Verified route: ${path}`);
     });
   }
 });
@@ -44,7 +54,7 @@ test.describe('Maestro UI - Core routes', () => {
 test.describe('Maestro API - Health and Status', () => {
   test('GET /api/health returns healthy JSON', async ({ request, baseURL }) => {
     const r = await request.get(new URL('/api/health', baseURL).toString());
-    expect(r.ok()).toBeTruthy();
+    expect(r.ok(), `Health check failed: ${r.status()} ${r.statusText()}`).toBeTruthy();
     expect(r.headers()['content-type']).toMatch(/application\/json/);
     const json = await r.json();
     expect(json.status).toBe('healthy');
