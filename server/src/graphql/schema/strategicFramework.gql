@@ -1,0 +1,990 @@
+# Strategic Framework GraphQL Schema
+# Provides comprehensive strategic planning, analysis, decision support, and monitoring
+
+scalar DateTime
+scalar JSON
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+
+enum StrategicPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum StrategicStatus {
+  DRAFT
+  ACTIVE
+  ON_HOLD
+  COMPLETED
+  CANCELLED
+  AT_RISK
+}
+
+enum TimeHorizon {
+  IMMEDIATE
+  SHORT_TERM
+  MEDIUM_TERM
+  LONG_TERM
+  STRATEGIC
+}
+
+enum AnalysisType {
+  SWOT
+  PESTLE
+  PORTER_FIVE_FORCES
+  GAP_ANALYSIS
+  SCENARIO_PLANNING
+  RISK_ASSESSMENT
+  CAPABILITY_ASSESSMENT
+  COMPETITIVE_ANALYSIS
+}
+
+enum DecisionType {
+  STRATEGIC
+  TACTICAL
+  OPERATIONAL
+  RESOURCE_ALLOCATION
+  RISK_MITIGATION
+  INVESTMENT
+  PARTNERSHIP
+  MARKET_ENTRY
+}
+
+enum ImpactLevel {
+  TRANSFORMATIONAL
+  SIGNIFICANT
+  MODERATE
+  MINOR
+  NEGLIGIBLE
+}
+
+enum RiskCategory {
+  STRATEGIC
+  OPERATIONAL
+  FINANCIAL
+  COMPLIANCE
+  REPUTATIONAL
+  TECHNOLOGICAL
+  MARKET
+  GEOPOLITICAL
+}
+
+enum MetricType {
+  KPI
+  OKR
+  LEADING_INDICATOR
+  LAGGING_INDICATOR
+  HEALTH_METRIC
+  EFFICIENCY_METRIC
+}
+
+enum TrendDirection {
+  IMPROVING
+  STABLE
+  DECLINING
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+# =============================================================================
+# STRATEGIC PLANNING TYPES
+# =============================================================================
+
+type StrategicGoal {
+  id: ID!
+  title: String!
+  description: String!
+  vision: String
+  missionAlignment: String
+  priority: StrategicPriority!
+  status: StrategicStatus!
+  timeHorizon: TimeHorizon!
+  startDate: DateTime!
+  targetDate: DateTime!
+  owner: String!
+  stakeholders: [String!]!
+  objectives: [StrategicObjective!]!
+  successCriteria: [SuccessCriterion!]!
+  dependencies: [String!]!
+  risks: [String!]!
+  progress: Int!
+  healthScore: Int!
+  lastAssessmentDate: DateTime!
+  tags: [String!]!
+  labels: JSON
+  notes: String
+  createdAt: DateTime!
+  createdBy: String!
+  updatedAt: DateTime!
+  version: Int!
+}
+
+type StrategicObjective {
+  id: ID!
+  goalId: ID!
+  title: String!
+  description: String!
+  keyResults: [KeyResult!]!
+  priority: StrategicPriority!
+  status: StrategicStatus!
+  owner: String!
+  contributors: [String!]!
+  startDate: DateTime!
+  targetDate: DateTime!
+  progress: Int!
+  initiatives: [Initiative!]!
+  alignedCapabilities: [String!]!
+  measurementCriteria: String
+}
+
+type KeyResult {
+  id: ID!
+  objectiveId: ID!
+  title: String!
+  description: String!
+  metricType: MetricType!
+  baseline: Float!
+  target: Float!
+  current: Float!
+  unit: String!
+  frequency: String!
+  dataSource: String!
+  owner: String!
+  status: StrategicStatus!
+  trend: TrendDirection!
+  confidence: Int!
+  history: [MetricDataPoint!]!
+}
+
+type Initiative {
+  id: ID!
+  objectiveId: ID!
+  title: String!
+  description: String!
+  rationale: String
+  priority: StrategicPriority!
+  status: StrategicStatus!
+  owner: String!
+  team: [String!]!
+  startDate: DateTime!
+  targetDate: DateTime!
+  actualEndDate: DateTime
+  budget: BudgetAllocation
+  milestones: [Milestone!]!
+  deliverables: [Deliverable!]!
+  progress: Int!
+  effortEstimate: Int
+  actualEffort: Int
+  tags: [String!]!
+}
+
+type Milestone {
+  id: ID!
+  initiativeId: ID!
+  title: String!
+  description: String!
+  targetDate: DateTime!
+  actualDate: DateTime
+  status: String!
+  deliverables: [String!]!
+  blockers: [String!]!
+  notes: String
+}
+
+type Deliverable {
+  id: ID!
+  initiativeId: ID!
+  title: String!
+  description: String!
+  type: String!
+  status: String!
+  owner: String!
+  dueDate: DateTime!
+  completedDate: DateTime
+  acceptanceCriteria: [String!]!
+  artifacts: [String!]!
+}
+
+type SuccessCriterion {
+  id: ID!
+  goalId: ID!
+  criterion: String!
+  measurementMethod: String!
+  threshold: String!
+  achieved: Boolean!
+  evidence: String
+  assessmentDate: DateTime!
+}
+
+type BudgetAllocation {
+  total: Float!
+  currency: String!
+  allocated: Float!
+  spent: Float!
+  committed: Float!
+  forecast: Float!
+}
+
+type MetricDataPoint {
+  timestamp: DateTime!
+  value: Float!
+  note: String
+}
+
+# =============================================================================
+# STRATEGIC ANALYSIS TYPES
+# =============================================================================
+
+type SWOTAnalysis {
+  id: ID!
+  title: String!
+  description: String!
+  scope: String
+  context: String
+  timeHorizon: TimeHorizon!
+  status: String!
+  analyst: String!
+  reviewers: [String!]!
+  strengths: [SWOTItem!]!
+  weaknesses: [SWOTItem!]!
+  opportunities: [SWOTItem!]!
+  threats: [SWOTItem!]!
+  strategicImplications: [StrategicImplication!]!
+  findings: [AnalysisFinding!]!
+  recommendations: [AnalysisRecommendation!]!
+  executiveSummary: String
+  confidenceLevel: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type SWOTItem {
+  id: ID!
+  description: String!
+  impact: ImpactLevel!
+  evidence: [String!]!
+  relevance: Int!
+  timeframe: TimeHorizon!
+  linkedFactors: [String!]!
+  actionability: Int!
+}
+
+type StrategicImplication {
+  id: ID!
+  implication: String!
+  derivedFrom: [String!]!
+  priority: StrategicPriority!
+  recommendedAction: String!
+  timeframe: TimeHorizon!
+}
+
+type ScenarioAnalysis {
+  id: ID!
+  title: String!
+  description: String!
+  timeHorizon: TimeHorizon!
+  status: String!
+  analyst: String!
+  scenarios: [Scenario!]!
+  keyUncertainties: [Uncertainty!]!
+  criticalDrivers: [Driver!]!
+  preferredScenario: String
+  contingencyPlans: [ContingencyPlan!]!
+  executiveSummary: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Scenario {
+  id: ID!
+  name: String!
+  narrative: String!
+  probability: Float!
+  timeframe: TimeHorizon!
+  assumptions: [String!]!
+  triggers: [String!]!
+  opportunities: [String!]!
+  threats: [String!]!
+  preparednessScore: Int!
+}
+
+type Uncertainty {
+  id: ID!
+  description: String!
+  importance: Float!
+  uncertainty: Float!
+  relatedScenarios: [String!]!
+}
+
+type Driver {
+  id: ID!
+  name: String!
+  description: String!
+  category: String!
+  influence: Float!
+  predictability: Float!
+}
+
+type ContingencyPlan {
+  id: ID!
+  scenarioId: ID!
+  name: String!
+  description: String!
+  triggerConditions: [String!]!
+  owner: String!
+  status: String!
+}
+
+type RiskAssessment {
+  id: ID!
+  title: String!
+  description: String!
+  timeHorizon: TimeHorizon!
+  status: String!
+  analyst: String!
+  risks: [Risk!]!
+  aggregateRiskScore: Float!
+  executiveSummary: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Risk {
+  id: ID!
+  title: String!
+  description: String!
+  category: RiskCategory!
+  source: String!
+  probability: Float!
+  impact: ImpactLevel!
+  riskScore: Float!
+  inherentRisk: Float!
+  residualRisk: Float!
+  owner: String!
+  status: String!
+}
+
+type GapAnalysis {
+  id: ID!
+  title: String!
+  description: String!
+  timeHorizon: TimeHorizon!
+  status: String!
+  analyst: String!
+  gaps: [Gap!]!
+  executiveSummary: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Gap {
+  id: ID!
+  area: String!
+  description: String!
+  currentState: String!
+  targetState: String!
+  gapSize: Float!
+  impact: ImpactLevel!
+  priority: StrategicPriority!
+  estimatedEffort: Int!
+  estimatedCost: Float!
+  timeline: String!
+}
+
+type AnalysisFinding {
+  id: ID!
+  category: String!
+  finding: String!
+  evidence: [String!]!
+  significance: ImpactLevel!
+  confidence: Int!
+  implications: [String!]!
+}
+
+type AnalysisRecommendation {
+  id: ID!
+  recommendation: String!
+  rationale: String!
+  priority: StrategicPriority!
+  expectedBenefit: String!
+  effort: String!
+  timeline: TimeHorizon!
+  owner: String
+}
+
+# =============================================================================
+# STRATEGIC DECISION TYPES
+# =============================================================================
+
+type StrategicDecision {
+  id: ID!
+  title: String!
+  description: String!
+  type: DecisionType!
+  context: String
+  urgency: String!
+  importance: ImpactLevel!
+  status: String!
+  decisionMaker: String!
+  stakeholders: [String!]!
+  deadline: DateTime!
+  options: [DecisionOption!]!
+  criteria: [DecisionCriterion!]!
+  analysis: DecisionAnalysis
+  selectedOption: ID
+  rationale: String
+  decision: String
+  decisionDate: DateTime
+  linkedGoals: [String!]!
+  linkedAnalyses: [String!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DecisionOption {
+  id: ID!
+  decisionId: ID!
+  name: String!
+  description: String!
+  pros: [String!]!
+  cons: [String!]!
+  assumptions: [String!]!
+  timeline: String!
+  feasibilityScore: Float!
+  alignmentScore: Float!
+  overallScore: Float!
+  rank: Int!
+}
+
+type DecisionCriterion {
+  id: ID!
+  name: String!
+  description: String!
+  weight: Float!
+  type: String!
+  measurementMethod: String!
+  mustHave: Boolean!
+}
+
+type DecisionAnalysis {
+  recommendation: String
+  confidenceLevel: Int!
+  keyConsiderations: [String!]!
+  risksAndMitigations: [String!]!
+}
+
+# =============================================================================
+# MONITORING TYPES
+# =============================================================================
+
+type StrategicDashboard {
+  id: ID!
+  name: String!
+  description: String!
+  owner: String!
+  viewers: [String!]!
+  sections: [DashboardSection!]!
+  refreshFrequency: String!
+  lastRefresh: DateTime!
+  alerts: [DashboardAlert!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DashboardSection {
+  id: ID!
+  title: String!
+  type: String!
+  config: JSON
+  metrics: [String!]!
+  position: JSON
+}
+
+type StrategicMetric {
+  id: ID!
+  name: String!
+  description: String!
+  type: MetricType!
+  category: String!
+  owner: String!
+  formula: String
+  dataSource: String!
+  unit: String!
+  direction: String!
+  baseline: Float!
+  target: Float!
+  stretch: Float!
+  current: Float!
+  previousPeriod: Float!
+  trend: TrendAnalysis!
+  linkedGoals: [String!]!
+  linkedObjectives: [String!]!
+  history: [MetricDataPoint!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type TrendAnalysis {
+  direction: TrendDirection!
+  rate: Float!
+  volatility: Float!
+  seasonality: Boolean!
+  projectedValue: Float!
+  confidenceInterval: [Float!]!
+}
+
+type DashboardAlert {
+  id: ID!
+  metricId: ID!
+  type: String!
+  severity: AlertSeverity!
+  message: String!
+  triggered: DateTime!
+  acknowledged: Boolean!
+  acknowledgedBy: String
+  acknowledgedAt: DateTime
+  resolution: String
+}
+
+type ProgressReport {
+  id: ID!
+  reportType: String!
+  periodStart: DateTime!
+  periodEnd: DateTime!
+  goals: [GoalProgress!]!
+  metrics: [MetricSummary!]!
+  highlights: [String!]!
+  challenges: [String!]!
+  nextPeriodFocus: [String!]!
+  executiveSummary: String!
+  createdAt: DateTime!
+}
+
+type GoalProgress {
+  goalId: ID!
+  goalTitle: String!
+  previousProgress: Int!
+  currentProgress: Int!
+  change: Int!
+  status: StrategicStatus!
+  healthScore: Int!
+  onTrack: Boolean!
+  blockers: [String!]!
+  achievements: [String!]!
+}
+
+type MetricSummary {
+  metricId: ID!
+  metricName: String!
+  previousValue: Float!
+  currentValue: Float!
+  change: Float!
+  changePercent: Float!
+  target: Float!
+  attainment: Float!
+  trend: TrendDirection!
+}
+
+# =============================================================================
+# OVERVIEW & INSIGHTS TYPES
+# =============================================================================
+
+type StrategicOverview {
+  totalGoals: Int!
+  activeGoals: Int!
+  completedGoals: Int!
+  atRiskGoals: Int!
+  averageProgress: Int!
+  averageHealthScore: Int!
+  goalsByPriority: JSON!
+  goalsByTimeHorizon: JSON!
+  upcomingMilestones: [Milestone!]!
+  blockedInitiatives: [Initiative!]!
+}
+
+type DecisionInsights {
+  totalDecisions: Int!
+  pendingDecisions: Int!
+  overdueDecisions: Int!
+  decidedThisMonth: Int!
+  averageTimeToDecision: Float!
+  decisionsByType: JSON!
+  decisionsByUrgency: JSON!
+  outcomeSuccessRate: Int!
+}
+
+type StrategicHealthSummary {
+  overallHealth: Int!
+  goalHealth: JSON!
+  metricHealth: JSON!
+  alertCount: JSON!
+}
+
+# =============================================================================
+# INPUTS
+# =============================================================================
+
+input CreateGoalInput {
+  title: String!
+  description: String!
+  vision: String
+  missionAlignment: String
+  priority: StrategicPriority!
+  timeHorizon: TimeHorizon!
+  startDate: DateTime!
+  targetDate: DateTime!
+  owner: String!
+  stakeholders: [String!]
+  tags: [String!]
+  labels: JSON
+  notes: String
+}
+
+input UpdateGoalInput {
+  id: ID!
+  title: String
+  description: String
+  vision: String
+  missionAlignment: String
+  priority: StrategicPriority
+  status: StrategicStatus
+  timeHorizon: TimeHorizon
+  startDate: DateTime
+  targetDate: DateTime
+  owner: String
+  stakeholders: [String!]
+  tags: [String!]
+  notes: String
+}
+
+input CreateObjectiveInput {
+  goalId: ID!
+  title: String!
+  description: String!
+  priority: StrategicPriority!
+  owner: String!
+  contributors: [String!]
+  startDate: DateTime!
+  targetDate: DateTime!
+  alignedCapabilities: [String!]
+  measurementCriteria: String
+}
+
+input CreateInitiativeInput {
+  objectiveId: ID!
+  title: String!
+  description: String!
+  rationale: String
+  priority: StrategicPriority!
+  owner: String!
+  team: [String!]
+  startDate: DateTime!
+  targetDate: DateTime!
+  budgetTotal: Float
+  budgetCurrency: String
+  effortEstimate: Int
+  tags: [String!]
+}
+
+input CreateDecisionInput {
+  title: String!
+  description: String!
+  type: DecisionType!
+  context: String
+  urgency: String!
+  importance: ImpactLevel!
+  decisionMaker: String!
+  stakeholders: [String!]
+  deadline: DateTime!
+  linkedGoals: [String!]
+  linkedAnalyses: [String!]
+}
+
+input CreateAnalysisInput {
+  type: AnalysisType!
+  title: String!
+  description: String!
+  scope: String
+  context: String
+  timeHorizon: TimeHorizon!
+  analyst: String!
+  reviewers: [String!]
+  linkedGoals: [String!]
+}
+
+input CreateMetricInput {
+  name: String!
+  description: String!
+  type: MetricType!
+  category: String!
+  owner: String!
+  formula: String
+  dataSource: String!
+  unit: String!
+  direction: String!
+  baseline: Float!
+  target: Float!
+  stretch: Float
+  linkedGoals: [String!]
+  linkedObjectives: [String!]
+}
+
+input AddOptionInput {
+  decisionId: ID!
+  name: String!
+  description: String!
+  pros: [String!]!
+  cons: [String!]!
+  assumptions: [String!]
+  timeline: String!
+  initialInvestment: Float
+  ongoingCosts: Float
+}
+
+input AddCriterionInput {
+  decisionId: ID!
+  name: String!
+  description: String!
+  weight: Float!
+  type: String!
+  measurementMethod: String!
+  minimumThreshold: Float
+  idealValue: Float
+  mustHave: Boolean!
+}
+
+input SWOTItemInput {
+  description: String!
+  impact: ImpactLevel!
+  evidence: [String!]
+  relevance: Int!
+  timeframe: TimeHorizon!
+  linkedFactors: [String!]
+  actionability: Int!
+}
+
+input MultiCriteriaScoresInput {
+  optionId: ID!
+  scores: JSON!
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+extend type Query {
+  # Strategic Planning
+  strategicGoal(id: ID!): StrategicGoal
+  strategicGoals(
+    status: StrategicStatus
+    priority: StrategicPriority
+    timeHorizon: TimeHorizon
+    owner: String
+  ): [StrategicGoal!]!
+  strategicOverview: StrategicOverview!
+  goalHierarchy(goalId: ID!): JSON
+
+  # Strategic Analysis
+  swotAnalysis(id: ID!): SWOTAnalysis
+  scenarioAnalysis(id: ID!): ScenarioAnalysis
+  riskAssessment(id: ID!): RiskAssessment
+  gapAnalysis(id: ID!): GapAnalysis
+  strategicAnalyses(
+    type: AnalysisType
+    status: String
+    analyst: String
+    timeHorizon: TimeHorizon
+  ): [JSON!]!
+
+  # Strategic Decisions
+  strategicDecision(id: ID!): StrategicDecision
+  strategicDecisions(
+    status: String
+    type: DecisionType
+    decisionMaker: String
+    urgency: String
+  ): [StrategicDecision!]!
+  decisionInsights: DecisionInsights!
+
+  # Monitoring
+  strategicDashboard(id: ID!): StrategicDashboard
+  strategicDashboards(userId: String): [StrategicDashboard!]!
+  strategicMetric(id: ID!): StrategicMetric
+  strategicMetrics(
+    type: MetricType
+    category: String
+    owner: String
+  ): [StrategicMetric!]!
+  activeAlerts: [DashboardAlert!]!
+  progressReport(id: ID!): ProgressReport
+  progressReports(
+    reportType: String
+    startDate: DateTime
+    endDate: DateTime
+  ): [ProgressReport!]!
+  strategicHealthSummary: StrategicHealthSummary!
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+extend type Mutation {
+  # Strategic Planning
+  createStrategicGoal(input: CreateGoalInput!): StrategicGoal!
+  updateStrategicGoal(input: UpdateGoalInput!): StrategicGoal!
+  deleteStrategicGoal(id: ID!): Boolean!
+  activateStrategicGoal(id: ID!): StrategicGoal!
+  completeStrategicGoal(id: ID!): StrategicGoal!
+
+  createObjective(input: CreateObjectiveInput!): StrategicObjective!
+  updateObjective(id: ID!, updates: JSON!): StrategicObjective!
+  deleteObjective(id: ID!): Boolean!
+
+  createKeyResult(
+    objectiveId: ID!
+    title: String!
+    description: String!
+    baseline: Float!
+    target: Float!
+    unit: String!
+    frequency: String!
+    dataSource: String!
+    owner: String!
+  ): KeyResult!
+  updateKeyResultValue(id: ID!, value: Float!, note: String): KeyResult!
+
+  createInitiative(input: CreateInitiativeInput!): Initiative!
+  updateInitiative(id: ID!, updates: JSON!): Initiative!
+  deleteInitiative(id: ID!): Boolean!
+
+  createMilestone(
+    initiativeId: ID!
+    title: String!
+    description: String!
+    targetDate: DateTime!
+    deliverables: [String!]
+  ): Milestone!
+  updateMilestoneStatus(id: ID!, status: String!, notes: String): Milestone!
+
+  addSuccessCriterion(
+    goalId: ID!
+    criterion: String!
+    measurementMethod: String!
+    threshold: String!
+  ): StrategicGoal!
+  assessSuccessCriterion(
+    goalId: ID!
+    criterionId: ID!
+    achieved: Boolean!
+    evidence: String!
+  ): StrategicGoal!
+
+  # Strategic Analysis
+  createSWOTAnalysis(input: CreateAnalysisInput!): SWOTAnalysis!
+  addSWOTItem(
+    analysisId: ID!
+    quadrant: String!
+    item: SWOTItemInput!
+  ): SWOTAnalysis!
+  generateSWOTImplications(analysisId: ID!): SWOTAnalysis!
+
+  createScenarioAnalysis(input: CreateAnalysisInput!): ScenarioAnalysis!
+  addScenario(analysisId: ID!, scenario: JSON!): ScenarioAnalysis!
+  generateScenarios(analysisId: ID!, count: Int!): ScenarioAnalysis!
+
+  createRiskAssessment(input: CreateAnalysisInput!): RiskAssessment!
+  addRisk(assessmentId: ID!, risk: JSON!): RiskAssessment!
+
+  createGapAnalysis(input: CreateAnalysisInput!): GapAnalysis!
+  addGap(analysisId: ID!, gap: JSON!): GapAnalysis!
+  generateGapClosurePlan(analysisId: ID!): GapAnalysis!
+
+  finalizeAnalysis(
+    analysisId: ID!
+    executiveSummary: String!
+    confidenceLevel: Int!
+  ): JSON!
+  deleteAnalysis(id: ID!): Boolean!
+
+  # Strategic Decisions
+  createStrategicDecision(input: CreateDecisionInput!): StrategicDecision!
+  updateStrategicDecision(id: ID!, updates: JSON!): StrategicDecision!
+  deleteStrategicDecision(id: ID!): Boolean!
+
+  addDecisionOption(input: AddOptionInput!): DecisionOption!
+  updateDecisionOption(optionId: ID!, updates: JSON!): DecisionOption!
+  deleteDecisionOption(optionId: ID!): Boolean!
+
+  addDecisionCriterion(input: AddCriterionInput!): DecisionCriterion!
+  updateCriterionWeight(criterionId: ID!, weight: Float!): DecisionCriterion!
+
+  performMultiCriteriaAnalysis(
+    decisionId: ID!
+    scores: [MultiCriteriaScoresInput!]!
+  ): StrategicDecision!
+  performSensitivityAnalysis(decisionId: ID!): JSON!
+
+  recordDecision(
+    decisionId: ID!
+    selectedOptionId: ID!
+    rationale: String!
+  ): StrategicDecision!
+  createImplementationPlan(
+    decisionId: ID!
+    owner: String!
+    startDate: DateTime!
+    targetDate: DateTime!
+    steps: JSON!
+  ): StrategicDecision!
+  updateImplementationProgress(
+    decisionId: ID!
+    stepIndex: Int!
+    status: String!
+    notes: String
+  ): StrategicDecision!
+  recordDecisionOutcome(decisionId: ID!, outcome: JSON!): StrategicDecision!
+
+  # Monitoring
+  createDashboard(
+    name: String!
+    description: String!
+    owner: String!
+    viewers: [String!]
+    refreshFrequency: String
+  ): StrategicDashboard!
+  addDashboardSection(dashboardId: ID!, section: JSON!): StrategicDashboard!
+  updateDashboardSection(
+    dashboardId: ID!
+    sectionId: ID!
+    updates: JSON!
+  ): StrategicDashboard!
+  deleteDashboard(id: ID!): Boolean!
+
+  createStrategicMetric(input: CreateMetricInput!): StrategicMetric!
+  updateMetricValue(metricId: ID!, value: Float!, note: String): StrategicMetric!
+  addMetricAnnotation(
+    metricId: ID!
+    timestamp: DateTime!
+    note: String!
+    author: String!
+    type: String!
+  ): StrategicMetric!
+  deleteMetric(id: ID!): Boolean!
+
+  acknowledgeAlert(alertId: ID!, resolution: String): DashboardAlert!
+
+  generateProgressReport(
+    reportType: String!
+    periodStart: DateTime!
+    periodEnd: DateTime!
+  ): ProgressReport!
+}
