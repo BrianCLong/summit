@@ -2,6 +2,12 @@ import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
 import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
+import { CircuitBreaker } from '../lib/circuitBreaker.js';
+import {
+  dbPoolSize,
+  dbPoolIdle,
+  dbPoolWaiting
+} from '../metrics/dbMetrics.js';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
@@ -24,6 +30,15 @@ const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
+
+const MAX_CONNECTION_POOL_SIZE = parseInt(process.env.NEO4J_POOL_MAX_SIZE || '50', 10);
+const ACQUISITION_TIMEOUT_MS = parseInt(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT_MS || '5000', 10);
+
+const circuitBreaker = new CircuitBreaker({
+  name: 'neo4j',
+  failureThreshold: 5,
+  cooldownMs: 30000,
+});
 
 let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
@@ -241,10 +256,15 @@ function createDriverFacade(): Neo4jDriver {
   const facade: Partial<Neo4jDriver> = {};
 
   facade.session = ((options?: Parameters<Neo4jDriver['session']>[0]) => {
+    if (realDriver && !circuitBreaker.canExecute()) {
+       logger.warn('Neo4j circuit breaker open - returning mock session');
+       return instrumentSession(createMockSession());
+    }
+
     const session = realDriver
       ? realDriver.session(options)
       : createMockSession();
-    return instrumentSession(session);
+    return instrumentSession(session, true); // true = enable circuit breaker
   }) as Neo4jDriver['session'];
 
   facade.close = (async () => {
@@ -252,6 +272,11 @@ function createDriverFacade(): Neo4jDriver {
       await teardownRealDriver();
     }
   }) as Neo4jDriver['close'];
+
+  // Expose metrics retrieval if needed (Neo4j driver doesn't expose raw pool stats easily without internal access,
+  // but we can simulate or wrap if we had a custom pool. For now, we rely on Prometheus metrics from the driver if available,
+  // or we can wrap the pool. The JS driver doesn't expose pool stats publicly easily.
+  // We will trust the driver's internal management but ensure we log pool events.)
 
   facade.verifyConnectivity = (async () => {
     if (realDriver) {
@@ -291,19 +316,32 @@ function createMockTransaction() {
   } as any;
 }
 
-function instrumentSession(session: any) {
+function instrumentSession(session: any, useCircuitBreaker = false) {
   const originalRun = session.run.bind(session);
   session.run = async (
     cypher: string,
     params?: any,
     labels: { operation?: string; label?: string } = {},
   ) => {
+    if (useCircuitBreaker && !circuitBreaker.canExecute()) {
+      const err = new Error('Neo4j circuit breaker is open');
+      logger.warn('Neo4j circuit breaker blocked query execution');
+      throw err;
+    }
+
     telemetry.subsystems.database.queries.add(1);
     const startTime = Date.now();
     try {
-      return await originalRun(cypher, params);
+      const result = await originalRun(cypher, params);
+      if (useCircuitBreaker) {
+        circuitBreaker.recordSuccess();
+      }
+      return result;
     } catch (error) {
       telemetry.subsystems.database.errors.add(1);
+      if (useCircuitBreaker) {
+        circuitBreaker.recordFailure(error as Error);
+      }
       throw error;
     } finally {
       telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);

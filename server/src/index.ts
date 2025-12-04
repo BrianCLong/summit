@@ -15,6 +15,8 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { BackupManager } from './backup/BackupManager.js';
+import { checkNeo4jIndexes } from './db/indexManager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -78,6 +80,13 @@ const startServer = async () => {
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
+
+    // Initialize Backup Manager
+    const backupManager = new BackupManager();
+    backupManager.startScheduler();
+
+    // Check Neo4j Indexes
+    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();

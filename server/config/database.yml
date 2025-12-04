@@ -1,0 +1,28 @@
+# Database Configuration
+
+# Connection Pools
+postgres:
+  pool_size_read: 60
+  pool_size_write: 24
+  timeout_ms: 30000
+  circuit_breaker:
+    threshold: 5
+    cooldown_ms: 30000
+
+neo4j:
+  pool_size: 50
+  timeout_ms: 5000
+  circuit_breaker:
+    threshold: 5
+    cooldown_ms: 30000
+
+redis:
+  max_retries: 3
+  retry_delay_ms: 100
+
+# Backups
+backup:
+  schedule: "0 2 * * *" # Daily at 2 AM
+  retention_days: 7
+  compress: true
+  storage: "local" # or s3

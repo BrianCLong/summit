@@ -342,3 +342,12 @@
 {"level":"info","message":"Redis connected","service":"intelgraph-api","timestamp":"2025-09-02T19:42:24.597Z"}
 {"level":"error","message":"Redis error:","service":"intelgraph-api","timestamp":"2025-09-02T19:42:24.602Z"}
 {"level":"info","message":"Redis reconnecting...","service":"intelgraph-api","timestamp":"2025-09-02T19:42:24.604Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":2},"service":"intelgraph-api","timestamp":"2025-12-04T02:08:43.316Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":1},"service":"intelgraph-api","timestamp":"2025-12-04T02:08:43.322Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":1},"service":"intelgraph-api","timestamp":"2025-12-04T02:08:43.385Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":2},"service":"intelgraph-api","timestamp":"2025-12-04T02:11:13.802Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":1},"service":"intelgraph-api","timestamp":"2025-12-04T02:11:13.807Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":1},"service":"intelgraph-api","timestamp":"2025-12-04T02:11:13.871Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":2},"service":"intelgraph-api","timestamp":"2025-12-04T02:15:14.710Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":1},"service":"intelgraph-api","timestamp":"2025-12-04T02:15:14.716Z"}
+{"level":"error","message":{"component":"test","err":{},"failureCount":1},"service":"intelgraph-api","timestamp":"2025-12-04T02:15:14.779Z"}

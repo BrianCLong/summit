@@ -131,6 +131,11 @@ const createMetrics = (): ConnectionMetrics => ({
     'Reconnect delay duration in ms',
     ['tenant'],
   ),
+  connectionUptimeGauge: getOrCreateGauge(
+    'websocket_connection_uptime_seconds',
+    'Uptime of active connections',
+    ['tenant']
+  ),
   stateGauge: getOrCreateGauge(
     'websocket_connections_state',
     'Current WebSocket connections by state',
@@ -150,6 +155,7 @@ const createMetrics = (): ConnectionMetrics => ({
 
 const enum TimerType {
   QUEUE_DRAIN,
+  HEARTBEAT,
 }
 
 const READY_STATE_OPEN = 1;
@@ -170,6 +176,7 @@ export class ManagedConnection {
   private failureReason: string | null = null;
   private readonly onStateChange: () => void;
   private connectStartedAt = Date.now();
+  private connectionId: string;
 
   constructor(
     ws: any,
@@ -184,6 +191,8 @@ export class ManagedConnection {
     this.metrics = metrics;
     this.tokens = this.options.rateLimitPerSecond;
     this.onStateChange = onStateChange;
+    this.connectionId = context.id;
+    this.startHeartbeatMonitor();
   }
 
   getContext(): ManagedConnectionContext {
@@ -231,6 +240,8 @@ export class ManagedConnection {
     this.connectStartedAt = Date.now();
     this.transitionTo(ConnectionState.CONNECTED);
     this.flushQueue();
+    // Send initial sync/ack
+    this.sendJson({ type: 'connection_ack', connectionId: this.connectionId });
   }
 
   markReconnecting(reason: string): void {
@@ -295,6 +306,25 @@ export class ManagedConnection {
     }
     this.transitionTo(ConnectionState.DISCONNECTED);
     this.clearTimer(TimerType.QUEUE_DRAIN);
+    this.clearTimer(TimerType.HEARTBEAT);
+  }
+
+  private startHeartbeatMonitor() {
+      if (this.timers.has(TimerType.HEARTBEAT)) return;
+
+      const interval = setInterval(() => {
+          if (this.state === ConnectionState.CONNECTED) {
+              const uptime = (Date.now() - this.connectStartedAt) / 1000;
+              (this.metrics as any).connectionUptimeGauge?.labels(this.context.tenantId).set(uptime);
+
+              if (this.isHeartbeatExpired(this.options.heartbeatTimeout)) {
+                  this.options.logger.warn(`Heartbeat timeout for ${this.context.id}`);
+                  this.markFailed('heartbeat_timeout');
+                  this.close(4008, 'Heartbeat timeout');
+              }
+          }
+      }, 5000);
+      this.timers.set(TimerType.HEARTBEAT, interval);
   }
 
   sendJson(payload: Record<string, unknown>): boolean {
