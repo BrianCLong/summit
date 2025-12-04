@@ -1,6 +1,6 @@
 # CLAUDE.md - AI Assistant Guide for Summit/IntelGraph Platform
 
-> **Last Updated**: 2025-11-20
+> **Last Updated**: 2025-12-03
 > **Purpose**: This document provides AI assistants with comprehensive context about the Summit/IntelGraph codebase structure, development workflows, and key conventions.
 
 ## Table of Contents
@@ -68,6 +68,20 @@ summit/
 │   ├── policy/             # Policy engine (OPA)
 │   └── [150+ services]     # Extensive service ecosystem
 │
+├── agents/                 # AI agent implementations (workspace member)
+│
+├── sdk/                    # Multi-language SDKs
+│   ├── acc/                # TypeScript SDK
+│   ├── acx/                # Cross-platform consent SDK (iOS/Android)
+│   ├── go/                 # Go SDK (ABAC client)
+│   ├── mobile/             # Mobile telemetry SDKs (iOS/Android)
+│   └── [more SDKs]         # Various language bindings
+│
+├── ga-graphai/             # Graph AI analytics suite
+│   ├── packages/           # AI/ML packages (autonomous-investigator, c2pa-bridge, etc.)
+│   ├── infra/              # Docker/Helm infrastructure for GraphAI
+│   └── docs/               # GraphAI documentation
+│
 ├── client/                 # Legacy/alternative client (workspace member)
 ├── server/                 # Legacy/alternative server (workspace member)
 │
@@ -91,6 +105,7 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'services/*'
+  - 'agents/*'
   - 'contracts/*'
   - 'server'
   - 'client'
@@ -109,6 +124,8 @@ exclude:
 - **`SECURITY/`**: Security documentation and policies
 - **`ops/`**: Operations scripts and configurations
 - **`observability/`**: Prometheus, Grafana configs, and monitoring dashboards
+- **`ga-graphai/`**: Graph AI analytics - autonomous investigator, C2PA bridge, cloud arbitrage
+- **`sdk/`**: Multi-language SDKs (TypeScript, Go, Swift, Kotlin) for platform integration
 
 ---
 
@@ -196,6 +213,18 @@ make smoke
 - **TypeScript 5.3.3+** (strict: false for gradual migration)
 - **Node.js ESM** modules (type: "module" in package.json)
 - **Python 3.11+** for ML/data pipelines
+- **Go** for high-performance ABAC clients and infrastructure tooling
+- **Swift/Kotlin** for mobile SDKs (iOS/Android)
+- **Rust** for performance-critical components (pgvr)
+
+### Graph AI Analytics (ga-graphai)
+
+Located in `ga-graphai/`, this suite provides AI/ML capabilities:
+- **autonomous-investigator**: Python-based autonomous investigation engine
+- **c2pa-bridge**: Content authenticity verification (C2PA standard)
+- **cloud-arbitrage**: Multi-cloud cost optimization
+- **dth**: Deterministic hash tooling
+- **msqe**: Multi-source query engine with middleware
 
 ---
 
@@ -332,7 +361,13 @@ All workflows are required checks for merge.
     "strict": false,              // Gradual strictness migration
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "forceConsistentCasingInFileNames": true,
+    "incremental": true,
+    "allowImportingTsExtensions": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node", "jest"]
   }
 }
 ```
@@ -619,6 +654,8 @@ The API **refuses to boot in production** if:
 - **Provenance tracking**: `prov-ledger` service maintains chain-of-custody
 - **RBAC+ABAC**: Open Policy Agent (OPA) for fine-grained access control
 - **Data classification**: Policy labels on entities/relationships
+- **SLSA L3 Compliance**: Supply chain security with provenance attestation (see `docs/security/SLSA-L3-COMPLIANCE.md`)
+- **Multi-tenant ABAC**: IC-grade multi-tenancy isolation (see `SECURITY/docs/IC-MULTI-TENANCY.md`)
 
 ---
 
@@ -652,8 +689,10 @@ The API **refuses to boot in production** if:
 | `docs/REPOSITORY_STRUCTURE.md`  | Codebase organization                     |
 | `docs/Copilot-Playbook.md`      | AI copilot usage guide                    |
 | `docs/TESTPLAN.md`              | Testing strategy and plans                |
+| `docs/security/SLSA-L3-COMPLIANCE.md` | SLSA Level 3 compliance documentation |
 | `RUNBOOKS/`                     | Operational runbooks                      |
 | `SECURITY/`                     | Security policies and guidelines          |
+| `SECURITY/docs/IC-MULTI-TENANCY.md` | IC-grade multi-tenant isolation        |
 
 ### Key Scripts
 
@@ -942,6 +981,7 @@ This document should be updated when:
 
 ### Version History
 
+- **2025-12-03**: Updated codebase structure (added ga-graphai, sdk, agents), updated TypeScript config, updated pnpm workspace
 - **2025-11-20**: Initial creation (comprehensive audit of codebase)
 
 ---
