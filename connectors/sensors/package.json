@@ -1,0 +1,35 @@
+{
+  "name": "@intelgraph/sensor-connectors",
+  "version": "1.0.0",
+  "description": "Sensor connector framework for the Signal Bus - base abstractions for ingesting signals from various sensor types",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@intelgraph/signal-contracts": "workspace:*",
+    "@opentelemetry/api": "1.7.0",
+    "eventemitter3": "^5.0.1",
+    "pino": "^8.17.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "sensor",
+    "connector",
+    "streaming",
+    "intelgraph"
+  ],
+  "author": "IntelGraph Team",
+  "license": "UNLICENSED"
+}
