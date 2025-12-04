@@ -259,3 +259,38 @@ number,title,state,reviewDecision,mergeStateStatus,action,notes
 - Transparent operation with detailed reporting
 
 This automation system provides safe, efficient batch processing while maintaining all safety guardrails and audit requirements.
+
+---
+
+## `ingest-taxonomy.js`
+
+This script ingests the master business document taxonomy from `docs/master-document-taxonomy.yaml` into the Neo4j database.
+
+### Usage
+
+To run the script, execute the following command from the root of the repository:
+
+```bash
+node scripts/ingest-taxonomy.js
+```
+
+### YAML Format
+
+The script expects the `master-document-taxonomy.yaml` file to be in the following format:
+
+```yaml
+categories:
+  - name: <category_name>
+    documents:
+      - name: <document_name>
+      # ...
+  # ...
+
+relationships:
+  - source: <source_document_name>
+    type: <relationship_type>
+    target: <target_document_name>
+  # ...
+```
+
+The script is idempotent, meaning it can be run multiple times without creating duplicate data. It uses `MERGE` operations to create new nodes and relationships only if they do not already exist.

@@ -1,0 +1,314 @@
+categories:
+  - name: Corporate Formation & Governance
+    documents:
+      - name: Articles of Incorporation / Certificate of Formation
+      - name: Operating Agreement / Partnership Agreement
+      - name: Bylaws / Corporate Constitution
+      - name: Shareholder Agreements
+      - name: Board Minutes / Board Resolutions
+      - name: Equity Ledger / Cap Table
+      - name: Stock Certificates
+      - name: Good Standing Certificates
+      - name: Corporate Seal Documentation
+      - name: Annual Reports (State filings)
+      - name: Registered Agent Agreements
+      - name: DBA / Trade Name Filings
+      - name: Corporate Compliance Calendar
+  - name: Strategic / Executive / Management
+    documents:
+      - name: Vision/Mission Statements
+      - name: Strategic Roadmaps
+      - name: Annual/Quarterly Operating Plans (AOP/QOP)
+      - name: OKRs / KPIs
+      - name: Executive Briefs
+      - name: Leadership Meeting Notes
+      - name: Risk Registers
+      - name: Business Continuity Plans
+      - name: Crisis Escalation Protocols
+  - name: Finance / Accounting
+    documents:
+      - name: General Ledger
+      - name: Chart of Accounts
+      - name: Financial Statements (P/L, Balance Sheet, Cash Flow)
+      - name: Bank Reconciliations
+      - name: Invoices (AP/AR)
+      - name: Purchase Orders
+      - name: Receipts
+      - name: Expense Reports
+      - name: Payroll Records
+      - name: 1099/Tax Filings (Federal, State, Local)
+      - name: Depreciation Schedules
+      - name: Audit Reports
+      - name: Cost-Benefit Analyses
+      - name: Budget Forecasts
+  - name: HR / People Operations
+    documents:
+      - name: Job Descriptions
+      - name: Offer Letters
+      - name: Employment Agreements
+      - name: Non-Compete/Non-Solicit
+      - name: Employee Handbook
+      - name: Performance Reviews
+      - name: PIP (Performance Improvement Plans)
+      - name: Timesheets
+      - name: Training Records
+      - name: Termination Letters
+      - name: COBRA Notices
+      - name: Benefits Enrollment Docs
+      - name: Equity Grant Agreements
+  - name: Legal
+    documents:
+      - name: Contracts / Agreements (all types)
+      - name: NDA / MNDA
+      - name: MSA / SOW
+      - name: SOW
+      - name: License Agreements
+      - name: Data Processing Addendum (DPA)
+      - name: Terms of Service / Privacy Policy
+      - name: Indemnification Agreement
+      - name: Liability Waivers
+      - name: Cooperation Agreements
+      - name: Settlement Agreements
+      - name: Demand Letters
+      - name: Subpoenas / Legal Notices
+      - name: Compliance Certifications
+  - name: Sales / Partnerships / BizDev
+    documents:
+      - name: Pitch Decks
+      - name: Lead Lists
+      - name: Opportunity Reports
+      - name: CRM Records
+      - name: Quotes / Proposals
+      - name: RFP/RFI Responses
+      - name: Sales Contracts
+      - name: Partnership Agreements
+      - name: Reseller Agreements
+      - name: Channel Contracts
+      - name: Commission Plans
+  - name: Marketing / Communications
+    documents:
+      - name: Brand Guidelines
+      - name: Content Calendars
+      - name: Press Releases
+      - name: Social Media Plans
+      - name: Advertising Briefs
+      - name: Copy Decks
+      - name: Market Research Reports
+      - name: Customer Personas
+      - name: SEO Audits
+      - name: Media Kits
+  - name: Engineering / Product / Technology
+    documents:
+      - name: Product Requirements Document (PRD)
+      - name: Technical Specification (Tech Spec)
+      - name: Architecture Diagrams
+      - name: API Documentation
+      - name: SDK Docs
+      - name: Runbooks / Playbooks
+      - name: SRE Incident Reports (Postmortems)
+      - name: SLO/SLI Dashboards
+      - name: Code Review Artifacts
+      - name: Release Notes
+      - name: Roadmaps
+      - name: QA Test Plans
+      - name: Security Threat Models
+      - name: Software Licenses
+  - name: Operations / Logistics
+    documents:
+      - name: SOPs (Standard Operating Procedures)
+      - name: Inventory Logs
+      - name: Quality Control Checklists
+      - name: Facility Inspection Reports
+      - name: Maintenance Logs
+      - name: Supply Chain Manifests
+      - name: Packing Slips
+      - name: Shipping Labels
+      - name: Incident Reports
+  - name: Procurement / Vendor Management
+    documents:
+      - name: Vendor Master Records
+      - name: RFP/RFI
+      - name: Vendor Contracts
+      - name: SLAs
+      - name: Pricing Schedules
+      - name: Approval Workflows
+      - name: Onboarding/Offboarding
+  - name: Security / Compliance / Risk
+    documents:
+      - name: Information Security Policies
+      - name: Acceptable Use Policies
+      - name: Incident Response Plans
+      - name: Vulnerability Scans
+      - name: Penetration Test Reports
+      - name: SOC 2 / ISO 27001 Controls
+      - name: HIPAA / GDPR docs
+      - name: SLSA / SBOM
+      - name: Access Control Logs
+      - name: Business Continuity Plans
+      - name: Disaster Recovery Plans
+      - name: Risk Assessments
+  - name: Product, UX, Design
+    documents:
+      - name: Wireframes
+      - name: User Journey Maps
+      - name: Mockups
+      - name: Prototype Notes
+      - name: UX Research Interviews
+      - name: A/B Testing Reports
+  - name: Manufacturing / Industrial
+    documents:
+      - name: Bill of Materials
+      - name: Manufacturing Instructions
+      - name: Compliance Certifications
+      - name: Equipment Manuals
+      - name: Factory Audits
+      - name: Production Schedules
+  - name: Supply Chain
+    documents:
+      - name: Import/Export Declarations
+      - name: Customs Forms
+      - name: Bill of Lading
+      - name: Freight Forwarding Docs
+      - name: Warehouse Receipts
+  - name: Investor Relations / Corporate Finance
+    documents:
+      - name: Pitch Decks
+      - name: Pro-Forma Financials
+      - name: Investor Updates
+      - name: Term Sheets
+      - name: SAFE Agreements
+      - name: Share Purchase Agreements
+      - name: Due Diligence Checklists
+      - name: Convertible Notes
+      - name: Board Packs
+  - name: Real Estate / Facilities
+    documents:
+      - name: Lease Agreements
+      - name: Property Deeds
+      - name: Construction Plans
+      - name: Zoning/Permit Documentation
+      - name: Utilities Contracts
+  - name: Environmental / ESG
+    documents:
+      - name: Environmental Impact Reports
+      - name: Sustainability Reports
+      - name: Carbon Accounting
+      - name: Safety Compliance Docs
+      - name: HazMat Sheets (MSDS)
+  - name: Insurance
+    documents:
+      - name: Policy Documents
+      - name: Certificates of Insurance
+      - name: Claim Forms
+      - name: Underwriting Reports
+      - name: Risk Assessments
+      - name: Adjuster Reports
+  - name: Government / Regulatory / Public Sector
+    documents:
+      - name: Permits / Licenses
+      - name: Regulatory Filings
+      - name: OSHA Documents
+      - name: FCC/FAA/SEC Forms
+      - name: Compliance Orders
+      - name: Grant Applications
+      - name: Freedom of Information Act Reports
+  - name: Data / AI / Cloud / DevOps
+    documents:
+      - name: Data Dictionaries
+      - name: ETL Pipelines
+      - name: Data Flow Diagrams
+      - name: AI Model Cards
+      - name: Dataset Documentation
+      - name: Cloud Architecture Diagrams
+      - name: Terraform Plans
+      - name: CI/CD Pipeline Definition
+      - name: Deployment Manifests
+      - name: Dockerfiles
+      - name: LLM Prompt Libraries
+      - name: Evaluation Reports
+  - name: Intellectual Property
+    documents:
+      - name: Patent Disclosures
+      - name: Patent Applications
+      - name: Trademark Filings
+      - name: Copyright Registrations
+      - name: IP Assignments
+      - name: Licensing Agreements
+      - name: Trade Secret Docs
+  - name: M&A / Corporate Restructuring
+    documents:
+      - name: LOIs (Letters of Intent)
+      - name: Due Diligence Questionnaires
+      - name: Data Room Indexes
+      - name: Valuation Reports
+      - name: Merger Agreements
+      - name: Transition Plans
+      - name: Integration Playbooks
+  - name: Customer Success
+    documents:
+      - name: Onboarding Guides
+      - name: Support Tickets
+      - name: SLAs
+      - name: Churn Analysis
+      - name: Renewal Playbooks
+relationships:
+  - source: NDA / MNDA
+    type: PRECONDITION
+    target: Sales Contracts
+  - source: MSA / SOW
+    type: GOVERNING_AGREEMENT
+    target: SOW
+  - source: Product Requirements Document (PRD)
+    type: BUILD_CHAIN
+    target: Technical Specification (Tech Spec)
+  - source: Technical Specification (Tech Spec)
+    type: BUILD_CHAIN
+    target: Architecture Diagrams
+  - source: Architecture Diagrams
+    type: BUILD_CHAIN
+    target: CI/CD Pipeline Definition
+  - source: General Ledger
+    type: FINANCIAL_CHAIN
+    target: Financial Statements (P/L, Balance Sheet, Cash Flow)
+  - source: Financial Statements (P/L, Balance Sheet, Cash Flow)
+    type: FINANCIAL_CHAIN
+    target: Investor Updates
+  - source: Risk Registers
+    type: GOVERNANCE_CHAIN
+    target: Audit Reports
+  - source: Audit Reports
+    type: GOVERNANCE_CHAIN
+    target: Board Packs
+  - source: IP Assignments
+    type: OWNERSHIP_CHAIN
+    target: Patent Applications
+  - source: Employment Agreements
+    type: EMPLOYMENT_CHAIN
+    target: Payroll Records
+  - source: Payroll Records
+    type: EMPLOYMENT_CHAIN
+    target: Benefits Enrollment Docs
+  - source: Benefits Enrollment Docs
+    type: EMPLOYMENT_CHAIN
+    target: 1099/Tax Filings (Federal, State, Local)
+  - source: Incident Reports
+    type: OPERATIONS_CHAIN
+    target: SRE Incident Reports (Postmortems)
+  - source: SRE Incident Reports (Postmortems)
+    type: OPERATIONS_CHAIN
+    target: Runbooks / Playbooks
+  - source: Data Dictionaries
+    type: AI_CHAIN
+    target: ETL Pipelines
+  - source: ETL Pipelines
+    type: AI_CHAIN
+    target: AI Model Cards
+  - source: AI Model Cards
+    type: AI_CHAIN
+    target: Evaluation Reports
+  - source: Policy Documents
+    type: INSURANCE_CHAIN
+    target: Certificates of Insurance
+  - source: Certificates of Insurance
+    type: INSURANCE_CHAIN
+    target: Claim Forms
