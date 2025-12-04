@@ -1,0 +1,354 @@
+name: Promise Tracker
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**/*.md'
+      - '.promise-tracker/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**/*.md'
+      - '.promise-tracker/**'
+  schedule:
+    # Run weekly health check on Mondays at 9am UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'health'
+        type: choice
+        options:
+          - health
+          - extract
+          - report
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  # ============================================================================
+  # Doc-to-Issue Link Validation
+  # ============================================================================
+  validate-doc-links:
+    name: Validate Doc-to-Issue Links
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed docs
+        id: changed-docs
+        run: |
+          CHANGED_DOCS=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }} -- '*.md' | tr '\n' ' ')
+          echo "files=$CHANGED_DOCS" >> $GITHUB_OUTPUT
+          echo "Changed docs: $CHANGED_DOCS"
+
+      - name: Check for unlinked TODOs
+        if: steps.changed-docs.outputs.files != ''
+        run: |
+          ERRORS=0
+          WARNINGS=0
+
+          echo "Checking for unlinked TODOs in documentation..."
+          echo ""
+
+          for file in ${{ steps.changed-docs.outputs.files }}; do
+            if [[ -f "$file" ]]; then
+              # Check for TODO without issue reference
+              UNLINKED=$(grep -n "TODO" "$file" | grep -v "#[0-9]" | grep -v "TODO.*\[.*\]" || true)
+
+              if [[ -n "$UNLINKED" ]]; then
+                echo "::warning file=$file::Found TODO without issue link"
+                echo "$UNLINKED"
+                WARNINGS=$((WARNINGS + 1))
+              fi
+
+              # Check for Backlog sections without issue links
+              if grep -q "^##* *Backlog" "$file" || grep -q "^##* *TODO" "$file" || grep -q "^##* *Action Items" "$file"; then
+                UNLINKED_ITEMS=$(grep -E "^[-*] " "$file" | grep -v "#[0-9]" | grep -v "\[.*\]" | head -5 || true)
+
+                if [[ -n "$UNLINKED_ITEMS" ]]; then
+                  echo "::warning file=$file::Backlog section has items without issue links"
+                  echo "$UNLINKED_ITEMS"
+                  WARNINGS=$((WARNINGS + 1))
+                fi
+              fi
+            fi
+          done
+
+          echo ""
+          echo "Summary: $WARNINGS warnings found"
+
+          # Don't fail the build, just warn
+          # To make this a hard requirement, uncomment:
+          # if [[ $WARNINGS -gt 0 ]]; then
+          #   echo "::error::Unlinked TODOs found. Link to issues or use Promise Tracker."
+          #   exit 1
+          # fi
+
+      - name: Comment on PR
+        if: steps.changed-docs.outputs.files != '' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            // Check if we should add a comment
+            const changedDocs = '${{ steps.changed-docs.outputs.files }}'.trim().split(' ').filter(f => f);
+
+            if (changedDocs.length === 0) return;
+
+            let hasBacklogContent = false;
+
+            for (const file of changedDocs) {
+              try {
+                const content = fs.readFileSync(file, 'utf8');
+                if (content.includes('TODO') ||
+                    content.includes('Backlog') ||
+                    content.includes('Action Items') ||
+                    content.includes('[ ]')) {
+                  hasBacklogContent = true;
+                  break;
+                }
+              } catch (e) {
+                // File might not exist in this context
+              }
+            }
+
+            if (!hasBacklogContent) return;
+
+            const body = `### Promise Tracker Notice
+
+            This PR includes documentation changes that may contain backlog items or TODOs.
+
+            **Reminder:** To ensure promises are tracked to completion:
+
+            1. Link TODOs to GitHub issues: \`TODO: Implement feature (#123)\`
+            2. Or use unchecked boxes with issue links: \`- [ ] Add validation [#123]\`
+            3. Run \`pnpm promise-tracker extract\` to capture unlinked items
+
+            [Learn more about the Definition of Done](.github/ISSUE_TEMPLATE/promise-feature.yml)
+            `;
+
+            // Check if comment already exists
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.body.includes('Promise Tracker Notice') &&
+              c.user.type === 'Bot'
+            );
+
+            if (!existingComment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+  # ============================================================================
+  # Backlog Health Check
+  # ============================================================================
+  health-check:
+    name: Backlog Health Check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.action == 'health')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: cd tools/promise-tracker && pnpm install
+
+      - name: Run health check
+        id: health
+        run: |
+          cd tools/promise-tracker
+          pnpm run health --ci 2>&1 | tee health-output.txt
+
+          # Extract metrics for summary
+          TOTAL=$(grep "Total Items:" health-output.txt | grep -oE '[0-9]+' || echo "0")
+          DOC_ONLY=$(grep "Doc-Only" health-output.txt | grep -oE '[0-9]+' || echo "0")
+          STALE=$(grep "Stale In-Progress" health-output.txt | grep -oE '[0-9]+' || echo "0")
+
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+          echo "doc_only=$DOC_ONLY" >> $GITHUB_OUTPUT
+          echo "stale=$STALE" >> $GITHUB_OUTPUT
+
+      - name: Create health report issue
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const total = '${{ steps.health.outputs.total }}';
+            const docOnly = '${{ steps.health.outputs.doc_only }}';
+            const stale = '${{ steps.health.outputs.stale }}';
+
+            const date = new Date().toISOString().split('T')[0];
+
+            const body = `## Weekly Backlog Health Report
+
+            **Date:** ${date}
+
+            ### Metrics
+
+            | Metric | Value |
+            |--------|-------|
+            | Total Items | ${total} |
+            | Doc-Only (untracked) | ${docOnly} |
+            | Stale In-Progress | ${stale} |
+
+            ### Actions Required
+
+            ${parseInt(docOnly) > 10 ? '- [ ] Convert high-confidence staging items to tracked issues' : ''}
+            ${parseInt(stale) > 0 ? '- [ ] Review and unblock stale in-progress items' : ''}
+
+            ---
+
+            *Generated by Promise Tracker CI*
+            `;
+
+            // Check for existing weekly report issue
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: 'promise-tracker,weekly-health',
+              state: 'open'
+            });
+
+            if (issues.length > 0) {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body: body
+              });
+            } else {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[Promise Tracker] Weekly Health Report - ${date}`,
+                body: body,
+                labels: ['promise-tracker', 'weekly-health']
+              });
+            }
+
+  # ============================================================================
+  # Extract Promises (Manual Trigger)
+  # ============================================================================
+  extract:
+    name: Extract Promises
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.action == 'extract'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: cd tools/promise-tracker && pnpm install
+
+      - name: Run extraction
+        run: |
+          cd tools/promise-tracker
+          pnpm run extract
+
+      - name: Upload staging data
+        uses: actions/upload-artifact@v4
+        with:
+          name: promise-tracker-staging
+          path: .promise-tracker/staging.json
+          retention-days: 30
+
+      - name: Summary
+        run: |
+          echo "## Promise Tracker Extraction Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ -f .promise-tracker/staging.json ]]; then
+            COUNT=$(jq '.staging | length' .promise-tracker/staging.json)
+            echo "Found **$COUNT** staging items" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Download the artifact to review captured promises." >> $GITHUB_STEP_SUMMARY
+          fi
+
+  # ============================================================================
+  # Generate Report (Manual Trigger)
+  # ============================================================================
+  report:
+    name: Generate Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.action == 'report'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: cd tools/promise-tracker && pnpm install
+
+      - name: Generate report
+        run: |
+          cd tools/promise-tracker
+          pnpm run report --format markdown > ../../PROMISE_TRACKER_REPORT.md
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: promise-tracker-report
+          path: PROMISE_TRACKER_REPORT.md
+          retention-days: 30
+
+      - name: Add to summary
+        run: |
+          echo "## Promise Tracker Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          cat PROMISE_TRACKER_REPORT.md >> $GITHUB_STEP_SUMMARY
