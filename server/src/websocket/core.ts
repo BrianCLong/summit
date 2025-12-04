@@ -8,6 +8,7 @@ import {
   WebSocketConnectionPool,
 } from './connectionManager.js';
 import { activeConnections } from '../observability/metrics.js';
+import { YjsHandler } from '../yjs/YjsHandler.js';
 
 interface WebSocketClaims {
   tenantId: string;
@@ -45,6 +46,7 @@ export class WebSocketCore {
   private readonly HEARTBEAT_INTERVAL = 30000; // 30 seconds
   private readonly MAX_BACKPRESSURE = 64 * 1024; // 64KB
   private readonly TOPIC_PREFIX = 'maestro:';
+  private yjsHandler: YjsHandler;
 
   constructor() {
     this.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
@@ -53,6 +55,7 @@ export class WebSocketCore {
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
     });
+    this.yjsHandler = new YjsHandler(this.redis);
 
     this.connectionPool = new WebSocketConnectionPool({
       maxQueueSize: parseInt(process.env.WS_MAX_QUEUE_SIZE || '500', 10),
@@ -189,6 +192,73 @@ export class WebSocketCore {
           key_file_name: process.env.SSL_KEY,
           cert_file_name: process.env.SSL_CERT,
         }),
+    });
+
+    // Y.js WebSocket handler
+    this.app.ws('/yjs/:docName', {
+      upgrade: (res, req, context) => {
+        const span = otelService.createSpan('websocket.yjs.upgrade');
+        try {
+          // Extract docName from URL
+          const url = req.getUrl();
+          const docName = url.split('/yjs/')[1];
+
+          if (!docName) {
+            res.writeStatus('400 Bad Request').end();
+            return;
+          }
+
+          // Support both header and query param for auth (common in Y.js clients)
+          let token = req.getHeader('authorization')?.replace('Bearer ', '');
+          if (!token) {
+            const query = req.getQuery();
+            const params = new URLSearchParams(query);
+            token = params.get('token') || '';
+          }
+
+          if (!token) {
+            console.warn('Yjs upgrade failed: No token provided');
+            res.writeStatus('401 Unauthorized').end();
+            return;
+          }
+
+          const claims = this.verifyJWT(token);
+          if (!claims) {
+            console.warn('Yjs upgrade failed: Invalid token');
+            res.writeStatus('401 Unauthorized').end();
+            return;
+          }
+
+          res.upgrade(
+            {
+              ...claims,
+              docName,
+              isYjs: true,
+            },
+            req.getHeader('sec-websocket-key'),
+            req.getHeader('sec-websocket-protocol'),
+            req.getHeader('sec-websocket-extensions'),
+            context
+          );
+        } catch (error) {
+            console.error('Yjs upgrade error:', error);
+            res.writeStatus('500 Internal Server Error').end();
+        } finally {
+            span?.end();
+        }
+      },
+      open: (ws) => {
+        const docName = (ws as any).docName;
+        this.yjsHandler.handleConnection(ws, docName);
+      },
+      message: (ws, message, isBinary) => {
+        const buffer = Buffer.from(message);
+        const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+        this.yjsHandler.handleMessage(ws, uint8Array);
+      },
+      close: (ws, code, message) => {
+        this.yjsHandler.handleClose(ws);
+      }
     });
 
     this.app.ws('/*', {
