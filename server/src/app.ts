@@ -15,6 +15,9 @@ import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import sanitizeRequest from './middleware/sanitize.js';
+import { securityHardening } from './middleware/security-hardening.js';
+import { globalErrorHandler } from './middleware/global-error-handler.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -97,6 +100,12 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
+
+  // Security Hardening - Input Validation & Sanitization
+  // Must run before logic but after body parsing
+  app.use(securityHardening); // Block malicious requests first
+  app.use(sanitizeRequest);   // Sanitize allowed requests
+
   // Standard audit logger for basic request tracking
   app.use(auditLogger);
   // Audit-First middleware for cryptographic stamping of sensitive operations
@@ -324,6 +333,9 @@ export const createApp = async () => {
   }
 
   logger.info('Anomaly detector activated.');
+
+  // Global Error Handler - Must be last
+  app.use(globalErrorHandler);
 
   return app;
 };
