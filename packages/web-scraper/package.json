@@ -27,7 +27,7 @@
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "puppeteer-extra-plugin-recaptcha": "^3.6.8",
     "node-html-parser": "^6.1.13",
-    "robotstxt-parser": "^0.1.2",
+    "robots-parser": "^3.0.1",
     "sitemap-parser": "^1.0.0",
     "difflib": "^0.2.4",
     "turndown": "^7.2.0",
