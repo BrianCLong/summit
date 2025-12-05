@@ -1,0 +1,305 @@
+---
+# Storage Plane Network Policies
+# Controls traffic for mesh-storage namespace (databases, caches, object storage)
+
+# Allow DNS resolution for all pods in storage plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: mesh-storage
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# PostgreSQL ingress from control plane and data plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-ingress
+  namespace: mesh-storage
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes:
+    - Ingress
+  ingress:
+    # From control plane (full read/write)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # From data plane (limited read-only via DB user permissions)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-data
+      ports:
+        - protocol: TCP
+          port: 5432
+
+    # From ops zone (read-only for monitoring, backups)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 5432
+
+---
+# Redis ingress from control plane and data plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: redis-ingress
+  namespace: mesh-storage
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+    - Ingress
+  ingress:
+    # From control plane
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # From data plane
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-data
+      ports:
+        - protocol: TCP
+          port: 6379
+
+    # From ops zone (monitoring)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 6379
+
+---
+# Neo4j ingress from control plane (if using graph database)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: neo4j-ingress
+  namespace: mesh-storage
+spec:
+  podSelector:
+    matchLabels:
+      app: neo4j
+  policyTypes:
+    - Ingress
+  ingress:
+    # From control plane
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+      ports:
+        - protocol: TCP
+          port: 7687  # Bolt protocol
+        - protocol: TCP
+          port: 7474  # HTTP
+
+    # From ops zone (monitoring, admin UI)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 7474
+        - protocol: TCP
+          port: 7687
+
+---
+# Kafka/Redpanda ingress from control plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-ingress
+  namespace: mesh-storage
+spec:
+  podSelector:
+    matchLabels:
+      app: kafka
+  policyTypes:
+    - Ingress
+  ingress:
+    # From control plane (producers/consumers)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+      ports:
+        - protocol: TCP
+          port: 9092  # Kafka
+
+    # From data plane (consumers only)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-data
+      ports:
+        - protocol: TCP
+          port: 9092
+
+    # From ops zone (monitoring)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-ops
+      ports:
+        - protocol: TCP
+          port: 9092
+
+---
+# Allow Kafka brokers to communicate with each other (cluster formation)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: kafka-cluster-communication
+  namespace: mesh-storage
+spec:
+  podSelector:
+    matchLabels:
+      app: kafka
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # From other Kafka brokers
+    - from:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9093  # Inter-broker
+  egress:
+    # To other Kafka brokers
+    - to:
+        - podSelector:
+            matchLabels:
+              app: kafka
+      ports:
+        - protocol: TCP
+          port: 9093
+
+---
+# Allow PostgreSQL to access external backup storage (S3, GCS, etc.)
+# This is for pg_dump to cloud storage
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgresql-backup-egress
+  namespace: mesh-storage
+spec:
+  podSelector:
+    matchLabels:
+      app: postgresql
+  policyTypes:
+    - Egress
+  egress:
+    # Allow HTTPS to cloud storage endpoints
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 443
+
+    # Example: AWS S3 endpoint CIDR blocks
+    # - to:
+    #     - ipBlock:
+    #         cidr: 52.216.0.0/15  # S3 IP range (example)
+    #   ports:
+    #     - protocol: TCP
+    #       port: 443
+
+---
+# Block all other egress from storage plane (storage should not initiate connections)
+# Already covered by default-deny, this is explicit
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: storage-minimal-egress
+  namespace: mesh-storage
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - redis
+          - neo4j
+  policyTypes:
+    - Egress
+  egress:
+    # Only DNS, no other egress
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Allow health check probes from Kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: mesh-storage
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 5432  # PostgreSQL
+        - protocol: TCP
+          port: 6379  # Redis
+        - protocol: TCP
+          port: 7474  # Neo4j HTTP
+        - protocol: TCP
+          port: 9092  # Kafka
