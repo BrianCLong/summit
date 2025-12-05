@@ -5,5 +5,5 @@
     "types": []
   },
   "include": ["src"],
-  "references": [{ "path": "../types" }, { "path": "../ai-core" }]
+  "references": [{ "path": "../types" }]
 }
