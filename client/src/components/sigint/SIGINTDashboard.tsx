@@ -63,7 +63,7 @@ const generateDemoStreams = (): SignalStream[] => [
     centerFrequency: 8e9,
     bandwidth: 36e6,
     sampleRate: 100000,
-    modulation: 'QPSK',
+    modulation: 'PSK',
     confidence: 'HIGH',
     samples: [],
     active: true,
@@ -114,7 +114,7 @@ const generateDemoMASINT = (): MASINTOverlay[] => [
         location: { lat: 36.85, lng: -75.95 },
         confidence: 0.78,
         classification: 'Submarine Contact',
-        metadata: { bearing: 045, range: 12 },
+        metadata: { bearing: 45, range: 12 },
       },
     ],
     status: 'ACTIVE',
@@ -168,7 +168,7 @@ const generateDemoTasks = (): DemodulationTask[] => [
 
 export const SIGINTDashboard: React.FC<SIGINTDashboardProps> = ({
   streamKey = 'sigint:primary',
-  initialFilters,
+  initialFilters: _initialFilters,
   onDemodulationComplete,
   className,
 }) => {
