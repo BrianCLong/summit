@@ -177,6 +177,7 @@ export function Navigation({ user }: NavigationProps) {
           variant="outline"
           className="w-full justify-start text-muted-foreground"
           onClick={openSearch}
+          aria-label="Search (Command+K)"
         >
           <Command className="h-4 w-4 mr-2" />
           Search...
@@ -235,6 +236,7 @@ export function Navigation({ user }: NavigationProps) {
             size="sm"
             className="w-full justify-start text-muted-foreground"
             onClick={logout}
+            aria-label="Sign Out"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out
