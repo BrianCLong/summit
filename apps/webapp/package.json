@@ -28,7 +28,7 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.8.1",
     "socket.io-client": "^4.8.1",
-    "vis-data": "^8.3.0",
+    "vis-data": "^8.0.3",
     "vis-timeline": "^8.3.0"
   },
   "devDependencies": {
