@@ -239,6 +239,7 @@ export const securityHeaders = helmet({
       objectSrc: ["'none'"],
       mediaSrc: ["'self'"],
       frameSrc: ["'none'"],
+      upgradeInsecureRequests: [],
     },
   },
   crossOriginEmbedderPolicy: false,
@@ -247,6 +248,11 @@ export const securityHeaders = helmet({
     includeSubDomains: true,
     preload: true,
   },
+  frameguard: {
+    action: 'deny',
+  },
+  xContentTypeOptions: true,
+  dnsPrefetchControl: { allow: false },
 });
 
 type CorsCallback = (err: Error | null, allow?: boolean) => void;
