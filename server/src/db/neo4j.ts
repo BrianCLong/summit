@@ -1,4 +1,4 @@
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
@@ -25,6 +25,8 @@ const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
+const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
+const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
 
 let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
@@ -175,6 +177,14 @@ async function connectToNeo4j(): Promise<void> {
     candidate = neo4j.driver(
       NEO4J_URI,
       neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+      {
+        maxConnectionPoolSize: MAX_CONNECTION_POOL_SIZE,
+        connectionTimeout: CONNECTION_TIMEOUT_MS,
+        logging: {
+          level: 'info',
+          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message)
+        }
+      }
     );
 
     await candidate.verifyConnectivity();
@@ -183,7 +193,7 @@ async function connectToNeo4j(): Promise<void> {
     candidate = null;
     isMockMode = false;
     neo4jConnectivityUp.set(1);
-    logger.info('Neo4j driver initialized.');
+    logger.info(`Neo4j driver initialized with maxConnectionPoolSize=${MAX_CONNECTION_POOL_SIZE}.`);
     await notifyDriverReady(hasEmittedReadyEvent ? 'reconnected' : 'initial');
   } catch (error) {
     if (candidate) {
