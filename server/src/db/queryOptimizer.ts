@@ -322,16 +322,15 @@ export class QueryOptimizer {
               return new Promise((resolve, reject) => {
                   const stream = redis.scanStream({ match: pattern, count: 100 });
 
-                  stream.on('data', async (keys) => {
+                  stream.on('data', (keys) => {
                       if (keys.length) {
-                          // Note: This is async inside event handler, so stream might continue
-                          // before deletion is done. For strict consistency we should pause/resume
-                          // but this is 'good enough' for now as keys are small batches.
-                          try {
-                              await redis.del(...keys);
-                          } catch (e) {
-                              logger.error('Error deleting cache keys', e);
-                          }
+                          stream.pause();
+                          redis.del(...keys)
+                              .then(() => stream.resume())
+                              .catch((e) => {
+                                  logger.error('Error deleting cache keys', e);
+                                  stream.resume();
+                              });
                       }
                   });
 

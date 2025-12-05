@@ -461,6 +461,16 @@ function instrumentSession(session: any) {
             });
         };
 
+        // Shim Async Iterator for compatibility
+        promise[Symbol.asyncIterator] = async function* () {
+            const result = await promise;
+            if (result.records) {
+                for (const record of result.records) {
+                    yield record;
+                }
+            }
+        };
+
         return promise;
     }
 
