@@ -1,5 +1,6 @@
 import DataLoader from 'dataloader';
 import { getPostgresPool, getNeo4jDriver } from '../config/database.js';
+import { createSupportTicketLoader, SupportTicketComment } from './dataloaders/supportTicketLoader.js';
 
 interface User {
   id: string;
@@ -56,9 +57,11 @@ const batchEntities = async (entityIds: readonly string[]): Promise<(any | Error
 export interface Loaders {
   userLoader: DataLoader<string, User | Error>;
   entityLoader: DataLoader<string, any | Error>;
+  supportTicketLoader: DataLoader<string, SupportTicketComment[]>;
 }
 
 export const createLoaders = (): Loaders => ({
   userLoader: new DataLoader(batchUsers),
   entityLoader: new DataLoader(batchEntities),
+  supportTicketLoader: createSupportTicketLoader(),
 });

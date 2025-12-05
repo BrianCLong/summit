@@ -77,8 +77,23 @@ const supportTicketResolvers = {
     },
   },
   SupportTicket: {
-    comments: async (parent: { id: string }) => {
-      return getComments(parent.id);
+    comments: async (parent: { id: string }, args: { limit?: number; offset?: number }, context: any) => {
+      let comments;
+      // Use DataLoader if available, otherwise fall back to service
+      if (context?.loaders?.supportTicketLoader) {
+        comments = await context.loaders.supportTicketLoader.load(parent.id);
+      } else {
+        comments = await getComments(parent.id);
+      }
+
+      // Handle pagination in memory (since loader fetches all)
+      if (args.limit !== undefined || args.offset !== undefined) {
+        const offset = args.offset || 0;
+        const limit = args.limit || 100;
+        return comments.slice(offset, offset + limit);
+      }
+
+      return comments;
     },
   },
 };

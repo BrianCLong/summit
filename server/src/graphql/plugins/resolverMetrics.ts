@@ -6,25 +6,29 @@ import {
 } from '../../monitoring/metrics.js';
 
 const resolverMetricsPlugin: ApolloServerPlugin<any> = {
-async requestDidStart(_ctx: GraphQLRequestContext<any>): Promise<GraphQLRequestListener<any>> {
+  async requestDidStart(_ctx: GraphQLRequestContext<any>): Promise<GraphQLRequestListener<any>> {
     return {
-async executionDidStart(): Promise<GraphQLRequestExecutionListener<any>> {
+      async executionDidStart(): Promise<GraphQLRequestExecutionListener<any>> {
         return {
-willResolveField({ info }: { info: any }) {
+          willResolveField({ info }: { info: any }) {
             const start = process.hrtime.bigint();
             const labels = {
               resolver_name: `${info.parentType.name}.${info.fieldName}`,
               field_name: info.fieldName,
               type_name: info.parentType.name,
             };
-            graphqlResolverCallsTotal.inc(labels);
+            if (graphqlResolverCallsTotal) {
+                graphqlResolverCallsTotal.inc(labels);
+            }
             return (error: unknown) => {
               const duration = Number(process.hrtime.bigint() - start) / 1e9;
-              graphqlResolverDurationSeconds.observe(
-                { ...labels, status: error ? 'error' : 'success' },
-                duration,
-              );
-              if (error) {
+              if (graphqlResolverDurationSeconds) {
+                  graphqlResolverDurationSeconds.observe(
+                    { ...labels, status: error ? 'error' : 'success' },
+                    duration,
+                  );
+              }
+              if (error && graphqlResolverErrorsTotal) {
                 const errType = (error as any)?.constructor?.name || 'Error';
                 graphqlResolverErrorsTotal.inc({
                   ...labels,

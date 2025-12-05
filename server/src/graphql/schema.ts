@@ -355,7 +355,7 @@ type SupportTicket {
   updated_at: DateTime!
   resolved_at: DateTime
   closed_at: DateTime
-  comments: [SupportTicketComment!]!
+  comments(limit: Int = 100, offset: Int = 0): [SupportTicketComment!]!
 }
 
 type SupportTicketComment {
