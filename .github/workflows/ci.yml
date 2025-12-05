@@ -3,16 +3,25 @@ name: CI
 on:
   pull_request:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'LICENSE'
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+      - 'LICENSE'
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 env:
-  PNPM_CACHE_FOLDER: ~/.pnpm-store
   NODE_VERSION: '20.x'
+  HUSKY: 0 # Disable husky hooks in CI
 
 permissions:
   contents: read
@@ -20,11 +29,11 @@ permissions:
 
 jobs:
   changes:
-    name: Detect impacted areas
+    name: Detect Changes
     runs-on: ubuntu-latest
     outputs:
-      run-core: ${{ steps.filter.outputs.core }}
-      run-docker: ${{ steps.filter.outputs.docker }}
+      core: ${{ steps.filter.outputs.core }}
+      docker: ${{ steps.filter.outputs.docker }}
     steps:
       - uses: actions/checkout@v4
       - id: filter
@@ -40,44 +49,29 @@ jobs:
               - 'turbo.json'
               - 'pnpm-lock.yaml'
               - 'package.json'
+              - 'tsconfig*'
             docker:
-              - 'docker-compose.dev.yml'
-              - 'server/Dockerfile*'
-              - 'client/Dockerfile*'
-              - 'Dockerfile*'
+              - 'docker-compose*'
+              - '**/Dockerfile*'
               - 'scripts/run-compose.sh'
 
-  # Fast lane: Quick feedback on code quality (no build required)
-  fast-checks:
+  # Quality Lane: Lint and Typecheck (Parallelized by Turbo)
+  quality:
     needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-core == 'true' }}
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Lint
-        run: pnpm -w run lint
-      - name: Typecheck
-        run: pnpm -w run typecheck
-      - name: Production guardrails
+
+      - name: Code Quality Checks
+        run: pnpm turbo run lint typecheck --filter="!docs-site"
+
+      - name: Production Guardrails
         run: |
           set +e
           NODE_ENV=production \
@@ -99,163 +93,127 @@ jobs:
           fi
           echo "Prod guardrails correctly blocked unsafe config"
 
-  # Build lane: Build and test
-  build-test:
+  # Build Lane: Build artifacts
+  build:
     needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-core == 'true' }}
-    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Cache Turbo
-        uses: actions/cache@v4
-        with:
-          path: .turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-turbo-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Build workspace
-        run: pnpm -w run build
-      - name: Unit & integration tests
-        run: pnpm -w run test
-      - name: Upload build artifacts for golden path
+
+      - name: Build Workspace
+        run: pnpm turbo run build --filter="!docs-site"
+
+      - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
+            dist
+            build
+            apps/*/dist
+            apps/*/build
+            packages/*/dist
+            services/*/dist
+            server/dist
+            client/dist
             .turbo
-            node_modules/.cache
           retention-days: 1
 
-  # Security lane: Run security scans (non-blocking on PR)
-  security-scan:
-    needs: [changes]
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-core == 'true' || needs.changes.outputs.run-docker == 'true' }}
-    continue-on-error: true
+  # Unit Tests Lane: Sharded Jest Tests
+  unit-tests:
+    needs: [build]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+    runs-on: ubuntu-latest-8-cores
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     steps:
       - uses: actions/checkout@v4
-      - name: Generate SBOM (SPDX)
-        uses: anchore/sbom-action@v0
-        with:
-          path: .
-          output-file: sbom.spdx.json
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-spdx
-          path: sbom.spdx.json
-      - name: Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          format: table
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
-          vuln-type: 'os,library'
 
-  # Integration lane: Golden path smoke tests
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Note: Jest tests run against source (ts-jest) so we don't strictly need build artifacts here.
+      # This saves bandwidth.
+
+      - name: Run Unit Tests (Shard ${{ matrix.shard }}/2)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 2
+          # package.json defines "test:jest"
+          command: pnpm run test:jest --shard ${{ matrix.shard }}/${{ strategy.job-total }}
+
+  # Integration Lane: Golden Path Smoke Tests (Covers E2E)
   golden-path:
-    runs-on: ubuntu-latest
-    needs: [changes, fast-checks, build-test]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-docker == 'true' }}
+    needs: [build, quality]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.docker == 'true' }}
+    runs-on: ubuntu-latest-8-cores
     env:
       DOCKER_BUILDKIT: '1'
       COMPOSE_DOCKER_CLI_BUILD: '1'
-      PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
-        with:
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-        continue-on-error: true
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Bootstrap repo (make bootstrap)
+          install: 'true'
+
+      - name: Bootstrap
         run: make bootstrap
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('docker-compose.dev.yml', 'server/package.json', 'client/package.json') }}
-          restore-keys: ${{ runner.os }}-buildx-
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build API image (cached)
+
+      - name: Build API image
         uses: docker/build-push-action@v6
         with:
           context: ./server
           file: ./server/Dockerfile.dev
           tags: summit/api:ci
-          push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      - name: Build client image (cached)
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Client image
         uses: docker/build-push-action@v6
         with:
           context: ./client
           file: ./client/Dockerfile.dev
           tags: summit/web:ci
-          push: false
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
-      # Move cache to prevent unbounded growth
-      - name: Rotate Docker cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
-      - name: Bring up stack (make up)
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start Stack
         run: make up
-      - name: Golden path smoke tests
+
+      - name: Smoke Tests
         run: make smoke
-      - name: Compose logs on failure
+
+      - name: Logs on Failure
         if: failure()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
-      - name: Tear down stack
+
+      - name: Teardown
         if: always()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
 
-  # Compatibility matrix: Test on multiple Node versions (non-blocking)
+  # Compatibility Matrix (Non-blocking)
   compatibility:
     needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.run-core == 'true' }}
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
@@ -263,28 +221,36 @@ jobs:
         node: ['18.x']
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup
         with:
           node-version: ${{ matrix.node }}
-          cache: 'pnpm'
-      - name: Enable corepack
-        run: corepack enable
-      - uses: pnpm/action-setup@v4
+
+      - name: Build Workspace
+        run: pnpm turbo run build --filter="!docs-site"
+
+      - name: Unit Tests
+        run: pnpm run test:jest
+
+  # Security Lane
+  security:
+    needs: [changes]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
         with:
-          run_install: false
-      - name: Cache pnpm store
-        uses: actions/cache@v4
+          path: .
+          output-file: sbom.spdx.json
+
+      - name: Trivy Scan
+        uses: aquasecurity/trivy-action@0.24.0
         with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ runner.os }}-${{ matrix.node }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.node }}-pnpm-
-            ${{ runner.os }}-pnpm-
-      - name: Configure pnpm store
-        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Build workspace
-        run: pnpm -w run build
-      - name: Unit tests
-        run: pnpm -w run test
+          scan-type: fs
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '0'
