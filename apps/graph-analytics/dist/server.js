@@ -379,14 +379,10 @@ app.get('/api/updates/stream', authorize(['user', 'admin']), (req, res) => {
         'Access-Control-Allow-Origin': '*',
     });
     // Send initial connection
-    res.write('data: {"type": "connected", "timestamp": "' +
-        new Date().toISOString() +
-        '"}\n\n');
+    res.write(`data: {"type": "connected", "timestamp": "${new Date().toISOString()}"}\n\n`);
     // Set up interval for periodic updates
     const interval = setInterval(() => {
-        res.write('data: {"type": "heartbeat", "timestamp": "' +
-            new Date().toISOString() +
-            '"}\n\n');
+        res.write(`data: {"type": "heartbeat", "timestamp": "${new Date().toISOString()}"}\n\n`);
     }, 30000);
     // Clean up on client disconnect
     req.on('close', () => {

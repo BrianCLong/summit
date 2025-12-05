@@ -100,7 +100,7 @@ export class ChartService {
                 {
                     label: chartQuery.aggregateFunction || 'Value',
                     data,
-                    backgroundColor: colors[0] + '20', // 20% opacity
+                    backgroundColor: `${colors[0]}20`, // 20% opacity
                     borderColor: colors[0],
                     borderWidth: 2,
                     fill: true,
@@ -183,7 +183,7 @@ export class ChartService {
         const datasets = secondaryCategories.map((category, index) => ({
             label: category,
             data: labels.map((label) => nested[label][category] || 0),
-            backgroundColor: colors[index % colors.length] + '80', // 50% opacity
+            backgroundColor: `${colors[index % colors.length]}80`, // 50% opacity
             borderColor: colors[index % colors.length],
             borderWidth: 1,
         }));
@@ -234,7 +234,7 @@ export class ChartService {
                 {
                     label: 'Frequency',
                     data,
-                    backgroundColor: colors[0] + '60', // 40% opacity
+                    backgroundColor: `${colors[0]}60`, // 40% opacity
                     borderColor: colors[0],
                     borderWidth: 1,
                 },
@@ -262,7 +262,7 @@ export class ChartService {
                 {
                     label: 'Data Points',
                     data,
-                    backgroundColor: colors[0] + '60', // 40% opacity
+                    backgroundColor: `${colors[0]}60`, // 40% opacity
                     borderColor: colors[0],
                     borderWidth: 1,
                     pointRadius: 4,
@@ -314,10 +314,7 @@ export class ChartService {
     formatDateLabel(date, interval) {
         switch (interval) {
             case 'hour':
-                return (date.toLocaleDateString() +
-                    ' ' +
-                    date.getHours().toString().padStart(2, '0') +
-                    ':00');
+                return (`${date.toLocaleDateString()} ${date.getHours().toString().padStart(2, '0')}:00`);
             case 'day':
                 return date.toLocaleDateString();
             case 'week':
@@ -451,7 +448,7 @@ export class ChartService {
         return {
             data: heatmapData,
             labels: {
-                hours: Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0') + ':00'),
+                hours: Array.from({ length: 24 }, (_, i) => `${i.toString().padStart(2, '0')}:00`),
                 days: [
                     'Sunday',
                     'Monday',
