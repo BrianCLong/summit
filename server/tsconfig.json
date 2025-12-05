@@ -20,7 +20,7 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*", "src/**/__tests__/**/*"],
+  "include": ["src/**/*", "src/**/__tests__/**/*", "health/**/*"],
   "exclude": [
     "node_modules",
     "dist",
