@@ -20,7 +20,7 @@
     "@azure/storage-blob": "^12.25.0",
     "@azure/identity": "^4.5.0",
     "@azure/arm-compute": "^22.0.0",
-    "@google-cloud/storage": "^8.0.0",
+    "@google-cloud/storage": "^7.7.0",
     "@google-cloud/compute": "^4.10.0",
     "zod": "^4.1.12",
     "pino": "^10.1.0"
