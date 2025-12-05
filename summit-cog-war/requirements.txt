@@ -6,8 +6,8 @@ pytest
 playwright
 
 # AI/ML
-# Using 2.11.1+ to address CVE-2023-25668 (critical heap overflow)
-tensorflow==2.11.1
+# Using 2.12.1+ to address CVE-2023-25668 and CVE-2023-33976
+tensorflow==2.12.1
 torch
 transformers
 # For NeuroGraph/LLM hybrids
