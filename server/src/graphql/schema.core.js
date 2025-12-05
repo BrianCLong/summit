@@ -96,6 +96,15 @@ export const coreTypeDefs = gql`
     relationshipCount: Int!
   }
 
+  type InvestigationSnapshot {
+    id: ID!
+    investigationId: ID!
+    data: JSON!
+    snapshotLabel: String
+    createdAt: DateTime!
+    createdBy: String!
+  }
+
   # Input types for mutations
   input EntityInput {
     tenantId: String!
@@ -191,6 +200,8 @@ export const coreTypeDefs = gql`
       limit: Int = 50
       offset: Int = 0
     ): [Investigation!]!
+    investigationSnapshots(investigationId: ID!): [InvestigationSnapshot!]!
+    investigationSnapshot(id: ID!): InvestigationSnapshot
 
     # Graph operations
     graphNeighborhood(input: GraphTraversalInput!): GraphNeighborhood!
@@ -218,6 +229,7 @@ export const coreTypeDefs = gql`
     # Investigation mutations
     createInvestigation(input: InvestigationInput!): Investigation!
     updateInvestigation(input: InvestigationUpdateInput!): Investigation
+    createInvestigationSnapshot(investigationId: ID!, label: String): InvestigationSnapshot!
     deleteInvestigation(id: ID!, tenantId: String!): Boolean!
 
     # Bulk operations

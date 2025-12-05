@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Filter, Settings, Download, RefreshCw } from 'lucide-react'
+import { useSearchParams } from 'react-router-dom'
+import { Search, Filter, Settings, Download, RefreshCw, History } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
@@ -9,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { useEntities, useEntityUpdates } from '@/hooks/useGraphQL'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
+import { SnapshotManager } from '@/components/features/investigation/SnapshotManager'
 import { trackGoldenPathStep } from '@/telemetry/metrics'
 import mockData from '@/mock/data.json'
 import type {
@@ -28,6 +30,8 @@ export default function ExplorePage() {
     refetch,
   } = useEntities()
   const { data: entityUpdates } = useEntityUpdates()
+  const [searchParams] = useSearchParams()
+  const investigationId = searchParams.get('investigation')
 
   const [entities, setEntities] = useState<Entity[]>([])
   const [relationships, setRelationships] = useState<Relationship[]>([])
@@ -40,6 +44,7 @@ export default function ExplorePage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [filterPanelOpen, setFilterPanelOpen] = useState(true)
   const [timelineOpen, setTimelineOpen] = useState(true)
+  const [snapshotsOpen, setSnapshotsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
   // Graph state
@@ -249,6 +254,15 @@ export default function ExplorePage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setSnapshotsOpen(!snapshotsOpen)}
+          >
+            <History className="h-4 w-4 mr-2" />
+            Snapshots
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={loading}
           >
@@ -344,6 +358,16 @@ export default function ExplorePage() {
                 }
               }}
               className="m-4"
+            />
+          </div>
+        )}
+
+        {/* Far Right Sidebar - Snapshots (Overlay or separate panel) */}
+        {snapshotsOpen && (
+          <div className="w-96 border-l overflow-y-auto bg-background z-10">
+            <SnapshotManager
+              investigationId={investigationId || 'inv-1'}
+              onClose={() => setSnapshotsOpen(false)}
             />
           </div>
         )}
