@@ -1,0 +1,55 @@
+name: Infrastructure as Code (IaC) Scan
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'terraform/**'
+      - 'kubernetes/**'
+      - 'helm/**'
+      - '**/*.tf'
+      - '**/*.yaml'
+      - '**/*.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'terraform/**'
+      - 'kubernetes/**'
+      - 'helm/**'
+      - '**/*.tf'
+      - '**/*.yaml'
+      - '**/*.yml'
+  schedule:
+    - cron: '0 4 * * 1' # Weekly on Mondays
+
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+jobs:
+  iac-scan:
+    name: Checkov IaC Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@v12.2818.0
+        with:
+          directory: .
+          skip_dirs: node_modules,.git
+          soft_fail: false
+          output_format: sarif
+          output_file_path: results.sarif
+          quiet: true
+        continue-on-error: false
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        if: success() || failure()
+        with:
+          sarif_file: results.sarif
+          category: checkov
