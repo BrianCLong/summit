@@ -13,7 +13,7 @@
     "seed-templates": "node dist/scripts/seed-templates.js"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",
     "express-rate-limit": "^8.2.1",
