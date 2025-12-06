@@ -130,7 +130,8 @@ jobs:
       - name: Make backup scripts executable
         run: |
           chmod +x scripts/backup-enhanced.sh
-          chmod +x scripts/restore-enhanced.sh
+          chmod +x scripts/db/backup.sh
+          chmod +x scripts/db/restore.sh
 
       - name: Create backup
         id: create_backup
@@ -244,8 +245,10 @@ jobs:
           # Ensure backup is in correct location
           mv "$BACKUP_DIR" "backups/$BACKUP_ID" 2>/dev/null || true
 
-      - name: Make restore script executable
-        run: chmod +x scripts/restore-enhanced.sh
+      - name: Make restore scripts executable
+        run: |
+          chmod +x scripts/restore-enhanced.sh 2>/dev/null || true
+          chmod +x scripts/db/restore.sh
 
       - name: Set restore environment
         id: restore_env
