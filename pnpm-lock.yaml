@@ -565,6 +565,9 @@ importers:
 
   apps/intelgraph-api:
     dependencies:
+      '@opentelemetry/api':
+        specifier: 1.7.0
+        version: 1.7.0
       apollo-server-express:
         specifier: ^3.12.0
         version: 3.13.0(encoding@0.1.13)(express@5.1.0)(graphql@16.12.0)
@@ -577,6 +580,9 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
+      express-jwt:
+        specifier: ^8.4.1
+        version: 8.5.1
       graphql:
         specifier: ^16.12.0
         version: 16.12.0
@@ -602,6 +608,9 @@ importers:
       '@types/express':
         specifier: ^5.0.3
         version: 5.0.5
+      '@types/express-jwt':
+        specifier: ^7.4.4
+        version: 7.4.4
       '@types/jsonwebtoken':
         specifier: ^9.0.6
         version: 9.0.10
@@ -1746,6 +1755,9 @@ importers:
       d3:
         specifier: ^7.8.5
         version: 7.9.0
+      date-fns:
+        specifier: ^4.1.0
+        version: 4.1.0
       framer-motion:
         specifier: ^12.23.24
         version: 12.23.24(@emotion/is-prop-valid@1.4.0)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)
@@ -1816,9 +1828,18 @@ importers:
       '@storybook/react-vite':
         specifier: ^10.0.6
         version: 10.0.8(esbuild@0.25.12)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(rollup@4.53.3)(storybook@10.0.8(@testing-library/dom@10.4.0)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)))(typescript@5.9.3)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2))(webpack@5.103.0(@swc/core@1.15.3(@swc/helpers@0.5.17))(esbuild@0.25.12))
+      '@storybook/test':
+        specifier: ^8.6.14
+        version: 8.6.14(storybook@10.0.8(@testing-library/dom@10.4.0)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)))
       '@storybook/testing-library':
         specifier: ^0.2.2
         version: 0.2.2
+      '@testing-library/react':
+        specifier: ^16.1.0
+        version: 16.3.0(@testing-library/dom@10.4.0)(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)
+      '@testing-library/user-event':
+        specifier: ^14.6.1
+        version: 14.6.1(@testing-library/dom@10.4.0)
       '@types/react':
         specifier: ^19.2.7
         version: 19.2.7
@@ -27115,6 +27136,10 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
+  '@types/express-jwt@7.4.4':
+    resolution: {integrity: sha512-F0f+zvdAT6gBOtMf0XTkNTvwiqXv0JjW0yj6nZM1Q03P8cCoA0+zrg+JeFv+AyaJ50qJJadBpbqOSdr4kYjuyg==}
+    deprecated: This is a stub types definition. express-jwt provides its own type definitions, so you do not need this installed.
+
   '@types/express-rate-limit@6.0.2':
     resolution: {integrity: sha512-e1xZLOOlxCDvplAGq7rDcXtbdBu2CWRsMjaIu1LVqGxWtKvwr884YE5mPs3IvHeG/OMDhf24oTaqG5T1bV3rBQ==}
     deprecated: This is a stub types definition. express-rate-limit provides its own type definitions, so you do not need this installed.
@@ -32561,11 +32586,18 @@ packages:
   expr-eval@2.0.2:
     resolution: {integrity: sha512-4EMSHGOPSwAfBiibw3ndnP0AvjDWLsMvGOvWEZ2F96IGk0bIVdjQisOHxReSkE13mHcfbuCiXw+G4y0zv6N8Eg==}
 
+  express-jwt@8.5.1:
+    resolution: {integrity: sha512-Dv6QjDLpR2jmdb8M6XQXiCcpEom7mK8TOqnr0/TngDKsG2DHVkO8+XnVxkJVN7BuS1I3OrGw6N8j5DaaGgkDRQ==}
+    engines: {node: '>= 8.0.0'}
+
   express-rate-limit@8.1.0:
     resolution: {integrity: sha512-4nLnATuKupnmwqiJc27b4dCFmB/T60ExgmtDD7waf4LdrbJ8CPZzZRHYErDYNhoz+ql8fUdYwM/opf90PoPAQA==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
+
+  express-unless@2.1.3:
+    resolution: {integrity: sha512-wj4tLMyCVYuIIKHGt0FhCtIViBcwzWejX0EjNxveAa6dG+0XBCQhMbx+PnkLkFCxLC69qoFrxds4pIyL88inaQ==}
 
   express-validator@7.3.0:
     resolution: {integrity: sha512-ujK2BX5JUun5NR4JuBo83YSXoDDIpoGz3QxgHTzQcHFevkKnwV1in4K7YNuuXQ1W3a2ObXB/P4OTnTZpUyGWiw==}
@@ -57554,6 +57586,12 @@ snapshots:
       react: 19.2.1
       react-dom: 19.2.0(react@19.2.1)
 
+  '@storybook/instrumenter@8.6.14(storybook@10.0.8(@testing-library/dom@10.4.0)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      '@vitest/utils': 2.1.9
+      storybook: 10.0.8(@testing-library/dom@10.4.0)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2))
+
   '@storybook/instrumenter@8.6.14(storybook@10.0.8(@testing-library/dom@9.3.4)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)))':
     dependencies:
       '@storybook/global': 5.0.0
@@ -57767,6 +57805,17 @@ snapshots:
       '@storybook/client-logger': 7.6.20
       memoizerific: 1.11.3
       qs: 6.14.0
+
+  '@storybook/test@8.6.14(storybook@10.0.8(@testing-library/dom@10.4.0)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)))':
+    dependencies:
+      '@storybook/global': 5.0.0
+      '@storybook/instrumenter': 8.6.14(storybook@10.0.8(@testing-library/dom@10.4.0)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)))
+      '@testing-library/dom': 10.4.0
+      '@testing-library/jest-dom': 6.5.0
+      '@testing-library/user-event': 14.5.2(@testing-library/dom@10.4.0)
+      '@vitest/expect': 2.0.5
+      '@vitest/spy': 2.0.5
+      storybook: 10.0.8(@testing-library/dom@10.4.0)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2))
 
   '@storybook/test@8.6.14(storybook@10.0.8(@testing-library/dom@9.3.4)(msw@2.12.2(@types/node@24.10.1)(typescript@5.9.3))(prettier@3.6.2)(react-dom@19.2.0(react@19.2.1))(react@19.2.1)(vite@7.2.2(@types/node@24.10.1)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.2)))':
     dependencies:
@@ -60632,6 +60681,10 @@ snapshots:
   '@types/estree@0.0.39': {}
 
   '@types/estree@1.0.8': {}
+
+  '@types/express-jwt@7.4.4':
+    dependencies:
+      express-jwt: 8.5.1
 
   '@types/express-rate-limit@6.0.2(express@5.1.0)':
     dependencies:
@@ -67898,6 +67951,12 @@ snapshots:
 
   expr-eval@2.0.2: {}
 
+  express-jwt@8.5.1:
+    dependencies:
+      '@types/jsonwebtoken': 9.0.10
+      express-unless: 2.1.3
+      jsonwebtoken: 9.0.3
+
   express-rate-limit@8.1.0(express@4.21.2):
     dependencies:
       express: 4.21.2
@@ -67912,6 +67971,8 @@ snapshots:
     dependencies:
       express: 5.1.0
       ip-address: 10.0.1
+
+  express-unless@2.1.3: {}
 
   express-validator@7.3.0:
     dependencies:
