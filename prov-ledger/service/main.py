@@ -1,136 +1,91 @@
-import csv
-import io
-import json
-from datetime import datetime
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from typing import List
 
-from fastapi import FastAPI, HTTPException, Body, UploadFile, File
-from pydantic import BaseModel, Field
-from prov.model import ProvDocument
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric import padding, rsa
-from cryptography.exceptions import InvalidSignature
+from . import crud, models, logic, database
+
+# Create database tables on startup
+database.create_tables()
 
 app = FastAPI()
 
-
-# Models
-class SignedProvDocument(BaseModel):
-    document: dict  # PROV-JSON
-    signature: str  # Hex-encoded signature
-
-class Namespace(BaseModel):
-    prefix: str
-    uri: str
-
-
-# In-memory storage
-_prov_documents: dict[str, SignedProvDocument] = {}
-_public_keys: dict[str, rsa.RSAPublicKey] = {}
-_private_keys: dict[str, rsa.RSAPrivateKey] = {}
-_namespaces: dict[str, str] = {} # For managing cross-domain namespaces
-_green_lock_ledger: dict[str, ProvDocument] = {}
-
-
-# Generate a key pair for demo purposes
-key_id = "default_key"
-private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
-_private_keys[key_id] = private_key
-_public_keys[key_id] = private_key.public_key()
-
-
 # API Endpoints
-@app.post("/namespace")
-async def register_namespace(namespace: Namespace):
-    if namespace.prefix in _namespaces:
-        raise HTTPException(status_code=409, detail="Namespace prefix already registered")
-    _namespaces[namespace.prefix] = namespace.uri
-    return {"message": "Namespace registered"}
+from fastapi import Response
 
-@app.post("/documents/{doc_id}")
-async def submit_document(doc_id: str, signed_doc: SignedProvDocument):
-    if doc_id in _prov_documents:
-        raise HTTPException(status_code=409, detail="Document with this ID already exists")
+@app.post("/evidence/", response_model=models.Evidence, status_code=201)
+def create_evidence(evidence: models.EvidenceCreate, response: Response, db: Session = Depends(crud.get_db)):
+    checksum = logic.generate_checksum(evidence.content)
+    db_evidence = crud.get_evidence_by_checksum(db, checksum=checksum)
+    if db_evidence:
+        response.status_code = 200
+        return db_evidence
+    return crud.create_evidence(db=db, evidence=evidence, checksum=checksum)
 
-    # Verify the signature
-    public_key = _public_keys.get(key_id)  # In a real app, you'd look up the key
-    if not public_key:
-        raise HTTPException(status_code=500, detail="Public key not found")
+@app.get("/evidence/{evidence_id}", response_model=models.Evidence)
+def get_evidence(evidence_id: int, db: Session = Depends(crud.get_db)):
+    db_evidence = crud.get_evidence(db, evidence_id=evidence_id)
+    if db_evidence is None:
+        raise HTTPException(status_code=404, detail="Evidence not found")
+    return db_evidence
 
-    try:
-        message = json.dumps(signed_doc.document, sort_keys=True).encode('utf-8')
-        signature = bytes.fromhex(signed_doc.signature)
-        public_key.verify(
-            signature,
-            message,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
-        )
-    except InvalidSignature:
-        raise HTTPException(status_code=400, detail="Invalid signature")
-    except Exception:
-        raise HTTPException(status_code=500, detail="Error during verification")
+@app.post("/claims/", response_model=models.Claim)
+def create_claim(claim: models.ClaimCreate, db: Session = Depends(crud.get_db)):
+    return crud.create_claim(db=db, claim=claim)
 
-    _prov_documents[doc_id] = signed_doc
-    return {"message": "Document submitted and verified successfully"}
+@app.get("/claims/{claim_id}", response_model=models.Claim)
+def get_claim(claim_id: int, db: Session = Depends(crud.get_db)):
+    db_claim = crud.get_claim_with_evidence_ids(db, claim_id=claim_id)
+    if db_claim is None:
+        raise HTTPException(status_code=404, detail="Claim not found")
+    return db_claim
 
+@app.post("/claims/{claim_id}/link", response_model=models.Claim)
+def link_claim(claim_id: int, link: models.ClaimLink, db: Session = Depends(crud.get_db)):
+    db_claim = crud.link_claim(
+        db,
+        source_claim_id=claim_id,
+        target_claim_id=link.target_claim_id,
+        relationship_type=link.relationship_type,
+    )
+    if db_claim is None:
+        raise HTTPException(status_code=404, detail="Claim not found")
+    return db_claim
 
-@app.get("/documents/{doc_id}", response_model=SignedProvDocument)
-async def get_document(doc_id: str):
-    if doc_id not in _prov_documents:
-        raise HTTPException(status_code=404, detail="Document not found")
-    return _prov_documents[doc_id]
+@app.post("/disclosures/", response_model=models.DisclosureBundle)
+def create_disclosure_bundle(bundle: models.DisclosureBundleCreate, db: Session = Depends(crud.get_db)):
+    evidence_checksums = []
+    for evidence_id in bundle.evidence_ids:
+        evidence = crud.get_evidence(db, evidence_id)
+        if not evidence:
+            raise HTTPException(status_code=404, detail=f"Evidence with ID {evidence_id} not found")
+        evidence_checksums.append(evidence.checksum)
 
-@app.post("/documents/verify/{doc_id}")
-async def verify_document_integrity(doc_id: str):
-    if doc_id not in _prov_documents:
-        raise HTTPException(status_code=404, detail="Document not found")
+    merkle_root = logic.generate_merkle_root(evidence_checksums)
 
-    signed_doc = _prov_documents[doc_id]
-    public_key = _public_keys.get(key_id)
-    if not public_key:
-        raise HTTPException(status_code=500, detail="Public key not found")
+    db_bundle = crud.create_disclosure_bundle(db=db, bundle=bundle, merkle_root=merkle_root)
+    return models.DisclosureBundle(
+        id=db_bundle.id,
+        evidence_ids=[evidence.id for evidence in db_bundle.evidence],
+        merkle_root=db_bundle.merkle_root,
+        created_at=db_bundle.created_at,
+    )
 
-    try:
-        message = json.dumps(signed_doc.document, sort_keys=True).encode('utf-8')
-        signature = bytes.fromhex(signed_doc.signature)
-        public_key.verify(
-            signature,
-            message,
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
-        )
-        return {"verified": True}
-    except InvalidSignature:
-        return {"verified": False, "reason": "Invalid signature"}
-    except Exception as e:
-        return {"verified": False, "reason": str(e)}
+@app.get("/disclosures/{bundle_id}", response_model=models.DisclosureBundle)
+def get_disclosure_bundle(bundle_id: int, db: Session = Depends(crud.get_db)):
+    db_bundle = crud.get_disclosure_bundle(db, bundle_id=bundle_id)
+    if db_bundle is None:
+        raise HTTPException(status_code=404, detail="Disclosure bundle not found")
+    return models.DisclosureBundle.from_orm(db_bundle)
 
-@app.post("/migrate/green-lock-ledger")
-async def migrate_green_lock_ledger(file: UploadFile = File(...)):
-    content = await file.read()
-    reader = csv.reader(io.StringIO(content.decode('utf-8')))
+# Helper endpoints for creating dependent entities
+@app.post("/sources/", response_model=models.Source)
+def create_source(source: models.SourceCreate, db: Session = Depends(crud.get_db)):
+    return crud.create_source(db=db, source=source)
 
-    for row in reader:
-        pr_id, branch, author, timestamp, title = row
+@app.post("/transforms/", response_model=models.Transform)
+def create_transform(transform: models.TransformCreate, db: Session = Depends(crud.get_db)):
+    return crud.create_transform(db=db, transform=transform)
 
-        doc = ProvDocument()
-        doc.add_namespace("pr", "https://github.com/pulls/")
-        doc.add_namespace("user", "https://github.com/")
-
-        pr_entity = doc.entity(f"pr:{pr_id}", {
-            "pr:branch": branch,
-            "pr:title": title
-        })
-        author_agent = doc.agent(f"user:{author}")
-
-        doc.wasAttributedTo(pr_entity, author_agent)
-
-        _green_lock_ledger[pr_id] = doc
-
-    return {"message": f"Migrated {len(_green_lock_ledger)} records from green-lock-ledger"}
+@app.post("/licenses/", response_model=models.License)
+def create_license(license: models.LicenseCreate, db: Session = Depends(crud.get_db)):
+    return crud.create_license(db=db, license=license)
