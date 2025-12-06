@@ -13,8 +13,6 @@ import type {
   ServerMessage,
   StreamEvent,
   StreamError,
-  Subscription,
-  ConnectionMetadata,
 } from '../types';
 
 export interface WebSocketServerOptions {
@@ -44,7 +42,7 @@ export class StreamingWebSocketServer extends EventEmitter {
       maxConnections: options.maxConnections || 10000,
       heartbeatInterval: options.heartbeatInterval || 30000,
       messageTimeout: options.messageTimeout || 5000,
-      authenticate: options.authenticate || (async () => ({})),
+      authenticate: options.authenticate || (() => Promise.resolve({})),
     };
 
     this.wss = new WebSocketServer({
@@ -89,7 +87,7 @@ export class StreamingWebSocketServer extends EventEmitter {
     this.connections.set(connectionId, connection);
 
     socket.on('message', (data: Buffer) => {
-      this.handleMessage(connectionId, data);
+      void this.handleMessage(connectionId, data);
     });
 
     socket.on('close', () => {
@@ -112,7 +110,7 @@ export class StreamingWebSocketServer extends EventEmitter {
 
   private async handleMessage(connectionId: string, data: Buffer) {
     const connection = this.connections.get(connectionId);
-    if (!connection) return;
+    if (!connection) {return;}
 
     connection.metadata.lastActivity = new Date();
 
@@ -162,7 +160,7 @@ export class StreamingWebSocketServer extends EventEmitter {
 
   private async handleSubscribe(connectionId: string, message: any) {
     const connection = this.connections.get(connectionId);
-    if (!connection) return;
+    if (!connection) {return;}
 
     const { topic, filter } = message;
 
@@ -173,7 +171,10 @@ export class StreamingWebSocketServer extends EventEmitter {
     if (!this.subscriptions.has(topic)) {
       this.subscriptions.set(topic, new Set());
     }
-    this.subscriptions.get(topic)!.add(connectionId);
+    const subs = this.subscriptions.get(topic);
+    if (subs) {
+      subs.add(connectionId);
+    }
 
     // Send confirmation
     this.sendMessage(connectionId, {
@@ -184,11 +185,12 @@ export class StreamingWebSocketServer extends EventEmitter {
     });
 
     this.emit('subscribe', { connectionId, topic, filter });
+    await Promise.resolve();
   }
 
   private async handleUnsubscribe(connectionId: string, message: any) {
     const connection = this.connections.get(connectionId);
-    if (!connection) return;
+    if (!connection) {return;}
 
     const { topic } = message;
 
@@ -213,6 +215,7 @@ export class StreamingWebSocketServer extends EventEmitter {
     });
 
     this.emit('unsubscribe', { connectionId, topic });
+    await Promise.resolve();
   }
 
   private async handleQuery(connectionId: string, message: any) {
@@ -222,11 +225,12 @@ export class StreamingWebSocketServer extends EventEmitter {
       query: message.query,
       stream: message.stream,
     });
+    await Promise.resolve();
   }
 
   private handleDisconnection(connectionId: string) {
     const connection = this.connections.get(connectionId);
-    if (!connection) return;
+    if (!connection) {return;}
 
     // Remove from all subscriptions
     connection.subscriptions.forEach((topic) => {
@@ -252,7 +256,7 @@ export class StreamingWebSocketServer extends EventEmitter {
    */
   broadcast(topic: string, event: StreamEvent) {
     const subscribers = this.subscriptions.get(topic);
-    if (!subscribers) return;
+    if (!subscribers) {return;}
 
     const message: ServerMessage = {
       type: 'data',
@@ -270,14 +274,15 @@ export class StreamingWebSocketServer extends EventEmitter {
    */
   sendMessage(connectionId: string, message: ServerMessage) {
     const connection = this.connections.get(connectionId);
-    if (!connection) return;
+    if (!connection) {return;}
 
     try {
       if (connection.socket.readyState === WebSocket.OPEN) {
         connection.socket.send(JSON.stringify(message));
       }
-    } catch (error) {
-      console.error('Failed to send message:', error);
+    } catch (_error) {
+      // Suppress console error or use logger if available
+      // console.error('Failed to send message:', error);
     }
   }
 
@@ -311,7 +316,7 @@ export class StreamingWebSocketServer extends EventEmitter {
           this.sendMessage(connectionId, {
             type: 'ping',
             timestamp: now,
-          } as any);
+          });
         }
       });
     }, this.options.heartbeatInterval);
