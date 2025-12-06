@@ -83,6 +83,7 @@ export interface SandboxResult {
   truncated: boolean;
   plan: string[];
   policyWarnings: string[];
+  monitoring: QueryMonitoringResult;
 }
 
 export interface QueryPlan {
@@ -91,6 +92,8 @@ export interface QueryPlan {
   depth: number;
   containsAggregation: boolean;
 }
+
+export type { QueryMonitoringResult } from './queryMonitor.js';
 
 export type UndoRedoCommand<TState> = {
   description: string;
