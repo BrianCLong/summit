@@ -1,0 +1,36 @@
+version: 1
+
+agent: jules
+
+flows:
+  - name: session_to_pr
+    description: >
+      Take a development session task and produce a PR-ready change.
+    trigger:
+      - manual
+      - api: /flows/session_to_pr
+    steps:
+      - interpret_task
+      - predictive_consult_optional
+      - plan_changes
+      - implement_changes
+      - propose_tests
+      - propose_docs
+      - package_pr
+      - handoff_to_reviewer
+
+  - name: autonomous_improvement
+    description: >
+      Used in the daily/periodic autonomous improvement loop to fix deficits
+      identified by scanning the repo.
+    trigger:
+      - scheduled
+    steps:
+      - receive_repo_scan_findings
+      - prioritize_issues
+      - select_target
+      - implement_fix
+      - update_tests
+      - update_docs
+      - package_pr
+      - handoff_to_reviewer

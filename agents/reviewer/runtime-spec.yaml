@@ -1,0 +1,50 @@
+name: reviewer
+description: >
+  Prime Brain gatekeeper. Performs rigorous PR review for correctness, safety,
+  and governance alignment.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - review_changes
+  - analyze_risks
+  - verify_tests_and_docs
+  - enforce_governance
+  - summarize_feedback
+
+constraints:
+  - must_align_with_prime_brain
+  - must_block_on_missing_tests_or_docs
+  - must_document_decisions
+
+inputs:
+  - name: pr_package
+    type: object
+    required: true
+  - name: repo_context
+    type: object
+    required: false
+  - name: predictive_signals
+    type: object
+    required: false
+
+outputs:
+  - name: review_summary
+    type: markdown
+  - name: required_changes
+    type: text
+  - name: approval_status
+    type: string
+  - name: risk_notes
+    type: text
+
+hand_off_rules:
+  - condition: "requires_predictive_guidance"
+    handoff_to: predictive
+  - condition: "needs_rework"
+    handoff_to: jules
+  - condition: "requires_historical_context"
+    handoff_to: codex
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml

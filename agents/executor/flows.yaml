@@ -1,0 +1,33 @@
+version: 1
+
+agent: executor
+
+flows:
+  - name: session_routing
+    description: >
+      Accept a task and route it to the correct agent with proper context.
+    trigger:
+      - manual
+      - api: /flows/session_routing
+    steps:
+      - validate_inputs
+      - select_flow
+      - dispatch_to_agent
+      - monitor_status
+      - collect_outputs
+      - publish_status
+
+  - name: multi_agent_pr_flow
+    description: >
+      Coordinate the full journey from task intake to PR review across agents.
+    trigger:
+      - manual
+      - api: /flows/multi_agent_pr_flow
+    steps:
+      - accept_task
+      - request_predictive_signals
+      - handoff_to_jules
+      - aggregate_results
+      - handoff_to_reviewer
+      - finalize_status
+      - archive_artifacts
