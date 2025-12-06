@@ -1,0 +1,36 @@
+# Cross-repo dependency map (Phase 1)
+# Add new entries when establishing a cross-repo contract.
+- repo_name: intelgraph-platform
+  role: source-of-truth
+  description: Core domain models, policy bundles, and API surface.
+  dependencies:
+    - target_repo: ga-graphai
+      dependency_type: library
+      versioning_strategy: workspace-pinned@main
+    - target_repo: intelgraph-studio
+      dependency_type: API
+      versioning_strategy: api-tag+semver
+    - target_repo: prov-ledger-service
+      dependency_type: schema
+      versioning_strategy: schema-revision-file
+- repo_name: ga-graphai
+  role: peer-library
+  description: Graph analytics and cognitive orchestration packages consumed by the platform.
+  dependencies:
+    - target_repo: intelgraph-platform
+      dependency_type: library
+      versioning_strategy: workspace-pinned@main
+- repo_name: intelgraph-studio
+  role: consumer
+  description: Analyst-facing UI that consumes generated GraphQL/OpenAPI clients.
+  dependencies:
+    - target_repo: intelgraph-platform
+      dependency_type: API
+      versioning_strategy: api-tag+semver
+- repo_name: prov-ledger-service
+  role: consumer
+  description: Ledger/event sink that consumes platform event and policy schemas.
+  dependencies:
+    - target_repo: intelgraph-platform
+      dependency_type: schema
+      versioning_strategy: schema-revision-file
