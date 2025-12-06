@@ -3,13 +3,13 @@ const fs = require('fs');
 const path = require('path');
 const {
   ensureAuthenticated,
-  requirePermission,
 } = require('../middleware/auth');
 const { getPostgresPool } = require('../config/database');
+const { authorize } = require('../middleware/authorization');
 
 const router = express.Router();
 
-router.use(ensureAuthenticated, requirePermission('admin:access'));
+router.use(ensureAuthenticated, authorize('manage_users'));
 
 router.get('/users', async (req, res) => {
   try {

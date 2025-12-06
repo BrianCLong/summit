@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 interface Override {
   id: string;
@@ -28,6 +29,8 @@ export default function OverridesPanel() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const { hasPermission } = useAuth();
+  const canManageOverrides = hasPermission?.('manage_users');
 
   const [newOverride, setNewOverride] = useState<CreateOverrideRequest>({
     tenant_id: '',
@@ -54,6 +57,11 @@ export default function OverridesPanel() {
   };
 
   const createOverride = async () => {
+    if (!canManageOverrides) {
+      setError('You do not have permission to create overrides');
+      return;
+    }
+
     if (!newOverride.tenant_id || !newOverride.reason) {
       setError('Tenant ID and reason are required');
       return;
@@ -93,6 +101,11 @@ export default function OverridesPanel() {
   };
 
   const revokeOverride = async (overrideId: string) => {
+    if (!canManageOverrides) {
+      setError('You do not have permission to revoke overrides');
+      return;
+    }
+
     try {
       const response = await fetch(`/api/admin/overrides/${overrideId}`, {
         method: 'DELETE',
@@ -158,18 +171,27 @@ export default function OverridesPanel() {
         <h2>Budget & Policy Overrides</h2>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
+          disabled={!canManageOverrides}
           style={{
             background: '#007bff',
             color: 'white',
             border: 'none',
             padding: '8px 16px',
             borderRadius: '4px',
-            cursor: 'pointer',
+            cursor: canManageOverrides ? 'pointer' : 'not-allowed',
+            opacity: canManageOverrides ? 1 : 0.6,
           }}
         >
           {showCreateForm ? 'Cancel' : 'Create Override'}
         </button>
       </div>
+
+      {!canManageOverrides && (
+        <p style={{ marginTop: -12, marginBottom: 16, color: '#6c757d' }}>
+          You have read-only access to overrides. Management actions are
+          disabled until elevated permissions are granted.
+        </p>
+      )}
 
       {error && (
         <div
@@ -355,15 +377,16 @@ export default function OverridesPanel() {
           <div style={{ display: 'flex', gap: 12 }}>
             <button
               onClick={createOverride}
-              disabled={createLoading}
+              disabled={createLoading || !canManageOverrides}
               style={{
                 background: '#28a745',
                 color: 'white',
                 border: 'none',
                 padding: '10px 20px',
                 borderRadius: '4px',
-                cursor: createLoading ? 'not-allowed' : 'pointer',
-                opacity: createLoading ? 0.7 : 1,
+                cursor:
+                  createLoading || !canManageOverrides ? 'not-allowed' : 'pointer',
+                opacity: createLoading || !canManageOverrides ? 0.7 : 1,
               }}
             >
               {createLoading ? 'Creating...' : 'Create Override'}
@@ -521,6 +544,7 @@ export default function OverridesPanel() {
                     {override.status === 'active' && (
                       <button
                         onClick={() => revokeOverride(override.id)}
+                        disabled={!canManageOverrides}
                         style={{
                           background: '#dc3545',
                           color: 'white',
@@ -528,7 +552,8 @@ export default function OverridesPanel() {
                           padding: '4px 8px',
                           borderRadius: '4px',
                           fontSize: '12px',
-                          cursor: 'pointer',
+                          cursor: canManageOverrides ? 'pointer' : 'not-allowed',
+                          opacity: canManageOverrides ? 1 : 0.6,
                         }}
                       >
                         Revoke
