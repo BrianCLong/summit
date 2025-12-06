@@ -1,0 +1,362 @@
+openapi: 3.0.0
+info:
+  title: IntelGraph Summit API
+  version: 1.0.0
+  description: API for IntelGraph Summit, including Maestro orchestration and monitoring.
+
+servers:
+  - url: /api
+    description: Base API path for most endpoints
+  - url: /
+    description: Root path for monitoring and health
+
+paths:
+  /monitoring/metrics:
+    get:
+      summary: Prometheus metrics
+      tags: [Observability]
+      responses:
+        '200':
+          description: Prometheus metrics text
+          content:
+            text/plain:
+              schema:
+                type: string
+
+  /health:
+    get:
+      summary: System health check
+      tags: [Observability]
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+
+  /api/maestro/route/preview:
+    post:
+      summary: Preview routing candidates for a task
+      tags: [Maestro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task:
+                  type: string
+                context:
+                  type: object
+      responses:
+        '200':
+          description: List of candidates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoutePreviewResponse'
+
+  /api/maestro/route/execute:
+    post:
+      summary: Execute a task with selected candidates
+      tags: [Maestro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task:
+                  type: string
+                selection:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Execution results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteExecuteResponse'
+
+  /api/maestro/web/interfaces:
+    get:
+      summary: Get available web interfaces
+      tags: [Maestro]
+      responses:
+        '200':
+          description: List of web interfaces
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebInterfacesResponse'
+
+  /api/maestro/web/run:
+    post:
+      summary: Orchestrate web search/content tasks
+      tags: [Maestro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                task:
+                  type: string
+                interfaces:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Orchestration results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestrateWebResponse'
+
+  /api/maestro/budgets:
+    get:
+      summary: Get budget and usage information
+      tags: [Maestro]
+      responses:
+        '200':
+          description: Budget info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BudgetsResponse'
+
+  /api/maestro/policy/check:
+    post:
+      summary: Check policy for an action
+      tags: [Maestro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                action:
+                  type: string
+                payload:
+                  type: object
+      responses:
+        '200':
+          description: Policy check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyCheckResponse'
+
+  /api/maestro/runs:
+    post:
+      summary: Create and run a new pipeline
+      tags: [Maestro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                requestText:
+                  type: string
+      responses:
+        '200':
+          description: Run created
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        error:
+          type: string
+
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [model, web]
+        name:
+          type: string
+        score:
+          type: number
+        cost_est:
+          type: number
+        latency_est_ms:
+          type: number
+        rationale:
+          type: string
+
+    RoutePreviewResponse:
+      type: object
+      properties:
+        candidates:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candidate'
+
+    RouteExecuteStep:
+      type: object
+      properties:
+        id:
+          type: string
+        source:
+          type: string
+        status:
+          type: string
+          enum: [ok, fail]
+        tokens:
+          type: number
+        cost:
+          type: number
+        citations:
+          type: array
+          items:
+            type: object
+            properties:
+              title:
+                type: string
+              url:
+                type: string
+        elapsed_ms:
+          type: number
+
+    RouteExecuteResponse:
+      type: object
+      properties:
+        runId:
+          type: string
+        steps:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteExecuteStep'
+
+    WebInterface:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        reliability:
+          type: number
+        cost_hint:
+          type: number
+
+    WebInterfacesResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebInterface'
+
+    OrchestrateWebResponse:
+      type: object
+      properties:
+        responses:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              interface:
+                type: string
+              text:
+                type: string
+              citations:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                    url:
+                      type: string
+        synthesized:
+          type: object
+          properties:
+            text:
+              type: string
+            citations:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  url:
+                    type: string
+
+    BudgetsResponse:
+      type: object
+      properties:
+        tier:
+          type: string
+          enum: [bronze, silver, gold]
+        remaining:
+          type: object
+          properties:
+            tokens:
+              type: number
+            usd:
+              type: number
+        burndown:
+          type: array
+          items:
+            type: object
+            properties:
+              t:
+                type: string
+              usd:
+                type: number
+              tokens:
+                type: number
+
+    PolicyCheckResponse:
+      type: object
+      properties:
+        allowed:
+          type: boolean
+        reason:
+          type: string
+        elevation:
+          type: object
+          properties:
+            contact:
+              type: string
+            sla_hours:
+              type: number
