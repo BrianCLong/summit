@@ -16,20 +16,19 @@ import Menu from '@mui/material/Menu';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
-import {
-  Dashboard,
-  AccountTree,
-  Search,
-  Security,
-  Gavel,
-  Notifications,
-  Settings,
-  ExitToApp,
-  Person,
-  Timeline,
-  Assessment,
-  OpenInNew,
-} from '@mui/icons-material';
+// Direct icon imports for tree-shaking (reduces bundle size)
+import Dashboard from '@mui/icons-material/Dashboard';
+import AccountTree from '@mui/icons-material/AccountTree';
+import Search from '@mui/icons-material/Search';
+import Security from '@mui/icons-material/Security';
+import Gavel from '@mui/icons-material/Gavel';
+import Notifications from '@mui/icons-material/Notifications';
+import Settings from '@mui/icons-material/Settings';
+import ExitToApp from '@mui/icons-material/ExitToApp';
+import Person from '@mui/icons-material/Person';
+import Timeline from '@mui/icons-material/Timeline';
+import Assessment from '@mui/icons-material/Assessment';
+import OpenInNew from '@mui/icons-material/OpenInNew';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { setTenant, setStatus } from '../store/slices/ui';
 
