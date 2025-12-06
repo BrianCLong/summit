@@ -265,6 +265,30 @@ async function createPostgresTables(): Promise<void> {
       'CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)',
     );
 
+    // Approvals table (HITL)
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS approvals (
+        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        requester_id VARCHAR(255) NOT NULL,
+        approver_id VARCHAR(255),
+        status VARCHAR(20) NOT NULL,
+        action VARCHAR(100),
+        payload JSONB,
+        reason TEXT,
+        decision_reason TEXT,
+        run_id VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        resolved_at TIMESTAMP
+      )
+    `);
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_approvals_status ON approvals(status)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_approvals_run_id ON approvals(run_id)',
+    );
+
     logger.info('PostgreSQL tables created');
   } catch (error) {
     logger.error('Failed to create PostgreSQL tables:', error);
