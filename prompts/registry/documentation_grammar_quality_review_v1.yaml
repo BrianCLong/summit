@@ -1,0 +1,18 @@
+id: documentation_grammar_quality_review_v1
+version: 1.0.0
+owner: documentation
+module: ai-content-assistant
+type: system
+description: Identify grammar, spelling, and style issues within documentation content.
+riskTier: medium
+tags:
+  - quality
+  - review
+variables:
+  - content_body
+template: |
+  Check the following content for grammar, spelling, and style issues:
+
+  {{content_body}}
+
+  Identify specific issues with their positions and provide suggestions for improvement.

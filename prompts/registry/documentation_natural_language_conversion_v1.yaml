@@ -1,0 +1,27 @@
+id: documentation_natural_language_conversion_v1
+version: 1.0.0
+owner: documentation
+module: ai-content-assistant
+type: system
+description: Convert unstructured natural language into formatted documentation.
+riskTier: medium
+tags:
+  - conversion
+  - formatting
+variables:
+  - target_format
+  - input_text
+template: |
+  Convert the following natural language description into well-structured {{target_format}} documentation:
+
+  Input:
+  {{input_text}}
+
+  Requirements:
+  - Use proper {{target_format}} syntax
+  - Create clear headings and structure
+  - Include code examples where appropriate
+  - Add lists and formatting for readability
+  - Ensure technical accuracy
+
+  Output only the formatted {{target_format}} content.
