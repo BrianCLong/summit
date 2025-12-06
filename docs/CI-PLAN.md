@@ -1,56 +1,38 @@
-# CI/CD & Merge Train Plan
+# CI Plan
 
-## 1. CI Strategy
+This document captures the proposed consolidation of Summit CI into three clear lanes plus merge-train support. It is intended to be the source of truth for near-term CI refactors and required checks.
 
-We are adopting a streamlined, 3-lane CI strategy to ensure reliability and speed.
+## Overview
 
-### Lanes
+- **Fast lane (PR protection)**: A single workflow (planned name: `ci-lint-and-unit.yml`) that runs on `pull_request` and `push` to `main`. It installs with pnpm on Node 20, caches dependencies, and runs type-check, lint, and unit tests only. This replaces legacy fast-path workflows once landed.
+- **Golden path (integration)**: A workflow (`ci-golden-path.yml`) that mirrors the developer golden path: `make bootstrap`, `make up`, `make smoke`, with health checks and artifacted docker logs. It runs on `push` to `main`, manual dispatch, and nightly schedule.
+- **Security lane**: A consolidated security workflow (`security.yml` or equivalent) covering SCA and secret scanning. Runs on `push` to `main` and a weekly schedule. Existing overlapping security workflows will be retired or routed through this job.
 
-1.  **Fast Lane (`ci-lint-and-unit.yml`)**
-    *   **Scope**: PRs, Main.
-    *   **Checks**: `pnpm install`, `pnpm lint`, `pnpm typecheck`, `pnpm test`.
-    *   **Goal**: fail fast (< 5 mins).
-    *   **Status**: Implemented.
+## Required checks for branch protection
 
-2.  **Golden Path Lane (`ci-golden-path.yml`)**
-    *   **Scope**: PRs (optional/conditional), Main, Nightly.
-    *   **Checks**: `make bootstrap`, `make up`, `make smoke`.
-    *   **Goal**: Guarantee the "deployable-first" promise.
-    *   **Status**: Implemented.
+Set the following jobs as required on `main` once the workflows are in place:
 
-3.  **Security Lane (`security.yml`)**
-    *   **Scope**: Main, Nightly.
-    *   **Checks**: CodeQL, Dependency Review, Gitleaks.
-    *   **Status**: Implemented.
+- `ci-lint-and-unit / lint-and-unit`
+- `ci-golden-path / golden-path`
+- `security / security-scan`
 
-### Consolidation
-We will delete legacy workflows that duplicate these functions to reduce noise and confusion.
+Job names will be kept stable to avoid frequent branch protection updates.
 
-## 2. Branch Protection & Policy
+## Merge-train and auto-update strategy
 
-The following checks will be **Required** on `main`:
-*   `lint-and-unit` (from `ci-lint-and-unit.yml`)
-*   `golden-path` (from `ci-golden-path.yml`)
-*   `CodeQL` (from `security.yml`) - *Optional for now if slow, but recommended.*
+- Keep the existing **“Auto Update PRs (safe)”** workflow to rebase/merge `main` into open PRs; prefer updates via labels instead of blanket rebases.
+- Define a label such as `automerge-safe` or `merge-train` to opt PRs into automated sequencing.
+- A lightweight train runner should iterate through labelled PRs, update from `main`, wait for the required checks above, and auto-merge when clean. The train stops on the first failure to keep `main` green.
+- Exclude PRs with conflict markers or “danger” labels (`do-not-merge`, `wip`, `needs-design`).
 
-## 3. Merge Train Strategy
+## Cleanup scope
 
-We will implement a "Label-Driven" merge train.
+- Deprecate or delete legacy fast lanes that duplicate lint/type/test (e.g., `ci.yml`, `ci.main.yml`, `ci-main.yml`, `dev-ci.yml`, `lane-fast.yml`) after the new fast lane is validated.
+- Keep golden-path variants (`golden-path-ci.yml`, `ci-golden-path.yml`, `golden-pr-tests.yml`) but route them through the new canonical `ci-golden-path.yml` to avoid drift.
+- Consolidate security workflows into one canonical file; stub superseded workflows with comments pointing to the new location if immediate deletion is risky.
 
-*   **Label**: `automerge-safe`
-*   **Mechanism**:
-    *   A script/bot polls for PRs with this label.
-    *   **Loop**:
-        1.  Pick highest priority PR.
-        2.  Update branch from `main` (rebase preferred, or merge).
-        3.  Wait for CI (Fast Lane + Golden Path).
-        4.  If Green: Merge.
-        5.  If Red: Remove label, comment on PR.
-*   **Automation**:
-    *   We will use `scripts/merge-train.sh` to drive this process locally or via a dispatch workflow.
+## Documentation and onboarding
 
-## 4. Actions
-
-1.  **Cleanup**: Delete `ci-test.yml`, `ci.yml`, `ci.main.yml`, `ci-comprehensive.yml`, and other noise.
-2.  **Docs**: Update `README.md` and create `RUNBOOKS/CI.md`.
-3.  **Tooling**: Create `scripts/merge-train.sh`.
+- Update README with a concise CI & merge policy section (required checks, golden-path enforcement on `main`, and the auto-merge label policy).
+- Maintain a runbook (`RUNBOOKS/CI.md`) describing workflows, debugging tips, and local pre-flight commands (`./start.sh` or `make bootstrap && make up && make smoke`).
+- Keep workflow names and job names human-readable and consistent with the required-checks list above.
