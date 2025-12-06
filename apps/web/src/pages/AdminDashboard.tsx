@@ -28,12 +28,13 @@ import { gql } from '@apollo/client';
 
 import DashboardOverview from '../components/admin/DashboardOverview';
 import UserManagement from '../components/admin/UserManagement';
-import ModerationQueue from '../components/admin/ModerationQueue';
-import FeatureFlagsPanel from '../components/admin/FeatureFlagsPanel';
-import AuditLogViewer from '../components/admin/AuditLogViewer';
-import DataExportTools from '../components/admin/DataExportTools';
-import SystemConfigPanel from '../components/admin/SystemConfigPanel';
-import AlertsPanel from '../components/admin/AlertsPanel';
+// TODO: Implement missing admin components
+// import ModerationQueue from '../components/admin/ModerationQueue';
+// import FeatureFlagsPanel from '../components/admin/FeatureFlagsPanel';
+// import AuditLogViewer from '../components/admin/AuditLogViewer';
+// import DataExportTools from '../components/admin/DataExportTools';
+// import SystemConfigPanel from '../components/admin/SystemConfigPanel';
+// import AlertsPanel from '../components/admin/AlertsPanel';
 
 // ============================================================================
 // GRAPHQL QUERIES
@@ -260,27 +261,27 @@ export default function AdminDashboard() {
       </TabPanel>
 
       <TabPanel value={currentTab} index={2}>
-        <ModerationQueue stats={dashboardData?.adminDashboard?.moderation} />
+        <Typography>Moderation Queue (Coming Soon)</Typography>
       </TabPanel>
 
       <TabPanel value={currentTab} index={3}>
-        <FeatureFlagsPanel />
+        <Typography>Feature Flags (Coming Soon)</Typography>
       </TabPanel>
 
       <TabPanel value={currentTab} index={4}>
-        <AuditLogViewer />
+        <Typography>Audit Log Viewer (Coming Soon)</Typography>
       </TabPanel>
 
       <TabPanel value={currentTab} index={5}>
-        <DataExportTools />
+        <Typography>Data Export Tools (Coming Soon)</Typography>
       </TabPanel>
 
       <TabPanel value={currentTab} index={6}>
-        <SystemConfigPanel />
+        <Typography>System Configuration (Coming Soon)</Typography>
       </TabPanel>
 
       <TabPanel value={currentTab} index={7}>
-        <AlertsPanel alerts={alertsData?.adminAlerts} />
+        <Typography>Alerts Panel (Coming Soon)</Typography>
       </TabPanel>
     </Container>
   );

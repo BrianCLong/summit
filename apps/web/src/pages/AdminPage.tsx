@@ -4,20 +4,14 @@ import { Button } from '@/components/ui/Button'
 import { Plus } from 'lucide-react'
 import { trackGoldenPathStep } from '@/telemetry/metrics'
 import { markStepComplete } from '@/lib/activation'
-import { useToast } from '@/components/ui/Toast'
 import { ContextualNudge } from '@/components/activation/ContextualNudge'
 
 export default function AdminPage() {
-  const { toast } = useToast()
-
   const handleCreateTenant = () => {
     trackGoldenPathStep('tenant_created')
     markStepComplete('tenant_created')
-    toast({
-      title: 'Tenant Created',
-      description: 'Your new tenant organization has been provisioned.',
-      variant: 'success',
-    })
+    // TODO: Add toast notification when component is implemented
+    console.log('Tenant created successfully')
   }
 
   return (
