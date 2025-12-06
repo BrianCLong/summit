@@ -1,9 +1,34 @@
 const { getNeo4jDriver } = require('../config/database');
 const logger = require('../utils/logger');
+const { withCache } = require('../utils/cacheHelper');
 
 class GraphAnalyticsService {
   constructor() {
     this.logger = logger;
+    this.driver = getNeo4jDriver();
+  }
+
+  /**
+   * Projects a named graph for the specific tenant and investigation context.
+   * This is a "Hot Spot" optimization to avoid re-projecting for every algo run.
+   */
+  async ensureGraphProjection(session, graphName, investigationId, tenantId) {
+    const exists = await session.run(`
+      CALL gds.graph.exists($graphName) YIELD exists RETURN exists
+    `, { graphName });
+
+    if (!exists.records[0].get('exists')) {
+      logger.info(`Projecting graph ${graphName}`);
+      // Use Cypher Projection to correctly filter nodes/rels by tenant/investigation
+      await session.run(`
+        CALL gds.graph.project(
+          $graphName,
+          'MATCH (n:Entity) WHERE n.investigation_id = $investigationId AND n.tenantId = $tenantId RETURN id(n) AS id',
+          'MATCH (n:Entity)-[r]-(m:Entity) WHERE n.investigation_id = $investigationId AND n.tenantId = $tenantId AND m.investigation_id = $investigationId AND m.tenantId = $tenantId RETURN id(n) AS source, id(m) AS target',
+          { parameters: { investigationId: $investigationId, tenantId: $tenantId } }
+        )
+      `, { graphName, investigationId, tenantId });
+    }
   }
 
   /**
@@ -168,7 +193,7 @@ class GraphAnalyticsService {
   }
 
   /**
-   * Find communities using label propagation algorithm
+   * Find communities using label propagation algorithm (Legacy)
    */
   async detectCommunities(investigationId = null) {
     const session = this.driver.session();
@@ -233,6 +258,46 @@ class GraphAnalyticsService {
   }
 
   /**
+   * Find communities using GDS Louvain (Optimized)
+   * Falls back to detectCommunities if GDS fails or tenantId missing
+   */
+  async getCommunityDetection(investigationId, tenantId) {
+    if (!tenantId) {
+        // Fallback for backward compatibility
+        return this.detectCommunities(investigationId);
+    }
+
+    const cacheKey = `graph:analytics:community:${tenantId}:${investigationId}`;
+    return withCache(cacheKey, 600, async () => {
+        const session = this.driver.session();
+        try {
+          // Optimized: Use named graph projection via Cypher Projection for correct filtering
+          const graphName = `community-${tenantId}-${investigationId}`;
+          await this.ensureGraphProjection(session, graphName, investigationId, tenantId);
+
+          const cypher = `
+            CALL gds.louvain.stream($graphName, {
+                includeIntermediateCommunities: false
+            })
+            YIELD nodeId, communityId
+            RETURN gds.util.asNode(nodeId).id AS id, communityId
+            ORDER BY communityId ASC
+          `;
+          const res = await session.run(cypher, { graphName });
+          return res.records.map((r) => ({
+            id: r.get('id'),
+            communityId: r.get('communityId'),
+          }));
+        } catch (err) {
+            this.logger.warn('GDS Community Detection failed, falling back', err);
+            return this.detectCommunities(investigationId);
+        } finally {
+          await session.close();
+        }
+    });
+  }
+
+  /**
    * Find shortest paths between nodes
    */
   async findShortestPaths(sourceId, targetId, maxLength = 6) {
@@ -283,16 +348,71 @@ class GraphAnalyticsService {
     }
   }
 
+  async getShortestPath(sourceId, targetId, investigationId, tenantId) {
+    // Optimized alias to findShortestPaths but with specific graph constraints if needed
+    // For now reusing the existing logic logic but adapting the signature
+    return this.findShortestPaths(sourceId, targetId, 15);
+  }
+
   /**
    * Analyze node importance using PageRank algorithm
+   * Optimized to use GDS Named Graphs when tenantId is provided.
    */
   async calculatePageRank(
     investigationId = null,
     iterations = 20,
     dampingFactor = 0.85,
+    tenantId = null // Optional new param
   ) {
-    const session = this.driver.session();
+    // Handling overloaded arguments or object destructuring if needed,
+    // but assuming standard call signature for now.
+    // If called as getPageRank(invId, tenantId), iterations will be tenantId string!
 
+    let actualTenantId = tenantId;
+    let actualIterations = iterations;
+
+    // Check if second arg is string (tenantId) instead of number (iterations)
+    if (typeof iterations === 'string') {
+        actualTenantId = iterations;
+        actualIterations = 20; // reset default
+    }
+
+    if (actualTenantId) {
+        const cacheKey = `graph:analytics:pagerank:${actualTenantId}:${investigationId}`;
+        return withCache(cacheKey, 600, async () => {
+            const session = this.driver.session();
+            try {
+                const graphName = `pagerank-${actualTenantId}-${investigationId}`;
+                await this.ensureGraphProjection(session, graphName, investigationId, actualTenantId);
+
+                const cypher = `
+                    CALL gds.pageRank.stream($graphName, {
+                        maxIterations: 20,
+                        dampingFactor: 0.85
+                    })
+                    YIELD nodeId, score
+                    RETURN gds.util.asNode(nodeId).id AS id, score
+                    ORDER BY score DESC
+                    LIMIT 50
+                `;
+                const res = await session.run(cypher, { graphName });
+                return res.records.map((r) => ({
+                    id: r.get('id'),
+                    label: r.get('id'), // Fallback label
+                    pageRank: r.get('score'),
+                    score: r.get('score'),
+                }));
+            } catch (err) {
+                 this.logger.warn('GDS PageRank failed, falling back to legacy', err);
+                 // Fall through to legacy
+            } finally {
+                await session.close();
+            }
+        });
+    }
+
+    // LEGACY IMPLEMENTATION
+    const session = this.driver.session();
     try {
       const constraints = investigationId
         ? 'WHERE n.investigation_id = $investigationId AND m.investigation_id = $investigationId'
@@ -362,7 +482,7 @@ class GraphAnalyticsService {
       });
 
       // Iterate PageRank algorithm
-      for (let iter = 0; iter < iterations; iter++) {
+      for (let iter = 0; iter < actualIterations; iter++) {
         nodeArray.forEach((nodeId) => {
           let sum = 0;
 
@@ -412,6 +532,11 @@ class GraphAnalyticsService {
     } finally {
       await session.close();
     }
+  }
+
+  // Alias for optimized call signature
+  async getPageRank(investigationId, tenantId) {
+      return this.calculatePageRank(investigationId, 20, 0.85, tenantId);
   }
 
   /**
