@@ -49,6 +49,12 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
+import { buildMaestroRouter } from './routes/maestro.js';
+import { buildApprovalsRouter } from './routes/approvals.js';
+import { IntelGraphClientImpl } from './intelgraph/client.js';
+import { CostMeter } from './maestro/cost_meter.js';
+import { OpenAILLM } from './maestro/adapters/llm_openai.js';
+import { Maestro } from './maestro/core.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -59,6 +65,20 @@ export const createApp = async () => {
   await tracer.initialize();
 
   const app = express();
+
+  // Maestro + HITL setup
+  const intelGraphClient = new IntelGraphClientImpl();
+  const costMeter = new CostMeter(intelGraphClient, {
+    'openai:gpt-4.1': { inputPer1K: 0.01, outputPer1K: 0.03 },
+  });
+  const llm = new OpenAILLM(
+    cfg.OPENAI_API_KEY || 'dev-placeholder-maestro-key',
+    costMeter,
+  );
+  const maestro = new Maestro(intelGraphClient, costMeter, llm, {
+    defaultPlannerAgent: 'openai:gpt-4.1',
+    defaultActionAgent: 'openai:gpt-4.1',
+  });
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
@@ -149,6 +169,8 @@ export const createApp = async () => {
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
+  app.use('/api/maestro', buildMaestroRouter(maestro));
+  app.use('/api/approvals', buildApprovalsRouter(maestro));
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
