@@ -1,0 +1,366 @@
+# P24: Argo Rollouts Canary Deployment Configuration
+# Progressive delivery with automated analysis and rollback
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: summit-api
+  namespace: summit-production
+  labels:
+    app.kubernetes.io/name: summit-api
+    app.kubernetes.io/part-of: summit
+    app.kubernetes.io/component: api
+spec:
+  replicas: 5
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: summit-api
+  template:
+    metadata:
+      labels:
+        app: summit-api
+        app.kubernetes.io/name: summit-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "4000"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: summit-api
+      priorityClassName: summit-api
+      containers:
+        - name: api
+          image: ghcr.io/brianclong/summit/api:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: PORT
+              value: "4000"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          envFrom:
+            - configMapRef:
+                name: summit-api-config
+            - secretRef:
+                name: summit-api-secrets
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "2"
+              memory: "2Gi"
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.cache
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: summit-api
+                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: summit-api
+
+  # Canary Strategy Configuration
+  strategy:
+    canary:
+      # Traffic routing
+      canaryService: summit-api-canary
+      stableService: summit-api-stable
+      trafficRouting:
+        nginx:
+          stableIngress: summit-api-ingress
+          additionalIngressAnnotations:
+            canary-by-header: X-Canary
+            canary-by-header-value: "true"
+
+      # Progressive rollout steps
+      steps:
+        # Step 1: 5% traffic to canary
+        - setWeight: 5
+        - pause: { duration: 2m }
+
+        # Step 2: Run analysis
+        - analysis:
+            templates:
+              - templateName: summit-success-rate
+              - templateName: summit-latency
+            args:
+              - name: service-name
+                value: summit-api-canary
+
+        # Step 3: Increase to 20%
+        - setWeight: 20
+        - pause: { duration: 5m }
+
+        # Step 4: Another analysis
+        - analysis:
+            templates:
+              - templateName: summit-success-rate
+              - templateName: summit-latency
+              - templateName: summit-error-rate
+
+        # Step 5: 50% traffic
+        - setWeight: 50
+        - pause: { duration: 10m }
+
+        # Step 6: Final analysis before full rollout
+        - analysis:
+            templates:
+              - templateName: summit-full-analysis
+
+        # Step 7: 80% traffic
+        - setWeight: 80
+        - pause: { duration: 5m }
+
+        # Final promotion happens automatically if all analyses pass
+
+      # Anti-affinity for canary pods
+      antiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          weight: 100
+
+      # Canary metadata
+      canaryMetadata:
+        labels:
+          role: canary
+        annotations:
+          deployment.kubernetes.io/revision: canary
+
+      stableMetadata:
+        labels:
+          role: stable
+
+      # Maximum unavailable during rollout
+      maxUnavailable: 1
+      maxSurge: 2
+
+      # Scaledown delay before scaling down old pods
+      scaleDownDelaySeconds: 30
+
+      # Abort on failure
+      abortScaleDownDelaySeconds: 30
+
+---
+# Analysis Template: Success Rate
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-success-rate
+  namespace: summit-production
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: success-rate
+      interval: 30s
+      count: 10
+      successCondition: result[0] >= 0.99
+      failureCondition: result[0] < 0.95
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.summit-observability:9090
+          query: |
+            sum(rate(http_requests_total{
+              service="{{ args.service-name }}",
+              code!~"5.."
+            }[2m]))
+            /
+            sum(rate(http_requests_total{
+              service="{{ args.service-name }}"
+            }[2m]))
+
+---
+# Analysis Template: Latency
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-latency
+  namespace: summit-production
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: p99-latency
+      interval: 30s
+      count: 10
+      successCondition: result[0] < 0.5
+      failureCondition: result[0] > 1.0
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.summit-observability:9090
+          query: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{
+                service="{{ args.service-name }}"
+              }[2m])) by (le)
+            )
+
+---
+# Analysis Template: Error Rate
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-error-rate
+  namespace: summit-production
+spec:
+  metrics:
+    - name: error-rate
+      interval: 30s
+      count: 10
+      successCondition: result[0] < 0.01
+      failureCondition: result[0] > 0.05
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.summit-observability:9090
+          query: |
+            sum(rate(http_requests_total{code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+
+---
+# Analysis Template: Full Analysis (all metrics)
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: summit-full-analysis
+  namespace: summit-production
+spec:
+  metrics:
+    - name: success-rate
+      interval: 1m
+      count: 5
+      successCondition: result[0] >= 0.995
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.summit-observability:9090
+          query: |
+            sum(rate(http_requests_total{code!~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total[5m]))
+
+    - name: p99-latency
+      interval: 1m
+      count: 5
+      successCondition: result[0] < 0.5
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.summit-observability:9090
+          query: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+            )
+
+    - name: throughput
+      interval: 1m
+      count: 5
+      successCondition: result[0] > 100
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.summit-observability:9090
+          query: sum(rate(http_requests_total[5m]))
+
+    - name: memory-usage
+      interval: 1m
+      count: 5
+      successCondition: result[0] < 0.8
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.summit-observability:9090
+          query: |
+            sum(container_memory_working_set_bytes{
+              pod=~"summit-api.*"
+            })
+            /
+            sum(container_spec_memory_limit_bytes{
+              pod=~"summit-api.*"
+            })
+
+---
+# Services for canary traffic splitting
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-api-stable
+  namespace: summit-production
+spec:
+  selector:
+    app: summit-api
+  ports:
+    - port: 80
+      targetPort: 4000
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-api-canary
+  namespace: summit-production
+spec:
+  selector:
+    app: summit-api
+  ports:
+    - port: 80
+      targetPort: 4000

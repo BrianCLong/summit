@@ -1,0 +1,309 @@
+meta:
+  id: plan.mock-data-factory@v1
+  owner: 'data-engineering'
+  purpose: 'Create consistent test data utilities across languages'
+  tags:
+    - testing
+    - mock-data
+    - fixtures
+    - seed
+    - deterministic
+  guardrails:
+    - 'Mock data must be deterministic'
+    - 'No PII in generated data'
+    - 'Data must be realistic for testing'
+    - 'Cross-language consistency required'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  data_types: string
+  languages: string
+  testing_frameworks: string
+  database_targets: string
+  special_requirements: string
+
+template: |
+  You are a Test Engineer creating a mock data factory for Summit/IntelGraph.
+
+  **Objective:** Consistent test data across languages.
+
+  **Data Types:**
+  {{data_types}}
+
+  **Languages:**
+  {{languages}}
+
+  **Testing Frameworks:**
+  {{testing_frameworks}}
+
+  **Database Targets:**
+  {{database_targets}}
+
+  **Special Requirements:**
+  {{special_requirements}}
+
+  ## Deliverables
+
+  ### 1. Mock Data Library
+  ```yaml
+  library:
+    structure:
+      core:
+        - generators: Random data generators with seeds
+        - factories: Entity factories with relationships
+        - fixtures: Pre-defined test scenarios
+        - seeds: Deterministic seed datasets
+
+    packages:
+      typescript: "@summit/test-data"
+      python: "summit-test-data"
+      shared: "data/fixtures/*.json"
+
+    principles:
+      - Deterministic with seed
+      - Cross-language compatible
+      - Realistic but fake
+      - No PII ever
+  ```
+
+  ### 2. Entity Factories
+  ```yaml
+  factories:
+    typescript: |
+      import { Factory } from 'fishery';
+      import { faker } from '@faker-js/faker';
+
+      // Seed for determinism
+      faker.seed(12345);
+
+      export const entityFactory = Factory.define<Entity>(({ sequence }) => ({
+        id: faker.string.uuid(),
+        type: faker.helpers.arrayElement(['Person', 'Organization', 'Location']),
+        name: faker.person.fullName(),
+        createdAt: faker.date.past(),
+        metadata: {
+          source: faker.helpers.arrayElement(['api', 'import', 'enrichment']),
+          confidence: faker.number.float({ min: 0.5, max: 1.0 }),
+        },
+      }));
+
+      // With relationships
+      export const investigationFactory = Factory.define<Investigation>(({ sequence }) => ({
+        id: faker.string.uuid(),
+        title: faker.lorem.sentence(),
+        entities: entityFactory.buildList(5),
+        relationships: relationshipFactory.buildList(10),
+        createdBy: userFactory.build(),
+      }));
+
+    python: |
+      from factory import Factory, Faker, LazyAttribute, SubFactory
+      from faker import Faker as FakerLib
+
+      fake = FakerLib()
+      fake.seed_instance(12345)
+
+      class EntityFactory(Factory):
+          class Meta:
+              model = Entity
+
+          id = Faker('uuid4')
+          type = Faker('random_element', elements=['Person', 'Organization', 'Location'])
+          name = Faker('name')
+          created_at = Faker('past_datetime')
+
+          @LazyAttribute
+          def metadata(self):
+              return {
+                  'source': fake.random_element(['api', 'import', 'enrichment']),
+                  'confidence': fake.pyfloat(min_value=0.5, max_value=1.0),
+              }
+
+      class InvestigationFactory(Factory):
+          class Meta:
+              model = Investigation
+
+          id = Faker('uuid4')
+          title = Faker('sentence')
+          entities = SubFactory(EntityFactory, size=5)
+  ```
+
+  ### 3. Seed Datasets
+  ```yaml
+  seed_datasets:
+    - name: golden_path
+      description: Standard test scenario for smoke tests
+      file: data/fixtures/golden-path.json
+      contents:
+        investigations: 3
+        entities: 50
+        relationships: 100
+        users: 5
+      usage: |
+        pnpm run seed --dataset=golden_path
+
+    - name: performance_test
+      description: Large dataset for load testing
+      file: data/fixtures/performance.json
+      contents:
+        investigations: 100
+        entities: 10000
+        relationships: 50000
+      usage: |
+        pnpm run seed --dataset=performance_test
+
+    - name: edge_cases
+      description: Unusual data for edge case testing
+      file: data/fixtures/edge-cases.json
+      contents:
+        - empty_investigation: No entities
+        - large_entity: 10MB of metadata
+        - unicode_names: International characters
+        - circular_relationships: Self-referencing
+      usage: |
+        pnpm run seed --dataset=edge_cases
+
+    format:
+      json: |
+        {
+          "entities": [
+            {
+              "id": "entity-001",
+              "type": "Person",
+              "name": "Test Entity 1",
+              "metadata": {}
+            }
+          ],
+          "relationships": [
+            {
+              "id": "rel-001",
+              "source": "entity-001",
+              "target": "entity-002",
+              "type": "KNOWS"
+            }
+          ]
+        }
+  ```
+
+  ### 4. Cross-Language Compatibility
+  ```yaml
+  compatibility:
+    shared_fixtures:
+      location: data/fixtures/
+      format: JSON
+      schema: data/schemas/fixture-schema.json
+      validation: |
+        # Validate fixture against schema
+        ajv validate -s schema.json -d fixture.json
+
+    deterministic_seeds:
+      master_seed: 12345
+      per_test_salt: test_name_hash
+      reproducibility: |
+        # Same seed produces same data in all languages
+        ts: faker.seed(12345) → "John Smith"
+        py: fake.seed_instance(12345) → "John Smith"
+
+    id_generation:
+      format: "{prefix}-{counter:04d}"
+      examples:
+        - entity-0001
+        - investigation-0001
+        - relationship-0001
+      rationale: Predictable IDs for assertions
+
+    data_mapping:
+      ensure:
+        - Same UUIDs across languages
+        - Same timestamps (ISO 8601)
+        - Same enum values
+        - Same relationship patterns
+  ```
+
+  ### 5. Usage Examples
+  ```yaml
+  usage:
+    unit_test:
+      typescript: |
+        import { entityFactory, investigationFactory } from '@summit/test-data';
+
+        describe('EntityService', () => {
+          it('should create entity', async () => {
+            const input = entityFactory.build();
+            const result = await entityService.create(input);
+            expect(result.id).toBeDefined();
+          });
+
+          it('should handle batch', async () => {
+            const entities = entityFactory.buildList(10);
+            const results = await entityService.batchCreate(entities);
+            expect(results).toHaveLength(10);
+          });
+        });
+
+    integration_test:
+      setup: |
+        # Seed database before test
+        pnpm run seed --dataset=golden_path --target=test_db
+
+      test: |
+        describe('Investigation API', () => {
+          beforeAll(async () => {
+            await seedDatabase('golden_path');
+          });
+
+          it('should return seeded investigations', async () => {
+            const response = await api.get('/investigations');
+            expect(response.body).toHaveLength(3);
+          });
+        });
+
+    e2e_test:
+      playwright: |
+        test('investigation workflow', async ({ page }) => {
+          // Seed specific scenario
+          await seedScenario('single_investigation');
+
+          await page.goto('/investigations');
+          await expect(page.locator('.investigation')).toHaveCount(1);
+        });
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Factories work in all languages
+  - [ ] Deterministic output with seeds
+  - [ ] Shared fixtures validated
+  - [ ] Tests run with deterministic data
+  - [ ] Documentation complete
+
+  ## Rollback Plan
+  - Mock data library is additive
+  - Tests can use old random data
+  - Fixtures can be regenerated
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'test-data-factory'
+    inputs:
+      data_types: 'Entities, Relationships, Investigations, Users, Queries'
+      languages: 'TypeScript, Python'
+      testing_frameworks: 'Jest, Pytest, Playwright'
+      database_targets: 'Neo4j, PostgreSQL, in-memory'
+      special_requirements: 'Golden path scenario, performance datasets'
+    expected_contains:
+      - 'Entity Factories'
+      - 'Seed Datasets'
+      - 'Cross-Language'
+      - 'Usage Examples'

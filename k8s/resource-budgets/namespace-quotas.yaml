@@ -1,0 +1,105 @@
+# P21: Resource Budgets - Namespace ResourceQuotas
+# Defines resource limits per namespace to prevent resource exhaustion
+apiVersion: v1
+kind: List
+items:
+  # Production namespace quota - strict limits
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: production-quota
+      namespace: summit-production
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      hard:
+        # Compute resources
+        requests.cpu: "100"
+        requests.memory: "200Gi"
+        limits.cpu: "200"
+        limits.memory: "400Gi"
+        # Storage
+        requests.storage: "500Gi"
+        persistentvolumeclaims: "50"
+        # Object counts
+        pods: "200"
+        services: "100"
+        secrets: "200"
+        configmaps: "100"
+        replicationcontrollers: "50"
+        services.loadbalancers: "10"
+        services.nodeports: "20"
+      scopeSelector:
+        matchExpressions:
+          - scopeName: PriorityClass
+            operator: In
+            values:
+              - high
+              - medium
+              - low
+
+  # Staging namespace quota - moderate limits
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: staging-quota
+      namespace: summit-staging
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      hard:
+        requests.cpu: "50"
+        requests.memory: "100Gi"
+        limits.cpu: "100"
+        limits.memory: "200Gi"
+        requests.storage: "200Gi"
+        persistentvolumeclaims: "30"
+        pods: "100"
+        services: "50"
+        secrets: "100"
+        configmaps: "50"
+
+  # Development namespace quota - relaxed limits
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: development-quota
+      namespace: summit-development
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      hard:
+        requests.cpu: "20"
+        requests.memory: "40Gi"
+        limits.cpu: "40"
+        limits.memory: "80Gi"
+        requests.storage: "100Gi"
+        persistentvolumeclaims: "20"
+        pods: "50"
+        services: "30"
+        secrets: "50"
+        configmaps: "30"
+
+  # AI/ML workloads quota - GPU resources
+  - apiVersion: v1
+    kind: ResourceQuota
+    metadata:
+      name: ai-workloads-quota
+      namespace: summit-ai
+      labels:
+        app.kubernetes.io/part-of: summit
+        app.kubernetes.io/component: resource-management
+    spec:
+      hard:
+        requests.cpu: "32"
+        requests.memory: "128Gi"
+        limits.cpu: "64"
+        limits.memory: "256Gi"
+        requests.nvidia.com/gpu: "8"
+        limits.nvidia.com/gpu: "8"
+        pods: "20"
+        persistentvolumeclaims: "10"
+        requests.storage: "1Ti"

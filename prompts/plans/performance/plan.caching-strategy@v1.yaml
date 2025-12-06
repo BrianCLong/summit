@@ -1,0 +1,158 @@
+meta:
+  id: plan.caching-strategy@v1
+  owner: 'platform-engineering'
+  purpose: 'Design and implement caching and memoization strategy to reduce redundant computation'
+  tags:
+    - performance
+    - caching
+    - redis
+    - memoization
+    - optimization
+  guardrails:
+    - 'Cache invalidation strategy must be defined upfront'
+    - 'Cache keys must be deterministic and collision-free'
+    - 'Stale data risks must be documented and mitigated'
+    - 'Cache size limits must prevent memory exhaustion'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  cacheable_operations: string
+  current_latency: string
+  cache_infrastructure: string
+  data_freshness_requirements: string
+  memory_budget: string
+
+template: |
+  You are a Performance Architect designing caching strategy for Summit/IntelGraph.
+
+  **Objective:** Reduce redundant computation via strategic caching.
+
+  **Cacheable Operations:**
+  {{cacheable_operations}}
+
+  **Current Latency:**
+  {{current_latency}}
+
+  **Cache Infrastructure:**
+  {{cache_infrastructure}}
+
+  **Data Freshness Requirements:**
+  {{data_freshness_requirements}}
+
+  **Memory Budget:**
+  {{memory_budget}}
+
+  ## Deliverables
+
+  ### 1. Caching Plan
+  ```yaml
+  cache_layers:
+    - layer: application
+      type: in-memory (LRU)
+      scope: per-instance
+      max_size: [MB]
+      ttl: [seconds]
+
+    - layer: distributed
+      type: Redis
+      scope: cluster-wide
+      max_size: [GB]
+      ttl: [seconds]
+      eviction_policy: [allkeys-lru|volatile-lru|...]
+  ```
+
+  ### 2. Cacheable Operations Matrix
+  | Operation | Layer | TTL | Key Pattern | Hit Rate Target | Invalidation Trigger |
+  |-----------|-------|-----|-------------|-----------------|---------------------|
+  | Entity lookup | Redis | 5m | entity:{id} | 80% | Entity update |
+  | Graph traversal | Local | 30s | graph:{query_hash} | 60% | Time-based |
+  | User session | Redis | 24h | session:{token} | 95% | Logout/expire |
+
+  ### 3. Cache Key Strategy
+  ```typescript
+  // Key patterns with namespacing
+  const keyPatterns = {
+    entity: (id: string) => `summit:v1:entity:${id}`,
+    query: (hash: string) => `summit:v1:query:${hash}`,
+    user: (id: string) => `summit:v1:user:${id}`,
+  };
+
+  // Hash function for complex queries
+  function queryHash(query: object): string {
+    return crypto.createHash('sha256')
+      .update(JSON.stringify(query))
+      .digest('hex')
+      .substring(0, 16);
+  }
+  ```
+
+  ### 4. Invalidation Policy
+  ```yaml
+  invalidation_strategies:
+    - trigger: entity_update
+      action: delete_key
+      keys: ["entity:{id}", "graph:*:{id}:*"]
+
+    - trigger: schema_change
+      action: flush_namespace
+      namespace: "summit:v1:query:*"
+
+    - trigger: ttl_expiry
+      action: lazy_refresh
+      background: true
+  ```
+
+  ### 5. Memoization Patterns
+  ```typescript
+  // Function-level memoization
+  const memoizedExpensiveOp = memoize(expensiveOperation, {
+    maxAge: 60000,  // 1 minute
+    maxSize: 100,   // entries
+    cacheKey: (args) => JSON.stringify(args),
+  });
+  ```
+
+  ### 6. Monitoring and Metrics
+  - Cache hit/miss ratio per operation
+  - Cache size and memory usage
+  - Eviction rate
+  - Latency improvement tracking
+
+  ### 7. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Cache hit rate meets targets (>70% for hot paths)
+  - [ ] Latency reduction demonstrated
+  - [ ] No stale data issues in testing
+  - [ ] Invalidation works correctly
+  - [ ] Memory usage within budget
+
+  ## Rollback Plan
+  - Feature flag to bypass cache
+  - Flush commands documented
+  - Fallback to uncached operation
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'entity-caching'
+    inputs:
+      cacheable_operations: 'Entity lookup, Entity search, Relationship queries'
+      current_latency: 'Lookup: 50ms, Search: 200ms, Relationships: 150ms'
+      cache_infrastructure: 'Redis 7.0, 2GB cluster'
+      data_freshness_requirements: 'Entities: 5min stale OK, Relationships: 1min'
+      memory_budget: '512MB local, 2GB Redis'
+    expected_contains:
+      - 'cache_layers'
+      - 'Invalidation Policy'
+      - 'hit rate'
+      - 'Rollback Plan'

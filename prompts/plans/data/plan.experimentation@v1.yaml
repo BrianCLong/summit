@@ -1,0 +1,278 @@
+meta:
+  id: plan.experimentation@v1
+  owner: 'data-engineering'
+  purpose: 'Bootstrap lightweight A/B testing and experimentation platform'
+  tags:
+    - experimentation
+    - ab-testing
+    - feature-flags
+    - analytics
+    - product
+  guardrails:
+    - 'Experiments must have clear hypotheses'
+    - 'Statistical significance must be ensured'
+    - 'User experience must not be degraded'
+    - 'Results must be reproducible'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  experiment_types: string
+  user_segments: string
+  metric_requirements: string
+  infrastructure: string
+  traffic_volume: string
+
+template: |
+  You are a Product Engineer building an experimentation platform for Summit/IntelGraph.
+
+  **Objective:** Lightweight A/B testing scaffold.
+
+  **Experiment Types:**
+  {{experiment_types}}
+
+  **User Segments:**
+  {{user_segments}}
+
+  **Metric Requirements:**
+  {{metric_requirements}}
+
+  **Infrastructure:**
+  {{infrastructure}}
+
+  **Traffic Volume:**
+  {{traffic_volume}}
+
+  ## Deliverables
+
+  ### 1. Experiment Definition DSL
+  ```yaml
+  experiments:
+    - id: exp_new_search_algorithm
+      name: "New Search Algorithm"
+      hypothesis: "New algorithm improves search relevance by 20%"
+      owner: search-team
+      status: running  # draft | running | paused | completed
+
+      targeting:
+        segments:
+          - segment: power_users
+            allocation: 50%
+          - segment: new_users
+            allocation: 30%
+        exclusions:
+          - experiment: exp_other_search_test  # Mutual exclusion
+
+      variants:
+        - id: control
+          name: "Current Algorithm"
+          allocation: 50%
+          config: {}
+
+        - id: treatment
+          name: "New Algorithm"
+          allocation: 50%
+          config:
+            search_algorithm: "v2"
+            relevance_boost: 1.5
+
+      metrics:
+        primary:
+          - name: search_click_through_rate
+            direction: increase
+            min_detectable_effect: 5%
+
+        secondary:
+          - name: time_to_first_click
+            direction: decrease
+          - name: search_abandonment_rate
+            direction: decrease
+
+        guardrail:
+          - name: page_load_time
+            threshold: "< 2x baseline"
+          - name: error_rate
+            threshold: "< 1%"
+
+      schedule:
+        start: "2024-02-01"
+        end: "2024-02-15"
+        min_runtime_days: 7
+        min_sample_size: 1000
+
+      analysis:
+        method: frequentist  # frequentist | bayesian
+        confidence_level: 0.95
+        correction: bonferroni  # For multiple comparisons
+  ```
+
+  ### 2. Experiment Routing
+  ```yaml
+  routing:
+    bucketing:
+      method: deterministic_hash
+      salt: experiment_id + user_id
+      algorithm: murmur3
+
+    assignment_flow:
+      1. Check eligibility (segment, exclusions)
+      2. Hash user_id with experiment salt
+      3. Map hash to bucket (0-100)
+      4. Assign to variant based on allocation
+      5. Cache assignment
+
+    consistency:
+      sticky_bucketing: true
+      cache_ttl: session
+      fallback: control
+
+    implementation:
+      sdk: |
+        interface ExperimentClient {
+          getVariant(experimentId: string, userId: string): Variant;
+          track(experimentId: string, userId: string, metric: string, value: number): void;
+          isEligible(experimentId: string, userId: string): boolean;
+        }
+
+        // Usage
+        const variant = experimentClient.getVariant('exp_new_search', userId);
+        if (variant.id === 'treatment') {
+          // Use new algorithm
+        }
+  ```
+
+  ### 3. Result Capture
+  ```yaml
+  result_capture:
+    events:
+      - type: exposure
+        trigger: When user is assigned to variant
+        data:
+          experiment_id: string
+          variant_id: string
+          user_id: string
+          timestamp: datetime
+          context: object
+
+      - type: metric
+        trigger: When user takes measurable action
+        data:
+          experiment_id: string
+          user_id: string
+          metric_name: string
+          value: number
+          timestamp: datetime
+
+    storage:
+      real_time: Kafka → Flink → Metrics Store
+      batch: S3 → Spark → Data Warehouse
+
+    aggregation:
+      windows: [1h, 1d, experiment_duration]
+      dimensions: [variant, segment, date]
+      metrics: [count, sum, mean, percentiles]
+  ```
+
+  ### 4. Analyzer Fragment
+  ```yaml
+  analysis:
+    statistical_tests:
+      - name: t_test
+        use_for: Continuous metrics (revenue, time)
+        assumptions: Normal distribution, equal variance
+        output: p_value, confidence_interval, effect_size
+
+      - name: chi_square
+        use_for: Categorical metrics (conversion)
+        output: p_value, odds_ratio
+
+      - name: mann_whitney
+        use_for: Non-normal distributions
+        output: p_value, effect_size
+
+    sample_size_calculator:
+      inputs:
+        - baseline_rate
+        - min_detectable_effect
+        - confidence_level (default: 0.95)
+        - power (default: 0.80)
+      formula: |
+        n = 2 * ((z_alpha + z_beta)^2 * p * (1-p)) / delta^2
+
+    results_report:
+      sections:
+        - summary: Key metrics, winner
+        - statistical: p-values, CIs, effect sizes
+        - segments: Breakdown by user segment
+        - guardrails: Did we harm any guardrails?
+        - recommendation: Ship / Don't ship / Iterate
+
+    automation:
+      auto_stop:
+        - condition: guardrail_violated
+          action: pause_experiment
+        - condition: statistical_significance_reached
+          action: notify_owner
+  ```
+
+  ### 5. CI Integration
+  ```yaml
+  ci_integration:
+    experiment_validation:
+      - Check experiment config syntax
+      - Validate targeting rules
+      - Ensure no allocation conflicts
+      - Verify metric definitions exist
+
+    pr_checks:
+      - Experiments changing must be reviewed by data team
+      - New experiments require hypothesis documentation
+
+    deployment:
+      - Experiments deployed via config
+      - No code deployment needed for new experiments
+      - Feature flags can be linked to experiments
+
+    rollback:
+      - One-click experiment pause
+      - Automatic revert to control
+      - Historical assignments preserved
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] A/B experiments can run in CI with results
+  - [ ] Experiment DSL validated
+  - [ ] Results statistically sound
+  - [ ] UI for viewing results
+  - [ ] Documentation complete
+
+  ## Rollback Plan
+  - Any experiment can be paused immediately
+  - Users revert to control experience
+  - No data loss on pause
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'experimentation-platform'
+    inputs:
+      experiment_types: 'UI changes, Algorithm tweaks, Feature launches'
+      user_segments: 'Free, Pro, Enterprise, New users, Power users'
+      metric_requirements: 'Click-through, Conversion, Engagement, Latency'
+      infrastructure: 'Kafka events, PostgreSQL, Grafana'
+      traffic_volume: '100k users/month, 1M events/day'
+    expected_contains:
+      - 'Experiment Definition'
+      - 'Routing'
+      - 'Result Capture'
+      - 'Analyzer'
