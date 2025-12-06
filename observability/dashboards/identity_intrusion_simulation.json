@@ -1,0 +1,59 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Campaign Overview",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(campaign_active_alerts)", "legendFormat": "Active Alerts" }
+      ]
+    },
+    {
+      "title": "Intrusion Timeline",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "rate(intrusion_events_total[1h])", "legendFormat": "{{event_type}}" }
+      ]
+    },
+    {
+      "title": "MITRE ATT&CK Matrix Coverage",
+      "type": "heatmap",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "sum by (technique) (mitre_technique_detections)" }
+      ]
+    },
+    {
+      "title": "Compromised Identities",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "expr": "topk(5, compromised_user_risk_score)" }
+      ]
+    }
+  ],
+  "schemaVersion": 27,
+  "style": "dark",
+  "tags": ["simulation", "red-team", "identity"],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-72h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Identity Intrusion Simulation - Unit 83M",
+  "uid": "identity-sim-001",
+  "version": 1
+}
