@@ -1,0 +1,129 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sandbox-gateway
+  namespace: intelgraph
+spec:
+  podSelector:
+    matchLabels:
+      app: sandbox-gateway
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 4100
+    # Allow traffic from other sandbox services
+    - from:
+        - podSelector:
+            matchLabels:
+              component: sandbox
+      ports:
+        - protocol: TCP
+          port: 4100
+    # Allow Prometheus scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 4100
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow Neo4j access
+    - to:
+        - podSelector:
+            matchLabels:
+              app: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+    # Allow PostgreSQL access
+    - to:
+        - podSelector:
+            matchLabels:
+              app: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow Redis access
+    - to:
+        - podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow OpenTelemetry collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: observability
+          podSelector:
+            matchLabels:
+              app: otel-collector
+      ports:
+        - protocol: TCP
+          port: 4317
+    # Allow sandbox-tenant-profile service
+    - to:
+        - podSelector:
+            matchLabels:
+              app: sandbox-tenant-profile
+      ports:
+        - protocol: TCP
+          port: 4101
+    # Allow datalab-service
+    - to:
+        - podSelector:
+            matchLabels:
+              app: datalab-service
+      ports:
+        - protocol: TCP
+          port: 4102
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: sandbox-gateway-deny-external
+  namespace: intelgraph
+  annotations:
+    description: "Explicitly deny all external egress from sandbox gateway to prevent data exfiltration"
+spec:
+  podSelector:
+    matchLabels:
+      app: sandbox-gateway
+  policyTypes:
+    - Egress
+  egress:
+    # Only allow egress to internal cluster IPs
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+        - ipBlock:
+            cidr: 172.16.0.0/12
+        - ipBlock:
+            cidr: 192.168.0.0/16
