@@ -21,3 +21,12 @@ features:
     expires: 2025-12-31
   search_synonyms: { default: false, owners: [search] }
   search_fuzzy: { default: false, owners: [search] }
+  FEATURE_PROV_LEDGER_V1:
+    default: false
+    description: "Enables the Provenance & Claim Ledger v1 service"
+    owners:
+      - "@squad-prov-ledger"
+    rollout:
+      dev: 0
+      staging: 0
+      prod: 0
