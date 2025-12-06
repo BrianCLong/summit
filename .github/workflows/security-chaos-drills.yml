@@ -1,0 +1,95 @@
+name: Security Chaos Drills
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment (non-prod by default)'
+        required: false
+        default: 'preprod'
+      drills:
+        description: 'Comma-separated drill IDs to run (default: all)'
+        required: false
+        default: ''
+      target:
+        description: 'Override base URL (optional)'
+        required: false
+        default: ''
+      dry-run:
+        description: 'Skip live HTTP execution (safe preview)'
+        required: false
+        default: 'true'
+      allow-prod:
+        description: 'Allow prod runs (requires explicit true)'
+        required: false
+        default: 'false'
+  schedule:
+    - cron: '0 6 1 * *' # first day of each month at 06:00 UTC
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  id-token: write
+  security-events: write
+  pull-requests: write
+
+jobs:
+  run-drills:
+    name: Run security chaos drills
+    runs-on: ubuntu-latest
+    env:
+      PNPM_HOME: ~/.pnpm
+      DRILL_ENV: ${{ github.event.inputs.environment || 'preprod' }}
+      DRILL_LIST: ${{ github.event.inputs.drills || '' }}
+      DRILL_TARGET: ${{ github.event.inputs.target || '' }}
+      DRILL_DRY_RUN: ${{ github.event.inputs['dry-run'] || 'true' }}
+      DRILL_ALLOW_PROD: ${{ github.event.inputs['allow-prod'] || 'false' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Setup PNPM
+        run: |
+          corepack enable
+          pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run security chaos drills
+        run: |
+          REPORT_PATH="drills/security-report-${{ github.run_id }}.md"
+          CMD="pnpm exec ts-node --transpile-only scripts/security/run-drill.ts --env \"${DRILL_ENV}\" --report \"${REPORT_PATH}\""
+
+          if [ -n "${DRILL_LIST}" ]; then
+            CMD+=" --drills=${DRILL_LIST}"
+          fi
+
+          if [ -n "${DRILL_TARGET}" ]; then
+            CMD+=" --target=${DRILL_TARGET}"
+          fi
+
+          if [ "${DRILL_DRY_RUN}" = "true" ]; then
+            CMD+=" --dry-run"
+          fi
+
+          if [ "${DRILL_ENV}" = "prod" ] && [ "${DRILL_ALLOW_PROD}" = "true" ]; then
+            CMD+=" --allow-prod"
+          fi
+
+          echo "Executing: ${CMD}"
+          eval "${CMD}"
+
+      - name: Upload drill report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-chaos-drill-report
+          path: drills/security-report-*.md
