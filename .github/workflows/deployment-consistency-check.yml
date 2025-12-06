@@ -1,0 +1,46 @@
+name: Deployment Consistency Check
+
+on:
+  push:
+    branches: [ main, develop, 'feature/**' ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  golden-path-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: 1. Bootstrap
+        run: ./scripts/bootstrap.sh
+
+      - name: 2. Start
+        run: ./scripts/start.sh
+
+      - name: 3. Health Check (Explicit)
+        run: ./scripts/healthcheck.sh
+
+      - name: 4. Smoke Test
+        run: |
+          # Use pnpm if available (installed by bootstrap)
+          if command -v pnpm &> /dev/null; then
+             pnpm smoke
+          else
+             npm run smoke
+          fi
+
+      - name: 5. Teardown
+        if: always()
+        run: ./scripts/teardown.sh
