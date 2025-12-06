@@ -19,7 +19,10 @@ import {
   closePostgresPool,
   __private,
 } from '../postgres';
-import type { Pool, PoolClient } from 'pg';
+import type pg from 'pg';
+
+type Pool = pg.Pool;
+type PoolClient = pg.PoolClient;
 
 // Mock pg module
 jest.mock('pg', () => {
