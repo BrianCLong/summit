@@ -37,6 +37,17 @@ import {
 import { RedisStateManager, RedisStateConfig } from './state/index.js';
 import { GovernanceEngine, GovernanceResult } from './governance/index.js';
 import { HallucinationScorer } from './scoring/index.js';
+import {
+    ContextCompiler,
+    ContextProcessor,
+    Session,
+    Event,
+    CompilationOptions,
+    HistoryProcessor,
+    InstructionProcessor,
+    ArtifactProcessor,
+    MemoryProcessor,
+} from './context/index.js';
 
 export interface MultiLLMOrchestratorConfig {
   redis?: Partial<RedisStateConfig>;
@@ -47,6 +58,7 @@ export interface MultiLLMOrchestratorConfig {
   defaultModel?: LLMModel;
   maxChainDepth?: number;
   enableMetrics?: boolean;
+  contextProcessors?: ContextProcessor[];
 }
 
 export class MultiLLMOrchestrator extends EventEmitter {
@@ -56,6 +68,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
   private governanceEngine: GovernanceEngine;
   private hallucinationScorer: HallucinationScorer;
   private fallbackRouter: FallbackRouter;
+  private contextCompiler: ContextCompiler;
   private config: MultiLLMOrchestratorConfig;
   private chains: Map<string, ChainConfig> = new Map();
 
@@ -83,6 +96,15 @@ export class MultiLLMOrchestrator extends EventEmitter {
       config.routing,
     );
 
+    // Initialize Context Engineering Pipeline (Google ADK Pattern)
+    const processors = config.contextProcessors ?? [
+        new InstructionProcessor([]),
+        new ArtifactProcessor(),
+        new MemoryProcessor(),
+        new HistoryProcessor()
+    ];
+    this.contextCompiler = new ContextCompiler(processors);
+
     this.setupEventForwarding();
   }
 
@@ -106,10 +128,19 @@ export class MultiLLMOrchestrator extends EventEmitter {
     const userId = options.userId ?? 'anonymous';
 
     // Create or get session
-    let session = await this.stateManager.getSession(sessionId);
-    if (!session) {
-      session = await this.stateManager.createSession(sessionId, userId);
+    let redisSession = await this.stateManager.getSession(sessionId);
+    if (!redisSession) {
+      redisSession = await this.stateManager.createSession(sessionId, userId);
     }
+
+    // Adapt to Context Session
+    const session: Session = {
+        id: redisSession.sessionId,
+        userId: redisSession.userId,
+        events: redisSession.messages.map(m => this.mapLLMMessageToEvent(m)),
+        metadata: redisSession.context,
+        variables: {},
+    };
 
     // Build context
     const context: ChainContext = {
@@ -119,9 +150,15 @@ export class MultiLLMOrchestrator extends EventEmitter {
       userId,
       startTime: new Date(),
       variables: {},
-      history: session.messages,
+      history: redisSession.messages,
       metadata: {},
     };
+
+    // Note: 'request' here overrides the session history typically.
+    // However, if we want to respect the "Context as Compiled View" pattern,
+    // we should really be building the request from the session + new input.
+    // But 'complete' API signature takes 'request' which usually implies a direct call.
+    // We will stick to the existing logic for 'complete' but add governance/scoring.
 
     // Run governance check on input
     let governanceResult: GovernanceResult = { allowed: true, violations: [], warnings: [], score: 1 };
@@ -166,10 +203,13 @@ export class MultiLLMOrchestrator extends EventEmitter {
     const response = routingResult.response;
 
     // Update session state
-    await this.stateManager.addMessage(sessionId, {
-      role: 'user',
-      content: request.messages[request.messages.length - 1].content,
-    });
+    // Note: Request messages might contain full history or just last turn.
+    // We assume just last turn for storage if length > history
+    const lastUserMessage = request.messages[request.messages.length - 1];
+    if (lastUserMessage && lastUserMessage.role === 'user') {
+        await this.stateManager.addMessage(sessionId, lastUserMessage);
+    }
+
     await this.stateManager.addMessage(sessionId, {
       role: 'assistant',
       content: response.content,
@@ -238,9 +278,9 @@ export class MultiLLMOrchestrator extends EventEmitter {
     const startTime = Date.now();
 
     // Create session
-    let session = await this.stateManager.getSession(sessionId);
-    if (!session) {
-      session = await this.stateManager.createSession(sessionId, userId);
+    let redisSession = await this.stateManager.getSession(sessionId);
+    if (!redisSession) {
+      redisSession = await this.stateManager.createSession(sessionId, userId);
     }
 
     const context: ChainContext = {
@@ -250,7 +290,7 @@ export class MultiLLMOrchestrator extends EventEmitter {
       userId,
       startTime: new Date(),
       variables: options.variables ?? {},
-      history: session.messages,
+      history: redisSession.messages,
       metadata: {},
     };
 
@@ -508,6 +548,9 @@ export class MultiLLMOrchestrator extends EventEmitter {
   // Private Methods
   // ============================================================================
 
+  /**
+   * Executes a single step using the Context Engineering pipeline
+   */
   private async executeStep(
     step: ChainStep,
     input: string,
@@ -525,19 +568,41 @@ export class MultiLLMOrchestrator extends EventEmitter {
         transformedInput = step.transform(input, stepContext);
       }
 
-      // Build messages
-      const messages: LLMMessage[] = [];
-      if (step.systemPrompt) {
-        messages.push({ role: 'system', content: step.systemPrompt });
-      }
-      messages.push({ role: 'user', content: transformedInput });
+      // ----------------------------------------------------------------------
+      // NEW: Use Context Compiler to build the request
+      // ----------------------------------------------------------------------
 
-      // Execute with routing
-      const request: LLMRequest = {
-        messages,
-        model: step.model,
-        maxTokens: 4096,
+      // 1. Fetch current session from Redis
+      const redisSession = await this.stateManager.getSession(context.sessionId);
+      if (!redisSession) {
+          throw new OrchestratorError('Session not found');
+      }
+
+      // 2. Adapt to Context Session
+      const session: Session = {
+          id: redisSession.sessionId,
+          userId: redisSession.userId,
+          events: redisSession.messages.map(m => this.mapLLMMessageToEvent(m)),
+          metadata: { ...redisSession.context, systemInstructions: step.systemPrompt },
+          variables: context.variables,
       };
+
+      // 3. Add pending user input to session (transiently for compilation)
+      session.events.push({
+          id: uuid(),
+          type: 'message',
+          role: 'user',
+          content: transformedInput,
+          timestamp: new Date(),
+      });
+
+      // 4. Compile Context
+      const request = await this.contextCompiler.compile(session, {
+          model: step.model ?? this.config.defaultModel!,
+          tokenLimit: 4096, // Could be configured per step
+      });
+
+      // ----------------------------------------------------------------------
 
       const routingResult = await this.fallbackRouter.route(request, stepContext);
 
@@ -613,6 +678,21 @@ export class MultiLLMOrchestrator extends EventEmitter {
 
       return result;
     }
+  }
+
+  private mapLLMMessageToEvent(message: LLMMessage): Event {
+      return {
+          id: uuid(),
+          type: message.role === 'tool' ? 'tool_result' : 'message',
+          role: message.role,
+          content: message.content,
+          metadata: {
+              name: message.name,
+              toolCalls: message.toolCalls,
+              toolCallId: message.toolCallId,
+          },
+          timestamp: new Date(), // RedisStateManager doesn't store timestamps per msg yet
+      };
   }
 
   private estimateRequestCost(request: LLMRequest): number {
