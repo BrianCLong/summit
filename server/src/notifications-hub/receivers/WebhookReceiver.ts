@@ -31,6 +31,13 @@ export interface WebhookReceiverConfig extends ReceiverConfig {
   signatureSecret?: string;
   payloadTransform?: 'full' | 'minimal' | 'custom';
   customTransform?: (event: CanonicalEvent) => Record<string, unknown>;
+  simulation?: {
+    enabled?: boolean;
+    transientFailureRate?: number;
+    httpErrorRate?: number;
+    minLatencyMs?: number;
+    maxLatencyMs?: number;
+  };
 }
 
 export interface WebhookPayload {
@@ -221,18 +228,26 @@ export class WebhookReceiver extends BaseReceiver {
     payload: WebhookPayload,
     headers: Record<string, string>,
   ): Promise<string> {
+    const simulate = this.webhookConfig.simulation?.enabled ?? true;
+    const failureRate = this.webhookConfig.simulation?.transientFailureRate ?? 0.08;
+    const httpErrorRate = this.webhookConfig.simulation?.httpErrorRate ?? 0.05;
+    const minLatency = this.webhookConfig.simulation?.minLatencyMs ?? 100;
+    const maxLatency = this.webhookConfig.simulation?.maxLatencyMs ?? 400;
+
     return await this.retryWithBackoff(async () => {
       // Mock implementation - replace with actual HTTP client (axios, fetch, etc.)
-      await this.sleep(100 + Math.random() * 300);
+      if (simulate) {
+        await this.sleep(minLatency + Math.random() * Math.max(0, maxLatency - minLatency));
 
-      // Simulate occasional failures
-      if (Math.random() < 0.08) {
-        throw new Error('Webhook endpoint timeout');
-      }
+        // Simulate occasional failures
+        if (Math.random() < failureRate) {
+          throw new Error('Webhook endpoint timeout');
+        }
 
-      // Simulate HTTP errors
-      if (Math.random() < 0.05) {
-        throw new Error('Webhook endpoint returned 500 Internal Server Error');
+        // Simulate HTTP errors
+        if (Math.random() < httpErrorRate) {
+          throw new Error('Webhook endpoint returned 500 Internal Server Error');
+        }
       }
 
       // Return mock message ID

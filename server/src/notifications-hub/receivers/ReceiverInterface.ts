@@ -157,7 +157,10 @@ export abstract class BaseReceiver implements IReceiver {
           continue;
         }
 
-        const result = await this.deliverToRecipient(event, recipient, options);
+        const result = await this.retryWithBackoff(
+          () => this.deliverToRecipient(event, recipient, options),
+          `${this.id}:deliver:${recipient}`,
+        );
         results.push(result);
 
         if (result.success) {
