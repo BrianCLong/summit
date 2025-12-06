@@ -4,6 +4,7 @@ import type {
   SandboxResult,
   SandboxRow,
 } from './types.js';
+import { defaultQueryMonitor, IntelGraphQueryMonitor } from './queryMonitor.js';
 
 const WRITE_PATTERN = /\b(create|merge|delete|drop|set)\b/i;
 
@@ -208,7 +209,10 @@ function lookupNeighbor(
   );
 }
 
-export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
+export function sandboxExecute(
+  input: SandboxExecuteInput,
+  monitor: IntelGraphQueryMonitor = defaultQueryMonitor,
+): SandboxResult {
   const cypher = input.cypher.trim();
   ensureReadOnly(cypher);
   const dataset = input.dataset ?? DEFAULT_DATASET;
@@ -252,12 +256,27 @@ export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
       : null,
   );
 
-  return {
-    rows,
-    columns: rows[0]?.columns ?? [primary.alias],
+  const monitoring = monitor.observe({
+    cypher,
+    plan,
+    rowsReturned: rows.length,
     latencyMs,
-    truncated: rows.length > 50,
+    tenantId: input.tenantId,
+    caseId: input.policy.authorityId,
+  });
+
+  const cappedRows =
+    monitoring.throttled && monitoring.throttleLimit
+      ? rows.slice(0, monitoring.throttleLimit)
+      : rows;
+
+  return {
+    rows: cappedRows,
+    columns: cappedRows[0]?.columns ?? [primary.alias],
+    latencyMs,
+    truncated: cappedRows.length > 50 || cappedRows.length < rows.length,
     plan,
     policyWarnings,
+    monitoring,
   };
 }
