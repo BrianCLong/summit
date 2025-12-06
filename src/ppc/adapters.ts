@@ -4,12 +4,27 @@ import {
   Policy,
   PolicyExecution,
 } from './types';
+import {
+  BudgetDecision,
+  BudgetUsage,
+  BudgetLimit,
+  BudgetContext,
+  LlmBudgetEngine,
+  createEngineWithOverrides,
+} from '../core/llmBudget';
 
 export interface LLMRequest {
   prompt: string;
   tools?: string[];
   metadata?: Record<string, unknown>;
   response?: string;
+  budget?: {
+    feature?: string;
+    tenantId?: string;
+    environment?: string;
+    estimatedTokens?: number;
+    estimatedCostUsd?: number;
+  };
 }
 
 export interface GuardedLLMResult {
@@ -80,6 +95,80 @@ const mergeViolations = (
   second: GuardViolation[]
 ): GuardViolation[] => [...first, ...second];
 
+const createBudgetEngine = (): LlmBudgetEngine => {
+  const budgetLogger = {
+    info: (message: string, meta?: Record<string, unknown>) =>
+      console.info(`[llm-budget] ${message}`, meta),
+    warn: (message: string, meta?: Record<string, unknown>) =>
+      console.warn(`[llm-budget] ${message}`, meta),
+  };
+
+  return createEngineWithOverrides(process.env.LLM_BUDGET_OVERRIDES, {
+    logger: budgetLogger,
+  });
+};
+
+const budgetEngine = createBudgetEngine();
+
+const inferBudgetContext = (request: LLMRequest): BudgetContext => {
+  const environment =
+    request.budget?.environment ||
+    (process.env.APP_ENV as string | undefined) ||
+    (process.env.NODE_ENV as string | undefined) ||
+    'dev';
+
+  return {
+    environment,
+    feature: request.budget?.feature || (request.metadata?.feature as string | undefined),
+    tenantId:
+      request.budget?.tenantId || (request.metadata?.tenantId as string | undefined),
+    metadata: request.metadata,
+  };
+};
+
+const estimateBudgetUsage = (request: LLMRequest): BudgetUsage => {
+  const estimatedTokens =
+    request.budget?.estimatedTokens ?? Math.max(1, Math.round(request.prompt.length / 4));
+  const estimatedUsd = request.budget?.estimatedCostUsd ?? 0;
+
+  return {
+    tokens: estimatedTokens,
+    usd: estimatedUsd,
+    requests: 1,
+  };
+};
+
+const annotateBudgetMetadata = (
+  result: GuardedLLMResult,
+  decision: BudgetDecision,
+  scopeHit?: string,
+  remaining?: BudgetLimit
+): GuardedLLMResult => ({
+  ...result,
+  metadata: {
+    ...result.metadata,
+    budgetDecision: decision,
+    budgetScope: scopeHit,
+    budgetRemaining: remaining,
+  },
+});
+
+const blockedByBudget = (
+  request: LLMRequest,
+  scopeHit?: string,
+  message?: string
+): GuardedLLMResult => ({
+  blocked: true,
+  blockedBy: scopeHit || 'llm_budget',
+  prompt: request.prompt,
+  response: message || 'LLM usage capped for this scope.',
+  tools: request.tools ?? [],
+  metadata: { ...request.metadata, budgetDecision: BudgetDecision.HARD_LIMIT },
+  trace: [],
+  stage: 'prompt',
+  violations: [],
+});
+
 const runPromptStage = async (
   policy: Policy,
   provider: string,
@@ -134,6 +223,17 @@ export const createOpenAIAdapter = (
   client: OpenAIStub
 ) => ({
   async complete(request: LLMRequest): Promise<GuardedLLMResult> {
+    const budgetContext = inferBudgetContext(request);
+    const budgetUsage = estimateBudgetUsage(request);
+    const budgetDecision = await budgetEngine.checkAndConsume(
+      budgetContext,
+      budgetUsage
+    );
+
+    if (budgetDecision.decision === BudgetDecision.HARD_LIMIT) {
+      return blockedByBudget(request, budgetDecision.scopeHit, budgetDecision.message);
+    }
+
     const promptStage = await runPromptStage(policy, 'openai', request);
     if (!promptStage.allowed) {
       return {
@@ -183,16 +283,21 @@ export const createOpenAIAdapter = (
       };
     }
 
-    return {
-      blocked: false,
-      prompt: responseStage.prompt,
-      response: responseStage.response ?? normalized.output,
-      tools: responseStage.tools,
-      metadata: { ...promptStage.metadata, ...normalized.metadata },
-      trace,
-      stage: 'complete',
-      violations,
-    };
+    return annotateBudgetMetadata(
+      {
+        blocked: false,
+        prompt: responseStage.prompt,
+        response: responseStage.response ?? normalized.output,
+        tools: responseStage.tools,
+        metadata: { ...promptStage.metadata, ...normalized.metadata },
+        trace,
+        stage: 'complete',
+        violations,
+      },
+      budgetDecision.decision,
+      budgetDecision.scopeHit,
+      budgetDecision.remaining
+    );
   },
   dryRun(request: LLMRequest): Promise<GuardedLLMResult> {
     return dryRun(policy, 'openai', request);
@@ -204,6 +309,17 @@ export const createAnthropicAdapter = (
   client: AnthropicStub
 ) => ({
   async complete(request: LLMRequest): Promise<GuardedLLMResult> {
+    const budgetContext = inferBudgetContext(request);
+    const budgetUsage = estimateBudgetUsage(request);
+    const budgetDecision = await budgetEngine.checkAndConsume(
+      budgetContext,
+      budgetUsage
+    );
+
+    if (budgetDecision.decision === BudgetDecision.HARD_LIMIT) {
+      return blockedByBudget(request, budgetDecision.scopeHit, budgetDecision.message);
+    }
+
     const promptStage = await runPromptStage(policy, 'anthropic', request);
     if (!promptStage.allowed) {
       return {
@@ -252,16 +368,21 @@ export const createAnthropicAdapter = (
       };
     }
 
-    return {
-      blocked: false,
-      prompt: responseStage.prompt,
-      response: responseStage.response ?? normalized.output,
-      tools: responseStage.tools,
-      metadata: { ...promptStage.metadata, ...normalized.metadata },
-      trace,
-      stage: 'complete',
-      violations,
-    };
+    return annotateBudgetMetadata(
+      {
+        blocked: false,
+        prompt: responseStage.prompt,
+        response: responseStage.response ?? normalized.output,
+        tools: responseStage.tools,
+        metadata: { ...promptStage.metadata, ...normalized.metadata },
+        trace,
+        stage: 'complete',
+        violations,
+      },
+      budgetDecision.decision,
+      budgetDecision.scopeHit,
+      budgetDecision.remaining
+    );
   },
   dryRun(request: LLMRequest): Promise<GuardedLLMResult> {
     return dryRun(policy, 'anthropic', request);
