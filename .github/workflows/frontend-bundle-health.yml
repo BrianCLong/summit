@@ -1,0 +1,160 @@
+# Frontend Bundle Health Monitoring
+# Tracks bundle size changes and uploads bundle analysis artifacts
+#
+# Purpose:
+# - Generate bundle size reports on PRs and main branch
+# - Upload bundle stats for inspection
+# - Alert on significant size increases
+
+name: Frontend Bundle Health
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web app with bundle analysis
+        working-directory: apps/web
+        run: pnpm build
+        env:
+          NODE_ENV: production
+
+      - name: Generate bundle size report
+        id: bundle-size
+        working-directory: apps/web
+        run: |
+          # Extract bundle sizes from build output
+          echo "## Bundle Size Report" > bundle-report.md
+          echo "" >> bundle-report.md
+          echo "| Chunk | Size | Gzip |" >> bundle-report.md
+          echo "|-------|------|------|" >> bundle-report.md
+
+          # List all JS chunks
+          for file in dist/assets/*.js; do
+            if [ -f "$file" ]; then
+              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
+              size_kb=$((size / 1024))
+              gzip_size=$(gzip -c "$file" | wc -c)
+              gzip_kb=$((gzip_size / 1024))
+              filename=$(basename "$file")
+              echo "| $filename | ${size_kb}KB | ${gzip_kb}KB |" >> bundle-report.md
+            fi
+          done
+
+          echo "" >> bundle-report.md
+          echo "📊 Full bundle visualization available in artifacts: \`stats.html\`" >> bundle-report.md
+
+          # Calculate total size
+          total_size=0
+          for file in dist/assets/*.js; do
+            if [ -f "$file" ]; then
+              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
+              total_size=$((total_size + size))
+            fi
+          done
+          total_kb=$((total_size / 1024))
+          echo "total_size=$total_kb" >> $GITHUB_OUTPUT
+
+          echo "" >> bundle-report.md
+          echo "**Total JS size: ${total_kb}KB**" >> bundle-report.md
+
+      - name: Upload bundle stats artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-stats-${{ github.sha }}
+          path: |
+            apps/web/dist/stats.html
+            apps/web/bundle-report.md
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('apps/web/bundle-report.md', 'utf8');
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Bundle Size Report')
+            );
+
+            const body = `<!-- bundle-size-report -->
+            ${report}
+
+            *Updated for commit ${context.sha.substring(0, 7)}*`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Check bundle size budget
+        working-directory: apps/web
+        run: |
+          # Performance budget: warn if total JS > 1MB
+          BUDGET_KB=1024
+          TOTAL_SIZE=${{ steps.bundle-size.outputs.total_size }}
+
+          if [ "$TOTAL_SIZE" -gt "$BUDGET_KB" ]; then
+            echo "::warning::Bundle size ($TOTAL_SIZE KB) exceeds budget ($BUDGET_KB KB)"
+          else
+            echo "✅ Bundle size ($TOTAL_SIZE KB) is within budget ($BUDGET_KB KB)"
+          fi

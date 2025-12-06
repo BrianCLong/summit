@@ -64,12 +64,19 @@ export default defineConfig({
             '@hookform/resolvers',
             'zod',
           ],
-          // Visualization libraries (D3, Recharts)
-          'viz-vendor': ['d3', 'recharts'],
+          // Visualization libraries (D3 modules, Recharts)
+          // Using individual D3 modules for tree-shaking (~55KB vs ~300KB)
+          'viz-vendor': [
+            'd3-selection',
+            'd3-force',
+            'd3-zoom',
+            'd3-drag',
+            'recharts',
+          ],
           // Animation
           'animation-vendor': ['framer-motion'],
           // Utilities
-          'utils-vendor': ['lodash', 'clsx', 'tailwind-merge', 'immer'],
+          'utils-vendor': ['lodash', 'clsx', 'tailwind-merge'],
         },
       },
     },
@@ -92,10 +99,12 @@ export default defineConfig({
       'react-router-dom',
       '@apollo/client',
       'zustand',
+      // D3 modules for graph visualization
+      'd3-selection',
+      'd3-force',
     ],
     exclude: [
-      // Exclude heavy deps from pre-bundling
-      'd3',
+      // Exclude heavy deps from pre-bundling (lazy loaded)
       'framer-motion',
     ],
   },
