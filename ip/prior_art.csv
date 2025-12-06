@@ -1,0 +1,6 @@
+"Prior Art","Experiment Representation","Curriculum Formalization","Delta (Our Novelty)"
+"AutoML (e.g., Google AutoML, H2O.ai)","Hyperparameter search space; pipeline graph","Implicit or non-existent; typically greedy or exhaustive search","Lacks explicit, staged curriculum and LLM-driven hypothesis generation in a rich graph."
+"ML Experiment Tracking (e.g., W&B, MLflow)","Runs, experiments, artifacts (flat or loosely grouped)","None; they are passive tracking tools, not schedulers","Does not propose or schedule experiments; purely a system of record."
+"LLM-based Agents (e.g., AutoGPT, BabyAGI)","Task list or vector memory","Implicit through prompting and goal decomposition","State representation is not a formal experiment graph; no concept of a scientific curriculum."
+"AutoRL / Population-Based Training","Policy parameters, environment configurations","Implicit through fitness functions and population dynamics","Curriculum is emergent, not declarative. Graph representation is not used for planning."
+"RLHF Frameworks (e.g., TRIL, RLax)","Model weights, preference data, reward model state","Often manual or based on simple heuristics (e.g., task difficulty)","Lacks a generalized graph to represent diverse experiments beyond reward modeling."
