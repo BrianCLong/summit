@@ -1,0 +1,40 @@
+# Default values for SummitROIForge Helm Chart
+replicaCount: 3
+
+image:
+  repository: summit/roiforge
+  pullPolicy: IfNotPresent
+  tag: "v1.0.0"
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+
+# Governance Configuration
+governance:
+  enabled: true
+  biasDetection:
+    enabled: true
+    standard: "NIST"
+  pqc:
+    enabled: true
+    algorithms:
+      - kyber
+      - dilithium
+
+# Sector Specific Configuration
+sector: "bfsi" # Default, override with --set sector=health
