@@ -14,9 +14,10 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
-import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
+import { getNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { verifyStartupDependencies } from './utils/startup-readiness.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -41,6 +42,8 @@ const startServer = async () => {
       logger.warn('Kafka not available - running in minimal mode');
     }
   }
+  await verifyStartupDependencies();
+
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
@@ -62,8 +65,6 @@ const startServer = async () => {
     logger.warn('SSL not configured, falling back to HTTP (Not recommended for production)');
     httpServer = http.createServer(app);
   }
-
-  await initializeNeo4jDriver();
 
   // Subscriptions with Persisted Query validation
 
@@ -152,4 +153,7 @@ const startServer = async () => {
   process.on('SIGTERM', shutdown);
 };
 
-startServer();
+startServer().catch((error) => {
+  logger.error({ error }, 'Fatal error during server startup');
+  process.exit(1);
+});
