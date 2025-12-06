@@ -1,0 +1,488 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chatops
+  labels:
+    app.kubernetes.io/name: chatops
+    app.kubernetes.io/part-of: summit
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chatops-config
+  namespace: chatops
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  LOG_FORMAT: "json"
+
+  # Service ports
+  HTTP_PORT: "8080"
+  GRPC_PORT: "9090"
+  METRICS_PORT: "9464"
+
+  # Redis
+  REDIS_HOST: "redis-master.redis.svc.cluster.local"
+  REDIS_PORT: "6379"
+
+  # PostgreSQL
+  POSTGRES_HOST: "postgres-primary.postgres.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: "chatops"
+
+  # Neo4j
+  NEO4J_URI: "bolt://neo4j.neo4j.svc.cluster.local:7687"
+
+  # Feature flags
+  ENABLE_MULTI_MODEL: "true"
+  ENABLE_HIERARCHICAL_MEMORY: "true"
+  ENABLE_BOUNDED_AUTONOMY: "true"
+  ENABLE_GRAPH_CHAT: "true"
+
+  # Limits
+  MAX_CONCURRENT_SESSIONS: "1000"
+  MAX_TURNS_PER_SESSION: "200"
+  SESSION_TTL_SECONDS: "3600"
+  MAX_TOKEN_BUDGET: "128000"
+
+  # Observability
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability.svc.cluster.local:4318"
+  OTEL_SERVICE_NAME: "chatops"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: chatops-secrets
+  namespace: chatops
+type: Opaque
+stringData:
+  # These should be replaced with actual secrets in production
+  ANTHROPIC_API_KEY: "${ANTHROPIC_API_KEY}"
+  OPENAI_API_KEY: "${OPENAI_API_KEY}"
+  POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+  REDIS_PASSWORD: "${REDIS_PASSWORD}"
+  NEO4J_PASSWORD: "${NEO4J_PASSWORD}"
+  JWT_SECRET: "${JWT_SECRET}"
+
+  # Threat Intel API Keys
+  VIRUSTOTAL_API_KEY: "${VIRUSTOTAL_API_KEY}"
+  SHODAN_API_KEY: "${SHODAN_API_KEY}"
+  ABUSEIPDB_API_KEY: "${ABUSEIPDB_API_KEY}"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatops
+  namespace: chatops
+  labels:
+    app.kubernetes.io/name: chatops
+    app.kubernetes.io/component: api
+    app.kubernetes.io/part-of: summit
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chatops
+      app.kubernetes.io/component: api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chatops
+        app.kubernetes.io/component: api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9464"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: chatops
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: chatops
+          image: summit/chatops:latest
+          imagePullPolicy: Always
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: grpc
+              containerPort: 9090
+              protocol: TCP
+            - name: metrics
+              containerPort: 9464
+              protocol: TCP
+
+          envFrom:
+            - configMapRef:
+                name: chatops-config
+            - secretRef:
+                name: chatops-secrets
+
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          startupProbe:
+            httpGet:
+              path: /health/startup
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 30
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+            - name: cache
+              mountPath: /app/.cache
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: cache
+          emptyDir:
+            sizeLimit: 1Gi
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: chatops
+                topologyKey: kubernetes.io/hostname
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: chatops
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatops
+  namespace: chatops
+  labels:
+    app.kubernetes.io/name: chatops
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: grpc
+      port: 9090
+      targetPort: grpc
+      protocol: TCP
+    - name: metrics
+      port: 9464
+      targetPort: metrics
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: chatops
+    app.kubernetes.io/component: api
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chatops
+  namespace: chatops
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: chatops
+  namespace: chatops
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: chatops
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Pods
+      pods:
+        metric:
+          name: chatops_sessions_active
+        target:
+          type: AverageValue
+          averageValue: "100"
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 10
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 15
+        - type: Pods
+          value: 4
+          periodSeconds: 15
+      selectPolicy: Max
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: chatops
+  namespace: chatops
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chatops
+      app.kubernetes.io/component: api
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: chatops
+  namespace: chatops
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: chatops
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow from other summit services
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              app.kubernetes.io/part-of: summit
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090
+    # Allow Prometheus scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+      ports:
+        - protocol: TCP
+          port: 9464
+  egress:
+    # Allow DNS
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+    # Allow Redis
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: redis
+      ports:
+        - protocol: TCP
+          port: 6379
+    # Allow PostgreSQL
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: postgres
+      ports:
+        - protocol: TCP
+          port: 5432
+    # Allow Neo4j
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: neo4j
+      ports:
+        - protocol: TCP
+          port: 7687
+    # Allow external HTTPS (for LLM APIs)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - protocol: TCP
+          port: 443
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chatops
+  namespace: chatops
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/websocket-services: "chatops"
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  tls:
+    - hosts:
+        - chatops.summit.example.com
+      secretName: chatops-tls
+  rules:
+    - host: chatops.summit.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: chatops
+                port:
+                  name: http
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: chatops
+  namespace: chatops
+  labels:
+    app.kubernetes.io/name: chatops
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chatops
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+  namespaceSelector:
+    matchNames:
+      - chatops
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chatops-alerts
+  namespace: chatops
+  labels:
+    app.kubernetes.io/name: chatops
+spec:
+  groups:
+    - name: chatops.rules
+      rules:
+        - alert: ChatOpsHighErrorRate
+          expr: |
+            sum(rate(chatops_errors_total[5m])) / sum(rate(chatops_messages_total[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High error rate in ChatOps service
+            description: Error rate is {{ $value | humanizePercentage }} over the last 5 minutes
+
+        - alert: ChatOpsHighLatency
+          expr: |
+            histogram_quantile(0.95, sum(rate(chatops_message_latency_ms_bucket[5m])) by (le)) > 5000
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: High latency in ChatOps service
+            description: P95 latency is {{ $value | humanizeDuration }} over the last 5 minutes
+
+        - alert: ChatOpsApprovalBacklog
+          expr: |
+            chatops_approvals_pending > 50
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: High number of pending approvals
+            description: There are {{ $value }} approvals pending for more than 10 minutes
+
+        - alert: ChatOpsCircuitBreakerOpen
+          expr: |
+            chatops_circuit_breaker_state{state="open"} == 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: Circuit breaker open
+            description: Circuit breaker {{ $labels.name }} is open
+
+        - alert: ChatOpsCostSpike
+          expr: |
+            sum(increase(chatops_cost_usd_total[1h])) > 100
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Unusual cost spike detected
+            description: Cost has increased by ${{ $value }} in the last hour
