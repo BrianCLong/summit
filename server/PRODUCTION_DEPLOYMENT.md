@@ -235,6 +235,14 @@ The NGINX configuration provides:
 - Redis clustering for cache scaling
 - Container orchestration ready (Kubernetes, Docker Swarm)
 
+### Multi-Region PostgreSQL Read Replicas
+
+- **Replica declaration**: `DATABASE_READ_REPLICAS` accepts comma-separated URLs and optional metadata (`url|region=us-east-1|priority=120|name=read-east`). Legacy `DATABASE_READ_URL` still works as a single entry.
+- **Region-aware routing**: `CURRENT_REGION` and `PG_PREFERRED_READ_REGIONS` influence health scoring to keep reads local when possible.
+- **Health scoring & failover**: Tunable via `PG_READ_REPLICA_HEALTH_THRESHOLD`, `PG_READ_REPLICA_REGION_BONUS`, `PG_READ_REPLICA_LATENCY_BASELINE_MS`, `PG_READ_REPLICA_FAILURE_WEIGHT`, `PG_READ_REPLICA_SUCCESS_RECOVERY_WEIGHT`, and `PG_READ_REPLICA_ALLOW_DEGRADED`.
+- **Failover toggle**: `PG_FAILOVER_TO_WRITER=true` enables automatic fallback to the primary when all replicas are unhealthy.
+- **Operational insight**: `POSTGRES_POOL.replicaHealth()` and `POSTGRES_POOL.healthCheck()` expose live circuit/health scores for dashboards and alerts.
+
 ## 🔍 Troubleshooting
 
 ### Common Issues

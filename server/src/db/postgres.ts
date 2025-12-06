@@ -27,10 +27,16 @@ interface PoolHealthSnapshot {
   circuitState: CircuitState;
   healthy: boolean;
   lastError?: string;
+  region?: string;
+  priority?: number;
   activeConnections: number;
   idleConnections: number;
   queuedRequests: number;
   totalConnections: number;
+  healthScore?: number;
+  avgLatencyMs?: number;
+  successStreak?: number;
+  failureStreak?: number;
 }
 
 export interface ManagedPostgresPool {
@@ -42,6 +48,7 @@ export interface ManagedPostgresPool {
   on: Pool['on'];
   healthCheck: () => Promise<PoolHealthSnapshot[]>;
   slowQueryInsights: () => SlowQueryInsight[];
+  replicaHealth: () => ReplicaHealthSnapshot[];
 }
 
 interface SlowQueryInsight {
@@ -53,6 +60,16 @@ interface SlowQueryInsight {
 }
 
 type CircuitState = 'closed' | 'half-open' | 'open';
+
+interface ReplicaHealthSnapshot {
+  name: string;
+  region?: string;
+  priority: number;
+  healthScore: number;
+  avgLatencyMs: number;
+  successStreak: number;
+  failureStreak: number;
+}
 
 const logger = baseLogger.child({ name: 'postgres-pool' });
 
@@ -103,6 +120,39 @@ const CIRCUIT_BREAKER_COOLDOWN_MS = parseInt(
   10,
 );
 
+const READ_REPLICA_REGION_BONUS = parseInt(
+  process.env.PG_READ_REPLICA_REGION_BONUS ?? '12',
+  10,
+);
+const READ_REPLICA_PRIORITY_WEIGHT = parseInt(
+  process.env.PG_READ_REPLICA_PRIORITY_WEIGHT ?? '1',
+  10,
+);
+const READ_REPLICA_HEALTH_THRESHOLD = parseInt(
+  process.env.PG_READ_REPLICA_HEALTH_THRESHOLD ?? '20',
+  10,
+);
+const READ_REPLICA_LATENCY_BASELINE_MS = Math.max(
+  parseInt(process.env.PG_READ_REPLICA_LATENCY_BASELINE_MS ?? '120', 10),
+  1,
+);
+const READ_REPLICA_HEALTH_DECAY = Math.min(
+  Math.max(parseFloat(process.env.PG_READ_REPLICA_HEALTH_DECAY ?? '0.25'), 0.05),
+  0.9,
+);
+const READ_REPLICA_FAILURE_WEIGHT = parseInt(
+  process.env.PG_READ_REPLICA_FAILURE_WEIGHT ?? '15',
+  10,
+);
+const READ_REPLICA_SUCCESS_RECOVERY_WEIGHT = parseInt(
+  process.env.PG_READ_REPLICA_SUCCESS_RECOVERY_WEIGHT ?? '5',
+  10,
+);
+const READ_REPLICA_ALLOW_DEGRADED =
+  (process.env.PG_READ_REPLICA_ALLOW_DEGRADED ?? 'true') !== 'false';
+const FAILOVER_TO_WRITER_ON_READ_FAILURE =
+  (process.env.PG_FAILOVER_TO_WRITER ?? 'true') !== 'false';
+
 // New configurations for optimized pooling
 const IDLE_TIMEOUT_MS = parseInt(
   process.env.PG_IDLE_TIMEOUT_MS ?? '30000',
@@ -126,6 +176,8 @@ interface PoolWrapper {
   type: 'write' | 'read';
   pool: Pool;
   circuitBreaker: CircuitBreaker;
+  region?: string;
+  priority?: number;
 }
 
 interface PoolConfig {
@@ -135,6 +187,13 @@ interface PoolConfig {
   password?: string;
   database?: string;
   port?: number;
+}
+
+interface ReadReplicaConfig {
+  config: PoolConfig;
+  name: string;
+  region?: string;
+  priority: number;
 }
 
 // Extend PoolClient to include connectedAt
@@ -214,6 +273,143 @@ class CircuitBreaker {
 
   getLastError(): Error | undefined {
     return this.lastError;
+  }
+}
+
+interface ReplicaHealthRecord {
+  avgLatencyMs: number;
+  failureStreak: number;
+  successStreak: number;
+  lastFailureAt?: number;
+  lastSuccessAt?: number;
+}
+
+class ReplicaHealthTracker {
+  private readonly records = new Map<string, ReplicaHealthRecord>();
+  private readonly metadata = new Map<
+    string,
+    { region?: string; priority: number; circuitBreaker: CircuitBreaker }
+  >();
+
+  constructor(private readonly preferredRegions: string[]) {}
+
+  registerPool(pool: PoolWrapper): void {
+    this.metadata.set(pool.name, {
+      region: pool.region,
+      priority: pool.priority ?? 100,
+      circuitBreaker: pool.circuitBreaker,
+    });
+    if (!this.records.has(pool.name)) {
+      this.records.set(pool.name, {
+        avgLatencyMs: READ_REPLICA_LATENCY_BASELINE_MS,
+        failureStreak: 0,
+        successStreak: 0,
+      });
+    }
+  }
+
+  recordSuccess(pool: PoolWrapper, durationMs: number): void {
+    if (pool.type !== 'read') return;
+    const record = this.getRecord(pool.name);
+
+    record.avgLatencyMs =
+      record.avgLatencyMs * (1 - READ_REPLICA_HEALTH_DECAY) +
+      durationMs * READ_REPLICA_HEALTH_DECAY;
+    record.failureStreak = Math.max(record.failureStreak - 1, 0);
+    record.successStreak += 1;
+    record.lastSuccessAt = Date.now();
+    this.records.set(pool.name, record);
+  }
+
+  recordFailure(pool: PoolWrapper): void {
+    if (pool.type !== 'read') return;
+    const record = this.getRecord(pool.name);
+    record.failureStreak += 1;
+    record.successStreak = 0;
+    record.lastFailureAt = Date.now();
+    this.records.set(pool.name, record);
+  }
+
+  getHealthScore(pool: PoolWrapper): number {
+    if (pool.type !== 'read') return 100;
+    const record = this.getRecord(pool.name);
+    const meta = this.metadata.get(pool.name);
+    const priority = (meta?.priority ?? 100) / Math.max(READ_REPLICA_PRIORITY_WEIGHT, 1);
+    const latencyPenalty = Math.min(
+      (record.avgLatencyMs / READ_REPLICA_LATENCY_BASELINE_MS) * 15,
+      40,
+    );
+    const failurePenalty = Math.min(record.failureStreak * READ_REPLICA_FAILURE_WEIGHT, 45);
+    const recoveryBonus = Math.min(record.successStreak * READ_REPLICA_SUCCESS_RECOVERY_WEIGHT, 20);
+    const regionBonus = this.preferredRegions.includes(meta?.region ?? '')
+      ? READ_REPLICA_REGION_BONUS
+      : 0;
+    const circuitPenalty =
+      (meta?.circuitBreaker ?? pool.circuitBreaker).getState() === 'open'
+        ? 50
+        : (meta?.circuitBreaker ?? pool.circuitBreaker).getState() === 'half-open'
+          ? 25
+          : 0;
+
+    const score =
+      priority + regionBonus + recoveryBonus - latencyPenalty - failurePenalty - circuitPenalty;
+
+    return Math.max(0, Math.round(score));
+  }
+
+  getSnapshotFor(pool: PoolWrapper): ReplicaHealthSnapshot | undefined {
+    if (pool.type !== 'read') return undefined;
+    const record = this.getRecord(pool.name);
+    const meta = this.metadata.get(pool.name);
+
+    return {
+      name: pool.name,
+      region: meta?.region,
+      priority: meta?.priority ?? 100,
+      healthScore: this.getHealthScore(pool),
+      avgLatencyMs: record.avgLatencyMs,
+      successStreak: record.successStreak,
+      failureStreak: record.failureStreak,
+    };
+  }
+
+  snapshot(): ReplicaHealthSnapshot[] {
+    return Array.from(this.records.entries()).map(([name, record]) => {
+      const meta = this.metadata.get(name);
+      return {
+        name,
+        region: meta?.region,
+        priority: meta?.priority ?? 100,
+        healthScore: this.getHealthScore({
+          name,
+          type: 'read',
+          pool: {} as Pool,
+          circuitBreaker: meta?.circuitBreaker ?? new CircuitBreaker(name, 1, 1),
+          region: meta?.region,
+          priority: meta?.priority,
+        }),
+        avgLatencyMs: record.avgLatencyMs,
+        successStreak: record.successStreak,
+        failureStreak: record.failureStreak,
+      };
+    });
+  }
+
+  reset(): void {
+    this.records.clear();
+    this.metadata.clear();
+  }
+
+  private getRecord(name: string): ReplicaHealthRecord {
+    if (!this.records.has(name)) {
+      this.records.set(name, {
+        avgLatencyMs: READ_REPLICA_LATENCY_BASELINE_MS,
+        failureStreak: 0,
+        successStreak: 0,
+      });
+    }
+
+    return this.records.get(name)!;
   }
 }
 
@@ -331,24 +527,67 @@ function parseConnectionConfig(): PoolConfig {
   };
 }
 
-function parseReadReplicaUrls(): string[] {
-  const explicit = (process.env.DATABASE_READ_REPLICAS || '')
-    .split(',')
-    .map((url) => url.trim())
-    .filter(Boolean);
-
-  const legacy = process.env.DATABASE_READ_URL
-    ? [process.env.DATABASE_READ_URL]
+function parsePreferredReadRegions(): string[] {
+  const preferred = (process.env.PG_PREFERRED_READ_REGIONS || '').split(',');
+  const current = process.env.CURRENT_REGION
+    ? [process.env.CURRENT_REGION]
     : [];
 
-  return [...new Set([...explicit, ...legacy])];
+  return [...new Set([...preferred, ...current])].map((region) => region.trim()).filter(Boolean);
 }
+
+function parseReplicaEntry(entry: string, idx: number): ReadReplicaConfig | null {
+  const [url, ...metaParts] = entry.split('|').map((segment) => segment.trim());
+  if (!url) return null;
+
+  const metadata: Record<string, string> = {};
+  metaParts.forEach((part) => {
+    const [key, value] = part.split('=').map((segment) => segment.trim());
+    if (key && value) {
+      metadata[key.toLowerCase()] = value;
+    }
+  });
+
+  return {
+    config: { connectionString: url },
+    name: metadata.name ?? `read-replica-${idx + 1}`,
+    region: metadata.region,
+    priority: Number.isFinite(parseInt(metadata.priority ?? '', 10))
+      ? parseInt(metadata.priority ?? '100', 10)
+      : 100,
+  };
+}
+
+function parseReadReplicaConfigs(): ReadReplicaConfig[] {
+  const explicit = (process.env.DATABASE_READ_REPLICAS || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((entry, idx) => parseReplicaEntry(entry, idx))
+    .filter(Boolean) as ReadReplicaConfig[];
+
+  const legacy = process.env.DATABASE_READ_URL
+    ? [
+        {
+          config: { connectionString: process.env.DATABASE_READ_URL },
+          name: 'read-legacy',
+          region: undefined,
+          priority: 80,
+        } satisfies ReadReplicaConfig,
+      ]
+    : [];
+
+  return [...explicit, ...legacy];
+}
+
+let replicaHealthTracker = new ReplicaHealthTracker(parsePreferredReadRegions());
 
 function createPool(
   config: PoolConfig,
   name: string,
   type: 'write' | 'read',
   max: number,
+  metadata?: { region?: string; priority?: number },
 ): PoolWrapper {
   const pool = new Pool({
     ...config,
@@ -381,6 +620,8 @@ function createPool(
       CIRCUIT_BREAKER_FAILURE_THRESHOLD,
       CIRCUIT_BREAKER_COOLDOWN_MS,
     ),
+    region: metadata?.region,
+    priority: metadata?.priority,
   };
 }
 
@@ -389,28 +630,40 @@ function initializePools(): void {
     return;
   }
 
+  replicaHealthTracker = new ReplicaHealthTracker(parsePreferredReadRegions());
+  replicaHealthTracker.reset();
   const baseConfig = parseConnectionConfig();
   writePoolWrapper = createPool(
     baseConfig,
     'write-primary',
     'write',
     DEFAULT_WRITE_POOL_SIZE,
+    { region: process.env.PG_PRIMARY_REGION || process.env.CURRENT_REGION },
   );
   poolMonitor.register(writePoolWrapper);
 
-  const replicaUrls = parseReadReplicaUrls();
-  if (replicaUrls.length === 0) {
-    const pool = createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE);
+  const replicaConfigs = parseReadReplicaConfigs();
+  if (replicaConfigs.length === 0) {
+    const pool = createPool(
+      baseConfig,
+      'read-default',
+      'read',
+      DEFAULT_READ_POOL_SIZE,
+      { region: process.env.CURRENT_REGION, priority: 100 },
+    );
     readPoolWrappers = [pool];
+    replicaHealthTracker.registerPool(pool);
     poolMonitor.register(pool);
   } else {
-    readPoolWrappers = replicaUrls.map((url, idx) => {
+    readPoolWrappers = replicaConfigs.map((replica) => {
       const pool = createPool(
-        { connectionString: url },
-        `read-replica-${idx + 1}`,
+        replica.config,
+        replica.name,
         'read',
         DEFAULT_READ_POOL_SIZE,
+        { region: replica.region, priority: replica.priority },
       );
+      replicaHealthTracker.registerPool(pool);
       poolMonitor.register(pool);
       return pool;
     });
@@ -485,6 +738,8 @@ function createManagedPool(
           type: wrapper.type,
           circuitState: wrapper.circuitBreaker.getState(),
           healthy: true,
+          region: wrapper.region,
+          priority: wrapper.priority,
           activeConnections:
             (wrapper.pool.totalCount ?? 0) - (wrapper.pool.idleCount ?? 0),
           idleConnections: wrapper.pool.idleCount ?? 0,
@@ -492,10 +747,18 @@ function createManagedPool(
           totalConnections: wrapper.pool.totalCount ?? 0,
         };
 
+        const replicaSnapshot = replicaHealthTracker.getSnapshotFor(wrapper);
+        if (replicaSnapshot) {
+          snapshot.healthScore = replicaSnapshot.healthScore;
+          snapshot.avgLatencyMs = replicaSnapshot.avgLatencyMs;
+          snapshot.successStreak = replicaSnapshot.successStreak;
+          snapshot.failureStreak = replicaSnapshot.failureStreak;
+        }
+
         try {
           // Use withManagedClient to leverage validation logic
           await withManagedClient(wrapper, 1000, async (client) => {
-             await client.query('SELECT 1');
+            await client.query('SELECT 1');
           });
         } catch (error) {
           snapshot.healthy = false;
@@ -528,6 +791,10 @@ function createManagedPool(
     return entries.sort((a, b) => b.maxDurationMs - a.maxDurationMs);
   };
 
+  const replicaHealth = (): ReplicaHealthSnapshot[] => {
+    return replicaHealthTracker.snapshot();
+  };
+
   return {
     query,
     read,
@@ -537,6 +804,7 @@ function createManagedPool(
     on,
     healthCheck,
     slowQueryInsights,
+    replicaHealth,
   };
 }
 
@@ -556,16 +824,39 @@ async function executeManagedQuery({
   readPools: PoolWrapper[];
 }): Promise<QueryResult<any>> {
   const normalized = normalizeQuery(queryInput, params);
-  const queryType =
+  const inferredType =
     desiredType === 'auto' ? inferQueryType(normalized.text) : desiredType;
-  const poolCandidates =
-    queryType === 'write'
-      ? [writePool]
-      : [...pickReadPoolSequence(readPools), writePool];
+  const queryType = options.forceWrite ? 'write' : inferredType;
+  const readCandidates = queryType === 'write' ? [] : pickReadPoolSequence(readPools);
+  const label = options.label ?? inferOperation(normalized.text);
+
+  let poolCandidates: PoolWrapper[] = [];
+  if (queryType === 'write') {
+    poolCandidates = [writePool];
+  } else {
+    poolCandidates = [...readCandidates];
+    if (FAILOVER_TO_WRITER_ON_READ_FAILURE) {
+      poolCandidates.push(writePool);
+    }
+  }
+
+  if (queryType === 'read' && readCandidates.length === 0) {
+    if (FAILOVER_TO_WRITER_ON_READ_FAILURE) {
+      logger.warn(
+        { label, desiredType, reason: 'no_healthy_read_replicas' },
+        'Falling back to writer for read because no healthy replicas are available',
+      );
+    } else {
+      throw new Error('No healthy read replicas available and writer failover disabled');
+    }
+  }
+
+  if (poolCandidates.length === 0) {
+    throw new Error('No PostgreSQL pools available for query execution');
+  }
   const timeoutMs =
     options.timeoutMs ??
     (queryType === 'write' ? WRITE_TIMEOUT_MS : READ_TIMEOUT_MS);
-  const label = options.label ?? inferOperation(normalized.text);
 
   let lastError: Error | undefined;
 
@@ -609,6 +900,10 @@ async function executeWithRetry(
       const err = error as Error;
       wrapper.circuitBreaker.recordFailure(err);
 
+      if (wrapper.type === 'read') {
+        replicaHealthTracker.recordFailure(wrapper);
+      }
+
       if (!isRetryableError(err) || attempt === MAX_RETRIES) {
         throw err;
       }
@@ -637,6 +932,10 @@ async function executeQueryOnClient(
   });
 
   const duration = performance.now() - start;
+
+  if (wrapper.type === 'read') {
+    replicaHealthTracker.recordSuccess(wrapper, duration);
+  }
 
   if (duration >= SLOW_QUERY_THRESHOLD_MS) {
     recordSlowQuery(
@@ -810,14 +1109,31 @@ function pickReadPoolSequence(readPools: PoolWrapper[]): PoolWrapper[] {
     return [];
   }
 
-  const sequence: PoolWrapper[] = [];
-  for (let i = 0; i < readPools.length; i += 1) {
-    const index = (readReplicaCursor + i) % readPools.length;
-    sequence.push(readPools[index]);
+  const scored = readPools.map((pool) => ({
+    pool,
+    score: replicaHealthTracker.getHealthScore(pool),
+  }));
+
+  const healthy = scored
+    .filter((entry) => entry.score >= READ_REPLICA_HEALTH_THRESHOLD)
+    .sort((a, b) => b.score - a.score);
+
+  const degraded = scored
+    .filter((entry) => entry.score < READ_REPLICA_HEALTH_THRESHOLD)
+    .sort((a, b) => b.score - a.score);
+
+  const ordered = [...healthy, ...(READ_REPLICA_ALLOW_DEGRADED ? degraded : [])];
+
+  if (ordered.length === 0) {
+    return [];
   }
 
-  readReplicaCursor = (readReplicaCursor + 1) % readPools.length;
-  return sequence;
+  const offset = ordered.length > 0 ? readReplicaCursor % ordered.length : 0;
+  readReplicaCursor = (readReplicaCursor + 1) % ordered.length;
+
+  return [...ordered.slice(offset), ...ordered.slice(0, offset)].map(
+    (entry) => entry.pool,
+  );
 }
 
 function inferQueryType(queryText: string): 'read' | 'write' {
@@ -899,6 +1215,9 @@ export async function closePostgresPool(): Promise<void> {
     await managedPool.end();
     managedPool = null;
   }
+
+  replicaHealthTracker.reset();
+  readReplicaCursor = 0;
 }
 
 export const __private = {
@@ -908,4 +1227,7 @@ export const __private = {
   inferQueryType,
   isRetryableError,
   CircuitBreaker,
+  parseReadReplicaConfigs,
+  parsePreferredReadRegions,
+  replicaHealthTracker,
 };
