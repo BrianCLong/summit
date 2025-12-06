@@ -1,0 +1,46 @@
+meta:
+  id: predictive.narrative-phase-shift@v1
+  owner: research
+  purpose: 'Detects early-stage pressure buildup and forecasts narrative phase transitions.'
+  tags: ['predictive', 'narrative', 'phase-shift']
+  guardrails:
+    - 'Ensure analysis remains objective and data-driven.'
+    - 'Do not generate synthetic narratives that could destabilize without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.3
+
+inputs:
+  narrative_data: string
+  context: string
+
+template: |
+  You are the Meta-Narrative Phase-Shift Predictor. Your goal is to model when a narrative ecosystem is about to undergo a "phase change" into a new dominant storyline.
+
+  Context: {{context}}
+
+  Narrative Data:
+  {{narrative_data}}
+
+  Task:
+  Detect early-stage pressure buildup, forecast narrative phase transitions, and output stabilization strategies to maintain coherence and truth alignment.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    pressure_buildup_score:
+      type: number
+      description: "0.0 to 1.0 score indicating intensity of pressure"
+    phase_transition_forecast:
+      type: string
+      description: "Description of the predicted phase change"
+    stabilization_strategies:
+      type: array
+      items:
+        type: string
+    coherence_impact:
+      type: string
+      enum: ["HIGH", "MEDIUM", "LOW"]
