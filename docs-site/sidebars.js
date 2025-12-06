@@ -52,6 +52,8 @@ const sidebars = {
       label: 'Operations',
       items: [
         'RUNBOOKS',
+        'runbooks/orchestration-troubleshooting',
+        'runbooks/ml-pipeline-troubleshooting',
         'maestro/DR_RUNBOOK',
         'infra/dr-runbook',
         'devops/incident-runbook',
@@ -74,6 +76,7 @@ const sidebars = {
         'ADR/ADR-002-contract-only-integration',
         'ADR/ADR-003-separate-repos-packaged-adapters',
         'ADR/ADR-007-MoE-MCP-Conductor',
+        'ADR/ADR-013-orchestration-ml-split',
       ],
     },
   ],
