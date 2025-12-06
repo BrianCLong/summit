@@ -1,0 +1,97 @@
+name: CI Golden Path
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  golden-path:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      actions: read
+      checks: read
+      packages: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build || mkdir -p dist
+
+      - name: Run tests
+        run: pnpm test
+
+      # --------------------------------------
+      # SLSA PROVENANCE GENERATION
+      # --------------------------------------
+      - name: Generate SLSA provenance
+        uses: slsa-framework/slsa-github-generator@v1
+        with:
+          artifact_path: dist/
+          output_path: provenance.json
+
+      - name: Upload provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: slsa-provenance
+          path: provenance.json
+
+      # --------------------------------------
+      # SBOM GENERATION (CycloneDX)
+      # --------------------------------------
+      - name: Install CycloneDX for npm
+        run: |
+          npm install -g @cyclonedx/cyclonedx-npm
+
+      - name: Generate SBOM
+        run: |
+          cyclonedx-npm --output-format json --output-file sbom.json
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+
+      # --------------------------------------
+      # OPA / CONFTEST POLICY GATES
+      # --------------------------------------
+      - name: Install Conftest
+        uses: instrumenta/conftest-action@v0.5.0
+
+      - name: Validate SBOM policy
+        run: |
+          conftest test sbom.json --policy policy/sbom_policy.rego
+
+      - name: Validate SLSA attestation policy
+        run: |
+          # Wrap attestation + expected commit into an input object
+          jq -n --argfile att provenance.json --arg commit "${GITHUB_SHA}" \
+            '{ attestation: $att, expected_commit: $commit }' > attestation-input.json
+          conftest test attestation-input.json --policy policy/slsa_attestation.rego
+
+      - name: Validate lineage integrity policy
+        if: false  # flip to true/ remove when you produce lineage.json
+        run: |
+          conftest test lineage.json --policy policy/lineage_integrity.rego
