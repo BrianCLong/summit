@@ -1,0 +1,15 @@
+{
+  "name": "sql",
+  "description": "PostgreSQL and relational schema migrations.",
+  "schemaGlobs": [
+    "migrations/sql/**/*.sql",
+    "migrations/*.sql",
+    "server/src/db/migrations/postgres/**/*.sql",
+    "server/db/migrations/postgres/**/*.sql"
+  ],
+  "migrationGlobs": [
+    "migrations/sql/**/*.sql",
+    "server/src/db/migrations/postgres/**/*.sql",
+    "server/db/migrations/postgres/**/*.sql"
+  ]
+}

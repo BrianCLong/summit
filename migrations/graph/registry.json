@@ -1,0 +1,15 @@
+{
+  "name": "graph",
+  "description": "Neo4j and graph database schema migrations.",
+  "schemaGlobs": [
+    "migrations/graph/**/*.{cypher,cql,graphql}",
+    "migrations/*.cypher",
+    "migrations/neo4j/**/*.{cypher,cql}",
+    "server/src/db/migrations/neo4j/**/*.{cypher,cql}"
+  ],
+  "migrationGlobs": [
+    "migrations/graph/**/*.{cypher,cql,graphql}",
+    "migrations/neo4j/**/*.{cypher,cql}",
+    "server/src/db/migrations/neo4j/**/*.{cypher,cql}"
+  ]
+}
