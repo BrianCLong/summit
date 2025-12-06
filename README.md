@@ -1,4 +1,5 @@
 [![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
+[![Developer Radar](https://img.shields.io/badge/Developer%20Radar-Active-blue)](docs/dev/radar-dashboard.md)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
 [![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
