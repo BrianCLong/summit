@@ -1,0 +1,72 @@
+name: Threat model coverage (advisory)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  coverage:
+    name: Check threat model coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (minimal)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Evaluate threat model coverage
+        run: |
+          npx ts-node --transpile-only scripts/security/check-threat-model-coverage.ts \
+            --base ${{ github.event.pull_request.base.sha }} \
+            --head ${{ github.event.pull_request.head.sha }} \
+            --format json \
+            --output-file threat-model-report.json
+
+      - name: Format PR comment
+        id: format_comment
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('threat-model-report.json', 'utf8'));
+          let body;
+          if (!report.results.length) {
+            body = 'Threat model coverage: no mapped high-risk features touched. ✅';
+          } else {
+            const lines = report.results.map((r) => {
+              const status = r.status.toUpperCase();
+              const reason = r.reason ? ` (${r.reason})` : '';
+              return `- ${r.feature}: **${status}**${reason} – [model](${r.modelPath}) (owner: ${r.owner})`;
+            });
+            body = `This change touches ${report.results.length} mapped high-risk area(s).\n${lines.join('\n')}`;
+          }
+          fs.writeFileSync('comment.txt', body);
+          console.log(body);
+          console.log(`body<<'EOF'\n${body}\nEOF`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `body<<'EOF'\n${body}\nEOF\n`);
+          NODE
+
+      - name: Comment on PR
+        if: github.event.pull_request.draft == false
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('comment.txt', 'utf8');
+            const { owner, repo } = context.repo;
+            await github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: context.issue.number,
+              body
+            });
