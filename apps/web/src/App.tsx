@@ -35,6 +35,7 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -79,6 +80,12 @@ function App() {
                       <Route
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
+                      />
+
+                      {/* Narrative Intelligence */}
+                      <Route
+                        path="analysis/narrative"
+                        element={<NarrativeIntelligencePage />}
                       />
 
                       {/* Alerts */}
