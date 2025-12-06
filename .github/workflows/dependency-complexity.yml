@@ -1,0 +1,36 @@
+name: Dependency Complexity Guardrail
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'services/**'
+      - 'docker-compose*.yml'
+      - '.github/workflows/**'
+      - 'docs/architecture/**'
+
+jobs:
+  dependency-graph:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Generate dependency graph
+        run: node --loader ts-node/esm scripts/analyze-dependencies.ts
+      - name: Enforce complexity threshold
+        run: node --loader ts-node/esm scripts/ci/dependency-complexity-check.ts
+        env:
+          DEPENDENCY_COMPLEXITY_THRESHOLD: 5
