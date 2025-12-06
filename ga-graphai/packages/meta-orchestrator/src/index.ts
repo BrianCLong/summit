@@ -19,6 +19,12 @@ import type {
   StageExecutionGuardrail,
 } from '@ga-graphai/common-types';
 import {
+  buildReplayEnvironment,
+  createReplayDescriptor,
+  persistReplayDescriptor,
+  sanitizePayload,
+} from '@ga-graphai/common-types';
+import {
   OrchestrationKnowledgeGraph,
   type CostSignalRecord,
   type EnvironmentRecord,
@@ -690,6 +696,60 @@ export interface ReferenceWorkflowResult {
   auditTrail: AuditEntry[];
 }
 
+function captureMaestroReplay(options: {
+  input: ReferenceWorkflowInput;
+  auditTrail: AuditEntry[];
+  outcome?: ExecutionOutcome;
+  error?: unknown;
+  classification: string;
+}): void {
+  const descriptor = createReplayDescriptor({
+    service: 'maestro-conductor',
+    flow: 'maestro-reference-workflow',
+    request: {
+      path: 'reference-workflow',
+      method: 'EXECUTE',
+      payload: sanitizePayload({
+        pipeline: options.input.pipeline,
+        services: options.input.services,
+        environments: options.input.environments,
+        incidents: options.input.incidents,
+        policies: options.input.policies,
+        costSignals: options.input.costSignals,
+        stageOverlays: options.input.stageOverlays,
+        providers: options.input.providers,
+        pricing: options.input.pricing,
+        executionScripts: options.input.executionScripts,
+        metadata: options.input.metadata,
+      }),
+    },
+    context: {
+      tenantId: 'reference',
+      purpose: 'maestro-e2e',
+      traceId: options.outcome?.trace?.[0]?.stageId,
+      featureFlags:
+        (options.input.metadata?.featureFlags as
+          | Record<string, boolean | string>
+          | undefined) ?? undefined,
+    },
+    environment: buildReplayEnvironment({ env: { MAESTRO_ENV: 'test' } }),
+    outcome: {
+      status: options.error ? 'error' : 'success',
+      message:
+        options.error instanceof Error
+          ? options.error.message
+          : options.error
+            ? String(options.error)
+            : undefined,
+      classification: options.classification,
+    },
+    originalResponse: options.outcome ?? { auditTrail: options.auditTrail },
+    privacy: { notes: ['Auto-captured from reference workflow run.'] },
+    tags: ['auto-captured'],
+  });
+  persistReplayDescriptor(descriptor);
+}
+
 class StaticPricingFeed implements PricingFeed {
   constructor(private signals: PricingSignal[]) {}
 
@@ -795,7 +855,26 @@ async function runReferenceWorkflow(
   });
 
   const stages = stageDefinitionsFromGraph(graphSnapshot, input.stageOverlays);
-  const outcome = await orchestrator.executePlan(stages, input.metadata ?? {});
+  let outcome: ExecutionOutcome;
+  try {
+    outcome = await orchestrator.executePlan(stages, input.metadata ?? {});
+  } catch (error) {
+    captureMaestroReplay({
+      input,
+      auditTrail,
+      error,
+      classification: 'plan-execution-throw',
+    });
+    throw error;
+  }
+  if (outcome.trace.some((entry) => entry.status === 'failed')) {
+    captureMaestroReplay({
+      input,
+      auditTrail,
+      outcome,
+      classification: 'stage-failure',
+    });
+  }
   const telemetry = orchestrator.deriveTelemetry(outcome);
 
   return {
