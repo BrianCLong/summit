@@ -5,7 +5,16 @@
 
 export type ReportStatus = 'QUEUED' | 'GENERATING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
 
-export type ReportFormat = 'PDF' | 'HTML' | 'DOCX' | 'JSON' | 'CSV' | 'EXCEL' | 'PPT' | 'GEPHI';
+export type ReportFormat =
+  | 'PDF'
+  | 'HTML'
+  | 'DOCX'
+  | 'JSON'
+  | 'CSV'
+  | 'EXCEL'
+  | 'PPT'
+  | 'PPTX'
+  | 'GEPHI';
 
 export type AccessLevel = 'ANALYST' | 'SENIOR_ANALYST' | 'SUPERVISOR' | 'SYSTEM_ADMIN';
 
