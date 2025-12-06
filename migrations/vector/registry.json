@@ -1,0 +1,13 @@
+{
+  "name": "vector",
+  "description": "Vector database schemas and embedding payload definitions.",
+  "schemaGlobs": [
+    "migrations/vector/**/*.{sql,json,yaml,yml,ts}",
+    "server/src/db/migrations/postgres/**/*vector*.sql",
+    "packages/**/*vector-schema*/**/*.{sql,json,yaml,yml}"
+  ],
+  "migrationGlobs": [
+    "migrations/vector/**/*.{sql,json,yaml,yml,ts}",
+    "server/src/db/migrations/postgres/**/*vector*.sql"
+  ]
+}

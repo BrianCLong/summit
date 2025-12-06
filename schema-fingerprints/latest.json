@@ -1,0 +1,266 @@
+{
+  "version": 1,
+  "generatedAt": "2025-12-06T19:10:46.437651Z",
+  "layers": [
+    {
+      "name": "sql",
+      "files": [
+        {
+          "path": "migrations/add-performance-indexes.sql",
+          "hash": "3b5107259e27f1ec8fdc1fee8e8651caefb9e0cd018bb902374458e692cef87f",
+          "bytes": 10356
+        },
+        {
+          "path": "migrations/ledger_v2.sql",
+          "hash": "191e3124b835fcc7376709a538f900e15af0286842d2475ef250cc8eff9a00ba",
+          "bytes": 11372
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-13_initial.sql",
+          "hash": "d6aabe3670fd59f78e5ae4c1f11d979d492f791976556de916994d9bc5c843ac",
+          "bytes": 2593
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-14_graph_ai.sql",
+          "hash": "09daf93b8366a66c380636b54ffc7ef72b8b0c7a3f9fee8f8275af27437ba33e",
+          "bytes": 543
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-15_ai_tables.sql",
+          "hash": "8bc541758569abf514a8aa6ef922f94eda51e6e7f2f5f695fd448d715ef96e27",
+          "bytes": 1966
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-15_copilot.sql",
+          "hash": "ca32bb7ab7fb9d1a76d9399f370379dc69d4afb2ed0516d139bd054a7554763d",
+          "bytes": 5194
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-15_import_services.sql",
+          "hash": "9f946e250894b55d8833125cea9da5ef6a4c4ff40159f837cb1d3ef810395082",
+          "bytes": 4898
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-19_audit_tables.sql",
+          "hash": "fc687ed4db6672f830369076078d86555577ef97766253aa06c691a67e6ab277",
+          "bytes": 3511
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-28_incidents_minimal.sql",
+          "hash": "a603b9cefdfa11d16e86ab80e7b3bf8d79e75d86177ad850bf18c31dc8c9ac76",
+          "bytes": 567
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-08-28_provenance_audit_indexes.sql",
+          "hash": "cfabfb27ea3c3ace24aedfa3dba16eb02867bec38c8cffc4b9fa3534af267e52",
+          "bytes": 2851
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-09-26_trust_risk_evidence.sql",
+          "hash": "fea02b4c4089669e715a091a2bc6b8f6df0ded116ff16c96678fd87f4aa54bd8",
+          "bytes": 1253
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-09-27_ledger_v2.sql",
+          "hash": "c66a56492da3302f9a73ca28211da12c8b8248d85af3d1b9238372a2d26abceb",
+          "bytes": 11338
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-10-24_webhooks.sql",
+          "hash": "62faeed2762607177cad72d225f8ddfe63433c9901ce97c7bb06895130490866",
+          "bytes": 1273
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-20_admin_panel_schema.sql",
+          "hash": "991828774a334b9da15ac6b4a0509dec7ff4091f7a22f829a761eafb6672347a",
+          "bytes": 21455
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-20_canonical_schema.down.sql",
+          "hash": "2f08ceb3d0cec4b82d65123d1dead65e7abd39a962c048c35aefa9657f66ecfb",
+          "bytes": 1543
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-20_canonical_schema.sql",
+          "hash": "7efa43b55119c64fbf832ddb03eb1f08051eaa591d66f914dc8902a118261fea",
+          "bytes": 11283
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-20_enhanced_audit_event_sourcing.sql",
+          "hash": "62052fe6d10802f8712391e4c5495b8763428b4118c87213887b8347d0baed42",
+          "bytes": 22733
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-20_performance_indexes.sql",
+          "hash": "d971bf1ec81d45120558766ce5415f4d0963cab96a9ad3cabb4c892c16363276",
+          "bytes": 9548
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-20_provenance_ledger_beta.sql",
+          "hash": "8e9ad92a110d8734c485636c32cf973b468c6011816b7fbc3fb1cab5363e66b5",
+          "bytes": 18183
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-21_semantic_search.sql",
+          "hash": "210a6d3b5e1df1872c19b36be29147dbcf61e409f62007892e6f3313ac371e4d",
+          "bytes": 694
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-24_authorization_audit_log.sql",
+          "hash": "a3b6ce988df5ca32f4d8d038e43e6e611e5d91bed04b1f6e4cc0cf113def4d5e",
+          "bytes": 4867
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-24_license_registry.sql",
+          "hash": "01c24d4b3324c036be09e0b21615f9a1c6ed3d903c135baf1eb85ebe2b0671a9",
+          "bytes": 18912
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-11-24_warrant_lifecycle_management.sql",
+          "hash": "877b133d340602cb94409ca8bee3dd4e902638492e0a33d6e6db0a37f86ed80e",
+          "bytes": 17731
+        },
+        {
+          "path": "server/db/migrations/postgres/2025-12-04_add_tenant_created_at_index_to_entities.sql",
+          "hash": "f2bbe44ae7a100be1005c63b3850c4b2b9e349db0525c7a2ff146897bdeef968",
+          "bytes": 194
+        },
+        {
+          "path": "server/src/db/migrations/postgres/000_create_investigations_table.sql",
+          "hash": "c8aa0221d7b7170b945b3570f260909d08cfa076c6d144dba7111a69e2ec48e4",
+          "bytes": 1276
+        },
+        {
+          "path": "server/src/db/migrations/postgres/001_enable_pgvector.sql",
+          "hash": "a183b9e16fc492735db807b4c73d765c12b07b330987caa5e65c3eca71bacc16",
+          "bytes": 38
+        },
+        {
+          "path": "server/src/db/migrations/postgres/002_create_entity_embeddings_table.sql",
+          "hash": "1640d92aa81633942b07f3314df970bc0f2f554dd8a5b0c9ed6c652c2d01de62",
+          "bytes": 437
+        },
+        {
+          "path": "server/src/db/migrations/postgres/003_add_custom_schema_to_investigations.sql",
+          "hash": "638f0b09739946773e745832d04e1360a8732fca316b79db99e3f0de1e462a7e",
+          "bytes": 86
+        },
+        {
+          "path": "server/src/db/migrations/postgres/004_5_create_mcp_servers_table.sql",
+          "hash": "bf33825b94282843d162fae7c54dbcdc9ea2b9eaaa70055c15c9e803ff4d8c6f",
+          "bytes": 802
+        },
+        {
+          "path": "server/src/db/migrations/postgres/004_create_mcp_sessions.sql",
+          "hash": "327bccc4586a0ffc1418eaafb90859af1b563deebebf9922fe16e512a74d482b",
+          "bytes": 368
+        },
+        {
+          "path": "server/src/db/migrations/postgres/005_mcp_servers_fingerprint.sql",
+          "hash": "fa4415c06c6f8f41896c5054ce4665ee325348b4f9f911a7d3340080ca46988c",
+          "bytes": 111
+        },
+        {
+          "path": "server/src/db/migrations/postgres/006_create_pipelines.sql",
+          "hash": "4c70d66cbbf42e7bac5671d56b948cf4beb279e9f59a30c7f3f25072d058adea",
+          "bytes": 319
+        },
+        {
+          "path": "server/src/db/migrations/postgres/007_create_executors.sql",
+          "hash": "3e67daae76c3aa96b7e6720fcc4ab62404b166a9fb8e196ac9c782f583f3750c",
+          "bytes": 283
+        },
+        {
+          "path": "server/src/db/migrations/postgres/008_create_runs_table.sql",
+          "hash": "2fdbe7c631b02516408f5a5df4193bc460348139d3906c5debaf2b34db18a541",
+          "bytes": 1194
+        },
+        {
+          "path": "server/src/db/migrations/postgres/009_create_cases_table.sql",
+          "hash": "51fc973190627c0a73ca3bd93a3eedb7d73f8671e29446eb05ca072fb6fbaf46",
+          "bytes": 2043
+        },
+        {
+          "path": "server/src/db/migrations/postgres/009_create_companyos_operational_tables.sql",
+          "hash": "01a1afa0b809f2c7b2e1259a8e254d9215c814069e089fe44fdcb6b5217011c1",
+          "bytes": 27180
+        },
+        {
+          "path": "server/src/db/migrations/postgres/009_create_graphrag_query_preview_tables.sql",
+          "hash": "a06731666a9eee0891022dc6af3169e15f9cb4dbfc840164ad261973c1dc7ee7",
+          "bytes": 7089
+        },
+        {
+          "path": "server/src/db/migrations/postgres/009_selector_minimization.sql",
+          "hash": "688ba4a146af1861f5c52af87ff139e17ef6c089b088c95cf1ce6d889f8ec47c",
+          "bytes": 12597
+        },
+        {
+          "path": "server/src/db/migrations/postgres/010_create_audit_access_logs_table.sql",
+          "hash": "3b15594aaae6617b6bab66192e99b29d831d533498de3cc6f18cf132a74dbf72",
+          "bytes": 4952
+        }
+      ],
+      "layerHash": "44095bbf51491db517375330d181936918b0b8f81afa60c2f254d1cbf10b353b"
+    },
+    {
+      "name": "graph",
+      "files": [
+        {
+          "path": "migrations/V2__add_case_and_custody_constraints.cypher",
+          "hash": "130a631bdae2de2bfb549247e9ca6096fc3d8bf8dce7e0337c1188c05b78b4e5",
+          "bytes": 213
+        },
+        {
+          "path": "migrations/add-neo4j-indexes.cypher",
+          "hash": "6dcfe13e9f3cc196a60a4435ca214bc1f8a4a1868d8bc93b1fd2d3b4f4ed6e14",
+          "bytes": 9663
+        },
+        {
+          "path": "migrations/neo4j/001_initial_schema.cypher",
+          "hash": "76f2081de24c0c75593f5ee11603bb9d1c5ed9e5a1a3875187528ea21ce8ceb0",
+          "bytes": 3579
+        },
+        {
+          "path": "migrations/neo4j/003_canonical_entities.cypher",
+          "hash": "34c0cbf6fa22434aa005cc6b64a9881ebc2999f5ff99eecfb0c40038b8d80210",
+          "bytes": 6348
+        },
+        {
+          "path": "migrations/neo4j/010_humint_source_management.cypher",
+          "hash": "9f88b7f89e146076b34a0a1c23ab172720dfba644bfbf308a4d454d1555bacb5",
+          "bytes": 9220
+        }
+      ],
+      "layerHash": "6dcfcae479def135346c1bb41de4937454e6ea74b29a4afe4556bed87f1ae57d"
+    },
+    {
+      "name": "vector",
+      "files": [
+        {
+          "path": "migrations/vector/registry.json",
+          "hash": "e7b750f4097192ac62dfc8cd4d2c38242ad7a24ac6a65ad1e875c27e2e4e8e7a",
+          "bytes": 431
+        },
+        {
+          "path": "server/src/db/migrations/postgres/001_enable_pgvector.sql",
+          "hash": "a183b9e16fc492735db807b4c73d765c12b07b330987caa5e65c3eca71bacc16",
+          "bytes": 38
+        }
+      ],
+      "layerHash": "5d14baa6d8e16fbcc670e9db1c08f4a15fc841e00db48b15814629b56542b972"
+    },
+    {
+      "name": "json",
+      "files": [
+        {
+          "path": "migrations/json/registry.json",
+          "hash": "434e82cf753226bb887721edfbb011c78dcd629302b21c973d4c79d45b4152e8",
+          "bytes": 336
+        }
+      ],
+      "layerHash": "9ab2beb9061d70ea0a8726686313c01d01717e7d9a812e9a74e2040d5846af58"
+    }
+  ],
+  "compositeHash": "0702b82876ad8abadea8cbc120f3a1cd9b3949222b8db8122ccda3a652ec56ed"
+}
