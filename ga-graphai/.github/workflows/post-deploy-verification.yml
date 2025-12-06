@@ -1,0 +1,85 @@
+name: Post-deploy verification
+
+on:
+  deployment_status:
+    types: [success]
+
+jobs:
+  smoke-and-load:
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install --workspaces
+
+      - name: Run smoke workflow
+        id: smoke
+        run: npm run test:smoke
+        continue-on-error: true
+
+      - name: Run load workflow
+        id: load
+        run: npm run test:load
+        continue-on-error: true
+
+      - name: Post verification status to PR
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          SMOKE_RESULT: ${{ steps.smoke.conclusion }}
+          LOAD_RESULT: ${{ steps.load.conclusion }}
+          WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo } = context.repo;
+            const sha = context.payload.deployment?.sha || context.payload.deployment_status?.sha;
+            const smoke = process.env.SMOKE_RESULT || 'unknown';
+            const load = process.env.LOAD_RESULT || 'unknown';
+
+            if (!sha) {
+              core.info('No deployment SHA available; skipping PR comment.');
+              return;
+            }
+
+            const prs = await github.paginate(
+              github.rest.repos.listPullRequestsAssociatedWithCommit,
+              { owner, repo, commit_sha: sha },
+            );
+
+            if (!prs.length) {
+              core.info('No PRs associated with deployment SHA; skipping comment.');
+              return;
+            }
+
+            const body = [
+              '## Post-deploy verification',
+              `- Smoke: **${smoke}**`,
+              `- Load: **${load}**`,
+              `- Run: [${process.env.WORKFLOW_URL}](${process.env.WORKFLOW_URL})`,
+            ].join('\n');
+
+            for (const pr of prs) {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: pr.number,
+                body,
+              });
+            }
+
+      - name: Enforce smoke/load results
+        if: steps.smoke.conclusion == 'failure' || steps.load.conclusion == 'failure'
+        run: exit 1
