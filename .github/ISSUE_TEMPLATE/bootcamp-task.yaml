@@ -1,0 +1,48 @@
+name: Bootcamp Task
+description: Starter tasks for new engineers to practice the stack end-to-end
+labels: [bootcamp, good-first-issue]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Welcome! Pick one of the tasks below and document what you learned. Keep the scope small and ship in a day.
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / area you picked
+      description: Which service, package, or doc are you touching? Link to any related spec or file path.
+      placeholder: e.g., server/src/resolvers/graph.ts or docs/api/new-endpoint.md
+    validations:
+      required: true
+  - type: checkboxes
+    id: tasks
+    attributes:
+      label: Choose a bootcamp task
+      options:
+        - label: Add a focused unit/integration test for an existing resolver, service, or utility
+        - label: Add or update an endpoint doc (GraphQL SDL/REST) with parameters + example requests
+        - label: Fix a small bug labeled good-first-issue or bootcamp
+        - label: Instrument a metric or log line around a known failure path (use existing logging/metrics helpers)
+    validations:
+      required: true
+  - type: textarea
+    id: plan
+    attributes:
+      label: Plan of attack
+      description: What files will you touch? Any data you need? Keep it to a few bullet points.
+    validations:
+      required: true
+  - type: textarea
+    id: testing
+    attributes:
+      label: Verification
+      description: Commands you will run (e.g., pnpm bootcamp:check, pnpm test:quick, pnpm lint, pnpm typecheck) and how you will validate locally.
+    validations:
+      required: true
+  - type: textarea
+    id: findings
+    attributes:
+      label: Notes & follow-ups
+      description: Capture setup hurdles, flaky tests, or docs to improve after finishing the task.
+    validations:
+      required: false
