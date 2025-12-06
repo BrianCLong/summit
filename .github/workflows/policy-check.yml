@@ -1,0 +1,69 @@
+name: Policy Check
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  opa-policy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Get Changed Files
+        if: github.event_name == 'pull_request'
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          json: true
+          escape_json: false
+
+      - name: Generate Input JSON
+        run: |
+          # Construct input.json with necessary context
+          cat <<EOF > input.json
+          {
+            "event_name": "${{ github.event_name }}",
+            "ref": "${{ github.ref }}",
+            "actor": "${{ github.actor }}",
+            "pr": {
+              "title": $(jq -n --arg title "${{ github.event.pull_request.title }}" '$title'),
+              "labels": ${{ toJson(github.event.pull_request.labels) || '[]' }},
+              "draft": ${{ github.event.pull_request.draft || 'false' }}
+            },
+            "changed_files": ${{ steps.changed-files.outputs.all_changed_files || '[]' }}
+          }
+          EOF
+
+          echo "Debug: Input JSON content:"
+          cat input.json
+
+      - name: Run OPA Evaluation
+        run: |
+          # Evaluate the 'deny' rule in policy/workflow.rego
+          # We expect 'deny' to be empty.
+
+          # Using 'opa eval' to get the result
+          # We load the entire policy/ directory to include all policies
+          RESULT=$(opa eval --input input.json --data policy/ --format pretty 'data.summit.workflow.deny')
+
+          echo "OPA Result:"
+          echo "$RESULT"
+
+          # Check if result is empty array or set
+          if [[ "$RESULT" == "[]" ]]; then
+            echo "Policy check passed."
+            exit 0
+          else
+            echo "Policy check FAILED. Violations found:"
+            echo "$RESULT"
+            exit 1
+          fi
