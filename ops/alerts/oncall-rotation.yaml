@@ -1,0 +1,18 @@
+# On-call rotation and PagerDuty validation targets for CI
+rotation:
+  primary:
+    schedule: sre-primary
+    escalation_policy: sre-ml-primary
+    paging_channel: "#oncall-bridge"
+    shift_length: 1w
+  secondary:
+    schedule: sre-secondary
+    escalation_policy: sre-ml-primary
+    paging_channel: "#incident-commander"
+    shift_length: 1w
+pagerduty:
+  service: intelgraph-ml-observability
+  escalation_policy: sre-ml-primary
+  verification_endpoint: https://events.pagerduty.com/v2/enqueue
+  mock_routing_key_secret: PAGERDUTY_ML_ROUTING_KEY
+  heartbeat_name: observability-ci-oncall
