@@ -1,0 +1,57 @@
+name: System Map Drift
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/architecture/**'
+      - 'docs/architecture/**'
+      - '.github/workflows/system-map-drift.yml'
+      - 'docker-compose*.yml'
+      - 'docker-compose*.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/architecture/**'
+      - 'docs/architecture/**'
+      - '.github/workflows/system-map-drift.yml'
+      - 'docker-compose*.yml'
+      - 'docker-compose*.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/**'
+  workflow_dispatch:
+
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install Graphviz
+        run: sudo apt-get update -y && sudo apt-get install -y graphviz
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --no-frozen-lockfile --ignore-scripts
+
+      - name: Generate system map
+        run: pnpm dlx ts-node --esm scripts/architecture/generate-system-map.ts
+
+      - name: Detect drift
+        run: |
+          git diff --stat -- docs/architecture/system-map.json docs/architecture/system-map.dot docs/architecture/system-map.png
+          git diff --exit-code -- docs/architecture/system-map.json docs/architecture/system-map.dot docs/architecture/system-map.png
