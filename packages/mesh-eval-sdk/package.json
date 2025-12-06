@@ -1,0 +1,42 @@
+{
+  "name": "@intelgraph/mesh-eval-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for Agentic Mesh Evaluation & Auto-Improvement",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix"
+  },
+  "keywords": [
+    "agentic-mesh",
+    "evaluation",
+    "benchmarking",
+    "llm",
+    "ai-safety"
+  ],
+  "author": "Summit Platform Team",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  }
+}
