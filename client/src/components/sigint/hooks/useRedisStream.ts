@@ -135,8 +135,6 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
 
   // Socket.IO connection lifecycle
   useEffect(() => {
-    let reconnectTimer: NodeJS.Timeout;
-
     const connect = () => {
       socketRef.current = io({
         path: '/api/sigint/stream',
@@ -199,7 +197,6 @@ export function useRedisStream(options: RedisStreamOptions): RedisStreamState & 
 
     return () => {
       clearInterval(updateInterval);
-      clearTimeout(reconnectTimer);
       socketRef.current?.disconnect();
     };
   }, [
