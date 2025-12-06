@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auto_scientist"
+version = "0.1.0"
+description = "A small, clean Python package plus Repro Pack for the v0.1 Auto-Scientist SDK."
+dependencies = [
+    "pydantic",
+    "PyYAML",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+examples = [
+    "scikit-learn",
+    "numpy",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
