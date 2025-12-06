@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Device Trust Posture</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 2rem; }
+      .status { padding: 1rem; border-radius: 8px; }
+      .status.pass { background: #e8f5e9; }
+      .status.fail { background: #fff3e0; }
+      .remediation { margin-top: 1rem; }
+      .remediation li { margin-bottom: 0.4rem; }
+      code { background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 4px; }
+      button { padding: 0.5rem 1rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Device Trust Posture</h1>
+    <p class="secure-context-warning" aria-live="polite"></p>
+
+    <section class="status fail" id="posture-status">
+      <h2>Posture Status</h2>
+      <p id="posture-summary">Evaluating signals...</p>
+      <button id="copy-claims" type="button">Copy anonymized claims</button>
+    </section>
+
+    <section class="remediation" aria-label="Remediation guidance">
+      <h3>Remediation Guide</h3>
+      <ul id="remediation-list">
+        <li>Enable disk encryption (FileVault/BitLocker/Linux LUKS).</li>
+        <li>Turn on automatic screen lock and biometric unlock.</li>
+        <li>Use hardware-backed WebAuthn security keys for step-up prompts.</li>
+        <li>Keep browsers updated to latest stable channel.</li>
+      </ul>
+    </section>
+
+    <script>
+      (function ($) {
+        const statusEl = $('#posture-summary');
+        const secureWarning = $('.secure-context-warning');
+        const copyButton = $('#copy-claims');
+        const sampleClaims = {
+          device_hash: 'privacy-preserving-hash',
+          posture: 'non-compliant',
+          required_step_up: 'security-key'
+        };
+
+        const isSecure = window.isSecureContext;
+        if (!isSecure) {
+          secureWarning.text('Secure context required for clipboard and WebAuthn. Load over HTTPS or localhost.');
+          copyButton.prop('disabled', true);
+        } else {
+          secureWarning.text('Running in a secure context. WebAuthn and clipboard guarded.');
+        }
+
+        function evaluateSignals() {
+          const checks = [
+            { name: 'disk_encryption', passed: true },
+            { name: 'screen_lock', passed: false }
+          ];
+          const failed = checks.filter(check => !check.passed);
+          if (failed.length === 0) {
+            $('#posture-status').removeClass('fail').addClass('pass');
+            statusEl.text('Compliant: no remediation required.');
+          } else {
+            statusEl.text('Non-compliant: ' + failed.map(c => c.name).join(', '));
+          }
+        }
+
+        function copyClaims() {
+          if (!isSecure) return;
+          const serialized = JSON.stringify(sampleClaims, null, 2);
+          navigator.clipboard.writeText(serialized).catch(() => {
+            secureWarning.text('Clipboard blocked by browser; copy manually.');
+          });
+        }
+
+        copyButton.on('click', copyClaims);
+        evaluateSignals();
+      })(jQuery);
+    </script>
+  </body>
+</html>

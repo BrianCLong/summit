@@ -1,0 +1,9 @@
+{
+  "name": "device-trust-node",
+  "version": "0.1.0",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/policySimulator.test.js"
+  }
+}
