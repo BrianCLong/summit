@@ -1,6 +1,6 @@
 import { Router, type Router as RouterType } from 'express';
-import { EntitySchema } from '../schema';
-import { store } from '../services/store';
+import { EntitySchema } from '../schema.js';
+import { store } from '../services/store.js';
 
 const router: RouterType = Router();
 

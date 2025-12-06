@@ -1,13 +1,13 @@
 import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
-import { EntitySchema } from '../schema';
+import { EntitySchema } from '../schema.js';
 import {
   scoreEntities,
   enqueueCandidate,
   decide,
   getExplanation,
   listCandidates,
-} from '../services/er';
+} from '../services/er.js';
 
 const CandidateInput = z.object({
   entities: z.array(EntitySchema),

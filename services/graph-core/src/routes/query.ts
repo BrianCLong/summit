@@ -1,6 +1,6 @@
 import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
-import { store } from '../services/store';
+import { store } from '../services/store.js';
 
 const QueryInput = z.object({
   cypher: z.string(),
