@@ -11,7 +11,7 @@
  * @module graph-core/canonical/validation
  */
 
-import { z } from 'zod';
+import { z, type SafeParseReturnType } from 'zod';
 import {
   CanonicalEntityType,
   CanonicalRelationshipType,
@@ -419,7 +419,7 @@ export const QueryCostLimits = {
  */
 export function validateEntityInput(
   input: unknown
-): z.SafeParseReturnType<unknown, z.infer<typeof EntityInputSchema>> {
+): SafeParseReturnType<unknown, z.infer<typeof EntityInputSchema>> {
   return EntityInputSchema.safeParse(input);
 }
 
@@ -428,7 +428,7 @@ export function validateEntityInput(
  */
 export function validateRelationshipInput(
   input: unknown
-): z.SafeParseReturnType<unknown, z.infer<typeof RelationshipInputSchema>> {
+): SafeParseReturnType<unknown, z.infer<typeof RelationshipInputSchema>> {
   return RelationshipInputSchema.safeParse(input);
 }
 
@@ -437,7 +437,7 @@ export function validateRelationshipInput(
  */
 export function validatePolicyLabels(
   input: unknown
-): z.SafeParseReturnType<unknown, z.infer<typeof PolicyLabelsSchema>> {
+): SafeParseReturnType<unknown, z.infer<typeof PolicyLabelsSchema>> {
   return PolicyLabelsSchema.safeParse(input);
 }
 
@@ -446,7 +446,7 @@ export function validatePolicyLabels(
  */
 export function validateNeighborhoodQuery(
   input: unknown
-): z.SafeParseReturnType<unknown, z.infer<typeof NeighborhoodQuerySchema>> {
+): SafeParseReturnType<unknown, z.infer<typeof NeighborhoodQuerySchema>> {
   return NeighborhoodQuerySchema.safeParse(input);
 }
 
