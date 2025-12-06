@@ -1,0 +1,29 @@
+{
+  "name": "@intelgraph/companyos-sync",
+  "version": "1.0.0",
+  "description": "Bi-directional user and role synchronization between CompanyOS and Summit RBAC",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "ioredis": "^5.3.2",
+    "pg": "^8.11.3",
+    "zod": "^3.22.4",
+    "pino": "^8.16.2",
+    "node-cron": "^3.0.3",
+    "eventemitter3": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/pg": "^8.10.9",
+    "typescript": "^5.3.3",
+    "tsx": "^4.6.2",
+    "vitest": "^1.1.0"
+  }
+}
