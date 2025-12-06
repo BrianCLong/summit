@@ -29,6 +29,8 @@ const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
 );
 const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
 const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
+const CONNECTION_ACQUISITION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_ACQUISITION_TIMEOUT_MS || 60000);
+const MAX_TRANSACTION_RETRY_TIME_MS = Number(process.env.NEO4J_MAX_TRANSACTION_RETRY_TIME_MS || 30000);
 
 // Connection Pool Settings
 const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
@@ -193,6 +195,8 @@ async function connectToNeo4j(): Promise<void> {
             logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
         maxConnectionPoolSize: MAX_CONNECTION_POOL_SIZE,
         connectionTimeout: CONNECTION_TIMEOUT_MS,
+        connectionAcquisitionTimeout: CONNECTION_ACQUISITION_TIMEOUT_MS,
+        maxTransactionRetryTime: MAX_TRANSACTION_RETRY_TIME_MS,
         logging: {
           level: 'info',
           logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message)
