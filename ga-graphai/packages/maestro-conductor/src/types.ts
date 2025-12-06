@@ -140,6 +140,35 @@ export interface PolicyHook {
   evaluate(input: PolicyInput): PolicyEvaluation | Promise<PolicyEvaluation>;
 }
 
+export type GuardrailSeverity = 'info' | 'warn' | 'block';
+
+export interface GuardrailInput {
+  guardrailId?: string;
+  asset: AssetDescriptor;
+  job: JobSpec;
+  intent: string;
+  taskId: string;
+  context?: Record<string, unknown>;
+}
+
+export interface GuardrailResult {
+  id: string;
+  description?: string;
+  passed: boolean;
+  severity: GuardrailSeverity;
+  reason?: string;
+  recommendations?: string[];
+  metadata?: Record<string, unknown>;
+  assetId?: string;
+  error?: string;
+}
+
+export interface GuardrailHook {
+  id: string;
+  description?: string;
+  evaluate(input: GuardrailInput): GuardrailResult | Promise<GuardrailResult>;
+}
+
 export interface SelfHealingAction {
   type: string;
   targetAssetId?: string;
@@ -214,4 +243,74 @@ export interface IncidentReport {
   snapshot: HealthSnapshot;
   plans: SelfHealingPlan[];
   timestamp: Date;
+}
+
+export interface OrchestrationTask {
+  id: string;
+  intent: string;
+  job: JobSpec;
+  metadata?: Record<string, unknown>;
+  context?: Record<string, unknown>;
+}
+
+export interface GuardrailEvaluation {
+  decision: RoutingDecision;
+  results: GuardrailResult[];
+  blocked: boolean;
+  warnings: GuardrailResult[];
+  errors: GuardrailResult[];
+}
+
+export interface CiCheckResult {
+  id: string;
+  description?: string;
+  passed: boolean;
+  detail?: string;
+  metadata?: Record<string, unknown>;
+  required?: boolean;
+  error?: string;
+}
+
+export interface CiCheck {
+  id: string;
+  description?: string;
+  required?: boolean;
+  evaluate(task: OrchestrationTask): CiCheckResult | Promise<CiCheckResult>;
+}
+
+export interface TraceEntry {
+  step:
+    | 'discovery'
+    | 'routing'
+    | 'guardrail'
+    | 'ci-check'
+    | 'fallback'
+    | 'complete'
+    | 'error';
+  status: 'success' | 'skipped' | 'failed';
+  detail: string;
+  metadata?: Record<string, unknown>;
+  timestamp?: Date;
+}
+
+export type TraceStatus = 'running' | 'completed' | 'failed';
+
+export interface ExecutionTrace {
+  taskId: string;
+  intent: string;
+  status: TraceStatus;
+  entries: TraceEntry[];
+  startedAt: Date;
+  completedAt?: Date;
+  metadata?: Record<string, unknown>;
+}
+
+export interface TaskExecutionResult {
+  task: OrchestrationTask;
+  plan: RoutingPlan;
+  selected?: RoutingDecision;
+  guardrails: GuardrailEvaluation[];
+  ciChecks: CiCheckResult[];
+  trace: ExecutionTrace;
+  fallbacksTried: string[];
 }
