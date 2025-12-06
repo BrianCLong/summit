@@ -1,0 +1,14 @@
+{
+  "id": "loc-1",
+  "schemaVersion": "v1",
+  "entityType": "Location",
+  "name": "Denver Operations Center",
+  "address": "100 Terminal Ave, Denver, CO",
+  "country": "US",
+  "geo": { "lat": 39.8561, "lon": -104.6737 },
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "site-catalog",
+    "ingestedAt": "2025-01-04T08:00:00Z"
+  }
+}

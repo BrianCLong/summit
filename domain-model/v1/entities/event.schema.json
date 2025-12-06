@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./event.schema.json",
+  "title": "Event (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Event" },
+    "name": { "type": "string" },
+    "category": { "type": "string" },
+    "occurredAt": { "$ref": "../base.schema.json#/$defs/Timestamp" },
+    "timeRange": { "$ref": "../base.schema.json#/$defs/TimeRange" },
+    "locationId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "name"],
+  "additionalProperties": false
+}
