@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/slow-query-killer",
+  "version": "1.0.0",
+  "description": "Slow query killer with cost budgeting for IntelGraph",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "neo4j-driver": "^5.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/pg": "^8.10.0",
+    "typescript": "^5.3.3"
+  },
+  "keywords": [
+    "query",
+    "performance",
+    "cost",
+    "timeout",
+    "database"
+  ]
+}
