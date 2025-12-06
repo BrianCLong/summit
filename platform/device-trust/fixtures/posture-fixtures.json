@@ -1,0 +1,23 @@
+[
+  {
+    "os": "macOS",
+    "browser": "Safari",
+    "ua": { "platform": "macOS 14", "architecture": "arm64" },
+    "webauthn": { "userVerified": true, "userPresent": true },
+    "local": { "firewallEnabled": true, "diskEncrypted": true, "screenLock": true }
+  },
+  {
+    "os": "Windows 11",
+    "browser": "Edge",
+    "ua": { "platform": "Windows 11", "architecture": "amd64" },
+    "webauthn": { "userVerified": false, "userPresent": true },
+    "local": { "firewallEnabled": false, "diskEncrypted": true, "screenLock": false }
+  },
+  {
+    "os": "Ubuntu",
+    "browser": "Chrome",
+    "ua": { "platform": "Linux", "architecture": "x86_64" },
+    "webauthn": { "userVerified": true, "userPresent": true },
+    "local": { "firewallEnabled": true, "diskEncrypted": false, "screenLock": true, "offlineMode": true }
+  }
+]
