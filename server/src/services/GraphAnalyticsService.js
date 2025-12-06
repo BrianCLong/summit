@@ -13,29 +13,31 @@ class GraphAnalyticsService {
     const session = this.driver.session();
 
     try {
-      const constraints = investigationId
-        ? 'WHERE n.investigation_id = $investigationId AND m.investigation_id = $investigationId'
-        : '';
+      // Ensure investigationId is present in params even if null, as the query references it
+      const params = { investigationId };
 
-      const params = investigationId ? { investigationId } : {};
-
+      // Optimization:
+      // 1. Use specific Label (Entity) to allow index usage.
+      // 2. Avoid Cartesian products (MATCH (n), (m)).
+      // 3. Calculate degrees via size((n)--()) which is efficient and avoids expanding relationships.
+      // 4. edgeCount is derived from sum(degrees) / 2.
       const query = `
-        MATCH (n)
-        ${constraints.replace('m.investigation_id', 'n.investigation_id')}
-        WITH count(n) as nodeCount
-        MATCH ()-[r]->()
-        ${constraints.replace('n.investigation_id', 'r.investigation_id')}
-        WITH nodeCount, count(r) as edgeCount
-        MATCH (n)-[r]->()
-        ${constraints.replace('m.investigation_id', 'n.investigation_id')}
-        WITH nodeCount, edgeCount, n.id as nodeId, count(r) as degree
+        MATCH (n:Entity)
+        WHERE ($investigationId IS NULL OR n.investigation_id = $investigationId)
+        WITH n, size((n)--()) as degree
+        WITH count(n) as nodeCount,
+             sum(degree) as totalDegree,
+             avg(degree) as avgDegree,
+             max(degree) as maxDegree,
+             min(degree) as minDegree,
+             stdev(degree) as degreeStdDev
         RETURN 
           nodeCount,
-          edgeCount,
-          avg(degree) as avgDegree,
-          max(degree) as maxDegree,
-          min(degree) as minDegree,
-          stdev(degree) as degreeStdDev
+          toInteger(totalDegree / 2) as edgeCount,
+          avgDegree,
+          maxDegree,
+          minDegree,
+          degreeStdDev
       `;
 
       const result = await session.run(query, params);
@@ -88,30 +90,26 @@ class GraphAnalyticsService {
     const session = this.driver.session();
 
     try {
-      const constraints = investigationId
-        ? 'WHERE n.investigation_id = $investigationId'
-        : '';
+      // Ensure investigationId is present in params
+      const params = { investigationId, limit: Number(limit) };
 
-      const params = investigationId ? { investigationId, limit } : { limit };
-
-      // Degree Centrality
+      // Degree Centrality (Optimized: Use size((n)--()) and :Entity label)
       const degreeQuery = `
-        MATCH (n)
-        ${constraints}
-        OPTIONAL MATCH (n)-[r]-()
-        WITH n, count(r) as degree
-        RETURN n.id as nodeId, n.label as label, degree
+        MATCH (n:Entity)
+        WHERE ($investigationId IS NULL OR n.investigation_id = $investigationId)
+        RETURN n.id as nodeId, n.label as label, size((n)--()) as degree
         ORDER BY degree DESC
         LIMIT $limit
       `;
 
-      // Betweenness Centrality (approximation)
+      // Betweenness Centrality (Approximation Optimized)
+      // Limit path depth to 4 and sample size to avoid O(N^2) explosion
       const betweennessQuery = `
-        MATCH (n)
-        ${constraints}
-        WITH n
-        MATCH path = allShortestPaths((n)-[*]-(m))
-        WHERE n <> m ${investigationId ? 'AND m.investigation_id = $investigationId' : ''}
+        MATCH (n:Entity)
+        WHERE ($investigationId IS NULL OR n.investigation_id = $investigationId)
+        WITH n LIMIT 100 // Sample top nodes for performance
+        MATCH path = allShortestPaths((n)-[*1..4]-(m:Entity))
+        WHERE n <> m AND ($investigationId IS NULL OR m.investigation_id = $investigationId)
         WITH n, length(path) as pathLength, count(path) as pathCount
         RETURN n.id as nodeId, n.label as label, 
                avg(pathLength) as avgPathLength,
@@ -120,13 +118,14 @@ class GraphAnalyticsService {
         LIMIT $limit
       `;
 
-      // Closeness Centrality
+      // Closeness Centrality (Optimized)
+      // Limit path depth to 4
       const closenessQuery = `
-        MATCH (n)
-        ${constraints}
-        WITH n
-        MATCH path = shortestPath((n)-[*]-(m))
-        WHERE n <> m ${investigationId ? 'AND m.investigation_id = $investigationId' : ''}
+        MATCH (n:Entity)
+        WHERE ($investigationId IS NULL OR n.investigation_id = $investigationId)
+        WITH n LIMIT 100 // Sample top nodes
+        MATCH path = shortestPath((n)-[*1..4]-(m:Entity))
+        WHERE n <> m AND ($investigationId IS NULL OR m.investigation_id = $investigationId)
         WITH n, avg(length(path)) as avgDistance
         RETURN n.id as nodeId, n.label as label,
                CASE WHEN avgDistance > 0 THEN 1.0/avgDistance ELSE 0 END as closeness
@@ -174,19 +173,18 @@ class GraphAnalyticsService {
     const session = this.driver.session();
 
     try {
-      const constraints = investigationId
-        ? 'WHERE n.investigation_id = $investigationId AND m.investigation_id = $investigationId'
-        : '';
-
-      const params = investigationId ? { investigationId } : {};
+      // Ensure investigationId is present in params
+      const params = { investigationId };
 
       // Simplified community detection using connected components
+      // Optimization: Limit path depth to 3 to prevent infinite loops in cyclic graphs
+      // and restrict to :Entity label.
       const query = `
-        MATCH (n)
-        ${constraints.replace('AND m.investigation_id', 'AND n.investigation_id')}
+        MATCH (n:Entity)
+        WHERE ($investigationId IS NULL OR n.investigation_id = $investigationId)
         WITH n
-        MATCH path = (n)-[*]-(m)
-        ${constraints}
+        MATCH path = (n)-[*1..3]-(m:Entity)
+        WHERE ($investigationId IS NULL OR m.investigation_id = $investigationId)
         WITH n, collect(DISTINCT m.id) as connectedNodes
         WITH n, connectedNodes, size(connectedNodes) as componentSize
         RETURN n.id as nodeId, n.label as label, connectedNodes, componentSize
