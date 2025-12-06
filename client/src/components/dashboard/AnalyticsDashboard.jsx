@@ -60,11 +60,15 @@ import {
   BugReport,
   Star,
   Flag,
+  Search,
+  Wifi,
+  WifiOff
 } from '@mui/icons-material';
 import { formatDistanceToNow, format } from 'date-fns';
+import useDashboardSocket from '../../hooks/useDashboardSocket';
 
-// Mock data for demonstration
-const mockMetrics = {
+// Initial Mock data
+const initialMetrics = {
   network: {
     totalNodes: 1247,
     totalEdges: 2891,
@@ -94,7 +98,7 @@ const mockMetrics = {
   },
 };
 
-const mockRecentActivity = [
+const initialRecentActivity = [
   {
     id: 1,
     type: 'analysis',
@@ -116,29 +120,9 @@ const mockRecentActivity = [
     status: 'alert',
     priority: 'high',
   },
-  {
-    id: 3,
-    type: 'investigation',
-    title: 'Investigation INV-001 Updated',
-    description: 'New evidence added to financial fraud investigation',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-    user: 'Jane Investigator',
-    status: 'in-progress',
-    priority: 'medium',
-  },
-  {
-    id: 4,
-    type: 'collaboration',
-    title: 'Team Comment Added',
-    description: 'Mike Operative commented on suspicious location cluster',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4),
-    user: 'Mike Operative',
-    status: 'info',
-    priority: 'low',
-  },
 ];
 
-const mockInsights = [
+const initialInsights = [
   {
     id: 1,
     title: 'Network Growth Trend',
@@ -147,33 +131,6 @@ const mockInsights = [
     trend: 'up',
     category: 'network',
     actionable: true,
-  },
-  {
-    id: 2,
-    title: 'Geographic Clustering',
-    description: '3 new geographic clusters identified in surveillance data',
-    confidence: 0.76,
-    trend: 'neutral',
-    category: 'geospatial',
-    actionable: true,
-  },
-  {
-    id: 3,
-    title: 'Relationship Pattern Change',
-    description: 'Communication patterns show shift towards encrypted channels',
-    confidence: 0.92,
-    trend: 'down',
-    category: 'communication',
-    actionable: true,
-  },
-  {
-    id: 4,
-    title: 'Entity Importance Shift',
-    description: 'New high-importance entities emerged in financial network',
-    confidence: 0.84,
-    trend: 'up',
-    category: 'financial',
-    actionable: false,
   },
 ];
 
@@ -184,10 +141,18 @@ function AnalyticsDashboard() {
   const [detailDialog, setDetailDialog] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Use the WebSocket hook
+  const { metrics, insights, activity, connected, error } = useDashboardSocket();
+
+  // Use live data if available, otherwise fall back to initial/state
+  const displayMetrics = metrics || initialMetrics;
+  const displayActivity = activity.length > 0 ? activity : initialRecentActivity;
+  const displayInsights = insights.length > 0 ? insights : initialInsights;
+
   const handleRefresh = async () => {
     setRefreshing(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Real refresh would happen via socket or API re-fetch
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setRefreshing(false);
   };
 
@@ -303,7 +268,7 @@ function AnalyticsDashboard() {
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {activity.user} •{' '}
-              {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
+              {formatDistanceToNow(new Date(activity.timestamp), { addSuffix: true })}
             </Typography>
           </>
         }
@@ -379,9 +344,18 @@ function AnalyticsDashboard() {
           mb: 3,
         }}
       >
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Analytics Dashboard
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+            Analytics Dashboard
+          </Typography>
+          <Chip
+            icon={connected ? <Wifi /> : <WifiOff />}
+            label={connected ? "Live" : "Disconnected"}
+            color={connected ? "success" : "error"}
+            variant="outlined"
+            size="small"
+          />
+        </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Time Range</InputLabel>
@@ -417,7 +391,7 @@ function AnalyticsDashboard() {
         <Grid item xs={12} md={3}>
           <MetricCard
             title="Total Entities"
-            value={mockMetrics.network.totalNodes.toLocaleString()}
+            value={displayMetrics.network.totalNodes.toLocaleString()}
             subtitle="Network nodes"
             icon={<AccountTree />}
             trend="up"
@@ -427,8 +401,8 @@ function AnalyticsDashboard() {
         <Grid item xs={12} md={3}>
           <MetricCard
             title="Active Investigations"
-            value={mockMetrics.investigations.active}
-            subtitle={`${mockMetrics.investigations.total} total`}
+            value={displayMetrics.investigations.active}
+            subtitle={`${displayMetrics.investigations.total} total`}
             icon={<Security />}
             trend="up"
             color="success"
@@ -437,8 +411,8 @@ function AnalyticsDashboard() {
         <Grid item xs={12} md={3}>
           <MetricCard
             title="High Priority Alerts"
-            value={mockMetrics.alerts.high}
-            subtitle={`${mockMetrics.alerts.total} total alerts`}
+            value={displayMetrics.alerts.high}
+            subtitle={`${displayMetrics.alerts.total} total alerts`}
             icon={<Warning />}
             trend="down"
             color="error"
@@ -447,7 +421,7 @@ function AnalyticsDashboard() {
         <Grid item xs={12} md={3}>
           <MetricCard
             title="Daily Queries"
-            value={mockMetrics.activity.dailyQueries}
+            value={displayMetrics.activity.dailyQueries}
             subtitle="AI-powered searches"
             icon={<Psychology />}
             trend="up"
@@ -491,7 +465,7 @@ function AnalyticsDashboard() {
                           color="primary.main"
                           sx={{ fontWeight: 'bold' }}
                         >
-                          {mockMetrics.network.totalEdges.toLocaleString()}
+                          {displayMetrics.network.totalEdges.toLocaleString()}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Total Connections
@@ -505,7 +479,7 @@ function AnalyticsDashboard() {
                           color="secondary.main"
                           sx={{ fontWeight: 'bold' }}
                         >
-                          {mockMetrics.network.density.toFixed(2)}
+                          {displayMetrics.network.density.toFixed(2)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Network Density
@@ -519,7 +493,7 @@ function AnalyticsDashboard() {
                           color="success.main"
                           sx={{ fontWeight: 'bold' }}
                         >
-                          {mockMetrics.network.avgDegree.toFixed(1)}
+                          {displayMetrics.network.avgDegree.toFixed(1)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Avg. Degree
@@ -533,7 +507,7 @@ function AnalyticsDashboard() {
                           color="warning.main"
                           sx={{ fontWeight: 'bold' }}
                         >
-                          {mockMetrics.network.clusters}
+                          {displayMetrics.network.clusters}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Clusters Found
@@ -589,7 +563,7 @@ function AnalyticsDashboard() {
                   </ListItemIcon>
                   <ListItemText
                     primary="Avg. Session Time"
-                    secondary={mockMetrics.activity.avgSessionTime}
+                    secondary={displayMetrics.activity.avgSessionTime}
                   />
                 </ListItem>
 
@@ -599,7 +573,7 @@ function AnalyticsDashboard() {
                   </ListItemIcon>
                   <ListItemText
                     primary="Active Collaborators"
-                    secondary={`${mockMetrics.activity.collaborators} users`}
+                    secondary={`${displayMetrics.activity.collaborators} users`}
                   />
                 </ListItem>
 
@@ -609,7 +583,7 @@ function AnalyticsDashboard() {
                   </ListItemIcon>
                   <ListItemText
                     primary="Weekly Analyses"
-                    secondary={`${mockMetrics.activity.weeklyAnalyses} completed`}
+                    secondary={`${displayMetrics.activity.weeklyAnalyses} completed`}
                   />
                 </ListItem>
 
@@ -639,15 +613,15 @@ function AnalyticsDashboard() {
                 >
                   <Typography variant="caption">Active</Typography>
                   <Typography variant="caption">
-                    {mockMetrics.investigations.active}/
-                    {mockMetrics.investigations.total}
+                    {displayMetrics.investigations.active}/
+                    {displayMetrics.investigations.total}
                   </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
                   value={
-                    (mockMetrics.investigations.active /
-                      mockMetrics.investigations.total) *
+                    (displayMetrics.investigations.active /
+                      displayMetrics.investigations.total) *
                     100
                   }
                   sx={{ height: 8, borderRadius: 4 }}
@@ -672,15 +646,19 @@ function AnalyticsDashboard() {
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
                   Recent Activity
                 </Typography>
-                <Badge badgeContent={mockRecentActivity.length} color="primary">
+                <Badge badgeContent={displayActivity.length} color="primary">
                   <Timeline />
                 </Badge>
               </Box>
 
               <List sx={{ maxHeight: 400, overflow: 'auto' }}>
-                {mockRecentActivity.map((activity) => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))}
+                {displayActivity.length === 0 ? (
+                  <ListItem><ListItemText primary="No recent activity" /></ListItem>
+                ) : (
+                  displayActivity.map((activity) => (
+                    <ActivityItem key={activity.id} activity={activity} />
+                  ))
+                )}
               </List>
             </CardContent>
           </Card>
@@ -705,9 +683,13 @@ function AnalyticsDashboard() {
               </Box>
 
               <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-                {mockInsights.map((insight) => (
-                  <InsightCard key={insight.id} insight={insight} />
-                ))}
+                {displayInsights.length === 0 ? (
+                  <Typography variant="body2" sx={{ p: 2 }}>Waiting for insights...</Typography>
+                ) : (
+                  displayInsights.map((insight) => (
+                    <InsightCard key={insight.id} insight={insight} />
+                  ))
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -720,7 +702,7 @@ function AnalyticsDashboard() {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Flag color="error" />
                 <Typography variant="h6">Alert Summary</Typography>
-                <Badge badgeContent={mockMetrics.alerts.high} color="error">
+                <Badge badgeContent={displayMetrics.alerts.high} color="error">
                   <Chip label="High Priority" color="error" size="small" />
                 </Badge>
               </Box>
@@ -737,7 +719,7 @@ function AnalyticsDashboard() {
                     }}
                   >
                     <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
-                      {mockMetrics.alerts.high}
+                      {displayMetrics.alerts.high}
                     </Typography>
                     <Typography variant="body2">High Priority</Typography>
                   </Paper>
@@ -752,7 +734,7 @@ function AnalyticsDashboard() {
                     }}
                   >
                     <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
-                      {mockMetrics.alerts.medium}
+                      {displayMetrics.alerts.medium}
                     </Typography>
                     <Typography variant="body2">Medium Priority</Typography>
                   </Paper>
@@ -767,7 +749,7 @@ function AnalyticsDashboard() {
                     }}
                   >
                     <Typography variant="h3" sx={{ fontWeight: 'bold' }}>
-                      {mockMetrics.alerts.low}
+                      {displayMetrics.alerts.low}
                     </Typography>
                     <Typography variant="body2">Low Priority</Typography>
                   </Paper>
