@@ -1,0 +1,73 @@
+name: Schema Drift Detection
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  PNPM_CACHE_FOLDER: ~/.pnpm-store
+  NODE_VERSION: '20.x'
+
+jobs:
+  detect-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Start required services
+      - name: Start Postgres and Neo4j
+        run: |
+          # Use the dev compose file but we only need db and neo4j
+          if [ -f docker-compose.dev.yml ]; then
+             docker compose -f docker-compose.dev.yml up -d postgres neo4j redis
+             echo "Waiting for services..."
+             sleep 15
+          else
+             # Fallback
+             echo "Using docker run fallback"
+             docker network create summit-net
+             docker run -d --name postgres --network summit-net -e POSTGRES_PASSWORD=devpassword -e POSTGRES_USER=summit -e POSTGRES_DB=summit_dev -p 5432:5432 postgres:15
+             docker run -d --name neo4j --network summit-net -e NEO4J_AUTH=neo4j/devpassword -p 7687:7687 -p 7474:7474 neo4j:5.12.0
+             sleep 15
+          fi
+
+      - name: Run Migrations
+        env:
+          POSTGRES_URL: postgresql://summit:devpassword@localhost:5432/summit_dev
+          DATABASE_URL: postgresql://summit:devpassword@localhost:5432/summit_dev
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: devpassword
+        run: |
+          cd server
+          npm run db:migrate
+
+      - name: Detect Schema Drift
+        env:
+          POSTGRES_URL: postgresql://summit:devpassword@localhost:5432/summit_dev
+          DATABASE_URL: postgresql://summit:devpassword@localhost:5432/summit_dev
+          NEO4J_URI: bolt://localhost:7687
+          NEO4J_USER: neo4j
+          NEO4J_PASSWORD: devpassword
+        run: |
+          cd server
+          npm run db:drift
