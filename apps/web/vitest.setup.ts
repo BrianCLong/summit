@@ -5,10 +5,14 @@
 
 import { expect, afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
-import * as matchers from 'vitest-axe/matchers'
+import * as matchers from '@testing-library/jest-dom/matchers'
+import * as axeMatchers from 'vitest-axe/matchers'
 
-// Add vitest-axe matchers (includes toBeInTheDocument and other jest-dom matchers)
+// Add jest-dom matchers (toBeInTheDocument, toBeVisible, etc.)
 expect.extend(matchers)
+
+// Add vitest-axe accessibility matchers
+expect.extend(axeMatchers)
 
 // Cleanup after each test
 afterEach(() => {
