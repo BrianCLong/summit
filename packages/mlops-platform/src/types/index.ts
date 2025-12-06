@@ -78,10 +78,10 @@ export const ModelMetadataSchema = z.object({
   // Training info
   trainingRunId: z.string().optional(),
   trainingDataset: z.string().optional(),
-  trainingConfig: z.record(z.any()).optional(),
+  trainingConfig: z.record(z.string(), z.any()).optional(),
 
   // Performance metrics
-  metrics: z.record(z.number()).optional(),
+  metrics: z.record(z.string(), z.number()).optional(),
 
   // Deployment info
   deployments: z.array(z.object({
@@ -132,7 +132,7 @@ export const TrainingConfigSchema = z.object({
   }),
 
   // Hyperparameters
-  hyperparameters: z.record(z.any()),
+  hyperparameters: z.record(z.string(), z.any()),
 
   // Compute resources
   resources: z.object({
@@ -173,7 +173,7 @@ export const TrainingConfigSchema = z.object({
 
   // Experiment tracking
   experimentTags: z.array(z.string()).default([]),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type TrainingConfig = z.infer<typeof TrainingConfigSchema>;
@@ -253,13 +253,13 @@ export const FeatureSchema = z.object({
   // Transformation
   transformation: z.object({
     type: z.string(),
-    config: z.record(z.any()),
+    config: z.record(z.string(), z.any()),
   }).optional(),
 
   // Data quality
   constraints: z.array(z.object({
     type: z.string(),
-    config: z.record(z.any()),
+    config: z.record(z.string(), z.any()),
   })).default([]),
 
   // Statistics
@@ -286,13 +286,13 @@ export const FeatureStoreConfigSchema = z.object({
     enabled: z.boolean().default(true),
     backend: z.enum(['redis', 'dynamodb', 'cassandra', 'bigtable']),
     ttl: z.number().optional(), // seconds
-    config: z.record(z.any()),
+    config: z.record(z.string(), z.any()),
   }),
 
   offline: z.object({
     enabled: z.boolean().default(true),
     backend: z.enum(['s3', 'gcs', 'azure-blob', 'postgresql', 'snowflake']),
-    config: z.record(z.any()),
+    config: z.record(z.string(), z.any()),
   }),
 
   // Feature materialization
@@ -327,7 +327,7 @@ export const ServingConfigSchema = z.object({
 
   // Deployment strategy
   strategy: DeploymentStrategySchema,
-  strategyConfig: z.record(z.any()).optional(),
+  strategyConfig: z.record(z.string(), z.any()).optional(),
 
   // Environment
   environment: z.enum(['dev', 'staging', 'production']),
@@ -477,12 +477,12 @@ export const ExplanationRequestSchema = z.object({
   method: ExplainabilityMethodSchema,
 
   // Input data
-  input: z.record(z.any()),
+  input: z.record(z.string(), z.any()),
 
   // Method configuration
   config: z.object({
     numSamples: z.number().optional(),
-    backgroundData: z.array(z.record(z.any())).optional(),
+    backgroundData: z.array(z.record(z.string(), z.any())).optional(),
     targetClass: z.number().optional(),
   }).optional(),
 });
@@ -514,7 +514,7 @@ export const ExplanationResultSchema = z.object({
   // Visualization data
   visualizations: z.array(z.object({
     type: z.string(),
-    data: z.record(z.any()),
+    data: z.record(z.string(), z.any()),
   })).default([]),
 
   // Text explanation
@@ -561,7 +561,7 @@ export const ModelGovernanceSchema = z.object({
     timestamp: z.date(),
     action: z.string(),
     actor: z.string(),
-    details: z.record(z.any()),
+    details: z.record(z.string(), z.any()),
   })).default([]),
 
   // Access control
@@ -646,7 +646,7 @@ export const PipelineStageSchema = z.object({
     'deployment',
     'monitoring',
   ]),
-  config: z.record(z.any()),
+  config: z.record(z.string(), z.any()),
   dependencies: z.array(z.string()).default([]), // stage IDs
 
   // Execution
@@ -684,7 +684,7 @@ export const MLPipelineSchema = z.object({
   // Triggers
   triggers: z.array(z.object({
     type: z.enum(['manual', 'scheduled', 'event', 'performance-degradation']),
-    config: z.record(z.any()),
+    config: z.record(z.string(), z.any()),
   })).default([]),
 
   // Metadata
