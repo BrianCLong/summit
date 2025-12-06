@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    - cron: '0 2 * * 1' # Weekly on Mondays
+    - cron: '0 2 * * *' # Daily at 02:00 UTC
 
 # Prevent concurrent CodeQL runs
 concurrency:

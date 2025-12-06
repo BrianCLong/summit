@@ -346,8 +346,9 @@ export class GraphAnalyticsService {
             anomalies.sort((a, b) => {
                 const severityOrder = { critical: 4, high: 3, medium: 2, low: 1 };
                 const severityDiff = severityOrder[b.severity] - severityOrder[a.severity];
-                if (severityDiff !== 0)
+                if (severityDiff !== 0) {
                     return severityDiff;
+                }
                 return b.confidence - a.confidence;
             });
             logger.info(`Detected ${anomalies.length} anomalies`, {
@@ -472,10 +473,12 @@ export class GraphAnalyticsService {
                 : 0;
             const avgGrowthRate = (nodeGrowthRate + edgeGrowthRate) / 2;
             let growth = 'stable';
-            if (avgGrowthRate > 0.1)
+            if (avgGrowthRate > 0.1) {
                 growth = 'increasing';
-            else if (avgGrowthRate < -0.1)
+            }
+            else if (avgGrowthRate < -0.1) {
                 growth = 'decreasing';
+            }
             // Calculate volatility (standard deviation of growth rates)
             const growthRates = [];
             for (let i = 1; i < snapshots.length; i++) {

@@ -1,0 +1,60 @@
+name: 'Setup Environment'
+description: 'Sets up Node.js, pnpm, and caching'
+inputs:
+  node-version:
+    description: 'Node.js version'
+    required: false
+    default: '20.x'
+  install:
+    description: 'Install dependencies'
+    required: false
+    default: 'true'
+  turbo-cache:
+    description: 'Enable Turbo cache'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        # setup-node v4 has built-in pnpm caching if pnpm is enabled, but we need to enable it first or use pnpm/action-setup
+
+    - name: Enable corepack
+      shell: bash
+      run: corepack enable
+
+    - uses: pnpm/action-setup@v4
+      with:
+        run_install: false
+
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+    - name: Cache pnpm store
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-
+
+    - name: Cache Turbo
+      if: inputs.turbo-cache == 'true'
+      uses: actions/cache@v4
+      with:
+        path: .turbo
+        key: ${{ runner.os }}-turbo-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-turbo-
+
+    - name: Install dependencies
+      if: inputs.install == 'true'
+      shell: bash
+      run: pnpm install --frozen-lockfile --prefer-offline

@@ -7,7 +7,7 @@ import { BrandingEngine } from './branding/branding-engine.js';
 import { PackageGenerator } from './exporters/package-generator.js';
 import { CountryProfileSchema, ServiceCategorySchema } from './models/types.js';
 
-const app = express();
+const app: express.Application = express();
 app.use(helmet());
 app.use(express.json());
 

@@ -1,0 +1,213 @@
+# GitHub issue plan for prompts #25–#32
+
+This plan converts the eight provided prompts into ready-to-file GitHub issues with suggested branches, feature flags, CI gates, and success criteria. Each issue is scoped to ship behind its specified flag and relies only on typed APIs/events to avoid shared-state conflicts.
+
+## #25 Graph Branching, Diffs & Merges (GBDM)
+- **Issue title:** GBDM: branchable graph commits with 3-way diff/merge and UI
+- **Branch:** `feature/graph-branching`
+- **Feature flag:** `GBDM_ENABLED`
+- **Scope:** Service at `/services/gbdm` (Node 18 + TS) with Postgres commit log, Neo4j head refs; APIs for branch creation, commit, diff, merge (ours/theirs/ancestor/rule-guided); 3-way diff engine with provenance-aware conflict explainers; React UI branch switcher, diff viewer with jQuery overlays, merge wizard; events `graph.branch.created|committed|merged`.
+- **Constraints:** Append-only commits (no force-push); merge policy honors LAC and license tags; diff payloads redact PII values but include schema/IDs.
+- **CI/DoD:** Golden commit/diff fixtures; deterministic 3-way merges; Playwright flow (branch → edit → diff → merge); p95 diff for 5k-change sets ≤ 1.2s. Clarify protected branches and merge policy precedence (provenance > recency > authority?).
+- **Execution slices:**
+  - Define branch metadata schema (Postgres commit log, Neo4j refs) and branch protection defaults (main/prod) with seed migration.
+  - Implement commit API with append-only guards, provenance capture, and merge-policy annotations; emit `graph.branch.committed` with payload redaction.
+  - Build 3-way diff engine (nodes/edges/properties) with deterministic sort and conflict explainer (provenance + license). Cache 5k-change-set diffs for the p95 target.
+  - Implement merge strategies (ours/theirs/ancestor/rule-guided) with policy precedence (provenance > recency > authority) and LAC enforcement.
+  - Ship UI: branch switcher + diff viewer overlays, merge wizard with conflict previews and policy chooser; ensure flag-driven routing.
+  - Tests: golden fixtures for commits/diffs/merges; Playwright branch → edit → diff → merge; perf harness validating ≤1.2s p95 for 5k changes.
+- **23rd-order implications:**
+  - Provenance data must align with audit/export schemas to keep compliance evidence admissible; conflicts should surface license blockers before write.
+  - Append-only log implies storage growth—add log-compaction policy docs (retention + checksum receipts) and dashboard alerts for head lag.
+  - Protected branches require gateway policy hooks to block force merges; integrate with CI status checks to enforce green builds before merge.
+  - Ensure diff payload redaction schema mirrors data-classification registry so PII never leaks into fixtures, logs, or telemetry.
+  - Merge resolutions should emit machine-verifiable receipts (hash-linked to commits) so downstream consumers can prove branch provenance in audits.
+  - Branch switcher UX needs offline-tolerant cache invalidation rules to prevent stale heads in air-gapped review workflows.
+  - Conflict explainers should feed a learning loop that tunes rule-guided merges and flags hotspots where schema drift is likely to recur.
+  - Post-merge stabilization needs background reconciliation to re-pin layout/embedding snapshots derived from the merged head, preventing cross-service drift.
+  - License-tag awareness must be enforced at SDK level to avoid client-side bypass and should be fuzz-tested for malformed tags.
+
+## #26 Cost-Based Query Planner & Cardinality Estimator (CBQP)
+- **Issue title:** CBQP: cost-based planner and cardinality estimator for Cypher/GraphQL
+- **Branch:** `feature/cbqp`
+- **Feature flag:** `CBQP_ENABLED`
+- **Scope:** `/services/cbqp` (Node/TS) with histogram sketches, path selectivity models, memoized DP planner; APIs `POST /plan`, `GET /plan/:id`, `POST /advise-indexes`; IDE hook for NL→Cypher preview showing cost before run; persisted queries must carry planner hash; read-only with advisory index scripts only; per-tenant cost ceilings integrating Cost Guard (#6).
+- **CI/DoD:** Unit tests on synthetic schemas; regression tests for known plans; k6 plan-query latency p95 ≤ 200ms; feature-flag checks. Decide cost units (estimated ms vs abstract) and index advisor scope (labels/properties).
+- **Execution slices:**
+  - Define cost model (units + ceilings) and memoization strategy; add schema for persisted plan artifacts with planner hash and tenant ceilings.
+  - Implement histogram/path-selectivity estimators and DP planner with deterministic seeds; expose plan explain output consumable by NL→Cypher preview.
+  - Build APIs with validation for ceiling enforcement; add advisory index generator with scope guardrails (labels/properties only, no DDL).
+  - Wire IDE hook to display pre-run cost and planner hash; block execution when ceilings exceeded; emit advisory scripts as artifacts.
+  - Tests: synthetic-schema unit tests, regression corpus for known plans, k6 latency budget ≤200ms p95, and feature-flag gating.
+- **23rd-order implications:**
+  - Cost ceilings must align with Cost Guard (#6) policies to avoid split-brain enforcement; publish compatibility matrix for versions/hashes.
+  - Persisted planner hashes become part of CI contracts—schema drift must invalidate and regenerate hashes to avoid stale approvals.
+  - Advisory indexes should feed governance review (no auto-DDL) and export audit trails for change boards; include tenant-scoped quotas.
+  - Estimator telemetry (errors, mispredictions) should flow to observability dashboards to iteratively reduce variance and avoid runaway plans.
+  - Cached cost models must respect tenant isolation—cold starts should not leak cross-tenant statistics; add cache sharding and eviction proofs.
+  - Planner hash rotation policy should be documented for incident response when a planner bug is found (mass invalidation playbook).
+  - IDE hook should degrade gracefully when cost models are unavailable, surfacing clear refusal reasons to prevent blind query execution.
+  - Index advisor outputs should be diffable and signed so DBAs can verify provenance before applying in regulated environments.
+  - Ceiling breaches must trigger adaptive throttles coordinated with NL→Cypher previews to avoid cascading UI retries.
+
+## #27 Secrets & Key Management (KMS) + Envelope Encryption
+- **Issue title:** KMS: tenant-scoped keys, envelope encryption, and sidecar decryptor
+- **Branch:** `infra/kms`
+- **Feature flag:** `KMS_ENABLED`
+- **Scope:** `/platform/kms` (Go or Node) with tenant master keys, DEK generation, rotation schedules, audit trails; SDKs (TS/Java/Python) for encrypt/decrypt/rotate; sidecar decryptor via gRPC; export signer for #7/#13; CLI for break-glass and key inventory.
+- **Constraints:** AES-GCM or ChaCha20-Poly1305 only; dual-control for rotation and break-glass; tamper-evident logs.
+- **CI/DoD:** Test vectors; property-based stream-integrity tests; rotation drill in CI. Confirm default rotation cadence and priority external HSM/KMS integrations (AWS KMS, HashiCorp Vault?).
+- **Execution slices:**
+  - Define key hierarchy (tenant master, DEK envelope, rotation policy) and audit schema; scaffold gRPC sidecar contract.
+  - Implement master/DEK generation, rotation scheduler with dual-control approvals, and tamper-evident logging with checksum chains.
+  - Deliver SDKs (TS/Java/Python) with envelope encryption helpers for blobs/streams; include deterministic IV guidance and no try/catch wrapping imports.
+  - Build break-glass CLI with dual-control challenge/response and inventory export; ensure zero secrets in logs.
+  - Integrate export signer for #7/#13 via typed adapters; add AWS KMS / Vault plug points without hard dependency.
+  - Tests: NIST/AEAD vectors, property-based stream integrity, rotation drill in CI (simulate dual-control), sidecar decrypt/verify harnesses.
+- **23rd-order implications:**
+  - Rotation cadences drive downstream envelope re-encryption load—document backpressure strategy and maintenance windows per tenant.
+  - Audit logs must be privacy-safe yet court-admissible; include hash-chain receipts and time-sync checks to prevent replay disputes.
+  - Sidecar deployment model should align with service mesh MTLS and support air-gapped exports; ensure failure modes favor locked-down access.
+  - SDK ergonomics influence adoption; provide migration guides for existing services and deprecation timeline for legacy crypto libs.
+  - Dual-control workflows require human-factor safety: enforce out-of-band confirmation channels and session timeboxing to mitigate coercion risks.
+  - Key inventory exports should be signed and watermark-stamped so auditors can verify lineage and freshness without exposing secrets.
+  - Envelope encryption paths must include streaming backpressure metrics to prevent partial writes during high-throughput exports.
+  - Rotation drills should include synthetic corruption scenarios to validate recovery paths and ensure receipts survive incident tooling.
+  - External HSM adapters need contract tests that prove capability parity (e.g., attestation formats) before enabling tenants.
+
+## #28 Inference & Rule Engine (Datalog-ish) with Provenance
+- **Issue title:** RULES: deterministic inference engine with explainable derivations
+- **Branch:** `feature/rules-engine`
+- **Feature flag:** `RULES_ENABLED`
+- **Scope:** `/services/rules` (Python 3.12 + FastAPI) with rule DSL → compiled plans, stratified negation, incremental materialization; APIs `POST /rules`, `GET /explain/:factId`; events `rules.fact.derived|retracted`; UI rule tester (paste rule → matched subgraphs + explanations); derived facts stored in separate namespace with provenance backlinks.
+- **Constraints:** No silent overwrites of source facts; LAC-aware (rules cannot emit violating facts); deterministic derivations carrying explain chains.
+- **CI/DoD:** Golden rule packs; determinism tests; delta-update benchmarks; Playwright author → test → publish flow. Resolve starter rule packs (ATT&CK/fraud/compliance) and defaults for recursion depth/timeout.
+- **Execution slices:**
+  - Finalize rule DSL grammar and compile pipeline; add stratified negation guardrails and recursion depth/time defaults.
+  - Implement incremental materialization with provenance backlinks and separate label/namespace for derived facts; enforce LAC in emit path.
+  - Build explanation API (`GET /explain/:factId`) with path proofs and deterministic ordering; include policy-aware redaction for PII.
+  - Ship rule tester UI (paste → match → explanation) with React surface and jQuery overlays; add diff view for rule revisions.
+  - Eventing: emit `rules.fact.derived|retracted` with schema IDs and provenance references only (no sensitive payloads).
+  - Tests: golden rule packs (ATT&CK/fraud/compliance), determinism snapshots, delta benchmarks, Playwright author → test → publish.
+- **23rd-order implications:**
+  - Provenance chains must interoperate with audit exports and retention policies—derive lineage hashes to anchor receipts.
+  - Stratified negation defaults influence completeness/termination; publish SLAs for recursion depth/timeouts and expose override configs per tenant.
+  - Materialized derived namespace should be protected from manual edits; governance needs role-based controls for rule authors vs approvers.
+  - Rule tester must mask PII in matched subgraphs yet retain structure for explainability, preserving compliance with redaction policies.
+  - Explain chains should be checksum-linked so downstream consumers (e.g., DRLH receipts) can cite rule provenance in legal contexts.
+  - Incremental materialization should emit backpressure signals to layout/embedding services so derived graph changes don’t outpace visualization/index refresh SLAs.
+  - Starter rule packs require license and jurisdictional vetting; ship toggleable modules with export controls for regulated regions.
+  - DSL compiler should expose static analyzers to detect unsafe negation patterns and suggest rewrites before runtime.
+  - Event schemas must be versioned with migration playbooks to prevent consumer breakage when rule provenance schemas evolve.
+
+## #29 Embeddings Fabric & Vector Index (Text/Image/Graph)
+- **Issue title:** EMBEDDINGS: centralized vector service with HNSW index and UI ties
+- **Branch:** `feature/embeddings-fabric`
+- **Feature flag:** `EMBEDDINGS_ENABLED`
+- **Scope:** `/services/embeddings` (Python + Celery; optional GPU) supporting pluggable models, batch/stream modes, HNSW index; APIs `POST /embed`, `GET /neighbors`, `GET /models`; per-tenant model registry/quotas; UI similar-items panel with path + citation tie-ins; backfills and drift monitors; seed control for reproducibility.
+- **Constraints:** No face/biometric vectors; vectors encrypted at rest via KMS (#27); indices snapshot-pinned for reproducible GraphRAG (#12).
+- **CI/DoD:** Golden cosine-ranking fixtures; throughput baselines; model audit cards. Clarify initial model set (miniLM/e5/Whisper-text) and UI neighbor count k.
+- **Execution slices:**
+  - Define model registry schema (per-tenant quotas, audit fields) and HNSW index snapshot strategy with seed controls for reproducibility.
+  - Implement `POST /embed` (batch/stream) with Celery orchestration and optional GPU routing; enforce no biometric content.
+  - Build `GET /neighbors` with citation/path tie-ins and redaction-safe payloads; add `GET /models` for registry inspection.
+  - Add backfill + drift monitor jobs with alert thresholds; integrate KMS encryption for vector storage via #27 SDK.
+  - UI: similar-items panel (React + jQuery overlays) with deterministic seed display and neighbor count k selector.
+  - Tests: golden cosine fixtures, throughput benchmarks, model audit cards, flag gating.
+- **23rd-order implications:**
+  - Vector encryption keys tie to KMS rotation—document reindex/backfill sequencing during key rotation to avoid downtime.
+  - Snapshot-pinned indices become evidence for reproducible GraphRAG responses; include checksum receipts and expiry policies.
+  - GPU usage impacts tenant quotas and cost guardrails; expose usage metrics and preemption policies to avoid noisy-neighbor effects.
+  - Content safety requires biometric detection gates and audit of rejected items; maintain appeal workflow and traceability.
+  - Model registry must track lineage (weights, data license, eval sets) to meet auditability and bias-reporting standards.
+  - HNSW snapshotting should include deterministically seeded randomness and storage budget forecasts to prevent drift across regions.
+  - Backfill pipelines need adaptive throttling and resume tokens so long-running jobs survive failure without duplicating embeddings.
+  - UI neighbor panels must reveal seed/version info to keep interpretations reproducible for investigations.
+  - Drift monitors should feed into AASH to cross-check prompt-injection effects on embeddings-based retrieval quality.
+
+## #30 Layout Orchestrator & Viewport Engine (LOVE)
+- **Issue title:** LAYOUT: orchestrated layouts with LOD streaming and stable positions
+- **Branch:** `feature/layout-orchestrator`
+- **Feature flag:** `LAYOUT_ENABLED`
+- **Scope:** `/services/layout` (Node/TS + WASM kernels) offering force-atlas2, dagre, concentric; tiled LOD quadtree; layout anchors; APIs `POST /layout/jobs`, `GET /layout/:id/tiles`, `POST /layout/pin`; client integrates React + Cytoscape.js workers with jQuery micro-interactions for drag/lasso/pin and smooth zoom; snapshot-pinned positions keyed by subgraph hash.
+- **Constraints:** No PII in tiles; budgeted CPU/GPU with cancelable jobs; deterministic seeds for stability.
+- **CI/DoD:** Visual regression snapshots; k6 stream tests; p95 first-contentful layout ≤ 1.2s for 20k nodes (LOD). Choose default layout per view and max tile payload size.
+- **Execution slices:**
+  - Define job schema (seed, layout type, LOD params) and tile payload contract with PII redaction guarantees.
+  - Implement layout kernels (force-atlas2/dagre/concentric) in WASM with deterministic seeds and cancelable jobs; add budget enforcement.
+  - Build tiled LOD quadtree streaming API and snapshot-pinned positions keyed by subgraph hash; support pin/unpin operations.
+  - Client: React + Cytoscape worker integration with jQuery micro-interactions (drag, lasso, pin/unpin, smooth zoom) and layout selector defaults per view.
+  - Tests: visual regression snapshots, k6 stream tests, perf harness validating p95 first-contentful layout ≤1.2s for 20k nodes.
+- **23rd-order implications:**
+  - Stable seeds ensure layout continuity across sessions—document caching semantics and invalidation when graph hash changes.
+  - CPU/GPU budgeting must respect multi-tenant fairness; add scheduler backpressure and cancellation hooks to avoid resource starvation.
+  - Tile payload size limits affect network posture; publish limits, chunking strategy, and CDN/cache headers for previews.
+  - PII scrubbing in tiles must be validated in CI to prevent leakage through labels/tooltips; include schema-based allowlists.
+  - Layout pinning receipts should be hash-linked to subgraph versions so investigations can replay exact visual states.
+  - LOD streaming must coordinate with gateway QoS to prevent priority inversion during large investigative sessions.
+  - WASM kernel updates require compatibility matrices and rollback bundles to avoid layout divergences across clients.
+  - Idle session rehydration should prefetch last-known tiles with etag validation to minimize cold-start thrash.
+  - Layout telemetry (frame render times, cancel events) should feed capacity planning and anomaly detection.
+
+## #31 Data Retention, Legal Hold & Cryptographic Erasure (DRLH)
+- **Issue title:** DRLH: retention policies, legal holds, and verifiable crypto-erasure
+- **Branch:** `feature/retention-legal-hold`
+- **Feature flag:** `DRLH_ENABLED`
+- **Scope:** `/services/retention` (Node/TS) with policy DSL (retention classes, hold conditions), scheduler, crypto-erase adapter for object stores; APIs `POST /policies`, `POST /holds`, `POST /erase`, `GET /receipts/:id`; UI retention matrix per connector/case, hold indicators, erasure receipts viewer; events `retention.hold.applied|released|erased`.
+- **Constraints:** Erasure receipts include hash trees and KMS-backed key-destruction attestations; LAC consulted before erase; holds supersede retention.
+- **CI/DoD:** Policy simulation tests; golden erase receipts; Playwright hold → erase blocked → release → erase flow. Decide default retention classes (90/180/365/indefinite) and erasure approval roles/dual-control.
+- **Execution slices:**
+  - Define policy DSL (classes, holds, exemptions) and scheduler cadence; add adapter contract for object-store crypto-erasure.
+  - Implement APIs for policy/hold/erase/receipts with LAC checks and hold precedence; integrate KMS key-destruction attestations.
+  - Build receipts generator with hash trees and dual-control approvals; persist receipts with tamper-evident metadata.
+  - UI: retention matrix, hold indicators, receipt viewer with export; ensure redaction of PII and audit-safe formatting.
+  - Events: emit `retention.hold.applied|released|erased` with minimal identifiers; wire alerting for blocked erasures.
+  - Tests: policy simulation suite, golden erase receipts, Playwright hold → blocked erase → release → erase path.
+- **23rd-order implications:**
+  - Crypto-erasure requires coordination with backups and replicas—publish runbooks for erasure propagation and proof-of-destruction windows.
+  - Dual-control flows must align with IAM roles; provide separation-of-duties guidance and on-call escalation procedures.
+  - Receipts form compliance evidence; ensure long-term retention with integrity checks and re-verification schedules.
+  - Legal holds must override retention even during incident response; add guardrails to prevent automation from clearing holds prematurely.
+  - Erasure adapters should emit attestation bundles consumable by auditors without revealing object contents; include nonce-based replay protection.
+  - Policy DSL changes need semantic versioning and migration tooling to avoid silent policy drift across environments.
+  - Scheduler must account for storage-class tiers so erasure cadence respects cold-storage retrieval SLAs and costs.
+  - Receipts viewer should support cross-tenant redaction policies and export-safe PDFs with visible integrity seals.
+  - Legal hold indicators must propagate to downstream services (rules/layout/embeddings) to freeze non-essential processing when required.
+
+## #32 Adversarial AI & Safety Harness (AASH)
+- **Issue title:** AASH: continuous red-team harness and AI middleware gates
+- **Branch:** `feature/ai-safety-harness`
+- **Feature flag:** `AASH_ENABLED`
+- **Scope:** `/ai/safety-harness` (Python) with attack corpus, canary prompts, guardrail probes; gatekeeper middleware for AI calls enforcing sanitization, citation checks, refusal hooks; CI job fails on regressions (exfil rate, citation adherence); Grafana dashboard with trends and failure exemplars; adapters for NLQ (#2) and GraphRAG (#12).
+- **Constraints:** Do not store raw sensitive prompts; redact/hash instead. Integrates via typed adapters only.
+- **CI/DoD:** Baseline and tracked safety scores; failing examples stored with redacted manifests. Define required minimum safety score (e.g., ≥95%) and high-risk domains to emphasize.
+- **Execution slices:**
+  - Build attack corpus (prompt-injection, nested contexts), canary prompts, guardrail probes with versioned manifests and redacted storage.
+  - Implement gatekeeper middleware enforcing sanitization, citation presence, refusal hooks; add adapters for NLQ (#2) and GraphRAG (#12).
+  - Create CI job that runs harness and fails on regression (higher exfil, lower citation adherence); store failing exemplars with manifests.
+  - Grafana panel: trend lines, failure exemplars, minimum safety score threshold; wire alerts for score drops below ≥95% (tunable).
+  - Tests: baseline attack success rate, regression tracking, feature-flag gating, adapter contract validation.
+- **23rd-order implications:**
+  - Safety scores influence release gating; publish policy for canary failures and rollback triggers across AI surfaces.
+  - Redaction/hashing of prompts must align with privacy requirements; ensure salted hashes per tenant to prevent cross-correlation.
+  - Middleware should remain performance-aware—add latency budgets and fallback paths to avoid user-facing timeouts while still blocking exfil.
+  - High-risk domain focus (finance/PII/geopolitics) should inform corpus weighting and incident playbooks; coordinate with legal/compliance.
+  - Attack corpus evolution should be treated as code: signed manifests, reproducible seeds, and regression diffs reviewed like dependencies.
+  - Gatekeeper middleware must expose denial reason codes for analytics without leaking sensitive prompt fragments.
+  - CI harness should run under load with synthetic traffic to confirm that safety enforcement scales and does not skew latency SLOs.
+  - Dashboard exemplars need lifecycle governance so sensitive-but-redacted failures expire per policy while keeping statistical fidelity.
+  - Adapters for NLQ/GraphRAG must publish compatibility contracts, enabling staged rollout and rollback without blocking unrelated AI paths.
+
+## Shared CI wiring
+- Add branch-specific pipelines that fail if feature flag is disabled in tests, enforce golden fixtures where specified, and run Playwright/k6 suites per service. Persist planner hashes for CBQP in CI and ensure GBDM/RULES/DRLH flows run end-to-end in preview environments.
+- Layered gates (23rd-order coverage):
+  - **Flag awareness:** Require feature flags to be enabled in CI for the target service only; block accidental cross-flag leakage.
+  - **Artifacts & receipts:** Store golden fixtures, planner hashes, diff/merge receipts, erasure receipts, and safety harness manifests with checksums and expiry/rotation policies.
+  - **Performance envelopes:** Enforce perf SLOs (diff ≤1.2s p95; planner ≤200ms p95; layout ≤1.2s FCL; embeddings throughput targets) with alerting and release blocks.
+  - **Security & privacy:** Validate redaction schemas (no PII in diffs/layout tiles/rule explanations/AI harness logs) and crypto posture (KMS rotation drills) inside CI.
+  - **Observability hooks:** Ensure each service exports dashboards/alerts for capacity, error budgets, and policy violations; CI should verify dashboards load and alerts are armed.
+  - **Disaster readiness:** Inject chaos tests (failed HSM, planner hash corruption, expired snapshots) and require automated rollback playbooks tied to feature flags.
+  - **Governance alignment:** Attach policy sign-offs (LAC, license tags, data-classification) as required checks before merge; evidence archived with immutability guarantees.
+  - **Cross-service coherence:** Run contract tests verifying adapters (KMS, AASH, CBQP hooks) remain backward-compatible; block release on schema drift without migrations.
+  - **Data minimization:** Scan fixtures and receipts for over-collection; enforce deletion/expiry automation with audit logs to prove minimization compliance.
+  - **Human-in-the-loop safety:** CI should assert that dual-control and approval flows remain reachable (e.g., simulated approver paths) and fail if guardrails are bypassed.

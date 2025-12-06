@@ -10,11 +10,20 @@ log() {
 
 log "🔒 Running pre-commit checks..."
 
-# Run gitleaks
+# Run custom secret scanner
+log "🔍 Running custom secret scanner..."
+if [ -f "scripts/scan_secrets.py" ]; then
+    python3 scripts/scan_secrets.py || {
+      log "❌ Secrets detected by custom scanner!"
+      exit 1
+    }
+fi
+
+# Run gitleaks if available
 if command -v gitleaks >/dev/null 2>&1; then
-  log "🔍 Scanning for secrets..."
+  log "🔍 Scanning for secrets with gitleaks..."
   gitleaks protect --staged --verbose || {
-    log "❌ Secret detected!"
+    log "❌ Secret detected by gitleaks!"
     exit 1
   }
 fi

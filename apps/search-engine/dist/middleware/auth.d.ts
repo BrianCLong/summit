@@ -7,4 +7,4 @@ export interface AuthenticatedRequest extends Request {
         tenantId: string;
     };
 }
-export declare const authMiddleware: (req: AuthenticatedRequest, res: Response, next: NextFunction) => any;
+export declare const authMiddleware: (req: AuthenticatedRequest, res: Response, next: NextFunction) => Response<any, Record<string, any>>;

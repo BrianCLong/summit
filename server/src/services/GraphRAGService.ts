@@ -28,6 +28,7 @@ const logger: pino.Logger = pino({ name: 'GraphRAGService' });
 // Zod schemas for type safety and validation
 const GraphRAGRequestSchema = z.object({
   investigationId: z.string().min(1),
+  tenantId: z.string().min(1).optional(), // Optional for backward compatibility, but recommended
   question: z.string().min(3),
   focusEntityIds: z.array(z.string()).optional(),
   maxHops: z.number().int().min(1).max(3).optional(),
@@ -42,7 +43,7 @@ const EntitySchema = z.object({
   type: z.string(),
   label: z.string(),
   description: z.string().optional(),
-  properties: z.record(z.any()),
+  properties: z.record(z.string(), z.any()),
   confidence: z.number().min(0).max(1),
 });
 
@@ -52,7 +53,7 @@ const RelationshipSchema = z.object({
   fromEntityId: z.string(),
   toEntityId: z.string(),
   label: z.string().optional(),
-  properties: z.record(z.any()),
+  properties: z.record(z.string(), z.any()),
   confidence: z.number().min(0).max(1),
 });
 
@@ -356,9 +357,14 @@ export class GraphRAGService {
 
       if (focusEntityIds.length > 0) {
         // Focused retrieval around specific entities
+        let whereClause = 'WHERE anchor.id IN $focusIds AND anchor.investigationId = $investigationId';
+        if (request.tenantId) {
+          whereClause += ' AND anchor.tenantId = $tenantId';
+        }
+
         cypher = `
           MATCH (anchor:Entity)
-          WHERE anchor.id IN $focusIds AND anchor.investigationId = $investigationId
+          ${whereClause}
           CALL apoc.path.subgraphAll(anchor, {
             maxLevel: $maxHops,
             relationshipFilter: 'RELATIONSHIP>',
@@ -370,11 +376,15 @@ export class GraphRAGService {
           WITH collect(DISTINCT node) as allNodes, collect(DISTINCT rel) as allRels
           RETURN allNodes as nodes, allRels as relationships
         `;
-        params = { focusIds: focusEntityIds, investigationId, maxHops };
+        params = { focusIds: focusEntityIds, investigationId, maxHops, tenantId: request.tenantId };
       } else {
         // General retrieval - get central entities and their neighborhoods
+        const matchProps = request.tenantId
+          ? '{investigationId: $investigationId, tenantId: $tenantId}'
+          : '{investigationId: $investigationId}';
+
         cypher = `
-          MATCH (e:Entity {investigationId: $investigationId})
+          MATCH (e:Entity ${matchProps})
           WITH e ORDER BY e.confidence DESC, e.createdAt DESC LIMIT 10
           CALL apoc.path.subgraphAll(e, {
             maxLevel: $maxHops,
@@ -387,7 +397,7 @@ export class GraphRAGService {
           WITH collect(DISTINCT node) as allNodes, collect(DISTINCT rel) as allRels
           RETURN allNodes as nodes, allRels as relationships
         `;
-        params = { investigationId, maxHops };
+        params = { investigationId, maxHops, tenantId: request.tenantId };
       }
 
       const result = await session.run(cypher, params);
@@ -471,8 +481,8 @@ export class GraphRAGService {
             ? this.summarizeZodIssues(error)
             : error.message;
         logger.warn(
-          `LLM schema violation or invalid JSON; retrying with temperature=0`,
           { issues: summary },
+          `LLM schema violation or invalid JSON; retrying with temperature=0`
         );
         try {
           const retryResponse = await callLLMAndValidate(0); // Second attempt with stricter prompt/temperature=0
@@ -487,10 +497,10 @@ export class GraphRAGService {
               : retryError instanceof Error
                 ? retryError.message
                 : 'Unknown error';
-          logger.error('LLM schema invalid after retry', {
+          logger.error({
             traceId: mapped.traceId,
             issues: retrySummary,
-          });
+          }, 'LLM schema invalid after retry');
           throw mapped;
         }
       }
@@ -588,9 +598,10 @@ Respond with JSON only:`;
    * Create cache key based on investigation, anchors, and hops
    */
   private createSubgraphCacheKey(request: GraphRAGRequest): string {
-    const { investigationId, focusEntityIds = [], maxHops = 2 } = request;
+    const { investigationId, tenantId, focusEntityIds = [], maxHops = 2 } = request;
     const sortedAnchors = [...focusEntityIds].sort();
-    const keyData = `${investigationId}:${sortedAnchors.join(',')}:${maxHops}`;
+    // Include tenantId in cache key if available for stricter isolation
+    const keyData = `${tenantId || 'no-tenant'}:${investigationId}:${sortedAnchors.join(',')}:${maxHops}`;
     return `graphrag:subgraph:${createHash('sha256').update(keyData).digest('hex').substring(0, 16)}`;
   }
 
