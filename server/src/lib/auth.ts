@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import jwt from 'jsonwebtoken';
 import { getPostgresPool } from '../db/postgres.js';

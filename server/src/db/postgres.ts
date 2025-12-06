@@ -140,6 +140,8 @@ interface PoolConfig {
 // Extend PoolClient to include connectedAt
 interface ExtendedPoolClient extends PoolClient {
   connectedAt?: number;
+  release(destroy?: boolean): void;
+  query(queryTextOrConfig: string | QueryConfig<any>, values?: any[]): Promise<QueryResult<any>>;
 }
 
 class CircuitBreaker {

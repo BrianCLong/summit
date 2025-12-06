@@ -29,6 +29,7 @@ import {
   type InvestigationAction,
   type UserIdentity,
 } from './investigationAccess.js';
+import { registerDashboardHandlers } from './dashboard.js';
 
 const logger = pino();
 
@@ -633,6 +634,11 @@ export function initSocket(httpServer: any): Server {
   });
 
   ioInstance = io;
+
+  ns.on('connection', (socket: UserSocket) => {
+    registerDashboardHandlers(ns as any, socket);
+  });
+
   initGraphSync(ns);
   return io;
 }
