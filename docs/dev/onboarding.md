@@ -6,6 +6,8 @@ Welcome to the **Summit / IntelGraph / Maestro** platform. This guide will get y
 
 The fastest way to get started is using the `make` commands defined in the root `Makefile`.
 
+> **See also**: [DEV_EXPERIENCE_FAST_LANE.md](./DEV_EXPERIENCE_FAST_LANE.md) for canonical commands and workflows.
+
 ### Prerequisites
 
 - **Node.js**: v20+
@@ -18,7 +20,7 @@ The fastest way to get started is using the `make` commands defined in the root 
 Initialize dependencies and configuration:
 
 ```bash
-make dev-setup
+make bootstrap
 ```
 
 This command will:
@@ -31,12 +33,12 @@ This command will:
 Spin up the local development stack:
 
 ```bash
-make dev-run
+make up
 ```
 
 This starts:
 - **Server**: Node.js/Express (port 4000)
-- **Client**: Vite/React (port 5173)
+- **Client**: Vite/React (port 3000)
 - **Infrastructure**: Postgres, Neo4j, Redis (via Docker Compose)
 
 ### 3. Verify Setup
@@ -44,7 +46,7 @@ This starts:
 Run the smoke tests to ensure everything is working:
 
 ```bash
-make dev-test
+make smoke
 ```
 
 ## 🤖 Agent Roles

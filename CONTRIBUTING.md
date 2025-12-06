@@ -1,6 +1,8 @@
 # Contributing to Summit (IntelGraph)
 
 > **For AI Assistants:** See [CLAUDE.md](CLAUDE.md) for comprehensive codebase context, conventions, and development workflows.
+>
+> **Quick Reference:** See [docs/dev/DEV_EXPERIENCE_FAST_LANE.md](docs/dev/DEV_EXPERIENCE_FAST_LANE.md) for canonical commands.
 
 ## Prerequisites
 
@@ -35,19 +37,25 @@ make up && make smoke
 
 ## Pre-commit Hooks
 
-Our pre-commit hooks ensure code quality and generate documentation artifacts.
+Our pre-commit hooks are designed to be **fast** (< 5 seconds) to keep development friction low.
 
-### Configuration
+### What Runs on Commit
 
-- **Lint-staged:** Runs ESLint and Prettier on staged files.
-- **Gitleaks:** Scans for secrets.
-- **Screenshots:** Generates UI screenshots (skipped if server is down).
+- **Gitleaks:** Scans staged files for secrets.
+- **Lint-staged:** Runs ESLint and Prettier on staged files only.
+- **Commitlint:** Validates conventional commit message format.
+
+### What Does NOT Run on Commit
+
+- Full test suite (use `make test` or `make ci-fast`)
+- Type checking (use `make typecheck` or `make ci-fast`)
+- Screenshot generation (moved to CI pipeline)
 
 ### Troubleshooting
 
-- **Logs:** Check `git-hook.log` in the root directory for detailed output.
 - **Skipping:** Use `git commit --no-verify` to bypass hooks in emergencies.
-- **Screenshots:** Requires `npm run dev` to be running on port 3000. If the server is not running, screenshot generation is skipped automatically.
+- **Format issues:** Run `make format` to auto-fix formatting before committing.
+- **Before pushing:** Run `make ci-fast` to catch issues early.
 
 ## Branch & Pull Request Workflow
 

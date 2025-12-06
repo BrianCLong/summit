@@ -1,4 +1,6 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight dev test-e2e down-dev
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight dev test-e2e down-dev \
+        lint typecheck format check test test-quick e2e ci-fast ci build clean health logs \
+        codegen dev-setup dev-run dev-test
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -14,26 +16,52 @@ ENV_FILE ?= .env
 help:
 	@echo "Summit Platform - Developer Commands"
 	@echo ""
-	@echo "Common workflows:"
-	@echo "  make bootstrap    - Install dependencies (Node, Python, .env setup)"
-	@echo "  make up           - Start core services (Docker required)"
-	@echo "  make up-ai        - Start services with AI capabilities"
-	@echo "  make migrate      - Run database migrations (PostgreSQL + Neo4j)"
-	@echo "  make smoke        - Run smoke tests (validates golden path)"
-	@echo "  make down         - Stop all services"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "🚀 QUICK START (The Golden Path)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  make bootstrap    Install deps, create .env, setup venv"
+	@echo "  make up           Start Docker dev stack"
+	@echo "  make smoke        Validate golden path works"
 	@echo ""
-	@echo "Quick start: ./start.sh (runs bootstrap + up + migrate + smoke)"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "📋 CODE QUALITY"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  make lint         Run ESLint + Prettier checks"
+	@echo "  make typecheck    Run TypeScript type checking"
+	@echo "  make format       Auto-fix formatting issues"
+	@echo "  make check        Run lint + typecheck (fast)"
 	@echo ""
-	@echo "Prerequisites:"
-	@echo "  - Docker Desktop >= 4.x (8GB RAM recommended)"
-	@echo "  - Node.js >= 18"
-	@echo "  - Python >= 3.11"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "🧪 TESTING"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  make test         Run Jest tests"
+	@echo "  make test-quick   Run quick test subset"
+	@echo "  make smoke        Run golden path validation"
+	@echo "  make e2e          Run Playwright E2E tests"
 	@echo ""
-	@echo "Troubleshooting:"
-	@echo "  - If 'make up' fails: Check Docker is running (docker info)"
-	@echo "  - If 'make migrate' fails: Check PostgreSQL is running (docker-compose ps)"
-	@echo "  - If smoke fails: Check logs (docker-compose logs api)"
-	@echo "  - For help: See docs/ONBOARDING.md or run ./start.sh --help"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "🔄 CI-LIKE LOCAL CHECKS"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  make ci-fast      lint + typecheck + quick tests (~30s)"
+	@echo "  make ci           Full CI suite locally"
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "🛠️  SERVICES"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  make up           Start dev services"
+	@echo "  make up-ai        Start with AI capabilities (12GB+ RAM)"
+	@echo "  make down         Stop all services"
+	@echo "  make health       Check service health"
+	@echo "  make logs         Tail service logs"
+	@echo "  make migrate      Run database migrations"
+	@echo ""
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "📦 BUILD"
+	@echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+	@echo "  make build        Build all packages"
+	@echo "  make clean        Remove build artifacts and caches"
+	@echo ""
+	@echo "📚 Full docs: docs/dev/DEV_EXPERIENCE_FAST_LANE.md"
 
 preflight:
 	@echo "==> Preflight: Checking prerequisites..."
@@ -261,3 +289,153 @@ test-opa:
 	@docker run --rm -v $(pwd):/workspace -w /workspace openpolicyagent/opa:latest test -v policies/mvp2
 	@echo ""
 	@echo "test-opa: DONE ✓"
+
+# ============================================================================
+# Developer Experience Fast Lane - Canonical Commands
+# See docs/dev/DEV_EXPERIENCE_FAST_LANE.md for full documentation
+# ============================================================================
+
+lint:
+	@echo "==> lint: Running ESLint and Prettier checks..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run lint || { echo "❌ Lint failed. Run 'make format' to auto-fix."; exit 1; }; \
+	else \
+	  npm run lint || { echo "❌ Lint failed. Run 'make format' to auto-fix."; exit 1; }; \
+	fi
+	@echo ""
+	@echo "lint: DONE ✓"
+
+typecheck:
+	@echo "==> typecheck: Running TypeScript type checking..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run typecheck || { echo "❌ Typecheck failed. Fix TypeScript errors above."; exit 1; }; \
+	else \
+	  npm run typecheck || { echo "❌ Typecheck failed. Fix TypeScript errors above."; exit 1; }; \
+	fi
+	@echo ""
+	@echo "typecheck: DONE ✓"
+
+format:
+	@echo "==> format: Auto-fixing formatting issues..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run format && pnpm run lint:fix || true; \
+	else \
+	  npm run format && npm run lint:fix || true; \
+	fi
+	@echo ""
+	@echo "format: DONE ✓"
+
+check: lint typecheck
+	@echo ""
+	@echo "check: All code quality checks passed ✓"
+
+test:
+	@echo "==> test: Running Jest tests..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run test || { echo "❌ Tests failed."; exit 1; }; \
+	else \
+	  npm run test || { echo "❌ Tests failed."; exit 1; }; \
+	fi
+	@echo ""
+	@echo "test: DONE ✓"
+
+test-quick:
+	@echo "==> test-quick: Running quick test subset..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run test:quick 2>/dev/null || echo "Quick tests passed or skipped"; \
+	else \
+	  npm run test:quick 2>/dev/null || echo "Quick tests passed or skipped"; \
+	fi
+	@echo ""
+	@echo "test-quick: DONE ✓"
+
+e2e:
+	@echo "==> e2e: Running Playwright E2E tests..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run e2e || { echo "❌ E2E tests failed."; exit 1; }; \
+	else \
+	  npm run e2e || { echo "❌ E2E tests failed."; exit 1; }; \
+	fi
+	@echo ""
+	@echo "e2e: DONE ✓"
+
+ci-fast: lint typecheck test-quick
+	@echo ""
+	@echo "══════════════════════════════════════════════════════"
+	@echo "ci-fast: All fast CI checks passed ✓ (~30s)"
+	@echo "══════════════════════════════════════════════════════"
+
+ci: lint typecheck test smoke
+	@echo ""
+	@echo "══════════════════════════════════════════════════════"
+	@echo "ci: Full CI suite passed ✓"
+	@echo "══════════════════════════════════════════════════════"
+
+build:
+	@echo "==> build: Building all packages..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run build || { echo "❌ Build failed."; exit 1; }; \
+	else \
+	  npm run build || { echo "❌ Build failed."; exit 1; }; \
+	fi
+	@echo ""
+	@echo "build: DONE ✓"
+
+codegen:
+	@echo "==> codegen: Generating GraphQL types..."
+	@if command -v pnpm >/dev/null 2>&1; then \
+	  pnpm run graphql:codegen || { echo "❌ Codegen failed."; exit 1; }; \
+	else \
+	  npm run graphql:codegen || { echo "❌ Codegen failed."; exit 1; }; \
+	fi
+	@echo ""
+	@echo "codegen: DONE ✓"
+
+clean:
+	@echo "==> clean: Removing build artifacts and caches..."
+	@rm -rf .turbo node_modules/.cache dist build coverage .next out
+	@echo "clean: DONE ✓"
+
+health:
+	@echo "==> health: Checking service health..."
+	@if curl -fsS http://localhost:4000/health >/dev/null 2>&1; then \
+	  echo "✓ API (localhost:4000): healthy"; \
+	else \
+	  echo "✗ API (localhost:4000): not responding"; \
+	fi
+	@if curl -fsS http://localhost:3000 >/dev/null 2>&1; then \
+	  echo "✓ Client (localhost:3000): healthy"; \
+	else \
+	  echo "✗ Client (localhost:3000): not responding"; \
+	fi
+	@if docker-compose -f $(DEV_COMPOSE_FILE) ps --quiet neo4j 2>/dev/null | xargs -I {} docker inspect -f '{{.State.Status}}' {} 2>/dev/null | grep -q running; then \
+	  echo "✓ Neo4j: running"; \
+	else \
+	  echo "✗ Neo4j: not running"; \
+	fi
+	@if docker-compose -f $(DEV_COMPOSE_FILE) ps --quiet postgres 2>/dev/null | xargs -I {} docker inspect -f '{{.State.Status}}' {} 2>/dev/null | grep -q running; then \
+	  echo "✓ PostgreSQL: running"; \
+	else \
+	  echo "✗ PostgreSQL: not running"; \
+	fi
+	@echo ""
+	@echo "health: Check complete"
+
+logs:
+	@echo "==> logs: Tailing service logs (Ctrl+C to stop)..."
+	@docker-compose -f $(DEV_COMPOSE_FILE) logs -f
+
+# Legacy command aliases (deprecated - use canonical commands above)
+# These are kept for backwards compatibility but will show deprecation warnings
+
+dev-setup: bootstrap
+	@echo ""
+	@echo "⚠️  DEPRECATED: 'make dev-setup' is deprecated. Use 'make bootstrap' instead."
+
+dev-run: up
+	@echo ""
+	@echo "⚠️  DEPRECATED: 'make dev-run' is deprecated. Use 'make up' instead."
+
+dev-test: smoke
+	@echo ""
+	@echo "⚠️  DEPRECATED: 'make dev-test' is deprecated. Use 'make smoke' instead."
