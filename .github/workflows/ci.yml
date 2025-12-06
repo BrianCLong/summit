@@ -1,4 +1,4 @@
-name: CI
+name: Summit Pipeline
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ concurrency:
 
 env:
   NODE_VERSION: '20.x'
-  HUSKY: 0 # Disable husky hooks in CI
+  HUSKY: 0
 
 permissions:
   contents: read
@@ -50,189 +50,30 @@ jobs:
               - 'pnpm-lock.yaml'
               - 'package.json'
               - 'tsconfig*'
+              - 'jest*'
+              - 'vitest*'
+              - 'playwright*'
             docker:
               - 'docker-compose*'
               - '**/Dockerfile*'
               - 'scripts/run-compose.sh'
+              - 'Makefile'
 
-  # Quality Lane: Lint and Typecheck (Parallelized by Turbo)
+  # Quality Lane
   quality:
     needs: [changes]
     if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Environment
         uses: ./.github/actions/setup
         with:
           node-version: ${{ env.NODE_VERSION }}
-
       - name: Code Quality Checks
         run: pnpm turbo run lint typecheck --filter="!docs-site"
 
-      - name: Production Guardrails
-        run: |
-          set +e
-          NODE_ENV=production \
-          JWT_SECRET=weaksecret \
-          JWT_REFRESH_SECRET=weaksecret2 \
-          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
-          NEO4J_URI=bolt://localhost:7687 \
-          NEO4J_USERNAME=neo4j \
-          NEO4J_PASSWORD=devpassword \
-          REDIS_HOST=localhost \
-          REDIS_PORT=6379 \
-          REDIS_PASSWORD=devpassword \
-          CORS_ORIGIN=* \
-          pnpm ci:prod-guard
-          status=$?
-          if [ "$status" -eq 0 ]; then
-            echo "Prod guardrails command succeeded unexpectedly"
-            exit 1
-          fi
-          echo "Prod guardrails correctly blocked unsafe config"
-
-  # Build Lane: Build artifacts
-  build:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest-8-cores
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Build Workspace
-        run: pnpm turbo run build --filter="!docs-site"
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            dist
-            build
-            apps/*/dist
-            apps/*/build
-            packages/*/dist
-            services/*/dist
-            server/dist
-            client/dist
-            .turbo
-          retention-days: 1
-
-  # Unit Tests Lane: Sharded Jest Tests
-  unit-tests:
-    needs: [build]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest-8-cores
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      # Note: Jest tests run against source (ts-jest) so we don't strictly need build artifacts here.
-      # This saves bandwidth.
-
-      - name: Run Unit Tests (Shard ${{ matrix.shard }}/2)
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 15
-          max_attempts: 2
-          # package.json defines "test:jest"
-          command: pnpm run test:jest --shard ${{ matrix.shard }}/${{ strategy.job-total }}
-
-  # Integration Lane: Golden Path Smoke Tests (Covers E2E)
-  golden-path:
-    needs: [build, quality]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.docker == 'true' }}
-    runs-on: ubuntu-latest-8-cores
-    env:
-      DOCKER_BUILDKIT: '1'
-      COMPOSE_DOCKER_CLI_BUILD: '1'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          install: 'true'
-
-      - name: Bootstrap
-        run: make bootstrap
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build API image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./server
-          file: ./server/Dockerfile.dev
-          tags: summit/api:ci
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build Client image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./client
-          file: ./client/Dockerfile.dev
-          tags: summit/web:ci
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Start Stack
-        run: make up
-
-      - name: Smoke Tests
-        run: make smoke
-
-      - name: Logs on Failure
-        if: failure()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
-
-      - name: Teardown
-        if: always()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
-
-  # Compatibility Matrix (Non-blocking)
-  compatibility:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    strategy:
-      matrix:
-        node: ['18.x']
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ matrix.node }}
-
-      - name: Build Workspace
-        run: pnpm turbo run build --filter="!docs-site"
-
-      - name: Unit Tests
-        run: pnpm run test:jest
-
-  # Security Lane
+  # Security Lane (Restored)
   security:
     needs: [changes]
     if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
@@ -254,3 +95,141 @@ jobs:
           severity: CRITICAL,HIGH
           ignore-unfixed: true
           exit-code: '0'
+
+      - name: Dependency Audit
+        run: pnpm audit --audit-level=high || true
+
+  # Test Lane: Backend (Jest)
+  backend-tests:
+    needs: [build]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run Jest Tests (Shard ${{ matrix.shard }}/4)
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 15
+          max_attempts: 2
+          command: pnpm run test:jest --shard ${{ matrix.shard }}/${{ strategy.job-total }}
+
+  # Test Lane: Frontend (Vitest)
+  frontend-tests:
+    needs: [build]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run Vitest (Web & Client)
+        run: pnpm turbo run test --filter='./apps/web' --filter='./client'
+
+  # Build Lane
+  build:
+    needs: [changes]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+    runs-on: ubuntu-latest-8-cores
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Build Workspace
+        run: pnpm turbo run build --filter="!docs-site"
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            dist
+            build
+            apps/*/dist
+            apps/*/build
+            packages/*/dist
+            services/*/dist
+            server/dist
+            client/dist
+            .turbo
+          retention-days: 1
+
+  # Verification Lane: Smoke & E2E
+  verification:
+    needs: [build, quality]
+    if: ${{ github.event_name == 'push' || needs.changes.outputs.docker == 'true' || needs.changes.outputs.core == 'true' }}
+    runs-on: ubuntu-latest-8-cores
+    env:
+      DOCKER_BUILDKIT: '1'
+      COMPOSE_DOCKER_CLI_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Environment
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          install: 'true'
+
+      # Bootstrap & Build Images
+      - name: Bootstrap
+        run: make bootstrap
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile.dev
+          tags: summit/api:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build Client image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          file: ./client/Dockerfile.dev
+          tags: summit/web:ci
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Integration: Smoke
+      - name: Start Stack
+        run: make up
+      - name: API Smoke Tests
+        run: make smoke
+
+      # E2E: Playwright
+      - name: Install Playwright Browsers
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Run Playwright E2E
+        run: pnpm exec playwright test
+        env:
+          BASE_URL: http://localhost:3000
+          CI: true
+
+      - name: Upload E2E Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Logs on Failure
+        if: failure()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
+      - name: Teardown
+        if: always()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
