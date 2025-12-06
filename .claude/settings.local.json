@@ -1,7 +1,7 @@
 {
   "$schema": "https://claude.ai/schemas/claude-code-settings-local.json",
   "permissions": {
-    "allow": ["Bash(pnpm add:*)"],
+    "allow": ["Bash(tee:*)"],
     "deny": [],
     "ask": []
   },

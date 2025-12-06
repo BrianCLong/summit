@@ -1,6 +1,7 @@
 # Contributing to Summit (IntelGraph)
 
-> **For AI Assistants:** See [CLAUDE.md](CLAUDE.md) for comprehensive codebase context, conventions, and development workflows.
+> **For AI Assistants:** See [CLAUDE.md](CLAUDE.md) for comprehensive codebase context, conventions,
+> and development workflows.
 
 ## Prerequisites
 
@@ -47,7 +48,8 @@ Our pre-commit hooks ensure code quality and generate documentation artifacts.
 
 - **Logs:** Check `git-hook.log` in the root directory for detailed output.
 - **Skipping:** Use `git commit --no-verify` to bypass hooks in emergencies.
-- **Screenshots:** Requires `npm run dev` to be running on port 3000. If the server is not running, screenshot generation is skipped automatically.
+- **Screenshots:** Requires `npm run dev` to be running on port 3000. If the server is not running,
+  screenshot generation is skipped automatically.
 
 ## Branch & Pull Request Workflow
 
@@ -70,9 +72,11 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 [optional footer]
 ```
 
-**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`, `revert`
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `ci`, `build`,
+`revert`
 
 **Examples:**
+
 ```
 feat(api): add entity search endpoint
 fix(graph): resolve neo4j connection timeout
@@ -99,7 +103,8 @@ chore(deps): update pnpm-lock.yaml
 
 ## AI Agent Collaboration
 
-Summit embraces AI-augmented development through multi-agent collaboration. This section provides guidelines for AI agents (Claude, Jules, Codex, GitHub Copilot) and their human partners.
+Summit embraces AI-augmented development through multi-agent collaboration. This section provides
+guidelines for AI agents (Claude, Jules, Codex, GitHub Copilot) and their human partners.
 
 ### AI Agent Types
 
@@ -147,7 +152,8 @@ graph TD
 
 - **Skip the smoke test:** Never claim completion without running `make smoke`
 - **Commit secrets:** Never commit credentials, API keys, or sensitive data
-- **Break golden path:** Ensure Investigation → Entities → Relationships → Copilot → Results workflow
+- **Break golden path:** Ensure Investigation → Entities → Relationships → Copilot → Results
+  workflow
 - **Use production defaults:** Never use default passwords or localhost in production config
 - **Bypass security:** Don't disable security checks or skip validation
 - **Ignore test failures:** Fix all failing tests before committing
@@ -245,18 +251,14 @@ describe('EntityService', () => {
     it('should throw error when entity type is invalid', async () => {
       const input = entityFactory({ type: 'InvalidType' });
 
-      await expect(entityService.create(input))
-        .rejects.toThrow(ValidationError);
+      await expect(entityService.create(input)).rejects.toThrow(ValidationError);
     });
 
     it('should audit entity creation', async () => {
       const input = entityFactory();
       await entityService.create(input);
 
-      expect(auditLog.record).toHaveBeenCalledWith(
-        'entity:create',
-        expect.any(String)
-      );
+      expect(auditLog.record).toHaveBeenCalledWith('entity:create', expect.any(String));
     });
   });
 });
@@ -266,9 +268,12 @@ describe('EntityService', () => {
 
 For detailed multi-agent collaboration patterns, see:
 
-- **[AI Agent Workflow Guide](docs/AI_AGENT_WORKFLOW.md)** - Complete multi-agent workflow documentation
-- **[Multi-Agent LLM Innovation Roadmap](docs/ai/multi-agent-llm-innovation-roadmap.md)** - Strategic multi-agent architecture
-- **[Multi-Agent Frameworks 2025](docs/multi-agent-frameworks-2025.md)** - Framework comparison and recommendations
+- **[AI Agent Workflow Guide](docs/AI_AGENT_WORKFLOW.md)** - Complete multi-agent workflow
+  documentation
+- **[Multi-Agent LLM Innovation Roadmap](docs/ai/multi-agent-llm-innovation-roadmap.md)** -
+  Strategic multi-agent architecture
+- **[Multi-Agent Frameworks 2025](docs/multi-agent-frameworks-2025.md)** - Framework comparison and
+  recommendations
 
 ### Getting Help
 
@@ -281,7 +286,8 @@ For detailed multi-agent collaboration patterns, see:
 
 ### Overview
 
-We maintain a comprehensive test suite with high coverage requirements to ensure code quality and reliability. All code changes should include appropriate tests.
+We maintain a comprehensive test suite with high coverage requirements to ensure code quality and
+reliability. All code changes should include appropriate tests.
 
 ### Test Types
 
@@ -289,10 +295,10 @@ We maintain a comprehensive test suite with high coverage requirements to ensure
 
 Unit tests focus on testing individual functions, classes, and modules in isolation.
 
-**Location:** `__tests__` directories next to source files
-**Pattern:** `*.test.ts`, `*.test.tsx`
+**Location:** `__tests__` directories next to source files **Pattern:** `*.test.ts`, `*.test.tsx`
 
 **Example:**
+
 ```typescript
 // server/src/middleware/__tests__/auth.test.ts
 import { ensureAuthenticated } from '../auth';
@@ -312,6 +318,7 @@ describe('ensureAuthenticated', () => {
 ```
 
 **Best Practices:**
+
 - Test one thing per test case
 - Use descriptive test names: "should X when Y"
 - Mock external dependencies
@@ -322,10 +329,10 @@ describe('ensureAuthenticated', () => {
 
 Integration tests verify that multiple components work together correctly.
 
-**Location:** `tests/integration/`
-**Pattern:** `*.integration.test.ts`
+**Location:** `tests/integration/` **Pattern:** `*.integration.test.ts`
 
 **Example:**
+
 ```typescript
 // tests/integration/auth.integration.test.ts
 describe('Authentication Flow', () => {
@@ -338,6 +345,7 @@ describe('Authentication Flow', () => {
 ```
 
 **Best Practices:**
+
 - Test realistic workflows
 - Use actual database connections (test DB)
 - Clean up test data after each test
@@ -348,11 +356,10 @@ describe('Authentication Flow', () => {
 
 End-to-end tests validate complete user flows in a browser environment.
 
-**Location:** `tests/e2e/`
-**Pattern:** `*.spec.ts`
-**Tool:** Playwright
+**Location:** `tests/e2e/` **Pattern:** `*.spec.ts` **Tool:** Playwright
 
 **Example:**
+
 ```typescript
 // tests/e2e/login-logout.spec.ts
 import { test, expect } from '@playwright/test';
@@ -367,6 +374,7 @@ test('should login successfully', async ({ page }) => {
 ```
 
 **Best Practices:**
+
 - Test critical user journeys
 - Test across different browsers
 - Use data-testid attributes
@@ -378,12 +386,7 @@ test('should login successfully', async ({ page }) => {
 Use test factories to generate consistent test data:
 
 ```typescript
-import {
-  userFactory,
-  entityFactory,
-  investigationFactory,
-  graphFactory,
-} from '@tests/factories';
+import { userFactory, entityFactory, investigationFactory, graphFactory } from '@tests/factories';
 
 // Create a test user
 const user = userFactory({ role: 'admin' });
@@ -396,6 +399,7 @@ const graph = graphFactory({ nodeCount: 10, relationshipDensity: 0.3 });
 ```
 
 **Available Factories:**
+
 - `userFactory` - Create test users
 - `entityFactory` - Create graph entities
 - `relationshipFactory` - Create graph relationships
@@ -433,16 +437,19 @@ pnpm run test -- path/to/test.test.ts
 ### Coverage Requirements
 
 **Minimum Coverage Thresholds:**
+
 - Global: 80%
 - Critical paths (middleware, resolvers): 85%
 
 **View Coverage Reports:**
+
 ```bash
 pnpm run test:coverage
 open coverage/lcov-report/index.html
 ```
 
 **Coverage is tracked for:**
+
 - Lines
 - Statements
 - Functions
@@ -451,6 +458,7 @@ open coverage/lcov-report/index.html
 ### Writing Good Tests
 
 #### DO:
+
 - ✅ Write tests before or alongside code (TDD/BDD)
 - ✅ Test edge cases and error scenarios
 - ✅ Use descriptive test names
@@ -461,6 +469,7 @@ open coverage/lcov-report/index.html
 - ✅ Test async code properly (async/await)
 
 #### DON'T:
+
 - ❌ Test implementation details
 - ❌ Write flaky tests
 - ❌ Share state between tests
@@ -500,17 +509,20 @@ project/
 ### Mocking
 
 **Mock modules:**
+
 ```typescript
 jest.mock('../services/AuthService');
 ```
 
 **Mock functions:**
+
 ```typescript
 const mockFn = jest.fn().mockReturnValue('value');
 const mockAsyncFn = jest.fn().mockResolvedValue({ data: 'value' });
 ```
 
 **Mock timers:**
+
 ```typescript
 jest.useFakeTimers();
 jest.advanceTimersByTime(1000);
@@ -536,6 +548,7 @@ pnpm run test -- --silent=false
 ### CI/CD Integration
 
 Tests run automatically in CI/CD:
+
 - On every push to main/develop
 - On every pull request
 - Coverage reports are generated
@@ -546,11 +559,13 @@ Tests run automatically in CI/CD:
 ### Performance
 
 **Test Performance Guidelines:**
+
 - Unit tests: < 100ms each
 - Integration tests: < 5s each
 - E2E tests: < 30s each
 
 **Optimize slow tests:**
+
 - Use `beforeAll` instead of `beforeEach` where possible
 - Mock expensive operations
 - Use test.concurrent for parallel execution
@@ -559,6 +574,7 @@ Tests run automatically in CI/CD:
 ### Common Patterns
 
 **Testing middleware:**
+
 ```typescript
 const req = requestFactory({ headers: { 'x-tenant-id': 'test' } });
 const res = responseFactory();
@@ -570,6 +586,7 @@ expect(next).toHaveBeenCalled();
 ```
 
 **Testing resolvers:**
+
 ```typescript
 const context = authenticatedContextFactory();
 const result = await resolver(parent, args, context);
@@ -578,6 +595,7 @@ expect(result).toBeDefined();
 ```
 
 **Testing async errors:**
+
 ```typescript
 await expect(asyncFunction()).rejects.toThrow('Error message');
 ```
@@ -595,3 +613,85 @@ await expect(asyncFunction()).rejects.toThrow('Error message');
 - Ask in #engineering Slack channel
 - Review test coverage reports
 - Consult the testing best practices doc
+
+## Mergefix / Express 5 Changes (Fast Path)
+
+This section defines **coding rules, commit conventions, and the minimal gate** for any PR that
+touches the Express 5 migration or related merge conflict work. Use it for PRs labeled `mergefix`.
+
+### Coding Rules (must)
+
+1. **One global error handler** at the end of the middleware chain. No router-level error handlers.
+2. **Async handlers `throw`**; never call `next(err)` from an `async` function.
+3. **Structured errors** only:
+
+   ```json
+   { "error": { "code": "BAD_REQUEST", "message": "Human-readable text" } }
+   ```
+
+4. **Order**: routes → 404 → error handler.
+5. **Return after responding** (avoid `"headers already sent"`).
+6. **Validation**: validators may `throw` `{ statusCode, code, message }`; do not `next(err)`.
+7. **Streaming**: use `await pipeline(stream, res)`; let rejections bubble to the global error
+   handler.
+8. **Tests**: Supertest must `await`; assert JSON errors; 404 is JSON.
+
+### Commit Message Convention
+
+Use the `mergefix` type + scope:
+
+- `mergefix(express5): centralize error handler`
+- `mergefix(router): drop next(err) in async handlers`
+- `mergefix(build): adjust Vite 7 config`
+- `mergefix(tests): update Supertest for JSON errors`
+
+If a commit is a pure conflict resolution, prefer the prefix `mergefix(express5):` and keep the diff
+tightly scoped.
+
+> Add formatting-only or mass-rename SHAs to `.git-blame-ignore-revs`.
+
+### Minimal Local Gate (must pass before pushing)
+
+```bash
+pnpm install --frozen-lockfile
+pnpm lint
+pnpm test -- --ci
+pnpm -r build
+pnpm playwright install --with-deps
+pnpm e2e
+pnpm jest contracts/graphql/__tests__/schema.contract.ts --runInBand
+curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa && ./opa test policies/ -v
+pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+```
+
+Or with `make`:
+
+```bash
+make ci-check contracts policy-sim
+```
+
+### Conflict-Resolution Tips
+
+- Enable `git rerere` once:
+
+  ```bash
+  git config --global rerere.enabled true
+  git config --global rerere.autoUpdate true
+  git config --global rerere.log true
+  ```
+
+- Detect duplicates before opening your PR:
+
+  ```bash
+  git log --oneline --cherry origin/main...HEAD
+  ```
+
+### PR Checklist
+
+- [ ] No `next(err)` in async handlers
+- [ ] Single global error handler (after 404)
+- [ ] JSON error shape consistent
+- [ ] Tests updated for Express 5 semantics
+- [ ] Contracts + policy sim pass
+- [ ] SBOM + provenance generated and verified

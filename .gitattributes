@@ -39,3 +39,9 @@ website/static/img/docusaurus-social-card.jpg -filter -diff -merge -text
 website/static/img/docusaurus.png -filter -diff -merge -text
 *.db -diff
 *.sqlite* -diff
+
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf

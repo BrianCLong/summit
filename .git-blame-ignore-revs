@@ -1,3 +1,2 @@
-# GraphQL namespace codemod sweep
-<PUT_THE_MERGE_OR_SQUASH_COMMIT_SHA_HERE>
-
+# Formatting-only / mass-rename commits
+# Add mergefix commits here to keep blame signal clean.
