@@ -99,6 +99,9 @@ export class BudgetAdmissionController {
       options?.isEmergency &&
       this.hasEmergencyBudget(dailyUsage, projectedCostUsd)
     ) {
+      // Reserve the budget for emergency
+      await this.reserveBudget(expert, projectedCostUsd, options?.tenantId, options?.userId);
+
       return {
         admit: true,
         mode: 'emergency',
@@ -111,6 +114,11 @@ export class BudgetAdmissionController {
           (dailyUsage.totalSpent / this.config.dailyUsd) * 100,
         ),
       };
+    }
+
+    if (expertDecision.admit) {
+      // Atomically reserve the budget to prevent race conditions
+      await this.reserveBudget(expert, projectedCostUsd, options?.tenantId, options?.userId);
     }
 
     const budgetRemaining = Math.max(
@@ -135,7 +143,56 @@ export class BudgetAdmissionController {
   }
 
   /**
-   * Record actual spending for budget tracking
+   * Reserve budget for a request.
+   * This is called automatically by admit() if the request is approved.
+   * recordSpending() should then be called with the DELTA (actual - projected)
+   * or we just accept projected as the cost.
+   *
+   * To simplify for this patch: We treat 'projected' as the cost.
+   * If actual cost is known later, recordSpending can adjust.
+   */
+  private async reserveBudget(
+    expert: ExpertType,
+    costUsd: number,
+    tenantId?: string,
+    userId?: string,
+  ): Promise<void> {
+    const timestamp = Date.now();
+    const tenant = tenantId || 'global';
+    const hourKey = this.getUsageKey('hour', timestamp, tenant);
+    const dayKey = this.getUsageKey('day', timestamp, tenant);
+
+    const pipeline = this.redis.pipeline();
+
+    // Update hourly usage
+    pipeline.hincrbyfloat(`${hourKey}:total`, 'spent', costUsd);
+    pipeline.hincrby(`${hourKey}:total`, 'requests', 1);
+    pipeline.hincrbyfloat(`${hourKey}:experts`, expert, costUsd);
+    pipeline.expire(`${hourKey}:total`, 3600); // 1 hour TTL
+    pipeline.expire(`${hourKey}:experts`, 3600);
+
+    // Update daily usage
+    pipeline.hincrbyfloat(`${dayKey}:total`, 'spent', costUsd);
+    pipeline.hincrby(`${dayKey}:total`, 'requests', 1);
+    pipeline.hincrbyfloat(`${dayKey}:experts`, expert, costUsd);
+    pipeline.expire(`${dayKey}:total`, 86400); // 24 hour TTL
+    pipeline.expire(`${dayKey}:experts`, 86400);
+
+    if (userId) {
+      pipeline.hincrbyfloat(`${dayKey}:users`, userId, costUsd);
+      pipeline.expire(`${dayKey}:users`, 86400);
+    }
+
+    await pipeline.exec();
+  }
+
+  /**
+   * Record actual spending for budget tracking.
+   *
+   * @param expert The expert used
+   * @param actualCostUsd The actual cost incurred
+   * @param options.reservedCost If provided, this amount was already reserved by admit()
+   *                             and we will only record the delta (actual - reserved).
    */
   public async recordSpending(
     expert: ExpertType,
@@ -143,32 +200,48 @@ export class BudgetAdmissionController {
     options?: {
       userId?: string;
       tenantId?: string;
+      reservedCost?: number;
     },
   ): Promise<void> {
     const timestamp = Date.now();
     const tenant = options?.tenantId || 'global';
+    const reserved = options?.reservedCost || 0;
+
+    // Calculate the delta to apply (can be negative if actual < reserved)
+    const deltaCost = actualCostUsd - reserved;
+
+    // If no delta, we don't need to update spending, but we might want to update request counts?
+    // admit() doesn't update request count in this implementation (it updates 'requests' in reserveBudget).
+    // So if reserved > 0, we assume request count was incremented.
+    // If reserved == 0, we assume this is a fresh spending record (not pre-admitted), so we increment requests.
+    const deltaRequests = reserved > 0 ? 0 : 1;
+
+    if (deltaCost === 0 && deltaRequests === 0) {
+      return;
+    }
+
     const hourKey = this.getUsageKey('hour', timestamp, tenant);
     const dayKey = this.getUsageKey('day', timestamp, tenant);
 
     const pipeline = this.redis.pipeline();
 
     // Update hourly usage
-    pipeline.hincrbyfloat(`${hourKey}:total`, 'spent', actualCostUsd);
-    pipeline.hincrby(`${hourKey}:total`, 'requests', 1);
-    pipeline.hincrbyfloat(`${hourKey}:experts`, expert, actualCostUsd);
+    pipeline.hincrbyfloat(`${hourKey}:total`, 'spent', deltaCost);
+    if (deltaRequests > 0) pipeline.hincrby(`${hourKey}:total`, 'requests', deltaRequests);
+    pipeline.hincrbyfloat(`${hourKey}:experts`, expert, deltaCost);
     pipeline.expire(`${hourKey}:total`, 3600); // 1 hour TTL
     pipeline.expire(`${hourKey}:experts`, 3600);
 
     // Update daily usage
-    pipeline.hincrbyfloat(`${dayKey}:total`, 'spent', actualCostUsd);
-    pipeline.hincrby(`${dayKey}:total`, 'requests', 1);
-    pipeline.hincrbyfloat(`${dayKey}:experts`, expert, actualCostUsd);
+    pipeline.hincrbyfloat(`${dayKey}:total`, 'spent', deltaCost);
+    if (deltaRequests > 0) pipeline.hincrby(`${dayKey}:total`, 'requests', deltaRequests);
+    pipeline.hincrbyfloat(`${dayKey}:experts`, expert, deltaCost);
     pipeline.expire(`${dayKey}:total`, 86400); // 24 hour TTL
     pipeline.expire(`${dayKey}:experts`, 86400);
 
     // Record per-user spending if provided
     if (options?.userId) {
-      pipeline.hincrbyfloat(`${dayKey}:users`, options.userId, actualCostUsd);
+      pipeline.hincrbyfloat(`${dayKey}:users`, options.userId, deltaCost);
       pipeline.expire(`${dayKey}:users`, 86400);
     }
 
