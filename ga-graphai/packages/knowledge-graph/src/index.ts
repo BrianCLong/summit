@@ -1,3 +1,4 @@
+import { StructuredEventEmitter } from '@ga-graphai/common-types';
 import type { PolicyRule } from '@ga-graphai/common-types';
 
 type NodeType =
@@ -167,6 +168,8 @@ function edgeId(from: string, type: RelationshipType, to: string): string {
 }
 
 export class OrchestrationKnowledgeGraph {
+  private readonly events: StructuredEventEmitter;
+
   private readonly state: GraphState = {
     nodes: new Map(),
     edges: new Map(),
@@ -185,6 +188,10 @@ export class OrchestrationKnowledgeGraph {
   private policyConnectors: PolicyConnector[] = [];
   private costSignalConnectors: CostSignalConnector[] = [];
   private version = 0;
+
+  constructor(events = new StructuredEventEmitter()) {
+    this.events = events;
+  }
 
   registerPipelineConnector(connector: PipelineConnector): void {
     this.pipelineConnectors.push(connector);
@@ -238,6 +245,7 @@ export class OrchestrationKnowledgeGraph {
   }
 
   queryService(serviceId: string) {
+    const startedAt = Date.now();
     const service = this.state.services.get(serviceId);
     if (!service) {
       return undefined;
@@ -256,7 +264,7 @@ export class OrchestrationKnowledgeGraph {
     const pipelines = Array.from(this.state.pipelines.values()).filter((pipeline) =>
       pipeline.stages.some((stage) => stage.serviceId === serviceId),
     );
-    return {
+    const snapshot = {
       service,
       environments,
       incidents,
@@ -264,6 +272,20 @@ export class OrchestrationKnowledgeGraph {
       pipelines,
       risk: this.calculateServiceRisk()[serviceId],
     };
+
+    const durationMs = Date.now() - startedAt;
+    const resultCount =
+      environments.length + incidents.length + policies.length + pipelines.length;
+    this.events.emitEvent('summit.intelgraph.query.executed', {
+      queryType: 'service',
+      subjectId: serviceId,
+      durationMs,
+      resultCount,
+      riskScore: snapshot.risk?.score ?? 0,
+      incidentCount: incidents.length,
+    });
+
+    return snapshot;
   }
 
   private async ingestServices(): Promise<void> {

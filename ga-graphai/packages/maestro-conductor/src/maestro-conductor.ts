@@ -4,6 +4,7 @@ import { HealthMonitor } from './monitoring';
 import { SelfHealingOrchestrator } from './self-healing';
 import { CostLatencyOptimizer } from './optimization';
 import { JobRouter } from './job-router';
+import { StructuredEventEmitter } from '@ga-graphai/common-types';
 import {
   PredictiveInsightEngine,
   type PredictiveInsightEngineOptions,
@@ -32,6 +33,7 @@ export interface MaestroConductorOptions {
   optimizer?: CostLatencyOptimizerOptions;
   jobRouter?: JobRouterOptions;
   insights?: PredictiveInsightEngineOptions;
+  events?: StructuredEventEmitter;
 }
 
 export class MaestroConductor {
@@ -53,11 +55,14 @@ export class MaestroConductor {
 
   private readonly insights?: PredictiveInsightEngine;
 
+  private readonly events: StructuredEventEmitter;
+
   constructor(options?: MaestroConductorOptions) {
     this.anomaly = new AnomalyDetector(options?.anomaly);
     this.selfHealing = new SelfHealingOrchestrator(options?.selfHealing);
     this.optimizer = new CostLatencyOptimizer(options?.optimizer);
     this.jobRouter = new JobRouter(options?.jobRouter);
+    this.events = options?.events ?? new StructuredEventEmitter();
     if (options?.insights) {
       this.insights = new PredictiveInsightEngine(options.insights);
     }
@@ -204,6 +209,14 @@ export class MaestroConductor {
       plans,
       timestamp: new Date(),
     };
+    this.events.emitEvent('summit.incident.detected', {
+      incidentId: incident.id,
+      assetId: incident.asset.id,
+      severity: incident.anomaly.severity,
+      metric: incident.anomaly.metric,
+      timestamp: incident.timestamp.toISOString(),
+      plans: plans.map((plan) => plan.strategyId),
+    });
     this.incidents.push(incident);
   }
 }
