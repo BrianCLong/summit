@@ -17,6 +17,7 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { resolveSafetyState } from './middleware/safety-mode.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -40,6 +41,15 @@ const startServer = async () => {
     } catch (error) {
       logger.warn('Kafka not available - running in minimal mode');
     }
+  }
+  const safetyState = await resolveSafetyState();
+  if (safetyState.killSwitch || safetyState.safeMode) {
+    logger.warn({ safetyState }, 'Safety mode enabled - starting in degraded configuration');
+  }
+
+  if (safetyState.killSwitch || safetyState.safeMode) {
+    startKafkaConsumer = null;
+    stopKafkaConsumer = null;
   }
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -100,11 +110,20 @@ const startServer = async () => {
 
     // Initialize and start Data Retention Service
     const neo4jDriver = getNeo4jDriver();
-    const dataRetentionService = new DataRetentionService(neo4jDriver);
-    dataRetentionService.startCleanupJob(); // Start the cleanup job
+    if (!safetyState.killSwitch && !safetyState.safeMode) {
+      const dataRetentionService = new DataRetentionService(neo4jDriver);
+      dataRetentionService.startCleanupJob(); // Start the cleanup job
 
-    // WAR-GAMED SIMULATION - Start Kafka Consumer
-    await startKafkaConsumer();
+      // WAR-GAMED SIMULATION - Start Kafka Consumer
+      if (startKafkaConsumer) {
+        await startKafkaConsumer();
+      }
+    } else {
+      logger.warn(
+        { safetyState },
+        'Skipping data retention and Kafka consumers due to safety gates',
+      );
+    }
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
