@@ -1,5 +1,4 @@
 
-import { snapshotter } from './diagnostic-snapshotter';
 import {
   Meter,
   Counter,

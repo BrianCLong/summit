@@ -39,7 +39,7 @@ export declare class TrainingPipeline {
     private readonly modelRegistry?;
     private pgPool;
     private modelsDir;
-    constructor(pgPool: Pool, benchmarkingService?: ModelBenchmarkingService, modelRegistry?: ModelRegistry);
+    constructor(pgPool: Pool, benchmarkingService?: ModelBenchmarkingService | undefined, modelRegistry?: ModelRegistry | undefined);
     private ensureModelsDirectory;
     collectTrainingData(minExamples?: number): Promise<TrainingExample[]>;
     generateFeatures(examples: TrainingExample[]): Promise<TrainingExample[]>;

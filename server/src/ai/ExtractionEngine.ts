@@ -12,78 +12,21 @@ import { EmbeddingService } from './services/EmbeddingService.js';
 import { MediaType } from '../services/MediaUploadService.js';
 import {
   VideoFrameExtractor,
-  ExtractedFrame,
-  ExtractedAudio,
 } from './engines/VideoFrameExtractor.js'; // WAR-GAMED SIMULATION - Import VideoFrameExtractor
 import ffmpegStatic from 'ffmpeg-static'; // WAR-GAMED SIMULATION - Import ffmpeg-static
 import ffprobeStatic from 'ffprobe-static'; // WAR-GAMED SIMULATION - Import ffprobe-static
 import fs from 'fs/promises'; // WAR-GAMED SIMULATION - For file system operations
+import {
+  ExtractionEngineConfig,
+  ExtractionRequest,
+  ExtractionResult,
+  ExtractedEntity,
+  BoundingBox,
+  TemporalRange,
+  ExtractionMetrics,
+} from './types.js';
 
 const logger = pino({ name: 'ExtractionEngine' });
-
-export interface ExtractionEngineConfig {
-  pythonPath: string;
-  modelsPath: string;
-  tempPath: string;
-  maxConcurrentJobs: number;
-  enableGPU: boolean;
-}
-
-export interface ExtractionRequest {
-  jobId: string;
-  mediaSourceId: string;
-  mediaPath: string;
-  mediaType: MediaType;
-  extractionMethods: string[];
-  options: Record<string, any>;
-}
-
-export interface ExtractionResult {
-  jobId: string;
-  method: string;
-  entities: ExtractedEntity[];
-  metrics: ExtractionMetrics;
-  errors: string[];
-}
-
-export interface ExtractedEntity {
-  entityType: string;
-  extractedText?: string;
-  boundingBox?: BoundingBox;
-  temporalRange?: TemporalRange;
-  confidence: number;
-  extractionMethod: string;
-  extractionVersion: string;
-  embeddings?: {
-    text?: number[];
-    visual?: number[];
-    audio?: number[];
-  };
-  metadata: Record<string, any>;
-}
-
-export interface BoundingBox {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  confidence: number;
-}
-
-export interface TemporalRange {
-  startTime: number;
-  endTime: number;
-  confidence: number;
-}
-
-export interface ExtractionMetrics {
-  processingTime: number;
-  entitiesExtracted: number;
-  averageConfidence: number;
-  memoryUsage: number;
-  gpuUsage?: number;
-  modelVersion: string;
-}
 
 export class ExtractionEngine {
   private config: ExtractionEngineConfig;

@@ -8,7 +8,6 @@ import {
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
-import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 
 dotenv.config();
 
@@ -272,7 +271,15 @@ function createDriverFacade(): Neo4jDriver {
   }) as Neo4jDriver['verifyConnectivity'];
 
   return facade as Neo4jDriver;
-} 
+}
+
+// Simple query observer interface to avoid circular dependency
+type QueryObserver = (cypher: string) => void;
+const queryObservers = new Set<QueryObserver>();
+
+export function registerQueryObserver(observer: QueryObserver) {
+  queryObservers.add(observer);
+}
 
 function createMockSession(): Neo4jSession {
   return {
@@ -311,14 +318,14 @@ function instrumentSession(session: any) {
   ) => {
     telemetry.subsystems.database.queries.add(1);
 
-    // Asynchronously analyze query for indexing recommendations
-    // We don't await this to avoid adding latency to the main path
-    try {
-      GraphIndexAdvisorService.getInstance().recordQuery(cypher);
-    } catch (err) {
-      // Suppress advisor errors so they don't break the app
-      logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
-    }
+    // Notify observers (e.g., GraphIndexAdvisorService)
+    queryObservers.forEach((observer) => {
+      try {
+        observer(cypher);
+      } catch (err) {
+        logger.warn('Error in query observer', err);
+      }
+    });
 
     const startTime = Date.now();
     try {
