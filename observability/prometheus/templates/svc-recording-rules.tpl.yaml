@@ -1,0 +1,26 @@
+groups:
+  - name: {{ service }}-slo
+    rules:
+      - record: {{ service }}:request_total:rate5m
+        expr: sum by (status_code) (
+          rate(http_requests_total{job="{{ job_label }}"}[5m])
+        )
+
+      - record: {{ service }}:error_rate:ratio5m
+        expr: |
+          (
+            sum(rate(http_requests_total{job="{{ job_label }}",status_code=~"5.."}[5m]))
+          )
+          /
+          (
+            sum(rate(http_requests_total{job="{{ job_label }}"}[5m]))
+          )
+
+      - record: {{ service }}:latency_p95:seconds5m
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (le) (
+              rate(http_request_duration_seconds_bucket{job="{{ job_label }}"}[5m])
+            )
+          )

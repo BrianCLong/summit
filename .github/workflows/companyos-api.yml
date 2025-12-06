@@ -1,0 +1,14 @@
+name: CompanyOS API
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  companyos-api:
+    uses: ./.github/workflows/companyos-service-template.yml
+    with:
+      service: companyos-api
+      helm_chart: charts/companyos-api
+      job_label: companyos-api
