@@ -2,14 +2,13 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": "src",
     "allowImportingTsExtensions": false,
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "types": []
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src"],
   "references": [
     {
       "path": "../types"
