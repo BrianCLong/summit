@@ -28,7 +28,8 @@
   ],
   "dependencies": {
     "@intelgraph/nlp": "workspace:*",
-    "@intelgraph/text-analytics": "workspace:*"
+    "@intelgraph/text-analytics": "workspace:*",
+    "@intelgraph/errors": "workspace:*"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

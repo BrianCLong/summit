@@ -5,6 +5,8 @@
  * for seamless citizen, immigrant, and international partner access.
  */
 
+import { errorFactory, SummitError } from '@intelgraph/errors';
+
 import type { TranslationResult } from '../types';
 
 export interface TranslationProvider {
@@ -31,7 +33,7 @@ export interface StreamingTranslationOptions {
   chunkSize?: number;
   onChunk?: (chunk: TranslationResult) => void;
   onComplete?: (result: TranslationResult) => void;
-  onError?: (error: Error) => void;
+  onError?: (error: SummitError) => void;
 }
 
 export interface TranslationContext {
@@ -176,8 +178,15 @@ export class RealTimeTranslator {
         translatedChunks.push(result.translatedText);
         options.onChunk?.(result);
       } catch (error) {
-        options.onError?.(error as Error);
-        throw error;
+        const llmError = errorFactory.fromUnknown(error, {
+          category: 'LLM',
+          errorCode: 'LLM_STREAM_FAILURE',
+          humanMessage: 'Streaming translation failed.',
+          suggestedAction: 'Retry with a smaller chunk size or alternate provider.',
+          context: { targetLanguage, chunkSize },
+        });
+        options.onError?.(llmError);
+        throw llmError;
       }
     }
 

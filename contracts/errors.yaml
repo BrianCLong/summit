@@ -1,0 +1,111 @@
+version: 1.0.0
+name: Summit Platform Error Taxonomy
+description: |
+  Canonical error taxonomy and envelope shared across all Summit platform services.
+  All runtime errors must be represented using this schema so that API clients,
+  workers, LLM services, and graph components can reason about failures in a
+  consistent, machine-parseable fashion.
+
+categories:
+  auth:
+    description: Authentication and authorization failures (identity, scope, MFA).
+    default_http_status: 401
+    examples:
+      - error_code: AUTH_INVALID_TOKEN
+        human_message: Authentication failed.
+        developer_message: Token signature validation failed.
+        suggested_action: Reauthenticate and obtain a fresh token.
+  validation:
+    description: Request or payload validation issues.
+    default_http_status: 422
+    examples:
+      - error_code: VALIDATION_SCHEMA_MISMATCH
+        human_message: Submitted payload is invalid.
+        developer_message: JSON body failed schema validation against contract v1.
+        suggested_action: Compare payload to OpenAPI schema and retry.
+  rate-limit:
+    description: Quota and abuse-prevention controls.
+    default_http_status: 429
+    examples:
+      - error_code: RATE_LIMIT_EXCEEDED
+        human_message: Too many requests; please slow down.
+        developer_message: Request volume exceeded per-tenant burst window.
+        suggested_action: Respect Retry-After header and back off.
+  internal:
+    description: Unexpected platform failures and invariants.
+    default_http_status: 500
+    examples:
+      - error_code: INTERNAL_UNHANDLED
+        human_message: Something went wrong on our side.
+        developer_message: Uncaught exception bubbled to the platform boundary.
+        suggested_action: Retry the request; contact support if persistent.
+  LLM:
+    description: Prompt orchestration, model invocation, or safety guardrail errors.
+    default_http_status: 502
+    examples:
+      - error_code: LLM_STREAM_FAILURE
+        human_message: The language model could not complete the request.
+        developer_message: Provider streaming API interrupted mid-response.
+        suggested_action: Retry with a shorter prompt or reduced temperature.
+  upstream:
+    description: Dependencies and connectors (databases, object stores, third parties).
+    default_http_status: 502
+    examples:
+      - error_code: UPSTREAM_CONNECTOR_HEALTH
+        human_message: Upstream system is unavailable.
+        developer_message: Connector health check failed during startup.
+        suggested_action: Verify upstream credentials/network and retry later.
+
+envelope_schema:
+  description: Standard error envelope returned by every Summit surface area.
+  fields:
+    error_code:
+      type: string
+      required: true
+      description: Stable machine-readable identifier for the failure condition.
+    human_message:
+      type: string
+      required: true
+      description: Localizable, user-friendly summary of the error.
+    developer_message:
+      type: string
+      required: false
+      description: Detailed context meant for engineers and logs.
+    category:
+      type: string
+      enum: [auth, validation, rate-limit, internal, LLM, upstream]
+      required: true
+      description: Maps to the canonical taxonomy above.
+    trace_id:
+      type: string
+      required: true
+      description: Correlation identifier propagated across service boundaries.
+    suggested_action:
+      type: string
+      required: false
+      description: Concrete next step the caller can take to self-remediate.
+    timestamp:
+      type: string
+      format: date-time
+      required: true
+      description: RFC 3339 timestamp of when the error was generated.
+    context:
+      type: object
+      required: false
+      description: Non-PII breadcrumbs useful for debugging (path, method, provider).
+  examples:
+    http_response:
+      error:
+        error_code: VALIDATION_SCHEMA_MISMATCH
+        human_message: Submitted payload is invalid.
+        developer_message: JSON body failed schema validation against contract v1.
+        category: validation
+        trace_id: 1b8f1b84-0a1a-4c53-8c82-9e5bb5871b9c
+        suggested_action: Compare payload to OpenAPI schema and retry.
+        timestamp: 2024-12-01T12:00:00Z
+        context:
+          path: /api/v1/entities
+          method: POST
+      metadata:
+        request_id: 123e4567-e89b-12d3-a456-426614174000
+        version: v1

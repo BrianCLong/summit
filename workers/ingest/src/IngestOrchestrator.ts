@@ -5,6 +5,7 @@ import { Kafka, Producer } from 'kafkajs';
 import yaml from 'js-yaml';
 import fs from 'fs/promises';
 import path from 'path';
+import { errorFactory } from '@intelgraph/errors';
 
 import { S3CSVConnector } from './connectors/S3CSVConnector';
 import { HTTPConnector } from './connectors/HTTPConnector';
@@ -386,7 +387,13 @@ export class IngestOrchestrator {
       });
 
       if (!healthy) {
-        throw new Error(`Connector ${name} failed health check`);
+        throw errorFactory.upstream({
+          errorCode: 'UPSTREAM_CONNECTOR_HEALTH',
+          humanMessage: 'Upstream connector failed health verification.',
+          developerMessage: `Connector ${name} failed health check`,
+          suggestedAction: 'Inspect connector credentials or network reachability.',
+          context: { connector: name },
+        });
       }
     }
   }

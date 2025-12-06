@@ -1,0 +1,28 @@
+{
+  "name": "@intelgraph/errors",
+  "version": "0.1.0",
+  "description": "Shared Summit error taxonomy and factory utilities",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/logger": "workspace:*",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/uuid": "^10.0.0",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

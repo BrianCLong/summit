@@ -39,6 +39,24 @@ module.exports = {
         ],
       },
     },
+    {
+      files: [
+        'packages/rest-api/src/**/*.{ts,tsx}',
+        'packages/language-models/src/**/*.{ts,tsx}',
+        'packages/graph-query/src/**/*.{ts,tsx}',
+        'workers/**/*.ts',
+      ],
+      rules: {
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: "NewExpression[callee.name='Error']",
+            message:
+              'Use @intelgraph/errors errorFactory helpers instead of raw Error.',
+          },
+        ],
+      },
+    },
   ],
   rules: {
     'import/order': [
