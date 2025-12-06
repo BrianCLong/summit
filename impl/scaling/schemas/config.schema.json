@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScalingConfig",
+  "type": "object",
+  "required": ["model", "training", "data"],
+  "properties": {
+    "model": {
+      "type": "object",
+      "required": ["family", "parameter_count"],
+      "properties": {
+        "family": {
+          "type": "string",
+          "enum": ["dense", "moe"],
+          "description": "Model family (dense transformer or MoE)."
+        },
+        "parameter_count": {
+          "type": "number",
+          "description": "Total non-embedding parameters."
+        },
+        "depth": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of transformer blocks."
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Hidden dimension width."
+        },
+        "num_experts": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Expert count if MoE is enabled."
+        },
+        "top_k_experts": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Top-k routing if MoE is enabled."
+        },
+        "context_length": {
+          "type": "integer",
+          "minimum": 512,
+          "description": "Maximum context length in tokens."
+        }
+      },
+      "additionalProperties": false
+    },
+    "data": {
+      "type": "object",
+      "required": ["mix"],
+      "properties": {
+        "mix": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["dataset_id", "proportion"],
+            "properties": {
+              "dataset_id": {
+                "type": "string",
+                "description": "Canonical dataset identifier or URI."
+              },
+              "proportion": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Relative proportion within the mix (normalized externally)."
+              },
+              "curriculum_stage": {
+                "type": "integer",
+                "minimum": 0,
+                "description": "Optional curriculum stage index for scheduling." 
+              },
+              "filtering": {
+                "type": "string",
+                "description": "Filtering or quality tier applied (e.g., deduped, filtered, safety-level)."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "curriculum_enabled": {
+          "type": "boolean",
+          "description": "Whether curriculum learning is active."
+        }
+      },
+      "additionalProperties": false
+    },
+    "training": {
+      "type": "object",
+      "required": ["optimizer", "learning_rate"],
+      "properties": {
+        "optimizer": {
+          "type": "string",
+          "enum": ["adamw", "lamb", "adafactor", "sgd"],
+          "description": "Optimizer choice."
+        },
+        "learning_rate": {
+          "type": "number",
+          "description": "Peak learning rate."
+        },
+        "lr_schedule": {
+          "type": "string",
+          "enum": ["cosine", "linear", "constant", "piecewise"],
+          "description": "Learning rate schedule family."
+        },
+        "warmup_steps": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Warmup steps for the LR schedule."
+        },
+        "decay_steps": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Decay steps or total training steps."
+        },
+        "batch_size_tokens": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Global batch size in tokens."
+        },
+        "gradient_checkpointing": {
+          "type": "boolean",
+          "description": "Whether gradient checkpointing is enabled."
+        },
+        "weight_decay": {
+          "type": "number",
+          "description": "Weight decay coefficient."
+        },
+        "dropout": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Dropout probability."
+        },
+        "label_smoothing": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Label smoothing factor."
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "properties": {
+        "precision": {
+          "type": "string",
+          "enum": ["fp32", "fp16", "bf16", "fp8"],
+          "description": "Numerical precision used."
+        },
+        "tensor_parallel": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Tensor parallelism degree."
+        },
+        "pipeline_parallel": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Pipeline parallelism degree."
+        },
+        "checkpoint_interval": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Interval in steps between checkpoints."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
