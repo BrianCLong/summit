@@ -1,86 +1,114 @@
 #!/usr/bin/env bash
+
 set -euo pipefail
-ORG=BrianCLong
-REPO=intelgraph
-PROJECT_TITLE="IntelGraph – GA Q4 2025"
 
-# 0. Tools
-command -v gh >/dev/null || { echo "gh CLI required"; exit 1; }
+# IntelGraph Platform - Environment Bootstrap
+# Implements the "Golden Path" for preparing the development environment.
 
-# 1. Labels
-mkdir -p .github
-cat > .github/labels.json <<'JSON'
-[
- {"name":"area:graph","color":"1f77b4"},
- {"name":"area:ingest","color":"2ca02c"},
- {"name":"area:er","color":"17becf"},
- {"name":"area:analytics","color":"9467bd"},
- {"name":"area:copilot","color":"ff7f0e"},
- {"name":"area:governance","color":"8c564b"},
- {"name":"area:prov-ledger","color":"e377c2"},
- {"name":"area:ops","color":"7f7f7f"},
- {"name":"area:ui","color":"bcbd22"},
- {"name":"area:docs","color":"17a2b8"},
- {"name":"prio:P0","color":"d62728"},
- {"name":"prio:P1","color":"ff9896"},
- {"name":"prio:P2","color":"c7c7c7"},
- {"name":"risk:high","color":"d62728"},
- {"name":"good first issue","color":"6cc644"},
- {"name":"area:fuzzer","color":"#ff00ff"}
-]
-JSON
-jq -r '.[] | [.name,.color] | @tsv' .github/labels.json | while IFS=$'\t' read -r n c; do gh label create "$n" --color "$c" -R $ORG/$REPO || gh label edit "$n" --color "$c" -R $ORG/$REPO; done
+# Colors for output
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'
 
-# 2. Project v2
-PROJ_NUM=$(gh projects create --title "$PROJECT_TITLE" --format json | jq -r .number)
-echo "Project #$PROJ_NUM"
-for spec in Status:single_select Area:single_select Priority:single_select Sprint:text Owner:users Risk:single_select "Story Points":number "Exit Criteria":text; do
-  NAME=${spec%%:*}; TYPE=${spec##*:}
-  gh projects fields create $PROJ_NUM --name "$NAME" --type $TYPE >/dev/null
-done
+log_info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
+log_success() { echo -e "${GREEN}✅ $1${NC}"; }
+log_error() { echo -e "${RED}❌ $1${NC}"; }
 
-gh projects views create $PROJ_NUM --name Board --layout board --field Status >/dev/null || true
+NODE_VERSION=18
+PY_VERSION=3.11
+ENV_FILE=".env"
 
-# 3. Milestones
-for M in "M1: Graph Core & API" "M2: Ingest & ER v1" "M3: Copilot v1" "M4: Governance & Security" "M5: Prov-Ledger (beta)" "M6: GA RC"; do
-  gh milestone create "$M" -R $ORG/$REPO || true
-done
+# Preflight Checks
+log_info "Running preflight checks..."
 
-# 4. Seed issues (subset; full list in docs/plan)
-cat > .github/seed-issues.csv <<'CSV'
-Title,Body,Labels,Milestone
-Graph schema v1 (entities/claims/provenance),Define base nodes/edges,area:graph;prio:P0,M1: Graph Core & API
-GraphQL gateway (Apollo) + persisted queries,Gateway with field-level authz & cost hints,area:graph;prio:P0,M1: Graph Core & API
-Cost guard middleware,Estimate cardinality + reject heavy queries,area:graph;prio:P0,M1: Graph Core & API
-Connector: CSV,Manifest + golden tests,area:ingest;prio:P0,M2: Ingest & ER v1
-Connector: STIX/TAXII,Threat intel ingestion,area:ingest;prio:P0,M2: Ingest & ER v1
-Ingest Wizard (UI + API),Source config + schedules,area:ingest;area:ui;prio:P0,M2: Ingest & ER v1
-Fuzzer: Sophisticated Attack Grammars,Implement complex time-window, data type mismatch, and nested aliasing grammars,area:fuzzer;prio:P0,M4: Governance & Security
-Fuzzer: Automated Oracle Generation,Refactor oracle to rule-based system, integrate property-based and metamorphic testing,area:fuzzer;prio:P0,M4: Governance & Security
-Fuzzer: Enhanced Coverage Metrics,Granular tracking of policy rule execution and attack grammar detection,area:fuzzer;prio:P1,M4: Governance & Security
-Fuzzer: Improved Reporting and UX,HTML reports with visual heatmap, root cause analysis, severity/impact assessment,area:fuzzer;prio:P0,M4: Governance & Security
-Fuzzer: Refined Configuration,Add command-line options to enable/disable attack grammar categories,area:fuzzer;prio:P1,M4: Governance & Security
-CSV
+if ! command -v docker >/dev/null 2>&1; then
+    log_error "Docker not found. Please install Docker Desktop."
+    exit 1
+fi
 
-python3 - <<'PY'
-import csv, os, subprocess
-from pathlib import Path
-with open('.github/seed-issues.csv') as f:
-    r=csv.DictReader(f)
-    for row in r:
-        labels=row['Labels'].replace(';',',')
-        subprocess.run(['gh','issue','create','-R',os.getenv('ORG')+'/'+os.getenv('REPO'),
-                        '--title',row['Title'],'--body',row['Body'],
-                        '--label',labels,'--milestone',row['Milestone']],check=True)
-PY
+if ! docker info >/dev/null 2>&1; then
+    log_error "Docker daemon is not running. Start Docker Desktop and try again."
+    exit 1
+fi
 
-# 5. Branch protections
-for BR in main develop; do
-  gh api -X PUT repos/$ORG/$REPO/branches/$BR/protection \
-    -F required_status_checks.strict=true \
-    -F required_pull_request_reviews.required_approving_review_count=2 \
-    -F enforce_admins=true \
-    -F restrictions=null || true
-done
+if ! command -v node >/dev/null 2>&1; then
+    log_error "Node.js not found. Install from https://nodejs.org/"
+    exit 1
+fi
 
-echo "Bootstrap complete."
+CURRENT_NODE_VER=$(node -v | sed 's/v//;s/\..*//')
+if [ "$CURRENT_NODE_VER" -lt "$NODE_VERSION" ]; then
+    log_error "Node.js v$NODE_VERSION+ required (found v$CURRENT_NODE_VER)"
+    exit 1
+fi
+
+log_success "Preflight checks passed."
+
+# 1. Environment Configuration
+log_info "Setting up environment configuration..."
+if [ ! -f "$ENV_FILE" ]; then
+    cp .env.example "$ENV_FILE"
+    log_success "Created $ENV_FILE from .env.example"
+    log_info "NOTE: Update secrets in $ENV_FILE for production/custom deployments."
+else
+    log_info "$ENV_FILE already exists. Skipping creation."
+fi
+
+# 2. Node.js Dependencies
+log_info "Installing Node.js dependencies..."
+if [ -f package.json ]; then
+    if command -v corepack >/dev/null 2>&1; then
+        corepack enable || true
+    fi
+
+    if [ -f pnpm-lock.yaml ]; then
+        if ! command -v pnpm >/dev/null 2>&1; then
+            npm install -g pnpm
+        fi
+        pnpm install --frozen-lockfile || pnpm install
+    elif [ -f package-lock.json ]; then
+        npm ci || npm install
+    else
+        npm install || true
+    fi
+    log_success "Node.js dependencies installed."
+fi
+
+# 3. Python Virtual Environment
+log_info "Setting up Python environment..."
+if [ -f requirements.txt ] || [ -f pyproject.toml ]; then
+    if [ ! -d ".venv" ]; then
+        python3 -m venv .venv
+    fi
+
+    # Activate venv for installation
+    source .venv/bin/activate
+
+    python -m pip install -U pip wheel
+
+    if [ -f requirements.txt ]; then
+        pip install -r requirements.txt || true
+    fi
+
+    if [ -f pyproject.toml ]; then
+        pip install -e . || pip install . || true
+    fi
+
+    # Install additional tooling
+    pip install ruamel.yaml==0.18.* pip-audit==2.* || true
+
+    log_success "Python environment ready."
+fi
+
+# 4. Dev Tooling Scaffolding
+log_info "Setting up helper tools..."
+mkdir -p scripts/tools
+cat > scripts/tools/yq_json.py << 'EOF'
+#!/usr/bin/env python3
+from ruamel.yaml import YAML; import sys,json
+y=YAML(); doc=y.load(sys.stdin.read()); print(json.dumps(doc))
+EOF
+chmod +x scripts/tools/yq_json.py
+
+log_success "Bootstrap complete! You are ready to run './scripts/start.sh'."
