@@ -153,11 +153,24 @@ runTest('enumerateArtifacts aggregates produced bindings', () => {
   assert.equal(artifacts[0]?.type, 'junit');
 });
 
-runTest('ensureSecret only accepts vault references', () => {
+runTest('ensureSecret validates supported provider shapes', () => {
   assert.equal(ensureSecret('plain'), false);
   assert.equal(
     ensureSecret({ vault: 'vault://main', key: 'db/password' }),
     true,
+  );
+  assert.equal(
+    ensureSecret({
+      provider: 'kms',
+      keyId: 'kms-key',
+      ciphertext: Buffer.from('cipher').toString('base64'),
+      key: 'db/password',
+    }),
+    true,
+  );
+  assert.equal(
+    ensureSecret({ provider: 'kms', keyId: 'kms-key', key: 'db/password' }),
+    false,
   );
 });
 
