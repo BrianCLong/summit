@@ -10,6 +10,7 @@ import Redis from 'ioredis';
 import { logger } from '../utils/logger';
 import { PolicyGuard } from './policyGuard';
 import { Budget } from '../ai/llmBudget';
+import { systemMonitor } from '../src/lib/system-monitor';
 
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
@@ -66,6 +67,19 @@ class MaestroOrchestrator {
   }
 
   async enqueueTask(task: AgentTask): Promise<string> {
+    // 1. System Health Check (Backpressure)
+    const health = systemMonitor.getHealth();
+    if (health.isOverloaded) {
+      throw new Error(`System overloaded: ${health.reason}. Task rejected.`);
+    }
+
+    // 2. Queue Depth Check (Backpressure)
+    const waitingCount = await maestroQueue.count();
+    const MAX_QUEUE_DEPTH = 1000; // Hard limit for backlog
+    if (waitingCount > MAX_QUEUE_DEPTH) {
+      throw new Error(`Queue full (${waitingCount} pending). Task rejected.`);
+    }
+
     // Pre-flight policy check
     const policyResult = await this.policyGuard.checkPolicy(task);
     if (!policyResult.allowed) {

@@ -15,6 +15,7 @@ import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
@@ -61,6 +62,9 @@ export const createApp = async () => {
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+
+  // Load Shedding / Overload Protection (Second, to reject early)
+  app.use(overloadProtection);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
