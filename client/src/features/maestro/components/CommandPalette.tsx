@@ -1,11 +1,13 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 interface Command {
   id: string;
   label: string;
   shortcut?: string;
   onSelect: () => void;
+  requires?: string;
 }
 
 export function CommandPalette({
@@ -18,6 +20,7 @@ export function CommandPalette({
   basePath: string;
 }) {
   const navigate = useNavigate();
+  const { hasPermission } = useAuth();
   const [query, setQuery] = React.useState('');
 
   const commands = React.useMemo<Command[]>(
@@ -39,6 +42,7 @@ export function CommandPalette({
         label: 'Open Latest Run',
         shortcut: 'g r',
         onSelect: () => navigate(`${basePath}runs/run-1`),
+        requires: 'run_maestro',
       },
       {
         id: 'releases',
@@ -57,6 +61,7 @@ export function CommandPalette({
         label: 'View Audit Log',
         shortcut: 'g a',
         onSelect: () => navigate(`${basePath}admin`),
+        requires: 'manage_users',
       },
     ],
     [basePath, navigate],
@@ -64,11 +69,15 @@ export function CommandPalette({
 
   const filtered = React.useMemo(() => {
     const trimmed = query.trim().toLowerCase();
-    if (!trimmed) return commands;
-    return commands.filter((command) =>
+    const commandPool = commands.filter(
+      (command) => !command.requires || hasPermission?.(command.requires),
+    );
+
+    if (!trimmed) return commandPool;
+    return commandPool.filter((command) =>
       command.label.toLowerCase().includes(trimmed),
     );
-  }, [commands, query]);
+  }, [commands, hasPermission, query]);
 
   React.useEffect(() => {
     if (!open) setQuery('');

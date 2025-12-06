@@ -43,6 +43,7 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+import { userHasPermission } from '../security/permissions.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
@@ -157,53 +158,6 @@ interface TokenPair {
   token: string;
   refreshToken: string;
 }
-
-/**
- * Role-based permission mappings for RBAC enforcement
- *
- * Permissions follow the pattern: `resource:action`
- *
- * @constant
- * @type {Record<string, string[]>}
- *
- * @example
- * // Available roles and their permissions:
- * // - ADMIN: '*' (all permissions)
- * // - ANALYST: investigation, entity, relationship, tag CRUD + graph + AI
- * // - VIEWER: read-only access to investigations, entities, relationships, tags, graph
- */
-const ROLE_PERMISSIONS: Record<string, string[]> = {
-  ADMIN: [
-    '*', // Admin has all permissions
-  ],
-  ANALYST: [
-    'investigation:create',
-    'investigation:read',
-    'investigation:update',
-    'entity:create',
-    'entity:read',
-    'entity:update',
-    'entity:delete',
-    'relationship:create',
-    'relationship:read',
-    'relationship:update',
-    'relationship:delete',
-    'tag:create',
-    'tag:read',
-    'tag:delete',
-    'graph:read',
-    'graph:export',
-    'ai:request',
-  ],
-  VIEWER: [
-    'investigation:read',
-    'entity:read',
-    'relationship:read',
-    'tag:read',
-    'graph:read',
-    'graph:export',
-  ],
-};
 
 /**
  * Authentication and Authorization Service
@@ -649,11 +603,7 @@ export class AuthService {
    * ```
    */
   hasPermission(user: User | null, permission: string): boolean {
-    if (!user || !user.role) return false;
-    const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()];
-    if (!userPermissions) return false;
-    if (userPermissions.includes('*')) return true; // Admin or super role
-    return userPermissions.includes(permission);
+    return userHasPermission(user, permission);
   }
 
   /**
