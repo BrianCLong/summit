@@ -11,7 +11,8 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "@intelgraph/graph-database": "workspace:*"
+    "@intelgraph/graph-database": "workspace:*",
+    "@intelgraph/errors": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",

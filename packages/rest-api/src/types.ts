@@ -4,6 +4,7 @@
 
 import type { Request, Response, NextFunction, RequestHandler } from 'express';
 import type { OpenAPIObject, PathItemObject, OperationObject } from 'openapi3-ts/oas31';
+import type { ErrorEnvelope } from '@intelgraph/errors';
 
 // ===== API Configuration =====
 
@@ -177,24 +178,16 @@ export interface CacheOptions {
 export interface APIResponse<T = any> {
   success: boolean;
   data?: T;
-  error?: APIError;
+  error?: ErrorEnvelope;
   metadata?: ResponseMetadata;
   links?: HATEOASLinks;
-}
-
-export interface APIError {
-  code: string;
-  message: string;
-  details?: any;
-  timestamp: string;
-  path: string;
-  traceId?: string;
 }
 
 export interface ResponseMetadata {
   timestamp: string;
   version: string;
   requestId: string;
+  traceId?: string;
   duration?: number;
   pagination?: PaginationMetadata;
 }
@@ -249,12 +242,12 @@ export interface BatchOperationResult {
   status: number;
   headers?: Record<string, string>;
   body?: any;
-  error?: APIError;
+  error?: ErrorEnvelope;
 }
 
 export interface BatchError {
   id: string;
-  error: APIError;
+  error: ErrorEnvelope;
 }
 
 // ===== Idempotency =====
@@ -324,7 +317,7 @@ export interface RequestMetrics {
   apiVersion?: string;
   userAgent?: string;
   ip?: string;
-  error?: APIError;
+  error?: ErrorEnvelope;
 }
 
 // ===== Extended Express Types =====
