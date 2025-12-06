@@ -49,6 +49,8 @@ import {
   setErrorMessage, // New import for error messages
   setNodeTypeFilter, // New import for node type filter
   setMinConfidenceFilter, // New import for min confidence filter
+  compressGraph, // New import for compression
+  fetchGraphData, // New import for re-fetching
 } from '../../store/slices/graphSlice';
 
 // Register Cytoscape.js extensions
@@ -567,7 +569,17 @@ const GraphVisualization = () => {
   };
 
   const handleToggleFeature = (featureName) => (event) => {
-    dispatch(toggleFeature({ featureName, enabled: event.target.checked }));
+    const enabled = event.target.checked;
+    dispatch(toggleFeature({ featureName, enabled }));
+
+    if (featureName === 'highDensityCompression') {
+      if (enabled) {
+        dispatch(compressGraph({ nodes: graphData.nodes, edges: graphData.edges }));
+      } else {
+        // Revert to original data (simple re-fetch for now as we don't store original separately in state yet)
+        dispatch(fetchGraphData({ investigationId: 'current' }));
+      }
+    }
   };
 
   // jQuery example: Animate a simple message box
@@ -742,6 +754,16 @@ const GraphVisualization = () => {
             />
           }
           label="Node Clustering"
+        />
+        <FormControlLabel
+          control={
+            <Switch
+              checked={graphData.featureToggles.highDensityCompression || false}
+              onChange={handleToggleFeature('highDensityCompression')}
+              name="highDensityCompression"
+            />
+          }
+          label="High-Density Compression"
         />
         <TextField
           label="Search Nodes/Edges"
