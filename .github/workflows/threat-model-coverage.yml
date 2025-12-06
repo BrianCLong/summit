@@ -1,0 +1,56 @@
+name: Threat Model Coverage (Advisory)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies (minimal)
+        run: npm ci --ignore-scripts
+
+      - name: Run threat model coverage checker
+        run: node --loader ts-node/register scripts/security/check-threat-model-coverage.ts --base ${{ github.event.pull_request.base.sha }} --head ${{ github.event.pull_request.head.sha }} --json threat-model-report.json
+
+      - name: Comment on PR with coverage status
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const reportPath = path.join(process.cwd(), 'threat-model-report.json');
+            const report = fs.existsSync(reportPath)
+              ? JSON.parse(fs.readFileSync(reportPath, 'utf8'))
+              : null;
+
+            const touched = report?.touchedFeatures?.length
+              ? report.touchedFeatures.join(', ')
+              : 'no monitored features';
+            const status = report?.results?.length
+              ? report.results.map((r) => `${r.feature}: ${r.status}${r.stale ? ' (stale)' : ''}`).join('; ')
+              : 'not required';
+
+            const body = `This change touches ${touched}; threat model is ${status}.`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
