@@ -10,8 +10,8 @@ import Redis from 'ioredis';
 import { Logger } from 'pino';
 import { z } from 'zod';
 import { sign, verify } from 'jsonwebtoken';
-import { getPostgresPool, getRedisClient } from '../../config/database.js';
-import logger from '../../utils/logger.js';
+import { getPostgresPool, getRedisClient } from '../config/database.js';
+import logger from '../utils/logger.js';
 
 // Core audit event types
 export type AuditEventType =
