@@ -7,6 +7,7 @@
 // ============================================================================
 
 export * from './linearx';
+export * from './guardrails';
 
 // LinearX Automation Types
 export type AutomationMode = 'auto' | 'guided' | 'manual';
