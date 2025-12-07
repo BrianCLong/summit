@@ -134,6 +134,7 @@ yarn.lock
 # Backup files
 backups/
 *.bak
+*.rehydrated
 
 # Conflicts directory
 conflicts/

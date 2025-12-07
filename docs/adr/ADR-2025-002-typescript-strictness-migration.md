@@ -74,6 +74,46 @@ Adopt an incremental strictness migration:
 - [ ] Address remaining excluded files
 - [ ] Enable `exactOptionalPropertyTypes`
 
+## Exemplary Patterns Already in Codebase
+
+The file `server/src/graphql/resolvers/legacy.ts` demonstrates excellent type patterns that should be adopted across the codebase:
+
+```typescript
+// Well-defined interfaces at the top of the file
+interface User {
+  id: string;
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  permissions?: string[];
+}
+
+interface Context {
+  user?: User;
+  req?: any;
+  pubsub?: PubSub;
+}
+
+interface LoginInput {
+  email: string;
+  password: string;
+}
+
+interface CreateEntityInput {
+  type: string;
+  label: string;
+  description?: string;
+  properties?: any;
+  confidence?: number;
+  source?: string;
+  position?: { x: number; y: number };
+  investigationId?: string;
+}
+```
+
+This pattern of defining input types at the top of resolver files should be standardized.
+
 ## Type Patterns to Adopt
 
 ### Resolver Context

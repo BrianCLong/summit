@@ -1,2 +1,0 @@
-10096tWARNt  # Timestamp Disclosure
-10020tWARNt  # X-Frame-Options Header Not Set (handled by helmet in prod)
