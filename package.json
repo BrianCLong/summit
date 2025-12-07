@@ -115,7 +115,11 @@
     "security:audit:fix": "pnpm audit --fix",
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",
     "security:scan": "pnpm run security:audit && pnpm run security:lint",
-    "security:outdated": "pnpm outdated"
+    "security:outdated": "pnpm outdated",
+    "adr:create": "npx ts-node --esm scripts/architecture/create-adr.ts",
+    "adr:list": "ls -la docs/architecture/adr/*.md | grep -v template",
+    "system-map:generate": "npx ts-node --esm scripts/architecture/generate-system-map.ts",
+    "system-map:render": "dot -Tpng docs/architecture/system-map.dot -o docs/architecture/system-map.png && dot -Tsvg docs/architecture/system-map.dot -o docs/architecture/system-map.svg"
   },
   "keywords": [
     "intelligence-analysis",

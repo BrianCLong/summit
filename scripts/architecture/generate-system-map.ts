@@ -20,9 +20,14 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// ESM compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
-const ROOT_DIR = path.join(__dirname, '../..');
+const ROOT_DIR = path.resolve(__dirname, '../..');
 const OUTPUT_DIR = path.join(ROOT_DIR, 'docs/architecture');
 const COMPOSE_FILES = ['docker-compose.dev.yml', 'docker-compose.ai.yml'];
 const WORKSPACE_FILE = 'pnpm-workspace.yaml';
@@ -130,7 +135,6 @@ function parseDockerCompose(filepath: string): Service[] {
 
   let currentService: string | null = null;
   let inServices = false;
-  let serviceIndent = 0;
 
   const serviceData: Record<
     string,
@@ -154,55 +158,46 @@ function parseDockerCompose(filepath: string): Service[] {
 
     if (inServices) {
       // Check for volume/network sections (end of services)
-      if (/^(volumes|networks):/.test(trimmed)) {
+      if (/^(volumes|networks):/.test(trimmed) && !line.startsWith(' ')) {
         inServices = false;
         continue;
       }
 
-      // Check for service definition (no leading dash, ends with colon)
-      const serviceMatch = line.match(/^(\s{2})(\w[\w-]*):\s*$/);
-      if (serviceMatch && serviceMatch[1].length === 2) {
-        currentService = serviceMatch[2];
+      // Check for service definition (exactly 2 spaces, then a word ending with colon)
+      // Match lines like "  postgres:" or "  api:"
+      if (/^  [a-zA-Z][\w-]*:\s*$/.test(line)) {
+        currentService = trimmed.replace(':', '');
         serviceData[currentService] = { ports: [], depends_on: [] };
-        serviceIndent = 2;
         continue;
       }
 
       if (currentService && line.startsWith('    ')) {
         // Parse service properties
         if (trimmed.startsWith('image:')) {
-          serviceData[currentService].image = trimmed.split(':').slice(1).join(':').trim();
+          serviceData[currentService].image = trimmed.replace(/^image:\s*/, '');
         } else if (trimmed.startsWith('build:')) {
-          serviceData[currentService].build = trimmed.split(':').slice(1).join(':').trim();
+          serviceData[currentService].build = trimmed.replace(/^build:\s*/, '');
         } else if (trimmed.startsWith("- '") && trimmed.includes(':')) {
-          // Port mapping
+          // Port mapping like - '5432:5432'
           const portMatch = trimmed.match(/- '(\d+):\d+'/);
           if (portMatch) {
             serviceData[currentService].ports.push(portMatch[1]);
           }
-        } else if (trimmed.match(/^\w+:$/)) {
-          // Sub-section like depends_on:
-          const section = trimmed.replace(':', '');
-          if (section === 'depends_on') {
-            // Read the next lines for dependencies
-            let j = i + 1;
-            while (j < lines.length) {
-              const depLine = lines[j].trim();
-              if (depLine.startsWith('-') || depLine.match(/^\w+:$/)) {
-                if (depLine.startsWith('-')) {
-                  serviceData[currentService].depends_on.push(depLine.replace(/^-\s*/, ''));
-                }
-                j++;
-                continue;
-              }
-              const depMatch = depLine.match(/^(\w+):$/);
-              if (depMatch && lines[j].startsWith('      ')) {
-                serviceData[currentService].depends_on.push(depMatch[1]);
-                j++;
-                continue;
-              }
-              break;
+        } else if (trimmed === 'depends_on:') {
+          // Read the next lines for dependencies
+          let j = i + 1;
+          while (j < lines.length) {
+            const depLine = lines[j];
+            const depTrimmed = depLine.trim();
+            // Check if still in depends_on section (more indented than depends_on:)
+            if (!depLine.startsWith('      ')) break;
+
+            // Match dependency names like "postgres:" or "- postgres"
+            const depMatch = depTrimmed.match(/^(\w[\w-]*):/);
+            if (depMatch) {
+              serviceData[currentService].depends_on.push(depMatch[1]);
             }
+            j++;
           }
         }
       }
