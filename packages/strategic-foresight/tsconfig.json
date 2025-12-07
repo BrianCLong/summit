@@ -10,6 +10,7 @@
     "moduleResolution": "Bundler",
     "declarationMap": true,
     "sourceMap": true,
+    "baseUrl": "./src",
     "types": ["node"],
     "lib": ["ES2022"],
     "allowImportingTsExtensions": false
