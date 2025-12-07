@@ -1,0 +1,118 @@
+name: Frontend Bundle Health
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+  pull_request:
+    paths:
+      - "apps/web/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+
+jobs:
+  bundle-analysis:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Build web app with bundle analysis
+        working-directory: apps/web
+        run: |
+          pnpm build:analyze || echo "Build completed with warnings"
+
+      - name: Generate bundle stats summary
+        working-directory: apps/web
+        run: |
+          if [ -f dist/stats.html ]; then
+            echo "## Bundle Analysis Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Bundle visualization available as artifact" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Get total bundle size
+            TOTAL_SIZE=$(du -sh dist/ 2>/dev/null | cut -f1 || echo "N/A")
+            echo "**Total dist size:** $TOTAL_SIZE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # List largest JS chunks
+            echo "### Largest JS chunks:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            ls -lhS dist/assets/*.js 2>/dev/null | head -10 || echo "No JS files found"
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload bundle analysis
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bundle-stats
+          path: |
+            apps/web/dist/stats.html
+            apps/web/dist/assets/*.js
+          retention-days: 14
+
+      - name: Check bundle size limits
+        working-directory: apps/web
+        run: |
+          # Define bundle size limits (in KB)
+          MAX_MAIN_BUNDLE_KB=800
+          MAX_VENDOR_BUNDLE_KB=1500
+
+          # Find main bundle
+          MAIN_BUNDLE=$(find dist/assets -name "index-*.js" -o -name "main-*.js" 2>/dev/null | head -1)
+          if [ -n "$MAIN_BUNDLE" ]; then
+            MAIN_SIZE_KB=$(du -k "$MAIN_BUNDLE" | cut -f1)
+            echo "Main bundle size: ${MAIN_SIZE_KB}KB (limit: ${MAX_MAIN_BUNDLE_KB}KB)"
+
+            if [ "$MAIN_SIZE_KB" -gt "$MAX_MAIN_BUNDLE_KB" ]; then
+              echo "::warning::Main bundle exceeds size limit: ${MAIN_SIZE_KB}KB > ${MAX_MAIN_BUNDLE_KB}KB"
+            fi
+          fi
+
+          # Find largest vendor chunk
+          VENDOR_BUNDLE=$(find dist/assets -name "*vendor*.js" 2>/dev/null | head -1)
+          if [ -n "$VENDOR_BUNDLE" ]; then
+            VENDOR_SIZE_KB=$(du -k "$VENDOR_BUNDLE" | cut -f1)
+            echo "Vendor bundle size: ${VENDOR_SIZE_KB}KB (limit: ${MAX_VENDOR_BUNDLE_KB}KB)"
+
+            if [ "$VENDOR_SIZE_KB" -gt "$MAX_VENDOR_BUNDLE_KB" ]; then
+              echo "::warning::Vendor bundle exceeds size limit: ${VENDOR_SIZE_KB}KB > ${MAX_VENDOR_BUNDLE_KB}KB"
+            fi
+          fi
