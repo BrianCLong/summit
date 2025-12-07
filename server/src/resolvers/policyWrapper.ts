@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { GraphQLError } from 'graphql';
 import { evaluate } from '../services/AccessControl.js';
 

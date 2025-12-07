@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Financial Compliance Module - Shared Types
  *

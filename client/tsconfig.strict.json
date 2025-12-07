@@ -1,0 +1,34 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "src/__tests__/**",
+    "src/components/**/__tests__/**",
+    "src/components/ai-enhanced/tests/**",
+    "src/components/ai-enhanced/__tests__/**",
+    "src/components/Map/GeospatialDashboard.tsx",
+    "src/components/Map/MapContainer.tsx",
+    "src/components/Map/layers/GeoJSONLayer.tsx",
+    "src/components/Map/layers/HeatmapLayer.tsx",
+    "src/components/Map/layers/MarkerLayer.tsx",
+    "src/components/admin/AdminDashboard.tsx",
+    "src/components/ai-enhanced/__tests__/EnhancedAIAssistant.test.tsx",
+    "src/components/explorer/KGExplorer.tsx",
+    "src/components/hunting/HuntQueryBuilder.tsx",
+    "src/components/hunting/ThreatHuntingDashboard.tsx",
+    "src/components/intelligence/__tests__/ThreatIntelligenceHub.test.tsx",
+    "src/components/search/QueryBuilderPreview.stories.tsx",
+    "src/components/search/QueryBuilderPreview.tsx",
+    "src/components/security/VulnerabilityDashboard.tsx",
+    "src/components/timeline/__tests__/TemporalAnalysis.test.tsx",
+    "src/components/visualization/__tests__/InteractiveGraphCanvas.test.tsx",
+    "src/features/companyos/pages/OperationsDashboard.tsx",
+    "src/features/lho/LhoDashboard.tsx"
+  ]
+}

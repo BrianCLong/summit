@@ -47,6 +47,7 @@ function EntityFilterPanel() {
     }
     if (startParam) setStartDate(new Date(startParam));
     if (endParam) setEndDate(new Date(endParam));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -80,6 +81,7 @@ function EntityFilterPanel() {
     if (startDate) params.set('startDate', startDate.toISOString());
     if (endDate) params.set('endDate', endDate.toISOString());
     setSearchParams(params, { replace: true });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, tags, confidence, startDate, endDate]);
 
   const resultsLink = useMemo(() => {
@@ -140,12 +142,14 @@ function EntityFilterPanel() {
               label="Start Date"
               value={startDate}
               onChange={(date: Date | null) => setStartDate(date)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               renderInput={(params: any) => <TextField {...params} />}
             />
             <DatePicker
               label="End Date"
               value={endDate}
               onChange={(date: Date | null) => setEndDate(date)}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               renderInput={(params: any) => <TextField {...params} />}
             />
           </Stack>

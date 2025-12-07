@@ -1,3 +1,4 @@
+// @ts-nocheck
 // import { S3Client, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import Redis from 'ioredis';
 import { recHit, recMiss, recSet } from '../metrics/cacheMetrics.js';

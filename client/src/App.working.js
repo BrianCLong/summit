@@ -78,7 +78,9 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 IntelGraph Platform Starting...');
+    // eslint-disable-next-line no-console
     console.log('✅ App component mounted successfully');
   }, []);
 

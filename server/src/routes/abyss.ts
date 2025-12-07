@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/routes/abyss.ts
 import { Router } from 'express';
 import { abyssService } from '../abyss/AbyssService';

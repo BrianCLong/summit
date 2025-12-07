@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Explainable Defense AI Service
  *

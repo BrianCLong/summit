@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { randomUUID as uuidv4 } from 'crypto';

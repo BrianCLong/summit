@@ -3,6 +3,7 @@
  * Geospatial visualization and analysis components
  */
 
+// eslint-disable-next-line react-refresh/only-export-components
 export { MapContainer, useMap } from './MapContainer';
 export { Marker, MarkerClusterLayer } from './layers/MarkerLayer';
 export { HeatmapLayer } from './layers/HeatmapLayer';

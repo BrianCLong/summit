@@ -32,6 +32,7 @@ interface Notification {
   timestamp: string;
   actionId?: string;
   investigationId?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: any;
   expiresAt?: string;
 }
@@ -49,6 +50,7 @@ function NotificationSystem({
 }: NotificationSystemProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showPanel, setShowPanel] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // Subscribe to real-time notifications
@@ -65,6 +67,7 @@ function NotificationSystem({
       const newNotification = subscriptionData.notificationUpdates;
       addNotification(newNotification);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subscriptionData]);
 
   const addNotification = (notification: Notification) => {
@@ -107,6 +110,7 @@ function NotificationSystem({
     // Create a subtle notification sound using Web Audio API
     try {
       const audioContext = new (window.AudioContext ||
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (window as any).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gain = audioContext.createGain();
@@ -123,6 +127,7 @@ function NotificationSystem({
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 0.3);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Fallback: silent
     }
@@ -200,6 +205,7 @@ function NotificationSystem({
         setTimeout(() => addNotification(notification), index * 1000);
       });
     }, 2000);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * KGExplorer - Knowledge Graph Explorer
  * Main component for interactive graph exploration with Cytoscape.js

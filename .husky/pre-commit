@@ -28,6 +28,13 @@ if command -v gitleaks >/dev/null 2>&1; then
   }
 fi
 
+# Run typecheck
+log "🔍 Running strict typechecks..."
+npm run typecheck || {
+  log "❌ Typecheck failed."
+  exit 1
+}
+
 # Run lint-staged
 log "🔍 Running lint-staged..."
 pnpm exec lint-staged || {

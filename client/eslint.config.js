@@ -1,4 +1,5 @@
 // ESLint v9 flat config for the React client (Vite)
+import fs from 'fs';
 import globals from 'globals';
 import js from '@eslint/js';
 import * as tseslint from 'typescript-eslint';
@@ -6,6 +7,8 @@ import prettier from 'eslint-config-prettier';
 import react from 'eslint-plugin-react';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
+
+const legacyFiles = JSON.parse(fs.readFileSync('.eslint-legacy-files.json', 'utf8'));
 
 export default [
   {
@@ -75,12 +78,12 @@ export default [
       'react/jsx-uses-react': 'off', // new JSX transform
       'react/react-in-jsx-scope': 'off',
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
+      'react-hooks/exhaustive-deps': 'error',
       'react-refresh/only-export-components': [
-        'warn',
+        'error',
         { allowConstantExport: true },
       ],
-      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
       'no-unused-expressions': 'off',
       '@typescript-eslint/no-unused-expressions': ['error', {}],
       'import/order': 'off',
@@ -89,14 +92,37 @@ export default [
       'import/default': 'off',
       'comma-dangle': 'off',
       'no-undef': 'off',
-      'no-console': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
+      'no-console': ['error', { allow: ['warn', 'error'] }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/ban-ts-comment': 'off',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-var-requires': 'off',
-      'no-empty': 'warn',
+      'no-empty': 'error',
       'no-fallthrough': 'off',
-      'no-useless-escape': 'warn',
+      'no-useless-escape': 'error',
+    },
+  },
+  // Legacy files exemption
+  {
+    files: legacyFiles,
+    linterOptions: { reportUnusedDisableDirectives: 'off' },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
+      'react-hooks/exhaustive-deps': 'off',
+      'react-refresh/only-export-components': 'off',
+      'no-empty': 'off',
+      'no-useless-escape': 'off',
+      'no-case-declarations': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      'react-hooks/rules-of-hooks': 'off',
+      'no-constant-binary-expression': 'off',
+      'no-unreachable': 'off',
+      'no-prototype-builtins': 'off',
+      'no-dupe-keys': 'off',
+      'prefer-const': 'off',
+      '@typescript-eslint/no-this-alias': 'off',
     },
   },
   {

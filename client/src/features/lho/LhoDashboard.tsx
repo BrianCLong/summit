@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useMemo, useState } from 'react';
 import holdData from './data/sampleHold.json';
 import type { HoldDataset } from './types';

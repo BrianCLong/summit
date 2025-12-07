@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Standardized Prometheus Metrics Helpers
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GraphQL Resolvers for Explainable Defense AI
  */

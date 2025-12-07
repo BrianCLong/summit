@@ -1,8 +1,11 @@
 // ESLint v9 flat config for the Node/TS server
+import fs from 'fs';
 import globals from 'globals';
 import * as tseslint from 'typescript-eslint';
 import js from '@eslint/js';
 import prettier from 'eslint-config-prettier';
+
+const legacyFiles = JSON.parse(fs.readFileSync('.eslint-legacy-files.json', 'utf8'));
 
 export default [
   {
@@ -113,8 +116,10 @@ export default [
     linterOptions: { reportUnusedDisableDirectives: true },
     rules: {
       'no-unused-expressions': 'off', // Disable due to ESLint 9/typescript-eslint compatibility issue
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': ['error', { allow: ['warn', 'error'] }],
       'no-process-exit': 'off',
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
     },
   },
   // Script files - allow console output
@@ -169,6 +174,34 @@ export default [
       'jest/no-disabled-tests': 'warn',
       'jest/no-identical-title': 'error',
       'no-console': 'off', // Allow console in tests
+    },
+  },
+  // Legacy files exemption (gradual migration)
+  {
+    files: legacyFiles,
+    linterOptions: { reportUnusedDisableDirectives: 'off' },
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'no-console': 'off',
+      'no-unused-vars': 'off',
+      'no-useless-escape': 'off',
+      'no-case-declarations': 'off',
+      'no-empty': 'off',
+      'jest/expect-expect': 'off',
+      'no-redeclare': 'off',
+      'no-useless-catch': 'off',
+      'no-control-regex': 'off',
+      'no-unreachable': 'off',
+      'no-shadow-restricted-names': 'off',
+      'no-prototype-builtins': 'off',
+      'no-duplicate-case': 'off',
+      'no-async-promise-executor': 'off',
+      'no-undef': 'off',
+      'no-empty-pattern': 'off',
+      'require-yield': 'off',
+      'no-dupe-keys': 'off',
+      'no-dupe-class-members': 'off',
     },
   },
   prettier,

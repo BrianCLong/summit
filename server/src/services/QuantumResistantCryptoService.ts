@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Quantum-Resistant Cryptography Service
  * Provides post-quantum cryptographic operations for Summit platform

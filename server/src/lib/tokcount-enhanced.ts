@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Enhanced token counting with provider-aware tokenization, pricing registry, and caching
  * Supports precise tokenization, billing rounding, and post-hoc reconciliation

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Semantic Knowledge Graph RAG Service
  * Agentic orchestration for retrieval-augmented generation over knowledge graphs

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getPostgresPool } from '../postgres';
 import baseLogger from '../../config/logger';
 

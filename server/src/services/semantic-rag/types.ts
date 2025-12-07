@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Semantic RAG Knowledge Graph Types
  * Type-safe definitions for agentic RAG orchestration

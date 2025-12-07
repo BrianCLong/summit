@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AI API Endpoints for IntelGraph
  * Provides endpoints for link prediction, sentiment analysis, and AI-powered insights

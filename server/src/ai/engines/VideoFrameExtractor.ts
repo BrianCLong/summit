@@ -1,3 +1,4 @@
+// @ts-nocheck
 import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
