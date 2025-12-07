@@ -1,0 +1,369 @@
+# PR Triage Automation Workflow
+# Gap Analysis Reference: Gap 6.4 - Create PR triage automation
+#
+# Automatically labels, prioritizes, and routes PRs based on content analysis.
+# Supports AI agent PRs (Jules, Codex, Claude) with special handling.
+
+name: PR Triage Automation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  triage:
+    name: Auto-Triage PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Changed Files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files_yaml: |
+            ci:
+              - '.github/**'
+              - 'Makefile'
+              - 'docker-compose*.yml'
+            server:
+              - 'server/**'
+            client:
+              - 'client/**'
+              - 'apps/web/**'
+            services:
+              - 'services/**'
+            packages:
+              - 'packages/**'
+            docs:
+              - 'docs/**'
+              - '*.md'
+            tests:
+              - 'tests/**'
+              - '**/*.test.ts'
+              - '**/*.spec.ts'
+            security:
+              - 'SECURITY/**'
+              - '.gitleaks.toml'
+              - '**/security/**'
+            database:
+              - '**/migrations/**'
+              - '**/db/**'
+              - '**/prisma/**'
+            graphql:
+              - '**/*.graphql'
+              - '**/resolvers/**'
+              - '**/schema/**'
+
+      - name: Detect Agent PR
+        id: detect-agent
+        run: |
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          BRANCH="${{ github.head_ref }}"
+          TITLE="${{ github.event.pull_request.title }}"
+
+          IS_AGENT="false"
+          AGENT_TYPE=""
+
+          # Detect Claude Code PRs
+          if [[ "$BRANCH" == claude/* ]] || [[ "$AUTHOR" == *claude* ]]; then
+            IS_AGENT="true"
+            AGENT_TYPE="claude"
+          fi
+
+          # Detect Jules PRs
+          if [[ "$AUTHOR" == "jules-google"* ]] || [[ "$TITLE" == *"[Jules]"* ]]; then
+            IS_AGENT="true"
+            AGENT_TYPE="jules"
+          fi
+
+          # Detect Codex PRs
+          if [[ "$AUTHOR" == *codex* ]] || [[ "$TITLE" == *"[Codex]"* ]]; then
+            IS_AGENT="true"
+            AGENT_TYPE="codex"
+          fi
+
+          # Detect Copilot PRs
+          if [[ "$AUTHOR" == "github-actions"* ]] && [[ "$TITLE" == *"copilot"* ]]; then
+            IS_AGENT="true"
+            AGENT_TYPE="copilot"
+          fi
+
+          echo "is_agent=$IS_AGENT" >> $GITHUB_OUTPUT
+          echo "agent_type=$AGENT_TYPE" >> $GITHUB_OUTPUT
+
+      - name: Determine Priority
+        id: priority
+        run: |
+          PRIORITY="P3"
+          LABELS=""
+
+          # P0: Critical - Security, Breaking Changes
+          if [[ "${{ steps.changed-files.outputs.security_any_changed }}" == "true" ]]; then
+            PRIORITY="P0"
+            LABELS="${LABELS},security"
+          fi
+
+          # P1: High - CI/CD, Database Migrations
+          if [[ "${{ steps.changed-files.outputs.ci_any_changed }}" == "true" ]]; then
+            PRIORITY="P1"
+            LABELS="${LABELS},ci-cd"
+          fi
+
+          if [[ "${{ steps.changed-files.outputs.database_any_changed }}" == "true" ]]; then
+            PRIORITY="P1"
+            LABELS="${LABELS},database"
+          fi
+
+          # P2: Medium - Server, Services, GraphQL
+          if [[ "${{ steps.changed-files.outputs.server_any_changed }}" == "true" ]]; then
+            if [[ "$PRIORITY" == "P3" ]]; then PRIORITY="P2"; fi
+            LABELS="${LABELS},server"
+          fi
+
+          if [[ "${{ steps.changed-files.outputs.services_any_changed }}" == "true" ]]; then
+            if [[ "$PRIORITY" == "P3" ]]; then PRIORITY="P2"; fi
+            LABELS="${LABELS},services"
+          fi
+
+          if [[ "${{ steps.changed-files.outputs.graphql_any_changed }}" == "true" ]]; then
+            if [[ "$PRIORITY" == "P3" ]]; then PRIORITY="P2"; fi
+            LABELS="${LABELS},graphql"
+          fi
+
+          # Component labels
+          if [[ "${{ steps.changed-files.outputs.client_any_changed }}" == "true" ]]; then
+            LABELS="${LABELS},client"
+          fi
+
+          if [[ "${{ steps.changed-files.outputs.packages_any_changed }}" == "true" ]]; then
+            LABELS="${LABELS},packages"
+          fi
+
+          if [[ "${{ steps.changed-files.outputs.docs_any_changed }}" == "true" ]]; then
+            LABELS="${LABELS},documentation"
+          fi
+
+          if [[ "${{ steps.changed-files.outputs.tests_any_changed }}" == "true" ]]; then
+            LABELS="${LABELS},tests"
+          fi
+
+          # Agent labels
+          if [[ "${{ steps.detect-agent.outputs.is_agent }}" == "true" ]]; then
+            LABELS="${LABELS},agent-pr,${{ steps.detect-agent.outputs.agent_type }}"
+          fi
+
+          # Remove leading comma
+          LABELS="${LABELS#,}"
+
+          echo "priority=$PRIORITY" >> $GITHUB_OUTPUT
+          echo "labels=$LABELS" >> $GITHUB_OUTPUT
+
+      - name: Apply Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = '${{ steps.priority.outputs.labels }}'.split(',').filter(l => l);
+            const priority = '${{ steps.priority.outputs.priority }}';
+
+            // Add priority label
+            labels.push(`priority:${priority}`);
+
+            // Ensure labels exist
+            const existingLabels = await github.rest.issues.listLabelsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+
+            const existingLabelNames = existingLabels.data.map(l => l.name);
+
+            for (const label of labels) {
+              if (!existingLabelNames.includes(label)) {
+                try {
+                  let color = '0366d6'; // Default blue
+
+                  if (label.startsWith('priority:P0')) color = 'd73a4a';
+                  else if (label.startsWith('priority:P1')) color = 'fbca04';
+                  else if (label.startsWith('priority:P2')) color = '0e8a16';
+                  else if (label === 'security') color = 'd73a4a';
+                  else if (label === 'ci-cd') color = 'fbca04';
+                  else if (label === 'agent-pr') color = '7057ff';
+                  else if (label === 'claude') color = 'c27ba0';
+                  else if (label === 'jules') color = '4285f4';
+                  else if (label === 'codex') color = '00a67e';
+
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: label,
+                    color: color
+                  });
+                } catch (e) {
+                  // Label might have been created by another workflow
+                  console.log(`Label ${label} already exists or couldn't be created`);
+                }
+              }
+            }
+
+            // Apply labels to PR
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: labels
+            });
+
+            console.log(`Applied labels: ${labels.join(', ')}`);
+
+      - name: Add Size Label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const additions = pr.additions;
+            const deletions = pr.deletions;
+            const total = additions + deletions;
+
+            let sizeLabel = 'size:XS';
+            if (total > 500) sizeLabel = 'size:XL';
+            else if (total > 200) sizeLabel = 'size:L';
+            else if (total > 50) sizeLabel = 'size:M';
+            else if (total > 10) sizeLabel = 'size:S';
+
+            // Create label if needed
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: sizeLabel,
+                color: total > 200 ? 'd73a4a' : (total > 50 ? 'fbca04' : '0e8a16')
+              });
+            } catch (e) {}
+
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: [sizeLabel]
+            });
+
+      - name: Agent PR Auto-Review Request
+        if: steps.detect-agent.outputs.is_agent == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // For agent PRs, add a comment with CI status link
+            const agentType = '${{ steps.detect-agent.outputs.agent_type }}';
+
+            const body = `## 🤖 Agent PR Detected
+
+            This PR was created by **${agentType}** agent.
+
+            ### Automated Checks
+            - [ ] CI Pipeline passes
+            - [ ] Type checking passes
+            - [ ] Lint checks pass
+            - [ ] Tests pass
+            - [ ] No security issues detected
+
+            ### Review Guidelines
+            Agent PRs require:
+            1. Green CI status
+            2. No breaking changes to public APIs
+            3. Documentation for new features
+
+            *This comment was auto-generated by PR Triage Automation*`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: body
+            });
+
+  auto-merge-check:
+    name: Auto-Merge Eligibility
+    runs-on: ubuntu-latest
+    needs: triage
+    if: github.event.pull_request.draft == false
+    steps:
+      - name: Check Auto-Merge Criteria
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+
+            const { data: labels } = await github.rest.issues.listLabelsOnIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number
+            });
+
+            const labelNames = labels.map(l => l.name);
+
+            // Check if eligible for auto-merge
+            const isAgentPR = labelNames.includes('agent-pr');
+            const isSmall = labelNames.some(l => ['size:XS', 'size:S'].includes(l));
+            const isDocsOnly = labelNames.includes('documentation') &&
+              !labelNames.includes('server') &&
+              !labelNames.includes('services');
+            const notSecurity = !labelNames.includes('security');
+            const notP0 = !labelNames.includes('priority:P0');
+
+            if (isAgentPR && isSmall && notSecurity && notP0) {
+              // Add auto-merge candidate label
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'auto-merge-candidate',
+                  color: '0e8a16'
+                });
+              } catch (e) {}
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['auto-merge-candidate']
+              });
+
+              console.log('PR is eligible for auto-merge');
+            } else if (isDocsOnly && notSecurity) {
+              // Docs-only PRs can also be auto-merged
+              try {
+                await github.rest.issues.createLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: 'auto-merge-candidate',
+                  color: '0e8a16'
+                });
+              } catch (e) {}
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['auto-merge-candidate']
+              });
+            }
