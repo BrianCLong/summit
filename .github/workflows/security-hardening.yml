@@ -1,0 +1,368 @@
+# Security Hardening CI Workflow
+# Gap Analysis Reference: Gap 8 - Security Hardening & Secret Management
+#
+# Enforces strict security checks including:
+# - Secret scanning (blocking, not warning)
+# - Dependency vulnerability scanning
+# - Container security scanning
+# - SBOM generation and verification
+
+name: Security Hardening
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+env:
+  TRIVY_SEVERITY: CRITICAL,HIGH
+  GITLEAKS_VERSION: v8.18.1
+
+jobs:
+  # ============================================================================
+  # Secret Scanning - BLOCKING
+  # ============================================================================
+  secret-scan:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+        with:
+          config-path: .gitleaks.toml
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+      - name: Block on Secrets Found
+        if: failure()
+        run: |
+          echo "::error::Secrets detected in repository! PR cannot be merged."
+          echo "Please remove the detected secrets and rotate any exposed credentials."
+          exit 1
+
+  # ============================================================================
+  # Dependency Vulnerability Scanning
+  # ============================================================================
+  dependency-scan:
+    name: Dependency Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: |
+          pnpm audit --audit-level=high 2>&1 | tee audit-report.txt
+          if grep -q "high\|critical" audit-report.txt; then
+            echo "::warning::High or critical vulnerabilities found in dependencies"
+          fi
+        continue-on-error: true
+
+      - name: Run audit-ci
+        run: |
+          npx audit-ci --high --report-type full
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-report
+          path: audit-report.txt
+          retention-days: 30
+
+  # ============================================================================
+  # Static Analysis Security Testing (SAST)
+  # ============================================================================
+  sast:
+    name: SAST Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:javascript-typescript"
+
+      - name: Run Semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/typescript
+            p/nodejs
+        continue-on-error: true
+
+  # ============================================================================
+  # Container Security Scanning
+  # ============================================================================
+  container-scan:
+    name: Container Security
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build container for scanning
+        run: |
+          if [ -f Dockerfile ]; then
+            docker build -t summit:scan .
+          else
+            echo "No Dockerfile found, skipping container scan"
+            exit 0
+          fi
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'summit:scan'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: ${{ env.TRIVY_SEVERITY }}
+          ignore-unfixed: true
+
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ============================================================================
+  # SBOM Generation
+  # ============================================================================
+  sbom:
+    name: SBOM Generation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate SBOM (CycloneDX)
+        run: |
+          npx @cyclonedx/cyclonedx-npm --output-file sbom.json --output-format json
+
+      - name: Generate SBOM (SPDX)
+        run: |
+          npx spdx-sbom-generator -o spdx-sbom.json || echo "SPDX generation skipped"
+
+      - name: Verify SBOM
+        run: |
+          if [ -f sbom.json ]; then
+            echo "SBOM generated successfully"
+            echo "Components: $(jq '.components | length' sbom.json)"
+          fi
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: |
+            sbom.json
+            spdx-sbom.json
+          retention-days: 90
+
+  # ============================================================================
+  # Production Config Validation
+  # ============================================================================
+  prod-config-check:
+    name: Production Config Validation
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run production config guard
+        run: |
+          if [ -f scripts/ci/prod-config-check.ts ]; then
+            npx tsx scripts/ci/prod-config-check.ts
+          else
+            echo "Production config check script not found, skipping"
+          fi
+
+      - name: Check for hardcoded secrets in changed files
+        run: |
+          # Get list of changed files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Patterns to detect
+          SECRET_PATTERNS=(
+            'password\s*[:=]\s*["\x27][^"\x27]{8,}["\x27]'
+            'api[_-]?key\s*[:=]\s*["\x27][^"\x27]{16,}["\x27]'
+            'secret\s*[:=]\s*["\x27][^"\x27]{8,}["\x27]'
+            'token\s*[:=]\s*["\x27][^"\x27]{16,}["\x27]'
+            'bearer\s+[a-zA-Z0-9\-_]{20,}'
+            'AWS[_A-Z]*\s*[:=]\s*["\x27]AKIA[A-Z0-9]{16}["\x27]'
+          )
+
+          FOUND_SECRETS=false
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              for pattern in "${SECRET_PATTERNS[@]}"; do
+                if grep -E -i "$pattern" "$file" 2>/dev/null; then
+                  echo "::error file=$file::Potential secret detected in $file"
+                  FOUND_SECRETS=true
+                fi
+              done
+            fi
+          done
+
+          if [ "$FOUND_SECRETS" = true ]; then
+            echo "::error::Potential secrets detected in changed files. Please review and remove."
+            exit 1
+          fi
+
+  # ============================================================================
+  # Security Summary Report
+  # ============================================================================
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [secret-scan, dependency-scan, sast, sbom]
+    if: always()
+    steps:
+      - name: Generate Security Report
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scanning | ${{ needs.secret-scan.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Scan | ${{ needs.dependency-scan.result == 'success' && '✅ Pass' || '⚠️ Review' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SAST Analysis | ${{ needs.sast.result == 'success' && '✅ Pass' || '⚠️ Review' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM Generation | ${{ needs.sbom.result == 'success' && '✅ Pass' || '❌ Fail' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.secret-scan.result }}" != "success" ]; then
+            echo "- 🚨 **CRITICAL**: Review and remove detected secrets" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.dependency-scan.result }}" != "success" ]; then
+            echo "- ⚠️ Review dependency vulnerabilities and update packages" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const secretStatus = '${{ needs.secret-scan.result }}';
+            const depStatus = '${{ needs.dependency-scan.result }}';
+            const sastStatus = '${{ needs.sast.result }}';
+            const sbomStatus = '${{ needs.sbom.result }}';
+
+            const body = `## 🔒 Security Scan Results
+
+            | Check | Status |
+            |-------|--------|
+            | Secret Scanning | ${secretStatus === 'success' ? '✅ Pass' : '❌ **BLOCKING**'} |
+            | Dependency Scan | ${depStatus === 'success' ? '✅ Pass' : '⚠️ Review Required'} |
+            | SAST Analysis | ${sastStatus === 'success' ? '✅ Pass' : '⚠️ Review Required'} |
+            | SBOM Generation | ${sbomStatus === 'success' ? '✅ Pass' : '⚠️ Check Logs'} |
+
+            ${secretStatus !== 'success' ? '### 🚨 Action Required\nSecrets were detected in this PR. Please remove them before merging.' : ''}
+
+            *This comment is auto-generated by Security Hardening CI*`;
+
+            // Check if comment already exists
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.body.includes('🔒 Security Scan Results') &&
+              c.user.login === 'github-actions[bot]'
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
