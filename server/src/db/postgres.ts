@@ -137,11 +137,6 @@ interface PoolConfig {
   port?: number;
 }
 
-// Extend PoolClient to include connectedAt
-interface ExtendedPoolClient extends PoolClient {
-  connectedAt?: number;
-}
-
 class CircuitBreaker {
   private failureCount = 0;
   private state: CircuitState = 'closed';
