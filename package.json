@@ -1,7 +1,7 @@
 {
-  "name": "intelgraph-platform",
+  "name": "summit-forge",
   "version": "1.0.0",
-  "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
+  "description": "SummitForge: AI-Powered Open OSINT Fusion Platform",
   "main": "server/server.js",
   "bin": {
     "docforge": "./tools/docforge/cli.js"
