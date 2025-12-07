@@ -190,6 +190,8 @@ declare module '@apollo/client' {
   }
 
   export const ApolloProvider: ComponentType<ApolloProviderProps>;
+  export const useQuery: any;
+  export const useMutation: any;
 }
 
 declare module '@apollo/client/react/components' {

@@ -5,6 +5,7 @@
     "outDir": "dist",
     "declaration": true,
     "allowImportingTsExtensions": false,
+    "baseUrl": "./src",
     "emitDeclarationOnly": false,
     "types": []
   },

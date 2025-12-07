@@ -17,10 +17,54 @@
     "tsBuildInfoFile": ".tsbuildinfo",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-
-    "typeRoots": ["./node_modules/@types"],
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node", "jest"]
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "node",
+      "jest",
+      "shims"
+    ],
+    "paths": {
+      "@mui/material": [
+        "types/shims/mui-grid.d.ts"
+      ],
+      "@mui/material/*": [
+        "types/shims/mui-grid.d.ts"
+      ],
+      "express": [
+        "types/shims/express-routes.d.ts"
+      ],
+      "express/*": [
+        "types/shims/express-routes.d.ts"
+      ],
+      "zod": [
+        "types/shims/zod.d.ts"
+      ],
+      "zod/*": [
+        "types/shims/zod.d.ts"
+      ],
+      "neo4j-driver": [
+        "types/shims/neo4j-driver.d.ts"
+      ],
+      "neo4j-driver/*": [
+        "types/shims/neo4j-driver.d.ts"
+      ],
+      "uuid": [
+        "types/shims/uuid.d.ts"
+      ]
+    }
   },
-  "exclude": ["**/dist", "**/build", "**/.turbo", "**/.next"]
+  "exclude": [
+    "**/dist",
+    "**/build",
+    "**/.turbo",
+    "**/.next"
+  ]
 }

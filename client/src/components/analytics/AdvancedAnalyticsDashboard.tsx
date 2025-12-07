@@ -241,7 +241,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
 
   const generateNetworkNodes = (count: number) => {
     const types = ['person', 'organization', 'ip', 'email', 'file'];
-    const nodes = [];
+    const nodes: any[] = [];
 
     for (let i = 0; i < count; i++) {
       const type = types[Math.floor(Math.random() * types.length)];
@@ -260,7 +260,7 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
   };
 
   const generateNetworkEdges = (count: number) => {
-    const edges = [];
+    const edges: any[] = [];
 
     for (let i = 0; i < count; i++) {
       edges.push({
@@ -382,13 +382,12 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
                     <td key={j} className="py-2 px-3 text-gray-700">
                       {j === 2 || j === 3 ? ( // Confidence and Risk Score columns
                         <span
-                          className={`font-medium ${
-                            parseFloat(cell) > 90 || parseFloat(cell) > 8
-                              ? 'text-red-600'
-                              : parseFloat(cell) > 80 || parseFloat(cell) > 6
-                                ? 'text-yellow-600'
-                                : 'text-green-600'
-                          }`}
+                          className={`font-medium ${parseFloat(cell) > 90 || parseFloat(cell) > 8
+                            ? 'text-red-600'
+                            : parseFloat(cell) > 80 || parseFloat(cell) > 6
+                              ? 'text-yellow-600'
+                              : 'text-green-600'
+                            }`}
                         >
                           {cell}
                         </span>
@@ -523,11 +522,10 @@ const AdvancedAnalyticsDashboard: React.FC<AdvancedAnalyticsDashboardProps> = ({
           {/* Auto-refresh Toggle */}
           <button
             onClick={() => setAutoRefresh(!autoRefresh)}
-            className={`px-3 py-2 text-sm rounded-lg border ${
-              autoRefresh
-                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                : 'bg-gray-50 text-gray-600 border-gray-200'
-            }`}
+            className={`px-3 py-2 text-sm rounded-lg border ${autoRefresh
+              ? 'bg-blue-50 text-blue-700 border-blue-200'
+              : 'bg-gray-50 text-gray-600 border-gray-200'
+              }`}
           >
             🔄 Auto-refresh
           </button>

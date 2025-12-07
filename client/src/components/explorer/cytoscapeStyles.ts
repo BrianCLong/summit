@@ -3,9 +3,10 @@
  * Styling configuration for the graph visualization
  */
 
+import type { Stylesheet } from 'cytoscape';
 import { NODE_TYPE_COLORS } from './types';
 
-export function getCytoscapeStylesheet() {
+export function getCytoscapeStylesheet(): Stylesheet {
   return [
     // Base node style
     {
@@ -262,7 +263,7 @@ export function getCytoscapeStylesheet() {
         'line-dash-pattern': [4, 2],
       },
     },
-  ];
+  ] as unknown as Stylesheet;
 }
 
 // Dark mode stylesheet overrides

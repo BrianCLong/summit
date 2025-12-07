@@ -186,7 +186,11 @@ export default function GraphCanvas() {
     const cy = cyRef.current;
     if (!cy || !menuTarget?.id) return;
     const node = cy.$id(menuTarget.id);
-    node.grabbed() ? node.ungrabify() : node.grabify();
+    if (node.grabbed()) {
+      node.ungrabify();
+    } else {
+      node.grabify();
+    }
     setMenuAnchor(null);
   };
 

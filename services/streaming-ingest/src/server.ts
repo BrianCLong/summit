@@ -48,7 +48,7 @@ await fastify.register(cors, {
 });
 
 // Health checks
-fastify.get('/health', async () => {
+fastify.get('/health', () => {
   return { status: 'ok', service: 'streaming-ingest' };
 });
 
@@ -132,7 +132,7 @@ fastify.get('/checkpoint/:id', async (request, reply) => {
 });
 
 // Metrics endpoint
-fastify.get('/metrics', async () => {
+fastify.get('/metrics', () => {
   // TODO: Implement Prometheus metrics
   return {
     service: 'streaming-ingest',

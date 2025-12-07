@@ -193,7 +193,7 @@ describe('Canonical Entities Integration', () => {
     );
 
     expect(now).toHaveLength(1);
-    expect(now[0].name.full).toBe('Alice Johnson');
+    expect((now[0] as any).name.full).toBe('Alice Johnson');
     console.log('✓ Time-travel query (current knowledge): Found Alice');
 
     // ============ Step 4: Update Entity (Promotion) ============
@@ -257,8 +257,8 @@ describe('Canonical Entities Integration', () => {
 
     // Verify the progression
     const sorted = history.sort((a, b) => a.version - b.version);
-    expect(sorted[0].occupations).toContain('Software Engineer');
-    expect(sorted[1].occupations).toContain('Staff Software Engineer');
+    expect((sorted[0] as any).occupations).toContain('Software Engineer');
+    expect((sorted[1] as any).occupations).toContain('Staff Software Engineer');
     console.log('✓ History shows progression from Engineer to Staff Engineer');
 
     // ============ Step 6: Retroactive Correction ============
@@ -278,7 +278,7 @@ describe('Canonical Entities Integration', () => {
           middle: 'Marie',
           family: 'Johnson',
         },
-      },
+      } as any,
       userId,
       provenanceId,
     );
@@ -294,7 +294,7 @@ describe('Canonical Entities Integration', () => {
       new Date(), // But with current knowledge
     );
 
-    expect(corrected[0].name.middle).toBe('Marie');
+    expect((corrected[0] as any).name.middle).toBe('Marie');
     console.log('✓ Correction visible in current knowledge');
 
     // ============ Step 7: Export Subgraph with Provenance ============

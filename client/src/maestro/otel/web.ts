@@ -1,4 +1,4 @@
-// @ts-nocheck
+
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
 import {
   ConsoleSpanExporter,
@@ -38,7 +38,7 @@ class PiiRedactingWebSpanProcessor implements SpanProcessor {
         if (typeof event.attributes[key] === 'string') {
           event.attributes[key] = scrub(event.attributes[key] as string);
         }
-        d;
+
       }
     }
   }
@@ -58,4 +58,4 @@ registerInstrumentations({
     new FetchInstrumentation({ propagateTraceHeaderCorsUrls: /.*/ }),
   ],
 });
-// @ts-nocheck
+

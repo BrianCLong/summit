@@ -21,7 +21,7 @@ const KeyboardShortcuts: React.FC<KeyboardShortcutsProps> = ({
     (event: KeyboardEvent) => {
       if (!enabled) return;
 
-      const pressedKeys = [];
+      const pressedKeys: string[] = [];
       if (event.ctrlKey || event.metaKey) pressedKeys.push('ctrl');
       if (event.shiftKey) pressedKeys.push('shift');
       if (event.altKey) pressedKeys.push('alt');
@@ -86,7 +86,7 @@ export const useKeyboardShortcuts = (
     if (!enabled) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      const pressedKeys = [];
+      const pressedKeys: string[] = [];
       if (event.ctrlKey || event.metaKey) pressedKeys.push('ctrl');
       if (event.shiftKey) pressedKeys.push('shift');
       if (event.altKey) pressedKeys.push('alt');
@@ -264,42 +264,42 @@ export const defaultShortcuts: ShortcutAction[] = [
   {
     keys: ['ctrl+2'],
     description: 'Go to Investigations tab',
-    action: () => {},
+    action: () => { },
     category: 'Navigation',
     global: true,
   },
   {
     keys: ['ctrl+3'],
     description: 'Go to Search tab',
-    action: () => {},
+    action: () => { },
     category: 'Navigation',
     global: true,
   },
   {
     keys: ['ctrl+4'],
     description: 'Go to Export tab',
-    action: () => {},
+    action: () => { },
     category: 'Navigation',
     global: true,
   },
   {
     keys: ['ctrl+k'],
     description: 'Quick search',
-    action: () => {},
+    action: () => { },
     category: 'Navigation',
     global: true,
   },
   {
     keys: ['?'],
     description: 'Show keyboard shortcuts',
-    action: () => {},
+    action: () => { },
     category: 'Help',
     global: true,
   },
   {
     keys: ['escape'],
     description: 'Close modals and panels',
-    action: () => {},
+    action: () => { },
     category: 'General',
     global: true,
   },
@@ -308,19 +308,19 @@ export const defaultShortcuts: ShortcutAction[] = [
   {
     keys: ['/'],
     description: 'Focus search box',
-    action: () => {},
+    action: () => { },
     category: 'Search',
   },
   {
     keys: ['enter'],
     description: 'Execute search',
-    action: () => {},
+    action: () => { },
     category: 'Search',
   },
   {
     keys: ['ctrl+shift+f'],
     description: 'Toggle advanced filters',
-    action: () => {},
+    action: () => { },
     category: 'Search',
   },
 
@@ -328,25 +328,25 @@ export const defaultShortcuts: ShortcutAction[] = [
   {
     keys: ['space'],
     description: 'Pause/resume graph simulation',
-    action: () => {},
+    action: () => { },
     category: 'Graph',
   },
   {
     keys: ['f'],
     description: 'Fit graph to screen',
-    action: () => {},
+    action: () => { },
     category: 'Graph',
   },
   {
     keys: ['r'],
     description: 'Reset graph view',
-    action: () => {},
+    action: () => { },
     category: 'Graph',
   },
   {
     keys: ['ctrl+a'],
     description: 'Select all nodes',
-    action: () => {},
+    action: () => { },
     category: 'Graph',
   },
 
@@ -354,13 +354,13 @@ export const defaultShortcuts: ShortcutAction[] = [
   {
     keys: ['ctrl+n'],
     description: 'New investigation',
-    action: () => {},
+    action: () => { },
     category: 'Investigations',
   },
   {
     keys: ['ctrl+s'],
     description: 'Save investigation',
-    action: () => {},
+    action: () => { },
     category: 'Investigations',
   },
 
@@ -368,13 +368,13 @@ export const defaultShortcuts: ShortcutAction[] = [
   {
     keys: ['ctrl+e'],
     description: 'Quick export',
-    action: () => {},
+    action: () => { },
     category: 'Export',
   },
   {
     keys: ['ctrl+p'],
     description: 'Print current view',
-    action: () => {},
+    action: () => { },
     category: 'Export',
   },
 ];

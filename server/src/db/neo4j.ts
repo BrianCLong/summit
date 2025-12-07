@@ -1,7 +1,5 @@
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
-import neo4j, { Driver, Session } from 'neo4j-driver';
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
-import neo4j from 'neo4j-driver';
+import neo4j, { Driver, Session } from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
 import {
@@ -27,10 +25,6 @@ const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
-const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
-const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
-
-// Connection Pool Settings
 const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
 const POOL_CONNECTION_TIMEOUT = Number(process.env.NEO4J_POOL_CONNECTION_TIMEOUT || 30000);
 const POOL_ACQUISITION_TIMEOUT = Number(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT || 30000);
@@ -189,15 +183,11 @@ async function connectToNeo4j(): Promise<void> {
         connectionTimeout: POOL_CONNECTION_TIMEOUT,
         connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
         logging: {
-            level: 'info',
-            logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
-        maxConnectionPoolSize: MAX_CONNECTION_POOL_SIZE,
-        connectionTimeout: CONNECTION_TIMEOUT_MS,
-        logging: {
           level: 'info',
-          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message)
-        }
-      }
+          logger: (level, message) =>
+            logger[level === 'warn' ? 'warn' : 'info'](`Neo4j Driver: ${message}`),
+        },
+      },
     );
 
     await candidate.verifyConnectivity();
@@ -206,7 +196,7 @@ async function connectToNeo4j(): Promise<void> {
     candidate = null;
     isMockMode = false;
     neo4jConnectivityUp.set(1);
-    logger.info(`Neo4j driver initialized with maxConnectionPoolSize=${MAX_CONNECTION_POOL_SIZE}.`);
+    logger.info(`Neo4j driver initialized with maxConnectionPoolSize=${POOL_MAX_SIZE}.`);
     await notifyDriverReady(hasEmittedReadyEvent ? 'reconnected' : 'initial');
   } catch (error) {
     if (candidate) {

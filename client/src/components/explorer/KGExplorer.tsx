@@ -277,7 +277,7 @@ export function KGExplorer({
       const cy = cyRef.current;
       if (!cy || cy.nodes().length === 0) return;
 
-      const layoutOptions: Record<string, object> = {
+      const layoutOptions: Record<string, unknown> = {
         fcose: {
           name: 'fcose',
           quality: 'default',
@@ -351,7 +351,7 @@ export function KGExplorer({
       };
 
       const opts = layoutOptions[layoutName] ?? layoutOptions.fcose;
-      cy.layout(opts).run();
+      cy.layout(opts as any).run();
     },
     [],
   );

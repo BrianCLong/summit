@@ -1,0 +1,7 @@
+-:  ----------- > 1:  c5932da3430 fix: lint errors in rest-api, entity-resolution and operations-center
+-:  ----------- > 2:  69b2cefca87 fix(jira-integration): add jest and node types to tsconfig
+-:  ----------- > 3:  6d109722e4f fix(logging-pipeline): add resourceName to AuditEventInput and fix unused variable
+-:  ----------- > 4:  94d7e339c49 fix(event-booster): resolve type errors and module imports
+-:  ----------- > 5:  86cc4f45ac8 fix(govtech-export-engine): address module import and zod usage for build
+-:  ----------- > 6:  19571136c20 fix(graph-analytics): resolve express import errors
+-:  ----------- > 7:  c338ac079ca fix(strategic-foresight): add baseUrl to tsconfig for non-relative paths

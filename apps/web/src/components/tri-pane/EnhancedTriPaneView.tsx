@@ -91,7 +91,7 @@ export function EnhancedTriPaneView({
   const [timeBrush, setTimeBrush] = useState<TimeBrush | null>(null)
   const [showProvenance, setShowProvenance] = useState(true)
   const [showXAI, setShowXAI] = useState(true)
-  const [graphLayout] = useState<GraphLayout>({ type: 'force', options: {} })
+  const [graphLayout] = useState<GraphLayout>({ type: 'force' } as GraphLayout)
   const [focusedPane, setFocusedPane] = useState<
     'timeline' | 'graph' | 'map' | null
   >(null)

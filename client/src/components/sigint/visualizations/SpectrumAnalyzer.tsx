@@ -162,7 +162,7 @@ export const SpectrumAnalyzer: React.FC<SpectrumAnalyzerProps> = ({
 
     // Convert samples to Float32Array for FFT
     const sampleData = new Float32Array(samples.map((s) => s.amplitude));
-    let spectrum = computeFFT(sampleData);
+    const spectrum = computeFFT(sampleData);
 
     // Apply smoothing with previous frame
     if (prevSpectrumRef.current && prevSpectrumRef.current.length === spectrum.length) {

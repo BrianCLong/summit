@@ -6,6 +6,8 @@ import { useActionSafetyStatus } from '../hooks/useActionSafetyStatus';
 export default function ActionDetailsRoute() {
   const { actionId } = useParams<{ actionId: string }>();
 
+  const { status, loading, error } = useActionSafetyStatus(actionId || '');
+
   if (!actionId) {
     return (
       <div className="p-6">
@@ -14,8 +16,6 @@ export default function ActionDetailsRoute() {
       </div>
     );
   }
-
-  const { status, loading, error } = useActionSafetyStatus(actionId);
 
   if (error) {
     // This gets caught by ErrorBoundary as well, but show a friendly inline state

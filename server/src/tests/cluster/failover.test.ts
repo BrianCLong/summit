@@ -1,4 +1,4 @@
-import { Neo4jError } from 'neo4j-driver';
+// import { Neo4jError } from 'neo4j-driver';
 
 describe('Neo4j Causal Cluster Failover Tests', () => {
   // Placeholder for actual cluster connection and setup

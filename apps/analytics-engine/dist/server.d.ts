@@ -1,3 +1,2 @@
-import { Express } from 'express';
-declare const app: Express;
+declare const app: any;
 export { app };

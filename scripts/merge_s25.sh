@@ -10,6 +10,12 @@ EOF
 
 REPO=""; BASE=""; BRANCH=""; PRS=""; STATE=""; RESUME=false; OPEN_RELEASE_ONLY=false; NODE_VER="20"
 
+# Defaults for stack branches if not provided in env
+STACK_SERVER="${STACK_SERVER:-stack/express5-eslint9}"
+STACK_ARTIFACTS="${STACK_ARTIFACTS:-stack/artifacts-pack-v1}"
+STACK_CLIENT="${STACK_CLIENT:-stack/client-vite7-leaflet5}"
+STACK_REBRAND="${STACK_REBRAND:-stack/rebrand-docs}"
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --repo) REPO="$2"; shift 2 ;;
@@ -40,8 +46,8 @@ jq_safe_write() {
 jq_array_push_unique() {
   local arr="$1" val="$2"
   tmp="$(mktemp)"
-  jq --arg v "$val" ".${arr} += ( [\$v] | map(select(. as \$x | . != \$x)) ) | .${arr} |= unique" "$STATE" > "$tmp" || true
-  mv "$tmp" "$STATE"
+  # Corrected jq logic to add unique element to array
+  jq --arg item "$val" --arg arr_key "${arr}" '.[$arr_key] |= (. + [$item] | unique)' "$STATE" > "$tmp" && mv "$tmp" "$STATE"
 }
 
 ensure_state() {
@@ -92,8 +98,10 @@ cherry_pick_pr() {
     fi
     echo "Cherry-pick $c"
     if ! git cherry-pick -x "$c"; then
-      echo "CONFLICT on $c (PR #$pr). Resolve, then run: make merge-s25.resume"
-      exit 2
+      echo "CONFLICT on $c (PR #$pr) — launching resolver."
+      echo "To resolve: fix conflicts, 'git add -A', then 'git cherry-pick --continue'."
+      echo "To skip: 'git cherry-pick --abort' (PR #$pr will be marked as skipped)."
+      exit 2 # Exit to allow user to resolve conflict manually
     fi
   done
 
@@ -113,11 +121,13 @@ open_stack_prs() {
   done
 
   # Open PRs only if not already open
-  for spec in \
+  local specs=(
     "$STACK_SERVER|stack/server: Express 5 + ESLint 9 migration|Upgrade to Express 5 (centralized async error); ESLint 9 Flat Config; update tests."
     "$STACK_ARTIFACTS|stack/ops: Artifacts pack v1 + SBOM + provenance verifier|Adds CycloneDX SBOM, signing (cosign), and provenance generation/verification in CI."
     "$STACK_CLIENT|stack/client: Vite 7 + React-Leaflet 5 compatibility|Map init/context fixes and Playwright tile-load stabilization."
-    "$STACK_REBRAND|stack/docs: Rebrand apply + provenance references intact|Renames and docs without breaking provenance/export manifests."; do
+    "$STACK_REBRAND|stack/docs: Rebrand apply + provenance references intact|Renames and docs without breaking provenance/export manifests."
+  )
+  for spec in "${specs[@]}"; do
     IFS="|" read -r head title body <<<"$spec"
     if gh pr list -R "$REPO" --state open --head "$head" --json number | jq -e 'length>0' >/dev/null; then
       echo "PR already open for $head"
@@ -183,17 +193,14 @@ MD
     return
   fi
 
-  gh pr create -R "$REPO" \
-    --base "$BASE" \
-    --head "$BRANCH" \
-    --title "release: S25 consolidated merge (closed PR recovery + infra bumps)" \
-    --body-file ".github/release-s25.md" || true
+  gh pr create -R "$REPO" --base "$BASE" --head "$BRANCH" --title "$TITLE" --body-file ".github/release-s25.md" || true
 }
 
 main() {
   ensure_state
 
   if $OPEN_RELEASE_ONLY; then
+    TITLE="release: S25 consolidated merge (forced re-open)"
     open_release_pr
     exit 0
   fi
@@ -226,6 +233,7 @@ main() {
   jq_safe_write "artifacts" "ready"
 
   echo "==> Opening final release PR"
+  local TITLE="release: S25 consolidated merge (closed PR recovery + infra bumps)"
   open_release_pr
   jq_safe_write "release_pr" "opened"
 

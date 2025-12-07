@@ -52,6 +52,8 @@ declare module 'd3';
 declare module 'react-virtualized';
 declare module 'cytoscape-cola';
 declare module 'cytoscape-dagre';
+declare module 'cytoscape-fcose';
+declare module 'cytoscape-edgehandles';
 declare module 'recharts';
 declare module 'reactflow';
 declare module 'zustand';

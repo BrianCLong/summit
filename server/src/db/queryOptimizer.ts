@@ -113,7 +113,7 @@ export class QueryOptimizer {
   private readonly resultCachePrefix = 'query_result';
   private readonly defaultTTL = 3600; // 1 hour
   private indexHints: Map<string, string[]> = new Map();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   private queryPatterns: Map<string, QueryPlan> = new Map();
 
   constructor() {

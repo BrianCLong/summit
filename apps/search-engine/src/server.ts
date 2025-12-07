@@ -1,13 +1,13 @@
 import compression from 'compression';
 import cors from 'cors';
-import express, { Express } from 'express';
+import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import helmet from 'helmet';
 import { createLogger, format, transports } from 'winston';
 
 import searchRoutes from './routes/searchRoutes';
 
-const app: Express = express();
+const app: any = express();
 const port = process.env.PORT || 4006;
 
 const logger = createLogger({

@@ -2,6 +2,8 @@
 > intelgraph-platform@1.0.0 typecheck /Users/brianlong/Developer/summit
 > tsc -b tsconfig.build.json
 
+client/src/apollo/index.tsx(42,42): error TS2322: Type 'ReactNode' is not assignable to type 'ReactNode | ReactNode[]'.
+  Type 'bigint' is not assignable to type 'ReactNode | ReactNode[]'.
 client/src/components/admin/AdminDashboard.tsx(297,10): error TS2769: No overload matches this call.
   Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
     Property 'component' is missing in type '{ children: Element; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
@@ -205,6 +207,15 @@ client/src/features/lho/LhoDashboard.tsx(11,17): error TS2352: Conversion of typ
                 Type 'undefined' is not comparable to type 'Record<string, string>'.
 server/src/db/neo4j.ts(194,9): error TS1005: ',' expected.
 server/src/db/neo4j.ts(201,5): error TS1005: ',' expected.
+apps/analytics-engine/src/server.ts(40,9): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is not assignable to parameter of type 'PathParams'.
+apps/graph-analytics/src/server.ts(36,9): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is not assignable to parameter of type 'PathParams'.
+apps/search-engine/src/server.ts(64,9): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is not assignable to parameter of type 'PathParams'.
 apps/search-engine/src/services/SearchAnalyticsService.ts(2,10): error TS2305: Module '"redis"' has no exported member 'Redis'.
 apps/web/src/components/admin/UserManagement.tsx(44,10): error TS2305: Module '"@apollo/client"' has no exported member 'useQuery'.
 apps/web/src/components/admin/UserManagement.tsx(44,20): error TS2305: Module '"@apollo/client"' has no exported member 'useMutation'.
@@ -227,87 +238,30 @@ apps/web/src/components/github/CreatePRDialog.tsx(19,26): error TS1149: File nam
     Imported via '@/components/ui/Textarea' from file '/Users/brianlong/Developer/summit/apps/web/src/components/github/CreatePRDialog.tsx'
     Matched by include pattern 'src' in '/Users/brianlong/Developer/summit/apps/web/tsconfig.json'
 apps/web/src/components/tri-pane/EnhancedTriPaneView.tsx(94,64): error TS2353: Object literal may only specify known properties, and 'options' does not exist in type 'GraphLayout | (() => GraphLayout)'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(28,49): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(35,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(41,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(47,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(53,39): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(59,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(65,37): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(71,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(91,7): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(97,64): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(114,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(128,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(135,59): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(143,43): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(149,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(155,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(165,9): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(189,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(196,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/analyst-console/__tests__/AnalystConsole.test.tsx(210,7): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
 apps/web/src/features/analyst-console/AnalystConsole.stories.tsx(20,3): error TS2322: Type '({ entities, links, events, locations, initialTimeWindow, className, onExport, }: AnalystConsoleProps) => Element' is not assignable to type 'ComponentType<({ entities, links, events, locations, initialTimeWindow, className, onExport, }: AnalystConsoleProps) => Element>'.
   Type '({ entities, links, events, locations, initialTimeWindow, className, onExport, }: AnalystConsoleProps) => Element' is not assignable to type 'FunctionComponent<({ entities, links, events, locations, initialTimeWindow, className, onExport, }: AnalystConsoleProps) => Element>'.
     Types of parameters '__0' and 'props' are incompatible.
       Type '({ entities, links, events, locations, initialTimeWindow, className, onExport, }: AnalystConsoleProps) => Element' is not assignable to type 'AnalystConsoleProps'.
-apps/web/src/features/federated-search/FederatedSearch.tsx(14,25): error TS2503: Cannot find namespace 'JQuery'.
-apps/web/src/features/focusMode/bindings.ts(5,38): error TS2304: Cannot find name 'JQuery'.
-apps/web/src/features/focusMode/bindings.ts(7,27): error TS2503: Cannot find namespace 'JQuery'.
-apps/web/src/features/geospatial/MapView.tsx(66,18): error TS2339: Property 'latitude' does not exist on type 'GeospatialEvent'.
-apps/web/src/features/geospatial/MapView.tsx(67,18): error TS2339: Property 'longitude' does not exist on type 'GeospatialEvent'.
-apps/web/src/features/lineage/lineageWidgets.test.tsx(23,22): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/lineage/lineageWidgets.test.tsx(24,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/lineage/lineageWidgets.test.tsx(25,55): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/lineage/lineageWidgets.test.tsx(54,25): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/lineage/lineageWidgets.test.tsx(55,28): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/lineage/lineageWidgets.test.tsx(68,58): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/lineage/lineageWidgets.test.tsx(69,58): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+apps/web/src/features/triPane/mockData.ts(262,17): error TS2345: Argument of type '{ id: string; timestamp: string; location: GeoLocation; type: string; severity: "low" | "medium" | "high" | "critical" | "info"; description: string; metadata: { source: string; ipAddress: string; }; }' is not assignable to parameter of type 'GeospatialEvent'.
+  Type '{ id: string; timestamp: string; location: GeoLocation; type: string; severity: "low" | "medium" | "high" | "critical" | "info"; description: string; metadata: { source: string; ipAddress: string; }; }' is missing the following properties from type 'GeospatialEvent': latitude, longitude
 apps/web/src/features/triPane/TriPaneShell.stories.tsx(26,3): error TS2322: Type '({ entities, relationships, timelineEvents, geospatialEvents, initialSyncState, onEntitySelect, onEventSelect, onLocationSelect, onTimeWindowChange, onSyncStateChange, showProvenanceOverlay, className, onExport, }: TriPaneShellProps) => Element' is not assignable to type 'ComponentType<({ entities, relationships, timelineEvents, geospatialEvents, initialSyncState, onEntitySelect, onEventSelect, onLocationSelect, onTimeWindowChange, onSyncStateChange, showProvenanceOverlay, className, onExport, }: TriPaneShellProps) => Element>'.
   Type '({ entities, relationships, timelineEvents, geospatialEvents, initialSyncState, onEntitySelect, onEventSelect, onLocationSelect, onTimeWindowChange, onSyncStateChange, showProvenanceOverlay, className, onExport, }: TriPaneShellProps) => Element' is not assignable to type 'FunctionComponent<({ entities, relationships, timelineEvents, geospatialEvents, initialSyncState, onEntitySelect, onEventSelect, onLocationSelect, onTimeWindowChange, onSyncStateChange, showProvenanceOverlay, className, onExport, }: TriPaneShellProps) => Element>'.
     Types of parameters '__0' and 'props' are incompatible.
       Type '({ entities, relationships, timelineEvents, geospatialEvents, initialSyncState, onEntitySelect, onEventSelect, onLocationSelect, onTimeWindowChange, onSyncStateChange, showProvenanceOverlay, className, onExport, }: TriPaneShellProps) => Element' is not assignable to type 'TriPaneShellProps'.
 apps/web/src/features/triPane/TriPaneShell.stories.tsx(109,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(124,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(155,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(186,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(212,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(238,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(263,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(292,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(320,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.stories.tsx(346,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
-apps/web/src/features/triPane/TriPaneShell.test.tsx(56,44): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(57,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(58,51): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(73,51): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(78,49): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(83,52): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(99,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(100,46): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(101,41): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(102,42): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(161,31): error TS2339: Property 'toBeDisabled' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(168,56): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(194,25): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLDivElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(282,9): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(286,9): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(305,24): error TS2339: Property 'toHaveAttribute' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(322,9): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(323,58): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(324,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(338,66): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(339,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(340,52): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(357,53): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(360,51): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(361,49): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(362,52): error TS2339: Property 'toHaveTextContent' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(387,48): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
-apps/web/src/features/triPane/TriPaneShell.test.tsx(402,54): error TS2339: Property 'toBeInTheDocument' does not exist on type 'Assertion<HTMLElement>'.
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(127,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(161,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(195,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(221,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(247,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(272,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(304,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(335,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
+apps/web/src/features/triPane/TriPaneShell.stories.tsx(361,8): error TS2739: Type '{}' is missing the following properties from type 'TriPaneShellProps': entities, relationships, timelineEvents, geospatialEvents
 apps/web/src/hooks/useExplainView.ts(1,10): error TS2305: Module '"@apollo/client"' has no exported member 'useQuery'.
 apps/web/src/hooks/useExplainView.ts(1,20): error TS2305: Module '"@apollo/client"' has no exported member 'useMutation'.
 apps/web/src/pages/AdminDashboard.tsx(26,10): error TS2305: Module '"@apollo/client"' has no exported member 'useQuery'.
+apps/web/src/pages/maestro/MaestroDashboard.tsx(100,16): error TS2604: JSX element type 'item.icon' does not have any construct or call signatures.
 apps/webapp/src/panes/MapPane.tsx(43,11): error TS2339: Property 'remove' does not exist on type '{ flyTo?: (options: { center: [number, number]; zoom?: number; }) => void; __marker?: unknown; } | Map$1'.
   Property 'remove' does not exist on type '{ flyTo?: (options: { center: [number, number]; zoom?: number; }) => void; __marker?: unknown; }'.
 packages/jira-integration/__tests__/client.test.ts(6,1): error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
@@ -341,45 +295,18 @@ packages/jira-integration/__tests__/jiraIntegration.test.ts(179,5): error TS2304
 packages/jira-integration/__tests__/jiraIntegration.test.ts(182,3): error TS2593: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
 packages/jira-integration/__tests__/jiraIntegration.test.ts(196,5): error TS2304: Cannot find name 'expect'.
 packages/jira-integration/__tests__/jiraIntegration.test.ts(197,5): error TS2304: Cannot find name 'expect'.
-packages/mlops-platform/src/types/index.ts(142,21): error TS2554: Expected 2-3 arguments, but got 1.
-packages/mlops-platform/src/types/index.ts(195,16): error TS2554: Expected 2-3 arguments, but got 1.
-packages/mlops-platform/src/types/index.ts(410,17): error TS2554: Expected 2-3 arguments, but got 1.
-packages/mlops-platform/src/types/index.ts(411,16): error TS2554: Expected 2-3 arguments, but got 1.
-packages/mlops-platform/src/types/index.ts(554,16): error TS2554: Expected 2-3 arguments, but got 1.
-packages/mlops-platform/src/types/index.ts(600,24): error TS2554: Expected 2-3 arguments, but got 1.
-packages/training-orchestration/src/AutoMLEngine.ts(121,21): error TS2339: Property 'type' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(123,36): error TS2339: Property 'values' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(123,77): error TS2339: Property 'values' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(126,36): error TS2339: Property 'min' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(126,66): error TS2339: Property 'max' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(126,79): error TS2339: Property 'min' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(129,47): error TS2339: Property 'min' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(129,77): error TS2339: Property 'max' does not exist on type 'unknown'.
-packages/training-orchestration/src/AutoMLEngine.ts(129,90): error TS2339: Property 'min' does not exist on type 'unknown'.
-services/graph-core/src/canonical/validation.ts(247,53): error TS2339: Property 'extend' does not exist on type 'ZodPipe<ZodObject<{ id: ZodOptional<ZodString>; canonicalId: ZodOptional<ZodNullable<ZodString>>; tenantId: ZodDefault<ZodString>; ... 15 more ...; caseId: ZodOptional<...>; }, $strip>, ZodTransform<...>>'.
-services/graph-core/src/canonical/validation.ts(325,65): error TS2339: Property 'extend' does not exist on type 'ZodPipe<ZodObject<{ id: ZodOptional<ZodString>; tenantId: ZodDefault<ZodString>; type: ZodEnum<typeof CanonicalRelationshipType>; ... 19 more ...; caseId: ZodOptional<...>; }, $strip>, ZodTransform<...>>'.
-services/graph-core/src/canonical/validation.ts(422,6): error TS2694: Namespace '"/Users/brianlong/Developer/summit/node_modules/.pnpm/zod@4.1.12/node_modules/zod/v4/classic/external"' has no exported member 'SafeParseReturnType'.
-services/graph-core/src/canonical/validation.ts(431,6): error TS2694: Namespace '"/Users/brianlong/Developer/summit/node_modules/.pnpm/zod@4.1.12/node_modules/zod/v4/classic/external"' has no exported member 'SafeParseReturnType'.
-services/graph-core/src/canonical/validation.ts(440,6): error TS2694: Namespace '"/Users/brianlong/Developer/summit/node_modules/.pnpm/zod@4.1.12/node_modules/zod/v4/classic/external"' has no exported member 'SafeParseReturnType'.
-services/graph-core/src/canonical/validation.ts(449,6): error TS2694: Namespace '"/Users/brianlong/Developer/summit/node_modules/.pnpm/zod@4.1.12/node_modules/zod/v4/classic/external"' has no exported member 'SafeParseReturnType'.
-services/graph-core/src/graphql/index.ts(85,5): error TS2769: No overload matches this call.
+services/graph-core/src/graphql/index.ts(85,5): error TS2352: Conversion of type 'import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express@4.17.25/node_modules/@types/express/index").RequestHandler<import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express-serve-static-core@4.19.7/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any,...' to type 'import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express@5.0.5/node_modules/@types/express/index").RequestHandler<import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express-serve-static-core@5.1.0/node_modules/@types/express-serve-static-core/index").ParamsDictionary, any, any, qs...' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of parameters 'req' and 'req' are incompatible.
+    Property 'param' is missing in type 'import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express-serve-static-core@5.1.0/node_modules/@types/express-serve-static-core/index").Request<import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express-serve-static-core@5.1.0/node_modules/@types/express-serve-static-core/index").P...' but required in type 'import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express-serve-static-core@4.19.7/node_modules/@types/express-serve-static-core/index").Request<import("/Users/brianlong/Developer/summit/node_modules/.pnpm/@types+express-serve-static-core@4.19.7/node_modules/@types/express-serve-static-core/index")...'.
+services/graph-core/src/graphql/resolvers.ts(527,30): error TS2339: Property 'errors' does not exist on type 'ZodError<{ origin: string; sensitivity: SensitivityLevel; clearance: ClearanceLevel; legalBasis: string; needToKnow: string[]; purposeLimitation: string[]; retentionClass: RetentionClass; }>'.
+services/graph-core/src/graphql/resolvers.ts(549,41): error TS2339: Property 'errors' does not exist on type 'ZodError<{ tenantId: string; entityType: CanonicalEntityType; label: string; properties: Record<string, unknown>; confidence: number; source: string; createdBy: string; ... 11 more ...; caseId?: string; } & { ...; }>'.
+services/graph-core/src/graphql/resolvers.ts(569,41): error TS2339: Property 'errors' does not exist on type 'ZodError<{ tenantId: string; type: CanonicalRelationshipType; fromEntityId: string; toEntityId: string; directed: boolean; properties: Record<string, unknown>; ... 16 more ...; caseId?: string; } & { ...; }>'.
+services/graph-core/src/graphql/resolvers.ts(629,41): error TS2339: Property 'errors' does not exist on type 'ZodError<{ origin: string; sensitivity: SensitivityLevel; clearance: ClearanceLevel; legalBasis: string; needToKnow: string[]; purposeLimitation: string[]; retentionClass: RetentionClass; }>'.
+services/graph-core/src/graphql/resolvers.ts(655,41): error TS2339: Property 'errors' does not exist on type 'ZodError<{ origin: string; sensitivity: SensitivityLevel; clearance: ClearanceLevel; legalBasis: string; needToKnow: string[]; purposeLimitation: string[]; retentionClass: RetentionClass; }>'.
+services/mlops-service/src/server.ts(28,9): error TS2769: No overload matches this call.
   The last overload gave the following error.
-    Argument of type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is not assignable to parameter of type 'Application<Record<string, any>>'.
-      Type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is missing the following properties from type 'Application<Record<string, any>>': init, defaultConfiguration, engine, set, and 63 more.
-services/graph-core/src/routes/entities.ts(2,30): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../schema.js'?
-services/graph-core/src/routes/entities.ts(3,23): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../services/store.js'?
-services/graph-core/src/routes/er.ts(3,30): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../schema.js'?
-services/graph-core/src/routes/er.ts(10,8): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../services/er.js'?
-services/graph-core/src/routes/query.ts(3,23): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../services/store.js'?
-services/graph-core/src/routes/relationships.ts(2,36): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../schema.js'?
-services/graph-core/src/routes/relationships.ts(3,23): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../services/store.js'?
-services/graph-core/src/services/er.ts(1,24): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../schema.js'?
-services/graph-core/src/services/store.ts(1,38): error TS2835: Relative import paths need explicit file extensions in ECMAScript imports when '--moduleResolution' is 'node16' or 'nodenext'. Did you mean '../schema.js'?
-services/license-registry/src/index.ts(132,5): error TS2741: Property 'prohibited_markets' is missing in type '{ commercial_use: true; export_allowed: true; research_only: false; attribution_required: true; share_alike: false; }' but required in type '{ commercial_use: boolean; export_allowed: boolean; research_only: boolean; attribution_required: boolean; share_alike: boolean; prohibited_markets: string[]; export_classification?: string; tos_required?: boolean; }'.
-services/license-registry/src/index.ts(144,5): error TS2741: Property 'prohibited_markets' is missing in type '{ commercial_use: true; export_allowed: false; research_only: false; attribution_required: true; share_alike: false; }' but required in type '{ commercial_use: boolean; export_allowed: boolean; research_only: boolean; attribution_required: boolean; share_alike: boolean; prohibited_markets: string[]; export_classification?: string; tos_required?: boolean; }'.
-services/license-registry/src/index.ts(156,5): error TS2741: Property 'prohibited_markets' is missing in type '{ commercial_use: false; export_allowed: false; research_only: true; attribution_required: true; share_alike: false; }' but required in type '{ commercial_use: boolean; export_allowed: boolean; research_only: boolean; attribution_required: boolean; share_alike: boolean; prohibited_markets: string[]; export_classification?: string; tos_required?: boolean; }'.
-services/license-registry/src/index.ts(554,50): error TS2339: Property 'tos_required' does not exist on type '{ export_allowed: boolean; research_only: boolean; prohibited_markets: any[]; }'.
-services/prov-ledger/src/graphql/resolvers.ts(784,64): error TS2554: Expected 2 arguments, but got 3.
-services/mlops-service/src/server.ts(22,7): error TS2742: The inferred type of 'app' cannot be named without a reference to '.pnpm/@types+express-serve-static-core@5.1.0/node_modules/@types/express-serve-static-core'. This is likely not portable. A type annotation is necessary.
-services/model-registry-service/src/server.ts(15,7): error TS2742: The inferred type of 'app' cannot be named without a reference to '.pnpm/@types+express-serve-static-core@5.1.0/node_modules/@types/express-serve-static-core'. This is likely not portable. A type annotation is necessary.
+    Argument of type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is not assignable to parameter of type 'PathParams'.
+services/model-registry-service/src/server.ts(21,9): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'RequestHandler<ParamsDictionary, any, any, ParsedQs, Record<string, any>>' is not assignable to parameter of type 'PathParams'.
  ELIFECYCLE  Command failed with exit code 2.

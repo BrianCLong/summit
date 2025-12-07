@@ -4,6 +4,7 @@ export interface MapboxTestStub {
   createMap?: (container: HTMLElement) => {
     flyTo?: (options: { center: [number, number]; zoom?: number }) => void;
     __marker?: unknown;
+    remove?: () => void;
   };
   createMarker?: () => {
     setLngLat: (coords: [number, number]) => unknown;

@@ -14,7 +14,8 @@
  */
 
 import validator from 'validator';
-import { escape as htmlEscape } from 'html-escaper';
+import * as htmlEscaper from 'html-escaper';
+const htmlEscape = htmlEscaper.escape;
 import DOMPurify from 'isomorphic-dompurify';
 
 /**
@@ -126,7 +127,7 @@ export function sanitizeHTML(
   if (useDOMPurify) {
     // Build config from options or use preset
     const baseConfig = DOMPURIFY_CONFIGS[mode];
-    const config: DOMPurify.Config = {
+    const config: any = {
       ...baseConfig,
       ...(allowedTags && { ALLOWED_TAGS: allowedTags }),
       ...(allowedAttributes && { ALLOWED_ATTR: Object.values(allowedAttributes).flat() }),
@@ -543,7 +544,7 @@ export function validateBoolean(input: any): boolean {
 /**
  * Validate UUID
  */
-export function validateUUID(input: string, version?: validator.UUIDVersion): string {
+export function validateUUID(input: string, version?: any): string {
   if (!validator.isUUID(input, version)) {
     throw new Error('Invalid UUID');
   }

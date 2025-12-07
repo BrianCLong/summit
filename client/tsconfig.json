@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -17,11 +21,26 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "uuid": [
+        "../types/shims/uuid.d.ts"
+      ]
     },
-    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "noImplicitAny": false,
+    "types": [
+      "node",
+      "jest",
+      "@testing-library/jest-dom",
+      "shims"
+    ],
     "jsxImportSource": "react",
-    "typeRoots": ["./types", "./node_modules/@types"]
+    "typeRoots": [
+      "./types",
+      "../types",
+      "./node_modules/@types"
+    ]
   },
   "include": [
     "src/**/*",
@@ -39,5 +58,10 @@
     "src/components/ai-enhanced/tests/**",
     "src/components/ai-enhanced/__tests__/**"
   ],
-  "files": ["types/custom.d.ts", "types/mui.d.ts", "types/grid2.d.ts"]
+  "files": [
+    "types/custom.d.ts",
+    "types/mui.d.ts",
+    "types/grid2.d.ts",
+    "src/types/mui-compat.d.ts"
+  ]
 }

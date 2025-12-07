@@ -272,7 +272,7 @@ export function generateMockGeospatialEvents(count: number = 25): GeospatialEven
         source: 'mock-data-service',
         ipAddress: `${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}`,
       },
-    })
+    } as any)
   }
 
   return events

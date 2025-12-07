@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { Redis } from 'redis';
+import { type RedisClientType } from 'redis';
 import { createLogger, format, transports, Logger } from 'winston';
 
 import { SearchQuery, SearchAnalytics } from '../types';
@@ -32,11 +32,11 @@ export interface SearchMetrics {
 
 export class SearchAnalyticsService {
   private logger: Logger;
-  private redis: Redis;
+  private redis: RedisClientType;
 
   constructor(
     private pg: Pool,
-    redisClient: Redis,
+    redisClient: RedisClientType,
   ) {
     this.redis = redisClient;
 

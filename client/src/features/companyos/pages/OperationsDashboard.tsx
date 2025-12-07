@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, Clock, TrendingUp, GitBranch, Activity } from 'lucide-react';
+import { AlertCircle, CheckCircle, Clock, ArrowUpRight, GitBranch, Activity } from 'lucide-react';
 
 interface Incident {
   id: string;
@@ -228,7 +228,7 @@ export function OperationsDashboard() {
         <Card className={data.sloViolations.length > 0 ? 'border-yellow-500' : ''}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">SLO Violations</CardTitle>
-            <TrendingUp className="w-4 h-4 text-yellow-500" />
+            <ArrowUpRight className="w-4 h-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">
@@ -381,7 +381,7 @@ export function OperationsDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <TrendingUp className="w-5 h-5 mr-2 text-yellow-500" />
+              <ArrowUpRight className="w-5 h-5 mr-2 text-yellow-500" />
               SLO Violations
             </CardTitle>
           </CardHeader>

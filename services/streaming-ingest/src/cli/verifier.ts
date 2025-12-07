@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 import { Command } from 'commander';
 import axios from 'axios';
 import { createHash } from 'crypto';
@@ -304,8 +305,12 @@ program
  * Compute Merkle root
  */
 function computeMerkleRoot(hashes: string[]): string {
-  if (hashes.length === 0) return '';
-  if (hashes.length === 1) return hashes[0];
+  if (hashes.length === 0) {
+    return '';
+  }
+  if (hashes.length === 1) {
+    return hashes[0];
+  }
 
   const newLevel: string[] = [];
   for (let i = 0; i < hashes.length; i += 2) {

@@ -88,7 +88,9 @@ export class EventStore {
    * Batch append for high throughput
    */
   async batchAppend(events: Array<{ event: Event; partition: number; offset: string }>): Promise<void> {
-    if (events.length === 0) return;
+    if (events.length === 0) {
+      return;
+    }
 
     const client = await this.pool.connect();
     try {
@@ -200,7 +202,9 @@ export class EventStore {
       [id]
     );
 
-    if (result.rows.length === 0) return null;
+    if (result.rows.length === 0) {
+      return null;
+    }
 
     const row = result.rows[0];
     return {

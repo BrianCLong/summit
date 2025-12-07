@@ -12,18 +12,18 @@ SHELL := /usr/bin/env bash
 MAKEFLAGS += --no-builtin-rules
 
 # Config (override via env)
-REPO              ?= BrianCLong/summit
-BASE_BRANCH       ?= main
-CONSOLIDATION     ?= feature/merge-closed-prs-s25
-STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
-STACK_SERVER      ?= stack/express5-eslint9
-STACK_CLIENT      ?= stack/client-vite7-leaflet5
-STACK_REBRAND     ?= stack/rebrand-docs
-PR_TARGETS        ?= 1279 1261 1260 1259
-STATE_DIR         ?= .merge-evidence
-STATE_FILE        ?= $(STATE_DIR)/state.json
+export REPO              ?= BrianCLong/summit
+export BASE_BRANCH       ?= main
+export CONSOLIDATION     ?= feature/merge-closed-prs-s25
+export STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
+export STACK_SERVER      ?= stack/express5-eslint9
+export STACK_CLIENT      ?= stack/client-vite7-leaflet5
+export STACK_REBRAND     ?= stack/rebrand-docs
+export PR_TARGETS        ?= 1279 1261 1260 1259
+export STATE_DIR         ?= .merge-evidence
+export STATE_FILE        ?= $(STATE_DIR)/state.json
 
-NODE_VERSION      ?= 20
+export NODE_VERSION      ?= 20
 
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
 

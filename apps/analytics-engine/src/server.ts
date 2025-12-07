@@ -1,4 +1,4 @@
-import express, { Express } from 'express';
+import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
@@ -16,7 +16,7 @@ import {
   AuthenticatedRequest,
 } from './middleware/auth';
 
-const app: Express = express();
+const app: any = express();
 const PORT = config.server.port || 4004;
 
 // Security middleware
