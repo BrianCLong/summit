@@ -36,6 +36,7 @@ export interface AuditEventInput {
   userId?: string;
   resourceType?: string;
   resourceId?: string;
+  resourceName?: string;
   criticalCategory?: string;
   complianceRelevant?: boolean;
   complianceFrameworks?: string[];
@@ -69,6 +70,7 @@ const AuditEventInputSchema = z.object({
   userId: z.string().optional(),
   resourceType: z.string().optional(),
   resourceId: z.string().optional(),
+  resourceName: z.string().optional(),
   criticalCategory: z.string().optional(),
   complianceRelevant: z.boolean().optional(),
   complianceFrameworks: z.array(z.string()).optional(),
@@ -155,6 +157,13 @@ export class AuditSink extends EventEmitter {
     await this.redis.ping();
     this.connected = true;
     this.emit('connected');
+  }
+
+  /**
+   * Check if sink is connected
+   */
+  get isConnected(): boolean {
+    return this.connected;
   }
 
   /**
