@@ -1,3 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="0" failures="0" errors="0" time="12.309">
+<testsuites name="jest tests" tests="4" failures="0" errors="0" time="19.143">
+  <testsuite name="Runbook Engine" errors="0" failures="0" skipped="0" timestamp="2025-12-07T05:15:55" time="19.062" tests="4">
+    <testcase classname="Runbook Engine should list definitions" name="Runbook Engine should list definitions" time="0.004">
+    </testcase>
+    <testcase classname="Runbook Engine should execute a runbook" name="Runbook Engine should execute a runbook" time="0.004">
+    </testcase>
+    <testcase classname="Runbook Engine should interpolate variables correctly" name="Runbook Engine should interpolate variables correctly" time="0.001">
+    </testcase>
+    <testcase classname="Runbook Engine should handle missing definition" name="Runbook Engine should handle missing definition" time="0.017">
+    </testcase>
+  </testsuite>
 </testsuites>
