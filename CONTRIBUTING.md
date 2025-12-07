@@ -1,23 +1,28 @@
-# Contributing
+# Contributing to Summit (IntelGraph)
 
-Thank you for helping improve the project! Follow these guidelines for smooth reviews and predictable releases.
+> **⚠️ IMPORTANT:** This document is being superseded by the **[Developer Enablement Pack](planning/enablement-pack/README.md)**.
+> Please refer to that directory for the authoritative "Golden Path" on onboarding, workflows, and architecture.
 
-## Branching and Commits
-- Use `type/scope/short-desc` branches (e.g., `feat/gateway/healthz-endpoint`).
-- Conventional Commits are required (e.g., `feat: add preview compose stack`).
+## Prerequisites & Setup
 
-## Pull Requests
-- Keep PR descriptions concise and link to tracking issues (e.g., `Closes #123`).
-- Include screenshots for UI changes and note feature flags that are enabled.
-- Ensure CI is green before requesting review.
+Please follow the **[Onboarding & Quickstart Guide](planning/enablement-pack/onboarding-quickstart.md)**.
 
-## Testing Policy
-- Add unit tests for new code and run `make test` before pushing.
-- Health endpoints must return 200 responses.
+## Common Development Tasks
 
-## Feature Flags
-- Default new flags to OFF. Document flags in the PR body when toggled for previews.
+See **[Daily Developer Workflows](planning/enablement-pack/daily-dev-workflows.md)**.
 
-## SBOM and Security
-- Generate SBOMs via `make sbom` when changing dependencies.
-- Do not commit secrets; follow the guidance in `SECURITY.md` for incident handling.
+## Testing Guidelines
+
+See **[Testing Guidelines](planning/enablement-pack/testing-guidelines.md)** for detailed patterns, factories, and mocking strategies.
+
+## AI Agent Collaboration
+
+See **[AI Agent Guidelines](planning/enablement-pack/ai-agent-guidelines.md)**.
+
+## Merge Rules & CI Gates
+
+See **[Merge Rules & CI Gates](planning/enablement-pack/merge-rules-and-ci-gates.md)** for:
+*   Branching Strategy
+*   Pull Request Expectations
+*   CI Gates
+*   Fast Path / Mergefix instructions
