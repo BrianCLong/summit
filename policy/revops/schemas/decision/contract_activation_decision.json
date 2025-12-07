@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Contract Activation Decision",
+  "type": "object",
+  "required": ["allowed", "reason", "required_actions", "flags"],
+  "properties": {
+    "allowed": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "required_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "policy_bundle_version": { "type": "string" }
+  },
+  "additionalProperties": false
+}

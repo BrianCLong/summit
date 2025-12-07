@@ -1,0 +1,4 @@
+[
+  {"id": "quote-1", "segment": "enterprise", "discount_percentage": 20, "total_value": 100000, "term_months": 12, "currency": "USD", "region": "US", "non_standard_terms": []},
+  {"id": "quote-2", "segment": "smb", "discount_percentage": 45, "total_value": 20000, "term_months": 6, "currency": "USD", "region": "US", "non_standard_terms": ["custom_billing"]}
+]

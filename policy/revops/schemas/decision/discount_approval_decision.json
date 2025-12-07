@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Discount Approval Decision",
+  "type": "object",
+  "required": ["allowed", "reason", "required_approvals", "max_discount_allowed", "flags"],
+  "properties": {
+    "allowed": { "type": "boolean" },
+    "reason": { "type": "string" },
+    "required_approvals": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "max_discount_allowed": { "type": "number" },
+    "flags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "policy_bundle_version": { "type": "string" }
+  },
+  "additionalProperties": false
+}

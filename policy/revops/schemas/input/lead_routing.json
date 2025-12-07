@@ -1,0 +1,47 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Lead Routing Input",
+  "type": "object",
+  "required": ["lead", "tenant", "context"],
+  "properties": {
+    "lead": {
+      "type": "object",
+      "required": ["id", "email", "country"],
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "domain": { "type": "string" },
+        "company_size": { "type": "string" },
+        "industry": { "type": "string" },
+        "country": { "type": "string" },
+        "state": { "type": "string" },
+        "segment_hint": { "type": "string" }
+      }
+    },
+    "account": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "owner_id": { "type": "string" },
+        "customer_status": { "type": "string" },
+        "segment": { "type": "string" }
+      }
+    },
+    "tenant": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["source", "received_at"],
+      "properties": {
+        "source": { "type": "string" },
+        "received_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "additionalProperties": false
+}
