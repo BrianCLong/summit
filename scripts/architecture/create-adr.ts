@@ -15,10 +15,15 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// ESM compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
-const ADR_DIR = path.join(__dirname, '../../docs/architecture/adr');
-const INDEX_FILE = path.join(__dirname, '../../docs/architecture/ADR_INDEX.md');
+const ADR_DIR = path.resolve(__dirname, '../../docs/architecture/adr');
+const INDEX_FILE = path.resolve(__dirname, '../../docs/architecture/ADR_INDEX.md');
 const TEMPLATE_FILE = path.join(ADR_DIR, 'adr-template.md');
 
 const VALID_AREAS = [
