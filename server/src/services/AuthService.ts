@@ -90,6 +90,7 @@ interface User {
   lastName?: string;
   fullName?: string;
   role: string;
+  defaultTenantId?: string;
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
@@ -110,6 +111,7 @@ interface DatabaseUser {
   first_name?: string;
   last_name?: string;
   role: string;
+  default_tenant_id?: string;
   is_active: boolean;
   last_login?: Date;
   created_at: Date;
@@ -294,6 +296,16 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
+
+      // Auto-assign to default tenant if configured or just 'global'
+      // This ensures the new user has at least one tenant membership
+      await client.query(
+        `INSERT INTO user_tenants (user_id, tenant_id, roles)
+         VALUES ($1, 'global', $2)
+         ON CONFLICT DO NOTHING`,
+        [user.id, [user.role]]
+      );
+
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
@@ -675,6 +687,7 @@ export class AuthService {
       lastName: user.last_name,
       fullName: `${user.first_name} ${user.last_name}`,
       role: user.role,
+      defaultTenantId: user.default_tenant_id,
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,
