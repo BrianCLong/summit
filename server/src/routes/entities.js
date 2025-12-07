@@ -7,6 +7,13 @@ const {
 } = require('../middleware/auth');
 const sanitize = require('../middleware/sanitize').default;
 
+const {
+  encodeCursor,
+  decodeCursor,
+  normalizeLimit,
+  buildPageInfo,
+} = require('../utils/cursorPagination');
+
 const router = express.Router();
 
 // Authn for all, RBAC for write, sanitize inputs
@@ -35,30 +42,92 @@ async function logAudit(req, action, resourceId, details) {
 }
 
 router.get('/', async (req, res) => {
-  const { type, q, limit = 50, skip = 0 } = req.query;
+  const { type, q } = req.query;
+  const defaultLimit = 50;
+  const limit = normalizeLimit(req.query.limit, defaultLimit, 500);
+  const cursor = decodeCursor(req.query.cursor, {
+    offset: Number(req.query.skip ?? 0) || 0,
+    limit,
+  });
   const driver = getNeo4jDriver();
   const session = driver.session();
+
+  const clauses = ['MATCH (e:Entity)'];
+  const where = [];
+  const params = { limit: cursor.limit, skip: cursor.offset };
+  if (type) {
+    where.push('e.type = $type');
+    params.type = type;
+  }
+  if (q) {
+    where.push(
+      '(toLower(e.label) CONTAINS toLower($q) OR toLower(e.description) CONTAINS toLower($q))',
+    );
+    params.q = q;
+  }
+  if (where.length) clauses.push('WHERE ' + where.join(' AND '));
+  clauses.push('RETURN e ORDER BY e.createdAt DESC SKIP $skip LIMIT $limit');
+  const cypher = clauses.join('\n');
+
+  const streamMode =
+    req.query.stream === 'true' || req.headers.accept === 'text/event-stream';
+
+  if (streamMode) {
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    let active = true;
+    req.on('close', async () => {
+      active = false;
+      await session.close();
+    });
+
+    const sendBatch = async (offset) => {
+      if (!active) return;
+      const result = await session.run(cypher, { ...params, skip: offset });
+      const items = result.records.map((r) => r.get('e').properties);
+      const pageInfo = buildPageInfo(offset, params.limit, items.length);
+      res.write(`data: ${JSON.stringify({ type: 'batch', items, pageInfo })}\n\n`);
+      if (!pageInfo.hasMore || !active) {
+        res.write(
+          `data: ${JSON.stringify({ type: 'complete', pageInfo })}\n\n`,
+        );
+        res.end();
+        active = false;
+        await session.close();
+        return;
+      }
+      setImmediate(() => sendBatch(offset + params.limit));
+    };
+
+    try {
+      await logAudit(req, 'READ', 'EntityListStream', null, {
+        type,
+        q,
+        limit: params.limit,
+        cursor,
+      });
+      await sendBatch(params.skip);
+    } catch (e) {
+      res.write(`data: ${JSON.stringify({ type: 'error', message: e.message })}\n\n`);
+      res.end();
+      await session.close();
+    }
+    return;
+  }
+
   try {
-    const clauses = ['MATCH (e:Entity)'];
-    const where = [];
-    const params = { limit: Number(limit), skip: Number(skip) };
-    if (type) {
-      where.push('e.type = $type');
-      params.type = type;
-    }
-    if (q) {
-      where.push(
-        '(toLower(e.label) CONTAINS toLower($q) OR toLower(e.description) CONTAINS toLower($q))',
-      );
-      params.q = q;
-    }
-    if (where.length) clauses.push('WHERE ' + where.join(' AND '));
-    clauses.push('RETURN e ORDER BY e.createdAt DESC SKIP $skip LIMIT $limit');
-    const cypher = clauses.join('\n');
     const result = await session.run(cypher, params);
     const entities = result.records.map((r) => r.get('e').properties);
-    await logAudit(req, 'READ', 'EntityList', null, { type, q, limit, skip });
-    res.json({ items: entities, count: entities.length });
+    const pageInfo = buildPageInfo(params.skip, params.limit, entities.length);
+    await logAudit(req, 'READ', 'EntityList', null, {
+      type,
+      q,
+      limit: params.limit,
+      cursor,
+    });
+    res.json({ items: entities, count: entities.length, pageInfo });
   } catch (e) {
     res.status(500).json({ error: e.message });
   } finally {
