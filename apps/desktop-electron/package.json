@@ -15,7 +15,7 @@
     "preview": "vite preview",
     "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "vite build && electron-builder",
-    "lint": "eslint src --ext .ts,.tsx",
+    "lint": "if [ -d src ]; then eslint src --ext .ts,.tsx; elif [ -d electron ]; then eslint electron --ext .ts,.tsx; else echo \"skip lint (no lintable sources)\"; fi",
     "typecheck": "tsc --noEmit",
     "postinstall": "electron-builder install-app-deps"
   },

@@ -12,6 +12,7 @@
  */
 
 import crypto from 'crypto';
+import type { BufferEncoding } from 'node:buffer';
 
 /**
  * Generate a cryptographically secure random string
