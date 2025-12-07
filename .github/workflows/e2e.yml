@@ -36,21 +36,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm
-          cache-dependency-path: |
-            server/package-lock.json
-            client/package-lock.json
 
-      - name: Install server dependencies
-        run: npm ci
-        working-directory: server
+      - name: Enable Corepack
+        run: corepack enable
 
-      - name: Install client dependencies
-        run: npm ci
-        working-directory: client
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Generate persisted queries (required for test)
-        run: npm run generate:persisted
+        run: pnpm run generate:persisted
         working-directory: client
 
       - name: Start services for testing
@@ -64,11 +58,11 @@ jobs:
             sleep 2
           done
 
-          cd server && npm run build
-          cd server && npm run seed:demo
+          cd server && pnpm run build
+          cd server && pnpm run seed:demo
 
-          cd server && npm start &
-          cd client && npm run dev &
+          cd server && pnpm start &
+          cd client && pnpm run dev &
           sleep 15
 
       - name: Install Playwright browsers
@@ -161,13 +155,15 @@ jobs:
           # wait for client and server
           for i in {1..60}; do curl -fsS http://localhost:4000/health && break || sleep 2; done
           for i in {1..60}; do curl -fsS http://localhost:3000 || sleep 2; done
-      - name: Install client deps
-        run: cd client && npm ci
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run E2E tests (layout=${{ matrix.layout }}, sprite=${{ matrix.sprite }})
         env:
           LAYOUT: ${{ matrix.layout }}
           SPRITE_LABELS: ${{ matrix.sprite }}
-        run: cd client && npm run test:e2e
+        run: cd client && pnpm run test:e2e
       - name: Dump compose logs (on failure)
         if: failure()
         run: docker compose -f docker-compose.yml logs --no-color server client | tail -n 300
@@ -201,13 +197,15 @@ jobs:
           docker compose -f docker-compose.yml up -d --build server
           # wait for server
           for i in {1..60}; do curl -fsS http://localhost:4000/health && break || sleep 2; done
-      - name: Install client deps
-        run: cd client && npm ci
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
       - name: Run analytics bridge E2E (with trace)
         env:
           E2E_WS_URL: http://localhost:4000
           E2E_REDIS_URL: redis://localhost:6379/1
-        run: cd client && npm run test:e2e -- tests/e2e/analytics-bridge.spec.ts -- --trace on
+        run: cd client && pnpm run test:e2e -- tests/e2e/analytics-bridge.spec.ts -- --trace on
       - name: Upload Playwright traces (on failure)
         if: failure()
         uses: actions/upload-artifact@v4
