@@ -115,7 +115,10 @@
     "security:audit:fix": "pnpm audit --fix",
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",
     "security:scan": "pnpm run security:audit && pnpm run security:lint",
-    "security:outdated": "pnpm outdated"
+    "security:outdated": "pnpm outdated",
+    "future-history:create": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ops/create-future-history-entry.ts",
+    "future-history:check": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ops/check-future-history-coverage.ts",
+    "future-history:check:strict": "FH_STRICT=true pnpm run future-history:check"
   },
   "keywords": [
     "intelligence-analysis",
