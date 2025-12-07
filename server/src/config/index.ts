@@ -10,6 +10,8 @@ interface Config {
     username: string;
     password: string;
     database: string;
+    slowQueryThresholdMs: number;
+    logCypher: boolean;
   };
   postgres: {
     host: string;
@@ -59,6 +61,10 @@ const config: Config = {
     username: process.env.NEO4J_USERNAME || 'neo4j',
     password: process.env.NEO4J_PASSWORD || 'devpassword',
     database: process.env.NEO4J_DATABASE || 'neo4j',
+    slowQueryThresholdMs: parseInt(
+      process.env.NEO4J_SLOW_QUERY_THRESHOLD_MS || '2000',
+    ),
+    logCypher: process.env.NEO4J_LOG_CYPHER === 'true',
   },
 
   postgres: {

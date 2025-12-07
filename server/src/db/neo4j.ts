@@ -1,9 +1,8 @@
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
-import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
+import config from '../config/index.js';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
@@ -185,19 +184,15 @@ async function connectToNeo4j(): Promise<void> {
       NEO4J_URI,
       neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
       {
-        maxConnectionPoolSize: POOL_MAX_SIZE,
-        connectionTimeout: POOL_CONNECTION_TIMEOUT,
-        connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
-        logging: {
-            level: 'info',
-            logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
         maxConnectionPoolSize: MAX_CONNECTION_POOL_SIZE,
         connectionTimeout: CONNECTION_TIMEOUT_MS,
+        connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
         logging: {
           level: 'info',
-          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message)
-        }
-      }
+          logger: (level, message) =>
+            logger[level === 'warn' ? 'warn' : 'info'](message),
+        },
+      },
     );
 
     await candidate.verifyConnectivity();
@@ -489,7 +484,86 @@ function instrumentSession(session: any) {
     } catch (err) {
       logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
     }
-    return originalRun(cypher, params);
+
+    const startTime = Date.now();
+    const resultPromise = originalRun(cypher, params);
+
+    // Observability wrapper
+    const promise = resultPromise
+      .then((result: any) => {
+        const durationMs = Date.now() - startTime;
+        neo4jQueryLatencyMs.observe(
+          { operation: 'run', label: 'success' },
+          durationMs,
+        );
+        telemetry.subsystems.database.latency.record(durationMs / 1000);
+
+        if (
+          durationMs > config.neo4j.slowQueryThresholdMs ||
+          config.neo4j.logCypher
+        ) {
+          logger.info({
+            msg:
+              durationMs > config.neo4j.slowQueryThresholdMs
+                ? 'Slow Neo4j query'
+                : 'Neo4j query',
+            query: config.neo4j.logCypher
+              ? cypher
+              : cypher.substring(0, 200) + '...',
+            durationMs,
+            tenantId,
+            success: true,
+          });
+        }
+        return result;
+      })
+      .catch((error: any) => {
+        const durationMs = Date.now() - startTime;
+        neo4jQueryErrorsTotal.inc({ operation: 'run', label: error.code });
+        neo4jQueryLatencyMs.observe(
+          { operation: 'run', label: 'error' },
+          durationMs,
+        );
+        telemetry.subsystems.database.errors.add(1);
+
+        logger.error({
+          msg: 'Neo4j query failed',
+          query: config.neo4j.logCypher
+            ? cypher
+            : cypher.substring(0, 200) + '...',
+          error: error.message,
+          code: error.code,
+          durationMs,
+          tenantId,
+        });
+        throw error;
+      });
+
+    // Shim .subscribe for compatibility with Neo4j Result
+    (promise as any).subscribe = (observer: any) => {
+      promise
+        .then((result: any) => {
+          if (result.records) {
+            result.records.forEach((r: any) => observer.onNext && observer.onNext(r));
+          }
+          if (observer.onCompleted) observer.onCompleted();
+        })
+        .catch((err: any) => {
+          if (observer.onError) observer.onError(err);
+        });
+    };
+
+    // Shim Async Iterator for compatibility
+    (promise as any)[Symbol.asyncIterator] = async function* () {
+      const result = await promise;
+      if (result.records) {
+        for (const record of result.records) {
+          yield record;
+        }
+      }
+    };
+
+    return promise;
   };
   return session;
 }
