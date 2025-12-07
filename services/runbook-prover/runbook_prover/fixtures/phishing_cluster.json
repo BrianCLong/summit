@@ -1,0 +1,7 @@
+[
+  {"lure_theme": "Payroll Update", "sender_domain": "corp-payroll.example", "severity": 0.8},
+  {"lure_theme": "Payroll Update", "sender_domain": "corp-payroll.example", "severity": 0.7},
+  {"lure_theme": "Security Reset", "sender_domain": "secure-login.example", "severity": 0.5},
+  {"lure_theme": "Payroll Update", "sender_domain": "benefits.example", "severity": 0.6},
+  {"lure_theme": "Benefits Survey", "sender_domain": "benefits.example", "severity": 0.4}
+]
