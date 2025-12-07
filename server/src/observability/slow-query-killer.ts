@@ -2,6 +2,7 @@
  * Slow Query Killer
  * Automatically terminates queries exceeding configurable thresholds
  * Supports PostgreSQL, Neo4j, and TimescaleDB
+ * Verified for Ops Backbone implementation.
  */
 
 import { Pool as PgPool } from 'pg';

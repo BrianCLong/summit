@@ -9,8 +9,10 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import * as LaunchDarkly from 'launchdarkly-node-server-sdk';
 import { Logger } from '../utils/logger';
+
+// Placeholder type for LaunchDarkly client
+type LDClient = any;
 
 /**
  * Feature flag configuration
@@ -71,7 +73,7 @@ export interface FlagEvaluation {
  */
 export class FeatureFlagService {
   private provider: 'local' | 'launchdarkly';
-  private ldClient?: LaunchDarkly.LDClient;
+  private ldClient?: LDClient;
   private localFlags: Map<string, FlagMetadata> = new Map();
   private cache: Map<string, { value: FlagValue; timestamp: number }> = new Map();
   private cacheTimeout: number = 60000; // 1 minute cache
@@ -154,12 +156,22 @@ export class FeatureFlagService {
 
     this.logger.info('Initializing LaunchDarkly client...');
 
+    let LaunchDarkly: any;
+    try {
+      LaunchDarkly = await import('launchdarkly-node-server-sdk');
+    } catch (e) {
+      this.logger.warn('LaunchDarkly SDK not found. Falling back to local provider.');
+      this.provider = 'local';
+      await this.initializeLocalProvider();
+      return;
+    }
+
     // Create LaunchDarkly client with configuration
     this.ldClient = LaunchDarkly.init(sdkKey, {
       timeout: timeout / 1000, // Convert to seconds
       logger: LaunchDarkly.basicLogger({
         level: 'info',
-        destination: (line) => this.logger.debug(`[LaunchDarkly] ${line}`),
+        destination: (line: string) => this.logger.debug(`[LaunchDarkly] ${line}`),
       }),
     });
 
@@ -352,7 +364,7 @@ export class FeatureFlagService {
     }
 
     // Convert user to LaunchDarkly format
-    const ldUser: LaunchDarkly.LDUser = {
+    const ldUser: any = {
       key: user.key,
       email: user.email,
       name: user.name,
