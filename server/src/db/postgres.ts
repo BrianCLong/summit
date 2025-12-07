@@ -21,6 +21,10 @@ type QueryExecutor = <T = any>(
   options?: QueryOptions,
 ) => Promise<QueryResult<T>>;
 
+interface ExtendedPoolClient extends PoolClient {
+  connectedAt?: number;
+}
+
 interface PoolHealthSnapshot {
   name: string;
   type: 'write' | 'read';

@@ -8,6 +8,7 @@
     "target": "ES2022",
     "declaration": true,
     "sourceMap": true,
+    "baseUrl": "./src",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "jsx": "react-jsx"
