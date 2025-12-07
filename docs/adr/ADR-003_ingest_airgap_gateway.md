@@ -1,8 +1,8 @@
 # ADR-003: Ingest Staging and Air-Gap Gateway
 
-- **Status:** Proposed  
-- **Date:** 2025-12-05  
-- **Owner:** Data / Platform Team  
+- **Status:** Proposed
+- **Date:** 2025-12-05
+- **Owner:** Data / Platform Team
 
 ## 1. Context
 
@@ -51,13 +51,13 @@ We will introduce a **two-stage ingress model** with explicit “dirty” and �
 
 ## 3. Rationale
 
-- **Security**  
+- **Security**
   Prevents direct coupling between internet-facing code and core data stores; reduces blast radius for scraper compromises.
 
-- **Robustness**  
+- **Robustness**
   Decouples ingest rates from DB availability, while making backpressure explicit via Kafka.
 
-- **Clarity & compliance**  
+- **Clarity & compliance**
   Makes it possible to reason about what transformations happened to external data before it touched internal systems.
 
 ## 4. Implications
@@ -92,16 +92,16 @@ We will introduce a **two-stage ingress model** with explicit “dirty” and �
 
 ## 5. Alternatives Considered
 
-1. **Direct DB writes from scrapers**  
-   - Simplest in the short term.  
+1. **Direct DB writes from scrapers**
+   - Simplest in the short term.
    - High security and stability risk; not acceptable for target use-case.
 
-2. **A single monolithic “ingest service” handling everything**  
-   - Blends internet access, parsing, validation, and DB writes.  
+2. **A single monolithic “ingest service” handling everything**
+   - Blends internet access, parsing, validation, and DB writes.
    - Hard to secure and scale; large blast radius for bugs or attacks.
 
-3. **Fully managed ETL (e.g. commercial pipelines)**  
-   - Could offload some complexity but introduces external dependencies and costs.  
+3. **Fully managed ETL (e.g. commercial pipelines)**
+   - Could offload some complexity but introduces external dependencies and costs.
    - Still doesn’t solve IC-specific air-gap requirements.
 
 ## 6. Rollout Plan

@@ -1,8 +1,8 @@
 # ADR-001: IntelGraph Ontology and Temporal / Source Model
 
-- **Status:** Proposed  
-- **Date:** 2025-12-05  
-- **Owner:** Architecture / IntelGraph Team  
+- **Status:** Proposed
+- **Date:** 2025-12-05
+- **Owner:** Architecture / IntelGraph Team
 
 ## 1. Context
 
@@ -51,16 +51,16 @@ We will standardize on:
 
 ## 3. Rationale
 
-- **Temporal correctness**  
+- **Temporal correctness**
   Intelligence work is inherently time-dependent. Overwriting a relationship erases the analysis context and prevents us from answering “what did we think on date X?”.
 
-- **Lineage & auditability**  
+- **Lineage & auditability**
   Regulation, IC review, and internal QA all require us to show “where did this come from?” for any analytic conclusion.
 
-- **Conflict representation**  
+- **Conflict representation**
   Real-world data conflicts frequently. Forcing a single truth collapses uncertainty and hides adversary activity, data poisoning, or model errors.
 
-- **Simulation & explainability**  
+- **Simulation & explainability**
   Narrative simulation and AI copilots should be able to:
   - Cite specific Observations and Sources.
   - Weight evidence by trust.
@@ -84,9 +84,9 @@ We will standardize on:
 ### 4.2 On queries
 
 - Queries become more complex:
-  - “Who is the CEO of Org X now?”  
+  - “Who is the CEO of Org X now?”
     → Filter `CEO_OF` edges with `valid_end IS NULL`.
-  - “What did we believe the CEO was on 2024-01-01?”  
+  - “What did we believe the CEO was on 2024-01-01?”
     → Filter on `valid_start <= date` and `(valid_end IS NULL OR valid_end > date)` and also account for tx time if doing “what did we know when?”.
 
 - Read paths must be standardized:
@@ -110,17 +110,17 @@ We will standardize on:
 
 ## 5. Alternatives Considered
 
-1. **Last-write-wins on entity properties**  
-   - Simplest but loses conflict and history.  
+1. **Last-write-wins on entity properties**
+   - Simplest but loses conflict and history.
    - Not acceptable for IC/enterprise-grade use.
 
-2. **Edge-only properties for provenance**  
-   - Embeds everything into relationship properties.  
-   - Harder to attach evidence, source, or multiple observations.  
+2. **Edge-only properties for provenance**
+   - Embeds everything into relationship properties.
+   - Harder to attach evidence, source, or multiple observations.
    - Doesn’t scale well to multi-source, multi-observation scenarios.
 
-3. **Temporal tables only in Postgres**  
-   - Would separate graph from time/lineage.  
+3. **Temporal tables only in Postgres**
+   - Would separate graph from time/lineage.
    - Makes explainable graph analytics much harder and more fragile.
 
 ## 6. Rollout Plan
