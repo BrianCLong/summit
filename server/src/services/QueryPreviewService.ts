@@ -17,6 +17,7 @@ import { logger } from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
 import { GlassBoxRunService } from './GlassBoxRunService.js';
+import { QueryResultCache } from './queryResultCache.js';
 
 export type QueryLanguage = 'cypher' | 'sql';
 
@@ -114,6 +115,11 @@ export type ExecutePreviewResult = {
   rowCount: number;
   executionTimeMs: number;
   warnings: string[];
+  cached?: boolean;
+  cacheTier?: 'ram' | 'flash';
+  partialResults?: unknown[];
+  partialCacheHit?: boolean;
+  signature?: string;
 };
 
 export class QueryPreviewService {
@@ -125,6 +131,7 @@ export class QueryPreviewService {
   private cacheEnabled: boolean;
   private cacheTTL: number = 600; // 10 minutes
   private previewTTL: number = 3600; // 1 hour
+  private queryCache: QueryResultCache;
 
   constructor(
     pool: Pool,
@@ -139,6 +146,12 @@ export class QueryPreviewService {
     this.glassBoxService = glassBoxService;
     this.redis = redis || null;
     this.cacheEnabled = !!redis;
+    this.queryCache = new QueryResultCache(this.redis, {
+      ttlSeconds: this.cacheTTL,
+      streamingTtlSeconds: 20,
+      maxEntries: 2000,
+      partialLimit: 20,
+    });
   }
 
   /**
@@ -437,43 +450,104 @@ export class QueryPreviewService {
         input: { query: queryToExecute, dryRun: input.dryRun },
       });
 
-      let results: unknown;
-      let rowCount: number = 0;
       const warnings: string[] = [];
+      let results: unknown[] = [];
+      let rowCount: number = 0;
+      let cached = false;
+      let cacheTier: 'ram' | 'flash' | undefined;
+      const executionStartedAt = Date.now();
+      const signature = this.queryCache.buildSignature(
+        preview.language,
+        queryToExecute,
+        preview.parameters,
+      );
 
-      if (input.dryRun) {
-        // Dry run - validate but don't execute
-        results = { message: 'Dry run - query validated but not executed' };
-        warnings.push('Dry run mode - no data was accessed');
-      } else {
-        // Execute query
-        if (preview.language === 'cypher') {
-          const execResult = await this.executeCypher(
-            queryToExecute,
-            preview.parameters,
-            {
-              maxRows: input.maxRows || 100,
-              timeout: input.timeout || 30000,
-            }
-          );
-          results = execResult.records;
-          rowCount = execResult.records.length;
-          warnings.push(...execResult.warnings);
-        } else {
-          const execResult = await this.executeSql(
-            queryToExecute,
-            {
-              maxRows: input.maxRows || 100,
-              timeout: input.timeout || 30000,
-            }
-          );
-          results = execResult.rows;
-          rowCount = execResult.rows.length;
-          warnings.push(...execResult.warnings);
-        }
+      const streamingCached = await this.queryCache.getStreamingPartial(
+        signature,
+        preview.tenantId,
+      );
+      if (streamingCached) {
+        warnings.push('Using streaming cache while full query executes');
       }
 
-      const executionTimeMs = Date.now() - startTime;
+      const cachedResult = await this.queryCache.getResult(
+        signature,
+        preview.tenantId,
+      );
+
+      if (cachedResult) {
+        cached = true;
+        cacheTier = cachedResult.tier;
+        results = cachedResult.rows;
+        rowCount = cachedResult.rows.length;
+        warnings.push(...cachedResult.warnings, 'Served from read-through cache');
+      } else if (input.dryRun) {
+        results = [{ message: 'Dry run - query validated but not executed' }];
+        warnings.push('Dry run mode - no data was accessed');
+      } else if (preview.language === 'cypher') {
+        const execResult = await this.executeCypher(
+          queryToExecute,
+          preview.parameters,
+          {
+            maxRows: input.maxRows || 100,
+            timeout: input.timeout || 30000,
+          }
+        );
+        results = execResult.records;
+        rowCount = execResult.records.length;
+        warnings.push(...execResult.warnings);
+        await this.queryCache.setResult(
+          signature,
+          {
+            rows: execResult.records,
+            warnings: execResult.warnings,
+            executionTimeMs: Date.now() - executionStartedAt,
+          },
+          preview.tenantId,
+        );
+        await this.queryCache.setStreamingPartial(
+          signature,
+          execResult.records,
+          preview.tenantId,
+        );
+      } else {
+        const execResult = await this.executeSql(
+          queryToExecute,
+          {
+            maxRows: input.maxRows || 100,
+            timeout: input.timeout || 30000,
+          }
+        );
+        results = execResult.rows;
+        rowCount = execResult.rows.length;
+        warnings.push(...execResult.warnings);
+        await this.queryCache.setResult(
+          signature,
+          {
+            rows: execResult.rows,
+            warnings: execResult.warnings,
+            executionTimeMs: Date.now() - executionStartedAt,
+          },
+          preview.tenantId,
+        );
+        await this.queryCache.setStreamingPartial(
+          signature,
+          execResult.rows,
+          preview.tenantId,
+        );
+      }
+
+      const executionTimeMs = cached
+        ? cachedResult?.executionTimeMs ?? Date.now() - startTime
+        : Date.now() - executionStartedAt;
+
+      const hitRate = this.queryCache.getHitRate();
+      if (!cached && hitRate < 0.3) {
+        logger.warn(
+          { signature, hitRate },
+          'Query cache hit rate below target during load validation',
+        );
+      }
 
       // Complete step
       await this.glassBoxService.completeStep(run.id, stepId, {
@@ -518,6 +592,12 @@ export class QueryPreviewService {
         rowCount,
         executionTimeMs,
         warnings,
+        cached,
+        cacheTier,
+        partialResults:
+          streamingCached?.rows ?? results.slice(0, this.queryCache.getPartialLimit()),
+        partialCacheHit: Boolean(streamingCached),
+        signature,
       };
     } catch (error) {
       await this.glassBoxService.updateStatus(run.id, 'failed', undefined, String(error));
