@@ -1,0 +1,46 @@
+Topicality Summit NOTICE
+
+This product is developed and owned by:
+  Topicality LLC, Topicality Summit, and Brian C. Long.
+
+Copyright (c) 2024–2025
+Topicality LLC, Topicality Summit, and Brian C. Long
+All rights reserved.
+
+Licensing
+---------
+
+Current versions of the Topicality Summit software are distributed under the
+IntelGraph / Topicality Summit Enterprise License Agreement (Version 1.0).
+See the LICENSE file for terms, restrictions, and contact information.
+
+Historical open source releases of Summit (for example, the tag
+`v0.4.0-oss-mit`) were made available under the MIT License. The historical
+MIT license text is preserved in OSS-MIT-LICENSE and applies only to those
+designated releases.
+
+Contributor License Agreement
+-----------------------------
+
+Contributions are accepted only under the Topicality Summit Contributor
+License Agreement (CLA). See CONTRIBUTOR_LICENSE_AGREEMENT.md for the full
+text and acceptance terms.
+
+Third-Party Open Source Components
+----------------------------------
+
+This product may include third-party open source components that are
+licensed under their own respective licenses. Such components are not
+licensed under the IntelGraph / Topicality Summit Enterprise License
+Agreement.
+
+A non-exhaustive list of such components includes (examples):
+
+- Node.js, pnpm, and associated JavaScript/TypeScript libraries
+  (MIT, Apache-2.0, BSD, or other OSS licenses as noted in their packages).
+- Any other vendored or embedded libraries identified in package metadata
+  (e.g., package.json, pnpm-lock.yaml) or source headers.
+
+For the complete and authoritative list of third-party licenses, consult
+the documentation and metadata of those dependencies in your installed
+environment (e.g., `node_modules`, `pnpm-lock.yaml`, or `package.json`).
