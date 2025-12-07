@@ -188,6 +188,13 @@ class Neo4jGraph:
     def close(self) -> None:
         self.driver.close()
 
+    def health_check(self) -> bool:
+        try:
+            self.driver.verify_connectivity()
+            return True
+        except Exception:
+            return False
+
     def _run_write(self, query: str, **params):
         with self.driver.session() as session:
             return session.execute_write(lambda tx: tx.run(query, **params).data())

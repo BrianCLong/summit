@@ -104,7 +104,20 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
   // Include errors in response for debugging
   health.errors = errors;
 
-  const statusCode = health.status === 'ok' ? 200 : 503;
+  // Determine overall status code
+  // Postgres and Neo4j are critical -> 503 if down
+  // Redis is important but system can function in degraded mode -> 200 if down
+  let statusCode = 200;
+  if (health.services.postgres === 'unhealthy' || health.services.neo4j === 'unhealthy') {
+    health.status = 'unhealthy';
+    statusCode = 503;
+  } else if (health.services.redis === 'unhealthy') {
+    health.status = 'degraded';
+    statusCode = 200;
+  } else {
+    health.status = 'ok';
+  }
+
   res.status(statusCode).json(health);
 });
 

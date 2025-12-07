@@ -66,3 +66,11 @@ class PostgresProvenanceStore(BaseProvenanceStore):
 
     def close(self) -> None:
         self.conn.close()
+
+    def health_check(self) -> bool:
+        try:
+            with self.conn.cursor() as cur:
+                cur.execute("SELECT 1")
+            return True
+        except Exception:
+            return False
