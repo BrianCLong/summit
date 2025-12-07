@@ -12,6 +12,7 @@ Quick reference for operational procedures and incident response.
 
 ### General Operations
 
+- **[Release](./RELEASE.md)** - Release procedures, hotfix path, rollback (NEW)
 - [Release Captain Quick Reference](./release-captain-quick-reference.md)
 - [Release Captain Verification](./release-captain-verification.md)
 - [Disaster Recovery Procedures](./disaster-recovery-procedures.yaml)
