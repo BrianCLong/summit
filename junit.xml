@@ -1,3 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="0" failures="0" errors="0" time="12.309">
+<testsuites name="jest tests" tests="9" failures="0" errors="0" time="31.182">
+  <testsuite name="TenantRepository" errors="0" failures="0" skipped="0" timestamp="2025-12-07T23:05:26" time="29.632" tests="5">
+    <testcase classname="TenantRepository findById adds tenant_id clause" name="TenantRepository findById adds tenant_id clause" time="0.01">
+    </testcase>
+    <testcase classname="TenantRepository findAll adds tenant_id clause" name="TenantRepository findAll adds tenant_id clause" time="0.002">
+    </testcase>
+    <testcase classname="TenantRepository create adds tenant_id" name="TenantRepository create adds tenant_id" time="0.002">
+    </testcase>
+    <testcase classname="TenantRepository update adds tenant_id clause" name="TenantRepository update adds tenant_id clause" time="0.003">
+    </testcase>
+    <testcase classname="TenantRepository delete adds tenant_id clause" name="TenantRepository delete adds tenant_id clause" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="AuthorizationServiceImpl" errors="0" failures="0" skipped="0" timestamp="2025-12-07T23:05:26" time="30.02" tests="4">
+    <testcase classname="AuthorizationServiceImpl can() allows access when tenant matches and RBAC allows" name="AuthorizationServiceImpl can() allows access when tenant matches and RBAC allows" time="0.01">
+    </testcase>
+    <testcase classname="AuthorizationServiceImpl can() denies access when tenant mismatch" name="AuthorizationServiceImpl can() denies access when tenant mismatch" time="0.005">
+    </testcase>
+    <testcase classname="AuthorizationServiceImpl can() allows cross-tenant access for global admin" name="AuthorizationServiceImpl can() allows cross-tenant access for global admin" time="0.001">
+    </testcase>
+    <testcase classname="AuthorizationServiceImpl assertCan() throws on denial" name="AuthorizationServiceImpl assertCan() throws on denial" time="0.029">
+    </testcase>
+  </testsuite>
 </testsuites>
