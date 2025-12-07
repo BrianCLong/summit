@@ -6,6 +6,7 @@
     "declaration": true,
     "allowImportingTsExtensions": false,
     "sourceMap": true,
+    "baseUrl": "./src",
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "types": []
