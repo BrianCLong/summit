@@ -1,3 +1,4 @@
+// Added for Privacy Engine visibility
 export type PIIType =
   | 'fullName'
   | 'firstName'
