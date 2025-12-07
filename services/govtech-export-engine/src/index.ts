@@ -1,4 +1,5 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import { v4 as uuid } from 'uuid';
 import { MarketAnalyzer } from './analyzers/market-analyzer.js';

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as zod from 'zod';
 
 // Digital Service Categories
 export const ServiceCategorySchema = z.enum([
@@ -22,7 +22,7 @@ export const ServiceCategorySchema = z.enum([
 export type ServiceCategory = z.infer<typeof ServiceCategorySchema>;
 
 // Digital Service Definition
-export const DigitalServiceSchema = z.object({
+export const DigitalServiceSchema = zod.z.object({
   id: z.string().uuid(),
   name: z.string(),
   category: ServiceCategorySchema,
@@ -32,7 +32,7 @@ export const DigitalServiceSchema = z.object({
   maturityLevel: z.enum(['pilot', 'production', 'legacy']),
 
   // Technical specifications
-  techStack: z.object({
+  techStack: zod.z.object({
     backend: z.array(z.string()),
     frontend: z.array(z.string()),
     databases: z.array(z.string()),
@@ -41,7 +41,7 @@ export const DigitalServiceSchema = z.object({
   }),
 
   // Integration requirements
-  integrations: z.array(z.object({
+  integrations: z.array(zod.z.object({
     name: z.string(),
     type: z.enum(['required', 'optional', 'recommended']),
     protocol: z.string(),
@@ -54,7 +54,7 @@ export const DigitalServiceSchema = z.object({
   dependencies: z.array(z.string()),
 
   // Metrics
-  metrics: z.object({
+  metrics: zod.z.object({
     activeUsers: z.number().optional(),
     transactionsPerYear: z.number().optional(),
     costSavingsEur: z.number().optional(),
@@ -65,7 +65,7 @@ export const DigitalServiceSchema = z.object({
 export type DigitalService = z.infer<typeof DigitalServiceSchema>;
 
 // Target Country Profile
-export const CountryProfileSchema = z.object({
+export const CountryProfileSchema = zod.z.object({
   code: z.string().length(2),
   name: z.string(),
   region: z.string(),
@@ -73,7 +73,7 @@ export const CountryProfileSchema = z.object({
   gdpPerCapita: z.number().optional(),
 
   // Existing digital infrastructure
-  infrastructure: z.object({
+  infrastructure: zod.z.object({
     internetPenetration: z.number().min(0).max(100),
     mobileSubscriptions: z.number(),
     digitalLiteracy: z.enum(['low', 'medium', 'high']),
@@ -81,7 +81,7 @@ export const CountryProfileSchema = z.object({
   }),
 
   // Legal/regulatory environment
-  regulatory: z.object({
+  regulatory: zod.z.object({
     dataProtectionLaw: z.string().optional(),
     eSignatureLaw: z.boolean(),
     cloudPolicy: z.enum(['local_only', 'regional', 'flexible']),
@@ -89,7 +89,7 @@ export const CountryProfileSchema = z.object({
   }),
 
   // Language and localization
-  localization: z.object({
+  localization: zod.z.object({
     officialLanguages: z.array(z.string()),
     currencyCode: z.string(),
     dateFormat: z.string(),
@@ -103,18 +103,18 @@ export const CountryProfileSchema = z.object({
 export type CountryProfile = z.infer<typeof CountryProfileSchema>;
 
 // Export Package
-export const ExportPackageSchema = z.object({
+export const ExportPackageSchema = zod.z.object({
   id: z.string().uuid(),
   name: z.string(),
   targetCountry: CountryProfileSchema,
-  services: z.array(z.object({
+  services: z.array(zod.z.object({
     service: DigitalServiceSchema,
     adaptations: z.array(z.string()),
     estimatedCost: z.number(),
     implementationMonths: z.number(),
   })),
 
-  branding: z.object({
+  branding: zod.z.object({
     primaryColor: z.string(),
     secondaryColor: z.string(),
     logoUrl: z.string().optional(),
