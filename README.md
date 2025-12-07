@@ -1069,7 +1069,7 @@ Use the [Feature Request template](https://github.com/BrianCLong/summit/issues/n
 
 The current Topicality Summit software is proprietary and is licensed only
 under the **IntelGraph / Topicality Summit Enterprise License Agreement
-(Version 1.0)**.
+(Version 1.1)**.
 
 - Copyright (c) 2024–2025  \
   Topicality LLC, Topicality Summit, and Brian C. Long  \
@@ -1078,14 +1078,16 @@ under the **IntelGraph / Topicality Summit Enterprise License Agreement
 Use of the current software requires a valid commercial agreement with
 Topicality LLC / Topicality Summit. See [LICENSE](./LICENSE) for enterprise
 terms, restrictions (including prohibitions on SaaS resale, competitive use,
-and reverse engineering), and contact information.
+reverse engineering, model/data extraction, and audit rights), ownership of
+derivative works, and contact information.
 
 **Contributor License Agreement**
 
 All Contributions to Summit are accepted only under the
-[Topicality Summit Contributor License Agreement](./CONTRIBUTOR_LICENSE_AGREEMENT.md).
+[Topicality Summit Contributor License Agreement (Version 2.0)](./CONTRIBUTOR_LICENSE_AGREEMENT.md).
 By submitting a pull request or other Contribution, you confirm your
-acceptance of that CLA.
+acceptance of that CLA (including work-made-for-hire/assignment provisions,
+patent grants, and moral-rights waivers).
 
 **Historical MIT-licensed snapshot**
 
