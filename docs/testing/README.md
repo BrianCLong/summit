@@ -79,3 +79,11 @@ For a feature or change to be considered "Done" and ready for merge, the followi
 - **License Gate Verified:** All licensing requirements are met, and no license violations are detected.
 - All automated tests (unit, integration, E2E, performance, security) pass.
 - Code reviews are completed and approved.
+
+## Detailed Guides
+
+*   **[Strategy & Pyramid](./STRATEGY.md)**: Detailed breakdown of testing levels and standards.
+*   **[Infrastructure Design](./INFRASTRUCTURE.md)**: Design of the shared `testing-sdk`.
+*   **[Quality Gates](./QUALITY_GATES.md)**: PR and Release policies.
+*   **[Service Checklist](./CHECKLIST.md)**: "Is my service ready?" checklist.
+*   **[Examples](./EXAMPLES.md)**: Narrative examples of test suites.
