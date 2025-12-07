@@ -30,7 +30,7 @@ function signAuditPayload(payload: JsonObject, secret?: string): string | null {
     const h = crypto.createHmac('sha256', String(secret));
     h.update(Buffer.from(JSON.stringify(payload)));
     return h.digest('base64');
-  } catch (_) {
+  } catch {
     return null;
   }
 }
@@ -103,7 +103,7 @@ async function writeAudit({
         userAgent || null,
       ],
     );
-  } catch (e) {
+  } catch {
     // non-fatal, avoid throwing in hot paths
   }
 }

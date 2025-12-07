@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 export interface Span {
   setAttributes(attributes: Record<string, unknown>): void;
   setAttribute(key: string, value: unknown): void;

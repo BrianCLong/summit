@@ -119,7 +119,7 @@ export const CompoundConditionSchema: z.ZodType<CompoundCondition> = z.lazy(() =
       z.union([SimpleConditionSchema, CompoundConditionSchema]),
     ),
   }),
-);
+) as z.ZodType<CompoundCondition>;
 
 export interface CompoundCondition {
   type: 'compound';

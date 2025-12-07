@@ -87,7 +87,6 @@ export class MerkleTreeBuilder {
     }
 
     // Reconstruct the path to root
-    let currentHash = leafHash;
     let currentIndex = leafIndex;
     let levelSize = tree.leaves.length;
 
@@ -273,7 +272,7 @@ export function verifyMerkleRoot(items: any[], expectedRoot: string): boolean {
   try {
     const actualRoot = buildMerkleRoot(items);
     return actualRoot === expectedRoot;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

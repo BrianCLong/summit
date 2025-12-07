@@ -4,9 +4,6 @@ import { promisify } from 'util';
 
 const gzip = promisify(zlib.gzip);
 const gunzip = promisify(zlib.gunzip);
-const deflate = promisify(zlib.deflate);
-const inflate = promisify(zlib.inflate);
-
 /**
  * Compression utility for handling large query results and cache data.
  * Supports GZIP and Deflate algorithms.

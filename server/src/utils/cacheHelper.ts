@@ -6,6 +6,7 @@ import { cacheService } from '../services/cacheService.js';
  * @param resolver The original resolver function
  * @param ttl Time to live in seconds
  */
+/* eslint-disable no-unused-vars */
 export const withCache = <TArgs = any, TResult = any>(
   keyGenerator: (parent: any, args: TArgs, context: any, info: any) => string,
   resolver: (parent: any, args: TArgs, context: any, info: any) => Promise<TResult>,

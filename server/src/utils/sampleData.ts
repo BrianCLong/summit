@@ -189,7 +189,7 @@ async function createSampleUsers(): Promise<void> {
     }
 
     logger.info(`Created ${users.length} sample users`);
-  } catch (error) {
+  } catch {
     logger.debug('Users table may not exist yet, skipping user creation');
   }
 }
@@ -231,7 +231,7 @@ async function createSampleInvestigations(): Promise<void> {
     }
 
     logger.info(`Created ${investigations.length} sample investigations`);
-  } catch (error) {
+  } catch {
     logger.debug(
       'Investigations table may not exist yet, skipping investigation creation',
     );

@@ -4,7 +4,8 @@
  * Standardizes API responses
  */
 
-import type { Request, Response, APIResponse, HATEOASLinks, Link } from '../types';
+import type { Request, Response, NextFunction } from 'express';
+import type { APIResponse, HATEOASLinks } from '../types';
 
 /**
  * Helper to send a standardized success response
@@ -26,8 +27,8 @@ export function sendSuccess<T>(
     metadata: {
       timestamp: new Date().toISOString(),
       version: req.context?.apiVersion || '1.0',
-      requestId: req.context!.requestId,
-      duration: Date.now() - req.context!.startTime,
+      requestId: req.context?.requestId || 'unknown',
+      duration: req.context?.startTime ? Date.now() - req.context.startTime : 0,
       pagination: req.pagination,
     },
     links: options?.links,
@@ -108,7 +109,8 @@ export function generateHATEOASLinks(
  */
 export function responseMiddleware(req: Request, res: Response, next: NextFunction) {
   // Add success helper
-  res.success = function <T>(data: T, options?: any) {
+  // Using type assertion to avoid namespace error if possible, or just attaching directly
+  (res as any).success = function <T>(data: T, options?: any) {
     sendSuccess(req, res, data, options);
   };
 
@@ -116,6 +118,7 @@ export function responseMiddleware(req: Request, res: Response, next: NextFuncti
 }
 
 // Extend Express Response type
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace Express {
     interface Response {
@@ -123,3 +126,4 @@ declare global {
     }
   }
 }
+/* eslint-enable @typescript-eslint/no-namespace */
