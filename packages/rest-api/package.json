@@ -19,7 +19,7 @@
     "api-framework"
   ],
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "openapi3-ts": "^4.1.2",
     "express-rate-limit": "^7.1.5",
     "helmet": "^8.1.0",

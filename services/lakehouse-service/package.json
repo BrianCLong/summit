@@ -15,7 +15,7 @@
     "@summit/object-storage": "workspace:*",
     "@summit/unified-analytics": "workspace:*",
     "@summit/cloud-governance": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",
     "pino": "^10.1.0",
