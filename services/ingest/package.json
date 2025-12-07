@@ -1,5 +1,5 @@
 {
-  "name": "policy-compiler",
+  "name": "ingest",
   "private": true,
   "scripts": {
     "build": "tsc -p . || true",
@@ -8,8 +8,8 @@
     "test:contract": "echo 'contract ok' && exit 0"
   },
   "dependencies": {
-    "body-parser": "^1.20.3",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-fileupload": "^1.5.1"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

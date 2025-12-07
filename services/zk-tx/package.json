@@ -1,5 +1,5 @@
 {
-  "name": "policy-compiler",
+  "name": "zk-tx",
   "private": true,
   "scripts": {
     "build": "tsc -p . || true",

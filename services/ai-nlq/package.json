@@ -1,5 +1,5 @@
 {
-  "name": "policy-compiler",
+  "name": "ai-nlq",
   "private": true,
   "scripts": {
     "build": "tsc -p . || true",

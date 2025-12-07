@@ -1,28 +1,16 @@
-## Summary
+# Feature Flag(s): <name(s)>
+- [ ] Flag default OFF
+- [ ] Read-only or additive changes only
+- [ ] Preview URL(s):
 
-<!-- What changed and why -->
+## Tests
+- [ ] Unit
+- [ ] Contract (PACT link)
+- [ ] E2E (Playwright link)
+- [ ] Perf smoke (k6)
+- [ ] Security notes
 
-## Type
-
-- [ ] Feature
-- [ ] Fix
-- [ ] Chore
-- [ ] Mergefix (Express5)
-
-## Validation
-
-- [ ] Unit tests green
-- [ ] E2E (Playwright) green
-- [ ] Lint (ESLint 9) clean
-- [ ] GraphQL contracts unchanged or baselined
-- [ ] OPA policy sim PASS
-- [ ] SBOM + provenance generated & verified
-
-## Risk
-
-- Blast radius:
-- Rollback plan:
-
-## Notes for Reviewers
-
-- Conflict patterns addressed (link): docs/merge/express5_conflict_cookbook.md
+## Ops
+- [ ] /healthz exposed
+- [ ] Metrics plan (stub ok)
+- [ ] Runbook link
