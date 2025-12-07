@@ -1,0 +1,39 @@
+mode: universal
+prompt: |
+  (Insert the Universal Ultra-Maximal Extrapolative Development Prompt from docs/PROMPTS.md)
+tools:
+  - file.write
+  - file.read
+  - git.commit
+  - git.diff
+  - git.status
+  - tests.run
+  - formatter.run
+  - linter.run
+  - pr.create
+modules:
+  - interpreter
+  - planner
+  - executor
+  - verifier
+  - documenter
+  - devops
+  - pr_manager
+pr:
+  branch: feat/auto-generated
+  autoMerge: true
+  reviewChecklist:
+    - All tests passing
+    - CI green
+    - Docs complete
+    - Commit history clean
+    - Architecture justified
+qualityGates:
+  coverage: 0.8
+  lint: true
+  typecheck: true
+  securityScan: true
+observability:
+  metrics: true
+  traces: false
+  logs: true
