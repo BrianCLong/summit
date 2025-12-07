@@ -234,6 +234,10 @@
     ]
   },
   "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.67.2",
+    "@opentelemetry/exporter-jaeger": "^2.2.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "axios": "^1.11.0",
@@ -241,9 +245,9 @@
     "docx": "^9.5.1",
     "dotenv": "^17.2.3",
     "graphql-depth-limit": "^1.1.0",
+    "ioredis": "^5.4.1",
     "jest-extended": "^7.0.0",
     "js-yaml": "^4.1.1",
-    "ioredis": "^5.4.1",
     "neo4j-driver": "6.0.1",
     "pg": "^8.16.3",
     "prom-client": "^15.1.2",

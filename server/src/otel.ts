@@ -1,51 +1,83 @@
-import logger from './utils/logger.js';
+import { logger } from './config/logger.js';
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import * as OpenTelemetryResources from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
+import { cfg } from './config.js';
 
-// No-op diagnostics
+// Setup OpenTelemetry SDK
+const resource = new OpenTelemetryResources.Resource({
+  [SemanticResourceAttributes.SERVICE_NAME]: 'intelgraph-server',
+  [SemanticResourceAttributes.SERVICE_VERSION]:
+    process.env.GIT_SHA || process.env.npm_package_version || 'dev',
+  [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'intelgraph',
+  [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: process.env.NODE_ENV || 'local',
+});
 
-// No-op resource attributes
-const resource = {
-  attributes: {
-    'service.name': 'intelgraph-server',
-    'service.version':
-      process.env.GIT_SHA || process.env.npm_package_version || 'dev',
-    'service.namespace': 'intelgraph',
-    'deployment.environment': process.env.NODE_ENV || 'local',
-  },
-} as any;
+// Configure Exporter
+// If OTLP_ENDPOINT is set, use OTLP. Else if JAEGER_ENDPOINT, use Jaeger. Else no-op/log.
+let traceExporter: any = undefined;
 
-// No-op exporters
+if (process.env.OTLP_ENDPOINT) {
+    traceExporter = new OTLPTraceExporter({
+        url: process.env.OTLP_ENDPOINT,
+    });
+} else if (process.env.JAEGER_ENDPOINT) {
+    traceExporter = new JaegerExporter({
+        endpoint: process.env.JAEGER_ENDPOINT,
+    });
+}
 
-// No-op instrumentations
-const instrumentations: any[] = [];
-
-// No-op SDK
-export const sdk: any = {
-  start: async () => {},
-  shutdown: async () => {},
-};
+// SDK Instance
+export const sdk = new NodeSDK({
+  resource,
+  traceExporter,
+  instrumentations: [
+    getNodeAutoInstrumentations({
+      '@opentelemetry/instrumentation-fs': { enabled: false },
+      '@opentelemetry/instrumentation-http': { enabled: true },
+      '@opentelemetry/instrumentation-express': { enabled: true },
+      '@opentelemetry/instrumentation-pg': { enabled: true },
+      '@opentelemetry/instrumentation-redis': { enabled: true },
+    }),
+  ],
+});
 
 let started = false;
 
 export async function startOtel(): Promise<void> {
   if (started) return;
+
+  // If explicitly disabled via env var
+  if (process.env.ENABLE_OTEL === 'false') {
+      logger.info('Observability (OTel) explicitly disabled via env.');
+      return;
+  }
+
   started = true;
 
   try {
-    logger.info('Observability (OTel) disabled; starting no-op telemetry.');
+    logger.info('Starting OpenTelemetry SDK...');
     await sdk.start();
+    logger.info('OpenTelemetry SDK started successfully.');
 
     // Graceful shutdown handling
     const shutdown = async () => {
       try {
         await sdk.shutdown();
-      } catch {}
+        logger.info('OpenTelemetry SDK shut down.');
+      } catch (err) {
+          logger.error({ err }, 'Error shutting down OpenTelemetry SDK');
+      }
       process.exit(0);
     };
 
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
   } catch (error) {
-    logger.warn('Continuing with no-op telemetry', {
+    logger.warn('Failed to start OpenTelemetry SDK', {
       error: (error as Error).message,
     });
   }
@@ -53,24 +85,4 @@ export async function startOtel(): Promise<void> {
 
 export function isOtelStarted() {
   return started;
-}
-
-// Health check span for validation (no-op)
-export function createHealthSpan(_spanName: string = 'health-check') {
-  return { end: () => {}, setAttributes: (_: any) => {} };
-}
-
-// Export tracer for manual instrumentation (no-op)
-export function getTracer(_name: string = 'intelgraph') {
-  return {
-    startSpan: (_n: string, _o?: any) => ({
-      end: () => {},
-      setAttributes: (_: any) => {},
-    }),
-  };
-}
-
-// Environment validation
-export function validateOtelConfig(): boolean {
-  return false;
 }

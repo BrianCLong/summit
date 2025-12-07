@@ -14,6 +14,26 @@ export type GoldenPathStep =
 
 export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
 
+// Generate or retrieve session correlation ID
+const getSessionId = () => {
+    let sid = sessionStorage.getItem('summit_session_id');
+    if (!sid) {
+        sid = crypto.randomUUID();
+        sessionStorage.setItem('summit_session_id', sid);
+    }
+    return sid;
+};
+
+// Generate or retrieve device ID
+const getDeviceId = () => {
+    let did = localStorage.getItem('summit_device_id');
+    if (!did) {
+        did = crypto.randomUUID();
+        localStorage.setItem('summit_device_id', did);
+    }
+    return did;
+};
+
 /**
  * Tracks a step in the Golden Path user journey.
  * Sends a telemetry event to the backend.
@@ -31,10 +51,16 @@ export const trackGoldenPathStep = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-correlation-id': getSessionId(), // Use session ID as correlation ID for events
       },
       body: JSON.stringify({
         event: 'golden_path_step',
         labels: { step, status },
+        context: {
+            sessionId: getSessionId(),
+            deviceId: getDeviceId(),
+            url: window.location.href
+        }
       }),
     });
   } catch (error) {
@@ -73,6 +99,7 @@ export const reportError = async (
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'x-correlation-id': getSessionId(),
       },
       body: JSON.stringify({
         event: 'client_error',
@@ -81,6 +108,10 @@ export const reportError = async (
           severity,
         },
         payload: errorData,
+        context: {
+            sessionId: getSessionId(),
+            deviceId: getDeviceId(),
+        }
       }),
     });
   } catch (trackingError) {
@@ -88,3 +119,8 @@ export const reportError = async (
     console.error('Failed to report error:', trackingError);
   }
 };
+
+export const getTelemetryContext = () => ({
+    sessionId: getSessionId(),
+    deviceId: getDeviceId(),
+});
