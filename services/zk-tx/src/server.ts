@@ -1,18 +1,19 @@
-import http from "http";
+import express from "express";
+import body from "body-parser";
+import crypto from "crypto";
 
-const port = process.env.PORT ? Number(process.env.PORT) : 8080;
+const app = express();
+app.use(body.json());
 
-const server = http.createServer((req, res) => {
-  if (req.url === "/healthz") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: true, service: "zk-tx" }));
-    return;
-  }
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "zk-tx" }));
 
-  res.writeHead(404);
-  res.end();
+app.post("/zk/overlap", (req, res) => {
+  const { selectorA, selectorB } = req.body || {};
+  if (!selectorA || !selectorB) return res.status(400).json({ error: "missing selectors" });
+  const overlap =
+    crypto.createHash("sha256").update(selectorA).digest("hex")[0] ===
+    crypto.createHash("sha256").update(selectorB).digest("hex")[0];
+  return res.json({ overlap, proof: "stub" });
 });
 
-server.listen(port, "0.0.0.0", () => {
-  console.log(`zk-tx listening on ${port}`);
-});
+app.listen(process.env.PORT || 8080);
