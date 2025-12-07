@@ -1,4 +1,4 @@
-import { performance } from 'node:perf_hooks';
+import { performance } from 'perf_hooks';
 import EventBooster from './EventBooster.js';
 import { BoostRunResult, EventRecord } from './types.js';
 

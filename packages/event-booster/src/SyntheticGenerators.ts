@@ -53,7 +53,7 @@ const createEvent = (
   id,
   timestamp,
   payload: { ...basePayload, signal },
-  tags: tags ? [...tags] : undefined,
+  tags: tags ? [...tags] : [],
 });
 
 const resolveStartTimestamp = (provided?: number): number =>

@@ -1,4 +1,4 @@
-import { performance } from 'node:perf_hooks';
+import { performance } from 'perf_hooks';
 import {
   BoostPattern,
   BoostRunResult,
@@ -14,7 +14,7 @@ const DEFAULT_HISTORY_LIMIT = 50;
 const cloneEvent = (event: EventRecord): EventRecord => ({
   ...event,
   payload: { ...event.payload },
-  tags: event.tags ? [...event.tags] : undefined,
+  tags: event.tags ? [...event.tags] : [],
 });
 
 const freezeOptions = (
@@ -125,7 +125,7 @@ export class EventBooster {
           ...derivative,
           boostPattern: derivative.boostPattern ?? pattern.name,
           sourceEventId: derivative.sourceEventId ?? source.id,
-          tags: derivative.tags ? [...derivative.tags] : undefined,
+          tags: derivative.tags ? [...derivative.tags] : [],
           payload: { ...derivative.payload },
         });
       }
