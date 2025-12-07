@@ -4,7 +4,8 @@
   "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
   "main": "server/server.js",
   "bin": {
-    "docforge": "./tools/docforge/cli.js"
+    "docforge": "./tools/docforge/cli.js",
+    "summit": "./scripts/summit-cli.mjs"
   },
   "scripts": {
     "setup": "chmod +x scripts/setup.sh && scripts/setup.sh",
