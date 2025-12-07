@@ -25,6 +25,9 @@ node-compile-cache/
 tools/dmcl/bin/
 reports/dmcl/
 
+# Graph Oracle generated reports
+reports/graph-oracle-report.*
+
 # Prevent secrets / env files
 .env.*
 !.env.example
