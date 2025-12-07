@@ -40,7 +40,7 @@ export class CompressionUtils {
     }
 
     // Compress with GZIP
-    const compressed = await gzip(buffer);
+    const compressed = (await gzip(buffer)) as Buffer;
     const result = Buffer.alloc(compressed.length + 1);
     result.writeUInt8(1, 0); // 1 = GZIP
     compressed.copy(result, 1);
