@@ -103,7 +103,7 @@ We use a "Safe Merge" label strategy to manage the PR backlog:
 
 ---
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com) [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen.svg)](https://nodejs.org) [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org) [![GraphQL](https://img.shields.io/badge/GraphQL-API-E10098.svg)](https://graphql.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com) [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen.svg)](https://nodejs.org) [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org) [![GraphQL](https://img.shields.io/badge/GraphQL-API-E10098.svg)](https://graphql.org)
 
 ### Automations
 
@@ -1065,7 +1065,44 @@ Use the [Feature Request template](https://github.com/BrianCLong/summit/issues/n
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Current Summit / Topicality Summit**
+
+The current Topicality Summit software is proprietary and is licensed only
+under the **IntelGraph / Topicality Summit Enterprise License Agreement
+(Version 1.0)**.
+
+- Copyright (c) 2024–2025  \
+  Topicality LLC, Topicality Summit, and Brian C. Long  \
+  All rights reserved.
+
+Use of the current software requires a valid commercial agreement with
+Topicality LLC / Topicality Summit. See [LICENSE](./LICENSE) for enterprise
+terms, restrictions (including prohibitions on SaaS resale, competitive use,
+and reverse engineering), and contact information.
+
+**Contributor License Agreement**
+
+All Contributions to Summit are accepted only under the
+[Topicality Summit Contributor License Agreement](./CONTRIBUTOR_LICENSE_AGREEMENT.md).
+By submitting a pull request or other Contribution, you confirm your
+acceptance of that CLA.
+
+**Historical MIT-licensed snapshot**
+
+Earlier open source releases of Summit were distributed under the MIT
+License. Those rights are preserved for the specific historical snapshot(s)
+that were released under MIT (for example, tag `v0.4.0-oss-mit`).
+
+- The historical MIT license text is preserved in
+  [OSS-MIT-LICENSE](./OSS-MIT-LICENSE).
+- The MIT license applies ONLY to those explicitly designated historical
+  releases, not to current proprietary versions.
+
+**Third-party open source**
+
+Summit may include third-party open source components that remain subject
+to their own licenses. See [NOTICE](./NOTICE) and the dependency metadata
+(e.g., `package.json`, `pnpm-lock.yaml`) for more information.
 
 ## 🙏 Acknowledgments
 
