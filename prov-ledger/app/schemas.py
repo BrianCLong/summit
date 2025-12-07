@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class SubmitText(BaseModel):
@@ -25,7 +25,14 @@ class Evidence(BaseModel):
     created_at: str | None = None
     signed: bool | None = False
     signer_fp: str | None = None
+    proof_status: str | None = None # e.g. "anchored"
 
+class EvidenceRequest(BaseModel):
+    hash: str
+    type: str = "document"
+    url: str | None = None
+    content: str | None = None
+    metadata: dict = Field(default_factory=dict)
 
 class AttachEvidenceRequest(BaseModel):
     claim_id: str
