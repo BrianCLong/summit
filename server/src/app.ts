@@ -49,6 +49,7 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
+import ingestionRouter from './routes/ingestion.js'; // Added knowledge fabric routes
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -166,6 +167,7 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/api/ingestion', ingestionRouter); // Register ingestion routes
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
