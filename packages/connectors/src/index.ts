@@ -25,6 +25,9 @@ export interface ConnectorConfig {
     maxRequestsPerMinute: number;
   };
   metadata?: Record<string, any>;
+  tags?: string[];
+  capabilities?: string[];
+  reliabilityScore?: number;
 }
 
 export interface AuthenticationConfig {
@@ -56,6 +59,8 @@ export interface ConnectorOperation {
   parameters?: OperationParameter[];
   requestSchema?: any;
   responseSchema?: any;
+  capabilities?: string[];
+  stability?: 'experimental' | 'beta' | 'ga';
 }
 
 export interface OperationParameter {
@@ -65,6 +70,74 @@ export interface OperationParameter {
   required: boolean;
   default?: any;
   description?: string;
+}
+
+export interface DiscoveryFilter {
+  type?: string;
+  capabilities?: string[];
+  tags?: string[];
+  authTypes?: AuthenticationConfig['type'][];
+}
+
+export interface ConnectorDescriptor {
+  id: string;
+  name: string;
+  type: string;
+  description?: string;
+  authentication: AuthenticationConfig['type'];
+  capabilities: string[];
+  tags: string[];
+  reliabilityScore?: number;
+  operations: Array<{
+    id: string;
+    name: string;
+    method: ConnectorOperation['method'];
+    endpoint: string;
+    parameters: OperationParameter[];
+    requestSchema?: any;
+    responseSchema?: any;
+    capabilities: string[];
+  }>;
+  metadata?: Record<string, any>;
+}
+
+export interface CapabilityNegotiationRequest {
+  required: string[];
+  preferred?: string[];
+  authTypes?: AuthenticationConfig['type'][];
+}
+
+export interface CapabilityMatch {
+  connector: ConnectorDescriptor;
+  score: number;
+  matched: string[];
+  missing: string[];
+}
+
+export interface OperationSchemaIntrospection {
+  id: string;
+  name: string;
+  method: ConnectorOperation['method'];
+  endpoint: string;
+  parameters: OperationParameter[];
+  requestSchema?: any;
+  responseSchema?: any;
+  capabilities: string[];
+  stability?: ConnectorOperation['stability'];
+}
+
+export interface SchemaIntrospectionResult {
+  connector: ConnectorDescriptor;
+  operations: OperationSchemaIntrospection[];
+}
+
+export interface GeneratedAdapter {
+  connectorId: string;
+  operation: string;
+  requiredParams: string[];
+  optionalParams: string[];
+  schema?: { request?: any; response?: any };
+  invoke(params?: Record<string, any>): Promise<ConnectorExecutionResult>;
 }
 
 export interface ConnectorExecutionResult {
@@ -488,18 +561,29 @@ export class ConnectorRegistry extends EventEmitter {
     this.emit('connector_type.registered', type);
   }
 
-  registerConnector(config: ConnectorConfig): BaseConnector {
+  registerConnector(
+    config: ConnectorConfig,
+    options: { operations?: ConnectorOperation[] } = {},
+  ): BaseConnector {
     const ConnectorClass = this.connectorTypes.get(config.type);
     if (!ConnectorClass) {
       throw new Error(`Unknown connector type: ${config.type}`);
     }
 
-    const connector = new ConnectorClass(config);
+    const connector = new ConnectorClass(config, options.operations ?? []);
     connector.validate();
 
     this.connectors.set(config.id, connector);
     this.emit('connector.registered', config);
 
+    return connector;
+  }
+
+  registerInstance(connector: BaseConnector): BaseConnector {
+    const config = connector.getConfig();
+    connector.validate();
+    this.connectors.set(config.id, connector);
+    this.emit('connector.registered', config);
     return connector;
   }
 
@@ -531,6 +615,191 @@ export class ConnectorRegistry extends EventEmitter {
     }
 
     return results;
+  }
+}
+
+function uniqueStrings(values: Array<string | undefined | null>): string[] {
+  return Array.from(new Set(values.filter(Boolean) as string[]));
+}
+
+function resolveTags(config: ConnectorConfig): string[] {
+  const metadataTags = Array.isArray(config.metadata?.tags)
+    ? config.metadata?.tags
+    : [];
+  return uniqueStrings([...(config.tags ?? []), ...metadataTags]);
+}
+
+function resolveCapabilities(
+  connector: BaseConnector,
+  operations: ConnectorOperation[],
+): string[] {
+  const config = connector.getConfig();
+  const configCaps = Array.isArray(config.capabilities)
+    ? config.capabilities
+    : [];
+  const metadataCaps = Array.isArray(config.metadata?.capabilities)
+    ? config.metadata?.capabilities
+    : [];
+  const operationCaps = operations.flatMap((operation) =>
+    operation.capabilities?.length ? operation.capabilities : [operation.name],
+  );
+  return uniqueStrings([...configCaps, ...metadataCaps, ...operationCaps]);
+}
+
+function describeConnector(connector: BaseConnector): ConnectorDescriptor {
+  const config = connector.getConfig();
+  const operations = connector.getOperations().map((operation) => ({
+    id: operation.id,
+    name: operation.name,
+    method: operation.method,
+    endpoint: operation.endpoint,
+    parameters: operation.parameters ?? [],
+    requestSchema: operation.requestSchema,
+    responseSchema: operation.responseSchema,
+    capabilities: operation.capabilities?.length
+      ? operation.capabilities
+      : [operation.name],
+  }));
+
+  return {
+    id: config.id,
+    name: config.name,
+    type: config.type,
+    description: config.description,
+    authentication: config.authentication.type,
+    capabilities: resolveCapabilities(connector, operations),
+    tags: resolveTags(config),
+    reliabilityScore:
+      config.reliabilityScore ?? (config.metadata?.reliability as number | undefined),
+    operations,
+    metadata: config.metadata,
+  };
+}
+
+export class ConnectorDiscoveryApi {
+  constructor(private readonly registry: ConnectorRegistry) {}
+
+  discover(filter: DiscoveryFilter = {}): ConnectorDescriptor[] {
+    const descriptors = this.registry.getAllConnectors().map(describeConnector);
+    return descriptors
+      .filter((descriptor) => {
+        if (filter.type && descriptor.type !== filter.type) {
+          return false;
+        }
+        if (
+          filter.capabilities &&
+          !filter.capabilities.every((cap) => descriptor.capabilities.includes(cap))
+        ) {
+          return false;
+        }
+        if (
+          filter.tags &&
+          filter.tags.length > 0 &&
+          !filter.tags.every((tag) => descriptor.tags.includes(tag))
+        ) {
+          return false;
+        }
+        if (
+          filter.authTypes &&
+          !filter.authTypes.includes(descriptor.authentication)
+        ) {
+          return false;
+        }
+        return true;
+      })
+      .sort(
+        (a, b) => (b.reliabilityScore ?? 0) - (a.reliabilityScore ?? 0),
+      );
+  }
+
+  negotiateCapabilities(
+    request: CapabilityNegotiationRequest,
+  ): CapabilityMatch[] {
+    const candidates = this.discover({ authTypes: request.authTypes });
+    const required = request.required ?? [];
+    const matches: CapabilityMatch[] = [];
+
+    for (const connector of candidates) {
+      const matched = required.filter((cap) =>
+        connector.capabilities.includes(cap),
+      );
+      const missing = required.filter((cap) => !connector.capabilities.includes(cap));
+      if (missing.length > 0) {
+        continue;
+      }
+      const preferredMatches = (request.preferred ?? []).filter((cap) =>
+        connector.capabilities.includes(cap),
+      );
+      const authBonus = request.authTypes?.includes(connector.authentication)
+        ? 0.25
+        : 0;
+      const score =
+        matched.length * 2 +
+        preferredMatches.length +
+        (connector.reliabilityScore ?? 0) +
+        authBonus;
+      matches.push({ connector, score, matched, missing });
+    }
+
+    return matches.sort((a, b) => b.score - a.score);
+  }
+
+  introspectSchema(connectorId: string): SchemaIntrospectionResult {
+    const connector = this.registry.getConnector(connectorId);
+    if (!connector) {
+      throw new Error(`Connector ${connectorId} not found`);
+    }
+    const descriptor = describeConnector(connector);
+    const operations: OperationSchemaIntrospection[] = descriptor.operations.map(
+      (operation) => ({
+        ...operation,
+        stability: connector
+          .getOperations()
+          .find((candidate) => candidate.name === operation.name)?.stability,
+      }),
+    );
+    return { connector: descriptor, operations };
+  }
+
+  generateAdapter(
+    connectorId: string,
+    operationName: string,
+  ): GeneratedAdapter {
+    const connector = this.registry.getConnector(connectorId);
+    if (!connector) {
+      throw new Error(`Connector ${connectorId} not found`);
+    }
+    const operation = connector
+      .getOperations()
+      .find(
+        (candidate) =>
+          candidate.name === operationName || candidate.id === operationName,
+      );
+    if (!operation) {
+      throw new Error(`Operation ${operationName} not found on connector ${connectorId}`);
+    }
+    const parameters = operation.parameters ?? [];
+    const requiredParams = parameters
+      .filter((param) => param.required)
+      .map((param) => param.name);
+    const optionalParams = parameters
+      .filter((param) => !param.required)
+      .map((param) => param.name);
+
+    return {
+      connectorId,
+      operation: operation.name,
+      requiredParams,
+      optionalParams,
+      schema: { request: operation.requestSchema, response: operation.responseSchema },
+      invoke: async (params = {}) => {
+        const missing = requiredParams.filter((param) => params[param] === undefined);
+        if (missing.length > 0) {
+          throw new Error(`Missing required parameters: ${missing.join(', ')}`);
+        }
+        return connector.execute(operation.name, params);
+      },
+    };
   }
 }
 
