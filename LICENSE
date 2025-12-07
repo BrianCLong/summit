@@ -1,21 +1,157 @@
-MIT License
+IntelGraph / Topicality Summit Enterprise License Agreement
+Version 1.1
 
-Copyright (c) 2025 IntelGraph Platform
+Copyright (c) 2024–2025
+Topicality LLC, Topicality Summit, and Brian C. Long
+All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This Agreement governs access to and use of the Topicality Summit software
+and all accompanying documentation, models, data, configurations, keys,
+interfaces, and other deliverables (the "Software") provided by Topicality
+LLC, Topicality Summit, and Brian C. Long (collectively, the "Licensor"). Any
+rights not expressly granted are reserved.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Commercial Agreement Required
+   Access to and use of the Software is conditioned on your prior acceptance
+   of and continued compliance with a written commercial agreement, order
+   form, or proof-of-concept agreement executed with the Licensor (a
+   "Commercial Agreement"). In the event of any conflict between this notice
+   and a valid Commercial Agreement, the Commercial Agreement controls.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. License Grant (Enterprise Use Only)
+   Subject to the Commercial Agreement and this notice, the Licensor grants
+   you a limited, revocable, non-exclusive, non-transferable,
+   non-sublicensable license to install and use the Software solely for your
+   internal business purposes and only in the environments and quantities
+   specified in the Commercial Agreement. No other rights are granted by
+   implication, estoppel, or otherwise.
+
+3. Restrictions (Non-Exhaustive)
+   Except as expressly authorized in a Commercial Agreement, you may not and
+   may not permit any third party to:
+   - provide the Software (or any output) as a hosted, SaaS, platform,
+     bureau, managed service, or timesharing service to any third party;
+   - use the Software to build, train, fine-tune, or improve any product,
+     service, model, or dataset that competes with or substitutes for the
+     Software or any offering of the Licensor;
+   - copy, modify, fork, translate, adapt, decompile, disassemble, reverse
+     engineer, or otherwise attempt to derive or gain access to any source
+     code, models, weights, prompts, data, or trade secrets in the Software
+     (except to the limited extent required by applicable law and only after
+     providing prior written notice to the Licensor);
+   - remove, obscure, or modify any proprietary notices, security mechanisms,
+     or technical controls;
+   - publish or disclose performance, benchmarking, or security test results
+     without the Licensor's prior written consent;
+   - circumvent usage limits, licensing controls, or access restrictions;
+   - redistribute, resell, rent, lease, loan, sublicense, assign, pledge, or
+     otherwise transfer the Software (or any keys, tokens, credentials, or
+     access) to any third party;
+   - use the Software to develop training data for any competitive AI/ML
+     models or to mine, scrape, or extract proprietary parameters, prompts,
+     or weights;
+   - use the Software in violation of applicable law, including export
+     control, sanctions, privacy, or information security requirements; or
+   - deploy the Software in safety-critical or high-risk environments without
+     a separate written agreement that expressly permits such use.
+
+4. Ownership; Derivative Works
+   The Software is licensed, not sold. The Licensor retains all right, title,
+   and interest in and to the Software, including all intellectual property
+   rights and any modifications, updates, or derivative works, regardless of
+   who creates or provides them. To the extent you create any modifications,
+   derivative works, or improvements to the Software, you hereby assign to
+   the Licensor all right, title, and interest in such works. Where
+   assignment is not permitted by law, you grant the Licensor an exclusive,
+   perpetual, irrevocable, worldwide, royalty-free license (with rights to
+   sublicense) to use, reproduce, modify, distribute, perform, display, make
+   available, and otherwise exploit those works without restriction. You will
+   execute documents and take actions reasonably requested to perfect these
+   rights. No license is granted to the Licensor's trademarks, service marks,
+   or trade dress except as necessary to identify the Software.
+
+5. Feedback and Usage Data
+   You grant the Licensor a perpetual, irrevocable, worldwide, royalty-free
+   license to use, reproduce, modify, distribute, and otherwise exploit any
+   feedback, suggestions, usage data, telemetry, or improvements you provide
+   relating to the Software, without restriction or obligation to you.
+
+6. Confidentiality and Security
+   The Software (including its structure, interfaces, models, training data,
+   weights, benchmarks, configurations, and performance data) constitutes the
+   Licensor's confidential information. You will protect it using at least
+   the same degree of care you use to protect your own confidential
+   information and no less than reasonable care. You will implement
+   appropriate administrative, technical, and physical safeguards to prevent
+   unauthorized access, use, or disclosure, and will promptly notify the
+   Licensor of any actual or suspected unauthorized access or security
+   incident involving the Software.
+
+7. Compliance and Audit
+   You will maintain complete and accurate records sufficient to demonstrate
+   compliance with this Agreement and any usage limits. Upon reasonable
+   notice, the Licensor may audit your use of the Software (directly or via a
+   mutually agreed third party) to verify compliance. If an audit reveals
+   unlicensed use, you will promptly pay additional fees and costs and take
+   corrective actions required by the Licensor.
+
+8. Third-Party Components
+   The Software may include or depend on third-party open source components
+   licensed under separate open source licenses. Those components are not
+   licensed under this Enterprise License Agreement and remain subject to
+   their respective licenses, as identified in the NOTICE / THIRD_PARTY file
+   or applicable package metadata.
+
+9. Export Compliance
+   You represent and warrant that you are not located in, organized in, or a
+   resident of any country or territory subject to comprehensive U.S.
+   sanctions and that you will not export, re-export, or transfer the
+   Software in violation of applicable export control or sanctions laws. You
+   will promptly notify the Licensor of any export control inquiry relating
+   to the Software.
+
+10. Termination and Injunctive Relief
+    The license granted herein terminates automatically upon expiration or
+    termination of the applicable Commercial Agreement or upon any breach of
+    this notice. Upon termination, you must immediately stop using the
+    Software and destroy all copies in your possession or control. You agree
+    that any unauthorized use of the Software or breach of Sections 3, 4, 6,
+    or 9 will cause irreparable harm for which damages are an inadequate
+    remedy, and the Licensor is entitled to seek injunctive relief in
+    addition to any other remedies available at law or equity.
+
+11. Disclaimer of Warranties
+    UNLESS OTHERWISE STATED IN A COMMERCIAL AGREEMENT, THE SOFTWARE IS
+    PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-
+    INFRINGEMENT, AND ANY WARRANTIES ARISING FROM COURSE OF DEALING OR
+    USAGE OF TRADE.
+
+12. Limitation of Liability
+    TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT WILL THE LICENSOR OR
+    ITS AFFILIATES, OFFICERS, EMPLOYEES, CONTRACTORS, OR AGENTS BE LIABLE FOR
+    ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE
+    DAMAGES, OR ANY LOSS OF PROFITS, REVENUE, DATA, OR GOODWILL, ARISING OUT
+    OF OR IN CONNECTION WITH THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
+    OF SUCH DAMAGES. THE LICENSOR'S TOTAL LIABILITY FOR ALL CLAIMS RELATING
+    TO THE SOFTWARE WILL NOT EXCEED THE AMOUNT PAID BY YOU FOR THE SOFTWARE
+    UNDER THE APPLICABLE COMMERCIAL AGREEMENT IN THE TWELVE (12) MONTHS
+    PRECEDING THE EVENT GIVING RISE TO THE CLAIM.
+
+13. Indemnity
+    You will indemnify, defend, and hold harmless the Licensor and its
+    affiliates, officers, employees, contractors, and agents from and
+    against any claims, damages, losses, liabilities, costs, and expenses
+    (including reasonable attorneys' fees) arising out of or related to your
+    use of the Software in violation of this Agreement or applicable law.
+
+14. Governing Law
+    Unless expressly stated otherwise in a Commercial Agreement, this notice
+    is governed by the laws specified in that Commercial Agreement, without
+    regard to conflict-of-law principles.
+
+For commercial licensing inquiries, contact:
+  Topicality LLC / Topicality Summit
+  Attn: Licensing
+  Email: brianclong@gmail.com
