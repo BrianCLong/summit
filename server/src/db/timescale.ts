@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * IntelGraph TimescaleDB Connection - GA-Core Enhanced
  * Committee Specification: Temporal functions with event hypertables

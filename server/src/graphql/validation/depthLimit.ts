@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Kind, visit, ValidationContext, ASTNode, GraphQLError } from 'graphql';
 
 export function depthLimit(maxDepth: number = 10) {

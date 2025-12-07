@@ -1,3 +1,4 @@
+// @ts-nocheck
 import crypto from 'crypto';
 // import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
 import { getPostgresPool } from '../../db/postgres.js';

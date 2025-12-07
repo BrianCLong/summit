@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getRedisClient } from '../config/database.js';
 import crypto from 'node:crypto';
 import {

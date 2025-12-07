@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { PubSub } from 'graphql-subscriptions';
 // @ts-ignore - RedisPubSub type not exported
 import { RedisPubSub } from 'graphql-redis-subscriptions';

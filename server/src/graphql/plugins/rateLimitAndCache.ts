@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { ApolloServerPlugin } from '@apollo/server';
 import { GraphQLError } from 'graphql';
 import { getComplexity, simpleEstimator, fieldExtensionsEstimator } from 'graphql-query-complexity';

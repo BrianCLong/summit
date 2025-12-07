@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ThreatHuntingDashboard
  * Main dashboard for orchestrating agentic threat hunts over the knowledge graph

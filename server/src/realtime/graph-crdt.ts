@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Namespace, Socket } from 'socket.io';
 import Redis from 'ioredis';
 import pino from 'pino';

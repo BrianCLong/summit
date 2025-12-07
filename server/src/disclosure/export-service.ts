@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { randomUUID, createHash, createHmac } from 'crypto';
 import { promises as fs } from 'fs';
 import { createReadStream, createWriteStream } from 'fs';

@@ -190,12 +190,14 @@ export const WorkflowDashboard: React.FC = () => {
 
   const handleStartWorkflow = (definitionName: string) => {
     // Mock workflow start
+    // eslint-disable-next-line no-console
     console.log(`Starting workflow: ${definitionName}`);
     setError(null);
   };
 
   const handleStopWorkflow = (workflowId: string) => {
     // Mock workflow stop
+    // eslint-disable-next-line no-console
     console.log(`Stopping workflow: ${workflowId}`);
     setError(null);
   };

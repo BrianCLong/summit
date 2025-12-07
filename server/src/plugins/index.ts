@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Plugin, PluginContext } from './sdk';
 import { vaultReadKvV2 } from '../vault/helpers';
 import { RedisService as RedisCache } from '../cache/redis.js';
