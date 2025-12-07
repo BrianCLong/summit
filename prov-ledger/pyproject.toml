@@ -10,7 +10,14 @@ dependencies = [
     "prometheus-client",
     "cryptography",
     "prov",
+    "sqlalchemy",
+    "psycopg2-binary",
+    "pymerkle",
+    "python-dotenv",
 ]
 
 [project.optional-dependencies]
 test = ["pytest", "httpx"]
+
+[tool.setuptools]
+packages = ["service"]
