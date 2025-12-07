@@ -216,4 +216,11 @@ export const runsRepo = {
   ): Promise<Run[]> {
     return this.instance.getByPipeline(pipelineId, tenantId, limit);
   },
+
+  /**
+   * Helper to strictly get a run for a tenant, throwing if not found or unauthorized (implicit).
+   */
+  async getRunForTenant(id: string, tenantId: string): Promise<Run | null> {
+    return this.instance.get(id, tenantId);
+  },
 };

@@ -4,17 +4,14 @@ import { Client } from 'pg';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { dbConfig } from '../config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DATABASE_URL =
-  process.env.DATABASE_URL ||
-  'postgresql://maestro:maestro-dev-secret@localhost:5432/maestro';
-
 class MigrationRunner {
-  constructor(dbUrl) {
-    this.client = new Client({ connectionString: dbUrl });
+  constructor() {
+    this.client = new Client(dbConfig.connectionConfig);
     this.migrationsDir = path.join(__dirname, 'migrations/postgres');
   }
 
@@ -161,7 +158,7 @@ class MigrationRunner {
 // CLI interface
 async function main() {
   const command = process.argv[2];
-  const runner = new MigrationRunner(DATABASE_URL);
+  const runner = new MigrationRunner();
 
   try {
     switch (command) {
@@ -191,7 +188,10 @@ async function main() {
         break;
       default:
         console.log('Usage: node migrate.js [up|rollback|status] [steps]');
-        process.exit(1);
+        // Don't exit error here, just log usage if running directly
+        if (import.meta.url === `file://${process.argv[1]}`) {
+            process.exit(1);
+        }
     }
   } catch (error) {
     console.error('Migration failed:', error.message);

@@ -123,7 +123,8 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
 router.get('/runs/:id', requirePermission('run:read'), async (req, res) => {
   try {
     const tenantId = (req.context as RequestContext).tenantId; // Get tenantId from context
-    const run = await runsRepo.get(req.params.id, tenantId); // Pass tenantId
+    // Use the explicit tenant helper
+    const run = await runsRepo.getRunForTenant(req.params.id, tenantId);
     if (!run) {
       return res.status(404).json({ error: 'Run not found' });
     }
