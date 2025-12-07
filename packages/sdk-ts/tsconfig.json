@@ -4,7 +4,8 @@
     "outDir": "dist",
     "rootDir": "src",
     "declaration": true,
-    "allowImportingTsExtensions": false,
+    "baseUrl": "./src",
+    "emitDeclarationOnly": false,
     "composite": true,
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "types": []
