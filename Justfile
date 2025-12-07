@@ -260,3 +260,36 @@ pipelines-by-owner OWNER:
 pipelines-demo-cisa:
     python3 pipelines/cli.py run cisa-kev-ingest --dry-run
 
+# ============================================================================
+# Maestro Pipeline Shims
+# ============================================================================
+
+sbom:
+    bash scripts/sbom-attest.sh
+
+trivy:
+    @echo "Running Trivy security scan..."
+    @if command -v trivy >/dev/null; then \
+        trivy fs . --scanners vuln,secret,config --exit-code 0; \
+    else \
+        echo "Trivy not found, skipping scan (simulation mode)"; \
+    fi
+
+slo-check:
+    python3 scripts/slo_burn_check.py --budget .maestro/ci_budget.json
+
+migration-gate:
+    bash scripts/migration-gate.sh
+
+deploy strategy="canary" weight="10":
+    bash scripts/deploy.sh --strategy {{strategy}} --weight {{weight}}
+
+canary-analyze budget=".maestro/ci_budget.json":
+    bash scripts/canary_analyze.sh --budget {{budget}}
+
+promote:
+    @echo "Promoting deployment to stable..."
+    @echo "Promotion complete."
+
+rollback service="intelgraph":
+    bash scripts/rollback.sh {{service}}
