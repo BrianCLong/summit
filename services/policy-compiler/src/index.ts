@@ -1,5 +1,7 @@
 import yaml from 'js-yaml';
 import { z } from 'zod';
+import express from 'express';
+import crypto from 'crypto';
 
 // Policy Schema
 export const PolicySchema = z.object({
@@ -80,9 +82,25 @@ export function middleware(policyName: string, compiler: PolicyCompiler) {
       user: req.user || {},
     });
     if (!result.allowed) {
-      res.status(403).json({ error: 'Forbidden', reason: result.reason });
+      res.status(403).json({ error: 'Forbidden', reason: result.reason, traceId: req.headers['x-trace-id'] || crypto.randomUUID() });
       return;
     }
     next();
   };
 }
+
+// Server (if used as standalone service)
+const app = express();
+app.use(express.json());
+
+const compiler = new PolicyCompiler();
+
+app.post("/simulate", (req, res) => {
+  const { policyChanges, samples } = req.body || {};
+  // Mock simulation of policy changes against samples
+  const results = (samples || []).map((s: any) => ({ query: s.query, before: true, after: true, diff: false }));
+  res.json({ results, traceId: crypto.randomUUID() });
+});
+
+// Export for usage if needed
+export { app };

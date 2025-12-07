@@ -2,8 +2,9 @@ import csv
 import io
 import json
 from datetime import datetime
+from typing import Optional, List
 
-from fastapi import FastAPI, HTTPException, Body, UploadFile, File
+from fastapi import FastAPI, HTTPException, Body, UploadFile, File, Header
 from pydantic import BaseModel, Field
 from prov.model import ProvDocument
 from cryptography.hazmat.primitives import hashes
@@ -22,6 +23,18 @@ class Namespace(BaseModel):
     prefix: str
     uri: str
 
+class ClaimIn(BaseModel):
+    evidenceId: str
+    assertion: str
+
+class ClaimOut(BaseModel):
+    id: str
+    status: str
+    timestamp: float
+
+class ClaimList(BaseModel):
+    items: List[ClaimOut]
+    nextCursor: Optional[str] = None
 
 # In-memory storage
 _prov_documents: dict[str, SignedProvDocument] = {}
@@ -30,6 +43,12 @@ _private_keys: dict[str, rsa.RSAPrivateKey] = {}
 _namespaces: dict[str, str] = {} # For managing cross-domain namespaces
 _green_lock_ledger: dict[str, ProvDocument] = {}
 
+# Idempotency storage
+IDEMP_KEYS = set()
+LAST_RESPONSES = {}
+
+# Claims storage (mock)
+_claims: List[ClaimOut] = []
 
 # Generate a key pair for demo purposes
 key_id = "default_key"
@@ -134,3 +153,44 @@ async def migrate_green_lock_ledger(file: UploadFile = File(...)):
         _green_lock_ledger[pr_id] = doc
 
     return {"message": f"Migrated {len(_green_lock_ledger)} records from green-lock-ledger"}
+
+@app.post("/claim", response_model=ClaimOut, status_code=201)
+def register_claim(body: ClaimIn, idempotency_key: Optional[str] = Header(None)):
+    if not idempotency_key:
+        raise HTTPException(400, "missing idempotency-key")
+    if idempotency_key in IDEMP_KEYS:
+        return LAST_RESPONSES[idempotency_key]
+
+    # ... compute ...
+    claim_id = f"clm_{len(_claims) + 1}"
+    resp = ClaimOut(id=claim_id, status="verified", timestamp=datetime.now().timestamp())
+
+    # Store
+    _claims.append(resp)
+
+    IDEMP_KEYS.add(idempotency_key)
+    LAST_RESPONSES[idempotency_key] = resp
+    return resp
+
+@app.get("/claims", response_model=ClaimList)
+def list_claims(limit: int = 50, after: Optional[str] = None):
+    # Mock implementation of cursor pagination
+    start_index = 0
+    if after:
+        # Find index after 'after' cursor
+        for i, claim in enumerate(_claims):
+            if claim.id == after:
+                start_index = i + 1
+                break
+
+    items = _claims[start_index : start_index + limit]
+
+    next_cursor = None
+    if start_index + limit < len(_claims):
+        next_cursor = items[-1].id if items else None
+
+    return {"items": items, "nextCursor": next_cursor}
+
+@app.get("/export/manifest/{id}")
+def export_manifest(id: str):
+    return {"id": id, "stub": "manifest-content", "signature": "stub-signature"}
