@@ -237,20 +237,70 @@ jobs:
     needs: [changes]
     if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
     runs-on: ubuntu-latest
-    continue-on-error: true
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@v4
 
+      # 1. Secret Scanning (Blocking)
+      - name: Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        with:
+          config-path: .gitleaks.toml
+          fail: true
+
+      # 2. SBOM Generation
       - name: Generate SBOM
         uses: anchore/sbom-action@v0
         with:
           path: .
+          format: spdx-json
           output-file: sbom.spdx.json
 
+      # 3. Vulnerability Scanning (Trivy)
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@0.24.0
         with:
           scan-type: fs
           severity: CRITICAL,HIGH
           ignore-unfixed: true
-          exit-code: '0'
+          format: 'json'
+          output: 'trivy-results.json'
+          exit-code: '0' # OPA decides policy
+
+      # 4. Policy Gate Preparation
+      - name: Generate OPA Input
+        run: node scripts/ci/generate-opa-input.cjs --sbom sbom.spdx.json --trivy trivy-results.json --output opa-input.json
+
+      # 5. OPA Setup
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      # 6. Policy Evaluation (Blocking)
+      - name: Evaluate Security Policy
+        run: |
+          # Evaluate CI Gate policy
+          VIOLATION_COUNT=$(opa eval --input opa-input.json --data policy/ --format json "count(data.ci_gate.deny)" | jq '.result[0].expressions[0].value')
+
+          if [ "$VIOLATION_COUNT" -gt 0 ]; then
+             echo "❌ Security Policy Gate Failed with $VIOLATION_COUNT violations:"
+             opa eval --input opa-input.json --data policy/ --format pretty "data.ci_gate.deny"
+             exit 1
+          else
+             echo "✅ Security Policy Gate Passed."
+             # Warn about non-blocking issues
+             opa eval --input opa-input.json --data policy/ --format pretty "data.ci_gate.warn"
+          fi
+
+      # 7. Upload Artifacts
+      - name: Upload Security Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            sbom.spdx.json
+            trivy-results.json
+            opa-input.json
