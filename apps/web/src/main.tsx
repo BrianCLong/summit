@@ -1,11 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import config from './config'
 import './index.css'
 
 // Start MSW for development
 async function enableMocking() {
-  if (process.env.NODE_ENV !== 'development') {
+  if (config.env !== 'development') {
     return
   }
 
