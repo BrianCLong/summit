@@ -19,6 +19,7 @@ import {
 import type { Pool, PoolClient } from 'pg';
 
 describe('InvestigationRepo', () => {
+  const tenantId = 'tenant-123';
   let investigationRepo: InvestigationRepo;
   let mockPgPool: jest.Mocked<Pool>;
   let mockPgClient: jest.Mocked<PoolClient>;
@@ -179,6 +180,7 @@ describe('InvestigationRepo', () => {
     it('should update investigation name', async () => {
       const updateInput = {
         id: 'inv-789',
+        tenantId,
         name: 'Updated Investigation Name',
       };
 
@@ -209,6 +211,7 @@ describe('InvestigationRepo', () => {
     it('should update status', async () => {
       const updateInput = {
         id: 'inv-789',
+        tenantId,
         status: 'completed' as const,
       };
 
@@ -234,6 +237,7 @@ describe('InvestigationRepo', () => {
     it('should update multiple fields', async () => {
       const updateInput = {
         id: 'inv-789',
+        tenantId,
         name: 'New Name',
         description: 'New description',
         status: 'archived' as const,
@@ -265,6 +269,7 @@ describe('InvestigationRepo', () => {
     it('should return null if investigation not found', async () => {
       const updateInput = {
         id: 'non-existent',
+        tenantId,
         name: 'Updated Name',
       };
 
@@ -278,6 +283,7 @@ describe('InvestigationRepo', () => {
     it('should return existing investigation if no fields to update', async () => {
       const updateInput = {
         id: 'inv-789',
+        tenantId,
       };
 
       const mockRow = {
@@ -307,6 +313,7 @@ describe('InvestigationRepo', () => {
     it('should always update updated_at timestamp', async () => {
       const updateInput = {
         id: 'inv-789',
+        tenantId,
         name: 'Updated Name',
       };
 
@@ -336,16 +343,16 @@ describe('InvestigationRepo', () => {
       const investigationId = 'inv-789';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ tenant_id: tenantId }] }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
-      const result = await investigationRepo.delete(investigationId);
+      const result = await investigationRepo.delete(investigationId, tenantId);
 
       expect(result).toBe(true);
       expect(mockPgClient.query).toHaveBeenCalledWith('BEGIN');
       expect(mockPgClient.query).toHaveBeenCalledWith(
-        'DELETE FROM investigations WHERE id = $1',
-        [investigationId],
+        'DELETE FROM investigations WHERE id = $1 AND tenant_id = $2 RETURNING tenant_id',
+        [investigationId, tenantId],
       );
       expect(mockPgClient.query).toHaveBeenCalledWith('COMMIT');
       expect(mockPgClient.release).toHaveBeenCalled();
@@ -355,10 +362,10 @@ describe('InvestigationRepo', () => {
       const investigationId = 'non-existent';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rowCount: 0 }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rows: [] }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
 
-      const result = await investigationRepo.delete(investigationId);
+      const result = await investigationRepo.delete(investigationId, tenantId);
 
       expect(result).toBe(false);
       expect(mockPgClient.release).toHaveBeenCalled();
@@ -371,7 +378,7 @@ describe('InvestigationRepo', () => {
       mockPgClient.query.mockRejectedValueOnce(new Error('Database error'));
 
       await expect(
-        investigationRepo.delete(investigationId),
+        investigationRepo.delete(investigationId, tenantId),
       ).rejects.toThrow('Database error');
 
       expect(mockPgClient.query).toHaveBeenCalledWith('ROLLBACK');
@@ -384,7 +391,7 @@ describe('InvestigationRepo', () => {
       const investigationId = 'inv-789';
       const mockRow = {
         id: investigationId,
-        tenant_id: 'tenant-123',
+        tenant_id: tenantId,
         name: 'Test Investigation',
         description: 'Description',
         status: 'active',
@@ -396,34 +403,41 @@ describe('InvestigationRepo', () => {
 
       mockPgPool.query.mockResolvedValue({ rows: [mockRow] } as any);
 
-      const result = await investigationRepo.findById(investigationId);
+      const result = await investigationRepo.findById(investigationId, tenantId);
 
       expect(result).not.toBeNull();
       expect(result?.id).toBe(investigationId);
-      expect(mockPgPool.query).toHaveBeenCalledWith(
-        'SELECT * FROM investigations WHERE id = $1',
-        [investigationId],
-      );
-    });
-
-    it('should filter by tenantId when provided', async () => {
-      const investigationId = 'inv-789';
-      const tenantId = 'tenant-123';
-
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
-
-      await investigationRepo.findById(investigationId, tenantId);
-
       expect(mockPgPool.query).toHaveBeenCalledWith(
         expect.stringContaining('AND tenant_id = $2'),
         [investigationId, tenantId],
       );
     });
 
+    it('should throw on cross-tenant row', async () => {
+      const investigationId = 'inv-789';
+      const mockRow = {
+        id: investigationId,
+        tenant_id: 'other-tenant',
+        name: 'Test Investigation',
+        description: 'Description',
+        status: 'active',
+        props: {},
+        created_at: new Date(),
+        updated_at: new Date(),
+        created_by: 'user-456',
+      };
+
+      mockPgPool.query.mockResolvedValue({ rows: [mockRow] } as any);
+
+      await expect(
+        investigationRepo.findById(investigationId, tenantId),
+      ).rejects.toThrow(/Cross-tenant data access blocked/);
+    });
+
     it('should return null if investigation not found', async () => {
       mockPgPool.query.mockResolvedValue({ rows: [] } as any);
 
-      const result = await investigationRepo.findById('non-existent');
+      const result = await investigationRepo.findById('non-existent', tenantId);
 
       expect(result).toBeNull();
     });
@@ -434,7 +448,7 @@ describe('InvestigationRepo', () => {
       const mockRows = [
         {
           id: 'inv-1',
-          tenant_id: 'tenant-123',
+          tenant_id: tenantId,
           name: 'Investigation 1',
           description: null,
           status: 'active',
@@ -445,7 +459,7 @@ describe('InvestigationRepo', () => {
         },
         {
           id: 'inv-2',
-          tenant_id: 'tenant-123',
+          tenant_id: tenantId,
           name: 'Investigation 2',
           description: null,
           status: 'completed',
@@ -593,7 +607,7 @@ describe('InvestigationRepo', () => {
       const ids = ['inv-1', 'inv-2', 'inv-3'];
       const mockRows = ids.map((id) => ({
         id,
-        tenant_id: 'tenant-123',
+        tenant_id: tenantId,
         name: `Investigation ${id}`,
         description: null,
         status: 'active',
@@ -605,13 +619,13 @@ describe('InvestigationRepo', () => {
 
       mockPgPool.query.mockResolvedValue({ rows: mockRows } as any);
 
-      const results = await investigationRepo.batchByIds(ids);
+      const results = await investigationRepo.batchByIds(ids, tenantId);
 
       expect(results).toHaveLength(3);
       expect(results.every((r) => r !== null)).toBe(true);
       expect(mockPgPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE id = ANY($1)'),
-        [ids],
+        expect.stringContaining('AND tenant_id = $2'),
+        [ids, tenantId],
       );
     });
 
@@ -620,7 +634,7 @@ describe('InvestigationRepo', () => {
       const mockRows = [
         {
           id: 'inv-1',
-          tenant_id: 'tenant-123',
+          tenant_id: tenantId,
           name: 'Investigation 1',
           description: null,
           status: 'active',
@@ -633,7 +647,7 @@ describe('InvestigationRepo', () => {
 
       mockPgPool.query.mockResolvedValue({ rows: mockRows } as any);
 
-      const results = await investigationRepo.batchByIds(ids);
+      const results = await investigationRepo.batchByIds(ids, tenantId);
 
       expect(results).toHaveLength(3);
       expect(results[0]).not.toBeNull();
@@ -642,7 +656,7 @@ describe('InvestigationRepo', () => {
     });
 
     it('should handle empty IDs array', async () => {
-      const results = await investigationRepo.batchByIds([]);
+      const results = await investigationRepo.batchByIds([], tenantId);
 
       expect(results).toEqual([]);
       expect(mockPgPool.query).not.toHaveBeenCalled();
@@ -650,7 +664,6 @@ describe('InvestigationRepo', () => {
 
     it('should filter by tenantId when provided', async () => {
       const ids = ['inv-1', 'inv-2'];
-      const tenantId = 'tenant-123';
 
       mockPgPool.query.mockResolvedValue({ rows: [] } as any);
 
@@ -691,7 +704,7 @@ describe('InvestigationRepo', () => {
 
       mockPgPool.query.mockResolvedValue({ rows: mockRows } as any);
 
-      const results = await investigationRepo.batchByIds(ids);
+      const results = await investigationRepo.batchByIds(ids, tenantId);
 
       expect(results[0]).toBeNull(); // inv-3 not found
       expect(results[1]?.id).toBe('inv-1');
