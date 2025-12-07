@@ -12,7 +12,8 @@ import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
-import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { observabilityMiddleware } from './middleware/observability.js';
+import { contextBindingMiddleware } from './middleware/context-binding.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
@@ -60,8 +61,8 @@ export const createApp = async () => {
 
   const app = express();
 
-  // Add correlation ID middleware FIRST (before other middleware)
-  app.use(correlationIdMiddleware);
+  // Add observability middleware FIRST (replaces correlationIdMiddleware)
+  app.use(observabilityMiddleware);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -308,10 +309,15 @@ export const createApp = async () => {
           next();
         };
 
+  // Add context binding middleware AFTER auth but BEFORE routes/graphql
+  // This ensures tenantId from the user is injected into the observability context
+  app.use(authenticateToken);
+  app.use(contextBindingMiddleware);
+
   app.use(
     '/graphql',
     express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    // authenticateToken, // Removed here as it is now global above
     rateLimitMiddleware, // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, { context: getContext }),
   );

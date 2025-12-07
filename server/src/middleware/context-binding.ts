@@ -1,72 +1,35 @@
 import { Request, Response, NextFunction } from 'express';
-import { GraphQLError } from 'graphql';
-import baseLogger from '../config/logger';
-import { trace } from '@opentelemetry/api';
-import { PolicyDecision } from '../conductor/governance/opa-integration.js'; // Import PolicyDecision
+import { context, getContext } from '../observability/context.js';
 
-const logger = baseLogger.child({ name: 'contextBindingMiddleware' });
+/**
+ * Middleware to update the RequestContext with authenticated user details.
+ * Must be placed AFTER authentication middleware (passport, jwt, etc.).
+ */
+export const contextBindingMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const currentCtx = getContext();
+  if (!currentCtx) {
+    return next();
+  }
 
-export interface RequestContext {
-  tenantId: string;
-  purpose: string;
-  legalBasis: string;
-  sensitivity: string;
-}
+  const user = (req as any).user;
+  if (user) {
+    // We can't mutate the context object directly if we want strict immutability,
+    // but AsyncLocalStorage store is mutable object.
+    // However, best practice with ALS is to run a new context if we want to change it cleanly,
+    // but that would require nesting middleware execution which is hard here.
+    // Since we passed an object reference to context.run in observabilityMiddleware,
+    // mutating that object properties works for the rest of the request lifetime.
 
-declare global {
-  namespace Express {
-    interface Request {
-      context?: RequestContext;
-      policyDecision?: PolicyDecision; // Add this line
+    if (user.tenant_id || user.tenantId) {
+        currentCtx.tenantId = user.tenant_id || user.tenantId;
     }
+
+    currentCtx.principal = {
+        id: user.sub || user.id,
+        role: user.role,
+        orgId: user.orgId
+    };
   }
-}
-
-export function contextBindingMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const tenantId = req.headers['x-tenant-id'] as string;
-  const purpose = req.headers['x-purpose'] as string;
-  const legalBasis = req.headers['x-legal-basis'] as string;
-  const sensitivity = req.headers['x-sensitivity'] as string;
-
-  if (!tenantId || !purpose || !legalBasis || !sensitivity) {
-    logger.warn('Missing required context headers', {
-      tenantId,
-      purpose,
-      legalBasis,
-      sensitivity,
-    });
-    return res.status(400).json({
-      error: 'Bad Request',
-      message:
-        'Missing required context headers: X-Tenant-Id, X-Purpose, X-Legal-Basis, X-Sensitivity',
-    });
-  }
-
-  const context: RequestContext = {
-    tenantId,
-    purpose,
-    legalBasis,
-    sensitivity,
-  };
-
-  req.context = context;
-
-  // Echo context in traces
-  const activeSpan = trace.getActiveSpan();
-  if (activeSpan) {
-    activeSpan.setAttributes({
-      'app.tenant_id': context.tenantId,
-      'app.purpose': context.purpose,
-      'app.legal_basis': context.legalBasis,
-      'app.sensitivity': context.sensitivity,
-    });
-  }
-
-  logger.debug('Request context bound', context);
 
   next();
-}
+};
