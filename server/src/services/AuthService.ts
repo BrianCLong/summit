@@ -43,6 +43,8 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+import { secretsService } from './SecretsService.js';
+import { SECRETS } from '../config/secretRefs.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
@@ -406,8 +408,10 @@ export class AuthService {
       role: user.role,
     };
 
+    const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+
     // @ts-ignore - jwt.sign overload mismatch
-    const token = jwt.sign(tokenPayload, config.jwt.secret, {
+    const token = jwt.sign(tokenPayload, jwtSecret, {
       expiresIn: config.jwt.expiresIn,
     });
 
@@ -447,7 +451,8 @@ export class AuthService {
     try {
       if (!token) return null;
 
-      const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
+      const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+      const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
 
       // Check if token is blacklisted
       const blacklistCheck = await this.pool.query(
