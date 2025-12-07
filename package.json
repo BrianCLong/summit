@@ -121,7 +121,10 @@
     "security:outdated": "pnpm outdated",
     "drill:run": "npx tsx scripts/security/run-drill.ts",
     "drill:all": "npx tsx scripts/security/run-drill.ts --all --env local --report",
-    "drill:dry-run": "npx tsx scripts/security/run-drill.ts --all --dry-run"
+    "drill:dry-run": "npx tsx scripts/security/run-drill.ts --all --dry-run",
+    "future-history:create": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ops/create-future-history-entry.ts",
+    "future-history:check": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ops/check-future-history-coverage.ts",
+    "future-history:check:strict": "FH_STRICT=true pnpm run future-history:check"
   },
   "keywords": [
     "intelligence-analysis",
