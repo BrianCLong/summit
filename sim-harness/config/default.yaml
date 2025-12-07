@@ -1,0 +1,36 @@
+# IntelGraph Simulation Harness - Default Configuration
+
+api:
+  baseUrl: http://localhost:4000
+  graphqlUrl: http://localhost:4000/graphql
+  timeout: 30000
+  retries: 3
+  headers: {}
+
+scenarios:
+  defaultSize: medium
+  defaultNoise: 0.1
+  deterministic: true
+  seed: 42
+
+ghostAnalyst:
+  maxSteps: 50
+  thinkTime: 1000  # ms between steps
+  strategy: systematic
+  enableAI: false
+  aiModel: null
+
+metrics:
+  enabled: true
+  detailed: true
+  exportFormat: json  # json, csv, or both
+
+reporting:
+  outputDir: ./reports
+  format: html  # html, json, or markdown
+  includeCharts: false
+
+safety:
+  nonProdOnly: true
+  maxConcurrentSessions: 5
+  requireConfirmation: false

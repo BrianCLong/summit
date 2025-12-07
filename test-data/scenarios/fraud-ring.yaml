@@ -1,0 +1,95 @@
+# Fraud Ring Scenario Template
+
+name: Financial Fraud Investigation
+description: Complex fraud network involving shell companies, money mules, and international transfers
+type: FRAUD_INVESTIGATION
+
+parameters:
+  type: fraud-ring
+  size: large
+  noiseLevel: 0.15
+  missingDataRate: 0.1
+  conflictingEvidenceRate: 0.05
+  temporalSpan:
+    start: 2022-01-01
+    end: 2024-12-31
+  seed: 12345
+
+copilotGoal: |
+  Identify the key actors in the fraud network, trace money flows between shell companies,
+  and establish connections to beneficial owners. Focus on:
+  1. Identifying the ringleader
+  2. Mapping the corporate structure
+  3. Tracing financial flows
+  4. Finding evidence of coordination
+
+expectedKeyEntities:
+  - type: PERSON
+    role: ringleader
+    count: 1-2
+  - type: ORGANIZATION
+    role: shell_company
+    count: 5-10
+  - type: ACCOUNT
+    role: conduit
+    count: 10-20
+
+workflow:
+  name: Fraud Investigation Workflow
+  description: Systematic investigation of fraud network
+  strategy: targeted
+  steps:
+    - type: CREATE_INVESTIGATION
+      params: {}
+
+    - type: ADD_ENTITY
+      params:
+        entityIndex: 0-all
+
+    - type: ADD_RELATIONSHIP
+      params:
+        relationshipIndex: 0-all
+
+    - type: QUERY_ENTITIES
+      params:
+        type: PERSON
+        limit: 100
+
+    - type: QUERY_ENTITIES
+      params:
+        type: ORGANIZATION
+        limit: 100
+
+    - type: RUN_COPILOT
+      params:
+        goal: "Identify key actors and trace money flows"
+        timeout: 60000
+
+    - type: EXPAND_NETWORK
+      params:
+        entityId: first-person
+        depth: 3
+
+    - type: QUERY_RELATIONSHIPS
+      params:
+        entityId: first-person
+
+    - type: RUN_COPILOT
+      params:
+        goal: "Analyze corporate structures and beneficial ownership"
+        timeout: 60000
+
+    - type: EXPORT_DATA
+      params: {}
+
+evaluationCriteria:
+  successThresholds:
+    coverageRate: 0.8
+    keyEntitiesFound: 0.7
+    precision: 0.6
+    recall: 0.7
+
+  performanceTargets:
+    maxDuration: 300000  # 5 minutes
+    maxQueriesPerSession: 50
+    copilotSuccessRate: 0.9
