@@ -630,9 +630,9 @@ app.get(
 app.use(
   (
     error: Error,
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
+    req: Request,
+    res: Response,
+    next: NextFunction,
   ) => {
     logger.error('Unhandled error:', error);
     res.status(500).json({
