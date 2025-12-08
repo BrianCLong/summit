@@ -57,7 +57,6 @@ const config: Config = {
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
-  reporters: ['default'],
   verbose: true,
   clearMocks: true,
   restoreMocks: true,
