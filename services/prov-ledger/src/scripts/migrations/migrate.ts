@@ -13,6 +13,7 @@ const pool = new Pool({
 });
 
 const migrations = [
+  // ... (previous migrations 001-010 same as before)
   {
     name: '001_create_claims_table',
     sql: `
@@ -191,6 +192,22 @@ const migrations = [
 
       CREATE INDEX IF NOT EXISTS idx_case_evidence_case ON case_evidence(case_id);
       CREATE INDEX IF NOT EXISTS idx_case_evidence_evidence ON case_evidence(evidence_id);
+    `,
+  },
+  {
+    name: '011_create_manifests_table',
+    sql: `
+      CREATE TABLE IF NOT EXISTS manifests (
+        id VARCHAR(255) PRIMARY KEY,
+        version VARCHAR(50) NOT NULL,
+        hash_chain VARCHAR(255) NOT NULL,
+        signature TEXT,
+        claims JSONB NOT NULL,
+        generated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+        authority_id VARCHAR(255)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_manifests_generated_at ON manifests(generated_at);
     `,
   },
 ];
