@@ -1,26 +1,24 @@
 # Terraform configuration for the development environment
-# This is a placeholder file.
 
 provider "aws" {
-  region = "us-east-1" # Example region
+  region = "us-east-1"
 }
 
-resource "aws_s3_bucket" "dev_bucket" {
-  bucket = "intelgraph-dev-bucket-${random_string.suffix.result}"
-  acl    = "private"
-
-  tags = {
-    Environment = "Development"
-    Project     = "IntelGraph"
+terraform {
+  backend "s3" {
+    bucket         = "summit-terraform-state"
+    key            = "dev/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "summit-terraform-locks"
+    encrypt        = true
   }
 }
 
-resource "random_string" "suffix" {
-  length  = 8
-  special = false
-  upper   = false
-}
+module "vpc" {
+  source = "../../modules/vpc"
 
-output "bucket_name" {
-  value = aws_s3_bucket.dev_bucket.bucket
+  environment    = "dev"
+  cidr_block     = "10.0.0.0/16"
+  public_subnets = ["10.0.1.0/24", "10.0.2.0/24"]
+  azs            = ["us-east-1a", "us-east-1b"]
 }
