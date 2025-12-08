@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Credit memo or discount request",
+  "type": "object",
+  "required": ["subject", "credit_memo", "context"],
+  "properties": {
+    "subject": {
+      "type": "object",
+      "required": ["id", "role"],
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "level": { "type": "string" }
+      }
+    },
+    "credit_memo": {
+      "type": "object",
+      "required": ["id", "tenant_id", "amount", "reason"],
+      "properties": {
+        "id": { "type": "string" },
+        "tenant_id": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "reason": { "type": "string" },
+        "type": { "type": "string", "enum": ["credit", "discount", "write_off"] }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["reason", "requested_at"],
+      "properties": {
+        "reason": { "type": "string" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "supporting_ticket": { "type": "string" }
+      }
+    }
+  }
+}
