@@ -1,4 +1,4 @@
-.PHONY: bootstrap up up-ai migrate smoke tools down help preflight dev test-e2e down-dev
+.PHONY: bootstrap up up-ai migrate smoke tools down help preflight dev test-e2e down-dev doctor verify logs status
 
 # Minimal, portable golden path. No assumptions about project layout.
 
@@ -22,6 +22,14 @@ help:
 	@echo "  make smoke        - Run smoke tests (validates golden path)"
 	@echo "  make down         - Stop all services"
 	@echo ""
+	@echo "Developer tools:"
+	@echo "  make doctor       - Check environment prerequisites"
+	@echo "  make verify       - Verify onboarding setup"
+	@echo "  make logs         - View service logs"
+	@echo "  make status       - Show service status"
+	@echo ""
+	@echo "CLI: Run 'node scripts/summit-cli.mjs help' for full CLI"
+	@echo ""
 	@echo "Quick start: ./start.sh (runs bootstrap + up + migrate + smoke)"
 	@echo ""
 	@echo "Prerequisites:"
@@ -33,7 +41,7 @@ help:
 	@echo "  - If 'make up' fails: Check Docker is running (docker info)"
 	@echo "  - If 'make migrate' fails: Check PostgreSQL is running (docker-compose ps)"
 	@echo "  - If smoke fails: Check logs (docker-compose logs api)"
-	@echo "  - For help: See docs/ONBOARDING.md or run ./start.sh --help"
+	@echo "  - For help: See docs/dx/ONBOARDING_CHECKLIST.md"
 
 preflight:
 	@echo "==> Preflight: Checking prerequisites..."
@@ -261,3 +269,15 @@ test-opa:
 	@docker run --rm -v $(pwd):/workspace -w /workspace openpolicyagent/opa:latest test -v policies/mvp2
 	@echo ""
 	@echo "test-opa: DONE ✓"
+
+doctor:
+	@node scripts/summit-cli.mjs doctor
+
+verify:
+	@chmod +x scripts/verify-onboarding.sh && ./scripts/verify-onboarding.sh
+
+logs:
+	@$(COMPOSE) -f $(DEV_COMPOSE_FILE) logs -f
+
+status:
+	@$(COMPOSE) -f $(DEV_COMPOSE_FILE) ps
