@@ -237,6 +237,25 @@ router.post(
   })
 );
 
+router.post(
+  '/unmerge/:id',
+  asyncHandler(async (req: Request, res: Response) => {
+    // Stub implementation: Reversible unmerge
+    // In a real implementation, this would fetch the merge record and invert it
+    // For now, we return a success response with the new decision
+
+    // Log intent to append a new record with decision=NO_MERGE and valid_from=now
+    logger.info({ id: req.params.id }, 'Processing unmerge request');
+
+    res.json({
+      ok: true,
+      id: req.params.id,
+      decision: 'NO_MERGE',
+      timestamp: new Date().toISOString()
+    });
+  })
+);
+
 // =============================================================================
 // Explainability API
 // =============================================================================
