@@ -1,59 +1,102 @@
 openapi: 3.0.3
 info:
-  title: Provenance & Claim Ledger
-  version: 1.0.0
+  title: Provenance & Claim Ledger Service
   description: |
-    Append-only ledger that records evidence, binds claims, and exports signed manifests.
+    Evidence/claim registration, provenance chain tracking, and disclosure bundle generation.
+
+    All requests require authorization headers:
+    - `x-authority-id`: Identifier for the requesting authority
+    - `x-reason-for-access`: Justification for the request
+  version: 1.0.0
+  contact:
+    name: IntelGraph Team
+    email: support@intelgraph.com
+
 servers:
   - url: http://localhost:4010
+    description: Local development
+  - url: https://prov-ledger.intelgraph.com
+    description: Production
+
+tags:
+  - name: Claims
+    description: Claim registration
+  - name: Evidence
+    description: Evidence registration
+  - name: Transforms
+    description: Transformation registration
+  - name: Manifests
+    description: Bundle generation and verification
+  - name: Health
+    description: Service health checks
+
+security:
+  - PolicyHeaders: []
+
 paths:
   /health:
     get:
+      tags: [Health]
       summary: Health check
+      description: Returns service health status
+      security: []
       responses:
         '200':
-          description: Healthy
+          description: Service is healthy
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  timestamp:
-                    type: string
-                    format: date-time
+                $ref: '#/components/schemas/HealthResponse'
+
   /evidence:
     post:
+      tags: [Evidence]
       summary: Register evidence
-      description: Accepts binary or JSON payload and returns a deterministic checksum and evidenceId.
+      description: Accepts a blob or URL + source info, license, and hash. Returns evidenceId.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                content:
-                  description: Arbitrary payload or base64 encoded buffer
-                attributes:
-                  type: object
-                  additionalProperties: true
-          application/octet-stream:
-            schema:
-              type: string
-              format: binary
+              $ref: '#/components/schemas/CreateEvidenceRequest'
       responses:
-        '200':
+        '201':
           description: Evidence registered
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/EvidenceResponse'
-  /claims:
+        '400':
+          description: Invalid request
+        '500':
+          description: Internal error
+
+  /transform:
     post:
-      summary: Create claim
-      description: Links evidence IDs to an assertion and returns a claim identifier.
+      tags: [Transforms]
+      summary: Register transformation
+      description: Records a transformation (inputs, tool, params, outputs). Returns transformId.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTransformRequest'
+      responses:
+        '201':
+          description: Transformation registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransformResponse'
+        '400':
+          description: Invalid request
+
+  /claim:
+    post:
+      tags: [Claims]
+      summary: Register claim
+      description: Records a claim (subject, predicate, object, evidenceRefs). Returns claimId.
       requestBody:
         required: true
         content:
@@ -61,155 +104,156 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateClaimRequest'
       responses:
-        '200':
-          description: Claim created
+        '201':
+          description: Claim registered
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ClaimResponse'
-  /manifests/{claimId}:
+        '400':
+          description: Invalid request
+
+  /manifest/{bundleId}:
     get:
-      summary: Export signed manifest
+      tags: [Manifests]
+      summary: Get deterministic Merkle manifest
+      description: Returns a hash tree of inputs -> transforms -> claims.
       parameters:
-        - in: path
-          name: claimId
+        - name: bundleId
+          in: path
+          required: true
           schema:
             type: string
-          required: true
       responses:
         '200':
-          description: Manifest
+          description: Manifest generated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Manifest'
+                $ref: '#/components/schemas/ManifestResponse'
         '404':
-          description: Not found
-  /verify:
-    post:
-      summary: Offline manifest verification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Manifest'
-      responses:
-        '200':
-          description: Verification result
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/VerificationResult'
-  /lineage/{claimId}:
-    get:
-      summary: Lineage adjacency list
-      parameters:
-        - in: path
-          name: claimId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: adjacency
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  claimId:
-                    type: string
-                  adjacency:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Edge'
+          description: Bundle not found
+
 components:
+  securitySchemes:
+    PolicyHeaders:
+      type: apiKey
+      in: header
+      name: x-authority-id
+
   schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        pcl_enabled:
+          type: boolean
+
+    CreateEvidenceRequest:
+      type: object
+      required:
+        - source
+        - hash
+      properties:
+        url:
+          type: string
+          description: URL to the evidence file
+        blob:
+          type: string
+          description: Base64 encoded content (optional if URL provided)
+        source:
+          type: string
+          description: Source identifier
+        license:
+          type: string
+          description: License identifier
+        hash:
+          type: string
+          description: SHA-256 hash of the content
+
     EvidenceResponse:
       type: object
       properties:
         evidenceId:
           type: string
-        checksum:
-          type: string
-        signature:
-          type: string
-    CreateClaimRequest:
+
+    CreateTransformRequest:
       type: object
+      required:
+        - inputs
+        - tool
+        - outputs
+        - operatorId
       properties:
-        evidenceIds:
+        inputs:
           type: array
           items:
             type: string
-        assertion:
-          type: object
-          additionalProperties: true
-        actor:
+          description: List of input Evidence/Claim IDs
+        tool:
           type: string
+          description: Name of the tool used
+        params:
+          type: object
+          description: Parameters passed to the tool
+        outputs:
+          type: array
+          items:
+            type: string
+          description: List of output Evidence/Claim IDs (if known, or placeholders)
+        operatorId:
+          type: string
+
+    TransformResponse:
+      type: object
+      properties:
+        transformId:
+          type: string
+
+    CreateClaimRequest:
+      type: object
+      required:
+        - subject
+        - predicate
+        - object
+        - evidenceRefs
+        - confidence
+        - licenseId
+      properties:
+        subject:
+          type: string
+        predicate:
+          type: string
+        object:
+          type: string
+        evidenceRefs:
+          type: array
+          items:
+            type: string
+          description: List of supporting Evidence IDs
+        confidence:
+          type: number
+          format: float
+        licenseId:
+          type: string
+
     ClaimResponse:
       type: object
       properties:
         claimId:
           type: string
-        signature:
-          type: string
-    Manifest:
+
+    ManifestResponse:
       type: object
       properties:
-        schemaVersion:
-          type: string
-        claimId:
+        bundleId:
           type: string
         merkleRoot:
           type: string
-        leaves:
+        entries:
           type: array
           items:
-            $ref: '#/components/schemas/MerkleLeaf'
-        adjacency:
-          type: array
-          items:
-            $ref: '#/components/schemas/Edge'
-        manifestSignature:
-          type: string
-        generatedAt:
-          type: string
-          format: date-time
-    MerkleLeaf:
-      type: object
-      properties:
-        id:
-          type: string
-        type:
-          type: string
-        hash:
-          type: string
-        prevHash:
-          type: string
-        signature:
-          type: string
-    Edge:
-      type: object
-      properties:
-        from:
-          type: string
-        to:
-          type: string
-        kind:
-          type: string
-        signature:
-          type: string
-        prevHash:
-          type: string
-        recordHash:
-          type: string
-    VerificationResult:
-      type: object
-      properties:
-        valid:
-          type: boolean
-        reasons:
-          type: array
-          items:
-            type: string
+            type: object
+            description: Ordered list of entries in the bundle
