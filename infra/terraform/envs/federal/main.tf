@@ -94,7 +94,7 @@ data "aws_caller_identity" "current" {}
 
 # Module instantiation for all five federal WORM buckets
 module "worm_audit_bucket" {
-  source = "./modules/worm_bucket"
+  source = "../../modules/worm_bucket"
   
   bucket_name       = "intelgraph-federal-audit-${random_id.bucket_suffix.hex}"
   kms_key_arn       = aws_kms_key.worm_encryption_key.arn
@@ -113,7 +113,7 @@ module "worm_audit_bucket" {
 }
 
 module "worm_billing_bucket" {
-  source = "./modules/worm_bucket"
+  source = "../../modules/worm_bucket"
   
   bucket_name       = "intelgraph-federal-billing-${random_id.bucket_suffix.hex}"
   kms_key_arn       = aws_kms_key.worm_encryption_key.arn
@@ -131,7 +131,7 @@ module "worm_billing_bucket" {
 }
 
 module "worm_event_bucket" {
-  source = "./modules/worm_bucket"
+  source = "../../modules/worm_bucket"
   
   bucket_name       = "intelgraph-federal-event-${random_id.bucket_suffix.hex}"
   kms_key_arn       = aws_kms_key.worm_encryption_key.arn
@@ -149,7 +149,7 @@ module "worm_event_bucket" {
 }
 
 module "worm_breakglass_bucket" {
-  source = "./modules/worm_bucket"
+  source = "../../modules/worm_bucket"
   
   bucket_name       = "intelgraph-federal-breakglass-${random_id.bucket_suffix.hex}"
   kms_key_arn       = aws_kms_key.worm_encryption_key.arn
@@ -168,7 +168,7 @@ module "worm_breakglass_bucket" {
 }
 
 module "worm_compliance_bucket" {
-  source = "./modules/worm_bucket"
+  source = "../../modules/worm_bucket"
   
   bucket_name       = "intelgraph-federal-compliance-${random_id.bucket_suffix.hex}"
   kms_key_arn       = aws_kms_key.worm_encryption_key.arn
