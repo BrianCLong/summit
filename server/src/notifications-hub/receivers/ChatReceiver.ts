@@ -17,6 +17,7 @@ import {
   ReceiverConfig,
 } from './ReceiverInterface.js';
 import { CanonicalEvent, EventSeverity } from '../events/EventSchema.js';
+import { RenderedTemplate } from '../templates/TemplateRenderer.js';
 
 export type ChatPlatform = 'slack' | 'teams' | 'discord' | 'mattermost' | 'custom';
 
@@ -26,6 +27,27 @@ export interface ChatReceiverConfig extends ReceiverConfig {
   defaultChannel?: string;
   mentionUsers?: boolean;
   threadMessages?: boolean;
+  simulation?: {
+    enabled?: boolean;
+    minLatencyMs?: number;
+    maxLatencyMs?: number;
+  };
+}
+
+type SimulationConfig = ChatReceiverConfig['simulation'];
+
+async function simulateDelay(
+  simulation?: SimulationConfig,
+  defaultMin = 50,
+  defaultMax = 150,
+): Promise<void> {
+  if (!simulation?.enabled) return;
+
+  const min = simulation.minLatencyMs ?? defaultMin;
+  const max = simulation.maxLatencyMs ?? defaultMax;
+  await new Promise((resolve) =>
+    setTimeout(resolve, min + Math.random() * Math.max(0, max - min)),
+  );
 }
 
 export interface ChatMessage {
@@ -77,15 +99,15 @@ export class ChatReceiver extends BaseReceiver {
   private createAdapter(platform: ChatPlatform): IChatAdapter {
     switch (platform) {
       case 'slack':
-        return new SlackAdapter();
+        return new SlackAdapter(this.chatConfig.simulation);
       case 'teams':
-        return new TeamsAdapter();
+        return new TeamsAdapter(this.chatConfig.simulation);
       case 'discord':
-        return new DiscordAdapter();
+        return new DiscordAdapter(this.chatConfig.simulation);
       case 'mattermost':
-        return new MattermostAdapter();
+        return new MattermostAdapter(this.chatConfig.simulation);
       case 'custom':
-        return new CustomChatAdapter();
+        return new CustomChatAdapter(this.chatConfig.simulation);
       default:
         throw new Error(`Unsupported chat platform: ${platform}`);
     }
@@ -97,7 +119,8 @@ export class ChatReceiver extends BaseReceiver {
     options?: Record<string, unknown>,
   ): Promise<DeliveryResult> {
     try {
-      const message = this.buildChatMessage(event, recipient, options);
+      const template = options?.template as RenderedTemplate | undefined;
+      const message = this.buildChatMessage(event, recipient, template, options);
       const messageId = await this.adapter.sendMessage(message);
 
       return {
@@ -124,12 +147,13 @@ export class ChatReceiver extends BaseReceiver {
   private buildChatMessage(
     event: CanonicalEvent,
     recipient: string,
+    template?: RenderedTemplate,
     options?: Record<string, unknown>,
   ): ChatMessage {
     const channel = (options?.channel as string) || recipient;
     const severityEmoji = this.getSeverityEmoji(event.severity);
-    const text = this.buildMessageText(event, severityEmoji);
-    const blocks = this.buildMessageBlocks(event, severityEmoji);
+    const text = this.buildMessageText(event, severityEmoji, template);
+    const blocks = this.buildMessageBlocks(event, severityEmoji, template);
 
     return {
       channel,
@@ -143,28 +167,39 @@ export class ChatReceiver extends BaseReceiver {
     };
   }
 
-  private buildMessageText(event: CanonicalEvent, emoji: string): string {
-    let text = `${emoji} *${event.title}*\n\n`;
-    text += `${event.message}\n\n`;
+  private buildMessageText(
+    event: CanonicalEvent,
+    emoji: string,
+    template?: RenderedTemplate,
+  ): string {
+    const body = template?.message || event.message;
+    let text = `${emoji} *${template?.subject || event.title}*\n\n`;
+    text += `${body}\n\n`;
     text += `Actor: ${event.actor.name} (${event.actor.type})\n`;
     text += `Subject: ${event.subject.name || event.subject.id}\n`;
     text += `Time: ${event.timestamp.toISOString()}\n`;
 
-    if (event.subject.url) {
-      text += `\n<${event.subject.url}|View Details>`;
+    const cta = template?.callToAction || event.subject.url;
+    if (cta) {
+      text += `\n<${cta}|View Details>`;
     }
 
     return text;
   }
 
-  private buildMessageBlocks(event: CanonicalEvent, emoji: string): unknown[] {
+  private buildMessageBlocks(
+    event: CanonicalEvent,
+    emoji: string,
+    template?: RenderedTemplate,
+  ): unknown[] {
+    const body = template?.message || event.message;
     // Generic block structure that can be adapted per platform
     const blocks: unknown[] = [
       {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: `${emoji} ${event.title}`,
+          text: `${emoji} ${template?.subject || event.title}`,
           emoji: true,
         },
       },
@@ -172,7 +207,7 @@ export class ChatReceiver extends BaseReceiver {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: event.message,
+          text: body,
         },
       },
       {
@@ -282,6 +317,8 @@ export class SlackAdapter implements IChatAdapter {
   private webhookUrl?: string;
   private apiToken?: string;
 
+  constructor(private readonly simulation?: SimulationConfig) {}
+
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
     this.apiToken = credentials.apiToken as string;
@@ -308,13 +345,13 @@ export class SlackAdapter implements IChatAdapter {
     };
 
     // Mock implementation - replace with actual HTTP request
-    await this.sleep(50 + Math.random() * 100);
+    await simulateDelay(this.simulation);
     return `slack_msg_${Date.now()}`;
   }
 
   private async sendViaApi(message: ChatMessage): Promise<string> {
     // Mock implementation - replace with Slack Web API client
-    await this.sleep(50 + Math.random() * 100);
+    await simulateDelay(this.simulation);
     return `slack_msg_${Date.now()}`;
   }
 
@@ -336,9 +373,6 @@ export class SlackAdapter implements IChatAdapter {
     // Cleanup
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }
 
 /**
@@ -347,6 +381,8 @@ export class SlackAdapter implements IChatAdapter {
 export class TeamsAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'teams';
   private webhookUrl?: string;
+
+  constructor(private readonly simulation?: SimulationConfig) {}
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -361,7 +397,7 @@ export class TeamsAdapter implements IChatAdapter {
     const adaptiveCard = this.convertToAdaptiveCard(message);
 
     // Mock implementation - replace with actual HTTP request
-    await this.sleep(50 + Math.random() * 100);
+    await simulateDelay(this.simulation);
     return `teams_msg_${Date.now()}`;
   }
 
@@ -388,9 +424,6 @@ export class TeamsAdapter implements IChatAdapter {
     // Cleanup
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }
 
 /**
@@ -399,6 +432,8 @@ export class TeamsAdapter implements IChatAdapter {
 export class DiscordAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'discord';
   private webhookUrl?: string;
+
+  constructor(private readonly simulation?: SimulationConfig) {}
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -415,7 +450,7 @@ export class DiscordAdapter implements IChatAdapter {
     };
 
     // Mock implementation
-    await this.sleep(50 + Math.random() * 100);
+    await simulateDelay(this.simulation);
     return `discord_msg_${Date.now()}`;
   }
 
@@ -436,9 +471,6 @@ export class DiscordAdapter implements IChatAdapter {
     // Cleanup
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }
 
 /**
@@ -447,6 +479,8 @@ export class DiscordAdapter implements IChatAdapter {
 export class MattermostAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'mattermost';
   private webhookUrl?: string;
+
+  constructor(private readonly simulation?: SimulationConfig) {}
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -464,7 +498,7 @@ export class MattermostAdapter implements IChatAdapter {
     };
 
     // Mock implementation
-    await this.sleep(50 + Math.random() * 100);
+    await simulateDelay(this.simulation);
     return `mattermost_msg_${Date.now()}`;
   }
 
@@ -480,9 +514,6 @@ export class MattermostAdapter implements IChatAdapter {
     // Cleanup
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }
 
 /**
@@ -491,6 +522,8 @@ export class MattermostAdapter implements IChatAdapter {
 export class CustomChatAdapter implements IChatAdapter {
   readonly platform: ChatPlatform = 'custom';
   private webhookUrl?: string;
+
+  constructor(private readonly simulation?: SimulationConfig) {}
 
   async initialize(credentials: Record<string, unknown>): Promise<void> {
     this.webhookUrl = credentials.webhookUrl as string;
@@ -509,7 +542,7 @@ export class CustomChatAdapter implements IChatAdapter {
     };
 
     // Mock implementation - posts to generic webhook
-    await this.sleep(50 + Math.random() * 100);
+    await simulateDelay(this.simulation);
     return `custom_msg_${Date.now()}`;
   }
 
@@ -525,7 +558,4 @@ export class CustomChatAdapter implements IChatAdapter {
     // Cleanup
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
 }

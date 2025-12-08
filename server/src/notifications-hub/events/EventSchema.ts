@@ -58,6 +58,9 @@ export enum EventType {
   DEPLOYMENT_COMPLETED = 'deployment.completed',
   DEPLOYMENT_FAILED = 'deployment.failed',
 
+  // Notification lifecycle
+  NOTIFICATION_DIGEST = 'notification.digest',
+
   // Budget & Cost
   BUDGET_THRESHOLD_EXCEEDED = 'budget.threshold_exceeded',
   BUDGET_DEPLETED = 'budget.depleted',

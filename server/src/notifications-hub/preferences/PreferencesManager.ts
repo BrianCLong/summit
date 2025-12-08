@@ -163,7 +163,7 @@ export class PreferencesManager {
    */
   async setChannelEnabled(
     userId: string,
-    channel: 'email' | 'chat' | 'webhook',
+    channel: 'email' | 'chat' | 'webhook' | 'sms' | 'push' | 'realtime',
     enabled: boolean,
   ): Promise<void> {
     const prefs = await this.getEffectivePreferences(userId);
@@ -182,7 +182,7 @@ export class PreferencesManager {
    */
   async setChannelMinSeverity(
     userId: string,
-    channel: 'email' | 'chat' | 'webhook',
+    channel: 'email' | 'chat' | 'webhook' | 'sms' | 'push' | 'realtime',
     severity: EventSeverity,
   ): Promise<void> {
     const prefs = await this.getEffectivePreferences(userId);
@@ -330,6 +330,21 @@ export class PreferencesManager {
         },
         webhook: {
           enabled: false,
+        },
+        sms: {
+          enabled: false,
+          minSeverity: EventSeverity.HIGH,
+          batchingEnabled: false,
+        },
+        push: {
+          enabled: false,
+          minSeverity: EventSeverity.MEDIUM,
+          batchingEnabled: false,
+        },
+        realtime: {
+          enabled: true,
+          minSeverity: EventSeverity.INFO,
+          batchingEnabled: false,
         },
       },
       quietHours: {
