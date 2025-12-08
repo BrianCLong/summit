@@ -1,3 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="0" failures="0" errors="0" time="22.236">
+<testsuites name="jest tests" tests="4" failures="0" errors="0" time="25.898">
+  <testsuite name="Canonical Data Model" errors="0" failures="0" skipped="0" timestamp="2025-12-08T18:51:21" time="25.761" tests="4">
+    <testcase classname="Canonical Data Model Temporal Logic isValidAt correctly identifies valid periods" name="Canonical Data Model Temporal Logic isValidAt correctly identifies valid periods" time="0.004">
+    </testcase>
+    <testcase classname="Canonical Data Model Temporal Logic isValidAt handles open-ended validTo" name="Canonical Data Model Temporal Logic isValidAt handles open-ended validTo" time="0.001">
+    </testcase>
+    <testcase classname="Canonical Data Model Temporal Logic wasKnownAt correctly identifies knowledge time" name="Canonical Data Model Temporal Logic wasKnownAt correctly identifies knowledge time" time="0.001">
+    </testcase>
+    <testcase classname="Canonical Data Model Policy Labels Can create object with policy labels" name="Canonical Data Model Policy Labels Can create object with policy labels" time="0.001">
+    </testcase>
+  </testsuite>
 </testsuites>
