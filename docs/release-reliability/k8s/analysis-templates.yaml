@@ -1,0 +1,456 @@
+# CompanyOS Argo Rollouts Analysis Templates
+# These templates define the SLO checks for canary deployments
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: smoke-check
+  namespace: production
+  labels:
+    app.kubernetes.io/part-of: companyos
+    app.kubernetes.io/component: release-reliability
+spec:
+  args:
+    - name: service
+    - name: namespace
+      value: production
+  metrics:
+    - name: health-endpoint
+      interval: 30s
+      count: 3
+      successCondition: result == 200
+      failureLimit: 1
+      provider:
+        web:
+          url: "http://{{args.service}}.{{args.namespace}}.svc.cluster.local:4000/health"
+          method: GET
+          timeoutSeconds: 10
+          headers:
+            - key: Accept
+              value: application/json
+
+    - name: readiness-endpoint
+      interval: 30s
+      count: 3
+      successCondition: result == 200
+      failureLimit: 1
+      provider:
+        web:
+          url: "http://{{args.service}}.{{args.namespace}}.svc.cluster.local:4000/readyz"
+          method: GET
+          timeoutSeconds: 10
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: slo-burn-check
+  namespace: production
+  labels:
+    app.kubernetes.io/part-of: companyos
+    app.kubernetes.io/component: release-reliability
+spec:
+  args:
+    - name: service
+    - name: namespace
+      value: production
+    - name: error-rate-threshold
+      value: "0.02"
+    - name: latency-threshold
+      value: "0.5"
+  metrics:
+    # Error rate must be below 2%
+    - name: error-rate
+      interval: 60s
+      count: 5
+      successCondition: result < {{args.error-rate-threshold}}
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{
+              service="{{args.service}}",
+              namespace="{{args.namespace}}",
+              code=~"5.."
+            }[2m]))
+            /
+            sum(rate(http_requests_total{
+              service="{{args.service}}",
+              namespace="{{args.namespace}}"
+            }[2m]))
+
+    # p95 latency must be below 500ms
+    - name: latency-p95
+      interval: 60s
+      count: 5
+      successCondition: result < {{args.latency-threshold}}
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{
+                service="{{args.service}}",
+                namespace="{{args.namespace}}"
+              }[2m])) by (le)
+            )
+
+    # p99 latency check (warning, not blocking)
+    - name: latency-p99
+      interval: 60s
+      count: 5
+      successCondition: result < 1.0
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{
+                service="{{args.service}}",
+                namespace="{{args.namespace}}"
+              }[2m])) by (le)
+            )
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: error-budget-check
+  namespace: production
+  labels:
+    app.kubernetes.io/part-of: companyos
+    app.kubernetes.io/component: release-reliability
+spec:
+  args:
+    - name: service
+    - name: min-budget
+      value: "20"
+  metrics:
+    # Error budget must have at least 20% remaining
+    - name: error-budget-remaining
+      interval: 120s
+      count: 3
+      successCondition: result >= {{args.min-budget}}
+      failureLimit: 1
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            (
+              1 - (
+                (1 - (
+                  sum(rate(http_requests_total{service="{{args.service}}",code!~"5.."}[30d]))
+                  / sum(rate(http_requests_total{service="{{args.service}}"}[30d]))
+                ))
+                / (1 - 0.999)
+              )
+            ) * 100
+
+    # Fast burn rate check
+    - name: fast-burn-rate
+      interval: 60s
+      count: 5
+      successCondition: result < 2.0
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{service="{{args.service}}",code=~"5.."}[5m]))
+            / sum(rate(http_requests_total{service="{{args.service}}"}[5m]))
+            / (1 - 0.999)
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: synthetic-check
+  namespace: production
+  labels:
+    app.kubernetes.io/part-of: companyos
+    app.kubernetes.io/component: release-reliability
+spec:
+  args:
+    - name: service
+    - name: namespace
+      value: production
+  metrics:
+    - name: golden-path-test
+      interval: 300s
+      count: 2
+      successCondition: result.exitCode == 0
+      failureLimit: 1
+      provider:
+        job:
+          spec:
+            backoffLimit: 0
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: golden-path-runner
+                    image: ghcr.io/brianclong/summit/golden-path-runner:latest
+                    env:
+                      - name: TARGET_SERVICE
+                        value: "{{args.service}}"
+                      - name: TARGET_NAMESPACE
+                        value: "{{args.namespace}}"
+                      - name: TARGET_URL
+                        value: "http://{{args.service}}.{{args.namespace}}.svc.cluster.local:4000"
+                    command:
+                      - /bin/sh
+                      - -c
+                      - |
+                        set -e
+                        echo "Running golden path test for {{args.service}}"
+
+                        # Test health endpoint
+                        curl -sf "${TARGET_URL}/health" || exit 1
+
+                        # Test GraphQL introspection
+                        curl -sf -X POST "${TARGET_URL}/graphql" \
+                          -H "Content-Type: application/json" \
+                          -d '{"query":"{ __typename }"}' || exit 1
+
+                        # Run golden path scenario
+                        node /app/golden-path-test.js || exit 1
+
+                        echo "Golden path test passed"
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: anomaly-check
+  namespace: production
+  labels:
+    app.kubernetes.io/part-of: companyos
+    app.kubernetes.io/component: release-reliability
+spec:
+  args:
+    - name: service
+    - name: namespace
+      value: production
+  metrics:
+    # Check for sudden traffic drop (potential routing issue)
+    - name: traffic-anomaly
+      interval: 60s
+      count: 5
+      successCondition: result > 0.5
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{service="{{args.service}}",namespace="{{args.namespace}}"}[5m]))
+            /
+            avg_over_time(
+              sum(rate(http_requests_total{service="{{args.service}}",namespace="{{args.namespace}}"}[5m]))[1h:]
+            )
+
+    # Check for error rate spike vs baseline
+    - name: error-anomaly
+      interval: 60s
+      count: 5
+      successCondition: result < 3.0
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            (
+              sum(rate(http_requests_total{service="{{args.service}}",namespace="{{args.namespace}}",code=~"5.."}[5m]))
+              / sum(rate(http_requests_total{service="{{args.service}}",namespace="{{args.namespace}}"}[5m]))
+            )
+            /
+            (
+              avg_over_time(
+                (sum(rate(http_requests_total{service="{{args.service}}",namespace="{{args.namespace}}",code=~"5.."}[5m]))
+                / sum(rate(http_requests_total{service="{{args.service}}",namespace="{{args.namespace}}"}[5m]))[1h:]
+              ) + 0.001
+            )
+
+    # Check CPU saturation
+    - name: cpu-saturation
+      interval: 60s
+      count: 5
+      successCondition: result < 0.85
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            avg(
+              rate(container_cpu_usage_seconds_total{
+                pod=~"{{args.service}}-.*",
+                namespace="{{args.namespace}}"
+              }[2m])
+            )
+            /
+            avg(
+              kube_pod_container_resource_limits{
+                pod=~"{{args.service}}-.*",
+                namespace="{{args.namespace}}",
+                resource="cpu"
+              }
+            )
+
+    # Check memory saturation
+    - name: memory-saturation
+      interval: 60s
+      count: 5
+      successCondition: result < 0.9
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            avg(
+              container_memory_usage_bytes{
+                pod=~"{{args.service}}-.*",
+                namespace="{{args.namespace}}"
+              }
+            )
+            /
+            avg(
+              kube_pod_container_resource_limits{
+                pod=~"{{args.service}}-.*",
+                namespace="{{args.namespace}}",
+                resource="memory"
+              }
+            )
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: quick-health-check
+  namespace: production
+  labels:
+    app.kubernetes.io/part-of: companyos
+    app.kubernetes.io/component: release-reliability
+spec:
+  args:
+    - name: service
+    - name: namespace
+      value: production
+  metrics:
+    - name: health-endpoint
+      interval: 20s
+      count: 5
+      successCondition: result == 200
+      failureLimit: 2
+      provider:
+        web:
+          url: "http://{{args.service}}.{{args.namespace}}.svc.cluster.local:4000/health"
+          method: GET
+          timeoutSeconds: 5
+
+    - name: error-rate-quick
+      interval: 20s
+      count: 5
+      successCondition: result < 0.05
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            sum(rate(http_requests_total{
+              service="{{args.service}}",
+              namespace="{{args.namespace}}",
+              code=~"5.."
+            }[1m]))
+            /
+            sum(rate(http_requests_total{
+              service="{{args.service}}",
+              namespace="{{args.namespace}}"
+            }[1m]))
+
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: canary-comparison
+  namespace: production
+  labels:
+    app.kubernetes.io/part-of: companyos
+    app.kubernetes.io/component: release-reliability
+spec:
+  args:
+    - name: service
+    - name: namespace
+      value: production
+    - name: canary-hash
+    - name: stable-hash
+  metrics:
+    # Compare canary error rate to stable
+    - name: error-rate-comparison
+      interval: 60s
+      count: 5
+      successCondition: result < 1.5
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            (
+              sum(rate(http_requests_total{
+                service="{{args.service}}",
+                namespace="{{args.namespace}}",
+                rollouts_pod_template_hash="{{args.canary-hash}}",
+                code=~"5.."
+              }[5m]))
+              /
+              sum(rate(http_requests_total{
+                service="{{args.service}}",
+                namespace="{{args.namespace}}",
+                rollouts_pod_template_hash="{{args.canary-hash}}"
+              }[5m]))
+            )
+            /
+            (
+              sum(rate(http_requests_total{
+                service="{{args.service}}",
+                namespace="{{args.namespace}}",
+                rollouts_pod_template_hash="{{args.stable-hash}}",
+                code=~"5.."
+              }[5m]))
+              /
+              sum(rate(http_requests_total{
+                service="{{args.service}}",
+                namespace="{{args.namespace}}",
+                rollouts_pod_template_hash="{{args.stable-hash}}"
+              }[5m]))
+              + 0.001
+            )
+
+    # Compare canary latency to stable
+    - name: latency-comparison
+      interval: 60s
+      count: 5
+      successCondition: result < 1.3
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{
+                service="{{args.service}}",
+                namespace="{{args.namespace}}",
+                rollouts_pod_template_hash="{{args.canary-hash}}"
+              }[5m])) by (le)
+            )
+            /
+            (
+              histogram_quantile(0.95,
+                sum(rate(http_request_duration_seconds_bucket{
+                  service="{{args.service}}",
+                  namespace="{{args.namespace}}",
+                  rollouts_pod_template_hash="{{args.stable-hash}}"
+                }[5m])) by (le)
+              ) + 0.001
+            )

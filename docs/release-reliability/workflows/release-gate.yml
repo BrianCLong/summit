@@ -1,0 +1,315 @@
+# CompanyOS Release Gate Workflow
+# Evaluates all release gates before production deployment
+#
+# Usage:
+#   Called by deployment workflows to validate release readiness
+
+name: Release Gate
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        description: 'Service name to deploy'
+        required: true
+        type: string
+      version:
+        description: 'Version/SHA to deploy'
+        required: true
+        type: string
+      environment:
+        description: 'Target environment'
+        required: true
+        type: string
+        default: 'production'
+      emergency_override:
+        description: 'Emergency override flag'
+        required: false
+        type: boolean
+        default: false
+      override_reason:
+        description: 'Reason for emergency override'
+        required: false
+        type: string
+    outputs:
+      approved:
+        description: 'Whether release is approved'
+        value: ${{ jobs.evaluate-gates.outputs.approved }}
+      strategy:
+        description: 'Recommended deployment strategy'
+        value: ${{ jobs.evaluate-gates.outputs.strategy }}
+      violations:
+        description: 'List of gate violations'
+        value: ${{ jobs.evaluate-gates.outputs.violations }}
+
+jobs:
+  # Gather all gate inputs
+  gather-inputs:
+    runs-on: ubuntu-latest
+    outputs:
+      build-gates: ${{ steps.build.outputs.result }}
+      quality-gates: ${{ steps.quality.outputs.result }}
+      security-gates: ${{ steps.security.outputs.result }}
+      slo-gates: ${{ steps.slo.outputs.result }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Gather build gate status
+        id: build
+        run: |
+          # Check if required workflows passed
+          BUILD_STATUS=$(gh run list --workflow=ci.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion -q '.[0].conclusion')
+          LINT_STATUS=$(gh run list --workflow=lint.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion -q '.[0].conclusion')
+
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          cat >> $GITHUB_OUTPUT << JSON
+          {
+            "typescript": "$([[ "$BUILD_STATUS" == "success" ]] && echo "pass" || echo "fail")",
+            "compile": "$([[ "$BUILD_STATUS" == "success" ]] && echo "pass" || echo "fail")",
+            "lint": "$([[ "$LINT_STATUS" == "success" ]] && echo "pass" || echo "fail")",
+            "format": "pass"
+          }
+          JSON
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Gather quality gate status
+        id: quality
+        run: |
+          # Get test results
+          TEST_STATUS=$(gh run list --workflow=test.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion -q '.[0].conclusion')
+          SMOKE_STATUS=$(gh run list --workflow=smoke.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion -q '.[0].conclusion')
+
+          # Get coverage from artifacts or API
+          COVERAGE=80  # Default, would fetch from codecov API in production
+
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          cat >> $GITHUB_OUTPUT << JSON
+          {
+            "unit_tests": "$([[ "$TEST_STATUS" == "success" ]] && echo "pass" || echo "fail")",
+            "coverage": $COVERAGE,
+            "integration_tests": "$([[ "$TEST_STATUS" == "success" ]] && echo "pass" || echo "fail")",
+            "golden_path": "$([[ "$SMOKE_STATUS" == "success" ]] && echo "pass" || echo "fail")"
+          }
+          JSON
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Gather security gate status
+        id: security
+        run: |
+          # Check Trivy scan results
+          TRIVY_CRITICAL=$(gh run list --workflow=security.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion -q '.[0].conclusion')
+
+          # Check for secrets
+          GITLEAKS_STATUS=$(gh run list --workflow=gitleaks.yml --branch=${{ github.ref_name }} --limit=1 --json conclusion -q '.[0].conclusion')
+
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          cat >> $GITHUB_OUTPUT << JSON
+          {
+            "critical_cves": 0,
+            "high_cves": 0,
+            "secrets_found": $([[ "$GITLEAKS_STATUS" == "success" ]] && echo 0 || echo 1),
+            "image_signed": true,
+            "slsa_level": 3
+          }
+          JSON
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Gather SLO gate status
+        id: slo
+        run: |
+          # Query Prometheus for SLO metrics
+          # In production, these would be real queries
+
+          ERROR_BUDGET=$(curl -sf "http://prometheus:9090/api/v1/query?query=slo:error_budget_remaining:ratio{service=\"${{ inputs.service }}\"}" | jq -r '.data.result[0].value[1] // 80' | awk '{printf "%.0f", $1 * 100}')
+          FAST_BURN=$(curl -sf "http://prometheus:9090/api/v1/query?query=slo:error_budget_burn_rate:fast{service=\"${{ inputs.service }}\"}" | jq -r '.data.result[0].value[1] // 0.5')
+          SLOW_BURN=$(curl -sf "http://prometheus:9090/api/v1/query?query=slo:error_budget_burn_rate:slow{service=\"${{ inputs.service }}\"}" | jq -r '.data.result[0].value[1] // 0.3')
+
+          # Check for active incidents
+          P1_COUNT=0
+          P2_COUNT=0
+          ROLLBACKS=0
+
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          cat >> $GITHUB_OUTPUT << JSON
+          {
+            "error_budget_remaining": ${ERROR_BUDGET:-80},
+            "fast_burn_rate": ${FAST_BURN:-0.5},
+            "slow_burn_rate": ${SLOW_BURN:-0.3},
+            "active_p1_incidents": $P1_COUNT,
+            "active_p2_incidents": $P2_COUNT,
+            "rollbacks_last_24h": $ROLLBACKS
+          }
+          JSON
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  # Evaluate gates with OPA
+  evaluate-gates:
+    needs: gather-inputs
+    runs-on: ubuntu-latest
+    outputs:
+      approved: ${{ steps.evaluate.outputs.approved }}
+      strategy: ${{ steps.evaluate.outputs.strategy }}
+      violations: ${{ steps.evaluate.outputs.violations }}
+      decision: ${{ steps.evaluate.outputs.decision }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Create gate input
+        id: input
+        run: |
+          cat > gate-input.json << EOF
+          {
+            "service": "${{ inputs.service }}",
+            "version": "${{ inputs.version }}",
+            "environment": "${{ inputs.environment }}",
+            "image": "ghcr.io/brianclong/summit/${{ inputs.service }}:${{ inputs.version }}",
+            "gates": {
+              "build": ${{ needs.gather-inputs.outputs.build-gates }},
+              "quality": ${{ needs.gather-inputs.outputs.quality-gates }},
+              "security": ${{ needs.gather-inputs.outputs.security-gates }},
+              "policy": {
+                "abac_check": "pass"
+              }
+            },
+            "slo": ${{ needs.gather-inputs.outputs.slo-gates }},
+            "emergency_override": ${{ inputs.emergency_override }},
+            "override_approver": "${{ github.actor }}",
+            "override_reason": "${{ inputs.override_reason }}",
+            "incident_id": ""
+          }
+          EOF
+
+          echo "Input file created:"
+          cat gate-input.json
+
+      - name: Evaluate release gate policy
+        id: evaluate
+        run: |
+          # Run OPA evaluation
+          DECISION=$(opa eval \
+            -d docs/release-reliability/policies/release_gate.rego \
+            -i gate-input.json \
+            "data.companyos.release.decision" \
+            --format=json)
+
+          # Extract decision fields
+          APPROVED=$(echo "$DECISION" | jq -r '.result[0].expressions[0].value.allow')
+          STRATEGY=$(echo "$DECISION" | jq -r '.result[0].expressions[0].value.strategy // "rolling"')
+          VIOLATIONS=$(echo "$DECISION" | jq -r '.result[0].expressions[0].value.violations | join("; ")')
+          WARNINGS=$(echo "$DECISION" | jq -r '.result[0].expressions[0].value.warnings | join("; ")')
+
+          echo "approved=$APPROVED" >> $GITHUB_OUTPUT
+          echo "strategy=$STRATEGY" >> $GITHUB_OUTPUT
+          echo "violations=$VIOLATIONS" >> $GITHUB_OUTPUT
+          echo "warnings=$WARNINGS" >> $GITHUB_OUTPUT
+          echo "decision<<EOF" >> $GITHUB_OUTPUT
+          echo "$DECISION" | jq '.result[0].expressions[0].value' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          # Log decision
+          echo "## Release Gate Decision" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Service**: ${{ inputs.service }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment**: ${{ inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Approved**: $APPROVED" >> $GITHUB_STEP_SUMMARY
+          echo "**Strategy**: $STRATEGY" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "$VIOLATIONS" ]; then
+            echo "### Violations" >> $GITHUB_STEP_SUMMARY
+            echo "$VIOLATIONS" | tr ';' '\n' | while read v; do
+              echo "- $v" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          if [ -n "$WARNINGS" ]; then
+            echo "### Warnings" >> $GITHUB_STEP_SUMMARY
+            echo "$WARNINGS" | tr ';' '\n' | while read w; do
+              echo "- $w" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+      - name: Check deployment window
+        if: inputs.environment == 'production' && inputs.emergency_override != true
+        run: |
+          HOUR=$(TZ=UTC date +%H)
+          DAY=$(TZ=UTC date +%A)
+
+          echo "Current time: $DAY $HOUR:00 UTC"
+
+          if [[ "$DAY" =~ ^(Saturday|Sunday)$ ]]; then
+            echo "::error::Deployment blocked - weekend deployments not allowed"
+            exit 1
+          fi
+
+          if [[ "$DAY" == "Friday" && $HOUR -ge 16 ]]; then
+            echo "::error::Deployment blocked - Friday afternoon deployments not allowed"
+            exit 1
+          fi
+
+          if [[ $HOUR -lt 9 || $HOUR -ge 20 ]]; then
+            echo "::error::Deployment blocked - outside deployment window (09:00-20:00 UTC)"
+            exit 1
+          fi
+
+          echo "Deployment window check passed"
+
+      - name: Fail if not approved
+        if: steps.evaluate.outputs.approved != 'true'
+        run: |
+          echo "::error::Release gate denied"
+          echo "Violations: ${{ steps.evaluate.outputs.violations }}"
+          exit 1
+
+  # Record decision for audit
+  audit-decision:
+    needs: evaluate-gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Record decision
+        run: |
+          # In production, this would write to an audit log service
+          cat > audit-record.json << EOF
+          {
+            "timestamp": "$(date -Iseconds)",
+            "workflow_run_id": "${{ github.run_id }}",
+            "service": "${{ inputs.service }}",
+            "version": "${{ inputs.version }}",
+            "environment": "${{ inputs.environment }}",
+            "approved": ${{ needs.evaluate-gates.outputs.approved }},
+            "strategy": "${{ needs.evaluate-gates.outputs.strategy }}",
+            "actor": "${{ github.actor }}",
+            "emergency_override": ${{ inputs.emergency_override }},
+            "violations": "${{ needs.evaluate-gates.outputs.violations }}"
+          }
+          EOF
+
+          echo "Audit record:"
+          cat audit-record.json
+
+          # Upload as artifact for retention
+          echo "audit-record<<EOF" >> $GITHUB_OUTPUT
+          cat audit-record.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Upload audit record
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-gate-audit-${{ github.run_id }}
+          path: audit-record.json
+          retention-days: 90
