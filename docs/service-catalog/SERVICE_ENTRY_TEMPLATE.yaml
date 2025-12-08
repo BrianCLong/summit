@@ -1,0 +1,453 @@
+# Service Catalog Entry Template
+# ================================
+# Use this template to register a new service in the CompanyOS Service Catalog.
+# All fields marked [REQUIRED] must be completed before the service can be deployed to production.
+# Fields marked [REQUIRED for tier: critical, high] are mandatory for those service tiers.
+#
+# Instructions:
+# 1. Copy this template to your service's repository as `catalog.yaml`
+# 2. Fill in all required fields
+# 3. Submit a PR to register the service
+# 4. The catalog sync will automatically import your service
+#
+# Schema Version: 1.0.0
+# Last Updated: 2025-12-07
+
+---
+
+# =============================================================================
+# SECTION 1: SERVICE IDENTITY
+# =============================================================================
+
+service:
+  # [REQUIRED] Unique identifier for the service (kebab-case, 3-50 chars)
+  # Example: graph-core, api-gateway, user-auth-service
+  id: my-service-name
+
+  # [REQUIRED] Human-readable display name
+  name: My Service Name
+
+  # [REQUIRED] Clear description of what this service does (2-3 sentences)
+  # Focus on the "what" and "why", not the "how"
+  description: |
+    Brief description of the service's purpose and main functionality.
+    Explain what business capability it enables and who uses it.
+
+  # [REQUIRED] Service type
+  # Options: api | worker | cron | data-pipeline | gateway | ui
+  type: api
+
+  # [REQUIRED] Service tier - determines SLO requirements and support level
+  # Options: critical | high | medium | low
+  # - critical: Business-critical, 99.9%+ SLO, on-call required
+  # - high: Important, 99.5%+ SLO, on-call required
+  # - medium: Standard, 99%+ SLO
+  # - low: Best-effort
+  tier: medium
+
+  # [REQUIRED] Lifecycle state
+  # Options: experimental | beta | ga | deprecated | sunset
+  lifecycle: ga
+
+# =============================================================================
+# SECTION 2: TECHNICAL DETAILS
+# =============================================================================
+
+technical:
+  # [REQUIRED] Primary programming language
+  # Options: typescript | python | go | rust | java | other
+  language: typescript
+
+  # [REQUIRED] Runtime and version
+  # Examples: node-20, python-3.11, go-1.21
+  runtime: node-20
+
+  # [REQUIRED] Path to source repository (relative to monorepo root or full URL)
+  repository: services/my-service
+
+  # [REQUIRED] Main entry point file
+  entry_point: src/index.ts
+
+  # Framework used (optional)
+  framework: express
+
+  # Build tool (optional)
+  build_tool: esbuild
+
+# =============================================================================
+# SECTION 3: DEPLOYMENT
+# =============================================================================
+
+deployment:
+  # [REQUIRED] Current deployment status
+  # Options: production | staging | development | disabled
+  status: production
+
+  # [REQUIRED] Kubernetes namespace
+  namespace: summit-core
+
+  # Helm chart path (if applicable)
+  helm_chart: helm/my-service
+
+  # Container image (auto-populated by CI if not specified)
+  image: ghcr.io/company/my-service
+
+  # Replica count
+  replicas:
+    min: 2
+    max: 10
+    default: 3
+
+  # Resource requirements
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 1000m
+      memory: 1Gi
+
+# =============================================================================
+# SECTION 4: OWNERSHIP
+# =============================================================================
+
+ownership:
+  # [REQUIRED] Primary owner team ID (must exist in org graph)
+  primary_owner: platform-engineering
+
+  # [REQUIRED] Backup owner team ID
+  backup_owner: sre-team
+
+  # [REQUIRED for tier: critical] Escalation owner (director+ level)
+  escalation_owner: engineering-director
+
+  # [REQUIRED for tier: critical, high] PagerDuty on-call schedule ID
+  oncall_schedule: my-service-oncall
+
+  # Contact information
+  contacts:
+    # [REQUIRED] Primary Slack channel for the service
+    slack_channel: "#my-service-team"
+
+    # [REQUIRED] Team email or distribution list
+    email: my-team@company.com
+
+    # [REQUIRED for tier: critical, high] PagerDuty service ID
+    pagerduty_service: PXXXXXX
+
+  # Date of last ownership review (must be within 90 days)
+  last_ownership_review: "2025-12-01"
+
+# =============================================================================
+# SECTION 5: INTERFACES
+# =============================================================================
+
+interfaces:
+  # List all APIs/interfaces exposed by this service
+  - id: my-service-rest
+    # [REQUIRED] Interface type
+    # Options: graphql | rest | grpc | event | websocket
+    type: rest
+
+    # [REQUIRED] API version
+    version: v1
+
+    # Base path for the API
+    base_path: /api/v1
+
+    # OpenAPI/GraphQL spec URL
+    spec_url: /openapi.json
+
+    # [REQUIRED] Authentication methods
+    # Options: jwt | api-key | mtls | oidc | none
+    authentication:
+      - jwt
+      - mtls
+
+    # OPA policy for authorization
+    authorization: policies/my-service.rego
+
+    # Rate limiting configuration
+    rate_limit:
+      requests_per_second: 100
+      burst_size: 200
+      scope: per-tenant  # per-tenant | per-user | global
+
+  # Health and metrics endpoints
+  health:
+    # [REQUIRED] Liveness probe endpoint
+    liveness: /health/live
+
+    # [REQUIRED] Readiness probe endpoint
+    readiness: /health/ready
+
+    # Dependency health check
+    dependencies: /health/dependencies
+
+  metrics:
+    # [REQUIRED for tier: critical, high] Prometheus metrics endpoint
+    endpoint: /metrics
+
+    # Prometheus job name
+    job_name: my-service
+
+# =============================================================================
+# SECTION 6: DEPENDENCIES
+# =============================================================================
+
+dependencies:
+  # List all runtime dependencies on other services
+  - service: postgres
+    # [REQUIRED] Dependency type
+    # Options: sync | async | data | configuration
+    type: data
+
+    # Is this a critical dependency?
+    is_critical: true
+
+    # What happens when this dependency is unavailable?
+    fallback_behavior: "Return 503 Service Unavailable"
+
+    # Does this dependency's SLO affect our SLO?
+    slo_dependency: true
+
+    # Is circuit breaker implemented?
+    circuit_breaker: true
+
+  - service: redis
+    type: data
+    is_critical: false
+    fallback_behavior: "Degrades gracefully, operates without caching"
+    circuit_breaker: true
+
+  - service: kafka
+    type: async
+    is_critical: false
+    fallback_behavior: "Events queued locally, retry on reconnect"
+    circuit_breaker: false
+
+# =============================================================================
+# SECTION 7: CAPABILITIES
+# =============================================================================
+
+capabilities:
+  # Map this service to business capabilities
+  - id: my-capability
+    # Role in implementing this capability
+    # Options: primary | supporting
+    role: primary
+
+  - id: another-capability
+    role: supporting
+
+# =============================================================================
+# SECTION 8: SLOs (Service Level Objectives)
+# =============================================================================
+# [REQUIRED for tier: critical, high]
+
+slo:
+  availability:
+    # Target availability percentage
+    target: 99.9
+
+    # Measurement window
+    measurement_window: 30d
+
+  latency:
+    # P50 latency target in milliseconds
+    p50_ms: 50
+
+    # P95 latency target in milliseconds
+    p95_ms: 200
+
+    # P99 latency target in milliseconds
+    p99_ms: 500
+
+  error_rate:
+    # Maximum error rate percentage
+    target: 0.1
+
+    # Measurement window
+    measurement_window: 24h
+
+  # For data services: freshness SLO
+  # freshness:
+  #   max_staleness_seconds: 300
+
+# =============================================================================
+# SECTION 9: DATA CLASSIFICATION
+# =============================================================================
+
+data_classification:
+  # [REQUIRED] Types of data handled
+  # Options: pii | phi | financial | confidential | public
+  data_classes:
+    - confidential
+
+  # [REQUIRED] Data residency requirements
+  # Options: us | eu | apac | global
+  data_residency:
+    - us
+    - eu
+
+  # Data retention policy identifier
+  retention_policy: standard-7y
+
+  # [REQUIRED] Encryption at rest
+  encryption_at_rest: true
+
+  # [REQUIRED] Encryption in transit
+  encryption_in_transit: true
+
+# =============================================================================
+# SECTION 10: TENANCY
+# =============================================================================
+
+tenancy:
+  # [REQUIRED] Tenancy model
+  # Options: single | multi-tenant | hybrid
+  model: multi-tenant
+
+  # Tenant isolation type
+  # Options: logical | physical | none
+  tenant_isolation: logical
+
+  # Tenants served (list of tenant IDs or "all")
+  tenants_served: all
+
+# =============================================================================
+# SECTION 11: DOCUMENTATION & RUNBOOKS
+# =============================================================================
+
+documentation:
+  # [REQUIRED] Primary documentation URL
+  docs_url: /docs/services/my-service
+
+  # [REQUIRED for tier: critical, high] Runbook location
+  runbook_url: /runbooks/my-service
+
+  # Architecture documentation
+  architecture_url: /docs/architecture/my-service
+
+  # API reference (auto-generated from spec if not specified)
+  api_docs_url: /docs/api/my-service
+
+  # Grafana dashboard UID
+  dashboard_uid: my-service-dashboard
+
+  # Grafana dashboard URL
+  dashboard_url: https://grafana.example.com/d/my-service
+
+# Runbook references
+runbooks:
+  # [REQUIRED for tier: critical, high] At least one runbook
+  - name: High Memory Usage
+    path: /runbooks/my-service/memory.md
+    trigger: "Memory > 80% for 5 minutes"
+
+  - name: High Error Rate
+    path: /runbooks/my-service/errors.md
+    trigger: "Error rate > 1% for 5 minutes"
+
+  - name: Dependency Failure
+    path: /runbooks/my-service/dependencies.md
+    trigger: "Dependency health check failing"
+
+# =============================================================================
+# SECTION 12: OBSERVABILITY
+# =============================================================================
+
+observability:
+  # Key metrics to monitor
+  key_metrics:
+    - name: request_rate
+      query: rate(http_requests_total{service="my-service"}[5m])
+      threshold: "> 1000"
+
+    - name: error_rate
+      query: rate(http_requests_total{service="my-service",status=~"5.."}[5m]) / rate(http_requests_total{service="my-service"}[5m])
+      threshold: "> 0.01"
+
+    - name: latency_p95
+      query: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service="my-service"}[5m]))
+      threshold: "> 0.2"
+
+  # Logging configuration
+  logging:
+    format: json
+    level: info
+    sensitive_fields_redacted: true
+
+  # Tracing configuration
+  tracing:
+    enabled: true
+    sample_rate: 0.1
+    propagation: w3c
+
+# =============================================================================
+# SECTION 13: SECURITY
+# =============================================================================
+
+security:
+  # Security scanning enabled
+  vulnerability_scanning: true
+
+  # Last security review date
+  last_security_review: "2025-11-15"
+
+  # Security classification
+  classification: internal
+
+  # Network policy
+  network_policy:
+    ingress:
+      - from: api-gateway
+      - from: internal-services
+    egress:
+      - to: postgres
+      - to: redis
+      - to: kafka
+
+# =============================================================================
+# SECTION 14: COMPLIANCE
+# =============================================================================
+
+compliance:
+  # Compliance frameworks this service must adhere to
+  frameworks:
+    - SOC2
+    - GDPR
+
+  # Audit logging enabled
+  audit_logging: true
+
+  # Data subject access request support
+  dsar_support: true
+
+  # Right to be forgotten support
+  rtbf_support: true
+
+# =============================================================================
+# SECTION 15: METADATA
+# =============================================================================
+
+metadata:
+  # Tags for categorization and search
+  tags:
+    - core
+    - api
+    - internal
+
+  # Custom labels
+  labels:
+    cost-center: engineering
+    product: platform
+
+  # Creation date
+  created_at: "2025-01-15"
+
+  # Last updated (auto-updated on sync)
+  updated_at: "2025-12-01"
+
+  # Schema version
+  schema_version: "1.0.0"
