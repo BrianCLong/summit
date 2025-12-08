@@ -16,6 +16,7 @@ import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { httpMetricsMiddleware } from './lib/observability/middleware.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -108,29 +109,17 @@ export const createApp = async () => {
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
 
-  // Telemetry middleware
+  // Unified Telemetry middleware
+  app.use(httpMetricsMiddleware);
+
+  // Legacy Telemetry middleware support (for snapshotter)
   app.use((req, res, next) => {
     snapshotter.trackRequest(req);
-    const start = process.hrtime();
-    telemetry.incrementActiveConnections();
-    telemetry.subsystems.api.requests.add(1);
-
+    // Legacy metrics are now handled by httpMetricsMiddleware via unified metrics.
+    // We keep snapshotter tracking here.
     res.on('finish', () => {
       snapshotter.untrackRequest(req);
-      const diff = process.hrtime(start);
-      const duration = diff[0] * 1e3 + diff[1] * 1e-6;
-      telemetry.recordRequest(duration, {
-        method: req.method,
-        route: req.route?.path ?? req.path,
-        status: res.statusCode,
-      });
-      telemetry.decrementActiveConnections();
-
-      if (res.statusCode >= 500) {
-        telemetry.subsystems.api.errors.add(1);
-      }
     });
-
     next();
   });
 
