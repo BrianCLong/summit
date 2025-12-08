@@ -1,0 +1,54 @@
+# CompanyOS Tenant API - Prometheus Recording Rules
+# Generated: 2025-12-07
+
+groups:
+  - name: tenant-api-recording-rules
+    interval: 30s
+    rules:
+      # Request rate
+      - record: companyos:tenant_api:request_rate_5m
+        expr: sum(rate(companyos_tenant_api_http_requests_total[5m])) by (method, path, status)
+
+      # Error rate
+      - record: companyos:tenant_api:error_rate_5m
+        expr: |
+          sum(rate(companyos_tenant_api_http_requests_total{status=~"5.."}[5m]))
+          /
+          sum(rate(companyos_tenant_api_http_requests_total[5m]))
+
+      # Latency percentiles
+      - record: companyos:tenant_api:latency_p50_5m
+        expr: histogram_quantile(0.50, sum(rate(companyos_tenant_api_http_request_duration_seconds_bucket[5m])) by (le))
+
+      - record: companyos:tenant_api:latency_p95_5m
+        expr: histogram_quantile(0.95, sum(rate(companyos_tenant_api_http_request_duration_seconds_bucket[5m])) by (le))
+
+      - record: companyos:tenant_api:latency_p99_5m
+        expr: histogram_quantile(0.99, sum(rate(companyos_tenant_api_http_request_duration_seconds_bucket[5m])) by (le))
+
+      # Tenant operations
+      - record: companyos:tenant_operations:rate_5m
+        expr: sum(rate(companyos_tenant_operations_total[5m])) by (operation, success)
+
+      # Feature flag evaluations
+      - record: companyos:feature_flags:evaluations_rate_5m
+        expr: sum(rate(companyos_feature_flag_evaluations_total[5m])) by (flag_name, enabled)
+
+      # Availability indicator (for SLO)
+      - record: companyos:tenant_api:availability_5m
+        expr: |
+          1 - (
+            sum(rate(companyos_tenant_api_http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(companyos_tenant_api_http_requests_total[5m]))
+          )
+
+      # GraphQL specific metrics
+      - record: companyos:tenant_api:graphql_request_rate_5m
+        expr: sum(rate(companyos_tenant_api_graphql_requests_total[5m])) by (operation)
+
+      - record: companyos:tenant_api:graphql_error_rate_5m
+        expr: |
+          sum(rate(companyos_tenant_api_graphql_errors_total[5m]))
+          /
+          sum(rate(companyos_tenant_api_graphql_requests_total[5m]))
