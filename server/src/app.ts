@@ -1,4 +1,3 @@
-// @ts-nocheck
 import 'dotenv/config';
 import express from 'express';
 import { ApolloServer } from '@apollo/server';
@@ -17,15 +16,11 @@ import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
-import { httpMetricsMiddleware } from './lib/observability/middleware.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
-import erRouter from './routes/er.js'; // Added ER router
-import reportingRouter from './routes/reporting.js'; // Added Reporting router
-import safetyRouter from './routes/safety.js'; // Added Safety router
 import { metricsRoute } from './http/metricsRoute.js';
 import rbacRouter from './routes/rbacRoutes.js';
 import { typeDefs } from './graphql/schema.js';
@@ -33,7 +28,6 @@ import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
-import { unifiedAuthMiddleware } from './middleware/unifiedAuth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
@@ -55,6 +49,7 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
+import searchV1Router from './routes/search-v1.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -114,17 +109,29 @@ export const createApp = async () => {
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
 
-  // Unified Telemetry middleware
-  app.use(httpMetricsMiddleware);
-
-  // Legacy Telemetry middleware support (for snapshotter)
+  // Telemetry middleware
   app.use((req, res, next) => {
     snapshotter.trackRequest(req);
-    // Legacy metrics are now handled by httpMetricsMiddleware via unified metrics.
-    // We keep snapshotter tracking here.
+    const start = process.hrtime();
+    telemetry.incrementActiveConnections();
+    telemetry.subsystems.api.requests.add(1);
+
     res.on('finish', () => {
       snapshotter.untrackRequest(req);
+      const diff = process.hrtime(start);
+      const duration = diff[0] * 1e3 + diff[1] * 1e-6;
+      telemetry.recordRequest(duration, {
+        method: req.method,
+        route: req.route?.path ?? req.path,
+        status: res.statusCode,
+      });
+      telemetry.decrementActiveConnections();
+
+      if (res.statusCode >= 500) {
+        telemetry.subsystems.api.errors.add(1);
+      }
     });
+
     next();
   });
 
@@ -141,11 +148,6 @@ export const createApp = async () => {
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
-
-  // Apply Unified Auth to /api routes
-  // We apply it here for all /api endpoints to ensure consistent identity handling
-  app.use('/api', unifiedAuthMiddleware);
-
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
@@ -165,9 +167,7 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
-  app.use('/er', erRouter); // Register ER routes
-  app.use('/reporting', reportingRouter); // Register Reporting routes
-  app.use('/safety', safetyRouter); // Register Safety routes
+  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
