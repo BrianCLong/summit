@@ -1,85 +1,31 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { PredictiveInsightEngine } from '../src/predictive-insights.js';
 import { CostGuard } from '@ga-graphai/cost-guard';
 import {
   OrchestrationKnowledgeGraph,
-  type ServiceConnector,
-  type PipelineConnector,
-  type EnvironmentConnector,
-  type IncidentConnector,
-  type PolicyConnector,
 } from '@ga-graphai/knowledge-graph';
+import {
+  loadGoldenIntelGraph,
+  type GoldenGraphScenario,
+} from '../../../../scripts/testing/load-golden-intelgraph.js';
 import type { HealthSignal } from '../src/types.js';
 
 describe('PredictiveInsightEngine', () => {
   let knowledgeGraph: OrchestrationKnowledgeGraph;
   let costGuard: CostGuard;
+  let scenario: GoldenGraphScenario;
 
   beforeEach(async () => {
-    knowledgeGraph = new OrchestrationKnowledgeGraph();
+    const loaded = await loadGoldenIntelGraph({ scenario: 'toy' });
+    // Toy scenario keeps readiness checks fast while exercising golden fixtures.
+    knowledgeGraph = loaded.graph;
+    scenario = loaded.scenario;
     costGuard = new CostGuard();
-    const serviceConnector: ServiceConnector = {
-      loadServices: vi.fn().mockResolvedValue([
-        { id: 'svc-api', name: 'API' },
-      ]),
-    };
-    const environmentConnector: EnvironmentConnector = {
-      loadEnvironments: vi.fn().mockResolvedValue([
-        { id: 'env-prod', name: 'Prod', stage: 'prod', region: 'us-west-2' },
-      ]),
-    };
-    const pipelineConnector: PipelineConnector = {
-      loadPipelines: vi.fn().mockResolvedValue([
-        {
-          id: 'pipeline-1',
-          name: 'Deploy',
-          stages: [
-            {
-              id: 'stage-1',
-              name: 'Deploy',
-              pipelineId: 'pipeline-1',
-              serviceId: 'svc-api',
-              environmentId: 'env-prod',
-              capability: 'deploy',
-            },
-          ],
-        },
-      ]),
-    };
-    const incidentConnector: IncidentConnector = {
-      loadIncidents: vi.fn().mockResolvedValue([
-        {
-          id: 'incident-open',
-          serviceId: 'svc-api',
-          environmentId: 'env-prod',
-          severity: 'medium',
-          occurredAt: new Date().toISOString(),
-          status: 'open',
-        },
-      ]),
-    };
-    const policyConnector: PolicyConnector = {
-      loadPolicies: vi.fn().mockResolvedValue([
-        {
-          id: 'policy-1',
-          description: 'Baseline',
-          effect: 'allow',
-          actions: ['orchestration.deploy'],
-          resources: ['service:svc-api'],
-          conditions: [],
-          obligations: [],
-        },
-      ]),
-    };
-    knowledgeGraph.registerServiceConnector(serviceConnector);
-    knowledgeGraph.registerEnvironmentConnector(environmentConnector);
-    knowledgeGraph.registerPipelineConnector(pipelineConnector);
-    knowledgeGraph.registerIncidentConnector(incidentConnector);
-    knowledgeGraph.registerPolicyConnector(policyConnector);
-    await knowledgeGraph.refresh();
   });
 
   it('builds readiness insight blending risk and health signals', () => {
+    const serviceId = scenario.services[0].id;
+    const environmentId = scenario.environments[0].id;
     const engine = new PredictiveInsightEngine({
       knowledgeGraph,
       costGuard,
@@ -87,14 +33,14 @@ describe('PredictiveInsightEngine', () => {
     });
 
     const latencySignal: HealthSignal = {
-      assetId: 'svc-api',
+      assetId: serviceId,
       metric: 'latency_p99',
       value: 1200,
       timestamp: new Date(),
     };
     engine.observeHealthSignal(latencySignal);
 
-    const insight = engine.buildInsight('svc-api', 'env-prod');
+    const insight = engine.buildInsight(serviceId, environmentId);
     expect(insight).toBeDefined();
     expect(insight?.readinessScore).toBeLessThanOrEqual(1);
     expect(insight?.recommendations.some((rec) => rec.includes('release readiness survey'))).toBe(true);

@@ -1,0 +1,359 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "generatedAt": "2024-04-22T12:00:00Z",
+    "note": "Synthetic IntelGraph fixtures for tests only"
+  },
+  "tags": ["hipaa", "sox", "critical-path", "hub", "edge-case"],
+  "tenants": [
+    { "id": "tenant-health", "name": "Health Analytics", "tier": "gold", "tags": ["hipaa"] },
+    { "id": "tenant-corp", "name": "Corporate Ops", "tier": "silver", "tags": ["sox"] }
+  ],
+  "users": [
+    {
+      "id": "user-ops",
+      "email": "ops@example.test",
+      "tenantId": "tenant-health",
+      "roles": ["owner"],
+      "tags": ["oncall", "critical-path"]
+    },
+    {
+      "id": "user-analyst",
+      "email": "analyst@example.test",
+      "tenantId": "tenant-corp",
+      "roles": ["analyst"],
+      "tags": ["read-only"]
+    }
+  ],
+  "scenarios": {
+    "toy": {
+      "description": "Minimal graph for smoke tests",
+      "services": [
+        { "id": "svc-toy-api", "name": "Toy API", "tier": "tier-1", "dependencies": [] }
+      ],
+      "environments": [
+        { "id": "env-toy", "name": "Toy", "stage": "staging", "region": "us-west-1" }
+      ],
+      "pipelines": [
+        {
+          "id": "pipe-toy",
+          "name": "Toy Deploy",
+          "stages": [
+            {
+              "id": "stage-toy-build",
+              "name": "Build",
+              "pipelineId": "pipe-toy",
+              "serviceId": "svc-toy-api",
+              "environmentId": "env-toy",
+              "capability": "build"
+            }
+          ]
+        }
+      ],
+      "incidents": [
+        {
+          "id": "incident-toy",
+          "serviceId": "svc-toy-api",
+          "environmentId": "env-toy",
+          "severity": "medium",
+          "occurredAt": "2024-04-22T10:00:00Z",
+          "status": "open"
+        }
+      ],
+      "policies": [
+        {
+          "id": "policy-toy",
+          "description": "Allow toy deploys",
+          "effect": "allow",
+          "actions": ["deploy"],
+          "resources": ["service:svc-toy-api"],
+          "conditions": [],
+          "obligations": [],
+          "tags": ["sandbox"]
+        }
+      ],
+      "costSignals": [
+        {
+          "serviceId": "svc-toy-api",
+          "timeBucket": "2024-04-22T10",
+          "saturation": 0.35,
+          "budgetBreaches": 0,
+          "throttleCount": 0,
+          "slowQueryCount": 0
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-toy-1",
+          "serviceId": "svc-toy-api",
+          "pipelineId": "pipe-toy",
+          "environmentId": "env-toy",
+          "status": "success",
+          "startedAt": "2024-04-22T10:05:00Z",
+          "endedAt": "2024-04-22T10:10:00Z"
+        }
+      ]
+    },
+    "realistic-medium": {
+      "description": "Multi-tenant deployment with incidents and policies",
+      "services": [
+        {
+          "id": "svc-api",
+          "name": "Orchestration API",
+          "tier": "tier-0",
+          "owningTeam": "platform",
+          "dependencies": ["svc-db"],
+          "soxCritical": true,
+          "piiClassification": "hipaa"
+        },
+        {
+          "id": "svc-db",
+          "name": "Primary Database",
+          "tier": "tier-0",
+          "dependencies": [],
+          "owningTeam": "data"
+        },
+        {
+          "id": "svc-analytics",
+          "name": "Analytics Engine",
+          "tier": "tier-1",
+          "dependencies": ["svc-api"],
+          "owningTeam": "insights"
+        }
+      ],
+      "environments": [
+        {
+          "id": "env-staging",
+          "name": "Staging",
+          "stage": "staging",
+          "region": "us-east-1",
+          "complianceTags": ["sox"]
+        },
+        {
+          "id": "env-prod",
+          "name": "Production",
+          "stage": "prod",
+          "region": "us-west-2",
+          "zeroTrustTier": 2,
+          "complianceTags": ["hipaa", "sox"]
+        }
+      ],
+      "pipelines": [
+        {
+          "id": "pipeline-blue",
+          "name": "Blue Deployment",
+          "owner": "platform",
+          "stages": [
+            {
+              "id": "stage-blue-build",
+              "name": "Build",
+              "pipelineId": "pipeline-blue",
+              "serviceId": "svc-api",
+              "environmentId": "env-staging",
+              "capability": "build",
+              "guardrails": { "maxErrorRate": 0.02 }
+            },
+            {
+              "id": "stage-blue-deploy",
+              "name": "Deploy",
+              "pipelineId": "pipeline-blue",
+              "serviceId": "svc-api",
+              "environmentId": "env-prod",
+              "capability": "deploy",
+              "policies": ["policy-hipaa-api"]
+            }
+          ]
+        },
+        {
+          "id": "pipeline-analytics",
+          "name": "Analytics Release",
+          "stages": [
+            {
+              "id": "stage-analytics-deploy",
+              "name": "Deploy",
+              "pipelineId": "pipeline-analytics",
+              "serviceId": "svc-analytics",
+              "environmentId": "env-prod",
+              "capability": "deploy",
+              "complianceTags": ["sox"]
+            }
+          ]
+        }
+      ],
+      "incidents": [
+        {
+          "id": "incident-api-latency",
+          "serviceId": "svc-api",
+          "environmentId": "env-prod",
+          "severity": "high",
+          "occurredAt": "2024-04-20T09:00:00Z",
+          "status": "open",
+          "rootCauseCategory": "network"
+        },
+        {
+          "id": "incident-api-error",
+          "serviceId": "svc-api",
+          "environmentId": "env-prod",
+          "severity": "medium",
+          "occurredAt": "2024-04-18T11:00:00Z",
+          "status": "closed",
+          "rootCauseCategory": "rollback"
+        },
+        {
+          "id": "incident-analytics-lag",
+          "serviceId": "svc-analytics",
+          "environmentId": "env-prod",
+          "severity": "low",
+          "occurredAt": "2024-04-17T08:00:00Z",
+          "status": "open",
+          "rootCauseCategory": "data"
+        }
+      ],
+      "policies": [
+        {
+          "id": "policy-hipaa-api",
+          "description": "Require HIPAA tagging for prod API",
+          "effect": "allow",
+          "actions": ["deploy"],
+          "resources": ["service:svc-api"],
+          "conditions": [],
+          "obligations": [],
+          "tags": ["hipaa", "high-risk"]
+        },
+        {
+          "id": "policy-sox-db",
+          "description": "SOX control for primary DB",
+          "effect": "allow",
+          "actions": ["deploy", "migrate"],
+          "resources": ["service:svc-db"],
+          "conditions": [],
+          "obligations": ["change-window"],
+          "tags": ["sox"]
+        }
+      ],
+      "costSignals": [
+        {
+          "serviceId": "svc-api",
+          "timeBucket": "2024-04-20T09",
+          "saturation": 0.92,
+          "budgetBreaches": 1,
+          "throttleCount": 1,
+          "slowQueryCount": 0
+        },
+        {
+          "serviceId": "svc-analytics",
+          "timeBucket": "2024-04-20T09",
+          "saturation": 0.65,
+          "budgetBreaches": 0,
+          "throttleCount": 0,
+          "slowQueryCount": 2
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-api-blue-42",
+          "serviceId": "svc-api",
+          "pipelineId": "pipeline-blue",
+          "environmentId": "env-prod",
+          "status": "failed",
+          "startedAt": "2024-04-20T08:30:00Z",
+          "endedAt": "2024-04-20T08:45:00Z",
+          "tags": ["critical-path", "hipaa"]
+        },
+        {
+          "id": "run-analytics-7",
+          "serviceId": "svc-analytics",
+          "pipelineId": "pipeline-analytics",
+          "environmentId": "env-prod",
+          "status": "success",
+          "startedAt": "2024-04-19T12:00:00Z",
+          "endedAt": "2024-04-19T12:20:00Z",
+          "tags": ["batch"]
+        }
+      ]
+    },
+    "edge-cases": {
+      "description": "Dense hubs and disconnected components",
+      "services": [
+        {
+          "id": "svc-edge-hub",
+          "name": "Hub Service",
+          "tier": "tier-0",
+          "dependencies": ["svc-edge-a", "svc-edge-b", "svc-edge-c", "svc-edge-d"],
+          "languages": ["go"],
+          "piiClassification": "none"
+        },
+        { "id": "svc-edge-a", "name": "Edge A", "tier": "tier-2", "dependencies": [] },
+        { "id": "svc-edge-b", "name": "Edge B", "tier": "tier-2", "dependencies": [] },
+        { "id": "svc-edge-c", "name": "Edge C", "tier": "tier-2", "dependencies": [] },
+        { "id": "svc-edge-d", "name": "Edge D", "tier": "tier-2", "dependencies": [] },
+        { "id": "svc-edge-isolated", "name": "Isolated", "tier": "tier-1", "dependencies": [] }
+      ],
+      "environments": [
+        { "id": "env-dr", "name": "Disaster Recovery", "stage": "dr", "region": "us-south-1" }
+      ],
+      "pipelines": [
+        {
+          "id": "pipeline-hub",
+          "name": "Hub Release",
+          "stages": [
+            {
+              "id": "stage-hub-deploy",
+              "name": "Deploy",
+              "pipelineId": "pipeline-hub",
+              "serviceId": "svc-edge-hub",
+              "environmentId": "env-dr",
+              "capability": "deploy",
+              "guardrails": { "maxErrorRate": 0.05 }
+            }
+          ]
+        }
+      ],
+      "incidents": [
+        {
+          "id": "incident-hub-saturation",
+          "serviceId": "svc-edge-hub",
+          "environmentId": "env-dr",
+          "severity": "critical",
+          "occurredAt": "2024-04-16T04:00:00Z",
+          "status": "open",
+          "rootCauseCategory": "capacity"
+        }
+      ],
+      "policies": [
+        {
+          "id": "policy-hub-guardrail",
+          "description": "Require chaos drills before DR deploys",
+          "effect": "allow",
+          "actions": ["deploy"],
+          "resources": ["service:svc-edge-hub"],
+          "conditions": [],
+          "obligations": ["drill-complete"],
+          "tags": ["edge-case"]
+        }
+      ],
+      "costSignals": [
+        {
+          "serviceId": "svc-edge-hub",
+          "timeBucket": "2024-04-16T04",
+          "saturation": 0.97,
+          "budgetBreaches": 2,
+          "throttleCount": 3,
+          "slowQueryCount": 1
+        }
+      ],
+      "runs": [
+        {
+          "id": "run-hub-drill",
+          "serviceId": "svc-edge-hub",
+          "pipelineId": "pipeline-hub",
+          "environmentId": "env-dr",
+          "status": "failed",
+          "startedAt": "2024-04-16T03:40:00Z",
+          "endedAt": "2024-04-16T03:55:00Z",
+          "tags": ["dr", "edge-case"]
+        }
+      ]
+    }
+  }
+}

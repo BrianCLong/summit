@@ -1,0 +1,156 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "generatedAt": "2024-04-22T12:00:00Z",
+    "note": "Synthetic Maestro fixtures for control-loop testing"
+  },
+  "tenants": [
+    { "id": "tenant-health", "name": "Health Analytics" },
+    { "id": "tenant-corp", "name": "Corporate Ops" }
+  ],
+  "users": [
+    { "id": "user-ops", "email": "ops@example.test", "tenantId": "tenant-health", "roles": ["owner"] },
+    { "id": "user-sre", "email": "sre@example.test", "tenantId": "tenant-corp", "roles": ["sre"] }
+  ],
+  "scenarios": {
+    "control-loop": {
+      "description": "Two orchestrator services with HIPAA-aware policy and fallback",
+      "assets": [
+        {
+          "id": "svc-alpha",
+          "name": "orchestrator-alpha",
+          "kind": "microservice",
+          "cloud": "aws",
+          "region": "us-east-1",
+          "labels": { "compliance": "soc2,hipaa", "data-region": "us" },
+          "metadata": { "fallback": "svc-beta" },
+          "capabilities": [
+            { "name": "maestro-routing", "qualityOfService": { "latencyMs": 120, "reliability": 0.999 } },
+            { "name": "auto-heal", "qualityOfService": { "latencyMs": 200, "reliability": 0.998 } }
+          ]
+        },
+        {
+          "id": "svc-beta",
+          "name": "orchestrator-beta",
+          "kind": "microservice",
+          "cloud": "gcp",
+          "region": "us-central1",
+          "labels": { "compliance": "soc2", "data-region": "us" },
+          "metadata": { "fallback": "svc-alpha" },
+          "capabilities": [
+            { "name": "maestro-routing", "qualityOfService": { "latencyMs": 160, "reliability": 0.992 } },
+            { "name": "auto-heal", "qualityOfService": { "latencyMs": 260, "reliability": 0.989 } }
+          ]
+        }
+      ],
+      "policyHooks": [
+        {
+          "id": "hipaa-sensitivity",
+          "description": "require hipaa tag when job is sensitive",
+          "rules": [
+            {
+              "type": "require-tag",
+              "metadataKey": "sensitive",
+              "requiredTag": "hipaa"
+            }
+          ]
+        }
+      ],
+      "responseStrategies": [
+        {
+          "id": "auto-fallback",
+          "description": "failover to paired service and launch runbook",
+          "supports": { "metadataKey": "fallback" },
+          "cooldownMs": 1,
+          "actions": [
+            {
+              "type": "failover",
+              "impact": "high",
+              "payload": { "mode": "multi-cloud-drain" },
+              "runbook": "runbooks/fallback.md"
+            },
+            {
+              "type": "runbook",
+              "impact": "medium",
+              "payload": { "link": "runbooks/live-observability.md" }
+            }
+          ]
+        }
+      ],
+      "healthSignals": [
+        { "assetId": "svc-alpha", "metric": "latency.p95", "value": 110, "timestamp": "2024-04-20T10:00:00Z" },
+        { "assetId": "svc-alpha", "metric": "latency.p95", "value": 108, "timestamp": "2024-04-20T10:01:00Z" },
+        { "assetId": "svc-alpha", "metric": "latency.p95", "value": 112, "timestamp": "2024-04-20T10:02:00Z" },
+        { "assetId": "svc-alpha", "metric": "latency.p95", "value": 115, "timestamp": "2024-04-20T10:03:00Z" },
+        { "assetId": "svc-alpha", "metric": "latency.p95", "value": 420, "timestamp": "2024-04-20T10:04:00Z" },
+        { "assetId": "svc-alpha", "metric": "cost.perHour", "value": 28, "timestamp": "2024-04-20T10:04:10Z" },
+        { "assetId": "svc-alpha", "metric": "error.rate", "value": 0.11, "timestamp": "2024-04-20T10:04:20Z" },
+        { "assetId": "svc-alpha", "metric": "saturation", "value": 0.82, "timestamp": "2024-04-20T10:04:30Z" },
+        { "assetId": "svc-beta", "metric": "latency.p95", "value": 150, "timestamp": "2024-04-20T10:05:00Z" },
+        { "assetId": "svc-beta", "metric": "cost.perHour", "value": 18, "timestamp": "2024-04-20T10:05:10Z" },
+        { "assetId": "svc-beta", "metric": "error.rate", "value": 0.04, "timestamp": "2024-04-20T10:05:20Z" },
+        { "assetId": "svc-beta", "metric": "throughput", "value": 210, "timestamp": "2024-04-20T10:05:30Z" }
+      ],
+      "runs": [
+        {
+          "id": "run-alpha-incident",
+          "assetId": "svc-alpha",
+          "type": "incident-mitigation",
+          "priority": "critical",
+          "requiredCapabilities": ["maestro-routing"],
+          "requirements": { "regions": ["us-east-1"], "complianceTags": ["soc2"], "maxLatencyMs": 500 },
+          "metadata": { "sensitive": true },
+          "result": "mitigated",
+          "startedAt": "2024-04-20T10:04:00Z",
+          "endedAt": "2024-04-20T10:06:00Z"
+        }
+      ]
+    },
+    "edge-burst": {
+      "description": "Hub-and-spoke with cold spare and cost spike",
+      "assets": [
+        {
+          "id": "svc-hub",
+          "name": "hub-gateway",
+          "kind": "microservice",
+          "cloud": "azure",
+          "region": "eu-west-1",
+          "labels": { "compliance": "sox", "data-region": "eu" },
+          "metadata": { "fallback": "svc-spare" },
+          "capabilities": [
+            { "name": "gateway", "qualityOfService": { "latencyMs": 140, "reliability": 0.994 } }
+          ]
+        },
+        {
+          "id": "svc-spare",
+          "name": "hub-spare",
+          "kind": "microservice",
+          "cloud": "azure",
+          "region": "eu-west-1",
+          "labels": { "compliance": "sox" },
+          "metadata": {},
+          "capabilities": [
+            { "name": "gateway", "qualityOfService": { "latencyMs": 200, "reliability": 0.99 } }
+          ]
+        }
+      ],
+      "policyHooks": [],
+      "responseStrategies": [
+        {
+          "id": "burst-relief",
+          "description": "shed load to spare",
+          "supports": { "metadataKey": "fallback" },
+          "cooldownMs": 1,
+          "actions": [
+            { "type": "reroute", "impact": "medium", "payload": { "percentage": 30 } }
+          ]
+        }
+      ],
+      "healthSignals": [
+        { "assetId": "svc-hub", "metric": "saturation", "value": 0.95, "timestamp": "2024-04-19T09:00:00Z" },
+        { "assetId": "svc-hub", "metric": "cost.perHour", "value": 42, "timestamp": "2024-04-19T09:00:10Z" }
+      ],
+      "runs": []
+    }
+  }
+}
