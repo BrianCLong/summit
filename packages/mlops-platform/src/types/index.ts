@@ -139,7 +139,7 @@ export const TrainingConfigSchema = z.object({
     gpus: z.number().default(0),
     cpus: z.number().default(1),
     memory: z.string().default('4Gi'),
-    nodeSelector: z.record(z.string()).optional(),
+    nodeSelector: z.record(z.string(), z.any()).optional(),
     tolerations: z.array(z.any()).optional(),
   }),
 
@@ -192,7 +192,7 @@ export const TrainingRunSchema = z.object({
     epoch: z.number(),
     step: z.number(),
     timestamp: z.date(),
-    metrics: z.record(z.number()),
+    metrics: z.record(z.string(), z.number()),
   })).default([]),
 
   // Resource utilization
@@ -407,8 +407,8 @@ export const DriftDetectionResultSchema = z.object({
   // Affected features
   affectedFeatures: z.array(z.object({
     name: z.string(),
-    baseline: z.record(z.number()),
-    current: z.record(z.number()),
+    baseline: z.record(z.string(), z.number()),
+    current: z.record(z.string(), z.number()),
     drift: z.number(),
   })).optional(),
 
@@ -551,7 +551,7 @@ export const ModelGovernanceSchema = z.object({
   // Bias and fairness
   fairness: z.object({
     evaluated: z.boolean().default(false),
-    metrics: z.record(z.number()).optional(),
+    metrics: z.record(z.string(), z.number()).optional(),
     protectedAttributes: z.array(z.string()).default([]),
     mitigationStrategies: z.array(z.string()).default([]),
   }).optional(),
@@ -597,7 +597,7 @@ export const AutoMLConfigSchema = z.object({
   // Search space
   searchSpace: z.object({
     algorithms: z.array(z.string()).optional(),
-    hyperparameters: z.record(z.object({
+    hyperparameters: z.record(z.string(), z.object({
       type: z.enum(['categorical', 'continuous', 'discrete']),
       values: z.array(z.any()).optional(),
       min: z.number().optional(),

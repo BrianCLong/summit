@@ -7,7 +7,7 @@ import {
 import { CircularProgress, Box } from '@mui/material';
 import { createApolloClient } from './createApolloClient';
 
-export function WithApollo({ children }: { children: React.ReactNode }) {
+export function WithApollo({ children }: { children: React.ReactNode | React.ReactNode[] }) {
   const [client, setClient] =
     useState<ApolloClient<NormalizedCacheObject> | null>(null);
   const [error, setError] = useState<Error | null>(null);
