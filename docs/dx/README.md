@@ -10,6 +10,7 @@
 | [LOCAL_DEV_CONFIG.md](./LOCAL_DEV_CONFIG.md) | Docker profiles, secrets, customization | All developers |
 | [ONBOARDING_CHECKLIST.md](./ONBOARDING_CHECKLIST.md) | New developer setup checklist | New hires |
 | [GOLDEN_PATHS.md](./GOLDEN_PATHS.md) | Step-by-step workflows for common tasks | All developers |
+| [PR_CONVENTIONS.md](./PR_CONVENTIONS.md) | Pull request guidelines and commit format | All developers |
 
 ## Quick Start
 
