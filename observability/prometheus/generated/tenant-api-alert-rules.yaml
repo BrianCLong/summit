@@ -1,0 +1,113 @@
+# CompanyOS Tenant API - Prometheus Alert Rules
+# Generated: 2025-12-07
+
+groups:
+  - name: tenant-api-alerts
+    rules:
+      # High error rate alert
+      - alert: TenantApiHighErrorRate
+        expr: companyos:tenant_api:error_rate_5m > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          service: tenant-api
+          team: companyos
+        annotations:
+          summary: "Tenant API error rate is elevated"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-high-error-rate"
+
+      - alert: TenantApiCriticalErrorRate
+        expr: companyos:tenant_api:error_rate_5m > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: tenant-api
+          team: companyos
+        annotations:
+          summary: "Tenant API error rate is critical"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-critical-error-rate"
+
+      # High latency alerts
+      - alert: TenantApiHighLatency
+        expr: companyos:tenant_api:latency_p95_5m > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          service: tenant-api
+          team: companyos
+        annotations:
+          summary: "Tenant API p95 latency is elevated"
+          description: "P95 latency is {{ $value | humanizeDuration }} (threshold: 300ms)"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-high-latency"
+
+      - alert: TenantApiCriticalLatency
+        expr: companyos:tenant_api:latency_p99_5m > 1.0
+        for: 2m
+        labels:
+          severity: critical
+          service: tenant-api
+          team: companyos
+        annotations:
+          summary: "Tenant API p99 latency is critical"
+          description: "P99 latency is {{ $value | humanizeDuration }} (threshold: 1s)"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-critical-latency"
+
+      # Availability alert (SLO burn rate)
+      - alert: TenantApiSLOBurnRateCritical
+        expr: |
+          (
+            sum(rate(companyos_tenant_api_http_requests_total{status=~"5.."}[5m]))
+            /
+            sum(rate(companyos_tenant_api_http_requests_total[5m]))
+          ) > (14.4 * 0.001)
+        for: 2m
+        labels:
+          severity: critical
+          service: tenant-api
+          team: companyos
+          slo: availability
+        annotations:
+          summary: "Tenant API SLO burn rate is critical"
+          description: "Burning error budget at 14.4x rate"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-slo-burn"
+
+      # Service down alert
+      - alert: TenantApiDown
+        expr: up{job="tenant-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: tenant-api
+          team: companyos
+        annotations:
+          summary: "Tenant API is down"
+          description: "Tenant API service is not responding to health checks"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-down"
+
+      # Database connectivity
+      - alert: TenantApiDatabaseUnhealthy
+        expr: companyos_tenant_api_database_healthy == 0
+        for: 2m
+        labels:
+          severity: critical
+          service: tenant-api
+          team: companyos
+        annotations:
+          summary: "Tenant API database connection unhealthy"
+          description: "PostgreSQL connection is failing"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-db-unhealthy"
+
+      # No traffic alert (potential issue)
+      - alert: TenantApiNoTraffic
+        expr: sum(rate(companyos_tenant_api_http_requests_total[10m])) == 0
+        for: 15m
+        labels:
+          severity: warning
+          service: tenant-api
+          team: companyos
+        annotations:
+          summary: "No traffic to Tenant API"
+          description: "Tenant API has received no requests in 15 minutes"
+          runbook_url: "https://runbooks.companyos.io/tenant-api-no-traffic"
