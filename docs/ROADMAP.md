@@ -154,3 +154,17 @@ If you want, I’ll ship:
 [7]: https://aws.amazon.com/blogs/aws-insights/the-rise-of-autonomous-agents-what-enterprise-leaders-need-to-know-about-the-next-wave-of-ai/?utm_source=chatgpt.com 'The rise of autonomous agents: What enterprise leaders ...'
 [8]: https://venturebeat.com/programming-development/devin-2-0-is-here-cognition-slashes-price-of-ai-software-engineer-to-20-per-month-from-500?utm_source=chatgpt.com 'Devin 2.0 is here: Cognition slashes price of AI software ...'
 [9]: https://www.mckinsey.com/industries/automotive-and-assembly/our-insights/empowering-advanced-industries-with-agentic-ai?utm_source=chatgpt.com 'Empowering advanced industries with agentic AI'
+
+---
+
+# Vertical Strategy: Summit Intelligence Platform
+
+While CompanyOS provides the operating system, **Summit** is the flagship intelligence analysis application built on top of it. We have established a dedicated strategic roadmap to evolve Summit into a superior open-source alternative to **Maltego**, **Recorded Future**, and **Palantir Gotham**.
+
+See the full plan here: [STRATEGIC_EVOLUTION_PLAN.md](./STRATEGIC_EVOLUTION_PLAN.md).
+
+**Key pillars:**
+1. **OSINT Ingestion & Enrichment**: 50+ free transforms and open threat feeds.
+2. **Threat Intel & Predictive Analytics**: AI-driven forecasting and open IOC repositories.
+3. **Data Fusion & Visualization**: High-scale Neo4j graph fusion and 3D geospatial views.
+4. **Disruption**: Community-driven marketplace for transforms and seamless interoperability.
