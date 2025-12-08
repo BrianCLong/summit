@@ -12,10 +12,11 @@
  * 5. See live results
  */
 
-const axios = require('axios');
-const { WebSocket } = require('ws');
 const fs = require('fs');
 const path = require('path');
+
+let axios;
+let WebSocket;
 
 // Configuration
 const defaultApiBase = process.env.API_BASE_URL || 'http://localhost:4000';
@@ -584,12 +585,16 @@ class SmokeTest {
 // Install axios if not available
 async function ensureDependencies() {
   try {
-    require('axios');
-    require('ws');
+    axios = require('axios');
+    const wsModule = require('ws');
+    WebSocket = wsModule.WebSocket;
   } catch (error) {
     console.log('Installing required dependencies...');
     const { execSync } = require('child_process');
     execSync('npm install axios ws', { stdio: 'inherit' });
+    axios = require('axios');
+    const wsModule = require('ws');
+    WebSocket = wsModule.WebSocket;
   }
 }
 
