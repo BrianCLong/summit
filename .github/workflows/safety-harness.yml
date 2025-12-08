@@ -1,0 +1,204 @@
+name: Safety Harness - Red Team Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+  schedule:
+    # Run nightly at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      fail_on_high:
+        description: 'Fail on high-severity findings'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  safety-tests:
+    name: Run Safety Harness Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      matrix:
+        component: [copilot, analytics, case, export]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: |
+          cd safety-harness
+          pnpm install --frozen-lockfile
+
+      - name: Build safety harness
+        run: |
+          cd safety-harness
+          pnpm build
+
+      - name: Start services (if local)
+        if: ${{ github.event.inputs.environment == 'staging' || github.event_name == 'pull_request' }}
+        run: |
+          make up
+          ./scripts/wait-for-stack.sh
+
+      - name: Run safety tests
+        env:
+          TARGET_ENDPOINT: ${{ secrets.SAFETY_TEST_ENDPOINT || 'http://localhost:4000' }}
+          ENVIRONMENT: ${{ github.event.inputs.environment || 'ci' }}
+          BUILD_VERSION: ${{ github.sha }}
+          CI_SAFETY_GATE_ENABLED: 'true'
+          CI_FAIL_ON_CRITICAL: 'true'
+          CI_FAIL_ON_HIGH: ${{ github.event.inputs.fail_on_high || 'false' }}
+          CI_MAX_FAILURE_RATE: '0.10'
+          OUTPUT_DIR: ./safety-reports
+        run: |
+          cd safety-harness
+          mkdir -p ../safety-reports
+          pnpm run-suite \
+            --testpacks-dir ../testpacks \
+            --endpoint $TARGET_ENDPOINT \
+            --environment $ENVIRONMENT \
+            --build-version $BUILD_VERSION \
+            --parallel \
+            --concurrency 10 \
+            --output ../safety-reports/safety-${{ matrix.component }}.json \
+            --format json \
+            --packs ${{ matrix.component }}-*
+
+      - name: Generate HTML report
+        if: always()
+        run: |
+          cd safety-harness
+          pnpm report \
+            --input ../safety-reports/safety-${{ matrix.component }}.json \
+            --output ../safety-reports/safety-${{ matrix.component }}.html \
+            --format html
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: safety-reports-${{ matrix.component }}
+          path: safety-reports/
+          retention-days: 30
+
+      - name: Publish test results
+        if: always()
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: safety-reports/safety-junit.xml
+          check_name: Safety Tests - ${{ matrix.component }}
+          comment_mode: off
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('./safety-reports/safety-${{ matrix.component }}.json', 'utf8'));
+
+            const summary = report.summary;
+            const passed = summary.passed;
+            const failed = summary.failed;
+            const total = summary.total;
+            const passRate = (passed / total * 100).toFixed(1);
+
+            const emoji = failed === 0 ? '✅' : '⚠️';
+            const status = failed === 0 ? 'PASSED' : 'FAILED';
+
+            const comment = `
+            ## ${emoji} Safety Harness - ${{ matrix.component }} - ${status}
+
+            | Metric | Value |
+            |--------|-------|
+            | Total Tests | ${total} |
+            | Passed | ✅ ${passed} |
+            | Failed | ❌ ${failed} |
+            | Pass Rate | ${passRate}% |
+
+            ${failed > 0 ? '⚠️ **Warning:** Some safety tests failed. Review the [detailed report](../safety-reports/safety-${{ matrix.component }}.html) for more information.' : ''}
+
+            [View Full Report](../safety-reports/safety-${{ matrix.component }}.html)
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Fail if critical issues found
+        if: always()
+        run: |
+          cd safety-reports
+          CRITICAL_FAILURES=$(jq '.summary.byRiskLevel.critical.failed' safety-${{ matrix.component }}.json)
+          if [ "$CRITICAL_FAILURES" -gt 0 ]; then
+            echo "::error::Critical safety failures detected: $CRITICAL_FAILURES"
+            exit 1
+          fi
+
+  aggregate-results:
+    name: Aggregate Safety Results
+    needs: safety-tests
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-reports
+
+      - name: Aggregate results
+        run: |
+          echo "# 🛡️ Safety Harness - Aggregate Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Component | Total | Passed | Failed | Pass Rate |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|-------|--------|--------|-----------|" >> $GITHUB_STEP_SUMMARY
+
+          for report in all-reports/*/safety-*.json; do
+            if [ -f "$report" ]; then
+              component=$(basename "$report" .json | sed 's/safety-//')
+              total=$(jq '.summary.total' "$report")
+              passed=$(jq '.summary.passed' "$report")
+              failed=$(jq '.summary.failed' "$report")
+              passRate=$(echo "scale=1; $passed * 100 / $total" | bc)
+
+              status=$([ $failed -eq 0 ] && echo "✅" || echo "⚠️")
+              echo "| $status $component | $total | $passed | $failed | $passRate% |" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+      - name: Upload aggregate report
+        uses: actions/upload-artifact@v4
+        with:
+          name: safety-aggregate-report
+          path: all-reports/
+          retention-days: 90
