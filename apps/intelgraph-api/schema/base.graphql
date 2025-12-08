@@ -1,93 +1,121 @@
 # Entities & Relationships (SDL)
 
-type Organization {
+scalar DateTime
+scalar UUID
+scalar _Any
+scalar _FieldSet
+
+directive @link(import: [String!], url: String!) repeatable on SCHEMA
+directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+directive @external on FIELD_DEFINITION
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+directive @shareable on OBJECT | FIELD_DEFINITION
+directive @inaccessible on
+  FIELD_DEFINITION
+  | OBJECT
+  | INTERFACE
+  | UNION
+  | ENUM
+  | INPUT_OBJECT
+  | SCALAR
+directive @override(from: String!) on FIELD_DEFINITION
+
+type SchemaInfo {
+  version: String!
+  lastUpdated: DateTime!
+  hash: String!
+  federated: Boolean!
+}
+
+type Organization @key(fields: "id") {
   id: ID!
   name: String!
   region: String
-  createdAt: String!
+  createdAt: DateTime!
 }
-type Tenant {
+type Tenant @key(fields: "id orgId") {
   id: ID!
   orgId: ID!
   name: String!
-  createdAt: String!
+  createdAt: DateTime!
 }
-type User {
+type User @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   email: String!
   roles: [Role!]!
-  createdAt: String!
+  createdAt: DateTime!
 } # Updated to link to Role
-type Role {
+type Role @key(fields: "id") {
   id: ID!
   name: String!
   permissions: [Permission!]!
-  createdAt: String!
+  createdAt: DateTime!
 } # New Role type
-type Permission {
+type Permission @key(fields: "id") {
   id: ID!
   name: String!
   description: String
-  createdAt: String!
+  createdAt: DateTime!
 } # New Permission type
-type Policy {
+type Policy @key(fields: "id tenantId version") {
   id: ID!
   tenantId: ID!
   name: String!
   version: String!
   body: String!
-  createdAt: String!
+  createdAt: DateTime!
 } # Added tenantId for scoping
-type Asset {
+type Asset @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   kind: String!
   uri: String
   labels: [String!]
-  createdAt: String!
+  createdAt: DateTime!
 }
-type DataSet {
+type DataSet @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   name: String!
   source: String
-  createdAt: String!
+  createdAt: DateTime!
 }
-type Model {
+type Model @key(fields: "id tenantId version") {
   id: ID!
   tenantId: ID!
   name: String!
   version: String!
-  createdAt: String!
+  createdAt: DateTime!
 }
-type Eval {
+type Eval @key(fields: "id tenantId modelId") {
   id: ID!
   tenantId: ID!
   modelId: ID!
   name: String!
   score: Float
   reportURI: String
-  createdAt: String!
+  createdAt: DateTime!
 } # Added tenantId for scoping
-type Task {
+type Task @key(fields: "id tenantId planId") {
   id: ID!
   tenantId: ID!
   planId: ID!
   name: String!
   status: String!
-  createdAt: String!
-  updatedAt: String
+  createdAt: DateTime!
+  updatedAt: DateTime
 } # Added tenantId for scoping
-type Plan {
+type Plan @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   name: String!
   status: String!
-  createdAt: String!
-  updatedAt: String
+  createdAt: DateTime!
+  updatedAt: DateTime
 } # Added tenantId for scoping
-type Artifact {
+type Artifact @key(fields: "id tenantId planId") {
   id: ID!
   tenantId: ID!
   planId: ID!
@@ -95,47 +123,47 @@ type Artifact {
   uri: String!
   hash: String
   signature: String
-  createdAt: String!
+  createdAt: DateTime!
 } # Added tenantId for scoping
-type Incident {
+type Incident @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   severity: String!
   description: String!
-  createdAt: String!
+  createdAt: DateTime!
 }
-type Risk {
+type Risk @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   category: String!
   level: String!
-  createdAt: String!
+  createdAt: DateTime!
 }
-type Control {
+type Control @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   name: String!
   evidenceURI: String
-  createdAt: String!
+  createdAt: DateTime!
 }
-type KPI {
+type KPI @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   name: String!
   value: Float!
-  ts: String!
+  ts: DateTime!
 }
-type OKR {
+type OKR @key(fields: "id tenantId") {
   id: ID!
   tenantId: ID!
   objective: String!
   keyResults: [String!]!
-  ts: String!
+  ts: DateTime!
 }
 
 type Provenance {
   who: String!
-  when: String!
+  when: DateTime!
   tool: String!
   model: String
   data_lineage: String
@@ -147,11 +175,16 @@ type Provenance {
 }
 
 type Query {
+  schemaInfo: SchemaInfo!
   org(id: ID!): Organization
   tenant(id: ID!): Tenant
   user(id: ID!): User
   roles: [Role!]! # New query for roles
   permissions: [Permission!]! # New query for permissions
+  policyHistory(tenantId: ID!, name: String!, limit: Int = 20): [Policy!]!
+  policyVersion(tenantId: ID!, name: String!, version: String!): Policy
+  _service: _Service!
+  _entities(representations: [_Any!]!): [_Entity]!
 }
 
 type Mutation {
@@ -175,4 +208,28 @@ type Mutation {
   assignRoleToUser(userId: ID!, roleId: ID!): User! # New mutation
   createRole(name: String!, permissionIds: [ID!]): Role! # New mutation
   createPermission(name: String!, description: String): Permission! # New mutation
+}
+
+union _Entity =
+    Organization
+  | Tenant
+  | User
+  | Role
+  | Permission
+  | Policy
+  | Asset
+  | DataSet
+  | Model
+  | Eval
+  | Task
+  | Plan
+  | Artifact
+  | Incident
+  | Risk
+  | Control
+  | KPI
+  | OKR
+
+type _Service {
+  sdl: String!
 }

@@ -1,0 +1,22 @@
+[package]
+name = "zk-tx"
+version = "0.1.0"
+edition = "2021"
+authors = ["Summit Engineering"]
+license = "MIT"
+
+[dependencies]
+axum = { version = "0.7", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+base64 = "0.22"
+blake3 = "1.5"
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+http-body-util = "0.1"
+tower = { version = "0.4", features = ["util"] }
+
+[workspace]
