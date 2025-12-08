@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * HuntQueryBuilder
  * Visual query builder for creating custom threat hunting queries

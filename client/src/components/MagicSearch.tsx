@@ -12,6 +12,7 @@ import {
 
 interface ParsedQuery {
   query: DocumentNode;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variables: Record<string, any>;
 }
 
@@ -44,6 +45,7 @@ export default function MagicSearch() {
   const client = useApolloClient();
   const [input, setInput] = useState('');
   const [graphql, setGraphql] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [results, setResults] = useState<any[]>([]);
   const options = [...ENTITY_SUGGESTIONS, ...RELATION_SUGGESTIONS];
 

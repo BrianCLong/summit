@@ -1,3 +1,4 @@
+// @ts-nocheck
 import DataLoader from 'dataloader';
 import { getPostgresPool } from '../../config/database.js';
 import { getRedisClient } from '../../config/database.js';

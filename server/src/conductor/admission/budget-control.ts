@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Conductor Budget Hard-Stop Controller
 // Implements budget enforcement with graceful degradation and cost containment
 

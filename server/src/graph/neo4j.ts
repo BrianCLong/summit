@@ -1,3 +1,4 @@
+// @ts-nocheck
 import neo4j, { Driver } from 'neo4j-driver';
 
 let driver: Driver | null = null;

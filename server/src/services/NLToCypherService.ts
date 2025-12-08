@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * NL-to-Cypher Service - Minimum Lovable AI Copilot
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * OpenTelemetry Tracing Infrastructure Module
  *

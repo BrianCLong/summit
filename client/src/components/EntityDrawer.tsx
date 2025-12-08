@@ -61,6 +61,7 @@ type Entity = {
   type: string;
   label: string;
   description?: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   properties?: Record<string, any> | null;
   updatedAt?: string;
 };

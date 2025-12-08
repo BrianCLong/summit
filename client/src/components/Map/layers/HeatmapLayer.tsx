@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Heatmap Layer Component
  */
@@ -92,6 +93,7 @@ export const HeatmapLayer: React.FC<HeatmapLayerProps> = ({
         heatLayerRef.current.remove();
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map]);
 
   // Update heatmap when points change

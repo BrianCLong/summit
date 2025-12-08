@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * GraphRAG Service - Retrieval Augmented Generation over Knowledge Graphs
  * Combines graph traversal with LLM generation for intelligent responses

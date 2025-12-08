@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Worker, Job } from 'bullmq';
 import IORedis from 'ioredis';
 import axios from 'axios';

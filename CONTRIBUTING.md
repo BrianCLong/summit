@@ -695,3 +695,21 @@ make ci-check contracts policy-sim
 - [ ] Tests updated for Express 5 semantics
 - [ ] Contracts + policy sim pass
 - [ ] SBOM + provenance generated and verified
+
+## Strict CI Enforcement & Code Quality
+
+We enforce strict TypeScript checks (`strict: true`, `noImplicitAny`) and ESLint rules (`no-explicit-any`, `no-unused-vars`).
+
+### Zero Tolerance
+
+- All PRs must pass `npm run typecheck` and `npm run lint` with **zero errors and zero warnings**.
+- CI will fail fast on the first error.
+
+### Legacy Code Exemption
+
+To support gradual migration, existing files with errors are grandfathered via:
+- `.eslint-legacy-files.json`: Files exempt from strict ESLint rules.
+- `tsconfig.strict.json` exclude list: Files exempt from strict type checking.
+
+**New code must not be added to these exemption lists.**
+If you modify a legacy file, aim to fix the errors and remove it from the exemption list.

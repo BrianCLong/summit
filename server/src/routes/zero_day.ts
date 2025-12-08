@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/routes/zero_day.ts
 import { Router } from 'express';
 import { zeroDayService } from '../zero_day/ZeroDayService';

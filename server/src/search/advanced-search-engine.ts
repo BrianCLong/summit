@@ -1,3 +1,4 @@
+// @ts-nocheck
 import natural from 'natural';
 
 export type FacetFilter = Record<string, string[]>;

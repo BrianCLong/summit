@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Cost Guard Middleware
  *

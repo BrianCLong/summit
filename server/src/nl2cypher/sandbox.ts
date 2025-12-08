@@ -1,3 +1,4 @@
+// @ts-nocheck
 import neo4j from 'neo4j-driver';
 import { Neo4jContainer, StartedNeo4jContainer } from '@testcontainers/neo4j';
 

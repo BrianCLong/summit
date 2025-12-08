@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';

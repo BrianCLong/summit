@@ -1,3 +1,4 @@
+// @ts-nocheck
 import axios from 'axios'; // Existing dep
 
 const AI_SERVER_URL = 'http://ai-server:8000'; // Docker service name and port

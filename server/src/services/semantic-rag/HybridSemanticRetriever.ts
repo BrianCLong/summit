@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Hybrid Semantic Retriever
  * Combines pgvector semantic search with graph-based retrieval

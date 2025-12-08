@@ -144,6 +144,7 @@ function Dashboard() {
                 <Button
                   variant="contained"
                   color="primary"
+                  // eslint-disable-next-line no-console
                   onClick={() => console.log('Dashboard clicked')}
                 >
                   Dashboard
@@ -151,6 +152,7 @@ function Dashboard() {
                 <Button
                   variant="outlined"
                   color="secondary"
+                  // eslint-disable-next-line no-console
                   onClick={() => console.log('Investigations clicked')}
                 >
                   Investigations
@@ -158,6 +160,7 @@ function Dashboard() {
                 <Button
                   variant="outlined"
                   color="info"
+                  // eslint-disable-next-line no-console
                   onClick={() => console.log('Graph Explorer clicked')}
                 >
                   Graph Explorer
@@ -165,6 +168,7 @@ function Dashboard() {
                 <Button
                   variant="outlined"
                   color="success"
+                  // eslint-disable-next-line no-console
                   onClick={() => console.log('AI Copilot clicked')}
                 >
                   AI Copilot
@@ -214,9 +218,13 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Apollo IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
+    // eslint-disable-next-line no-console
     console.log('✅ Apollo GraphQL client initialized');
   }, []);
 

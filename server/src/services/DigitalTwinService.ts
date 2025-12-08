@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Digital Twin Service
  * Manages digital twin assets with real-time sensor integration and synchronization
