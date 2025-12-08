@@ -189,11 +189,6 @@ async function connectToNeo4j(): Promise<void> {
         connectionTimeout: POOL_CONNECTION_TIMEOUT,
         connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
         logging: {
-            level: 'info',
-            logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
-        maxConnectionPoolSize: MAX_CONNECTION_POOL_SIZE,
-        connectionTimeout: CONNECTION_TIMEOUT_MS,
-        logging: {
           level: 'info',
           logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message)
         }

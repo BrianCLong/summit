@@ -2,6 +2,8 @@ import { IntelGraphClient } from '../intelgraph/client';
 import { Task, Run, Artifact, TaskStatus } from './types';
 import { CostMeter } from './cost_meter';
 import { OpenAILLM } from './adapters/llm_openai';
+import { GraphAnalysisService } from '../analysis/GraphAnalysisService';
+import { GraphAlgorithmKey } from '../analysis/graphTypes';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -9,12 +11,16 @@ export interface MaestroConfig {
 }
 
 export class Maestro {
+  private graphService: GraphAnalysisService;
+
   constructor(
     private ig: IntelGraphClient,
     private costMeter: CostMeter,
     private llm: OpenAILLM,
     private config: MaestroConfig,
-  ) {}
+  ) {
+    this.graphService = GraphAnalysisService.getInstance();
+  }
 
   async createRun(userId: string, requestText: string): Promise<Run> {
     const run: Run = {
@@ -76,7 +82,8 @@ export class Maestro {
     await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
     try {
-      let result: string = '';
+      let result: any = '';
+      let artifactKind: Artifact['kind'] = 'text';
 
       if (task.agent.kind === 'llm') {
         result = await this.llm.callCompletion(task.runId, task.id, {
@@ -87,6 +94,23 @@ export class Maestro {
             ...(task.input.requestText ? [{ role: 'user', content: String(task.input.requestText) }] : []),
           ],
         });
+      } else if (task.kind === 'graph.analysis') {
+         // Extract params
+         const algorithm = task.input.algorithm as GraphAlgorithmKey;
+         const params = task.input.params as Record<string, unknown>;
+         const tenantId = task.input.tenantId as string;
+
+         if (!algorithm || !tenantId) throw new Error("Missing algorithm or tenantId for graph analysis task");
+
+         const job = await this.graphService.createJob(tenantId, algorithm, params);
+         const completedJob = await this.graphService.runJob(job.id);
+
+         if (completedJob.status === 'failed') {
+            throw new Error(completedJob.error || "Graph analysis failed");
+         }
+
+         result = completedJob.result;
+         artifactKind = 'json'; // Or 'graph' if we want to store it specifically
       } else {
         // TODO: shell tools, etc.
         result = 'TODO: implement non-LLM agent';
@@ -96,7 +120,7 @@ export class Maestro {
         id: crypto.randomUUID(),
         runId: task.runId,
         taskId: task.id,
-        kind: 'text',
+        kind: artifactKind,
         label: 'task-output',
         data: result,
         createdAt: new Date().toISOString(),
