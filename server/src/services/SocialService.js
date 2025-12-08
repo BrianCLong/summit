@@ -1,5 +1,6 @@
-const { getPostgresPool } = require('../config/database');
-const fetch = require('node-fetch');
+import { getPostgresPool, getNeo4jDriver } from '../config/database.js';
+import fetch from 'node-fetch';
+import KeyVaultService from './KeyVaultService.js';
 
 class SocialService {
   constructor() {
@@ -65,7 +66,6 @@ class SocialService {
         }
       } else if (provider === 'mastodon') {
         // Mastodon instance host required; token optional via KeyVault
-        const KeyVaultService = require('./KeyVaultService');
         const kv = new KeyVaultService();
         const key = await kv.getActiveKey('mastodon');
         const api = `https://${host || 'mastodon.social'}/api/v2/search?type=statuses&q=${encodeURIComponent(query)}&limit=${limit || 10}`;
@@ -106,7 +106,6 @@ class SocialService {
         }
       } else if (provider === 'x') {
         // X/Twitter requires Bearer token via KeyVault
-        const KeyVaultService = require('./KeyVaultService');
         const kv = new KeyVaultService();
         const key = await kv.getActiveKey('x');
         if (key) {
@@ -141,7 +140,6 @@ class SocialService {
     const mentions = this.nerExtractEntities(textBlob);
     // Optionally persist mentions as entities
     try {
-      const { getNeo4jDriver } = require('../config/database');
       const driver = getNeo4jDriver();
       const session = driver.session();
       for (const m of mentions) {
@@ -177,4 +175,4 @@ class SocialService {
   }
 }
 
-module.exports = SocialService;
+export default SocialService;
