@@ -1,0 +1,385 @@
+name: Regulatory Stance Analysis
+
+# Analyzes the platform's regulatory stance under GDPR, CCPA, and EU AI Act
+# frameworks to identify high-risk areas and compliance obligations.
+#
+# DISCLAIMER: This is a simulation/aid tool, NOT legal advice.
+# Consult qualified legal counsel for compliance matters.
+
+on:
+  # Manual trigger with lens selection
+  workflow_dispatch:
+    inputs:
+      lens:
+        description: "Regulatory lens to analyze"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - all
+          - gdpr
+          - ccpa
+          - eu_ai_act
+      notify_on_findings:
+        description: "Create issue if critical/high findings detected"
+        required: false
+        default: false
+        type: boolean
+
+  # Nightly analysis (optional - commented out by default)
+  # schedule:
+  #   - cron: '0 3 * * 1'  # Weekly on Monday at 3 AM
+
+  # Run on changes to compliance-related files
+  push:
+    branches: [main]
+    paths:
+      - "compliance/**"
+      - "docs/compliance/**"
+      - "scripts/compliance/**"
+      - "services/compliance/**"
+
+  pull_request:
+    paths:
+      - "compliance/**"
+      - "docs/compliance/**"
+      - "scripts/compliance/**"
+      - "services/compliance/**"
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  NODE_VERSION: "18"
+  REPORTS_DIR: reports
+
+jobs:
+  analyze:
+    name: Regulatory Stance Analysis
+    runs-on: ubuntu-latest
+    outputs:
+      has_critical_findings: ${{ steps.check_findings.outputs.has_critical }}
+      has_high_findings: ${{ steps.check_findings.outputs.has_high }}
+      report_summary: ${{ steps.check_findings.outputs.summary }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@a5ac7e51b4109f5124f9564e9f05e504dfbe8c05 # v4.1.7
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_OUTPUT
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare reports directory
+        run: mkdir -p ${{ env.REPORTS_DIR }}
+
+      - name: Determine analysis scope
+        id: scope
+        run: |
+          LENS="${{ github.event.inputs.lens || 'all' }}"
+          if [ "$LENS" = "all" ]; then
+            echo "args=--all" >> "$GITHUB_OUTPUT"
+            echo "description=all regulatory frameworks (GDPR, CCPA, EU AI Act)" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=--lens $LENS" >> "$GITHUB_OUTPUT"
+            echo "description=$LENS" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run regulatory stance analysis
+        id: analyze
+        run: |
+          echo "Analyzing regulatory stance for: ${{ steps.scope.outputs.description }}"
+          pnpm tsx scripts/compliance/analyze-regulatory-stance.ts ${{ steps.scope.outputs.args }}
+
+      - name: Check for findings
+        id: check_findings
+        run: |
+          HAS_CRITICAL="false"
+          HAS_HIGH="false"
+          SUMMARY=""
+
+          for report in ${{ env.REPORTS_DIR }}/regulatory-stance-*.md; do
+            if [ -f "$report" ]; then
+              lens=$(basename "$report" .md | sed 's/regulatory-stance-//')
+
+              # Check for CRITICAL findings
+              if grep -q '\[CRITICAL\]' "$report"; then
+                HAS_CRITICAL="true"
+              fi
+
+              # Check for HIGH findings
+              if grep -q '\[HIGH\]' "$report"; then
+                HAS_HIGH="true"
+              fi
+
+              # Extract score
+              score=$(grep -oP 'Overall Score.*?\|\s*\K[\d.]+' "$report" || echo "N/A")
+              status=$(grep -oP 'Status.*?\|\s*\K\w+' "$report" || echo "UNKNOWN")
+
+              SUMMARY="${SUMMARY}${lens}: ${score}% (${status})\n"
+            fi
+          done
+
+          echo "has_critical=$HAS_CRITICAL" >> "$GITHUB_OUTPUT"
+          echo "has_high=$HAS_HIGH" >> "$GITHUB_OUTPUT"
+          echo "summary<<EOF" >> "$GITHUB_OUTPUT"
+          echo -e "$SUMMARY" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+
+      - name: Upload reports as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: regulatory-stance-reports
+          path: ${{ env.REPORTS_DIR }}/regulatory-stance-*.md
+          retention-days: 90
+
+      - name: Generate job summary
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
+          # Regulatory Stance Analysis Results
+
+          ## Summary
+
+          ${{ steps.check_findings.outputs.summary }}
+
+          ## Reports
+
+          Reports have been uploaded as workflow artifacts and are available for download.
+
+          | Framework | Report |
+          |-----------|--------|
+          EOF
+
+          for report in ${{ env.REPORTS_DIR }}/regulatory-stance-*.md; do
+            if [ -f "$report" ]; then
+              lens=$(basename "$report" .md | sed 's/regulatory-stance-//')
+              echo "| ${lens^^} | [View Report](../artifacts/regulatory-stance-reports/${lens}) |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
+
+          ---
+
+          > **DISCLAIMER**: This is a simulation/aid tool, NOT legal advice.
+          > Consult qualified legal counsel for compliance matters.
+          EOF
+
+  notify:
+    name: Notify on Critical Findings
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: |
+      (github.event.inputs.notify_on_findings == 'true' || github.event_name == 'schedule') &&
+      (needs.analyze.outputs.has_critical_findings == 'true' || needs.analyze.outputs.has_high_findings == 'true')
+
+    steps:
+      - name: Download reports
+        uses: actions/download-artifact@v4
+        with:
+          name: regulatory-stance-reports
+          path: reports
+
+      - name: Create compliance issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const hasCritical = '${{ needs.analyze.outputs.has_critical_findings }}' === 'true';
+            const hasHigh = '${{ needs.analyze.outputs.has_high_findings }}' === 'true';
+            const summary = `${{ needs.analyze.outputs.report_summary }}`;
+
+            const severity = hasCritical ? 'CRITICAL' : 'HIGH';
+
+            // Read all reports
+            const reportsDir = 'reports';
+            let reportContent = '';
+            const files = fs.readdirSync(reportsDir);
+            for (const file of files) {
+              if (file.endsWith('.md')) {
+                const lens = file.replace('regulatory-stance-', '').replace('.md', '').toUpperCase();
+                const content = fs.readFileSync(path.join(reportsDir, file), 'utf8');
+
+                // Extract findings section
+                const findingsMatch = content.match(/## Findings\n\n([\s\S]*?)(?=\n## |$)/);
+                if (findingsMatch) {
+                  reportContent += `### ${lens} Findings\n\n${findingsMatch[1]}\n\n`;
+                }
+              }
+            }
+
+            const issueBody = `
+            ## Regulatory Stance Analysis - ${severity} Findings Detected
+
+            A scheduled regulatory stance analysis has detected ${severity.toLowerCase()} findings that require attention.
+
+            ### Summary
+
+            \`\`\`
+            ${summary}
+            \`\`\`
+
+            ### Findings
+
+            ${reportContent}
+
+            ### Next Steps
+
+            1. Review the full reports in the workflow artifacts
+            2. Assess the impact and priority of each finding
+            3. Create follow-up issues for remediation items
+            4. Update compliance documentation as needed
+
+            ---
+
+            > **DISCLAIMER**: This is a simulation/aid tool, NOT legal advice.
+            > Consult qualified legal counsel for compliance matters.
+
+            *Generated by [Regulatory Stance Analysis](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})*
+            `;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `[Compliance] ${severity} regulatory stance findings detected`,
+              body: issueBody,
+              labels: ['compliance', 'security', severity.toLowerCase()]
+            });
+
+  pr-comment:
+    name: Comment on PR
+    runs-on: ubuntu-latest
+    needs: analyze
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Download reports
+        uses: actions/download-artifact@v4
+        with:
+          name: regulatory-stance-reports
+          path: reports
+
+      - name: Comment on PR with analysis results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const hasCritical = '${{ needs.analyze.outputs.has_critical_findings }}' === 'true';
+            const hasHigh = '${{ needs.analyze.outputs.has_high_findings }}' === 'true';
+            const summary = `${{ needs.analyze.outputs.report_summary }}`;
+
+            let statusEmoji = '✅';
+            let statusText = 'No significant findings';
+
+            if (hasCritical) {
+              statusEmoji = '🚨';
+              statusText = 'Critical findings detected - review required';
+            } else if (hasHigh) {
+              statusEmoji = '⚠️';
+              statusText = 'High-severity findings detected - review recommended';
+            }
+
+            // Read findings count from reports
+            const reportsDir = 'reports';
+            let findingsSummary = '';
+            const files = fs.readdirSync(reportsDir);
+            for (const file of files) {
+              if (file.endsWith('.md')) {
+                const lens = file.replace('regulatory-stance-', '').replace('.md', '').toUpperCase();
+                const content = fs.readFileSync(path.join(reportsDir, file), 'utf8');
+
+                const criticalCount = (content.match(/\[CRITICAL\]/g) || []).length;
+                const highCount = (content.match(/\[HIGH\]/g) || []).length;
+                const mediumCount = (content.match(/\[MEDIUM\]/g) || []).length;
+
+                findingsSummary += `| ${lens} | ${criticalCount} | ${highCount} | ${mediumCount} |\n`;
+              }
+            }
+
+            const commentBody = `
+            ## ${statusEmoji} Regulatory Stance Analysis
+
+            ${statusText}
+
+            ### Framework Scores
+
+            \`\`\`
+            ${summary}
+            \`\`\`
+
+            ### Findings by Severity
+
+            | Framework | Critical | High | Medium |
+            |-----------|----------|------|--------|
+            ${findingsSummary}
+
+            <details>
+            <summary>View full reports</summary>
+
+            Reports are available as workflow artifacts in the [Actions run](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}).
+
+            </details>
+
+            ---
+
+            > **DISCLAIMER**: This is a simulation/aid tool, NOT legal advice.
+            `;
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' &&
+              comment.body.includes('Regulatory Stance Analysis')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
