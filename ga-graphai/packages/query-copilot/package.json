@@ -10,6 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@ga-graphai/cost-guard": "file:../cost-guard",
     "@ga-graphai/prov-ledger": "file:../prov-ledger",
     "common-types": "file:../common-types"
   },
