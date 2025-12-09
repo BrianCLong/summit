@@ -1,0 +1,388 @@
+"""
+Admin Studio GraphQL API
+Provides cost/budget management, monitoring, and operational control
+"""
+scalar DateTime
+scalar JSON
+
+"""
+Tenant budget configuration
+"""
+type TenantBudget {
+  id: ID!
+  tenantId: String!
+  period: BudgetPeriod!
+  limit: Float!
+  current: Float!
+  remaining: Float!
+  utilizationPercent: Float!
+  resetAt: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+enum BudgetPeriod {
+  MINUTE
+  HOUR
+  DAY
+  MONTH
+}
+
+"""
+Budget ledger entry
+"""
+type BudgetLedgerEntry {
+  id: ID!
+  tenantId: String!
+  operation: String!
+  estimatedCost: Float!
+  actualCost: Float
+  resourceType: String!
+  metadata: JSON
+  createdAt: DateTime!
+}
+
+"""
+QOS Override configuration
+"""
+type QOSOverride {
+  id: ID!
+  tenantId: String!
+  expert: String
+  exploreMax: Float!
+  expiresAt: DateTime!
+  reason: String!
+  actor: String!
+  createdAt: DateTime!
+}
+
+"""
+Tenant notice/warning
+"""
+type TenantNotice {
+  id: ID!
+  tenantId: String!
+  noticeType: String!
+  message: String!
+  severity: NoticeSeverity!
+  acknowledged: Boolean!
+  createdAt: DateTime!
+  acknowledgedAt: DateTime
+}
+
+enum NoticeSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+"""
+Running query information
+"""
+type RunningQuery {
+  queryId: ID!
+  tenantId: String!
+  database: DatabaseType!
+  query: String!
+  estimatedCost: Float!
+  complexity: Int
+  executionTimeMs: Int!
+  costIncurred: Float!
+  status: QueryStatus!
+  startedAt: DateTime!
+}
+
+enum DatabaseType {
+  NEO4J
+  POSTGRES
+  REDIS
+}
+
+enum QueryStatus {
+  RUNNING
+  WARNING
+  SHOULD_KILL
+}
+
+"""
+Slow query statistics
+"""
+type SlowQueryStats {
+  totalQueries: Int!
+  killedQueries: Int!
+  warningsIssued: Int!
+  totalCostSaved: Float!
+  killsByReason: JSON!
+  avgExecutionTimeMs: Float!
+  p95ExecutionTimeMs: Float!
+  p99ExecutionTimeMs: Float!
+}
+
+"""
+Service health status
+"""
+type ServiceHealth {
+  service: String!
+  status: HealthStatus!
+  uptime: Int!
+  lastCheck: DateTime!
+  details: JSON
+}
+
+enum HealthStatus {
+  HEALTHY
+  DEGRADED
+  UNHEALTHY
+  UNKNOWN
+}
+
+"""
+System metrics
+"""
+type SystemMetrics {
+  cpuUsagePercent: Float!
+  memoryUsageBytes: Float!
+  memoryUsagePercent: Float!
+  activeConnections: Int!
+  requestRate: Float!
+  errorRate: Float!
+  p95LatencyMs: Float!
+}
+
+"""
+Cost metrics by tenant
+"""
+type CostMetrics {
+  tenantId: String!
+  period: BudgetPeriod!
+  totalCost: Float!
+  costByOperation: JSON!
+  costByResource: JSON!
+  requestCount: Int!
+  avgCostPerRequest: Float!
+}
+
+"""
+Feature flag configuration
+"""
+type FeatureFlag {
+  id: ID!
+  name: String!
+  enabled: Boolean!
+  rolloutPercent: Int!
+  tenantWhitelist: [String!]
+  tenantBlacklist: [String!]
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Connector/job status
+"""
+type ConnectorJob {
+  id: ID!
+  connectorType: String!
+  status: JobStatus!
+  startedAt: DateTime
+  completedAt: DateTime
+  recordsProcessed: Int
+  errorCount: Int
+  lastError: String
+  metadata: JSON
+}
+
+enum JobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+"""
+SLO adherence metrics
+"""
+type SLOAdherence {
+  service: String!
+  sloName: String!
+  target: Float!
+  actual: Float!
+  adherencePercent: Float!
+  violationCount: Int!
+  evaluatedAt: DateTime!
+}
+
+type Query {
+  """Get tenant budget by ID or tenant ID"""
+  tenantBudget(id: ID, tenantId: String, period: BudgetPeriod): TenantBudget
+
+  """List all tenant budgets"""
+  tenantBudgets(
+    limit: Int = 50
+    offset: Int = 0
+    tenantId: String
+  ): [TenantBudget!]!
+
+  """Get budget ledger entries"""
+  budgetLedgerEntries(
+    tenantId: String!
+    startDate: DateTime
+    endDate: DateTime
+    limit: Int = 100
+    offset: Int = 0
+  ): [BudgetLedgerEntry!]!
+
+  """Get QOS overrides"""
+  qosOverrides(
+    tenantId: String
+    active: Boolean = true
+  ): [QOSOverride!]!
+
+  """Get tenant notices"""
+  tenantNotices(
+    tenantId: String!
+    acknowledged: Boolean
+    severity: NoticeSeverity
+  ): [TenantNotice!]!
+
+  """Get running queries"""
+  runningQueries(
+    tenantId: String
+    database: DatabaseType
+    status: QueryStatus
+  ): [RunningQuery!]!
+
+  """Get slow query statistics"""
+  slowQueryStats(
+    tenantId: String
+    period: BudgetPeriod = DAY
+  ): SlowQueryStats!
+
+  """Get service health status"""
+  serviceHealth(service: String): [ServiceHealth!]!
+
+  """Get system metrics"""
+  systemMetrics: SystemMetrics!
+
+  """Get cost metrics"""
+  costMetrics(
+    tenantId: String!
+    period: BudgetPeriod = DAY
+    startDate: DateTime
+    endDate: DateTime
+  ): CostMetrics!
+
+  """Get all cost metrics aggregated"""
+  aggregatedCostMetrics(
+    period: BudgetPeriod = DAY
+    topN: Int = 10
+  ): [CostMetrics!]!
+
+  """Get feature flags"""
+  featureFlags(name: String): [FeatureFlag!]!
+
+  """Get feature flag by name"""
+  featureFlag(name: String!): FeatureFlag
+
+  """Get connector jobs"""
+  connectorJobs(
+    connectorType: String
+    status: JobStatus
+    limit: Int = 50
+    offset: Int = 0
+  ): [ConnectorJob!]!
+
+  """Get SLO adherence"""
+  sloAdherence(
+    service: String
+    sloName: String
+  ): [SLOAdherence!]!
+}
+
+type Mutation {
+  """Create or update tenant budget"""
+  setTenantBudget(
+    tenantId: String!
+    period: BudgetPeriod!
+    limit: Float!
+  ): TenantBudget!
+
+  """Record spending (for testing/manual adjustments)"""
+  recordSpending(
+    tenantId: String!
+    operation: String!
+    estimatedCost: Float!
+    actualCost: Float
+    resourceType: String!
+    metadata: JSON
+  ): BudgetLedgerEntry!
+
+  """Create QOS override"""
+  createQOSOverride(
+    tenantId: String!
+    expert: String
+    exploreMax: Float!
+    ttlMinutes: Int!
+    reason: String!
+  ): QOSOverride!
+
+  """Extend QOS override"""
+  extendQOSOverride(
+    id: ID!
+    extendMinutes: Int!
+    reason: String!
+  ): QOSOverride!
+
+  """Delete QOS override"""
+  deleteQOSOverride(id: ID!): Boolean!
+
+  """Acknowledge tenant notice"""
+  acknowledgeTenantNotice(id: ID!): TenantNotice!
+
+  """Kill a running query"""
+  killQuery(queryId: ID!): Boolean!
+
+  """Set tenant query budget"""
+  setTenantQueryBudget(
+    tenantId: String!
+    maxExecutionTimeMs: Int!
+    maxCostDollars: Float!
+    maxConcurrentQueries: Int
+    maxComplexity: Int
+  ): Boolean!
+
+  """Enable/disable feature flag"""
+  toggleFeatureFlag(
+    name: String!
+    enabled: Boolean!
+  ): FeatureFlag!
+
+  """Update feature flag rollout"""
+  updateFeatureFlagRollout(
+    name: String!
+    rolloutPercent: Int!
+    tenantWhitelist: [String!]
+    tenantBlacklist: [String!]
+  ): FeatureFlag!
+
+  """Re-run failed connector job"""
+  retryConnectorJob(id: ID!): ConnectorJob!
+
+  """Cancel running connector job"""
+  cancelConnectorJob(id: ID!): ConnectorJob!
+}
+
+type Subscription {
+  """Subscribe to budget utilization changes"""
+  budgetUtilizationChanged(tenantId: String!): TenantBudget!
+
+  """Subscribe to query warnings"""
+  queryWarnings(tenantId: String): RunningQuery!
+
+  """Subscribe to query kills"""
+  queryKills(tenantId: String): RunningQuery!
+
+  """Subscribe to system metrics updates"""
+  systemMetricsUpdated: SystemMetrics!
+}
