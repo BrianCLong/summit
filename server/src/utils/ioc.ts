@@ -4,8 +4,13 @@ export type IoCType = 'ip' | 'domain' | 'sha256' | 'url' | 'email';
 
 /**
  * Normalize indicator values into a canonical form for deduplication.
- * @param type Type of IoC (ip, domain, sha256, url, email)
- * @param v Raw IoC value
+ *
+ * This function standardizes the format of various IoC types (e.g., lowercasing domains,
+ * trimming whitespace from IPs) to ensure consistent storage and querying.
+ *
+ * @param type - The type of Indicator of Compromise (ip, domain, sha256, url, email).
+ * @param v - The raw IoC value to normalize.
+ * @returns The normalized IoC string.
  */
 export function normalizeIoC(type: IoCType, v: string): string {
   switch (type) {
@@ -29,8 +34,13 @@ export function normalizeIoC(type: IoCType, v: string): string {
 }
 
 /**
- * Fuse multiple confidence scores into a single probability.
- * @param confidences Array of confidence values (0-100)
+ * Fuses multiple confidence scores into a single aggregate probability score.
+ *
+ * Uses a probabilistic OR logic (1 - product of failure probabilities) to combine scores.
+ * This effectively calculates the probability that at least one of the indicators is correct.
+ *
+ * @param confidences - An array of confidence values ranging from 0 to 100.
+ * @returns An aggregated confidence score between 0 and 100, rounded to the nearest integer.
  */
 export function fuse(confidences: number[]): number {
   const probs = confidences.map((c) => {

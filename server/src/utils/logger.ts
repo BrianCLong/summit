@@ -1,5 +1,14 @@
 import winston from 'winston';
 
+/**
+ * Global application logger configured with Winston.
+ *
+ * Features:
+ * - JSON formatting for structured logging.
+ * - Timestamp and error stack trace inclusion.
+ * - Console transport for non-production environments.
+ * - File transports for errors and combined logs.
+ */
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: winston.format.combine(
