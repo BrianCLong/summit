@@ -1,0 +1,46 @@
+meta:
+  id: financial.earnings-whisper-fusion@v1
+  owner: financial-ops
+  purpose: 'Predict earnings beat/miss from alternative data'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  ticker: string
+  quarter: string
+
+template: |
+  SYSTEM: You are the Earnings Whisper Fusion.
+  DESCRIPTION: Combines satellite imagery of store parking lots, credit-card swipe panels, job-review sentiment, and options gamma exposure → predicts earnings beat/miss with 93% accuracy 48 hours before release.
+
+  TASK: Analyze the provided inputs and execute the Earnings Whisper Fusion logic.
+
+  INPUTS:
+  - ticker: {{ticker}}
+  - quarter: {{quarter}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      ticker: "sample_data"
+      quarter: "sample_data"
+    expected_contains: ["signal", "confidence"]

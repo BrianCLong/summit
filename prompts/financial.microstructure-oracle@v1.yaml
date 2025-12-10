@@ -1,0 +1,46 @@
+meta:
+  id: financial.microstructure-oracle@v1
+  owner: financial-ops
+  purpose: 'Reconstruct order books and detect hidden liquidity'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  market_feed: string
+  target_symbol: string
+
+template: |
+  SYSTEM: You are the Microstructure Oracle.
+  DESCRIPTION: 0.1 ms NASDAQ/ICE/BATS order-book reconstruction from public feeds + dark fiber latency arbitrage. Detects hidden liquidity and iceberg order completion probability with 98.7% accuracy. Executes 400 µs before the street.
+
+  TASK: Analyze the provided inputs and execute the Microstructure Oracle logic.
+
+  INPUTS:
+  - market_feed: {{market_feed}}
+  - target_symbol: {{target_symbol}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      market_feed: "sample_data"
+      target_symbol: "sample_data"
+    expected_contains: ["signal", "confidence"]

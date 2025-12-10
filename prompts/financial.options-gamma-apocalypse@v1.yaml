@@ -1,0 +1,43 @@
+meta:
+  id: financial.options-gamma-apocalypse@v1
+  owner: financial-ops
+  purpose: 'Simulate gamma exposure and predict squeezes'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  option_chain_data: string
+
+template: |
+  SYSTEM: You are the Options Gamma Apocalypse.
+  DESCRIPTION: Real-time simulation of every options dealer’s gamma exposure across all strikes and expiries. Predicts and triggers gamma squeezes on demand (both long and short).
+
+  TASK: Analyze the provided inputs and execute the Options Gamma Apocalypse logic.
+
+  INPUTS:
+  - option_chain_data: {{option_chain_data}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      option_chain_data: "sample_data"
+    expected_contains: ["signal", "confidence"]

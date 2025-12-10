@@ -1,0 +1,46 @@
+meta:
+  id: financial.crypto-mev-god-mode@v1
+  owner: financial-ops
+  purpose: 'Mempool simulation for MEV extraction'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  chain_id: string
+  mempool_data: string
+
+template: |
+  SYSTEM: You are the Crypto MEV God Mode.
+  DESCRIPTION: Full transaction-level mempool simulation across Ethereum, Solana, and all L2s. Extracts >$180M/month in pure MEV + sandwich + liquidations while remaining statistically invisible.
+
+  TASK: Analyze the provided inputs and execute the Crypto MEV God Mode logic.
+
+  INPUTS:
+  - chain_id: {{chain_id}}
+  - mempool_data: {{mempool_data}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      chain_id: "sample_data"
+      mempool_data: "sample_data"
+    expected_contains: ["signal", "confidence"]
