@@ -1,19 +1,22 @@
-name: Policy Tests
-
+name: Policy CI
 on:
-  pull_request:
   push:
-    branches: [main]
-
+    paths:
+      - 'policy/**/*.rego'
+      - 'policy/**/*.yaml'
+  pull_request:
+    paths:
+      - 'policy/**/*.rego'
+      - 'policy/**/*.yaml'
 jobs:
-  conftest:
+  opa-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Conftest
+      - name: Set up OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+      - name: Run policy tests
         run: |
-          curl -L https://github.com/open-policy-agent/conftest/releases/download/v0.53.0/conftest_0.53.0_Linux_x86_64.tar.gz | tar xz
-          sudo mv conftest /usr/local/bin/
-      - name: Run policy unit tests
-        working-directory: server/policies
-        run: conftest test --all-namespaces --output table .
+          opa test policy -v
