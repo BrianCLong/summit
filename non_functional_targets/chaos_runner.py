@@ -10,9 +10,9 @@ against baseline SLO expectations so program managers can gate releases.
 from __future__ import annotations
 
 import logging
-import math
 import re
 import time
+from datetime import datetime, timezone
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -244,6 +244,8 @@ class ChaosRunner:
             "duration_seconds": finished_at - start_time,
         }
 
+        metrics.update(self._collect_objective_metrics(experiment, start_time, finished_at))
+
         return ChaosExperimentResult(
             name=experiment.name,
             success=success,
@@ -360,6 +362,46 @@ class ChaosRunner:
                 dry_run=self.dry_run,
             )
 
+        if fault_type == "broker_kill":
+            broker = target.get("broker") or target.get("service")
+            if not broker:
+                raise ValueError(f"Experiment {experiment.name} missing broker target")
+            return chaos_hooks.inject_broker_kill_hook(
+                str(broker),
+                namespace=self.namespace,
+                delay_seconds=self._optional_int(fault.get("delay_seconds", 0)),
+                dry_run=self.dry_run,
+            )
+
+        if fault_type == "cross_region_failover":
+            primary = target.get("primary_region")
+            secondary = target.get("secondary_region")
+            details = simulate_cross_region_failover(
+                str(primary),
+                str(secondary),
+                dry_run=self.dry_run,
+            )
+            return self._wrap_simulation_result(
+                "cross_region_failover",
+                metadata=details,
+                started_at=details.get("started_at", time.time()),
+                finished_at=details.get("finished_at", time.time()),
+            )
+
+        if fault_type == "pitr_recovery":
+            backup_id = fault.get("backup_id") or target.get("backup_id") or ""
+            details = simulate_pitr_recovery(
+                str(backup_id),
+                target_timestamp=fault.get("target_timestamp"),
+                allow_empty=True,
+            )
+            return self._wrap_simulation_result(
+                "pitr_recovery",
+                metadata=details,
+                started_at=details.get("started_at", time.time()),
+                finished_at=details.get("finished_at", time.time()),
+            )
+
         logger.warning("No dispatcher implemented for fault type '%s'", fault_type)
         return None
 
@@ -381,6 +423,8 @@ class ChaosRunner:
             "pass_rate": pass_rate,
             "meets_slo_floor": meets_floor,
             "baseline": baseline,
+            "rto_compliance": all(result.metrics.get("rto_met", True) for result in results),
+            "rpo_compliance": all(result.metrics.get("rpo_met", True) for result in results),
         }
 
     def _optional_int(self, value: Any) -> int:
@@ -394,6 +438,79 @@ class ChaosRunner:
             return
         logger.debug("Waiting %s seconds between compound experiments", seconds)
         time.sleep(seconds)
+
+    def _collect_objective_metrics(
+        self, experiment: ChaosExperimentSpec, started_at: float, finished_at: float
+    ) -> dict[str, Any]:
+        rto_objective = self._extract_objective_value(experiment, "rto_seconds")
+        rpo_objective = self._extract_objective_value(experiment, "rpo_seconds")
+
+        fault = experiment.fault_injection
+        observed_rto = float(
+            fault.get(
+                "observed_rto_seconds",
+                fault.get("expected_failover_seconds", finished_at - started_at),
+            )
+        )
+        observed_rpo = self._infer_rpo(experiment)
+
+        metrics = {
+            "rto_seconds": observed_rto,
+            "rpo_seconds": observed_rpo,
+            "rto_objective_seconds": rto_objective,
+            "rpo_objective_seconds": rpo_objective,
+            "rto_met": rto_objective is None or observed_rto <= rto_objective,
+            "rpo_met": rpo_objective is None
+            or (observed_rpo is not None and observed_rpo <= rpo_objective),
+        }
+        metrics["objectives_met"] = bool(metrics["rto_met"] and metrics["rpo_met"])
+        return metrics
+
+    def _extract_objective_value(
+        self, experiment: ChaosExperimentSpec, key: str
+    ) -> float | None:
+        for criterion in experiment.success_criteria:
+            if isinstance(criterion, dict) and key in criterion:
+                return self._parse_objective_threshold(str(criterion[key]))
+        if key in experiment.raw:
+            return self._parse_objective_threshold(str(experiment.raw[key]))
+        return None
+
+    def _parse_objective_threshold(self, raw: str) -> float:
+        match = re.search(r"(\d+(?:\.\d+)?)", raw)
+        if not match:
+            return 0.0
+        return float(match.group(1))
+
+    def _infer_rpo(self, experiment: ChaosExperimentSpec) -> float | None:
+        fault = experiment.fault_injection
+        target = experiment.target
+        for key in ("observed_rpo_seconds", "data_loss_seconds", "replication_lag_seconds"):
+            if key in fault:
+                return float(fault[key])
+            if key in target:
+                return float(target[key])
+        return None
+
+    def _wrap_simulation_result(
+        self,
+        hook: str,
+        *,
+        metadata: dict[str, Any],
+        started_at: float,
+        finished_at: float,
+    ) -> chaos_hooks.HookExecutionResult:
+        metadata_copy = dict(metadata)
+        metadata_copy.setdefault("duration_seconds", finished_at - started_at)
+        return chaos_hooks.HookExecutionResult(
+            hook=hook,
+            command=[hook],
+            success=bool(metadata.get("success", True)),
+            stdout="",
+            stderr="",
+            duration_seconds=float(metadata_copy.get("duration_seconds", 0.0)),
+            metadata={k: str(v) for k, v in metadata_copy.items()},
+        )
 
 
 # Convenience wrappers retained for legacy callers -----------------------
@@ -422,12 +539,22 @@ def run_broker_kill_chaos_test(
     namespace: str = "default",
     dry_run: bool = False,
 ) -> dict[str, Any]:
-    results = [
-        chaos_hooks.inject_broker_kill_hook(broker, namespace=namespace, dry_run=dry_run)
-        for broker in target_brokers
-    ]
+    results = []
+    for broker in target_brokers:
+        start = time.time()
+        result = chaos_hooks.inject_broker_kill_hook(
+            broker, namespace=namespace, dry_run=dry_run
+        )
+        finished = time.time()
+        result.metadata.update(
+            {
+                "rto_seconds": finished - start,
+                "rpo_seconds": result.metadata.get("lag_seconds", "0"),
+            }
+        )
+        results.append(result)
 
-    success = all(result.success for result in results)
+    success = all(entry.success for entry in results)
     return {
         "status": "completed" if success else "failed",
         "results": [result.metadata for result in results],
@@ -435,27 +562,85 @@ def run_broker_kill_chaos_test(
     }
 
 
-def simulate_pitr_recovery(backup_id: str, *, allow_empty: bool = False) -> bool:
+def simulate_pitr_recovery(
+    backup_id: str,
+    *,
+    target_timestamp: str | None = None,
+    allow_empty: bool = False,
+    rto_objective_seconds: float = 300.0,
+    rpo_objective_seconds: float = 300.0,
+) -> dict[str, Any]:
     if not backup_id and not allow_empty:
         raise ValueError("backup_id is required for PITR simulation")
 
+    started_at = time.time()
     logger.info("Simulating PITR recovery using backup '%s'", backup_id)
-    time.sleep(0.1)
     checksum = sum(ord(char) for char in backup_id) % 97 if backup_id else 0
-    return checksum % 2 == 0
+    recovery_time_seconds = 30 + (checksum % 60)
+
+    parsed_timestamp: datetime | None = None
+    if target_timestamp:
+        try:
+            parsed_timestamp = datetime.fromisoformat(target_timestamp.replace("Z", "+00:00"))
+        except ValueError:
+            parsed_timestamp = None
+    if parsed_timestamp and parsed_timestamp.tzinfo is None:
+        parsed_timestamp = parsed_timestamp.replace(tzinfo=timezone.utc)
+
+    now = datetime.now(tz=timezone.utc)
+    rpo_seconds = abs((now - parsed_timestamp).total_seconds()) if parsed_timestamp else checksum
+
+    meets_rto = recovery_time_seconds <= rto_objective_seconds
+    meets_rpo = rpo_seconds <= rpo_objective_seconds
+
+    finished_at = started_at + recovery_time_seconds
+    return {
+        "backup_id": backup_id,
+        "recovery_time_seconds": recovery_time_seconds,
+        "rpo_seconds": rpo_seconds,
+        "rto_objective_seconds": rto_objective_seconds,
+        "rpo_objective_seconds": rpo_objective_seconds,
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "success": bool(meets_rto and meets_rpo),
+    }
 
 
-def simulate_cross_region_failover(region_a: str, region_b: str, *, dry_run: bool = True) -> bool:
+def simulate_cross_region_failover(
+    region_a: str,
+    region_b: str,
+    *,
+    dry_run: bool = True,
+    max_replication_lag_seconds: float = 60.0,
+    rto_objective_seconds: float = 180.0,
+    rpo_objective_seconds: float = 60.0,
+) -> dict[str, Any]:
     if not region_a or not region_b:
         raise ValueError("Both regions must be provided for failover simulation")
 
+    started_at = time.time()
     logger.info("Simulating cross-region failover %s -> %s", region_a, region_b)
     if dry_run:
-        return True
+        replication_lag_seconds = 0.0
+        duration_seconds = 0.0
+    else:
+        entropy = float(sum(ord(char) for char in f"{region_a}{region_b}") % 30)
+        replication_lag_seconds = entropy
+        duration_seconds = 45.0 + entropy
 
-    time.sleep(0.2)
-    entropy = math.fabs(hash((region_a, region_b))) % 10
-    return entropy < 8
+    finished_at = started_at + duration_seconds
+    meets_rto = duration_seconds <= rto_objective_seconds
+    meets_rpo = replication_lag_seconds <= min(max_replication_lag_seconds, rpo_objective_seconds)
+
+    return {
+        "primary_region": region_a,
+        "secondary_region": region_b,
+        "replication_lag_seconds": replication_lag_seconds,
+        "failover_duration_seconds": duration_seconds,
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "success": bool(meets_rto and meets_rpo),
+    }
 
 
 __all__ = [
