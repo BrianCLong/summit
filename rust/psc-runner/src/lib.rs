@@ -4,6 +4,7 @@ pub mod enclave;
 pub mod functional_encryption;
 pub mod policy;
 pub mod sealing;
+pub mod monitoring;
 
 pub use attestation::{AttestationProof, AttestationTranscript};
 pub use auditor::Auditor;
