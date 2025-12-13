@@ -30,6 +30,7 @@
       "node",
       "jest"
     ],
+    "baseUrl": ".",
     "paths": {
       "zod/v4": [
         "types/shims/zod-v4.d.ts"
