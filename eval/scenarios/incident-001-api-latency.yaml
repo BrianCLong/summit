@@ -1,0 +1,198 @@
+# Incident Investigation Scenario: API Latency Spike
+
+id: sc-incident-investigation-001
+version: 1.0.0
+type: incident_investigation
+name: Diagnose API Latency Spike
+description: |
+  Investigate a sudden spike in API response times affecting multiple endpoints.
+  Analyze logs, metrics, and system state to identify the root cause.
+tags:
+  - incident
+  - performance
+  - api
+  - debugging
+  - root-cause-analysis
+
+inputs:
+  - type: structured
+    content:
+      alert:
+        title: "API Latency Spike Detected"
+        severity: high
+        timestamp: "2025-11-22T14:30:00Z"
+        affected_endpoints:
+          - "/api/users"
+          - "/api/entities"
+          - "/api/relationships"
+        metrics:
+          p95_latency_ms: 8500
+          p99_latency_ms: 15000
+          normal_p95_ms: 200
+          error_rate: 0.02
+
+      logs:
+        - timestamp: "2025-11-22T14:28:00Z"
+          level: info
+          message: "Database connection pool exhausted, waiting for available connection"
+          service: api-server
+
+        - timestamp: "2025-11-22T14:29:00Z"
+          level: warn
+          message: "Query execution time: 8.2s for getUserEntities"
+          service: database
+          query: "SELECT * FROM entities WHERE user_id = ?"
+
+        - timestamp: "2025-11-22T14:29:30Z"
+          level: error
+          message: "Connection timeout after 10s"
+          service: api-server
+
+        - timestamp: "2025-11-22T14:25:00Z"
+          level: info
+          message: "Started background job: entity_relationship_sync"
+          service: worker
+
+      system_metrics:
+        database:
+          cpu_percent: 95
+          active_connections: 98
+          max_connections: 100
+          slow_queries: 45
+
+        application:
+          cpu_percent: 40
+          memory_percent: 65
+          active_requests: 150
+
+        redis:
+          cpu_percent: 15
+          memory_percent: 30
+          hit_rate: 0.85
+    metadata:
+      incident_id: INC-2025-1122-001
+      priority: P1
+
+constraints:
+  - type: time_limit
+    value: 120000
+    strict: false
+  - type: tool_restriction
+    value:
+      - log_analysis
+      - metric_query
+      - system_health_check
+    strict: true
+
+scoringStrategy:
+  method: llm_judged
+  llmJudge:
+    model: claude-sonnet-4
+    prompt: |
+      Evaluate this incident investigation on the following dimensions:
+
+      1. **Root Cause Identification** (0-1): Did they correctly identify that the
+         background sync job is causing database connection pool exhaustion?
+
+      2. **Evidence Quality** (0-1): Did they cite specific log entries and metrics
+         to support their diagnosis?
+
+      3. **Investigation Methodology** (0-1): Did they follow a logical investigation
+         process (check symptoms → gather data → form hypothesis → validate)?
+
+      4. **Remediation Recommendations** (0-1): Did they provide actionable steps
+         to resolve the immediate issue and prevent recurrence?
+
+      5. **Completeness** (0-1): Did they cover all aspects (what, when, why, how to fix)?
+
+      Provide dimensional scores and overall assessment.
+    dimensions:
+      - root_cause_identification
+      - evidence_quality
+      - methodology
+      - remediation
+      - completeness
+    temperature: 0.3
+
+rubric:
+  guidance: |
+    A good incident investigation should:
+    1. Identify the root cause (background job exhausting connections)
+    2. Provide evidence from logs and metrics
+    3. Explain the causal chain (job started → connections used → pool exhausted → queries slow)
+    4. Recommend immediate mitigation (kill job, add connections)
+    5. Suggest long-term fixes (better job scheduling, connection pooling strategy)
+
+  dimensions:
+    - name: root_cause_identification
+      weight: 0.35
+      description: Correctly identifies the background job as the root cause
+
+    - name: evidence_quality
+      weight: 0.20
+      description: Uses specific log entries and metrics as evidence
+
+    - name: methodology
+      weight: 0.15
+      description: Follows systematic debugging approach
+
+    - name: remediation
+      weight: 0.20
+      description: Provides actionable immediate and long-term fixes
+
+    - name: completeness
+      weight: 0.10
+      description: Covers all key aspects of incident response
+
+  examples:
+    - input: "Same as above"
+      output: |
+        ## Root Cause Analysis
+
+        The latency spike was caused by the `entity_relationship_sync` background job
+        (started at 14:25:00) exhausting the database connection pool.
+
+        **Evidence:**
+        - Database pool at 98/100 connections (14:29:00)
+        - Database CPU at 95% with 45 slow queries
+        - Log shows "connection pool exhausted" at 14:28:00
+        - Background job started 5 minutes before symptoms
+
+        **Causal Chain:**
+        1. Background sync job started at 14:25:00
+        2. Job consumed majority of database connections
+        3. API requests unable to acquire connections
+        4. Requests queue up waiting for connections
+        5. Timeouts and high latency result
+
+        ## Remediation
+
+        **Immediate:**
+        - Kill the background job to free connections
+        - Consider increasing max_connections temporarily
+
+        **Long-term:**
+        - Schedule heavy jobs during low-traffic windows
+        - Implement dedicated connection pool for background jobs
+        - Add connection pool monitoring and alerting
+        - Review job queries for optimization opportunities
+      score: 0.95
+      dimensionScores:
+        root_cause_identification: 1.0
+        evidence_quality: 1.0
+        methodology: 0.9
+        remediation: 1.0
+        completeness: 0.9
+      rationale: |
+        Excellent investigation with clear root cause, strong evidence,
+        and comprehensive remediation plan.
+
+difficulty: medium
+estimatedCost: 0.08
+estimatedDuration: 30000
+createdBy: platform-team
+metadata:
+  category: incident-response
+  requires_reasoning: true
+  complexity: medium
+  domain: system-reliability
