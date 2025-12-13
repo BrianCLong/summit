@@ -1,0 +1,11 @@
+Category,System,Description,Delta (Our Approach)
+Generic LLM Inference,vLLM,"High-throughput, memory-efficient LLM serving engine.","Deep integration of tool/graph orchestration + oversight as part of the runtime graph."
+Generic LLM Inference,TensorRT-LLM,"NVIDIA's library for optimizing LLM inference performance.","Deep integration of tool/graph orchestration + oversight as part of the runtime graph."
+Generic LLM Inference,TGI (Text Generation Inference),"Hugging Face's toolkit for deploying LLMs.","Deep integration of tool/graph orchestration + oversight as part of the runtime graph."
+Agent Framework,LangChain,"Framework for developing applications powered by language models.","Treat agent/tool graphs as runtime-optimized DAGs with latency/cost-aware routing."
+Agent Framework,Guidance,"Language for controlling large language models.","Treat agent/tool graphs as runtime-optimized DAGs with latency/cost-aware routing."
+Agent Framework,AutoGen,"Framework that enables development of LLM applications using multiple agents.","Treat agent/tool graphs as runtime-optimized DAGs with latency/cost-aware routing."
+Safety Middleware,Guardrails AI,"Python library for validating outputs of LLMs.","Unify safety/oversight with training and alignment telemetry and treat them as routable stages."
+Safety Middleware,NeMo Guardrails,"Toolkit for adding programmable guardrails to LLM-based systems.","Unify safety/oversight with training and alignment telemetry and treat them as routable stages."
+API Gateway,Kong/Nginx,"Generic API gateways for traffic management.","We build a domain-specific runtime for LMs + tools + graphs, not a generic mesh."
+Service Mesh,Istio/Linkerd,"Infrastructure layer for microservice communication.","We build a domain-specific runtime for LMs + tools + graphs, not a generic mesh."
