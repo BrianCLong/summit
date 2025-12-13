@@ -1,0 +1,303 @@
+# Notification System GraphQL Schema
+
+"""
+Notification severity levels
+"""
+enum NotificationSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  EMERGENCY
+}
+
+"""
+Notification delivery channels
+"""
+enum NotificationChannel {
+  WEBSOCKET
+  EMAIL
+  SLACK
+  WEBHOOK
+  SMS
+}
+
+"""
+Notification delivery status
+"""
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  THROTTLED
+  READ
+  ACKNOWLEDGED
+}
+
+"""
+Email digest frequency
+"""
+enum DigestFrequency {
+  IMMEDIATE
+  HOURLY
+  DAILY
+  NEVER
+}
+
+"""
+Notification channel configuration
+"""
+type NotificationChannels {
+  websocket: Boolean!
+  email: Boolean!
+  slack: Boolean!
+  webhook: Boolean!
+}
+
+"""
+Notification channel configuration input
+"""
+input NotificationChannelsInput {
+  websocket: Boolean!
+  email: Boolean!
+  slack: Boolean!
+  webhook: Boolean!
+}
+
+"""
+User notification preferences
+"""
+type NotificationPreferences {
+  id: ID!
+  userId: ID!
+  tenantId: ID!
+
+  # Event filters
+  eventTypes: [String!]
+  severityThreshold: AuditLevel!
+  resourceTypes: [String!]
+  tags: [String!]
+
+  # Channel configuration
+  channels: NotificationChannels!
+
+  # Email settings
+  emailAddress: String
+  emailDigestFrequency: DigestFrequency
+
+  # Slack settings
+  slackWebhookUrl: String
+  slackChannel: String
+
+  # Webhook settings
+  webhookUrl: String
+
+  # Throttling
+  maxNotificationsPerHour: Int
+  quietHoursStart: String
+  quietHoursEnd: String
+  quietHoursTimezone: String
+
+  # Status
+  enabled: Boolean!
+  lastNotifiedAt: DateTime
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Notification preferences input
+"""
+input NotificationPreferencesInput {
+  eventTypes: [String!]
+  severityThreshold: AuditLevel!
+  resourceTypes: [String!]
+  tags: [String!]
+  channels: NotificationChannelsInput!
+  emailAddress: String
+  emailDigestFrequency: DigestFrequency
+  slackWebhookUrl: String
+  slackChannel: String
+  webhookUrl: String
+  maxNotificationsPerHour: Int
+  quietHoursStart: String
+  quietHoursEnd: String
+  quietHoursTimezone: String
+  enabled: Boolean
+}
+
+"""
+Notification delivery record
+"""
+type NotificationDelivery {
+  id: ID!
+  auditEvent: AuditEvent
+  auditEventId: ID!
+
+  # Recipient
+  userId: ID!
+  tenantId: ID!
+
+  # Delivery details
+  channel: NotificationChannel!
+  destination: String
+  notificationSeverity: NotificationSeverity!
+
+  # Content
+  title: String!
+  body: String!
+  data: JSON
+
+  # Status
+  status: NotificationStatus!
+  errorMessage: String
+  retryCount: Int!
+
+  # Timestamps
+  createdAt: DateTime!
+  sentAt: DateTime
+  deliveredAt: DateTime
+  readAt: DateTime
+  acknowledgedAt: DateTime
+  acknowledgedBy: String
+  acknowledgementNote: String
+}
+
+"""
+Notification history connection (pagination)
+"""
+type NotificationHistoryConnection {
+  edges: [NotificationHistoryEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+"""
+Notification history edge
+"""
+type NotificationHistoryEdge {
+  cursor: String!
+  node: NotificationDelivery!
+}
+
+"""
+Notification history filter
+"""
+input NotificationHistoryFilter {
+  channel: NotificationChannel
+  status: NotificationStatus
+  severity: NotificationSeverity
+  startDate: DateTime
+  endDate: DateTime
+  unreadOnly: Boolean
+}
+
+"""
+Notification statistics
+"""
+type NotificationStats {
+  totalSent: Int!
+  totalDelivered: Int!
+  totalFailed: Int!
+  totalThrottled: Int!
+  unreadCount: Int!
+  byChannel: [ChannelStats!]!
+  bySeverity: [SeverityStats!]!
+}
+
+"""
+Statistics per channel
+"""
+type ChannelStats {
+  channel: NotificationChannel!
+  sent: Int!
+  delivered: Int!
+  failed: Int!
+}
+
+"""
+Statistics per severity
+"""
+type SeverityStats {
+  severity: NotificationSeverity!
+  count: Int!
+}
+
+extend type Query {
+  """
+  Get notification preferences for the current user
+  """
+  myNotificationPreferences: NotificationPreferences! @auth
+
+  """
+  Get notification delivery history
+  """
+  notificationHistory(
+    first: Int = 20
+    after: String
+    filter: NotificationHistoryFilter
+  ): NotificationHistoryConnection! @auth
+
+  """
+  Get unread notification count
+  """
+  unreadNotificationCount: Int! @auth
+
+  """
+  Get notification statistics
+  """
+  notificationStats(
+    startDate: DateTime
+    endDate: DateTime
+  ): NotificationStats! @auth
+}
+
+extend type Mutation {
+  """
+  Update notification preferences for the current user
+  """
+  updateNotificationPreferences(
+    input: NotificationPreferencesInput!
+  ): NotificationPreferences! @auth
+
+  """
+  Mark notification as read
+  """
+  markNotificationRead(id: ID!): NotificationDelivery! @auth
+
+  """
+  Mark all notifications as read
+  """
+  markAllNotificationsRead: Int! @auth
+
+  """
+  Acknowledge critical notification
+  """
+  acknowledgeNotification(
+    id: ID!
+    note: String
+  ): NotificationDelivery! @auth
+
+  """
+  Test notification delivery (admin only)
+  """
+  testNotification(
+    userId: ID!
+    channel: NotificationChannel!
+    message: String!
+  ): Boolean! @auth @requireRole(role: ADMIN)
+}
+
+extend type Subscription {
+  """
+  Real-time notification stream for the current user
+  """
+  notificationReceived: NotificationDelivery! @auth
+
+  """
+  Real-time notification count updates
+  """
+  unreadCountUpdated: Int! @auth
+}
