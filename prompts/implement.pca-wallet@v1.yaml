@@ -1,0 +1,585 @@
+meta:
+  id: implement.pca-wallet@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Implement Proof-Carrying Analytics with attestations, wallet export, and selective disclosure for verifiable results'
+  tags: ['pca', 'attestation', 'verifiable-analytics', 'zero-knowledge', 'wallet']
+  guardrails:
+    - 'All analytical results must include signed attestations'
+    - 'Lineage must trace back to source evidence'
+    - 'Model cards required for all ML predictions'
+    - 'Hyperparameters and checksums must be recorded'
+    - 'Revocation checking must be enforced'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.1
+  maxTokens: 8000
+
+inputs:
+  signature_algorithm: string
+  wallet_format: string
+  disclosure_protocol: string
+
+template: |
+  You are implementing **Proof-Carrying Analytics (PCA)** with wallet export for IntelGraph.
+
+  ## Objective
+
+  Build a system that attaches cryptographic attestations to materialized analytical results, enabling selective disclosure, external verification, and revocation checking through a wallet export mechanism.
+
+  ## Target Paths
+
+  ```
+  services/pca/
+    ├── src/
+    │   ├── api/
+    │   │   └── AttestationController.ts
+    │   ├── attestation/
+    │   │   ├── AttestationGenerator.ts
+    │   │   ├── LineageBuilder.ts
+    │   │   ├── ModelCardGenerator.ts
+    │   │   └── ChecksumComputer.ts
+    │   ├── wallet/
+    │   │   ├── WalletExporter.ts
+    │   │   ├── SelectiveDisclosure.ts
+    │   │   └── RevocationChecker.ts
+    │   ├── crypto/
+    │   │   ├── Signer.ts
+    │   │   ├── Verifier.ts
+    │   │   └── ZKProofGenerator.ts
+    │   └── storage/
+    │       └── AttestationStore.ts
+    ├── tests/
+    │   ├── unit/
+    │   ├── integration/
+    │   └── golden/
+    │       └── sample-artifact.json
+    └── README.md
+
+  cmd/pca-verify/
+    ├── main.go
+    ├── verify/
+    │   ├── AttestationVerifier.go
+    │   ├── LineageValidator.go
+    │   ├── RevocationChecker.go
+    │   └── ToleranceChecker.go
+    └── README.md
+
+  apps/analyst-console/
+    └── src/
+        └── export/
+            ├── ProvenanceWallet.tsx
+            ├── DisclosureSelector.tsx
+            └── ExportDialog.tsx
+  ```
+
+  ## Core Components
+
+  ### 1. Attestation Generation
+
+  **AttestationGenerator.ts:**
+
+  ```typescript
+  interface Attestation {
+    version: string;
+    id: string;
+    timestamp: string;
+    issuer: {
+      publicKey: string;
+      organization: string;
+    };
+    subject: {
+      resultId: string;
+      resultType: 'prediction' | 'score' | 'insight' | 'report';
+      summary: string;
+    };
+    lineage: Lineage;
+    modelCard?: ModelCard;
+    hyperparameters?: Record<string, any>;
+    checksums: Checksums;
+    signature: Signature;
+    revocationId: string;
+  }
+
+  interface Lineage {
+    sourceEvidence: string[]; // Provenance IDs
+    transformations: Transformation[];
+    dependencies: Dependency[];
+    dataFlowGraph: DataFlowNode[];
+  }
+
+  interface ModelCard {
+    modelId: string;
+    modelVersion: string;
+    architecture: string;
+    trainingData: {
+      sources: string[];
+      size: number;
+      dateRange: string;
+    };
+    performance: {
+      accuracy?: number;
+      precision?: number;
+      recall?: number;
+      f1?: number;
+      auc?: number;
+    };
+    limitations: string[];
+    biases: string[];
+  }
+
+  interface Checksums {
+    resultHash: string; // SHA-256 of result data
+    lineageHash: string;
+    modelHash?: string;
+    merkleRoot: string;
+  }
+
+  async function generateAttestation(
+    result: AnalyticalResult,
+    options: AttestationOptions
+  ): Promise<Attestation> {
+    // 1. Build lineage from provenance ledger
+    const lineage = await buildLineage(result.id);
+
+    // 2. Generate model card if ML result
+    const modelCard = result.modelId
+      ? await generateModelCard(result.modelId)
+      : undefined;
+
+    // 3. Compute checksums
+    const checksums = computeChecksums(result, lineage, modelCard);
+
+    // 4. Sign attestation
+    const signature = await signAttestation(
+      {
+        resultId: result.id,
+        lineage,
+        modelCard,
+        checksums,
+      },
+      options.signingKey
+    );
+
+    // 5. Generate revocation ID
+    const revocationId = generateRevocationId();
+
+    return {
+      version: '1.0',
+      id: generateAttestationId(),
+      timestamp: new Date().toISOString(),
+      issuer: options.issuer,
+      subject: {
+        resultId: result.id,
+        resultType: result.type,
+        summary: result.summary,
+      },
+      lineage,
+      modelCard,
+      hyperparameters: result.hyperparameters,
+      checksums,
+      signature,
+      revocationId,
+    };
+  }
+  ```
+
+  ### 2. Wallet Export
+
+  **WalletExporter.ts:**
+
+  ```typescript
+  interface ProvenanceWallet {
+    version: string;
+    exportedAt: string;
+    exportedBy: string;
+    contents: WalletContent[];
+    index: WalletIndex;
+    signature: WalletSignature;
+  }
+
+  interface WalletContent {
+    attestationId: string;
+    result: any; // Actual result data
+    attestation: Attestation;
+    disclosureLevel: 'full' | 'summary' | 'hash-only';
+    zkProofs?: ZKProof[];
+  }
+
+  interface WalletIndex {
+    attestationIds: string[];
+    resultTypes: string[];
+    dateRange: { start: string; end: string };
+    merkleRoot: string;
+  }
+
+  async function exportWallet(
+    resultIds: string[],
+    disclosureOptions: DisclosureOptions
+  ): Promise<ProvenanceWallet> {
+    const contents: WalletContent[] = [];
+
+    for (const resultId of resultIds) {
+      const result = await getResult(resultId);
+      const attestation = await getAttestation(resultId);
+
+      // Apply selective disclosure
+      const disclosed = applyDisclosure(result, attestation, disclosureOptions);
+
+      contents.push({
+        attestationId: attestation.id,
+        result: disclosed.result,
+        attestation: disclosed.attestation,
+        disclosureLevel: disclosed.level,
+        zkProofs: disclosed.zkProofs,
+      });
+    }
+
+    // Build index
+    const index = buildWalletIndex(contents);
+
+    // Sign wallet
+    const signature = signWallet(contents, index);
+
+    return {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      exportedBy: disclosureOptions.exportedBy,
+      contents,
+      index,
+      signature,
+    };
+  }
+  ```
+
+  ### 3. Selective Disclosure ({{disclosure_protocol}})
+
+  **SelectiveDisclosure.ts:**
+
+  ```typescript
+  interface DisclosureOptions {
+    fields?: string[]; // Whitelist fields to include
+    redact?: string[]; // Blacklist fields to redact
+    aggregateOnly?: boolean; // Show only aggregated values
+    zkProofs?: boolean; // Include ZK proofs for hidden fields
+  }
+
+  function applyDisclosure(
+    result: any,
+    attestation: Attestation,
+    options: DisclosureOptions
+  ): { result: any; attestation: Attestation; level: string; zkProofs?: ZKProof[] } {
+    let disclosed = { ...result };
+    let level: 'full' | 'summary' | 'hash-only' = 'full';
+    let zkProofs: ZKProof[] = [];
+
+    if (options.aggregateOnly) {
+      // Show only aggregated statistics
+      disclosed = {
+        count: result.count,
+        mean: result.mean,
+        median: result.median,
+        // Omit individual records
+      };
+      level = 'summary';
+    }
+
+    if (options.redact) {
+      // Redact specific fields
+      for (const field of options.redact) {
+        if (disclosed[field]) {
+          const hash = sha256(disclosed[field]);
+          disclosed[field] = `[REDACTED:${hash.substring(0, 8)}]`;
+
+          if (options.zkProofs) {
+            // Generate ZK proof that field exists and meets criteria
+            zkProofs.push(generateZKProof(field, result[field]));
+          }
+        }
+      }
+    }
+
+    if (options.fields) {
+      // Include only whitelisted fields
+      disclosed = pick(disclosed, options.fields);
+      level = 'summary';
+    }
+
+    // Always preserve checksums for verification
+    return {
+      result: disclosed,
+      attestation: {
+        ...attestation,
+        subject: { ...attestation.subject, summary: '[Selective Disclosure Applied]' },
+      },
+      level,
+      zkProofs: zkProofs.length > 0 ? zkProofs : undefined,
+    };
+  }
+  ```
+
+  ### 4. External Verifier CLI
+
+  **cmd/pca-verify/main.go:**
+
+  ```go
+  func main() {
+      if len(os.Args) < 2 {
+          fmt.Println("Usage: pca-verify <wallet.json>")
+          os.Exit(1)
+      }
+
+      walletPath := os.Args[1]
+
+      // Load wallet
+      wallet, err := loadWallet(walletPath)
+      if err != nil {
+          fmt.Printf("Error loading wallet: %v\n", err)
+          os.Exit(1)
+      }
+
+      // Verify wallet signature
+      if !verifyWalletSignature(wallet) {
+          fmt.Println("FAIL: Invalid wallet signature")
+          os.Exit(1)
+      }
+
+      // Verify each attestation
+      for _, content := range wallet.Contents {
+          result := verifyAttestation(content)
+          fmt.Printf("[%s] %s\n", result.Status, content.AttestationID)
+
+          if result.Status == "FAIL" {
+            for _, err := range result.Errors {
+                fmt.Printf("  - %s\n", err)
+            }
+          }
+
+          if result.Warnings != nil {
+              for _, warn := range result.Warnings {
+                  fmt.Printf("  ! %s\n", warn)
+              }
+          }
+      }
+  }
+
+  func verifyAttestation(content WalletContent) VerificationResult {
+      result := VerificationResult{Status: "PASS"}
+
+      // 1. Verify signature
+      if !verifySignature(content.Attestation.Signature, content.Attestation) {
+          result.Status = "FAIL"
+          result.Errors = append(result.Errors, "Invalid attestation signature")
+          return result
+      }
+
+      // 2. Check revocation
+      if isRevoked(content.Attestation.RevocationID) {
+          result.Status = "FAIL"
+          result.Errors = append(result.Errors, "Attestation has been revoked")
+          return result
+      }
+
+      // 3. Validate checksums
+      computedHash := computeResultHash(content.Result)
+      if computedHash != content.Attestation.Checksums.ResultHash {
+          result.Status = "FAIL"
+          result.Errors = append(result.Errors, "Result hash mismatch")
+      }
+
+      // 4. Reproduce results (with tolerance)
+      if content.Attestation.ModelCard != nil {
+          reproducedResult, err := reproduceResult(content)
+          if err != nil {
+              result.Warnings = append(result.Warnings, fmt.Sprintf("Could not reproduce: %v", err))
+          } else if !withinTolerance(content.Result, reproducedResult, 0.01) {
+              result.Status = "FAIL"
+              result.Errors = append(result.Errors, "Result not reproducible within tolerance")
+          }
+      }
+
+      // 5. Verify ZK proofs (if present)
+      if content.ZKProofs != nil {
+          for _, proof := range content.ZKProofs {
+              if !verifyZKProof(proof) {
+                  result.Status = "FAIL"
+                  result.Errors = append(result.Errors, fmt.Sprintf("Invalid ZK proof for %s", proof.Claim))
+              }
+          }
+      }
+
+      return result
+  }
+  ```
+
+  ## Frontend UI
+
+  ### ProvenanceWallet.tsx
+
+  ```tsx
+  <ProvenanceWallet>
+    <ExportDialog
+      selectedResults={selectedResults}
+      onExport={handleExport}
+    >
+      <DisclosureSelector
+        options={disclosureOptions}
+        onChange={setDisclosureOptions}
+      />
+
+      <FormControlLabel
+        control={<Checkbox checked={includeZKProofs} onChange={setIncludeZKProofs} />}
+        label="Include ZK proofs for redacted fields"
+      />
+
+      <FormControl>
+        <InputLabel>Disclosure Level</InputLabel>
+        <Select value={disclosureLevel} onChange={setDisclosureLevel}>
+          <MenuItem value="full">Full (all data)</MenuItem>
+          <MenuItem value="summary">Summary (aggregates only)</MenuItem>
+          <MenuItem value="hash-only">Hash Only (verification only)</MenuItem>
+        </Select>
+      </FormControl>
+
+      <Button onClick={handleExportWallet} variant="contained">
+        Export Wallet
+      </Button>
+    </ExportDialog>
+
+    <WalletPreview wallet={previewWallet} />
+  </ProvenanceWallet>
+  ```
+
+  ## API Endpoints
+
+  ### POST /api/pca/attest
+
+  **Request:**
+  ```json
+  {
+    "resultId": "res_123",
+    "issuer": {
+      "publicKey": "-----BEGIN PUBLIC KEY-----...",
+      "organization": "IntelGraph Analyst Team"
+    }
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "attestationId": "att_456",
+    "signature": "...",
+    "revocationId": "rev_789"
+  }
+  ```
+
+  ### POST /api/pca/export-wallet
+
+  **Request:**
+  ```json
+  {
+    "resultIds": ["res_123", "res_124"],
+    "disclosure": {
+      "aggregateOnly": false,
+      "redact": ["pii_field"],
+      "zkProofs": true
+    }
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "walletUrl": "/downloads/wallet_20251122.json",
+    "attestationCount": 2,
+    "expiresAt": "2025-12-22T00:00:00Z"
+  }
+  ```
+
+  ### POST /api/pca/revoke
+
+  **Request:**
+  ```json
+  {
+    "revocationId": "rev_789",
+    "reason": "Model retraining invalidated predictions"
+  }
+  ```
+
+  ## Signature Algorithm: {{signature_algorithm}}
+
+  Use **Ed25519** for all signatures:
+
+  ```typescript
+  import { sign, verify } from 'tweetnacl';
+
+  function signAttestation(data: any, privateKey: Uint8Array): Signature {
+    const message = canonicalize(data); // Deterministic JSON
+    const signature = sign.detached(Buffer.from(message), privateKey);
+
+    return {
+      algorithm: 'Ed25519',
+      signature: Buffer.from(signature).toString('base64'),
+      publicKey: derivePublicKey(privateKey).toString('base64'),
+    };
+  }
+
+  function verifySignature(sig: Signature, data: any): boolean {
+    const message = canonicalize(data);
+    const signature = Buffer.from(sig.signature, 'base64');
+    const publicKey = Buffer.from(sig.publicKey, 'base64');
+
+    return verify.detached(Buffer.from(message), signature, publicKey);
+  }
+  ```
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] All analytical results can be attested with signatures
+  - [ ] Lineage traces back to source evidence (provenance IDs)
+  - [ ] Model cards generated for ML predictions
+  - [ ] Hyperparameters and checksums recorded
+  - [ ] Wallet export supports full, summary, and hash-only disclosure
+  - [ ] Selective disclosure with ZK proofs for redacted fields
+  - [ ] External verifier CLI reproduces results within tolerance (±1%)
+  - [ ] Revocation checking rejects revoked attestations
+  - [ ] Sample artifact validates successfully with `pca-verify`
+  - [ ] UI allows wallet export with disclosure options
+  - [ ] Unit test coverage ≥80%
+  - [ ] Documentation includes ZK proof explanation
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for service, Go for CLI verifier
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Include golden path smoke test
+
+  Remember: **Attestations are currency.** Every claim must be verifiable, revocable, and traceable.
+
+examples:
+  - name: 'ed25519-w3c-zksnark'
+    inputs:
+      signature_algorithm: 'Ed25519'
+      wallet_format: 'W3C Verifiable Credentials'
+      disclosure_protocol: 'zk-SNARK'
+    expected_contains:
+      - 'Ed25519'
+      - 'W3C'
+      - 'zk-SNARK'
+      - 'selective disclosure'
+      - 'revocation'
+
+  - name: 'ecdsa-json-zkstark'
+    inputs:
+      signature_algorithm: 'ECDSA'
+      wallet_format: 'JSON'
+      disclosure_protocol: 'zk-STARK'
+    expected_contains:
+      - 'ECDSA'
+      - 'JSON'
+      - 'zk-STARK'
+      - 'attestation'

@@ -1,0 +1,393 @@
+meta:
+  id: implement.provenance-ledger@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Create provenance ledger microservice with offline verifier for chain-of-custody tracking'
+  tags: ['security', 'provenance', 'chain-of-custody', 'integrity']
+  guardrails:
+    - 'All evidence must be cryptographically signed with Ed25519'
+    - 'Merkle tree structure must be deterministic and verifiable'
+    - 'Offline verifier must work without network dependencies'
+    - 'No secrets or credentials in committed code'
+    - 'Include comprehensive tamper-detection tests'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.1
+  maxTokens: 8000
+
+inputs:
+  deployment_target: string
+  signing_algorithm: string
+  storage_backend: string
+
+template: |
+  You are implementing the **Provenance & Claim Ledger** system for IntelGraph.
+
+  ## Objective
+
+  Create a provenance ledger microservice and offline verifier to provide cryptographically verifiable chain-of-custody for all evidence, transformations, and analytical conclusions in the IntelGraph platform.
+
+  ## Target Paths
+
+  Create the following directory structure:
+
+  ```
+  services/provenance-ledger/
+    ├── src/
+    │   ├── api/          # FastAPI or Go Fiber endpoints
+    │   ├── ledger/       # Core ledger logic
+    │   ├── crypto/       # Ed25519 signing/verification
+    │   ├── merkle/       # Merkle tree implementation
+    │   └── export/       # Manifest export logic
+    ├── tests/
+    │   ├── unit/
+    │   ├── integration/
+    │   └── golden/       # Golden path tamper tests
+    ├── Dockerfile
+    ├── Makefile
+    └── README.md
+
+  cmd/prov-verify/
+    ├── main.go           # CLI verifier
+    ├── verify/           # Verification logic
+    └── README.md
+
+  deploy/helm/provenance-ledger/
+    ├── Chart.yaml
+    ├── values.yaml
+    └── templates/
+  ```
+
+  ## Core Features
+
+  ### 1. Evidence Registration
+
+  - **POST /api/v1/evidence**
+    - Register new evidence with metadata (source, timestamp, hash)
+    - Generate unique evidence ID
+    - Create initial claim with signature
+    - Return evidence receipt with Merkle proof
+
+  - **GET /api/v1/evidence/{id}**
+    - Retrieve evidence record
+    - Include all associated claims
+    - Provide Merkle proof chain
+
+  ### 2. Claims Management
+
+  - **POST /api/v1/evidence/{id}/claims**
+    - Attach transformation claims (e.g., "OCR applied", "PII redacted")
+    - Record analyst actions
+    - Sign claims with service or analyst keys
+    - Update Merkle tree
+
+  - **GET /api/v1/claims/{claim_id}**
+    - Retrieve specific claim
+    - Include provenance chain
+
+  ### 3. Merkle Bundle Export
+
+  - **GET /api/v1/export/bundle**
+    - Compute Merkle root for evidence set
+    - Generate signed manifest (Ed25519)
+    - Include all evidence, claims, and proofs
+    - Return portable JSON bundle
+
+  ### 4. Transform Chain Verification
+
+  - **POST /api/v1/verify/chain**
+    - Verify transform chain integrity
+    - Check signature validity
+    - Validate Merkle proofs
+    - Return verification report
+
+  ## Cryptographic Requirements
+
+  ### Signing Algorithm: {{signing_algorithm}}
+
+  - Use **Ed25519** for all signatures
+  - Generate key pairs for services and analysts
+  - Store public keys in ledger
+  - Sign all claims with private keys
+
+  ### Merkle Tree Structure
+
+  - Use **SHA-256** for hashing
+  - Build balanced binary tree
+  - Include metadata in leaf nodes
+  - Compute root deterministically
+
+  ### Export Format
+
+  ```json
+  {
+    "version": "1.0",
+    "merkle_root": "abc123...",
+    "signature": {
+      "algorithm": "Ed25519",
+      "public_key": "def456...",
+      "signature": "789ghi..."
+    },
+    "evidence": [
+      {
+        "id": "ev_001",
+        "hash": "sha256:...",
+        "claims": [...],
+        "merkle_proof": [...]
+      }
+    ],
+    "timestamp": "2025-11-22T10:30:00Z"
+  }
+  ```
+
+  ## Offline Verifier (CLI)
+
+  ### Command: `prov-verify`
+
+  ```bash
+  # Verify a bundle
+  prov-verify bundle.json
+
+  # Verify specific evidence
+  prov-verify bundle.json --evidence ev_001
+
+  # Check for tampering
+  prov-verify bundle.json --strict
+
+  # Output formats
+  prov-verify bundle.json --format json
+  prov-verify bundle.json --format table
+  ```
+
+  ### Verification Logic
+
+  1. **Signature Verification**
+     - Verify Ed25519 signature on Merkle root
+     - Check public key against trusted registry
+
+  2. **Merkle Proof Validation**
+     - Reconstruct Merkle tree from evidence
+     - Validate each proof path
+     - Compare computed root with signed root
+
+  3. **Claim Chain Validation**
+     - Verify each claim signature
+     - Check timestamp ordering
+     - Validate transform integrity
+
+  4. **Tamper Detection**
+     - Flag any mismatched hashes
+     - Report unsigned or invalid claims
+     - Detect missing evidence
+
+  ### Exit Codes
+
+  - `0`: Valid, no tampering detected
+  - `1`: Invalid signature
+  - `2`: Merkle proof failure
+  - `3`: Tamper detected
+  - `4`: Missing evidence
+
+  ## Testing Requirements
+
+  ### Unit Tests
+
+  - Crypto primitives (signing, hashing, key generation)
+  - Merkle tree operations (build, proof, verify)
+  - API endpoints (CRUD operations)
+
+  ### Integration Tests
+
+  - End-to-end evidence registration
+  - Multi-claim chains
+  - Bundle export and verification
+
+  ### Golden Path Tests
+
+  Create test cases in `tests/golden/`:
+
+  1. **Valid Chain Test**
+     - Register evidence
+     - Add multiple claims
+     - Export bundle
+     - Verify with CLI → Exit 0
+
+  2. **Tamper Detection Tests**
+     - Modify evidence hash → Exit 3
+     - Alter claim content → Exit 3
+     - Invalid signature → Exit 1
+     - Missing Merkle proof → Exit 2
+
+  3. **Transform Chain Test**
+     - OCR → Redaction → Analysis
+     - Verify each step
+     - Validate final output
+
+  ## Documentation Requirements
+
+  ### services/provenance-ledger/README.md
+
+  - Architecture overview
+  - API documentation (OpenAPI spec)
+  - Cryptographic design
+  - Threat model
+  - Deployment guide
+
+  ### cmd/prov-verify/README.md
+
+  - Installation instructions
+  - Usage examples
+  - Verification algorithm
+  - Troubleshooting
+
+  ### Threat Model
+
+  Document mitigation for:
+
+  - **Evidence Tampering**: Merkle proofs + signatures
+  - **Replay Attacks**: Timestamps + nonces
+  - **Key Compromise**: Key rotation procedures
+  - **Insider Threats**: Multi-party signing
+  - **Network Attacks**: Offline verification
+
+  ## Helm Chart
+
+  ### deploy/helm/provenance-ledger/
+
+  - Service deployment
+  - ConfigMap for trusted keys
+  - Secret management (signing keys)
+  - Health checks
+  - Resource limits
+
+  ### Example values.yaml
+
+  ```yaml
+  replicaCount: 3
+
+  image:
+    repository: intelgraph/provenance-ledger
+    tag: "1.0.0"
+
+  storage:
+    backend: {{storage_backend}}
+    persistence: true
+
+  crypto:
+    algorithm: Ed25519
+    keyRotationDays: 90
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  ```
+
+  ## Makefile Targets
+
+  ```makefile
+  .PHONY: test build helm verify
+
+  test:
+  	go test ./... -v -cover
+  	pytest tests/ -v
+
+  build:
+  	docker build -t provenance-ledger:latest .
+  	go build -o prov-verify cmd/prov-verify/main.go
+
+  helm:
+  	helm lint deploy/helm/provenance-ledger
+  	helm template deploy/helm/provenance-ledger
+
+  verify:
+  	./prov-verify tests/golden/sample-bundle.json
+  ```
+
+  ## Example Manifest
+
+  Create `tests/golden/sample-bundle.json` with:
+
+  - 3 pieces of evidence
+  - 5 transform claims
+  - Valid signatures
+  - Complete Merkle tree
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Service API implements all endpoints with OpenAPI spec
+  - [ ] Ed25519 signing/verification works correctly
+  - [ ] Merkle tree builds deterministically
+  - [ ] Bundle export produces valid JSON
+  - [ ] CLI verifier runs offline (no network calls)
+  - [ ] CLI deterministically flags tampering (Exit 3) for provided sample
+  - [ ] Golden path tests pass: valid chain (Exit 0), tampered evidence (Exit 3)
+  - [ ] Helm chart renders without errors (`helm lint`, `helm template`)
+  - [ ] Threat model documented with 5+ attack scenarios
+  - [ ] README includes architecture diagram and API examples
+  - [ ] Dockerfile builds successfully
+  - [ ] All Makefile targets execute without errors
+  - [ ] Unit test coverage ≥80%
+  - [ ] Integration tests cover evidence → claims → export → verify flow
+
+  ## Security Checklist
+
+  - [ ] No private keys in code or config
+  - [ ] Signing keys loaded from environment or secrets
+  - [ ] Timestamps use UTC and ISO 8601 format
+  - [ ] All hashes use SHA-256 (no MD5/SHA-1)
+  - [ ] Ed25519 implementation uses standard library or audited library
+  - [ ] Input validation on all API endpoints
+  - [ ] Rate limiting on expensive operations
+  - [ ] Audit logging for all mutations
+
+  ## Integration Points
+
+  - **Evidence Service**: Register evidence on ingest
+  - **Transform Pipeline**: Add claims after each step
+  - **Export Service**: Bundle evidence for external sharing
+  - **Audit Service**: Log all provenance events
+
+  ## Performance Targets
+
+  - Evidence registration: <100ms p95
+  - Claim attachment: <50ms p95
+  - Bundle export (1000 items): <5s
+  - CLI verification (1000 items): <3s
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript or Go (prefer Go for CLI)
+  - Follow CLAUDE.md coding standards
+  - Include pre-commit hooks (gitleaks, prettier)
+  - Add to `pnpm-workspace.yaml` if Node.js
+  - Use turbo for build caching
+  - Create golden path smoke test
+
+  Remember: **The verifier is your ground truth.** If the CLI can't verify it offline, it's not production-ready.
+
+examples:
+  - name: 'postgres-storage'
+    inputs:
+      deployment_target: 'kubernetes'
+      signing_algorithm: 'Ed25519'
+      storage_backend: 'postgresql'
+    expected_contains:
+      - 'PostgreSQL'
+      - 'Ed25519'
+      - 'Merkle'
+      - 'prov-verify'
+      - 'golden path'
+
+  - name: 's3-storage'
+    inputs:
+      deployment_target: 'docker-compose'
+      signing_algorithm: 'Ed25519'
+      storage_backend: 's3'
+    expected_contains:
+      - 'S3'
+      - 'Ed25519'
+      - 'offline verifier'
+      - 'tamper detection'

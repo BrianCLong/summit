@@ -1,0 +1,677 @@
+meta:
+  id: implement.disinfo-mapper@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build disinformation network mapper with narrative detection, influence tracing, and counter-messaging simulation'
+  tags: ['disinformation', 'narrative-analysis', 'influence-ops', 'cti', 'simulation']
+  guardrails:
+    - 'Counter-messaging must show risk-of-harm meters'
+    - 'COA selection requires uplift > risk threshold'
+    - 'All assumptions must be exportable and cited'
+    - 'Gradient/flow overlays required for influence visualization'
+    - 'Simulations must include confidence intervals'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.3
+  maxTokens: 8000
+
+inputs:
+  narrative_detection_method: string
+  influence_model: string
+  harm_risk_threshold: string
+
+template: |
+  You are implementing the **Disinformation Network Mapper + Narrative Physics** for IntelGraph.
+
+  ## Objective
+
+  Build a console for mapping disinformation narratives, detecting burst/cadence patterns, tracing influence paths, and simulating counter-messaging courses of action (COAs) with risk-of-harm meters and uplift metrics.
+
+  ## Target Paths
+
+  ```
+  apps/disinfo-mapper/
+    ├── src/
+    │   ├── pages/
+    │   │   ├── NetworkMapPage.tsx
+    │   │   ├── NarrativeTimelinePage.tsx
+    │   │   ├── InfluenceTracePage.tsx
+    │   │   └── COASimulatorPage.tsx
+    │   ├── components/
+    │   │   ├── NarrativeGraph.tsx
+    │   │   ├── BurstDetector.tsx
+    │   │   ├── InfluenceFlowOverlay.tsx
+    │   │   ├── COASelector.tsx
+    │   │   ├── HarmRiskMeter.tsx
+    │   │   └── UpliftMetric.tsx
+    │   ├── hooks/
+    │   │   ├── useNarrativeDetection.ts
+    │   │   ├── useInfluenceModel.ts
+    │   │   └── useCOASimulation.ts
+    │   └── utils/
+    │       ├── narrativeParser.ts
+    │       ├── burstDetection.ts
+    │       └── influenceCalculator.ts
+    └── README.md
+
+  services/narrative-physics/
+    ├── src/
+    │   ├── api/
+    │   │   └── NarrativeController.ts
+    │   ├── detection/
+    │   │   ├── NarrativeDetector.ts
+    │   │   ├── BurstAnalyzer.ts
+    │   │   ├── CadenceAnalyzer.ts
+    │   │   └── ClusteringEngine.ts
+    │   ├── influence/
+    │   │   ├── InfluenceModel.ts
+    │   │   ├── PropagationSimulator.ts
+    │   │   └── PathTracer.ts
+    │   ├── coa/
+    │   │   ├── COAGenerator.ts
+    │   │   ├── HarmRiskEstimator.ts
+    │   │   ├── UpliftCalculator.ts
+    │   │   └── SimulationEngine.ts
+    │   └── export/
+    │       ├── BriefExporter.ts
+    │       └── AssumptionCitator.ts
+    └── README.md
+  ```
+
+  ## Narrative Detection ({{narrative_detection_method}})
+
+  ### NarrativeDetector.ts
+
+  ```typescript
+  interface Narrative {
+    id: string;
+    theme: string;
+    keywords: string[];
+    entities: string[]; // Actors, orgs
+    timeRange: { start: string; end: string };
+    volume: number; // Message count
+    reach: number; // Unique audience
+    sentiment: number; // -1 to 1
+    confidence: number; // 0 to 1
+    sources: Source[];
+    clusters: MessageCluster[];
+  }
+
+  interface MessageCluster {
+    id: string;
+    messages: Message[];
+    centroid: string; // Representative message
+    coherence: number; // Semantic similarity
+    timestamp: string;
+  }
+
+  class NarrativeDetector {
+    async detectNarratives(
+      messages: Message[],
+      options: DetectionOptions
+    ): Promise<Narrative[]> {
+      // 1. Embed messages (LLM embeddings or TF-IDF)
+      const embeddings = await this.embedMessages(messages);
+
+      // 2. Cluster messages ({{narrative_detection_method}})
+      const clusters = await this.clusterMessages(embeddings, options);
+
+      // 3. Extract themes from clusters
+      const narratives: Narrative[] = [];
+
+      for (const cluster of clusters) {
+        const theme = await this.extractTheme(cluster);
+        const keywords = this.extractKeywords(cluster);
+        const entities = await this.extractEntities(cluster);
+
+        narratives.push({
+          id: generateId(),
+          theme,
+          keywords,
+          entities,
+          timeRange: this.getTimeRange(cluster.messages),
+          volume: cluster.messages.length,
+          reach: this.calculateReach(cluster.messages),
+          sentiment: this.analyzeSentiment(cluster.messages),
+          confidence: cluster.coherence,
+          sources: this.getSources(cluster.messages),
+          clusters: [cluster],
+        });
+      }
+
+      return narratives;
+    }
+
+    private async clusterMessages(
+      embeddings: number[][],
+      options: DetectionOptions
+    ): Promise<MessageCluster[]> {
+      // Use DBSCAN, HDBSCAN, or K-Means
+      const clustering = new DBSCAN(embeddings, {
+        epsilon: options.epsilon || 0.3,
+        minPoints: options.minPoints || 5,
+      });
+
+      const clusterIds = clustering.fit();
+
+      const clusters: MessageCluster[] = [];
+
+      for (const clusterId of new Set(clusterIds)) {
+        if (clusterId === -1) continue; // Noise
+
+        const messages = embeddings
+          .map((emb, idx) => (clusterIds[idx] === clusterId ? this.messages[idx] : null))
+          .filter(Boolean);
+
+        const coherence = this.calculateCoherence(messages);
+
+        clusters.push({
+          id: `cluster_${clusterId}`,
+          messages,
+          centroid: this.getCentroid(messages),
+          coherence,
+          timestamp: messages[0].timestamp,
+        });
+      }
+
+      return clusters;
+    }
+  }
+  ```
+
+  ### BurstAnalyzer.ts
+
+  ```typescript
+  interface BurstDetection {
+    narrativeId: string;
+    burstStart: string;
+    burstEnd: string;
+    peakTime: string;
+    baselineVolume: number;
+    peakVolume: number;
+    amplification: number; // Peak / Baseline
+    suspiciousnessScore: number; // 0 to 1 (coordinated?)
+  }
+
+  class BurstAnalyzer {
+    async detectBursts(narrative: Narrative): Promise<BurstDetection[]> {
+      // 1. Build time series (hourly message counts)
+      const timeSeries = this.buildTimeSeries(narrative.clusters);
+
+      // 2. Calculate baseline (median over window)
+      const baseline = this.calculateBaseline(timeSeries);
+
+      // 3. Detect bursts (volume > threshold * baseline)
+      const bursts: BurstDetection[] = [];
+
+      for (let i = 0; i < timeSeries.length; i++) {
+        const volume = timeSeries[i].count;
+
+        if (volume > baseline * 3) {
+          // 3x baseline = burst
+          const burstWindow = this.extractBurstWindow(timeSeries, i);
+
+          bursts.push({
+            narrativeId: narrative.id,
+            burstStart: burstWindow.start,
+            burstEnd: burstWindow.end,
+            peakTime: burstWindow.peak,
+            baselineVolume: baseline,
+            peakVolume: burstWindow.peakVolume,
+            amplification: burstWindow.peakVolume / baseline,
+            suspiciousnessScore: this.assessSuspiciousness(burstWindow),
+          });
+        }
+      }
+
+      return bursts;
+    }
+
+    private assessSuspiciousness(burstWindow: any): number {
+      let score = 0;
+
+      // Factor 1: Sharp onset (suspicious if < 1 hour ramp-up)
+      const rampUpTime = burstWindow.peak - burstWindow.start;
+      if (rampUpTime < 3600000) score += 0.3; // < 1 hour
+
+      // Factor 2: Coordinated timing (many messages at exact same time)
+      const uniqueTimestamps = new Set(burstWindow.messages.map(m => m.timestamp)).size;
+      const coordination = 1 - (uniqueTimestamps / burstWindow.messages.length);
+      score += coordination * 0.4;
+
+      // Factor 3: Bot-like cadence (messages at regular intervals)
+      const cadenceRegularity = this.detectCadenceRegularity(burstWindow.messages);
+      score += cadenceRegularity * 0.3;
+
+      return Math.min(score, 1.0);
+    }
+  }
+  ```
+
+  ## Influence Model ({{influence_model}})
+
+  ### InfluenceModel.ts
+
+  ```typescript
+  interface InfluencePath {
+    from: string; // Source account
+    to: string; // Target account
+    narrative: string;
+    strength: number; // 0 to 1
+    mechanism: 'retweet' | 'reply' | 'mention' | 'quote';
+    timestamp: string;
+  }
+
+  interface InfluenceGraph {
+    nodes: InfluenceNode[];
+    edges: InfluencePath[];
+    cascades: Cascade[];
+  }
+
+  interface InfluenceNode {
+    id: string;
+    label: string; // Account name
+    reach: number; // Follower count
+    influence: number; // PageRank or similar
+    role: 'amplifier' | 'originator' | 'bridge' | 'consumer';
+  }
+
+  class InfluenceModel {
+    async buildInfluenceGraph(narrative: Narrative): Promise<InfluenceGraph> {
+      const nodes: InfluenceNode[] = [];
+      const edges: InfluencePath[] = [];
+
+      // 1. Extract accounts from messages
+      for (const cluster of narrative.clusters) {
+        for (const message of cluster.messages) {
+          const node = this.getOrCreateNode(message.author, nodes);
+
+          // Track retweets, replies, mentions
+          if (message.retweet) {
+            edges.push({
+              from: message.retweet.author,
+              to: message.author,
+              narrative: narrative.id,
+              strength: this.calculateStrength(message),
+              mechanism: 'retweet',
+              timestamp: message.timestamp,
+            });
+          }
+        }
+      }
+
+      // 2. Calculate influence scores (PageRank)
+      const influence = this.calculatePageRank(nodes, edges);
+
+      for (const node of nodes) {
+        node.influence = influence[node.id];
+        node.role = this.classifyRole(node, edges);
+      }
+
+      // 3. Detect cascades
+      const cascades = this.detectCascades(edges);
+
+      return { nodes, edges, cascades };
+    }
+
+    private calculatePageRank(
+      nodes: InfluenceNode[],
+      edges: InfluencePath[]
+    ): Record<string, number> {
+      const damping = 0.85;
+      const iterations = 100;
+
+      let rank: Record<string, number> = {};
+      for (const node of nodes) {
+        rank[node.id] = 1 / nodes.length;
+      }
+
+      for (let i = 0; i < iterations; i++) {
+        const newRank: Record<string, number> = {};
+
+        for (const node of nodes) {
+          let sum = 0;
+
+          const incomingEdges = edges.filter(e => e.to === node.id);
+
+          for (const edge of incomingEdges) {
+            const outgoingCount = edges.filter(e => e.from === edge.from).length;
+            sum += rank[edge.from] / outgoingCount;
+          }
+
+          newRank[node.id] = (1 - damping) / nodes.length + damping * sum;
+        }
+
+        rank = newRank;
+      }
+
+      return rank;
+    }
+  }
+  ```
+
+  ## COA Simulation
+
+  ### COAGenerator.ts
+
+  ```typescript
+  interface CourseOfAction {
+    id: string;
+    name: string;
+    description: string;
+    tactics: Tactic[];
+    assumptions: Assumption[];
+    estimatedCost: number;
+    timeframe: string;
+    uplift: UpliftEstimate; // Expected positive impact
+    harmRisk: HarmRiskEstimate; // Potential negative impact
+  }
+
+  interface Tactic {
+    type: 'counter_narrative' | 'deplatform' | 'fact_check' | 'inoculation';
+    target: string; // Narrative or account
+    message?: string;
+  }
+
+  interface Assumption {
+    id: string;
+    statement: string;
+    confidence: number;
+    citations: string[];
+  }
+
+  interface UpliftEstimate {
+    metric: string; // e.g., 'narrative_reach_reduction'
+    baseline: number;
+    projected: number;
+    improvement: number; // Percentage
+    confidence: [number, number]; // Confidence interval
+  }
+
+  interface HarmRiskEstimate {
+    riskType: string; // e.g., 'amplification', 'backlash', 'censorship_perception'
+    probability: number; // 0 to 1
+    severity: number; // 0 to 1
+    riskScore: number; // probability * severity
+    mitigation: string;
+  }
+
+  class COAGenerator {
+    async generateCOAs(
+      narrative: Narrative,
+      influenceGraph: InfluenceGraph
+    ): Promise<CourseOfAction[]> {
+      const coas: CourseOfAction[] = [];
+
+      // COA 1: Counter-Narrative
+      coas.push(await this.generateCounterNarrative(narrative, influenceGraph));
+
+      // COA 2: Targeted Fact-Checking
+      coas.push(await this.generateFactCheck(narrative, influenceGraph));
+
+      // COA 3: Deplatform Key Amplifiers
+      coas.push(await this.generateDeplatform(narrative, influenceGraph));
+
+      // COA 4: Inoculation (Pre-bunking)
+      coas.push(await this.generateInoculation(narrative, influenceGraph));
+
+      return coas;
+    }
+
+    private async generateCounterNarrative(
+      narrative: Narrative,
+      influenceGraph: InfluenceGraph
+    ): Promise<CourseOfAction> {
+      const uplift = await this.estimateUplift('counter_narrative', narrative);
+      const harmRisk = await this.estimateHarmRisk('counter_narrative', narrative);
+
+      return {
+        id: 'coa_counter_narrative',
+        name: 'Counter-Narrative Campaign',
+        description: `Promote alternative narrative to reduce ${narrative.theme} reach`,
+        tactics: [
+          {
+            type: 'counter_narrative',
+            target: narrative.id,
+            message: '[Generated counter-message]',
+          },
+        ],
+        assumptions: [
+          {
+            id: 'assume_1',
+            statement: 'Counter-narrative will resonate with moderate audience',
+            confidence: 0.7,
+            citations: ['study_xyz'],
+          },
+        ],
+        estimatedCost: 50000,
+        timeframe: '2 weeks',
+        uplift,
+        harmRisk,
+      };
+    }
+  }
+  ```
+
+  ### HarmRiskEstimator.ts
+
+  ```typescript
+  class HarmRiskEstimator {
+    async estimate(tactic: Tactic, narrative: Narrative): Promise<HarmRiskEstimate> {
+      const risks: HarmRiskEstimate[] = [];
+
+      if (tactic.type === 'counter_narrative') {
+        // Risk: Amplification (drawing more attention)
+        risks.push({
+          riskType: 'amplification',
+          probability: 0.3,
+          severity: 0.6,
+          riskScore: 0.18,
+          mitigation: 'Avoid direct engagement with original narrative',
+        });
+
+        // Risk: Backlash (perceived as censorship)
+        risks.push({
+          riskType: 'backlash',
+          probability: 0.2,
+          severity: 0.5,
+          riskScore: 0.10,
+          mitigation: 'Frame as providing additional context, not suppression',
+        });
+      }
+
+      if (tactic.type === 'deplatform') {
+        // Risk: Censorship perception
+        risks.push({
+          riskType: 'censorship_perception',
+          probability: 0.7,
+          severity: 0.8,
+          riskScore: 0.56,
+          mitigation: 'Transparent enforcement of ToS violations',
+        });
+      }
+
+      // Return highest risk
+      return risks.sort((a, b) => b.riskScore - a.riskScore)[0];
+    }
+  }
+  ```
+
+  ## Frontend UI
+
+  ### NetworkMapPage.tsx
+
+  ```tsx
+  <NetworkMapPage>
+    <NarrativeGraph
+      narratives={narratives}
+      influenceGraph={influenceGraph}
+      overlays={['gradient', 'flow']}
+    />
+
+    <BurstDetector
+      bursts={detectedBursts}
+      onSelectBurst={handleSelectBurst}
+    />
+
+    <InfluenceFlowOverlay
+      paths={influencePaths}
+      animated
+    />
+  </NetworkMapPage>
+  ```
+
+  ### COASimulatorPage.tsx
+
+  ```tsx
+  <COASimulatorPage>
+    <COASelector
+      coas={generatedCOAs}
+      onSelect={handleSelectCOA}
+    />
+
+    {selectedCOA && (
+      <>
+        <UpliftMetric
+          uplift={selectedCOA.uplift}
+          showConfidenceInterval
+        />
+
+        <HarmRiskMeter
+          harmRisk={selectedCOA.harmRisk}
+          threshold={parseFloat('{{harm_risk_threshold}}')}
+        />
+
+        {selectedCOA.uplift.improvement > selectedCOA.harmRisk.riskScore && (
+          <Alert severity="success">
+            ✓ Uplift ({selectedCOA.uplift.improvement.toFixed(2)}) exceeds harm risk ({selectedCOA.harmRisk.riskScore.toFixed(2)})
+          </Alert>
+        )}
+
+        {selectedCOA.uplift.improvement <= selectedCOA.harmRisk.riskScore && (
+          <Alert severity="error">
+            ✗ Harm risk ({selectedCOA.harmRisk.riskScore.toFixed(2)}) exceeds uplift ({selectedCOA.uplift.improvement.toFixed(2)})
+            <br />
+            COA not recommended
+          </Alert>
+        )}
+
+        <AssumptionsList
+          assumptions={selectedCOA.assumptions}
+          onExport={handleExportAssumptions}
+        />
+
+        <Button
+          onClick={handleExportBrief}
+          disabled={selectedCOA.uplift.improvement <= selectedCOA.harmRisk.riskScore}
+        >
+          Export Reproducible Brief
+        </Button>
+      </>
+    )}
+  </COASimulatorPage>
+  ```
+
+  ## Brief Export
+
+  **BriefExporter.ts:**
+
+  ```typescript
+  interface DisinformationBrief {
+    narrative: Narrative;
+    influenceGraph: InfluenceGraph;
+    bursts: BurstDetection[];
+    selectedCOA: CourseOfAction;
+    assumptions: Assumption[];
+    citations: Citation[];
+    reproducibilityChecklist: string[];
+  }
+
+  async function exportBrief(data: DisinformationBrief): Promise<string> {
+    const brief = `
+  # Disinformation Analysis Brief
+
+  ## Narrative: ${data.narrative.theme}
+
+  **Volume**: ${data.narrative.volume} messages
+  **Reach**: ${data.narrative.reach} users
+  **Timeframe**: ${data.narrative.timeRange.start} to ${data.narrative.timeRange.end}
+
+  ## Bursts Detected
+
+  ${data.bursts.map(b => `- ${b.peakTime}: ${b.amplification}x amplification (suspiciousness: ${b.suspiciousnessScore})`).join('\n')}
+
+  ## Influence Network
+
+  **Key Amplifiers**:
+  ${data.influenceGraph.nodes.filter(n => n.role === 'amplifier').map(n => `- ${n.label} (influence: ${n.influence.toFixed(3)})`).join('\n')}
+
+  ## Recommended COA: ${data.selectedCOA.name}
+
+  ${data.selectedCOA.description}
+
+  **Uplift**: ${data.selectedCOA.uplift.improvement.toFixed(2)}% reduction in narrative reach
+  **Harm Risk**: ${data.selectedCOA.harmRisk.riskScore.toFixed(2)} (${data.selectedCOA.harmRisk.riskType})
+
+  **Assumptions**:
+  ${data.assumptions.map(a => `- ${a.statement} (confidence: ${a.confidence})`).join('\n')}
+
+  **Citations**:
+  ${data.citations.map(c => `- ${c.title} (${c.url})`).join('\n')}
+
+  ## Reproducibility
+
+  ${data.reproducibilityChecklist.map(item => `- [ ] ${item}`).join('\n')}
+    `;
+
+    return brief;
+  }
+  ```
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Narrative detection clusters messages by theme
+  - [ ] Burst analyzer detects volume spikes with suspiciousness scores
+  - [ ] Influence model traces propagation paths with PageRank
+  - [ ] COA generator produces 4+ COA options with tactics
+  - [ ] Uplift calculator estimates positive impact with confidence intervals
+  - [ ] Harm risk meter shows probability × severity scores
+  - [ ] COA selection blocked if uplift ≤ harm risk (threshold: {{harm_risk_threshold}})
+  - [ ] Gradient/flow overlays visualize influence paths
+  - [ ] Brief export includes assumptions + citations
+  - [ ] Unit test coverage ≥80%
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript and React
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Include golden path smoke test
+
+  Remember: **First, do no harm.** Counter-messaging must meet uplift > risk threshold.
+
+examples:
+  - name: 'dbscan-pagerank-030'
+    inputs:
+      narrative_detection_method: 'DBSCAN'
+      influence_model: 'PageRank'
+      harm_risk_threshold: '0.30'
+    expected_contains:
+      - 'DBSCAN'
+      - 'PageRank'
+      - 'burst detection'
+      - 'harm risk'
+      - '0.30'
+
+  - name: 'hdbscan-ic-050'
+    inputs:
+      narrative_detection_method: 'HDBSCAN'
+      influence_model: 'Independent Cascade'
+      harm_risk_threshold: '0.50'
+    expected_contains:
+      - 'HDBSCAN'
+      - 'Independent Cascade'
+      - 'uplift'
+      - 'COA'

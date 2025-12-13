@@ -1,0 +1,562 @@
+meta:
+  id: implement.dissent-ledger@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Build dissent capture system with sealed timestamps, ombuds queues, and mandatory resolution before publish'
+  tags: ['ethics', 'dissent', 'ombuds', 'governance', 'compliance']
+  guardrails:
+    - 'High-risk actions must capture dissent before execution'
+    - 'No publish without dissent resolution or explicit override with reasons'
+    - 'Dissent timestamps must be cryptographically sealed (immutable)'
+    - 'Ombuds queues must be independent from operational chains'
+    - 'Audit trail must include dissent excerpts in briefs'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 6000
+
+inputs:
+  timestamp_service: string
+  risk_threshold: string
+  ombuds_escalation_hours: string
+
+template: |
+  You are implementing the **Dissent Ledger + Ombuds Workflow** for IntelGraph.
+
+  ## Objective
+
+  Build an ethics scaffolding system that captures analyst dissent, seals it with cryptographic timestamps, routes high-risk concerns to ombuds queues, and blocks publication until dissent is addressed or explicitly overridden with documented reasons.
+
+  ## Target Paths
+
+  ```
+  services/dissent-ledger/
+    ├── src/
+    │   ├── api/
+    │   │   └── DissentController.ts
+    │   ├── capture/
+    │   │   ├── DissentCapture.ts
+    │   │   ├── RiskAssessor.ts
+    │   │   └── SealedTimestamp.ts
+    │   ├── ombuds/
+    │   │   ├── OmbudsQueue.ts
+    │   │   ├── EscalationRules.ts
+    │   │   └── ResolutionTracker.ts
+    │   ├── workflow/
+    │   │   ├── PublishGate.ts
+    │   │   ├── OverrideLogger.ts
+    │   │   └── DissentNotifier.ts
+    │   └── audit/
+    │       ├── DissentAuditLog.ts
+    │       └── ExcerptGenerator.ts
+    └── README.md
+
+  apps/briefing/
+    └── src/
+        └── panels/
+            ├── DissentPanel.tsx
+            ├── DissentForm.tsx
+            ├── OmbudsView.tsx
+            └── ResolutionWorkflow.tsx
+  ```
+
+  ## Dissent Capture
+
+  ### DissentCapture.ts
+
+  ```typescript
+  interface Dissent {
+    id: string;
+    caseId: string;
+    actionId: string; // e.g., publish, share, export
+    analystId: string;
+    timestamp: string; // Sealed timestamp
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    category: string; // e.g., 'legal', 'ethical', 'accuracy', 'bias'
+    summary: string;
+    details: string;
+    suggestedAction: string;
+    status: 'pending' | 'acknowledged' | 'resolved' | 'overridden';
+    resolution?: DissentResolution;
+    sealedTimestamp: SealedTimestamp;
+  }
+
+  interface DissentResolution {
+    resolvedBy: string;
+    resolvedAt: string;
+    outcome: 'accepted' | 'rejected' | 'mitigated';
+    explanation: string;
+    changes: string[];
+  }
+
+  interface SealedTimestamp {
+    timestamp: string;
+    signature: string; // From trusted timestamp authority
+    hash: string; // SHA-256 of dissent content
+  }
+
+  class DissentCapture {
+    async captureDissent(
+      actionId: string,
+      analystId: string,
+      dissentData: {
+        category: string;
+        summary: string;
+        details: string;
+        suggestedAction: string;
+      }
+    ): Promise<Dissent> {
+      // 1. Assess risk level
+      const riskLevel = await this.riskAssessor.assess(actionId, dissentData);
+
+      // 2. Create sealed timestamp
+      const sealedTimestamp = await this.createSealedTimestamp(dissentData);
+
+      // 3. Store dissent
+      const dissent: Dissent = {
+        id: generateId(),
+        caseId: await this.getCaseId(actionId),
+        actionId,
+        analystId,
+        timestamp: new Date().toISOString(),
+        riskLevel,
+        category: dissentData.category,
+        summary: dissentData.summary,
+        details: dissentData.details,
+        suggestedAction: dissentData.suggestedAction,
+        status: 'pending',
+        sealedTimestamp,
+      };
+
+      await this.db.saveDissent(dissent);
+
+      // 4. Escalate to ombuds if high-risk
+      if (riskLevel === 'high' || riskLevel === 'critical') {
+        await this.ombudsQueue.enqueue(dissent);
+      }
+
+      // 5. Notify stakeholders
+      await this.notifyStakeholders(dissent);
+
+      return dissent;
+    }
+
+    private async createSealedTimestamp(data: any): Promise<SealedTimestamp> {
+      const hash = sha256(canonicalize(data));
+
+      // Get timestamp from trusted authority ({{timestamp_service}})
+      const tsResponse = await this.timestampService.seal({
+        hash,
+        timestamp: new Date().toISOString(),
+      });
+
+      return {
+        timestamp: tsResponse.timestamp,
+        signature: tsResponse.signature,
+        hash,
+      };
+    }
+  }
+  ```
+
+  ### RiskAssessor.ts
+
+  ```typescript
+  class RiskAssessor {
+    async assess(
+      actionId: string,
+      dissentData: any
+    ): Promise<'low' | 'medium' | 'high' | 'critical'> {
+      const action = await this.getAction(actionId);
+
+      let score = 0;
+
+      // Factor 1: Action type
+      if (action.type === 'publish_external') score += 30;
+      if (action.type === 'share_coalition') score += 20;
+      if (action.type === 'export_data') score += 25;
+
+      // Factor 2: Dissent category
+      if (dissentData.category === 'legal') score += 40;
+      if (dissentData.category === 'ethical') score += 35;
+      if (dissentData.category === 'accuracy') score += 30;
+      if (dissentData.category === 'bias') score += 25;
+
+      // Factor 3: Keywords in details
+      const sensitiveKeywords = ['classified', 'collateral', 'civilian', 'unlawful'];
+      for (const keyword of sensitiveKeywords) {
+        if (dissentData.details.toLowerCase().includes(keyword)) {
+          score += 15;
+        }
+      }
+
+      // Thresholds
+      if (score >= {{risk_threshold}}) return 'critical';
+      if (score >= 60) return 'high';
+      if (score >= 30) return 'medium';
+      return 'low';
+    }
+  }
+  ```
+
+  ## Ombuds Workflow
+
+  ### OmbudsQueue.ts
+
+  ```typescript
+  interface OmbudsTicket {
+    id: string;
+    dissentId: string;
+    createdAt: string;
+    assignedTo?: string;
+    dueAt: string; // Auto-calculated based on escalation rules
+    status: 'open' | 'in_review' | 'resolved';
+    priority: 'normal' | 'urgent';
+    notes: string[];
+  }
+
+  class OmbudsQueue {
+    async enqueue(dissent: Dissent): Promise<OmbudsTicket> {
+      const dueAt = this.calculateDueDate(dissent.riskLevel);
+
+      const ticket: OmbudsTicket = {
+        id: generateId(),
+        dissentId: dissent.id,
+        createdAt: new Date().toISOString(),
+        dueAt,
+        status: 'open',
+        priority: dissent.riskLevel === 'critical' ? 'urgent' : 'normal',
+        notes: [],
+      };
+
+      await this.db.saveOmbudsTicket(ticket);
+
+      // Notify ombuds team
+      await this.notifyOmbuds(ticket);
+
+      return ticket;
+    }
+
+    private calculateDueDate(riskLevel: string): string {
+      let hoursToAdd: number;
+
+      switch (riskLevel) {
+        case 'critical':
+          hoursToAdd = 4; // 4 hours for critical
+          break;
+        case 'high':
+          hoursToAdd = {{ombuds_escalation_hours}}; // Config param
+          break;
+        default:
+          hoursToAdd = 72; // 3 days for medium/low
+      }
+
+      const dueDate = new Date();
+      dueDate.setHours(dueDate.getHours() + hoursToAdd);
+      return dueDate.toISOString();
+    }
+
+    async resolve(
+      ticketId: string,
+      resolution: DissentResolution
+    ): Promise<void> {
+      const ticket = await this.db.getOmbudsTicket(ticketId);
+      const dissent = await this.db.getDissent(ticket.dissentId);
+
+      // Update dissent with resolution
+      dissent.status = 'resolved';
+      dissent.resolution = resolution;
+
+      await this.db.saveDissent(dissent);
+
+      // Close ticket
+      ticket.status = 'resolved';
+      await this.db.saveOmbudsTicket(ticket);
+
+      // Unblock action if applicable
+      await this.publishGate.unblock(dissent.actionId);
+    }
+  }
+  ```
+
+  ## Publish Gate
+
+  ### PublishGate.ts
+
+  ```typescript
+  interface PublishCheckResult {
+    allowed: boolean;
+    blockedBy?: Dissent[];
+    requiresOverride: boolean;
+    reason: string;
+  }
+
+  class PublishGate {
+    async checkPublish(actionId: string): Promise<PublishCheckResult> {
+      // 1. Get all dissents for this action
+      const dissents = await this.db.getDissentsByAction(actionId);
+
+      // 2. Filter unresolved high-risk dissents
+      const blockers = dissents.filter(
+        d => (d.riskLevel === 'high' || d.riskLevel === 'critical') &&
+             (d.status === 'pending' || d.status === 'acknowledged')
+      );
+
+      if (blockers.length === 0) {
+        return {
+          allowed: true,
+          requiresOverride: false,
+          reason: 'No blocking dissents',
+        };
+      }
+
+      return {
+        allowed: false,
+        blockedBy: blockers,
+        requiresOverride: true,
+        reason: `${blockers.length} unresolved high-risk dissents`,
+      };
+    }
+
+    async override(
+      actionId: string,
+      overrideBy: string,
+      reason: string
+    ): Promise<void> {
+      // 1. Verify authority
+      const authorized = await this.verifyOverrideAuthority(overrideBy);
+      if (!authorized) {
+        throw new Error('Insufficient authority to override dissent');
+      }
+
+      // 2. Log override
+      await this.overrideLogger.log({
+        actionId,
+        overrideBy,
+        reason,
+        timestamp: new Date().toISOString(),
+        dissentsOverridden: await this.db.getDissentsByAction(actionId),
+      });
+
+      // 3. Mark dissents as overridden
+      const dissents = await this.db.getDissentsByAction(actionId);
+      for (const dissent of dissents) {
+        dissent.status = 'overridden';
+        await this.db.saveDissent(dissent);
+      }
+
+      // 4. Send alert to oversight
+      await this.sendOversightAlert(actionId, overrideBy, reason);
+
+      // 5. Allow publish
+      await this.unblock(actionId);
+    }
+  }
+  ```
+
+  ## Frontend UI
+
+  ### DissentPanel.tsx
+
+  ```tsx
+  <DissentPanel caseId={caseId}>
+    <Typography variant="h6">
+      Dissents ({dissents.length})
+    </Typography>
+
+    {dissents.map(dissent => (
+      <Card key={dissent.id}>
+        <CardHeader
+          title={dissent.summary}
+          subheader={
+            <Chip
+              label={dissent.riskLevel}
+              color={dissent.riskLevel === 'high' || dissent.riskLevel === 'critical' ? 'error' : 'warning'}
+            />
+          }
+        />
+        <CardContent>
+          <Typography variant="body2">{dissent.details}</Typography>
+
+          <Typography variant="caption">
+            Category: {dissent.category}
+            <br />
+            Suggested Action: {dissent.suggestedAction}
+          </Typography>
+
+          {dissent.status === 'pending' && (
+            <Alert severity="warning">
+              Awaiting resolution
+              {dissent.riskLevel === 'high' && ' - Escalated to Ombuds'}
+            </Alert>
+          )}
+
+          {dissent.resolution && (
+            <Alert severity="success">
+              Resolved: {dissent.resolution.explanation}
+            </Alert>
+          )}
+        </CardContent>
+
+        <CardActions>
+          {dissent.status === 'pending' && currentUser.role === 'ombuds' && (
+            <Button onClick={() => handleResolve(dissent)}>
+              Resolve
+            </Button>
+          )}
+
+          {dissent.status === 'pending' && currentUser.role === 'supervisor' && (
+            <Button onClick={() => handleOverride(dissent)} color="error">
+              Override (Requires Justification)
+            </Button>
+          )}
+        </CardActions>
+      </Card>
+    ))}
+
+    <Fab
+      color="primary"
+      onClick={() => setShowDissentForm(true)}
+    >
+      <AddIcon /> Raise Dissent
+    </Fab>
+  </DissentPanel>
+  ```
+
+  ### DissentForm.tsx
+
+  ```tsx
+  <DissentForm onSubmit={handleSubmitDissent}>
+    <FormControl fullWidth>
+      <InputLabel>Category</InputLabel>
+      <Select value={category} onChange={setCategory}>
+        <MenuItem value="legal">Legal Concern</MenuItem>
+        <MenuItem value="ethical">Ethical Issue</MenuItem>
+        <MenuItem value="accuracy">Accuracy Concern</MenuItem>
+        <MenuItem value="bias">Potential Bias</MenuItem>
+        <MenuItem value="privacy">Privacy Violation</MenuItem>
+        <MenuItem value="other">Other</MenuItem>
+      </Select>
+    </FormControl>
+
+    <TextField
+      label="Summary"
+      fullWidth
+      required
+      value={summary}
+      onChange={setSummary}
+    />
+
+    <TextField
+      label="Details"
+      fullWidth
+      multiline
+      rows={4}
+      required
+      value={details}
+      onChange={setDetails}
+    />
+
+    <TextField
+      label="Suggested Action"
+      fullWidth
+      multiline
+      rows={2}
+      value={suggestedAction}
+      onChange={setSuggestedAction}
+    />
+
+    <Alert severity="info">
+      Your dissent will be sealed with a cryptographic timestamp and cannot be altered.
+      High-risk dissents are automatically escalated to the Ombuds team.
+    </Alert>
+
+    <Button type="submit" variant="contained">
+      Submit Dissent
+    </Button>
+  </DissentForm>
+  ```
+
+  ## Brief Integration
+
+  **apps/briefing:** All briefs must include dissent excerpts by default.
+
+  ```tsx
+  <BriefDocument>
+    <Section title="Executive Summary">
+      {executiveSummary}
+    </Section>
+
+    <Section title="Dissents & Resolutions">
+      {dissents.length === 0 ? (
+        <Typography>No dissents recorded for this analysis.</Typography>
+      ) : (
+        dissents.map(dissent => (
+          <DissentExcerpt key={dissent.id}>
+            <Typography variant="subtitle2">{dissent.summary}</Typography>
+            <Typography variant="caption">
+              Category: {dissent.category} | Risk: {dissent.riskLevel}
+            </Typography>
+            {dissent.resolution && (
+              <Typography variant="body2">
+                Resolution: {dissent.resolution.explanation}
+              </Typography>
+            )}
+          </DissentExcerpt>
+        ))
+      )}
+    </Section>
+
+    <Section title="Analysis">
+      {analysisContent}
+    </Section>
+  </BriefDocument>
+  ```
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Dissent capture UI allows analysts to raise concerns
+  - [ ] Risk assessor scores dissents (low/medium/high/critical)
+  - [ ] Sealed timestamps from {{timestamp_service}} make dissents immutable
+  - [ ] High-risk dissents auto-escalate to ombuds queue
+  - [ ] Publish gate blocks actions with unresolved high-risk dissents
+  - [ ] Override requires supervisor role + documented justification
+  - [ ] Oversight alerts sent on all overrides
+  - [ ] Briefs include dissent excerpts by default
+  - [ ] Audit trail exports complete dissent history
+  - [ ] Unit test coverage ≥80%
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for service and React for UI
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Include golden path smoke test
+
+  Remember: **Dissent is a feature, not a bug.** Ethics require visible disagreement.
+
+examples:
+  - name: 'rfc3161-high-24h'
+    inputs:
+      timestamp_service: 'RFC3161'
+      risk_threshold: '75'
+      ombuds_escalation_hours: '24'
+    expected_contains:
+      - 'RFC3161'
+      - 'sealed timestamp'
+      - 'ombuds'
+      - '24'
+      - 'publish gate'
+
+  - name: 'custom-critical-8h'
+    inputs:
+      timestamp_service: 'Custom TSA'
+      risk_threshold: '80'
+      ombuds_escalation_hours: '8'
+    expected_contains:
+      - 'Custom TSA'
+      - 'critical'
+      - 'override'
+      - 'audit trail'

@@ -1,0 +1,510 @@
+meta:
+  id: implement.attribution-runbook@v1
+  owner: 'intelgraph-advisory-committee'
+  purpose: 'Encode Rapid Attribution methodology as replayable DAG with machine-checkable gates and proof artifacts'
+  tags: ['attribution', 'cti', 'runbook', 'dag', 'proof-carrying']
+  guardrails:
+    - 'All analytical steps must have pre/post-conditions'
+    - 'Legal basis and license scope must be verified before execution'
+    - 'KPIs and citations required in proof artifacts'
+    - 'Export blocked on gate failures'
+    - 'Runbook must be deterministic and replayable'
+
+modelConfig:
+  model: 'claude-sonnet-4-5'
+  temperature: 0.2
+  maxTokens: 7000
+
+inputs:
+  dag_engine: string
+  runbook_format: string
+  target_completion_time_minutes: string
+
+template: |
+  You are implementing the **Rapid Attribution Runbook Prover** for IntelGraph CTI.
+
+  ## Objective
+
+  Encode the Rapid Attribution methodology as a replayable Directed Acyclic Graph (DAG) with machine-checkable pre/post-conditions, legal gates, and exportable proof artifacts.
+
+  ## Target Paths
+
+  ```
+  services/runbook-prover/
+    ├── src/
+    │   ├── api/
+    │   │   └── RunbookController.ts
+    │   ├── engine/
+    │   │   ├── DAGExecutor.ts
+    │   │   ├── StepRunner.ts
+    │   │   ├── GateChecker.ts
+    │   │   └── ProofGenerator.ts
+    │   ├── gates/
+    │   │   ├── LegalBasisGate.ts
+    │   │   ├── LicenseScopeGate.ts
+    │   │   ├── DataQualityGate.ts
+    │   │   └── KPIGate.ts
+    │   ├── steps/
+    │   │   ├── DataCollectionStep.ts
+    │   │   ├── IndicatorEnrichmentStep.ts
+    │   │   ├── TTLPAnalysisStep.ts
+    │   │   ├── AttributionStep.ts
+    │   │   └── ReportGenerationStep.ts
+    │   └── proof/
+    │       ├── ProofArtifact.ts
+    │       └── CitationLinker.ts
+    ├── runbooks/
+    │   ├── rapid-attribution.yaml
+    │   ├── malware-analysis.yaml
+    │   └── campaign-tracking.yaml
+    └── README.md
+  ```
+
+  ## Runbook Format ({{runbook_format}})
+
+  ### rapid-attribution.yaml
+
+  ```yaml
+  version: "1.0"
+  name: "Rapid Attribution Runbook"
+  description: "CTI methodology for attributing cyber attacks to threat actors"
+  author: "IntelGraph CTI Team"
+  target_completion_time_minutes: {{target_completion_time_minutes}}
+
+  gates:
+    pre_execution:
+      - name: "legal_basis"
+        type: "LegalBasisGate"
+        config:
+          required_authorities: ["incident_response", "threat_intel"]
+          jurisdictions: ["US", "EU", "UK"]
+
+      - name: "license_scope"
+        type: "LicenseScopeGate"
+        config:
+          allowed_licenses: ["CC-BY", "TLP:WHITE", "TLP:GREEN"]
+          blocked_licenses: ["All Rights Reserved"]
+
+    post_execution:
+      - name: "kpi_validation"
+        type: "KPIGate"
+        config:
+          required_kpis:
+            - "ioc_count >= 10"
+            - "confidence_score >= 0.70"
+            - "citation_count >= 5"
+            - "ttp_coverage >= 3"
+
+      - name: "citation_completeness"
+        type: "CitationGate"
+        config:
+          require_provenance_ids: true
+          require_source_attribution: true
+
+  steps:
+    - id: "collect_indicators"
+      name: "Collect Indicators of Compromise"
+      type: "DataCollectionStep"
+      depends_on: []
+      preconditions:
+        - "incident_data_available"
+        - "legal_basis_verified"
+      implementation: "CollectIOCsFromIncident"
+      postconditions:
+        - "ioc_count > 0"
+        - "ioc_types_include: [ip, domain, hash, email]"
+      outputs:
+        - name: "iocs"
+          type: "IOC[]"
+
+    - id: "enrich_indicators"
+      name: "Enrich Indicators with Threat Intel"
+      type: "IndicatorEnrichmentStep"
+      depends_on: ["collect_indicators"]
+      preconditions:
+        - "ioc_count > 0"
+      implementation: "EnrichWithThreatFeeds"
+      postconditions:
+        - "enrichment_rate >= 0.5"
+      outputs:
+        - name: "enriched_iocs"
+          type: "EnrichedIOC[]"
+
+    - id: "analyze_ttps"
+      name: "Analyze Tactics, Techniques, and Procedures"
+      type: "TTLPAnalysisStep"
+      depends_on: ["enrich_indicators"]
+      preconditions:
+        - "enriched_iocs.length > 0"
+      implementation: "MapToMITREATTCK"
+      postconditions:
+        - "ttp_coverage >= 3"
+        - "confidence_scores.mean >= 0.6"
+      outputs:
+        - name: "ttps"
+          type: "MITREATTCK[]"
+
+    - id: "attribute_actor"
+      name: "Attribute to Threat Actor"
+      type: "AttributionStep"
+      depends_on: ["analyze_ttps"]
+      preconditions:
+        - "ttp_coverage >= 3"
+      implementation: "CorrelateWithKnownActors"
+      postconditions:
+        - "attribution_confidence >= 0.70"
+        - "actor_profile_exists"
+      outputs:
+        - name: "threat_actor"
+          type: "ThreatActor"
+        - name: "attribution_confidence"
+          type: "number"
+
+    - id: "generate_report"
+      name: "Generate Attribution Report"
+      type: "ReportGenerationStep"
+      depends_on: ["attribute_actor"]
+      preconditions:
+        - "attribution_confidence >= 0.70"
+      implementation: "GenerateSTIXReport"
+      postconditions:
+        - "report_format == 'STIX 2.1'"
+        - "citation_count >= 5"
+      outputs:
+        - name: "report"
+          type: "STIXBundle"
+
+  kpis:
+    - name: "ioc_count"
+      description: "Number of IOCs collected"
+      target: ">= 10"
+
+    - name: "confidence_score"
+      description: "Attribution confidence"
+      target: ">= 0.70"
+
+    - name: "citation_count"
+      description: "Number of external sources cited"
+      target: ">= 5"
+
+    - name: "ttp_coverage"
+      description: "Number of MITRE ATT&CK TTPs identified"
+      target: ">= 3"
+
+    - name: "completion_time_minutes"
+      description: "Total runbook execution time"
+      target: "<= {{target_completion_time_minutes}}"
+
+  proof_requirements:
+    include:
+      - "step_executions"
+      - "gate_results"
+      - "kpi_values"
+      - "citations"
+      - "provenance_lineage"
+    format: "signed_json"
+  ```
+
+  ## DAG Execution Engine ({{dag_engine}})
+
+  ### DAGExecutor.ts
+
+  ```typescript
+  interface RunbookExecution {
+    runbookId: string;
+    caseId: string;
+    startedAt: string;
+    completedAt?: string;
+    status: 'running' | 'completed' | 'failed' | 'blocked';
+    dag: DAGNode[];
+    gateResults: GateResult[];
+    stepResults: StepResult[];
+    proof?: ProofArtifact;
+  }
+
+  interface DAGNode {
+    id: string;
+    name: string;
+    type: string;
+    dependsOn: string[];
+    preconditions: Condition[];
+    postconditions: Condition[];
+    status: 'pending' | 'running' | 'completed' | 'failed';
+    outputs: Record<string, any>;
+  }
+
+  async function executeRunbook(
+    runbookPath: string,
+    caseId: string
+  ): Promise<RunbookExecution> {
+    // 1. Load runbook YAML
+    const runbook = loadRunbook(runbookPath);
+
+    // 2. Check pre-execution gates
+    const preGateResults = await checkGates(runbook.gates.pre_execution, caseId);
+    if (preGateResults.some(g => !g.passed)) {
+      return {
+        status: 'blocked',
+        gateResults: preGateResults,
+        proof: null,
+      };
+    }
+
+    // 3. Build DAG
+    const dag = buildDAG(runbook.steps);
+
+    // 4. Execute DAG (topological sort)
+    const stepResults = await executeDag(dag, caseId);
+
+    // 5. Check post-execution gates
+    const postGateResults = await checkGates(runbook.gates.post_execution, stepResults);
+
+    // 6. Generate proof artifact
+    const proof = await generateProof(runbook, stepResults, preGateResults.concat(postGateResults));
+
+    return {
+      runbookId: runbook.name,
+      caseId,
+      startedAt: new Date().toISOString(),
+      completedAt: new Date().toISOString(),
+      status: postGateResults.every(g => g.passed) ? 'completed' : 'blocked',
+      dag,
+      gateResults: preGateResults.concat(postGateResults),
+      stepResults,
+      proof,
+    };
+  }
+
+  async function executeDag(dag: DAGNode[], caseId: string): Promise<StepResult[]> {
+    const results: StepResult[] = [];
+    const completed = new Set<string>();
+
+    // Topological sort execution
+    while (completed.size < dag.length) {
+      const ready = dag.filter(node =>
+        !completed.has(node.id) &&
+        node.dependsOn.every(dep => completed.has(dep))
+      );
+
+      if (ready.length === 0) {
+        throw new Error('DAG has cycles or unmet dependencies');
+      }
+
+      // Execute ready nodes in parallel
+      const stepResults = await Promise.all(
+        ready.map(node => executeStep(node, caseId, results))
+      );
+
+      for (const result of stepResults) {
+        results.push(result);
+        completed.add(result.stepId);
+      }
+    }
+
+    return results;
+  }
+  ```
+
+  ### GateChecker.ts
+
+  ```typescript
+  interface GateResult {
+    gateName: string;
+    passed: boolean;
+    reason?: string;
+    evidence: Record<string, any>;
+    timestamp: string;
+  }
+
+  async function checkGate(gate: Gate, context: any): Promise<GateResult> {
+    switch (gate.type) {
+      case 'LegalBasisGate':
+        return checkLegalBasis(gate.config, context);
+
+      case 'LicenseScopeGate':
+        return checkLicenseScope(gate.config, context);
+
+      case 'KPIGate':
+        return checkKPIs(gate.config, context);
+
+      case 'CitationGate':
+        return checkCitations(gate.config, context);
+
+      default:
+        throw new Error(`Unknown gate type: ${gate.type}`);
+    }
+  }
+
+  async function checkLegalBasis(config: any, context: any): Promise<GateResult> {
+    // Verify legal authority for investigation
+    const authorities = await getAuthorities(context.caseId);
+
+    const hasRequired = config.required_authorities.every(req =>
+      authorities.includes(req)
+    );
+
+    return {
+      gateName: 'legal_basis',
+      passed: hasRequired,
+      reason: hasRequired ? null : 'Missing required legal authorities',
+      evidence: { authorities, required: config.required_authorities },
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  async function checkKPIs(config: any, stepResults: StepResult[]): Promise<GateResult> {
+    const kpiValues = computeKPIs(stepResults);
+
+    const allMet = config.required_kpis.every(kpi => evaluateKPI(kpi, kpiValues));
+
+    return {
+      gateName: 'kpi_validation',
+      passed: allMet,
+      reason: allMet ? null : 'KPI targets not met',
+      evidence: { kpiValues, required: config.required_kpis },
+      timestamp: new Date().toISOString(),
+    };
+  }
+  ```
+
+  ### ProofGenerator.ts
+
+  ```typescript
+  interface ProofArtifact {
+    runbookId: string;
+    caseId: string;
+    timestamp: string;
+    gates: {
+      pre: GateResult[];
+      post: GateResult[];
+    };
+    steps: StepResult[];
+    kpis: Record<string, any>;
+    citations: Citation[];
+    provenance: ProvenanceLineage[];
+    signature: Signature;
+  }
+
+  async function generateProof(
+    runbook: Runbook,
+    stepResults: StepResult[],
+    gateResults: GateResult[]
+  ): Promise<ProofArtifact> {
+    // 1. Extract KPI values
+    const kpis = computeKPIs(stepResults);
+
+    // 2. Collect citations from all steps
+    const citations = extractCitations(stepResults);
+
+    // 3. Build provenance lineage
+    const provenance = buildProvenanceLineage(stepResults);
+
+    // 4. Sign proof
+    const signature = await signProof({
+      runbookId: runbook.name,
+      stepResults,
+      gateResults,
+      kpis,
+      citations,
+      provenance,
+    });
+
+    return {
+      runbookId: runbook.name,
+      caseId: stepResults[0].caseId,
+      timestamp: new Date().toISOString(),
+      gates: {
+        pre: gateResults.filter(g => g.gateName.includes('legal') || g.gateName.includes('license')),
+        post: gateResults.filter(g => g.gateName.includes('kpi') || g.gateName.includes('citation')),
+      },
+      steps: stepResults,
+      kpis,
+      citations,
+      provenance,
+      signature,
+    };
+  }
+  ```
+
+  ## API Endpoints
+
+  ### POST /api/runbook/execute
+
+  **Request:**
+  ```json
+  {
+    "runbookPath": "runbooks/rapid-attribution.yaml",
+    "caseId": "case_12345",
+    "inputs": {
+      "incident_data": {...}
+    }
+  }
+  ```
+
+  **Response:**
+  ```json
+  {
+    "executionId": "exec_789",
+    "status": "completed",
+    "completionTime": 28,
+    "kpis": {
+      "ioc_count": 42,
+      "confidence_score": 0.87,
+      "citation_count": 12,
+      "ttp_coverage": 5
+    },
+    "proofUrl": "/api/runbook/proof/exec_789"
+  }
+  ```
+
+  ### GET /api/runbook/proof/{executionId}
+
+  **Response:** Signed proof artifact (JSON)
+
+  ## Acceptance Criteria
+
+  **Done When:**
+
+  - [ ] Runbook YAML defines DAG with steps, gates, KPIs
+  - [ ] DAG executor runs steps in topological order
+  - [ ] Pre-execution gates block execution on failure (legal, license)
+  - [ ] Post-execution gates block export on failure (KPIs, citations)
+  - [ ] Proof artifact includes: steps, gates, KPIs, citations, provenance
+  - [ ] Proof is signed and tamper-proof
+  - [ ] Labeled case runs <{{target_completion_time_minutes}} minutes end-to-end
+  - [ ] Export blocked if any gate fails
+  - [ ] Unit test coverage ≥80%
+  - [ ] Runbook is deterministic (same inputs → same outputs)
+
+  ## Follow IntelGraph Conventions
+
+  - Use TypeScript for service, YAML for runbooks
+  - Follow CLAUDE.md coding standards
+  - Add to pnpm workspace
+  - Include golden path smoke test
+
+  Remember: **Gates are non-negotiable.** No export without passing all checks.
+
+examples:
+  - name: 'airflow-yaml-30min'
+    inputs:
+      dag_engine: 'Airflow'
+      runbook_format: 'YAML'
+      target_completion_time_minutes: '30'
+    expected_contains:
+      - 'Airflow'
+      - 'YAML'
+      - '30 minutes'
+      - 'gates'
+      - 'proof artifact'
+
+  - name: 'prefect-json-45min'
+    inputs:
+      dag_engine: 'Prefect'
+      runbook_format: 'JSON'
+      target_completion_time_minutes: '45'
+    expected_contains:
+      - 'Prefect'
+      - 'JSON'
+      - 'KPI'
+      - 'legal basis'
