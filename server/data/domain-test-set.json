@@ -1,0 +1,20 @@
+[
+  {
+    "text": "Alice met Bob at the conference. She introduced him to the robotics lead.",
+    "tenantId": "demo",
+    "source": "synthetic",
+    "id": "sample-1"
+  },
+  {
+    "text": "The satellite report referenced the launch window; it also mentioned the payload fairing.",
+    "tenantId": "demo",
+    "source": "synthetic",
+    "id": "sample-2"
+  },
+  {
+    "text": "During the after-action review, commanders noted the sensor fusion delays and their impact on ISR feeds.",
+    "tenantId": "demo",
+    "source": "synthetic",
+    "id": "sample-3"
+  }
+]
