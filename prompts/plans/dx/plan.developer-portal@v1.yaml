@@ -1,0 +1,342 @@
+meta:
+  id: plan.developer-portal@v1
+  owner: 'platform-engineering'
+  purpose: 'Create a central portal for developer documentation, APIs, and onboarding'
+  tags:
+    - dx
+    - documentation
+    - portal
+    - onboarding
+    - api-docs
+  guardrails:
+    - 'Portal must be easy to maintain'
+    - 'Documentation must stay in sync with code'
+    - 'Search must be fast and accurate'
+    - 'Mobile-friendly for quick reference'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  documentation_sources: string
+  api_specs: string
+  target_audiences: string
+  existing_docs: string
+  hosting_preferences: string
+
+template: |
+  You are a DX Engineer creating a developer portal for Summit/IntelGraph.
+
+  **Objective:** Create a central portal for developers.
+
+  **Documentation Sources:**
+  {{documentation_sources}}
+
+  **API Specs:**
+  {{api_specs}}
+
+  **Target Audiences:**
+  {{target_audiences}}
+
+  **Existing Docs:**
+  {{existing_docs}}
+
+  **Hosting Preferences:**
+  {{hosting_preferences}}
+
+  ## Deliverables
+
+  ### 1. Portal Architecture
+  ```yaml
+  architecture:
+    framework: Docusaurus | MkDocs | custom Next.js
+    features:
+      - Full-text search (Algolia / local)
+      - Version support
+      - Dark mode
+      - API playground
+      - Code examples in multiple languages
+
+    structure:
+      /docs
+        /getting-started
+          - quickstart.md
+          - installation.md
+          - first-steps.md
+        /guides
+          - authentication.md
+          - working-with-entities.md
+          - graphql-queries.md
+        /api-reference
+          - graphql (auto-generated)
+          - rest (OpenAPI)
+        /architecture
+          - overview.md
+          - data-model.md
+          - security.md
+        /tutorials
+          - build-first-integration.md
+          - advanced-querying.md
+        /contributing
+          - development-setup.md
+          - code-style.md
+          - testing.md
+
+    technical:
+      build: Static site generation
+      deployment: Vercel / Netlify / S3+CloudFront
+      ci: Build on PR, deploy on merge
+      preview: Preview deployments for PRs
+  ```
+
+  ### 2. Content Structure
+  ```yaml
+  content:
+    sections:
+      - name: Getting Started
+        audience: New developers
+        content:
+          - Platform overview (5 min read)
+          - Quick start guide (15 min)
+          - Key concepts glossary
+          - Video walkthrough (optional)
+
+      - name: Guides
+        audience: All developers
+        content:
+          - Task-based how-to guides
+          - Best practices
+          - Common patterns
+          - Troubleshooting
+
+      - name: API Reference
+        audience: Integration developers
+        content:
+          - Auto-generated from OpenAPI/GraphQL
+          - Interactive playground
+          - Code examples (JS, Python, cURL)
+          - Authentication guide
+
+      - name: Architecture
+        audience: Senior developers, architects
+        content:
+          - System overview
+          - Data model
+          - Security model
+          - Deployment options
+
+      - name: Tutorials
+        audience: Hands-on learners
+        content:
+          - Step-by-step projects
+          - Sample applications
+          - Integration examples
+
+      - name: Contributing
+        audience: Contributors
+        content:
+          - Development setup
+          - Coding standards
+          - PR process
+          - Release process
+
+    templates:
+      guide: |
+        # Guide Title
+
+        ## Overview
+        Brief description of what this guide covers.
+
+        ## Prerequisites
+        - Requirement 1
+        - Requirement 2
+
+        ## Steps
+        ### Step 1: [Title]
+        Description and code examples.
+
+        ### Step 2: [Title]
+        ...
+
+        ## Next Steps
+        Links to related guides.
+
+      api_endpoint: |
+        # Endpoint Name
+
+        `METHOD /path`
+
+        ## Description
+        What this endpoint does.
+
+        ## Parameters
+        | Name | Type | Required | Description |
+        |------|------|----------|-------------|
+
+        ## Request Example
+        \`\`\`bash
+        curl -X METHOD ...
+        \`\`\`
+
+        ## Response Example
+        \`\`\`json
+        {...}
+        \`\`\`
+  ```
+
+  ### 3. Navigation Map
+  ```yaml
+  navigation:
+    sidebar:
+      - title: Getting Started
+        items:
+          - { title: Overview, link: /docs/getting-started }
+          - { title: Quick Start, link: /docs/getting-started/quickstart }
+          - { title: Installation, link: /docs/getting-started/installation }
+
+      - title: Guides
+        items:
+          - { title: Authentication, link: /docs/guides/auth }
+          - { title: Working with Entities, link: /docs/guides/entities }
+          - { title: GraphQL Queries, link: /docs/guides/graphql }
+
+      - title: API Reference
+        items:
+          - { title: GraphQL API, link: /docs/api/graphql }
+          - { title: REST API, link: /docs/api/rest }
+          - { title: Webhooks, link: /docs/api/webhooks }
+
+    top_nav:
+      - { title: Docs, link: /docs }
+      - { title: API, link: /api }
+      - { title: Tutorials, link: /tutorials }
+      - { title: Blog, link: /blog }
+      - { title: GitHub, link: https://github.com/... }
+
+    footer:
+      - column: Resources
+        items: [Docs, Tutorials, API Reference]
+      - column: Community
+        items: [GitHub, Discord, Stack Overflow]
+      - column: Company
+        items: [About, Blog, Careers]
+
+    search:
+      provider: Algolia DocSearch
+      config:
+        index: summit-docs
+        filters: version, section
+        placeholder: "Search documentation..."
+  ```
+
+  ### 4. API Playground
+  ```yaml
+  playground:
+    graphql:
+      tool: GraphiQL | Apollo Sandbox
+      features:
+        - Schema explorer
+        - Query autocomplete
+        - Query history
+        - Variables panel
+        - Response viewer
+      authentication:
+        - Demo API key for public
+        - User's key when logged in
+
+    rest:
+      tool: Swagger UI | Redoc
+      features:
+        - Try it out
+        - Code generation
+        - Request/response examples
+      authentication:
+        - API key input
+        - OAuth flow
+
+    code_examples:
+      languages: [JavaScript, Python, cURL, Go]
+      sync: Generated from OpenAPI/GraphQL
+      runnable: Codesandbox / Replit embeds
+  ```
+
+  ### 5. Onboarding Content
+  ```yaml
+  onboarding:
+    paths:
+      - name: Integration Developer
+        description: Building integrations with Summit
+        content:
+          1. Quick start guide
+          2. Authentication setup
+          3. First API call
+          4. Webhooks setup
+          5. Best practices
+
+      - name: Platform Administrator
+        description: Managing Summit deployment
+        content:
+          1. Installation guide
+          2. Configuration reference
+          3. Security hardening
+          4. Monitoring setup
+          5. Backup and recovery
+
+      - name: Contributor
+        description: Contributing to Summit
+        content:
+          1. Development setup
+          2. Codebase tour
+          3. Testing guide
+          4. PR process
+          5. Release process
+
+    interactive:
+      checklists:
+        - [ ] Set up development environment
+        - [ ] Make your first API call
+        - [ ] Create a test entity
+        - [ ] Query the graph
+
+      progress_tracking:
+        - Save progress to localStorage
+        - Resume where left off
+        - Completion badges
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Portal renders locally
+  - [ ] Search functional
+  - [ ] API playground working
+  - [ ] Onboarding paths complete
+  - [ ] Deployed to staging
+
+  ## Rollback Plan
+  - Portal is a separate deployment
+  - Previous version always available
+  - Content in version control
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'developer-portal'
+    inputs:
+      documentation_sources: 'Markdown in docs/, OpenAPI specs, GraphQL schema'
+      api_specs: 'OpenAPI 3.0 for REST, GraphQL SDL'
+      target_audiences: 'Integration developers, administrators, contributors'
+      existing_docs: '100+ markdown files, scattered across repos'
+      hosting_preferences: 'Vercel or Netlify, custom domain'
+    expected_contains:
+      - 'Portal Architecture'
+      - 'Content Structure'
+      - 'Navigation Map'
+      - 'Onboarding'

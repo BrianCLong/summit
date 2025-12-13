@@ -1,0 +1,232 @@
+# P29-30: SBOM Generation and License Compliance Workflow
+name: Compliance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, develop]
+  release:
+    types: [published]
+  schedule:
+    # Weekly compliance check on Monday at 6 AM UTC
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  # Generate Software Bill of Materials
+  sbom:
+    name: Generate SBOM
+    runs-on: ubuntu-latest
+    outputs:
+      sbom-path: ${{ steps.sbom.outputs.path }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate SBOM (CycloneDX)
+        id: sbom
+        run: |
+          mkdir -p sbom
+          npx tsx scripts/compliance/generate-sbom.ts --cyclonedx --output sbom
+          echo "path=sbom" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM (SPDX)
+        run: npx tsx scripts/compliance/generate-sbom.ts --spdx --output sbom
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom/
+          retention-days: 90
+
+      # Generate attestation for the SBOM
+      - name: Generate SBOM attestation
+        if: github.event_name == 'release'
+        uses: actions/attest-sbom@v1
+        with:
+          subject-path: 'sbom/*-sbom-cyclonedx.json'
+          sbom-path: 'sbom/*-sbom-cyclonedx.json'
+
+  # License compliance check
+  license-check:
+    name: License Compliance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check license compliance
+        run: npx tsx scripts/compliance/license-check.ts --markdown --output license-report.md
+
+      - name: Upload license report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: license-report.md
+
+      - name: Add license report to summary
+        run: cat license-report.md >> $GITHUB_STEP_SUMMARY
+
+  # FOSSA license scanning (if configured)
+  fossa:
+    name: FOSSA Scan
+    runs-on: ubuntu-latest
+    if: ${{ vars.FOSSA_API_KEY != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run FOSSA Scan
+        uses: fossas/fossa-action@main
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
+
+      - name: Run FOSSA Test
+        uses: fossas/fossa-action@main
+        with:
+          api-key: ${{ secrets.FOSSA_API_KEY }}
+          run-tests: true
+
+  # Container SBOM for releases
+  container-sbom:
+    name: Container SBOM
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    needs: [sbom]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build container
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.optimized
+          push: false
+          load: true
+          tags: summit:latest
+
+      - name: Generate container SBOM with Syft
+        uses: anchore/sbom-action@v0
+        with:
+          image: summit:latest
+          format: cyclonedx-json
+          output-file: sbom/container-sbom-cyclonedx.json
+
+      - name: Generate container SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          image: summit:latest
+          format: spdx-json
+          output-file: sbom/container-sbom-spdx.json
+
+      - name: Upload container SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: container-sbom
+          path: sbom/container-*.json
+
+  # SLSA provenance attestation
+  provenance:
+    name: SLSA Provenance
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    needs: [sbom, container-sbom]
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download SBOMs
+        uses: actions/download-artifact@v4
+        with:
+          pattern: '*sbom*'
+          merge-multiple: true
+          path: sbom/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push with provenance
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infra/docker/Dockerfile.optimized
+          push: true
+          tags: ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+          provenance: true
+          sbom: true
+
+      - name: Generate SLSA provenance
+        uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v1.9.0
+        with:
+          image: ghcr.io/${{ github.repository }}:${{ github.event.release.tag_name }}
+          digest: ${{ steps.build.outputs.digest }}
+
+  # Compliance summary
+  summary:
+    name: Compliance Summary
+    runs-on: ubuntu-latest
+    needs: [sbom, license-check]
+    if: always()
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+
+      - name: Generate summary
+        run: |
+          echo "# Compliance Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM Generation | ${{ needs.sbom.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| License Compliance | ${{ needs.license-check.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "sbom/summit-*-sbom-cyclonedx.json" ]; then
+            COMPONENT_COUNT=$(jq '.components | length' sbom/summit-*-sbom-cyclonedx.json 2>/dev/null || echo "N/A")
+            echo "**SBOM Components:** $COMPONENT_COUNT" >> $GITHUB_STEP_SUMMARY
+          fi

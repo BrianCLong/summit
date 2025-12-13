@@ -1,0 +1,253 @@
+meta:
+  id: plan.realtime-analytics@v1
+  owner: 'platform-engineering'
+  purpose: 'Create lightweight real-time dashboards for demonstrations and monitoring'
+  tags:
+    - analytics
+    - streaming
+    - dashboards
+    - demos
+    - realtime
+  guardrails:
+    - 'Demo data must not contain real user data'
+    - 'Streaming must handle backpressure'
+    - 'Dashboards must be responsive'
+    - 'Data freshness must be documented'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  demo_scenarios: string
+  data_sources: string
+  latency_requirements: string
+  audience: string
+  infrastructure_constraints: string
+
+template: |
+  You are a Data Engineer creating real-time analytics for Summit/IntelGraph.
+
+  **Objective:** Quick, live dashboards for demonstrations.
+
+  **Demo Scenarios:**
+  {{demo_scenarios}}
+
+  **Data Sources:**
+  {{data_sources}}
+
+  **Latency Requirements:**
+  {{latency_requirements}}
+
+  **Audience:**
+  {{audience}}
+
+  **Infrastructure Constraints:**
+  {{infrastructure_constraints}}
+
+  ## Deliverables
+
+  ### 1. Demo Dashboard Specifications
+  ```yaml
+  dashboards:
+    - name: Live Activity
+      description: Real-time platform activity
+      refresh: 1 second
+      panels:
+        - title: Active Investigations
+          type: stat
+          query: count(active_investigations)
+
+        - title: Entities Processed/min
+          type: graph
+          query: rate(entities_processed[1m])
+
+        - title: Live Query Stream
+          type: log_stream
+          query: last 20 queries
+
+        - title: Geographic Distribution
+          type: world_map
+          query: by_country(active_users)
+
+    - name: Investigation Flow
+      description: Visual investigation lifecycle
+      refresh: 5 seconds
+      panels:
+        - title: Investigation Pipeline
+          type: sankey
+          stages: [created, analyzing, enriching, complete]
+
+        - title: Entity Graph Growth
+          type: animated_graph
+          query: entity_relationships
+
+    - name: Copilot Insights
+      description: AI copilot activity
+      refresh: 2 seconds
+      panels:
+        - title: Queries/min
+          type: counter
+          query: rate(copilot_queries[1m])
+
+        - title: Response Time
+          type: gauge
+          query: avg(copilot_latency)
+
+        - title: Sample Conversations
+          type: chat_stream
+          query: last 5 conversations (anonymized)
+  ```
+
+  ### 2. Streaming Architecture
+  ```yaml
+  streaming:
+    ingestion:
+      source: Kafka/Redpanda
+      topics:
+        - summit.events
+        - summit.metrics
+        - summit.activities
+
+    processing:
+      tool: Flink | ksqlDB | Materialize
+      transformations:
+        - windowed_aggregations: 1s, 5s, 1m, 5m
+        - entity_joins: enrich with metadata
+        - anomaly_flags: deviation from baseline
+
+    serving:
+      hot_data: Redis Streams
+      dashboards: Grafana | custom React
+      api: GraphQL subscriptions
+
+    data_flow:
+      App -> Kafka -> Stream Processor -> Redis -> Dashboard
+      |
+      +-> Metrics Store (for history)
+  ```
+
+  ### 3. Demo Datasets
+  ```yaml
+  demo_data:
+    generator:
+      type: synthetic
+      realistic: true
+      pii_free: true
+
+    scenarios:
+      - name: investigation_burst
+        description: Simulates investigation creation spike
+        rate: 10 investigations/min for 5 min
+        entities_per: 50-100
+        relationships_per: 100-500
+
+      - name: entity_enrichment
+        description: Shows entity data enrichment flow
+        sources: 5 data providers
+        latency_simulation: 100-2000ms
+        success_rate: 95%
+
+      - name: copilot_session
+        description: AI copilot interaction demo
+        queries: 20 sample questions
+        context_switches: 5
+        insights_generated: 10
+
+    seeding:
+      command: pnpm run demo:seed --scenario=investigation_burst
+      cleanup: pnpm run demo:cleanup
+  ```
+
+  ### 4. Data Feed Wiring
+  ```yaml
+  data_feeds:
+    websocket:
+      endpoint: wss://api.summit.local/live
+      protocol: GraphQL Subscriptions
+      subscriptions:
+        - name: activityFeed
+          query: |
+            subscription {
+              activityFeed {
+                id
+                type
+                timestamp
+                data
+              }
+            }
+
+    server_sent_events:
+      endpoint: /api/events/stream
+      events:
+        - investigation_created
+        - entity_added
+        - relationship_discovered
+
+    polling_fallback:
+      endpoint: /api/stats
+      interval: 5s
+      response:
+        investigations_active: number
+        entities_total: number
+        queries_per_minute: number
+  ```
+
+  ### 5. Performance Considerations
+  ```yaml
+  performance:
+    data_freshness:
+      target: < 2 seconds end-to-end
+      measurement: kafka_lag + processing_time + render_time
+
+    backpressure:
+      strategy: drop oldest on overflow
+      buffer_size: 1000 events
+      alert_threshold: 80% buffer usage
+
+    rendering:
+      virtualization: Only render visible items
+      debouncing: Aggregate updates within 100ms
+      lazy_loading: Load details on demand
+
+    scalability:
+      concurrent_viewers: 100+
+      events_per_second: 10,000+
+      fan_out: Redis pub/sub
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Dashboards render in CI/demo
+  - [ ] Data latency < 2 seconds
+  - [ ] Demo data is realistic and PII-free
+  - [ ] Works with 100 concurrent viewers
+  - [ ] Documented demo playbook
+
+  ## Rollback Plan
+  - Static mock data fallback
+  - Pre-recorded demo videos
+  - Polling fallback if streaming fails
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'demo-dashboards'
+    inputs:
+      demo_scenarios: 'Sales demo, investor pitch, customer POC'
+      data_sources: 'Kafka events, metrics, synthetic activities'
+      latency_requirements: '< 2 second end-to-end'
+      audience: 'Non-technical executives, security analysts'
+      infrastructure_constraints: 'Must work on demo laptop, cloud optional'
+    expected_contains:
+      - 'Demo Dashboard'
+      - 'Streaming Architecture'
+      - 'Demo Datasets'
+      - 'Performance Considerations'

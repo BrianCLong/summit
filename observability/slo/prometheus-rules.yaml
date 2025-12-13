@@ -1,0 +1,258 @@
+# P22: SLO Prometheus Recording and Alerting Rules
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: summit-slo-rules
+  namespace: summit-observability
+  labels:
+    app.kubernetes.io/part-of: summit
+    app.kubernetes.io/component: slo
+    prometheus: summit
+    role: alert-rules
+spec:
+  groups:
+    # SLI Recording Rules
+    - name: summit.sli.recording
+      interval: 30s
+      rules:
+        # API Error Rate
+        - record: summit:api:error_rate:5m
+          expr: |
+            sum(rate(http_requests_total{job="graphql-api",code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="graphql-api"}[5m]))
+
+        - record: summit:api:error_rate:1h
+          expr: |
+            sum(rate(http_requests_total{job="graphql-api",code=~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total{job="graphql-api"}[1h]))
+
+        - record: summit:api:error_rate:24h
+          expr: |
+            sum(rate(http_requests_total{job="graphql-api",code=~"5.."}[24h]))
+            /
+            sum(rate(http_requests_total{job="graphql-api"}[24h]))
+
+        # API Latency Percentiles
+        - record: summit:api:latency_p50:5m
+          expr: |
+            histogram_quantile(0.50,
+              sum(rate(http_request_duration_seconds_bucket{job="graphql-api"}[5m])) by (le)
+            )
+
+        - record: summit:api:latency_p95:5m
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(http_request_duration_seconds_bucket{job="graphql-api"}[5m])) by (le)
+            )
+
+        - record: summit:api:latency_p99:5m
+          expr: |
+            histogram_quantile(0.99,
+              sum(rate(http_request_duration_seconds_bucket{job="graphql-api"}[5m])) by (le)
+            )
+
+        # Database Query Latency
+        - record: summit:db:query_latency_p95:5m
+          expr: |
+            histogram_quantile(0.95,
+              sum(rate(db_query_duration_seconds_bucket[5m])) by (le, database)
+            )
+
+        # Request Throughput
+        - record: summit:api:requests_per_second:5m
+          expr: |
+            sum(rate(http_requests_total{job="graphql-api"}[5m]))
+
+        # Active Connections
+        - record: summit:db:active_connections
+          expr: |
+            sum(db_connections_active) by (database)
+
+    # SLO Error Budget Recording Rules
+    - name: summit.slo.error_budget
+      interval: 1m
+      rules:
+        # API Availability Error Budget (99.9% = 0.1% budget)
+        - record: summit:slo:api_availability:error_budget_remaining
+          expr: |
+            1 - (
+              (1 - 0.999) - summit:api:error_rate:24h
+            ) / (1 - 0.999)
+
+        # API Latency Error Budget (99% under 500ms)
+        - record: summit:slo:api_latency:error_budget_remaining
+          expr: |
+            1 - (
+              (1 - 0.99) - (
+                1 - sum(rate(http_request_duration_seconds_bucket{job="graphql-api",le="0.5"}[24h]))
+                    / sum(rate(http_request_duration_seconds_count{job="graphql-api"}[24h]))
+              )
+            ) / (1 - 0.99)
+
+        # Burn rate calculations
+        - record: summit:slo:api_availability:burn_rate_1h
+          expr: |
+            summit:api:error_rate:1h / (1 - 0.999)
+
+        - record: summit:slo:api_availability:burn_rate_6h
+          expr: |
+            (
+              sum(increase(http_requests_total{job="graphql-api",code=~"5.."}[6h]))
+              /
+              sum(increase(http_requests_total{job="graphql-api"}[6h]))
+            ) / (1 - 0.999)
+
+    # SLO Alerting Rules
+    - name: summit.slo.alerts
+      rules:
+        # Multi-window, multi-burn-rate alerts
+
+        # Fast burn - Page immediately (2% budget in 1 hour)
+        - alert: SummitAPIAvailabilityBurnRateCritical
+          expr: |
+            summit:slo:api_availability:burn_rate_1h > 14.4
+            and
+            summit:api:error_rate:5m > (1 - 0.999)
+          for: 2m
+          labels:
+            severity: critical
+            slo: api-availability
+            category: availability
+          annotations:
+            summary: "API availability SLO burning error budget too fast"
+            description: |
+              API availability is burning through error budget at {{ $value | printf "%.1f" }}x the sustainable rate.
+              At this rate, the monthly error budget will be exhausted in {{ (720 / $value) | printf "%.0f" }} hours.
+            runbook_url: "https://runbooks.summit.io/slo/api-availability"
+            dashboard_url: "https://grafana.summit.io/d/summit-slo/summit-slo-dashboard"
+
+        # Medium burn - Page with delay (5% budget in 6 hours)
+        - alert: SummitAPIAvailabilityBurnRateHigh
+          expr: |
+            summit:slo:api_availability:burn_rate_6h > 6
+            and
+            summit:api:error_rate:1h > (1 - 0.999)
+          for: 15m
+          labels:
+            severity: warning
+            slo: api-availability
+            category: availability
+          annotations:
+            summary: "API availability SLO burn rate elevated"
+            description: |
+              API availability burn rate is elevated at {{ $value | printf "%.1f" }}x sustainable rate.
+            runbook_url: "https://runbooks.summit.io/slo/api-availability"
+
+        # Slow burn - Ticket (10% budget in 24 hours)
+        - alert: SummitAPIAvailabilityBurnRateWarning
+          expr: |
+            summit:api:error_rate:24h > (1 - 0.999) * 2.4
+          for: 1h
+          labels:
+            severity: warning
+            slo: api-availability
+            category: availability
+            ticket: "true"
+          annotations:
+            summary: "API availability SLO showing degradation"
+            description: |
+              API error rate over 24h is {{ $value | printf "%.4f" }}, above sustainable level.
+
+        # Latency SLO Alerts
+        - alert: SummitAPILatencyBurnRateCritical
+          expr: |
+            (
+              1 - sum(rate(http_request_duration_seconds_bucket{job="graphql-api",le="0.5"}[1h]))
+                  / sum(rate(http_request_duration_seconds_count{job="graphql-api"}[1h]))
+            ) > (1 - 0.99) * 14.4
+          for: 2m
+          labels:
+            severity: critical
+            slo: api-latency
+            category: latency
+          annotations:
+            summary: "API latency SLO burning error budget critically fast"
+            description: |
+              P99 API latency is exceeding 500ms at a critical rate.
+              Current p99: {{ with query "summit:api:latency_p99:5m" }}{{ . | first | value | printf "%.3f" }}s{{ end }}
+            runbook_url: "https://runbooks.summit.io/slo/api-latency"
+
+        - alert: SummitAPILatencyP99High
+          expr: summit:api:latency_p99:5m > 0.5
+          for: 5m
+          labels:
+            severity: warning
+            slo: api-latency
+            category: latency
+          annotations:
+            summary: "API p99 latency exceeds 500ms"
+            description: "API p99 latency is {{ $value | printf \"%.3f\" }}s"
+
+        # Database Alerts
+        - alert: SummitDatabaseLatencyHigh
+          expr: summit:db:query_latency_p95:5m > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            slo: database-latency
+            category: latency
+          annotations:
+            summary: "Database p95 latency exceeds 100ms"
+            description: "Database {{ $labels.database }} p95 latency is {{ $value | printf \"%.3f\" }}s"
+
+        - alert: SummitDatabaseConnectionPoolExhausted
+          expr: |
+            summit:db:active_connections / on(database) group_left
+            db_connections_max > 0.9
+          for: 5m
+          labels:
+            severity: critical
+            category: capacity
+          annotations:
+            summary: "Database connection pool nearly exhausted"
+            description: "Database {{ $labels.database }} is using {{ $value | printf \"%.0f\" }}% of connections"
+
+        # Error Budget Exhaustion Alerts
+        - alert: SummitSLOErrorBudgetLow
+          expr: summit:slo:api_availability:error_budget_remaining < 0.25
+          for: 10m
+          labels:
+            severity: warning
+            category: slo
+          annotations:
+            summary: "API availability error budget is low"
+            description: "Only {{ $value | printf \"%.1f\" }}% of error budget remaining"
+
+        - alert: SummitSLOErrorBudgetExhausted
+          expr: summit:slo:api_availability:error_budget_remaining < 0
+          for: 5m
+          labels:
+            severity: critical
+            category: slo
+          annotations:
+            summary: "API availability error budget exhausted"
+            description: "Error budget is exhausted. SLO is breached."
+            runbook_url: "https://runbooks.summit.io/slo/budget-exhausted"
+
+    # Service Health Recording Rules
+    - name: summit.health.recording
+      interval: 30s
+      rules:
+        - record: summit:service:up
+          expr: up{job=~"summit-.*"}
+
+        - record: summit:service:health_score
+          expr: |
+            (
+              (1 - summit:api:error_rate:5m) * 0.4 +
+              (summit:api:latency_p99:5m < 0.5) * 0.3 +
+              (summit:db:query_latency_p95:5m < 0.1) * 0.3
+            ) * 100
+
+        - record: summit:cluster:ready_pods_ratio
+          expr: |
+            sum(kube_deployment_status_replicas_ready{namespace=~"summit-.*"})
+            /
+            sum(kube_deployment_spec_replicas{namespace=~"summit-.*"})

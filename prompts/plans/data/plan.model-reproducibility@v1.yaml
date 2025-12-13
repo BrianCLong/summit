@@ -1,0 +1,281 @@
+meta:
+  id: plan.model-reproducibility@v1
+  owner: 'ml-engineering'
+  purpose: 'Ensure ML experiments and model training are reproducible'
+  tags:
+    - ml
+    - reproducibility
+    - versioning
+    - experiments
+    - registry
+  guardrails:
+    - 'All experiments must be reproducible'
+    - 'Model versions must be traceable to code'
+    - 'Training data must be versioned'
+    - 'Environment must be captured'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  ml_frameworks: string
+  current_workflow: string
+  reproducibility_gaps: string
+  storage_constraints: string
+  team_size: string
+
+template: |
+  You are an ML Engineer implementing reproducibility for Summit/IntelGraph.
+
+  **Objective:** Reproduce ML experiments reliably.
+
+  **ML Frameworks:**
+  {{ml_frameworks}}
+
+  **Current Workflow:**
+  {{current_workflow}}
+
+  **Reproducibility Gaps:**
+  {{reproducibility_gaps}}
+
+  **Storage Constraints:**
+  {{storage_constraints}}
+
+  **Team Size:**
+  {{team_size}}
+
+  ## Deliverables
+
+  ### 1. Environment Capture
+  ```yaml
+  environment:
+    capture_on_training:
+      - python_version: sys.version
+      - packages: pip freeze / conda list
+      - cuda_version: nvidia-smi
+      - hardware: CPU, GPU, memory
+
+    storage:
+      format: requirements.txt, conda.yaml, docker
+      location: experiment artifacts
+
+    docker_approach:
+      base_image: nvidia/cuda:12.0-python3.11
+      dockerfile: |
+        FROM nvidia/cuda:12.0-python3.11
+
+        COPY requirements.txt .
+        RUN pip install -r requirements.txt
+
+        COPY src/ /app/src/
+        WORKDIR /app
+
+        ENTRYPOINT ["python", "-m", "training"]
+
+    lockfile:
+      tool: pip-tools / poetry / pdm
+      command: pip-compile requirements.in
+      output: requirements.txt (pinned versions)
+
+    random_seeds:
+      python: random.seed(42)
+      numpy: np.random.seed(42)
+      torch: torch.manual_seed(42)
+      tensorflow: tf.random.set_seed(42)
+      global_seed_env: PYTHONHASHSEED=42
+  ```
+
+  ### 2. Versioned Artifacts
+  ```yaml
+  versioning:
+    code:
+      tool: Git
+      tagging: model-{name}-v{version}
+      commit_hash: Stored with experiment
+
+    data:
+      tool: DVC | LakeFS | Delta Lake
+      tracking: |
+        dvc add data/training.parquet
+        dvc push
+      versioning: Content-addressable (hash-based)
+
+    models:
+      tool: MLflow | Weights & Biases | custom
+      artifacts:
+        - model weights (.pt, .h5, .pkl)
+        - config (hyperparameters.yaml)
+        - metrics (evaluation.json)
+        - lineage (training_data_version)
+
+    experiments:
+      tool: MLflow Tracking | W&B
+      tracked:
+        - hyperparameters
+        - metrics
+        - artifacts
+        - git commit
+        - environment
+  ```
+
+  ### 3. Model Registry Scaffolding
+  ```yaml
+  registry:
+    tool: MLflow Model Registry | custom
+
+    model_lifecycle:
+      stages:
+        - None: Just registered
+        - Staging: In testing
+        - Production: Serving traffic
+        - Archived: Deprecated
+
+    registration:
+      api: |
+        import mlflow
+
+        with mlflow.start_run():
+            mlflow.log_params(hyperparams)
+            mlflow.log_metrics(metrics)
+            mlflow.pytorch.log_model(model, "model")
+
+            # Register to registry
+            mlflow.register_model(
+                f"runs:/{run_id}/model",
+                "EntityClassifier"
+            )
+
+    schema:
+      model_entry:
+        name: string
+        version: integer
+        stage: enum
+        source_run: run_id
+        created_at: datetime
+        created_by: user_id
+        description: string
+        tags: object
+        signatures:
+          input: schema
+          output: schema
+
+    promotion:
+      staging_to_production:
+        requirements:
+          - All tests pass
+          - Performance meets threshold
+          - Reviewed by ML lead
+        automation: CI/CD pipeline
+  ```
+
+  ### 4. Reproducibility Guide
+  ```yaml
+  guide:
+    checklist:
+      before_training:
+        - [ ] Set all random seeds
+        - [ ] Pin all package versions
+        - [ ] Version training data
+        - [ ] Document hyperparameters
+        - [ ] Commit code changes
+
+      during_training:
+        - [ ] Log all parameters
+        - [ ] Log metrics at each epoch
+        - [ ] Save model checkpoints
+        - [ ] Capture environment info
+
+      after_training:
+        - [ ] Register model to registry
+        - [ ] Tag git commit
+        - [ ] Document results
+        - [ ] Archive artifacts
+
+    reproduction_steps:
+      1. Checkout exact git commit
+      2. Setup environment from lockfile
+      3. Download versioned data (dvc pull)
+      4. Set random seeds from config
+      5. Run training script
+      6. Compare metrics to original
+
+    troubleshooting:
+      metric_differences:
+        - Check random seeds set correctly
+        - Verify package versions match
+        - Ensure same GPU type
+        - Check for non-deterministic ops
+
+      environment_issues:
+        - Use Docker for full isolation
+        - Pin CUDA version
+        - Lock cuDNN version
+  ```
+
+  ### 5. CI/CD Integration
+  ```yaml
+  ci_cd:
+    on_commit:
+      - Validate experiment configs
+      - Run smoke test training
+      - Check reproducibility (short run)
+
+    on_release:
+      - Full training run
+      - Model evaluation
+      - Register to staging
+      - Trigger deployment pipeline
+
+    reproducibility_test:
+      script: |
+        # Run training twice with same config
+        python train.py --config config.yaml --seed 42 > run1.log
+        python train.py --config config.yaml --seed 42 > run2.log
+
+        # Compare final metrics
+        diff <(grep "final_metric" run1.log) <(grep "final_metric" run2.log)
+
+      tolerance: 0.001  # Allow tiny floating point differences
+
+    artifact_storage:
+      model_artifacts: S3 / GCS / Azure Blob
+      experiment_tracking: MLflow / W&B
+      data_versions: DVC remote
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Reproduced experiment outputs match
+  - [ ] Model registry operational
+  - [ ] Environment captured automatically
+  - [ ] Data versioning in place
+  - [ ] Guide documented
+
+  ## Rollback Plan
+  - Any model version can be rolled back
+  - Registry supports version history
+  - Artifacts retained per policy
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'ml-reproducibility'
+    inputs:
+      ml_frameworks: 'PyTorch, scikit-learn, transformers'
+      current_workflow: 'Ad-hoc notebooks, manual tracking'
+      reproducibility_gaps: 'No versioned data, inconsistent environments'
+      storage_constraints: '100GB for models, 1TB for data'
+      team_size: '3 ML engineers'
+    expected_contains:
+      - 'Environment Capture'
+      - 'Versioned Artifacts'
+      - 'Model Registry'
+      - 'Reproducibility Guide'

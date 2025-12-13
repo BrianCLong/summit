@@ -1,0 +1,123 @@
+meta:
+  id: plan.hot-path-profiling@v1
+  owner: 'platform-engineering'
+  purpose: 'Shadow-run profiling in staging to locate hot paths and optimization targets'
+  tags:
+    - performance
+    - profiling
+    - optimization
+    - cpu
+    - memory
+  guardrails:
+    - 'Profiling must not impact production traffic'
+    - 'PII and sensitive data must be redacted from profiles'
+    - 'Profiling overhead must be < 5% in staging'
+    - 'Results must map to actionable code regions'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  target_services: string
+  traffic_patterns: string
+  profiling_tools: string
+  staging_environment: string
+  known_bottlenecks: string
+
+template: |
+  You are a Performance Engineer analyzing hot paths in the Summit/IntelGraph platform.
+
+  **Objective:** Shadow-run profiling in a staging-like environment to locate hot paths.
+
+  **Target Services:**
+  {{target_services}}
+
+  **Traffic Patterns:**
+  {{traffic_patterns}}
+
+  **Available Profiling Tools:**
+  {{profiling_tools}}
+
+  **Staging Environment:**
+  {{staging_environment}}
+
+  **Known Bottlenecks:**
+  {{known_bottlenecks}}
+
+  ## Deliverables
+
+  ### 1. Profiling Strategy
+  - Instrumentation plan per service
+  - Sampling rates and overhead budget
+  - Data collection and storage approach
+  - Privacy/security considerations
+
+  ### 2. Production-like Flow Instrumentation
+  ```yaml
+  flows:
+    - name: [flow_name]
+      services: [list of services]
+      entry_point: [API endpoint or trigger]
+      expected_duration: [baseline]
+      sampling_rate: [percentage]
+  ```
+
+  ### 3. CPU/Memory Profile Collection
+  - Profile formats (flamegraphs, heap snapshots)
+  - Collection triggers (time-based, event-based)
+  - Storage and retention policy
+  - Analysis tooling
+
+  ### 4. Hotspot Map
+  | Rank | Location | Type | Impact | Evidence |
+  |------|----------|------|--------|----------|
+  | 1 | [file:line] | CPU/Memory/IO | [metric] | [profile link] |
+  | 2 | ... | ... | ... | ... |
+
+  ### 5. Recommended Refactors
+  For each hotspot:
+  ```yaml
+  hotspot:
+    location: [file:line]
+    current_behavior: [description]
+    proposed_change: [description]
+    expected_improvement: [percentage or metric]
+    risk_level: [low/medium/high]
+    validation_plan: [how to verify improvement]
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Top-5 hotspots documented with evidence
+  - [ ] At least 3 proposed refactors with validation plans
+  - [ ] Profiling can run without production impact
+  - [ ] Results reproducible across multiple runs
+  - [ ] Before/after comparison methodology defined
+
+  ## Rollback Plan
+  - Profiling is observational; disable via feature flag
+  - No code changes until validation completes
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'api-endpoint-profiling'
+    inputs:
+      target_services: 'GraphQL API, Entity Service, Relationship Service'
+      traffic_patterns: 'Peak: 1000 req/min, Avg: 200 req/min, Complex queries: 10%'
+      profiling_tools: 'Node.js --inspect, pprof (Go), py-spy (Python)'
+      staging_environment: 'Kubernetes staging cluster, 2 replicas per service'
+      known_bottlenecks: 'Entity resolution slow for large graphs, N+1 query issues'
+    expected_contains:
+      - 'Hotspot Map'
+      - 'flamegraphs'
+      - 'Recommended Refactors'
+      - 'Acceptance Criteria'

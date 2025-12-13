@@ -1,0 +1,367 @@
+meta:
+  id: plan.documentation-qa@v1
+  owner: 'platform-engineering'
+  purpose: 'Ensure documentation meets quality standards with automated checks'
+  tags:
+    - documentation
+    - quality
+    - linting
+    - automation
+    - standards
+  guardrails:
+    - 'Checks must not block critical fixes'
+    - 'False positives must be minimized'
+    - 'Human review still required for clarity'
+    - 'Standards must be achievable'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  documentation_types: string
+  current_quality: string
+  quality_standards: string
+  tooling_preferences: string
+  team_capacity: string
+
+template: |
+  You are a Documentation Engineer implementing QA for Summit/IntelGraph docs.
+
+  **Objective:** Ensure docs meet quality standards.
+
+  **Documentation Types:**
+  {{documentation_types}}
+
+  **Current Quality:**
+  {{current_quality}}
+
+  **Quality Standards:**
+  {{quality_standards}}
+
+  **Tooling Preferences:**
+  {{tooling_preferences}}
+
+  **Team Capacity:**
+  {{team_capacity}}
+
+  ## Deliverables
+
+  ### 1. Documentation Linting Configuration
+  ```yaml
+  linting:
+    markdown:
+      tool: markdownlint
+      config_file: .markdownlint.json
+      config: |
+        {
+          "default": true,
+          "MD013": false,  // Line length (disable, handled by editor)
+          "MD033": false,  // HTML allowed for advanced formatting
+          "MD041": true,   // First line should be heading
+          "MD024": { "siblings_only": true },  // Duplicate headings
+          "MD029": { "style": "ordered" },     // Ordered list style
+          "MD046": { "style": "fenced" }       // Code block style
+        }
+
+    prose:
+      tool: vale
+      config_file: .vale.ini
+      config: |
+        StylesPath = .vale/styles
+        MinAlertLevel = suggestion
+
+        [*.md]
+        BasedOnStyles = Vale, Summit
+
+        # Custom Summit style rules
+        Summit.Spelling = YES
+        Summit.Terminology = YES
+        Summit.Passive = warning
+        Summit.Weasel = warning
+
+      custom_rules:
+        terminology: |
+          # Enforce consistent terminology
+          extends: substitution
+          message: "Use '%s' instead of '%s'"
+          swap:
+            API: api
+            GraphQL: graphql
+            end-point: endpoint
+            data-base: database
+
+        passive_voice: |
+          extends: existence
+          message: "Avoid passive voice: '%s'"
+          level: warning
+          tokens:
+            - "was \\w+ed"
+            - "were \\w+ed"
+            - "is being"
+
+    links:
+      tool: markdown-link-check
+      config: |
+        {
+          "ignorePatterns": [
+            { "pattern": "^http://localhost" }
+          ],
+          "timeout": "10s",
+          "retryOn429": true
+        }
+
+    spelling:
+      tool: cspell
+      config: |
+        {
+          "language": "en",
+          "words": ["Summit", "IntelGraph", "Neo4j", "GraphQL"],
+          "ignorePaths": ["node_modules", "dist"],
+          "dictionaries": ["technical-terms"]
+        }
+  ```
+
+  ### 2. CI Render Checks
+  ```yaml
+  ci_checks:
+    build_validation:
+      - name: docs-build
+        trigger: Changes to docs/**
+        steps:
+          - Install dependencies
+          - Build documentation
+          - Check for build errors
+          - Check for broken internal links
+        blocking: true
+
+    preview_deployment:
+      - name: docs-preview
+        trigger: PR with docs changes
+        steps:
+          - Build docs
+          - Deploy to preview URL
+          - Comment preview link on PR
+        output: Preview URL in PR comment
+
+    scheduled_checks:
+      - name: external-link-check
+        schedule: weekly
+        steps:
+          - Check all external links
+          - Report broken links
+          - Create issues for fixes
+
+    workflow: |
+      name: Documentation QA
+      on:
+        pull_request:
+          paths: ['docs/**', '*.md']
+
+      jobs:
+        lint:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+
+            - name: Markdown Lint
+              uses: DavidAnson/markdownlint-cli2-action@v14
+
+            - name: Vale Prose Lint
+              uses: errata-ai/vale-action@v2
+
+            - name: Spell Check
+              uses: streetsidesoftware/cspell-action@v5
+
+            - name: Link Check
+              uses: gaurav-nelson/github-action-markdown-link-check@v1
+
+        build:
+          runs-on: ubuntu-latest
+          steps:
+            - uses: actions/checkout@v4
+
+            - name: Build Docs
+              run: npm run docs:build
+
+            - name: Check for Warnings
+              run: npm run docs:build 2>&1 | grep -i warning && exit 1 || exit 0
+  ```
+
+  ### 3. Quality Standards
+  ```yaml
+  standards:
+    structure:
+      - Every page has a clear title (H1)
+      - Logical heading hierarchy (no skipping levels)
+      - Introduction/overview at the start
+      - Clear next steps at the end
+      - Table of contents for long pages
+
+    content:
+      - Use active voice
+      - Define acronyms on first use
+      - Include code examples where applicable
+      - Provide context before details
+      - Keep paragraphs short (3-5 sentences)
+
+    code_examples:
+      - All code blocks have language specified
+      - Examples are runnable
+      - Error handling shown where relevant
+      - Comments explain non-obvious parts
+      - Versioned with the doc
+
+    accessibility:
+      - All images have alt text
+      - Links have descriptive text
+      - Tables have headers
+      - Color is not only indicator
+      - Keyboard navigable
+
+    maintainability:
+      - No hard-coded dates (use "current version")
+      - Links are relative where possible
+      - Reusable snippets for repeated content
+      - Version numbers in one place
+
+    metrics:
+      readability:
+        target: Flesch-Kincaid Grade Level 8-12
+        tool: textstat
+
+      completeness:
+        required_sections:
+          - Overview
+          - Prerequisites (if applicable)
+          - Steps/Content
+          - Next Steps/Related
+
+      freshness:
+        max_age: 6 months without review
+        indicator: Last reviewed date
+  ```
+
+  ### 4. Review Workflow
+  ```yaml
+  review:
+    automated:
+      - Linting (markdownlint, vale)
+      - Link checking
+      - Spell checking
+      - Build verification
+      - Accessibility scan
+
+    human:
+      - Technical accuracy
+      - Clarity and flow
+      - Appropriate audience level
+      - Completeness
+      - Tone consistency
+
+    process:
+      1. Author writes/updates documentation
+      2. Automated checks run on PR
+      3. Fix any automated issues
+      4. Request human review
+      5. Reviewer uses checklist
+      6. Iterate until approved
+      7. Merge and deploy
+
+    checklist: |
+      ## Documentation Review Checklist
+
+      ### Structure
+      - [ ] Clear title and introduction
+      - [ ] Logical flow
+      - [ ] Appropriate length
+
+      ### Content
+      - [ ] Technically accurate
+      - [ ] Clear and understandable
+      - [ ] Examples work
+
+      ### Style
+      - [ ] Active voice
+      - [ ] Consistent terminology
+      - [ ] No jargon without explanation
+
+      ### Meta
+      - [ ] Links work
+      - [ ] Images have alt text
+      - [ ] No TODOs left
+  ```
+
+  ### 5. Remediation Guide
+  ```yaml
+  remediation:
+    common_issues:
+      - issue: Passive voice
+        example: "The configuration was updated"
+        fix: "Update the configuration by..."
+        tool: Vale warning
+
+      - issue: Missing alt text
+        example: "![](image.png)"
+        fix: "![Description of what the image shows](image.png)"
+        tool: markdownlint MD045
+
+      - issue: Broken link
+        example: "[old page](/docs/removed)"
+        fix: Update to new location or remove
+        tool: markdown-link-check
+
+      - issue: Heading skip
+        example: "# Title\n### Subheading"
+        fix: "# Title\n## Subheading\n### Sub-subheading"
+        tool: markdownlint MD001
+
+    fix_commands:
+      auto_fix: |
+        # Fix markdown issues automatically where possible
+        npx markdownlint-cli2 --fix docs/**/*.md
+
+      spell_add: |
+        # Add word to custom dictionary
+        echo "NewTerm" >> .cspell/custom-words.txt
+
+      link_update: |
+        # Find and replace old links
+        find docs -name "*.md" -exec sed -i 's|old-path|new-path|g' {} \;
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Linting configured and running
+  - [ ] CI checks in place
+  - [ ] Standards documented
+  - [ ] Review process defined
+  - [ ] Remediation guide available
+
+  ## Rollback Plan
+  - Checks can be set to warn-only
+  - Emergency bypass for critical fixes
+  - Standards are guidance, not rigid
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'documentation-qa'
+    inputs:
+      documentation_types: 'Markdown docs, API docs, inline code docs'
+      current_quality: 'Inconsistent, some outdated, no automated checks'
+      quality_standards: 'Clear, accurate, accessible, maintainable'
+      tooling_preferences: 'Open source, CI-friendly'
+      team_capacity: '1 technical writer, all devs contribute'
+    expected_contains:
+      - 'Linting Configuration'
+      - 'CI Render Checks'
+      - 'Quality Standards'
+      - 'Review Workflow'

@@ -1,0 +1,194 @@
+meta:
+  id: plan.observability-reliability@v1
+  owner: 'platform-engineering'
+  purpose: 'Tie traces, logs, and metrics to SLOs for observability-driven reliability'
+  tags:
+    - observability
+    - reliability
+    - slo
+    - sli
+    - alerting
+  guardrails:
+    - 'SLOs must be based on user-facing impact'
+    - 'Alerts must be actionable with runbooks'
+    - 'Dashboard must show SLO burn rate'
+    - 'Avoid alert fatigue with proper thresholds'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  user_journeys: string
+  current_observability: string
+  reliability_targets: string
+  alerting_channels: string
+  on_call_structure: string
+
+template: |
+  You are a Reliability Engineer implementing SLO-based observability for Summit/IntelGraph.
+
+  **Objective:** Tie traces/logs/metrics to SLOs for reliability improvement.
+
+  **User Journeys:**
+  {{user_journeys}}
+
+  **Current Observability:**
+  {{current_observability}}
+
+  **Reliability Targets:**
+  {{reliability_targets}}
+
+  **Alerting Channels:**
+  {{alerting_channels}}
+
+  **On-Call Structure:**
+  {{on_call_structure}}
+
+  ## Deliverables
+
+  ### 1. SLOs/SLIs Document
+  ```yaml
+  slos:
+    - name: api_availability
+      description: API responds successfully to requests
+      sli:
+        type: availability
+        query: |
+          sum(rate(http_requests_total{status=~"2.."}[5m])) /
+          sum(rate(http_requests_total[5m]))
+      target: 99.9%
+      window: 30d
+      error_budget: 0.1%
+      owner: api-team
+
+    - name: query_latency
+      description: Graph queries complete within acceptable time
+      sli:
+        type: latency
+        query: |
+          histogram_quantile(0.99,
+            rate(query_duration_seconds_bucket[5m]))
+      target: 500ms
+      window: 30d
+      owner: graph-team
+
+    - name: investigation_success
+      description: Investigations complete without errors
+      sli:
+        type: success_rate
+        query: |
+          sum(rate(investigation_complete_total{status="success"}[5m])) /
+          sum(rate(investigation_complete_total[5m]))
+      target: 99.5%
+      window: 30d
+      owner: product-team
+  ```
+
+  ### 2. Alert Rules
+  ```yaml
+  alerts:
+    - name: SLOBurnRateHigh
+      expr: |
+        (
+          sum(rate(http_requests_total{status=~"5.."}[1h])) /
+          sum(rate(http_requests_total[1h]))
+        ) > (14.4 * 0.001)  # 14.4x burn rate, 1h window
+      for: 5m
+      labels:
+        severity: critical
+        slo: api_availability
+      annotations:
+        summary: "API availability SLO burn rate is high"
+        runbook: "https://docs/runbooks/api-availability"
+
+    - name: SLOBurnRateWarning
+      expr: |
+        (
+          sum(rate(http_requests_total{status=~"5.."}[6h])) /
+          sum(rate(http_requests_total[6h]))
+        ) > (6 * 0.001)  # 6x burn rate, 6h window
+      for: 15m
+      labels:
+        severity: warning
+        slo: api_availability
+  ```
+
+  ### 3. Dashboard Examples
+  ```yaml
+  dashboards:
+    - name: SLO Overview
+      panels:
+        - title: Error Budget Remaining
+          type: gauge
+          query: 1 - (sum(errors) / total * 1000)
+
+        - title: SLO Burn Rate (1h)
+          type: timeseries
+          query: burn_rate_1h
+
+        - title: SLI Trend (30d)
+          type: timeseries
+          query: sli_value over 30d
+
+    - name: Per-Service Health
+      panels:
+        - title: Request Rate
+        - title: Error Rate
+        - title: Latency Distribution
+        - title: Saturation Metrics
+  ```
+
+  ### 4. Trace-Log-Metric Correlation
+  ```yaml
+  correlation:
+    trace_to_logs:
+      - trace_id links to log entries
+      - span_id identifies specific operations
+      - exemplars on metrics link to traces
+
+    log_to_metrics:
+      - structured logs emit metrics
+      - error logs increment error counters
+      - latency logged as histogram
+
+    metric_to_trace:
+      - high-latency metric triggers trace lookup
+      - error spike correlates with error traces
+  ```
+
+  ### 5. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] SLOs defined for critical user journeys
+  - [ ] Alerts trigger on simulated faults
+  - [ ] Dashboards show burn rate and trends
+  - [ ] Runbooks linked to alerts
+  - [ ] Trace-log-metric correlation works
+
+  ## Rollback Plan
+  - Alerts can be silenced if noisy
+  - SLO targets adjustable after baseline
+  - Dashboards are additive
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'summit-slos'
+    inputs:
+      user_journeys: 'Investigation creation, Entity search, Relationship mapping, Copilot queries'
+      current_observability: 'Prometheus metrics, Grafana dashboards, basic logging'
+      reliability_targets: '99.9% availability, p99 < 500ms, 99.5% success rate'
+      alerting_channels: 'PagerDuty, Slack #alerts, Email'
+      on_call_structure: 'Weekly rotation, 2 engineers per shift'
+    expected_contains:
+      - 'slos'
+      - 'Alert Rules'
+      - 'burn rate'
+      - 'correlation'

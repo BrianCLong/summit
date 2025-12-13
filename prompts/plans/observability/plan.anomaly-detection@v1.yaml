@@ -1,0 +1,269 @@
+meta:
+  id: plan.anomaly-detection@v1
+  owner: 'platform-engineering'
+  purpose: 'Implement simple anomaly detection on metrics for proactive alerting'
+  tags:
+    - observability
+    - anomaly-detection
+    - alerting
+    - ml
+    - proactive
+  guardrails:
+    - 'Minimize false positives'
+    - 'Alerts must be actionable'
+    - 'Explanation must accompany detection'
+    - 'Feedback loop for tuning'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  target_metrics: string
+  current_alerting: string
+  false_positive_tolerance: string
+  response_requirements: string
+  ml_infrastructure: string
+
+template: |
+  You are a Data Scientist implementing anomaly detection for Summit/IntelGraph.
+
+  **Objective:** Simple anomaly detection on metrics.
+
+  **Target Metrics:**
+  {{target_metrics}}
+
+  **Current Alerting:**
+  {{current_alerting}}
+
+  **False Positive Tolerance:**
+  {{false_positive_tolerance}}
+
+  **Response Requirements:**
+  {{response_requirements}}
+
+  **ML Infrastructure:**
+  {{ml_infrastructure}}
+
+  ## Deliverables
+
+  ### 1. Anomaly Detection Strategy
+  ```yaml
+  strategy:
+    approach: hybrid
+    components:
+      statistical:
+        - z_score: For normally distributed metrics
+        - iqr: For skewed distributions
+        - mad: Robust to outliers
+
+      pattern_based:
+        - seasonal_decomposition: Weekly/daily patterns
+        - trend_detection: Long-term changes
+        - changepoint_detection: Sudden shifts
+
+      ml_based:
+        - isolation_forest: Multivariate anomalies
+        - prophet: Time series forecasting
+        - lstm: Complex patterns (if needed)
+
+    selection_criteria:
+      - Metric characteristics
+      - Training data availability
+      - Latency requirements
+      - Explainability needs
+  ```
+
+  ### 2. Metric-Specific Configurations
+  ```yaml
+  configurations:
+    - metric: summit_http_requests_total
+      method: prophet_forecast
+      parameters:
+        seasonality: daily, weekly
+        sensitivity: 2.5 sigma
+        training_window: 30 days
+      baseline: predict with confidence interval
+      anomaly_if: actual outside 99% CI
+
+    - metric: summit_http_request_duration_seconds
+      method: percentile_deviation
+      parameters:
+        baseline_percentile: p95
+        threshold_multiplier: 2x
+        window: 5 minutes
+      anomaly_if: current p95 > 2x baseline
+
+    - metric: summit_db_connections_active
+      method: static_threshold_with_trend
+      parameters:
+        warning: 80% of max
+        critical: 90% of max
+        trend_alert: 10% increase over 1h
+      anomaly_if: exceeds thresholds
+
+    - metric: summit_error_rate
+      method: exponential_smoothing
+      parameters:
+        alpha: 0.3
+        threshold: 3x smoothed baseline
+      anomaly_if: spikes above threshold
+  ```
+
+  ### 3. Detection Module
+  ```yaml
+  module:
+    architecture:
+      input: Prometheus/Victoria Metrics
+      processing: Python service or Prometheus rules
+      output: Alertmanager / custom alerts
+
+    simple_rules:
+      promql:
+        # Z-score based
+        - name: LatencyAnomaly
+          expr: |
+            (
+              histogram_quantile(0.99, rate(...[5m]))
+              - avg_over_time(histogram_quantile(0.99, rate(...[5m]))[1d:5m])
+            ) / stddev_over_time(histogram_quantile(0.99, rate(...[5m]))[1d:5m])
+            > 3
+          for: 5m
+          labels:
+            severity: warning
+            type: anomaly
+
+        # Percentage change
+        - name: TrafficAnomaly
+          expr: |
+            (rate(requests_total[5m]) - rate(requests_total[5m] offset 1h))
+            / rate(requests_total[5m] offset 1h)
+            > 0.5 or < -0.5
+          for: 10m
+
+    python_module:
+      libraries:
+        - prophet
+        - scikit-learn
+        - numpy
+      entrypoint: |
+        from anomaly_detector import AnomalyDetector
+
+        detector = AnomalyDetector(
+            metrics_source='prometheus',
+            method='prophet',
+            sensitivity=2.5,
+        )
+
+        anomalies = detector.detect(
+            metric='summit_http_requests_total',
+            window='1h',
+        )
+
+        for anomaly in anomalies:
+            alert_manager.fire(anomaly)
+  ```
+
+  ### 4. Alerting Integration
+  ```yaml
+  alerting:
+    channels:
+      - type: pagerduty
+        conditions: severity=critical
+      - type: slack
+        channel: "#alerts"
+        conditions: severity=warning
+      - type: email
+        conditions: all
+
+    alert_format:
+      title: "Anomaly Detected: {metric_name}"
+      body: |
+        **Metric:** {metric_name}
+        **Current Value:** {current_value}
+        **Expected Range:** {expected_low} - {expected_high}
+        **Deviation:** {deviation_sigma} sigma
+        **Detection Method:** {method}
+        **Time:** {timestamp}
+
+        **Possible Causes:**
+        - {cause_1}
+        - {cause_2}
+
+        **Recommended Actions:**
+        - {action_1}
+        - {action_2}
+
+        **Runbook:** {runbook_link}
+
+    enrichment:
+      - Correlated metrics
+      - Recent deployments
+      - Similar past incidents
+  ```
+
+  ### 5. Feedback and Tuning
+  ```yaml
+  feedback_loop:
+    collection:
+      - Alert acknowledged: true_positive | false_positive
+      - Manual input: "This was expected due to..."
+      - Automatic: Incident created / resolved
+
+    tuning:
+      sensitivity_adjustment:
+        - Too many FPs: increase threshold
+        - Missed anomalies: decrease threshold
+      baseline_update:
+        - Rolling window includes recent data
+        - Exclude known anomaly periods
+
+    metrics:
+      - false_positive_rate: target < 5%
+      - detection_rate: target > 95%
+      - time_to_detection: target < 5 min
+
+    review:
+      cadence: weekly
+      process:
+        1. Review all alerts
+        2. Categorize TP/FP
+        3. Adjust thresholds
+        4. Update baselines
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Anomalies detected in simulated scenarios
+  - [ ] False positive rate < target
+  - [ ] Alerts include explanations
+  - [ ] Feedback mechanism works
+  - [ ] Documentation complete
+
+  ## Rollback Plan
+  - Anomaly alerts can be silenced
+  - Fall back to static thresholds
+  - Disable ML components individually
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'metric-anomaly-detection'
+    inputs:
+      target_metrics: 'Request rate, latency p99, error rate, DB connections'
+      current_alerting: 'Static thresholds, many false positives during traffic changes'
+      false_positive_tolerance: '< 5% of alerts'
+      response_requirements: 'Detect within 5 minutes, actionable alerts'
+      ml_infrastructure: 'Python available, can run lightweight models'
+    expected_contains:
+      - 'Detection Strategy'
+      - 'Metric-Specific'
+      - 'Alerting Integration'
+      - 'Feedback Loop'

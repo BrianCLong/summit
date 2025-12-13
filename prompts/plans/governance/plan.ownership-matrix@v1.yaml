@@ -1,0 +1,363 @@
+meta:
+  id: plan.ownership-matrix@v1
+  owner: 'engineering-leadership'
+  purpose: 'Clarify ownership and accountability across all subsystems'
+  tags:
+    - governance
+    - ownership
+    - accountability
+    - raci
+    - organization
+  guardrails:
+    - 'Every component must have an owner'
+    - 'Ownership must be accepted, not assigned'
+    - 'Escalation paths must be clear'
+    - 'Ownership must be reviewed periodically'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  subsystems: string
+  team_structure: string
+  current_gaps: string
+  escalation_requirements: string
+  governance_model: string
+
+template: |
+  You are an Engineering Leader defining ownership for Summit/IntelGraph.
+
+  **Objective:** Clarify ownership and accountability.
+
+  **Subsystems:**
+  {{subsystems}}
+
+  **Team Structure:**
+  {{team_structure}}
+
+  **Current Gaps:**
+  {{current_gaps}}
+
+  **Escalation Requirements:**
+  {{escalation_requirements}}
+
+  **Governance Model:**
+  {{governance_model}}
+
+  ## Deliverables
+
+  ### 1. Ownership Matrix
+  ```yaml
+  ownership_matrix:
+    format: RACI (Responsible, Accountable, Consulted, Informed)
+
+    subsystems:
+      - name: API Server
+        code_path: services/api
+        ownership:
+          team: API Team
+          primary_owner: "@alice"
+          backup_owner: "@bob"
+          accountable: Engineering Manager - Platform
+        responsibilities:
+          development: API Team
+          code_review: API Team + Security
+          deployment: Platform Team
+          on_call: API Team (rotation)
+          incidents: API Team (L1), Platform (L2)
+
+      - name: Graph Engine
+        code_path: services/graph-engine
+        ownership:
+          team: Data Team
+          primary_owner: "@charlie"
+          backup_owner: "@diana"
+          accountable: Engineering Manager - Data
+        responsibilities:
+          development: Data Team
+          code_review: Data Team
+          deployment: Platform Team
+          on_call: Data Team
+          incidents: Data Team (L1), Platform (L2)
+
+      - name: Web Client
+        code_path: apps/web
+        ownership:
+          team: Frontend Team
+          primary_owner: "@eve"
+          backup_owner: "@frank"
+          accountable: Engineering Manager - Product
+        responsibilities:
+          development: Frontend Team
+          code_review: Frontend Team + Design
+          deployment: Frontend Team
+          on_call: Frontend Team
+          incidents: Frontend Team
+
+      - name: Infrastructure
+        code_path: infra/, k8s/, terraform/
+        ownership:
+          team: Platform Team
+          primary_owner: "@grace"
+          backup_owner: "@henry"
+          accountable: Director of Engineering
+        responsibilities:
+          development: Platform Team
+          code_review: Platform Team + Security
+          deployment: Platform Team
+          on_call: Platform Team
+          incidents: Platform Team
+
+    cross_cutting:
+      - name: Security
+        owner: Security Team
+        involved_in: All subsystems
+        authority: Can block releases
+        escalation: CISO
+
+      - name: Observability
+        owner: Platform Team
+        involved_in: All subsystems
+        authority: Set standards
+        escalation: Director of Engineering
+
+      - name: Documentation
+        owner: Each subsystem team
+        coordinator: Technical Writer
+        standards: Documentation QA
+  ```
+
+  ### 2. RACI Chart
+  ```yaml
+  raci:
+    activities:
+      - activity: New Feature Development
+        api_team: R
+        data_team: C
+        frontend_team: R
+        platform_team: I
+        security_team: C
+        product_team: A
+
+      - activity: Production Deployment
+        api_team: C
+        data_team: C
+        frontend_team: C
+        platform_team: R
+        security_team: I
+        product_team: A
+
+      - activity: Security Incident Response
+        api_team: C
+        data_team: C
+        frontend_team: C
+        platform_team: R
+        security_team: A
+        product_team: I
+
+      - activity: Architecture Decisions
+        api_team: C
+        data_team: C
+        frontend_team: C
+        platform_team: R
+        security_team: C
+        product_team: A
+
+      - activity: On-Call Rotation
+        api_team: R
+        data_team: R
+        frontend_team: R
+        platform_team: R/A
+        security_team: C
+        product_team: I
+
+    legend:
+      R: Responsible - Does the work
+      A: Accountable - Final decision maker
+      C: Consulted - Provides input
+      I: Informed - Kept in the loop
+  ```
+
+  ### 3. Escalation Paths
+  ```yaml
+  escalation:
+    technical:
+      levels:
+        - level: L1
+          handler: On-call engineer
+          response_time: 15 minutes
+          scope: Initial triage, known issues
+
+        - level: L2
+          handler: Team lead / Senior engineer
+          response_time: 30 minutes
+          scope: Complex issues, cross-team coordination
+
+        - level: L3
+          handler: Engineering Manager
+          response_time: 1 hour
+          scope: Major incidents, resource allocation
+
+        - level: L4
+          handler: Director of Engineering
+          response_time: 2 hours
+          scope: Critical incidents, business impact
+
+      triggers:
+        - Customer-facing outage > 15 min: L2
+        - Data integrity issue: L3
+        - Security breach suspected: L4 + Security
+        - Revenue impact > $10k: L4
+
+    decision:
+      technical_decisions:
+        - minor: Team lead (< 1 day impact)
+        - major: Engineering Manager (< 1 week)
+        - architectural: Architecture Review Board
+
+      resource_decisions:
+        - within_team: Team lead
+        - cross_team: Engineering Manager
+        - budget: Director + Finance
+
+    conflict_resolution:
+      - Try to resolve between parties
+      - Escalate to shared manager
+      - Engineering leadership meeting
+      - Final: Director decision
+
+    contacts:
+      on_call: PagerDuty rotation
+      security: security@company.com + Slack #security
+      executive: exec-alerts@company.com
+  ```
+
+  ### 4. Governance Charter
+  ```yaml
+  charter:
+    principles:
+      - Ownership is a privilege, not a burden
+      - Owners are empowered to make decisions
+      - Accountability comes with authority
+      - Transparency in decision-making
+      - Blameless post-mortems
+
+    owner_responsibilities:
+      - Understand the system deeply
+      - Maintain documentation
+      - Ensure adequate testing
+      - Participate in on-call rotation
+      - Review and approve changes
+      - Train backup owners
+      - Communicate changes
+
+    owner_rights:
+      - Authority over technical decisions
+      - Veto power on changes to their system
+      - Access to resources for maintenance
+      - Time allocated for ownership duties
+      - Recognition for ownership excellence
+
+    accountability:
+      metrics_owned:
+        - Uptime SLO
+        - Bug fix time
+        - Documentation freshness
+        - Test coverage
+        - Security vulnerabilities
+
+      reviews:
+        - Weekly: Team standup
+        - Monthly: Ownership review
+        - Quarterly: System health review
+        - Annually: Ownership reassessment
+
+    succession:
+      - Primary owner nominates successor
+      - Transition period (2-4 weeks)
+      - Knowledge transfer sessions
+      - Formal handoff meeting
+      - Update all documentation
+  ```
+
+  ### 5. Integration with Processes
+  ```yaml
+  integration:
+    codeowners:
+      file: .github/CODEOWNERS
+      content: |
+        # API
+        /services/api/ @api-team @alice
+
+        # Graph Engine
+        /services/graph-engine/ @data-team @charlie
+
+        # Frontend
+        /apps/web/ @frontend-team @eve
+
+        # Infrastructure
+        /infra/ @platform-team @grace
+        /k8s/ @platform-team @grace
+        /terraform/ @platform-team @grace
+
+        # Security-sensitive
+        /auth/ @security-team
+        *.secret* @security-team
+
+    pr_process:
+      - PR auto-assigns reviewers from CODEOWNERS
+      - Owner approval required to merge
+      - Cross-cutting changes require multiple owners
+
+    incident_process:
+      - PagerDuty routes to owning team
+      - Incident commander from owning team
+      - Post-mortem owner drives follow-ups
+
+    documentation:
+      - README in each subsystem lists owners
+      - Ownership dashboard in wiki
+      - Org chart integration
+
+    onboarding:
+      - New team members introduced to ownership model
+      - Shadow period before on-call
+      - Gradual ownership increase
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] All subsystems have owners
+  - [ ] CODEOWNERS file updated
+  - [ ] Escalation paths documented
+  - [ ] Charter approved
+  - [ ] PRs reference owners
+
+  ## Rollback Plan
+  - Ownership is organizational, not code
+  - Can revert to shared ownership temporarily
+  - Document transitions explicitly
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'ownership-matrix'
+    inputs:
+      subsystems: 'API, Graph Engine, Frontend, Infrastructure, ML, Data Pipeline'
+      team_structure: '4 teams: API, Data, Frontend, Platform; 20 engineers total'
+      current_gaps: 'Some orphaned code, unclear escalation, backup coverage'
+      escalation_requirements: '24/7 coverage, < 15 min response'
+      governance_model: 'Empowered teams with clear accountability'
+    expected_contains:
+      - 'Ownership Matrix'
+      - 'RACI'
+      - 'Escalation Paths'
+      - 'Governance Charter'

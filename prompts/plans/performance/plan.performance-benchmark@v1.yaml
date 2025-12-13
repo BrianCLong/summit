@@ -1,0 +1,123 @@
+meta:
+  id: plan.performance-benchmark@v1
+  owner: 'platform-engineering'
+  purpose: 'Establish canonical cross-language benchmark suite with representative workloads'
+  tags:
+    - performance
+    - benchmark
+    - typescript
+    - python
+    - go
+  guardrails:
+    - 'Benchmarks must be reproducible in CI environment'
+    - 'Results must include statistical significance measures'
+    - 'Workloads must represent real production patterns'
+    - 'Avoid microbenchmarks that do not reflect actual usage'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  subsystems: string
+  current_metrics: string
+  target_slis: string
+  runtime_versions: string
+  infrastructure_context: string
+
+template: |
+  You are a Performance Engineering specialist for the Summit/IntelGraph platform.
+
+  **Objective:** Create a canonical cross-language benchmark suite covering TS, Python, and Go subsystems.
+
+  **Target Subsystems:**
+  {{subsystems}}
+
+  **Current Performance Metrics:**
+  {{current_metrics}}
+
+  **Target SLIs:**
+  {{target_slis}}
+
+  **Runtime Versions:**
+  {{runtime_versions}}
+
+  **Infrastructure Context:**
+  {{infrastructure_context}}
+
+  ## Deliverables
+
+  ### 1. Benchmark Harness Design
+  - Cross-language benchmark runner architecture
+  - Consistent metric collection across TS/Python/Go
+  - CI integration strategy (GitHub Actions)
+  - Result aggregation and comparison tooling
+
+  ### 2. Microbenchmarks per Subsystem (3-5 each)
+  Define specific benchmarks for each subsystem:
+  ```yaml
+  benchmarks:
+    - name: [benchmark_name]
+      subsystem: [ts|python|go]
+      workload_type: [cpu|memory|io|network]
+      description: [what it measures]
+      baseline_target: [metric + threshold]
+      iterations: [number]
+  ```
+
+  ### 3. Baseline Establishment
+  - Current baseline measurements
+  - Statistical analysis (mean, p50, p95, p99, stddev)
+  - Comparison methodology for future runs
+
+  ### 4. Performance Delta Report Template
+  - Before/after comparison format
+  - Regression detection thresholds
+  - Automated alerting criteria
+
+  ### 5. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Benchmarks run successfully in CI
+  - [ ] Results are reproducible within 5% variance
+  - [ ] Documentation covers setup and interpretation
+  - [ ] Baseline results committed to repository
+  - [ ] Comparison tooling produces actionable output
+
+  ## Rollback Plan
+  - Benchmarks are additive; no rollback needed for harness
+  - Feature flag for CI integration if blocking PRs
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'graphql-api-benchmarks'
+    inputs:
+      subsystems: 'GraphQL API (TS), Graph Query Engine (Go), ML Pipeline (Python)'
+      current_metrics: 'p50: 45ms, p99: 250ms, throughput: 500 req/s'
+      target_slis: 'p99 < 200ms, throughput > 1000 req/s'
+      runtime_versions: 'Node 20, Go 1.22, Python 3.11'
+      infrastructure_context: 'Kubernetes, 4 CPU / 8GB per pod'
+    expected_contains:
+      - 'Benchmark Harness'
+      - 'Microbenchmarks'
+      - 'Statistical analysis'
+      - 'Acceptance Criteria'
+
+  - name: 'neo4j-query-benchmarks'
+    inputs:
+      subsystems: 'Neo4j Cypher queries, Entity resolution, Relationship traversal'
+      current_metrics: 'Simple query: 5ms, Complex traversal: 500ms'
+      target_slis: 'Complex traversal < 300ms'
+      runtime_versions: 'Neo4j 5.x, Node 20'
+      infrastructure_context: 'Docker Compose dev, K8s production'
+    expected_contains:
+      - 'benchmarks'
+      - 'Baseline'
+      - 'CI integration'
