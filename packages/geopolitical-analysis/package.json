@@ -1,0 +1,41 @@
+{
+  "name": "@summit/geopolitical-analysis",
+  "version": "1.0.0",
+  "description": "Geopolitical risk analysis, indicators, and scenario modeling for IntelGraph",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "geopolitical",
+    "risk-analysis",
+    "intelligence",
+    "scenario-modeling",
+    "early-warning",
+    "supply-chain",
+    "stability-indicators"
+  ],
+  "author": "Summit/IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "@summit/risk-scoring": "workspace:*",
+    "@intelgraph/geospatial": "workspace:*",
+    "zod": "^4.1.12",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "jest": "^30.2.0",
+    "typescript": "^5.9.3",
+    "eslint": "^9.18.0"
+  }
+}
