@@ -1,0 +1,6 @@
+category,method,description,delta_vs_ours
+RLHF,PPO (Proximal Policy Optimization),Standard RLHF using a reward model and PPO to optimize the policy.,"Tight coupling to training/data telemetry and tool/graph traces. We use graph-structured preference data."
+Preference Opt,DPO (Direct Preference Optimization),Optimizes policy directly from preferences without a separate reward model.,"We incorporate telemetry-aware sampling and tool-execution traces into the preference objective."
+Preference Opt,IPO / ORPO,Variations of DPO handling regularization and odds ratio.,"Same as DPO delta; focus on tool/graph-aware loss."
+Self-Alignment,Constitutional AI,Uses a set of principles (constitution) to guide self-improvement via RLAIF.,"We use multi-tier oversight policies that include graph-operations constraints, not just text principles."
+Agent RL,Bandit/RL for Tools,Optimizes tool selection using RL (e.g. contextual bandits).,"We integrate this into the general alignment loop with a unified oversight layer, rather than separate agent training."
