@@ -1,0 +1,57 @@
+{
+  "name": "@intelgraph/privacy-analytics-service",
+  "version": "1.0.0",
+  "description": "Privacy-preserving analytics service with differential privacy, k-anonymity, and aggregation controls for IntelGraph",
+  "type": "module",
+  "main": "dist/server.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "NODE_ENV=test jest --runInBand",
+    "test:watch": "NODE_ENV=test jest --watch",
+    "test:coverage": "NODE_ENV=test jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "express-rate-limit": "^7.1.5",
+    "pg": "^8.11.3",
+    "neo4j-driver": "^5.15.0",
+    "redis": "^4.6.12",
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.3.1",
+    "uuid": "^9.0.0",
+    "zod": "^3.22.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.10.9",
+    "@types/uuid": "^9.0.7",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "keywords": [
+    "privacy",
+    "analytics",
+    "differential-privacy",
+    "k-anonymity",
+    "aggregation",
+    "intelgraph"
+  ]
+}
