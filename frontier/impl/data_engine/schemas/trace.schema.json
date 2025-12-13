@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "trace_id": { "type": "string" },
+    "steps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "step_type": { "type": "string", "enum": ["tool_call", "thought", "observation"] },
+          "content": { "type": "object" },
+          "timestamp": { "type": "string", "format": "date-time" }
+        },
+        "required": ["step_type", "content"]
+      }
+    },
+    "tool_set": { "type": "array", "items": { "type": "string" } },
+    "outcome": { "type": "string", "enum": ["success", "failure", "interrupted"] }
+  },
+  "required": ["trace_id", "steps"]
+}
