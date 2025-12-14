@@ -34,20 +34,51 @@ for (const [provider, cfg] of Object.entries(breakerConfig)) {
   );
 }
 
+/**
+ * Signs a cache key using HMAC-SHA256 for security.
+ * Prevents cache key tampering and ensures consistent key generation.
+ *
+ * @param key - The cache key to sign
+ * @returns The hexadecimal HMAC signature of the key
+ */
 function signKey(key: string) {
   const secret = process.env.CACHE_SIGNING_KEY || 'dev';
   return crypto.createHmac('sha256', secret).update(key).digest('hex');
 }
 
+/**
+ * Retrieves a value from the Redis cache.
+ * Keys are signed for security before lookup.
+ *
+ * @param key - The cache key to retrieve
+ * @returns The cached value if found, null otherwise
+ */
 async function getCache(key: string) {
   const v = await redis.get(signKey(key));
   return v ? JSON.parse(v) : null;
 }
 
+/**
+ * Stores a value in the Redis cache with a 1-hour expiration.
+ * Keys are signed for security before storage.
+ *
+ * @param key - The cache key to store under
+ * @param value - The value to cache (will be JSON serialized)
+ */
 async function setCache(key: string, value: unknown) {
   await redis.set(signKey(key), JSON.stringify(value), { EX: 3600 });
 }
 
+/**
+ * Executes a function with exponential backoff retry logic.
+ * Useful for resilient external API calls that may experience transient failures.
+ *
+ * @template T - The return type of the function
+ * @param fn - The async function to execute with retries
+ * @param retries - Maximum number of retry attempts (default: 3)
+ * @returns The result of the function
+ * @throws The last error if all retry attempts fail
+ */
 async function fetchWithRetry<T>(
   fn: () => Promise<T>,
   retries = 3,
@@ -64,6 +95,15 @@ async function fetchWithRetry<T>(
   }
 }
 
+/**
+ * Calls an external enrichment provider with rate limiting and circuit breaker protection.
+ * Ensures compliance with provider API quotas and automatically opens circuit on repeated failures.
+ *
+ * @param provider - The name of the enrichment provider (must be configured in quota.json)
+ * @param query - The query parameters to send to the provider
+ * @returns Normalized enrichment data with source='live' indicator
+ * @throws Error if provider is unknown, rate limit exceeded, or circuit is open
+ */
 async function callProvider(provider: string, query: any) {
   const bucket = buckets.get(provider);
   const breaker = breakers.get(provider);
@@ -82,6 +122,14 @@ async function callProvider(provider: string, query: any) {
   }
 }
 
+/**
+ * Processes an enrichment job asynchronously.
+ * For each item in the job, checks cache first, then calls the provider if needed.
+ * Uses retry logic for resilience and caches results for future requests.
+ *
+ * @param jobId - The unique identifier for this job
+ * @param body - Array of enrichment items with provider and query properties
+ */
 async function processJob(jobId: string, body: any) {
   const results: any[] = [];
   for (const item of body || []) {
