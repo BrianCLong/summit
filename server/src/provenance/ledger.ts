@@ -74,6 +74,12 @@ export interface ProvenanceEntry {
     requestId?: string;
     purpose?: string;
     classification?: string[];
+    privacy?: {
+      epsilon?: number;
+      delta?: number;
+      mechanism?: string;
+      noiseParams?: Record<string, any>;
+    };
   };
   signature?: string;
   attestation?: {
