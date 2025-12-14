@@ -6,6 +6,8 @@
  * - Transaction time: when facts were recorded in system (observedAt/recordedAt)
  */
 
+import { PolicyLabels } from './policy';
+
 export interface BitemporalFields {
   /** When this version became valid in the real world */
   validFrom: Date;
@@ -38,6 +40,9 @@ export interface BaseCanonicalEntity extends BitemporalFields {
 
   /** Provenance tracking */
   provenanceId: string;
+
+  /** Policy and Governance labels */
+  policy?: PolicyLabels;
 }
 
 export interface EntityVersion<T> {
