@@ -36,9 +36,16 @@ async function expandNeighborhood(
   const session = driver.session();
   const start = Date.now();
   try {
+    // Safety cap: Limit radius to 3 to prevent exponential explosion
+    const safeRadius = Math.min(Math.max(Number(radius) || 1, 1), 3);
+
+    // Optimization:
+    // 1. Used parameterized radius (already done, but capped now)
+    // 2. Added safety limit on node count if possible, but Cypher limit applies to rows, not expansion width directly in vanilla Cypher.
+    //    However, `*1..3` is much safer than unbounded.
     const cypher = `
       MATCH (n:Entity {id: $entityId, tenantId: $tenantId, investigationId: $investigationId})
-      MATCH p = (n)-[r:RELATIONSHIP*1..$radius]-(m:Entity {tenantId: $tenantId, investigationId: $investigationId})
+      MATCH p = (n)-[r:RELATIONSHIP*1..${safeRadius}]-(m:Entity {tenantId: $tenantId, investigationId: $investigationId})
       WITH collect(DISTINCT m) AS mNodes, collect(DISTINCT r) AS rels
       RETURN
         [node IN mNodes | {id: node.id, label: coalesce(node.label, node.id), type: head(labels(node)), tags: coalesce(node.tags, [])}] AS nodes,
@@ -46,7 +53,6 @@ async function expandNeighborhood(
     `;
     const res = await session.run(cypher, {
       entityId,
-      radius: Number(radius),
       tenantId,
       investigationId,
     });
