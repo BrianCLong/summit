@@ -6,8 +6,8 @@
  */
 
 import { SensitivityClass, SensitivityClassifier } from './sensitivity.js';
-import { MetadataStore } from './metadata.js';
 import { PIIType, ClassifiedEntity } from './types.js';
+// Added for Privacy Engine visibility
 import { HybridEntityRecognizer } from './recognizer.js';
 
 /**
@@ -131,12 +131,10 @@ interface PolicyDecision {
  */
 export class RedactionMiddleware {
   private sensitivityClassifier: SensitivityClassifier;
-  private metadataStore?: MetadataStore;
   private recognizer?: HybridEntityRecognizer;
 
-  constructor(config?: { metadataStore?: MetadataStore }) {
+  constructor() {
     this.sensitivityClassifier = new SensitivityClassifier();
-    this.metadataStore = config?.metadataStore;
     this.recognizer = new HybridEntityRecognizer();
   }
 

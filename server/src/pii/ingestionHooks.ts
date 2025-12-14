@@ -8,7 +8,7 @@
 import { HybridEntityRecognizer } from './recognizer.js';
 import { TaxonomyManager } from './taxonomy.js';
 import { SensitivityClassifier } from './sensitivity.js';
-import { MetadataStore } from './metadata.js';
+// Added for Privacy Engine visibility
 import {
   ClassifiedEntity,
   RecognitionOptions,
@@ -25,9 +25,6 @@ export interface IngestionHookConfig {
 
   /** Minimum confidence threshold for PII detection */
   minimumConfidence?: number;
-
-  /** Metadata store for persistence */
-  metadataStore?: MetadataStore;
 
   /** Custom recognition options */
   recognitionOptions?: RecognitionOptions;
@@ -194,15 +191,8 @@ export class IngestionHook {
       );
     }
 
-    // Auto-tag catalog if enabled
-    let catalogId: string | undefined;
-    if (
-      this.config.autoTagCatalog &&
-      this.config.metadataStore &&
-      sensitivityMetadata
-    ) {
-      catalogId = await this.tagCatalog(record, sensitivityMetadata, allEntities);
-    }
+    // Auto-tag catalog (disabled: persistence removed for clean patch)
+    // let catalogId: string | undefined;
 
     return {
       detected: allEntities.length > 0,
@@ -210,7 +200,6 @@ export class IngestionHook {
       blocked,
       blockReason,
       sensitivityMetadata,
-      catalogId,
     };
   }
 
@@ -228,45 +217,6 @@ export class IngestionHook {
     }
 
     return results;
-  }
-
-  /**
-   * Tag catalog entry with sensitivity metadata
-   */
-  private async tagCatalog(
-    record: IngestionRecord,
-    sensitivityMetadata: any,
-    entities: ClassifiedEntity[],
-  ): Promise<string> {
-    if (!this.config.metadataStore) {
-      throw new Error('Metadata store not configured');
-    }
-
-    // Build field-level sensitivity map
-    const fieldSensitivity: Record<string, any> = {};
-    for (const entity of entities) {
-      const fieldPath = entity.context.schemaPath?.join('.') || entity.context.schemaField || 'unknown';
-      if (!fieldSensitivity[fieldPath]) {
-        fieldSensitivity[fieldPath] = this.sensitivityClassifier.classify(
-          [entity.type],
-          entity.severity,
-        );
-      }
-    }
-
-    const catalogId = `${record.source}:${record.tableName || 'unknown'}:${record.id}`;
-
-    await this.config.metadataStore.storeCatalogMetadata({
-      catalogId,
-      catalogType: 'table',
-      fullyQualifiedName: `${record.source}.${record.tableName}.${record.id}`,
-      sensitivity: sensitivityMetadata,
-      fieldSensitivity,
-      lastScanned: new Date(),
-      scanStatus: 'completed',
-    });
-
-    return catalogId;
   }
 
   /**
