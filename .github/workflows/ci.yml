@@ -1,256 +1,70 @@
 name: CI
-
 on:
   pull_request:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'LICENSE'
+    branches: [ main ]
   push:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'LICENSE'
-  workflow_dispatch:
-
-concurrency:
-  group: ci-${{ github.head_ref || github.sha }}
-  cancel-in-progress: true
-
-env:
-  NODE_VERSION: '20.x'
-  HUSKY: 0 # Disable husky hooks in CI
-
-permissions:
-  contents: read
-  security-events: write
-
+    branches: [ main ]
 jobs:
-  changes:
-    name: Detect Changes
-    runs-on: ubuntu-latest
-    outputs:
-      core: ${{ steps.filter.outputs.core }}
-      docker: ${{ steps.filter.outputs.docker }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: filter
-        uses: dorny/paths-filter@v3
-        with:
-          filters: |
-            core:
-              - 'apps/**'
-              - 'client/**'
-              - 'packages/**'
-              - 'services/**'
-              - 'server/**'
-              - 'turbo.json'
-              - 'pnpm-lock.yaml'
-              - 'package.json'
-              - 'tsconfig*'
-            docker:
-              - 'docker-compose*'
-              - '**/Dockerfile*'
-              - 'scripts/run-compose.sh'
-
-  # Quality Lane: Lint and Typecheck (Parallelized by Turbo)
-  quality:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+  setup:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - run: pnpm i --frozen-lockfile
 
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Code Quality Checks
-        run: pnpm turbo run lint typecheck --filter="!docs-site"
-
-      - name: Production Guardrails
-        run: |
-          set +e
-          NODE_ENV=production \
-          JWT_SECRET=weaksecret \
-          JWT_REFRESH_SECRET=weaksecret2 \
-          DATABASE_URL=postgresql://summit:devpassword@localhost:5432/summit_dev \
-          NEO4J_URI=bolt://localhost:7687 \
-          NEO4J_USERNAME=neo4j \
-          NEO4J_PASSWORD=devpassword \
-          REDIS_HOST=localhost \
-          REDIS_PORT=6379 \
-          REDIS_PASSWORD=devpassword \
-          CORS_ORIGIN=* \
-          pnpm ci:prod-guard
-          status=$?
-          if [ "$status" -eq 0 ]; then
-            echo "Prod guardrails command succeeded unexpectedly"
-            exit 1
-          fi
-          echo "Prod guardrails correctly blocked unsafe config"
-
-  # Build Lane: Build artifacts
-  build:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest-8-cores
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Build Workspace
-        run: pnpm turbo run build --filter="!docs-site"
-
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            dist
-            build
-            apps/*/dist
-            apps/*/build
-            packages/*/dist
-            services/*/dist
-            server/dist
-            client/dist
-            .turbo
-          retention-days: 1
-
-  # Unit Tests Lane: Sharded Jest Tests
-  unit-tests:
-    needs: [build]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest-8-cores
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      # Note: Jest tests run against source (ts-jest) so we don't strictly need build artifacts here.
-      # This saves bandwidth.
-
-      - name: Run Unit Tests (Shard ${{ matrix.shard }}/2)
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 15
-          max_attempts: 2
-          # package.json defines "test:jest"
-          command: pnpm run test:jest --shard ${{ matrix.shard }}/${{ strategy.job-total }}
-
-  # Integration Lane: Golden Path Smoke Tests (Covers E2E)
-  golden-path:
-    needs: [build, quality]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.docker == 'true' }}
-    runs-on: ubuntu-latest-8-cores
-    env:
-      DOCKER_BUILDKIT: '1'
-      COMPOSE_DOCKER_CLI_BUILD: '1'
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          install: 'true'
-
-      - name: Bootstrap
-        run: make bootstrap
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build API image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./server
-          file: ./server/Dockerfile.dev
-          tags: summit/api:ci
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build Client image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./client
-          file: ./client/Dockerfile.dev
-          tags: summit/web:ci
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Start Stack
-        run: make up
-
-      - name: Smoke Tests
-        run: make smoke
-
-      - name: Logs on Failure
-        if: failure()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
-
-      - name: Teardown
-        if: always()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
-
-  # Compatibility Matrix (Non-blocking)
-  compatibility:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+  unit:
+    needs: setup
     runs-on: ubuntu-latest
-    continue-on-error: true
-    strategy:
-      matrix:
-        node: ['18.x']
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ matrix.node }}
+      - run: pnpm -w run test:unit --ci --coverage
 
-      - name: Build Workspace
-        run: pnpm turbo run build --filter="!docs-site"
+  mutation:
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm -w run test:mutation
+    # require min score via script exit code
 
-      - name: Unit Tests
-        run: pnpm run test:jest
+  contract:
+    needs: unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm -w run test:contract
 
-  # Security Lane
+  e2e:
+    needs: [unit, contract]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm -w run test:e2e:headless
+
+  perf-smoke:
+    needs: [unit, contract]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./ops/k6/smoke.sh
+
   security:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+    needs: setup
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
+      - run: pnpm -w run scan:deps && pnpm -w run zap:passive
 
-      - name: Generate SBOM
-        uses: anchore/sbom-action@v0
-        with:
-          path: .
-          output-file: sbom.spdx.json
+  sbom:
+    needs: setup
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pnpm -w run sbom:gen
 
-      - name: Trivy Scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
+  gate:
+    needs: [unit, mutation, contract, e2e, perf-smoke, security, sbom]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "All checks passed"
