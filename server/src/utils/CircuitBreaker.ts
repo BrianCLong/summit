@@ -2,20 +2,56 @@ import pino from 'pino';
 
 const logger = pino();
 
+/**
+ * Enum representing the possible states of a Circuit Breaker.
+ */
 enum CircuitBreakerState {
+  /**
+   * Normal operation; requests are passed through.
+   */
   CLOSED = 'CLOSED',
+  /**
+   * The circuit is open; requests are rejected immediately.
+   */
   OPEN = 'OPEN',
+  /**
+   * The circuit is testing if the service has recovered; limited requests allowed.
+   */
   HALF_OPEN = 'HALF_OPEN',
 }
 
+/**
+ * Options for configuring the Circuit Breaker.
+ */
 interface CircuitBreakerOptions {
-  failureThreshold: number; // Number of consecutive failures before opening
-  successThreshold: number; // Number of consecutive successes before closing from half-open
-  resetTimeout: number; // Time in milliseconds to wait before transitioning from OPEN to HALF_OPEN
-  p95ThresholdMs: number; // P95 latency threshold in milliseconds
-  errorRateThreshold: number; // Error rate percentage (e.g., 0.5 for 50%)
+  /**
+   * Number of consecutive failures before opening the circuit.
+   */
+  failureThreshold: number;
+  /**
+   * Number of consecutive successes before closing the circuit from half-open.
+   */
+  successThreshold: number;
+  /**
+   * Time in milliseconds to wait before transitioning from OPEN to HALF_OPEN.
+   */
+  resetTimeout: number;
+  /**
+   * P95 latency threshold in milliseconds. If exceeded, the circuit may open.
+   */
+  p95ThresholdMs: number;
+  /**
+   * Error rate percentage (e.g., 0.5 for 50%) that triggers opening the circuit.
+   */
+  errorRateThreshold: number;
 }
 
+/**
+ * Circuit Breaker implementation to prevent cascading failures.
+ *
+ * It monitors the execution of a command and manages the state (CLOSED, OPEN, HALF_OPEN)
+ * based on failures, latency, and error rates.
+ */
 export class CircuitBreaker {
   private state: CircuitBreakerState = CircuitBreakerState.CLOSED;
   private failureCount: number = 0;
@@ -29,6 +65,11 @@ export class CircuitBreaker {
     stateChanges: number;
   };
 
+  /**
+   * Creates an instance of CircuitBreaker.
+   *
+   * @param options - Configuration options for the circuit breaker.
+   */
   constructor(options: Partial<CircuitBreakerOptions>) {
     this.options = {
       failureThreshold: 5,
@@ -51,10 +92,20 @@ export class CircuitBreaker {
     );
   }
 
+  /**
+   * Gets the current state of the circuit breaker.
+   *
+   * @returns The current CircuitBreakerState.
+   */
   public getState(): CircuitBreakerState {
     return this.state;
   }
 
+  /**
+   * Retrieves current metrics for the circuit breaker.
+   *
+   * @returns An object containing metrics such as total requests, failed requests, P95 latency, error rate, and current state.
+   */
   public getMetrics() {
     return {
       ...this.metrics,
@@ -67,10 +118,20 @@ export class CircuitBreaker {
     };
   }
 
+  /**
+   * Gets the number of consecutive failures.
+   *
+   * @returns The failure count.
+   */
   public getFailureCount(): number {
     return this.failureCount;
   }
 
+  /**
+   * Gets the timestamp of the last failure.
+   *
+   * @returns The timestamp (in milliseconds) of the last failure.
+   */
   public getLastFailureTime(): number {
     return this.lastFailureTime;
   }
@@ -134,6 +195,14 @@ export class CircuitBreaker {
     logger.info('Circuit Breaker: CLOSED');
   }
 
+  /**
+   * Executes a command within the context of the circuit breaker.
+   *
+   * @typeParam T - The return type of the command.
+   * @param command - The function to execute.
+   * @returns The result of the command.
+   * @throws Error if the circuit is OPEN or if the command itself fails.
+   */
   public async execute<T>(command: () => Promise<T>): Promise<T> {
     this.metrics.totalRequests++;
     this.evaluateState(); // Evaluate state before execution
