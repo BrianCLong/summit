@@ -1,0 +1,14 @@
+{
+  "blockList": ["windows 7", "xp"],
+  "stepUpRequirements": ["missing_webauthn_uv", "insecure_context"],
+  "sessionDowngrade": ["firewall_off", "weak_platform"],
+  "privacy": {
+    "dataMinimized": true,
+    "noInvasiveCollection": true,
+    "ephemeralClaims": true
+  },
+  "offline": {
+    "fcPwa": true,
+    "fallback": "last_known_good"
+  }
+}
