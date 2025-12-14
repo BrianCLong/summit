@@ -8,6 +8,23 @@
     },
     "enableExperimentalFeatures": {
       "type": "boolean"
+    },
+    "flags": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "enabled": { "type": "boolean" },
+          "environments": {
+            "type": "object",
+            "additionalProperties": { "type": "boolean" }
+          },
+          "rolloutPercentage": { "type": "number", "minimum": 0, "maximum": 100 },
+          "salt": { "type": "string" }
+        },
+        "required": ["enabled"]
+      }
     }
   }
 }

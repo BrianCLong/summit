@@ -1,14 +1,21 @@
 import Ajv, { ErrorObject } from 'ajv';
 import * as fs from 'fs';
 import * as path from 'path';
+import { SecretManager, SecretManagerOptions } from '../secrets/secret-manager';
 
 export class SchemaValidator {
   private ajv: Ajv;
   private schemas: Map<string, any> = new Map();
+  private secretManager: SecretManager;
 
-  constructor() {
+  constructor(secretManager = new SecretManager()) {
     this.ajv = new Ajv({ allErrors: true });
+    this.secretManager = secretManager;
     this.loadSchemas();
+  }
+
+  configureSecrets(options: SecretManagerOptions) {
+    this.secretManager.updateOptions(options);
   }
 
   private loadSchemas() {
@@ -22,9 +29,9 @@ export class SchemaValidator {
     }
   }
 
-  public validate(config: any, schemaName: string): void {
+  public validate(config: any, schemaName: string): any {
     const interpolatedConfig = this.interpolate(config);
-    const resolvedConfig = this.resolveSecrets(interpolatedConfig);
+    const resolvedConfig = this.secretManager.resolveConfig(interpolatedConfig);
 
     const validate = this.ajv.getSchema(schemaName);
     if (!validate) {
@@ -34,6 +41,8 @@ export class SchemaValidator {
     if (!validate(resolvedConfig)) {
       throw new Error(this.formatErrors(validate.errors));
     }
+
+    return resolvedConfig;
   }
 
   private interpolate(config: any): any {
@@ -46,17 +55,6 @@ export class SchemaValidator {
       return value;
     });
     return JSON.parse(interpolatedString);
-  }
-
-  private resolveSecrets(config: any): any {
-    const configString = JSON.stringify(config);
-    const resolvedString = configString.replace(/"aws-ssm:(.*?)"/g, (_, secretPath) => {
-      // In a real implementation, you would fetch this from AWS SSM.
-      // For this example, we'll use a dummy value.
-      console.log(`Resolving secret from AWS SSM: ${secretPath}`);
-      return `"resolved-${secretPath.split('/').pop()}"`;
-    });
-    return JSON.parse(resolvedString);
   }
 
   private formatErrors(errors: ErrorObject[] | null | undefined): string {
