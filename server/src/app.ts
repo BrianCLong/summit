@@ -16,6 +16,7 @@ import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { httpMetricsMiddleware } from './monitoring/middleware.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -100,6 +101,9 @@ export const createApp = async () => {
       }),
     }),
   );
+
+  // HTTP Metrics Middleware - captures request duration and counts for Prometheus
+  app.use(httpMetricsMiddleware);
 
   app.use(express.json({ limit: '1mb' }));
   // Standard audit logger for basic request tracking
