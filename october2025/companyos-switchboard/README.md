@@ -12,3 +12,7 @@ make tauri-dev   # launches the Tauri desktop shell (after `make dev` in another
 ```
 
 > All networked services are optional for local-first. See `deploy/local/docker-compose.switchboard.yml` for media + opa + NATS setup.
+
+## Architecture & Roadmap
+
+See [BUILD_MAP.md](./BUILD_MAP.md) for the "Missing Foundations Audit" and the comprehensive roadmap to unify Switchboard with the Enterprise Core (Governance, RBAC, Orchestration, and Schema).
