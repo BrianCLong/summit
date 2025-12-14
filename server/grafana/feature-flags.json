@@ -1,0 +1,50 @@
+{
+  "title": "Feature Flags & Kill Switches",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Decisions by Outcome",
+      "targets": [
+        {
+          "expr": "sum by (flag, outcome) (rate(feature_flag_decisions_total[5m]))",
+          "legendFormat": "{{flag}} - {{outcome}}"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "type": "graph",
+      "title": "Evaluation Latency (p95)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(feature_flag_evaluation_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Active Kill Switches",
+      "targets": [
+        {
+          "expr": "sum(feature_kill_switch_active)",
+          "legendFormat": "active"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 8 }
+    },
+    {
+      "type": "table",
+      "title": "Kill Switches by Module",
+      "targets": [
+        {
+          "expr": "feature_kill_switch_active"
+        }
+      ],
+      "gridPos": { "h": 6, "w": 12, "x": 6, "y": 8 }
+    }
+  ]
+}
