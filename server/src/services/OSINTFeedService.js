@@ -1,9 +1,14 @@
-const fs = require('fs');
-const path = require('path');
-const ExternalAPIService = require('./ExternalAPIService');
-const KeyVaultService = require('./KeyVaultService');
-const MultimodalSentimentService = require('./MultimodalSentimentService');
-const logger = require('../utils/logger');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import ExternalAPIService from './ExternalAPIService.js';
+import KeyVaultService from './KeyVaultService.js';
+import MultimodalSentimentService from './MultimodalSentimentService.js';
+import logger from '../utils/logger.js';
+
+// Fix __dirname and __filename for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class OSINTFeedService {
   constructor({ sourcesFile, configFile } = {}) {
@@ -120,4 +125,4 @@ class OSINTFeedService {
   }
 }
 
-module.exports = OSINTFeedService;
+export default OSINTFeedService;

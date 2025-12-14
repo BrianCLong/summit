@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
+import KeyVaultService from './KeyVaultService.js';
 
 class ExternalAPIService {
   constructor(logger) {
@@ -20,7 +21,6 @@ class ExternalAPIService {
         info: 'VirusTotal URL report (requires apiKey)',
         handler: async ({ url }) => {
           if (!url) throw new Error('url required');
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('virustotal');
           if (!apiKey) throw new Error('API key for virustotal not configured');
@@ -45,7 +45,6 @@ class ExternalAPIService {
       openweather_current: {
         info: 'OpenWeather current weather (requires apiKey)',
         handler: async ({ q, lat, lon }) => {
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('openweather');
           if (!apiKey)
@@ -62,7 +61,6 @@ class ExternalAPIService {
         info: 'Shodan host information (requires apiKey)',
         handler: async ({ ip }) => {
           if (!ip) throw new Error('ip required');
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('shodan');
           if (!apiKey) throw new Error('API key for shodan not configured');
@@ -75,7 +73,6 @@ class ExternalAPIService {
         info: 'GreyNoise IP context (requires apiKey)',
         handler: async ({ ip }) => {
           if (!ip) throw new Error('ip required');
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('greynoise');
           if (!apiKey) throw new Error('API key for greynoise not configured');
@@ -90,7 +87,6 @@ class ExternalAPIService {
         info: 'HaveIBeenPwned breached account (requires apiKey)',
         handler: async ({ account }) => {
           if (!account) throw new Error('account required');
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('hibp');
           if (!apiKey) throw new Error('API key for hibp not configured');
@@ -111,7 +107,6 @@ class ExternalAPIService {
         info: 'OpenCage geocoding (requires apiKey)',
         handler: async ({ q }) => {
           if (!q) throw new Error('q required');
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('opencage');
           if (!apiKey) throw new Error('API key for opencage not configured');
@@ -124,7 +119,6 @@ class ExternalAPIService {
         info: 'GNews search (requires apiKey)',
         handler: async ({ q }) => {
           if (!q) throw new Error('q required');
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('gnews');
           if (!apiKey) throw new Error('API key for gnews not configured');
@@ -191,7 +185,6 @@ class ExternalAPIService {
       nasa_apod: {
         info: 'NASA Astronomy Picture of the Day (apiKey required)',
         handler: async ({ date }) => {
-          const KeyVaultService = require('./KeyVaultService');
           const kv = new KeyVaultService();
           const apiKey = await kv.getApiKey('nasa_apod');
           if (!apiKey) throw new Error('API key for nasa_apod not configured');
@@ -211,4 +204,4 @@ class ExternalAPIService {
   }
 }
 
-module.exports = ExternalAPIService;
+export default ExternalAPIService;
