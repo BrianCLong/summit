@@ -1,0 +1,41 @@
+{
+  "repo": "intelgraph-platform",
+  "publicInterfaces": [
+    {
+      "name": "GraphQL schema",
+      "path": "packages/graphql/schema.graphql",
+      "type": "api",
+      "description": "Canonical GraphQL contract consumed by intelgraph-studio and internal services",
+      "versioning": "semver-major-for-breaking",
+      "owners": ["architecture", "graph-runtime"],
+      "lastValidated": "2025-10-01"
+    },
+    {
+      "name": "OpenAPI surface",
+      "path": "services/api/openapi.yaml",
+      "type": "api",
+      "description": "REST/OpenAPI contract for service integrations",
+      "versioning": "semver-major-for-breaking",
+      "owners": ["api-platform"],
+      "lastValidated": "2025-10-01"
+    },
+    {
+      "name": "Shared domain types",
+      "path": "packages/common-types/src",
+      "type": "library",
+      "description": "Reusable TypeScript domain models exported to dependent repos",
+      "versioning": "minor-for-additive",
+      "owners": ["platform-foundation"],
+      "lastValidated": "2025-10-01"
+    },
+    {
+      "name": "Policy bundle schema",
+      "path": "governance/policy-bundle-manifest-2025.10.HALLOWEEN.json",
+      "type": "schema",
+      "description": "Policy and compliance bundle schema referenced by prov-ledger-service",
+      "versioning": "schema-revision-file",
+      "owners": ["governance"],
+      "lastValidated": "2025-10-01"
+    }
+  ]
+}
