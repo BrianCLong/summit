@@ -6,6 +6,7 @@ export default defineConfig({
   testDir: 'e2e',
   testMatch: [
     'e2e/maestro.spec.ts',
+    'e2e/osint/**/*.spec.ts',
     'e2e/**/*.a11y.spec.ts',
     'tests/e2e/**/*.spec.ts',
   ],
