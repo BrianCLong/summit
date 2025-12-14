@@ -26,39 +26,42 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: 'client/package-lock.json'
+          cache: 'pnpm'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         working-directory: client
 
-      - name: Run npm audit
-        run: npm audit --audit-level=high || true # Allow audit to fail without failing CI
+      - name: Run pnpm audit
+        run: pnpm audit --audit-level=critical
         working-directory: client
 
       - name: Run lint
-        run: npm run lint || true
+        run: pnpm run lint || true
         working-directory: client
 
       - name: Run Jest tests
-        run: npm run test:jest || true
+        run: pnpm run test:jest || true
         working-directory: client
 
       - name: Run Vitest tests
-        run: npm run test:vitest || true
+        run: pnpm run test:vitest || true
         working-directory: client
 
       - name: Build client
-        run: npm run build
+        run: pnpm run build
         working-directory: client
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
         working-directory: client
 
       - name: Run E2E critical workflows
-        run: npm run test:e2e -- --config=playwright.config.ts --project=chromium --reporter=junit,line --output=playwright-results
+        run: pnpm run test:e2e -- --config=playwright.config.ts --project=chromium --reporter=junit,line --output=playwright-results
         working-directory: client
 
       - name: Upload Playwright artifacts
@@ -72,7 +75,7 @@ jobs:
             client/test-results
 
       - name: Generate Persisted Queries Manifest
-        run: npm run persist:queries
+        run: pnpm run persist:queries
         working-directory: client
 
       - name: Upload Persisted Queries Manifest
@@ -84,8 +87,30 @@ jobs:
       - name: Run CodeQL Analysis (Placeholder)
         run: echo "CodeQL analysis would run here"
 
-      - name: Generate SBOM (Placeholder)
-        run: echo "SBOM generation would run here"
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: client
+          format: cyclonedx-json
+          output-file: client/sbom.json
+
+      - name: Generate Build Manifest
+        run: |
+          npx tsx scripts/generate-build-manifest.ts client:client/dist:client/sbom.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          ARTIFACTS_DIR: artifacts
+
+      - name: Upload Supply Chain Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-supply-chain-artifacts
+          path: |
+            client/sbom.json
+            artifacts/build-manifest.*.json
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
