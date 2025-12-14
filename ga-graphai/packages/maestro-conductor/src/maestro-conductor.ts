@@ -4,6 +4,9 @@ import { HealthMonitor } from './monitoring';
 import { SelfHealingOrchestrator } from './self-healing';
 import { CostLatencyOptimizer } from './optimization';
 import { JobRouter } from './job-router';
+import { ExecutionTracer } from './tracing';
+import { GuardrailEngine } from './guardrails';
+import { CiGateway } from './ci-gateway';
 import {
   PredictiveInsightEngine,
   type PredictiveInsightEngineOptions,
@@ -15,10 +18,14 @@ import type {
   DiscoveryProvider,
   HealthSignal,
   IncidentReport,
+  OrchestrationTask,
   OptimizationSample,
   PolicyHook,
   ResponseStrategy,
   RoutingPlan,
+  GuardrailHook,
+  TaskExecutionResult,
+  CiCheck,
 } from './types';
 import type { AnomalyDetectorOptions } from './anomaly';
 import type { SelfHealingOrchestratorOptions } from './self-healing';
@@ -53,6 +60,12 @@ export class MaestroConductor {
 
   private readonly insights?: PredictiveInsightEngine;
 
+  private readonly guardrails = new GuardrailEngine();
+
+  private readonly ciGateway = new CiGateway();
+
+  private readonly tracer = new ExecutionTracer();
+
   constructor(options?: MaestroConductorOptions) {
     this.anomaly = new AnomalyDetector(options?.anomaly);
     this.selfHealing = new SelfHealingOrchestrator(options?.selfHealing);
@@ -81,6 +94,14 @@ export class MaestroConductor {
 
   registerPolicyHook(hook: PolicyHook): void {
     this.policyHooks.push(hook);
+  }
+
+  registerGuardrail(guardrail: GuardrailHook): void {
+    this.guardrails.register(guardrail);
+  }
+
+  registerCiCheck(check: CiCheck): void {
+    this.ciGateway.register(check);
   }
 
   registerResponseStrategy(strategy: ResponseStrategy): void {
@@ -125,6 +146,14 @@ export class MaestroConductor {
     }
   }
 
+  getExecutionTrace(taskId: string) {
+    return this.tracer.get(taskId);
+  }
+
+  listExecutionTraces() {
+    return this.tracer.list();
+  }
+
   async routeJob(job: JobSpec): Promise<RoutingPlan> {
     const assets = this.discovery.listAssets();
     const performance = this.optimizer.listSnapshots();
@@ -132,6 +161,174 @@ export class MaestroConductor {
       throw new Error('no assets registered');
     }
     return this.jobRouter.route(job, assets, performance, this.policyHooks);
+  }
+
+  async executeTask(task: OrchestrationTask): Promise<TaskExecutionResult> {
+    this.tracer.start(task.id, task.intent);
+    try {
+      this.tracer.record(task.id, {
+        step: 'discovery',
+        status: 'success',
+        detail: `assets available: ${this.discovery.listAssets().length}`,
+      });
+
+      const plan = await this.routeJob(task.job);
+      this.tracer.record(task.id, {
+        step: 'routing',
+        status: 'success',
+        detail: `primary ${plan.primary.assetId}`,
+        metadata: { fallbacks: plan.fallbacks.map((fallback) => fallback.assetId) },
+      });
+
+      const guardrails: TaskExecutionResult['guardrails'] = [];
+      const ciChecks: TaskExecutionResult['ciChecks'] = [];
+      const fallbacksTried: string[] = [];
+      let selected: TaskExecutionResult['selected'];
+
+      for (const decision of [plan.primary, ...plan.fallbacks]) {
+        const asset = this.discovery.getAsset(decision.assetId);
+        if (!asset) {
+          this.tracer.record(task.id, {
+            step: 'routing',
+            status: 'failed',
+            detail: `asset ${decision.assetId} missing from registry`,
+          });
+          fallbacksTried.push(decision.assetId);
+          continue;
+        }
+
+        const guardrailEvaluation = await this.guardrails.evaluate(
+          {
+            asset,
+            job: task.job,
+            intent: task.intent,
+            taskId: task.id,
+            context: task.context,
+          },
+          decision,
+        );
+        guardrails.push(guardrailEvaluation);
+
+        if (guardrailEvaluation.errors.length > 0) {
+          this.tracer.record(task.id, {
+            step: 'guardrail',
+            status: 'failed',
+            detail: `guardrail errors: ${guardrailEvaluation.errors
+              .map((result) => result.id)
+              .join(',')}`,
+            metadata: {
+              assetId: decision.assetId,
+              errors: guardrailEvaluation.errors.map((result) => result.error),
+            },
+          });
+        }
+
+        if (guardrailEvaluation.blocked) {
+          this.tracer.record(task.id, {
+            step: 'guardrail',
+            status: 'failed',
+            detail: `blocked by ${guardrailEvaluation.results
+              .filter((result) => result.severity === 'block')
+              .map((result) => result.id)
+              .join(',')}`,
+            metadata: { assetId: decision.assetId },
+          });
+          fallbacksTried.push(decision.assetId);
+          this.tracer.record(task.id, {
+            step: 'fallback',
+            status: 'success',
+            detail: `attempting fallback after guardrail block`,
+            metadata: { assetId: decision.assetId },
+          });
+          continue;
+        }
+
+        if (guardrailEvaluation.warnings.length > 0) {
+          this.tracer.record(task.id, {
+            step: 'guardrail',
+            status: 'skipped',
+            detail: `warnings: ${guardrailEvaluation.warnings
+              .map((warning) => warning.id)
+              .join(',')}`,
+            metadata: { assetId: decision.assetId },
+          });
+        } else {
+          this.tracer.record(task.id, {
+            step: 'guardrail',
+            status: 'success',
+            detail: `guardrails passed for ${decision.assetId}`,
+            metadata: { assetId: decision.assetId },
+          });
+        }
+
+        const ciResults = await this.ciGateway.evaluate(task);
+        ciChecks.push(...ciResults);
+        const blockingCheck = ciResults.find(
+          (result) => !result.passed && (result.required ?? true),
+        );
+        if (blockingCheck) {
+          this.tracer.record(task.id, {
+            step: 'ci-check',
+            status: 'failed',
+            detail: `ci check ${blockingCheck.id} failed`,
+            metadata: {
+              assetId: decision.assetId,
+              error: blockingCheck.error,
+            },
+          });
+          fallbacksTried.push(decision.assetId);
+          continue;
+        }
+
+        this.tracer.record(task.id, {
+          step: 'ci-check',
+          status: 'success',
+          detail: `ci checks passed for ${decision.assetId}`,
+          metadata: { assetId: decision.assetId },
+        });
+
+        selected = decision;
+        break;
+      }
+
+      if (selected) {
+        this.tracer.complete(task.id, 'completed', { assetId: selected.assetId });
+        this.tracer.record(task.id, {
+          step: 'complete',
+          status: 'success',
+          detail: `task routed to ${selected.assetId}`,
+          metadata: { assetId: selected.assetId },
+        });
+      } else {
+        this.tracer.complete(task.id, 'failed', {
+          message: 'no eligible assets after guardrails or ci checks',
+        });
+        this.tracer.record(task.id, {
+          step: 'error',
+          status: 'failed',
+          detail: 'task failed guardrail/ci checks for all candidates',
+        });
+      }
+
+      return {
+        task,
+        plan,
+        selected,
+        guardrails,
+        ciChecks,
+        trace: this.tracer.get(task.id)!,
+        fallbacksTried,
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unexpected execution failure';
+      this.tracer.record(task.id, {
+        step: 'error',
+        status: 'failed',
+        detail: message,
+      });
+      this.tracer.complete(task.id, 'failed', { error: message });
+      throw error;
+    }
   }
 
   private toOptimizationSample(
