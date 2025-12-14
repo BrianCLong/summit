@@ -3,6 +3,7 @@
  * Unified query interface supporting multiple query languages
  */
 
+import { errorFactory } from '@intelgraph/errors';
 import type { GraphStorage } from '@intelgraph/graph-database';
 import type { Node, Edge, Path } from '@intelgraph/graph-database';
 
@@ -38,54 +39,120 @@ export class QueryEngine {
    * Execute a Cypher-like query
    */
   executeCypher(query: string): QueryResult {
-    const startTime = Date.now();
-    const parsed = this.parseCypher(query);
-    const result = this.executeParsedQuery(parsed);
+    if (!query?.trim()) {
+      throw errorFactory.validation({
+        errorCode: 'GRAPH_QUERY_EMPTY',
+        humanMessage: 'Query text is required.',
+        developerMessage: 'Received empty Cypher query input.',
+        suggestedAction: 'Provide a valid Cypher statement to execute.',
+      });
+    }
 
-    return {
-      ...result,
-      stats: {
-        executionTime: Date.now() - startTime
-      }
-    };
+    const startTime = Date.now();
+    try {
+      const parsed = this.parseCypher(query);
+      const result = this.executeParsedQuery(parsed);
+
+      return {
+        ...result,
+        stats: {
+          executionTime: Date.now() - startTime
+        }
+      };
+    } catch (error) {
+      throw errorFactory.fromUnknown(error, {
+        category: 'internal',
+        errorCode: 'GRAPH_QUERY_FAILURE',
+        humanMessage: 'Graph query execution failed.',
+        suggestedAction: 'Inspect the Cypher statement for syntax or data issues.',
+        context: { language: 'cypher', query },
+      });
+    }
   }
 
   /**
    * Execute a Gremlin-like traversal query
    */
   executeGremlin(traversal: GremlinTraversal): QueryResult {
-    const startTime = Date.now();
-    const result = this.executeTraversal(traversal);
+    if (!traversal) {
+      throw errorFactory.validation({
+        errorCode: 'GRAPH_TRAVERSAL_EMPTY',
+        humanMessage: 'Traversal definition is required.',
+        developerMessage: 'Received undefined Gremlin traversal.',
+        suggestedAction: 'Provide a traversal pipeline before execution.',
+      });
+    }
 
-    return {
-      columns: ['result'],
-      rows: result.map(r => [r]),
-      stats: {
-        executionTime: Date.now() - startTime
-      }
-    };
+    const startTime = Date.now();
+    try {
+      const result = this.executeTraversal(traversal);
+
+      return {
+        columns: ['result'],
+        rows: result.map(r => [r]),
+        stats: {
+          executionTime: Date.now() - startTime
+        }
+      };
+    } catch (error) {
+      throw errorFactory.fromUnknown(error, {
+        category: 'internal',
+        errorCode: 'GRAPH_QUERY_FAILURE',
+        humanMessage: 'Graph traversal execution failed.',
+        suggestedAction: 'Review Gremlin traversal and retry.',
+        context: { language: 'gremlin' },
+      });
+    }
   }
 
   /**
    * Execute a SPARQL-like query for RDF triple patterns
    */
   executeSPARQL(query: string): QueryResult {
-    const startTime = Date.now();
-    const parsed = this.parseSPARQL(query);
-    const result = this.executeTriplePattern(parsed);
+    if (!query?.trim()) {
+      throw errorFactory.validation({
+        errorCode: 'GRAPH_QUERY_EMPTY',
+        humanMessage: 'Query text is required.',
+        developerMessage: 'Received empty SPARQL query input.',
+        suggestedAction: 'Provide a valid SPARQL statement to execute.',
+      });
+    }
 
-    return {
-      ...result,
-      stats: {
-        executionTime: Date.now() - startTime
-      }
-    };
+    const startTime = Date.now();
+    try {
+      const parsed = this.parseSPARQL(query);
+      const result = this.executeTriplePattern(parsed);
+
+      return {
+        ...result,
+        stats: {
+          executionTime: Date.now() - startTime
+        }
+      };
+    } catch (error) {
+      throw errorFactory.fromUnknown(error, {
+        category: 'internal',
+        errorCode: 'GRAPH_QUERY_FAILURE',
+        humanMessage: 'Graph query execution failed.',
+        suggestedAction: 'Inspect the SPARQL statement for syntax or data issues.',
+        context: { language: 'sparql', query },
+      });
+    }
   }
 
   /**
    * Generate query execution plan
    */
   explain(query: string, language: 'cypher' | 'gremlin' | 'sparql' = 'cypher'): QueryPlan {
+    if (!query?.trim()) {
+      throw errorFactory.validation({
+        errorCode: 'GRAPH_QUERY_EMPTY',
+        humanMessage: 'Query text is required to generate a plan.',
+        developerMessage: 'Received empty query input for explain().',
+        suggestedAction: 'Provide a representative query to analyze.',
+      });
+    }
+
     switch (language) {
       case 'cypher':
         return this.explainCypher(query);

@@ -215,32 +215,43 @@ export class OpenAPIGenerator {
       APIError: {
         type: 'object',
         properties: {
-          code: {
+          error_code: {
             type: 'string',
-            description: 'Error code',
+            description: 'Stable machine-readable identifier for the error',
           },
-          message: {
+          human_message: {
             type: 'string',
-            description: 'Error message',
+            description: 'User-friendly explanation of the error',
           },
-          details: {
-            description: 'Additional error details',
+          developer_message: {
+            type: 'string',
+            description: 'Technical context intended for engineers/logs',
+          },
+          category: {
+            type: 'string',
+            enum: ['auth', 'validation', 'rate-limit', 'internal', 'LLM', 'upstream'],
+            description: 'Error taxonomy bucket',
+          },
+          trace_id: {
+            type: 'string',
+            description: 'Trace identifier for correlation',
+          },
+          suggested_action: {
+            type: 'string',
+            description: 'Remediation guidance for the caller',
           },
           timestamp: {
             type: 'string',
             format: 'date-time',
-            description: 'Error timestamp',
+            description: 'When the error envelope was generated',
           },
-          path: {
-            type: 'string',
-            description: 'Request path',
-          },
-          traceId: {
-            type: 'string',
-            description: 'Trace ID for debugging',
+          context: {
+            type: 'object',
+            description: 'Non-PII debugging breadcrumbs (path, method, provider)',
+            additionalProperties: true,
           },
         },
-        required: ['code', 'message', 'timestamp', 'path'],
+        required: ['error_code', 'human_message', 'category', 'trace_id', 'timestamp'],
       },
       ResponseMetadata: {
         type: 'object',
@@ -254,6 +265,10 @@ export class OpenAPIGenerator {
           },
           requestId: {
             type: 'string',
+          },
+          traceId: {
+            type: 'string',
+            description: 'Trace identifier propagated across services',
           },
           duration: {
             type: 'number',
