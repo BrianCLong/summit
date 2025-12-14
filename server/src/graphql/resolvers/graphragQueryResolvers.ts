@@ -96,6 +96,15 @@ export const graphragQueryResolvers = {
       try {
         const { graphRAGQueryService } = createServices(context);
 
+        //
+        // TODO: This is a placeholder for the quota service
+        //
+        // await quotaService.assert({
+        //   tenantId,
+        //   dimension: 'graph.queries',
+        //   quantity: 1,
+        // });
+
         const response = await graphRAGQueryService.query({
           investigationId: args.input.investigationId,
           tenantId,
@@ -108,6 +117,23 @@ export const graphragQueryResolvers = {
           maxRows: args.input.maxRows,
           timeout: args.input.timeout,
         });
+
+        //
+        // TODO: This is a placeholder for the usage metering service
+        //
+        // await usageMeteringService.record({
+        //   id: '',
+        //   tenantId,
+        //   dimension: 'graph.queries',
+        //   quantity: 1,
+        //   unit: 'count',
+        //   source: 'graphrag',
+        //   metadata: {
+        //     investigationId: args.input.investigationId,
+        //   },
+        //   occurredAt: new Date().toISOString(),
+        //   recordedAt: new Date().toISOString(),
+        // });
 
         return response;
       } catch (error) {
