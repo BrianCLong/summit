@@ -46,7 +46,6 @@
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^1.0.1",
     "@socket.io/redis-adapter": "8.3.0",
-    "@summit/connector-sdk": "workspace:*",
     "@turf/area": "7.3.0",
     "@turf/bbox": "7.3.0",
     "@turf/boolean-point-in-polygon": "7.3.0",
