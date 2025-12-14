@@ -171,6 +171,9 @@
   },
   "devDependencies": {
     "@apollo/client": "^4.0.7",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^9.39.1",
@@ -187,6 +190,7 @@
     "@types/graphql-depth-limit": "^1.1.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
     "concurrently": "^9.2.0",
@@ -202,11 +206,12 @@
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
     "semantic-release": "^25.0.1",
-    "ts-jest": "^29.4.5",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "turbo": "^2.3.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.47.0"
+    "typescript-eslint": "^8.47.0",
+    "winston": "^3.19.0"
   },
   "husky": {
     "hooks": {
@@ -244,13 +249,14 @@
     "docx": "^9.5.1",
     "dotenv": "^17.2.3",
     "graphql-depth-limit": "^1.1.0",
+    "ioredis": "^5.4.1",
     "jest-extended": "^7.0.0",
     "js-yaml": "^4.1.1",
-    "ioredis": "^5.4.1",
     "neo4j-driver": "6.0.1",
     "pg": "^8.16.3",
     "prom-client": "^15.1.2",
     "redis": "^5.8.1",
+    "tiktoken": "^1.0.22",
     "ws": "^8.18.3"
   },
   "private": true,
