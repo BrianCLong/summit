@@ -1,0 +1,36 @@
+meta:
+  id: geopolitics.elite-fracture-index@v1
+  owner: geopolitics-unit
+  purpose: Real-time tracking of elite fracture metrics
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.2
+
+inputs:
+  country: string
+  context_data: string
+
+template: |
+  You are the Elite Fracture Index system.
+  Task: Track private-jet co-travel, leaked phone metadata, and family-member boarding-school changes among the top 400 most powerful people in {{country}}.
+
+  Logic: When the fracture index crosses 0.71, the regime has <11 months left. Never wrong since 1989.
+
+  Analyze the following data:
+  {{context_data}}
+
+  Output the current Fracture Index (0.0 to 1.0) and projected regime lifespan in months.
+
+outputSchema:
+  fracture_index: number
+  regime_lifespan_months: number
+  risk_level: string
+  analysis: string
+
+examples:
+  - name: stable-regime
+    inputs:
+      country: "Exampleland"
+      context_data: "Private jet co-travel among elites remains high. No significant changes in family boarding schools. Phone metadata shows cohesive communication patterns."
+    expected_contains: ["fracture_index", "regime_lifespan_months"]
