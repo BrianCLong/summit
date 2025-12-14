@@ -1,0 +1,9 @@
+{
+  "name": "@intelgraph/ui",
+  "private": true,
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
