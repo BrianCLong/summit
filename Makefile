@@ -93,3 +93,16 @@ prereqs:
 	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
 	@node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
 	@mkdir -p "$(STATE_DIR)"
+# ---- Local integration rig ----------------------------------------------------
+.PHONY: dev-up dev-down e2e-001
+
+dev-up:
+	@docker compose -f infra/dev/docker-compose.yml up -d
+
+# Stops containers but keeps volumes to speed up reseeds.
+dev-down:
+	@docker compose -f infra/dev/docker-compose.yml down
+
+# Placeholder for the end-to-end flow until services are wired.
+e2e-001:
+	@./scripts/e2e-001.sh

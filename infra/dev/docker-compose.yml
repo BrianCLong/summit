@@ -1,0 +1,87 @@
+version: "3.9"
+
+services:
+  ingress:
+    image: traefik:v3.1
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:8080
+    ports:
+      - "8080:8080"
+    networks:
+      - devnet
+
+  prov-ledger:
+    image: alpine:3.19
+    command: ["sleep", "infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prov-ledger.rule=PathPrefix(`/prov-ledger`)"
+      - "traefik.http.services.prov-ledger.loadbalancer.server.port=8080"
+    networks:
+      - devnet
+
+  nl-cypher:
+    image: alpine:3.19
+    command: ["sleep", "infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.nl-cypher.rule=PathPrefix(`/nl-cypher`)"
+      - "traefik.http.services.nl-cypher.loadbalancer.server.port=8080"
+    networks:
+      - devnet
+
+  lac-compiler:
+    image: alpine:3.19
+    command: ["sleep", "infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lac-compiler.rule=PathPrefix(`/lac-compiler`)"
+      - "traefik.http.services.lac-compiler.loadbalancer.server.port=8080"
+    networks:
+      - devnet
+
+  zk-tx:
+    image: alpine:3.19
+    command: ["sleep", "infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zk-tx.rule=PathPrefix(`/zk-tx`)"
+      - "traefik.http.services.zk-tx.loadbalancer.server.port=8080"
+    networks:
+      - devnet
+
+  runbook-prover:
+    image: alpine:3.19
+    command: ["sleep", "infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.runbook-prover.rule=PathPrefix(`/runbook-prover`)"
+      - "traefik.http.services.runbook-prover.loadbalancer.server.port=8080"
+    networks:
+      - devnet
+
+  ops-guard:
+    image: alpine:3.19
+    command: ["sleep", "infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ops-guard.rule=PathPrefix(`/ops-guard`)"
+      - "traefik.http.services.ops-guard.loadbalancer.server.port=8080"
+    networks:
+      - devnet
+
+  tri-pane:
+    image: alpine:3.19
+    command: ["sleep", "infinity"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tri-pane.rule=PathPrefix(`/tri-pane`)"
+      - "traefik.http.services.tri-pane.loadbalancer.server.port=8080"
+    networks:
+      - devnet
+
+networks:
+  devnet:
+    driver: bridge
