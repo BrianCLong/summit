@@ -25,6 +25,7 @@ import { disclosureRoutes } from './routes/disclosure.js';
 import { healthRoutes } from './routes/health.js';
 import { authMiddleware } from './middleware/auth.js';
 import { auditMiddleware } from './middleware/audit.js';
+import { serviceAuthMiddleware } from './middleware/service-auth.js';
 
 const PORT = parseInt(process.env.PORT || '4020');
 const NODE_ENV = process.env.NODE_ENV || 'development';
@@ -57,6 +58,7 @@ await server.register(cors, {
 });
 
 // Register middleware
+server.addHook('preHandler', serviceAuthMiddleware);
 server.addHook('preHandler', authMiddleware);
 server.addHook('onResponse', auditMiddleware);
 

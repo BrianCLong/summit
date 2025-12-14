@@ -3,6 +3,7 @@
  */
 
 import { FastifyRequest, FastifyReply } from 'fastify';
+import type { ServicePrincipal } from './service-auth.js';
 
 export interface AuthContext {
   user_id: string;
@@ -15,6 +16,7 @@ export interface AuthContext {
 declare module 'fastify' {
   interface FastifyRequest {
     auth: AuthContext;
+    servicePrincipal?: ServicePrincipal;
   }
 }
 
@@ -24,6 +26,20 @@ export async function authMiddleware(
 ): Promise<void> {
   // Skip auth for health checks
   if (request.url.startsWith('/health')) {
+    return;
+  }
+
+  const servicePrincipal = request.servicePrincipal;
+  if (servicePrincipal) {
+    request.auth = {
+      user_id: `service:${servicePrincipal.serviceId}`,
+      tenant_id: (request.headers['x-tenant-id'] as string) || 'system',
+      role: 'service',
+      clearance_level: 'internal',
+      permissions: servicePrincipal.scopes.length
+        ? servicePrincipal.scopes
+        : ['decision:write'],
+    };
     return;
   }
 

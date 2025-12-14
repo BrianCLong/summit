@@ -23,7 +23,8 @@
     "zod": "^3.22.4",
     "pg": "^8.11.3",
     "pino": "^8.16.0",
-    "pino-pretty": "^10.2.3"
+    "pino-pretty": "^10.2.3",
+    "jose": "^6.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",

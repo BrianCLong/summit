@@ -1,5 +1,6 @@
 import { GraphQLScalarType } from 'graphql';
 import { Kind } from 'graphql/language';
+import { buildServiceHeaders } from './utils/serviceAuth.js';
 
 const DateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
@@ -47,6 +48,7 @@ export const resolvers = {
     // XAI resolvers (delegated to graph-xai service)
     explainEntity: async (parent: any, args: any, context: any) => {
       const { entityId, model, version } = args;
+      const serviceHeaders = await buildServiceHeaders('graph-xai', ['xai:explain']);
       const response = await fetch(
         `${process.env.GRAPH_XAI_URL}/explain/entity`,
         {
@@ -55,6 +57,7 @@ export const resolvers = {
             'Content-Type': 'application/json',
             'X-Authority-ID': context.authorityId,
             'X-Reason-For-Access': context.reasonForAccess,
+            ...serviceHeaders,
           },
           body: JSON.stringify({ entityId, model, version }),
         },
@@ -69,12 +72,16 @@ export const resolvers = {
 
     // Provenance resolvers (delegated to prov-ledger service)
     claim: async (parent: any, args: any, context: any) => {
+      const serviceHeaders = await buildServiceHeaders('prov-ledger', [
+        'provenance:read',
+      ]);
       const response = await fetch(
         `${process.env.PROV_LEDGER_URL}/claims/${args.id}`,
         {
           headers: {
             'X-Authority-ID': context.authorityId,
             'X-Reason-For-Access': context.reasonForAccess,
+            ...serviceHeaders,
           },
         },
       );
@@ -87,12 +94,16 @@ export const resolvers = {
     },
 
     provenance: async (parent: any, args: any, context: any) => {
+      const serviceHeaders = await buildServiceHeaders('prov-ledger', [
+        'provenance:read',
+      ]);
       const response = await fetch(
         `${process.env.PROV_LEDGER_URL}/provenance?claimId=${args.claimId}`,
         {
           headers: {
             'X-Authority-ID': context.authorityId,
             'X-Reason-For-Access': context.reasonForAccess,
+            ...serviceHeaders,
           },
         },
       );
@@ -106,12 +117,16 @@ export const resolvers = {
 
     // Runbook resolvers (delegated to agent-runtime service)
     runbook: async (parent: any, args: any, context: any) => {
+      const serviceHeaders = await buildServiceHeaders('agent-runtime', [
+        'runbook:read',
+      ]);
       const response = await fetch(
         `${process.env.AGENT_RUNTIME_URL}/runbooks/${args.id}`,
         {
           headers: {
             'X-Authority-ID': context.authorityId,
             'X-Reason-For-Access': context.reasonForAccess,
+            ...serviceHeaders,
           },
         },
       );
@@ -128,11 +143,15 @@ export const resolvers = {
       if (args.status) {
         url.searchParams.set('status', args.status);
       }
+      const serviceHeaders = await buildServiceHeaders('agent-runtime', [
+        'runbook:read',
+      ]);
 
       const response = await fetch(url.toString(), {
         headers: {
           'X-Authority-ID': context.authorityId,
           'X-Reason-For-Access': context.reasonForAccess,
+          ...serviceHeaders,
         },
       });
 
@@ -145,12 +164,16 @@ export const resolvers = {
 
     // Forecast resolvers (delegated to predictive-suite service)
     forecast: async (parent: any, args: any, context: any) => {
+      const serviceHeaders = await buildServiceHeaders('predictive-suite', [
+        'forecast:read',
+      ]);
       const response = await fetch(
         `${process.env.PREDICTIVE_SUITE_URL}/forecasts/${args.id}`,
         {
           headers: {
             'X-Authority-ID': context.authorityId,
             'X-Reason-For-Access': context.reasonForAccess,
+            ...serviceHeaders,
           },
         },
       );
@@ -166,12 +189,16 @@ export const resolvers = {
   Mutation: {
     // Provenance mutations
     createClaim: async (parent: any, args: any, context: any) => {
+      const serviceHeaders = await buildServiceHeaders('prov-ledger', [
+        'provenance:write',
+      ]);
       const response = await fetch(`${process.env.PROV_LEDGER_URL}/claims`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Authority-ID': context.authorityId,
           'X-Reason-For-Access': context.reasonForAccess,
+          ...serviceHeaders,
         },
         body: JSON.stringify(args.input),
       });
@@ -185,6 +212,9 @@ export const resolvers = {
 
     // Runbook mutations
     startRunbook: async (parent: any, args: any, context: any) => {
+      const serviceHeaders = await buildServiceHeaders('agent-runtime', [
+        'runbook:write',
+      ]);
       const response = await fetch(
         `${process.env.AGENT_RUNTIME_URL}/runbooks`,
         {
@@ -193,6 +223,7 @@ export const resolvers = {
             'Content-Type': 'application/json',
             'X-Authority-ID': context.authorityId,
             'X-Reason-For-Access': context.reasonForAccess,
+            ...serviceHeaders,
           },
           body: JSON.stringify({
             name: args.name,
@@ -211,6 +242,9 @@ export const resolvers = {
 
     // Forecast mutations
     createForecast: async (parent: any, args: any, context: any) => {
+      const serviceHeaders = await buildServiceHeaders('predictive-suite', [
+        'forecast:write',
+      ]);
       const response = await fetch(
         `${process.env.PREDICTIVE_SUITE_URL}/forecast`,
         {
@@ -219,6 +253,7 @@ export const resolvers = {
             'Content-Type': 'application/json',
             'X-Authority-ID': context.authorityId,
             'X-Reason-For-Access': context.reasonForAccess,
+            ...serviceHeaders,
           },
           body: JSON.stringify(args.input),
         },
