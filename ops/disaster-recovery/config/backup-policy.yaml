@@ -1,0 +1,51 @@
+schedule:
+  full_backup: "0 2 * * *"  # daily at 02:00 UTC
+  wal_archive_push: "*/15 * * * *"  # every 15 minutes
+  verification_restore: "0 4 * * *"  # nightly restore test
+  failover_drill: "0 15 * * 6"  # weekly on Saturday
+
+retention:
+  hot: 14d
+  warm: 30d
+  cold: 180d
+  minimum_successful_verifications: 7
+
+storage:
+  provider: s3
+  bucket_primary: s3://app-prod-db-backups
+  bucket_secondary: s3://app-prod-db-backups-dr
+  encryption: aws:kms
+  versioning: true
+  replication:
+    enabled: true
+    destination_bucket: s3://app-prod-db-backups-dr
+    replication_time_control_minutes: 15
+
+postgres:
+  wal_compression: on
+  wal_keep_size_mb: 16384
+  max_wal_senders: 10
+  archive_mode: on
+  archive_timeout: 900
+  primary_conninfo: "host=standby-replica user=replicator sslmode=verify-full"
+
+alerts:
+  backup_failure: critical
+  verification_failure: critical
+  replica_lag_seconds: 900
+  replication_off: critical
+  rpo_breach_seconds: 900
+
+observability:
+  metrics:
+    - backup_duration_seconds
+    - wal_archive_lag_seconds
+    - replica_apply_lag_seconds
+    - verification_restore_duration_seconds
+    - failed_verification_count
+  logs:
+    retention_days: 30
+    shipping: centralized
+  traces:
+    enabled: true
+    sampler: 0.1
