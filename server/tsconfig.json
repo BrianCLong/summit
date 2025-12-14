@@ -29,7 +29,6 @@
     "src/ai/**",
     "src/kpro/**",
     "src/nl2cypher/**",
-    "src/runbooks/**",
     "src/routes/replay.ts",
     "src/maestro/**",
     "src/monitoring/opentelemetry.ts",

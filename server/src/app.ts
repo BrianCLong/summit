@@ -49,6 +49,8 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
+import runbookRouter from './routes/runbooks.js';
+import { initializeRunbookEngine } from './runbooks/init.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -166,7 +168,11 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/runbooks', runbookRouter);
   app.get('/metrics', metricsRoute);
+
+  // Initialize Runbook Engine
+  initializeRunbookEngine();
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
