@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
-import { logger } from '../utils/logger.js';
+import { logger } from '../config/logger.js';
+import { resilience } from '../utils/resilience.js';
 
 const router = Router();
 
@@ -12,23 +13,67 @@ interface ServiceHealthError {
 }
 
 /**
- * Basic health check endpoint
- * Returns 200 OK if the service is running
+ * Liveness Probe (/healthz)
+ * Returns 200 OK if the service process is running.
+ * Used by K8s to restart the pod if it hangs.
  */
-router.get('/health', async (_req: Request, res: Response) => {
+router.get(['/healthz', '/health/live'], (_req: Request, res: Response) => {
   res.status(200).json({
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development',
+      status: 'alive',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString()
   });
 });
 
 /**
- * Detailed health check with dependency status
- * Checks database connections and external dependencies
+ * Readiness Probe (/readyz)
+ * Returns 200 when the service is ready to accept traffic.
+ * Checks critical dependencies (DB, Redis).
  */
-router.get('/health/detailed', async (_req: Request, res: Response) => {
+router.get(['/readyz', '/health/ready'], async (_req: Request, res: Response) => {
+  const failures: string[] = [];
+
+  // Check Neo4j
+  try {
+     // Use a timeout to prevent hanging health checks
+     await resilience.execute('health-neo4j', async () => {
+         const neo4j = (await import('../db/neo4jConnection.js')).default;
+         await neo4j.getDriver().verifyConnectivity();
+     }, { timeout: 2000, enableRetry: false, enableCircuitBreaker: false });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    failures.push(`Neo4j: ${msg}`);
+  }
+
+  // Check Postgres
+  try {
+     await resilience.execute('health-pg', async () => {
+        const { getPostgresPool } = await import('../db/postgres.js');
+        const pool = getPostgresPool();
+        await pool.query('SELECT 1');
+     }, { timeout: 2000, enableRetry: false, enableCircuitBreaker: false });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    failures.push(`PostgreSQL: ${msg}`);
+  }
+
+  if (failures.length > 0) {
+    logger.warn({ failures }, 'Readiness check failed');
+    res.status(503).json({
+      status: 'not ready',
+      failures,
+      message: 'Critical services are unavailable.',
+    });
+  } else {
+    res.status(200).json({ status: 'ready' });
+  }
+});
+
+/**
+ * Detailed Health Check
+ * For internal admin dashboards.
+ */
+router.get(['/health', '/health/detailed'], async (_req: Request, res: Response) => {
   const errors: ServiceHealthError[] = [];
   const health = {
     status: 'ok',
@@ -62,7 +107,6 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       error: errorMsg,
       timestamp: new Date().toISOString(),
     });
-    logger.error({ error, service: 'neo4j' }, 'Neo4j health check failed');
   }
 
   // Check PostgreSQL connection
@@ -80,7 +124,6 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       error: errorMsg,
       timestamp: new Date().toISOString(),
     });
-    logger.error({ error, service: 'postgres' }, 'PostgreSQL health check failed');
   }
 
   // Check Redis connection
@@ -98,81 +141,11 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       error: errorMsg,
       timestamp: new Date().toISOString(),
     });
-    logger.error({ error, service: 'redis' }, 'Redis health check failed');
   }
 
-  // Include errors in response for debugging
   health.errors = errors;
-
   const statusCode = health.status === 'ok' ? 200 : 503;
   res.status(statusCode).json(health);
-});
-
-/**
- * Readiness probe for Kubernetes
- * Returns 200 when the service is ready to accept traffic
- */
-router.get('/health/ready', async (_req: Request, res: Response) => {
-  const failures: string[] = [];
-
-  // Check if critical services are available
-  try {
-    const neo4j = (await import('../db/neo4jConnection.js')).default;
-    await neo4j.getDriver().verifyConnectivity();
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    failures.push(`Neo4j: ${msg}`);
-    logger.warn({ error }, 'Readiness check failed: Neo4j unavailable');
-  }
-
-  try {
-    const { getPostgresPool } = await import('../db/postgres.js');
-    const pool = getPostgresPool();
-    await pool.query('SELECT 1');
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    failures.push(`PostgreSQL: ${msg}`);
-    logger.warn({ error }, 'Readiness check failed: PostgreSQL unavailable');
-  }
-
-  if (failures.length > 0) {
-    res.status(503).json({
-      status: 'not ready',
-      failures,
-      message: 'Critical services are unavailable. Check database connections.',
-    });
-  } else {
-    res.status(200).json({ status: 'ready' });
-  }
-});
-
-/**
- * Liveness probe for Kubernetes
- * Returns 200 if the process is alive
- */
-router.get('/health/live', (_req: Request, res: Response) => {
-  res.status(200).json({ status: 'alive' });
-});
-
-/**
- * Deployment validation endpoint
- * Checks all criteria required for a successful deployment
- */
-router.get('/health/deployment', async (_req: Request, res: Response) => {
-  // 1. Check basic connectivity
-  // 2. Check migrations (simulated check)
-  // 3. Check configuration
-  const checks = {
-    connectivity: true,
-    migrations: true, // In real app, query schema_migrations table
-    config: true
-  };
-
-  if (checks.connectivity && checks.migrations && checks.config) {
-    res.status(200).json({ status: 'ready_for_traffic', checks });
-  } else {
-    res.status(503).json({ status: 'deployment_failed', checks });
-  }
 });
 
 export default router;

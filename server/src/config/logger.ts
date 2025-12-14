@@ -1,5 +1,9 @@
 import pino from 'pino';
 import { cfg } from '../config.js';
+import { AsyncLocalStorage } from 'async_hooks';
+
+// AsyncLocalStorage for correlation ID propagation
+export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
 
 // Configuration for redaction of sensitive data
 const REDACT_PATHS = [
@@ -18,10 +22,23 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
+// Standard logging context
+export interface SummitLogContext {
+  correlationId?: string;
+  tenantId?: string;
+  principalId?: string;
+  principalKind?: "user" | "api_key" | "service_account" | "system";
+  service: string;
+  subsystem?: string;
+  requestId?: string;
+  runId?: string;
+  severity?: "debug" | "info" | "warn" | "error";
+  message?: string;
+  [key: string]: any;
+}
+
 export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
-  // Enforce structured JSON logging in all environments for consistency and to avoid missing dependency issues (pino-pretty).
-  // This satisfies the requirement "All logs must be JSON structured".
   base: {
     service: 'intelgraph-server',
     env: cfg.NODE_ENV,
@@ -31,6 +48,19 @@ export const logger = pino({
   redact: {
     paths: REDACT_PATHS,
     censor: '[REDACTED]',
+  },
+  mixin(_context, level) {
+    const store = correlationStorage.getStore();
+    if (store) {
+        return {
+            correlationId: store.get('correlationId'),
+            tenantId: store.get('tenantId'),
+            principalId: store.get('principalId'),
+            requestId: store.get('requestId'),
+            traceId: store.get('traceId'),
+        }
+    }
+    return {};
   },
   formatters: {
     level: (label) => {
