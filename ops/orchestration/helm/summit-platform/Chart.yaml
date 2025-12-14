@@ -1,0 +1,7 @@
+apiVersion: v2
+name: summit-platform
+version: 0.1.0
+description: Summit application stack with API, worker, and web front-end
+kubeVersion: ">=1.26.0"
+type: application
+appVersion: "1.0.0"

@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: summit-platform
+  labels:
+    istio-injection: enabled
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: summit-resource-quota
+  namespace: summit-platform
+spec:
+  hard:
+    requests.cpu: "6"
+    requests.memory: 12Gi
+    limits.cpu: "12"
+    limits.memory: 24Gi
+    pods: "50"
+    services.loadbalancers: "4"
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: summit-default-limits
+  namespace: summit-platform
+spec:
+  limits:
+    - default:
+        cpu: 1000m
+        memory: 1Gi
+      defaultRequest:
+        cpu: 250m
+        memory: 512Mi
+      type: Container
