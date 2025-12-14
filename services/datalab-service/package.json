@@ -1,0 +1,54 @@
+{
+  "name": "@intelgraph/datalab-service",
+  "version": "1.0.0",
+  "description": "Data Lab service for secure sandbox data operations, synthetic data generation, and anonymization",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@intelgraph/sandbox-tenant-profile": "workspace:*",
+    "zod": "^3.23.8",
+    "uuid": "^9.0.0",
+    "pino": "^8.16.0",
+    "faker-js": "npm:@faker-js/faker@^8.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "datalab",
+    "sandbox",
+    "synthetic-data",
+    "anonymization",
+    "research"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}
