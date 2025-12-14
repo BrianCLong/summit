@@ -37,6 +37,8 @@ function signAuditPayload(payload: JsonObject, secret?: string): string | null {
 
 interface WriteAuditParams {
   userId?: string;
+  userEmail?: string;
+  tenantId?: string;
   action: string;
   resourceType?: string;
   resourceId?: string;
@@ -47,10 +49,14 @@ interface WriteAuditParams {
   sessionId?: string;
   before?: JsonObject;
   after?: JsonObject;
+  success?: boolean;
+  errorMessage?: string;
 }
 
 async function writeAudit({
   userId,
+  userEmail,
+  tenantId,
   action,
   resourceType,
   resourceId,
@@ -61,6 +67,8 @@ async function writeAudit({
   sessionId,
   before,
   after,
+  success = true,
+  errorMessage,
 }: WriteAuditParams): Promise<void> {
   try {
     const pool = getPostgresPool();
@@ -91,20 +99,31 @@ async function writeAudit({
     }
 
     await pool.query(
-      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address, user_agent)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      `INSERT INTO audit_events (
+        user_id, user_email, tenant_id, action, resource_type, resource_id,
+        resource_data, old_values, new_values, success, error_message, ip_address, user_agent, session_id
+      )
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
       [
-        userId || null,
+        userId || 'system',
+        userEmail || 'system',
+        tenantId || 'system',
         action,
-        resourceType || null,
+        resourceType || 'unknown',
         resourceId || null,
         enrichedDetails,
+        before || null,
+        after || null,
+        success,
+        errorMessage || null,
         ip || null,
         userAgent || null,
+        sessionId || null
       ],
     );
   } catch (e) {
-    // non-fatal, avoid throwing in hot paths
+    // non-fatal, avoid throwing in hot paths, but log it
+    console.error('Audit write failed:', e);
   }
 }
 
