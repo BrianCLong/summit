@@ -1,0 +1,407 @@
+syntax = "proto3";
+
+package intelgraph.prov.v1;
+
+option go_package = "github.com/intelgraph/summit/services/prov-ledger/api/v1;ledgerv1";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+// ============================================================================
+// Provenance & Claim Ledger Service
+// ============================================================================
+
+service LedgerService {
+  // Evidence registration
+  rpc RegisterEvidence(RegisterEvidenceRequest) returns (RegisterEvidenceResponse);
+  rpc GetEvidence(GetEvidenceRequest) returns (Evidence);
+  rpc ListEvidence(ListEvidenceRequest) returns (ListEvidenceResponse);
+
+  // Claim operations
+  rpc ParseClaim(ParseClaimRequest) returns (ParseClaimResponse);
+  rpc RegisterClaim(RegisterClaimRequest) returns (Claim);
+  rpc GetClaim(GetClaimRequest) returns (Claim);
+
+  // Contradiction detection
+  rpc GetContradictions(GetContradictionsRequest) returns (ContradictionGraph);
+  rpc CheckContradiction(CheckContradictionRequest) returns (ContradictionResult);
+
+  // Export and verification
+  rpc ExportManifest(ExportManifestRequest) returns (ExportManifestResponse);
+  rpc VerifyManifest(VerifyManifestRequest) returns (VerifyManifestResponse);
+
+  // Provenance chains
+  rpc GetProvenanceChain(GetProvenanceChainRequest) returns (ProvenanceChain);
+  rpc CreateProvenanceLink(CreateProvenanceLinkRequest) returns (ProvenanceLink);
+}
+
+// ============================================================================
+// Evidence Messages
+// ============================================================================
+
+message RegisterEvidenceRequest {
+  string source_ref = 1;
+  string case_id = 2;
+  bytes content = 3;
+  string checksum = 4;
+  string checksum_algorithm = 5;
+  string content_type = 6;
+  int64 file_size = 7;
+  repeated TransformStep transform_chain = 8;
+  string license_id = 9;
+  repeated string policy_labels = 10;
+  google.protobuf.Struct metadata = 11;
+
+  // Authority binding (required)
+  string authority_id = 12;
+  string reason_for_access = 13;
+}
+
+message RegisterEvidenceResponse {
+  Evidence evidence = 1;
+  string merkle_proof = 2;
+}
+
+message GetEvidenceRequest {
+  string evidence_id = 1;
+}
+
+message ListEvidenceRequest {
+  string case_id = 1;
+  int32 page_size = 2;
+  string page_token = 3;
+}
+
+message ListEvidenceResponse {
+  repeated Evidence evidence = 1;
+  string next_page_token = 2;
+  int32 total_count = 3;
+}
+
+message Evidence {
+  string id = 1;
+  string case_id = 2;
+  string source_ref = 3;
+  string checksum = 4;
+  string checksum_algorithm = 5;
+  string content_type = 6;
+  int64 file_size = 7;
+  repeated TransformStep transform_chain = 8;
+  string license_id = 9;
+  repeated string policy_labels = 10;
+  string authority_id = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Struct metadata = 13;
+}
+
+message TransformStep {
+  string transform_type = 1;
+  google.protobuf.Timestamp timestamp = 2;
+  string actor_id = 3;
+  google.protobuf.Struct config = 4;
+  string input_hash = 5;
+  string output_hash = 6;
+}
+
+// ============================================================================
+// Claim Messages
+// ============================================================================
+
+message ParseClaimRequest {
+  // Raw claim content to parse (text, JSON, etc.)
+  string raw_content = 1;
+  string content_type = 2; // text/plain, application/json, etc.
+
+  // Parse options
+  bool extract_entities = 3;
+  bool extract_temporal = 4;
+  bool detect_sentiment = 5;
+  repeated string extraction_schemas = 6;
+}
+
+message ParseClaimResponse {
+  ParsedClaim parsed_claim = 1;
+  repeated string warnings = 2;
+  double confidence = 3;
+}
+
+message ParsedClaim {
+  string claim_type = 1;
+  google.protobuf.Struct structured_content = 2;
+  repeated ExtractedEntity entities = 3;
+  repeated TemporalAssertion temporal_assertions = 4;
+  repeated string source_citations = 5;
+  string sentiment = 6;
+  double sentiment_score = 7;
+}
+
+message ExtractedEntity {
+  string entity_type = 1;
+  string value = 2;
+  int32 start_offset = 3;
+  int32 end_offset = 4;
+  double confidence = 5;
+}
+
+message TemporalAssertion {
+  string assertion_type = 1; // POINT, RANGE, RELATIVE
+  google.protobuf.Timestamp start_time = 2;
+  google.protobuf.Timestamp end_time = 3;
+  string relative_expression = 4;
+  double confidence = 5;
+}
+
+message RegisterClaimRequest {
+  google.protobuf.Struct content = 1;
+  string signature = 2;
+  google.protobuf.Struct metadata = 3;
+  string source_ref = 4;
+  string license_id = 5;
+  repeated string policy_labels = 6;
+
+  // Authority binding
+  string authority_id = 7;
+  string reason_for_access = 8;
+
+  // Optional parsed claim to attach
+  ParsedClaim parsed_claim = 9;
+}
+
+message GetClaimRequest {
+  string claim_id = 1;
+}
+
+message Claim {
+  string id = 1;
+  google.protobuf.Struct content = 2;
+  string hash = 3;
+  string signature = 4;
+  google.protobuf.Struct metadata = 5;
+  string source_ref = 6;
+  string license_id = 7;
+  repeated string policy_labels = 8;
+  google.protobuf.Timestamp created_at = 9;
+  ParsedClaim parsed_claim = 10;
+}
+
+// ============================================================================
+// Contradiction Detection Messages
+// ============================================================================
+
+message GetContradictionsRequest {
+  repeated string claim_ids = 1;
+  string case_id = 2;
+
+  // Filter options
+  double min_confidence = 3;
+  repeated string contradiction_types = 4;
+}
+
+message ContradictionGraph {
+  repeated ContradictionNode nodes = 1;
+  repeated ContradictionEdge edges = 2;
+  ContradictionSummary summary = 3;
+}
+
+message ContradictionNode {
+  string claim_id = 1;
+  string claim_hash = 2;
+  google.protobuf.Struct claim_summary = 3;
+  int32 contradiction_count = 4;
+}
+
+message ContradictionEdge {
+  string source_claim_id = 1;
+  string target_claim_id = 2;
+  ContradictionType type = 3;
+  double confidence = 4;
+  string explanation = 5;
+  repeated string conflicting_fields = 6;
+}
+
+enum ContradictionType {
+  CONTRADICTION_TYPE_UNSPECIFIED = 0;
+  TEMPORAL_CONFLICT = 1;      // Events can't both be true at stated times
+  FACTUAL_CONFLICT = 2;       // Directly contradicting facts
+  ENTITY_CONFLICT = 3;        // Same entity, conflicting attributes
+  CAUSAL_CONFLICT = 4;        // Causality chain violation
+  SOURCE_CONFLICT = 5;        // Same source, different claims
+  LOGICAL_INCONSISTENCY = 6;  // Logical contradiction
+}
+
+message ContradictionSummary {
+  int32 total_claims = 1;
+  int32 total_contradictions = 2;
+  int32 critical_contradictions = 3;
+  map<string, int32> by_type = 4;
+  double graph_coherence_score = 5;
+}
+
+message CheckContradictionRequest {
+  string claim_id_a = 1;
+  string claim_id_b = 2;
+}
+
+message ContradictionResult {
+  bool has_contradiction = 1;
+  repeated ContradictionEdge contradictions = 2;
+}
+
+// ============================================================================
+// Export & Verification Messages
+// ============================================================================
+
+message ExportManifestRequest {
+  string case_id = 1;
+  repeated string claim_ids = 2;
+
+  // Export options
+  bool include_evidence = 3;
+  bool include_provenance = 4;
+  string signature_key_id = 5;
+}
+
+message ExportManifestResponse {
+  Manifest manifest = 1;
+  bytes manifest_bytes = 2;  // Canonical serialization for verification
+  string signature = 3;
+}
+
+message Manifest {
+  string version = 1;
+  string manifest_id = 2;
+  google.protobuf.Timestamp generated_at = 3;
+
+  // Content
+  repeated ManifestClaim claims = 4;
+  repeated ManifestEvidence evidence = 5;
+
+  // Hash tree for tamper evidence
+  HashTree hash_tree = 6;
+  string merkle_root = 7;
+
+  // Transform chain for reproducibility
+  repeated TransformChainEntry transform_chain = 8;
+
+  // Signature
+  string signature_algorithm = 9;
+  string signature = 10;
+  string signer_key_id = 11;
+}
+
+message ManifestClaim {
+  string id = 1;
+  string hash = 2;
+  repeated string transform_refs = 3;
+  repeated string source_refs = 4;
+}
+
+message ManifestEvidence {
+  string id = 1;
+  string checksum = 2;
+  string source_ref = 3;
+  repeated TransformStep transform_chain = 4;
+}
+
+message HashTree {
+  repeated HashTreeNode nodes = 1;
+  repeated HashTreeEdge edges = 2;
+}
+
+message HashTreeNode {
+  string id = 1;
+  string hash = 2;
+  HashNodeType type = 3;
+}
+
+enum HashNodeType {
+  HASH_NODE_TYPE_UNSPECIFIED = 0;
+  LEAF = 1;
+  INTERNAL = 2;
+  ROOT = 3;
+}
+
+message HashTreeEdge {
+  string parent_id = 1;
+  string child_id = 2;
+  int32 position = 3; // left=0, right=1
+}
+
+message TransformChainEntry {
+  string transform_id = 1;
+  string transform_type = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string actor_id = 4;
+  repeated string input_refs = 5;
+  repeated string output_refs = 6;
+  google.protobuf.Struct config = 7;
+}
+
+message VerifyManifestRequest {
+  bytes manifest_bytes = 1;
+  string signature = 2;
+  string public_key = 3;  // PEM encoded
+}
+
+message VerifyManifestResponse {
+  bool valid = 1;
+  bool signature_valid = 2;
+  bool hash_tree_valid = 3;
+  repeated string errors = 4;
+  repeated string warnings = 5;
+  google.protobuf.Timestamp verified_at = 6;
+}
+
+// ============================================================================
+// Provenance Chain Messages
+// ============================================================================
+
+message GetProvenanceChainRequest {
+  string claim_id = 1;
+  int32 max_depth = 2;
+}
+
+message ProvenanceChain {
+  string root_claim_id = 1;
+  repeated ProvenanceLink links = 2;
+  repeated string source_claims = 3;
+  google.protobuf.Struct lineage_graph = 4;
+}
+
+message CreateProvenanceLinkRequest {
+  string source_claim_id = 1;
+  string target_claim_id = 2;
+  string link_type = 3;
+  google.protobuf.Struct metadata = 4;
+}
+
+message ProvenanceLink {
+  string id = 1;
+  string source_claim_id = 2;
+  string target_claim_id = 3;
+  string link_type = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Struct metadata = 6;
+}
+
+// ============================================================================
+// Kafka Events (for outbox pattern)
+// ============================================================================
+
+message ClaimRegisteredEvent {
+  string event_id = 1;
+  string claim_id = 2;
+  string claim_hash = 3;
+  google.protobuf.Timestamp timestamp = 4;
+  string authority_id = 5;
+  repeated string policy_labels = 6;
+}
+
+message ContradictionUpdatedEvent {
+  string event_id = 1;
+  string claim_id_a = 2;
+  string claim_id_b = 3;
+  ContradictionType type = 4;
+  double confidence = 5;
+  google.protobuf.Timestamp timestamp = 6;
+}
