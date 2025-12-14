@@ -21,6 +21,9 @@ import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
+import erRouter from './routes/er.js'; // Added ER router
+import reportingRouter from './routes/reporting.js'; // Added Reporting router
+import safetyRouter from './routes/safety.js'; // Added Safety router
 import { metricsRoute } from './http/metricsRoute.js';
 import rbacRouter from './routes/rbacRoutes.js';
 import { typeDefs } from './graphql/schema.js';
@@ -166,6 +169,9 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/er', erRouter); // Register ER routes
+  app.use('/reporting', reportingRouter); // Register Reporting routes
+  app.use('/safety', safetyRouter); // Register Safety routes
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
