@@ -1,0 +1,43 @@
+name: Startup Race Test
+
+on:
+  pull_request:
+    paths:
+      - 'docker-compose.yml'
+      - 'scripts/scan-startup-races.mjs'
+      - 'server/**'
+      - '.github/workflows/startup-race-test.yml'
+      - 'docs/ops/health/**'
+  push:
+    branches:
+      - main
+
+jobs:
+  startup-race:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Static startup race scan
+        run: node scripts/scan-startup-races.mjs --compose docker-compose.yml --json
+
+      - name: Boot compose stack
+        run: |
+          docker compose -f docker-compose.yml up -d --quiet-pull
+
+      - name: Runtime readiness verification
+        run: node scripts/scan-startup-races.mjs --compose docker-compose.yml --runtime --max-retries 10
+
+      - name: Tear down stack
+        if: always()
+        run: docker compose -f docker-compose.yml down -v

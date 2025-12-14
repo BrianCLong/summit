@@ -4,7 +4,7 @@ import random
 import time
 
 import redis
-from fastapi import BackgroundTasks, FastAPI
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from kafka import KafkaConsumer, KafkaProducer
 from kafka.errors import NoBrokersAvailable
 
@@ -110,6 +110,21 @@ def shutdown_event():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/ready")
+def readiness_check():
+    try:
+        redis_client.ping()
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=503, detail=f"Redis unavailable: {exc}")
+
+    if producer is None or consumer is None:
+        raise HTTPException(
+            status_code=503, detail="Kafka clients not initialized yet"
+        )
+
+    return {"status": "ready"}
 
 
 @app.get("/score_source/{source_id}")
