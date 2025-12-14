@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
 import type {
   AssetDescriptor,
   DiscoveryProvider,
@@ -7,6 +7,7 @@ import type {
   ResponseStrategy,
 } from '../src/types';
 import { MaestroConductor } from '../src/maestro-conductor';
+import { StructuredEventEmitter } from '@ga-graphai/common-types';
 
 const assetAlpha: AssetDescriptor = {
   id: 'svc-alpha',
@@ -63,10 +64,14 @@ describe('MaestroConductor meta-agent', () => {
   let conductor: MaestroConductor;
   let assets: AssetDescriptor[];
   const executed: string[] = [];
+  let events: StructuredEventEmitter;
+  let eventTransport: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     assets = [assetAlpha, assetBeta];
     executed.length = 0;
+    eventTransport = vi.fn();
+    events = new StructuredEventEmitter({ transport: eventTransport });
     const provider: DiscoveryProvider = {
       id: 'stub',
       description: 'stub discovery',
@@ -85,6 +90,7 @@ describe('MaestroConductor meta-agent', () => {
         saturationThreshold: 0.7,
       },
       jobRouter: { latencyWeight: 0.4 },
+      events,
     });
 
     conductor.registerDiscoveryProvider(provider);
@@ -235,5 +241,30 @@ describe('MaestroConductor meta-agent', () => {
       plan.primary.reasoning.some((reason) => reason.includes('policy')),
     ).toBe(true);
     expect(plan.fallbacks.length).toBeLessThanOrEqual(1);
+  });
+
+  it('emits structured incidents when anomalies are detected', async () => {
+    const baselineLatencies = [110, 108, 112, 115];
+    for (const [index, value] of baselineLatencies.entries()) {
+      await conductor.ingestHealthSignal({
+        assetId: 'svc-alpha',
+        metric: 'latency.p95',
+        value,
+        unit: 'ms',
+        timestamp: new Date(Date.now() + index * 1000),
+      });
+    }
+
+    await conductor.ingestHealthSignal({
+      assetId: 'svc-alpha',
+      metric: 'latency.p95',
+      value: 500,
+      unit: 'ms',
+      timestamp: new Date(),
+    });
+
+    expect(eventTransport).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'summit.incident.detected' }),
+    );
   });
 });

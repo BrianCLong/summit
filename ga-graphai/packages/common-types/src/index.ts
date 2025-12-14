@@ -2,6 +2,8 @@
  * Common types and helpers shared across Maestro Conductor services.
  */
 
+export * from './events';
+
 // ============================================================================
 // MERGE TRAIN: Preserving existing LinearX types + adding Cursor governance
 // ============================================================================
