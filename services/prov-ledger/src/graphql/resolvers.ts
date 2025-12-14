@@ -110,6 +110,42 @@ function computeMerkleRoot(hashes: string[]): string {
   return computeMerkleRoot(newLevel);
 }
 
+// Function to generate (or retrieve) a signing key pair
+// In production, this would use a KMS or HSM
+function getSigningKeyPair() {
+  // Check if keys are stored in environment or generate ephemeral ones
+  if (process.env.SIGNING_PRIVATE_KEY && process.env.SIGNING_PUBLIC_KEY) {
+    return {
+      privateKey: process.env.SIGNING_PRIVATE_KEY,
+      publicKey: process.env.SIGNING_PUBLIC_KEY,
+    };
+  }
+
+  // For MVP/Demo: Generate ephemeral Ed25519 keys
+  // Note: This means signatures won't persist across restarts unless keys are externalized
+  // Ideally, these should be generated once and stored in secrets
+  return crypto.generateKeyPairSync('ed25519', {
+    privateKeyEncoding: { format: 'pem', type: 'pkcs8' },
+    publicKeyEncoding: { format: 'pem', type: 'spki' },
+  });
+}
+
+const { privateKey, publicKey } = getSigningKeyPair();
+
+function signContent(content: string): string {
+  const signer = crypto.createSign(null);
+  signer.update(content);
+  signer.end();
+  return signer.sign(privateKey).toString('base64');
+}
+
+function verifySignature(content: string, signature: string): boolean {
+  const verifier = crypto.createVerify(null);
+  verifier.update(content);
+  verifier.end();
+  return verifier.verify(publicKey, Buffer.from(signature, 'base64'));
+}
+
 // ============================================================================
 // Query Resolvers
 // ============================================================================
@@ -335,30 +371,29 @@ const Query = {
     };
   },
 
-  async exportManifest() {
-    const claimsResult = await pool.query(`
-      SELECT c.id, c.hash,
-             COALESCE(array_agg(pc.transforms ORDER BY pc.created_at), ARRAY[]::jsonb[]) as transforms
-      FROM claims c
-      LEFT JOIN provenance_chains pc ON c.id = pc.claim_id
-      GROUP BY c.id, c.hash
-      ORDER BY c.created_at DESC
-    `);
+  async provenanceManifest(_: any, { id }: { id: string }, context: any) {
+      // 1. Try to find if manifest already exists by ID
+      const manifestRes = await pool.query(
+        'SELECT * FROM manifests WHERE id = $1',
+        [id]
+      );
 
-    const claims = claimsResult.rows.map((row) => ({
-      id: row.id,
-      hash: row.hash,
-      transforms: row.transforms.filter((t: any) => t !== null),
-    }));
+      if (manifestRes.rows.length > 0) {
+        const row = manifestRes.rows[0];
+        return {
+          id: row.id,
+          version: row.version,
+          claims: row.claims,
+          hashChain: row.hash_chain,
+          signature: row.signature,
+          generatedAt: row.generated_at
+        };
+      }
 
-    const hashChain = generateHash(claims.map((c) => c.hash).join(''));
-
-    return {
-      version: '1.0',
-      claims,
-      hashChain,
-      generatedAt: new Date().toISOString(),
-    };
+      // If not found, fall back to generation logic (which should be in mutation strictly, but for safety read logic)
+      // Actually, standard practice for Query is read-only. We should likely throw or return null if not found.
+      // But based on previous implementation pattern, we'll return null to signal it needs creation.
+      return null;
   },
 
   async verifyTransformChain(_: any, { evidenceId }: { evidenceId: string }) {
@@ -626,11 +661,145 @@ const Mutation = {
 
     return {
       valid: isValid,
-      expectedHash,
-      actualHash,
-      verifiedAt: new Date().toISOString(),
+      verificationId: `verify_${crypto.randomUUID()}`,
+      timestamp: new Date().toISOString(),
+      details: {
+        expectedHash,
+        actualHash,
+      },
     };
   },
+
+  async manifest(_: any, { id }: { id: string }, context: any) {
+     // Generate manifest for the given ID (e.g. export or case)
+     // First check if it already exists
+     const existing = await Query.provenanceManifest(null, { id }, context);
+     if (existing) {
+       return existing;
+     }
+
+     // Generate new manifest
+     const caseRes = await pool.query('SELECT id FROM cases WHERE id = $1', [id]);
+     let claimsQuery = '';
+     let params: any[] = [];
+
+     if (caseRes.rows.length > 0) {
+       // It's a case, get evidence as claims
+       claimsQuery = `
+         SELECT e.id, e.checksum as hash,
+         COALESCE(e.transform_chain, '[]'::jsonb) as transforms
+         FROM evidence e
+         JOIN case_evidence ce ON e.id = ce.evidence_id
+         WHERE ce.case_id = $1
+       `;
+       params = [id];
+     } else {
+       // Treat it as a global export or specific collection if not a case
+       claimsQuery = `
+         SELECT c.id, c.hash,
+                COALESCE(array_agg(pc.transforms ORDER BY pc.created_at), ARRAY[]::jsonb[]) as transforms
+         FROM claims c
+         LEFT JOIN provenance_chains pc ON c.id = pc.claim_id
+         GROUP BY c.id, c.hash
+         ORDER BY c.created_at DESC
+       `;
+     }
+
+     const claimsResult = await pool.query(claimsQuery, params);
+
+     const claims = claimsResult.rows.map((row: any) => ({
+       id: row.id,
+       hash: row.hash,
+       transforms: Array.isArray(row.transforms) ? row.transforms.filter((t: any) => t !== null) : [],
+     }));
+
+     const hashChain = generateHash(claims.map((c: any) => c.hash).join(''));
+
+     // Sign the hash chain
+     const signature = signContent(hashChain);
+
+     const manifestId = `manifest_${crypto.randomUUID()}`;
+     const generatedAt = new Date().toISOString();
+     const version = '1.0';
+
+     // Persist to DB
+     await pool.query(
+       `INSERT INTO manifests (id, version, hash_chain, signature, claims, generated_at, authority_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+       [
+         manifestId,
+         version,
+         hashChain,
+         signature,
+         JSON.stringify(claims),
+         generatedAt,
+         context.authorityId
+       ]
+     );
+
+     return {
+       id: manifestId,
+       version,
+       claims,
+       hashChain,
+       signature,
+       generatedAt,
+     };
+  },
+
+  async verify(_: any, { manifestId }: { manifestId: string }) {
+     // 1. Fetch manifest from DB
+     const result = await pool.query(
+       'SELECT * FROM manifests WHERE id = $1',
+       [manifestId]
+     );
+
+     if (result.rows.length === 0) {
+       throw new Error(`Manifest not found: ${manifestId}`);
+     }
+
+     const row = result.rows[0];
+     const { hash_chain, signature, claims } = row;
+
+     const checks: string[] = [];
+     let valid = true;
+
+     // 2. Verify Hash Chain Integrity
+     // Recompute hash chain from claims
+     const claimHashes = (claims as any[]).map(c => c.hash).join('');
+     const computedChain = generateHash(claimHashes);
+
+     if (computedChain === hash_chain) {
+       checks.push('hash_chain_verified');
+     } else {
+       valid = false;
+       checks.push('hash_chain_mismatch');
+     }
+
+     // 3. Verify Signature
+     if (signature) {
+       if (verifySignature(hash_chain, signature)) {
+         checks.push('signature_verified');
+       } else {
+         valid = false;
+         checks.push('signature_invalid');
+       }
+     } else {
+       valid = false;
+       checks.push('signature_missing');
+     }
+
+     return {
+        valid,
+        verificationId: `verify_run_${crypto.randomUUID()}`,
+        timestamp: new Date().toISOString(),
+        details: {
+           manifestId,
+           message: valid ? "Manifest verified successfully" : "Manifest verification failed",
+           checks
+        }
+     };
+  }
 };
 
 // ============================================================================
