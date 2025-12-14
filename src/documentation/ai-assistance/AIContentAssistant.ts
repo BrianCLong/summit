@@ -14,6 +14,8 @@
 
 import { EventEmitter } from 'events';
 
+import { renderPrompt } from '../../core/promptRegistry';
+
 export interface AIAssistantConfig {
   models: {
     contentGeneration: AIModel;
@@ -399,19 +401,9 @@ export class AIContentAssistant extends EventEmitter {
       return [];
     }
 
-    const prompt = `
-Analyze the following content and suggest relevant tags:
-- Topic tags (main subjects covered)
-- Difficulty level (beginner/intermediate/advanced)
-- Content type (tutorial/reference/guide/api)
-- Target audience (developer/user/admin)
-- Technology/framework tags
-
-Content:
-${content.substring(0, 2000)}...
-
-Respond with a JSON array of tags with confidence scores.
-    `;
+    const prompt = renderPrompt('documentation_smart_tagging_v1', {
+      content_preview: `${content.substring(0, 2000)}...`,
+    }).content;
 
     try {
       const response = await client.generate(prompt);
@@ -437,20 +429,14 @@ Respond with a JSON array of tags with confidence scores.
       throw new Error('Code analysis model not initialized');
     }
 
-    const prompt = `
-Generate practical code examples for: ${description}
-Language: ${language}
-Complexity: ${complexity}
-
-Requirements:
-- Include clear comments
-- Show realistic use cases
-- Provide working, runnable code
-- Include expected output where applicable
-- Add brief explanations
-
-Generate 2-3 different examples showing different approaches or use cases.
-    `;
+    const prompt = renderPrompt('documentation_example_generation_v1', {
+      description,
+      language,
+      complexity,
+      expected_variants: '2-3',
+      include_output: true,
+      include_explanations: true,
+    }).content;
 
     try {
       const response = await client.generate(prompt);
@@ -500,21 +486,10 @@ Generate 2-3 different examples showing different approaches or use cases.
       throw new Error('Content generation model not initialized');
     }
 
-    const prompt = `
-Convert the following natural language description into well-structured ${targetFormat} documentation:
-
-Input:
-${naturalLanguage}
-
-Requirements:
-- Use proper ${targetFormat} syntax
-- Create clear headings and structure
-- Include code examples where appropriate
-- Add lists and formatting for readability
-- Ensure technical accuracy
-
-Output only the formatted ${targetFormat} content.
-    `;
+    const prompt = renderPrompt('documentation_natural_language_conversion_v1', {
+      target_format: targetFormat,
+      input_text: naturalLanguage,
+    }).content;
 
     return await client.generate(prompt);
   }
@@ -610,32 +585,27 @@ Output only the formatted ${targetFormat} content.
     request: ContentGenerationRequest,
     context: any,
   ): string {
-    let prompt = `Generate ${request.type} documentation with the following requirements:
+    const functionList = Array.isArray(context?.functions)
+      ? context.functions
+          .map((fn: FunctionInfo) => `- ${fn.name}: ${fn.signature}`)
+          .join('\n')
+      : 'None provided.';
 
-Target Audience: ${request.targetAudience}
-Writing Style: ${request.style}
-Content Length: ${request.length}
-Language: ${request.language}
-Format: ${request.format}
-Include Examples: ${request.includeExamples}
-Include Code Snippets: ${request.includeCodeSnippets}
+    const sourceMaterial =
+      typeof request.input === 'string' ? request.input : 'Provided in structured context.';
 
-`;
-
-    if (context.functions) {
-      prompt += `\nFunctions to document:\n`;
-      context.functions.forEach((fn: FunctionInfo) => {
-        prompt += `- ${fn.name}: ${fn.signature}\n`;
-      });
-    }
-
-    if (typeof request.input === 'string') {
-      prompt += `\nSource Material:\n${request.input}\n`;
-    }
-
-    prompt += `\nGenerate comprehensive, accurate documentation that helps users understand and use this functionality effectively.`;
-
-    return prompt;
+    return renderPrompt('documentation_generation_request_v1', {
+      request_type: request.type,
+      target_audience: request.targetAudience,
+      style: request.style,
+      length: request.length,
+      language: request.language,
+      format: request.format,
+      include_examples: request.includeExamples,
+      include_code: request.includeCodeSnippets,
+      functions: functionList,
+      source_material: sourceMaterial,
+    }).content;
   }
 
   private async postProcessContent(
@@ -679,13 +649,9 @@ Include Code Snippets: ${request.includeCodeSnippets}
     const client = this.modelClients.get('grammarCheck');
     if (!client) return [];
 
-    const prompt = `
-Check the following content for grammar, spelling, and style issues:
-
-${content}
-
-Identify specific issues with their positions and provide suggestions for improvement.
-    `;
+    const prompt = renderPrompt('documentation_grammar_quality_review_v1', {
+      content_body: content,
+    }).content;
 
     try {
       const response = await client.generate(prompt);

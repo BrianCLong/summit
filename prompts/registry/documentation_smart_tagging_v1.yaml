@@ -1,0 +1,24 @@
+id: documentation_smart_tagging_v1
+version: 1.0.0
+owner: documentation
+module: ai-content-assistant
+type: system
+description: Generate topic, difficulty, and audience tags for documentation content.
+riskTier: low
+tags:
+  - tagging
+  - classification
+variables:
+  - content_preview
+template: |
+  Analyze the following content and suggest relevant tags:
+  - Topic tags (main subjects covered)
+  - Difficulty level (beginner/intermediate/advanced)
+  - Content type (tutorial/reference/guide/api)
+  - Target audience (developer/user/admin)
+  - Technology/framework tags
+
+  Content:
+  {{content_preview}}
+
+  Respond with a JSON array of tags with confidence scores.
