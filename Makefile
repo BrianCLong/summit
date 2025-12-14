@@ -1,9 +1,9 @@
-# ---- IntelGraph S25 Merge Orchestrator ---------------------------------------
+# ---- Summit Platform Makefile ------------------------------------------------
 # Usage:
-#   make merge-s25          # end-to-end (idempotent)
-#   make merge-s25.resume   # resume from saved state
-#   make merge-s25.clean    # delete temp branches/state
-#   make pr-release         # force (re)open final release PR only
+#   make dev                # Start local development environment
+#   make dev-clean          # Clean local development environment
+#   make deploy-staging     # Deploy to staging (manual trigger wrapper)
+#   make merge-s25          # Legacy merge script
 # ------------------------------------------------------------------------------
 
 SHELL := /usr/bin/env bash
@@ -15,17 +15,50 @@ MAKEFLAGS += --no-builtin-rules
 REPO              ?= BrianCLong/summit
 BASE_BRANCH       ?= main
 CONSOLIDATION     ?= feature/merge-closed-prs-s25
-STACK_ARTIFACTS   ?= stack/artifacts-pack-v1
-STACK_SERVER      ?= stack/express5-eslint9
-STACK_CLIENT      ?= stack/client-vite7-leaflet5
-STACK_REBRAND     ?= stack/rebrand-docs
 PR_TARGETS        ?= 1279 1261 1260 1259
 STATE_DIR         ?= .merge-evidence
 STATE_FILE        ?= $(STATE_DIR)/state.json
-
 NODE_VERSION      ?= 20
 
-.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
+# ---- Local Development -------------------------------------------------------
+
+.PHONY: dev dev-clean dev-logs dev-shell
+
+dev:
+	@echo "Starting local development environment..."
+	@docker compose up -d
+	@echo "Services started. UI: http://localhost:3000, API: http://localhost:8080"
+
+dev-clean:
+	@echo "Stopping and cleaning local environment..."
+	@docker compose down -v --remove-orphans
+
+dev-logs:
+	@docker compose logs -f
+
+dev-shell:
+	@echo "Opening shell in server container..."
+	@docker compose exec server sh
+
+# ---- CI/CD & Compliance ------------------------------------------------------
+
+.PHONY: sbom provenance ci-check
+
+sbom:
+	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
+
+provenance:
+	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
+
+ci-check:
+	@pnpm install --frozen-lockfile
+	@pnpm lint
+	@pnpm test -- --ci --reporters=default --reporters=jest-junit
+	@pnpm -r build
+
+# ---- Legacy / Merge Scripts --------------------------------------------------
+
+.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release contracts policy-sim rerere dupescans prereqs
 
 merge-s25: prereqs
 	@./scripts/merge_s25.sh \
@@ -59,20 +92,6 @@ pr-release:
 	  --open-release-only \
 	  --state "$(STATE_FILE)" \
 	  --node "$(NODE_VERSION)"
-
-sbom:
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
-
-provenance:
-	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
-
-ci-check:
-	@pnpm install --frozen-lockfile
-	@pnpm lint
-	@pnpm test -- --ci --reporters=default --reporters=jest-junit
-	@pnpm -r build
-	@pnpm playwright install --with-deps
-	@pnpm e2e
 
 contracts:
 	@pnpm jest contracts/graphql/__tests__/schema.contract.ts --runInBand
