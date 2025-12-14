@@ -74,6 +74,11 @@ export interface ProvenanceEntry {
     requestId?: string;
     purpose?: string;
     classification?: string[];
+    connectorType?: string;
+    source?: string;
+    sourceId?: string;
+    ingestTimestamp?: Date;
+    enrichmentMetadata?: Record<string, any>;
   };
   signature?: string;
   attestation?: {
