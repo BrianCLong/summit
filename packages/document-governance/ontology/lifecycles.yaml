@@ -1,0 +1,527 @@
+version: '1.0.0'
+description: Document lifecycle state definitions and transition rules
+
+lifecycles:
+  Contract:
+    description: Lifecycle for contractual documents (NDAs, MSAs, SOWs, etc.)
+    states:
+      - id: Draft
+        description: Initial creation, not yet shared externally
+        is_initial: true
+        is_terminal: false
+      - id: Negotiation
+        description: Under negotiation with counterparty
+        is_initial: false
+        is_terminal: false
+      - id: PendingApproval
+        description: Awaiting internal approval
+        is_initial: false
+        is_terminal: false
+      - id: Approved
+        description: Internally approved, ready for execution
+        is_initial: false
+        is_terminal: false
+      - id: Executed
+        description: Signed by all parties
+        is_initial: false
+        is_terminal: false
+      - id: Active
+        description: Currently in effect
+        is_initial: false
+        is_terminal: false
+      - id: Expired
+        description: Term has ended naturally
+        is_initial: false
+        is_terminal: false
+      - id: Terminated
+        description: Terminated early by a party
+        is_initial: false
+        is_terminal: true
+      - id: Superseded
+        description: Replaced by a newer version
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained for historical/legal purposes
+        is_initial: false
+        is_terminal: true
+    default_state: Draft
+    transitions:
+      - from: Draft
+        to: Negotiation
+        requires_approval: false
+      - from: Draft
+        to: PendingApproval
+        requires_approval: false
+      - from: Negotiation
+        to: Draft
+        requires_approval: false
+        notes: Return to draft for revisions
+      - from: Negotiation
+        to: PendingApproval
+        requires_approval: false
+      - from: PendingApproval
+        to: Negotiation
+        requires_approval: false
+        notes: Return to negotiation if not approved
+      - from: PendingApproval
+        to: Approved
+        requires_approval: true
+        approvers:
+          - Legal
+          - AuthorizedSignatory
+      - from: Approved
+        to: Executed
+        requires_approval: false
+        notes: Requires signatures from all parties
+      - from: Executed
+        to: Active
+        requires_approval: false
+      - from: Active
+        to: Expired
+        requires_approval: false
+        notes: Automatic transition when term ends
+      - from: Active
+        to: Terminated
+        requires_approval: true
+        approvers:
+          - Legal
+      - from: Active
+        to: Superseded
+        requires_approval: false
+        notes: When replaced by new agreement
+      - from: Expired
+        to: Archived
+        requires_approval: false
+      - from: Terminated
+        to: Archived
+        requires_approval: false
+      - from: Superseded
+        to: Archived
+        requires_approval: false
+
+  Policy:
+    description: Lifecycle for internal policy documents
+    states:
+      - id: Draft
+        description: Initial creation
+        is_initial: true
+        is_terminal: false
+      - id: Review
+        description: Under stakeholder review
+        is_initial: false
+        is_terminal: false
+      - id: PendingApproval
+        description: Awaiting executive approval
+        is_initial: false
+        is_terminal: false
+      - id: Approved
+        description: Approved but not yet published
+        is_initial: false
+        is_terminal: false
+      - id: Published
+        description: Active and communicated to organization
+        is_initial: false
+        is_terminal: false
+      - id: Superseded
+        description: Replaced by newer version
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained for historical purposes
+        is_initial: false
+        is_terminal: true
+    default_state: Draft
+    transitions:
+      - from: Draft
+        to: Review
+        requires_approval: false
+      - from: Review
+        to: Draft
+        requires_approval: false
+      - from: Review
+        to: PendingApproval
+        requires_approval: false
+      - from: PendingApproval
+        to: Review
+        requires_approval: false
+      - from: PendingApproval
+        to: Approved
+        requires_approval: true
+        approvers:
+          - PolicyOwner
+          - ExecutiveSponsor
+      - from: Approved
+        to: Published
+        requires_approval: false
+      - from: Published
+        to: Review
+        requires_approval: false
+        notes: Return to review for updates
+      - from: Published
+        to: Superseded
+        requires_approval: false
+      - from: Superseded
+        to: Archived
+        requires_approval: false
+
+  Record:
+    description: Lifecycle for operational records
+    states:
+      - id: Open
+        description: Record is being created/updated
+        is_initial: true
+        is_terminal: false
+      - id: Active
+        description: Record is finalized and active
+        is_initial: false
+        is_terminal: false
+      - id: UnderReview
+        description: Under audit or review
+        is_initial: false
+        is_terminal: false
+      - id: Closed
+        description: Record is complete, no further updates
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained beyond operational use
+        is_initial: false
+        is_terminal: false
+      - id: Destroyed
+        description: Deleted per retention policy
+        is_initial: false
+        is_terminal: true
+    default_state: Open
+    transitions:
+      - from: Open
+        to: Active
+        requires_approval: false
+      - from: Active
+        to: UnderReview
+        requires_approval: false
+      - from: UnderReview
+        to: Active
+        requires_approval: false
+      - from: Active
+        to: Closed
+        requires_approval: false
+      - from: UnderReview
+        to: Closed
+        requires_approval: false
+      - from: Closed
+        to: Archived
+        requires_approval: false
+      - from: Archived
+        to: Destroyed
+        requires_approval: true
+        approvers:
+          - RecordsManager
+          - Legal
+
+  Versioned:
+    description: Lifecycle for versioned technical documents
+    states:
+      - id: Draft
+        description: Initial creation
+        is_initial: true
+        is_terminal: false
+      - id: Review
+        description: Under peer review
+        is_initial: false
+        is_terminal: false
+      - id: PendingApproval
+        description: Awaiting approval
+        is_initial: false
+        is_terminal: false
+      - id: Approved
+        description: Approved for release
+        is_initial: false
+        is_terminal: false
+      - id: Released
+        description: Published and active
+        is_initial: false
+        is_terminal: false
+      - id: Superseded
+        description: Replaced by newer version
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained for reference
+        is_initial: false
+        is_terminal: true
+    default_state: Draft
+    transitions:
+      - from: Draft
+        to: Review
+        requires_approval: false
+      - from: Review
+        to: Draft
+        requires_approval: false
+      - from: Review
+        to: PendingApproval
+        requires_approval: false
+      - from: PendingApproval
+        to: Review
+        requires_approval: false
+      - from: PendingApproval
+        to: Approved
+        requires_approval: true
+        approvers:
+          - DocumentOwner
+      - from: Approved
+        to: Released
+        requires_approval: false
+      - from: Released
+        to: Draft
+        requires_approval: false
+        notes: Start new version
+      - from: Released
+        to: Superseded
+        requires_approval: false
+      - from: Superseded
+        to: Archived
+        requires_approval: false
+
+  GovernanceCore:
+    description: Lifecycle for foundational corporate documents
+    states:
+      - id: Draft
+        description: Initial creation
+        is_initial: true
+        is_terminal: false
+      - id: Filed
+        description: Filed with authorities
+        is_initial: false
+        is_terminal: false
+      - id: PendingAcceptance
+        description: Awaiting regulatory acceptance
+        is_initial: false
+        is_terminal: false
+      - id: Accepted
+        description: Accepted and in effect
+        is_initial: false
+        is_terminal: false
+      - id: Amended
+        description: Has been amended
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: No longer in effect
+        is_initial: false
+        is_terminal: true
+    default_state: Draft
+    transitions:
+      - from: Draft
+        to: Filed
+        requires_approval: true
+        approvers:
+          - Legal
+          - Board
+      - from: Filed
+        to: PendingAcceptance
+        requires_approval: false
+      - from: PendingAcceptance
+        to: Filed
+        requires_approval: false
+        notes: Re-file if rejected
+      - from: PendingAcceptance
+        to: Accepted
+        requires_approval: false
+      - from: Accepted
+        to: Amended
+        requires_approval: true
+        approvers:
+          - Board
+      - from: Amended
+        to: Accepted
+        requires_approval: false
+      - from: Accepted
+        to: Archived
+        requires_approval: true
+        approvers:
+          - Legal
+          - Board
+
+  GovernanceRecord:
+    description: Lifecycle for corporate governance records
+    states:
+      - id: Draft
+        description: Initial creation
+        is_initial: true
+        is_terminal: false
+      - id: Finalized
+        description: Approved and finalized
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained for records
+        is_initial: false
+        is_terminal: true
+    default_state: Draft
+    transitions:
+      - from: Draft
+        to: Finalized
+        requires_approval: true
+        approvers:
+          - BoardChair
+          - Secretary
+      - from: Finalized
+        to: Archived
+        requires_approval: false
+
+  GovernanceVersioned:
+    description: Lifecycle for versionable governance documents
+    states:
+      - id: Draft
+        description: Initial creation
+        is_initial: true
+        is_terminal: false
+      - id: Review
+        description: Under review
+        is_initial: false
+        is_terminal: false
+      - id: Approved
+        description: Board approved
+        is_initial: false
+        is_terminal: false
+      - id: Active
+        description: Currently in effect
+        is_initial: false
+        is_terminal: false
+      - id: Superseded
+        description: Replaced by newer version
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained for historical purposes
+        is_initial: false
+        is_terminal: true
+    default_state: Draft
+    transitions:
+      - from: Draft
+        to: Review
+        requires_approval: false
+      - from: Review
+        to: Draft
+        requires_approval: false
+      - from: Review
+        to: Approved
+        requires_approval: true
+        approvers:
+          - Board
+      - from: Approved
+        to: Active
+        requires_approval: false
+      - from: Active
+        to: Review
+        requires_approval: false
+      - from: Active
+        to: Superseded
+        requires_approval: false
+      - from: Superseded
+        to: Archived
+        requires_approval: false
+
+  ExternalPolicy:
+    description: Lifecycle for public-facing policies
+    states:
+      - id: Draft
+        description: Initial creation
+        is_initial: true
+        is_terminal: false
+      - id: Review
+        description: Internal review
+        is_initial: false
+        is_terminal: false
+      - id: LegalReview
+        description: Legal review and approval
+        is_initial: false
+        is_terminal: false
+      - id: Approved
+        description: Approved for publication
+        is_initial: false
+        is_terminal: false
+      - id: Published
+        description: Live and publicly accessible
+        is_initial: false
+        is_terminal: false
+      - id: Superseded
+        description: Replaced by newer version
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained for legal purposes
+        is_initial: false
+        is_terminal: true
+    default_state: Draft
+    transitions:
+      - from: Draft
+        to: Review
+        requires_approval: false
+      - from: Review
+        to: Draft
+        requires_approval: false
+      - from: Review
+        to: LegalReview
+        requires_approval: false
+      - from: LegalReview
+        to: Review
+        requires_approval: false
+      - from: LegalReview
+        to: Approved
+        requires_approval: true
+        approvers:
+          - GC
+      - from: Approved
+        to: Published
+        requires_approval: true
+        approvers:
+          - ExecutiveSponsor
+      - from: Published
+        to: Review
+        requires_approval: false
+      - from: Published
+        to: Superseded
+        requires_approval: false
+      - from: Superseded
+        to: Archived
+        requires_approval: false
+
+  GeneratedArtifact:
+    description: Lifecycle for auto-generated documents (SBOMs, etc.)
+    states:
+      - id: Generated
+        description: Automatically generated
+        is_initial: true
+        is_terminal: false
+      - id: Validated
+        description: Validation checks passed
+        is_initial: false
+        is_terminal: false
+      - id: Published
+        description: Published to artifact repository
+        is_initial: false
+        is_terminal: false
+      - id: Superseded
+        description: Replaced by newer version
+        is_initial: false
+        is_terminal: false
+      - id: Archived
+        description: Retained per release
+        is_initial: false
+        is_terminal: true
+    default_state: Generated
+    transitions:
+      - from: Generated
+        to: Validated
+        requires_approval: false
+      - from: Validated
+        to: Published
+        requires_approval: false
+      - from: Published
+        to: Superseded
+        requires_approval: false
+      - from: Superseded
+        to: Archived
+        requires_approval: false
