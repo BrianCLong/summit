@@ -1,0 +1,13 @@
+Summary,Description,Story Points,Issue Type,Labels
+"Prov-Ledger Service API","Implement REST API for evidence registration. Endpoint: POST /api/v1/evidence. Storage: Postgres + Neo4j. Spec: OpenAPI 3.0.",8,Story,"backend,blocker"
+"Claim/Lineage Graph Model","Implement Neo4j schema for Claims, Evidence, DERIVED_FROM. Support bitemporal edges.",5,Story,"database"
+"LAC Policy Engine (Blocker)","Integrate OPA to block exports without license. Policy: export.rego. Fail-closed.",5,Story,"security,lac"
+"Selective Disclosure Packager","Service to bundle sub-graph + proofs. Output: JSON-LD signed bundle. Input: Graph query + Audience.",8,Story,"backend,wallet"
+"Proof-Carrying Analytics Hook","Inject lineage hash into analytics output. Metadata: _provenance object with input/model hashes.",5,Story,"analytics,pca"
+"Wallet Verification CLI","CLI to verify bundle signature and Merkle path. Command: summit-verify.",3,Story,"cli,tools"
+"Frontend: Explain This Panel","UI component in Tri-Pane. Show lineage, source, confidence for selected node.",5,Story,"frontend,ux"
+"Frontend: Export to Wallet","UI Action for export. Select Audience. Handle LAC rejection gracefully.",5,Story,"frontend,ux"
+"DPIA & Compliance Stubs","Implement Proof-of-Non-Collection stub and Right-to-Reply metadata templates.",3,Story,"compliance,docs"
+"Chaos Drill: Broker Loss","Test resilience to NATS/Redis outage. Ensure local queuing/WAL.",5,Story,"test,reliability"
+"Red-Team: Export Bypass","Security test to attempt bypassing LAC export restrictions.",3,Story,"security,test"
+"Offline Kit Sync","Endpoint to sync append-only logs from offline collectors. Basic CRDT merge.",5,Story,"backend,offline"

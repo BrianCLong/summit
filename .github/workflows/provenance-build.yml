@@ -1,0 +1,45 @@
+name: Build & Sign
+
+on:
+  push:
+    branches: [ main, feature/** ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f prov-ledger/pyproject.toml ]; then
+             pip install -e prov-ledger/
+          fi
+          # Install Syft and Cosign
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+          # Cosign install omitted for brevity/security in this stub, usually uses keyless or secrets
+
+      - name: Build Artifact (Stub)
+        run: |
+          # Simulate build
+          mkdir -p dist
+          echo "Build Artifact" > dist/app.bin
+
+      - name: Generate SBOM
+        run: syft . -o cyclonedx-json > dist/sbom.json
+
+      - name: Sign Artifacts (Mock)
+        if: github.event_name != 'pull_request'
+        env:
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          echo "Signing would happen here with cosign sign-blob --key env://COSIGN_KEY dist/app.bin"
+          # cosign sign-blob --key env://COSIGN_KEY dist/app.bin

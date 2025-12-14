@@ -10,7 +10,12 @@ dependencies = [
     "prometheus-client",
     "cryptography",
     "prov",
+    "python-multipart"
 ]
 
 [project.optional-dependencies]
 test = ["pytest", "httpx"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+python_files = "test_*.py"
