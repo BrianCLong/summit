@@ -1,0 +1,109 @@
+---
+# Edge Zone Network Policies
+# Controls traffic for mesh-edge namespace (API Gateway, Ingress)
+
+# Allow DNS resolution for all pods in edge zone
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: mesh-edge
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    # Allow DNS queries to kube-dns/CoreDNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+
+---
+# Allow ingress from external load balancer / internet to API Gateway
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-to-gateway
+  namespace: mesh-edge
+spec:
+  podSelector:
+    matchLabels:
+      app: auth-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow HTTPS from anywhere (will be filtered by LoadBalancer/Firewall)
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8443
+        - protocol: TCP
+          port: 8080  # Health checks
+
+---
+# Allow auth-gateway to communicate with mesh-control plane
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-control-plane
+  namespace: mesh-edge
+spec:
+  podSelector:
+    matchLabels:
+      app: auth-gateway
+  policyTypes:
+    - Egress
+  egress:
+    # Allow communication to mesh-orchestrator
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: mesh-orchestrator
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9090  # gRPC
+
+    # Allow communication to policy-enforcer
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: mesh-control
+          podSelector:
+            matchLabels:
+              app: policy-enforcer
+      ports:
+        - protocol: TCP
+          port: 8081
+
+---
+# Allow health check probes from Kubernetes
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kubelet-probes
+  namespace: mesh-edge
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Kubelet runs on nodes (no podSelector applies)
+    # This allows probes from node network
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8080  # Liveness/readiness probe port
