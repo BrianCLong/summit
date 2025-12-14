@@ -3,6 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
 import { enableTemporal, disableTemporal } from '../temporal/control.js';
+import { ensureAuthenticated } from '../middleware/auth.js';
+import { authorize } from '../middleware/authorization.js';
 
 const memConfig: Record<string, any> = {
   REQUIRE_BUDGET_PLUGIN: process.env.REQUIRE_BUDGET_PLUGIN === 'true',
@@ -86,6 +88,8 @@ function validateConfig(config: any): { isValid: boolean; errors: string[] } {
 }
 
 const router = express.Router();
+
+router.use(ensureAuthenticated, authorize('manage_users'));
 
 router.get('/admin/config', (req, res) => {
   const tenantId = (req.query.tenantId as string) || '';
