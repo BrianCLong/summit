@@ -1,0 +1,51 @@
+global:
+  environment: dev
+
+intelgraph-api:
+  replicaCount: 1
+  ingress:
+    enabled: true
+    hosts:
+      - host: api.dev.summit.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: api-tls
+        hosts:
+          - api.dev.summit.com
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+companyos-console:
+  replicaCount: 1
+  ingress:
+    enabled: true
+    hosts:
+      - host: console.dev.summit.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: console-tls
+        hosts:
+          - console.dev.summit.com
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+mc-runner:
+  replicaCount: 1
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi

@@ -1,0 +1,60 @@
+global:
+  environment: prod
+
+intelgraph-api:
+  replicaCount: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 80
+  ingress:
+    enabled: true
+    hosts:
+      - host: api.summit.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: api-tls
+        hosts:
+          - api.summit.com
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+companyos-console:
+  replicaCount: 3
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+  ingress:
+    enabled: true
+    hosts:
+      - host: console.summit.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls:
+      - secretName: console-tls
+        hosts:
+          - console.summit.com
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+
+mc-runner:
+  replicaCount: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
