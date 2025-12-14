@@ -1,6 +1,6 @@
 # Structured Logging & Observability Guide
 
-This service implements a comprehensive structured logging system designed for production observability using the ELK stack (Elasticsearch, Logstash, Kibana) or OpenTelemetry (OTEL).
+This guide documents the unified structured logging strategy for API services, asynchronous workers, and data pipelines. All log events must be wrapped in the **telemetry envelope** defined in the Structured Logging Unification RFC (`docs/rfcs/structured-logging-telemetry-envelope.md`). The envelope is schema-controlled, privacy-aware, and trace-friendly so that the same dashboards, alerts, and transports work across runtime domains.
 
 ## Overview
 
@@ -20,42 +20,47 @@ We adhere to the following log levels:
 | `INFO` | Normal application lifecycle events | Server startup, successful job completion, key business milestones. |
 | `DEBUG` | Detailed information for debugging | Request details, complex logic steps, payload contents (redacted). |
 
-## Structured Log Format
+## Telemetry Envelope Format
 
-All logs are output as JSON objects with the following schema:
+All logs are output as JSON objects that conform to the telemetry envelope schema. Required fields include `timestamp`, `severity`, `service`, `serviceRole`, `env`, `traceId`, `spanId`, `actor`, `request`, and `msg`. Optional fields such as `data`, `metrics`, `tags`, and `error` may be added when relevant.
 
 ```json
 {
-  "level": "INFO",
-  "time": "2023-10-27T10:00:00.000Z",
-  "pid": 12345,
-  "hostname": "api-worker-1",
+  "envelopeVersion": "v1",
+  "timestamp": "2023-10-27T10:00:00.000Z",
+  "severity": "INFO",
   "service": "intelgraph-server",
+  "serviceRole": "api",
   "env": "production",
-  "msg": "Request completed",
-  "correlationId": "550e8400-e29b-41d4-a716-446655440000",
   "traceId": "0af7651916cd43dd8448eb211c80319c",
   "spanId": "b7ad6b7169203331",
-  "req": {
+  "request": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "method": "POST",
-    "url": "/api/v1/resource",
-    "headers": { ... },
-    "remoteAddress": "::1"
+    "path": "/api/v1/resource",
+    "source": "http",
+    "remoteIp": "::1",
+    "tenantId": "tenant-123"
   },
-  "res": {
-    "statusCode": 200
+  "actor": {
+    "type": "user",
+    "id": "user-456",
+    "orgId": "org-xyz"
   },
-  "responseTime": 150
+  "msg": "Request completed",
+  "metrics": {
+    "duration_ms": 150
+  }
 }
 ```
 
+> **Compatibility note:** `correlationId` is still accepted during the dual-write window but `traceparent`/`baggage` headers are the canonical propagation mechanism.
+
 ### Sensitive Data Redaction
 
-The following fields are automatically redacted from logs:
-- `req.headers.authorization`
-- `req.headers.cookie`
-- `body.password`, `body.token`, `body.secret`
-- `user.email`, `user.phone`
+The telemetry envelope requires deterministic redaction. The following rules are enforced before serialization, with a second-pass denylist in the collector:
+- Remove auth headers/tokens, credentials, payment data, PII (email/phone), and any field matching `(?i)(password|secret|token|key|credential|ssn|card|authorization|cookie)`.
+- Add `redactionApplied: true` when any field is scrubbed to aid observability and alerting.
 
 ## Correlation & Distributed Tracing
 
@@ -63,7 +68,7 @@ The following fields are automatically redacted from logs:
 Every HTTP request is assigned a `x-correlation-id` (or inherits one from the request header). This ID is present in every log message generated during that request's lifecycle.
 
 ### OpenTelemetry
-The service is instrumented with OpenTelemetry. Trace IDs and Span IDs are automatically injected into logs to allow cross-referencing logs with traces in tools like Jaeger or Elastic APM.
+All runtimes (API, worker, pipeline) use OpenTelemetry for distributed tracing. The telemetry envelope pulls `traceId`/`spanId`/`traceFlags` from the active OTEL context; `serviceRole` is set according to the runtime. This guarantees that logs, traces, and metrics correlate in Grafana/Tempo, Jaeger, or Elastic APM.
 
 To view traces:
 1. Copy the `traceId` from a log entry.
