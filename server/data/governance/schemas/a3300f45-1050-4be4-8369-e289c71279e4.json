@@ -1,0 +1,14 @@
+{
+  "id": "a3300f45-1050-4be4-8369-e289c71279e4",
+  "version": "1.1.0",
+  "definition": {
+    "entities": [],
+    "edges": []
+  },
+  "changelog": "Activation test",
+  "status": "ACTIVE",
+  "createdAt": "2025-12-08T19:57:15.137Z",
+  "createdBy": "tester",
+  "approvedBy": "admin",
+  "approvedAt": "2025-12-08T19:57:15.138Z"
+}
