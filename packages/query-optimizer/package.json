@@ -8,9 +8,20 @@
     "build": "tsc",
     "test": "jest"
   },
-  "keywords": ["query-optimizer", "cost-based", "materialized-views", "indexes"],
+  "keywords": [
+    "query-optimizer",
+    "cost-based",
+    "materialized-views",
+    "indexes"
+  ],
   "license": "MIT",
   "dependencies": {
     "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.15.6",
+    "typescript": "^5.9.3"
   }
 }
