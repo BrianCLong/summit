@@ -1,0 +1,3 @@
+- Event sourcing and CQRS utilities.
+- Use 2 spaces for TypeScript files.
+- Run `npm test` in this package after making changes.
