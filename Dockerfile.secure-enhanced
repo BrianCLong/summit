@@ -12,7 +12,7 @@ ARG VCS_REF
 ARG DISTROLESS_TAG=nonroot-debug
 
 # ===== SECURITY SCANNING STAGE =====
-FROM aquasec/trivy:0.51.1 as security-scanner
+FROM aquasec/trivy:0.68.1 as security-scanner
 WORKDIR /scan
 COPY package*.json ./
 # Scan for vulnerabilities before building
