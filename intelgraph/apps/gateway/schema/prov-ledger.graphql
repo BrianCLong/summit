@@ -1,0 +1,3 @@
+# apps/gateway/schema/prov-ledger.graphql
+type Claim { id: ID!, hash: String!, createdAt: String!, evidenceId: ID! }
+extend type Query { claim(id: ID!): Claim, claims(limit: Int = 50, after: String): [Claim!]! }
