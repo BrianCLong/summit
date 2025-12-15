@@ -1,11 +1,11 @@
 # Multi-stage build for IntelGraph
-FROM node:20-alpine AS base
+FROM node:25-alpine AS base
 WORKDIR /app
 COPY package*.json ./
 COPY turbo.json ./
 RUN npm ci --only=production && npm cache clean --force
 
-FROM node:20-alpine AS build
+FROM node:25-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 COPY turbo.json ./
