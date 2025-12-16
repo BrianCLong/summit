@@ -1590,3 +1590,15 @@ export { CounterfactualShadowingCoordinator } from './cooperation/counterfactual
 export { CausalChallengeGamesCoordinator } from './cooperation/causalChallengeGames.js';
 export { CrossEntropySwapCoordinator } from './cooperation/crossEntropySwaps.js';
 export { ProofOfUsefulWorkbookCoordinator } from './cooperation/proofOfUsefulWorkbook.js';
+export {
+  FederatedGateway,
+  type GatewayExecutionResult,
+} from './federation/gateway.js';
+export { composeServices } from './federation/composition.js';
+export type {
+  EntityResolver,
+  FederationCompositionResult,
+  FederationServiceDefinition,
+  ResolverEntry,
+  ResolverMap,
+} from './federation/types.js';
