@@ -1,0 +1,39 @@
+version: "3.9"
+services:
+  gateway:
+    build: ./apps/gateway
+    ports: ["8080:8080"]
+    environment:
+      FEATURE_LAC_ENFORCE: "true"
+      COPILOT_NLQ: "true"
+      UI_TRIPANE: "true"
+      POLICY_COMPILER_URL: "http://policy-compiler:8080"
+    depends_on: [policy-compiler]
+
+  ui:
+    build: ./apps/ui
+    ports: ["3000:80"]
+
+  prov-ledger:
+    build: ./services/prov-ledger
+    ports: ["8101:8080"]
+
+  policy-compiler:
+    build: ./services/policy-compiler
+    ports: ["8102:8080"]
+
+  ai-nlq:
+    build: ./services/ai-nlq
+    ports: ["8103:8080"]
+
+  er-service:
+    build: ./services/er-service
+    ports: ["8104:8080"]
+
+  ingest:
+    build: ./services/ingest
+    ports: ["8105:8080"]
+
+  zk-tx:
+    build: ./services/zk-tx
+    ports: ["8106:8080"]

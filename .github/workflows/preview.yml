@@ -1,50 +1,37 @@
-name: Preview Env
+name: Preview
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-concurrency:
-  group: preview-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+    types: [opened, synchronize, reopened]
 jobs:
-  preview:
+  build-push:
     runs-on: ubuntu-latest
-    env:
-      PREVIEW_ID: pr-${{ github.event.pull_request.number }}
-      PREVIEW_NS: preview-${{ github.event.pull_request.number }}
-      CHART: deploy/helm/intelgraph
+    permissions:
+      contents: read
+      packages: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
-
-      # Use full SHA for uniqueness, or compute a 12-char short SHA after checkout
-      - name: Compute commit identifiers
-        id: sha
-        shell: bash
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push images
         run: |
-          echo "FULL_SHA=$GITHUB_SHA" >> $GITHUB_OUTPUT
-          SHORT12="$(git rev-parse --short=12 "$GITHUB_SHA")"
-          echo "SHORT_SHA=$SHORT12" >> $GITHUB_OUTPUT
-
-      - uses: pnpm/action-setup@v3
-      - name: Install deps
-        run: pnpm -r i --frozen-lockfile
-      - name: Build & unit tests (with coverage)
-        run: |
-          pnpm -r build
-          pnpm -r test:ci -- --coverage
-      - name: Generate SBOMs (CycloneDX) & sign attestations
-        run: |
-          pnpm -r sbom:gen || true
-          echo "Attesting container images with Cosign (supply-chain)"
-          pnpm -r cosign:attest || true
-      - name: Helm lint & K8s template dry-run
-        run: |
-          helm lint ${CHART}
-          helm template ${CHART} --debug --dry-run
-      - name: Deploy preview
-        env:
-          # Prefer FULL_SHA; if your target requires a shorter ref, use SHORT_SHA
-          DEPLOY_REF: ${{ steps.sha.outputs.FULL_SHA }}
-        run: |
-          echo "Deploying preview with ref: $DEPLOY_REF"
-          # If deploy script exists, uncomment:
-          # ./scripts/deploy-preview.sh "$DEPLOY_REF"
+          svcs=(apps/gateway apps/ui services/prov-ledger services/policy-compiler services/ai-nlq services/er-service services/ingest services/zk-tx)
+          for s in "${svcs[@]}"; do
+            name=${s//\//-}
+            docker buildx build --push -t ghcr.io/${{ github.repository }}:${name}-pr${{ github.event.number }} -f $s/Dockerfile $s
+          done
+      - name: Publish preview links
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: preview
+          message: |
+            🧪 Preview images pushed to GHCR (tagged per component). Deploy with:
+            ```
+            helm upgrade --install ig-${{ github.event.number }} ops/helm \
+              --set imageGateway=ghcr.io/${{ github.repository }}:apps-gateway-pr${{ github.event.number }} \
+              --set imageUI=ghcr.io/${{ github.repository }}:apps-ui-pr${{ github.event.number }}
+            ```

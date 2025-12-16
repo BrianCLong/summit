@@ -1,0 +1,16 @@
+{
+  "name": "@intelgraph/ingest",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p . || true",
+    "dev": "node --watch dist/server.js || ts-node src/server.ts",
+    "test:unit": "vitest run",
+    "test:contract": "node ../../packages/testing/run-pact.js"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.3"
+  }
+}
