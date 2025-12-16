@@ -1,0 +1,400 @@
+# HIPAA Security Rule Regulatory Pack
+# CompanyOS Trust Center
+
+id: hipaa-2025
+name: HIPAA Security Rule Compliance Pack
+description: |
+  HIPAA Security Rule compliance pack for handling Protected Health Information (PHI).
+  Covers Administrative, Physical, and Technical Safeguards.
+version: "2025.1"
+framework: HIPAA
+status: active
+
+metadata:
+  audit_period: "2024-01-01/2024-12-31"
+  certification_date: "2025-01-15"
+  expiration_date: "2026-01-15"
+
+controls:
+  # Administrative Safeguards - 164.308
+  - id: "164.308(a)(1)"
+    title: "Security Management Process"
+    description: |
+      Implement policies and procedures to prevent, detect, contain, and correct
+      security violations. Includes risk analysis and risk management.
+    category: Administrative Safeguards
+    evidence_sources:
+      - type: configuration
+        name: Security Policies
+        systems:
+          - name: Risk Assessment
+            config: /SECURITY/DPIA.md
+          - name: Security Policies
+            config: /SECURITY/policies/
+      - type: audit_log
+        name: Security Incidents
+        table: security_incidents
+        query: |
+          SELECT * FROM security_incidents
+          WHERE created_at BETWEEN $1 AND $2
+    tests:
+      - id: "164.308(a)(1)-T01"
+        name: Risk Assessment Current
+        type: manual
+        frequency: annual
+        procedure: Conduct comprehensive risk assessment
+        expected: Risk assessment completed within 12 months
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC3.1
+      - framework: ISO_27001
+        control: "6.1"
+      - framework: NIST_800_53
+        control: RA-3
+
+  - id: "164.308(a)(3)"
+    title: "Workforce Security"
+    description: |
+      Implement policies and procedures to ensure that all members of its workforce
+      have appropriate access to ePHI and to prevent unauthorized access.
+    category: Administrative Safeguards
+    evidence_sources:
+      - type: audit_log
+        name: Access Provisioning
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_type IN ('user.created', 'user.access_granted', 'user.terminated')
+          AND timestamp BETWEEN $1 AND $2
+      - type: configuration
+        name: Access Control Procedures
+        systems:
+          - name: Provisioning Workflow
+            config: /server/src/services/user-provisioning.ts
+    tests:
+      - id: "164.308(a)(3)-T01"
+        name: Access Authorization
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/hipaa-workforce-access.test.ts
+        expected: All access properly authorized
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.2
+      - framework: ISO_27001
+        control: A.9.2.1
+
+  - id: "164.308(a)(4)"
+    title: "Information Access Management"
+    description: |
+      Implement policies and procedures for authorizing access to ePHI that
+      are consistent with the applicable requirements of the Privacy Rule.
+    category: Administrative Safeguards
+    evidence_sources:
+      - type: policy
+        name: Access Policies
+        policy_path: /SECURITY/policy/opa/abac.rego
+      - type: audit_log
+        name: Access Decisions
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_category = 'authorization'
+          AND timestamp BETWEEN $1 AND $2
+    tests:
+      - id: "164.308(a)(4)-T01"
+        name: Minimum Necessary Access
+        type: automated
+        frequency: weekly
+        automation:
+          script: tests/compliance/hipaa-minimum-necessary.test.ts
+        expected: Access limited to minimum necessary
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.1
+      - framework: ISO_27001
+        control: A.5.15
+
+  - id: "164.308(a)(5)"
+    title: "Security Awareness and Training"
+    description: |
+      Implement a security awareness and training program for all members
+      of its workforce (including management).
+    category: Administrative Safeguards
+    evidence_sources:
+      - type: audit_log
+        name: Training Records
+        table: training_records
+        query: |
+          SELECT * FROM training_records
+          WHERE course_type = 'hipaa_security'
+          AND completed_at BETWEEN $1 AND $2
+    tests:
+      - id: "164.308(a)(5)-T01"
+        name: Training Completion
+        type: manual
+        frequency: annual
+        procedure: Verify all workforce members completed HIPAA training
+        expected: 100% completion rate
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC1.4
+      - framework: ISO_27001
+        control: "7.2"
+
+  - id: "164.308(a)(6)"
+    title: "Security Incident Procedures"
+    description: |
+      Implement policies and procedures to address security incidents.
+    category: Administrative Safeguards
+    evidence_sources:
+      - type: configuration
+        name: Incident Response Plan
+        systems:
+          - name: IR Playbook
+            config: /RUNBOOKS/incident-response-playbook.md
+      - type: audit_log
+        name: Incident Records
+        table: security_incidents
+        query: |
+          SELECT * FROM security_incidents
+          WHERE created_at BETWEEN $1 AND $2
+    tests:
+      - id: "164.308(a)(6)-T01"
+        name: Incident Response Testing
+        type: manual
+        frequency: annual
+        procedure: Conduct incident response tabletop exercise
+        expected: IR plan tested within 12 months
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC7.3
+      - framework: ISO_27001
+        control: A.5.24
+
+  - id: "164.308(a)(7)"
+    title: "Contingency Plan"
+    description: |
+      Establish policies and procedures for responding to an emergency or
+      other occurrence that damages systems containing ePHI.
+    category: Administrative Safeguards
+    evidence_sources:
+      - type: configuration
+        name: DR Plan
+        systems:
+          - name: Disaster Recovery
+            config: /RUNBOOKS/disaster-recovery.md
+          - name: Backup Procedures
+            config: /k8s/production/cron-pg-backup.yaml
+      - type: audit_log
+        name: DR Test Results
+        table: recovery_test_logs
+        query: |
+          SELECT * FROM recovery_test_logs
+          WHERE timestamp BETWEEN $1 AND $2
+    tests:
+      - id: "164.308(a)(7)-T01"
+        name: Backup Verification
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/backup-completion.test.ts
+        expected: Daily backups successful
+      - id: "164.308(a)(7)-T02"
+        name: DR Test
+        type: automated
+        frequency: annual
+        automation:
+          script: tests/compliance/recovery-test.test.ts
+        expected: Recovery within RTO/RPO
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: A1.2
+      - framework: ISO_27001
+        control: A.5.29
+
+  # Technical Safeguards - 164.312
+  - id: "164.312(a)(1)"
+    title: "Access Control"
+    description: |
+      Implement technical policies and procedures for electronic information
+      systems that maintain ePHI to allow access only to authorized persons.
+    category: Technical Safeguards
+    evidence_sources:
+      - type: audit_log
+        name: Authentication Events
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_category = 'authentication'
+          AND timestamp BETWEEN $1 AND $2
+      - type: configuration
+        name: Access Controls
+        systems:
+          - name: OIDC Configuration
+            config: /infra/terraform/modules/auth/
+          - name: MFA Settings
+            config: /server/src/config/mfa.ts
+    tests:
+      - id: "164.312(a)(1)-T01"
+        name: Unique User Identification
+        type: automated
+        frequency: continuous
+        automation:
+          script: tests/compliance/hipaa-unique-id.test.ts
+        expected: All users have unique identifiers
+      - id: "164.312(a)(1)-T02"
+        name: Automatic Logoff
+        type: automated
+        frequency: weekly
+        automation:
+          script: tests/compliance/hipaa-session-timeout.test.ts
+        expected: Sessions timeout after inactivity
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.1
+      - framework: ISO_27001
+        control: A.9.4.1
+
+  - id: "164.312(b)"
+    title: "Audit Controls"
+    description: |
+      Implement hardware, software, and procedural mechanisms that record
+      and examine activity in information systems containing ePHI.
+    category: Technical Safeguards
+    evidence_sources:
+      - type: audit_log
+        name: Audit Log System
+        table: audit_events
+        query: |
+          SELECT COUNT(*) as total, event_category
+          FROM audit_events
+          WHERE timestamp BETWEEN $1 AND $2
+          GROUP BY event_category
+      - type: configuration
+        name: Audit Configuration
+        systems:
+          - name: Audit System
+            config: /server/src/audit/
+    tests:
+      - id: "164.312(b)-T01"
+        name: Audit Log Completeness
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/hipaa-audit-completeness.test.ts
+        expected: All ePHI access logged
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC7.1
+      - framework: ISO_27001
+        control: A.8.15
+
+  - id: "164.312(c)(1)"
+    title: "Integrity Controls"
+    description: |
+      Implement policies and procedures to protect ePHI from improper
+      alteration or destruction.
+    category: Technical Safeguards
+    evidence_sources:
+      - type: configuration
+        name: Integrity Controls
+        systems:
+          - name: Hash Chain Audit
+            config: /server/src/audit/advanced-audit-system.ts
+          - name: WORM Storage
+            config: /server/src/federal/worm-audit-chain.ts
+      - type: metric
+        name: Integrity Verification
+        prometheus_query: |
+          sum(audit_chain_verification_failures_total)
+    tests:
+      - id: "164.312(c)(1)-T01"
+        name: Data Integrity Verification
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/hipaa-integrity.test.ts
+        expected: No integrity violations detected
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.1
+      - framework: ISO_27001
+        control: A.8.11
+
+  - id: "164.312(d)"
+    title: "Person or Entity Authentication"
+    description: |
+      Implement procedures to verify that a person or entity seeking access
+      to ePHI is the one claimed.
+    category: Technical Safeguards
+    evidence_sources:
+      - type: audit_log
+        name: Authentication Events
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_type IN ('auth.login', 'auth.mfa_challenge')
+          AND timestamp BETWEEN $1 AND $2
+      - type: configuration
+        name: MFA Configuration
+        systems:
+          - name: MFA Settings
+            config: /server/src/config/mfa.ts
+    tests:
+      - id: "164.312(d)-T01"
+        name: MFA Enforcement
+        type: automated
+        frequency: continuous
+        automation:
+          script: tests/compliance/hipaa-mfa.test.ts
+        expected: MFA required for ePHI access
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.1
+      - framework: ISO_27001
+        control: A.8.5
+
+  - id: "164.312(e)(1)"
+    title: "Transmission Security"
+    description: |
+      Implement technical security measures to guard against unauthorized
+      access to ePHI that is being transmitted over an electronic network.
+    category: Technical Safeguards
+    evidence_sources:
+      - type: configuration
+        name: TLS Configuration
+        systems:
+          - name: TLS Settings
+            config: /infra/terraform/modules/networking/tls.tf
+      - type: metric
+        name: TLS Version Distribution
+        prometheus_query: |
+          sum by (version) (tls_handshakes_total)
+    tests:
+      - id: "164.312(e)(1)-T01"
+        name: Encryption in Transit
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/hipaa-transmission.test.ts
+        expected: TLS 1.2+ enforced for all ePHI transmission
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.7
+      - framework: ISO_27001
+        control: A.8.24
+
+artifacts:
+  - type: attestation
+    name: HIPAA Compliance Attestation
+    description: Management attestation of HIPAA compliance
+    access: customer_nda
+    path: /artifacts/hipaa-attestation-2025.pdf
+
+  - type: policy_document
+    name: BAA Template
+    description: Business Associate Agreement template
+    access: customer
+    path: /artifacts/baa-template.pdf

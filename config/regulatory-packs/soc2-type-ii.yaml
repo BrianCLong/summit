@@ -1,0 +1,426 @@
+# SOC 2 Type II Regulatory Pack
+# CompanyOS Trust Center
+
+id: soc2-type-ii-2025
+name: SOC 2 Type II Compliance Pack
+description: |
+  Comprehensive SOC 2 Type II compliance pack covering all Trust Services Criteria (TSC).
+  This pack includes controls, evidence sources, and automated tests for security,
+  availability, processing integrity, confidentiality, and privacy.
+version: "2025.1"
+framework: SOC2_TYPE_II
+status: active
+
+metadata:
+  audit_period: "2024-01-01/2024-12-31"
+  auditor: "Independent Audit Firm LLP"
+  certification_date: "2025-02-15"
+  expiration_date: "2026-02-15"
+
+controls:
+  # CC1 - Control Environment
+  - id: CC1.1
+    title: "COSO Principle 1 - Commitment to Integrity"
+    description: |
+      The entity demonstrates a commitment to integrity and ethical values.
+    category: Control Environment
+    evidence_sources:
+      - type: configuration
+        name: Code of Conduct
+        path: /docs/policies/code-of-conduct.md
+      - type: audit_log
+        name: Ethics Training Records
+        query: |
+          SELECT * FROM training_records
+          WHERE course_type = 'ethics'
+          AND completed_at BETWEEN $1 AND $2
+    tests:
+      - id: CC1.1-T01
+        name: Code of Conduct Acknowledgment
+        type: manual
+        frequency: annual
+        procedure: Verify all employees have acknowledged code of conduct
+        expected: 100% acknowledgment rate
+    mappings:
+      - framework: ISO_27001
+        control: "5.1"
+        requirement: Leadership and commitment
+      - framework: NIST_800_53
+        control: "PL-4"
+        requirement: Rules of Behavior
+
+  # CC2 - Communication and Information
+  - id: CC2.1
+    title: "COSO Principle 13 - Quality Information"
+    description: |
+      The entity obtains or generates and uses relevant, quality information
+      to support the functioning of internal control.
+    category: Communication and Information
+    evidence_sources:
+      - type: configuration
+        name: Security Policies
+        systems:
+          - name: Policy Repository
+            config: /docs/policies/
+      - type: audit_log
+        name: Policy Communication Records
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_type = 'policy.acknowledged'
+          AND timestamp BETWEEN $1 AND $2
+    tests:
+      - id: CC2.1-T01
+        name: Policy Accessibility
+        type: automated
+        frequency: monthly
+        automation:
+          script: tests/compliance/policy-accessibility.test.ts
+          schedule: "0 0 1 * *"
+        expected: All policies accessible to relevant personnel
+
+  # CC6 - Logical and Physical Access Controls
+  - id: CC6.1
+    control_definition_id: ACCESS-001
+    title: "Logical Access Security"
+    description: |
+      The entity implements logical access security software, infrastructure,
+      and architectures over protected information assets to protect them
+      from security events to meet the entity's objectives.
+    category: Logical and Physical Access
+    evidence_sources:
+      - type: audit_log
+        name: Authentication Events
+        table: audit_events
+        query: |
+          SELECT event_id, event_type, actor_id, outcome, ip_address, timestamp
+          FROM audit_events
+          WHERE event_category = 'authentication'
+          AND tenant_id = $1
+          AND timestamp BETWEEN $2 AND $3
+          ORDER BY timestamp DESC
+        fields:
+          - event_type
+          - actor_id
+          - outcome
+          - ip_address
+          - timestamp
+        retention: 7y
+      - type: policy
+        name: OPA Access Policies
+        policy_path: /SECURITY/policy/opa/abac.rego
+        verification: |
+          Verify default deny, RBAC rules, tenant isolation
+      - type: configuration
+        name: Identity Provider Configuration
+        systems:
+          - name: OIDC Config
+            config: /infra/terraform/modules/auth/oidc.tf
+          - name: MFA Settings
+            config: /server/src/config/mfa.ts
+      - type: metric
+        name: Authentication Metrics
+        prometheus_query: |
+          sum(rate(auth_attempts_total{outcome="success"}[24h])) /
+          sum(rate(auth_attempts_total[24h]))
+    tests:
+      - id: CC6.1-T01
+        name: Authentication Required
+        type: automated
+        frequency: continuous
+        automation:
+          script: tests/compliance/access-auth-required.test.ts
+          schedule: "0 */4 * * *"
+        expected: All protected endpoints require authentication
+      - id: CC6.1-T02
+        name: RBAC Enforcement
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/access-rbac.test.ts
+          schedule: "0 2 * * *"
+        expected: Role-based access controls enforced
+      - id: CC6.1-T03
+        name: Tenant Isolation
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/access-tenant-isolation.test.ts
+          schedule: "0 3 * * *"
+        expected: Cross-tenant access prevented
+      - id: CC6.1-T04
+        name: Quarterly Access Review
+        type: manual
+        frequency: quarterly
+        procedure: docs/compliance/quarterly_access_review.md
+        expected: All access rights reviewed and documented
+    mappings:
+      - framework: ISO_27001
+        control: A.9.4.1
+        requirement: Information access restriction
+      - framework: NIST_800_53
+        control: AC-3
+        requirement: Access Enforcement
+      - framework: HIPAA
+        control: "164.312(d)"
+        requirement: Person or entity authentication
+
+  - id: CC6.2
+    title: "User Registration and Authorization"
+    description: |
+      Prior to issuing system credentials and granting system access, the entity
+      registers and authorizes new internal and external users whose access is
+      administered by the entity.
+    category: Logical and Physical Access
+    evidence_sources:
+      - type: audit_log
+        name: User Provisioning Events
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_type IN ('user.created', 'user.access_granted')
+          AND timestamp BETWEEN $1 AND $2
+      - type: configuration
+        name: Provisioning Workflow
+        systems:
+          - name: User Provisioning
+            config: /server/src/services/user-provisioning.ts
+    tests:
+      - id: CC6.2-T01
+        name: Provisioning Approval Required
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/user-provisioning.test.ts
+        expected: All user provisioning requires approval
+    mappings:
+      - framework: ISO_27001
+        control: A.9.2.1
+        requirement: User registration and de-registration
+      - framework: NIST_800_53
+        control: AC-2
+        requirement: Account Management
+
+  - id: CC6.3
+    title: "User Deprovisioning"
+    description: |
+      The entity removes access to protected information assets when a user's
+      employment or service relationship terminates.
+    category: Logical and Physical Access
+    evidence_sources:
+      - type: audit_log
+        name: User Deprovisioning Events
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_type IN ('user.deactivated', 'user.access_revoked')
+          AND timestamp BETWEEN $1 AND $2
+    tests:
+      - id: CC6.3-T01
+        name: Timely Deprovisioning
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/user-deprovisioning.test.ts
+        expected: Access revoked within 24 hours of termination
+    mappings:
+      - framework: ISO_27001
+        control: A.9.2.6
+        requirement: Removal or adjustment of access rights
+
+  # CC7 - System Operations
+  - id: CC7.1
+    title: "Detection of Security Events"
+    description: |
+      To meet its objectives, the entity uses detection and monitoring procedures
+      to identify anomalies that are indicative of compromises or potential threats.
+    category: System Operations
+    evidence_sources:
+      - type: configuration
+        name: Monitoring Configuration
+        systems:
+          - name: Prometheus Alerts
+            config: /observability/prometheus/alerts/
+          - name: Grafana Dashboards
+            config: /observability/grafana/dashboards/
+      - type: metric
+        name: Alert Metrics
+        prometheus_query: |
+          sum(increase(alertmanager_alerts_received_total[24h]))
+      - type: audit_log
+        name: Security Alerts
+        table: security_alerts
+        query: |
+          SELECT * FROM security_alerts
+          WHERE created_at BETWEEN $1 AND $2
+          ORDER BY severity DESC
+    tests:
+      - id: CC7.1-T01
+        name: Monitoring Coverage
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/monitoring-coverage.test.ts
+        expected: All critical systems have monitoring
+    mappings:
+      - framework: ISO_27001
+        control: A.12.4.1
+        requirement: Event logging
+      - framework: NIST_800_53
+        control: SI-4
+        requirement: System Monitoring
+
+  # CC8 - Change Management
+  - id: CC8.1
+    control_definition_id: CHANGE-001
+    title: "Change Management Process"
+    description: |
+      The entity authorizes, designs, develops, configures, documents, tests,
+      approves, and implements changes to infrastructure, data, software, and
+      procedures to meet its objectives.
+    category: Change Management
+    evidence_sources:
+      - type: external_api
+        name: Pull Request History
+        endpoint: https://api.github.com/repos/{owner}/{repo}/pulls
+      - type: audit_log
+        name: Deployment Events
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_category = 'deployment'
+          AND timestamp BETWEEN $1 AND $2
+      - type: configuration
+        name: Branch Protection
+        systems:
+          - name: GitHub Branch Protection
+            config: .github/branch-protection.json
+          - name: CODEOWNERS
+            config: .github/CODEOWNERS
+    tests:
+      - id: CC8.1-T01
+        name: PR Required for Changes
+        type: automated
+        frequency: continuous
+        automation:
+          script: tests/compliance/change-pr-required.test.ts
+        expected: Direct pushes to main blocked
+      - id: CC8.1-T02
+        name: Code Review Required
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/change-review.test.ts
+        expected: All PRs have required approvals
+      - id: CC8.1-T03
+        name: CI Tests Required
+        type: automated
+        frequency: continuous
+        automation:
+          script: tests/compliance/change-ci-pass.test.ts
+        expected: No deployments without passing CI
+    mappings:
+      - framework: ISO_27001
+        control: A.12.1.2
+        requirement: Change management
+      - framework: NIST_800_53
+        control: CM-3
+        requirement: Configuration Change Control
+
+  # A1 - Availability
+  - id: A1.1
+    title: "Availability Commitments"
+    description: |
+      The entity maintains, monitors, and evaluates current processing capacity
+      and use of system components to manage capacity demand.
+    category: Availability
+    evidence_sources:
+      - type: metric
+        name: Availability Metrics
+        prometheus_query: |
+          avg_over_time(up{job="api"}[30d])
+      - type: configuration
+        name: SLO Configuration
+        systems:
+          - name: SLO Definitions
+            config: /observability/slo/
+    tests:
+      - id: A1.1-T01
+        name: SLO Compliance
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/slo-compliance.test.ts
+        expected: Availability >= 99.9%
+    mappings:
+      - framework: ISO_27001
+        control: A.17.2.1
+        requirement: Availability of information processing facilities
+
+  - id: A1.2
+    control_definition_id: BACKUP-001
+    title: "Backup and Recovery"
+    description: |
+      The entity authorizes, designs, develops, implements, operates, and monitors
+      backup procedures to meet its objectives.
+    category: Availability
+    evidence_sources:
+      - type: audit_log
+        name: Backup Job Logs
+        table: backup_job_logs
+        query: |
+          SELECT job_id, job_type, status, backup_size_bytes, completed_at
+          FROM backup_job_logs
+          WHERE timestamp BETWEEN $1 AND $2
+      - type: metric
+        name: Backup Success Rate
+        prometheus_query: |
+          sum(backup_job_success_total) / sum(backup_job_total)
+      - type: configuration
+        name: Backup Configuration
+        systems:
+          - name: PostgreSQL Backup
+            config: /k8s/production/cron-pg-backup.yaml
+          - name: Neo4j Backup
+            config: /k8s/production/cron-neo4j-backup.yaml
+    tests:
+      - id: A1.2-T01
+        name: Daily Backup Completion
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/backup-completion.test.ts
+        expected: All scheduled backups complete successfully
+      - id: A1.2-T02
+        name: Monthly Recovery Test
+        type: automated
+        frequency: monthly
+        automation:
+          script: tests/compliance/recovery-test.test.ts
+        expected: Recovery completes within RTO
+    mappings:
+      - framework: ISO_27001
+        control: A.12.3.1
+        requirement: Information backup
+      - framework: NIST_800_53
+        control: CP-9
+        requirement: System Backup
+
+artifacts:
+  - type: report
+    name: SOC 2 Type II Report
+    description: Annual SOC 2 Type II audit report
+    access: customer_nda
+    path: /artifacts/soc2-type-ii-2024.pdf
+
+  - type: certificate
+    name: SOC 2 Type II Certificate
+    description: SOC 2 Type II certification letter
+    access: customer
+    path: /artifacts/soc2-certificate-2025.pdf
+
+  - type: attestation
+    name: Management Assertion Letter
+    description: Management assertion for SOC 2 controls
+    access: customer_nda
+    path: /artifacts/management-assertion-2025.pdf
