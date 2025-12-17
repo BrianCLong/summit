@@ -23,7 +23,11 @@ export function GlobalSearch() {
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
+<<<<<<< HEAD
+    if (!query.trim()) {return []}
+=======
     if (!query || !query.trim()) return []
+>>>>>>> main
 
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 200))
@@ -158,7 +162,7 @@ export function GlobalSearch() {
     }
   }
 
-  if (!isOpen) return null
+  if (!isOpen) {return null}
 
   return (
     <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -199,7 +203,7 @@ export function GlobalSearch() {
                 {['command', 'entity', 'investigation', 'alert', 'case'].map(
                   type => {
                     const typeResults = results.filter(r => r.type === type)
-                    if (typeResults.length === 0) return null
+                    if (typeResults.length === 0) {return null}
 
                     return (
                       <Command.Group
