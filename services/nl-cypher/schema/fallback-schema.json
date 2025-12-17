@@ -1,0 +1,14 @@
+{
+  "nodes": [
+    {"label": "Person", "properties": ["id", "name", "age", "city", "title"]},
+    {"label": "Company", "properties": ["id", "name", "industry", "location"]},
+    {"label": "Project", "properties": ["id", "name", "status", "budget"]},
+    {"label": "Event", "properties": ["id", "name", "date", "location"]}
+  ],
+  "relationships": [
+    {"type": "WORKS_AT", "from": "Person", "to": "Company"},
+    {"type": "PARTICIPATES_IN", "from": "Person", "to": "Project"},
+    {"type": "HOSTED_AT", "from": "Event", "to": "Company"},
+    {"type": "FUNDS", "from": "Company", "to": "Project"}
+  ]
+}
