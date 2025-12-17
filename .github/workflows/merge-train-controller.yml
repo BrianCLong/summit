@@ -1,0 +1,64 @@
+name: Merge Train Controller
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Run hourly
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  stabilize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      checks: read
+      statuses: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Git Identity
+        run: |
+          git config --global user.name "Merge Train Bot"
+          git config --global user.email "bot@example.com"
+
+      - name: Install Tools
+        run: |
+          npm install -g pnpm
+          # Ensure scripts are executable
+          chmod +x scripts/*.sh
+          chmod +x scripts/*.js
+
+      - name: 🔍 Analyze Dependency Conflicts
+        run: ./scripts/analyze-dependency-conflicts.js
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🚂 Merge Train Health Check
+        run: ./scripts/merge-train.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🧹 Normalize Branches (Hourly)
+        if: github.event_name == 'schedule'
+        run: ./scripts/normalize-branches.sh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📊 Post Status Report
+        if: always()
+        run: |
+          echo "Merge Train Stabilization Cycle Complete"
+          # Could post to Slack/Discord here
