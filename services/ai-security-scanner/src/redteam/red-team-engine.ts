@@ -491,9 +491,9 @@ export class RedTeamEngine {
     const successRate = results.filter((r) => r.success).length / Math.max(results.length, 1);
 
     let overallRisk: RiskAssessment['overallRisk'] = 'low';
-    if (criticalCount > 0) overallRisk = 'critical';
-    else if (highCount > 0) overallRisk = 'high';
-    else if (vulns.length > 0) overallRisk = 'medium';
+    if (criticalCount > 0) {overallRisk = 'critical';}
+    else if (highCount > 0) {overallRisk = 'high';}
+    else if (vulns.length > 0) {overallRisk = 'medium';}
 
     return {
       overallRisk,

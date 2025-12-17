@@ -358,4 +358,157 @@ export class RunbookEngine {
   getRunbook(runbookId: string): RunbookDefinition | undefined {
     return this.runbooks.get(runbookId);
   }
+
+  /**
+   * Pause a running execution
+   */
+  async pauseExecution(executionId: string): Promise<void> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    if (execution.status !== ExecutionStatus.RUNNING) {
+      throw new Error(
+        `Cannot pause execution in status: ${execution.status}`
+      );
+    }
+
+    execution.status = ExecutionStatus.PAUSED;
+    execution.logs.push({
+      id: uuidv4(),
+      timestamp: new Date(),
+      level: 'info',
+      stepId: 'engine',
+      executionId,
+      message: 'Execution paused',
+    });
+
+    await this.stateManager.saveExecution(execution);
+  }
+
+  /**
+   * Resume a paused execution
+   */
+  async resumeExecution(executionId: string): Promise<void> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    if (execution.status !== ExecutionStatus.PAUSED) {
+      throw new Error(
+        `Cannot resume execution in status: ${execution.status}`
+      );
+    }
+
+    execution.status = ExecutionStatus.RUNNING;
+    execution.logs.push({
+      id: uuidv4(),
+      timestamp: new Date(),
+      level: 'info',
+      stepId: 'engine',
+      executionId,
+      message: 'Execution resumed',
+    });
+
+    await this.stateManager.saveExecution(execution);
+
+    // Re-trigger execution
+    const runbook = this.runbooks.get(execution.runbookId);
+    if (!runbook) {
+      throw new Error(`Runbook not found: ${execution.runbookId}`);
+    }
+
+    this.executeRunbook(
+      executionId,
+      runbook,
+      execution.context,
+      execution.input
+    ).catch((error) => {
+      console.error(`Resumed execution ${executionId} failed:`, error);
+    });
+  }
+
+  /**
+   * Cancel a running execution
+   */
+  async cancelExecution(
+    executionId: string,
+    reason?: string
+  ): Promise<void> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    if (
+      execution.status !== ExecutionStatus.RUNNING &&
+      execution.status !== ExecutionStatus.PAUSED &&
+      execution.status !== ExecutionStatus.PENDING
+    ) {
+      throw new Error(
+        `Cannot cancel execution in status: ${execution.status}`
+      );
+    }
+
+    execution.status = ExecutionStatus.CANCELLED;
+    execution.endTime = new Date();
+    execution.durationMs = execution.endTime.getTime() - execution.startTime.getTime();
+    execution.logs.push({
+      id: uuidv4(),
+      timestamp: new Date(),
+      level: 'warn',
+      stepId: 'engine',
+      executionId,
+      message: `Execution cancelled${reason ? `: ${reason}` : ''}`,
+      metadata: { reason },
+    });
+
+    await this.stateManager.saveExecution(execution);
+  }
+
+  /**
+   * Get execution statistics
+   */
+  async getExecutionStats(executionId: string): Promise<{
+    totalSteps: number;
+    completedSteps: number;
+    failedSteps: number;
+    pendingSteps: number;
+    progress: number;
+  }> {
+    const execution = await this.stateManager.getExecution(executionId);
+    if (!execution) {
+      throw new Error(`Execution not found: ${executionId}`);
+    }
+
+    const runbook = this.runbooks.get(execution.runbookId);
+    if (!runbook) {
+      throw new Error(`Runbook not found: ${execution.runbookId}`);
+    }
+
+    const totalSteps = runbook.steps.length;
+    let completedSteps = 0;
+    let failedSteps = 0;
+
+    for (const result of execution.stepResults.values()) {
+      if (result.status === ExecutionStatus.COMPLETED) {
+        completedSteps++;
+      } else if (result.status === ExecutionStatus.FAILED) {
+        failedSteps++;
+      }
+    }
+
+    const pendingSteps = totalSteps - completedSteps - failedSteps;
+    const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0;
+
+    return {
+      totalSteps,
+      completedSteps,
+      failedSteps,
+      pendingSteps,
+      progress,
+    };
+  }
 }

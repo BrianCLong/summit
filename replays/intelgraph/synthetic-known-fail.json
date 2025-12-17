@@ -1,0 +1,54 @@
+{
+  "id": "intelgraph-synthetic-known-fail",
+  "service": "intelgraph",
+  "flow": "intelgraph-cypher-sandbox",
+  "capturedAt": "2025-01-01T00:00:00.000Z",
+  "request": {
+    "path": "/sandbox/execute",
+    "method": "POST",
+    "payload": {
+      "cypher": "MATCH (p:Person) DELETE p",
+      "timeoutMs": 120
+    },
+    "meta": {
+      "policy": {
+        "authorityId": "policy-ref",
+        "purpose": "exploration"
+      },
+      "featureFlags": {
+        "readOnly": true
+      }
+    }
+  },
+  "context": {
+    "tenantId": "tenant-synthetic",
+    "purpose": "exploration",
+    "traceId": "trace-sim-001",
+    "requestId": "request-sim-001",
+    "featureFlags": {
+      "readOnly": true
+    }
+  },
+  "environment": {
+    "runtime": "node",
+    "env": {
+      "NODE_ENV": "test",
+      "INTELGRAPH_ENV": "test"
+    }
+  },
+  "outcome": {
+    "status": "error",
+    "message": "Sandbox execution only supports read-only Cypher statements",
+    "classification": "query-validation"
+  },
+  "privacy": {
+    "piiScrubbed": true,
+    "notes": [
+      "Synthetic replay fixture; no live user data."
+    ]
+  },
+  "tags": [
+    "synthetic",
+    "known-fail"
+  ]
+}
