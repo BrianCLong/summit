@@ -235,7 +235,7 @@ export class PatternMining {
    */
   calculateRelationshipStrength(edgeId: string): number {
     const edge = this.storage.getEdge(edgeId);
-    if (!edge) return 0;
+    if (!edge) {return 0;}
 
     let strength = 0;
 
@@ -282,7 +282,7 @@ export class PatternMining {
    * Determine how significant a path is in the overall graph
    */
   analyzePathSignificance(path: Path): number {
-    if (path.length === 0) return 0;
+    if (path.length === 0) {return 0;}
 
     let significance = 0;
 
@@ -390,7 +390,7 @@ export class PatternMining {
     const totalNodes = stats.nodeCount;
     const totalEdges = stats.edgeCount;
 
-    if (totalNodes === 0) return 0;
+    if (totalNodes === 0) {return 0;}
 
     // Expected count in random graph (simplified)
     let expectedCount = 0;
@@ -482,8 +482,8 @@ export class PatternMining {
     paths: Path[],
     visited: Set<string>
   ): void {
-    if (currentPath.length >= maxHops) return;
-    if (visited.has(current)) return;
+    if (currentPath.length >= maxHops) {return;}
+    if (visited.has(current)) {return;}
 
     visited.add(current);
     currentPath.push(current);
@@ -495,12 +495,12 @@ export class PatternMining {
 
       for (let i = 0; i < currentPath.length; i++) {
         const node = this.storage.getNode(currentPath[i]);
-        if (node) nodes.push(node);
+        if (node) {nodes.push(node);}
 
         if (i < currentPath.length - 1) {
           const outgoing = this.storage.getOutgoingEdges(currentPath[i]);
           const edge = outgoing.find(e => e.targetId === currentPath[i + 1]);
-          if (edge) edges.push(edge);
+          if (edge) {edges.push(edge);}
         }
       }
 

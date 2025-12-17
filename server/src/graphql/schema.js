@@ -3,7 +3,10 @@ const { copilotTypeDefs } = require('./schema.copilot.js');
 const { graphTypeDefs } = require('./schema.graphops.js');
 const { aiTypeDefs } = require('./schema.ai.js');
 const { annotationsTypeDefs } = require('./schema.annotations.js');
-const { analyticsTypeDefs } = require('./schema.analytics.js');
+<<<<<<< HEAD
+=======
+const { healthTypeDefs } = require('./schema.health.js');
+>>>>>>> main
 const graphragTypes = require('./types/graphragTypes.js');
 
 const base = gql`
@@ -24,8 +27,8 @@ export const typeDefs = [
   base,
   copilotTypeDefs,
   graphTypeDefs,
-  analyticsTypeDefs,
   graphragTypes,
   aiTypeDefs,
   annotationsTypeDefs,
+  healthTypeDefs,
 ];

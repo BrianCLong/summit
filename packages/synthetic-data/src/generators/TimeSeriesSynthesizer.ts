@@ -74,7 +74,7 @@ export class TimeSeriesSynthesizer {
     const timestamps = this.generateTimestamps(length, frequency);
 
     // Generate base series
-    let values: number[][] = [];
+    const values: number[][] = [];
 
     for (let i = 0; i < numSeries; i++) {
       let series: number[] = new Array(length).fill(0);
