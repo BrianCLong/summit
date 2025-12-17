@@ -1,0 +1,88 @@
+# CompanyOS Tenant API - SLO Definitions
+# Generated: 2025-12-07
+
+service: tenant-api
+owner: companyos-team
+description: SLO definitions for the Tenant Control Plane API
+
+slos:
+  # Availability SLO
+  - name: tenant-api-availability
+    description: Tenant API should be available 99.9% of the time
+    objective: 99.9
+    window: 7d
+    indicator:
+      type: availability
+      good_events: |
+        sum(rate(companyos_tenant_api_http_requests_total{status!~"5.."}[5m]))
+      total_events: |
+        sum(rate(companyos_tenant_api_http_requests_total[5m]))
+    alerting:
+      burn_rate_alerts:
+        - severity: critical
+          short_window: 5m
+          long_window: 1h
+          burn_rate: 14.4
+        - severity: warning
+          short_window: 30m
+          long_window: 6h
+          burn_rate: 6
+
+  # Latency SLO - Read operations
+  - name: tenant-api-read-latency
+    description: 95% of read requests should complete in under 300ms
+    objective: 95.0
+    window: 7d
+    indicator:
+      type: latency
+      threshold_ms: 300
+      good_events: |
+        sum(rate(companyos_tenant_api_http_request_duration_seconds_bucket{le="0.3",method="GET"}[5m]))
+      total_events: |
+        sum(rate(companyos_tenant_api_http_request_duration_seconds_count{method="GET"}[5m]))
+    alerting:
+      burn_rate_alerts:
+        - severity: warning
+          short_window: 30m
+          long_window: 6h
+          burn_rate: 6
+
+  # Latency SLO - Write operations
+  - name: tenant-api-write-latency
+    description: 95% of write requests should complete in under 500ms
+    objective: 95.0
+    window: 7d
+    indicator:
+      type: latency
+      threshold_ms: 500
+      good_events: |
+        sum(rate(companyos_tenant_api_http_request_duration_seconds_bucket{le="0.5",method=~"POST|PUT|PATCH|DELETE"}[5m]))
+      total_events: |
+        sum(rate(companyos_tenant_api_http_request_duration_seconds_count{method=~"POST|PUT|PATCH|DELETE"}[5m]))
+
+  # Error rate SLO
+  - name: tenant-api-error-rate
+    description: Error rate should be below 0.5% over 7 days
+    objective: 99.5
+    window: 7d
+    indicator:
+      type: error_rate
+      good_events: |
+        sum(rate(companyos_tenant_api_http_requests_total{status!~"5.."}[5m]))
+      total_events: |
+        sum(rate(companyos_tenant_api_http_requests_total[5m]))
+    alerting:
+      burn_rate_alerts:
+        - severity: critical
+          short_window: 5m
+          long_window: 1h
+          burn_rate: 14.4
+
+# Error budget tracking
+error_budget:
+  monthly_budget_percent: 0.1  # 99.9% availability = 0.1% error budget
+  alerts:
+    - threshold: 50  # Alert when 50% of budget consumed
+      severity: warning
+    - threshold: 80  # Alert when 80% of budget consumed
+      severity: critical

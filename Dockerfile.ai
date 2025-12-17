@@ -2,7 +2,7 @@
 # Multi-stage build for optimized AI dependencies
 
 # Stage 1: Base Python environment with system dependencies
-FROM nvidia/cuda:13.0.0-devel-ubuntu22.04 as ai-base
+FROM nvidia/cuda:13.1.0-devel-ubuntu22.04 as ai-base
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive

@@ -1,11 +1,10 @@
 #!/usr/bin/env node
-import { execSync } from 'node:child_process';
+import { spawnSync } from 'node:child_process';
 
-const run = (command) => {
+const run = (command, args = []) => {
   try {
-    return execSync(command, { stdio: ['ignore', 'pipe', 'ignore'] })
-      .toString()
-      .trim();
+    const result = spawnSync(command, args, { stdio: ['ignore', 'pipe', 'ignore'] });
+    return result.status === 0 ? result.stdout.toString().trim() : undefined;
   } catch (error) {
     return undefined;
   }
@@ -15,19 +14,17 @@ const manifest = {
   schemaVersion: '1.0.0',
   generatedAt: new Date().toISOString(),
   git: {
-    commit: run('git rev-parse HEAD'),
-    tree: run('git rev-parse HEAD^{tree}'),
-    describe: run('git describe --tags --always'),
+    commit: run('git', ['rev-parse', 'HEAD']),
+    tree: run('git', ['rev-parse', 'HEAD^{tree}']),
+    describe: run('git', ['describe', '--tags', '--always'])
   },
   build: {
     node: process.version,
-    pnpm: run('pnpm --version'),
+    pnpm: run('pnpm', ['--version']),
     workflowRun: process.env.GITHUB_RUN_ID || null,
     actor: process.env.GITHUB_ACTOR || null,
-    repository:
-      process.env.GITHUB_REPOSITORY ||
-      run('git config --get remote.origin.url'),
-  },
+    repository: process.env.GITHUB_REPOSITORY || run('git', ['config', '--get', 'remote.origin.url'])
+  }
 };
 
 process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);

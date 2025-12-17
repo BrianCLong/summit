@@ -1,0 +1,787 @@
+# Regulatory Lenses Configuration for Summit/IntelGraph
+# ======================================================
+# This file defines regulatory compliance simulation lenses that help identify
+# high-risk areas early in design and changes. Each lens represents a major
+# regulatory framework with its specific requirements and mappings.
+#
+# DISCLAIMER: This is a simulation/aid tool, NOT legal advice.
+# Always consult qualified legal counsel for compliance matters.
+
+apiVersion: compliance.intelgraph.io/v1
+kind: RegulatoryLensConfiguration
+metadata:
+  name: regulatory-lenses
+  version: "1.0.0"
+  lastUpdated: "2025-12-07"
+  description: "Regulatory stance simulation framework for GDPR, CCPA, and EU AI Act"
+
+# ============================================================================
+# GDPR - General Data Protection Regulation (EU)
+# ============================================================================
+lenses:
+  - id: gdpr
+    name: "General Data Protection Regulation (GDPR)"
+    jurisdiction: "European Union"
+    effectiveDate: "2018-05-25"
+    authority: "European Data Protection Board (EDPB)"
+    referenceUrl: "https://gdpr.eu/"
+
+    categories:
+      - id: data_subject_rights
+        name: "Data Subject Rights"
+        description: "Rights afforded to individuals under GDPR Articles 12-22"
+        articles:
+          - "Art. 12 - Transparent information"
+          - "Art. 13/14 - Information provision"
+          - "Art. 15 - Right of access"
+          - "Art. 16 - Right to rectification"
+          - "Art. 17 - Right to erasure (RTBF)"
+          - "Art. 18 - Right to restriction"
+          - "Art. 20 - Right to data portability"
+          - "Art. 21 - Right to object"
+          - "Art. 22 - Automated decision-making"
+
+      - id: lawful_basis
+        name: "Lawful Basis for Processing"
+        description: "Legal grounds for processing personal data (Art. 6)"
+        bases:
+          - consent
+          - contract
+          - legal_obligation
+          - vital_interests
+          - public_task
+          - legitimate_interests
+
+      - id: retention
+        name: "Data Retention & Minimization"
+        description: "Storage limitation and data minimization principles"
+        articles:
+          - "Art. 5(1)(c) - Data minimization"
+          - "Art. 5(1)(e) - Storage limitation"
+
+      - id: security
+        name: "Security of Processing"
+        description: "Technical and organizational security measures"
+        articles:
+          - "Art. 32 - Security of processing"
+          - "Art. 33 - Breach notification to authority"
+          - "Art. 34 - Breach notification to data subject"
+
+      - id: accountability
+        name: "Accountability & Governance"
+        description: "Documentation and compliance demonstration"
+        articles:
+          - "Art. 5(2) - Accountability principle"
+          - "Art. 30 - Records of processing activities"
+          - "Art. 35 - Data Protection Impact Assessment"
+          - "Art. 37 - Data Protection Officer"
+
+      - id: international_transfers
+        name: "International Data Transfers"
+        description: "Cross-border data transfer requirements"
+        articles:
+          - "Art. 44-49 - Transfer conditions"
+          - "SCCs - Standard Contractual Clauses"
+
+      - id: special_categories
+        name: "Special Category Data"
+        description: "Enhanced protection for sensitive data (Art. 9)"
+        dataTypes:
+          - racial_ethnic_origin
+          - political_opinions
+          - religious_beliefs
+          - trade_union_membership
+          - genetic_data
+          - biometric_data
+          - health_data
+          - sexual_orientation
+
+      - id: automated_decisions
+        name: "Automated Decision-Making"
+        description: "Profiling and automated decisions with legal effects"
+        articles:
+          - "Art. 22 - Right not to be subject to automated decisions"
+          - "Recital 71 - Profiling safeguards"
+
+    dataTypeMappings:
+      personal_data:
+        - user_id
+        - email
+        - name
+        - ip_address
+        - device_id
+        - session_id
+        - cookie_id
+        - location
+        - phone_number
+        - address
+        - date_of_birth
+        - national_id
+        - passport_number
+
+      behavioral_data:
+        - browsing_history
+        - search_queries
+        - click_patterns
+        - purchase_history
+        - preferences
+        - interaction_logs
+        - usage_metrics
+
+      special_category:
+        - health_data
+        - biometric_data
+        - genetic_data
+        - political_opinions
+        - religious_beliefs
+        - racial_origin
+        - sexual_orientation
+        - trade_union_membership
+
+      profiling_data:
+        - risk_scores
+        - behavioral_scores
+        - predictive_models
+        - user_segments
+        - recommendation_signals
+        - threat_indicators
+        - trust_scores
+
+    featureMappings:
+      high_risk_features:
+        - automated_decision_making
+        - profiling
+        - large_scale_processing
+        - systematic_monitoring
+        - cross_border_transfer
+        - special_category_processing
+        - vulnerable_subjects
+        - innovative_technology
+
+      dpia_triggers:
+        - systematic_evaluation
+        - automated_decisions_with_effects
+        - large_scale_special_category
+        - large_scale_monitoring
+        - matching_datasets
+        - vulnerable_individuals
+        - new_technology
+        - denial_of_service
+
+    processingOperations:
+      collection:
+        obligations:
+          - transparency_notice
+          - lawful_basis_documentation
+          - purpose_limitation
+          - consent_mechanism
+
+      storage:
+        obligations:
+          - encryption_at_rest
+          - access_controls
+          - retention_policy
+          - backup_security
+
+      analysis:
+        obligations:
+          - purpose_limitation
+          - minimization
+          - accuracy_maintenance
+          - profiling_safeguards
+
+      sharing:
+        obligations:
+          - data_sharing_agreement
+          - transfer_impact_assessment
+          - recipient_verification
+          - purpose_compatibility
+
+      deletion:
+        obligations:
+          - secure_deletion
+          - backup_purge
+          - processor_notification
+          - audit_trail
+
+  # ============================================================================
+  # CCPA - California Consumer Privacy Act
+  # ============================================================================
+  - id: ccpa
+    name: "California Consumer Privacy Act (CCPA/CPRA)"
+    jurisdiction: "California, United States"
+    effectiveDate: "2020-01-01"
+    authority: "California Privacy Protection Agency (CPPA)"
+    referenceUrl: "https://oag.ca.gov/privacy/ccpa"
+
+    categories:
+      - id: consumer_rights
+        name: "Consumer Rights"
+        description: "Rights afforded to California consumers"
+        rights:
+          - right_to_know
+          - right_to_delete
+          - right_to_opt_out
+          - right_to_non_discrimination
+          - right_to_correct
+          - right_to_limit_sensitive_use
+
+      - id: disclosure
+        name: "Disclosure Requirements"
+        description: "Privacy notice and disclosure obligations"
+        requirements:
+          - privacy_policy
+          - at_collection_notice
+          - financial_incentive_notice
+          - opt_out_mechanisms
+
+      - id: sale_sharing
+        name: "Sale and Sharing of Data"
+        description: "Restrictions on selling/sharing personal information"
+        requirements:
+          - do_not_sell_link
+          - opt_out_preference_signal
+          - minor_consent
+          - service_provider_contracts
+
+      - id: sensitive_data
+        name: "Sensitive Personal Information"
+        description: "Enhanced protections for sensitive data"
+        dataTypes:
+          - ssn
+          - drivers_license
+          - financial_account
+          - precise_geolocation
+          - racial_ethnic_origin
+          - religious_beliefs
+          - union_membership
+          - health_data
+          - sexual_orientation
+          - genetic_data
+          - biometric_data
+          - mail_email_text_content
+
+      - id: retention
+        name: "Retention Requirements"
+        description: "Data retention limitations"
+        requirements:
+          - retention_schedule_disclosure
+          - purpose_limitation
+          - minimization
+
+    dataTypeMappings:
+      personal_information:
+        - identifiers
+        - customer_records
+        - characteristics
+        - commercial_info
+        - biometric
+        - internet_activity
+        - geolocation
+        - audio_visual
+        - professional_info
+        - education_info
+        - inferences
+        - sensitive_pi
+
+      selling_indicators:
+        - third_party_tracking
+        - advertising_data
+        - cross_context_behavioral
+        - data_broker_feeds
+
+    featureMappings:
+      regulated_features:
+        - targeted_advertising
+        - data_selling
+        - cross_context_tracking
+        - profiling
+        - automated_decisions
+        - sensitive_data_inference
+
+    processingOperations:
+      collection:
+        obligations:
+          - at_collection_notice
+          - purpose_disclosure
+          - retention_disclosure
+
+      sale:
+        obligations:
+          - opt_out_mechanism
+          - do_not_sell_link
+          - service_provider_contract
+
+      sharing:
+        obligations:
+          - cross_context_disclosure
+          - opt_out_preference_signal
+
+      deletion:
+        obligations:
+          - consumer_request_process
+          - service_provider_notification
+          - 45_day_response
+
+  # ============================================================================
+  # EU AI Act - Artificial Intelligence Act
+  # ============================================================================
+  - id: eu_ai_act
+    name: "EU Artificial Intelligence Act"
+    jurisdiction: "European Union"
+    effectiveDate: "2024-08-01"
+    authority: "European AI Office"
+    referenceUrl: "https://artificialintelligenceact.eu/"
+
+    categories:
+      - id: prohibited_practices
+        name: "Prohibited AI Practices"
+        description: "AI practices banned under Article 5"
+        practices:
+          - subliminal_manipulation
+          - exploitation_of_vulnerabilities
+          - social_scoring_by_public
+          - predictive_policing_profiling
+          - emotion_recognition_workplace_education
+          - biometric_categorization_sensitive
+          - real_time_remote_biometric_public
+
+      - id: high_risk_ai
+        name: "High-Risk AI Systems"
+        description: "AI systems requiring conformity assessment"
+        domains:
+          - biometric_identification
+          - critical_infrastructure
+          - education_vocational
+          - employment_worker_management
+          - essential_services_access
+          - law_enforcement
+          - migration_asylum_border
+          - justice_democratic
+
+      - id: transparency_obligations
+        name: "Transparency Requirements"
+        description: "Disclosure and notification obligations"
+        requirements:
+          - ai_interaction_disclosure
+          - emotion_recognition_disclosure
+          - deepfake_disclosure
+          - synthetic_content_marking
+
+      - id: general_purpose_ai
+        name: "General Purpose AI Models"
+        description: "GPAI model requirements"
+        requirements:
+          - technical_documentation
+          - training_data_summary
+          - copyright_compliance
+          - systemic_risk_assessment
+
+      - id: governance
+        name: "AI Governance"
+        description: "Organizational AI governance requirements"
+        requirements:
+          - risk_management_system
+          - data_governance
+          - technical_documentation
+          - record_keeping
+          - transparency
+          - human_oversight
+          - accuracy_robustness_cybersecurity
+
+    dataTypeMappings:
+      high_risk_inputs:
+        - biometric_data
+        - behavioral_predictions
+        - creditworthiness_scores
+        - employment_decisions
+        - educational_assessment
+        - criminal_risk_scores
+        - migration_risk_scores
+        - health_predictions
+
+      training_data:
+        - model_training_sets
+        - fine_tuning_data
+        - evaluation_datasets
+        - synthetic_data
+
+    featureMappings:
+      prohibited_ai:
+        - subliminal_manipulation
+        - vulnerability_exploitation
+        - social_scoring
+        - emotion_recognition_workplace
+        - biometric_categorization
+
+      high_risk_ai:
+        - biometric_identification
+        - critical_infrastructure_management
+        - educational_scoring
+        - employment_screening
+        - credit_scoring
+        - essential_service_eligibility
+        - law_enforcement_profiling
+        - recidivism_prediction
+        - border_risk_assessment
+
+      transparency_required:
+        - chatbot_interaction
+        - emotion_detection
+        - biometric_categorization
+        - deepfake_generation
+        - synthetic_content
+
+    processingOperations:
+      development:
+        obligations:
+          - risk_classification
+          - data_governance
+          - bias_testing
+          - technical_documentation
+          - conformity_assessment
+
+      deployment:
+        obligations:
+          - human_oversight
+          - logging_capability
+          - transparency_notice
+          - user_instructions
+
+      monitoring:
+        obligations:
+          - post_market_monitoring
+          - incident_reporting
+          - performance_tracking
+          - bias_monitoring
+
+      modification:
+        obligations:
+          - substantial_modification_assessment
+          - re_conformity_assessment
+          - documentation_update
+
+# ============================================================================
+# Cross-Framework Feature Risk Matrix
+# ============================================================================
+featureRiskMatrix:
+  automated_decision_making:
+    gdpr:
+      risk_level: high
+      obligations:
+        - human_review_mechanism
+        - explanation_capability
+        - right_to_contest
+        - dpia_required
+      articles: ["Art. 22"]
+    ccpa:
+      risk_level: medium
+      obligations:
+        - profiling_disclosure
+        - opt_out_mechanism
+    eu_ai_act:
+      risk_level: high
+      obligations:
+        - risk_classification
+        - human_oversight
+        - transparency
+      articles: ["Art. 14"]
+
+  profiling:
+    gdpr:
+      risk_level: high
+      obligations:
+        - lawful_basis
+        - transparency
+        - right_to_object
+        - dpia_likely
+      articles: ["Art. 21", "Art. 22"]
+    ccpa:
+      risk_level: medium
+      obligations:
+        - disclosure
+        - opt_out
+    eu_ai_act:
+      risk_level: variable
+      obligations:
+        - risk_assessment
+        - prohibited_if_social_scoring
+
+  biometric_processing:
+    gdpr:
+      risk_level: critical
+      obligations:
+        - explicit_consent
+        - dpia_required
+        - special_category_protections
+      articles: ["Art. 9"]
+    ccpa:
+      risk_level: high
+      obligations:
+        - sensitive_pi_protections
+        - consent_required
+    eu_ai_act:
+      risk_level: critical
+      obligations:
+        - prohibited_or_high_risk
+        - conformity_assessment
+        - human_oversight
+      articles: ["Art. 5", "Annex III"]
+
+  large_scale_monitoring:
+    gdpr:
+      risk_level: high
+      obligations:
+        - dpia_required
+        - dpo_required
+        - legitimate_interest_assessment
+      articles: ["Art. 35", "Art. 37"]
+    ccpa:
+      risk_level: medium
+      obligations:
+        - disclosure
+        - consumer_rights
+    eu_ai_act:
+      risk_level: high
+      obligations:
+        - high_risk_classification
+        - human_oversight
+
+  cross_border_transfer:
+    gdpr:
+      risk_level: high
+      obligations:
+        - transfer_mechanism
+        - tia_required
+        - sccs_or_adequacy
+      articles: ["Art. 44-49"]
+    ccpa:
+      risk_level: low
+      obligations:
+        - disclosure
+    eu_ai_act:
+      risk_level: medium
+      obligations:
+        - third_country_compliance
+
+# ============================================================================
+# Service-to-Category Mappings (Summit/IntelGraph specific)
+# ============================================================================
+serviceMappings:
+  api:
+    dataTypes:
+      - personal_data
+      - behavioral_data
+    features:
+      - data_collection
+      - data_sharing
+    regulations:
+      - gdpr
+      - ccpa
+
+  copilot:
+    dataTypes:
+      - behavioral_data
+      - profiling_data
+    features:
+      - automated_decision_making
+      - profiling
+      - ai_interaction
+    regulations:
+      - gdpr
+      - ccpa
+      - eu_ai_act
+
+  graph_api:
+    dataTypes:
+      - personal_data
+      - behavioral_data
+      - profiling_data
+    features:
+      - relationship_analysis
+      - entity_profiling
+    regulations:
+      - gdpr
+      - ccpa
+
+  analytics:
+    dataTypes:
+      - behavioral_data
+      - profiling_data
+    features:
+      - profiling
+      - large_scale_monitoring
+    regulations:
+      - gdpr
+      - ccpa
+      - eu_ai_act
+
+  ai_service_platform:
+    dataTypes:
+      - training_data
+      - profiling_data
+    features:
+      - automated_decision_making
+      - ai_model_deployment
+    regulations:
+      - gdpr
+      - eu_ai_act
+
+  entity_resolution:
+    dataTypes:
+      - personal_data
+      - biometric_data
+    features:
+      - profiling
+      - identity_matching
+    regulations:
+      - gdpr
+      - ccpa
+      - eu_ai_act
+
+  threat_intel:
+    dataTypes:
+      - personal_data
+      - behavioral_data
+      - profiling_data
+    features:
+      - threat_scoring
+      - behavioral_analysis
+    regulations:
+      - gdpr
+      - eu_ai_act
+
+  audit_service:
+    dataTypes:
+      - personal_data
+      - behavioral_data
+    features:
+      - logging
+      - monitoring
+    regulations:
+      - gdpr
+      - ccpa
+
+  compliance:
+    dataTypes:
+      - personal_data
+    features:
+      - dsar_handling
+      - rtbf_processing
+    regulations:
+      - gdpr
+      - ccpa
+
+# ============================================================================
+# Obligation Templates
+# ============================================================================
+obligationTemplates:
+  dpia:
+    name: "Data Protection Impact Assessment"
+    description: "Systematic assessment of high-risk processing operations"
+    triggers:
+      - automated_decision_making
+      - large_scale_special_category
+      - systematic_monitoring
+      - new_technology
+    outputs:
+      - risk_assessment_report
+      - mitigation_measures
+      - dpo_consultation
+      - supervisory_authority_consultation
+
+  consent_flow:
+    name: "Consent Management"
+    description: "Mechanisms for obtaining and managing consent"
+    requirements:
+      - freely_given
+      - specific
+      - informed
+      - unambiguous
+      - withdrawable
+    outputs:
+      - consent_record
+      - withdrawal_mechanism
+      - preference_center
+
+  dsar_handling:
+    name: "Data Subject Access Request"
+    description: "Process for handling individual rights requests"
+    sla: "30 days (GDPR) / 45 days (CCPA)"
+    steps:
+      - identity_verification
+      - scope_determination
+      - data_collection
+      - redaction_review
+      - response_delivery
+    outputs:
+      - data_export
+      - processing_record
+      - audit_trail
+
+  breach_response:
+    name: "Data Breach Response"
+    description: "Incident response for personal data breaches"
+    sla: "72 hours to authority (GDPR)"
+    steps:
+      - breach_detection
+      - impact_assessment
+      - containment
+      - authority_notification
+      - subject_notification
+    outputs:
+      - breach_report
+      - notification_records
+      - remediation_plan
+
+  ai_conformity:
+    name: "AI Conformity Assessment"
+    description: "Assessment for high-risk AI systems"
+    requirements:
+      - risk_management
+      - data_governance
+      - technical_documentation
+      - record_keeping
+      - human_oversight
+    outputs:
+      - conformity_certificate
+      - technical_documentation
+      - eu_declaration
+
+# ============================================================================
+# Analysis Configuration
+# ============================================================================
+analysisConfig:
+  defaultLens: gdpr
+  outputFormat: markdown
+  reportDirectory: reports
+
+  severityLevels:
+    critical:
+      threshold: 0.9
+      description: "Immediate action required - potential violation"
+      color: "#dc3545"
+    high:
+      threshold: 0.7
+      description: "Significant risk - remediation needed"
+      color: "#fd7e14"
+    medium:
+      threshold: 0.5
+      description: "Moderate risk - review recommended"
+      color: "#ffc107"
+    low:
+      threshold: 0.3
+      description: "Low risk - monitor and document"
+      color: "#28a745"
+    informational:
+      threshold: 0.0
+      description: "For awareness - no action needed"
+      color: "#17a2b8"
+
+  complianceScoring:
+    weights:
+      data_types: 0.25
+      features: 0.35
+      operations: 0.25
+      documentation: 0.15
+    passingThreshold: 0.7
