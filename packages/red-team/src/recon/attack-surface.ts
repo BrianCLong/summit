@@ -2,7 +2,7 @@ import {
   AttackSurface,
   SurfaceAsset,
   Exposure
-} from '../types';
+} from '../types.js';
 
 /**
  * Attack Surface Mapper
@@ -18,13 +18,15 @@ export class AttackSurfaceMapper {
       includePorts?: boolean;
       includeServices?: boolean;
       includeCertificates?: boolean;
+      includeCloudAssets?: boolean;
     } = {}
   ): Promise<AttackSurface> {
     const {
       includeSubdomains = true,
       includePorts = true,
       includeServices = true,
-      includeCertificates = true
+      includeCertificates = true,
+      includeCloudAssets = true
     } = options;
 
     const assets: SurfaceAsset[] = [];
@@ -47,6 +49,16 @@ export class AttackSurfaceMapper {
       const certs = await this.analyzeCertificates(target);
       assets.push(...certs);
     }
+
+    // Discover Cloud Assets (S3, etc.)
+    if (includeCloudAssets) {
+      const cloudAssets = await this.discoverCloudAssets('aws', { target }); // Defaulting to AWS simulation
+      const s3Buckets = await this.discoverS3Buckets(target);
+      assets.push(...cloudAssets, ...s3Buckets);
+    }
+
+    // Enrich with Vulnerabilities (CVEs)
+    await this.enrichWithVulnerabilities(assets);
 
     // Identify exposures
     exposures.push(...await this.identifyExposures(assets));
@@ -99,15 +111,15 @@ export class AttackSurfaceMapper {
    * Scan services
    */
   private async scanServices(target: string): Promise<SurfaceAsset[]> {
-    // Simulated service scan results
+    // Simulated service scan results with versions for CVE detection
     const commonServices = [
-      { port: 22, service: 'SSH', risk: 'medium' },
-      { port: 80, service: 'HTTP', risk: 'low' },
-      { port: 443, service: 'HTTPS', risk: 'low' },
-      { port: 3306, service: 'MySQL', risk: 'high' },
-      { port: 5432, service: 'PostgreSQL', risk: 'high' },
-      { port: 6379, service: 'Redis', risk: 'critical' },
-      { port: 27017, service: 'MongoDB', risk: 'critical' }
+      { port: 22, service: 'SSH', version: 'OpenSSH 7.2p2', risk: 'medium' },
+      { port: 80, service: 'HTTP', version: 'Apache 2.4.49', risk: 'low' }, // Intentionally vulnerable version for simulation
+      { port: 443, service: 'HTTPS', version: 'nginx 1.18.0', risk: 'low' },
+      { port: 3306, service: 'MySQL', version: '5.7.31', risk: 'high' },
+      { port: 5432, service: 'PostgreSQL', version: '12.4', risk: 'high' },
+      { port: 6379, service: 'Redis', version: '5.0.7', risk: 'critical' },
+      { port: 27017, service: 'MongoDB', version: '4.2.8', risk: 'critical' }
     ];
 
     const assets: SurfaceAsset[] = [];
@@ -123,6 +135,7 @@ export class AttackSurfaceMapper {
         attributes: {
           port: svc.port,
           service: svc.service,
+          version: svc.version,
           protocol: 'TCP'
         },
         risks: [{
@@ -203,6 +216,19 @@ export class AttackSurfaceMapper {
             remediation: 'Configure automatic HTTPS redirect'
           });
         }
+
+        // Map CVE risks to exposures
+        const cveRisks = asset.risks.filter(r => r.category === 'vulnerability');
+        for (const risk of cveRisks) {
+           exposures.push({
+             id: this.generateId(),
+             assetId: asset.id,
+             type: 'vulnerable-service',
+             severity: risk.score >= 9 ? 'critical' : risk.score >= 7 ? 'high' : 'medium',
+             description: `Vulnerable service detected: ${risk.factors.join(', ')}`,
+             remediation: 'Patch the service to the latest version immediately.'
+           });
+        }
       }
 
       if (asset.type === 'certificate' && asset.risks.length > 0) {
@@ -215,9 +241,94 @@ export class AttackSurfaceMapper {
           remediation: 'Renew SSL/TLS certificate before expiry'
         });
       }
+
+      if (asset.type === 'cloud-resource') {
+        const cloudRisks = asset.risks.filter(r => r.category === 'cloud');
+        for (const risk of cloudRisks) {
+          exposures.push({
+            id: this.generateId(),
+            assetId: asset.id,
+            type: 'misconfiguration',
+            severity: risk.score >= 7 ? 'high' : 'medium',
+            description: `Cloud Misconfiguration: ${risk.factors.join(', ')}`,
+            remediation: 'Review cloud resource permissions and restrict access.'
+          });
+        }
+      }
     }
 
     return exposures;
+  }
+
+  /**
+   * Discover S3 Buckets
+   */
+  async discoverS3Buckets(target: string): Promise<SurfaceAsset[]> {
+    const commonBuckets = [
+      'backup', 'logs', 'assets', 'static', 'internal', 'confidential', 'data', 'secure'
+    ];
+    const assets: SurfaceAsset[] = [];
+    const now = new Date();
+
+    // Simulate finding some buckets
+    for (const suffix of commonBuckets) {
+      // Deterministic simulation based on target string
+      const bucketName = `${target.replace(/\./g, '-')}-${suffix}`;
+      const isOpen = (target.length + suffix.length) % 5 === 0; // consistent simulation
+
+      if (isOpen) {
+         assets.push({
+             id: this.generateId(),
+             type: 'cloud-resource',
+             identifier: `s3://${bucketName}`,
+             firstSeen: now,
+             lastSeen: now,
+             attributes: {
+                 provider: 'aws',
+                 resourceType: 'storage',
+                 publicAccess: true,
+                 region: 'us-east-1'
+             },
+             risks: [{
+                 id: this.generateId(),
+                 category: 'cloud',
+                 score: 8,
+                 factors: [`Public S3 bucket found: ${bucketName}`]
+             }]
+         });
+      }
+    }
+    return assets;
+  }
+
+  /**
+   * Enrich assets with vulnerabilities (CVEs)
+   */
+  private async enrichWithVulnerabilities(assets: SurfaceAsset[]): Promise<void> {
+    // Mock CVE Database
+    const cveDb: Record<string, { cve: string, score: number, desc: string }[]> = {
+      'Apache 2.4.49': [{ cve: 'CVE-2021-41773', score: 9.8, desc: 'Path traversal vulnerability' }],
+      'Redis 5.0.7': [{ cve: 'CVE-2022-0543', score: 10.0, desc: 'Lua sandbox escape' }],
+      'OpenSSH 7.2p2': [{ cve: 'CVE-2016-0777', score: 7.1, desc: 'Roaming support information leak' }]
+    };
+
+    for (const asset of assets) {
+      if (asset.type === 'service' && asset.attributes['version']) {
+        const version = asset.attributes['version'] as string;
+        const vulnerabilities = cveDb[version];
+
+        if (vulnerabilities) {
+           for (const vuln of vulnerabilities) {
+             asset.risks.push({
+               id: this.generateId(),
+               category: 'vulnerability',
+               score: vuln.score,
+               factors: [`${vuln.cve}: ${vuln.desc}`]
+             });
+           }
+        }
+      }
+    }
   }
 
   /**
@@ -245,6 +356,7 @@ export class AttackSurfaceMapper {
    */
   async discoverCloudAssets(
     cloudProvider: 'aws' | 'azure' | 'gcp',
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     config: Record<string, string>
   ): Promise<SurfaceAsset[]> {
     // Simulated cloud asset discovery

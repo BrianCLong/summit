@@ -4,7 +4,13 @@ import type {
   SandboxResult,
   SandboxRow,
 } from './types.js';
-import { defaultQueryMonitor, IntelGraphQueryMonitor } from './queryMonitor.js';
+import {
+  buildReplayEnvironment,
+  createReplayDescriptor,
+  hashIdentifier,
+  persistReplayDescriptor,
+  sanitizePayload,
+} from '@ga-graphai/common-types';
 
 const WRITE_PATTERN = /\b(create|merge|delete|drop|set)\b/i;
 
@@ -60,6 +66,45 @@ const DEFAULT_DATASET: SandboxDataset = {
     },
   ],
 };
+
+function recordReplayFromError(input: SandboxExecuteInput, error: unknown): void {
+  const dataset = input.dataset ?? DEFAULT_DATASET;
+  const descriptor = createReplayDescriptor({
+    service: 'intelgraph',
+    flow: 'intelgraph-cypher-sandbox',
+    request: {
+      path: '/sandbox/execute',
+      method: 'POST',
+      payload: sanitizePayload({
+        cypher: input.cypher,
+        timeoutMs: input.timeoutMs,
+        datasetSize: {
+          nodes: dataset.nodes.length,
+          relationships: dataset.relationships.length,
+        },
+      }),
+      meta: sanitizePayload({ policy: input.policy, featureFlags: input.featureFlags }),
+    },
+    context: {
+      tenantId: input.tenantId,
+      purpose: input.policy.purpose,
+      traceId: input.traceId,
+      requestId: input.requestId,
+      featureFlags: input.featureFlags,
+      userIdHash: hashIdentifier(input.userId),
+    },
+    environment: buildReplayEnvironment({ env: { INTELGRAPH_ENV: input.environment } }),
+    outcome: {
+      status: 'error',
+      message: error instanceof Error ? error.message : 'unknown error',
+      classification: 'query-validation',
+    },
+    originalResponse: error instanceof Error ? { stack: error.stack } : undefined,
+    privacy: { notes: ['Auto-captured sandbox replay; headers stripped.'] },
+    tags: ['auto-captured'],
+  });
+  persistReplayDescriptor(descriptor);
+}
 
 function ensureReadOnly(cypher: string): void {
   if (WRITE_PATTERN.test(cypher)) {
@@ -209,74 +254,61 @@ function lookupNeighbor(
   );
 }
 
-export function sandboxExecute(
-  input: SandboxExecuteInput,
-  monitor: IntelGraphQueryMonitor = defaultQueryMonitor,
-): SandboxResult {
-  const cypher = input.cypher.trim();
-  ensureReadOnly(cypher);
-  const dataset = input.dataset ?? DEFAULT_DATASET;
-  const primary = extractPrimaryMatch(cypher);
-  if (!primary) {
-    throw new Error('Unable to parse MATCH clause from Cypher statement');
-  }
-  const relationship = extractRelationshipMatch(cypher);
-  const filter = extractWhereClause(cypher);
-  const candidates = selectNodes(dataset, primary.label).filter((node) =>
-    matchesFilter(node, filter),
-  );
-  const rows: SandboxRow[] = [];
-  for (const node of candidates) {
-    const neighbor = relationship
-      ? lookupNeighbor(dataset, relationship, node.id)
-      : null;
-    rows.push(
-      buildRow(
-        primary.alias,
-        node,
-        relationship
-          ? {
-              type: relationship.type,
-              neighborAlias: relationship.neighborAlias,
-            }
-          : null,
-        neighbor,
-      ),
+export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
+  try {
+    const cypher = input.cypher.trim();
+    ensureReadOnly(cypher);
+    const dataset = input.dataset ?? DEFAULT_DATASET;
+    const primary = extractPrimaryMatch(cypher);
+    if (!primary) {
+      throw new Error('Unable to parse MATCH clause from Cypher statement');
+    }
+    const relationship = extractRelationshipMatch(cypher);
+    const filter = extractWhereClause(cypher);
+    const candidates = selectNodes(dataset, primary.label).filter((node) =>
+      matchesFilter(node, filter),
     );
+    const rows: SandboxRow[] = [];
+    for (const node of candidates) {
+      const neighbor = relationship
+        ? lookupNeighbor(dataset, relationship, node.id)
+        : null;
+      rows.push(
+        buildRow(
+          primary.alias,
+          node,
+          relationship
+            ? {
+                type: relationship.type,
+                neighborAlias: relationship.neighborAlias,
+              }
+            : null,
+          neighbor,
+        ),
+      );
+    }
+    const latencyMs = Math.min(
+      input.timeoutMs ?? 800,
+      60 + rows.length * 8 + (relationship ? 45 : 25),
+    );
+    const policyWarnings = evaluatePolicy(input.tenantId, input.policy.purpose);
+    const plan = buildPlan(
+      primary.label,
+      relationship
+        ? { type: relationship.type, neighborLabel: relationship.neighborLabel }
+        : null,
+    );
+
+    return {
+      rows,
+      columns: rows[0]?.columns ?? [primary.alias],
+      latencyMs,
+      truncated: rows.length > 50,
+      plan,
+      policyWarnings,
+    };
+  } catch (error) {
+    recordReplayFromError(input, error);
+    throw error;
   }
-  const latencyMs = Math.min(
-    input.timeoutMs ?? 800,
-    60 + rows.length * 8 + (relationship ? 45 : 25),
-  );
-  const policyWarnings = evaluatePolicy(input.tenantId, input.policy.purpose);
-  const plan = buildPlan(
-    primary.label,
-    relationship
-      ? { type: relationship.type, neighborLabel: relationship.neighborLabel }
-      : null,
-  );
-
-  const monitoring = monitor.observe({
-    cypher,
-    plan,
-    rowsReturned: rows.length,
-    latencyMs,
-    tenantId: input.tenantId,
-    caseId: input.policy.authorityId,
-  });
-
-  const cappedRows =
-    monitoring.throttled && monitoring.throttleLimit
-      ? rows.slice(0, monitoring.throttleLimit)
-      : rows;
-
-  return {
-    rows: cappedRows,
-    columns: cappedRows[0]?.columns ?? [primary.alias],
-    latencyMs,
-    truncated: cappedRows.length > 50 || cappedRows.length < rows.length,
-    plan,
-    policyWarnings,
-    monitoring,
-  };
 }
