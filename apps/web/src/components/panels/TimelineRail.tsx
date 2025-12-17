@@ -6,10 +6,15 @@ import {
   ChevronRight,
   Filter,
   Zap,
+  Play,
+  Pause,
+  RotateCcw,
+  FastForward,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { Slider } from '@/components/ui/slider'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { formatRelativeTime } from '@/lib/utils'
 import type { TimelineEvent, PanelProps } from '@/types'
@@ -19,6 +24,10 @@ interface TimelineRailProps extends PanelProps<TimelineEvent[]> {
   onEventSelect?: (event: TimelineEvent) => void
   selectedEventId?: string
   autoScroll?: boolean
+  // Playback props
+  totalTimeRange?: { start: Date; end: Date }
+  currentTime?: Date
+  onCurrentTimeChange?: (time: Date) => void
 }
 
 export function TimelineRail({
@@ -30,6 +39,9 @@ export function TimelineRail({
   selectedEventId,
   autoScroll = true,
   className,
+  totalTimeRange,
+  currentTime,
+  onCurrentTimeChange,
 }: TimelineRailProps) {
   const [timeRange, setTimeRange] = React.useState<{
     start: string
@@ -41,12 +53,97 @@ export function TimelineRail({
   const [showFilters, setShowFilters] = React.useState(false)
   const timelineRef = React.useRef<HTMLDivElement>(null)
 
-  // Auto-scroll to latest events
+  // Playback state
+  const [isPlaying, setIsPlaying] = React.useState(false)
+  const [playbackSpeed, setPlaybackSpeed] = React.useState(1)
+
+  // Playback loop
   React.useEffect(() => {
-    if (autoScroll && timelineRef.current && events.length > 0) {
+    let interval: NodeJS.Timeout
+
+    if (isPlaying && totalTimeRange && currentTime && onCurrentTimeChange) {
+      interval = setInterval(() => {
+        const totalDuration =
+          totalTimeRange.end.getTime() - totalTimeRange.start.getTime()
+
+        // Target 60 seconds for full playback at 1x speed
+        const standardDurationSeconds = 60
+        const tickRateMs = 100
+        const timeStepMs =
+          (totalDuration / (standardDurationSeconds * (1000 / tickRateMs))) *
+          playbackSpeed
+
+        const nextTime = new Date(currentTime.getTime() + timeStepMs)
+
+        if (nextTime >= totalTimeRange.end) {
+          onCurrentTimeChange(totalTimeRange.end)
+          setIsPlaying(false)
+        } else {
+          onCurrentTimeChange(nextTime)
+        }
+      }, 100)
+    }
+
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [
+    isPlaying,
+    totalTimeRange,
+    currentTime,
+    onCurrentTimeChange,
+    playbackSpeed,
+  ])
+
+  // Auto-scroll to latest events or active event during playback
+  React.useEffect(() => {
+    if (!timelineRef.current || events.length === 0) return
+
+    if (isPlaying && currentTime) {
+      // Find the last event that is <= currentTime
+      const lastActiveEvent = events
+        .filter(e => new Date(e.timestamp) <= currentTime)
+        .sort(
+          (a, b) =>
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        )[0]
+
+      if (lastActiveEvent) {
+        // Find the element in the DOM (we need to give them IDs or refs, but we can't easily ref map)
+        // Alternatively, calculate scroll position.
+        // Simple hack: We are not rendering IDs on the DOM elements directly accessible.
+        // But we have key={event.id}.
+        // Let's try to query selector.
+        // The container is timelineRef.current
+        // We can't easily select by React key.
+        // Let's assume the events are rendered in order.
+        // The sortedEvents logic is inside Render, but we need it here.
+        // This is getting complex for a useEffect.
+
+        // Simpler: Just scroll to bottom if autoScroll is true AND NOT playing.
+        // If playing, we might want to stay put or follow.
+        // Let's just disable auto-scroll to bottom during playback to prevent jumping.
+        // Users can scroll manually.
+        return
+      }
+    }
+
+    if (autoScroll && !isPlaying) {
       timelineRef.current.scrollTop = timelineRef.current.scrollHeight
     }
-  }, [events, autoScroll])
+  }, [events, autoScroll, isPlaying, currentTime])
+
+  // Toggle playback
+  const togglePlayback = () => {
+    if (!totalTimeRange || !currentTime) return
+
+    // If at end, restart
+    if (currentTime.getTime() >= totalTimeRange.end.getTime()) {
+      onCurrentTimeChange?.(totalTimeRange.start)
+    }
+
+    setIsPlaying(!isPlaying)
+  }
 
   const sortedEvents = React.useMemo(() => {
     return [...events].sort(
@@ -193,6 +290,76 @@ export function TimelineRail({
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Playback Controls */}
+        {totalTimeRange && currentTime && (
+          <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => {
+                    setIsPlaying(false)
+                    onCurrentTimeChange?.(totalTimeRange.start)
+                  }}
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+                <Button
+                  variant={isPlaying ? 'default' : 'outline'}
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={togglePlayback}
+                >
+                  {isPlaying ? (
+                    <Pause className="h-3 w-3" />
+                  ) : (
+                    <Play className="h-3 w-3" />
+                  )}
+                </Button>
+              </div>
+
+              <div className="flex-1 px-2">
+                <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                  <span>{totalTimeRange.start.toLocaleDateString()}</span>
+                  <span>{currentTime.toLocaleString()}</span>
+                  <span>{totalTimeRange.end.toLocaleDateString()}</span>
+                </div>
+                <Slider
+                  value={[currentTime.getTime()]}
+                  min={totalTimeRange.start.getTime()}
+                  max={totalTimeRange.end.getTime()}
+                  step={
+                    (totalTimeRange.end.getTime() -
+                      totalTimeRange.start.getTime()) /
+                    100
+                  }
+                  onValueChange={vals => {
+                    setIsPlaying(false)
+                    onCurrentTimeChange?.(new Date(vals[0]))
+                  }}
+                  className="w-full"
+                />
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() =>
+                  setPlaybackSpeed(s =>
+                    s >= 10 ? 1 : s === 1 ? 2 : s === 2 ? 5 : 10
+                  )
+                }
+              >
+                {playbackSpeed}x
+                <FastForward className="ml-1 h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
+
         {showFilters && (
           <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
             <div className="flex items-center gap-2 text-sm font-medium">
@@ -244,16 +411,21 @@ export function TimelineRail({
                 </div>
               </div>
 
-              {dayEvents.map(event => (
-                <div
-                  key={event.id}
-                  className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors ${
-                    selectedEventId === event.id
-                      ? 'bg-muted ring-2 ring-primary'
-                      : ''
-                  }`}
-                  onClick={() => onEventSelect?.(event)}
-                >
+              {dayEvents.map(event => {
+                const isFuture = currentTime
+                  ? new Date(event.timestamp) > currentTime
+                  : false
+
+                return (
+                  <div
+                    key={event.id}
+                    className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors ${
+                      selectedEventId === event.id
+                        ? 'bg-muted ring-2 ring-primary'
+                        : ''
+                    } ${isFuture ? 'opacity-40 grayscale' : ''}`}
+                    onClick={() => onEventSelect?.(event)}
+                  >
                   <div
                     className={`relative z-10 w-2 h-2 rounded-full border-2 bg-background mt-2 ${getEventColor(event.type)}`}
                   >
@@ -294,7 +466,8 @@ export function TimelineRail({
                     </div>
                   </div>
                 </div>
-              ))}
+                )
+              })}
             </div>
           ))}
 

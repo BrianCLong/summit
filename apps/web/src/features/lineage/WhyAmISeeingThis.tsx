@@ -22,7 +22,7 @@ export function WhyAmISeeingThis({
 
   useEffect(() => {
     let mounted = true
-    if (initialGraph) return undefined
+    if (initialGraph) {return undefined}
 
     fetchLineageGraph(entityId)
       .then((data) => {

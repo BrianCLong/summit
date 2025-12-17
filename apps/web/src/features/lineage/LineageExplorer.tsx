@@ -9,9 +9,9 @@ interface LineageExplorerProps {
 
 function TagBadge({ tag }: { tag: string }) {
   const tagTone = useMemo(() => {
-    if (tag.toLowerCase().includes('pii')) return 'bg-red-100 text-red-700 border-red-200'
-    if (tag.toLowerCase().includes('warrant')) return 'bg-amber-100 text-amber-700 border-amber-200'
-    if (tag.toLowerCase().includes('license')) return 'bg-blue-100 text-blue-700 border-blue-200'
+    if (tag.toLowerCase().includes('pii')) {return 'bg-red-100 text-red-700 border-red-200'}
+    if (tag.toLowerCase().includes('warrant')) {return 'bg-amber-100 text-amber-700 border-amber-200'}
+    if (tag.toLowerCase().includes('license')) {return 'bg-blue-100 text-blue-700 border-blue-200'}
     return 'bg-slate-100 text-slate-700 border-slate-200'
   }, [tag])
 
@@ -70,7 +70,7 @@ export function LineageExplorer({ entityId, initialGraph }: LineageExplorerProps
 
   useEffect(() => {
     let mounted = true
-    if (initialGraph) return undefined
+    if (initialGraph) {return undefined}
 
     setLoading(true)
     fetchLineageGraph(entityId)
@@ -81,7 +81,7 @@ export function LineageExplorer({ entityId, initialGraph }: LineageExplorerProps
         }
       })
       .catch(() => {
-        if (mounted) setError('Unable to load lineage for this item')
+        if (mounted) {setError('Unable to load lineage for this item')}
       })
       .finally(() => mounted && setLoading(false))
 

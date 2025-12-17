@@ -1,9 +1,0 @@
-{
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "types": ["node", "react"],
-    "jsx": "react-jsx",
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]
-}
