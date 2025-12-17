@@ -1,5 +1,208 @@
+# Roadmap Mapping Configuration
+# Maps prompts to waves and categories for the 96-Prompt Engineering Roadmap
+
+# Legacy v1.1 mapping (retained for backwards compatibility)
 v1_1:
   routing: 'Assistant v1.1 — W1–2'
   citations: 'Assistant v1.1 — W1–2'
   exports: 'Assistant v1.1 — W3–4'
   quality: 'Assistant v1.1 — W5'
+
+# 96-Prompt Engineering Roadmap Mapping
+engineering_roadmap_96:
+  version: '1.0.0'
+
+  # Wave 1: Foundation (Prompts 1-8)
+  wave_1:
+    name: 'Foundation'
+    milestone: 'Wave 1 - Foundation'
+    labels: ['roadmap', 'wave-1', 'foundation']
+    prompts:
+      P1: 'Modernize Build & CI/CD'
+      P2: 'Expand Automated Test Coverage'
+      P3: 'Dependency & Security Audit'
+      P4: 'Database Schema Evolution'
+      P5: 'Documentation Overhaul'
+      P6: 'Performance Optimization'
+      P7: 'Security Hardening'
+      P8: 'Deployment & Environment Standardization'
+
+  # Wave 2: Expansion (Prompts 9-16)
+  wave_2:
+    name: 'Expansion'
+    milestone: 'Wave 2 - Expansion'
+    labels: ['roadmap', 'wave-2', 'expansion']
+    prompts:
+      P9: 'Observability & Monitoring'
+      P10: 'Database Migration Framework'
+      P11: 'API Design & Versioning'
+      P12: 'Codebase Modularity & Architecture'
+      P13: 'Internationalization (i18n)'
+      P14: 'Compliance & Audit Logging'
+      P15: 'Frontend Performance & Accessibility'
+      P16: 'Release Management & Versioning'
+
+  # Wave 3: Resilience (Prompts 17-24)
+  wave_3:
+    name: 'Resilience'
+    milestone: 'Wave 3 - Resilience'
+    labels: ['roadmap', 'wave-3', 'resilience']
+    prompts:
+      P17: 'Continuous Integration Stress Testing'
+      P18: 'Distributed Systems Readiness'
+      P19: 'Developer Tooling & DX'
+      P20: 'Data Pipelines & ETL'
+      P21: 'Accessibility Compliance (WCAG)'
+      P22: 'Error Handling & Resilience'
+      P23: 'Analytics & Telemetry'
+      P24: 'Chaos Engineering'
+
+  # Wave 4: Advanced (Prompts 25-48)
+  wave_4:
+    name: 'Advanced'
+    milestone: 'Wave 4 - Advanced'
+    labels: ['roadmap', 'wave-4', 'advanced']
+    prompts:
+      P25: 'Microservices Decomposition'
+      P26: 'Event-Driven Architecture'
+      P27: 'Machine Learning Integration'
+      P28: 'GraphQL Federation'
+      P29: 'Incident Response Playbooks'
+      P30: 'Multi-Region Deployment'
+      P31: 'Zero-Downtime Deployments'
+      P32: 'Self-Healing Infrastructure'
+      P33: 'Container Security'
+      P34: 'API Gateway Implementation'
+      P35: 'Database Replication & HA'
+      P36: 'Caching Strategy'
+      P37: 'Feature Flags System'
+      P38: 'Service Level Objectives (SLOs)'
+      P39: 'Knowledge Base & Wiki'
+      P40: 'API Deprecation Strategy'
+      P41: 'GraphQL Performance Optimization'
+      P42: 'Encryption Framework'
+      P43: 'Secrets Management Overhaul'
+      P44: 'Compliance Automation'
+      P45: 'Backup & Disaster Recovery'
+      P46: 'Load Balancing Optimization'
+      P47: 'Network Security'
+      P48: 'Cost Optimization'
+
+  # Wave 5: Innovation (Prompts 49-72)
+  wave_5:
+    name: 'Innovation'
+    milestone: 'Wave 5 - Innovation'
+    labels: ['roadmap', 'wave-5', 'innovation']
+    prompts:
+      P49: 'Predictive Analytics'
+      P50: 'Real-Time Data Streaming'
+      P51: 'Natural Language Processing'
+      P52: 'Graph Neural Networks'
+      P53: 'AutoML Pipeline'
+      P54: 'Explainable AI (XAI)'
+      P55: 'Active Learning System'
+      P56: 'Anomaly Detection'
+      P57: 'Recommendation Engine'
+      P58: 'Search Enhancement'
+      P59: 'Knowledge Graph Enrichment'
+      P60: 'Temporal Graph Analysis'
+      P61: 'Digital Twin Simulation'
+      P62: 'Edge Computing Integration'
+      P63: 'Engineering Playbook Library'
+      P64: 'API Analytics'
+      P65: 'GraphQL Federation & Scalability'
+      P66: 'Contract Testing Framework'
+      P67: 'Cognitive Load Reduction'
+      P68: 'Domain-Driven Design Alignment'
+      P69: 'API Schema Evolution Tracking'
+      P70: 'Synthetic Data Generation'
+      P71: 'Visual Regression Testing'
+      P72: 'API Mocking & Virtualization'
+
+  # Wave 6: Excellence (Prompts 73-96)
+  wave_6:
+    name: 'Excellence'
+    milestone: 'Wave 6 - Excellence'
+    labels: ['roadmap', 'wave-6', 'excellence']
+    prompts:
+      P73: 'SRE Practices Implementation'
+      P74: 'Infrastructure Testing'
+      P75: 'GitOps Implementation'
+      P76: 'Progressive Delivery'
+      P77: 'Performance Budgets'
+      P78: 'Technical Debt Management'
+      P79: 'Architecture Fitness Functions'
+      P80: 'API Governance'
+      P81: 'Data Governance'
+      P82: 'Privacy Engineering'
+      P83: 'Threat Modeling'
+      P84: 'Penetration Testing Integration'
+      P85: 'Resilience Benchmarking'
+      P86: 'Capacity Planning'
+      P87: 'Engineering Leadership Development'
+      P88: 'Code Review Excellence'
+      P89: 'Documentation-as-Code'
+      P90: 'Developer Onboarding Automation'
+      P91: 'Cross-Functional Collaboration'
+      P92: 'Innovation Time Framework'
+      P93: 'Security Champions Program'
+      P94: 'Platform Engineering'
+      P95: 'Engineering Mentorship Program'
+      P96: 'Continuous Improvement Framework'
+
+# Category mappings
+categories:
+  infrastructure:
+    name: 'Infrastructure & Deployment'
+    label: 'category:infrastructure'
+    emoji: '🔧'
+    prompts: [1, 8, 9, 12, 16, 18, 19, 23, 25, 30, 31, 32, 37, 38, 45, 46, 48, 62, 73, 75, 76, 86, 94]
+
+  quality:
+    name: 'Quality & Testing'
+    label: 'category:quality'
+    emoji: '🧪'
+    prompts: [2, 6, 15, 17, 21, 22, 24, 36, 66, 70, 71, 72, 74, 77, 79, 85]
+
+  security:
+    name: 'Security & Compliance'
+    label: 'category:security'
+    emoji: '🔒'
+    prompts: [3, 7, 14, 33, 42, 43, 44, 47, 82, 83, 84, 93]
+
+  documentation:
+    name: 'Documentation & Knowledge'
+    label: 'category:documentation'
+    emoji: '📚'
+    prompts: [5, 39, 63, 78, 88, 89, 90, 91]
+
+  data:
+    name: 'APIs & Data'
+    label: 'category:data'
+    emoji: '🌐'
+    prompts: [4, 10, 11, 13, 20, 26, 28, 34, 35, 40, 41, 49, 50, 51, 57, 58, 59, 60, 64, 65, 69, 80, 81]
+
+  innovation:
+    name: 'Innovation & Organization'
+    label: 'category:innovation'
+    emoji: '⚡'
+    prompts: [27, 29, 52, 53, 54, 55, 56, 61, 67, 68, 87, 92, 95, 96]
+
+# Priority mappings
+priorities:
+  P0:
+    name: 'Critical'
+    label: 'priority:critical'
+    color: 'ff0000'
+  P1:
+    name: 'High'
+    label: 'priority:high'
+    color: 'ff6600'
+  P2:
+    name: 'Medium'
+    label: 'priority:medium'
+    color: 'ffcc00'
+  P3:
+    name: 'Low'
+    label: 'priority:low'
+    color: '00cc00'

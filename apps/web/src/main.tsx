@@ -1,14 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
+import config from './config'
 import './index.css'
 
 // Start MSW for development
 async function enableMocking() {
-  // Disabled due to MSW 2.0 migration issues in origin/main
-  return Promise.resolve()
-  /*
-  if (process.env.NODE_ENV !== 'development') {
+  if (config.env !== 'development') {
     return
   }
 
@@ -17,7 +15,6 @@ async function enableMocking() {
   return worker.start({
     onUnhandledRequest: 'bypass',
   })
-  */
 }
 
 enableMocking().then(() => {
