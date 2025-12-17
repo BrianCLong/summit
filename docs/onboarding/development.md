@@ -63,10 +63,10 @@ Open these URLs in your browser:
 
 ```bash
 # Run unit tests
-npm test
+pnpm test
 
 # Run e2e tests
-npm run test:e2e
+pnpm run test:e2e
 ```
 
 ### **Agent Interaction (Jules, etc.)**

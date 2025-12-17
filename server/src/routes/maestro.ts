@@ -1,216 +1,120 @@
-import { Router, Request, Response } from 'express';
-import crypto from 'node:crypto';
-import { components } from '../types/api.js';
 
-// Mock data matching apps/web/src/lib/maestroApi.ts expectations
-// This ensures the backend satisfies the API contract immediately.
+import { Router } from 'express';
+import { ensureAuthenticated } from '../middleware/auth';
+import { MaestroEngine } from '../maestro/engine';
+import { MaestroTemplate } from '../maestro/model';
+import { Pool } from 'pg';
+import { logger } from '../utils/logger';
 
-const router = Router();
+// Note: This assumes `req.user` is populated by auth middleware
+// and `engine` and `db` are injected or available via singleton/context.
+// For this file, I'll export a factory function.
 
-// --- Helper for mocks ---
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
+  const router = Router();
 
-// --- Types from Generated Spec ---
-type RoutePreviewResponse = components['schemas']['RoutePreviewResponse'];
-type RouteExecuteResponse = components['schemas']['RouteExecuteResponse'];
-type WebInterfacesResponse = components['schemas']['WebInterfacesResponse'];
-type OrchestrateWebResponse = components['schemas']['OrchestrateWebResponse'];
-type BudgetsResponse = components['schemas']['BudgetsResponse'];
-type PolicyCheckResponse = components['schemas']['PolicyCheckResponse'];
+  // --- Runs ---
 
-// --- Endpoints ---
+  router.post('/runs', ensureAuthenticated, async (req, res) => {
+    try {
+      const { templateId, input } = req.body;
+      const tenantId = (req as any).user.tenantId;
+      const principalId = (req as any).user.id;
 
-router.post('/route/preview', async (req: Request, res: Response) => {
-  // Mock response for now
-  await sleep(250);
-  const response: RoutePreviewResponse = {
-    candidates: [
-      {
-        id: 'gpt-4o-mini',
-        type: 'model',
-        name: 'GPT‑4o‑mini',
-        score: 0.82,
-        cost_est: 0.004,
-        latency_est_ms: 950,
-        rationale: 'High prior win‑rate on Q/A; low cost.',
-      },
-      {
-        id: 'web-serp',
-        type: 'web',
-        name: 'SERP+Reader',
-        score: 0.74,
-        cost_est: 0.002,
-        latency_est_ms: 1200,
-        rationale: 'Freshness likely needed; medium reliability.',
-      },
-      {
-        id: 'claude-3.5',
-        type: 'model',
-        name: 'Claude 3.5',
-        score: 0.68,
-        cost_est: 0.012,
-        latency_est_ms: 1300,
-        rationale: 'Better on synthesis; higher cost.',
-      },
-    ],
-  };
-  res.json(response);
-});
+      if (!templateId) return res.status(400).json({ error: 'templateId required' });
 
-router.post('/route/execute', async (req: Request, res: Response) => {
-  const { selection } = req.body;
-  await sleep(400);
-  const response: RouteExecuteResponse = {
-    runId: `run_${Math.random().toString(36).slice(2)}`,
-    steps: [
-      {
-        id: 'step1',
-        source: selection?.[0] || 'gpt-4o-mini',
-        status: 'ok',
-        tokens: 520,
-        cost: 0.006,
-        citations: [
-          { title: 'Open source report', url: 'https://example.com' },
-        ],
-        elapsed_ms: 910,
-      },
-      {
-        id: 'step2',
-        source: selection?.[1] || 'web-serp',
-        status: 'ok',
-        tokens: 0,
-        cost: 0.001,
-        citations: [
-          { title: 'News site', url: 'https://news.example.com' },
-        ],
-        elapsed_ms: 1290,
-      },
-    ],
-  };
-  res.json(response);
-});
-
-router.get('/web/interfaces', async (req: Request, res: Response) => {
-  await sleep(200);
-  const response: WebInterfacesResponse = {
-    items: [
-      {
-        id: 'web-serp',
-        name: 'SERP Search',
-        category: 'Search',
-        reliability: 0.78,
-        cost_hint: 1,
-      },
-      {
-        id: 'web-reader',
-        name: 'Reader',
-        category: 'Content',
-        reliability: 0.82,
-        cost_hint: 1,
-      },
-      {
-        id: 'social-scan',
-        name: 'Social Scanner',
-        category: 'OSINT',
-        reliability: 0.61,
-        cost_hint: 2,
-      },
-    ],
-  };
-  res.json(response);
-});
-
-router.post('/web/run', async (req: Request, res: Response) => {
-  const { task, interfaces } = req.body;
-  await sleep(600);
-  const response: OrchestrateWebResponse = {
-    responses: (interfaces || []).map((id: string, i: number) => ({
-      id: `resp_${i}`,
-      interface: id,
-      text: `Result from ${id} for: ${task}`,
-      citations: [{ title: 'Source A', url: 'https://example.com/a' }],
-    })),
-    synthesized: {
-      text: `Synthesized answer for: ${task}`,
-      citations: [
-        { title: 'Merged Evidence', url: 'https://example.com/merged' },
-      ],
-    },
-  };
-  res.json(response);
-});
-
-router.get('/budgets', async (req: Request, res: Response) => {
-  await sleep(180);
-  const now = new Date();
-  const series = Array.from({ length: 10 }).map((_, i) => {
-    const d = new Date(now.getTime() - (9 - i) * 3600_000);
-    return { t: d.toISOString(), usd: 2 + i * 0.3, tokens: 1000 + i * 55 };
-  });
-  const response: BudgetsResponse = {
-    tier: 'silver',
-    remaining: { tokens: 84210, usd: 123.45 },
-    burndown: series,
-  };
-  res.json(response);
-});
-
-router.post('/policy/check', async (req: Request, res: Response) => {
-  const { action } = req.body;
-  await sleep(120);
-  let response: PolicyCheckResponse;
-  if (action === 'export/report') {
-    response = {
-      allowed: false,
-      reason: 'Export limited to Gold tier',
-      elevation: { contact: 'secops@intelgraph.local', sla_hours: 24 },
-    };
-  } else {
-    response = { allowed: true };
-  }
-  res.json(response);
-});
-
-router.get('/logs/stream', (req: Request, res: Response) => {
-  // SSE Setup
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
+      const run = await engine.createRun(tenantId, templateId, input, principalId);
+      res.status(201).json(run);
+    } catch (err: any) {
+      logger.error('Failed to create run', err);
+      res.status(500).json({ error: err.message });
+    }
   });
 
-  const sendEvent = (data: any) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
+  router.get('/runs/:runId', ensureAuthenticated, async (req, res) => {
+    try {
+      const { runId } = req.params;
+      const tenantId = (req as any).user.tenantId;
 
-  const interval = setInterval(() => {
-    const levels = ['info', 'warn', 'error'] as const;
-    const level = levels[Math.floor(Math.random() * levels.length)];
-    sendEvent({
-      ts: new Date().toISOString(),
-      level,
-      source: 'backend-mock',
-      message: `Backend log event ${Math.random().toString(36).slice(7)}`,
-    });
-  }, 2000);
+      const result = await db.query(
+        `SELECT * FROM maestro_runs WHERE id = $1 AND tenant_id = $2`,
+        [runId, tenantId]
+      );
 
-  req.on('close', () => {
-    clearInterval(interval);
+      if (result.rows.length === 0) return res.status(404).json({ error: 'Run not found' });
+      res.json(result.rows[0]);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
-});
 
-router.post('/runs', async (req: Request, res: Response) => {
-  // Mock run creation
-  const { requestText } = req.body;
-  await sleep(100);
-  res.json({
-    run: {
-      id: crypto.randomUUID(),
-      status: 'queued',
-      requestText,
-      createdAt: new Date().toISOString(),
-    },
+  router.get('/runs', ensureAuthenticated, async (req, res) => {
+    try {
+      const tenantId = (req as any).user.tenantId;
+      const { templateId, status, limit = 20 } = req.query;
+
+      let query = `SELECT * FROM maestro_runs WHERE tenant_id = $1`;
+      const params: any[] = [tenantId];
+      let idx = 2;
+
+      if (templateId) {
+        query += ` AND template_id = $${idx++}`;
+        params.push(templateId);
+      }
+      if (status) {
+        query += ` AND status = $${idx++}`;
+        params.push(status);
+      }
+
+      query += ` ORDER BY started_at DESC LIMIT $${idx}`;
+      params.push(limit);
+
+      const result = await db.query(query, params);
+      res.json(result.rows);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
   });
-});
 
-export default router;
+  // --- Templates ---
+
+  router.get('/templates', ensureAuthenticated, async (req, res) => {
+    try {
+      const tenantId = (req as any).user.tenantId;
+      const result = await db.query(
+        `SELECT * FROM maestro_templates WHERE tenant_id = $1 ORDER BY created_at DESC`,
+        [tenantId]
+      );
+      res.json(result.rows);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.post('/templates', ensureAuthenticated, async (req, res) => {
+    try {
+      const tenantId = (req as any).user.tenantId;
+      const template: MaestroTemplate = {
+        ...req.body,
+        id: req.body.id || crypto.randomUUID(),
+        tenantId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+
+      // TODO: Validate Spec via MaestroDSL.validate(template.spec)
+
+      await db.query(
+        `INSERT INTO maestro_templates (id, tenant_id, name, version, kind, input_schema, output_schema, spec, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [template.id, template.tenantId, template.name, template.version || 1, template.kind, template.inputSchema, template.outputSchema, template.spec, template.metadata]
+      );
+
+      res.status(201).json(template);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  return router;
+};

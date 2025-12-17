@@ -529,6 +529,8 @@ export type HuntEventType =
   | 'hunt_started'
   | 'hunt_completed'
   | 'hunt_failed'
+  | 'hunt_cancelled'
+  | 'phase_started'
   | 'hypothesis_generated'
   | 'query_executed'
   | 'finding_discovered'
