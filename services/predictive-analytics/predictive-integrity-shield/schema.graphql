@@ -1,0 +1,639 @@
+# Predictive Integrity Shield GraphQL Schema
+# Real-time prediction integrity monitoring and self-healing
+
+scalar DateTime
+scalar JSON
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+
+enum IntegrityStatus {
+  HEALTHY
+  DEGRADED
+  WARNING
+  CRITICAL
+  FAILED
+}
+
+enum DriftSeverity {
+  NONE
+  LOW
+  MODERATE
+  HIGH
+  CRITICAL
+}
+
+enum BiasSeverity {
+  NONE
+  LOW
+  MODERATE
+  HIGH
+  SEVERE
+}
+
+enum HealingActionType {
+  RECALIBRATE
+  FALLBACK_TO_ENSEMBLE
+  TRIGGER_RETRAINING
+  ADJUST_THRESHOLDS
+  BLOCK_PREDICTIONS
+  ALERT_TEAM
+  AUTO_SCALE
+  RESET_BASELINE
+}
+
+enum ActionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  SKIPPED
+}
+
+enum DetectorType {
+  DRIFT
+  ADVERSARIAL
+  BIAS
+  UNCERTAINTY
+  PERFORMANCE
+}
+
+# =============================================================================
+# CORE TYPES
+# =============================================================================
+
+type IntegrityReport {
+  id: ID!
+  timestamp: DateTime!
+  modelId: String!
+  modelVersion: String
+  reliabilityScore: Float!
+  status: IntegrityStatus!
+
+  # Detailed metrics
+  driftMetrics: DriftMetric!
+  adversarialSignals: AdversarialSignal!
+  biasIndicators: BiasIndicator!
+  performanceMetrics: PerformanceMetric!
+
+  # Actions and recommendations
+  healingActions: [HealingAction!]!
+  recommendations: [String!]!
+  alerts: [IntegrityAlert!]!
+
+  # Metadata
+  checksPerformed: [String!]!
+  processingTime: Float!
+  dataQuality: Float!
+}
+
+# =============================================================================
+# DRIFT METRICS
+# =============================================================================
+
+type DriftMetric {
+  dataDrift: Float!
+  conceptDrift: Float!
+  predictionDrift: Float!
+
+  # Statistical tests
+  psi: Float!
+  ksStatistic: Float!
+  jsDivergence: Float!
+
+  severity: DriftSeverity!
+  affectedFeatures: [FeatureDrift!]!
+  driftDetected: Boolean!
+
+  # Temporal analysis
+  driftTrend: String!
+  driftVelocity: Float!
+  estimatedImpact: String!
+}
+
+type FeatureDrift {
+  featureName: String!
+  psi: Float!
+  ksStatistic: Float!
+  severity: DriftSeverity!
+  baselineStats: FeatureStats!
+  currentStats: FeatureStats!
+}
+
+type FeatureStats {
+  mean: Float
+  median: Float
+  stdDev: Float
+  min: Float
+  max: Float
+  percentile25: Float
+  percentile75: Float
+  missingRate: Float
+  uniqueCount: Int
+  distribution: [Float!]
+}
+
+# =============================================================================
+# ADVERSARIAL SIGNALS
+# =============================================================================
+
+type AdversarialSignal {
+  adversarialScore: Float!
+  isAdversarial: Boolean!
+  confidence: Float!
+
+  # Detection methods
+  isolationForestScore: Float
+  lofScore: Float
+  reconstructionError: Float
+
+  # Analysis
+  anomalyCount: Int!
+  anomalyRate: Float!
+  suspiciousInputs: [SuspiciousInput!]!
+
+  # Input validation
+  validationPassed: Boolean!
+  validationErrors: [String!]!
+}
+
+type SuspiciousInput {
+  inputId: String!
+  timestamp: DateTime!
+  anomalyScore: Float!
+  detectionMethod: String!
+  features: JSON!
+  explanation: String!
+}
+
+# =============================================================================
+# BIAS INDICATORS
+# =============================================================================
+
+type BiasIndicator {
+  # Fairness metrics
+  demographicParity: Float!
+  equalOpportunity: Float!
+  equalizedOdds: Float!
+  calibrationError: Float!
+  disparateImpact: Float!
+
+  severity: BiasSeverity!
+  biasDetected: Boolean!
+
+  # Group analysis
+  affectedGroups: [GroupBias!]!
+  protectedAttributes: [String!]!
+
+  # Recommendations
+  mitigationStrategies: [String!]!
+}
+
+type GroupBias {
+  groupName: String!
+  protectedAttribute: String!
+  groupValue: String!
+
+  # Metrics per group
+  selectionRate: Float!
+  truePositiveRate: Float!
+  falsePositiveRate: Float!
+  precision: Float!
+  recall: Float!
+
+  # Comparisons
+  disparityRatio: Float!
+  isUnderrepresented: Boolean!
+}
+
+# =============================================================================
+# PERFORMANCE METRICS
+# =============================================================================
+
+type PerformanceMetric {
+  accuracy: Float
+  precision: Float
+  recall: Float
+  f1Score: Float
+  auc: Float
+
+  # Degradation tracking
+  performanceDrift: Float!
+  performanceTrend: String!
+  degradationRate: Float!
+
+  # Comparisons
+  vsBaseline: Float!
+  vsLastWeek: Float!
+  vsLastMonth: Float!
+}
+
+# =============================================================================
+# HEALING ACTIONS
+# =============================================================================
+
+type HealingAction {
+  id: ID!
+  timestamp: DateTime!
+  actionType: HealingActionType!
+  status: ActionStatus!
+
+  # Details
+  trigger: String!
+  severity: String!
+  details: JSON!
+  parameters: JSON
+
+  # Execution
+  startTime: DateTime
+  endTime: DateTime
+  duration: Float
+
+  # Results
+  success: Boolean
+  impact: String
+  beforeScore: Float
+  afterScore: Float
+  improvements: [String!]
+
+  # Errors
+  error: String
+  retryCount: Int
+}
+
+# =============================================================================
+# ALERTS
+# =============================================================================
+
+type IntegrityAlert {
+  id: ID!
+  timestamp: DateTime!
+  severity: String!
+  alertType: String!
+  message: String!
+  detectorType: DetectorType!
+
+  # Context
+  modelId: String!
+  affectedComponents: [String!]!
+  metrics: JSON!
+
+  # Actions
+  recommendedActions: [String!]!
+  autoRemediated: Boolean!
+  acknowledged: Boolean!
+  acknowledgedBy: String
+  acknowledgedAt: DateTime
+}
+
+# =============================================================================
+# RELIABILITY SCORING
+# =============================================================================
+
+type ReliabilityScoreResult {
+  reliabilityScore: Float!
+  confidence: Float!
+  trustLevel: String!
+
+  # Component scores
+  driftScore: Float!
+  adversarialScore: Float!
+  biasScore: Float!
+  uncertaintyScore: Float!
+  performanceScore: Float!
+
+  # Weights used
+  weights: ScoreWeights!
+
+  # Interpretation
+  interpretation: String!
+  warnings: [String!]!
+  usePrediction: Boolean!
+}
+
+type ScoreWeights {
+  drift: Float!
+  adversarial: Float!
+  bias: Float!
+  uncertainty: Float!
+  performance: Float!
+}
+
+# =============================================================================
+# SHIELD STATUS & CONFIGURATION
+# =============================================================================
+
+type ShieldStatus {
+  modelId: String!
+  enabled: Boolean!
+  lastCheck: DateTime
+  checksPerformed: Int!
+
+  # Health
+  shieldHealth: String!
+  averageReliability: Float!
+
+  # Statistics
+  driftDetections: Int!
+  adversarialDetections: Int!
+  biasDetections: Int!
+  healingActionsPerformed: Int!
+
+  # Configuration
+  config: ShieldConfig!
+}
+
+type ShieldConfig {
+  modelId: String!
+  enabled: Boolean!
+
+  driftDetection: DriftDetectionConfig!
+  adversarialDetection: AdversarialDetectionConfig!
+  biasAnalysis: BiasAnalysisConfig!
+  selfHealing: SelfHealingConfig!
+  reliabilityScoring: ReliabilityScoringConfig!
+}
+
+type DriftDetectionConfig {
+  enabled: Boolean!
+  checkInterval: Int!
+  psiThreshold: Float!
+  ksThreshold: Float!
+  baselineWindow: Int!
+  features: [String!]!
+}
+
+type AdversarialDetectionConfig {
+  enabled: Boolean!
+  anomalyThreshold: Float!
+  methods: [String!]!
+}
+
+type BiasAnalysisConfig {
+  enabled: Boolean!
+  protectedAttributes: [String!]!
+  demographicParityThreshold: Float!
+  equalOpportunityThreshold: Float!
+}
+
+type SelfHealingConfig {
+  enabled: Boolean!
+  autoRecalibrate: Boolean!
+  autoFallback: Boolean!
+  autoRetrain: Boolean!
+  escalationThreshold: Float!
+}
+
+type ReliabilityScoringConfig {
+  weights: ScoreWeights!
+  minAcceptableScore: Float!
+}
+
+# =============================================================================
+# BASELINE & MONITORING
+# =============================================================================
+
+type BaselineData {
+  modelId: String!
+  version: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Statistics
+  featureStats: [FeatureStats!]!
+  predictionStats: FeatureStats!
+
+  # Metadata
+  sampleSize: Int!
+  timeWindow: String!
+  dataQuality: Float!
+}
+
+type MonitoringMetrics {
+  modelId: String!
+  timestamp: DateTime!
+
+  # Real-time metrics
+  requestsPerSecond: Float!
+  averageLatency: Float!
+  errorRate: Float!
+
+  # Integrity metrics
+  averageReliability: Float!
+  driftRate: Float!
+  adversarialRate: Float!
+  biasRate: Float!
+
+  # Healing metrics
+  healingSuccessRate: Float!
+  autoRemediationRate: Float!
+}
+
+# =============================================================================
+# INPUT TYPES
+# =============================================================================
+
+input ShieldConfigInput {
+  modelId: String!
+  enabled: Boolean!
+
+  driftDetection: DriftDetectionConfigInput
+  adversarialDetection: AdversarialDetectionConfigInput
+  biasAnalysis: BiasAnalysisConfigInput
+  selfHealing: SelfHealingConfigInput
+  reliabilityScoring: ReliabilityScoringConfigInput
+}
+
+input DriftDetectionConfigInput {
+  enabled: Boolean!
+  checkInterval: Int
+  psiThreshold: Float
+  ksThreshold: Float
+  baselineWindow: Int
+  features: [String!]
+}
+
+input AdversarialDetectionConfigInput {
+  enabled: Boolean!
+  anomalyThreshold: Float
+  methods: [String!]
+}
+
+input BiasAnalysisConfigInput {
+  enabled: Boolean!
+  protectedAttributes: [String!]
+  demographicParityThreshold: Float
+  equalOpportunityThreshold: Float
+}
+
+input SelfHealingConfigInput {
+  enabled: Boolean!
+  autoRecalibrate: Boolean
+  autoFallback: Boolean
+  autoRetrain: Boolean
+  escalationThreshold: Float
+}
+
+input ReliabilityScoringConfigInput {
+  weights: ScoreWeightsInput!
+  minAcceptableScore: Float
+}
+
+input ScoreWeightsInput {
+  drift: Float!
+  adversarial: Float!
+  bias: Float!
+  uncertainty: Float!
+  performance: Float!
+}
+
+input PredictionInput {
+  features: JSON!
+  prediction: Float!
+  protectedAttributes: JSON
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+type Query {
+  # Current status
+  getIntegrityStatus(modelId: String!): IntegrityReport!
+
+  # Drift detection
+  checkDrift(
+    modelId: String!
+    currentData: [JSON!]!
+    baselineData: [JSON!]
+  ): DriftMetric!
+
+  # Bias analysis
+  analyzeBias(
+    modelId: String!
+    predictions: [PredictionInput!]!
+    protectedAttributes: [String!]!
+  ): BiasIndicator!
+
+  # Reliability scoring
+  getReliabilityScore(
+    modelId: String!
+    predictionInput: JSON!
+  ): ReliabilityScoreResult!
+
+  # Historical data
+  getIntegrityReports(
+    modelId: String!
+    startTime: DateTime
+    endTime: DateTime
+    limit: Int
+  ): [IntegrityReport!]!
+
+  # Shield management
+  getShieldStatus(modelId: String!): ShieldStatus!
+  getShieldConfig(modelId: String!): ShieldConfig!
+  listMonitoredModels: [String!]!
+
+  # Baselines
+  getBaseline(modelId: String!): BaselineData
+
+  # Metrics
+  getMonitoringMetrics(
+    modelId: String!
+    startTime: DateTime
+    endTime: DateTime
+  ): [MonitoringMetrics!]!
+
+  # Alerts
+  getActiveAlerts(modelId: String): [IntegrityAlert!]!
+  getAlertHistory(
+    modelId: String
+    startTime: DateTime
+    endTime: DateTime
+  ): [IntegrityAlert!]!
+
+  # Healing actions
+  getHealingActions(
+    modelId: String!
+    startTime: DateTime
+    endTime: DateTime
+  ): [HealingAction!]!
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+type Mutation {
+  # Shield management
+  enableShield(
+    modelId: String!
+    config: ShieldConfigInput!
+  ): ShieldStatus!
+
+  disableShield(modelId: String!): ShieldStatus!
+
+  updateShieldConfig(
+    modelId: String!
+    config: ShieldConfigInput!
+  ): ShieldStatus!
+
+  # Integrity checks
+  runIntegrityCheck(
+    modelId: String!
+    data: [JSON!]!
+  ): IntegrityReport!
+
+  # Healing actions
+  triggerSelfHeal(
+    modelId: String!
+    actionType: HealingActionType!
+    parameters: JSON
+  ): HealingAction!
+
+  # Baseline management
+  updateBaseline(
+    modelId: String!
+    data: [JSON!]!
+  ): BaselineData!
+
+  resetBaseline(modelId: String!): BaselineData!
+
+  # Alert management
+  acknowledgeAlert(
+    alertId: ID!
+    acknowledgedBy: String!
+  ): IntegrityAlert!
+
+  dismissAlert(alertId: ID!): IntegrityAlert!
+}
+
+# =============================================================================
+# SUBSCRIPTIONS
+# =============================================================================
+
+type Subscription {
+  # Real-time updates
+  integrityReportUpdated(modelId: String!): IntegrityReport!
+
+  # Alerts
+  newAlert(modelId: String): IntegrityAlert!
+  criticalAlert: IntegrityAlert!
+
+  # Drift detection
+  driftDetected(modelId: String!): DriftMetric!
+
+  # Adversarial detection
+  adversarialDetected(modelId: String!): AdversarialSignal!
+
+  # Bias detection
+  biasDetected(modelId: String!): BiasIndicator!
+
+  # Healing actions
+  healingActionStarted(modelId: String!): HealingAction!
+  healingActionCompleted(modelId: String!): HealingAction!
+
+  # Reliability changes
+  reliabilityChanged(modelId: String!, threshold: Float): ReliabilityScoreResult!
+}

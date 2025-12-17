@@ -36,6 +36,7 @@ import { CollaborationPanel } from '@/components/CollaborationPanel'
 import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
+import { useSnapshotHandler } from '@/features/snapshots'
 
 /**
  * Main TriPaneShell component
@@ -76,6 +77,27 @@ export function TriPaneShell({
   const [showProvenance, setShowProvenance] = useState(showProvenanceOverlay)
   const [activePane, setActivePane] = useState<'graph' | 'timeline' | 'map'>(
     'graph'
+  )
+  const [pinnedTools, setPinnedTools] = useState<string[]>([])
+  const [densityMode, setDensityMode] = useState<'comfortable' | 'compact'>('comfortable')
+
+  // Snapshot integration
+  useSnapshotHandler(
+    'triPane',
+    () => ({
+      syncState,
+      activePane,
+      showProvenance,
+      pinnedTools,
+      densityMode
+    }),
+    (data) => {
+      if (data.syncState) setSyncState(data.syncState)
+      if (data.activePane) setActivePane(data.activePane)
+      if (typeof data.showProvenance === 'boolean') setShowProvenance(data.showProvenance)
+      if (data.pinnedTools) setPinnedTools(data.pinnedTools)
+      if (data.densityMode) setDensityMode(data.densityMode)
+    }
   )
 
   // Auth context
