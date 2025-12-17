@@ -142,9 +142,9 @@ class ExerciseManager extends eventemitter3_1.EventEmitter {
     async startExercise(exerciseId) {
         const exercise = this.exercises.get(exerciseId);
         if (!exercise)
-            throw new Error(`Exercise ${exerciseId} not found`);
+            {throw new Error(`Exercise ${exerciseId} not found`);}
         if (this.activeExercise)
-            throw new Error('Another exercise is already running');
+            {throw new Error('Another exercise is already running');}
         exercise.status = 'RUNNING';
         exercise.startTime = new Date();
         this.activeExercise = exercise;
@@ -162,7 +162,7 @@ class ExerciseManager extends eventemitter3_1.EventEmitter {
     pauseExercise(exerciseId) {
         const exercise = this.exercises.get(exerciseId);
         if (!exercise || exercise.status !== 'RUNNING')
-            return;
+            {return;}
         exercise.status = 'PAUSED';
         this.clearInjectTimers();
         this.stopSignalGeneration();
@@ -175,7 +175,7 @@ class ExerciseManager extends eventemitter3_1.EventEmitter {
     resumeExercise(exerciseId) {
         const exercise = this.exercises.get(exerciseId);
         if (!exercise || exercise.status !== 'PAUSED')
-            return;
+            {return;}
         exercise.status = 'RUNNING';
         this.scheduleInjects(exercise, true);
         this.startSignalGeneration(exercise);
@@ -187,7 +187,7 @@ class ExerciseManager extends eventemitter3_1.EventEmitter {
     endExercise(exerciseId) {
         const exercise = this.exercises.get(exerciseId);
         if (!exercise)
-            return;
+            {return;}
         exercise.status = 'COMPLETED';
         exercise.endTime = new Date();
         this.activeExercise = undefined;
@@ -204,10 +204,10 @@ class ExerciseManager extends eventemitter3_1.EventEmitter {
     completeObjective(exerciseId, objectiveId, score) {
         const exercise = this.exercises.get(exerciseId);
         if (!exercise)
-            return;
+            {return;}
         const objective = exercise.objectives.find(o => o.id === objectiveId);
         if (!objective)
-            return;
+            {return;}
         objective.completed = true;
         objective.score = score;
         this.addEvent(exercise, 'OBJECTIVE', `Objective completed: ${objective.description}`);
@@ -341,11 +341,11 @@ class ExerciseManager extends eventemitter3_1.EventEmitter {
      */
     generateFeedback(scoreRatio) {
         if (scoreRatio >= 0.9)
-            return 'Excellent performance. All objectives met with high proficiency.';
+            {return 'Excellent performance. All objectives met with high proficiency.';}
         if (scoreRatio >= 0.7)
-            return 'Good performance. Most objectives completed successfully.';
+            {return 'Good performance. Most objectives completed successfully.';}
         if (scoreRatio >= 0.5)
-            return 'Satisfactory performance. Key objectives met but room for improvement.';
+            {return 'Satisfactory performance. Key objectives met but room for improvement.';}
         return 'Additional training recommended. Review procedures and try again.';
     }
     randomSignalType() {

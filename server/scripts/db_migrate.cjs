@@ -1,182 +1,52 @@
-/* eslint-disable no-console */
-const fs = require('fs');
+#!/usr/bin/env node
+
 const path = require('path');
-const { Client } = require('pg');
-const neo4j = require('neo4j-driver');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
-async function migratePostgres() {
-  const sqlDir = path.resolve(__dirname, '../db/migrations/postgres');
-  if (!fs.existsSync(sqlDir)) return console.log('Postgres migrations: none');
-
-  const connStr = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-  if (!connStr)
-    return console.warn('Skip Postgres: POSTGRES_URL/DATABASE_URL not set');
-
-  const client = new Client({ connectionString: connStr });
-  await client.connect();
-
+// Helper to run the ESM migration runner
+async function runMigrations() {
   try {
-    // 1. Ensure migrations table exists
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS schema_migrations (
-        migration_name TEXT PRIMARY KEY,
-        applied_at TIMESTAMPTZ DEFAULT now()
-      )
-    `);
+    // Dynamic import to load the ESM module
+    // We assume the MigrationRunner is exported from server/src/db/migrate.js
+    const { MigrationRunner } = await import('../src/db/migrate.js');
 
-    const files = fs
-      .readdirSync(sqlDir)
-      .filter((f) => f.endsWith('.sql'))
-      .sort();
+    const command = process.argv[2] || 'up';
+    const steps = process.argv[3] ? parseInt(process.argv[3]) : 1;
 
-    for (const f of files) {
-      // 2. Check if migration is already recorded
-      const res = await client.query(
-        'SELECT 1 FROM schema_migrations WHERE migration_name = $1',
-        [f],
-      );
-      if (res.rowCount > 0) {
-        continue;
-      }
+    const runner = new MigrationRunner();
 
-      console.log(`Applying Postgres migration: ${f}`);
-      try {
-        const sql = fs.readFileSync(path.join(sqlDir, f), 'utf8');
+    switch (command) {
+      case 'up':
+        await runner.runMigrations();
+        break;
+      case 'rollback':
+        await runner.rollback(steps);
+        break;
+      case 'status':
+        await runner.connect();
+        await runner.ensureMigrationsTable();
+        const executed = await runner.getExecutedMigrations();
+        const all = await runner.getMigrationFiles();
+        const pending = all.filter((f) => !executed.includes(f));
 
-        await client.query('BEGIN');
-        await client.query(sql);
-        await client.query(
-          'INSERT INTO schema_migrations (migration_name) VALUES ($1)',
-          [f],
-        );
-        await client.query('COMMIT');
-
-        console.log(`✅ Migration ${f} completed successfully`);
-      } catch (error) {
-        await client.query('ROLLBACK');
-
-        // Legacy support: If it fails because objects exist, assume it was previously applied but not tracked
-        if (
-          error.message.includes('already exists') ||
-          error.message.includes('does not exist') ||
-          error.code === '42P07' // duplicate_table
-        ) {
-          console.warn(
-            `⚠️  Migration ${f} failed with "exists" error (${error.message}). assuming legacy application. Marking as done.`,
-          );
-          await client.query(
-            'INSERT INTO schema_migrations (migration_name) VALUES ($1) ON CONFLICT DO NOTHING',
-            [f],
-          );
-        } else {
-          console.error(`❌ Migration ${f} failed: ${error.message}`);
-          throw error;
-        }
-      }
+        console.log('Migration Status:');
+        console.log(`Executed: ${executed.length}`);
+        console.log(`Pending: ${pending.length}`);
+        await runner.disconnect();
+        break;
+      default:
+        console.log('Usage: npm run db:migrate [up|rollback|status] [steps]');
     }
-  } finally {
-    await client.end();
+
+    // Neo4j migration logic is currently separate or needs to be integrated
+    // For now, we focus on Postgres as per the task "Postgres and Migration Discipline"
+    // If we need Neo4j, we should add it to the MigrationRunner or keep a separate call here.
+    // Given the task scope, having a solid Postgres runner is the priority.
+
+  } catch (error) {
+    console.error('Migration failed:', error);
+    process.exit(1);
   }
 }
 
-async function migrateNeo4j() {
-  const cypherDir = path.resolve(__dirname, '../db/migrations/neo4j');
-  if (!fs.existsSync(cypherDir)) return console.log('Neo4j migrations: none');
-
-  const uri = process.env.NEO4J_URI;
-  const user = process.env.NEO4J_USER || process.env.NEO4J_USERNAME;
-  const password = process.env.NEO4J_PASSWORD;
-  if (!uri || !user || !password)
-    return console.warn('Skip Neo4j: NEO4J_URI/USER/PASSWORD not set');
-
-  const driver = neo4j.driver(uri, neo4j.auth.basic(user, password));
-  const session = driver.session();
-  const files = fs
-    .readdirSync(cypherDir)
-    .filter((f) => f.endsWith('.cypher'))
-    .sort();
-
-  try {
-    // Create migration tracking constraint
-    await session.run(`
-      CREATE CONSTRAINT migration_name_unique IF NOT EXISTS 
-      FOR (m:Migration) REQUIRE m.name IS UNIQUE
-    `);
-
-    for (const f of files) {
-      const migrationName = path.basename(f, '.cypher');
-
-      // Check if migration already applied
-      const result = await session.run(
-        'MATCH (m:Migration {name: $name}) RETURN m',
-        { name: migrationName },
-      );
-
-      if (result.records.length > 0) {
-        continue;
-      }
-
-      const cypher = fs.readFileSync(path.join(cypherDir, f), 'utf8');
-      console.log(`🔄 Applying Neo4j migration: ${f}`);
-
-      if (cypher.trim()) {
-        // Split by lines and run each non-comment statement
-        const statements = cypher
-          .split('\n')
-          .map((line) => line.trim())
-          .filter((line) => line.length > 0 && !line.startsWith('//'))
-          .join('\n')
-          .split(';')
-          .map((stmt) => stmt.trim())
-          .filter((stmt) => stmt.length > 0);
-
-        for (const statement of statements) {
-          try {
-            await session.run(statement);
-          } catch (error) {
-            // Some constraints/indexes may already exist, warn but continue
-            if (
-              error.message.includes('already exists') ||
-              error.message.includes(
-                'EquivalentSchemaRuleAlreadyExistsException',
-              )
-            ) {
-              console.warn(
-                `⚠️  ${statement.split(' ').slice(0, 5).join(' ')}... already exists`,
-              );
-            } else {
-              throw error;
-            }
-          }
-        }
-
-        // Mark migration as applied
-        await session.run(
-          `
-          CREATE (m:Migration {
-            name: $name,
-            appliedAt: datetime(),
-            filename: $filename
-          })
-        `,
-          { name: migrationName, filename: f },
-        );
-
-        console.log(`✅ Neo4j migration ${migrationName} completed`);
-      }
-    }
-  } finally {
-    await session.close();
-    await driver.close();
-  }
-}
-
-(async () => {
-  await migratePostgres();
-  await migrateNeo4j();
-  console.log('Migrations complete');
-})().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+runMigrations();

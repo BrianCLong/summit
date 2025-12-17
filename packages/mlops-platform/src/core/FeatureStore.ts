@@ -207,7 +207,7 @@ export class FeatureStore extends EventEmitter {
 
       for (const featureName of query.featureNames) {
         const feature = await this.getFeatureByName(featureName);
-        if (!feature) continue;
+        if (!feature) {continue;}
 
         const key = this.getOfflineKey(entityId, feature.id);
         const values = this.offlineStore.get(key) || [];
