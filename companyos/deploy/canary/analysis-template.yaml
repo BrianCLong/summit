@@ -1,0 +1,219 @@
+# CompanyOS Canary Analysis Template
+# Implements B3: Canaryable CompanyOS Deployments
+#
+# This template defines metrics and thresholds for canary analysis
+# Used by Argo Rollouts or similar progressive delivery systems
+
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: companyos-canary-analysis
+  namespace: companyos
+  labels:
+    app.kubernetes.io/name: companyos
+    app.kubernetes.io/component: canary-analysis
+spec:
+  # Metrics to evaluate during canary
+  metrics:
+    # ============================================================================
+    # ERROR RATE METRIC
+    # ============================================================================
+    - name: error-rate
+      interval: 1m
+      count: 5
+      successCondition: result[0] < 0.05  # Less than 5% error rate
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: |
+            sum(rate(companyos_http_requests_total{status=~"5..",service="companyos-api",canary="true"}[5m]))
+            /
+            sum(rate(companyos_http_requests_total{service="companyos-api",canary="true"}[5m]))
+
+    # ============================================================================
+    # LATENCY METRIC (P95)
+    # ============================================================================
+    - name: latency-p95
+      interval: 1m
+      count: 5
+      successCondition: result[0] < 300  # Less than 300ms
+      failureLimit: 3
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: |
+            histogram_quantile(0.95,
+              sum(rate(companyos_http_request_duration_seconds_bucket{service="companyos-api",canary="true"}[5m])) by (le)
+            ) * 1000
+
+    # ============================================================================
+    # LATENCY DELTA (Canary vs Stable)
+    # ============================================================================
+    - name: latency-delta
+      interval: 1m
+      count: 5
+      successCondition: result[0] < 1.2  # Canary not more than 20% slower
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: |
+            (
+              histogram_quantile(0.95,
+                sum(rate(companyos_http_request_duration_seconds_bucket{service="companyos-api",canary="true"}[5m])) by (le)
+              )
+            )
+            /
+            (
+              histogram_quantile(0.95,
+                sum(rate(companyos_http_request_duration_seconds_bucket{service="companyos-api",canary="false"}[5m])) by (le)
+              )
+            )
+
+    # ============================================================================
+    # ERROR RATE DELTA (Canary vs Stable)
+    # ============================================================================
+    - name: error-rate-delta
+      interval: 1m
+      count: 5
+      successCondition: result[0] < 1.5  # Canary not more than 50% higher error rate
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: |
+            (
+              sum(rate(companyos_http_requests_total{status=~"5..",service="companyos-api",canary="true"}[5m]))
+              /
+              sum(rate(companyos_http_requests_total{service="companyos-api",canary="true"}[5m]))
+            )
+            /
+            (
+              sum(rate(companyos_http_requests_total{status=~"5..",service="companyos-api",canary="false"}[5m]))
+              /
+              sum(rate(companyos_http_requests_total{service="companyos-api",canary="false"}[5m]))
+            )
+
+    # ============================================================================
+    # HEALTH CHECK
+    # ============================================================================
+    - name: health-check
+      interval: 30s
+      count: 10
+      successCondition: result == "healthy"
+      failureLimit: 3
+      provider:
+        web:
+          url: http://companyos-api-canary.companyos:4100/health
+          jsonPath: "{$.status}"
+
+    # ============================================================================
+    # OPA POLICY DECISION SUCCESS RATE
+    # ============================================================================
+    - name: opa-success-rate
+      interval: 1m
+      count: 5
+      successCondition: result[0] > 0.99  # 99% OPA decisions successful
+      failureLimit: 2
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring:9090
+          query: |
+            sum(rate(companyos_opa_decisions_total{status="success",canary="true"}[5m]))
+            /
+            sum(rate(companyos_opa_decisions_total{canary="true"}[5m]))
+
+---
+# Rollout configuration for canary deployments
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: companyos-api
+  namespace: companyos
+spec:
+  replicas: 3
+  strategy:
+    canary:
+      # Canary steps
+      steps:
+        # Step 1: Deploy canary with 10% traffic
+        - setWeight: 10
+        - pause: {duration: 2m}
+
+        # Step 2: Run analysis
+        - analysis:
+            templates:
+              - templateName: companyos-canary-analysis
+            args:
+              - name: service-name
+                value: companyos-api
+
+        # Step 3: Increase to 25%
+        - setWeight: 25
+        - pause: {duration: 2m}
+
+        # Step 4: Run analysis again
+        - analysis:
+            templates:
+              - templateName: companyos-canary-analysis
+
+        # Step 5: Increase to 50%
+        - setWeight: 50
+        - pause: {duration: 3m}
+
+        # Step 6: Final analysis
+        - analysis:
+            templates:
+              - templateName: companyos-canary-analysis
+
+        # Step 7: Full rollout
+        - setWeight: 100
+
+      # Traffic routing
+      canaryService: companyos-api-canary
+      stableService: companyos-api-stable
+
+      # Automatic rollback on failure
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 300
+
+      # Anti-affinity to ensure canary and stable don't land on same node
+      antiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution: {}
+
+  selector:
+    matchLabels:
+      app: companyos-api
+  template:
+    metadata:
+      labels:
+        app: companyos-api
+    spec:
+      containers:
+        - name: companyos-api
+          image: companyos-api:latest
+          ports:
+            - containerPort: 4100
+          env:
+            - name: OPA_URL
+              value: http://companyos-opa:8181/v1/data/companyos/authz/decision
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 4100
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 4100
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

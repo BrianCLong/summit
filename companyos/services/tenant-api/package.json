@@ -1,0 +1,38 @@
+{
+  "name": "@companyos/tenant-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit",
+    "migrate": "psql $DATABASE_URL -f migrations/001_create_tenants.sql"
+  },
+  "dependencies": {
+    "@apollo/server": "^4.10.0",
+    "express": "^4.21.1",
+    "graphql": "^16.8.1",
+    "pg": "^8.11.3",
+    "pino": "^9.0.0",
+    "pino-http": "^10.0.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.1",
+    "@types/pg": "^8.11.0",
+    "@types/supertest": "^6.0.3",
+    "@types/uuid": "^9.0.7",
+    "supertest": "^7.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

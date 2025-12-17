@@ -1,0 +1,188 @@
+name: Threat Model Coverage
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-coverage:
+    name: Check Threat Model Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v44
+        with:
+          separator: ','
+
+      - name: Run threat model coverage check
+        id: coverage-check
+        run: |
+          # Run the coverage checker
+          OUTPUT=$(npx ts-node scripts/security/check-threat-model-coverage.ts \
+            --changed-files "${{ steps.changed-files.outputs.all_changed_files }}" \
+            --format markdown)
+
+          # Save output to file for the comment step
+          echo "$OUTPUT" > coverage-report.md
+
+          # Also run JSON format for parsing
+          JSON_OUTPUT=$(npx ts-node scripts/security/check-threat-model-coverage.ts \
+            --changed-files "${{ steps.changed-files.outputs.all_changed_files }}" \
+            --format json)
+
+          # Extract key metrics
+          HAS_CRITICAL=$(echo "$JSON_OUTPUT" | jq -r '.hasCriticalIssues')
+          HAS_HIGH=$(echo "$JSON_OUTPUT" | jq -r '.hasHighIssues')
+          MISSING_COUNT=$(echo "$JSON_OUTPUT" | jq -r '.missingCount')
+          STALE_COUNT=$(echo "$JSON_OUTPUT" | jq -r '.staleCount')
+
+          # Set outputs
+          echo "has-critical=$HAS_CRITICAL" >> $GITHUB_OUTPUT
+          echo "has-high=$HAS_HIGH" >> $GITHUB_OUTPUT
+          echo "missing-count=$MISSING_COUNT" >> $GITHUB_OUTPUT
+          echo "stale-count=$STALE_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Find existing comment
+        uses: peter-evans/find-comment@v3
+        id: find-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: 'Threat Model Coverage Check'
+
+      - name: Create or update PR comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body-path: coverage-report.md
+
+      - name: Set job status
+        run: |
+          # Phase 1: Advisory only - always pass
+          # Phase 2 (future): Uncomment to make critical issues blocking
+          # if [ "${{ steps.coverage-check.outputs.has-critical }}" == "true" ]; then
+          #   echo "::error::Critical-tier features have missing or stale threat models"
+          #   exit 1
+          # fi
+
+          if [ "${{ steps.coverage-check.outputs.has-critical }}" == "true" ]; then
+            echo "::warning::Critical-tier features have missing or stale threat models. Consider updating before merge."
+          elif [ "${{ steps.coverage-check.outputs.has-high }}" == "true" ]; then
+            echo "::notice::High-tier features have missing or stale threat models. Review recommended."
+          else
+            echo "All threat models are current."
+          fi
+
+  # Staleness check runs on schedule
+  staleness-report:
+    name: Weekly Staleness Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check all threat models for staleness
+        run: |
+          # Get all files that require threat models
+          ALL_PATHS=$(cat << 'EOF'
+          server/src/auth/index.ts
+          server/src/conductor/auth/index.ts
+          services/common/auth/index.ts
+          SECURITY/policy/opa/abac.rego
+          server/src/graphql/intelgraph/resolvers.ts
+          server/src/intelgraph/client.ts
+          server/src/maestro/core.ts
+          services/copilot/index.ts
+          src/maestro/core/conductor.ts
+          conductor-ui/frontend/src/maestro/api.ts
+          EOF
+          )
+
+          npx ts-node scripts/security/check-threat-model-coverage.ts \
+            --changed-files "$(echo "$ALL_PATHS" | tr '\n' ',')" \
+            --format text
+
+      - name: Create issue for stale models
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = 'Threat Model Staleness Alert';
+            const body = `
+            ## Weekly Threat Model Staleness Check
+
+            One or more threat models are stale and need review.
+
+            Please run the following command locally for details:
+            \`\`\`bash
+            npx ts-node scripts/security/check-threat-model-coverage.ts --base-ref HEAD~100
+            \`\`\`
+
+            See [THREAT_MODEL_INDEX.md](docs/security/THREAT_MODEL_INDEX.md) for the full list.
+
+            /cc @security-team
+            `;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,threat-model'
+            });
+
+            const existingIssue = issues.data.find(i => i.title === title);
+
+            if (!existingIssue) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['security', 'threat-model']
+              });
+            }

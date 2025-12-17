@@ -1,0 +1,98 @@
+# Terror Cell Scenario Template
+
+name: Terror Cell Network Analysis
+description: Intelligence analysis of suspected terror cell with focus on command structure and operational planning
+type: THREAT_ANALYSIS
+
+parameters:
+  type: terror-cell
+  size: medium
+  noiseLevel: 0.2
+  missingDataRate: 0.15
+  conflictingEvidenceRate: 0.1
+  temporalSpan:
+    start: 2023-01-01
+    end: 2024-12-31
+  seed: 23456
+
+copilotGoal: |
+  Map the organizational structure of the cell, identify the leadership hierarchy,
+  and predict potential targets or timelines. Focus on:
+  1. Command structure identification
+  2. Communication patterns
+  3. Operational indicators
+  4. Timeline construction
+
+expectedKeyEntities:
+  - type: PERSON
+    role: cell_leader
+    count: 1-3
+  - type: PERSON
+    role: operative
+    count: 5-10
+  - type: LOCATION
+    role: safe_house
+    count: 3-7
+  - type: EVENT
+    role: meeting
+    count: 10-20
+
+workflow:
+  name: Terror Cell Analysis Workflow
+  description: Systematic analysis of terror network
+  strategy: systematic
+  steps:
+    - type: CREATE_INVESTIGATION
+      params: {}
+
+    - type: ADD_ENTITY
+      params:
+        entityIndex: 0-all
+
+    - type: ADD_RELATIONSHIP
+      params:
+        relationshipIndex: 0-all
+
+    - type: QUERY_ENTITIES
+      params:
+        type: PERSON
+        limit: 100
+
+    - type: RUN_COPILOT
+      params:
+        goal: "Identify cell leadership and command structure"
+        timeout: 60000
+
+    - type: QUERY_ENTITIES
+      params:
+        type: LOCATION
+        limit: 100
+
+    - type: EXPAND_NETWORK
+      params:
+        entityId: leader
+        depth: 2
+
+    - type: QUERY_RELATIONSHIPS
+      params:
+        entityId: leader
+
+    - type: RUN_COPILOT
+      params:
+        goal: "Analyze communication patterns and predict activities"
+        timeout: 60000
+
+    - type: EXPORT_DATA
+      params: {}
+
+evaluationCriteria:
+  successThresholds:
+    coverageRate: 0.75
+    keyEntitiesFound: 0.8
+    precision: 0.7
+    recall: 0.75
+
+  performanceTargets:
+    maxDuration: 240000  # 4 minutes
+    maxQueriesPerSession: 40
+    copilotSuccessRate: 0.85
