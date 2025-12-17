@@ -317,6 +317,9 @@
   },
   "dependencies": {
 <<<<<<< HEAD
+    "@types/papaparse": "^5.5.0",
+=======
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 =======
@@ -344,12 +347,16 @@
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "axios": "^1.11.0",
     "cross-env": "^10.1.0",
     "docx": "^9.5.1",
     "dotenv": "^17.2.3",
+<<<<<<< HEAD
+    "helmet": "^8.1.0",
+=======
 <<<<<<< HEAD
     "graphql-depth-limit": "^1.1.0",
 =======
@@ -368,6 +375,7 @@
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
     "jest-extended": "^7.0.0",
     "jest-junit": "^16.0.0",
     "js-yaml": "^4.1.0",
@@ -382,6 +390,7 @@
     "js-yaml": "^4.1.1",
 >>>>>>> main
     "neo4j-driver": "6.0.1",
+    "papaparse": "^5.5.3",
     "pg": "^8.16.3",
     "redis": "^5.8.1",
 <<<<<<< HEAD

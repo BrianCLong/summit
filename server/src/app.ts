@@ -110,7 +110,33 @@ export const createApp = async () => {
   const app = express();
 <<<<<<< HEAD
   const logger = pino();
+<<<<<<< HEAD
+
+  // Add correlation ID middleware FIRST (before other middleware)
+  app.use(correlationIdMiddleware);
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          'script-src': [
+            "'self'",
+            "'unsafe-inline'",
+            'https://cdn.jsdelivr.net',
+          ],
+          'connect-src': ["'self'", 'https://api.intelgraph.example'],
+        },
+      },
+      crossOriginOpenerPolicy: { policy: 'same-origin' },
+      crossOriginEmbedderPolicy: { policy: 'require-corp' },
+      crossOriginResourcePolicy: { policy: 'same-origin' },
+      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+    })
+  );
+=======
   const isProduction = cfg.NODE_ENV === 'production';
+>>>>>>> main
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);

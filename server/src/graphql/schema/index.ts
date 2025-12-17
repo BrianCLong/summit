@@ -10,9 +10,13 @@ import evidenceTypeDefs from '../schema.evidence.js';
 import evidenceOkTypeDefs from '../schema.evidenceOk.js';
 import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
+<<<<<<< HEAD
+import { sprint28TypeDefs } from './sprint28.js';
+=======
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+>>>>>>> main
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
@@ -60,7 +64,11 @@ export const typeDefs = [
   evidenceOkTypeDefs,
   trustRiskTypeDefs,
   provenanceTypeDefs,
+<<<<<<< HEAD
+  sprint28TypeDefs,
+=======
   ewTypeDefs,
+>>>>>>> main
 ];
 
 export default typeDefs;
