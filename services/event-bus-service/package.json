@@ -16,7 +16,11 @@
     "@intelgraph/cqrs": "workspace:*",
     "@intelgraph/messaging": "workspace:*",
     "@intelgraph/event-streaming": "workspace:*",
+<<<<<<< HEAD
     "express": "^5.0.1",
+=======
+    "express": "^5.2.0",
+>>>>>>> main
     "pino": "^9.0.0",
     "pino-http": "^10.0.0",
     "dotenv": "^17.2.3",
