@@ -1,8 +1,11 @@
 [![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
+[![Developer Radar](https://img.shields.io/badge/Developer%20Radar-Active-blue)](docs/dev/radar-dashboard.md)
 ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
 [![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
 [![Release](https://github.com/BrianCLong/summit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/release.yml)
+[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 
 # Summit Platform
 
@@ -15,6 +18,12 @@
 - The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
 - **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
 
+## ✅ CI & Merge Policy
+
+- **Required checks:** `ci-lint-and-unit / lint-and-unit`, `ci-golden-path / golden-path`, and `security / security-scan` (see `RUNBOOKS/CI.md`).
+- **Golden path enforcement:** `make bootstrap`, `make up`, and `make smoke` run in CI on `main` and via nightly scheduled golden-path jobs. Local contributors should run `./start.sh` before opening PRs.
+- **Auto-merge lane:** PRs labelled `automerge-safe` (or queued for the merge train) are auto-updated from `main` by the “Auto Update PRs (safe)” workflow and merged once required checks are green and conflicts are clear.
+
 ## 🚀 Quickstart (< 60 Seconds)
 
 **Prerequisites:** Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+, ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available.
@@ -22,14 +31,15 @@
 ```bash
 git clone https://github.com/BrianCLong/summit.git
 cd summit
-./start.sh              # One-command bootstrap: installs deps, starts services, runs smoke test
+npm run quickstart      # Trivial setup: installs deps, starts infra, migrates DB, runs dev servers
 ```
 
-**Alternative (manual steps):**
+**Manual steps:**
 ```bash
 make bootstrap          # installs pnpm deps + venv + .env
-make up                 # docker-compose.dev.yml + migrations (API, web, dbs, observability)
-make smoke              # golden path automation against seeded data
+npm run docker:dev -- up -d postgres neo4j redis # start infrastructure
+npm run db:migrate      # setup database
+npm run dev             # start frontend and backend
 ```
 
 **Service Endpoints:**
@@ -44,6 +54,7 @@ make smoke              # golden path automation against seeded data
 
 ### Observability & Health
 
+- **Security Checks:** SBOMs, Trivy scans, and SLSA attestations run nightly. See [SECURITY.md](SECURITY.md) for verification steps.
 - Health probes ship at `/health`, `/health/detailed`, `/health/ready`, `/health/live`, `/metrics`. `make smoke` curls them before executing mutations.
 - Prometheus scrapes `api:4000/metrics` using `observability/prometheus/prometheus-dev.yml`.
 - Grafana auto-provisions the **Summit Golden Path** dashboard (`observability/grafana/provisioning/dashboards/summit-golden-path.json`) with Prometheus datasource credentials from `.env`. Panels cover GraphQL p95, health-check uptime, and the lightweight dev gateway stub exposed on port `4100`.
@@ -81,21 +92,28 @@ pnpm smoke            # same as make smoke (Node-based E2E)
 **Strict Branch Protection**: `main` is protected. Direct pushes are blocked.
 
 ### Required Checks
-1.  **CI (Lint & Unit)**: Fast lane. Runs lint, typecheck, and unit tests.
-2.  **CI (Golden Path)**: Integration lane. Boots the full stack and runs smoke tests.
-3.  **Security**: Scans for secrets and vulnerabilities.
+
+The `ci.yml` workflow runs on every PR + main with the following checks:
+
+1. **CI (Lint & Unit)**: Fast lane. Runs lint, typecheck, and unit tests.
+2. **CI (Golden Path)**: Integration lane. Boots the full stack with `make bootstrap`, `make up` (headless), and `make smoke`.
+3. **Security**: CodeQL analysis, dependency review, gitleaks, SBOM + Trivy scans.
+
+All workflows use cached `pnpm install` and Docker layer caching. These are required checks for merge.
 
 ### Merge Train
-We use a "Safe Merge" label strategy to manage the PR backlog.
-*   **Developers**: Open PR → Get Approval → Add `automerge-safe` label.
-*   **Automation**: The merge train script updates your branch from `main`, verifies CI, and merges automatically when green.
-*   **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
+
+We use a "Safe Merge" label strategy to manage the PR backlog:
+
+* **Developers**: Open PR → Get Approval → Add `automerge-safe` label.
+* **Automation**: The merge train script updates your branch from `main`, verifies CI, and merges automatically when green.
+* **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
 
 **Note**: Do not use "Squash and merge" manually if the train is active. Let the bot handle it to ensure linear history and green builds.
 
 ---
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com) [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen.svg)](https://nodejs.org) [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org) [![GraphQL](https://img.shields.io/badge/GraphQL-API-E10098.svg)](https://graphql.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com) [![Node.js](https://img.shields.io/badge/Node.js-20+-brightgreen.svg)](https://nodejs.org) [![React](https://img.shields.io/badge/React-18+-61DAFB.svg)](https://reactjs.org) [![GraphQL](https://img.shields.io/badge/GraphQL-API-E10098.svg)](https://graphql.org)
 
 ### Automations
 
@@ -1057,7 +1075,44 @@ Use the [Feature Request template](https://github.com/BrianCLong/summit/issues/n
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Current Summit / Topicality Summit**
+
+The current Topicality Summit software is proprietary and is licensed only
+under the **IntelGraph / Topicality Summit Enterprise License Agreement
+(Version 1.0)**.
+
+- Copyright (c) 2024–2025  \
+  Topicality LLC, Topicality Summit, and Brian C. Long  \
+  All rights reserved.
+
+Use of the current software requires a valid commercial agreement with
+Topicality LLC / Topicality Summit. See [LICENSE](./LICENSE) for enterprise
+terms, restrictions (including prohibitions on SaaS resale, competitive use,
+and reverse engineering), and contact information.
+
+**Contributor License Agreement**
+
+All Contributions to Summit are accepted only under the
+[Topicality Summit Contributor License Agreement](./CONTRIBUTOR_LICENSE_AGREEMENT.md).
+By submitting a pull request or other Contribution, you confirm your
+acceptance of that CLA.
+
+**Historical MIT-licensed snapshot**
+
+Earlier open source releases of Summit were distributed under the MIT
+License. Those rights are preserved for the specific historical snapshot(s)
+that were released under MIT (for example, tag `v0.4.0-oss-mit`).
+
+- The historical MIT license text is preserved in
+  [OSS-MIT-LICENSE](./OSS-MIT-LICENSE).
+- The MIT license applies ONLY to those explicitly designated historical
+  releases, not to current proprietary versions.
+
+**Third-party open source**
+
+Summit may include third-party open source components that remain subject
+to their own licenses. See [NOTICE](./NOTICE) and the dependency metadata
+(e.g., `package.json`, `pnpm-lock.yaml`) for more information.
 
 ## 🙏 Acknowledgments
 

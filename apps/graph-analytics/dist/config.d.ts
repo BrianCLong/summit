@@ -24,7 +24,7 @@ export declare const config: {
     redis: {
         host: string;
         port: number;
-        password: string;
+        password: string | undefined;
         db: number;
     };
     analytics: {

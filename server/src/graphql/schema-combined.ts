@@ -7,7 +7,7 @@ const { aiTypeDefs } = require('./schema.ai.js');
 const graphragTypes = require('./types/graphragTypes.js');
 const coreTypeDefs = require('./schema/core.js');
 import { activityTypeDefs } from './schema/activity.js';
-import { caseSpacesTypeDefs } from './schema.case-spaces.js';
+import { documentTypeDefs } from './schema.document.js';
 
 // Load v0.4.0 Transcendent Intelligence schema
 const v040Schema = gql(
@@ -40,5 +40,5 @@ export const typeDefs = [
   aiTypeDefs,
   v040Schema,
   activityTypeDefs,
-  caseSpacesTypeDefs,
+  documentTypeDefs,
 ];

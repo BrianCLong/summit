@@ -349,7 +349,7 @@ export class ExportService {
 
         // Metric name (truncate if too long)
         const metricName =
-          metric.name.length > 25 ? metric.name.substring(0, 25) + '...' : metric.name;
+          metric.name.length > 25 ? `${metric.name.substring(0, 25)  }...` : metric.name;
         page.drawText(metricName, {
           x: margin,
           y,
