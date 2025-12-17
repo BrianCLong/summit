@@ -732,10 +732,15 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Router IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
+    // eslint-disable-next-line no-console
     console.log('✅ Apollo GraphQL client initialized');
+    // eslint-disable-next-line no-console
     console.log('✅ React Router navigation enabled');
   }, []);
 

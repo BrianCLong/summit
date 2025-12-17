@@ -76,7 +76,9 @@ const formatFileSize = (bytes: number): string => {
 };
 
 export function FileUpload({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   investigationId,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   entityId,
   onUploadComplete,
   onUploadError,

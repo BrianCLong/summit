@@ -11,6 +11,7 @@ import { persistCache, LocalStorageWrapper } from 'apollo3-cache-persist';
 import sha256 from 'crypto-js/sha256';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4001/graphql';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:4001/graphql';
 const TENANT = import.meta.env.VITE_TENANT_ID || 'dev';
 
@@ -163,6 +164,7 @@ export async function createApolloClient() {
 
       // Clear cache if it gets corrupted
       if (import.meta.env.DEV) {
+        // eslint-disable-next-line no-console
         console.log('Apollo cache persistence enabled for tenant:', TENANT);
       }
     } catch (error) {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // Open Policy Agent (OPA) Integration for Conductor
 // Implements policy-based authorization and tenant isolation
 

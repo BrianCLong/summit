@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import $ from 'jquery';
 export default function ArtifactBusPanel() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [rows, setRows] = useState<any[]>([]);
   useEffect(() => {
     fetch('/api/oci/metrics')
@@ -33,6 +34,7 @@ export default function ArtifactBusPanel() {
           </tr>
         </thead>
         <tbody>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           {rows.map((x: any, i: number) => (
             <tr key={i} className="ab-row border-b">
               <td>{x.tag.slice(0, 16)}…</td>

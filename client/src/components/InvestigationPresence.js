@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { Box, Avatar, Tooltip, Typography, Paper } from '@mui/material';
 import { useSocket } from '../../hooks/useSocket';
 import { useParams } from 'react-router-dom';

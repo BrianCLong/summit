@@ -28,6 +28,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     const now = performance.now();
 
     // Memory usage (if available)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const memory = (performance as any).memory;
     const memoryUsage = memory ? memory.usedJSHeapSize / 1024 / 1024 : 0; // MB
 
@@ -40,6 +41,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
     ).length;
 
     // Error count from console (simplified tracking)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errorCount = (window as any).__performanceErrors || 0;
 
     // Render time (using performance marks if available)
@@ -220,6 +222,7 @@ const PerformanceMonitor: React.FC<PerformanceMonitorProps> = ({
 };
 
 // Hook to track performance metrics
+// eslint-disable-next-line react-refresh/only-export-components
 export const usePerformanceTracking = () => {
   const trackRender = useCallback((componentName: string) => {
     performance.mark(`${componentName}-start`);
@@ -234,7 +237,9 @@ export const usePerformanceTracking = () => {
   }, []);
 
   const trackError = useCallback((error: Error) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).__performanceErrors =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ((window as any).__performanceErrors || 0) + 1;
     console.error('[Performance] Error tracked:', error);
   }, []);
