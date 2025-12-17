@@ -13,12 +13,25 @@ import type {
   ShockDefinition,
   SimulationConfig,
 } from '../narrative/types.js';
+import { isFeatureEnabled } from '../config/mvp1-features.js';
 
 const router = express.Router();
 const scenarioSimulator = new ScenarioSimulator();
 
 // Apply permission check for all simulation routes
 router.use(requirePermission('simulation:run'));
+
+// Feature Flag Gate
+router.use((_req, res, next) => {
+  if (!isFeatureEnabled('NARRATIVE_SIMULATION')) {
+    res.status(403).json({
+      error: 'feature-disabled',
+      message: 'Narrative Simulation Engine is not enabled for this environment.',
+    });
+    return;
+  }
+  next();
+});
 
 const relationshipSchema = z.object({
   targetId: z.string(),
