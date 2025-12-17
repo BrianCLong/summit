@@ -200,7 +200,7 @@ export abstract class BaseConnector extends EventEmitter {
     params: Record<string, any> = {},
   ): Promise<ConnectorExecutionResult> {
     const startTime = Date.now();
-    let retries = 0;
+    const retries = 0;
 
     try {
       // Apply rate limiting if configured

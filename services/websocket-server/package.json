@@ -18,14 +18,18 @@
   "dependencies": {
     "socket.io": "^4.8.1",
     "@socket.io/redis-adapter": "^8.3.0",
+<<<<<<< HEAD
+    "@socket.io/redis-streams-adapter": "^0.2.2",
+=======
     "@socket.io/redis-streams-adapter": "^0.2.3",
+>>>>>>> main
     "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "pino": "^10.1.0",
     "pino-http": "^11.0.0",
     "pino-pretty": "^11.0.0",
     "prom-client": "^15.1.3",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "helmet": "^8.1.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

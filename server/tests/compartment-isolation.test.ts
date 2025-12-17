@@ -1,5 +1,6 @@
 import { ForbiddenError } from 'apollo-server-express';
 import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy';
+import { describe, it, test, expect } from '@jest/globals';
 
 describe('compartment-aware investigation isolation', () => {
   const baseUser = {
