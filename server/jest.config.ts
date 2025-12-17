@@ -23,9 +23,6 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '.*\\/lib\\/telemetry\\/comprehensive-telemetry(\\.(js|ts))?$': '<rootDir>/tests/mocks/lib/telemetry/comprehensive-telemetry.ts',
-    '.*\\/observability\\/tracer(\\.(js|ts))?$': '<rootDir>/tests/mocks/observability/tracer.ts',
-    '.*\\/webhooks\\/webhook\\.worker(\\.(js|ts))?$': '<rootDir>/tests/mocks/webhooks/webhook.worker.ts',
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
@@ -33,11 +30,7 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
-        isolatedModules: true,
-        tsconfig: 'tsconfig.json',
-        diagnostics: {
-          ignoreCodes: [1343, 2305],
-        },
+        tsconfig: 'tsconfig.test.json',
       },
     ],
   },
@@ -64,28 +57,13 @@ const config: Config = {
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
-  testResultsProcessor: 'jest-junit',
-  reporters: [
-    'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: '<rootDir>/test-results',
-        outputName: 'junit.xml',
-        classNameTemplate: '{classname}',
-        titleTemplate: '{title}',
-        ancestorSeparator: ' › ',
-        usePathForSuiteName: true,
-      },
-    ],
-  ],
   verbose: true,
   clearMocks: true,
   restoreMocks: true,
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)'],
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

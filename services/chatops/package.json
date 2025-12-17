@@ -1,0 +1,44 @@
+{
+  "name": "@intelgraph/chatops",
+  "version": "0.1.0",
+  "description": "ChatOps orchestration layer for Summit Intelligence Platform",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsx watch src/index.ts",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "@slack/bolt": "^3.18.0",
+    "@slack/web-api": "^7.0.0",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.3.2",
+    "neo4j-driver": "^5.17.0",
+    "openai": "^4.65.0",
+    "pg": "^8.11.3",
+    "ws": "^8.16.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/pg": "^8.11.0",
+    "@types/ws": "^8.5.10",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit.git",
+    "directory": "services/chatops"
+  }
+}
