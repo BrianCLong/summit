@@ -9,6 +9,7 @@ export default defineConfig({
     'e2e/osint/**/*.spec.ts',
     'e2e/**/*.a11y.spec.ts',
     'tests/e2e/**/*.spec.ts',
+    'e2e/simple.spec.ts',
   ],
   timeout: 30_000,
   retries: 2,
