@@ -331,7 +331,7 @@ export class EmulationPlanGenerator {
     }
   ): EmulationPlan {
     const actor = this.aptLibrary.getActor(actorId);
-    if (!actor) throw new Error(`Actor not found: ${actorId}`);
+    if (!actor) {throw new Error(`Actor not found: ${actorId}`);}
 
     // Build phases from actor TTPs
     const phases = this.buildPhases(actor, scope.duration);

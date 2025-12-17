@@ -49,6 +49,7 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -80,6 +81,9 @@ const DisclosurePackagerPage = React.lazy(() =>
 );
 const OrchestratorDashboard = React.lazy(() =>
   import('./features/orchestrator/OrchestratorDashboard')
+);
+const AdminDashboard = React.lazy(() =>
+  import('./components/admin/AdminDashboard')
 );
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
@@ -568,7 +572,9 @@ function DashboardPage() {
 function InvestigationsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InvestigationTimeline />
+      <ErrorBoundary componentName="InvestigationTimeline">
+        <InvestigationTimeline />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -576,7 +582,9 @@ function InvestigationsPage() {
 function GraphExplorerPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InteractiveGraphExplorer />
+      <ErrorBoundary componentName="InteractiveGraphExplorer">
+        <InteractiveGraphExplorer />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -584,7 +592,9 @@ function GraphExplorerPage() {
 function CopilotPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <IntelligentCopilot />
+      <ErrorBoundary componentName="IntelligentCopilot">
+        <IntelligentCopilot />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -670,7 +680,7 @@ function MainLayout() {
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
               <Route element={<ProtectedRoute roles={['ADMIN']} />}>
-                <Route path="/system" element={<InvestigationsPage />} />
+                <Route path="/system" element={<AdminDashboard />} />
                 <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
                 <Route
                   path="/wargame-dashboard"
@@ -722,10 +732,15 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Router IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
+    // eslint-disable-next-line no-console
     console.log('✅ Apollo GraphQL client initialized');
+    // eslint-disable-next-line no-console
     console.log('✅ React Router navigation enabled');
   }, []);
 

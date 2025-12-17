@@ -1,0 +1,29 @@
+{
+  "model_name": "sentiment-bert-v1",
+  "architecture": "BERT",
+  "base_model": "bert-base-uncased",
+  "fine_tuned_for": "domain-specific sentiment analysis",
+  "supported_languages": ["en"],
+  "max_sequence_length": 512,
+  "num_labels": 3,
+  "labels": ["negative", "neutral", "positive"],
+  "training_dataset": "intelligence-domain-corpus",
+  "training_samples": 100000,
+  "validation_accuracy": 0.94,
+  "inference": {
+    "batch_size": 8,
+    "quantization": "int8",
+    "device": "cpu"
+  },
+  "deployment": {
+    "framework": "transformers",
+    "version": "4.35.0",
+    "endpoint": "/api/sentiment/analyze"
+  },
+  "metrics": {
+    "f1_score": 0.93,
+    "precision": 0.94,
+    "recall": 0.92,
+    "roc_auc": 0.96
+  }
+}

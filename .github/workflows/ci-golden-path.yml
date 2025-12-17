@@ -1,97 +1,108 @@
 name: CI Golden Path
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: golden-path-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
-  golden-path:
+  fast-lane:
+    name: Fast lane (build + unit)
+    uses: ./.github/workflows/_reusable-ci-fast.yml
+
+  security:
+    name: Security posture
+    uses: ./.github/workflows/_reusable-ci-security.yml
+
+  perf-slo:
+    name: Perf SLO guardrail
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'perf:strict') || contains(github.event.pull_request.labels.*.name, 'needs-canary-plan')
+    uses: ./.github/workflows/_reusable-ci-perf.yml
+
+  promotion-gate:
+    name: Gate summary
+    needs: [fast-lane, security, perf-slo]
+    if: always()
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-      actions: read
-      checks: read
-      packages: read
-
+    env:
+      PERF_REQUIRED: ${{ github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'perf:strict') || contains(github.event.pull_request.labels.*.name, 'needs-canary-plan') }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Evaluate stage results
+        id: evaluate
+        uses: actions/github-script@v7
         with:
-          run_install: false
+          script: |
+            const failures = [];
+            const results = {
+              fast: '${{ needs.fast-lane.result }}',
+              security: '${{ needs.security.result }}',
+              perf: '${{ needs.perf-slo.result }}'
+            };
+            const perfRequired = process.env.PERF_REQUIRED === 'true';
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
+            if (results.fast !== 'success') {
+              failures.push('Fast lane failed; fix build/test.');
+            }
+            if (results.security !== 'success') {
+              failures.push('Security checks failed; review gitleaks/trivy outputs.');
+            }
+            if (perfRequired && results.perf !== 'success') {
+              failures.push('Perf SLO guardrail failed; review k6 thresholds.');
+            }
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+            const statusTable = [
+              ['fast-lane', results.fast],
+              ['security', results.security],
+              ['perf-slo', perfRequired ? results.perf : `${results.perf} (not required)`]
+            ];
 
-      - name: Build
-        run: pnpm build || mkdir -p dist
+            core.summary.addHeading('CI Golden Path status');
+            core.summary.addTable([
+              [{data: 'Stage', header: true}, {data: 'Result', header: true}],
+              ...statusTable
+            ]);
+            core.summary.write();
 
-      - name: Run tests
-        run: pnpm test
+            if (failures.length) {
+              core.setFailed(failures.join(' '));
+            }
 
-      # --------------------------------------
-      # SLSA PROVENANCE GENERATION
-      # --------------------------------------
-      - name: Generate SLSA provenance
-        uses: slsa-framework/slsa-github-generator@v1
-        with:
-          artifact_path: dist/
-          output_path: provenance.json
-
-      - name: Upload provenance
-        uses: actions/upload-artifact@v4
-        with:
-          name: slsa-provenance
-          path: provenance.json
-
-      # --------------------------------------
-      # SBOM GENERATION (CycloneDX)
-      # --------------------------------------
-      - name: Install CycloneDX for npm
+      - name: Comment status on PR
+        if: github.event.pull_request && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened' || github.event.action == 'ready_for_review' || github.event.action == 'labeled' || github.event.action == 'unlabeled')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npm install -g @cyclonedx/cyclonedx-npm
+          STATUS_FAST='${{ needs.fast-lane.result }}'
+          STATUS_SEC='${{ needs.security.result }}'
+          STATUS_PERF='${{ needs.perf-slo.result }}'
+          PERF_REQUIRED=${{ env.PERF_REQUIRED }}
 
-      - name: Generate SBOM
-        run: |
-          cyclonedx-npm --output-format json --output-file sbom.json
+          cat > golden-path.md <<'COMMENT'
+          ## ✅ CI Golden Path
 
-      - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.json
+          | Stage | Result |
+          |-------|--------|
+          COMMENT
 
-      # --------------------------------------
-      # OPA / CONFTEST POLICY GATES
-      # --------------------------------------
-      - name: Install Conftest
-        uses: instrumenta/conftest-action@v0.5.0
+          {
+            echo "| Fast lane | ${STATUS_FAST} |"
+            echo "| Security | ${STATUS_SEC} |"
+            if [ "${PERF_REQUIRED}" = "true" ]; then
+              echo "| Perf SLO | ${STATUS_PERF} |"
+            else
+              echo "| Perf SLO | ${STATUS_PERF} (not required) |"
+            fi
+          } >> golden-path.md
 
-      - name: Validate SBOM policy
-        run: |
-          conftest test sbom.json --policy policy/sbom_policy.rego
-
-      - name: Validate SLSA attestation policy
-        run: |
-          # Wrap attestation + expected commit into an input object
-          jq -n --argfile att provenance.json --arg commit "${GITHUB_SHA}" \
-            '{ attestation: $att, expected_commit: $commit }' > attestation-input.json
-          conftest test attestation-input.json --policy policy/slsa_attestation.rego
-
-      - name: Validate lineage integrity policy
-        if: false  # flip to true/ remove when you produce lineage.json
-        run: |
-          conftest test lineage.json --policy policy/lineage_integrity.rego
+          gh pr comment ${{ github.event.pull_request.number }} --body-file golden-path.md || true
