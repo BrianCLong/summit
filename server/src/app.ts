@@ -20,6 +20,9 @@ import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import monitoringRouter from './routes/monitoring.js';
+import billingRouter from './routes/billing.js';
+import entityResolutionRouter from './routes/entity-resolution.js';
+import workspaceRouter from './routes/workspaces.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
@@ -128,6 +131,23 @@ export const createApp = async () => {
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
 
+  // API Versioning Middleware (Epic 2: API v1.1 Default)
+  app.use((req, res, next) => {
+    const version = req.headers['x-ig-api-version'];
+    if (!version) {
+      // Default to v1.1 if not specified
+      req.headers['x-ig-api-version'] = '1.1';
+    }
+    // Attach to request for downstream consumption
+    (req as any).apiVersion = req.headers['x-ig-api-version'];
+
+    // Compat guard: If legacy client detected (v1.0), we might want to log or adjust behavior
+    if ((req as any).apiVersion === '1.0') {
+      // Logic for v1.0 compatibility if needed
+    }
+    next();
+  });
+
   // Telemetry middleware
   app.use((req, res, next) => {
     snapshotter.trackRequest(req);
@@ -172,6 +192,9 @@ export const createApp = async () => {
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
+  app.use('/api/billing', billingRouter);
+  app.use('/api/er', entityResolutionRouter);
+  app.use('/api/workspaces', workspaceRouter);
   app.use('/api/webhooks', webhookRouter);
   app.use('/api/support', supportTicketsRouter);
   app.use('/api', ticketLinksRouter);
