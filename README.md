@@ -3,6 +3,8 @@
 [![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
 [![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
 [![Release](https://github.com/BrianCLong/summit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/release.yml)
+[![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 
 # Summit Platform
 
@@ -14,6 +16,12 @@
 - `./start.sh [--ai]` wraps the golden path on laptops and CI. It fails fast if health probes do not respond.
 - The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
 - **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
+
+## ✅ CI & Merge Policy
+
+- **Required checks:** `ci-lint-and-unit / lint-and-unit`, `ci-golden-path / golden-path`, and `security / security-scan` (see `RUNBOOKS/CI.md`).
+- **Golden path enforcement:** `make bootstrap`, `make up`, and `make smoke` run in CI on `main` and via nightly scheduled golden-path jobs. Local contributors should run `./start.sh` before opening PRs.
+- **Auto-merge lane:** PRs labelled `automerge-safe` (or queued for the merge train) are auto-updated from `main` by the “Auto Update PRs (safe)” workflow and merged once required checks are green and conflicts are clear.
 
 ## 🚀 Quickstart (< 60 Seconds)
 
@@ -1069,7 +1077,7 @@ Use the [Feature Request template](https://github.com/BrianCLong/summit/issues/n
 
 The current Topicality Summit software is proprietary and is licensed only
 under the **IntelGraph / Topicality Summit Enterprise License Agreement
-(Version 1.1)**.
+(Version 1.0)**.
 
 - Copyright (c) 2024–2025  \
   Topicality LLC, Topicality Summit, and Brian C. Long  \
@@ -1078,16 +1086,14 @@ under the **IntelGraph / Topicality Summit Enterprise License Agreement
 Use of the current software requires a valid commercial agreement with
 Topicality LLC / Topicality Summit. See [LICENSE](./LICENSE) for enterprise
 terms, restrictions (including prohibitions on SaaS resale, competitive use,
-reverse engineering, model/data extraction, and audit rights), ownership of
-derivative works, and contact information.
+and reverse engineering), and contact information.
 
 **Contributor License Agreement**
 
 All Contributions to Summit are accepted only under the
-[Topicality Summit Contributor License Agreement (Version 2.0)](./CONTRIBUTOR_LICENSE_AGREEMENT.md).
+[Topicality Summit Contributor License Agreement](./CONTRIBUTOR_LICENSE_AGREEMENT.md).
 By submitting a pull request or other Contribution, you confirm your
-acceptance of that CLA (including work-made-for-hire/assignment provisions,
-patent grants, and moral-rights waivers).
+acceptance of that CLA.
 
 **Historical MIT-licensed snapshot**
 

@@ -11,22 +11,20 @@ Licensing
 ---------
 
 Current versions of the Topicality Summit software are distributed under the
-IntelGraph / Topicality Summit Enterprise License Agreement (Version 1.1).
-See the LICENSE file for the full commercial terms, restrictions, ownership
-provisions, and contact information.
+IntelGraph / Topicality Summit Enterprise License Agreement (Version 1.0).
+See the LICENSE file for terms, restrictions, and contact information.
 
 Historical open source releases of Summit (for example, the tag
 `v0.4.0-oss-mit`) were made available under the MIT License. The historical
 MIT license text is preserved in OSS-MIT-LICENSE and applies only to those
-explicitly designated releases.
+designated releases.
 
 Contributor License Agreement
 -----------------------------
 
 Contributions are accepted only under the Topicality Summit Contributor
-License Agreement (CLA) Version 2.0, which includes work-made-for-hire,
-assignment, patent grants, and moral rights waivers. See
-CONTRIBUTOR_LICENSE_AGREEMENT.md for the full text and acceptance terms.
+License Agreement (CLA). See CONTRIBUTOR_LICENSE_AGREEMENT.md for the full
+text and acceptance terms.
 
 Third-Party Open Source Components
 ----------------------------------
