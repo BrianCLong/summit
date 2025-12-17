@@ -91,7 +91,6 @@ export function createQueryComplexityPlugin(
                   complexity,
                   maxComplexity,
                   user: contextValue?.user?.id,
-                  // query: request.query?.substring(0, 200), // First 200 chars
                 },
                 'GraphQL query complexity analyzed'
               );
@@ -139,28 +138,24 @@ export function createQueryComplexityPlugin(
                 limit = cfg.RATE_LIMIT_MAX_COMPLEXITY_ANONYMOUS || 5000;
               }
 
-              const result = await rateLimiter.consume(key, complexity, limit, windowMs);
-
-              if (!result.allowed) {
-                logger.warn(
-                  {
-                    key,
-                    complexity,
-                    limit,
-                    remaining: result.remaining,
-                  },
-                  'Query exceeded complexity rate limit'
-                );
-
-                throw new GraphQLError(
-                  `Rate limit exceeded for query complexity. Try again in ${Math.ceil((result.reset - Date.now()) / 1000)}s`,
-                  {
-                    extensions: {
-                      code: 'COMPLEXITY_RATE_LIMIT_EXCEEDED',
-                      retryAfter: Math.ceil((result.reset - Date.now()) / 1000),
-                    },
+              // Use rateLimiter.consume if available
+              if (rateLimiter && typeof rateLimiter.consume === 'function') {
+                  const result = await rateLimiter.consume(key, complexity, limit, windowMs);
+                  if (!result.allowed) {
+                    logger.warn(
+                      { key, complexity, limit, remaining: result.remaining },
+                      'Query exceeded complexity rate limit'
+                    );
+                    throw new GraphQLError(
+                      `Rate limit exceeded for query complexity. Try again in ${Math.ceil((result.reset - Date.now()) / 1000)}s`,
+                      {
+                        extensions: {
+                          code: 'COMPLEXITY_RATE_LIMIT_EXCEEDED',
+                          retryAfter: Math.ceil((result.reset - Date.now()) / 1000),
+                        },
+                      }
+                    );
                   }
-                );
               }
             }
 
@@ -181,7 +176,6 @@ export function createQueryComplexityPlugin(
 
 /**
  * Helper function to get max complexity based on user role
- * Can be customized per application needs
  */
 export function getMaxComplexityByRole(context: any): number {
   const user = context?.user;

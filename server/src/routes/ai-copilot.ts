@@ -69,7 +69,7 @@ const ReplayQuerySchema = z.object({
  * Main AI Copilot query endpoint
  */
 router.post('/query',
-  rateLimitMiddleware({ maxRequests: 100, windowMs: 60000 }),
+  rateLimitMiddleware,
   async (req: Request, res: Response, next: NextFunction) => {
     const startTime = Date.now();
 
@@ -278,7 +278,7 @@ router.get('/run/:runId',
  * Replay a previous query with optional modifications
  */
 router.post('/replay/:runId',
-  rateLimitMiddleware({ maxRequests: 50, windowMs: 60000 }),
+  rateLimitMiddleware,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { runId } = req.params;
