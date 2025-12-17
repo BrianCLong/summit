@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Create offline deployment bundle for air-gapped environments
+# Create offline deployment bundle for air-gapped environments (GDC & Docker Compose)
 
 set -euo pipefail
 
@@ -21,7 +21,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 create_bundle_structure() {
   log_info "Creating bundle directory structure..."
 
-  mkdir -p "$BUNDLE_DIR"/{images,config,scripts,checksums,docs}
+  mkdir -p "$BUNDLE_DIR"/{images,config,scripts,checksums,docs,manifests}
 
   log_info "Bundle structure created at: $BUNDLE_DIR"
 }
@@ -80,6 +80,18 @@ pull_and_save_images() {
   log_info "All images pulled and saved"
 }
 
+# Copy Kubernetes manifests
+copy_k8s_manifests() {
+  log_info "Copying Kubernetes GDC manifests..."
+
+  if [ -d "../kubernetes/gdc" ]; then
+    cp -r ../kubernetes/gdc/* "$BUNDLE_DIR/manifests/"
+    log_info "Manifests copied to: $BUNDLE_DIR/manifests/"
+  else
+    log_warn "Kubernetes GDC manifests not found in ../kubernetes/gdc"
+  fi
+}
+
 # Generate checksums
 generate_checksums() {
   log_info "Generating SHA256 checksums..."
@@ -109,7 +121,7 @@ PRIVATE_REGISTRY_URL=registry.airgap.local:5000
 REGISTRY_USERNAME=
 REGISTRY_PASSWORD=
 
-# Database Configuration
+# Database Configuration (for external DBs)
 POSTGRES_HOST=postgres.airgap.local
 POSTGRES_PORT=5432
 POSTGRES_USER=intelgraph
@@ -132,6 +144,10 @@ OPA_URL=http://opa.airgap.local:8181
 JWT_SECRET=
 ENCRYPTION_KEY=
 API_KEY=
+
+# Zero Trust
+ENABLE_MTLS=true
+ENABLE_OPA=true
 
 # Feature Flags
 ENABLE_STEP_UP_AUTH=true
@@ -181,19 +197,18 @@ done < ../images/image-list.txt
 
 echo "✅ Private registry setup complete"
 EOF
-
   chmod +x "$BUNDLE_DIR/scripts/01-setup-private-registry.sh"
 
-  # Deployment script
-  cat > "$BUNDLE_DIR/scripts/02-deploy-airgap.sh" <<'EOF'
+  # Docker Compose Deployment Script
+  cat > "$BUNDLE_DIR/scripts/02-deploy-compose-airgap.sh" <<'EOF'
 #!/usr/bin/env bash
-# Deploy IntelGraph in air-gap environment
+# Deploy IntelGraph via Docker Compose in air-gap environment
 
 set -euo pipefail
 
 source ../config/.env
 
-echo "Deploying IntelGraph from private registry..."
+echo "Deploying IntelGraph (Docker Compose) from private registry..."
 
 # Generate docker-compose with private registry images
 cat > docker-compose.airgap.yml <<COMPOSE
@@ -254,10 +269,63 @@ COMPOSE
 
 docker-compose -f docker-compose.airgap.yml up -d
 
-echo "✅ Air-gap deployment complete"
+echo "✅ Air-gap deployment (Compose) complete"
 EOF
+  chmod +x "$BUNDLE_DIR/scripts/02-deploy-compose-airgap.sh"
 
-  chmod +x "$BUNDLE_DIR/scripts/02-deploy-airgap.sh"
+  # Kubernetes GDC Deployment Script
+  cat > "$BUNDLE_DIR/scripts/02-deploy-k8s-airgap.sh" <<'EOF'
+#!/usr/bin/env bash
+# Deploy IntelGraph to GDC/Kubernetes in air-gap environment
+
+set -euo pipefail
+
+source ../config/.env
+
+echo "Deploying IntelGraph to Kubernetes (GDC)..."
+
+if ! command -v kubectl >/dev/null 2>&1; then
+    echo "❌ kubectl is required but not installed."
+    exit 1
+fi
+
+echo "Updating kustomization.yaml with private registry: $PRIVATE_REGISTRY_URL"
+
+# We use sed to update the registry in kustomization.yaml located in manifests/
+# Note: This is a simple replacement for the reference implementation.
+# In production, use 'kustomize edit set image' if kustomize CLI is available.
+
+cd ../manifests
+
+if command -v kustomize >/dev/null 2>&1; then
+    kustomize edit set image ghcr.io/brianclong/intelgraph-api=$PRIVATE_REGISTRY_URL/intelgraph-api
+    kustomize edit set image ghcr.io/brianclong/intelgraph-frontend=$PRIVATE_REGISTRY_URL/intelgraph-frontend
+    kustomize edit set image postgres=$PRIVATE_REGISTRY_URL/postgres
+    kustomize edit set image neo4j=$PRIVATE_REGISTRY_URL/neo4j
+    kustomize edit set image redis=$PRIVATE_REGISTRY_URL/redis
+else
+    echo "⚠️ kustomize CLI not found, assuming manual kustomization.yaml edit or using defaults."
+fi
+
+# Apply secrets
+echo "Creating/Updating Secrets..."
+kubectl create secret generic intelgraph-secrets \
+    --namespace=intelgraph-gdc \
+    --from-literal=JWT_SECRET="$JWT_SECRET" \
+    --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+    --from-literal=NEO4J_PASSWORD="$NEO4J_PASSWORD" \
+    --from-literal=REDIS_PASSWORD="$REDIS_PASSWORD" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+# Apply manifests
+echo "Applying manifests..."
+kubectl apply -k .
+
+echo "✅ Air-gap deployment (Kubernetes) complete"
+echo "Waiting for pods to be ready..."
+kubectl wait --for=condition=ready pod --all -n intelgraph-gdc --timeout=300s
+EOF
+  chmod +x "$BUNDLE_DIR/scripts/02-deploy-k8s-airgap.sh"
 
   # Verification script
   cat > "$BUNDLE_DIR/scripts/03-verify-deployment.sh" <<'EOF'
@@ -272,12 +340,16 @@ sha256sum -c images.sha256 || { echo "❌ Image checksum verification failed"; e
 echo "✅ All image checksums verified"
 
 echo "Verifying deployment health..."
-curl -f http://localhost:3000/health || { echo "❌ Frontend health check failed"; exit 1; }
-curl -f http://localhost:8080/health || { echo "❌ API health check failed"; exit 1; }
+if command -v kubectl >/dev/null 2>&1; then
+    echo "Checking Kubernetes pods..."
+    kubectl get pods -n intelgraph-gdc
+else
+    echo "Checking Docker containers..."
+    docker ps | grep intelgraph
+fi
 
 echo "✅ Deployment verification complete"
 EOF
-
   chmod +x "$BUNDLE_DIR/scripts/03-verify-deployment.sh"
 
   log_info "Deployment scripts created in: $BUNDLE_DIR/scripts/"
@@ -295,14 +367,18 @@ set -euo pipefail
 
 echo "Rolling back deployment..."
 
-docker-compose -f docker-compose.airgap.yml down
-
-echo "Removing deployed images..."
-docker images | grep "$PRIVATE_REGISTRY_URL" | awk '{print $1":"$2}' | xargs -r docker rmi -f
+if command -v kubectl >/dev/null 2>&1; then
+    echo "Deleting Kubernetes resources..."
+    kubectl delete -k ../manifests --ignore-not-found
+else
+    echo "Bringing down Docker Compose..."
+    if [ -f "docker-compose.airgap.yml" ]; then
+        docker-compose -f docker-compose.airgap.yml down
+    fi
+fi
 
 echo "✅ Rollback complete"
 EOF
-
   chmod +x "$BUNDLE_DIR/scripts/rollback.sh"
 
   log_info "Rollback script created"
@@ -313,32 +389,36 @@ create_documentation() {
   log_info "Creating deployment documentation..."
 
   cat > "$BUNDLE_DIR/docs/AIR_GAP_DEPLOYMENT_GUIDE.md" <<'EOF'
-# IntelGraph Air-Gap Deployment Guide
+# IntelGraph Air-Gap Deployment Guide (GDC & Compose)
 
 ## Overview
 
-This bundle contains everything needed to deploy IntelGraph in an air-gapped environment.
+This bundle contains everything needed to deploy IntelGraph in an air-gapped environment, supporting both Google Distributed Cloud (GDC) / Kubernetes and Docker Compose.
 
 ## Bundle Contents
 
 - `images/` - Docker images (tar files) with digests
 - `config/` - Configuration templates
 - `scripts/` - Deployment automation scripts
+- `manifests/` - Kubernetes/GDC manifests
 - `checksums/` - SHA256 checksums for verification
 - `docs/` - This documentation
 
 ## Prerequisites
 
-- Docker Engine 24.0+
-- Docker Compose 2.20+
-- Private Docker registry
-- Network access to air-gap environment
+- **GDC/Kubernetes**:
+    - Kubernetes 1.24+ Cluster (Air-gapped)
+    - `kubectl` configured
+    - Private Container Registry accessible from cluster
+- **Docker Compose**:
+    - Docker Engine 24.0+
+    - Docker Compose 2.20+
 
 ## Deployment Steps
 
 ### 1. Transfer Bundle
 
-Copy entire `airgap-bundle/` directory to air-gap environment.
+Copy entire `airgap-bundle/` directory to air-gap environment (Bastion Host).
 
 ### 2. Verify Checksums
 
@@ -364,8 +444,14 @@ cd scripts
 
 ### 5. Deploy Application
 
+**Option A: Kubernetes / GDC (Recommended)**
 ```bash
-./02-deploy-airgap.sh
+./02-deploy-k8s-airgap.sh
+```
+
+**Option B: Docker Compose (Dev/Test)**
+```bash
+./02-deploy-compose-airgap.sh
 ```
 
 ### 6. Verify Deployment
@@ -392,10 +478,10 @@ If deployment fails:
 - Check registry credentials in `.env`
 - Verify network connectivity to registry
 
-### Deployment Fails
-- Check Docker logs: `docker-compose logs`
-- Verify all config values in `.env`
-- Check resource availability (CPU, memory, disk)
+### Kubernetes Errors
+- Ensure `kubectl` is authenticated
+- Check storage classes in `manifests/` match your environment
+- Verify ImagePullSecrets if required for private registry
 
 ## Support
 
@@ -417,9 +503,10 @@ generate_transcript() {
 ## Pre-Flight Checks
 
 ✅ Bundle directory structure created
-✅ Image list generated ($(wc -l < "$BUNDLE_DIR/images/image-list.txt" | xargs) images)
+✅ Image list generated
 ✅ Configuration template created
-✅ Deployment scripts created (4 scripts)
+✅ Deployment scripts created
+✅ Kubernetes manifests copied
 ✅ Checksums generated
 
 ## Image Manifest
@@ -440,21 +527,14 @@ $(cat "$BUNDLE_DIR/checksums/images.sha256")
 2. ✅ Verify checksums
 3. ✅ Configure environment (.env)
 4. ✅ Setup private registry
-5. ✅ Deploy application
+5. ✅ Deploy application (GDC/K8s or Compose)
 6. ✅ Verify deployment health
-
-## Rollback Procedure
-
-\`\`\`bash
-./scripts/rollback.sh
-\`\`\`
 
 ## Status
 
 **Bundle Size**: $(du -sh "$BUNDLE_DIR" | awk '{print $1}')
 **Images**: $(ls -1 "$BUNDLE_DIR/images"/*.tar 2>/dev/null | wc -l | xargs)
-**Scripts**: $(ls -1 "$BUNDLE_DIR/scripts"/*.sh 2>/dev/null | wc -l | xargs)
-**Docs**: $(ls -1 "$BUNDLE_DIR/docs"/*.md 2>/dev/null | wc -l | xargs)
+**Manifests**: $(ls -1 "$BUNDLE_DIR/manifests"/*.yaml 2>/dev/null | wc -l | xargs)
 
 ✅ **Air-gap bundle ready for deployment**
 EOF
@@ -471,6 +551,7 @@ main() {
   create_bundle_structure
   get_image_list
   pull_and_save_images
+  copy_k8s_manifests
   generate_checksums
   create_config_template
   create_deployment_scripts

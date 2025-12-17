@@ -5,6 +5,7 @@ import { Conductor, ConductorConfig } from '../index';
 import { mcpRegistry } from '../mcp/client';
 import { ConductInput } from '../types';
 import { conductorMetrics } from '../metrics';
+import { describe, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 describe('Conductor Integration', () => {
   let conductor: Conductor;

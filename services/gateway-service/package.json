@@ -18,7 +18,7 @@
     "@summit/rate-limiting": "workspace:*",
     "@summit/api-management": "workspace:*",
     "@summit/api-analytics": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "dotenv": "^17.2.3",
     "pino": "^8.17.0",
     "ioredis": "^5.4.1"

@@ -1,6 +1,7 @@
 import request from 'supertest';
 import fs from 'fs';
 import path from 'path';
+import { jest, describe, it, test, expect, beforeAll, beforeEach } from '@jest/globals';
 
 // Mock dependencies before importing the app
 jest.mock('../../src/recipes/loader.js');
