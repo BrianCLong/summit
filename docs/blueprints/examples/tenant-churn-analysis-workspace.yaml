@@ -1,0 +1,325 @@
+# Example Workspace Specification: Tenant-Level Churn Analysis
+#
+# This specification demonstrates how to configure a Safe Analytics Workbench
+# workspace for conducting customer churn analysis at the tenant level.
+#
+# Use Case: Marketing team needs to analyze customer churn patterns to
+# identify at-risk customers and develop retention strategies.
+
+apiVersion: analytics.intelgraph.io/v1
+kind: AnalyticsWorkspace
+metadata:
+  name: tenant-churn-analysis-q4-2025
+  namespace: analytics-workspaces
+  labels:
+    project: customer-retention
+    team: marketing-analytics
+    fiscal-quarter: Q4-2025
+    data-classification: internal
+  annotations:
+    description: >
+      Analyze customer churn patterns across tenant segments to identify
+      leading indicators and build predictive models for retention campaigns.
+    business-owner: marketing-ops@company.com
+    data-steward: data-governance@company.com
+    cost-center: CC-MKT-001
+
+spec:
+  # Workspace type determines default resources and policies
+  type: MODEL_DEVELOPMENT
+
+  # Justification for audit trail
+  justification: >
+    Q4 retention campaign planning requires analysis of customer behavior
+    patterns over the past 18 months to identify churn risk factors.
+    Output will inform targeted intervention strategies.
+
+  # Owner and access configuration
+  owner:
+    userId: analyst.jane@company.com
+    role: DATA_SCIENTIST
+
+  # Team collaboration
+  collaborators:
+    - userId: analyst.bob@company.com
+      role: ANALYST
+      permissions:
+        - VIEW
+        - QUERY
+      justification: "Supporting analyst for data preparation"
+
+    - userId: ml.engineer@company.com
+      role: DATA_SCIENTIST
+      permissions:
+        - VIEW
+        - QUERY
+        - EXPORT
+      justification: "ML engineer for model validation"
+
+    - userId: marketing.lead@company.com
+      role: ANALYST
+      permissions:
+        - VIEW
+      justification: "Business stakeholder for requirements validation"
+
+  # Resource allocation (overrides for this specific workspace)
+  resources:
+    vcpu: 8
+    memoryGb: 32
+    storageGb: 100
+    queryTimeoutSeconds: 3600  # 1 hour for complex aggregations
+    maxConcurrentQueries: 5
+    dailyQueryLimit: 500
+
+  # Lifecycle configuration
+  lifecycle:
+    expiresAt: "2025-12-31T23:59:59Z"
+    idleTimeoutHours: 48
+    autoExtend: true
+    archiveAfterIdleDays: 14
+    retentionDays: 365  # Keep for audit purposes
+
+  # Data access requests
+  dataAccess:
+    # Curated customer data
+    - datasetId: ds-customer-360
+      name: Customer 360 View
+      tier: CURATED
+      provisioningMethod: LIVE_VIEW
+      accessLevel: READ
+      justification: >
+        Core customer attributes needed for segmentation and feature engineering.
+      columns:
+        include:
+          - customer_id
+          - segment
+          - tenure_months
+          - contract_type
+          - monthly_charges
+          - total_charges
+          - payment_method
+          - signup_channel
+          - region
+        exclude:
+          - email  # PII not needed
+          - phone  # PII not needed
+          - address  # PII not needed
+
+    # Usage/activity data
+    - datasetId: ds-product-usage
+      name: Product Usage Metrics
+      tier: CURATED
+      provisioningMethod: SNAPSHOT
+      snapshotConfig:
+        asOf: "2025-10-01T00:00:00Z"
+        refreshSchedule: "0 0 * * 0"  # Weekly refresh
+      accessLevel: READ
+      rowFilter: "event_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 18 MONTH)"
+      justification: >
+        18 months of usage data for trend analysis and feature engineering.
+      columns:
+        include:
+          - customer_id
+          - event_date
+          - session_count
+          - feature_usage_minutes
+          - api_calls
+          - support_tickets
+          - nps_score
+
+    # Churn outcome data
+    - datasetId: ds-churn-events
+      name: Historical Churn Events
+      tier: CURATED
+      provisioningMethod: LIVE_VIEW
+      accessLevel: READ
+      justification: >
+        Target variable for model training - historical churn events.
+      columns:
+        include:
+          - customer_id
+          - churn_date
+          - churn_reason_category
+          - was_voluntary
+          - mrr_lost
+
+    # Anonymized benchmark data
+    - datasetId: ds-industry-benchmarks
+      name: Industry Churn Benchmarks
+      tier: ANONYMIZED
+      provisioningMethod: LIVE_VIEW
+      accessLevel: READ
+      justification: >
+        Anonymized industry benchmarks for comparison.
+
+  # Egress policy customization
+  egressPolicy:
+    maxRowsPerExport: 100000
+    maxBytesPerExport: 536870912  # 512 MB
+    dailyExportLimit: 500000
+    allowedFormats:
+      - CSV
+      - PARQUET
+    allowedDestinations:
+      - LOCAL
+      - S3
+    s3Config:
+      bucket: analytics-exports-prod
+      prefix: churn-analysis/q4-2025/
+      encryption: AES256
+    requireApproval: false  # Within limits, no approval needed
+    sensitiveColumnPolicy: HASH
+    piiDetectionEnabled: true
+    watermarkingEnabled: true
+
+  # Notebook environment
+  environment:
+    kernel: PYTHON_3
+    image: analytics-sandbox:python-ml
+    packages:
+      - pandas>=2.0
+      - scikit-learn>=1.3
+      - xgboost>=2.0
+      - shap>=0.42
+      - matplotlib>=3.7
+      - seaborn>=0.12
+      - plotly>=5.15
+    environmentVariables:
+      MLFLOW_TRACKING_URI: "http://mlflow.internal:5000"
+      EXPERIMENT_NAME: "churn-analysis-q4-2025"
+
+  # Scheduled jobs
+  schedules:
+    - name: weekly-feature-refresh
+      description: Refresh feature tables weekly
+      schedule: "0 2 * * 0"  # Sunday 2 AM
+      notebook: notebooks/01-feature-engineering.ipynb
+      enabled: true
+
+    - name: model-monitoring
+      description: Check model drift metrics
+      schedule: "0 8 * * *"  # Daily 8 AM
+      notebook: notebooks/04-model-monitoring.ipynb
+      enabled: true
+
+  # Compliance and governance
+  compliance:
+    frameworks:
+      - SOC2
+      - GDPR
+    dataClassification: INTERNAL
+    requiresReasonForAccess: true
+    auditFrequency: WEEKLY
+    reviewers:
+      - data-governance@company.com
+
+  # Cost allocation
+  costAllocation:
+    costCenter: CC-MKT-001
+    budget:
+      monthly: 500  # USD
+      alertThreshold: 80  # Alert at 80% of budget
+    chargebackEnabled: true
+
+  # Tags for organization
+  tags:
+    - churn-analysis
+    - customer-retention
+    - ml-model
+    - q4-2025
+    - marketing
+
+---
+# Approval Request (auto-generated when workspace is created)
+apiVersion: analytics.intelgraph.io/v1
+kind: ApprovalRequest
+metadata:
+  name: approval-tenant-churn-analysis-q4-2025
+  namespace: analytics-workspaces
+spec:
+  type: WORKSPACE_CREATION
+  workspaceRef: tenant-churn-analysis-q4-2025
+  requestor:
+    userId: analyst.jane@company.com
+    role: DATA_SCIENTIST
+  justification: >
+    Q4 retention campaign planning requires analysis of customer behavior
+    patterns over the past 18 months to identify churn risk factors.
+
+  requiredApprovers:
+    - role: MANAGER
+      required: true
+      escalationTimeoutHours: 24
+    - role: DATA_OWNER
+      required: true
+      escalationTimeoutHours: 48
+      specificApprovers:
+        - data-steward@company.com
+
+  expiresAt: "2025-10-15T23:59:59Z"  # 7 days to get approval
+
+---
+# Example Query Template for this workspace
+apiVersion: analytics.intelgraph.io/v1
+kind: SavedQuery
+metadata:
+  name: churn-cohort-analysis
+  namespace: analytics-workspaces
+spec:
+  workspaceRef: tenant-churn-analysis-q4-2025
+  name: Monthly Churn Cohort Analysis
+  description: >
+    Analyze churn rates by customer cohort (signup month) to identify
+    patterns in customer lifetime value.
+
+  sql: |
+    WITH customer_cohorts AS (
+      SELECT
+        customer_id,
+        DATE_TRUNC('month', signup_date) AS cohort_month,
+        tenure_months,
+        segment,
+        contract_type
+      FROM customer_360
+    ),
+    churn_events AS (
+      SELECT
+        customer_id,
+        churn_date,
+        DATE_TRUNC('month', churn_date) AS churn_month
+      FROM churn_events
+      WHERE churn_date >= :start_date
+    )
+    SELECT
+      cc.cohort_month,
+      cc.segment,
+      COUNT(DISTINCT cc.customer_id) AS cohort_size,
+      COUNT(DISTINCT ce.customer_id) AS churned_customers,
+      ROUND(
+        COUNT(DISTINCT ce.customer_id)::DECIMAL /
+        COUNT(DISTINCT cc.customer_id) * 100, 2
+      ) AS churn_rate_pct,
+      AVG(cc.tenure_months) AS avg_tenure_at_churn
+    FROM customer_cohorts cc
+    LEFT JOIN churn_events ce ON cc.customer_id = ce.customer_id
+    WHERE cc.cohort_month >= :cohort_start
+    GROUP BY cc.cohort_month, cc.segment
+    ORDER BY cc.cohort_month DESC, cc.segment
+
+  parameters:
+    - name: start_date
+      type: DATE
+      description: Start date for churn events
+      defaultValue: "2024-01-01"
+      required: true
+    - name: cohort_start
+      type: DATE
+      description: Earliest cohort month to include
+      defaultValue: "2023-01-01"
+      required: true
+
+  tags:
+    - cohort-analysis
+    - churn-rate
+
+  isPublic: false  # Only visible within workspace
