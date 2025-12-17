@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
+import config from '../config'
 
 interface JIRAMetrics {
   project: {
@@ -126,7 +127,7 @@ interface UseJIRAIntegrationOptions {
 
 export const useJIRAIntegration = (options: UseJIRAIntegrationOptions = {}) => {
   const {
-    projectKey = process.env.NEXT_PUBLIC_JIRA_PROJECT_KEY,
+    projectKey = config.integrations.jira.projectKey,
     refreshInterval = 120000, // 2 minutes
     maxResults = 50,
   } = options
@@ -137,11 +138,15 @@ export const useJIRAIntegration = (options: UseJIRAIntegrationOptions = {}) => {
       maxResults: maxResults.toString(),
     })
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    }
+    if (config.integrations.jira.token) {
+      headers.Authorization = `Bearer ${config.integrations.jira.token}`
+    }
+
     const response = await fetch(`/api/integrations/jira/metrics?${params}`, {
-      headers: {
-        Authorization: `Bearer ${process.env.JIRA_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
     })
 
     if (!response.ok) {

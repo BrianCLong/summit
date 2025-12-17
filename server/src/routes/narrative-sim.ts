@@ -1,6 +1,8 @@
+// @ts-nocheck
 import express from 'express';
 import z from 'zod';
 import { randomUUID } from 'node:crypto';
+import { requirePermission } from '../middleware/auth.js';
 import { narrativeSimulationManager } from '../narrative/manager.js';
 import type {
   NarrativeEvent,
@@ -10,6 +12,9 @@ import type {
 } from '../narrative/types.js';
 
 const router = express.Router();
+
+// Apply permission check for all simulation routes
+router.use(requirePermission('simulation:run'));
 
 const relationshipSchema = z.object({
   targetId: z.string(),

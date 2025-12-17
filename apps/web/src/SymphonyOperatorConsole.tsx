@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import {
   AlertCircle,
   Activity,
+  Bot,
   GitBranch,
   Github,
   Gauge,
@@ -217,6 +218,107 @@ function KPIBar() {
           <span className="text-xs text-muted-foreground">
             proxy: {getProxyBase()}
           </span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+// ---------- Prompt Activity Monitor ----------
+function PromptActivityMonitor() {
+  const [prompts, setPrompts] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [expanded, setExpanded] = useState<string | null>(null)
+
+  const fetchPrompts = async () => {
+    setLoading(true)
+    try {
+      const data = await getJSON<{ history: any[] }>('/api/ai/activity')
+      if (data && data.history) {
+        setPrompts(data.history)
+      }
+    } catch (e) {
+      console.error('Failed to fetch prompt history', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchPrompts()
+    // Poll every 5 seconds
+    const interval = setInterval(fetchPrompts, 5000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <Card className="col-span-12">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Bot className="w-4 h-4" />
+          Agent Prompt Activity
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex justify-end">
+            <Button size="sm" variant="outline" onClick={fetchPrompts} disabled={loading}>
+                Refresh
+            </Button>
+          </div>
+          <div className="space-y-2">
+            {prompts.length === 0 ? (
+                <div className="text-sm text-muted-foreground text-center py-8">
+                    No prompt activity recorded yet.
+                </div>
+            ) : (
+                prompts.map((p) => (
+                    <div key={p.id} className="border rounded-md p-3 text-sm">
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex items-center gap-2">
+                                <Badge variant={p.status === 'success' ? 'default' : 'destructive'}>
+                                    {p.status}
+                                </Badge>
+                                <span className="font-mono text-xs">{new Date(p.timestamp).toLocaleTimeString()}</span>
+                                <span className="text-muted-foreground">via {p.provider} / {p.model}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                <span>{Math.round(p.latency)}ms</span>
+                                {p.tokens && <span>{p.tokens.total_tokens} tokens</span>}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div
+                                className="bg-muted p-2 rounded cursor-pointer hover:bg-muted/80 transition-colors"
+                                onClick={() => setExpanded(expanded === p.id ? null : p.id)}
+                            >
+                                <div className="font-semibold text-xs mb-1 text-muted-foreground">PROMPT</div>
+                                <div className={`font-mono text-xs whitespace-pre-wrap ${expanded === p.id ? '' : 'line-clamp-2'}`}>
+                                    {p.messages ? JSON.stringify(p.messages, null, 2) : p.prompt}
+                                </div>
+                            </div>
+
+                            {p.response && (
+                                <div className="bg-slate-50 dark:bg-slate-900 p-2 rounded">
+                                    <div className="font-semibold text-xs mb-1 text-muted-foreground">RESPONSE</div>
+                                    <div className={`font-mono text-xs whitespace-pre-wrap ${expanded === p.id ? '' : 'line-clamp-3'}`}>
+                                        {p.response}
+                                    </div>
+                                </div>
+                            )}
+
+                            {p.error && (
+                                <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-2 rounded">
+                                    <div className="font-semibold text-xs mb-1">ERROR</div>
+                                    <div className="font-mono text-xs">{p.error}</div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ))
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -942,8 +1044,9 @@ export default function SymphonyOperatorConsole() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="observe">Observe</TabsTrigger>
+          <TabsTrigger value="prompts">Prompts</TabsTrigger>
           <TabsTrigger value="route">Route</TabsTrigger>
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="compose">Compose</TabsTrigger>
@@ -958,6 +1061,11 @@ export default function SymphonyOperatorConsole() {
             <ErrorChart />
             <LiveLogs />
           </div>
+        </TabsContent>
+
+        {/* Prompts */}
+        <TabsContent value="prompts" className="space-y-4">
+            <PromptActivityMonitor />
         </TabsContent>
 
         {/* Route */}
