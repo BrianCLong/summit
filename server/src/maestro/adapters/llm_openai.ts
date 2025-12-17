@@ -1,8 +1,12 @@
-import { CostMeter, LLMUsage } from '../cost_meter';
+import { CostMeter, LLMCallMetadata, LLMUsage } from '../cost_meter';
 
 export interface LLMResult {
   content: string;
   usage: LLMUsage;
+  costUSD: number;
+  feature?: string;
+  tenantId?: string;
+  environment?: string;
 }
 
 export class OpenAILLM {
@@ -15,7 +19,8 @@ export class OpenAILLM {
     runId: string,
     taskId: string,
     params: { model: string; messages: any[] },
-  ): Promise<string> {
+    metadata: LLMCallMetadata = {},
+  ): Promise<LLMResult> {
     // Strip prefix if present, e.g. "openai:gpt-4" -> "gpt-4"
     const modelName = params.model.replace(/^openai:/, '');
 
@@ -29,9 +34,16 @@ export class OpenAILLM {
       outputTokens: raw.usage.completion_tokens,
     };
 
-    await this.costMeter.record(runId, taskId, usage);
+    const sample = await this.costMeter.record(runId, taskId, usage, metadata);
 
-    return raw.choices[0].message.content;
+    return {
+      content: raw.choices[0].message.content,
+      usage,
+      costUSD: sample.cost,
+      feature: metadata.feature,
+      tenantId: metadata.tenantId,
+      environment: metadata.environment,
+    };
   }
 
   // Helper method to simulate OpenAI call

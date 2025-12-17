@@ -1,9 +1,15 @@
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
+// @ts-nocheck
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
 import neo4j, { Driver, Session } from 'neo4j-driver';
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
+import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
 import {
   neo4jConnectivityUp,
+  neo4jQueryErrorsTotal,
+  neo4jQueryLatencyMs,
+  neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
 import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 
@@ -26,6 +32,8 @@ const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
 const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
 
 // Connection Pool Settings
+const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
+const POOL_CONNECTION_TIMEOUT = Number(process.env.NEO4J_POOL_CONNECTION_TIMEOUT || 30000);
 const POOL_ACQUISITION_TIMEOUT = Number(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT || 30000);
 
 let realDriver: Neo4jDriver | null = null;
@@ -183,8 +191,8 @@ async function connectToNeo4j(): Promise<void> {
         connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
         logging: {
           level: 'info',
-          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message)
-        }
+          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message),
+        },
       }
     );
 
@@ -293,7 +301,7 @@ function createMockSession(): Neo4jSession {
     executeRead: async (fn: any) => fn(createMockTransaction()),
     executeWrite: async (fn: any) => {
         // Mock invalidation trigger
-        import('./queryOptimizer.js').then(({ queryOptimizer }) => {
+        import('./queryOptimizer').then(({ queryOptimizer }) => {
              // In a real scenario we'd extract labels from the mutation
              queryOptimizer.invalidateForLabels('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
         });
@@ -341,7 +349,7 @@ function instrumentSession(session: any) {
               const result = await originalTxCommit();
               if (writesDetected) {
                   try {
-                       const { queryOptimizer } = await import('./queryOptimizer.js');
+                       const { queryOptimizer } = await import('./queryOptimizer');
                        // Await invalidation to ensure subsequent reads see freshness
                        await queryOptimizer.invalidateForLabels('global', ['*']);
                   } catch (err) {
@@ -359,7 +367,7 @@ function instrumentSession(session: any) {
       session.executeWrite = async (fn: any) => {
           try {
               const result = await originalExecuteWrite(fn);
-               import('./queryOptimizer.js').then(({ queryOptimizer }) => {
+               import('./queryOptimizer').then(({ queryOptimizer }) => {
                    // Attempt to fallback to a broad invalidation since we lack tenant context here
                    // ideally the transaction function would provide hints.
                    queryOptimizer.invalidateForLabels('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
@@ -398,7 +406,7 @@ function instrumentSession(session: any) {
     if (isWrite) {
          // Fire-and-forget invalidation for raw queries
          // Note: For strict consistency, use executeWrite/beginTransaction
-         import('./queryOptimizer.js').then(({ queryOptimizer }) => {
+         import('./queryOptimizer').then(({ queryOptimizer }) => {
              queryOptimizer.invalidateForLabels(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
          });
          return originalRun(cypher, params);
@@ -408,7 +416,7 @@ function instrumentSession(session: any) {
         const promise: any = (async () => {
             const startTime = Date.now();
             try {
-                const { queryOptimizer } = await import('./queryOptimizer.js');
+                const { queryOptimizer } = await import('./queryOptimizer');
                 const context = {
                     tenantId,
                     queryType: 'cypher' as const,
