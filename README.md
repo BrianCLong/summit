@@ -17,6 +17,12 @@
 - The golden workflow we must defend end to end: **Investigation → Entities → Relationships → Copilot → Results** using the seeded dataset in `data/golden-path/demo-investigation.json`.
 - **New developers:** See [docs/ONBOARDING.md](docs/ONBOARDING.md) for your 30-minute quickstart guide.
 
+## ✅ CI & Merge Policy
+
+- **Required checks:** `ci-lint-and-unit / lint-and-unit`, `ci-golden-path / golden-path`, and `security / security-scan` (see `RUNBOOKS/CI.md`).
+- **Golden path enforcement:** `make bootstrap`, `make up`, and `make smoke` run in CI on `main` and via nightly scheduled golden-path jobs. Local contributors should run `./start.sh` before opening PRs.
+- **Auto-merge lane:** PRs labelled `automerge-safe` (or queued for the merge train) are auto-updated from `main` by the “Auto Update PRs (safe)” workflow and merged once required checks are green and conflicts are clear.
+
 ## 🚀 Quickstart (< 60 Seconds)
 
 **Prerequisites:** Docker Desktop ≥ 4.x (8GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+, ports 3000, 4000, 5432, 6379, 7474, 7687, 8080 available.
