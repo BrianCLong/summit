@@ -29,6 +29,7 @@ import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/q
 import { createInputSanitizationPlugin } from './plugins/inputSanitizationPlugin.js';
 import { createAPQPlugin } from './plugins/apqPlugin.js';
 import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
+import { createCircuitBreakerPlugin } from './plugins/circuitBreakerPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
 import depthLimit from 'graphql-depth-limit';
 
@@ -157,6 +158,12 @@ export function createApolloV5Server(
         // Redis will be injected if available
         enabled: process.env.ENABLE_APQ !== 'false',
         ttl: 86400, // 24 hours
+      }),
+
+      createCircuitBreakerPlugin({
+        failureThreshold: 20,
+        resetTimeout: 30000,
+        maxRequestsPerMinute: 2000,
       }),
 
       createPerformanceMonitoringPlugin(),
