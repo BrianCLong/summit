@@ -424,9 +424,9 @@ export class DriftDetector extends EventEmitter {
   ): 'low' | 'medium' | 'high' | 'critical' {
     const threshold = this.config.driftDetection.threshold;
 
-    if (drift > threshold * 3) return 'critical';
-    if (drift > threshold * 2) return 'high';
-    if (drift > threshold) return 'medium';
+    if (drift > threshold * 3) {return 'critical';}
+    if (drift > threshold * 2) {return 'high';}
+    if (drift > threshold) {return 'medium';}
     return 'low';
   }
 
