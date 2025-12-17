@@ -2,8 +2,6 @@ import { IntelGraphClient } from '../intelgraph/client';
 import { Task, Run, Artifact, TaskStatus } from './types';
 import { CostMeter } from './cost_meter';
 import { OpenAILLM } from './adapters/llm_openai';
-import { logger, getContext, metrics, tracer } from '../observability/index.js';
-import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -18,20 +16,15 @@ export class Maestro {
     private config: MaestroConfig,
   ) {}
 
-  async createRun(userId: string, requestText: string): Promise<Run> {
-    const context = getContext();
-    // Use existing correlationId or generate one if missing (though runPipeline typically called within request context)
-    const runId = crypto.randomUUID();
-
-    logger.info('Creating Maestro Run', { userId, runId });
-    metrics.incrementCounter('summit_maestro_runs_total', { status: 'created', tenantId: context?.tenantId });
-
+  async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
     const run: Run = {
-      id: runId,
+      id: crypto.randomUUID(),
       user: { id: userId },
       createdAt: new Date().toISOString(),
       requestText,
-    };
+      // Pass tenant context if available (will need DB schema update for full persistence)
+      ...(options?.tenantId ? { tenantId: options.tenantId } : {})
+    } as Run;
     await this.ig.createRun(run);
     return run;
   }
@@ -81,169 +74,96 @@ export class Maestro {
   }
 
   async executeTask(task: Task): Promise<{ task: Task; artifact: Artifact | null }> {
-    return tracer.trace('maestro.task', async (span) => {
-      const start = process.hrtime();
-      const now = new Date().toISOString();
-      const ctx = getContext();
+    const now = new Date().toISOString();
+    await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
-      span.setAttributes({
-        'maestro.runId': task.runId,
-        'maestro.taskId': task.id,
-        'maestro.agent': task.agent.name,
-        'maestro.agent.kind': task.agent.kind,
-        'tenant.id': ctx?.tenantId
-      });
+    try {
+      let result: string = '';
 
-      logger.info('Executing Maestro Task', {
-        runId: task.runId,
-        taskId: task.id,
-        agent: task.agent.name
-      });
-
-      await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
-
-      try {
-        let result: string = '';
-
-        if (task.agent.kind === 'llm') {
-          // LLM calls should be instrumented inside the adapter, but we add high-level span event here
-          result = await this.llm.callCompletion(task.runId, task.id, {
+      if (task.agent.kind === 'llm') {
+        const llmResult = await this.llm.callCompletion(
+          task.runId,
+          task.id,
+          {
             model: task.agent.modelId!,
             messages: [
               { role: 'system', content: 'You are an execution agent.' },
               { role: 'user', content: task.description },
-              ...(task.input.requestText ? [{ role: 'user', content: String(task.input.requestText) }] : []),
+              ...(task.input.requestText
+                ? [{ role: 'user', content: String(task.input.requestText) }]
+                : []),
             ],
-          });
-        } else {
-          // TODO: shell tools, etc.
-          result = 'TODO: implement non-LLM agent';
-        }
-
-        const artifact: Artifact = {
-          id: crypto.randomUUID(),
-          runId: task.runId,
-          taskId: task.id,
-          kind: 'text',
-          label: 'task-output',
-          data: result,
-          createdAt: new Date().toISOString(),
-        };
-
-        const updatedTask: Partial<Task> = {
-          status: 'succeeded',
-          output: { result },
-          updatedAt: new Date().toISOString(),
-        };
-
-        await this.ig.createArtifact(artifact);
-        await this.ig.updateTask(task.id, updatedTask);
-
-        const diff = process.hrtime(start);
-        const duration = (diff[0] * 1e9 + diff[1]) / 1e9;
-        metrics.observeHistogram('summit_maestro_task_duration_seconds', duration, {
-          status: 'succeeded',
-          agent: task.agent.name,
-          tenantId: ctx?.tenantId
-        });
-
-        return {
-          task: { ...task, ...updatedTask } as Task,
-          artifact,
-        };
-      } catch (err: any) {
-        logger.error('Maestro Task Failed', {
-           runId: task.runId,
-           taskId: task.id,
-           error: err.message
-        });
-
-        const updatedTask: Partial<Task> = {
-          status: 'failed',
-          errorMessage: err?.message ?? String(err),
-          updatedAt: new Date().toISOString(),
-        };
-        await this.ig.updateTask(task.id, updatedTask);
-
-        const diff = process.hrtime(start);
-        const duration = (diff[0] * 1e9 + diff[1]) / 1e9;
-        metrics.observeHistogram('summit_maestro_task_duration_seconds', duration, {
-          status: 'failed',
-          agent: task.agent.name,
-          tenantId: ctx?.tenantId
-        });
-
-        span.recordException(err);
-        span.setStatus({ code: SpanStatusCode.ERROR, message: err.message });
-
-        return { task: { ...task, ...updatedTask } as Task, artifact: null };
+          },
+          {
+            feature: `maestro_${task.kind}`,
+            tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
+            environment: process.env.NODE_ENV || 'unknown',
+          },
+        );
+        result = llmResult.content;
+      } else {
+        // TODO: shell tools, etc.
+        result = 'TODO: implement non-LLM agent';
       }
-    }, {
-      kind: SpanKind.INTERNAL,
-      attributes: {
-        'maestro.runId': task.runId,
-        'maestro.taskId': task.id
-      }
-    });
+
+      const artifact: Artifact = {
+        id: crypto.randomUUID(),
+        runId: task.runId,
+        taskId: task.id,
+        kind: 'text',
+        label: 'task-output',
+        data: result,
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedTask: Partial<Task> = {
+        status: 'succeeded',
+        output: { result },
+        updatedAt: new Date().toISOString(),
+      };
+
+      await this.ig.createArtifact(artifact);
+      await this.ig.updateTask(task.id, updatedTask);
+
+      return {
+        task: { ...task, ...updatedTask } as Task,
+        artifact,
+      };
+    } catch (err: any) {
+      const updatedTask: Partial<Task> = {
+        status: 'failed',
+        errorMessage: err?.message ?? String(err),
+        updatedAt: new Date().toISOString(),
+      };
+      await this.ig.updateTask(task.id, updatedTask);
+
+      return { task: { ...task, ...updatedTask } as Task, artifact: null };
+    }
   }
 
-  async runPipeline(userId: string, requestText: string) {
-    return tracer.trace('maestro.run', async (span) => {
-      const start = process.hrtime();
-      const ctx = getContext();
+  async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
+    const run = await this.createRun(userId, requestText, options);
+    const tasks = await this.planRequest(run);
 
-      try {
-        const run = await this.createRun(userId, requestText);
+    const executable = tasks.filter(t => t.status === 'queued');
 
-        span.setAttributes({
-            'maestro.runId': run.id,
-            'user.id': userId,
-            'tenant.id': ctx?.tenantId
-        });
+    const results = [];
+    for (const task of executable) {
+      const res = await this.executeTask(task);
+      results.push(res);
+    }
 
-        const tasks = await this.planRequest(run);
+    const costSummary = await this.costMeter.summarize(run.id);
 
-        const executable = tasks.filter(t => t.status === 'queued');
-
-        const results = [];
-        for (const task of executable) {
-          const res = await this.executeTask(task);
-          results.push(res);
-        }
-
-        const costSummary = await this.costMeter.summarize(run.id);
-
-        const diff = process.hrtime(start);
-        const duration = (diff[0] * 1e9 + diff[1]) / 1e9;
-
-        metrics.observeHistogram('summit_maestro_run_duration_seconds', duration, {
-            status: 'succeeded',
-            tenantId: ctx?.tenantId
-        });
-
-        return {
-          run,
-          tasks: tasks.map(t => ({
-            id: t.id,
-            status: t.status,
-            description: t.description,
-          })),
-          results,
-          costSummary,
-        };
-      } catch (error: any) {
-        const diff = process.hrtime(start);
-        const duration = (diff[0] * 1e9 + diff[1]) / 1e9;
-
-        metrics.observeHistogram('summit_maestro_run_duration_seconds', duration, {
-            status: 'failed',
-            tenantId: ctx?.tenantId
-        });
-
-        span.recordException(error);
-        span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
-        throw error;
-      }
-    });
+    return {
+      run,
+      tasks: tasks.map(t => ({
+        id: t.id,
+        status: t.status,
+        description: t.description,
+      })),
+      results,
+      costSummary,
+    };
   }
 }

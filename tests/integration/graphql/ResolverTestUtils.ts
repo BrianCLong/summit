@@ -343,11 +343,8 @@ export const TestQueries = {
     query GetEntity($id: ID!) {
       entity(id: $id) {
         id
-        name
         type
-        description
-        properties
-        confidence
+        props
         createdAt
         updatedAt
       }
@@ -355,21 +352,11 @@ export const TestQueries = {
   `,
 
   listEntities: `
-    query ListEntities($investigationId: ID!, $first: Int, $after: String) {
-      entities(investigationId: $investigationId, first: $first, after: $after) {
-        edges {
-          node {
-            id
-            name
-            type
-          }
-          cursor
-        }
-        pageInfo {
-          hasNextPage
-          endCursor
-        }
-        totalCount
+    query ListEntities($type: String, $q: String, $limit: Int, $offset: Int) {
+      entities(type: $type, q: $q, limit: $limit, offset: $offset) {
+        id
+        type
+        props
       }
     }
   `,
@@ -472,22 +459,21 @@ export const TestQueries = {
 export const TestMutations = {
   // Entity mutations
   createEntity: `
-    mutation CreateEntity($input: CreateEntityInput!) {
+    mutation CreateEntity($input: EntityInput!) {
       createEntity(input: $input) {
         id
-        name
         type
-        description
+        props
       }
     }
   `,
 
   updateEntity: `
-    mutation UpdateEntity($id: ID!, $input: UpdateEntityInput!) {
+    mutation UpdateEntity($id: ID!, $input: EntityInput!) {
       updateEntity(id: $id, input: $input) {
         id
-        name
         type
+        props
         updatedAt
       }
     }
@@ -495,10 +481,7 @@ export const TestMutations = {
 
   deleteEntity: `
     mutation DeleteEntity($id: ID!) {
-      deleteEntity(id: $id) {
-        success
-        message
-      }
+      deleteEntity(id: $id)
     }
   `,
 
