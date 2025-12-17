@@ -16,6 +16,7 @@ import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
 
 describe('EntityRepo', () => {
+  const tenantId = 'tenant-123';
   let entityRepo: EntityRepo;
   let mockPgPool: jest.Mocked<Pool>;
   let mockPgClient: any;
@@ -220,6 +221,7 @@ describe('EntityRepo', () => {
     it('should update entity labels and props', async () => {
       const updateInput = {
         id: 'entity-789',
+        tenantId,
         labels: ['NewLabel'],
         props: { name: 'Jane Doe' },
       };
@@ -252,6 +254,7 @@ describe('EntityRepo', () => {
     it('should return null if entity not found', async () => {
       const updateInput = {
         id: 'non-existent',
+        tenantId,
         labels: ['NewLabel'],
       };
 
@@ -267,6 +270,7 @@ describe('EntityRepo', () => {
     it('should handle partial updates (only labels)', async () => {
       const updateInput = {
         id: 'entity-789',
+        tenantId,
         labels: ['UpdatedLabel'],
       };
 
@@ -295,6 +299,7 @@ describe('EntityRepo', () => {
     it('should handle partial updates (only props)', async () => {
       const updateInput = {
         id: 'entity-789',
+        tenantId,
         props: { updated: 'value' },
       };
 
@@ -326,12 +331,12 @@ describe('EntityRepo', () => {
       const entityId = 'entity-789';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ tenant_id: tenantId }] }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
-      const result = await entityRepo.delete(entityId);
+      const result = await entityRepo.delete(entityId, tenantId);
 
       expect(result).toBe(true);
       expect(mockPgClient.query).toHaveBeenCalledWith('COMMIT');
@@ -341,12 +346,12 @@ describe('EntityRepo', () => {
       const entityId = 'entity-789';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ tenant_id: tenantId }] }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
-      await entityRepo.delete(entityId);
+      await entityRepo.delete(entityId, tenantId);
 
       const outboxCall = mockPgClient.query.mock.calls.find((call) =>
         call[0].includes('entity.delete'),
@@ -358,9 +363,9 @@ describe('EntityRepo', () => {
       const entityId = 'non-existent';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rowCount: 0 }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rows: [] }); // DELETE
 
-      const result = await entityRepo.delete(entityId);
+      const result = await entityRepo.delete(entityId, tenantId);
 
       expect(result).toBe(false);
       expect(mockPgClient.query).toHaveBeenCalledWith('ROLLBACK');
@@ -370,12 +375,12 @@ describe('EntityRepo', () => {
       const entityId = 'entity-789';
 
       mockPgClient.query.mockResolvedValueOnce(undefined); // BEGIN
-      mockPgClient.query.mockResolvedValueOnce({ rowCount: 1 }); // DELETE
+      mockPgClient.query.mockResolvedValueOnce({ rows: [{ tenant_id: tenantId }] }); // DELETE
       mockPgClient.query.mockResolvedValueOnce(undefined); // Outbox event
       mockPgClient.query.mockResolvedValueOnce(undefined); // COMMIT
       mockNeo4jSession.executeWrite.mockResolvedValue(undefined);
 
-      await entityRepo.delete(entityId);
+      await entityRepo.delete(entityId, tenantId);
 
       expect(mockNeo4jDriver.session).toHaveBeenCalled();
       expect(mockNeo4jSession.executeWrite).toHaveBeenCalled();
@@ -387,7 +392,7 @@ describe('EntityRepo', () => {
       const entityId = 'entity-789';
       const mockEntityRow = {
         id: entityId,
-        tenant_id: 'tenant-123',
+        tenant_id: tenantId,
         kind: 'Person',
         labels: ['Individual'],
         props: { name: 'John Doe' },
@@ -398,34 +403,40 @@ describe('EntityRepo', () => {
 
       mockPgPool.query.mockResolvedValue({ rows: [mockEntityRow] } as any);
 
-      const result = await entityRepo.findById(entityId);
+      const result = await entityRepo.findById(entityId, tenantId);
 
       expect(result).not.toBeNull();
       expect(result?.id).toBe(entityId);
-      expect(mockPgPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT * FROM entities WHERE id = $1'),
-        [entityId],
-      );
-    });
-
-    it('should filter by tenantId when provided', async () => {
-      const entityId = 'entity-789';
-      const tenantId = 'tenant-123';
-
-      mockPgPool.query.mockResolvedValue({ rows: [] } as any);
-
-      await entityRepo.findById(entityId, tenantId);
-
       expect(mockPgPool.query).toHaveBeenCalledWith(
         expect.stringContaining('AND tenant_id = $2'),
         [entityId, tenantId],
       );
     });
 
+    it('should throw on cross-tenant row', async () => {
+      const entityId = 'entity-789';
+      const mockEntityRow = {
+        id: entityId,
+        tenant_id: 'other-tenant',
+        kind: 'Person',
+        labels: ['Individual'],
+        props: { name: 'John Doe' },
+        created_at: new Date(),
+        updated_at: new Date(),
+        created_by: 'user-456',
+      };
+
+      mockPgPool.query.mockResolvedValue({ rows: [mockEntityRow] } as any);
+
+      await expect(entityRepo.findById(entityId, tenantId)).rejects.toThrow(
+        /Cross-tenant data access blocked/,
+      );
+    });
+
     it('should return null if entity not found', async () => {
       mockPgPool.query.mockResolvedValue({ rows: [] } as any);
 
-      const result = await entityRepo.findById('non-existent');
+      const result = await entityRepo.findById('non-existent', tenantId);
 
       expect(result).toBeNull();
     });
@@ -519,7 +530,7 @@ describe('EntityRepo', () => {
       const ids = ['entity-1', 'entity-2', 'entity-3'];
       const mockEntities = ids.map((id) => ({
         id,
-        tenant_id: 'tenant-123',
+        tenant_id: tenantId,
         kind: 'Person',
         labels: [],
         props: {},
@@ -530,13 +541,13 @@ describe('EntityRepo', () => {
 
       mockPgPool.query.mockResolvedValue({ rows: mockEntities } as any);
 
-      const results = await entityRepo.batchByIds(ids);
+      const results = await entityRepo.batchByIds(ids, tenantId);
 
       expect(results).toHaveLength(3);
       expect(results.every((r) => r !== null)).toBe(true);
       expect(mockPgPool.query).toHaveBeenCalledWith(
-        expect.stringContaining('WHERE id = ANY($1)'),
-        [ids],
+        expect.stringContaining('AND tenant_id = $2'),
+        [ids, tenantId],
       );
     });
 
@@ -545,7 +556,7 @@ describe('EntityRepo', () => {
       const mockEntities = [
         {
           id: 'entity-1',
-          tenant_id: 'tenant-123',
+          tenant_id: tenantId,
           kind: 'Person',
           labels: [],
           props: {},
@@ -557,7 +568,7 @@ describe('EntityRepo', () => {
 
       mockPgPool.query.mockResolvedValue({ rows: mockEntities } as any);
 
-      const results = await entityRepo.batchByIds(ids);
+      const results = await entityRepo.batchByIds(ids, tenantId);
 
       expect(results).toHaveLength(3);
       expect(results[0]).not.toBeNull();
@@ -566,7 +577,7 @@ describe('EntityRepo', () => {
     });
 
     it('should handle empty IDs array', async () => {
-      const results = await entityRepo.batchByIds([]);
+      const results = await entityRepo.batchByIds([], tenantId);
 
       expect(results).toEqual([]);
       expect(mockPgPool.query).not.toHaveBeenCalled();
@@ -574,7 +585,6 @@ describe('EntityRepo', () => {
 
     it('should filter by tenantId when provided', async () => {
       const ids = ['entity-1', 'entity-2'];
-      const tenantId = 'tenant-123';
 
       mockPgPool.query.mockResolvedValue({ rows: [] } as any);
 
