@@ -5,7 +5,10 @@ const { aiTypeDefs } = require('./schema.ai.js');
 const { annotationsTypeDefs } = require('./schema.annotations.js');
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 const { healthTypeDefs } = require('./schema.health.js');
+>>>>>>> main
 >>>>>>> main
 const graphragTypes = require('./types/graphragTypes.js');
 

@@ -87,6 +87,8 @@ import { logConfigSummary } from './config/index.js';
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
+<<<<<<< HEAD
+=======
     // Initialize Backup Manager
     const backupManager = new BackupManager();
     backupManager.startScheduler();
@@ -94,6 +96,7 @@ import { logConfigSummary } from './config/index.js';
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
+>>>>>>> main
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
 

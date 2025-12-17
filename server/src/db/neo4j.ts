@@ -417,6 +417,17 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
   ) => {
 <<<<<<< HEAD
     telemetry.subsystems.database.queries.add(1);
+<<<<<<< HEAD
+    const startTime = Date.now();
+    try {
+      return await originalRun(cypher, params);
+    } catch (error) {
+      telemetry.subsystems.database.errors.add(1);
+      throw error;
+    } finally {
+      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
+    }
+=======
 =======
     if (useCircuitBreaker && !circuitBreaker.canExecute()) {
       const err = new Error('Neo4j circuit breaker is open');
@@ -551,6 +562,7 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
     }
     return originalRun(cypher, params);
+>>>>>>> main
 >>>>>>> main
   };
   return session;

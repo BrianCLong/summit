@@ -1,5 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 import * as d3 from 'd3'
 =======
 // Tree-shaken D3 imports for better bundle size
@@ -67,6 +70,8 @@ export function GraphCanvas({
 
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
   // Calculate FPS
   useEffect(() => {
     if (!debugMode) return
@@ -89,6 +94,7 @@ export function GraphCanvas({
     return () => cancelAnimationFrame(animationFrameId)
   }, [debugMode])
 
+>>>>>>> main
 >>>>>>> main
   // Update dimensions on resize
   useEffect(() => {
@@ -133,18 +139,24 @@ export function GraphCanvas({
 
     // Create simulation based on layout type
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
     let simulation: d3.Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
       case 'force':
         simulation = d3
           .forceSimulation(nodes)
+<<<<<<< HEAD
+=======
 =======
     let simulation: Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
       case 'force':
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
           .force(
             'link',
@@ -153,6 +165,9 @@ export function GraphCanvas({
               .distance(100)
           )
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
           .force('charge', d3.forceManyBody().strength(-300))
           .force('center', d3.forceCenter(width / 2, height / 2))
           .force('collision', d3.forceCollide().radius(30))
@@ -161,6 +176,8 @@ export function GraphCanvas({
       case 'radial':
         simulation = d3
           .forceSimulation(nodes)
+<<<<<<< HEAD
+=======
 =======
           .force('charge', forceManyBody().strength(-300))
           .force('center', forceCenter(width / 2, height / 2))
@@ -169,6 +186,7 @@ export function GraphCanvas({
 
       case 'radial':
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
           .force(
             'link',
@@ -180,8 +198,13 @@ export function GraphCanvas({
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
 =======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
           .force('charge', forceManyBody().strength(-200))
           .force('radial', forceRadial(150, width / 2, height / 2))
+>>>>>>> main
 >>>>>>> main
         break
 
@@ -191,7 +214,12 @@ export function GraphCanvas({
         simulation = d3
           .forceSimulation(nodes)
 =======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
           .force(
             'link',
@@ -211,8 +239,11 @@ export function GraphCanvas({
 <<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
+<<<<<<< HEAD
+=======
 =======
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
           .force(
             'link',
@@ -448,6 +479,10 @@ export function GraphCanvas({
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
 =======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info
@@ -459,11 +494,14 @@ export function GraphCanvas({
               {debugMode ? 'Debug: ON' : 'Debug'}
             </button>
 >>>>>>> main
+>>>>>>> main
           </div>
           <div className="text-xs space-y-1">
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
+<<<<<<< HEAD
+=======
 <<<<<<< HEAD
 =======
             {debugMode && (
@@ -481,6 +519,7 @@ export function GraphCanvas({
                 </div>
               </>
             )}
+>>>>>>> main
 >>>>>>> main
           </div>
         </div>

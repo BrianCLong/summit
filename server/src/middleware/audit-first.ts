@@ -1,6 +1,9 @@
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 // @ts-nocheck
+>>>>>>> main
 >>>>>>> main
 import { Request, Response, NextFunction } from 'express';
 import { provenanceLedger } from '../provenance/ledger.js';
@@ -105,7 +108,10 @@ export function auditFirstMiddleware(
         payload,
         metadata: {
           requestId: (req as any).id || req.headers['x-request-id'],
+<<<<<<< HEAD
+=======
           // @ts-ignore
+>>>>>>> main
           correlationId: (req as any).correlationId || req.headers['x-correlation-id'],
           sessionId: (req as any).sessionID,
         },
