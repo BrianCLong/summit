@@ -49,6 +49,7 @@
     "lint": "turbo run lint --cache-dir=.turbo --continue",
     "lint:fix": "eslint . --fix",
     "lint:check": "eslint .",
+    "lint:cache": "node tools/check-cache-usage.cjs",
     "lint:tests": "node scripts/guard-tests.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
