@@ -14,7 +14,7 @@
     "@intelgraph/sentiment-analysis": "workspace:*",
     "@intelgraph/narrative-tracking": "workspace:*",
     "@intelgraph/influence-detection": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "axios": "^1.11.0"
   },
   "devDependencies": {

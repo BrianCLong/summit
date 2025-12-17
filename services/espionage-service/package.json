@@ -19,7 +19,7 @@
     "@intelgraph/covert-operations": "workspace:*",
     "@intelgraph/technical-intelligence": "workspace:*",
     "@intelgraph/counterintel-ops": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "zod": "^3.24.1",
     "helmet": "^8.0.0",
     "compression": "^1.7.4",
