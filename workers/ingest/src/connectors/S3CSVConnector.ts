@@ -7,6 +7,7 @@ import { trace, context } from '@opentelemetry/api';
 import { createReadStream } from 'fs';
 import { parse } from 'csv-parse';
 import { z } from 'zod';
+import { errorFactory } from '@intelgraph/errors';
 import { BaseConnector } from './BaseConnector';
 import type {
   ConnectorConfig,
@@ -106,7 +107,13 @@ export class S3CSVConnector extends BaseConnector {
     } catch (error) {
       span.recordException(error as Error);
       span.setStatus({ code: 2, message: (error as Error).message }); // ERROR
-      throw error;
+      throw errorFactory.fromUnknown(error, {
+        category: 'upstream',
+        errorCode: 'UPSTREAM_S3_READ_FAILED',
+        humanMessage: 'Failed to read from S3 during ingest.',
+        suggestedAction: 'Verify bucket permissions and network connectivity.',
+        context: { bucket, prefix },
+      });
     } finally {
       span.end();
     }
@@ -115,7 +122,12 @@ export class S3CSVConnector extends BaseConnector {
   private parseS3Url(url: string): { bucket: string; key: string } {
     const match = url.match(/^s3:\/\/([^\/]+)\/(.+)$/);
     if (!match) {
-      throw new Error(`Invalid S3 URL format: ${url}`);
+      throw errorFactory.validation({
+        errorCode: 'VALIDATION_S3_URL',
+        humanMessage: 'S3 URL is invalid.',
+        developerMessage: `Invalid S3 URL format: ${url}`,
+        suggestedAction: 'Use the s3://bucket/key convention.',
+      });
     }
     return { bucket: match[1], key: match[2] };
   }
@@ -143,7 +155,13 @@ export class S3CSVConnector extends BaseConnector {
     const response = await this.s3Client.send(command);
 
     if (!response.Body) {
-      throw new Error(`Empty response body for s3://${bucket}/${key}`);
+      throw errorFactory.upstream({
+        errorCode: 'UPSTREAM_EMPTY_BODY',
+        humanMessage: 'S3 object response was empty.',
+        developerMessage: `Empty response body for s3://${bucket}/${key}`,
+        suggestedAction: 'Verify the object exists and contains data.',
+        context: { bucket, key },
+      });
     }
 
     const stream = response.Body as NodeJS.ReadableStream;

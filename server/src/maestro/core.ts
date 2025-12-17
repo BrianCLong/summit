@@ -2,8 +2,6 @@ import { IntelGraphClient } from '../intelgraph/client';
 import { Task, Run, Artifact, TaskStatus } from './types';
 import { CostMeter } from './cost_meter';
 import { OpenAILLM } from './adapters/llm_openai';
-import { GraphAnalysisService } from '../analysis/GraphAnalysisService';
-import { GraphAlgorithmKey } from '../analysis/graphTypes';
 
 export interface MaestroConfig {
   defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
@@ -11,24 +9,22 @@ export interface MaestroConfig {
 }
 
 export class Maestro {
-  private graphService: GraphAnalysisService;
-
   constructor(
     private ig: IntelGraphClient,
     private costMeter: CostMeter,
     private llm: OpenAILLM,
     private config: MaestroConfig,
-  ) {
-    this.graphService = GraphAnalysisService.getInstance();
-  }
+  ) {}
 
-  async createRun(userId: string, requestText: string): Promise<Run> {
+  async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
     const run: Run = {
       id: crypto.randomUUID(),
       user: { id: userId },
       createdAt: new Date().toISOString(),
       requestText,
-    };
+      // Pass tenant context if available (will need DB schema update for full persistence)
+      ...(options?.tenantId ? { tenantId: options.tenantId } : {})
+    } as Run;
     await this.ig.createRun(run);
     return run;
   }
@@ -82,35 +78,29 @@ export class Maestro {
     await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
     try {
-      let result: any = '';
-      let artifactKind: Artifact['kind'] = 'text';
+      let result: string = '';
 
       if (task.agent.kind === 'llm') {
-        result = await this.llm.callCompletion(task.runId, task.id, {
-          model: task.agent.modelId!,
-          messages: [
-            { role: 'system', content: 'You are an execution agent.' },
-            { role: 'user', content: task.description },
-            ...(task.input.requestText ? [{ role: 'user', content: String(task.input.requestText) }] : []),
-          ],
-        });
-      } else if (task.kind === 'graph.analysis') {
-         // Extract params
-         const algorithm = task.input.algorithm as GraphAlgorithmKey;
-         const params = task.input.params as Record<string, unknown>;
-         const tenantId = task.input.tenantId as string;
-
-         if (!algorithm || !tenantId) throw new Error("Missing algorithm or tenantId for graph analysis task");
-
-         const job = await this.graphService.createJob(tenantId, algorithm, params);
-         const completedJob = await this.graphService.runJob(job.id);
-
-         if (completedJob.status === 'failed') {
-            throw new Error(completedJob.error || "Graph analysis failed");
-         }
-
-         result = completedJob.result;
-         artifactKind = 'json'; // Or 'graph' if we want to store it specifically
+        const llmResult = await this.llm.callCompletion(
+          task.runId,
+          task.id,
+          {
+            model: task.agent.modelId!,
+            messages: [
+              { role: 'system', content: 'You are an execution agent.' },
+              { role: 'user', content: task.description },
+              ...(task.input.requestText
+                ? [{ role: 'user', content: String(task.input.requestText) }]
+                : []),
+            ],
+          },
+          {
+            feature: `maestro_${task.kind}`,
+            tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
+            environment: process.env.NODE_ENV || 'unknown',
+          },
+        );
+        result = llmResult.content;
       } else {
         // TODO: shell tools, etc.
         result = 'TODO: implement non-LLM agent';
@@ -120,7 +110,7 @@ export class Maestro {
         id: crypto.randomUUID(),
         runId: task.runId,
         taskId: task.id,
-        kind: artifactKind,
+        kind: 'text',
         label: 'task-output',
         data: result,
         createdAt: new Date().toISOString(),
@@ -151,8 +141,8 @@ export class Maestro {
     }
   }
 
-  async runPipeline(userId: string, requestText: string) {
-    const run = await this.createRun(userId, requestText);
+  async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
+    const run = await this.createRun(userId, requestText, options);
     const tasks = await this.planRequest(run);
 
     const executable = tasks.filter(t => t.status === 'queued');
