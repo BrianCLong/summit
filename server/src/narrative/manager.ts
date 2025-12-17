@@ -15,6 +15,7 @@ interface CreateSimulationInput {
   tickIntervalMinutes?: number;
   initialEntities: SimulationConfig['initialEntities'];
   initialParameters?: SimulationConfig['initialParameters'];
+  agents?: SimulationConfig['agents'];
   generatorMode?: NarrativeGeneratorMode;
   llmClient?: SimulationConfig['llmClient'];
   metadata?: Record<string, unknown>;
@@ -40,6 +41,7 @@ export class NarrativeSimulationManager {
       tickIntervalMinutes: input.tickIntervalMinutes ?? 60,
       initialEntities: input.initialEntities,
       initialParameters: input.initialParameters,
+      agents: input.agents,
       generatorMode: input.generatorMode,
       llmClient: input.llmClient,
       metadata: input.metadata,
