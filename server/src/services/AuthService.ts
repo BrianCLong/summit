@@ -43,6 +43,8 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+import { secretsService } from './SecretsService.js';
+import { SECRETS } from '../config/secretRefs.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
@@ -90,6 +92,7 @@ interface User {
   lastName?: string;
   fullName?: string;
   role: string;
+  defaultTenantId?: string;
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
@@ -110,6 +113,7 @@ interface DatabaseUser {
   first_name?: string;
   last_name?: string;
   role: string;
+  default_tenant_id?: string;
   is_active: boolean;
   last_login?: Date;
   created_at: Date;
@@ -194,11 +198,9 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'graph:read',
     'graph:export',
     'ai:request',
-    'simulation:run',
-    'evidence:read',
-    'scenario:create',
-    'scenario:read',
-    'scenario:update',
+    'support:read',
+    'support:create',
+    'support:update',
   ],
   VIEWER: [
     'investigation:read',
@@ -207,8 +209,6 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'tag:read',
     'graph:read',
     'graph:export',
-    'evidence:read',
-    'scenario:read',
   ],
 };
 
@@ -301,6 +301,16 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
+
+      // Auto-assign to default tenant if configured or just 'global'
+      // This ensures the new user has at least one tenant membership
+      await client.query(
+        `INSERT INTO user_tenants (user_id, tenant_id, roles)
+         VALUES ($1, 'global', $2)
+         ON CONFLICT DO NOTHING`,
+        [user.id, [user.role]]
+      );
+
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
@@ -343,6 +353,8 @@ export class AuthService {
    *   console.error('Login failed:', error.message);
    * }
    * ```
+   *
+   * @trace REQ-AUTH-001
    */
   async login(
     email: string,
@@ -411,8 +423,10 @@ export class AuthService {
       role: user.role,
     };
 
+    const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+
     // @ts-ignore - jwt.sign overload mismatch
-    const token = jwt.sign(tokenPayload, config.jwt.secret, {
+    const token = jwt.sign(tokenPayload, jwtSecret, {
       expiresIn: config.jwt.expiresIn,
     });
 
@@ -452,7 +466,8 @@ export class AuthService {
     try {
       if (!token) return null;
 
-      const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
+      const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+      const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
 
       // Check if token is blacklisted
       const blacklistCheck = await this.pool.query(
@@ -680,6 +695,7 @@ export class AuthService {
       lastName: user.last_name,
       fullName: `${user.first_name} ${user.last_name}`,
       role: user.role,
+      defaultTenantId: user.default_tenant_id,
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,

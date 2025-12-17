@@ -184,12 +184,12 @@ export class OnboardingService {
     completed: boolean,
   ): OnboardingPlan {
     const updatedPhases = plan.phases.map((phase) => {
-      if (phase.name !== phaseName) return phase;
+      if (phase.name !== phaseName) {return phase;}
 
       return {
         ...phase,
         tasks: phase.tasks.map((task) => {
-          if (task.title !== taskTitle) return task;
+          if (task.title !== taskTitle) {return task;}
           return { ...task, completed };
         }),
       };

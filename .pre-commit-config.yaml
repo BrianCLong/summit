@@ -25,6 +25,7 @@ repos:
     rev: v8.28.0
     hooks:
       - id: gitleaks
+  # TruffleHog for secret scanning
   - repo: https://github.com/trufflesecurity/trufflehog
     rev: v3.90.11
     hooks:
