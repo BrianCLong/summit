@@ -13,6 +13,34 @@ export interface GraphData {
   edges: { source: string; target: string; weight?: number }[];
 }
 
+export interface CandidateEdge {
+  source: string;
+  target: string;
+}
+
+export interface CandidateEdgeOptions {
+  /**
+   * Limit candidate generation to non-existing edges
+   */
+  onlyNonExisting?: boolean;
+
+  /**
+   * Maximum number of candidate edges to return (to bound complexity)
+   */
+  maxCandidates?: number;
+
+  /**
+   * Randomize before truncating to reduce bias when sampling
+   */
+  randomize?: boolean;
+
+  /**
+   * Provide pre-built adjacency/edge cache to avoid recomputation
+   */
+  adjacency?: Map<string, Set<string>>;
+  existingEdges?: Set<string>;
+}
+
 export interface LinkPredictionResult {
   /**
    * Predicted links with scores
@@ -73,6 +101,118 @@ export interface LinkPredictionOptions {
    * Only predict between nodes that don't have edges
    */
   onlyNonExisting?: boolean;
+
+  /**
+   * Optional explicit candidate edge list to score
+   */
+  candidateEdges?: CandidateEdge[];
+
+  /**
+   * Maximum candidates to consider when auto-generating pairs
+   */
+  maxCandidates?: number;
+
+  /**
+   * Randomize candidate sampling when limiting size
+   */
+  randomizeCandidates?: boolean;
+}
+
+function buildAdjacency(graph: GraphData) {
+  const adjacency = new Map<string, Set<string>>();
+  const existingEdges = new Set<string>();
+
+  for (const node of graph.nodes) {
+    adjacency.set(node, new Set());
+  }
+
+  for (const edge of graph.edges) {
+    if (!adjacency.has(edge.source)) adjacency.set(edge.source, new Set());
+    if (!adjacency.has(edge.target)) adjacency.set(edge.target, new Set());
+
+    adjacency.get(edge.source)?.add(edge.target);
+    adjacency.get(edge.target)?.add(edge.source);
+    existingEdges.add(`${edge.source}-${edge.target}`);
+    existingEdges.add(`${edge.target}-${edge.source}`);
+  }
+
+  return { adjacency, existingEdges };
+}
+
+function deriveExistingEdges(
+  adjacency: Map<string, Set<string>>,
+): Set<string> {
+  const edges = new Set<string>();
+  for (const [node, neighbors] of adjacency) {
+    for (const neighbor of neighbors) {
+      edges.add(`${node}-${neighbor}`);
+    }
+  }
+  return edges;
+}
+
+function shuffleInPlace<T>(items: T[]): void {
+  for (let i = items.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+}
+
+function collectCandidates(
+  nodes: string[],
+  adjacency: Map<string, Set<string>>,
+  existingEdges: Set<string>,
+  options: CandidateEdgeOptions,
+): CandidateEdge[] {
+  const {
+    onlyNonExisting = true,
+    maxCandidates,
+    randomize = false,
+  } = options;
+
+  const pairs: CandidateEdge[] = [];
+
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const source = nodes[i];
+      const target = nodes[j];
+      const edgeKey = `${source}-${target}`;
+
+      if (onlyNonExisting && existingEdges.has(edgeKey)) continue;
+
+      // Skip if nodes were never registered in adjacency (safety for partial graphs)
+      if (!adjacency.has(source) || !adjacency.has(target)) continue;
+
+      pairs.push({ source, target });
+    }
+  }
+
+  if (maxCandidates && pairs.length > maxCandidates) {
+    if (randomize) {
+      shuffleInPlace(pairs);
+    }
+    return pairs.slice(0, maxCandidates);
+  }
+
+  return pairs;
+}
+
+/**
+ * Enumerate candidate edges from a graph for downstream scoring or GNN inference.
+ */
+export function generateCandidateEdges(
+  graph: GraphData,
+  options: CandidateEdgeOptions = {},
+): CandidateEdge[] {
+  const { adjacency, existingEdges } = options.adjacency
+    ? {
+        adjacency: options.adjacency,
+        existingEdges:
+          options.existingEdges || deriveExistingEdges(options.adjacency),
+      }
+    : buildAdjacency(graph);
+
+  return collectCandidates(graph.nodes, adjacency, existingEdges, options);
 }
 
 /**
@@ -93,21 +233,36 @@ export function predictLinks(
     minScore = 0,
     topK = 100,
     onlyNonExisting = true,
+    candidateEdges,
+    maxCandidates,
+    randomizeCandidates = false,
   } = options;
 
-  // Build adjacency structure
-  const adjacency = new Map<string, Set<string>>();
-  const existingEdges = new Set<string>();
+  const { adjacency, existingEdges } = buildAdjacency(graph);
 
-  for (const node of graph.nodes) {
-    adjacency.set(node, new Set());
-  }
+  const candidatePairs =
+    candidateEdges ||
+    generateCandidateEdges(graph, {
+      adjacency,
+      existingEdges,
+      onlyNonExisting,
+      maxCandidates,
+      randomize: randomizeCandidates,
+    });
 
-  for (const edge of graph.edges) {
-    adjacency.get(edge.source)?.add(edge.target);
-    adjacency.get(edge.target)?.add(edge.source);
-    existingEdges.add(`${edge.source}-${edge.target}`);
-    existingEdges.add(`${edge.target}-${edge.source}`);
+  // Normalize candidates to remove duplicates and enforce constraints
+  const normalizedCandidates: CandidateEdge[] = [];
+  const seen = new Set<string>();
+
+  for (const pair of candidatePairs) {
+    const key = `${pair.source}-${pair.target}`;
+    if (seen.has(key)) continue;
+
+    if (onlyNonExisting && existingEdges.has(key)) continue;
+    if (!adjacency.has(pair.source) || !adjacency.has(pair.target)) continue;
+
+    normalizedCandidates.push(pair);
+    seen.add(key);
   }
 
   const allPredictions: Array<{
@@ -123,19 +278,19 @@ export function predictLinks(
 
     switch (method) {
       case 'common-neighbors':
-        predictions = commonNeighbors(graph.nodes, adjacency);
+        predictions = commonNeighbors(adjacency, normalizedCandidates);
         break;
       case 'jaccard':
-        predictions = jaccardCoefficient(graph.nodes, adjacency);
+        predictions = jaccardCoefficient(adjacency, normalizedCandidates);
         break;
       case 'adamic-adar':
-        predictions = adamicAdar(graph.nodes, adjacency);
+        predictions = adamicAdar(adjacency, normalizedCandidates);
         break;
       case 'preferential-attachment':
-        predictions = preferentialAttachment(graph.nodes, adjacency);
+        predictions = preferentialAttachment(adjacency, normalizedCandidates);
         break;
       case 'resource-allocation':
-        predictions = resourceAllocation(graph.nodes, adjacency);
+        predictions = resourceAllocation(adjacency, normalizedCandidates);
         break;
     }
 
@@ -165,30 +320,25 @@ export function predictLinks(
  * Common Neighbors: Number of shared neighbors
  */
 function commonNeighbors(
-  nodes: string[],
   adjacency: Map<string, Set<string>>,
+  candidatePairs: CandidateEdge[],
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const nodeA = nodes[i];
-      const nodeB = nodes[j];
+  for (const { source: nodeA, target: nodeB } of candidatePairs) {
+    const neighborsA = adjacency.get(nodeA) || new Set();
+    const neighborsB = adjacency.get(nodeB) || new Set();
 
-      const neighborsA = adjacency.get(nodeA) || new Set();
-      const neighborsB = adjacency.get(nodeB) || new Set();
-
-      // Count common neighbors
-      let commonCount = 0;
-      for (const neighbor of neighborsA) {
-        if (neighborsB.has(neighbor)) {
-          commonCount++;
-        }
+    // Count common neighbors
+    let commonCount = 0;
+    for (const neighbor of neighborsA) {
+      if (neighborsB.has(neighbor)) {
+        commonCount++;
       }
+    }
 
-      if (commonCount > 0) {
-        predictions.push({ source: nodeA, target: nodeB, score: commonCount });
-      }
+    if (commonCount > 0) {
+      predictions.push({ source: nodeA, target: nodeB, score: commonCount });
     }
   }
 
@@ -199,34 +349,29 @@ function commonNeighbors(
  * Jaccard Coefficient: |Common Neighbors| / |Union of Neighbors|
  */
 function jaccardCoefficient(
-  nodes: string[],
   adjacency: Map<string, Set<string>>,
+  candidatePairs: CandidateEdge[],
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const nodeA = nodes[i];
-      const nodeB = nodes[j];
+  for (const { source: nodeA, target: nodeB } of candidatePairs) {
+    const neighborsA = adjacency.get(nodeA) || new Set();
+    const neighborsB = adjacency.get(nodeB) || new Set();
 
-      const neighborsA = adjacency.get(nodeA) || new Set();
-      const neighborsB = adjacency.get(nodeB) || new Set();
+    // Count common and union
+    let commonCount = 0;
+    const unionSet = new Set([...neighborsA, ...neighborsB]);
 
-      // Count common and union
-      let commonCount = 0;
-      const unionSet = new Set([...neighborsA, ...neighborsB]);
-
-      for (const neighbor of neighborsA) {
-        if (neighborsB.has(neighbor)) {
-          commonCount++;
-        }
+    for (const neighbor of neighborsA) {
+      if (neighborsB.has(neighbor)) {
+        commonCount++;
       }
+    }
 
-      if (unionSet.size > 0) {
-        const score = commonCount / unionSet.size;
-        if (score > 0) {
-          predictions.push({ source: nodeA, target: nodeB, score });
-        }
+    if (unionSet.size > 0) {
+      const score = commonCount / unionSet.size;
+      if (score > 0) {
+        predictions.push({ source: nodeA, target: nodeB, score });
       }
     }
   }
@@ -239,8 +384,8 @@ function jaccardCoefficient(
  * Gives more weight to common neighbors with fewer connections
  */
 function adamicAdar(
-  nodes: string[],
   adjacency: Map<string, Set<string>>,
+  candidatePairs: CandidateEdge[],
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
@@ -250,27 +395,22 @@ function adamicAdar(
     degrees.set(node, neighbors.size);
   }
 
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const nodeA = nodes[i];
-      const nodeB = nodes[j];
+  for (const { source: nodeA, target: nodeB } of candidatePairs) {
+    const neighborsA = adjacency.get(nodeA) || new Set();
+    const neighborsB = adjacency.get(nodeB) || new Set();
 
-      const neighborsA = adjacency.get(nodeA) || new Set();
-      const neighborsB = adjacency.get(nodeB) || new Set();
-
-      let score = 0;
-      for (const neighbor of neighborsA) {
-        if (neighborsB.has(neighbor)) {
-          const degree = degrees.get(neighbor) || 1;
-          if (degree > 1) {
-            score += 1 / Math.log(degree);
-          }
+    let score = 0;
+    for (const neighbor of neighborsA) {
+      if (neighborsB.has(neighbor)) {
+        const degree = degrees.get(neighbor) || 1;
+        if (degree > 1) {
+          score += 1 / Math.log(degree);
         }
       }
+    }
 
-      if (score > 0) {
-        predictions.push({ source: nodeA, target: nodeB, score });
-      }
+    if (score > 0) {
+      predictions.push({ source: nodeA, target: nodeB, score });
     }
   }
 
@@ -282,23 +422,18 @@ function adamicAdar(
  * Based on "rich get richer" principle
  */
 function preferentialAttachment(
-  nodes: string[],
   adjacency: Map<string, Set<string>>,
+  candidatePairs: CandidateEdge[],
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const nodeA = nodes[i];
-      const nodeB = nodes[j];
+  for (const { source: nodeA, target: nodeB } of candidatePairs) {
+    const degreeA = (adjacency.get(nodeA) || new Set()).size;
+    const degreeB = (adjacency.get(nodeB) || new Set()).size;
 
-      const degreeA = (adjacency.get(nodeA) || new Set()).size;
-      const degreeB = (adjacency.get(nodeB) || new Set()).size;
-
-      const score = degreeA * degreeB;
-      if (score > 0) {
-        predictions.push({ source: nodeA, target: nodeB, score });
-      }
+    const score = degreeA * degreeB;
+    if (score > 0) {
+      predictions.push({ source: nodeA, target: nodeB, score });
     }
   }
 
@@ -309,32 +444,27 @@ function preferentialAttachment(
  * Resource Allocation Index: Similar to Adamic-Adar but uses 1/degree
  */
 function resourceAllocation(
-  nodes: string[],
   adjacency: Map<string, Set<string>>,
+  candidatePairs: CandidateEdge[],
 ): Array<{ source: string; target: string; score: number }> {
   const predictions: Array<{ source: string; target: string; score: number }> = [];
 
-  for (let i = 0; i < nodes.length; i++) {
-    for (let j = i + 1; j < nodes.length; j++) {
-      const nodeA = nodes[i];
-      const nodeB = nodes[j];
+  for (const { source: nodeA, target: nodeB } of candidatePairs) {
+    const neighborsA = adjacency.get(nodeA) || new Set();
+    const neighborsB = adjacency.get(nodeB) || new Set();
 
-      const neighborsA = adjacency.get(nodeA) || new Set();
-      const neighborsB = adjacency.get(nodeB) || new Set();
-
-      let score = 0;
-      for (const neighbor of neighborsA) {
-        if (neighborsB.has(neighbor)) {
-          const degree = (adjacency.get(neighbor) || new Set()).size;
-          if (degree > 0) {
-            score += 1 / degree;
-          }
+    let score = 0;
+    for (const neighbor of neighborsA) {
+      if (neighborsB.has(neighbor)) {
+        const degree = (adjacency.get(neighbor) || new Set()).size;
+        if (degree > 0) {
+          score += 1 / degree;
         }
       }
+    }
 
-      if (score > 0) {
-        predictions.push({ source: nodeA, target: nodeB, score });
-      }
+    if (score > 0) {
+      predictions.push({ source: nodeA, target: nodeB, score });
     }
   }
 
