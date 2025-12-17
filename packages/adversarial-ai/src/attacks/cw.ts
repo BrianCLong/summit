@@ -155,7 +155,7 @@ export class CarliniWagnerAttack {
     const confidence = config.confidence || 0;
 
     // Start with all pixels modifiable
-    let activePixels = new Set(input.map((_, idx) => idx));
+    const activePixels = new Set(input.map((_, idx) => idx));
     let perturbedInput = [...input];
     const perturbation: number[] = new Array(input.length).fill(0);
 
@@ -172,7 +172,7 @@ export class CarliniWagnerAttack {
 
         // Update only active pixels
         perturbedInput = perturbedInput.map((val, idx) => {
-          if (!activePixels.has(idx)) return input[idx];
+          if (!activePixels.has(idx)) {return input[idx];}
 
           const newVal = val - 0.01 * gradients[idx];
           perturbation[idx] = newVal - input[idx];

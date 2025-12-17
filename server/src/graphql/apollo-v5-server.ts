@@ -17,6 +17,7 @@ import logger from '../utils/logger.js';
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
 import resolvers from './resolvers-combined.js';
+import { authDirectiveTransformer } from './authDirective.js';
 
 // Import DataLoaders
 import { createDataLoaders, type DataLoaders } from './dataloaders/index.js';
@@ -28,6 +29,7 @@ import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/q
 import { createInputSanitizationPlugin } from './plugins/inputSanitizationPlugin.js';
 import { createAPQPlugin } from './plugins/apqPlugin.js';
 import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
+import { createCircuitBreakerPlugin } from './plugins/circuitBreakerPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
 import depthLimit from 'graphql-depth-limit';
 
@@ -72,13 +74,16 @@ const permissions = shield({
 
 // Create enhanced GraphQL schema with security
 function createSecureSchema() {
-  const baseSchema = makeExecutableSchema({
+  let schema = makeExecutableSchema({
     typeDefs,
     resolvers,
   });
 
+  // Apply Auth Directive
+  schema = authDirectiveTransformer(schema);
+
   // Apply security middleware
-  return applyMiddleware(baseSchema, permissions);
+  return applyMiddleware(schema, permissions);
 }
 
 // Context function for Apollo v5
@@ -153,6 +158,12 @@ export function createApolloV5Server(
         // Redis will be injected if available
         enabled: process.env.ENABLE_APQ !== 'false',
         ttl: 86400, // 24 hours
+      }),
+
+      createCircuitBreakerPlugin({
+        failureThreshold: 20,
+        resetTimeout: 30000,
+        maxRequestsPerMinute: 2000,
       }),
 
       createPerformanceMonitoringPlugin(),
