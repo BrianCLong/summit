@@ -1,0 +1,45 @@
+id: phishing_cluster_discovery
+name: Phishing Cluster Discovery (DFIR)
+description: Discover phishing lure themes and prioritize response based on risk.
+parameters:
+  priority_threshold: 0.5
+preconditions:
+  legal_basis: post_breach_response
+  license_scope: enterprise
+  data_availability: synthetic_fixture
+postconditions:
+  kpis:
+    - id: priority-theme
+      description: Highest risk theme must exceed priority threshold
+      path: ["phishing_risk", "Payroll Update"]
+      target: 0.5
+      citation: fixtures/phishing_cluster.json
+      step: score_phishing_risk
+steps:
+  - id: load
+    description: Load phishing telemetry fixture
+    action: load_fixture
+    params:
+      fixture: phishing_cluster.json
+    deps: []
+  - id: cluster
+    description: Bucket lure themes and senders
+    action: extract_phishing_clusters
+    params: {}
+    deps: [load]
+  - id: risk
+    description: Score cluster risk
+    action: score_phishing_risk
+    params: {}
+    deps: [cluster]
+  - id: gate
+    description: Ensure KPIs satisfied
+    action: assert_kpis
+    params:
+      kpis:
+        - id: priority-theme
+          path: ["phishing_risk", "Payroll Update"]
+          target: 0.5
+          citation: fixtures/phishing_cluster.json
+          step: score_phishing_risk
+    deps: [risk]

@@ -1,0 +1,45 @@
+id: rapid_attribution
+name: Rapid Attribution (CTI)
+description: Identify likely campaign attribution from IOC clusters.
+parameters:
+  minimum_events: 1
+preconditions:
+  legal_basis: incident_response
+  license_scope: enterprise
+  data_availability: synthetic_fixture
+postconditions:
+  kpis:
+    - id: attribution-confidence
+      description: Leading attribution score must exceed threshold
+      path: ["attribution_scores", "Orchid Jackal"]
+      target: 1.0
+      citation: fixtures/rapid_attribution.json
+      step: score_attribution
+steps:
+  - id: load
+    description: Load synthetic threat telemetry
+    action: load_fixture
+    params:
+      fixture: rapid_attribution.json
+    deps: []
+  - id: cluster
+    description: Group indicators by campaign hypothesis
+    action: cluster_iocs
+    params: {}
+    deps: [load]
+  - id: score
+    description: Score attribution confidence
+    action: score_attribution
+    params: {}
+    deps: [cluster]
+  - id: gate
+    description: Enforce KPI success criteria
+    action: assert_kpis
+    params:
+      kpis:
+        - id: attribution-confidence
+          path: ["attribution_scores", "Orchid Jackal"]
+          target: 1.0
+          citation: fixtures/rapid_attribution.json
+          step: score_attribution
+    deps: [score]

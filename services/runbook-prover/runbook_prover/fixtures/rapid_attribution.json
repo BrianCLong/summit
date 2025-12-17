@@ -1,0 +1,7 @@
+[
+  {"campaign": "Orchid Jackal", "ioc": "8.8.8.8", "artifact": "dns", "signal": 0.8},
+  {"campaign": "Orchid Jackal", "ioc": "1.1.1.1", "artifact": "dns", "signal": 0.6},
+  {"campaign": "Amber Lynx", "ioc": "md5:aaaa", "artifact": "hash", "signal": 0.4},
+  {"campaign": "Orchid Jackal", "ioc": "md5:bbbb", "artifact": "hash", "signal": 0.5},
+  {"campaign": "Amber Lynx", "ioc": "2.2.2.2", "artifact": "dns", "signal": 0.3}
+]
