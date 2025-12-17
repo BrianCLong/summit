@@ -1,6 +1,16 @@
+<<<<<<< HEAD
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const RelationshipService = require('./RelationshipService.js');
+=======
+<<<<<<< HEAD
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const RelationshipService = require('./RelationshipService.js');
+=======
+import { RelationshipService } from './RelationshipService.js';
+>>>>>>> main
+>>>>>>> main
 import EmbeddingService from './EmbeddingService.js';
 import { getNeo4jDriver } from '../config/database.js';
 import logger from '../utils/logger.js';
@@ -27,10 +37,23 @@ export interface PredictedRelationship {
 
 export class PredictiveRelationshipService {
   private embeddingService: EmbeddingService;
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
   private relationshipService: any;
   private driver: Driver | null = null;
 
   constructor(embeddingService?: EmbeddingService, relationshipService?: any, driver?: Driver) {
+<<<<<<< HEAD
+=======
+=======
+  private relationshipService: RelationshipService;
+  private driver: Driver | null = null;
+
+  constructor(embeddingService?: EmbeddingService, relationshipService?: RelationshipService, driver?: Driver) {
+>>>>>>> main
+>>>>>>> main
     this.embeddingService = embeddingService || new EmbeddingService();
     this.relationshipService = relationshipService || new RelationshipService();
     this.driver = driver || null;

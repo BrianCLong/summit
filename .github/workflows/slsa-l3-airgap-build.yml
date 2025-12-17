@@ -35,9 +35,24 @@ on:
         description: 'Enable FIPS 140-2 compliance mode'
         type: boolean
         default: true
+<<<<<<< HEAD
   push:
     tags:
       - 'airgap-v*'
+=======
+<<<<<<< HEAD
+  push:
+    tags:
+      - 'airgap-v*'
+=======
+<<<<<<< HEAD
+  push:
+    tags:
+      - 'airgap-v*'
+=======
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
 
 permissions:
   contents: read
@@ -47,6 +62,13 @@ permissions:
 
 env:
   REGISTRY: ghcr.io
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
   IMAGE_NAME: ${{ github.repository }}
   COSIGN_EXPERIMENTAL: '1'
   BUNDLE_NAME: intelgraph-airgap-bundle
@@ -59,11 +81,31 @@ jobs:
   # ===========================================================================
   # Stage 1: Pre-flight Checks for Air-Gapped Build
   # ===========================================================================
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+  IMAGE_NAME_SERVER: ${{ github.repository }}/server
+  IMAGE_NAME_WEB: ${{ github.repository }}/web
+  BUNDLE_NAME: intelgraph-airgap-bundle
+
+jobs:
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
   preflight:
     name: Air-Gap Pre-flight Validation
     runs-on: ubuntu-latest
     outputs:
       bundle-id: ${{ steps.bundle-info.outputs.bundle-id }}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
       manifest-hash: ${{ steps.bundle-info.outputs.manifest-hash }}
     steps:
       - name: Checkout
@@ -126,10 +168,35 @@ jobs:
   # ===========================================================================
   hermetic-build:
     name: Hermetic Container Build
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate bundle info
+        id: bundle-info
+        run: |
+          VERSION="${{ inputs.bundle_version || github.ref_name }}"
+          BUNDLE_ID="${{ env.BUNDLE_NAME }}-${VERSION}-$(date +%Y%m%d%H%M%S)"
+          echo "bundle-id=$BUNDLE_ID" >> "$GITHUB_OUTPUT"
+
+  build-server:
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     needs: preflight
     runs-on: ubuntu-latest
     outputs:
       image-digest: ${{ steps.build.outputs.digest }}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
       image-uri: ${{ steps.build.outputs.image-uri }}
     steps:
       - name: Checkout
@@ -146,10 +213,29 @@ jobs:
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
 
       - name: Build container image (hermetic)
         id: build
@@ -226,10 +312,54 @@ jobs:
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+      - name: Build Server
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:airgap-${{ inputs.bundle_version }}
+          provenance: mode=max
+          sbom: true
+      - name: Export Server Image
+        run: |
+          mkdir -p images
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:airgap-${{ inputs.bundle_version }}
+          docker save ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}:airgap-${{ inputs.bundle_version }} -o images/server.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: server-image
+          path: images/server.tar
+
+  build-web:
+    needs: preflight
+    runs-on: ubuntu-latest
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
 
       - name: Generate SBOM
         run: |
@@ -622,3 +752,61 @@ jobs:
           - Change Advisory Board (CAB) notification required
 
           EOF
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+      - name: Build Web
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ./apps/web
+          file: ./apps/web/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:airgap-${{ inputs.bundle_version }}
+          provenance: mode=max
+          sbom: true
+      - name: Export Web Image
+        run: |
+          mkdir -p images
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:airgap-${{ inputs.bundle_version }}
+          docker save ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_WEB }}:airgap-${{ inputs.bundle_version }} -o images/web.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-image
+          path: images/web.tar
+
+  create-bundle:
+    needs: [preflight, build-server, build-web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: Create Bundle
+        run: |
+          mkdir -p bundle/images
+          cp artifacts/server-image/server.tar bundle/images/
+          cp artifacts/web-image/web.tar bundle/images/
+
+          # Create manifest
+          cat > bundle/manifest.json <<EOF
+          {
+            "bundleId": "${{ needs.preflight.outputs.bundle-id }}",
+            "version": "${{ inputs.bundle_version }}",
+            "serverDigest": "${{ needs.build-server.outputs.image-digest }}",
+            "webDigest": "${{ needs.build-web.outputs.image-digest }}",
+            "classification": "${{ inputs.target_classification }}"
+          }
+          EOF
+
+          tar -czvf airgap-bundle.tar.gz bundle/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: airgap-bundle
+          path: airgap-bundle.tar.gz
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
