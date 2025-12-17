@@ -1,8 +1,27 @@
-import React, { useRef, useEffect, useState, useMemo } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
+<<<<<<< HEAD
 import * as d3 from 'd3'
+=======
+// Tree-shaken D3 imports for better bundle size
+import { select } from 'd3-selection'
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  forceRadial,
+  forceY,
+  forceX,
+  type Simulation,
+  type SimulationNodeDatum,
+  type SimulationLinkDatum,
+} from 'd3-force'
+import { zoom } from 'd3-zoom'
+import { drag } from 'd3-drag'
+>>>>>>> main
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
-import { AlertTriangle, Zap, Activity, Eye } from 'lucide-react'
 
 interface GraphCanvasProps {
   entities: Entity[]
@@ -15,7 +34,7 @@ interface GraphCanvasProps {
   className?: string
 }
 
-interface GraphNode extends d3.SimulationNodeDatum {
+interface GraphNode extends SimulationNodeDatum {
   id: string
   entity: Entity
   x?: number
@@ -24,25 +43,16 @@ interface GraphNode extends d3.SimulationNodeDatum {
   fy?: number | null
 }
 
-interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
+interface GraphLink extends SimulationLinkDatum<GraphNode> {
   id: string
   relationship: Relationship
   source: GraphNode
   target: GraphNode
 }
 
-type RenderQuality = 'high' | 'medium' | 'low' | 'critical'
-
-const getRenderQuality = (nodeCount: number): RenderQuality => {
-  if (nodeCount > 2000) return 'critical'
-  if (nodeCount > 500) return 'low'
-  if (nodeCount > 100) return 'medium'
-  return 'high'
-}
-
 export function GraphCanvas({
-  entities: rawEntities,
-  relationships: rawRelationships,
+  entities,
+  relationships,
   layout,
   onEntitySelect,
   selectedEntityId,
@@ -50,28 +60,36 @@ export function GraphCanvas({
 }: GraphCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
+  const [fps, setFps] = useState(0)
+  const [debugMode, setDebugMode] = useState(false)
+  const frameCountRef = useRef(0)
+  const lastTimeRef = useRef(performance.now())
 
-  // Determine rendering quality based on raw dataset size
-  const quality = useMemo(() => getRenderQuality(rawEntities.length), [rawEntities.length])
+<<<<<<< HEAD
+=======
+  // Calculate FPS
+  useEffect(() => {
+    if (!debugMode) return
 
-  // Process data based on quality (sampling for critical size)
-  const { entities, relationships } = useMemo(() => {
-    if (quality === 'critical') {
-      // Sample top 1500 entities by confidence
-      const sortedEntities = [...rawEntities]
-        .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 1500)
+    let animationFrameId: number
 
-      const entityIds = new Set(sortedEntities.map(e => e.id))
-      const relevantRelationships = rawRelationships.filter(
-        r => entityIds.has(r.sourceId) && entityIds.has(r.targetId)
-      )
-
-      return { entities: sortedEntities, relationships: relevantRelationships }
+    const renderLoop = (time: number) => {
+      frameCountRef.current++
+      if (time - lastTimeRef.current >= 1000) {
+        setFps(
+          Math.round((frameCountRef.current * 1000) / (time - lastTimeRef.current))
+        )
+        frameCountRef.current = 0
+        lastTimeRef.current = time
+      }
+      animationFrameId = requestAnimationFrame(renderLoop)
     }
-    return { entities: rawEntities, relationships: rawRelationships }
-  }, [rawEntities, rawRelationships, quality])
 
+    animationFrameId = requestAnimationFrame(renderLoop)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [debugMode])
+
+>>>>>>> main
   // Update dimensions on resize
   useEffect(() => {
     const updateDimensions = () => {
@@ -89,7 +107,7 @@ export function GraphCanvas({
   useEffect(() => {
     if (!svgRef.current || entities.length === 0) return
 
-    const svg = d3.select(svgRef.current)
+    const svg = select(svgRef.current)
     svg.selectAll('*').remove()
 
     const { width, height } = dimensions
@@ -113,79 +131,95 @@ export function GraphCanvas({
         target: nodes.find(n => n.id === rel.targetId)!,
       }))
 
-    // Create simulation based on layout type and quality
+    // Create simulation based on layout type
+<<<<<<< HEAD
     let simulation: d3.Simulation<GraphNode, GraphLink>
-
-    // Adjust physics parameters based on quality
-    const alphaDecay = quality === 'high' ? 0.0228 : (quality === 'medium' ? 0.05 : 0.1) // Stabilize faster for large graphs
-    const chargeStrength = quality === 'high' ? -300 : (quality === 'medium' ? -200 : -100)
-    const collisionRadius = quality === 'high' ? 30 : 15
 
     switch (layout.type) {
       case 'force':
         simulation = d3
           .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
+=======
+    let simulation: Simulation<GraphNode, GraphLink>
+
+    switch (layout.type) {
+      case 'force':
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
-              .distance(quality === 'high' ? 100 : 60)
+              .distance(100)
           )
-          .force('charge', d3.forceManyBody().strength(chargeStrength))
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-300))
           .force('center', d3.forceCenter(width / 2, height / 2))
-
-        // Disable expensive collision detection for low/critical quality
-        if (quality === 'high' || quality === 'medium') {
-          simulation.force('collision', d3.forceCollide().radius(collisionRadius))
-        }
+          .force('collision', d3.forceCollide().radius(30))
         break
 
       case 'radial':
         simulation = d3
           .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
+=======
+          .force('charge', forceManyBody().strength(-300))
+          .force('center', forceCenter(width / 2, height / 2))
+          .force('collision', forceCollide().radius(30))
+        break
+
+      case 'radial':
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(80)
           )
-          .force('charge', d3.forceManyBody().strength(chargeStrength))
-          .force('radial', d3.forceRadial(Math.min(width, height) / 3, width / 2, height / 2))
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+          .force('charge', forceManyBody().strength(-200))
+          .force('radial', forceRadial(150, width / 2, height / 2))
+>>>>>>> main
         break
 
       case 'hierarchic':
+        // Simple hierarchical layout - in a real app you'd use dagre or similar
+<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
+=======
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(60)
           )
-          .force('charge', d3.forceManyBody().strength(-100))
+          .force('charge', forceManyBody().strength(-100))
           .force(
             'y',
-            d3.forceY().y(d => (d.index || 0) * 80 + 100)
+            forceY<GraphNode>().y(d => (d.index || 0) * 80 + 100)
           )
-          .force('x', d3.forceX(width / 2))
+          .force('x', forceX(width / 2))
         break
 
       default:
+<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
-          .alphaDecay(alphaDecay)
+=======
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id)
+            forceLink<GraphNode, GraphLink>(links).id(d => d.id)
           )
-          .force('charge', d3.forceManyBody())
-          .force('center', d3.forceCenter(width / 2, height / 2))
+          .force('charge', forceManyBody())
+          .force('center', forceCenter(width / 2, height / 2))
     }
 
     // Create container groups
@@ -194,21 +228,13 @@ export function GraphCanvas({
     const nodesGroup = container.append('g').attr('class', 'nodes')
 
     // Add zoom behavior
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on('zoom', event => {
         container.attr('transform', event.transform)
-
-        // Semantic Zoom: Show/hide labels based on zoom level for medium/low quality
-        if (quality !== 'high') {
-          const k = event.transform.k
-          svg.selectAll('.node-label').style('opacity', k > 1.5 ? 1 : 0)
-          svg.selectAll('.link-label').style('opacity', k > 2.0 ? 1 : 0)
-        }
       })
 
-    svg.call(zoom)
+    svg.call(zoomBehavior)
 
     // Draw links
     const link = linksGroup
@@ -221,22 +247,17 @@ export function GraphCanvas({
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', d => Math.sqrt(d.relationship.confidence * 3))
 
-    // Draw link labels (only for high quality or zoomed in)
-    let linkLabel: d3.Selection<SVGTextElement, GraphLink, SVGGElement, unknown> | null = null
-
-    if (quality === 'high' || quality === 'medium') {
-      linkLabel = linksGroup
-        .selectAll<SVGTextElement, GraphLink>('text')
-        .data(links)
-        .enter()
-        .append('text')
-        .attr('class', 'link-label')
-        .attr('font-size', '10px')
-        .attr('fill', '#666')
-        .attr('text-anchor', 'middle')
-        .style('opacity', quality === 'high' ? 1 : 0) // Hidden by default on medium
-        .text(d => d.relationship.type.replace('_', ' ').toLowerCase())
-    }
+    // Draw link labels
+    const linkLabel = linksGroup
+      .selectAll<SVGTextElement, GraphLink>('text')
+      .data(links)
+      .enter()
+      .append('text')
+      .attr('class', 'link-label')
+      .attr('font-size', '10px')
+      .attr('fill', '#666')
+      .attr('text-anchor', 'middle')
+      .text(d => d.relationship.type.replace('_', ' ').toLowerCase())
 
     // Entity type to color mapping
     const getEntityColor = (type: string) => {
@@ -279,8 +300,7 @@ export function GraphCanvas({
       .attr('class', 'node')
       .style('cursor', 'pointer')
       .call(
-        d3
-          .drag<SVGGElement, GraphNode>()
+        drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
             if (!event.active) simulation.alphaTarget(0.3).restart()
             d.fx = d.x
@@ -300,7 +320,7 @@ export function GraphCanvas({
     // Node circles
     node
       .append('circle')
-      .attr('r', d => quality === 'high' ? 15 + d.entity.confidence * 10 : 10)
+      .attr('r', d => 15 + d.entity.confidence * 10)
       .attr('fill', d => getEntityColor(d.entity.type))
       .attr('stroke', d =>
         selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
@@ -312,44 +332,38 @@ export function GraphCanvas({
           : 'none'
       )
 
-    // Node icons (only for high/medium quality)
-    if (quality !== 'low' && quality !== 'critical') {
-      node
-        .append('text')
-        .attr('text-anchor', 'middle')
-        .attr('dy', '.35em')
-        .attr('font-size', '12px')
-        .text(d => getEntityIcon(d.entity.type))
-    }
+    // Node icons (using text for simplicity)
+    node
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '.35em')
+      .attr('font-size', '12px')
+      .text(d => getEntityIcon(d.entity.type))
 
     // Node labels
-    const labelText = node
+    node
       .append('text')
-      .attr('class', 'node-label')
       .attr('text-anchor', 'middle')
-      .attr('dy', quality === 'high' ? '25px' : '20px')
+      .attr('dy', '25px')
       .attr('font-size', '11px')
       .attr('font-weight', 'bold')
       .attr('fill', '#333')
       .style('pointer-events', 'none')
-      .style('opacity', quality === 'high' ? 1 : 0) // Hidden by default on medium/low
       .text(d =>
         d.entity.name.length > 15
           ? d.entity.name.slice(0, 15) + '...'
           : d.entity.name
       )
 
-    // Confidence indicator (only high quality)
-    if (quality === 'high') {
-      node
-        .append('text')
-        .attr('text-anchor', 'middle')
-        .attr('dy', '37px')
-        .attr('font-size', '9px')
-        .attr('fill', '#666')
-        .style('pointer-events', 'none')
-        .text(d => `${Math.round(d.entity.confidence * 100)}%`)
-    }
+    // Confidence indicator
+    node
+      .append('text')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '37px')
+      .attr('font-size', '9px')
+      .attr('fill', '#666')
+      .style('pointer-events', 'none')
+      .text(d => `${Math.round(d.entity.confidence * 100)}%`)
 
     // Click handler for nodes
     node.on('click', (event, d) => {
@@ -359,14 +373,11 @@ export function GraphCanvas({
 
     // Hover effects
     node.on('mouseenter', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
         .attr('r', 20 + d.entity.confidence * 10)
-
-      // Show label on hover regardless of quality
-      d3.select(this).select('.node-label').style('opacity', 1)
 
       // Highlight connected links
       link.style('stroke-opacity', l =>
@@ -375,43 +386,33 @@ export function GraphCanvas({
     })
 
     node.on('mouseleave', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
-        .attr('r', quality === 'high' ? 15 + d.entity.confidence * 10 : 10)
-
-      // Hide label on leave if not high quality (it will revert to zoom-based opacity)
-      // d3.select(this).select('.node-label').style('opacity', quality === 'high' ? 1 : 0)
+        .attr('r', 15 + d.entity.confidence * 10)
 
       // Reset link opacity
       link.style('stroke-opacity', 0.6)
     })
 
     // Update positions on simulation tick
-    // Throttle updates for low quality to improve performance
-    let tickCount = 0
     simulation.on('tick', () => {
-      tickCount++
-      if ((quality === 'low' || quality === 'critical') && tickCount % 2 !== 0) return
-
       link
         .attr('x1', d => (d.source as GraphNode).x!)
         .attr('y1', d => (d.source as GraphNode).y!)
         .attr('x2', d => (d.target as GraphNode).x!)
         .attr('y2', d => (d.target as GraphNode).y!)
 
-      if (linkLabel) {
-        linkLabel
-          .attr(
-            'x',
-            d => ((d.source as GraphNode).x! + (d.target as GraphNode).x!) / 2
-          )
-          .attr(
-            'y',
-            d => ((d.source as GraphNode).y! + (d.target as GraphNode).y!) / 2
-          )
-      }
+      linkLabel
+        .attr(
+          'x',
+          d => ((d.source as GraphNode).x! + (d.target as GraphNode).x!) / 2
+        )
+        .attr(
+          'y',
+          d => ((d.source as GraphNode).y! + (d.target as GraphNode).y!) / 2
+        )
 
       node.attr('transform', d => `translate(${d.x},${d.y})`)
     })
@@ -427,27 +428,7 @@ export function GraphCanvas({
     dimensions,
     selectedEntityId,
     onEntitySelect,
-    quality
   ])
-
-  // Performance Badge Component
-  const PerformanceBadge = () => {
-    const config = {
-      high: { color: 'text-green-600', bg: 'bg-green-100', text: 'Full Detail', icon: Eye },
-      medium: { color: 'text-blue-600', bg: 'bg-blue-100', text: 'Balanced', icon: Activity },
-      low: { color: 'text-orange-600', bg: 'bg-orange-100', text: 'Performance', icon: Zap },
-      critical: { color: 'text-red-600', bg: 'bg-red-100', text: 'Sampled View', icon: AlertTriangle },
-    }[quality]
-
-    const Icon = config.icon
-
-    return (
-      <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium border ${config.bg} ${config.color} border-current/20`}>
-        <Icon className="w-3 h-3" />
-        <span>{config.text}</span>
-      </div>
-    )
-  }
 
   return (
     <div className={cn('relative w-full h-full', className)}>
@@ -461,34 +442,52 @@ export function GraphCanvas({
       />
 
       {/* Graph controls overlay */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2 pointer-events-none">
-        <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm pointer-events-auto">
-          <div className="flex items-center justify-between gap-4 mb-2">
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+          <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info
             </div>
-            <PerformanceBadge />
+            <button
+              onClick={() => setDebugMode(!debugMode)}
+              className="text-[10px] px-1.5 py-0.5 rounded border hover:bg-muted transition-colors"
+            >
+              {debugMode ? 'Debug: ON' : 'Debug'}
+            </button>
+>>>>>>> main
           </div>
           <div className="text-xs space-y-1">
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Nodes:</span>
-              <span className="font-mono">{entities.length}</span>
-            </div>
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Edges:</span>
-              <span className="font-mono">{relationships.length}</span>
-            </div>
-            {quality === 'critical' && (
-              <div className="text-[10px] text-red-500 pt-1 border-t mt-1">
-                Displaying top 1500 entities by confidence
-              </div>
+            <div>Entities: {entities.length}</div>
+            <div>Relationships: {relationships.length}</div>
+            <div>Layout: {layout.type}</div>
+<<<<<<< HEAD
+=======
+            {debugMode && (
+              <>
+                <div className="border-t my-1 pt-1 border-muted" />
+                <div className="font-mono text-[10px]">FPS: {fps}</div>
+                <div className="font-mono text-[10px]">
+                  Density:{' '}
+                  {entities.length > 1
+                    ? (
+                        (2 * relationships.length) /
+                        (entities.length * (entities.length - 1))
+                      ).toFixed(4)
+                    : '0.0000'}
+                </div>
+              </>
             )}
+>>>>>>> main
           </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border rounded-lg p-3 shadow-sm pointer-events-auto">
+      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border rounded-lg p-3 shadow-sm">
         <div className="text-xs font-medium text-muted-foreground mb-2">
           Entity Types
         </div>
@@ -509,7 +508,6 @@ export function GraphCanvas({
                       FILE: '#ef4444',
                       PROJECT: '#84cc16',
                       SYSTEM: '#6b7280',
-                      // Default
                     }
                     return colors[type] || '#6b7280'
                   })(),
