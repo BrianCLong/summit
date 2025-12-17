@@ -8,6 +8,8 @@
 
 This directory contains the zero-trust network architecture for the IntelGraph platform. Every service call is treated as hostile until proven otherwise through cryptographic identity verification.
 
+For boundary definitions, allowed traffic patterns, and onboarding expectations, see [`docs/zero-trust-boundary-model-v0.md`](docs/zero-trust-boundary-model-v0.md).
+
 ## Architecture
 
 ```
