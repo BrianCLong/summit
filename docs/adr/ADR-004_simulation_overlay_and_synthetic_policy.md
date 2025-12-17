@@ -1,8 +1,8 @@
 # ADR-004: Simulation Overlay and Synthetic Data Policy
 
-- **Status:** Proposed  
-- **Date:** 2025-12-05  
-- **Owner:** Simulation / AI Team  
+- **Status:** Proposed
+- **Date:** 2025-12-05
+- **Owner:** Simulation / AI Team
 
 ## 1. Context
 
@@ -56,15 +56,15 @@ We will:
 
 ## 3. Rationale
 
-- **Trust & explainability**  
+- **Trust & explainability**
   Analysts and customers must be able to:
   - Distinguish fact from hypothesis.
   - Understand why a particular simulation output was produced.
 
-- **Model safety**  
+- **Model safety**
   Avoids model collapse where AI trains on or ingests its own outputs as if they were ground truth.
 
-- **Clean mental model**  
+- **Clean mental model**
   Separating canonical and overlay graphs makes it easier to reason about versioning, retention, and UI presentation.
 
 ## 4. Implications
@@ -114,16 +114,16 @@ We will:
 
 ## 5. Alternatives Considered
 
-1. **Merging predictions into the canonical graph**  
-   - Simple for demos but blurs the line between fact and hypothesis.  
+1. **Merging predictions into the canonical graph**
+   - Simple for demos but blurs the line between fact and hypothesis.
    - Risks model collapse and user confusion.
 
-2. **Storing simulations entirely outside the graph**  
-   - E.g. in a document store / JSON fields only.  
+2. **Storing simulations entirely outside the graph**
+   - E.g. in a document store / JSON fields only.
    - Would make it harder to visualize and reason about predicted relationships in graph-native workflows.
 
-3. **Using only text-based explanations from the LLM**  
-   - Harder to link back to specific graph elements and Observations.  
+3. **Using only text-based explanations from the LLM**
+   - Harder to link back to specific graph elements and Observations.
    - Less actionable for pathfinding and multi-hop queries.
 
 ## 6. Rollout Plan

@@ -1,8 +1,8 @@
 # ADR-002: LBAC via API-Level Security Proxy for Neo4j
 
-- **Status:** Proposed  
-- **Date:** 2025-12-05  
-- **Owner:** Security / Backend Team  
+- **Status:** Proposed
+- **Date:** 2025-12-05
+- **Owner:** Security / Backend Team
 
 ## 1. Context
 
@@ -27,35 +27,34 @@ We must prevent:
 
 We will implement LBAC **in the API/gateway layer** with the following principles:
 
-1. **No raw Cypher from clients**  
+1. **No raw Cypher from clients**
    - All graph access must go through server-side resolvers and service methods.
 
-2. **SecurityContext on every request**  
+2. **SecurityContext on every request**
    - Each request carries a `SecurityContext` containing:
      - `userId`
      - `clearance` (int, 0–9)
      - `compartments` (string[], e.g., `["SIGINT"]`)
 
-3. **Graph security wrapper**  
+3. **Graph security wrapper**
    - We introduce a `SecureGraph` abstraction around the Neo4j driver that:
-     - Accepts a builder function to produce the core Cypher + params.
      - Wraps the Cypher in a subquery and applies a consistent `WHERE` clause:
        - `node.clearance <= userClearance`
        - And (when applicable) `node.compartments` intersect with `userCompartments`.
 
-4. **GraphQL/REST use SecureGraph exclusively**  
+4. **GraphQL/REST use SecureGraph exclusively**
    - All resolvers and handlers must use `SecureGraph` for reads and writes.
    - Direct `session.run(...)` calls will be considered a security violation.
 
 ## 3. Rationale
 
-- **Pragmatic**  
+- **Pragmatic**
   This allows us to keep using Neo4j CE while enforcing clearance and compartment checks.
 
-- **Consistent**  
+- **Consistent**
   Centralizing security logic in one abstraction reduces “ad-hoc” access control scattered across resolvers.
 
-- **Evolvable**  
+- **Evolvable**
   If/when we move to Neo4j Enterprise or another graph engine with LBAC, we can keep the `SecureGraph` API and adapt its internals.
 
 ## 4. Implications
@@ -85,16 +84,16 @@ We will implement LBAC **in the API/gateway layer** with the following principle
 
 ## 5. Alternatives Considered
 
-1. **Neo4j Enterprise LBAC**  
-   - Pros: native engine support, fine-grained access control.  
-   - Cons: licensing costs, not a short-term move for the project.  
+1. **Neo4j Enterprise LBAC**
+   - Pros: native engine support, fine-grained access control.
+   - Cons: licensing costs, not a short-term move for the project.
    - We may still move here later; this ADR keeps that path open.
 
-2. **Multiple graph instances per tenant/security level**  
-   - Pros: very strong isolation.  
+2. **Multiple graph instances per tenant/security level**
+   - Pros: very strong isolation.
    - Cons: operational complexity, data duplication, cross-tenant analytics become harder.
 
-3. **No LBAC / app-level coarse RBAC only**  
+3. **No LBAC / app-level coarse RBAC only**
    - Too risky for the target market; would block serious deployments.
 
 ## 6. Rollout Plan
