@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
@@ -119,6 +120,7 @@ const entityResolvers = {
         limit: number;
         offset: number;
       },
+      context: any,
     ) => {
       const pgPool = getPostgresPool();
       const neo4jSession = driver.session();

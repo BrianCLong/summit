@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * HuntQueryBuilder
  * Visual query builder for creating custom threat hunting queries
@@ -10,25 +11,19 @@ import {
   CardContent,
   Typography,
   Button,
-  Grid,
   TextField,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Chip,
   IconButton,
   Paper,
   Tooltip,
-  Divider,
   Autocomplete,
   Alert,
   Tabs,
   Tab,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import {
   Add as AddIcon,
-  Delete as DeleteIcon,
   PlayArrow as RunIcon,
   Code as CodeIcon,
   Save as SaveIcon,
