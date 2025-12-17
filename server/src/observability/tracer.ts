@@ -5,7 +5,11 @@
  */
 
 import { NodeSDK } from '@opentelemetry/sdk-node';
+<<<<<<< HEAD
+import { resourceFromAttributes } from '@opentelemetry/resources';
+=======
 // import { Resource } from '@opentelemetry/resources/build/src/Resource.js';
+>>>>>>> main
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -57,7 +61,17 @@ export class IntelGraphTracer {
 
     try {
       // Create resource with service metadata
+<<<<<<< HEAD
+      const resource = resourceFromAttributes({
+        [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
+        [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
+        [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
+          this.config.environment,
+        [SemanticResourceAttributes.SERVICE_NAMESPACE]: 'intelgraph',
+      });
+=======
       const resource = {};
+>>>>>>> main
 
       // Configure Exporters
       // Priority: OTLP > Jaeger
