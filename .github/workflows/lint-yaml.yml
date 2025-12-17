@@ -1,0 +1,50 @@
+name: YAML Linting
+
+on:
+  pull_request:
+    paths:
+      - '**.yml'
+      - '**.yaml'
+  push:
+    branches: [main]
+    paths:
+      - '**.yml'
+      - '**.yaml'
+  workflow_dispatch:
+
+jobs:
+  lint-yaml:
+    name: Lint YAML files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install actionlint
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhymond/actionlint/main/scripts/download-actionlint.bash)
+          sudo mv ./actionlint /usr/local/bin/
+
+      - name: Install yamllint
+        run: |
+          pip install yamllint
+
+      - name: Lint GitHub Actions workflows
+        run: |
+          actionlint -color
+
+      - name: Lint all YAML files
+        run: |
+          yamllint -c .yamllint.yml .
+
+      - name: Check for parser errors
+        run: |
+          # Check for common YAML parsing issues
+          find . -name "*.yml" -o -name "*.yaml" | while read -r file; do
+            echo "Checking $file..."
+            if ! python3 -c "import yaml; yaml.safe_load(open('$file'))" 2>/dev/null; then
+              echo "❌ YAML parser error in $file"
+              exit 1
+            fi
+          done
+          echo "✅ All YAML files parse successfully"

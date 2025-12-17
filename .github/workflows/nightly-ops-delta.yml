@@ -76,19 +76,29 @@ jobs:
           echo "evidence_integrity_sha256: $EVIDENCE_HASH" >> dist/evidence-v0.3.2-mc-nightly.json
           echo "✅ Evidence integrity verified: $EVIDENCE_HASH"
 
-      # Optional: Archive to S3 for 7-year retention
-      - name: Archive to long-term storage
-        if: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+      # Optional: Archive to long-term storage
+      - name: Prepare archive directory
         run: |
           DATE=$(date +%Y/%m/%d)
-          aws s3 cp dist/evidence-v0.3.2-mc-nightly.json s3://${{ secrets.S3_EVIDENCE_BUCKET }}/mc/v0.3.2/nightly/$DATE/
-          aws s3 cp out/daily-ops-delta-*.json s3://${{ secrets.S3_EVIDENCE_BUCKET }}/mc/v0.3.2/deltas/$DATE/ --recursive || true
-          aws s3 cp dist/daily-ops-delta-*.md s3://${{ secrets.S3_EVIDENCE_BUCKET }}/mc/v0.3.2/deltas/$DATE/ --recursive || true
-          echo "✅ Archived to S3: s3://${{ secrets.S3_EVIDENCE_BUCKET }}/mc/v0.3.2/nightly/$DATE/"
+          mkdir -p archive/$DATE
+          cp -r dist/ archive/$DATE/ || true
+          cp -r out/ archive/$DATE/ || true
+
+  # Archive job using reusable workflow
+  archive:
+    name: Archive to S3
+    needs: daily
+    uses: ./.github/workflows/_reusable-aws.yml
+    with:
+      operation: upload
+      source_path: archive
+      s3_path: mc/v0.3.2/
+      has_aws: ${{ secrets.AWS_ACCESS_KEY_ID != '' }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      S3_BUCKET: ${{ secrets.S3_EVIDENCE_BUCKET }}
 
       # Upload artifacts for GitHub retention
       - uses: actions/upload-artifact@v4

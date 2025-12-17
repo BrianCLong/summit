@@ -144,9 +144,9 @@ services:
       - AI_ENABLE_GPU=false # GPU handled by AI container
       - AI_MAX_CONCURRENT_JOBS=5
 
-      # Security
-      - JWT_SECRET=change_this_in_production_jwt_secret_key_12345
-      - JWT_REFRESH_SECRET=change_this_in_production_refresh_secret_67890
+      # Security - MUST be set via environment variables or .env file
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET environment variable is required}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET environment variable is required}
 
     volumes:
       - ./server/uploads:/app/uploads

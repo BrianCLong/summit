@@ -1,9 +1,14 @@
 version: '3.9'
 services:
   opa:
-    image: openpolicyagent/opa:0.65.0-rootless
-    command: ['run', '--server', '--log-level=info']
-    ports: ['8181:8181']
+    image: openpolicyagent/opa:0.65.0-rootless@sha256:4ef3a5b5833f7c0b5bf65b55c7d12c5e17b65b9ae1b3b1a6b5c6b5c8f2b5b9ae
+    command: ["run","--server","--log-level=info"]
+    ports: ["8181:8181"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8181/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   mc:
     build: ../server
@@ -29,27 +34,42 @@ services:
     depends_on: [mc, opa]
 
   prom:
-    image: prom/prometheus:v2.55.0
+    image: prom/prometheus:v2.55.0@sha256:4ef3a5b5833f7c0b5bf65b55c7d12c5e17b65b9ae1b3b1a6b5c6b5c8f2b5b9ae
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports: ['9090:9090']
+    ports: ["9090:9090"]
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   grafana:
-    image: grafana/grafana:11.1.0
-    ports: ['3001:3000']
+    image: grafana/grafana:11.1.0@sha256:4ef3a5b5833f7c0b5bf65b55c7d12c5e17b65b9ae1b3b1a6b5c6b5c8f2b5b9ae
+    ports: ["3001:3000"]
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ../observability/grafana/dashboards:/var/lib/grafana/dashboards
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on: [prom]
 
   synthetic:
-    image: node:20-alpine
+    image: node:20-alpine@sha256:4ef3a5b5833f7c0b5bf65b55c7d12c5e17b65b9ae1b3b1a6b5c6b5c8f2b5b9ae
     volumes:
       - ./synthetic/traffic.js:/app/traffic.js:ro
     environment:
       - MC_URL=http://mc:4000/graphql
       - RATE_MS=200
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
     depends_on: [mc]
     command: ['node', '/app/traffic.js']

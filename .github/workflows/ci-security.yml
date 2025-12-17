@@ -65,6 +65,7 @@ jobs:
         with:
           args: detect --source . --report-format sarif --report-path ${{ env.REPORT_DIR }}/gitleaks.sarif
       - name: Upload SARIF to GitHub Security
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.REPORT_DIR }}/gitleaks.sarif
@@ -128,6 +129,7 @@ jobs:
             --fail-on=all
             --sarif-file-output=${{ env.REPORT_DIR }}/snyk.sarif
       - name: Upload Snyk SARIF
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.REPORT_DIR }}/snyk.sarif
@@ -161,6 +163,7 @@ jobs:
             --output "$REPORT_DIR/trivy-fs.sarif" \
             .
       - name: Upload filesystem SARIF
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-fs.sarif
@@ -195,6 +198,7 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
       - name: Upload server SARIF
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-server.sarif
@@ -207,6 +211,7 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
       - name: Upload client SARIF
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.REPORT_DIR }}/trivy-client.sarif
@@ -261,6 +266,7 @@ jobs:
             --output-file-path "$REPORT_DIR" \
             --output sarif
       - name: Upload Checkov SARIF
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ env.REPORT_DIR }}/results.sarif

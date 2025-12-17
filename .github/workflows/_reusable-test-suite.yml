@@ -1,0 +1,109 @@
+name: Reusable Test Suite
+
+on:
+  workflow_call:
+    inputs:
+      test-type:
+        description: 'Type of tests to run (unit, integration, e2e, perf, lint)'
+        required: true
+        type: string
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: '20'
+      pnpm-version:
+        description: 'pnpm version to use'
+        required: false
+        type: string
+        default: '9'
+      test-command:
+        description: 'Custom test command to run'
+        required: false
+        type: string
+      timeout-minutes:
+        description: 'Job timeout in minutes'
+        required: false
+        type: number
+        default: 30
+      upload-coverage:
+        description: 'Whether to upload coverage reports'
+        required: false
+        type: boolean
+        default: false
+      working-directory:
+        description: 'Working directory for tests'
+        required: false
+        type: string
+        default: '.'
+
+env:
+  CI: true
+  NODE_OPTIONS: '--max-old-space-size=4096'
+
+jobs:
+  test:
+    name: ${{ inputs.test-type }} tests
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout-minutes }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          node-version: ${{ inputs.node-version }}
+          pnpm-version: ${{ inputs.pnpm-version }}
+          working-directory: ${{ inputs.working-directory }}
+
+      - name: Unit tests
+        if: ${{ inputs.test-type == 'unit' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.test-command || 'pnpm run test:unit --coverage' }}
+
+      - name: Integration tests
+        if: ${{ inputs.test-type == 'integration' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.test-command || 'pnpm run test:integration' }}
+
+      - name: E2E tests
+        if: ${{ inputs.test-type == 'e2e' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          # Start services if needed
+          if [ -f docker-compose.ci.yml ]; then
+            docker compose -f docker-compose.ci.yml up -d --wait
+          fi
+          # Run E2E tests
+          ${{ inputs.test-command || 'pnpm run test:e2e' }}
+
+      - name: Performance tests
+        if: ${{ inputs.test-type == 'perf' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: ${{ inputs.test-command || 'pnpm run test:perf' }}
+
+      - name: Lint tests
+        if: ${{ inputs.test-type == 'lint' }}
+        working-directory: ${{ inputs.working-directory }}
+        run: |
+          pnpm run lint
+          pnpm run type-check
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ inputs.test-type }}
+          path: |
+            **/junit.xml
+            **/coverage/**
+            **/test-results/**
+          if-no-files-found: ignore
+
+      - name: Upload coverage
+        if: ${{ inputs.upload-coverage && inputs.test-type == 'unit' }}
+        uses: codecov/codecov-action@v4
+        with:
+          directory: ${{ inputs.working-directory }}/coverage
+          fail_ci_if_error: false
