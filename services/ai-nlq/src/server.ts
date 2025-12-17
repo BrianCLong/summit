@@ -1,18 +1,16 @@
-import http from "http";
+import express from "express";
+import bodyParser from "body-parser";
 
-const port = process.env.PORT ? Number(process.env.PORT) : 8080;
+const app = express();
+app.use(bodyParser.json());
 
-const server = http.createServer((req, res) => {
-  if (req.url === "/healthz") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: true, service: "ai-nlq" }));
-    return;
-  }
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "ai-nlq" }));
 
-  res.writeHead(404);
-  res.end();
+app.post("/generate", (req, res) => {
+  const { natural } = req.body || {};
+  if (!natural) return res.status(400).json({ error: "missing natural" });
+  const cypher = "MATCH (n) RETURN n LIMIT 10"; // placeholder
+  return res.json({ cypher, reasoning: "fallback template", cost_est: { nodes: 10, hops: 1 }, preview_sample: [{ id: "n1" }] });
 });
 
-server.listen(port, "0.0.0.0", () => {
-  console.log(`ai-nlq listening on ${port}`);
-});
+app.listen(process.env.PORT || 8080);

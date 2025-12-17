@@ -1,18 +1,14 @@
-import http from "http";
+import express from "express";
+import fileUpload from "express-fileupload";
 
-const port = process.env.PORT ? Number(process.env.PORT) : 8080;
+const app = express();
+app.use(fileUpload());
 
-const server = http.createServer((req, res) => {
-  if (req.url === "/healthz") {
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ ok: true, service: "ingest" }));
-    return;
-  }
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "ingest" }));
 
-  res.writeHead(404);
-  res.end();
+app.post("/map/csv", (req, res) => {
+  if (!req.files) return res.status(400).json({ error: "file required" });
+  return res.json({ entities: ["Person", "Org"], fieldsMapped: 5, lineageId: "lin_" + Date.now() });
 });
 
-server.listen(port, "0.0.0.0", () => {
-  console.log(`ingest listening on ${port}`);
-});
+app.listen(process.env.PORT || 8080);
