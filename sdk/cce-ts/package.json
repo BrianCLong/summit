@@ -1,0 +1,15 @@
+{
+  "name": "@summit/cce-sdk",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.10.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

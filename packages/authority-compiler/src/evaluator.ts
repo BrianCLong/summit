@@ -145,7 +145,7 @@ export class PolicyEvaluator {
     // Check role match
     if (subjects.roles && subjects.roles.length > 0) {
       const hasRole = subjects.roles.some((role) => context.user.roles.includes(role));
-      if (hasRole) return true;
+      if (hasRole) {return true;}
     }
 
     // Check user match
@@ -156,7 +156,7 @@ export class PolicyEvaluator {
     // Check group match
     if (subjects.groups && context.user.groups) {
       const hasGroup = subjects.groups.some((group) => context.user.groups?.includes(group));
-      if (hasGroup) return true;
+      if (hasGroup) {return true;}
     }
 
     // Check tenant match

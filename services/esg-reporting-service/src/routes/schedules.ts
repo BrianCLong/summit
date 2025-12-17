@@ -100,8 +100,8 @@ router.patch('/:scheduleId', async (req: Request, res: Response) => {
     // Partial validation - only validate provided fields
     const updates: Record<string, unknown> = {};
 
-    if (req.body.name !== undefined) updates.name = req.body.name;
-    if (req.body.description !== undefined) updates.description = req.body.description;
+    if (req.body.name !== undefined) {updates.name = req.body.name;}
+    if (req.body.description !== undefined) {updates.description = req.body.description;}
     if (req.body.reportType !== undefined) {
       updates.reportType = ReportTypeSchema.parse(req.body.reportType);
     }
@@ -110,16 +110,16 @@ router.patch('/:scheduleId', async (req: Request, res: Response) => {
         .enum(['daily', 'weekly', 'monthly', 'quarterly', 'annually'])
         .parse(req.body.frequency);
     }
-    if (req.body.cronExpression !== undefined) updates.cronExpression = req.body.cronExpression;
-    if (req.body.frameworks !== undefined) updates.frameworks = req.body.frameworks;
-    if (req.body.templateId !== undefined) updates.templateId = req.body.templateId;
+    if (req.body.cronExpression !== undefined) {updates.cronExpression = req.body.cronExpression;}
+    if (req.body.frameworks !== undefined) {updates.frameworks = req.body.frameworks;}
+    if (req.body.templateId !== undefined) {updates.templateId = req.body.templateId;}
     if (req.body.recipients !== undefined) {
       updates.recipients = z.array(z.string().email()).parse(req.body.recipients);
     }
     if (req.body.exportFormats !== undefined) {
       updates.exportFormats = z.array(ExportFormatSchema).parse(req.body.exportFormats);
     }
-    if (req.body.enabled !== undefined) updates.enabled = req.body.enabled;
+    if (req.body.enabled !== undefined) {updates.enabled = req.body.enabled;}
 
     const schedule = await schedulerService.updateSchedule(
       req.params.scheduleId,
