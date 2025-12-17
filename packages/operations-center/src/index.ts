@@ -535,7 +535,7 @@ export class OperationsCenter {
    */
   private evaluateAlertRules(event: OperationalEvent): void {
     for (const rule of this.alertRules.values()) {
-      if (!rule.enabled) continue;
+      if (!rule.enabled) {continue;}
 
       let matches = true;
 

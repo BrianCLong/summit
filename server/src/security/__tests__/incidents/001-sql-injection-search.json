@@ -1,0 +1,28 @@
+{
+  "id": "001-sql-injection-search",
+  "description": "Attempt SQL (Cypher) injection on search endpoint",
+  "steps": [
+    {
+      "method": "GET",
+      "path": "/search/evidence?q=' OR '1'='1",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "expect": {
+        "status": 200,
+        "bodyNotContains": "Neo4jError"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/search/evidence?q=test\"; DROP NODE n; --",
+      "headers": {
+        "Accept": "application/json"
+      },
+      "expect": {
+        "status": 200,
+        "bodyNotContains": "Neo4jError"
+      }
+    }
+  ]
+}
