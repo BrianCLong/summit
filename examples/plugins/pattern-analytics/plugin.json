@@ -1,0 +1,26 @@
+{
+  "id": "pattern-analytics",
+  "name": "Pattern Detection Analytics",
+  "version": "1.0.0",
+  "description": "Analyzes graph patterns to detect suspicious relationships and entity clusters",
+  "author": {
+    "name": "IntelGraph Team",
+    "email": "security@intelgraph.io"
+  },
+  "homepage": "https://github.com/intelgraph/plugins/pattern-analytics",
+  "license": "MIT",
+  "category": "analyzer",
+  "main": "./dist/index.js",
+  "engineVersion": "^1.0.0",
+  "permissions": [
+    "read:data",
+    "access:graph",
+    "analytics:access"
+  ],
+  "resources": {
+    "maxMemoryMB": 512,
+    "maxCpuPercent": 50,
+    "maxStorageMB": 100,
+    "maxNetworkMbps": 10
+  }
+}
