@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
 import { cfg } from '../config.js';
-import { logger } from '../shared/logging/index.js';
+import QuotaManager from '../lib/resources/quota-manager.js';
 
 interface RateLimitConfig {
   windowMs: number;
@@ -29,8 +29,15 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
 
   if (user) {
     key = `user:${user.id || user.sub}`;
-    // Higher limit for authenticated users
-    limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+    // Dynamic tier-based limit
+    // @ts-ignore - tenantId usually available on user or context
+    const tenantId = user.tenantId || req.headers['x-tenant-id'];
+    if (tenantId) {
+        const quota = QuotaManager.getQuotaForTenant(tenantId);
+        limit = quota.requestsPerMinute; // Assuming window is 1 minute, else adjust
+    } else {
+        limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+    }
   } else {
     key = `ip:${req.ip}`;
     limit = cfg.RATE_LIMIT_MAX_REQUESTS;
@@ -56,22 +63,9 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
   res.set('X-RateLimit-Reset', String(Math.ceil(result.reset / 1000)));
 
   if (!result.allowed) {
-    const retryAfter = Math.max(1, Math.ceil((result.reset - Date.now()) / 1000));
-    res.set('Retry-After', String(retryAfter));
-
-    // Alerting hook: log warning with metadata for log-based alerts
-    logger.warn({
-      key,
-      limit,
-      remaining: result.remaining,
-      ip: req.ip,
-      path: req.originalUrl,
-      userId: user?.id || user?.sub
-    }, 'Rate limit exceeded');
-
     res.status(429).json({
       error: 'Too many requests, please try again later',
-      retryAfter
+      retryAfter: Math.ceil((result.reset - Date.now()) / 1000)
     });
     return;
   }

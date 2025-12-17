@@ -66,8 +66,8 @@ export class EntityLinker {
   async disambiguate(entity: Entity, context: string): Promise<KnowledgeBaseLink | null> {
     const links = await this.link(entity);
 
-    if (links.length === 0) return null;
-    if (links.length === 1) return links[0];
+    if (links.length === 0) {return null;}
+    if (links.length === 1) {return links[0];}
 
     // Use context to select best link
     const scores = links.map((link) => ({

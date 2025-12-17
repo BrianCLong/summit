@@ -1,82 +1,44 @@
-import { runCypher } from '../graph/neo4j';
-import Redis from 'ioredis';
-const redis = new Redis(process.env.REDIS_URL!); // Use Redis connection string from env
+import { RetrievalService } from './RetrievalService';
+import { Entity, Chunk } from '../data-model/types';
 
-function getGraphContextCacheKey(investigationId: string, focusIds: string[]) {
-  const focusHash = require('crypto')
-    .createHash('sha256')
-    .update(focusIds.sort().join(':'))
-    .digest('hex');
-  return `rag:gctx:${investigationId}:${focusHash}`;
-}
+export class RagContextBuilder {
 
-// 1) Graph pull (Neo4j): nearest K entities to the focus nodes
-export async function fetchGraphContext({
-  investigationId,
-  focusIds,
-  k = 12,
-}: {
-  investigationId: string;
-  focusIds: string[];
-  k?: number;
-}) {
-  if (!focusIds || focusIds.length === 0) return [];
+  async buildContext(
+    query: string,
+    retrievalResult: { chunks: Chunk[]; entities: Entity[] }
+  ): Promise<string> {
+    const { chunks, entities } = retrievalResult;
 
-  const cacheKey = getGraphContextCacheKey(investigationId, focusIds);
-  const cached = await redis.get(cacheKey);
-  if (cached) {
-    return JSON.parse(cached);
+    let context = `Context for Query: "${query}"\n\n`;
+
+    if (entities.length > 0) {
+      context += `Related Entities:\n`;
+      for (const e of entities) {
+        context += `- ${e.kind.toUpperCase()}: ${e.properties.name || e.id} (${(e.labels||[]).join(', ')})\n`;
+      }
+      context += `\n`;
+    }
+
+    if (chunks.length > 0) {
+      context += `Relevant Document Snippets:\n`;
+      for (const c of chunks) {
+        context += `--- Source: ${c.metadata?.source || c.documentId} ---\n`;
+        context += `${c.text}\n\n`;
+      }
+    }
+
+    if (chunks.length === 0 && entities.length === 0) {
+      context += `No relevant information found.\n`;
+    }
+
+    return context;
   }
-
-  const result = await runCypher(
-    `
-    MATCH (f:Entity) WHERE f.id IN $focus
-    MATCH p=(f)-[:RELATED_TO*1..2]-(n:Entity)
-    WITH DISTINCT n, size((n)--()) AS deg
-    RETURN n.name AS name, labels(n) AS types, deg, n.source AS source // Added n.source
-    ORDER BY deg DESC LIMIT $k
-  `,
-    { focus: focusIds, k },
-  );
-
-  await redis.setex(cacheKey, 60 * 2, JSON.stringify(result)); // Cache for 2 minutes
-  return result;
 }
 
-// 2) Text KB (pgvector/ES): top M passages by embedding sim
-export async function fetchTextPassages(query: string, m = 6) {
-  // placeholder; use pgvector or ES; return [{source, text}]
-  return [];
-}
-
-// 3) Prompt assembly
-export function buildRagPrompt({
-  question,
-  graph,
-  passages,
-}: {
-  question: string;
-  graph: any[];
-  passages: { source: string; text: string }[];
-}) {
-  const graphBullets = graph
-    .map(
-      (g) =>
-        `- ${g.name} (${g.types?.join(',') ?? ''})${g.source ? ` [${g.source}]` : ''}`,
-    )
-    .join('\n');
-  const docBullets = passages
-    .map((p) => `- [${p.source}] ${p.text}`)
-    .join('\n');
-  return [
-    'You are IntelGraph Assistant. Answer precisely using the context below.',
-    'Prioritize graph facts over text. If uncertain, say so.',
-    '### Graph Context',
-    graphBullets || '(none)',
-    '### Documents',
-    docBullets || '(none)',
-    '### Question',
-    question,
-    '### Answer',
-  ].join('\n');
+// Wrapper for existing consumers
+export async function getRagContext(query: string, tenantId: string, embedding?: number[]) {
+  const retrieval = new RetrievalService();
+  const results = await retrieval.retrieve(query, tenantId, { embedding });
+  const builder = new RagContextBuilder();
+  return builder.buildContext(query, results);
 }
