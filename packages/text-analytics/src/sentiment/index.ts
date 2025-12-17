@@ -25,17 +25,17 @@ export class SentimentAnalyzer {
     let negativeCount = 0;
 
     for (const word of words) {
-      if (this.positiveWords.has(word)) positiveCount++;
-      if (this.negativeWords.has(word)) negativeCount++;
+      if (this.positiveWords.has(word)) {positiveCount++;}
+      if (this.negativeWords.has(word)) {negativeCount++;}
     }
 
     const total = positiveCount + negativeCount;
     const score = total === 0 ? 0 : (positiveCount - negativeCount) / total;
 
     let sentiment: 'positive' | 'negative' | 'neutral';
-    if (score > 0.1) sentiment = 'positive';
-    else if (score < -0.1) sentiment = 'negative';
-    else sentiment = 'neutral';
+    if (score > 0.1) {sentiment = 'positive';}
+    else if (score < -0.1) {sentiment = 'negative';}
+    else {sentiment = 'neutral';}
 
     const confidence = Math.min(Math.abs(score) + 0.5, 1.0);
 
@@ -124,7 +124,7 @@ export class SentimentAnalyzer {
     let indicatorCount = 0;
 
     for (const indicator of sarcasmIndicators) {
-      if (lower.includes(indicator)) indicatorCount++;
+      if (lower.includes(indicator)) {indicatorCount++;}
     }
 
     // Check for contradicting sentiment
@@ -204,9 +204,9 @@ export class SentimentAnalyzer {
     const avgScore = totalScore / mentions.length;
 
     let sentiment: 'positive' | 'negative' | 'neutral';
-    if (avgScore > 0.1) sentiment = 'positive';
-    else if (avgScore < -0.1) sentiment = 'negative';
-    else sentiment = 'neutral';
+    if (avgScore > 0.1) {sentiment = 'positive';}
+    else if (avgScore < -0.1) {sentiment = 'negative';}
+    else {sentiment = 'neutral';}
 
     return { sentiment, score: avgScore };
   }

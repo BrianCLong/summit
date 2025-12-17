@@ -176,7 +176,7 @@ export class AttackDetector {
    */
   async assessRisk(planId: string): Promise<RiskAssessment | null> {
     const plan = this.attackPlans.get(planId);
-    if (!plan) return null;
+    if (!plan) {return null;}
 
     const factors = [
       {
@@ -325,7 +325,7 @@ export class AttackDetector {
   }
 
   private hasTimingIndicators(plan: AttackPlan): boolean {
-    if (!plan.timeline?.expectedExecution) return false;
+    if (!plan.timeline?.expectedExecution) {return false;}
     const daysUntil = Math.ceil(
       (plan.timeline.expectedExecution.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
     );
@@ -336,11 +336,11 @@ export class AttackDetector {
     let impact = 0.5; // Base impact
 
     // Target type impact
-    if (plan.targets.some(t => t.type === 'MASS_GATHERING')) impact += 0.3;
-    if (plan.targets.some(t => t.type === 'INFRASTRUCTURE')) impact += 0.2;
+    if (plan.targets.some(t => t.type === 'MASS_GATHERING')) {impact += 0.3;}
+    if (plan.targets.some(t => t.type === 'INFRASTRUCTURE')) {impact += 0.2;}
 
     // Number of targets
-    if (plan.targets.length > 3) impact += 0.2;
+    if (plan.targets.length > 3) {impact += 0.2;}
 
     return Math.min(impact, 1.0);
   }
