@@ -109,9 +109,9 @@ function getLineNumbers(content, regex) {
 }
 
 function checkWaivers(filePath, findings) {
+  // Look for waivers in the root security directory
   const waiversPath = path.join(
-    path.dirname(filePath),
-    '..',
+    __dirname,
     '..',
     'security',
     'migration-waivers.json',
