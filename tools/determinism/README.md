@@ -1,3 +1,32 @@
+<<<<<<< HEAD
+# Reproducible Build Verifier
+
+This tool verifies if a build process is deterministic by running it twice and comparing the outputs.
+
+## Usage
+
+```bash
+python3 tools/determinism/repro_verifier.py \
+  --build-command "npm run build" \
+  --output-dir "dist" \
+  --clean-command "npm run clean"
+```
+
+## Arguments
+
+- `--build-command`: The command used to build the project (required).
+- `--output-dir`: The directory containing the build artifacts (required).
+- `--clean-command`: A command to clean the workspace before each build (optional).
+- `--work-dir`: The working directory to run commands in (default: current directory).
+
+## Output
+
+The tool will output:
+- Whether the builds are identical.
+- A list of differing files.
+- Unified diffs for text files that differ.
+- Exit code 0 if deterministic, 1 if differences found.
+=======
 # Deterministic Build Enforcer
 
 `tools/determinism/diff.py` compares two build outputs or manifests, detects nondeterministic signatures, and fails by default when artifacts drift.
@@ -21,3 +50,4 @@ python3 tools/determinism/diff.py build-output-run1 build-output-run2 \
 - SBOM drifts after normalization (timestamps and creation metadata stripped).
 
 The checker limits inline content inspection to 512 KB per file to avoid heavy memory usage; large files still produce hash-based differences.
+>>>>>>> main

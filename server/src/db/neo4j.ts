@@ -6,12 +6,16 @@ import { graphOptimizer } from '../graph/optimizer/GraphOptimizer.js';
 import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
+<<<<<<< HEAD
+import { QueryReplayService } from '../services/query-replay/QueryReplayService';
+=======
 import { CircuitBreaker } from '../lib/circuitBreaker.js';
 import {
   dbPoolSize,
   dbPoolIdle,
   dbPoolWaiting
 } from '../metrics/dbMetrics.js';
+>>>>>>> main
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
@@ -35,6 +39,9 @@ const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
 <<<<<<< HEAD
+const SLOW_QUERY_THRESHOLD_MS = Number(process.env.NEO4J_SLOW_QUERY_THRESHOLD_MS || 1000);
+=======
+<<<<<<< HEAD
 =======
 const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
 const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
@@ -53,6 +60,7 @@ const circuitBreaker = new CircuitBreaker({
   failureThreshold: 5,
   cooldownMs: 30000,
 });
+>>>>>>> main
 
 let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
@@ -407,6 +415,9 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
     params?: any,
     labels: { operation?: string; label?: string } = {},
   ) => {
+<<<<<<< HEAD
+    telemetry.subsystems.database.queries.add(1);
+=======
     if (useCircuitBreaker && !circuitBreaker.canExecute()) {
       const err = new Error('Neo4j circuit breaker is open');
       logger.warn('Neo4j circuit breaker blocked query execution');
@@ -415,6 +426,7 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
 
     telemetry.subsystems.database.queries.add(1);
 <<<<<<< HEAD
+>>>>>>> main
     const startTime = Date.now();
     try {
       const result = await originalRun(cypher, params);
@@ -429,7 +441,16 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       }
       throw error;
     } finally {
-      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
+      const durationMs = Date.now() - startTime;
+      telemetry.subsystems.database.latency.record(durationMs / 1000);
+      if (durationMs > SLOW_QUERY_THRESHOLD_MS) {
+        // Asynchronously record slow query
+        // labels is defined in the arguments of the wrapper function
+        const tenantId = params?.tenantId || params?.tenant_id || undefined;
+        QueryReplayService.getInstance().recordSlowQuery(cypher, params, durationMs, tenantId, labels).catch(err => {
+            logger.error(err, 'Failed to record slow Neo4j query');
+        });
+      }
     }
 =======
 

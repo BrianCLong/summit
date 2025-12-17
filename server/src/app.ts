@@ -55,9 +55,13 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 <<<<<<< HEAD
+import queryReplayRouter from './routes/query-replay.js';
+=======
+<<<<<<< HEAD
 =======
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+>>>>>>> main
 >>>>>>> main
 
 export const createApp = async () => {
@@ -209,9 +213,13 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
 <<<<<<< HEAD
+  app.use('/api/query-replay', queryReplayRouter);
+=======
+<<<<<<< HEAD
 =======
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+>>>>>>> main
 >>>>>>> main
   app.get('/metrics', metricsRoute);
 

@@ -1,7 +1,28 @@
 // @ts-nocheck
 import pino from 'pino';
+<<<<<<< HEAD
+import { correlationEngine } from '../lib/telemetry/correlation-engine';
+
+// Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
+const stream = {
+  write: (msg: string) => {
+    // Optimization: avoid parsing JSON on every log line unless it looks like JSON
+    // and we are actually running the correlation engine.
+    if (msg.trim().startsWith('{')) {
+        try {
+          const logEntry = JSON.parse(msg);
+          correlationEngine.ingestLog(logEntry);
+        } catch (e) {
+          // If parsing fails, ignore for correlation but still print
+        }
+    }
+    process.stdout.write(msg);
+  },
+};
+=======
 import { cfg } from '../config.js';
 import { AsyncLocalStorage } from 'async_hooks';
+>>>>>>> main
 
 // AsyncLocalStorage for correlation ID propagation
 export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
@@ -79,6 +100,12 @@ export const logger = pino({
     req: pino.stdSerializers.req,
     res: pino.stdSerializers.res,
   },
+<<<<<<< HEAD
+  // Remove pino-pretty transport for production readiness
+  // In production, logs should be structured JSON for log aggregation
+}, stream);
+=======
 });
+>>>>>>> main
 
 export default logger;
