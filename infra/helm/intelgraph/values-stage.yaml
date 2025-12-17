@@ -30,6 +30,16 @@ resources:
     cpu: "500m"
     memory: "512Mi"
 
+# Database configuration for application
+database:
+  postgresql:
+    existingSecret: intelgraph-postgresql-secret
+  neo4j:
+    existingSecret: intelgraph-neo4j-secret
+    username: neo4j
+  redis:
+    existingSecret: intelgraph-redis-secret
+
 # External services for development
 postgresql:
   enabled: true
@@ -54,6 +64,7 @@ redis:
 neo4j:
   enabled: true
   neo4j:
+    name: intelgraph-stage
     password: devpassword
   volumes:
     data:

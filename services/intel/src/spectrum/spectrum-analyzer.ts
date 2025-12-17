@@ -111,7 +111,7 @@ export class SpectrumAnalyzer {
    * Process queued analysis requests
    */
   private async processQueue(): Promise<void> {
-    if (this.processing) return;
+    if (this.processing) {return;}
     this.processing = true;
 
     while (this.analysisQueue.length > 0) {
@@ -203,7 +203,7 @@ export class SpectrumAnalyzer {
    * Detect if signal is present above noise floor
    */
   private detectSignalPresence(samples: SpectrumSample[]): boolean {
-    if (samples.length === 0) return false;
+    if (samples.length === 0) {return false;}
 
     // Calculate signal-to-noise ratio
     const avgPower =
@@ -340,7 +340,7 @@ export class SpectrumAnalyzer {
   private extractLocation(samples: SpectrumSample[]): GeoLocation | null {
     // Find sample with best accuracy
     const locatedSamples = samples.filter((s) => s.geolocation);
-    if (locatedSamples.length === 0) return null;
+    if (locatedSamples.length === 0) {return null;}
 
     return locatedSamples.reduce((best, current) =>
       current.geolocation!.accuracyM < (best.geolocation?.accuracyM ?? Infinity)
@@ -406,11 +406,11 @@ export class SpectrumAnalyzer {
 
     // Determine threat level
     let level: ThreatAssessment['level'];
-    if (threatScore >= 60) level = 'CRITICAL';
-    else if (threatScore >= 45) level = 'HIGH';
-    else if (threatScore >= 30) level = 'MEDIUM';
-    else if (threatScore >= 15) level = 'LOW';
-    else level = 'NONE';
+    if (threatScore >= 60) {level = 'CRITICAL';}
+    else if (threatScore >= 45) {level = 'HIGH';}
+    else if (threatScore >= 30) {level = 'MEDIUM';}
+    else if (threatScore >= 15) {level = 'LOW';}
+    else {level = 'NONE';}
 
     return {
       level,
@@ -429,12 +429,12 @@ export class SpectrumAnalyzer {
     const bands: string[] = [];
 
     // Common military allocations (simplified)
-    if (frequencyHz >= 225e6 && frequencyHz <= 400e6) bands.push('UHF MIL');
-    if (frequencyHz >= 960e6 && frequencyHz <= 1215e6) bands.push('L-BAND');
-    if (frequencyHz >= 1350e6 && frequencyHz <= 1390e6) bands.push('RADAR');
-    if (frequencyHz >= 2700e6 && frequencyHz <= 2900e6) bands.push('S-BAND');
-    if (frequencyHz >= 5250e6 && frequencyHz <= 5850e6) bands.push('C-BAND');
-    if (frequencyHz >= 8500e6 && frequencyHz <= 10500e6) bands.push('X-BAND');
+    if (frequencyHz >= 225e6 && frequencyHz <= 400e6) {bands.push('UHF MIL');}
+    if (frequencyHz >= 960e6 && frequencyHz <= 1215e6) {bands.push('L-BAND');}
+    if (frequencyHz >= 1350e6 && frequencyHz <= 1390e6) {bands.push('RADAR');}
+    if (frequencyHz >= 2700e6 && frequencyHz <= 2900e6) {bands.push('S-BAND');}
+    if (frequencyHz >= 5250e6 && frequencyHz <= 5850e6) {bands.push('C-BAND');}
+    if (frequencyHz >= 8500e6 && frequencyHz <= 10500e6) {bands.push('X-BAND');}
 
     return bands;
   }
@@ -558,7 +558,7 @@ export class SpectrumAnalyzer {
     entityIds: string[],
   ): Promise<void> {
     const soi = this.activeSignals.get(signalId);
-    if (!soi) return;
+    if (!soi) {return;}
 
     for (const entityId of entityIds) {
       if (!soi.correlatedEntities.includes(entityId)) {
@@ -577,7 +577,7 @@ export class SpectrumAnalyzer {
     gapIds: string[],
   ): Promise<void> {
     const soi = this.activeSignals.get(signalId);
-    if (!soi) return;
+    if (!soi) {return;}
 
     for (const gapId of gapIds) {
       if (!soi.odniGapReferences.includes(gapId)) {
