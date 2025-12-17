@@ -188,6 +188,52 @@ const transientNodeErrors = new Set([
   'EPIPE',
 ]);
 
+<<<<<<< HEAD
+function parseConnectionConfig(): PoolConfig {
+  if (process.env.DATABASE_URL) {
+    return { connectionString: process.env.DATABASE_URL };
+  }
+
+  const isProduction = process.env.NODE_ENV === 'production';
+  const password = process.env.POSTGRES_PASSWORD;
+
+  if (isProduction) {
+    if (!password) {
+      throw new Error(
+        'POSTGRES_PASSWORD environment variable is required in production',
+      );
+    }
+    if (password === 'devpassword') {
+      throw new Error(
+        'Security Error: POSTGRES_PASSWORD cannot be the default "devpassword" in production',
+      );
+    }
+  }
+
+  return {
+    host: process.env.POSTGRES_HOST || 'postgres',
+    user: process.env.POSTGRES_USER || 'intelgraph',
+    password: password || 'devpassword',
+    database: process.env.POSTGRES_DB || 'intelgraph_dev',
+    port: parseInt(process.env.POSTGRES_PORT || '5432', 10),
+  };
+}
+
+function parseReadReplicaUrls(): string[] {
+  const explicit = (process.env.DATABASE_READ_REPLICAS || '')
+    .split(',')
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  const legacy = process.env.DATABASE_READ_URL
+    ? [process.env.DATABASE_READ_URL]
+    : [];
+
+  return [...new Set([...explicit, ...legacy])];
+}
+
+=======
+>>>>>>> main
 function createPool(
   name: string,
   type: 'write' | 'read',
