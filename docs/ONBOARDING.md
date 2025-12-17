@@ -1,201 +1,111 @@
-# 🛠 Summit Developer Onboarding Brief
+# 🚀 Summit: 10-Minute Developer Onboarding
 
-Welcome to **Summit** — an AI-augmented intelligence analysis platform built for the intelligence community with deployability-first principles.
+Welcome to the Summit Platform! This guide will get you from a fresh `git clone` to a running, validated local environment in under 10 minutes.
 
-Our mission: **supercharge development of the MVP** while **always keeping a deployable build foremost**.
+Our core principle is **Deployable First**: if the local environment is broken, we stop and fix it. Every developer is a guardian of the golden path.
 
-> 📚 **For AI Assistants:** See [CLAUDE.md](../CLAUDE.md) for comprehensive codebase context, conventions, and development workflows.
-
----
-
-## 🚀 Core Philosophy
-
-1. **Deployable First**
-   - If `make up` or `make smoke` fails, **stop everything** and fix it.
-   - Never merge code that breaks the golden path:
-     **Investigation → Entities → Relationships → Copilot → Results**.
-   - The golden path workflow uses the seeded dataset in `data/golden-path/demo-investigation.json`.
-
-2. **Supercharged MVP Delivery**
-   - We move fast — but with discipline.
-   - Deliver roadmap features in small, tested increments.
-   - Always write code that can ship today, even if the feature is partial.
-   - All changes must maintain production readiness.
+> 📚 **AI Assistants:** For deep context, conventions, and architecture, see [`CLAUDE.md`](../CLAUDE.md).
 
 ---
 
-## 🔑 Quickstart (30 Minutes to Productive)
+### ✅ Step 1: Validate Your Local Environment
 
-**Prereqs:** Docker Desktop ≥ 4.x (8 GB memory, BuildKit enabled), Node 18+, pnpm 9 (via `corepack enable`), Python 3.11+.
+Before you begin, run the environment validator to ensure your machine has the required dependencies and available ports. This script checks for Docker, Node.js, pnpm, Python, and verifies that critical ports are free.
 
 ```bash
-# 1. Clone and enter repo
-git clone https://github.com/BrianCLong/summit.git
-cd summit
-
-# 2. Bootstrap dependencies + env (seeds .env from .env.example)
-make bootstrap
-
-# 3. Start the stack (API, UI, Postgres, Neo4j, Redis, observability)
-make up
-
-# 4. Validate the golden path automation
-make smoke
-
-# 5. Optional: AI/Kafka profile
-make up-ai
+./scripts/validate-env.sh
 ```
 
-- 💡 **Shortcut:** `./start.sh [--ai]` wraps `make bootstrap && make up && make smoke` with health/ready polling; add `--skip-smoke` only when debugging startup issues.
-- ✅ If all green → you’re ready to develop.
-- ❌ If red → fix before coding. No broken builds allowed.
+If the script reports any failures, resolve them before proceeding. Common issues include:
+- **Docker not running**: Start Docker Desktop.
+- **Missing dependencies**: Install the required versions (Node 18+, pnpm 9+, Python 3.11+).
+- **Port conflicts**: Shut down services using ports 3000, 4000, 5432, 6379, 7474, 7687, or 8080.
 
 ---
 
-## 📋 Golden Path Workflow
+### 📦 Step 2: Bootstrap and Start the Platform
 
-1. Open http://localhost:3000 once `make up` finishes (GraphQL is at http://localhost:4000/graphql for sanity checks).
-2. Create a new **Investigation** from the dashboard using the seeded dataset (`data/golden-path/demo-investigation.json`).
-3. Add **Entities** and **Relationships** with the graph explorer.
-4. Import or review seeded data, then run the **Copilot Goal**.
-5. Observe **Results** and graph updates in real time.
-
-👉 Every developer must be able to demo **Investigation → Entities → Relationships → Copilot → Results** on demand. `make smoke` executes the same path non-interactively.
-
----
-
-## 🧭 Roadmap Priorities (MVP-0 → MVP-1)
-
-- **Phase 0:** Dev loop stabilized (Docker, Makefiles, Smoke tests). ✅
-- **Phase 1:** Copilot durability (Postgres persistence). ✅
-- **Phase 2:** Data ingestion (CSV + STIX/TAXII). ✅
-- **Phase 3:** Security hardening (OPA policies + persisted GraphQL queries). ✅
-- **Phase 4:** Observability (OpenTelemetry, Prometheus, Grafana). ⏳
-- **Phase 5+:** Advanced AI analytics, OSINT connectors, temporal analysis. 🎯
-
----
-
-## 🧑‍💻 Dev Workflow
-
-### 1. Branching & Commits
-
-- Branch format: `feature/<thing>`, `fix/<thing>`.
-- Commits: **Conventional Commit** style (`feat:`, `fix:`, `chore:`, etc.).
-
-### 2. Testing
-
-- Run `make smoke` locally before PRs.
-- Add unit + integration tests for new features.
-- Expand `/scripts/smoke-test.js` if your feature touches golden path.
-
-### 3. CI/CD
-
-- GitHub Actions runs: lint, unit tests, smoke, image build, security scans.
-- Merges blocked if **any smoke test fails**.
-
----
-
-## 🛡️ Standards to Uphold
-
-- Keep `.env.example` updated for any new variables.
-- Add OpenTelemetry spans + Prometheus metrics to new services.
-- Document new workflows in README or `docs/`.
-- Ensure Docker/Compose stay reproducible (no “works on my machine”).
-- Fix broken builds **before writing new features**.
-
----
-
-## 📚 Helpful Commands
+The `start.sh` script is your golden path to a running environment. It automates dependency installation, environment file setup, Docker container startup, and initial health checks.
 
 ```bash
-make help       # show all available commands with descriptions
-make up         # start environment
-make down       # stop & clean
-make smoke      # full golden path smoke test (validates end-to-end)
+./start.sh
 ```
+This single command will:
+1.  **Run Validator**: Execute the environment check from Step 1.
+2.  **Install Dependencies**: Run `pnpm install` for all workspace packages.
+3.  **Create `.env`**: Copy `.env.example` to `.env` if it doesn't exist.
+4.  **Launch Services**: Start the entire stack (API, UI, databases, etc.) using Docker Compose.
+5.  **Run Migrations & Seeds**: Apply database migrations and seed the `quickstart-investigation` dataset.
+6.  **Run Smoke Test**: Automatically validate the core workflow against the seeded data.
 
-💡 **Tip**: Run `make help` to see all available commands. For detailed command reference, see [docs/COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md).
+When the script finishes, you will have a fully functional development environment.
 
----
-
-## 🔐 Environment Files & Secrets
-
-- `.env.example` is **DEV ONLY**. Copy it to `.env` on laptops and keep the DEV-ONLY warnings intact.
-- `.env.production.sample` ships with empty placeholders so Terraform, Helm, and GitHub Actions can fail fast when secrets are missing.
-- When `NODE_ENV=production`, the server refuses to boot if `JWT_SECRET`, `JWT_REFRESH_SECRET`, DB passwords, or CORS origins match the sample defaults or include `localhost`.
-
----
-
-## 🩺 Health & Observability
-
-- Health probes: `curl http://localhost:4000/health`, `/health/detailed`, `/health/ready`, `/health/live`, `/metrics`.
-- Prometheus + Grafana live under `observability/` and are wired into `docker-compose.dev.yml`. Grafana auto-loads the **Summit Golden Path** dashboard with the admin credentials defined in `.env`.
-- `scripts/wait-for-stack.sh` waits until API/Postgres/Neo4j/Redis succeed before handing control back to `make up` (CLI and CI use the same guardrail).
+- **Optional AI Stack**: To include AI/ML services, run `./start.sh --ai`.
+- **Manual Mode**: If you prefer, you can run the steps manually: `make bootstrap`, `make up`, and `make smoke`.
 
 ---
 
-## ✅ Acceptance Criteria for Every Contribution
+### 🔬 Step 3: Explore the Golden Path Workflow
 
-- Build runs with `make up`.
-- Golden path workflow succeeds.
-- `make smoke` passes locally + in CI.
-- Code covered by tests and instrumentation.
-- Docs reflect reality.
+The smoke test in the previous step already validated the core application workflow. Now, walk through it yourself to understand the user experience.
 
-## 🆘 Troubleshooting
+**Golden Path**: **Investigation → Entities → Relationships → Copilot → Results**
 
-### "Docker is not running"
-```bash
-# Check Docker status
-docker info
+1.  **Open the Frontend**: Navigate to **http://localhost:3000**.
+2.  **Find the Demo Investigation**: On the dashboard, you'll find the pre-seeded "Quickstart Investigation". Click to open it.
+3.  **Explore the Graph**:
+    - The graph explorer will display entities and relationships from the `quickstart-investigation` dataset.
+    - Click on nodes and edges to see their properties.
+    - Use the layout tools to rearrange the graph.
+4.  **Run the Copilot**:
+    - In the investigation panel, click the "Run Copilot Goal" button.
+    - This will trigger an AI-driven analysis based on a predefined goal for the dataset.
+5.  **View the Results**:
+    - Observe as the Copilot streams its findings into the results panel.
+    - The graph may update in real time with newly discovered entities or relationships.
 
-# If failed, start Docker Desktop and try again
-make up
-```
-
-### "Health checks failing"
-```bash
-# View detailed health status
-curl http://localhost:4000/health/detailed | jq
-
-# Check individual service logs
-docker-compose logs api
-docker-compose logs postgres
-docker-compose logs neo4j
-
-# Nuclear option: clean restart
-make down
-make up
-```
-
-### "Smoke tests failing"
-```bash
-# Run smoke with verbose output
-pnpm smoke
-
-# Check what failed and fix that specific step
-# Golden path: Investigation → Entities → Relationships → Copilot → Results
-
-# After fixing, validate
-make smoke
-```
-
-For more help, see [docs/COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) or ask in #summit-dev.
+This workflow is the backbone of the Summit platform. `make smoke` automates these exact steps, ensuring that our core functionality is always working.
 
 ---
 
-## 📚 Next Steps
+### 🧑‍💻 Your First Commit: Development Workflow
 
-Once you've completed the golden path, explore these resources:
+Now that your environment is running and validated, you're ready to contribute.
 
-- **[CLAUDE.md](../CLAUDE.md)** - Comprehensive AI assistant guide with codebase structure, conventions, and common tasks
-- **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Contribution guidelines including AI agent collaboration patterns
-- **[Multi-Agent Workflow Guide](./AI_AGENT_WORKFLOW.md)** - Learn how Jules, Claude, Codex, and GitHub Actions collaborate
-- **[Multi-Agent LLM Frameworks](./multi-agent-frameworks-2025.md)** - Reference guide for multi-agent architectures
-- **[Command Reference](./COMMAND_REFERENCE.md)** - Complete command reference for development
-- **[Documentation Index](./README.md)** - Full documentation catalog
+1.  **Create a Branch**: Use the format `feature/<thing>` or `fix/<thing>`.
+    ```bash
+    git checkout -b feature/my-new-feature
+    ```
+2.  **Write Code**: Make your changes to the codebase. The `client/` and `server/` directories are the primary application folders.
+3.  **Run Tests**: Before committing, run local checks.
+    ```bash
+    make smoke      # Always run the smoke test
+    pnpm test       # Run unit/integration tests
+    pnpm lint       # Check for linting errors
+    ```
+4.  **Commit Your Changes**: Use the [Conventional Commits](https://www.conventionalcommits.org/) format.
+    ```bash
+    git commit -m "feat: add user profile page"
+    ```
+5.  **Open a Pull Request**: Push your branch to GitHub and create a PR against `main`. Ensure all CI checks pass.
 
 ---
 
-> ⚡️ Remember: _Ship fast, but ship safe._
-> If it can't deploy today, it doesn't merge.
+### 🛠️ Helpful Commands
+
+- `make help`: Display all available `make` commands.
+- `make up`: Start all services.
+- `make down`: Stop and remove all services.
+- `make smoke`: Run the end-to-end smoke test.
+- `pnpm test`: Run unit and integration tests.
+- `docker-compose logs -f <service-name>`: Tail logs for a specific service (e.g., `api`, `client`).
+
+---
+
+### 🆘 Troubleshooting
+
+- **`make smoke` fails**: Run `pnpm smoke` for a more detailed, verbose output to pinpoint the failure.
+- **Health checks failing**: Use `curl http://localhost:4000/health/detailed | jq` to see the status of all backend services.
+- **Docker issues**: A clean restart often helps. Run `make down` followed by `./start.sh`.
+
+For more detailed guides, see the [documentation index](./README.md). Welcome to the team!
