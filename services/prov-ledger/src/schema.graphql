@@ -30,7 +30,7 @@ type Claim {
 """
 A transformation step in the evidence processing pipeline
 """
-type TransformStep {
+type Transform {
   transformType: String!
   timestamp: DateTime!
   actorId: String!
@@ -48,7 +48,7 @@ type Evidence {
   checksumAlgorithm: String!
   contentType: String
   fileSize: Int
-  transformChain: [TransformStep!]!
+  transformChain: [Transform!]!
   licenseId: String
   policyLabels: [String!]!
   authorityId: String
@@ -131,23 +131,24 @@ type BundleEvidence {
   id: String!
   sourceRef: String!
   checksum: String!
-  transformChain: [TransformStep!]!
+  transformChain: [Transform!]!
 }
 
 """
 Hash verification result
 """
-type HashVerification {
+type VerificationResult {
   valid: Boolean!
-  expectedHash: String!
-  actualHash: String!
-  verifiedAt: DateTime!
+  verificationId: String
+  timestamp: DateTime!
+  details: JSON
 }
 
 """
 Manifest for export with hash chain
 """
-type ExportManifest {
+type ProvenanceManifest {
+  id: ID!
   version: String!
   claims: [ManifestClaim!]!
   hashChain: String!
@@ -189,7 +190,7 @@ input CreateClaimInput {
   policyLabels: [String!]
 }
 
-input TransformStepInput {
+input TransformInput {
   transformType: String!
   timestamp: DateTime!
   actorId: String!
@@ -204,7 +205,7 @@ input CreateEvidenceInput {
   checksumAlgorithm: String
   contentType: String
   fileSize: Int
-  transformChain: [TransformStepInput!]
+  transformChain: [TransformInput!]
   licenseId: String
   policyLabels: [String!]
   metadata: JSON
@@ -261,8 +262,8 @@ type Query {
   """Get disclosure bundle for a case"""
   disclosureBundle(caseId: String!): DisclosureBundle
 
-  """Get export manifest"""
-  exportManifest: ExportManifest!
+  """Get provenance manifest (export)"""
+  provenanceManifest(id: ID!): ProvenanceManifest
 
   """Verify transformation chain for evidence"""
   verifyTransformChain(evidenceId: String!): ChainVerificationResult!
@@ -289,5 +290,11 @@ type Mutation {
   createCase(input: CreateCaseInput!): Case!
 
   """Verify hash integrity"""
-  verifyHash(input: VerifyHashInput!): HashVerification!
+  verifyHash(input: VerifyHashInput!): VerificationResult!
+
+  """Generate or retrieve a manifest for a given ID (e.g. export or case ID)"""
+  manifest(id: ID!): ProvenanceManifest!
+
+  """Verify a manifest by its ID"""
+  verify(manifestId: ID!): VerificationResult!
 }
