@@ -1,11 +1,11 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
-  // extensionsToTreatAsEsm: ['.ts'],
+  extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
-    '<rootDir>/tests/setup/jest.setup.js',
+    '<rootDir>/tests/setup/jest.setup.ts',
     'jest-extended/all',
   ],
   testMatch: [
@@ -23,13 +23,13 @@ const config: Config = {
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  resolver: '<rootDir>/tests/resolver.cjs',
   transform: {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
-        useESM: false,
+        useESM: true,
         tsconfig: 'tsconfig.test.json',
       },
     ],
@@ -57,28 +57,19 @@ const config: Config = {
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
-  testResultsProcessor: 'jest-junit',
-  reporters: [
-    'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: '<rootDir>/test-results',
-        outputName: 'junit.xml',
-        classNameTemplate: '{classname}',
-        titleTemplate: '{title}',
-        ancestorSeparator: ' › ',
-        usePathForSuiteName: true,
-      },
-    ],
-  ],
   verbose: true,
   clearMocks: true,
   restoreMocks: true,
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+<<<<<<< HEAD
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))',
+  ],
+=======
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)'],
+>>>>>>> main
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

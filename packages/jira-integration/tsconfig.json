@@ -16,11 +16,8 @@
     "moduleResolution": "Bundler",
     "target": "ES2022",
     "composite": true,
-    "types": []
+    "types": ["jest", "node"]
   },
-  "include": [
-    "src/**/*",
-    "__tests__/**/*"
-  ],
+  "include": ["src/**/*", "__tests__/**/*"],
   "references": []
 }

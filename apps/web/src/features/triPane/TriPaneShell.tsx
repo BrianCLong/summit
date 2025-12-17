@@ -30,8 +30,13 @@ import { Button } from '@/components/ui/Button'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { MapPane } from './MapPane'
+import { useCollaboration } from '@/lib/yjs/useCollaboration'
+import { useGraphSync } from '@/lib/yjs/useGraphSync'
+import { CollaborationPanel } from '@/components/CollaborationPanel'
+import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
+import { useSnapshotHandler } from '@/features/snapshots'
 
 /**
  * Main TriPaneShell component
@@ -73,13 +78,55 @@ export function TriPaneShell({
   const [activePane, setActivePane] = useState<'graph' | 'timeline' | 'map'>(
     'graph'
   )
+  const [pinnedTools, setPinnedTools] = useState<string[]>([])
+  const [densityMode, setDensityMode] = useState<'comfortable' | 'compact'>('comfortable')
+
+  // Snapshot integration
+  useSnapshotHandler(
+    'triPane',
+    () => ({
+      syncState,
+      activePane,
+      showProvenance,
+      pinnedTools,
+      densityMode
+    }),
+    (data) => {
+      if (data.syncState) setSyncState(data.syncState)
+      if (data.activePane) setActivePane(data.activePane)
+      if (typeof data.showProvenance === 'boolean') setShowProvenance(data.showProvenance)
+      if (data.pinnedTools) setPinnedTools(data.pinnedTools)
+      if (data.densityMode) setDensityMode(data.densityMode)
+    }
+  )
+
+  // Auth context
+  const { user } = useAuth()
+  const token = localStorage.getItem('auth_token') || undefined
+
+  // Initialize collaboration
+  const { doc, users, isConnected, isSynced } = useCollaboration(
+    'main-graph', // TODO: Make dynamic based on workspace/investigation ID
+    user ? { id: user.id, name: user.name || user.email } : { id: 'anon', name: 'Anonymous' },
+    token
+  )
+
+  // Sync graph data
+  const {
+    entities: graphEntities,
+    relationships: graphRelationships,
+    updateEntityPosition
+  } = useGraphSync(doc, entities, relationships)
 
   // Filter data based on global time window
   const filteredData = useMemo(() => {
+    const currentEntities = graphEntities
+    const currentRelationships = graphRelationships
+
     if (!syncState.globalTimeWindow) {
       return {
-        entities,
-        relationships,
+        entities: currentEntities,
+        relationships: currentRelationships,
         timelineEvents,
         geospatialEvents,
       }
@@ -104,7 +151,7 @@ export function TriPaneShell({
       filteredTimelineEvents.map(e => e.entityId).filter(Boolean) as string[]
     )
 
-    const filteredEntities = entities.filter(entity => {
+    const filteredEntities = currentEntities.filter(entity => {
       if (relevantEntityIds.has(entity.id)) return true
 
       // Also include entities updated within the time window
@@ -118,7 +165,7 @@ export function TriPaneShell({
 
     // Filter relationships to only include those between filtered entities
     const filteredEntityIds = new Set(filteredEntities.map(e => e.id))
-    const filteredRelationships = relationships.filter(
+    const filteredRelationships = currentRelationships.filter(
       rel =>
         filteredEntityIds.has(rel.sourceId) &&
         filteredEntityIds.has(rel.targetId)
@@ -131,8 +178,8 @@ export function TriPaneShell({
       geospatialEvents: filteredGeospatialEvents,
     }
   }, [
-    entities,
-    relationships,
+    graphEntities,
+    graphRelationships,
     timelineEvents,
     geospatialEvents,
     syncState.globalTimeWindow,
@@ -433,6 +480,7 @@ export function TriPaneShell({
                 relationships={filteredData.relationships}
                 layout={syncState.graph.layout}
                 onEntitySelect={handleEntitySelect}
+                onNodeDragEnd={(node, pos) => updateEntityPosition(node.id, pos.x, pos.y)}
                 selectedEntityId={syncState.graph.selectedEntityId}
                 className="h-full"
               />
@@ -467,6 +515,8 @@ export function TriPaneShell({
           </Card>
         </div>
       </div>
+
+      <CollaborationPanel users={users} isConnected={isConnected} isSynced={isSynced} />
 
       {/* Status indicator for active filter */}
       {syncState.globalTimeWindow && (
