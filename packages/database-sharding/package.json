@@ -22,12 +22,16 @@
   "devDependencies": {
     "@types/node": "^20.0.0",
 <<<<<<< HEAD
+    "@types/pg": "^8.15.6",
+=======
+<<<<<<< HEAD
     "@types/pg": "^8.11.0",
 =======
 <<<<<<< HEAD
     "@types/pg": "^8.15.0",
 =======
     "@types/pg": "^8.15.6",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
     "typescript": "^5.7.2",

@@ -3,7 +3,7 @@ import { defineConfig } from '@playwright/test';
 const useWebServer = process.env.PLAYWRIGHT_USE_WEBSERVER === 'true';
 
 export default defineConfig({
-  testDir: 'e2e',
+  testDir: '.',
   testMatch: [
     'e2e/maestro.spec.ts',
 <<<<<<< HEAD
@@ -13,7 +13,11 @@ export default defineConfig({
 >>>>>>> main
     'e2e/**/*.a11y.spec.ts',
     'tests/e2e/**/*.spec.ts',
+<<<<<<< HEAD
+    'tests/performance.spec.ts',
+=======
     'e2e/simple.spec.ts',
+>>>>>>> main
   ],
   timeout: 30_000,
   retries: 2,

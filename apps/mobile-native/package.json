@@ -85,7 +85,11 @@
     "react-native-performance": "^5.1.0",
     "react-native-background-fetch": "^4.2.0",
     "@sentry/react-native": "^5.15.2",
+<<<<<<< HEAD
+    "metro-minify-terser": "^0.80.12",
+=======
     "metro-minify-terser": "^0.83.3",
+>>>>>>> main
     "axios": "^1.11.0",
     "date-fns": "^4.1.0",
     "zod": "^4.1.12",
