@@ -1,0 +1,632 @@
+# =============================================================================
+# IntelGraph Zero-Trust Falco Rules
+# Runtime security monitoring for air-gapped deployments
+# =============================================================================
+
+# =============================================================================
+# MACROS - Reusable conditions
+# =============================================================================
+
+- macro: intelgraph_container
+  condition: >
+    container.image.repository contains "intelgraph" or
+    container.image.repository contains "registry.intelgraph.local" or
+    container.image.repository contains "registry.intelgraph.airgap"
+
+- macro: intelgraph_namespace
+  condition: >
+    k8s.ns.name in (intelgraph-production, intelgraph-staging, intelgraph-security)
+
+- macro: trusted_process
+  condition: >
+    proc.name in (node, python, python3, java, postgres, redis-server, neo4j)
+
+- macro: sensitive_file_path
+  condition: >
+    fd.name startswith /etc/passwd or
+    fd.name startswith /etc/shadow or
+    fd.name startswith /etc/kubernetes or
+    fd.name startswith /var/run/secrets or
+    fd.name startswith /root/.ssh or
+    fd.name startswith /home/*/.ssh
+
+- macro: sensitive_mount_path
+  condition: >
+    fd.name startswith /proc/sys or
+    fd.name startswith /sys/kernel or
+    fd.name = /etc/hosts or
+    fd.name startswith /var/log
+
+- macro: network_tool
+  condition: >
+    proc.name in (nc, ncat, netcat, nmap, wget, curl, ssh, scp, sftp, telnet)
+
+- macro: shell_binary
+  condition: proc.name in (bash, sh, zsh, dash, ash, csh, tcsh, ksh)
+
+- macro: package_manager
+  condition: >
+    proc.name in (apt, apt-get, yum, dnf, rpm, dpkg, apk, pip, pip3, npm, yarn, pnpm)
+
+- macro: data_exfil_tool
+  condition: >
+    proc.name in (base64, xxd, hexdump, od, curl, wget, nc, ncat)
+
+- macro: crypto_mining_process
+  condition: >
+    proc.name in (xmrig, minerd, cpuminer, cgminer, bfgminer, ethminer,
+                  minergate, stratum, cryptonight) or
+    proc.cmdline contains "stratum+tcp" or
+    proc.cmdline contains "pool.minergate" or
+    proc.cmdline contains "xmr." or
+    proc.cmdline contains "monero"
+
+# =============================================================================
+# LISTS - Allowed/blocked entities
+# =============================================================================
+
+- list: allowed_k8s_api_callers
+  items: [kubelet, kube-proxy, kube-scheduler, kube-controller-manager,
+          coredns, etcd, flannel, calico-node, cilium-agent]
+
+- list: allowed_privileged_containers
+  items: [falco, sysdig-agent, datadog-agent, newrelic-infra,
+          node-exporter, kube-proxy, cilium, calico-node]
+
+- list: sensitive_env_vars
+  items: [AWS_SECRET_ACCESS_KEY, AWS_ACCESS_KEY_ID, DATABASE_PASSWORD,
+          JWT_SECRET, API_KEY, PRIVATE_KEY, DB_PASSWORD, REDIS_PASSWORD,
+          NEO4J_PASSWORD, ENCRYPTION_KEY, SIGNING_KEY]
+
+- list: allowed_outbound_ports
+  items: [53, 443, 5432, 6379, 7474, 7687, 9092, 8181]
+
+- list: intelgraph_services
+  items: [intelgraph-api, intelgraph-web, intelgraph-worker, intelgraph-copilot,
+          intelgraph-graph, intelgraph-conductor, maestro-orchestrator]
+
+# =============================================================================
+# CONTAINER ESCAPE DETECTION
+# =============================================================================
+
+- rule: Container Escape via Privileged Mode
+  desc: Detect attempts to escape container via privileged mode
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    (container.privileged = true or
+     proc.cmdline contains "nsenter" or
+     proc.cmdline contains "docker" or
+     proc.cmdline contains "crictl")
+  output: >
+    Container escape attempt detected via privileged mode
+    (container=%container.name image=%container.image.repository
+     command=%proc.cmdline user=%user.name ns=%k8s.ns.name
+     pod=%k8s.pod.name)
+  priority: CRITICAL
+  tags: [container, escape, zero-trust, intelgraph]
+
+- rule: Container Escape via Host Namespace
+  desc: Detect container accessing host namespaces
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    (proc.cmdline contains "--pid=host" or
+     proc.cmdline contains "--net=host" or
+     proc.cmdline contains "--ipc=host" or
+     proc.cmdline contains "--uts=host")
+  output: >
+    Container escape attempt via host namespace access
+    (container=%container.name image=%container.image.repository
+     command=%proc.cmdline user=%user.name)
+  priority: CRITICAL
+  tags: [container, escape, namespace, zero-trust]
+
+- rule: Container Breakout via /proc Write
+  desc: Detect writes to /proc filesystem from container
+  condition: >
+    open_write and
+    container and
+    intelgraph_namespace and
+    fd.name startswith /proc/ and
+    not fd.name startswith /proc/self
+  output: >
+    Potential container breakout via /proc write
+    (file=%fd.name container=%container.name user=%user.name
+     process=%proc.name)
+  priority: CRITICAL
+  tags: [container, escape, proc, zero-trust]
+
+# =============================================================================
+# PRIVILEGE ESCALATION DETECTION
+# =============================================================================
+
+- rule: Privilege Escalation via setuid/setgid
+  desc: Detect setuid/setgid binary execution in container
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    (proc.is_suid_or_sgid = true) and
+    not proc.name in (sudo, su, ping)
+  output: >
+    Privilege escalation via setuid/setgid binary
+    (process=%proc.name container=%container.name user=%user.name
+     command=%proc.cmdline)
+  priority: HIGH
+  tags: [privilege, escalation, zero-trust]
+
+- rule: Privilege Escalation via Capability Addition
+  desc: Detect processes gaining additional capabilities
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    proc.cap.effective != proc.cap.permitted
+  output: >
+    Suspicious capability change detected
+    (process=%proc.name container=%container.name
+     effective_caps=%proc.cap.effective permitted_caps=%proc.cap.permitted)
+  priority: HIGH
+  tags: [privilege, capabilities, zero-trust]
+
+- rule: Kernel Module Loading Attempt
+  desc: Detect attempts to load kernel modules
+  condition: >
+    spawned_process and
+    container and
+    (proc.name in (insmod, modprobe, rmmod) or
+     syscall.type in (init_module, finit_module, delete_module))
+  output: >
+    Kernel module loading attempt from container
+    (process=%proc.name container=%container.name command=%proc.cmdline)
+  priority: CRITICAL
+  tags: [kernel, module, zero-trust]
+
+# =============================================================================
+# NETWORK ANOMALY DETECTION
+# =============================================================================
+
+- rule: Unexpected Outbound Connection
+  desc: Detect outbound connections to unexpected destinations
+  condition: >
+    outbound and
+    container and
+    intelgraph_namespace and
+    fd.sport != 0 and
+    not fd.dport in (allowed_outbound_ports) and
+    not fd.sip.name = "127.0.0.1"
+  output: >
+    Unexpected outbound network connection
+    (container=%container.name destination=%fd.sip.name:%fd.dport
+     process=%proc.name user=%user.name)
+  priority: HIGH
+  tags: [network, egress, zero-trust, airgap]
+
+- rule: Network Reconnaissance Tool
+  desc: Detect use of network scanning/reconnaissance tools
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    network_tool and
+    not proc.pname in (healthcheck.sh, readiness.sh)
+  output: >
+    Network reconnaissance tool detected
+    (tool=%proc.name container=%container.name command=%proc.cmdline
+     user=%user.name)
+  priority: HIGH
+  tags: [network, reconnaissance, zero-trust]
+
+- rule: DNS Tunneling Attempt
+  desc: Detect potential DNS tunneling/exfiltration
+  condition: >
+    outbound and
+    container and
+    intelgraph_namespace and
+    fd.dport = 53 and
+    fd.bytes_out > 512
+  output: >
+    Potential DNS tunneling detected (large DNS payload)
+    (container=%container.name bytes=%fd.bytes_out
+     destination=%fd.sip.name process=%proc.name)
+  priority: HIGH
+  tags: [network, dns, exfiltration, zero-trust]
+
+- rule: Air-Gapped Network Violation
+  desc: Detect attempts to reach external networks in air-gapped mode
+  condition: >
+    outbound and
+    container and
+    intelgraph_namespace and
+    not (fd.sip.name startswith "10." or
+         fd.sip.name startswith "172." or
+         fd.sip.name startswith "192.168." or
+         fd.sip.name = "127.0.0.1")
+  output: >
+    Air-gapped network violation - external connection attempt
+    (container=%container.name destination=%fd.sip.name:%fd.dport
+     process=%proc.name)
+  priority: CRITICAL
+  tags: [network, airgap, violation, zero-trust]
+
+# =============================================================================
+# FILE INTEGRITY MONITORING
+# =============================================================================
+
+- rule: Sensitive File Access
+  desc: Detect access to sensitive files
+  condition: >
+    (open_read or open_write) and
+    container and
+    intelgraph_namespace and
+    sensitive_file_path and
+    not proc.name in (node, python, java)
+  output: >
+    Sensitive file access detected
+    (file=%fd.name container=%container.name process=%proc.name
+     user=%user.name operation=%evt.type)
+  priority: HIGH
+  tags: [file, sensitive, zero-trust]
+
+- rule: Secret Token File Access
+  desc: Detect access to Kubernetes secrets
+  condition: >
+    open_read and
+    container and
+    intelgraph_namespace and
+    fd.name startswith /var/run/secrets/kubernetes.io and
+    not proc.name in (node, java, python)
+  output: >
+    Kubernetes secret access detected
+    (file=%fd.name container=%container.name process=%proc.name
+     pod=%k8s.pod.name)
+  priority: MEDIUM
+  tags: [secrets, kubernetes, zero-trust]
+
+- rule: Binary Modification in Container
+  desc: Detect modification of executable files
+  condition: >
+    open_write and
+    container and
+    intelgraph_namespace and
+    (fd.name startswith /usr/bin or
+     fd.name startswith /usr/sbin or
+     fd.name startswith /bin or
+     fd.name startswith /sbin)
+  output: >
+    Binary modification detected in container
+    (file=%fd.name container=%container.name process=%proc.name
+     user=%user.name)
+  priority: CRITICAL
+  tags: [file, binary, integrity, zero-trust]
+
+- rule: Configuration File Tampering
+  desc: Detect unauthorized config file modifications
+  condition: >
+    open_write and
+    container and
+    intelgraph_namespace and
+    (fd.name contains ".conf" or
+     fd.name contains ".yaml" or
+     fd.name contains ".yml" or
+     fd.name contains ".json") and
+    fd.directory != "/app/config" and
+    fd.directory != "/tmp"
+  output: >
+    Configuration file tampering detected
+    (file=%fd.name container=%container.name process=%proc.name)
+  priority: HIGH
+  tags: [file, config, integrity, zero-trust]
+
+# =============================================================================
+# PROCESS EXECUTION MONITORING
+# =============================================================================
+
+- rule: Shell Spawned in Container
+  desc: Detect shell processes spawned in production containers
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    shell_binary and
+    not proc.pname in (node, npm, yarn, pnpm, start.sh, entrypoint.sh)
+  output: >
+    Shell spawned in container
+    (shell=%proc.name container=%container.name parent=%proc.pname
+     command=%proc.cmdline user=%user.name)
+  priority: MEDIUM
+  tags: [shell, process, zero-trust]
+
+- rule: Package Manager Execution
+  desc: Detect package manager execution in production
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    package_manager
+  output: >
+    Package manager execution in production container
+    (process=%proc.name container=%container.name command=%proc.cmdline
+     user=%user.name)
+  priority: HIGH
+  tags: [package, process, zero-trust]
+
+- rule: Reverse Shell Detection
+  desc: Detect potential reverse shell establishment
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    (proc.cmdline contains "/dev/tcp" or
+     proc.cmdline contains "bash -i" or
+     proc.cmdline contains "nc -e" or
+     proc.cmdline contains "ncat -e" or
+     proc.cmdline contains "mkfifo" or
+     (proc.name = "python" and proc.cmdline contains "socket"))
+  output: >
+    Potential reverse shell detected
+    (command=%proc.cmdline container=%container.name user=%user.name
+     parent=%proc.pname)
+  priority: CRITICAL
+  tags: [shell, reverse, zero-trust]
+
+- rule: Process Injection Attempt
+  desc: Detect ptrace-based process injection
+  condition: >
+    syscall.type = ptrace and
+    container and
+    intelgraph_namespace and
+    not proc.name in (gdb, strace, ltrace)
+  output: >
+    Process injection attempt via ptrace
+    (process=%proc.name container=%container.name target_pid=%evt.arg.pid)
+  priority: CRITICAL
+  tags: [injection, ptrace, zero-trust]
+
+# =============================================================================
+# CRYPTOMINING DETECTION
+# =============================================================================
+
+- rule: Cryptomining Process Detected
+  desc: Detect cryptomining processes
+  condition: >
+    spawned_process and
+    container and
+    crypto_mining_process
+  output: >
+    Cryptomining process detected
+    (process=%proc.name container=%container.name command=%proc.cmdline
+     user=%user.name)
+  priority: CRITICAL
+  tags: [cryptomining, malware, zero-trust]
+
+- rule: Cryptomining Network Connection
+  desc: Detect connections to known mining pools
+  condition: >
+    outbound and
+    container and
+    (fd.sip.name contains "pool." or
+     fd.sip.name contains "mining." or
+     fd.sip.name contains "xmr." or
+     fd.sip.name contains "nicehash" or
+     fd.dport in (3333, 4444, 5555, 7777, 8888, 9999, 14444, 45700))
+  output: >
+    Connection to suspected mining pool
+    (destination=%fd.sip.name:%fd.dport container=%container.name
+     process=%proc.name)
+  priority: CRITICAL
+  tags: [cryptomining, network, zero-trust]
+
+# =============================================================================
+# DATA EXFILTRATION DETECTION
+# =============================================================================
+
+- rule: Large Data Transfer
+  desc: Detect large outbound data transfers
+  condition: >
+    outbound and
+    container and
+    intelgraph_namespace and
+    fd.bytes_out > 104857600
+  output: >
+    Large outbound data transfer detected
+    (bytes=%fd.bytes_out container=%container.name
+     destination=%fd.sip.name:%fd.dport process=%proc.name)
+  priority: HIGH
+  tags: [exfiltration, data, zero-trust]
+
+- rule: Data Encoding for Exfiltration
+  desc: Detect base64/hex encoding of sensitive data
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    data_exfil_tool and
+    (proc.cmdline contains "/var/run/secrets" or
+     proc.cmdline contains "/etc/passwd" or
+     proc.cmdline contains ".pem" or
+     proc.cmdline contains ".key")
+  output: >
+    Potential data encoding for exfiltration
+    (process=%proc.name command=%proc.cmdline container=%container.name)
+  priority: HIGH
+  tags: [exfiltration, encoding, zero-trust]
+
+- rule: Clipboard Exfiltration Attempt
+  desc: Detect attempts to access clipboard data
+  condition: >
+    spawned_process and
+    container and
+    (proc.name in (xclip, xsel, pbcopy, pbpaste) or
+     proc.cmdline contains "clipboard")
+  output: >
+    Clipboard access attempt detected
+    (process=%proc.name container=%container.name command=%proc.cmdline)
+  priority: MEDIUM
+  tags: [exfiltration, clipboard, zero-trust]
+
+# =============================================================================
+# CREDENTIAL ACCESS DETECTION
+# =============================================================================
+
+- rule: Environment Variable Credential Dump
+  desc: Detect dumping of environment variables containing secrets
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    (proc.cmdline contains "printenv" or
+     proc.cmdline contains "env" or
+     proc.cmdline contains "set") and
+    proc.cmdline regex "SECRET|PASSWORD|KEY|TOKEN"
+  output: >
+    Environment variable credential access
+    (command=%proc.cmdline container=%container.name user=%user.name)
+  priority: HIGH
+  tags: [credentials, env, zero-trust]
+
+- rule: Memory Credential Scraping
+  desc: Detect attempts to read process memory for credentials
+  condition: >
+    open_read and
+    container and
+    intelgraph_namespace and
+    fd.name startswith /proc/ and
+    fd.name contains /mem
+  output: >
+    Process memory access attempt (potential credential scraping)
+    (file=%fd.name container=%container.name process=%proc.name)
+  priority: CRITICAL
+  tags: [credentials, memory, zero-trust]
+
+# =============================================================================
+# KUBERNETES API ACCESS
+# =============================================================================
+
+- rule: Unauthorized K8s API Access
+  desc: Detect unauthorized Kubernetes API access
+  condition: >
+    outbound and
+    container and
+    intelgraph_namespace and
+    fd.dport = 6443 and
+    not container.name in (allowed_k8s_api_callers)
+  output: >
+    Unauthorized Kubernetes API access attempt
+    (container=%container.name process=%proc.name user=%user.name)
+  priority: HIGH
+  tags: [kubernetes, api, zero-trust]
+
+- rule: ServiceAccount Token Theft
+  desc: Detect attempts to steal ServiceAccount tokens
+  condition: >
+    open_read and
+    container and
+    fd.name = /var/run/secrets/kubernetes.io/serviceaccount/token and
+    not proc.name in (node, java, python, curl)
+  output: >
+    ServiceAccount token access by unexpected process
+    (container=%container.name process=%proc.name user=%user.name)
+  priority: HIGH
+  tags: [kubernetes, token, credentials, zero-trust]
+
+# =============================================================================
+# INTELGRAPH-SPECIFIC RULES
+# =============================================================================
+
+- rule: IntelGraph Conductor Anomaly
+  desc: Detect anomalous behavior in Conductor service
+  condition: >
+    spawned_process and
+    container and
+    container.name = "intelgraph-conductor" and
+    not trusted_process and
+    not proc.name in (npm, node, pnpm)
+  output: >
+    Anomalous process in IntelGraph Conductor
+    (process=%proc.name command=%proc.cmdline user=%user.name)
+  priority: HIGH
+  tags: [intelgraph, conductor, anomaly, zero-trust]
+
+- rule: IntelGraph Graph Database Unauthorized Access
+  desc: Detect unauthorized access to Neo4j graph database
+  condition: >
+    outbound and
+    container and
+    intelgraph_namespace and
+    fd.dport in (7474, 7687) and
+    not container.name in (intelgraph-api, intelgraph-graph, maestro-orchestrator)
+  output: >
+    Unauthorized Neo4j access attempt
+    (container=%container.name destination=%fd.sip.name:%fd.dport
+     process=%proc.name)
+  priority: HIGH
+  tags: [intelgraph, neo4j, database, zero-trust]
+
+- rule: IntelGraph PII Data Access
+  desc: Detect access to PII-classified data paths
+  condition: >
+    (open_read or open_write) and
+    container and
+    intelgraph_namespace and
+    (fd.name contains "/pii/" or
+     fd.name contains "/sensitive/" or
+     fd.name contains "/classified/")
+  output: >
+    PII/Sensitive data path access
+    (file=%fd.name container=%container.name process=%proc.name
+     user=%user.name operation=%evt.type)
+  priority: HIGH
+  tags: [intelgraph, pii, sensitive, zero-trust]
+
+- rule: IntelGraph Export Anomaly
+  desc: Detect suspicious data export operations
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    (proc.cmdline contains "export" or
+     proc.cmdline contains "dump" or
+     proc.cmdline contains "backup") and
+    not proc.pname in (node, cron, backup.sh)
+  output: >
+    Suspicious data export operation
+    (command=%proc.cmdline container=%container.name user=%user.name)
+  priority: HIGH
+  tags: [intelgraph, export, data, zero-trust]
+
+# =============================================================================
+# ZERO-TRUST POLICY ENFORCEMENT
+# =============================================================================
+
+- rule: OPA Policy Decision Denial
+  desc: Log OPA policy denials for zero-trust enforcement
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    proc.cmdline contains "opa" and
+    proc.cmdline contains "deny"
+  output: >
+    OPA policy denial recorded
+    (container=%container.name command=%proc.cmdline)
+  priority: NOTICE
+  tags: [opa, policy, zero-trust]
+
+- rule: mTLS Certificate Validation Failure
+  desc: Detect mTLS certificate validation failures
+  condition: >
+    spawned_process and
+    container and
+    intelgraph_namespace and
+    (proc.cmdline contains "certificate verify failed" or
+     proc.cmdline contains "x509: certificate" or
+     proc.cmdline contains "SSL_ERROR")
+  output: >
+    mTLS certificate validation failure
+    (container=%container.name process=%proc.name error=%proc.cmdline)
+  priority: HIGH
+  tags: [mtls, certificate, zero-trust]
