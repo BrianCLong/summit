@@ -6,7 +6,7 @@
 // Extend Jest with additional matchers from jest-extended
 require('jest-extended');
 
-// Mock ioredis globally
+// Mock ioredis globally - using a simple mock implementation since module resolution fails
 jest.mock('ioredis', () => {
   const EventEmitter = require('events');
   class MockRedis extends EventEmitter {
@@ -38,7 +38,7 @@ jest.mock('ioredis', () => {
     }
   }
   return MockRedis;
-});
+}, { virtual: true }); // Use virtual mock to avoid requiring the actual module
 
 // Mock pg globally to avoid connection errors in tests that don't need real DB
 jest.mock('pg', () => {
@@ -55,6 +55,36 @@ jest.mock('pg', () => {
     on() { return this; }
   }
   return { Pool: MockPool };
+});
+
+// Mock fluent-ffmpeg globally
+jest.mock('fluent-ffmpeg', () => {
+  const ffmpeg = jest.fn(() => {
+    return {
+      seekInput: jest.fn().mockReturnThis(),
+      duration: jest.fn().mockReturnThis(),
+      fps: jest.fn().mockReturnThis(),
+      addOption: jest.fn().mockReturnThis(),
+      output: jest.fn().mockReturnThis(),
+      noVideo: jest.fn().mockReturnThis(),
+      audioCodec: jest.fn().mockReturnThis(),
+      on: jest.fn().mockReturnThis(),
+      run: jest.fn(),
+      save: jest.fn(),
+      toFormat: jest.fn().mockReturnThis(),
+      input: jest.fn().mockReturnThis(),
+      inputFormat: jest.fn().mockReturnThis(),
+      inputOptions: jest.fn().mockReturnThis(),
+      outputOptions: jest.fn().mockReturnThis(),
+      videoCodec: jest.fn().mockReturnThis(),
+      format: jest.fn().mockReturnThis(),
+      pipe: jest.fn(),
+    };
+  });
+  ffmpeg.setFfmpegPath = jest.fn();
+  ffmpeg.setFfprobePath = jest.fn();
+  ffmpeg.ffprobe = jest.fn();
+  return ffmpeg;
 });
 
 // Global test timeout

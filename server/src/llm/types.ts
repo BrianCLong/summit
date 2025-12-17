@@ -1,87 +1,81 @@
-export type ProviderType = 'openai' | 'anthropic' | 'groq' | 'openrouter' | 'mock';
 
-export interface LLMRequest {
-  id: string; // Unique request ID
-  messages: Array<{ role: 'user' | 'assistant' | 'system'; content: string }>;
-  model?: string; // Specific model request, overrides routing
-  tags?: string[]; // e.g., ['fast', 'code', 'reasoning']
-  temperature?: number;
-  maxTokens?: number;
-  stop?: string[];
-  tools?: any[]; // Tool definitions
-  toolChoice?: any;
-  userId?: string;
-  tenantId?: string;
-  metadata?: Record<string, any>;
-  budget?: {
-    maxCost?: number; // USD
-    maxLatency?: number; // ms
-  };
-}
+export type ProviderId = "openai" | "anthropic" | "mock" | "groq" | "openrouter" | "other";
+export type ModelId = string;
+export type Role = "system" | "user" | "assistant" | "tool";
 
-export interface LLMResponse {
+export interface ToolCallInvocation {
+  toolName: string;
+  args: Record<string, unknown>;
   id: string;
-  requestId: string;
-  provider: ProviderType;
-  model: string;
-  text: string;
-  toolCalls?: any[];
-  usage: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-    cost?: number; // USD
-  };
-  latencyMs: number;
-  cached: boolean;
-  metadata?: Record<string, any>;
 }
 
-export interface ProviderConfig {
-  apiKey: string;
-  baseUrl?: string;
-  models: string[];
-  rpmLimit?: number;
+export interface ChatMessage {
+  role: Role;
+  content: string | null;
+  name?: string;
+  toolCalls?: ToolCallInvocation[];
+  toolCallId?: string; // For role: 'tool'
 }
 
-export interface ModelCapability {
+export interface ToolDefinition {
   name: string;
-  contextWindow: number;
-  inputCostPer1k: number;
-  outputCostPer1k: number;
-  avgLatencyMs?: number;
-  tags: string[]; // ['fast', 'cheap', 'smart', 'vision']
+  description: string;
+  inputSchema: Record<string, unknown>;
+}
+
+export interface ChatCompletionRequest {
+  tenantId: string;
+  purpose: "rag_answer" | "summarization" | "classification" | "agent" | "tool_call" | "other";
+  riskLevel: "low" | "medium" | "high";
+  messages: ChatMessage[];
+  tools?: ToolDefinition[];
+  maxCostUsd?: number;
+  timeoutMs?: number;
+  correlationId?: string;
+  // Provider agnostic hints
+  temperature?: number;
+  jsonMode?: boolean;
+}
+
+export interface ChatCompletionResult {
+  provider: ProviderId;
+  model: ModelId;
+  content: string | null;
+  toolCalls?: ToolCallInvocation[];
+  usage?: {
+    inputTokens: number;
+    outputTokens: number;
+    totalTokens: number;
+    costUsd?: number;
+  };
+  raw?: unknown;
+}
+
+export interface LlmProvider {
+  id: ProviderId;
+  supports(model: ModelId, capabilities?: string[]): boolean;
+  chat(request: ChatCompletionRequest & { model: ModelId }): Promise<ChatCompletionResult>;
+}
+
+export interface RoutingContext {
+  tenantId: string;
+  purpose: ChatCompletionRequest["purpose"];
+  riskLevel: ChatCompletionRequest["riskLevel"];
+  inputTokenEstimate: number;
+  maxCostUsd?: number;
+  timeoutMs?: number;
+}
+
+export interface RoutingDecision {
+  provider: ProviderId;
+  model: ModelId;
+  reason?: string;
 }
 
 export interface RoutingPolicy {
-  name: string;
-  /**
-   * Sorts or filters providers based on the policy.
-   * Returns a prioritized list of providers to try.
-   */
-  sortProviders(providers: ProviderAdapter[], request: LLMRequest): Promise<ProviderAdapter[]>;
+  chooseModel(ctx: RoutingContext): RoutingDecision;
 }
 
-export interface SafetyGuardrail {
-    name: string;
-    /**
-     * Checks the request before sending it to the provider.
-     * Throws an error or returns modified request.
-     */
-    validateRequest(request: LLMRequest): Promise<LLMRequest>;
-
-    /**
-     * Checks the response before returning it to the user.
-     * Throws an error or returns modified response (e.g., redacted).
-     */
-    validateResponse(response: LLMResponse): Promise<LLMResponse>;
-}
-
-export interface ProviderAdapter {
-  name: ProviderType;
-  isHealthy(): boolean;
-  supports(model: string): boolean;
-  estimateCost(request: LLMRequest): number;
-  generate(request: LLMRequest): Promise<LLMResponse>;
-  getCapabilities(): ModelCapability[];
+export interface LlmOrchestrator {
+  chat(request: ChatCompletionRequest): Promise<ChatCompletionResult>;
 }
