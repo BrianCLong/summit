@@ -57,6 +57,36 @@ jest.mock('pg', () => {
   return { Pool: MockPool };
 });
 
+// Mock fluent-ffmpeg globally
+jest.mock('fluent-ffmpeg', () => {
+  const ffmpeg = jest.fn(() => {
+    return {
+      seekInput: jest.fn().mockReturnThis(),
+      duration: jest.fn().mockReturnThis(),
+      fps: jest.fn().mockReturnThis(),
+      addOption: jest.fn().mockReturnThis(),
+      output: jest.fn().mockReturnThis(),
+      noVideo: jest.fn().mockReturnThis(),
+      audioCodec: jest.fn().mockReturnThis(),
+      on: jest.fn().mockReturnThis(),
+      run: jest.fn(),
+      save: jest.fn(),
+      toFormat: jest.fn().mockReturnThis(),
+      input: jest.fn().mockReturnThis(),
+      inputFormat: jest.fn().mockReturnThis(),
+      inputOptions: jest.fn().mockReturnThis(),
+      outputOptions: jest.fn().mockReturnThis(),
+      videoCodec: jest.fn().mockReturnThis(),
+      format: jest.fn().mockReturnThis(),
+      pipe: jest.fn(),
+    };
+  });
+  ffmpeg.setFfmpegPath = jest.fn();
+  ffmpeg.setFfprobePath = jest.fn();
+  ffmpeg.ffprobe = jest.fn();
+  return ffmpeg;
+});
+
 // Global test timeout
 jest.setTimeout(30000);
 

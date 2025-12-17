@@ -164,6 +164,22 @@ const investigationOperations = new client.Counter({
   labelNames: ['operation', 'user_id'],
 });
 
+// Human-in-the-loop approvals
+const approvalsPending = new client.Gauge({
+  name: 'approvals_pending',
+  help: 'Current pending approvals requiring human review',
+});
+
+const approvalsApprovedTotal = new client.Counter({
+  name: 'approvals_approved_total',
+  help: 'Total approvals granted by human reviewers',
+});
+
+const approvalsRejectedTotal = new client.Counter({
+  name: 'approvals_rejected_total',
+  help: 'Total approvals rejected by human reviewers',
+});
+
 // Error tracking
 const applicationErrors = new client.Counter({
   name: 'application_errors_total',
@@ -227,6 +243,9 @@ register.registerMetric(websocketConnections);
 register.registerMetric(websocketMessages);
 register.registerMetric(investigationsActive);
 register.registerMetric(investigationOperations);
+register.registerMetric(approvalsPending);
+register.registerMetric(approvalsApprovedTotal);
+register.registerMetric(approvalsRejectedTotal);
 register.registerMetric(applicationErrors);
 register.registerMetric(memoryUsage);
 register.registerMetric(pipelineUptimeRatio);
@@ -464,6 +483,9 @@ export {
   websocketMessages,
   investigationsActive,
   investigationOperations,
+  approvalsPending,
+  approvalsApprovedTotal,
+  approvalsRejectedTotal,
   applicationErrors,
   tenantScopeViolationsTotal,
   memoryUsage,
@@ -516,6 +538,8 @@ export {
   intelgraphGlassBoxCacheHits,
   intelgraphCacheHits,
   intelgraphCacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
 };
 
 // Legacy IntelGraph metrics (merged from observability/metrics.ts)
@@ -621,6 +645,20 @@ const intelgraphCacheMisses = new client.Counter({
   help: 'Total cache misses',
 });
 
+// Copilot API metrics
+const copilotApiRequestTotal = new client.Counter({
+  name: 'copilot_api_request_total',
+  help: 'Total number of AI Copilot API requests',
+  labelNames: ['endpoint', 'mode', 'status'],
+});
+
+const copilotApiRequestDurationMs = new client.Histogram({
+  name: 'copilot_api_request_duration_ms',
+  help: 'AI Copilot API request duration in milliseconds',
+  labelNames: ['endpoint', 'mode'],
+  buckets: [50, 100, 250, 500, 1000, 2000, 5000, 10000, 30000],
+});
+
 // Register metrics
 register.registerMetric(intelgraphJobsProcessed);
 register.registerMetric(intelgraphOutboxSyncLatency);
@@ -638,3 +676,5 @@ register.registerMetric(intelgraphGlassBoxRunDurationMs);
 register.registerMetric(intelgraphGlassBoxCacheHits);
 register.registerMetric(intelgraphCacheHits);
 register.registerMetric(intelgraphCacheMisses);
+register.registerMetric(copilotApiRequestTotal);
+register.registerMetric(copilotApiRequestDurationMs);
