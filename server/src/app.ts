@@ -49,6 +49,7 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
+import searchV1Router from './routes/search-v1.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -166,6 +167,7 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
