@@ -99,7 +99,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
    */
   updateLinkState(linkId: string, state: LinkState, metrics?: Partial<SatelliteLink>): void {
     const link = this.links.get(linkId);
-    if (!link) return;
+    if (!link) {return;}
 
     const previousState = link.linkState;
     link.linkState = state;
@@ -166,7 +166,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
     let bestScore = -1;
 
     for (const link of this.links.values()) {
-      if (link.linkState !== 'connected') continue;
+      if (link.linkState !== 'connected') {continue;}
 
       // Score based on bandwidth, latency, and packet loss
       const score =
@@ -230,14 +230,14 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
   }
 
   private scheduleWindow(link: SatelliteLink): void {
-    if (!link.nextWindow) return;
+    if (!link.nextWindow) {return;}
 
     const msUntilWindow = link.nextWindow.getTime() - Date.now();
-    if (msUntilWindow <= 0) return;
+    if (msUntilWindow <= 0) {return;}
 
     // Clear existing timer
     const existing = this.windowTimers.get(link.id);
-    if (existing) clearTimeout(existing);
+    if (existing) {clearTimeout(existing);}
 
     // Schedule window opening
     const timer = setTimeout(() => {
@@ -261,7 +261,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
 
   private async processQueues(): Promise<void> {
     const link = this.getBestLink();
-    if (!link) return;
+    if (!link) {return;}
 
     const bandwidth = link.bandwidthKbps * 1024 / 8; // bytes per second
 
@@ -278,7 +278,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
     link: SatelliteLink
   ): Promise<void> {
     const queue = this.messageQueue.get(priority);
-    if (!queue || queue.length === 0) return;
+    if (!queue || queue.length === 0) {return;}
 
     let bytesUsed = 0;
     const toRemove: string[] = [];
@@ -292,7 +292,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
       }
 
       // Check if we have bandwidth
-      if (bytesUsed + message.payload.length > availableBytes) break;
+      if (bytesUsed + message.payload.length > availableBytes) {break;}
 
       // Simulate transmission
       const success = await this.transmitMessage(message, link);
@@ -312,7 +312,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
     // Remove processed messages
     for (const id of toRemove) {
       const idx = queue.findIndex(m => m.id === id);
-      if (idx >= 0) queue.splice(idx, 1);
+      if (idx >= 0) {queue.splice(idx, 1);}
     }
   }
 
@@ -346,7 +346,7 @@ export class SatelliteCommHandler extends EventEmitter<SatelliteEvents> {
   private transmissionIntervals: Map<string, NodeJS.Timeout> = new Map();
 
   private startTransmission(linkId: string): void {
-    if (this.transmissionIntervals.has(linkId)) return;
+    if (this.transmissionIntervals.has(linkId)) {return;}
 
     const interval = setInterval(() => {
       this.processQueues();
