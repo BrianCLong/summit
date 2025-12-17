@@ -64,6 +64,10 @@ export {
   type RolePreferences,
 } from './preferences/PreferencesManager.js';
 
+// Import for use in factory functions
+import { NotificationHub } from './NotificationHub.js';
+import { AdapterRegistry } from './adapters/EventAdapters.js';
+
 /**
  * Factory function to create a fully configured notification hub
  */
