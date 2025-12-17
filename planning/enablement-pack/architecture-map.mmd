@@ -1,0 +1,19 @@
+graph TD
+    User[User / Browser] -->|HTTPS| Client[Web Client (React)]
+    Client -->|GraphQL / REST| API[API Server (Node.js)]
+
+    subgraph "Backend Infrastructure"
+        API -->|Read/Write| Postgres[(PostgreSQL)]
+        API -->|Read/Write| Neo4j[(Neo4j Graph DB)]
+        API -->|Cache/PubSub| Redis[(Redis)]
+
+        API -->|Enqueue Jobs| Queue[Job Queue]
+        Queue -->|Process| Worker[Background Workers]
+        Worker -->|Update| Postgres
+        Worker -->|Update| Neo4j
+    end
+
+    subgraph "External Integrations"
+        API -->|API Calls| LLM[LLM Provider]
+        API -->|Ingest| ExtData[External Data Sources]
+    end
