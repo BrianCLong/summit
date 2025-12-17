@@ -1,12 +1,20 @@
 import type { Config } from 'jest';
 
 const config: Config = {
+<<<<<<< HEAD
+  testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts'],
+  setupFilesAfterEnv: [
+    '<rootDir>/tests/setup/jest.setup.js',
+    // 'jest-extended/all' is loaded via require in jest.setup.js to handle resolution issues safely
+=======
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.ts',
     'jest-extended/all',
+>>>>>>> main
   ],
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
@@ -31,9 +39,24 @@ const config: Config = {
       {
         useESM: true,
 <<<<<<< HEAD
+        tsconfig: {
+            target: 'ES2022',
+            module: 'ESNext',
+            moduleResolution: 'node',
+            esModuleInterop: true,
+            allowSyntheticDefaultImports: true,
+            resolveJsonModule: true,
+            allowJs: true,
+            sourceMap: true,
+            lib: ['ES2022'],
+            types: ['node', 'jest'],
+        },
+=======
+<<<<<<< HEAD
         tsconfig: 'tsconfig.json',
 =======
         tsconfig: 'tsconfig.test.json',
+>>>>>>> main
 >>>>>>> main
       },
     ],
@@ -56,7 +79,8 @@ const config: Config = {
       statements: 85,
     },
   },
-  coverageReporters: ['text', 'lcov', 'cobertura'],
+  // Restored original reporters and added json-summary
+  coverageReporters: ['text', 'lcov', 'cobertura', 'json-summary'],
   coverageDirectory: '<rootDir>/coverage',
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',

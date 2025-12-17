@@ -12,6 +12,7 @@
     "lint:fix": "ESLINT_USE_FLAT_CONFIG=false eslint . --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
+    "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
@@ -74,6 +75,12 @@
     "@testing-library/user-event": "^14.6.1",
 =======
 <<<<<<< HEAD
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
     "@types/react": "^19.2.5",
 =======
@@ -87,7 +94,11 @@
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
     "@vitejs/plugin-react": "^5.0.4",
+<<<<<<< HEAD
+    "@vitest/coverage-v8": "^4.0.10",
+=======
     "@vitest/coverage-v8": "^4.0.15",
+>>>>>>> main
     "autoprefixer": "^10.4.16",
     "axe-core": "^4.11.0",
     "class-variance-authority": "^0.7.0",
@@ -101,14 +112,21 @@
     "postcss": "^8.4.31",
     "prettier": "^3.6.2",
 <<<<<<< HEAD
+    "rollup-plugin-visualizer": "^6.0.5",
+=======
+<<<<<<< HEAD
 =======
     "rollup-plugin-visualizer": "^6.0.5",
+>>>>>>> main
 >>>>>>> main
     "storybook": "^10.0.6",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.9.3",
     "vite": "^7.1.11",
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
     "vitest": "^4.0.3"
 =======
     "vitest": "^4.0.3",
