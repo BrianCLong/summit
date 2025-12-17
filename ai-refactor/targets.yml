@@ -1,0 +1,24 @@
+# Phase 1: narrow, low-risk refactor targets
+- id: demo-docs-cleanup
+  paths:
+    - docs/dev/onboarding.md
+  goal: "Tighten onboarding guide wording and remove redundant bullets"
+  constraints:
+    - "No product claims or policy changes"
+    - "Keep headings and links intact"
+  checks:
+    - "npm run lint -- --filter=docs || true"
+    - "npm run typecheck -- --pretty false || true"
+    - "npm run test:quick || true"
+
+- id: ppc-utils-simplify
+  paths:
+    - src/ppc/index.ts
+  goal: "Clarify PPC exports and reduce surface duplication"
+  constraints:
+    - "Do not change exported names or types"
+    - "Keep policy composition behavior identical"
+  checks:
+    - "npm run lint -- --filter=ppc"
+    - "npm run typecheck -- --pretty false"
+    - "npm run test -- --testPathPattern=ppc || true"
