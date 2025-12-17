@@ -7,6 +7,18 @@ import logger from '../utils/logger.js';
 import { applicationErrors } from '../monitoring/metrics.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 
+// Global history buffer for the "Prompt Activity Monitor"
+// Stores the last 50 interactions across all LLMService instances.
+const globalHistory = [];
+const MAX_HISTORY = 50;
+
+function addToHistory(entry) {
+  globalHistory.unshift(entry);
+  if (globalHistory.length > MAX_HISTORY) {
+    globalHistory.pop();
+  }
+}
+
 class LLMService {
   constructor(config = {}) {
     this.config = {
@@ -28,6 +40,13 @@ class LLMService {
       totalTokensGenerated: 0,
       averageTokensPerCompletion: 0,
     };
+  }
+
+  /**
+   * Access global prompt history
+   */
+  static getGlobalHistory() {
+    return globalHistory;
   }
 
   /**
@@ -89,6 +108,21 @@ class LLMService {
           tokensUsed: response.usage,
         });
 
+        // Record to global history
+        addToHistory({
+          id: Date.now().toString() + Math.random().toString().slice(2, 5),
+          timestamp: new Date().toISOString(),
+          type: 'complete',
+          provider: this.config.provider,
+          model,
+          prompt,
+          systemMessage,
+          response: response.content,
+          latency,
+          tokens: response.usage,
+          status: 'success',
+        });
+
         return response.content;
       } catch (error) {
         attempt++;
@@ -104,6 +138,18 @@ class LLMService {
             model,
             attempt,
             error: error.message,
+          });
+
+          // Record failure
+          addToHistory({
+            id: Date.now().toString() + Math.random().toString().slice(2, 5),
+            timestamp: new Date().toISOString(),
+            type: 'complete',
+            provider: this.config.provider,
+            model,
+            prompt,
+            error: error.message,
+            status: 'error',
           });
 
           throw error;
@@ -159,6 +205,20 @@ class LLMService {
       const latency = Date.now() - startTime;
       this.updateMetrics(latency, response.usage);
 
+      // Record to global history
+      addToHistory({
+        id: Date.now().toString() + Math.random().toString().slice(2, 5),
+        timestamp: new Date().toISOString(),
+        type: 'chat',
+        provider: this.config.provider,
+        model,
+        messages,
+        response: response.content,
+        latency,
+        tokens: response.usage,
+        status: 'success',
+      });
+
       return response.content;
     } catch (error) {
       this.metrics.errorCount++;
@@ -168,6 +228,18 @@ class LLMService {
         provider: this.config.provider,
         messageCount: messages.length,
         error: error.message,
+      });
+
+      // Record failure
+      addToHistory({
+        id: Date.now().toString() + Math.random().toString().slice(2, 5),
+        timestamp: new Date().toISOString(),
+        type: 'chat',
+        provider: this.config.provider,
+        model,
+        messages,
+        error: error.message,
+        status: 'error',
       });
 
       throw error;
