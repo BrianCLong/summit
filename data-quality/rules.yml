@@ -1,0 +1,62 @@
+rules:
+  # ---------------------------------------------------------------------------
+  # Neo4j / Graph Rules
+  # ---------------------------------------------------------------------------
+  - id: DQ-G-001
+    entity: edge
+    type: reference
+    severity: BLOCKER
+    description: "Orphaned Edges: Relationships that point to non-existent nodes (should be impossible in Neo4j but checking for completeness)."
+    backend: neo4j
+    query: |
+      MATCH (n)-[r]->(m)
+      WHERE n IS NULL OR m IS NULL
+      RETURN elementId(r) as violation_id, type(r) as details
+
+  - id: DQ-G-002
+    entity: node
+    type: schema
+    severity: WARN
+    description: "Nodes missing core 'name' property."
+    backend: neo4j
+    query: |
+      MATCH (n:Node)
+      WHERE n.name IS NULL OR trim(n.name) = ""
+      RETURN elementId(n) as violation_id, labels(n) as details
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL / Relational Rules
+  # ---------------------------------------------------------------------------
+  - id: DQ-R-001
+    entity: run
+    type: reference
+    severity: BLOCKER
+    description: "Runs must belong to a valid tenant."
+    backend: postgres
+    query: |
+      SELECT id as violation_id, 'missing_tenant' as details
+      FROM runs
+      WHERE tenant_id IS NULL
+
+  - id: DQ-R-002
+    entity: tenant
+    type: reference
+    severity: WARN
+    description: "Tenants should have at least one owner (user)."
+    backend: postgres
+    query: |
+      SELECT t.id as violation_id, t.name as details
+      FROM tenants t
+      LEFT JOIN tenant_users tu ON t.id = tu.tenant_id
+      WHERE tu.user_id IS NULL
+
+  - id: DQ-R-003
+    entity: run
+    type: semantic
+    severity: BLOCKER
+    description: "Runs in 'completed' state must have a valid 'completed_at' timestamp."
+    backend: postgres
+    query: |
+      SELECT id as violation_id, status as details
+      FROM runs
+      WHERE status = 'completed' AND completed_at IS NULL
