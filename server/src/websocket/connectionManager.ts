@@ -174,6 +174,7 @@ export class ManagedConnection {
   private lastHeartbeat = Date.now();
   private lastStateChange = Date.now();
   private failureReason: string | null = null;
+  public subscriptions: Set<string> = new Set();
   private readonly onStateChange: () => void;
   private connectStartedAt = Date.now();
   private connectionId: string;
