@@ -473,8 +473,8 @@ export class ModelServer extends EventEmitter {
 
     return metrics.filter(m => {
       const timestamp = new Date(m.timestamp);
-      if (startTime && timestamp < startTime) return false;
-      if (endTime && timestamp > endTime) return false;
+      if (startTime && timestamp < startTime) {return false;}
+      if (endTime && timestamp > endTime) {return false;}
       return true;
     });
   }
@@ -529,7 +529,7 @@ export class ModelServer extends EventEmitter {
     success: boolean
   ): Promise<void> {
     const deployment = this.deployments.get(deploymentId);
-    if (!deployment) return;
+    if (!deployment) {return;}
 
     // Update real-time metrics
     deployment.metrics.requestsPerSecond += 0.1;

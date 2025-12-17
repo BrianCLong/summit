@@ -91,7 +91,7 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
   }
 
   start(): void {
-    if (this.running) return;
+    if (this.running) {return;}
 
     this.running = true;
     const intervalMs = 1000 / this.config.sweepRate;
@@ -124,8 +124,8 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
 
     // Add simulated signals
     for (const source of this.simulatedSources) {
-      if (!source.active) continue;
-      if (source.intermittent && Math.random() > 0.7) continue;
+      if (!source.active) {continue;}
+      if (source.intermittent && Math.random() > 0.7) {continue;}
 
       const binIndex = Math.floor(
         (source.frequency - this.config.startFrequency) / this.config.resolution
@@ -293,9 +293,9 @@ export class SpectrumMonitor extends EventEmitter<SpectrumMonitorEvents> {
   }
 
   private formatFreq(hz: number): string {
-    if (hz >= 1e9) return `${(hz / 1e9).toFixed(2)} GHz`;
-    if (hz >= 1e6) return `${(hz / 1e6).toFixed(2)} MHz`;
-    if (hz >= 1e3) return `${(hz / 1e3).toFixed(2)} kHz`;
+    if (hz >= 1e9) {return `${(hz / 1e9).toFixed(2)} GHz`;}
+    if (hz >= 1e6) {return `${(hz / 1e6).toFixed(2)} MHz`;}
+    if (hz >= 1e3) {return `${(hz / 1e3).toFixed(2)} kHz`;}
     return `${hz} Hz`;
   }
 

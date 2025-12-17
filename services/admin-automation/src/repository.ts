@@ -43,19 +43,19 @@ export class InMemoryCitizenProfileRepository implements ICitizenProfileReposito
   async findById(id: string): Promise<CitizenProfile | null> {
     // Check cache first
     const cached = this.cache.get(id);
-    if (cached) return cached;
+    if (cached) {return cached;}
 
     const profile = this.store.get(id) || null;
-    if (profile) this.cache.set(id, profile);
+    if (profile) {this.cache.set(id, profile);}
 
     return profile;
   }
 
   async findByIdentifier(type: string, value: string): Promise<CitizenProfile | null> {
     for (const profile of this.store.values()) {
-      if (type === 'email' && profile.contact.email === value) return profile;
-      if (type === 'ssn' && profile.identifiers.ssn === value) return profile;
-      if (type === 'phone' && profile.contact.phone === value) return profile;
+      if (type === 'email' && profile.contact.email === value) {return profile;}
+      if (type === 'ssn' && profile.identifiers.ssn === value) {return profile;}
+      if (type === 'phone' && profile.contact.phone === value) {return profile;}
     }
     return null;
   }
