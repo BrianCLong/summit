@@ -1,0 +1,5538 @@
+{
+  "version": "1.0.0",
+  "generatedAt": "2025-12-07T03:53:29.821Z",
+  "services": {
+    "postgres": {
+      "name": "postgres",
+      "type": "docker",
+      "category": "database",
+      "port": 5432,
+      "dependencies": [],
+      "dependents": [
+        "api"
+      ],
+      "metadata": {
+        "image": "postgres:16-alpine",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "redis": {
+      "name": "redis",
+      "type": "docker",
+      "category": "cache",
+      "port": 6379,
+      "dependencies": [],
+      "dependents": [
+        "api",
+        "websocket-server",
+        "ai-sandbox"
+      ],
+      "metadata": {
+        "image": "redis:7-alpine",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "neo4j": {
+      "name": "neo4j",
+      "type": "docker",
+      "category": "database",
+      "port": 7474,
+      "dependencies": [],
+      "dependents": [
+        "api"
+      ],
+      "metadata": {
+        "image": "neo4j:5-community",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "elasticsearch": {
+      "name": "elasticsearch",
+      "type": "docker",
+      "category": "search",
+      "port": 9200,
+      "dependencies": [],
+      "dependents": [
+        "api"
+      ],
+      "metadata": {
+        "image": "docker.elastic.co/elasticsearch/elasticsearch:8.15.0",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "api": {
+      "name": "api",
+      "type": "docker",
+      "category": "api",
+      "port": 4000,
+      "dependencies": [
+        "postgres",
+        "condition",
+        "redis",
+        "condition",
+        "neo4j",
+        "condition",
+        "elasticsearch",
+        "condition"
+      ],
+      "dependents": [
+        "gateway",
+        "web",
+        "ai-worker"
+      ],
+      "metadata": {
+        "build": "",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "gateway": {
+      "name": "gateway",
+      "type": "docker",
+      "category": "api",
+      "port": 4100,
+      "dependencies": [
+        "api",
+        "condition"
+      ],
+      "dependents": [],
+      "metadata": {
+        "build": "",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "web": {
+      "name": "web",
+      "type": "docker",
+      "category": "frontend",
+      "port": 3000,
+      "dependencies": [
+        "api",
+        "condition"
+      ],
+      "dependents": [],
+      "metadata": {
+        "build": "",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "websocket-server": {
+      "name": "websocket-server",
+      "type": "docker",
+      "category": "frontend",
+      "port": 9001,
+      "dependencies": [
+        "redis",
+        "condition"
+      ],
+      "dependents": [],
+      "metadata": {
+        "build": "",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "prometheus": {
+      "name": "prometheus",
+      "type": "docker",
+      "category": "observability",
+      "port": 9090,
+      "dependencies": [],
+      "dependents": [
+        "grafana"
+      ],
+      "metadata": {
+        "image": "prom/prometheus:v2.54.1",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "grafana": {
+      "name": "grafana",
+      "type": "docker",
+      "category": "observability",
+      "port": 3001,
+      "dependencies": [
+        "prometheus",
+        "condition",
+        "loki",
+        "condition",
+        "jaeger",
+        "condition"
+      ],
+      "dependents": [],
+      "metadata": {
+        "image": "grafana/grafana:10.4.7",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "jaeger": {
+      "name": "jaeger",
+      "type": "docker",
+      "category": "observability",
+      "port": 16686,
+      "dependencies": [],
+      "dependents": [
+        "grafana"
+      ],
+      "metadata": {
+        "image": "jaegertracing/all-in-one:1.52",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "loki": {
+      "name": "loki",
+      "type": "docker",
+      "category": "observability",
+      "port": 3100,
+      "dependencies": [],
+      "dependents": [
+        "grafana"
+      ],
+      "metadata": {
+        "image": "grafana/loki:2.9.3",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "promtail": {
+      "name": "promtail",
+      "type": "docker",
+      "category": "ai",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "image": "grafana/promtail:2.9.3",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "alertmanager": {
+      "name": "alertmanager",
+      "type": "docker",
+      "category": "observability",
+      "port": 9093,
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "image": "prom/alertmanager:v0.26.0",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "ai-sandbox": {
+      "name": "ai-sandbox",
+      "type": "docker",
+      "category": "ai",
+      "port": 4020,
+      "dependencies": [
+        "redis",
+        "condition"
+      ],
+      "dependents": [],
+      "metadata": {
+        "build": "",
+        "source": "docker-compose.dev.yml"
+      }
+    },
+    "zookeeper": {
+      "name": "zookeeper",
+      "type": "docker",
+      "category": "service",
+      "port": 2181,
+      "dependencies": [],
+      "dependents": [
+        "kafka"
+      ],
+      "metadata": {
+        "image": "bitnami/zookeeper:3.9",
+        "source": "docker-compose.ai.yml"
+      }
+    },
+    "kafka": {
+      "name": "kafka",
+      "type": "docker",
+      "category": "messaging",
+      "port": 9092,
+      "dependencies": [
+        "zookeeper",
+        "condition"
+      ],
+      "dependents": [
+        "ai-worker"
+      ],
+      "metadata": {
+        "image": "bitnami/kafka:3.7",
+        "source": "docker-compose.ai.yml"
+      }
+    },
+    "ai-worker": {
+      "name": "ai-worker",
+      "type": "docker",
+      "category": "ai",
+      "dependencies": [
+        "api",
+        "condition",
+        "kafka",
+        "condition"
+      ],
+      "dependents": [],
+      "metadata": {
+        "build": "",
+        "source": "docker-compose.ai.yml"
+      }
+    },
+    "strategic-foresight": {
+      "name": "strategic-foresight",
+      "type": "docker",
+      "category": "service",
+      "port": 8003,
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "build": "",
+        "source": "docker-compose.ai.yml"
+      }
+    },
+    "@summit/a11y-lab": {
+      "name": "@summit/a11y-lab",
+      "type": "app",
+      "category": "app",
+      "description": "Accessibility lab with Playwright + axe-core gates, keyboard trap detection, contrast budgeting, and SR tooling.",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/a11y-lab",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/analytics-engine": {
+      "name": "@intelgraph/analytics-engine",
+      "type": "app",
+      "category": "app",
+      "description": "Custom Analytics Dashboard Engine for IntelGraph",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/analytics-engine",
+        "version": "1.0.0"
+      }
+    },
+    "@companyos/compliance-console": {
+      "name": "@companyos/compliance-console",
+      "type": "app",
+      "category": "app",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/compliance-console",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/desktop": {
+      "name": "@intelgraph/desktop",
+      "type": "app",
+      "category": "app",
+      "description": "IntelGraph Desktop Application (Windows, Mac, Linux)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/desktop-electron",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/graph-analytics-service": {
+      "name": "@intelgraph/graph-analytics-service",
+      "type": "app",
+      "category": "app",
+      "description": "Advanced Graph Analytics Engine for IntelGraph",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/graph-analytics",
+        "version": "1.0.0"
+      }
+    },
+    "@companyos/intelgraph-api": {
+      "name": "@companyos/intelgraph-api",
+      "type": "app",
+      "category": "api",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/intelgraph-api",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/labeling-ui": {
+      "name": "@intelgraph/labeling-ui",
+      "type": "app",
+      "category": "app",
+      "description": "Labeling UI for data factory annotation workflows",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/labeling-ui",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/ml-engine": {
+      "name": "@intelgraph/ml-engine",
+      "type": "app",
+      "category": "app",
+      "description": "Machine Learning Engine for IntelGraph Entity Resolution",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/ml-engine",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/mobile": {
+      "name": "@intelgraph/mobile",
+      "type": "app",
+      "category": "app",
+      "description": "React Native OSINT mobile app for Summit IntelGraph with offline-first architecture and real-time GraphQL subscriptions",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/mobile",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/mobile-interface": {
+      "name": "@intelgraph/mobile-interface",
+      "type": "app",
+      "category": "app",
+      "description": "Mobile-responsive Investigation Interface for IntelGraph",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/mobile-interface",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/mobile-native": {
+      "name": "@intelgraph/mobile-native",
+      "type": "app",
+      "category": "app",
+      "description": "Native iOS and Android mobile apps for IntelGraph using React Native",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/mobile-native",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/search-engine": {
+      "name": "@intelgraph/search-engine",
+      "type": "app",
+      "category": "app",
+      "description": "Advanced Search and Query Engine for IntelGraph",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/search-engine",
+        "version": "1.0.0"
+      }
+    },
+    "apps-server": {
+      "name": "apps-server",
+      "type": "app",
+      "category": "api",
+      "description": "IntelGraph GraphQL Server",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/server",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/web": {
+      "name": "@intelgraph/web",
+      "type": "app",
+      "category": "frontend",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/web",
+        "version": "1.0.0"
+      }
+    },
+    "webapp": {
+      "name": "webapp",
+      "type": "app",
+      "category": "frontend",
+      "description": "Analyst tri-pane web app",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/webapp",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/workflow-engine": {
+      "name": "@intelgraph/workflow-engine",
+      "type": "app",
+      "category": "app",
+      "description": "Workflow Automation Engine for IntelGraph",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "apps/workflow-engine",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/3d-visualization": {
+      "name": "@intelgraph/3d-visualization",
+      "type": "package",
+      "category": "library",
+      "description": "3D and immersive visualization library for IntelGraph",
+      "dependencies": [
+        "@intelgraph/visualization"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/3d-visualization",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/acs-learner": {
+      "name": "@intelgraph/acs-learner",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/atl",
+        "@intelgraph/adc",
+        "@intelgraph/crsp"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/acs-learner",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/acs-simulator": {
+      "name": "@intelgraph/acs-simulator",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/atl",
+        "@intelgraph/adc",
+        "@intelgraph/crsp"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/acs-simulator",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/agent-identification": {
+      "name": "@intelgraph/agent-identification",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types",
+        "@intelgraph/espionage-tracking"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/agent-identification",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/anomaly-detection": {
+      "name": "@intelgraph/anomaly-detection",
+      "type": "package",
+      "category": "library",
+      "description": "Advanced anomaly detection with behavioral analytics (UBA/EBA)",
+      "dependencies": [
+        "@intelgraph/threat-detection-core",
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/anomaly-detection",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/api-framework": {
+      "name": "@intelgraph/api-framework",
+      "type": "package",
+      "category": "library",
+      "description": "Unified API framework combining REST, GraphQL, and streaming APIs",
+      "dependencies": [
+        "@intelgraph/query-language",
+        "@intelgraph/rest-api",
+        "@intelgraph/streaming-api"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/api-framework",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/attack-surface": {
+      "name": "@intelgraph/attack-surface",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/attack-surface",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/attribution-engine": {
+      "name": "@intelgraph/attribution-engine",
+      "type": "package",
+      "category": "library",
+      "description": "Digital identity attribution and footprint analysis engine",
+      "dependencies": [
+        "@intelgraph/osint-collector"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/attribution-engine",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/audio-analytics": {
+      "name": "@intelgraph/audio-analytics",
+      "type": "package",
+      "category": "library",
+      "description": "Audio feature extraction and analysis",
+      "dependencies": [
+        "@intelgraph/audio-processing"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/audio-analytics",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/audio-enhancement": {
+      "name": "@intelgraph/audio-enhancement",
+      "type": "package",
+      "category": "library",
+      "description": "Audio enhancement and quality improvement",
+      "dependencies": [
+        "@intelgraph/audio-processing"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/audio-enhancement",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/audio-forensics": {
+      "name": "@intelgraph/audio-forensics",
+      "type": "package",
+      "category": "library",
+      "description": "Audio forensics and authenticity verification",
+      "dependencies": [
+        "@intelgraph/audio-processing"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/audio-forensics",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/audio-intelligence": {
+      "name": "@intelgraph/audio-intelligence",
+      "type": "package",
+      "category": "library",
+      "description": "Audio event detection and acoustic intelligence",
+      "dependencies": [
+        "@intelgraph/audio-processing"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/audio-intelligence",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/audio-synthesis": {
+      "name": "@intelgraph/audio-synthesis",
+      "type": "package",
+      "category": "library",
+      "description": "Audio synthesis with TTS, voice cloning, and effects",
+      "dependencies": [
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/audio-synthesis",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/authz-core": {
+      "name": "@intelgraph/authz-core",
+      "type": "package",
+      "category": "library",
+      "description": "Comprehensive multi-tenant authorization library with warrant and license enforcement",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/authz-core",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/battle-fusion": {
+      "name": "@intelgraph/battle-fusion",
+      "type": "package",
+      "category": "library",
+      "description": "Multidomain data fusion engine for battle management",
+      "dependencies": [
+        "@intelgraph/battle-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/battle-fusion",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/behavioral-analysis": {
+      "name": "@intelgraph/behavioral-analysis",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/biometrics",
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/behavioral-analysis",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/bilateral-relations": {
+      "name": "@intelgraph/bilateral-relations",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types",
+        "@intelgraph/diplomatic-tracking",
+        "@intelgraph/treaty-monitor"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/bilateral-relations",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/biometrics": {
+      "name": "@intelgraph/biometrics",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types"
+      ],
+      "dependents": [
+        "@intelgraph/behavioral-analysis"
+      ],
+      "metadata": {
+        "path": "packages/biometrics",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/business-glossary": {
+      "name": "@intelgraph/business-glossary",
+      "type": "package",
+      "category": "library",
+      "description": "Business glossary and data dictionary with term management and approval workflows",
+      "dependencies": [
+        "@intelgraph/data-catalog",
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/business-glossary",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/catalog-analytics": {
+      "name": "@intelgraph/catalog-analytics",
+      "type": "package",
+      "category": "library",
+      "description": "Analytics and reporting for data catalog usage, adoption, and ROI",
+      "dependencies": [
+        "@intelgraph/data-catalog",
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/catalog-analytics",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/cep-engine": {
+      "name": "@intelgraph/cep-engine",
+      "type": "package",
+      "category": "library",
+      "description": "Complex Event Processing engine for pattern detection and temporal analysis",
+      "dependencies": [
+        "@intelgraph/kafka-integration",
+        "@intelgraph/stream-processing"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/cep-engine",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/chain-of-custody": {
+      "name": "@intelgraph/chain-of-custody",
+      "type": "package",
+      "category": "library",
+      "description": "Chain of custody tracking for evidence and legal compliance",
+      "dependencies": [
+        "@intelgraph/blockchain",
+        "@intelgraph/digital-signatures"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/chain-of-custody",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/charting": {
+      "name": "@intelgraph/charting",
+      "type": "package",
+      "category": "library",
+      "description": "Advanced charting library for IntelGraph",
+      "dependencies": [
+        "@intelgraph/visualization"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/charting",
+        "version": "1.0.0"
+      }
+    },
+    "@summit/cloud-governance": {
+      "name": "@summit/cloud-governance",
+      "type": "package",
+      "category": "library",
+      "description": "Cloud governance, security, and compliance for data lakehouse",
+      "dependencies": [
+        "@summit/lakehouse"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/cloud-governance",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/cnn-framework": {
+      "name": "@intelgraph/cnn-framework",
+      "type": "package",
+      "category": "library",
+      "description": "Convolutional Neural Network framework for Summit",
+      "dependencies": [
+        "@intelgraph/deep-learning-core",
+        "@intelgraph/neural-networks"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/cnn-framework",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/collaboration": {
+      "name": "@intelgraph/collaboration",
+      "type": "package",
+      "category": "library",
+      "description": "Comprehensive collaboration platform for intelligence analysis",
+      "dependencies": [
+        "@intelgraph/workspace",
+        "@intelgraph/real-time-sync",
+        "@intelgraph/commenting",
+        "@intelgraph/version-control"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/collaboration",
+        "version": "1.0.0"
+      }
+    },
+    "@summit/comint-analyzer": {
+      "name": "@summit/comint-analyzer",
+      "type": "package",
+      "category": "library",
+      "description": "Communications Intelligence Analysis - Training Framework",
+      "dependencies": [
+        "@summit/sigint-collector",
+        "@summit/rf-processor"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/comint-analyzer",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/compliance-monitor": {
+      "name": "@intelgraph/compliance-monitor",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/supply-chain-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/compliance-monitor",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/component-tracker": {
+      "name": "@intelgraph/component-tracker",
+      "type": "package",
+      "category": "ui",
+      "dependencies": [
+        "@intelgraph/supply-chain-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/component-tracker",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/content-verification": {
+      "name": "@intelgraph/content-verification",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/content-verification",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/counterintel-ops": {
+      "name": "@intelgraph/counterintel-ops",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types",
+        "@intelgraph/espionage-tracking"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/counterintel-ops",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/covert-operations": {
+      "name": "@intelgraph/covert-operations",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types",
+        "@intelgraph/espionage-tracking"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/covert-operations",
+        "version": "0.1.0"
+      }
+    },
+    "@intelgraph/cqrs": {
+      "name": "@intelgraph/cqrs",
+      "type": "package",
+      "category": "library",
+      "description": "CQRS (Command Query Responsibility Segregation) implementation with projections",
+      "dependencies": [
+        "@intelgraph/event-sourcing",
+        "@intelgraph/event-bus"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/cqrs",
+        "version": "1.0.0"
+      }
+    },
+    "@intelgraph/crisis-diplomacy": {
+      "name": "@intelgraph/crisis-diplomacy",
+      "type": "package",
+      "category": "library",
+      "dependencies": [
+        "@intelgraph/common-types"
+      ],
+      "dependents": [],
+      "metadata": {
+        "path": "packages/crisis-diplomacy",
+        "version": "0.1.0"
+      }
+    },
+    "workflow:_reusable-build": {
+      "name": "workflow:_reusable-build",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🏗️ Reusable - Build",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-build.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-ci-fast": {
+      "name": "workflow:_reusable-ci-fast",
+      "type": "workflow",
+      "category": "ci",
+      "description": "_reusable-ci-fast",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-ci-fast.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-ci-perf": {
+      "name": "workflow:_reusable-ci-perf",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Performance SLO",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-ci-perf.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-ci-security": {
+      "name": "workflow:_reusable-ci-security",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Security",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-ci-security.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-node-pnpm-setup": {
+      "name": "workflow:_reusable-node-pnpm-setup",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Reusable Node.js & pnpm Setup",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-node-pnpm-setup.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-release": {
+      "name": "workflow:_reusable-release",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Release",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-release.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-setup": {
+      "name": "workflow:_reusable-setup",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🔧 Reusable - Environment Setup",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-setup.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-slsa-build": {
+      "name": "workflow:_reusable-slsa-build",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Reusable SLSA L3 Build",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-slsa-build.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-test": {
+      "name": "workflow:_reusable-test",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🧪 Reusable - Test Runner",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-test.yml",
+        "triggers": []
+      }
+    },
+    "workflow:_reusable-toolchain-setup": {
+      "name": "workflow:_reusable-toolchain-setup",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🛠️ Reusable Toolchain Setup (Node + PNPM)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "_reusable-toolchain-setup.yml",
+        "triggers": []
+      }
+    },
+    "workflow:abac-policy": {
+      "name": "workflow:abac-policy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🔐 ABAC Policy Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "abac-policy.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:add-to-project": {
+      "name": "workflow:add-to-project",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Add Issues and PRs to Project",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "add-to-project.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:adr-check": {
+      "name": "workflow:adr-check",
+      "type": "workflow",
+      "category": "ci",
+      "description": "ADR Update Check",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "adr-check.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:agentic-task-orchestrator": {
+      "name": "workflow:agentic-task-orchestrator",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🤖 Agentic Task Orchestrator",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "agentic-task-orchestrator.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:agsm-probes": {
+      "name": "workflow:agsm-probes",
+      "type": "workflow",
+      "category": "ci",
+      "description": "AGSM Synthetic Probes",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "agsm-probes.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:airgap-deployment": {
+      "name": "workflow:airgap-deployment",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Air-Gapped Deployment CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "airgap-deployment.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:api-docs-validation": {
+      "name": "workflow:api-docs-validation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "API Documentation Validation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "api-docs-validation.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:api-docs": {
+      "name": "workflow:api-docs",
+      "type": "workflow",
+      "category": "ci",
+      "description": "API Documentation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "api-docs.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:attest-provenance": {
+      "name": "workflow:attest-provenance",
+      "type": "workflow",
+      "category": "ci",
+      "description": "attest-provenance",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "attest-provenance.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:attest-sbom": {
+      "name": "workflow:attest-sbom",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SBOM & Attest",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "attest-sbom.yml",
+        "triggers": []
+      }
+    },
+    "workflow:audit.strict.nightly": {
+      "name": "workflow:audit.strict.nightly",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Audit (strict, nightly)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "audit.strict.nightly.yml",
+        "triggers": [
+          "schedule"
+        ]
+      }
+    },
+    "workflow:auto-assign": {
+      "name": "workflow:auto-assign",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto Assign Reviewers",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-assign.yml",
+        "triggers": []
+      }
+    },
+    "workflow:auto-draft-release": {
+      "name": "workflow:auto-draft-release",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto Draft Release",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-draft-release.yml",
+        "triggers": []
+      }
+    },
+    "workflow:auto-fix-vulnerabilities": {
+      "name": "workflow:auto-fix-vulnerabilities",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto-Fix Vulnerabilities",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-fix-vulnerabilities.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:auto-green": {
+      "name": "workflow:auto-green",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto-Green PR",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-green.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:auto-merge-ready": {
+      "name": "workflow:auto-merge-ready",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto Merge Ready PRs",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-merge-ready.yml",
+        "triggers": []
+      }
+    },
+    "workflow:auto-resolve-conflicts": {
+      "name": "workflow:auto-resolve-conflicts",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto-resolve conflicts",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-resolve-conflicts.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:auto-rollback": {
+      "name": "workflow:auto-rollback",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🔄 Auto-Rollback Safety Net",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-rollback.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:auto-update-prs": {
+      "name": "workflow:auto-update-prs",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto Update PRs (safe)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "auto-update-prs.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:automerge": {
+      "name": "workflow:automerge",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Auto-merge",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "automerge.yml",
+        "triggers": []
+      }
+    },
+    "workflow:autotriage-ci": {
+      "name": "workflow:autotriage-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Autotriage CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "autotriage-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:backup-restore-validation": {
+      "name": "workflow:backup-restore-validation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Backup & Restore Validation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "backup-restore-validation.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:batch-merge": {
+      "name": "workflow:batch-merge",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Batch Merge PRs",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "batch-merge.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:blue-green-canary": {
+      "name": "workflow:blue-green-canary",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Blue-Green with Progressive Canary",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "blue-green-canary.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:branch-cleanup": {
+      "name": "workflow:branch-cleanup",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Branch Cleanup",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "branch-cleanup.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:branch-protection": {
+      "name": "workflow:branch-protection",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Configure Branch Protection",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "branch-protection.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:build-and-push": {
+      "name": "workflow:build-and-push",
+      "type": "workflow",
+      "category": "ci",
+      "description": "build-and-push",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "build-and-push.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:build-images": {
+      "name": "workflow:build-images",
+      "type": "workflow",
+      "category": "ci",
+      "description": "build-images",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "build-images.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:canary-deployment": {
+      "name": "workflow:canary-deployment",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Canary Deployment",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "canary-deployment.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:canary-progress": {
+      "name": "workflow:canary-progress",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Canary Weight Progression",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "canary-progress.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:cd-deploy": {
+      "name": "workflow:cd-deploy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CD Deploy",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "cd-deploy.yml",
+        "triggers": []
+      }
+    },
+    "workflow:cd-preview": {
+      "name": "workflow:cd-preview",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CD Preview Environments",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "cd-preview.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:cd-release": {
+      "name": "workflow:cd-release",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CD Release",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "cd-release.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:cd-rollback": {
+      "name": "workflow:cd-rollback",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CD Rollback",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "cd-rollback.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:cdis": {
+      "name": "workflow:cdis",
+      "type": "workflow",
+      "category": "ci",
+      "description": "cdis",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "cdis.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:chatops": {
+      "name": "workflow:chatops",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🤖 ChatOps Commands",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "chatops.yml",
+        "triggers": []
+      }
+    },
+    "workflow:ci-backbone": {
+      "name": "workflow:ci-backbone",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Backbone",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-backbone.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:ci-cd": {
+      "name": "workflow:ci-cd",
+      "type": "workflow",
+      "category": "ci",
+      "description": "IntelGraph CI/CD Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-cd.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ci-golden-path": {
+      "name": "workflow:ci-golden-path",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Golden Path",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-golden-path.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:ci-image": {
+      "name": "workflow:ci-image",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Image",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-image.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ci-main": {
+      "name": "workflow:ci-main",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Main - Green Lock Strategy",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-main.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ci-modernized": {
+      "name": "workflow:ci-modernized",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🚀 CI - Modernized Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-modernized.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:ci-performance-k6": {
+      "name": "workflow:ci-performance-k6",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Performance (k6)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-performance-k6.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:ci-security": {
+      "name": "workflow:ci-security",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security and Compliance Suite",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-security.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:ci-validate": {
+      "name": "workflow:ci-validate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Validate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-validate.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:ci-zap": {
+      "name": "workflow:ci-zap",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI Security (OWASP ZAP)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci-zap.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:ci.green": {
+      "name": "workflow:ci.green",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI (green)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci.green.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ci.main": {
+      "name": "workflow:ci.main",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI (main)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci.main.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ci": {
+      "name": "workflow:ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ci.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:cli": {
+      "name": "workflow:cli",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CLI Build & Test",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "cli.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:client-ci": {
+      "name": "workflow:client-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Client CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "client-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:close-when-done": {
+      "name": "workflow:close-when-done",
+      "type": "workflow",
+      "category": "ci",
+      "description": "close-when-done",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "close-when-done.yml",
+        "triggers": []
+      }
+    },
+    "workflow:closed-pr-excavator": {
+      "name": "workflow:closed-pr-excavator",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🏗️ Closed PR Excavator - Advanced Recovery",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "closed-pr-excavator.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:code-quality-gates": {
+      "name": "workflow:code-quality-gates",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🎯 Code Quality Gates",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "code-quality-gates.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:codeql-analysis": {
+      "name": "workflow:codeql-analysis",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🔍 CodeQL Analysis",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "codeql-analysis.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:codeql-dev": {
+      "name": "workflow:codeql-dev",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CodeQL",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "codeql-dev.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:codeql": {
+      "name": "workflow:codeql",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CodeQL",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "codeql.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:cognitive-targeting-engine-ci": {
+      "name": "workflow:cognitive-targeting-engine-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Cognitive Targeting Engine CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "cognitive-targeting-engine-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:compose-k6-smoke": {
+      "name": "workflow:compose-k6-smoke",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Compose k6 Smoke",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "compose-k6-smoke.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:compose-ui-screens": {
+      "name": "workflow:compose-ui-screens",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Compose UI Screens",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "compose-ui-screens.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:config-attest": {
+      "name": "workflow:config-attest",
+      "type": "workflow",
+      "category": "ci",
+      "description": "config-attestation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "config-attest.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:configure-oidc": {
+      "name": "workflow:configure-oidc",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Configure GitHub OIDC for Cloud Providers",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "configure-oidc.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:conftest": {
+      "name": "workflow:conftest",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Policy Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "conftest.yml",
+        "triggers": []
+      }
+    },
+    "workflow:container-security": {
+      "name": "workflow:container-security",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Container Security Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "container-security.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:contract-tests": {
+      "name": "workflow:contract-tests",
+      "type": "workflow",
+      "category": "ci",
+      "description": "contract-tests",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "contract-tests.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:contract-verify": {
+      "name": "workflow:contract-verify",
+      "type": "workflow",
+      "category": "ci",
+      "description": "contract-verify",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "contract-verify.yml",
+        "triggers": []
+      }
+    },
+    "workflow:copilot-adoption-report": {
+      "name": "workflow:copilot-adoption-report",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Weekly Copilot Adoption Report",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "copilot-adoption-report.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:copilot-guardrail": {
+      "name": "workflow:copilot-guardrail",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Copilot Guardrail",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "copilot-guardrail.yml",
+        "triggers": []
+      }
+    },
+    "workflow:copilot-refresh": {
+      "name": "workflow:copilot-refresh",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Copilot Context Refresh",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "copilot-refresh.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:copilot-wins-rollup": {
+      "name": "workflow:copilot-wins-rollup",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Copilot Wins Rollup",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "copilot-wins-rollup.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:coverage-gate": {
+      "name": "workflow:coverage-gate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Test Coverage Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "coverage-gate.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:create-roadmap-issues": {
+      "name": "workflow:create-roadmap-issues",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Create Roadmap Issues",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "create-roadmap-issues.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "push",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:danger": {
+      "name": "workflow:danger",
+      "type": "workflow",
+      "category": "ci",
+      "description": "danger",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "danger.yml",
+        "triggers": []
+      }
+    },
+    "workflow:data-spine-governance": {
+      "name": "workflow:data-spine-governance",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Data Spine Governance Checks",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "data-spine-governance.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:deception-sim": {
+      "name": "workflow:deception-sim",
+      "type": "workflow",
+      "category": "ci",
+      "description": "deception-simulation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deception-sim.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:delivery-train": {
+      "name": "workflow:delivery-train",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Golden Path Delivery",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "delivery-train.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:demo-validate": {
+      "name": "workflow:demo-validate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Demo Validate (Seed + Screens + k6)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "demo-validate.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:dependabot-auto-merge": {
+      "name": "workflow:dependabot-auto-merge",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Dependabot Auto Merge",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "dependabot-auto-merge.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:dependency-review": {
+      "name": "workflow:dependency-review",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Dependency Review",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "dependency-review.yml",
+        "triggers": []
+      }
+    },
+    "workflow:dependency-update": {
+      "name": "workflow:dependency-update",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Dependency Update",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "dependency-update.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:deploy-compose": {
+      "name": "workflow:deploy-compose",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy via Docker Compose (Remote)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-compose.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:deploy-dev": {
+      "name": "workflow:deploy-dev",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy Dev (AWS)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-dev.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "push"
+        ]
+      }
+    },
+    "workflow:deploy-pipeline": {
+      "name": "workflow:deploy-pipeline",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-pipeline.yaml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:deploy-preview-canary": {
+      "name": "workflow:deploy-preview-canary",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Preview Environment",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-preview-canary.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:deploy-preview": {
+      "name": "workflow:deploy-preview",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy Preview",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-preview.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:deploy-prod-canary": {
+      "name": "workflow:deploy-prod-canary",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy to Prod (Canary + Auto-rollback)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-prod-canary.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:deploy-production": {
+      "name": "workflow:deploy-production",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy to Production",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-production.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:deploy-stage-canary": {
+      "name": "workflow:deploy-stage-canary",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy to Stage (Canary)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-stage-canary.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:deploy-staging": {
+      "name": "workflow:deploy-staging",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy to Staging",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy-staging.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:deploy": {
+      "name": "workflow:deploy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Manual Deploy",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deploy.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:deps.cycles.changed": {
+      "name": "workflow:deps.cycles.changed",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Dependency Cycles (changed workspaces)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "deps.cycles.changed.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:detect-deception": {
+      "name": "workflow:detect-deception",
+      "type": "workflow",
+      "category": "ci",
+      "description": "detect-deception",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "detect-deception.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:dev-ci": {
+      "name": "workflow:dev-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "dev-ci.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:docker-build-modernized": {
+      "name": "workflow:docker-build-modernized",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🐳 Docker - Multi-arch Build & Push",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "docker-build-modernized.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:docker-build-multiarch": {
+      "name": "workflow:docker-build-multiarch",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Build Multi-Architecture Docker Images",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "docker-build-multiarch.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:docker-release": {
+      "name": "workflow:docker-release",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Build, Test, and Release Summit Docker Image",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "docker-release.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:docs-deploy": {
+      "name": "workflow:docs-deploy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Deploy Documentation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "docs-deploy.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:docs-screenshots": {
+      "name": "workflow:docs-screenshots",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Docs Screenshots",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "docs-screenshots.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:docs": {
+      "name": "workflow:docs",
+      "type": "workflow",
+      "category": "ci",
+      "description": "docs",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "docs.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:dr-verify": {
+      "name": "workflow:dr-verify",
+      "type": "workflow",
+      "category": "ci",
+      "description": "DR Verify Workflow",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "dr-verify.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:e2e-observability": {
+      "name": "workflow:e2e-observability",
+      "type": "workflow",
+      "category": "ci",
+      "description": "E2E Observability Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "e2e-observability.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "schedule",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:e2e": {
+      "name": "workflow:e2e",
+      "type": "workflow",
+      "category": "ci",
+      "description": "E2E (Playwright)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "e2e.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:enhanced-testing": {
+      "name": "workflow:enhanced-testing",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Enhanced Testing Suite",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "enhanced-testing.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:entity-resolution-train": {
+      "name": "workflow:entity-resolution-train",
+      "type": "workflow",
+      "category": "ci",
+      "description": "entity-resolution-train",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "entity-resolution-train.yml",
+        "triggers": [
+          "schedule",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:environment-specific-tests": {
+      "name": "workflow:environment-specific-tests",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Environment Specific Tests",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "environment-specific-tests.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:er-precision-gate": {
+      "name": "workflow:er-precision-gate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Entity Resolution Precision Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "er-precision-gate.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:error-budget-monitoring": {
+      "name": "workflow:error-budget-monitoring",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Error Budget Monitoring",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "error-budget-monitoring.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:evals": {
+      "name": "workflow:evals",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Evals",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "evals.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:evidence-bundle-release": {
+      "name": "workflow:evidence-bundle-release",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Evidence Bundle Generation and Release",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "evidence-bundle-release.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:feature-flag-branches": {
+      "name": "workflow:feature-flag-branches",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Feature Flag Branch Gates",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "feature-flag-branches.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:finops-monitoring": {
+      "name": "workflow:finops-monitoring",
+      "type": "workflow",
+      "category": "ci",
+      "description": "FinOps Cost Monitoring",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "finops-monitoring.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:gitleaks": {
+      "name": "workflow:gitleaks",
+      "type": "workflow",
+      "category": "ci",
+      "description": "gitleaks",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "gitleaks.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:golden-build": {
+      "name": "workflow:golden-build",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Golden Path Build (Image & Sign)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-build.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:golden-ci": {
+      "name": "workflow:golden-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Golden Path CI (Build & Scan)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-ci.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:golden-deploy": {
+      "name": "workflow:golden-deploy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Golden Path Deploy (Stage -> Prod)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-deploy.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:golden-path-ci": {
+      "name": "workflow:golden-path-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Golden Path CI/CD",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-path-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:golden-pr-tests": {
+      "name": "workflow:golden-pr-tests",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🏆 Golden PR Tests",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-pr-tests.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:golden-preview": {
+      "name": "workflow:golden-preview",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Golden Path Preview (Ephemeral)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-preview.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:golden-sample": {
+      "name": "workflow:golden-sample",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Service: Golden Sample",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-sample.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:golden-service-pipeline": {
+      "name": "workflow:golden-service-pipeline",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Golden Service Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "golden-service-pipeline.yml",
+        "triggers": []
+      }
+    },
+    "workflow:governance": {
+      "name": "workflow:governance",
+      "type": "workflow",
+      "category": "ci",
+      "description": "governance",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "governance.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:grafana-import": {
+      "name": "workflow:grafana-import",
+      "type": "workflow",
+      "category": "ci",
+      "description": "grafana-import-dashboards",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "grafana-import.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:graph-benchmark": {
+      "name": "workflow:graph-benchmark",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Graph Performance Benchmarks",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "graph-benchmark.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:graphql-validation": {
+      "name": "workflow:graphql-validation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "GraphQL Schema Validation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "graphql-validation.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:helm-ci": {
+      "name": "workflow:helm-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "helm-ci",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "helm-ci.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:helm-validation": {
+      "name": "workflow:helm-validation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Helm - Chart Validation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "helm-validation.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:iac-scan": {
+      "name": "workflow:iac-scan",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Infrastructure as Code (IaC) Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "iac-scan.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:image-ci": {
+      "name": "workflow:image-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Docker Image CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "image-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:infra-deploy": {
+      "name": "workflow:infra-deploy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Infra Deploy",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "infra-deploy.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:k6-gates": {
+      "name": "workflow:k6-gates",
+      "type": "workflow",
+      "category": "ci",
+      "description": "k6 SLO Gates",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "k6-gates.yml",
+        "triggers": [
+          "pull_request",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:k6-load": {
+      "name": "workflow:k6-load",
+      "type": "workflow",
+      "category": "ci",
+      "description": "k6-load",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "k6-load.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:k6.smoke.stage": {
+      "name": "workflow:k6.smoke.stage",
+      "type": "workflow",
+      "category": "ci",
+      "description": "k6 Smoke (staging, hard)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "k6.smoke.stage.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:k6.smoke": {
+      "name": "workflow:k6.smoke",
+      "type": "workflow",
+      "category": "ci",
+      "description": "k6 Smoke",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "k6.smoke.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:lane-fast": {
+      "name": "workflow:lane-fast",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Fast Lane",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "lane-fast.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:lane-integration": {
+      "name": "workflow:lane-integration",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Integration Lane",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "lane-integration.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:lane-security": {
+      "name": "workflow:lane-security",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security Lane",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "lane-security.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:license-compliance": {
+      "name": "workflow:license-compliance",
+      "type": "workflow",
+      "category": "ci",
+      "description": "License Compliance",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "license-compliance.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:lint-actions": {
+      "name": "workflow:lint-actions",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Lint Workflows & Terraform",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "lint-actions.yml",
+        "triggers": []
+      }
+    },
+    "workflow:lint-docs": {
+      "name": "workflow:lint-docs",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Docs Lint",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "lint-docs.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:lint.changed": {
+      "name": "workflow:lint.changed",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Lint (changed workspaces)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "lint.changed.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:load-test": {
+      "name": "workflow:load-test",
+      "type": "workflow",
+      "category": "ci",
+      "description": "k6 Load Tests",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "load-test.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:lockfile-verify": {
+      "name": "workflow:lockfile-verify",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Lockfile Verify",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "lockfile-verify.yml",
+        "triggers": []
+      }
+    },
+    "workflow:log-mirror": {
+      "name": "workflow:log-mirror",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Mirror CI Logs (self-archiving)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "log-mirror.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:maintainability-check": {
+      "name": "workflow:maintainability-check",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Maintainability Metrics Check",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "maintainability-check.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:marketplace-ga-ci": {
+      "name": "workflow:marketplace-ga-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "marketplace-ga-ci",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "marketplace-ga-ci.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:master-orchestrator": {
+      "name": "workflow:master-orchestrator",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🎯 Master Orchestrator - Supreme Control",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "master-orchestrator.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:mc-platform-v041-sovereign-safeguards": {
+      "name": "workflow:mc-platform-v041-sovereign-safeguards",
+      "type": "workflow",
+      "category": "ci",
+      "description": "MC Platform v0.4.1 Sovereign Safeguards CI/CD",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "mc-platform-v041-sovereign-safeguards.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:mega-merge-orchestrator": {
+      "name": "workflow:mega-merge-orchestrator",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🏭 Mega Merge Orchestrator - Industrial Scale",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "mega-merge-orchestrator.yml",
+        "triggers": [
+          "schedule",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:mega-pr-excavator": {
+      "name": "workflow:mega-pr-excavator",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🏗️ Mega PR Excavator - Mass Recovery",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "mega-pr-excavator.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:merge-queue-config": {
+      "name": "workflow:merge-queue-config",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Merge Queue Configuration",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "merge-queue-config.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:merge-queue": {
+      "name": "workflow:merge-queue",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Merge Queue",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "merge-queue.yml",
+        "triggers": []
+      }
+    },
+    "workflow:merge-train-health": {
+      "name": "workflow:merge-train-health",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Merge Train Health Check",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "merge-train-health.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:merge-train-intelligence": {
+      "name": "workflow:merge-train-intelligence",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🧠 Merge Train Intelligence & Self-Healing",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "merge-train-intelligence.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:merge.queue.kicker": {
+      "name": "workflow:merge.queue.kicker",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Merge Queue Kicker",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "merge.queue.kicker.yml",
+        "triggers": []
+      }
+    },
+    "workflow:metrics-export": {
+      "name": "workflow:metrics-export",
+      "type": "workflow",
+      "category": "ci",
+      "description": "📊 Metrics Export",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "metrics-export.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:migration-audit": {
+      "name": "workflow:migration-audit",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Migration Audit",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "migration-audit.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:migration-dryrun": {
+      "name": "workflow:migration-dryrun",
+      "type": "workflow",
+      "category": "ci",
+      "description": "migration-dryrun",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "migration-dryrun.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:migration-gate": {
+      "name": "workflow:migration-gate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "DB Migration Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "migration-gate.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ml-ci": {
+      "name": "workflow:ml-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "ML CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ml-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ml-pipeline": {
+      "name": "workflow:ml-pipeline",
+      "type": "workflow",
+      "category": "ci",
+      "description": "ML Infrastructure Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ml-pipeline.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:mobile": {
+      "name": "workflow:mobile",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Mobile CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "mobile.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:model-catalog-staleness": {
+      "name": "workflow:model-catalog-staleness",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Model Catalog Staleness Check",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "model-catalog-staleness.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:nightly-cve-scan": {
+      "name": "workflow:nightly-cve-scan",
+      "type": "workflow",
+      "category": "ci",
+      "description": "nightly-cve-scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "nightly-cve-scan.yml",
+        "triggers": [
+          "schedule"
+        ]
+      }
+    },
+    "workflow:nightly-ops-delta": {
+      "name": "workflow:nightly-ops-delta",
+      "type": "workflow",
+      "category": "ci",
+      "description": "nightly-ops-delta",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "nightly-ops-delta.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:nightly-testing": {
+      "name": "workflow:nightly-testing",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Nightly Testing",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "nightly-testing.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:nightly.ops.perf": {
+      "name": "workflow:nightly.ops.perf",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Nightly Ops & Perf (strict)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "nightly.ops.perf.yml",
+        "triggers": [
+          "schedule"
+        ]
+      }
+    },
+    "workflow:oct25-bulk-import": {
+      "name": "workflow:oct25-bulk-import",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Oct25 Bulk Import",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "oct25-bulk-import.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:operational-verification": {
+      "name": "workflow:operational-verification",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Operational Verification Checklist",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "operational-verification.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch",
+          "push"
+        ]
+      }
+    },
+    "workflow:ops-reminders": {
+      "name": "workflow:ops-reminders",
+      "type": "workflow",
+      "category": "ci",
+      "description": "ops-reminders",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ops-reminders.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:ops.validate.stage": {
+      "name": "workflow:ops.validate.stage",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Ops Validate (staging, hard)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ops.validate.stage.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:owasp-zap-scan": {
+      "name": "workflow:owasp-zap-scan",
+      "type": "workflow",
+      "category": "ci",
+      "description": "OWASP ZAP Security Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "owasp-zap-scan.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:owasp-zap": {
+      "name": "workflow:owasp-zap",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security - OWASP ZAP",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "owasp-zap.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:pact": {
+      "name": "workflow:pact",
+      "type": "workflow",
+      "category": "ci",
+      "description": "pact-contracts",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pact.yml",
+        "triggers": []
+      }
+    },
+    "workflow:performance-benchmark": {
+      "name": "workflow:performance-benchmark",
+      "type": "workflow",
+      "category": "ci",
+      "description": "📈 Performance Benchmarking",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "performance-benchmark.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:performance-regression": {
+      "name": "workflow:performance-regression",
+      "type": "workflow",
+      "category": "ci",
+      "description": "⚡ Performance Regression Testing",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "performance-regression.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:platform-sre-pipeline": {
+      "name": "workflow:platform-sre-pipeline",
+      "type": "workflow",
+      "category": "ci",
+      "description": "platform-sre-pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "platform-sre-pipeline.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:playwright.smoke": {
+      "name": "workflow:playwright.smoke",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Playwright Smoke",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "playwright.smoke.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:policy-ci": {
+      "name": "workflow:policy-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Policy Tests",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "policy-ci.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:policy-fuzzer": {
+      "name": "workflow:policy-fuzzer",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Policy Fuzzer",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "policy-fuzzer.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:policy-gate": {
+      "name": "workflow:policy-gate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Policy Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "policy-gate.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:policy-pack": {
+      "name": "workflow:policy-pack",
+      "type": "workflow",
+      "category": "ci",
+      "description": "policy-pack-v0",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "policy-pack.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:populate-october-project": {
+      "name": "workflow:populate-october-project",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Populate October Project",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "populate-october-project.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:post-deploy-verification": {
+      "name": "workflow:post-deploy-verification",
+      "type": "workflow",
+      "category": "ci",
+      "description": "post-deploy-verification",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "post-deploy-verification.yml",
+        "triggers": []
+      }
+    },
+    "workflow:post-ga-patch": {
+      "name": "workflow:post-ga-patch",
+      "type": "workflow",
+      "category": "ci",
+      "description": "post-ga-patch",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "post-ga-patch.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:pq-dual-sig-gate": {
+      "name": "workflow:pq-dual-sig-gate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Post-Quantum Dual Signature Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pq-dual-sig-gate.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:pr-auto-assign-reviewers": {
+      "name": "workflow:pr-auto-assign-reviewers",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Auto-Assign Reviewers",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-auto-assign-reviewers.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-auto-update": {
+      "name": "workflow:pr-auto-update",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Auto-Update and Merge Train",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-auto-update.yml",
+        "triggers": [
+          "push",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:pr-green-up": {
+      "name": "workflow:pr-green-up",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Green-Up Protocol",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-green-up.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:pr-labeler": {
+      "name": "workflow:pr-labeler",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Auto-Labeler",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-labeler.yml",
+        "triggers": []
+      }
+    },
+    "workflow:pr-policy-gates": {
+      "name": "workflow:pr-policy-gates",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Policy Gates",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-policy-gates.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-quality-gate": {
+      "name": "workflow:pr-quality-gate",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Quality Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-quality-gate.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-size-check": {
+      "name": "workflow:pr-size-check",
+      "type": "workflow",
+      "category": "ci",
+      "description": "📏 PR Size Check",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-size-check.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-size-checker": {
+      "name": "workflow:pr-size-checker",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Size Checker",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-size-checker.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-stale-close": {
+      "name": "workflow:pr-stale-close",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Mark and close stale PRs",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-stale-close.yml",
+        "triggers": [
+          "schedule"
+        ]
+      }
+    },
+    "workflow:pr-test-coverage-check": {
+      "name": "workflow:pr-test-coverage-check",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Test Coverage Check",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-test-coverage-check.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-triage": {
+      "name": "workflow:pr-triage",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PR Triage & Quality Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-triage.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-tripwire": {
+      "name": "workflow:pr-tripwire",
+      "type": "workflow",
+      "category": "ci",
+      "description": "pr-tripwire",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-tripwire.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pr-validation": {
+      "name": "workflow:pr-validation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🔍 PR Validation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pr-validation.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:preview-env": {
+      "name": "workflow:preview-env",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Preview Environment",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "preview-env.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:preview-teardown": {
+      "name": "workflow:preview-teardown",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Preview Teardown",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "preview-teardown.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:preview-ttl-reaper": {
+      "name": "workflow:preview-ttl-reaper",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Preview TTL Reaper",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "preview-ttl-reaper.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:preview": {
+      "name": "workflow:preview",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Preview Env",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "preview.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:promise-tracker": {
+      "name": "workflow:promise-tracker",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Promise Tracker",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "promise-tracker.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:promote-on-build": {
+      "name": "workflow:promote-on-build",
+      "type": "workflow",
+      "category": "ci",
+      "description": "promote-on-build",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "promote-on-build.yml",
+        "triggers": []
+      }
+    },
+    "workflow:publish-model-catalog-doc": {
+      "name": "workflow:publish-model-catalog-doc",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Publish Model Catalog Doc",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "publish-model-catalog-doc.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:publish.dryrun": {
+      "name": "workflow:publish.dryrun",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Publish Dry-Run (changed workspaces)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "publish.dryrun.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:pve": {
+      "name": "workflow:pve",
+      "type": "workflow",
+      "category": "ci",
+      "description": "PVE Policy Validation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "pve.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:python-ci": {
+      "name": "workflow:python-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "IntelGraph Python CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "python-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:queue-monitoring": {
+      "name": "workflow:queue-monitoring",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Queue Performance Monitoring",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "queue-monitoring.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:rbac-drift": {
+      "name": "workflow:rbac-drift",
+      "type": "workflow",
+      "category": "ci",
+      "description": "RBAC Drift Monitor",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "rbac-drift.yml",
+        "triggers": [
+          "schedule",
+          "push"
+        ]
+      }
+    },
+    "workflow:release-captain-demo": {
+      "name": "workflow:release-captain-demo",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🎬 Release Captain Demo",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-captain-demo.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:release-captain": {
+      "name": "workflow:release-captain",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Release Captain (one-shot)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-captain.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:release-comprehensive": {
+      "name": "workflow:release-comprehensive",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Release - Multi-arch Docker & Helm",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-comprehensive.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:release-ga": {
+      "name": "workflow:release-ga",
+      "type": "workflow",
+      "category": "ci",
+      "description": "release-ga",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-ga.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "push"
+        ]
+      }
+    },
+    "workflow:release-hardened": {
+      "name": "workflow:release-hardened",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Hardened Release",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-hardened.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:release-notes": {
+      "name": "workflow:release-notes",
+      "type": "workflow",
+      "category": "ci",
+      "description": "📝 Automated Release Notes",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-notes.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:release-on-main": {
+      "name": "workflow:release-on-main",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Release on main",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-on-main.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:release-train-discipline": {
+      "name": "workflow:release-train-discipline",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Release Train Discipline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-train-discipline.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:release-verify": {
+      "name": "workflow:release-verify",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Release Verify",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release-verify.yml",
+        "triggers": [
+          "push"
+        ]
+      }
+    },
+    "workflow:release": {
+      "name": "workflow:release",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Release",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "release.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "push"
+        ]
+      }
+    },
+    "workflow:review-sla": {
+      "name": "workflow:review-sla",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Review SLA",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "review-sla.yml",
+        "triggers": [
+          "schedule"
+        ]
+      }
+    },
+    "workflow:reviewdog": {
+      "name": "workflow:reviewdog",
+      "type": "workflow",
+      "category": "ci",
+      "description": "reviewdog",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "reviewdog.yml",
+        "triggers": []
+      }
+    },
+    "workflow:revive-closed-prs": {
+      "name": "workflow:revive-closed-prs",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Revive Closed PR Work",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "revive-closed-prs.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:run_pr_merge": {
+      "name": "workflow:run_pr_merge",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Run PR Merge",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "run_pr_merge.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:sbom-vuln-scan": {
+      "name": "workflow:sbom-vuln-scan",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SBOM & Vulnerability Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "sbom-vuln-scan.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:sbom": {
+      "name": "workflow:sbom",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SBOM",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "sbom.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:scenario-evaluation": {
+      "name": "workflow:scenario-evaluation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Scenario Evaluation Tests",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "scenario-evaluation.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:schema-validation": {
+      "name": "workflow:schema-validation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Schema Validation & Drift Detection",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "schema-validation.yml",
+        "triggers": [
+          "schedule",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:scpe": {
+      "name": "workflow:scpe",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SCPE Supply Chain Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "scpe.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:security-audit": {
+      "name": "workflow:security-audit",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security audit",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "security-audit.yml",
+        "triggers": []
+      }
+    },
+    "workflow:security-autopilot": {
+      "name": "workflow:security-autopilot",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security Autopilot",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "security-autopilot.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:security-comprehensive": {
+      "name": "workflow:security-comprehensive",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security - Comprehensive Scanning",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "security-comprehensive.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:security-gates": {
+      "name": "workflow:security-gates",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security Gates",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "security-gates.yml",
+        "triggers": []
+      }
+    },
+    "workflow:security-scan": {
+      "name": "workflow:security-scan",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "security-scan.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:security-scans": {
+      "name": "workflow:security-scans",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security Scans",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "security-scans.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:security": {
+      "name": "workflow:security",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Security",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "security.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "push",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    },
+    "workflow:semantic-release": {
+      "name": "workflow:semantic-release",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Semantic Release",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "semantic-release.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:server-ci": {
+      "name": "workflow:server-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Server CI",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "server-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ses": {
+      "name": "workflow:ses",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SES Gate",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ses.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:setup-smoke-test": {
+      "name": "workflow:setup-smoke-test",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Setup Smoke Test",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "setup-smoke-test.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:slsa-attestation": {
+      "name": "workflow:slsa-attestation",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SLSA Level 3 Attestation",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "slsa-attestation.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:slsa-l3-airgap-build": {
+      "name": "workflow:slsa-l3-airgap-build",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SLSA L3 Air-Gapped Build Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "slsa-l3-airgap-build.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "push"
+        ]
+      }
+    },
+    "workflow:slsa-l3-provenance": {
+      "name": "workflow:slsa-l3-provenance",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SLSA L3 Provenance & Supply Chain Security",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "slsa-l3-provenance.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:smoke-compose": {
+      "name": "workflow:smoke-compose",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Full Deployment Smoke (Compose)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "smoke-compose.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:soc2-evidence": {
+      "name": "workflow:soc2-evidence",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SOC2 Evidence Bundle",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "soc2-evidence.yml",
+        "triggers": [
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:sonar-scan": {
+      "name": "workflow:sonar-scan",
+      "type": "workflow",
+      "category": "ci",
+      "description": "SonarCloud Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "sonar-scan.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:stabilization": {
+      "name": "workflow:stabilization",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Stabilization: Build & Unit Tests",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "stabilization.yml",
+        "triggers": [
+          "push",
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:staging-deployment": {
+      "name": "workflow:staging-deployment",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Staging Deployment Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "staging-deployment.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:stale": {
+      "name": "workflow:stale",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Close Stale Issues",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "stale.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:supply-chain": {
+      "name": "workflow:supply-chain",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Supply Chain Gates",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "supply-chain.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:synthetic-monitoring": {
+      "name": "workflow:synthetic-monitoring",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Synthetic Monitoring",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "synthetic-monitoring.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:system-map-drift": {
+      "name": "workflow:system-map-drift",
+      "type": "workflow",
+      "category": "ci",
+      "description": "System Map Drift Detection",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "system-map-drift.yml",
+        "triggers": [
+          "pull_request",
+          "push",
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:terraform-drift": {
+      "name": "workflow:terraform-drift",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Terraform Drift Detection",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "terraform-drift.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:test-coverage": {
+      "name": "workflow:test-coverage",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Test Coverage",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "test-coverage.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:test-policy": {
+      "name": "workflow:test-policy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Test Policy Enforcement",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "test-policy.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:tests.changed": {
+      "name": "workflow:tests.changed",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Tests (changed workspaces)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "tests.changed.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:tip": {
+      "name": "workflow:tip",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Tenant Isolation Prover",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "tip.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:trivy": {
+      "name": "workflow:trivy",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Trivy Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "trivy.yml",
+        "triggers": [
+          "schedule",
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:turbo-ci-optimizer": {
+      "name": "workflow:turbo-ci-optimizer",
+      "type": "workflow",
+      "category": "ci",
+      "description": "⚡ Turbo CI Optimizer - Advanced Performance",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "turbo-ci-optimizer.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:typecheck.changed": {
+      "name": "workflow:typecheck.changed",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Typecheck (changed workspaces)",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "typecheck.changed.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:ultra-merge-orchestrator": {
+      "name": "workflow:ultra-merge-orchestrator",
+      "type": "workflow",
+      "category": "ci",
+      "description": "🚀 Ultra Merge Orchestrator",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "ultra-merge-orchestrator.yml",
+        "triggers": [
+          "schedule",
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:validate-canary-config": {
+      "name": "workflow:validate-canary-config",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Validate Canary Configuration",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "validate-canary-config.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:validate-canary-params": {
+      "name": "workflow:validate-canary-params",
+      "type": "workflow",
+      "category": "ci",
+      "description": "validate-canary-params",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "validate-canary-params.yml",
+        "triggers": [
+          "pull_request",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:validate-grafana-json": {
+      "name": "workflow:validate-grafana-json",
+      "type": "workflow",
+      "category": "ci",
+      "description": "validate-grafana-json",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "validate-grafana-json.yml",
+        "triggers": [
+          "pull_request",
+          "push"
+        ]
+      }
+    },
+    "workflow:validate-model-catalog": {
+      "name": "workflow:validate-model-catalog",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Validate Model Catalog",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "validate-model-catalog.yml",
+        "triggers": []
+      }
+    },
+    "workflow:validate-v035-config": {
+      "name": "workflow:validate-v035-config",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Validate v0.3.5 Configuration",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "validate-v035-config.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:wargame-ci": {
+      "name": "workflow:wargame-ci",
+      "type": "workflow",
+      "category": "ci",
+      "description": "WarGame Dashboard CI/CD",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "wargame-ci.yml",
+        "triggers": [
+          "push",
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:webapp-e2e": {
+      "name": "workflow:webapp-e2e",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Webapp E2E and Visual Regression",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "webapp-e2e.yml",
+        "triggers": [
+          "pull_request"
+        ]
+      }
+    },
+    "workflow:week2-deployment": {
+      "name": "workflow:week2-deployment",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Week 2 Deployment Pipeline",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "week2-deployment.yml",
+        "triggers": [
+          "push",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:weekly-hygiene": {
+      "name": "workflow:weekly-hygiene",
+      "type": "workflow",
+      "category": "ci",
+      "description": "Weekly Hygiene",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "weekly-hygiene.yml",
+        "triggers": [
+          "schedule",
+          "workflow_dispatch"
+        ]
+      }
+    },
+    "workflow:zap-dast": {
+      "name": "workflow:zap-dast",
+      "type": "workflow",
+      "category": "ci",
+      "description": "ZAP DAST Scan",
+      "dependencies": [],
+      "dependents": [],
+      "metadata": {
+        "file": "zap-dast.yml",
+        "triggers": [
+          "workflow_dispatch",
+          "pull_request",
+          "schedule"
+        ]
+      }
+    }
+  },
+  "edges": [
+    {
+      "from": "api",
+      "to": "postgres",
+      "type": "depends_on"
+    },
+    {
+      "from": "api",
+      "to": "redis",
+      "type": "depends_on"
+    },
+    {
+      "from": "api",
+      "to": "neo4j",
+      "type": "depends_on"
+    },
+    {
+      "from": "api",
+      "to": "elasticsearch",
+      "type": "depends_on"
+    },
+    {
+      "from": "gateway",
+      "to": "api",
+      "type": "depends_on"
+    },
+    {
+      "from": "web",
+      "to": "api",
+      "type": "depends_on"
+    },
+    {
+      "from": "websocket-server",
+      "to": "redis",
+      "type": "depends_on"
+    },
+    {
+      "from": "grafana",
+      "to": "prometheus",
+      "type": "depends_on"
+    },
+    {
+      "from": "grafana",
+      "to": "loki",
+      "type": "depends_on"
+    },
+    {
+      "from": "grafana",
+      "to": "jaeger",
+      "type": "depends_on"
+    },
+    {
+      "from": "ai-sandbox",
+      "to": "redis",
+      "type": "depends_on"
+    },
+    {
+      "from": "kafka",
+      "to": "zookeeper",
+      "type": "depends_on"
+    },
+    {
+      "from": "ai-worker",
+      "to": "api",
+      "type": "depends_on"
+    },
+    {
+      "from": "ai-worker",
+      "to": "kafka",
+      "type": "depends_on"
+    },
+    {
+      "from": "@intelgraph/behavioral-analysis",
+      "to": "@intelgraph/biometrics",
+      "type": "imports"
+    }
+  ],
+  "categories": {
+    "database": [
+      "postgres",
+      "neo4j"
+    ],
+    "cache": [
+      "redis"
+    ],
+    "search": [
+      "elasticsearch"
+    ],
+    "api": [
+      "api",
+      "gateway",
+      "@companyos/intelgraph-api",
+      "apps-server"
+    ],
+    "frontend": [
+      "web",
+      "websocket-server",
+      "@intelgraph/web",
+      "webapp"
+    ],
+    "observability": [
+      "prometheus",
+      "grafana",
+      "jaeger",
+      "loki",
+      "alertmanager"
+    ],
+    "ai": [
+      "promtail",
+      "ai-sandbox",
+      "ai-worker"
+    ],
+    "service": [
+      "zookeeper",
+      "strategic-foresight"
+    ],
+    "messaging": [
+      "kafka"
+    ],
+    "app": [
+      "@summit/a11y-lab",
+      "@intelgraph/analytics-engine",
+      "@companyos/compliance-console",
+      "@intelgraph/desktop",
+      "@intelgraph/graph-analytics-service",
+      "@intelgraph/labeling-ui",
+      "@intelgraph/ml-engine",
+      "@intelgraph/mobile",
+      "@intelgraph/mobile-interface",
+      "@intelgraph/mobile-native",
+      "@intelgraph/search-engine",
+      "@intelgraph/workflow-engine"
+    ],
+    "library": [
+      "@intelgraph/3d-visualization",
+      "@intelgraph/acs-learner",
+      "@intelgraph/acs-simulator",
+      "@intelgraph/agent-identification",
+      "@intelgraph/anomaly-detection",
+      "@intelgraph/api-framework",
+      "@intelgraph/attack-surface",
+      "@intelgraph/attribution-engine",
+      "@intelgraph/audio-analytics",
+      "@intelgraph/audio-enhancement",
+      "@intelgraph/audio-forensics",
+      "@intelgraph/audio-intelligence",
+      "@intelgraph/audio-synthesis",
+      "@intelgraph/authz-core",
+      "@intelgraph/battle-fusion",
+      "@intelgraph/behavioral-analysis",
+      "@intelgraph/bilateral-relations",
+      "@intelgraph/biometrics",
+      "@intelgraph/business-glossary",
+      "@intelgraph/catalog-analytics",
+      "@intelgraph/cep-engine",
+      "@intelgraph/chain-of-custody",
+      "@intelgraph/charting",
+      "@summit/cloud-governance",
+      "@intelgraph/cnn-framework",
+      "@intelgraph/collaboration",
+      "@summit/comint-analyzer",
+      "@intelgraph/compliance-monitor",
+      "@intelgraph/content-verification",
+      "@intelgraph/counterintel-ops",
+      "@intelgraph/covert-operations",
+      "@intelgraph/cqrs",
+      "@intelgraph/crisis-diplomacy"
+    ],
+    "ui": [
+      "@intelgraph/component-tracker"
+    ],
+    "ci": [
+      "workflow:_reusable-build",
+      "workflow:_reusable-ci-fast",
+      "workflow:_reusable-ci-perf",
+      "workflow:_reusable-ci-security",
+      "workflow:_reusable-node-pnpm-setup",
+      "workflow:_reusable-release",
+      "workflow:_reusable-setup",
+      "workflow:_reusable-slsa-build",
+      "workflow:_reusable-test",
+      "workflow:_reusable-toolchain-setup",
+      "workflow:abac-policy",
+      "workflow:add-to-project",
+      "workflow:adr-check",
+      "workflow:agentic-task-orchestrator",
+      "workflow:agsm-probes",
+      "workflow:airgap-deployment",
+      "workflow:api-docs-validation",
+      "workflow:api-docs",
+      "workflow:attest-provenance",
+      "workflow:attest-sbom",
+      "workflow:audit.strict.nightly",
+      "workflow:auto-assign",
+      "workflow:auto-draft-release",
+      "workflow:auto-fix-vulnerabilities",
+      "workflow:auto-green",
+      "workflow:auto-merge-ready",
+      "workflow:auto-resolve-conflicts",
+      "workflow:auto-rollback",
+      "workflow:auto-update-prs",
+      "workflow:automerge",
+      "workflow:autotriage-ci",
+      "workflow:backup-restore-validation",
+      "workflow:batch-merge",
+      "workflow:blue-green-canary",
+      "workflow:branch-cleanup",
+      "workflow:branch-protection",
+      "workflow:build-and-push",
+      "workflow:build-images",
+      "workflow:canary-deployment",
+      "workflow:canary-progress",
+      "workflow:cd-deploy",
+      "workflow:cd-preview",
+      "workflow:cd-release",
+      "workflow:cd-rollback",
+      "workflow:cdis",
+      "workflow:chatops",
+      "workflow:ci-backbone",
+      "workflow:ci-cd",
+      "workflow:ci-golden-path",
+      "workflow:ci-image",
+      "workflow:ci-main",
+      "workflow:ci-modernized",
+      "workflow:ci-performance-k6",
+      "workflow:ci-security",
+      "workflow:ci-validate",
+      "workflow:ci-zap",
+      "workflow:ci.green",
+      "workflow:ci.main",
+      "workflow:ci",
+      "workflow:cli",
+      "workflow:client-ci",
+      "workflow:close-when-done",
+      "workflow:closed-pr-excavator",
+      "workflow:code-quality-gates",
+      "workflow:codeql-analysis",
+      "workflow:codeql-dev",
+      "workflow:codeql",
+      "workflow:cognitive-targeting-engine-ci",
+      "workflow:compose-k6-smoke",
+      "workflow:compose-ui-screens",
+      "workflow:config-attest",
+      "workflow:configure-oidc",
+      "workflow:conftest",
+      "workflow:container-security",
+      "workflow:contract-tests",
+      "workflow:contract-verify",
+      "workflow:copilot-adoption-report",
+      "workflow:copilot-guardrail",
+      "workflow:copilot-refresh",
+      "workflow:copilot-wins-rollup",
+      "workflow:coverage-gate",
+      "workflow:create-roadmap-issues",
+      "workflow:danger",
+      "workflow:data-spine-governance",
+      "workflow:deception-sim",
+      "workflow:delivery-train",
+      "workflow:demo-validate",
+      "workflow:dependabot-auto-merge",
+      "workflow:dependency-review",
+      "workflow:dependency-update",
+      "workflow:deploy-compose",
+      "workflow:deploy-dev",
+      "workflow:deploy-pipeline",
+      "workflow:deploy-preview-canary",
+      "workflow:deploy-preview",
+      "workflow:deploy-prod-canary",
+      "workflow:deploy-production",
+      "workflow:deploy-stage-canary",
+      "workflow:deploy-staging",
+      "workflow:deploy",
+      "workflow:deps.cycles.changed",
+      "workflow:detect-deception",
+      "workflow:dev-ci",
+      "workflow:docker-build-modernized",
+      "workflow:docker-build-multiarch",
+      "workflow:docker-release",
+      "workflow:docs-deploy",
+      "workflow:docs-screenshots",
+      "workflow:docs",
+      "workflow:dr-verify",
+      "workflow:e2e-observability",
+      "workflow:e2e",
+      "workflow:enhanced-testing",
+      "workflow:entity-resolution-train",
+      "workflow:environment-specific-tests",
+      "workflow:er-precision-gate",
+      "workflow:error-budget-monitoring",
+      "workflow:evals",
+      "workflow:evidence-bundle-release",
+      "workflow:feature-flag-branches",
+      "workflow:finops-monitoring",
+      "workflow:gitleaks",
+      "workflow:golden-build",
+      "workflow:golden-ci",
+      "workflow:golden-deploy",
+      "workflow:golden-path-ci",
+      "workflow:golden-pr-tests",
+      "workflow:golden-preview",
+      "workflow:golden-sample",
+      "workflow:golden-service-pipeline",
+      "workflow:governance",
+      "workflow:grafana-import",
+      "workflow:graph-benchmark",
+      "workflow:graphql-validation",
+      "workflow:helm-ci",
+      "workflow:helm-validation",
+      "workflow:iac-scan",
+      "workflow:image-ci",
+      "workflow:infra-deploy",
+      "workflow:k6-gates",
+      "workflow:k6-load",
+      "workflow:k6.smoke.stage",
+      "workflow:k6.smoke",
+      "workflow:lane-fast",
+      "workflow:lane-integration",
+      "workflow:lane-security",
+      "workflow:license-compliance",
+      "workflow:lint-actions",
+      "workflow:lint-docs",
+      "workflow:lint.changed",
+      "workflow:load-test",
+      "workflow:lockfile-verify",
+      "workflow:log-mirror",
+      "workflow:maintainability-check",
+      "workflow:marketplace-ga-ci",
+      "workflow:master-orchestrator",
+      "workflow:mc-platform-v041-sovereign-safeguards",
+      "workflow:mega-merge-orchestrator",
+      "workflow:mega-pr-excavator",
+      "workflow:merge-queue-config",
+      "workflow:merge-queue",
+      "workflow:merge-train-health",
+      "workflow:merge-train-intelligence",
+      "workflow:merge.queue.kicker",
+      "workflow:metrics-export",
+      "workflow:migration-audit",
+      "workflow:migration-dryrun",
+      "workflow:migration-gate",
+      "workflow:ml-ci",
+      "workflow:ml-pipeline",
+      "workflow:mobile",
+      "workflow:model-catalog-staleness",
+      "workflow:nightly-cve-scan",
+      "workflow:nightly-ops-delta",
+      "workflow:nightly-testing",
+      "workflow:nightly.ops.perf",
+      "workflow:oct25-bulk-import",
+      "workflow:operational-verification",
+      "workflow:ops-reminders",
+      "workflow:ops.validate.stage",
+      "workflow:owasp-zap-scan",
+      "workflow:owasp-zap",
+      "workflow:pact",
+      "workflow:performance-benchmark",
+      "workflow:performance-regression",
+      "workflow:platform-sre-pipeline",
+      "workflow:playwright.smoke",
+      "workflow:policy-ci",
+      "workflow:policy-fuzzer",
+      "workflow:policy-gate",
+      "workflow:policy-pack",
+      "workflow:populate-october-project",
+      "workflow:post-deploy-verification",
+      "workflow:post-ga-patch",
+      "workflow:pq-dual-sig-gate",
+      "workflow:pr-auto-assign-reviewers",
+      "workflow:pr-auto-update",
+      "workflow:pr-green-up",
+      "workflow:pr-labeler",
+      "workflow:pr-policy-gates",
+      "workflow:pr-quality-gate",
+      "workflow:pr-size-check",
+      "workflow:pr-size-checker",
+      "workflow:pr-stale-close",
+      "workflow:pr-test-coverage-check",
+      "workflow:pr-triage",
+      "workflow:pr-tripwire",
+      "workflow:pr-validation",
+      "workflow:preview-env",
+      "workflow:preview-teardown",
+      "workflow:preview-ttl-reaper",
+      "workflow:preview",
+      "workflow:promise-tracker",
+      "workflow:promote-on-build",
+      "workflow:publish-model-catalog-doc",
+      "workflow:publish.dryrun",
+      "workflow:pve",
+      "workflow:python-ci",
+      "workflow:queue-monitoring",
+      "workflow:rbac-drift",
+      "workflow:release-captain-demo",
+      "workflow:release-captain",
+      "workflow:release-comprehensive",
+      "workflow:release-ga",
+      "workflow:release-hardened",
+      "workflow:release-notes",
+      "workflow:release-on-main",
+      "workflow:release-train-discipline",
+      "workflow:release-verify",
+      "workflow:release",
+      "workflow:review-sla",
+      "workflow:reviewdog",
+      "workflow:revive-closed-prs",
+      "workflow:run_pr_merge",
+      "workflow:sbom-vuln-scan",
+      "workflow:sbom",
+      "workflow:scenario-evaluation",
+      "workflow:schema-validation",
+      "workflow:scpe",
+      "workflow:security-audit",
+      "workflow:security-autopilot",
+      "workflow:security-comprehensive",
+      "workflow:security-gates",
+      "workflow:security-scan",
+      "workflow:security-scans",
+      "workflow:security",
+      "workflow:semantic-release",
+      "workflow:server-ci",
+      "workflow:ses",
+      "workflow:setup-smoke-test",
+      "workflow:slsa-attestation",
+      "workflow:slsa-l3-airgap-build",
+      "workflow:slsa-l3-provenance",
+      "workflow:smoke-compose",
+      "workflow:soc2-evidence",
+      "workflow:sonar-scan",
+      "workflow:stabilization",
+      "workflow:staging-deployment",
+      "workflow:stale",
+      "workflow:supply-chain",
+      "workflow:synthetic-monitoring",
+      "workflow:system-map-drift",
+      "workflow:terraform-drift",
+      "workflow:test-coverage",
+      "workflow:test-policy",
+      "workflow:tests.changed",
+      "workflow:tip",
+      "workflow:trivy",
+      "workflow:turbo-ci-optimizer",
+      "workflow:typecheck.changed",
+      "workflow:ultra-merge-orchestrator",
+      "workflow:validate-canary-config",
+      "workflow:validate-canary-params",
+      "workflow:validate-grafana-json",
+      "workflow:validate-model-catalog",
+      "workflow:validate-v035-config",
+      "workflow:wargame-ci",
+      "workflow:webapp-e2e",
+      "workflow:week2-deployment",
+      "workflow:weekly-hygiene",
+      "workflow:zap-dast"
+    ]
+  },
+  "stats": {
+    "totalServices": 350,
+    "totalEdges": 15,
+    "byCategory": {
+      "database": 2,
+      "cache": 1,
+      "search": 1,
+      "api": 4,
+      "frontend": 4,
+      "observability": 5,
+      "ai": 3,
+      "service": 2,
+      "messaging": 1,
+      "app": 12,
+      "library": 33,
+      "ui": 1,
+      "ci": 281
+    }
+  }
+}
