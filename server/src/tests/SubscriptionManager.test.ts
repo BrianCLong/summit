@@ -1,5 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { SubscriptionManager } from '../payments/SubscriptionManager.js';
+import { SubscriptionManager } from '../payments/SubscriptionManager';
 
 describe('SubscriptionManager', () => {
   let manager: SubscriptionManager;
