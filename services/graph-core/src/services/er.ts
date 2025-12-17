@@ -1,4 +1,4 @@
-import { Entity } from '../schema';
+import { Entity } from '../schema.js';
 
 export interface CandidateScore {
   id: string;

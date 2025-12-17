@@ -111,7 +111,7 @@ export class EnhancedGuardedGenerator {
     }
 
     // Check if user has clearance for detected PII
-    const { allowed, restricted, reason } = this.checkClearance(
+    const { allowed, restricted } = this.checkClearance(
       classifiedEntities,
       context.user.clearance,
     );

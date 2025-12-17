@@ -2,8 +2,8 @@ import express from 'express';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import pino from 'pino';
 import pinoHttp from 'pino-http';
-import { initKeys, getPublicJwk, getPrivateKey } from './keys';
-import { login, introspect } from './auth';
+import { initKeys, getPublicJwk } from './keys';
+import { login, introspect, oidcLogin } from './auth';
 import { requireAuth } from './middleware';
 import {
   startObservability,
@@ -15,12 +15,18 @@ import { StepUpManager } from './stepup';
 import { authorize } from './policy';
 import type { AuthenticatedRequest } from './middleware';
 import type { ResourceAttributes } from './types';
+import { sessionManager } from './session';
+import { requireServiceAuth } from './service-auth';
 
 export async function createApp(): Promise<express.Application> {
   await initKeys();
   await startObservability();
   const attributeService = new AttributeService();
   const stepUpManager = new StepUpManager();
+  const trustedServices = (process.env.SERVICE_AUTH_CALLERS || 'api-gateway,maestro')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
 
   const app: express.Application = express();
   app.use(pinoHttp());
@@ -43,15 +49,36 @@ export async function createApp(): Promise<express.Application> {
     res.json({ keys: [getPublicJwk()] });
   });
 
-  app.post('/auth/introspect', async (req, res) => {
+  app.post('/auth/oidc/callback', async (req, res) => {
+    const { idToken } = req.body || {};
+    if (!idToken) {
+      return res.status(400).json({ error: 'id_token_required' });
+    }
     try {
-      const { token } = req.body;
-      const payload = await introspect(token);
-      res.json(payload);
-    } catch {
-      res.status(401).json({ error: 'invalid_token' });
+      const token = await oidcLogin(idToken);
+      res.json({ token });
+    } catch (error) {
+      res.status(401).json({ error: (error as Error).message });
     }
   });
+
+  app.post(
+    '/auth/introspect',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['auth:introspect'],
+    }),
+    async (req, res) => {
+      try {
+        const { token } = req.body;
+        const payload = await introspect(token);
+        res.json(payload);
+      } catch {
+        res.status(401).json({ error: 'invalid_token' });
+      }
+    },
+  );
 
   app.get('/subject/:id/attributes', async (req, res) => {
     try {
@@ -79,67 +106,75 @@ export async function createApp(): Promise<express.Application> {
     }
   });
 
-  app.post('/authorize', async (req, res) => {
-    try {
-      const subjectId = req.body?.subject?.id;
-      const action = req.body?.action;
-      if (!subjectId || !action) {
-        return res
-          .status(400)
-          .json({ error: 'subject_id_and_action_required' });
-      }
-      const subject = await attributeService.getSubjectAttributes(subjectId);
-      let resource: ResourceAttributes;
-      if (req.body?.resource?.id) {
-        try {
-          const fromCatalog = await attributeService.getResourceAttributes(
-            req.body.resource.id,
-          );
-          resource = {
-            ...fromCatalog,
-            ...req.body.resource,
-          };
-        } catch (error) {
-          if (req.body.resource.tenantId) {
-            resource = {
-              id: req.body.resource.id,
-              tenantId: req.body.resource.tenantId,
-              residency: req.body.resource.residency || subject.residency,
-              classification:
-                req.body.resource.classification || subject.clearance,
-              tags: req.body.resource.tags || [],
-            };
-          } else {
-            throw error;
-          }
+  app.post(
+    '/authorize',
+    requireServiceAuth({
+      audience: 'authz-gateway',
+      allowedServices: trustedServices,
+      requiredScopes: ['abac:decide'],
+    }),
+    async (req, res) => {
+      try {
+        const subjectId = req.body?.subject?.id;
+        const action = req.body?.action;
+        if (!subjectId || !action) {
+          return res
+            .status(400)
+            .json({ error: 'subject_id_and_action_required' });
         }
-      } else {
-        resource = {
-          id: req.body?.resource?.id || 'inline',
-          tenantId: req.body?.resource?.tenantId || subject.tenantId,
-          residency: req.body?.resource?.residency || subject.residency,
-          classification:
-            req.body?.resource?.classification || subject.clearance,
-          tags: req.body?.resource?.tags || [],
-        };
+        const subject = await attributeService.getSubjectAttributes(subjectId);
+        let resource: ResourceAttributes;
+        if (req.body?.resource?.id) {
+          try {
+            const fromCatalog = await attributeService.getResourceAttributes(
+              req.body.resource.id,
+            );
+            resource = {
+              ...fromCatalog,
+              ...req.body.resource,
+            };
+          } catch (error) {
+            if (req.body.resource.tenantId) {
+              resource = {
+                id: req.body.resource.id,
+                tenantId: req.body.resource.tenantId,
+                residency: req.body.resource.residency || subject.residency,
+                classification:
+                  req.body.resource.classification || subject.clearance,
+                tags: req.body.resource.tags || [],
+              };
+            } else {
+              throw error;
+            }
+          }
+        } else {
+          resource = {
+            id: req.body?.resource?.id || 'inline',
+            tenantId: req.body?.resource?.tenantId || subject.tenantId,
+            residency: req.body?.resource?.residency || subject.residency,
+            classification:
+              req.body?.resource?.classification || subject.clearance,
+            tags: req.body?.resource?.tags || [],
+          };
+        }
+        const decision = await authorize({
+          subject,
+          resource,
+          action,
+          context: attributeService.getDecisionContext(
+            String(req.body?.context?.currentAcr || 'loa1'),
+          ),
+        });
+        res.json({
+          allow: decision.allowed,
+          reason: decision.reason,
+          obligations: decision.obligations,
+        });
+      } catch (error) {
+        res.status(400).json({ error: (error as Error).message });
       }
-      const decision = await authorize({
-        subject,
-        resource,
-        action,
-        context: attributeService.getDecisionContext(
-          String(req.body?.context?.currentAcr || 'loa1'),
-        ),
-      });
-      res.json({
-        allow: decision.allowed,
-        reason: decision.reason,
-        obligations: decision.obligations,
-      });
-    } catch (error) {
-      res.status(400).json({ error: (error as Error).message });
-    }
-  });
+    },
+  );
 
   app.post(
     '/auth/webauthn/challenge',
@@ -176,16 +211,13 @@ export async function createApp(): Promise<express.Application> {
           signature,
           challenge,
         });
-        const { SignJWT } = await import('jose');
-        const token = await new SignJWT({
-          ...req.user,
+        const sid = String(req.user?.sid || '');
+        const token = await sessionManager.elevateSession(sid, {
           acr: 'loa2',
-        })
-          .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
-          .setIssuedAt()
-          .setExpirationTime('1h')
-          .sign(getPrivateKey());
-        res.json({ token });
+          amr: ['hwk', 'fido2'],
+          extendSeconds: 30 * 60,
+        });
+        res.json({ token, acr: 'loa2', amr: ['hwk', 'fido2'] });
       } catch (error) {
         res.status(400).json({ error: (error as Error).message });
       }

@@ -10,7 +10,10 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "@summit/shared": "workspace:*",
+<<<<<<< HEAD
+=======
+    "@summit/shared": "workspace:^",
+>>>>>>> main
     "eventemitter3": "^5.0.1",
     "uuid": "^9.0.0",
     "zod": "^3.22.4"

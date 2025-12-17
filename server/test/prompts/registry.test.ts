@@ -1,6 +1,7 @@
 import { PromptRegistry } from '../../prompts/registry';
 import path from 'path';
 import fs from 'fs/promises';
+import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 
 describe('PromptRegistry', () => {
   let registry: PromptRegistry;
