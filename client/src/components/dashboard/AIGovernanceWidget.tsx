@@ -4,13 +4,13 @@ import {
   Card,
   CardContent,
   Chip,
-  Grid,
   IconButton,
   LinearProgress,
   Stack,
   Tooltip,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import PauseCircleIcon from '@mui/icons-material/PauseCircle';
@@ -112,8 +112,8 @@ function getStatusColor(
 }
 
 function getComplianceColor(compliance: number): string {
-  if (compliance >= 90) return '#4caf50';
-  if (compliance >= 70) return '#ff9800';
+  if (compliance >= 90) {return '#4caf50';}
+  if (compliance >= 70) {return '#ff9800';}
   return '#f44336';
 }
 
@@ -196,7 +196,7 @@ export default function AIGovernanceWidget() {
 
         {/* Key Metrics Row */}
         <Grid container spacing={3} mb={3}>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MetricCard
               title="Policy Validation Rate"
               value={`${metrics.automatedValidationRate}%`}
@@ -204,14 +204,14 @@ export default function AIGovernanceWidget() {
               color="#4caf50"
             />
           </Grid>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MetricCard
               title="Human Escalations"
               value={metrics.humanEscalations}
               subtitle="Last 24 hours"
             />
           </Grid>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MetricCard
               title="Active Agents"
               value={metrics.activeAgents}
@@ -219,7 +219,7 @@ export default function AIGovernanceWidget() {
               color={metrics.containedAgents > 0 ? '#ff9800' : '#4caf50'}
             />
           </Grid>
-          <Grid item xs={6} sm={3}>
+          <Grid size={{ xs: 6, sm: 3 }}>
             <MetricCard
               title="Avg Response Time"
               value={`${metrics.avgResponseTimeMs}ms`}
