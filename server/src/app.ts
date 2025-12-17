@@ -25,7 +25,7 @@ import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
-import rbacRouter from './routes/rbacRoutes.js';
+const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
@@ -62,8 +62,8 @@ export const createApp = async () => {
   const __dirname = path.dirname(__filename);
 
   // Initialize OpenTelemetry tracing
-  const tracer = initializeTracing();
-  await tracer.initialize();
+  // const tracer = initializeTracing();
+  // await tracer.initialize();
 
   const app = express();
 
