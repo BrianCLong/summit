@@ -8,7 +8,13 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const RelationshipService = require('./RelationshipService.js');
 =======
+<<<<<<< HEAD
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const RelationshipService = require('./RelationshipService.js');
+=======
 import { RelationshipService } from './RelationshipService.js';
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 import EmbeddingService from './EmbeddingService.js';
@@ -40,6 +46,9 @@ export class PredictiveRelationshipService {
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
   private relationshipService: any;
   private driver: Driver | null = null;
@@ -47,11 +56,14 @@ export class PredictiveRelationshipService {
   constructor(embeddingService?: EmbeddingService, relationshipService?: any, driver?: Driver) {
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
   private relationshipService: RelationshipService;
   private driver: Driver | null = null;
 
   constructor(embeddingService?: EmbeddingService, relationshipService?: RelationshipService, driver?: Driver) {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
     this.embeddingService = embeddingService || new EmbeddingService();

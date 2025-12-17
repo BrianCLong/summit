@@ -7,6 +7,8 @@ import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 import { QueryReplayService } from '../services/query-replay/QueryReplayService';
 =======
 import { CircuitBreaker } from '../lib/circuitBreaker.js';
@@ -15,6 +17,7 @@ import {
   dbPoolIdle,
   dbPoolWaiting
 } from '../metrics/dbMetrics.js';
+>>>>>>> main
 >>>>>>> main
 import {
   neo4jConnectivityUp,
@@ -39,6 +42,8 @@ const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 const SLOW_QUERY_THRESHOLD_MS = Number(process.env.NEO4J_SLOW_QUERY_THRESHOLD_MS || 1000);
 =======
 <<<<<<< HEAD
@@ -60,6 +65,7 @@ const circuitBreaker = new CircuitBreaker({
   failureThreshold: 5,
   cooldownMs: 30000,
 });
+>>>>>>> main
 >>>>>>> main
 
 let realDriver: Neo4jDriver | null = null;
@@ -429,6 +435,8 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       throw error;
     } finally {
       telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
+<<<<<<< HEAD
+=======
     }
 =======
 =======
@@ -465,6 +473,7 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
             logger.error(err, 'Failed to record slow Neo4j query');
         });
       }
+>>>>>>> main
     }
 =======
 

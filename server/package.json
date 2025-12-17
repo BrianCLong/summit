@@ -103,8 +103,12 @@
     "graphql-depth-limit": "^1.1.0",
 =======
 <<<<<<< HEAD
+    "graphql-depth-limit": "^1.1.0",
+=======
+<<<<<<< HEAD
 =======
     "graphql-depth-limit": "^1.1.0",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -195,6 +199,9 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
     "@types/jest": "30.0.0",

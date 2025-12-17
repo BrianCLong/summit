@@ -9,7 +9,10 @@ const { annotationsTypeDefs } = require('./schema.annotations.js');
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 const { healthTypeDefs } = require('./schema.health.js');
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

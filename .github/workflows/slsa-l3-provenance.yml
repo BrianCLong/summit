@@ -31,6 +31,10 @@ on:
 <<<<<<< HEAD
 # SLSA L3 requires specific permissions for OIDC token generation
 =======
+<<<<<<< HEAD
+# SLSA L3 requires specific permissions for OIDC token generation
+=======
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -53,8 +57,12 @@ env:
 <<<<<<< HEAD
   IMAGE_NAME: ${{ github.repository }}
 =======
+<<<<<<< HEAD
+  IMAGE_NAME: ${{ github.repository }}
+=======
   IMAGE_NAME_SERVER: ${{ github.repository }}/server
   IMAGE_NAME_WEB: ${{ github.repository }}/web
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -98,6 +106,11 @@ jobs:
 
           # Check if the commit is signed
 =======
+<<<<<<< HEAD
+
+          # Check if the commit is signed
+=======
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -125,6 +138,11 @@ jobs:
 
           # Create deterministic hash of source tree (excluding .git)
 =======
+<<<<<<< HEAD
+
+          # Create deterministic hash of source tree (excluding .git)
+=======
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -147,6 +165,11 @@ jobs:
 
           # Quick check for obvious secrets in staged files
 =======
+<<<<<<< HEAD
+
+          # Quick check for obvious secrets in staged files
+=======
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -161,6 +184,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
       - name: Verify lockfile integrity
@@ -182,12 +208,15 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
   # ===========================================================================
   # Stage 2: Hermetic Builds (Server & Web)
   # ===========================================================================
   build-server:
     name: Build Server
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -207,7 +236,12 @@ jobs:
       image-uri: ${{ steps.meta.outputs.tags }}
       sbom-digest: ${{ steps.sbom.outputs.digest }}
 =======
+<<<<<<< HEAD
+      image-uri: ${{ steps.meta.outputs.tags }}
+      sbom-digest: ${{ steps.sbom.outputs.digest }}
+=======
       image-uri: ${{ steps.build-image-uri.outputs.uri }}
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -228,6 +262,11 @@ jobs:
         with:
           fetch-depth: 0
 =======
+<<<<<<< HEAD
+        with:
+          fetch-depth: 0
+=======
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -240,6 +279,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
           set -euo pipefail
@@ -282,6 +324,8 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
           echo "timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> "$GITHUB_OUTPUT"
           echo "build-id=${{ github.run_id }}-${{ github.run_attempt }}" >> "$GITHUB_OUTPUT"
@@ -290,6 +334,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to Registry
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -308,6 +353,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
@@ -388,6 +436,8 @@ jobs:
   slsa-provenance:
     name: Generate SLSA L3 Provenance
     needs: hermetic-build
+<<<<<<< HEAD
+=======
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
@@ -493,6 +543,7 @@ jobs:
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
     if: github.event_name != 'pull_request'
     permissions:
       actions: read
@@ -501,6 +552,10 @@ jobs:
       packages: write
     uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
     with:
+<<<<<<< HEAD
+      image: ${{ needs.hermetic-build.outputs.image-uri }}
+      digest: ${{ needs.hermetic-build.outputs.image-digest }}
+=======
 <<<<<<< HEAD
       image: ${{ needs.hermetic-build.outputs.image-uri }}
       digest: ${{ needs.hermetic-build.outputs.image-digest }}
@@ -533,6 +588,7 @@ jobs:
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
     secrets:
       registry-password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -542,6 +598,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
   # Stage 4: Cosign OIDC Keyless Signing
@@ -549,6 +608,8 @@ jobs:
   cosign-sign:
     name: Cosign OIDC Keyless Signing
     needs: hermetic-build
+<<<<<<< HEAD
+=======
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
@@ -562,6 +623,7 @@ jobs:
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
@@ -572,6 +634,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
       id-token: write  # OIDC token for keyless signing
@@ -757,6 +822,8 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
       id-token: write
     steps:
@@ -764,6 +831,7 @@ jobs:
         uses: sigstore/cosign-installer@v3
 
       - name: Log in to Registry
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -778,6 +846,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
       - name: Verify image signature
@@ -1005,6 +1076,8 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
       - name: Sign Server Image
         run: |
@@ -1066,6 +1139,7 @@ jobs:
 
           **Verification:**
           \`cosign verify ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_SERVER }}@...\`
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
