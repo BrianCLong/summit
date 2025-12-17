@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import http from 'http';
 import express from 'express';
 import { useServer } from 'graphql-ws/use/ws';
@@ -12,31 +13,36 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
-import { GraphConsistencyService } from './services/GraphConsistencyService.js';
-import { scheduleWeeklyGraphConsistencyCheck } from './jobs/graphConsistencyJob.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { BackupManager } from './backup/BackupManager.js';
+import { checkNeo4jIndexes } from './db/indexManager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
+=======
+import { bootstrapSecrets } from './bootstrap-secrets.js';
+import { logger } from './config/logger.js';
+import { logConfigSummary } from './config/index.js';
+>>>>>>> main
 
-const startServer = async () => {
-  // Optional Kafka consumer import - only when AI services enabled
-  let startKafkaConsumer: any = null;
-  let stopKafkaConsumer: any = null;
-  if (
-    process.env.AI_ENABLED === 'true' ||
-    process.env.KAFKA_ENABLED === 'true'
-  ) {
-    try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
-      startKafkaConsumer = kafkaModule.startKafkaConsumer;
-      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
-      logger.warn('Kafka not available - running in minimal mode');
-    }
+(async () => {
+  try {
+    // 1. Load Secrets (Environment or Vault)
+    await bootstrapSecrets();
+
+    // Log Config
+    logConfigSummary();
+
+    // 2. Start Server
+    logger.info('Secrets loaded. Starting server...');
+    await import('./server_entry.js');
+  } catch (err) {
+    logger.error(`Fatal error during startup: ${err}`);
+    process.exit(1);
   }
+<<<<<<< HEAD
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
@@ -81,14 +87,15 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
-    // Initialize Graph Consistency Jobs
-    const graphConsistencyService = new GraphConsistencyService();
-    scheduleWeeklyGraphConsistencyCheck(graphConsistencyService);
+    // Initialize Backup Manager
+    const backupManager = new BackupManager();
+    backupManager.startScheduler();
+
+    // Check Neo4j Indexes
+    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
-    if (startKafkaConsumer) {
-      await startKafkaConsumer();
-    }
+    await startKafkaConsumer();
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
@@ -137,3 +144,6 @@ const startServer = async () => {
 };
 
 startServer();
+=======
+})();
+>>>>>>> main

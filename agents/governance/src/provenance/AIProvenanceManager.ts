@@ -382,7 +382,7 @@ export class AIProvenanceManager {
     attestation: Partial<AIAttestation>,
   ): Promise<AIAttestation | null> {
     const provenance = this.provenanceStore.get(provenanceId);
-    if (!provenance) return null;
+    if (!provenance) {return null;}
 
     const fullAttestation = await this.createAttestation(attestation, provenance);
     provenance.attestations.push(fullAttestation);
@@ -533,7 +533,7 @@ export class AIProvenanceManager {
    * Verify cosign bundle signature
    */
   private async verifySignature(bundle: CosignBundle): Promise<boolean> {
-    if (!bundle.verificationMaterial?.publicKey) return false;
+    if (!bundle.verificationMaterial?.publicKey) {return false;}
 
     try {
       const payload = Buffer.from(bundle.payload, 'base64').toString('utf8');
@@ -547,7 +547,7 @@ export class AIProvenanceManager {
           Buffer.from(sig.sig, 'base64'),
         );
 
-        if (isValid) return true;
+        if (isValid) {return true;}
       }
     } catch (error) {
       console.error('Signature verification failed:', error);
@@ -560,7 +560,7 @@ export class AIProvenanceManager {
    * Verify signature string
    */
   private verifySignatureString(signature: string, data: string): boolean {
-    if (!this.keyPair) return false;
+    if (!this.keyPair) {return false;}
 
     try {
       const publicKey = crypto.createPublicKey(this.keyPair.publicKey);
@@ -594,7 +594,7 @@ export class AIProvenanceManager {
    * Sign data with private key
    */
   private sign(data: string): string {
-    if (!this.keyPair) return '';
+    if (!this.keyPair) {return '';}
 
     const privateKey = crypto.createPrivateKey(this.keyPair.privateKey);
     const signature = crypto.sign(null, Buffer.from(data), privateKey);
@@ -623,11 +623,11 @@ export class AIProvenanceManager {
     const visited = new Set<string>();
 
     const traverse = (id: ProvenanceId) => {
-      if (visited.has(id)) return;
+      if (visited.has(id)) {return;}
       visited.add(id);
 
       const prov = this.provenanceStore.get(id);
-      if (!prov) return;
+      if (!prov) {return;}
 
       chain.push(prov);
 
@@ -649,7 +649,7 @@ export class AIProvenanceManager {
    */
   exportProvenance(provenanceId: ProvenanceId): string | null {
     const prov = this.provenanceStore.get(provenanceId);
-    if (!prov) return null;
+    if (!prov) {return null;}
 
     return JSON.stringify(
       {
