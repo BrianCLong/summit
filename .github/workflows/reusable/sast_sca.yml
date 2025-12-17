@@ -1,0 +1,45 @@
+name: sast_sca
+
+on:
+  workflow_call:
+    secrets:
+      NODE_AUTH_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  sast_sca:
+    name: sast_sca
+    runs-on: ubuntu-latest
+    env:
+      NODE_VERSION: '20.x'
+      PNPM_CACHE_FOLDER: ~/.pnpm-store
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Configure pnpm store
+        run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint for vulnerabilities and quality
+        run: pnpm run lint:check
+
+      - name: Run dependency vulnerability scan
+        run: pnpm run security:scan
