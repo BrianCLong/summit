@@ -73,6 +73,8 @@ jobs:
       - name: Run tests with coverage
         run: pnpm run test:coverage
         working-directory: server
+        env:
+          NODE_OPTIONS: --experimental-vm-modules --max-old-space-size=8192
 
       - name: Build server
         run: pnpm run build
