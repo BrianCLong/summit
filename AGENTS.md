@@ -1,53 +1,103 @@
-# Agent Operational Guidelines
+# Repository Guidelines
 
-> **Authority:** Jules, Autonomous Editor-in-Chief
-> **Purpose:** Define protocols for AI agents operating within the Summit repository.
+## Project Structure & Module Organization
 
-## 1. Project Structure & Organization
+- Apps: `server/` (Node/Express/GraphQL), `client/` (React/Vite).
+- Docs: `docs/` (guides) and `docs/generated/` (auto‑generated overviews).
+- Data: `server/db/{migrations,seeds}/{postgres,neo4j}`.
+- CI/Meta: `.github/`, `scripts/`, `project_management/`.
 
-*   **Apps:** `server/` (Node/Express/GraphQL), `client/` (React/Vite).
-*   **Documentation:** `docs/` (Core), `docs/generated/` (Automated).
-*   **Data:** `server/db/` (Migrations, Seeds).
-*   **Infrastructure:** `.github/` (CI/CD), `scripts/` (Automation), `deploy/` (K8s/Docker).
+## Build, Test, and Development Commands
 
-## 2. Core Operational Commands
+- Install: `pnpm install`.
+- Dev: `pnpm run dev` (runs server and client concurrently).
+- Test: `pnpm test` (server+client), server only: `pnpm --filter intelgraph-server test`.
+- Lint/Format: `pnpm run lint && pnpm run format`.
+- DB: `pnpm run db:migrate` and `pnpm run db:seed` (from repo root).
+- Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
 
-Agents must prioritize the `make` system for reliability.
+## Coding Style & Naming Conventions
 
-*   **Bootstrap:** `make bootstrap` (Install deps, setup env).
-*   **Start:** `make up` (Start Docker services).
-*   **Verify:** `make smoke` (Run Golden Path tests).
-*   **Test:** `make test` (Run full suite).
-*   **Lint:** `make lint` (Enforce style).
+- JS/TS: 2‑space indent; Prettier + ESLint enforced. Conventional Commits required.
+- Filenames: `kebab-case` for files/scripts; `PascalCase` for React components.
+- Configs: `.editorconfig`, `.markdownlint.json`, `commitlint.config.js` present.
 
-## 3. Coding Standards
+## Testing Guidelines
 
-*   **Language:** TypeScript (Strict), Python 3.11+ (Typed).
-*   **Style:** Prettier + ESLint (JS/TS), Black + Ruff (Python).
-*   **Conventions:**
-    *   Filenames: `kebab-case` (default), `PascalCase` (React components, Classes).
-    *   Commits: [Conventional Commits](https://www.conventionalcommits.org/) required (`feat:`, `fix:`, `docs:`).
+- Backend: Jest (`server/tests`), run with coverage: `pnpm --filter intelgraph-server test:coverage`.
+- Frontend: see client tests; e2e via Playwright: `pnpm run test:e2e`.
+- Naming: `*.spec.ts`/`*.test.js` (client), `*.test.js` (server). Target ≥80% coverage for changed code.
 
-## 4. Testing Protocols
+## Commit & Pull Request Guidelines
 
-*   **Mandate:** No feature is complete without tests.
-*   **Coverage:** Target ≥80% for new logic.
-*   **Structure:**
-    *   **Unit:** `__tests__` adjacent to source.
-    *   **Integration:** `tests/integration/`.
-    *   **E2E:** `tests/e2e/` (Playwright).
+- Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`, `refactor:`.
+- PRs: concise description, linked issues (`Closes #123`), screenshots for UI; CI green required.
+- Branches: `type/scope/short-desc` (e.g., `feat/ingest/rest-connector`).
 
-## 5. Pull Request Hygiene
+## Web Codex Global Guidance
 
-*   **Branching:** `type/scope/description` (e.g., `feat/ingest/csv-parser`).
-*   **Description:** Narrative structure (Context → Change → Validation).
-*   **Verification:** CI must be green. `make smoke` must pass locally.
+Run the following workflow when preparing scoped CI pull requests for the `feat/mstc`, `feat/trr`, and `feat/opa` branches:
 
-## 6. Security & Configuration
+```
+set -euo pipefail
 
-*   **Secrets:** Never commit secrets. Use `.env` (git-ignored).
-*   **Config:** Use `server/src/config/` for centralized configuration.
-*   **Defaults:** Assume production-secure defaults (TLS, Auth enabled).
+# verify required tooling up front so the workflow fails fast
+for bin in git gh bash; do
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    printf 'Required dependency "%s" not found on PATH.\n' "$bin" >&2
+    exit 1
+  fi
+done
 
----
-*Execute with precision. Document with clarity.*
+# start clean
+git fetch --all --prune
+
+# branches to open first
+for BR in feat/mstc feat/trr feat/opa; do
+  if ! git show-ref --quiet --verify "refs/heads/$BR"; then
+    printf 'Skipping branch %s because it does not exist locally.\n' "$BR" >&2
+    continue
+  fi
+
+  git checkout "$BR"
+
+  # sanitize diffs so PRs never include binaries/large files
+  bash scripts/pr_sanitize.sh || true
+
+  # rebase and push safely
+  git fetch origin
+  git rebase origin/main
+
+  scope=$(printf '%s' "$BR" | cut -d/ -f2)
+  if [ -z "$scope" ]; then
+    printf 'Unable to derive scope segment from branch %s; skipping.\n' "$BR" >&2
+    continue
+  fi
+  scope_upper=$(printf '%s' "$scope" | tr '[:lower:]' '[:upper:]')
+
+  # push with lease and open PR with scoped title/labels
+  git push --force-with-lease -u origin "$BR"
+
+  gh pr create \
+    --title "[$scope_upper] Scoped CI: ready for review" \
+    --body-file docs/pr-runbook-card.md \
+    --label "ci:scoped","ready-for-ci" \
+    --base main \
+    --head "$BR" || true
+done
+```
+
+## Security & Configuration Tips
+
+- Use `.env` (copy from `.env.example`); never commit secrets.
+- Helmet + CORS defaults are enabled; restrict `CORS_ORIGIN` in prod.
+- Run `scripts/bootstrap_github.sh` to set up labels/milestones and import issues.
+
+## Architectural North Star
+
+All agents should reference `docs/FIRST_PRINCIPLES_REDESIGN.md` when proposing major changes.
+The long-term goal is to migrate the monolithic architecture towards the "Cognitive Lattice" blueprint (Event Sourcing + Agentic Runtime).
+
+- **Strangler Pattern**: Prefer creating new logic in standalone `packages/` rather than adding to the existing `server/src/services/` monolith.
+- **Event-First**: Prioritize emitting immutable events (Provenance Ledger) over direct database mutations.
+- **Agent Independence**: Design agents as autonomous actors that react to the event stream, rather than synchronous HTTP services.
