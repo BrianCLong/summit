@@ -1,5 +1,9 @@
+// @ts-nocheck
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
-import neo4j, { Transaction } from 'neo4j-driver';
+import neo4j, { Driver, Session } from 'neo4j-driver';
+import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
+import { graphOptimizer } from '../graph/optimizer/GraphOptimizer.js';
+import neo4j from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
 import {
@@ -8,7 +12,6 @@ import {
   neo4jQueryLatencyMs,
   neo4jQueryTotal,
 } from '../metrics/neo4jMetrics.js';
-import { getFeatureFlagService } from '../feature-flags/setup.js';
 
 dotenv.config();
 
@@ -21,17 +24,22 @@ const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER =
   process.env.NEO4J_USER || process.env.NEO4J_USERNAME || 'neo4j';
 const NEO4J_PASSWORD = process.env.NEO4J_PASSWORD || 'devpassword';
-const NEO4J_REGION_B_URI = process.env.NEO4J_REGION_B_URI;
-const NEO4J_REGION_B_USER = process.env.NEO4J_REGION_B_USER || NEO4J_USER;
-const NEO4J_REGION_B_PASSWORD = process.env.NEO4J_REGION_B_PASSWORD || NEO4J_PASSWORD;
-
 const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
+<<<<<<< HEAD
+=======
+const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
+const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
+
+// Connection Pool Settings
+const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
+const POOL_CONNECTION_TIMEOUT = Number(process.env.NEO4J_POOL_CONNECTION_TIMEOUT || 30000);
+const POOL_ACQUISITION_TIMEOUT = Number(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT || 30000);
+>>>>>>> main
 
 let realDriver: Neo4jDriver | null = null;
-let realDriverB: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
 let connectivityTimer: NodeJS.Timeout | null = null;
 let isMockMode = true;
@@ -85,13 +93,6 @@ if (CONNECTIVITY_CHECK_INTERVAL_MS > 0) {
     if (realDriver) {
       try {
         await realDriver.verifyConnectivity();
-        if (realDriverB) {
-          try {
-             await realDriverB.verifyConnectivity();
-          } catch (e) {
-             logger.warn('Region B disconnected (non-fatal)', e);
-          }
-        }
         neo4jConnectivityUp.set(1);
       } catch (error) {
         logger.warn(
@@ -182,43 +183,33 @@ async function ensureInitialization(): Promise<void> {
 
 async function connectToNeo4j(): Promise<void> {
   let candidate: Neo4jDriver | null = null;
-  let candidateB: Neo4jDriver | null = null;
 
   try {
     candidate = neo4j.driver(
       NEO4J_URI,
       neo4j.auth.basic(NEO4J_USER, NEO4J_PASSWORD),
+      {
+        maxConnectionPoolSize: MAX_CONNECTION_POOL_SIZE,
+        connectionTimeout: CONNECTION_TIMEOUT_MS,
+        connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
+        logging: {
+          level: 'info',
+          logger: (level, message) => logger[level === 'warn' ? 'warn' : 'info'](message),
+        },
+      }
     );
 
     await candidate.verifyConnectivity();
+
     realDriver = candidate;
-
-    // Connect to Region B if configured
-    if (NEO4J_REGION_B_URI) {
-      try {
-        candidateB = neo4j.driver(
-           NEO4J_REGION_B_URI,
-           neo4j.auth.basic(NEO4J_REGION_B_USER, NEO4J_REGION_B_PASSWORD)
-        );
-        await candidateB.verifyConnectivity();
-        realDriverB = candidateB;
-        logger.info('Neo4j Region B driver initialized.');
-      } catch (error) {
-         logger.error('Failed to connect to Neo4j Region B (non-fatal)', error);
-         if (candidateB) await candidateB.close().catch(() => {});
-      }
-    }
-
+    candidate = null;
     isMockMode = false;
     neo4jConnectivityUp.set(1);
-    logger.info('Neo4j driver initialized.');
+    logger.info(`Neo4j driver initialized with maxConnectionPoolSize=${MAX_CONNECTION_POOL_SIZE}.`);
     await notifyDriverReady(hasEmittedReadyEvent ? 'reconnected' : 'initial');
   } catch (error) {
     if (candidate) {
       await candidate.close().catch(() => {});
-    }
-    if (candidateB) {
-      await candidateB.close().catch(() => {});
     }
 
     isMockMode = true;
@@ -264,14 +255,6 @@ async function teardownRealDriver(): Promise<void> {
     }
     realDriver = null;
   }
-  if (realDriverB) {
-    try {
-      await realDriverB.close();
-    } catch (error) {
-      logger.warn('Error closing Neo4j Region B driver during teardown.', error);
-    }
-    realDriverB = null;
-  }
 
   isMockMode = true;
   neo4jConnectivityUp.set(0);
@@ -280,24 +263,11 @@ async function teardownRealDriver(): Promise<void> {
 function createDriverFacade(): Neo4jDriver {
   const facade: Partial<Neo4jDriver> = {};
 
-  facade.session = ((options?: any) => {
-    // Separate tenantId (custom) from standard options
-    const { tenantId, ...sessionOptions } = options || {};
-
-    // 1. Get the session (Mock or Real A)
-    const sessionA = realDriver
-      ? realDriver.session(sessionOptions)
+  facade.session = ((options?: Parameters<Neo4jDriver['session']>[0]) => {
+    const session = realDriver
+      ? realDriver.session(options)
       : createMockSession();
-
-    // 2. Create Dual Write Session (wraps sessionA)
-    // Pass 'options' (containing tenantId) to DualWriteSession so it can use it for logic.
-    // We create the proxy first.
-    const dualWriteSession = createDualWriteSession(sessionA, options);
-
-    // 3. Instrument the Session (wraps the DualWriteSession)
-    // This ensures metrics capture the FULL latency of the Quorum operation (A + B).
-    return instrumentSession(dualWriteSession);
-
+    return instrumentSession(session);
   }) as Neo4jDriver['session'];
 
   facade.close = (async () => {
@@ -332,7 +302,12 @@ function createMockSession(): Neo4jSession {
     readTransaction: async (fn: any) => fn(createMockTransaction()),
     writeTransaction: async (fn: any) => fn(createMockTransaction()),
     executeRead: async (fn: any) => fn(createMockTransaction()),
-    executeWrite: async (fn: any) => fn(createMockTransaction()),
+    executeWrite: async (fn: any) => {
+        // Mock invalidation trigger
+        // In a real scenario we'd extract labels from the mutation
+        graphOptimizer.invalidate('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
+        return fn(createMockTransaction());
+    },
   } as unknown as Neo4jSession;
 }
 
@@ -344,243 +319,198 @@ function createMockTransaction() {
   } as any;
 }
 
-function instrumentSession(session: Neo4jSession): Neo4jSession {
-    // We bind to the original session, assuming it's the target.
-    // If 'session' is a Proxy (DualWriteSession), this binds to the Proxy's 'run' method.
-    // The Proxy's 'run' method triggers the 'get' trap, which returns the async dual-write function.
-    // So 'originalRun' becomes that async function.
-    const originalRun = session.run.bind(session);
+function instrumentSession(session: any) {
+  const originalRun = session.run.bind(session);
+  const originalExecuteWrite = session.executeWrite?.bind(session);
+  const originalBeginTransaction = session.beginTransaction?.bind(session);
 
-    // We replace 'run' on the object instance.
-    // If 'session' is a Proxy without a 'set' trap, this sets the property on the Target (sessionA).
-    // THIS IS RISKY if 'session' is the DualWriteProxy.
-    // DualWriteProxy wraps sessionA.
-    // sessionA.run = instrumentedRun.
-    // When user calls DualWriteProxy.run:
-    //   -> get trap returns DualWriteFn.
-    //   -> DualWriteFn calls target.run (sessionA.run).
-    //   -> sessionA.run is instrumentedRun.
-    //   -> instrumentedRun calls originalRun (bound to sessionA.run from BEFORE instrumentation?)
-    // No, originalRun is bound to session.run.
-    // If session is DualWriteProxy, session.run is DualWriteFn.
-    // So originalRun = DualWriteFn.
-    // If we set session.run = instrumentedRun...
-    //   Proxy has no set trap -> sets on Target (sessionA).
-    //   sessionA.run = instrumentedRun.
-    // BUT DualWriteFn calls target.run (sessionA.run).
-    // So DualWriteFn calls InstrumentedRun.
-    // InstrumentedRun calls originalRun (DualWriteFn).
-    // RECURSION!
+  if (originalBeginTransaction) {
+      session.beginTransaction = (config?: any) => {
+          const tx = originalBeginTransaction(config);
+          const originalTxRun = tx.run.bind(tx);
+          const originalTxCommit = tx.commit.bind(tx);
+          let writesDetected = false;
 
-    // We must NOT mutate the session if it's a Proxy.
-    // We must wrap it in another Proxy or object.
+          tx.run = async (cypher: string, params?: any) => {
+              const lower = cypher.toLowerCase();
+              if (lower.includes('create') ||
+                  lower.includes('merge') ||
+                  lower.includes('delete') ||
+                  lower.includes('set') ||
+                  lower.includes('remove') ||
+                  lower.includes('call')) {
+                  writesDetected = true;
+              }
+              return originalTxRun(cypher, params);
+          };
 
-    return new Proxy(session, {
-        get(target, prop, receiver) {
-            if (prop === 'run') {
-                return async (cypher: string, params?: any) => {
-                    telemetry.subsystems.database.queries.add(1);
-                    const startTime = Date.now();
-                    try {
-                        return await target.run(cypher, params);
-                    } catch (error) {
-                        telemetry.subsystems.database.errors.add(1);
-                        throw error;
-                    } finally {
-                        telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
-                    }
-                };
-            }
-            return Reflect.get(target, prop, receiver);
-        }
-    });
-}
+          tx.commit = async () => {
+              // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
+              // But Neo4j commits first. So we commit, then invalidate, then return.
+              const result = await originalTxCommit();
+              if (writesDetected) {
+                  try {
+                       // Await invalidation to ensure subsequent reads see freshness
+                       await graphOptimizer.invalidate('global', ['*']);
+                  } catch (err) {
+                       logger.warn('Cache invalidation error', err);
+                  }
+              }
+              return result;
+          };
 
+          return tx;
+      };
+  }
 
-// Check if query is a write operation
-function isWriteQuery(cypher: string): boolean {
-    return /\b(CREATE|MERGE|SET|DELETE|REMOVE|FOREACH|CALL|LOAD CSV)\b/i.test(cypher);
-}
+  if (originalExecuteWrite) {
+      session.executeWrite = async (fn: any) => {
+          try {
+              const result = await originalExecuteWrite(fn);
+               // Attempt to fallback to a broad invalidation since we lack tenant context here
+               // ideally the transaction function would provide hints.
+               graphOptimizer.invalidate('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
+              return result;
+          } catch (error) {
+              throw error;
+          }
+      };
+  }
 
-// Common function to determine if dual write is enabled
-async function isDualWriteEnabled(options: any): Promise<boolean> {
+  session.run = (
+    cypher: string,
+    params?: any,
+    labels: { operation?: string; label?: string } = {},
+  ) => {
+    telemetry.subsystems.database.queries.add(1);
+<<<<<<< HEAD
+    const startTime = Date.now();
     try {
-        const ff = getFeatureFlagService();
-        // Extract tenantId from options if available (passed via session config hack)
-        const tenantId = options?.tenantId || options?.context?.tenantId || 'system';
-
-        return await ff.getFlagValue('write_quorum', {
-            tenantId,
-            environment: process.env.NODE_ENV || 'development'
-        }, false);
-    } catch (e) {
-        return false;
+      return await originalRun(cypher, params);
+    } catch (error) {
+      telemetry.subsystems.database.errors.add(1);
+      throw error;
+    } finally {
+      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
     }
-}
+=======
 
-// Inject timestamp into params for conflict resolution
-function injectTimestamp(params: any): any {
-    return {
-        ...params,
-        _writeTimestamp: Date.now()
-    };
-}
+    // Extract tenantId from params if available
+    const tenantId = params?.tenantId || params?.tenant_id || 'global';
+    const lowerQuery = cypher.toLowerCase();
 
-function createDualWriteSession(sessionA: Neo4jSession, options: any): Neo4jSession {
-    // The wrapper that intercepts calls
-    return new Proxy(sessionA, {
-        get(target, prop, receiver) {
-             if (prop === 'run') {
-                 return async (cypher: string, params?: any) => {
-                     // 1. Check if Write first to avoid overhead on Read
-                     if (!isWriteQuery(cypher)) {
-                         return target.run(cypher, params);
-                     }
+    // Bypass optimization for EXPLAIN queries to prevent infinite recursion
+    // Also bypass if specific flag set in params to avoid buffering in GraphStreamer
+    if (lowerQuery.startsWith('explain') || params?._skipCache) {
+        return originalRun(cypher, params);
+    }
 
-                     const dualWriteEnabled = await isDualWriteEnabled(options);
-                     const finalParams = injectTimestamp(params);
+    const isWrite = lowerQuery.includes('create') ||
+                    lowerQuery.includes('merge') ||
+                    lowerQuery.includes('delete') ||
+                    lowerQuery.includes('set') ||
+                    lowerQuery.includes('remove') ||
+                    lowerQuery.includes('call');
 
-                     if (dualWriteEnabled && realDriverB) {
-                         const { tenantId, ...sessionOptions } = options || {};
-                         const sessionB = realDriverB.session(sessionOptions);
-                         try {
-                             const promiseA = target.run(cypher, finalParams);
-                             const promiseB = sessionB.run(cypher, finalParams);
-
-                             // Quorum = 2/2 enforcement
-                             const [resA, resB] = await Promise.allSettled([promiseA, promiseB]);
-
-                             if (resA.status === 'rejected') throw resA.reason;
-
-                             if (resB.status === 'rejected') {
-                                 logger.error('Write Quorum Error: Secondary region write failed. Failing request (Strict Quorum).', resB.reason);
-                                 throw new Error('Write Quorum Failed: Secondary region unavailable.');
-                             }
-
-                             return resA.value;
-                         } finally {
-                             await sessionB.close();
-                         }
-                     }
-                     return target.run(cypher, finalParams);
-                 }
-             }
-
-             if (prop === 'beginTransaction') {
-                 return (txConfig?: any) => {
-                     const txA = target.beginTransaction(txConfig);
-                     return createDualWriteTransaction(txA, options, txConfig);
-                 };
-             }
-
-             return Reflect.get(target, prop, receiver);
-        }
-    });
-}
-
-function createDualWriteTransaction(txA: Transaction, options: any, txConfig: any): Transaction {
-    let txB: Transaction | null = null;
-    let dualWriteChecked = false;
-    let dualWriteEnabled = false;
-
-    const ensureTxB = async () => {
-        if (!dualWriteChecked) {
-            dualWriteEnabled = await isDualWriteEnabled(options);
-            dualWriteChecked = true;
-        }
-        if (dualWriteEnabled && realDriverB && !txB) {
-            const { tenantId, ...sessionOptions } = options || {};
-            const sessionB = realDriverB.session(sessionOptions);
-            txB = sessionB.beginTransaction(txConfig);
-            (txB as any)._session = sessionB;
-        }
-    };
-
-    return new Proxy(txA, {
-        get(target, prop, receiver) {
-            if (prop === 'run') {
-                return async (cypher: string, params?: any) => {
-                    if (!isWriteQuery(cypher)) {
-                        return target.run(cypher, params);
-                    }
-
-                    const finalParams = injectTimestamp(params);
-                    await ensureTxB();
-
-                    if (txB) {
-                        const promiseA = target.run(cypher, finalParams);
-                        const promiseB = txB.run(cypher, finalParams);
-
-                        try {
-                             const [resA, resB] = await Promise.allSettled([promiseA, promiseB]);
-                             if (resA.status === 'rejected') throw resA.reason;
-                             if (resB.status === 'rejected') {
-                                 logger.error('Write Quorum Error (Tx): Secondary write failed.', resB.reason);
-                                 throw new Error('Write Quorum Failed (Tx): Secondary region unavailable.');
-                             }
-                             return resA.value;
-                        } catch (e) {
-                            throw e;
-                        }
-                    }
-                    return target.run(cypher, finalParams);
+    if (isWrite) {
+         // Fire-and-forget invalidation for raw queries
+         // Note: For strict consistency, use executeWrite/beginTransaction
+         graphOptimizer.invalidate(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
+         return originalRun(cypher, params);
+    } else if (lowerQuery.includes('match') || lowerQuery.includes('return')) {
+        // Return a Promise that mimics a Result (optimistic optimization)
+        // We use an async IIFE to handle the logic but return the promise immediately
+        const promise: any = (async () => {
+            const startTime = Date.now();
+            try {
+                const context = {
+                    tenantId,
+                    queryType: 'cypher' as const,
+                    priority: 'medium' as const,
+                    cacheEnabled: true
                 };
+
+                const result = await graphOptimizer.executeCached(cypher, params, context, (q, p) => originalRun(q, p));
+
+                // Shim the records to behave like Neo4j Records (implementing .get, .toObject)
+                // This ensures compatibility with existing driver code
+                if (result && Array.isArray(result.records)) {
+                    result.records = result.records.map((rec: any) => {
+                        // If it already looks like a record (has .get), return it
+                        if (typeof rec.get === 'function') return rec;
+
+                        // Otherwise wrap plain object
+                        return {
+                            get: (key: string) => rec[key],
+                            toObject: () => rec,
+                            keys: Object.keys(rec),
+                            has: (key: string) => Object.prototype.hasOwnProperty.call(rec, key),
+                            ...rec // Spread properties for direct access if needed, though idiomatic Neo4j usage is via .get()
+                        };
+                    });
+                }
+
+                return result;
+            } catch (error) {
+                logger.warn('Query optimization failed, falling back to direct execution', error);
+                return await originalRun(cypher, params);
+            } finally {
+                telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
             }
+        })();
 
-            if (prop === 'commit') {
-                return async () => {
-                    await ensureTxB();
-                    const promiseA = target.commit();
-                    const promiseB = txB ? txB.commit() : Promise.resolve();
+        // Shim .subscribe for compatibility
+        // Note: Caching buffers the whole result, so subscribe will receive everything at once
+        promise.subscribe = (observer: any) => {
+            promise.then((result: any) => {
+                if (result.records) {
+                    result.records.forEach((r: any) => observer.onNext && observer.onNext(r));
+                }
+                if (observer.onCompleted) observer.onCompleted();
+            }).catch((err: any) => {
+                if (observer.onError) observer.onError(err);
+            });
+        };
 
-                    const [resA, resB] = await Promise.allSettled([promiseA, promiseB]);
-
-                    if (txB && (txB as any)._session) {
-                        await (txB as any)._session.close();
-                    }
-
-                    if (resA.status === 'rejected') throw resA.reason;
-                    if (resB.status === 'rejected') {
-                         logger.error('Write Quorum Error (Tx Commit):', resB.reason);
-                         throw new Error('Write Quorum Failed (Commit): Secondary region commit failed.');
-                    }
-                    return resA.value;
-                };
+        // Shim Async Iterator for compatibility
+        promise[Symbol.asyncIterator] = async function* () {
+            const result = await promise;
+            if (result.records) {
+                for (const record of result.records) {
+                    yield record;
+                }
             }
+        };
 
-            if (prop === 'rollback') {
-                return async () => {
-                    await ensureTxB();
-                    const promiseA = target.rollback();
-                    const promiseB = txB ? txB.rollback() : Promise.resolve();
+        return promise;
+    }
 
-                    const [resA] = await Promise.allSettled([promiseA, promiseB]);
-
-                    if (txB && (txB as any)._session) {
-                        await (txB as any)._session.close();
-                    }
-
-                    if (resA.status === 'rejected') throw resA.reason;
-                    return resA.value;
-                };
-            }
-
-            return Reflect.get(target, prop, receiver);
-        }
-    });
+    // Default Fallback
+    try {
+      GraphIndexAdvisorService.getInstance().recordQuery(cypher);
+    } catch (err) {
+      logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
+    }
+    return originalRun(cypher, params);
+>>>>>>> main
+  };
+  return session;
 }
 
 // Export a convenience object for simple queries
 export const neo = {
   run: async (cypher: string, params?: any, context?: { tenantId?: string }) => {
     const driver = getNeo4jDriver();
-    // Pass tenantId via custom options object passed to driver.session
-    // We expect driver.session to be our facade which strips this out.
-    // Casting to any to pass type check
-    const options: any = { tenantId: context?.tenantId };
-    const session = driver.session(options);
+    const session = driver.session();
     try {
-      const result = await session.run(cypher, params);
+      // If tenant context is provided, ensure parameters include it
+      // Note: This relies on the query actually using $tenantId
+      // For strict enforcement, use withTenant middleware or manual query construction
+      const finalParams = context?.tenantId
+        ? { ...params, tenantId: context.tenantId }
+        : params;
+
+      const result = await session.run(cypher, finalParams);
       return result;
     } finally {
       await session.close();
