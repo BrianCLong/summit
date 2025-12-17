@@ -298,8 +298,8 @@ export class SignatureMatcher {
     detected: ModulationType,
     template: ModulationType,
   ): number {
-    if (detected === template) return 1.0;
-    if (detected === 'UNKNOWN' || template === 'UNKNOWN') return 0.3;
+    if (detected === template) {return 1.0;}
+    if (detected === 'UNKNOWN' || template === 'UNKNOWN') {return 0.3;}
 
     // Group similar modulation types
     const analogGroup: ModulationType[] = ['AM', 'FM', 'PM'];
@@ -334,7 +334,7 @@ export class SignatureMatcher {
 
     // Compute cosine similarity
     const minLength = Math.min(normalizedDetected.length, normalizedTemplate.length);
-    if (minLength === 0) return 0;
+    if (minLength === 0) {return 0;}
 
     let dotProduct = 0;
     let normA = 0;
@@ -354,11 +354,11 @@ export class SignatureMatcher {
    * Normalize fingerprint values to 0-1 range
    */
   private normalizeFingerprint(fingerprint: number[]): number[] {
-    if (fingerprint.length === 0) return [];
+    if (fingerprint.length === 0) {return [];}
     const min = Math.min(...fingerprint);
     const max = Math.max(...fingerprint);
     const range = max - min;
-    if (range === 0) return fingerprint.map(() => 0.5);
+    if (range === 0) {return fingerprint.map(() => 0.5);}
     return fingerprint.map((v) => (v - min) / range);
   }
 
@@ -369,8 +369,8 @@ export class SignatureMatcher {
     waveform: WaveformCharacteristics,
     patterns: SignalSignature['timingPatterns'],
   ): number {
-    if (!patterns || patterns.length === 0) return 0;
-    if (!waveform.pulseRepetitionHz && !waveform.pulseWidthUs) return 0;
+    if (!patterns || patterns.length === 0) {return 0;}
+    if (!waveform.pulseRepetitionHz && !waveform.pulseWidthUs) {return 0;}
 
     let maxScore = 0;
 
@@ -410,7 +410,7 @@ export class SignatureMatcher {
     detected: number[],
     template: number[],
   ): number {
-    if (detected.length === 0 || template.length === 0) return 0;
+    if (detected.length === 0 || template.length === 0) {return 0;}
 
     let matches = 0;
     const tolerance = 0.02; // 2% frequency tolerance
@@ -469,9 +469,9 @@ export class SignatureMatcher {
    * Convert match score to confidence level
    */
   private scoreToConfidence(score: number): ConfidenceLevel {
-    if (score >= 0.9) return 'CONFIRMED';
-    if (score >= 0.7) return 'HIGH';
-    if (score >= 0.5) return 'MEDIUM';
+    if (score >= 0.9) {return 'CONFIRMED';}
+    if (score >= 0.7) {return 'HIGH';}
+    if (score >= 0.5) {return 'MEDIUM';}
     return 'LOW';
   }
 

@@ -2,6 +2,7 @@ import React from 'react';
 
 function App() {
   React.useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Basic IntelGraph App mounted successfully!');
   }, []);
 
@@ -136,6 +137,7 @@ function App() {
               const msg =
                 '🎉 Button interaction successful! React event handling is working.';
               alert(msg);
+              // eslint-disable-next-line no-console
               console.log(msg);
             }}
             style={{

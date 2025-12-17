@@ -43,7 +43,7 @@ export default function ExplorePage() {
   const [searchQuery, setSearchQuery] = useState('')
 
   // Graph state
-  const [graphLayout, setGraphLayout] = useState<GraphLayout>({
+  const [graphLayout] = useState<GraphLayout>({
     type: 'force',
     settings: {},
   })
@@ -110,28 +110,28 @@ export default function ExplorePage() {
       filters.entityTypes.length > 0 &&
       !filters.entityTypes.includes(entity.type)
     )
-      return false
+      {return false}
     if (
       filters.confidenceRange.min > entity.confidence ||
       filters.confidenceRange.max < entity.confidence
     )
-      return false
+      {return false}
     if (
       filters.tags.length > 0 &&
       !entity.tags?.some(tag => filters.tags.includes(tag))
     )
-      return false
+      {return false}
     if (
       filters.sources.length > 0 &&
       entity.source &&
       !filters.sources.includes(entity.source)
     )
-      return false
+      {return false}
     if (
       searchQuery &&
       !entity.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
-      return false
+      {return false}
     return true
   })
 
@@ -140,7 +140,7 @@ export default function ExplorePage() {
       filters.relationshipTypes.length > 0 &&
       !filters.relationshipTypes.includes(rel.type)
     )
-      return false
+      {return false}
     // Only include relationships where both entities are in filtered set
     return (
       filteredEntities.some(e => e.id === rel.sourceId) &&
