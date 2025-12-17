@@ -47,6 +47,7 @@ out
 dist
 build
 docs/site/
+# TypeScript incremental caches (avoid committing build traces)
 *.tsbuildinfo
 .turbo/
 
