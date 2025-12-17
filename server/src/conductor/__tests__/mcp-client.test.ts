@@ -34,7 +34,7 @@ const mockServerConfig: MCPServerConfig = {
 describe('MCPClient', () => {
   let client: MCPClient;
   let registry: MCPServerRegistry;
-  let mockWs: jest.Mocked<WebSocket>;
+  let mockWs: any;
 
   beforeEach(() => {
     registry = new MCPServerRegistry();
@@ -47,10 +47,17 @@ describe('MCPClient', () => {
       readyState: WebSocket.OPEN,
       send: jest.fn(),
       close: jest.fn(),
+<<<<<<< HEAD
       on: jest.fn().mockReturnThis(),
       once: jest.fn().mockReturnThis(),
       removeAllListeners: jest.fn().mockReturnThis(),
     } as any;
+=======
+      on: jest.fn(),
+      once: jest.fn(),
+      removeAllListeners: jest.fn(),
+    };
+>>>>>>> main
 
     MockWebSocket.mockImplementation(() => mockWs);
   });
@@ -62,7 +69,11 @@ describe('MCPClient', () => {
   describe('connection management', () => {
     test('connects to MCP server successfully', async () => {
       // Setup connection success
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
+=======
+      mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
         if (event === 'open') {
           setTimeout(callback, 0);
         }
@@ -78,7 +89,11 @@ describe('MCPClient', () => {
 
     test('handles connection failure', async () => {
       const error = new Error('Connection failed');
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
+=======
+      mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
         if (event === 'error') {
           setTimeout(() => callback(error), 0);
         }
@@ -98,7 +113,11 @@ describe('MCPClient', () => {
 
     test('disconnects from server', async () => {
       // First connect
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
+=======
+      mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
       });
@@ -113,7 +132,11 @@ describe('MCPClient', () => {
   describe('tool execution', () => {
     beforeEach(async () => {
       // Setup successful connection
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
+=======
+      mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
       });
@@ -198,7 +221,11 @@ describe('MCPClient', () => {
         timeout: 100,
       });
 
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
+=======
+      mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
       });
@@ -219,7 +246,11 @@ describe('MCPClient', () => {
 
   describe('server info', () => {
     beforeEach(async () => {
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
+=======
+      mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
       });
@@ -265,7 +296,11 @@ describe('MCPClient', () => {
       expect(client.isConnected('test-server')).toBe(false);
 
       // After connecting
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
+=======
+      mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
         if (event === 'open') setTimeout(callback, 0);
         return mockWs;
       });

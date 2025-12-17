@@ -275,7 +275,7 @@ export class TextSynthesizer {
 
     while (words.length < maxLength) {
       const nextWords = this.ngramModel.get(context);
-      if (!nextWords || nextWords.length === 0) break;
+      if (!nextWords || nextWords.length === 0) {break;}
 
       const next = nextWords[Math.floor(Math.random() * nextWords.length)];
       words.push(next);
@@ -372,7 +372,7 @@ export class TextSynthesizer {
 
   private reorderSentences(text: string): string {
     const sentences = text.split(/\.\s+/);
-    if (sentences.length <= 1) return text;
+    if (sentences.length <= 1) {return text;}
 
     // Randomly swap two sentences
     const idx1 = Math.floor(Math.random() * sentences.length);
@@ -383,7 +383,7 @@ export class TextSynthesizer {
 
     [sentences[idx1], sentences[idx2]] = [sentences[idx2], sentences[idx1]];
 
-    return sentences.join('. ') + '.';
+    return `${sentences.join('. ')  }.`;
   }
 
   private async generateConversationTurn(
@@ -421,8 +421,8 @@ export class TextSynthesizer {
     const posCount = positiveWords.filter(w => lowerText.includes(w)).length;
     const negCount = negativeWords.filter(w => lowerText.includes(w)).length;
 
-    if (posCount > negCount) return 'positive';
-    if (negCount > posCount) return 'negative';
+    if (posCount > negCount) {return 'positive';}
+    if (negCount > posCount) {return 'negative';}
     return 'neutral';
   }
 

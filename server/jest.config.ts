@@ -57,30 +57,19 @@ const config: Config = {
   testTimeout: 30000,
   globalSetup: '<rootDir>/tests/setup/globalSetup.cjs',
   globalTeardown: '<rootDir>/tests/setup/globalTeardown.cjs',
-  testResultsProcessor: 'jest-junit',
-  reporters: [
-    'default',
-    [
-      'jest-junit',
-      {
-        outputDirectory: '<rootDir>/test-results',
-        outputName: 'junit.xml',
-        classNameTemplate: '{classname}',
-        titleTemplate: '{title}',
-        ancestorSeparator: ' › ',
-        usePathForSuiteName: true,
-      },
-    ],
-  ],
   verbose: true,
   clearMocks: true,
   restoreMocks: true,
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
+<<<<<<< HEAD
   transformIgnorePatterns: [
     'node_modules/(?!(.*\\.mjs$))',
   ],
+=======
+  transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)'],
+>>>>>>> main
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 
