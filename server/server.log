@@ -1,5 +1,0 @@
-
-> intelgraph-server@1.0.0 dev
-> cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts
-
-sh: 1: cross-env: not found

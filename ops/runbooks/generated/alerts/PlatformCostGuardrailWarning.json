@@ -1,0 +1,10 @@
+{
+  "alert": "PlatformCostGuardrailWarning",
+  "description": "FinOps data shows {{ $value | humanizePercentage }} of monthly budget used. Coordinate feature flags.",
+  "expr": "(intelgraph_monthly_spend_usd / intelgraph_monthly_budget_usd) > 0.8",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/observability-sre#finops-guardrail",
+  "service": "finops",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Platform costs exceeded 80% of budget"
+}
