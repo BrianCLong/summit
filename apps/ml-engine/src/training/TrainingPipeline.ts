@@ -517,7 +517,7 @@ export class TrainingPipeline {
       params.push(modelType);
     }
 
-    query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1);
+    query += ` ORDER BY created_at DESC LIMIT $${  params.length + 1}`;
     params.push(limit);
 
     const result = await this.pgPool.query(query, params);
