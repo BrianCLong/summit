@@ -3,7 +3,11 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "node",
+<<<<<<< HEAD
+    "rootDir": "./",
+=======
     "rootDir": ".",
+>>>>>>> main
     "outDir": "./dist",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -20,7 +24,11 @@
   "ts-node": {
     "esm": true
   },
+<<<<<<< HEAD
+  "include": ["src/**/*", "src/**/__tests__/**/*", "tests/**/*"],
+=======
   "include": ["src/**/*", "src/**/__tests__/**/*", "health/**/*"],
+>>>>>>> main
   "exclude": [
     "node_modules",
     "dist",
