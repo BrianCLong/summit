@@ -579,7 +579,7 @@ export class MultiINTFusion {
     let temporal = 0;
     let spatial = 0;
     let entity = 0;
-    let attribute = 0;
+    const attribute = 0;
 
     // Temporal correlation
     if (options.timeWindow) {
