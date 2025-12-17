@@ -1,0 +1,81 @@
+name: Golden Service Pipeline
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        required: true
+        type: string
+      working-directory:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run lint
+
+  security:
+    name: Security Scans
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Trivy Scan (FS)
+      - uses: aquasecurity/trivy-action@0.14.0
+        with:
+          scan-type: 'fs'
+          scan-ref: ${{ inputs.working-directory }}
+          ignore-unfixed: true
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+      # SBOM Generation
+      - name: Generate SBOM
+        uses: cyclonedx/gh-node-module-shim@v1
+        with:
+          path: ${{ inputs.working-directory }}
+          output: sbom.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sbom-${{ inputs.service-name }}
+          path: sbom.json
+
+  build-and-push:
+    name: Build & Push
+    needs: [test, security]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ${{ inputs.working-directory }}
+          push: false # Set to true if registry is configured
+          tags: ${{ inputs.service-name }}:latest
+          outputs: type=docker,dest=/tmp/image.tar
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-${{ inputs.service-name }}
+          path: /tmp/image.tar
