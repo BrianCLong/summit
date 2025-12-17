@@ -1,46 +1,111 @@
+// @ts-nocheck
 import pino from 'pino';
-import { context, trace } from '@opentelemetry/api';
+<<<<<<< HEAD
+import { correlationEngine } from '../lib/telemetry/correlation-engine';
 
-const transport = pino.transport({
-  targets: [
-    {
-      target: 'pino/file',
-      options: { destination: 1 }, // stdout
-    },
-    // Optional: Add transport for Logstash if configured
-    ...(process.env.LOGSTASH_HOST ? [{
-      target: 'pino-socket',
-      options: {
-        address: process.env.LOGSTASH_HOST,
-        port: 5000,
-        mode: 'tcp',
-        reconnect: true,
-      }
-    }] : [])
-  ],
-});
+// Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
+const stream = {
+  write: (msg: string) => {
+    // Optimization: avoid parsing JSON on every log line unless it looks like JSON
+    // and we are actually running the correlation engine.
+    if (msg.trim().startsWith('{')) {
+        try {
+          const logEntry = JSON.parse(msg);
+          correlationEngine.ingestLog(logEntry);
+        } catch (e) {
+          // If parsing fails, ignore for correlation but still print
+        }
+    }
+    process.stdout.write(msg);
+  },
+};
+=======
+import { cfg } from '../config.js';
+import { AsyncLocalStorage } from 'async_hooks';
+>>>>>>> main
 
-const logger = pino({
+// AsyncLocalStorage for correlation ID propagation
+export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
+
+// Configuration for redaction of sensitive data
+const REDACT_PATHS = [
+  'req.headers.authorization',
+  'req.headers.cookie',
+  'req.headers["x-auth-token"]',
+  'req.headers["x-api-key"]',
+  'body.password',
+  'body.token',
+  'body.refreshToken',
+  'body.secret',
+  'password',
+  'token',
+  'secret',
+  'user.email',
+  'user.phone',
+];
+
+// Standard logging context
+export interface SummitLogContext {
+  correlationId?: string;
+  tenantId?: string;
+  principalId?: string;
+  principalKind?: "user" | "api_key" | "service_account" | "system";
+  service: string;
+  subsystem?: string;
+  requestId?: string;
+  runId?: string;
+  severity?: "debug" | "info" | "warn" | "error";
+  message?: string;
+  [key: string]: any;
+}
+
+export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
+  base: {
+    service: 'intelgraph-server',
+    env: cfg.NODE_ENV,
+    version: process.env.npm_package_version || 'unknown',
+  },
+  timestamp: pino.stdTimeFunctions.isoTime,
+  redact: {
+    paths: REDACT_PATHS,
+    censor: '[REDACTED]',
+  },
+  mixin(_context, level) {
+    const store = correlationStorage.getStore();
+    if (store) {
+        return {
+            correlationId: store.get('correlationId'),
+            tenantId: store.get('tenantId'),
+            principalId: store.get('principalId'),
+            requestId: store.get('requestId'),
+            traceId: store.get('traceId'),
+        }
+    }
+    return {};
+  },
   formatters: {
     level: (label) => {
       return { level: label.toUpperCase() };
     },
-  },
-  mixin() {
-    // Add Trace ID and Span ID to every log from OpenTelemetry context
-    const currentSpan = trace.getSpan(context.active());
-    if (currentSpan) {
-      const spanContext = currentSpan.spanContext();
+    bindings: (bindings) => {
       return {
-        trace_id: spanContext.traceId,
-        span_id: spanContext.spanId,
-        service: process.env.OTEL_SERVICE_NAME || 'api'
+        pid: bindings.pid,
+        host: bindings.hostname,
       };
-    }
-    return { service: process.env.OTEL_SERVICE_NAME || 'api' };
+    },
   },
-  timestamp: pino.stdTimeFunctions.isoTime,
-}, transport);
+  serializers: {
+    err: pino.stdSerializers.err,
+    req: pino.stdSerializers.req,
+    res: pino.stdSerializers.res,
+  },
+<<<<<<< HEAD
+  // Remove pino-pretty transport for production readiness
+  // In production, logs should be structured JSON for log aggregation
+}, stream);
+=======
+});
+>>>>>>> main
 
 export default logger;

@@ -1,0 +1,364 @@
+# CompanyOS SLO Burn Rate Alert Rules
+# Based on Google SRE multi-window, multi-burn-rate methodology
+#
+# Usage: Replace ${SERVICE} and ${SLO_TARGET} with actual values
+# Deploy to Prometheus via PrometheusRule CRD or prometheus.yml
+
+groups:
+  - name: companyos.slo.recording
+    rules:
+      # =======================================================================
+      # AVAILABILITY SLI RECORDING RULES
+      # =======================================================================
+
+      # 5-minute success rate
+      - record: slo:http_availability:ratio_rate5m
+        expr: |
+          sum by (service) (rate(http_requests_total{status_code!~"5.."}[5m]))
+          /
+          sum by (service) (rate(http_requests_total[5m]))
+
+      # 30-minute success rate
+      - record: slo:http_availability:ratio_rate30m
+        expr: |
+          sum by (service) (rate(http_requests_total{status_code!~"5.."}[30m]))
+          /
+          sum by (service) (rate(http_requests_total[30m]))
+
+      # 1-hour success rate
+      - record: slo:http_availability:ratio_rate1h
+        expr: |
+          sum by (service) (rate(http_requests_total{status_code!~"5.."}[1h]))
+          /
+          sum by (service) (rate(http_requests_total[1h]))
+
+      # 6-hour success rate
+      - record: slo:http_availability:ratio_rate6h
+        expr: |
+          sum by (service) (rate(http_requests_total{status_code!~"5.."}[6h]))
+          /
+          sum by (service) (rate(http_requests_total[6h]))
+
+      # 1-day success rate
+      - record: slo:http_availability:ratio_rate1d
+        expr: |
+          sum by (service) (rate(http_requests_total{status_code!~"5.."}[1d]))
+          /
+          sum by (service) (rate(http_requests_total[1d]))
+
+      # 3-day success rate
+      - record: slo:http_availability:ratio_rate3d
+        expr: |
+          sum by (service) (rate(http_requests_total{status_code!~"5.."}[3d]))
+          /
+          sum by (service) (rate(http_requests_total[3d]))
+
+      # =======================================================================
+      # LATENCY SLI RECORDING RULES
+      # =======================================================================
+
+      # P50 latency
+      - record: slo:http_latency:p50
+        expr: |
+          histogram_quantile(0.50,
+            sum by (service, le) (rate(http_request_duration_seconds_bucket[5m]))
+          )
+
+      # P95 latency
+      - record: slo:http_latency:p95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (service, le) (rate(http_request_duration_seconds_bucket[5m]))
+          )
+
+      # P99 latency
+      - record: slo:http_latency:p99
+        expr: |
+          histogram_quantile(0.99,
+            sum by (service, le) (rate(http_request_duration_seconds_bucket[5m]))
+          )
+
+      # Latency SLI: % requests under threshold (500ms default)
+      - record: slo:http_latency:ratio_rate5m
+        expr: |
+          sum by (service) (rate(http_request_duration_seconds_bucket{le="0.5"}[5m]))
+          /
+          sum by (service) (rate(http_request_duration_seconds_count[5m]))
+
+      - record: slo:http_latency:ratio_rate1h
+        expr: |
+          sum by (service) (rate(http_request_duration_seconds_bucket{le="0.5"}[1h]))
+          /
+          sum by (service) (rate(http_request_duration_seconds_count[1h]))
+
+  - name: companyos.slo.alerts
+    rules:
+      # =======================================================================
+      # CRITICAL: 14.4x burn rate (exhausts 30-day budget in ~2 days)
+      # Page immediately
+      # =======================================================================
+
+      - alert: SLOAvailabilityBurnRateCritical
+        expr: |
+          (1 - slo:http_availability:ratio_rate1h) > 14.4 * (1 - 0.999)
+          and
+          (1 - slo:http_availability:ratio_rate5m) > 14.4 * (1 - 0.999)
+        for: 2m
+        labels:
+          severity: critical
+          slo: availability
+          alert_type: burn_rate
+        annotations:
+          summary: "SLO availability burn rate critical for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} is burning error budget at 14.4x the sustainable rate.
+            At this rate, the 30-day error budget will be exhausted in approximately 2 days.
+            Current 1h error rate: {{ printf "%.4f" $value }}
+          runbook_url: "https://runbooks.companyos.dev/slo/availability-burn-critical"
+          dashboard_url: "https://grafana.companyos.dev/d/companyos-slo-overview?var-service={{ $labels.service }}"
+
+      - alert: SLOLatencyBurnRateCritical
+        expr: |
+          (1 - slo:http_latency:ratio_rate1h) > 14.4 * (1 - 0.99)
+          and
+          (1 - slo:http_latency:ratio_rate5m) > 14.4 * (1 - 0.99)
+        for: 2m
+        labels:
+          severity: critical
+          slo: latency
+          alert_type: burn_rate
+        annotations:
+          summary: "SLO latency burn rate critical for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} latency SLO is burning error budget at 14.4x rate.
+            At this rate, the 30-day error budget will be exhausted in approximately 2 days.
+          runbook_url: "https://runbooks.companyos.dev/slo/latency-burn-critical"
+
+      # =======================================================================
+      # HIGH: 6x burn rate (exhausts 30-day budget in ~5 days)
+      # Page during business hours
+      # =======================================================================
+
+      - alert: SLOAvailabilityBurnRateHigh
+        expr: |
+          (1 - slo:http_availability:ratio_rate6h) > 6 * (1 - 0.999)
+          and
+          (1 - slo:http_availability:ratio_rate30m) > 6 * (1 - 0.999)
+        for: 5m
+        labels:
+          severity: warning
+          slo: availability
+          alert_type: burn_rate
+        annotations:
+          summary: "SLO availability burn rate high for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} is burning error budget at 6x the sustainable rate.
+            At this rate, the 30-day error budget will be exhausted in approximately 5 days.
+          runbook_url: "https://runbooks.companyos.dev/slo/availability-burn-high"
+
+      - alert: SLOLatencyBurnRateHigh
+        expr: |
+          (1 - slo:http_latency:ratio_rate6h) > 6 * (1 - 0.99)
+          and
+          (1 - slo:http_latency:ratio_rate30m) > 6 * (1 - 0.99)
+        for: 5m
+        labels:
+          severity: warning
+          slo: latency
+          alert_type: burn_rate
+        annotations:
+          summary: "SLO latency burn rate high for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} latency SLO is burning error budget at 6x rate.
+          runbook_url: "https://runbooks.companyos.dev/slo/latency-burn-high"
+
+      # =======================================================================
+      # MEDIUM: 1x burn rate over 3 days (on track to exhaust budget)
+      # Create ticket
+      # =======================================================================
+
+      - alert: SLOAvailabilityBurnRateMedium
+        expr: |
+          (1 - slo:http_availability:ratio_rate3d) > 1 * (1 - 0.999)
+          and
+          (1 - slo:http_availability:ratio_rate6h) > 1 * (1 - 0.999)
+        for: 30m
+        labels:
+          severity: warning
+          slo: availability
+          alert_type: burn_rate
+        annotations:
+          summary: "SLO availability degraded for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} is consuming error budget at the sustainable rate.
+            If this continues, budget will be exhausted by end of window.
+          runbook_url: "https://runbooks.companyos.dev/slo/availability-burn-medium"
+
+      # =======================================================================
+      # ABSOLUTE THRESHOLD ALERTS (immediate SLO breach)
+      # =======================================================================
+
+      - alert: SLOAvailabilityBreach
+        expr: |
+          slo:http_availability:ratio_rate1h < 0.999
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+          alert_type: breach
+        annotations:
+          summary: "SLO availability breached for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} availability is below 99.9% SLO target.
+            Current availability: {{ printf "%.2f" (mul $value 100) }}%
+          runbook_url: "https://runbooks.companyos.dev/slo/availability-breach"
+
+      - alert: SLOLatencyBreach
+        expr: |
+          slo:http_latency:p99 > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          slo: latency
+          alert_type: breach
+        annotations:
+          summary: "SLO latency breached for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} P99 latency exceeds 500ms threshold.
+            Current P99: {{ printf "%.3f" $value }}s
+          runbook_url: "https://runbooks.companyos.dev/slo/latency-breach"
+
+      # =======================================================================
+      # ERROR BUDGET EXHAUSTION
+      # =======================================================================
+
+      - alert: SLOErrorBudgetExhausted
+        expr: |
+          (
+            (0.999 - slo:http_availability:ratio_rate30d) / (1 - 0.999)
+          ) >= 1
+        for: 5m
+        labels:
+          severity: critical
+          slo: availability
+          alert_type: budget_exhausted
+        annotations:
+          summary: "Error budget exhausted for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} has consumed 100% of its 30-day error budget.
+            Feature releases should be frozen until budget recovers.
+          runbook_url: "https://runbooks.companyos.dev/slo/budget-exhausted"
+
+      - alert: SLOErrorBudgetLow
+        expr: |
+          (
+            (0.999 - slo:http_availability:ratio_rate30d) / (1 - 0.999)
+          ) >= 0.75
+          and
+          (
+            (0.999 - slo:http_availability:ratio_rate30d) / (1 - 0.999)
+          ) < 1
+        for: 30m
+        labels:
+          severity: warning
+          slo: availability
+          alert_type: budget_low
+        annotations:
+          summary: "Error budget low for {{ $labels.service }}"
+          description: |
+            Service {{ $labels.service }} has consumed 75%+ of its 30-day error budget.
+            Consider pausing non-critical changes.
+          runbook_url: "https://runbooks.companyos.dev/slo/budget-low"
+
+  - name: companyos.infrastructure.alerts
+    rules:
+      # =======================================================================
+      # HEALTH CHECK ALERTS
+      # =======================================================================
+
+      - alert: ServiceUnhealthy
+        expr: |
+          up{job=~".*-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been unreachable for more than 1 minute."
+          runbook_url: "https://runbooks.companyos.dev/infra/service-down"
+
+      - alert: HighMemoryUsage
+        expr: |
+          100 * nodejs_heap_size_used_bytes / nodejs_heap_size_total_bytes > 90
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "Service {{ $labels.service }} heap usage is above 90%."
+          runbook_url: "https://runbooks.companyos.dev/infra/high-memory"
+
+      - alert: HighErrorRate
+        expr: |
+          sum by (service) (rate(errors_total{severity="high"}[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Service {{ $labels.service }} is experiencing elevated error rates."
+          runbook_url: "https://runbooks.companyos.dev/infra/high-errors"
+
+      # =======================================================================
+      # DATABASE ALERTS
+      # =======================================================================
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: |
+          db_connections_active / (db_connections_active + db_connections_idle) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connection pool nearly exhausted for {{ $labels.service }}"
+          description: "Connection pool is 90% utilized. Consider scaling or optimizing queries."
+          runbook_url: "https://runbooks.companyos.dev/infra/db-pool-exhausted"
+
+      - alert: DatabaseQuerySlow
+        expr: |
+          histogram_quantile(0.99, sum by (service, db_system, le) (rate(db_query_duration_seconds_bucket[5m]))) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow database queries on {{ $labels.service }}"
+          description: "P99 query latency exceeds 1 second for {{ $labels.db_system }}."
+          runbook_url: "https://runbooks.companyos.dev/infra/slow-queries"
+
+      # =======================================================================
+      # QUEUE ALERTS (Worker Services)
+      # =======================================================================
+
+      - alert: QueueBacklogHigh
+        expr: |
+          jobs_in_queue > 1000
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Queue backlog high for {{ $labels.service }}"
+          description: "Queue {{ $labels.queue }} has {{ $value }} pending jobs."
+          runbook_url: "https://runbooks.companyos.dev/infra/queue-backlog"
+
+      - alert: JobFailureRateHigh
+        expr: |
+          sum by (service, queue) (rate(jobs_processed_total{status="failed"}[5m]))
+          /
+          sum by (service, queue) (rate(jobs_processed_total[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High job failure rate for {{ $labels.service }}"
+          description: "Queue {{ $labels.queue }} failure rate exceeds 10%."
+          runbook_url: "https://runbooks.companyos.dev/infra/job-failures"
