@@ -269,7 +269,7 @@ export class CommandReporter extends EventEmitter<ReporterEvents> {
    */
   async broadcastReport(report: CommandReport): Promise<void> {
     for (const subscriber of this.subscribers.values()) {
-      if (!subscriber.connected) continue;
+      if (!subscriber.connected) {continue;}
 
       // Check classification
       if (!this.canReceiveClassification(subscriber.classification, report.classification)) {
@@ -356,7 +356,7 @@ export class CommandReporter extends EventEmitter<ReporterEvents> {
   }
 
   private queueForSatellite(report: CommandReport): void {
-    if (!this.satelliteHandler) return;
+    if (!this.satelliteHandler) {return;}
 
     const priority = this.mapPriorityToSatellite(report.priority);
     const payload = Buffer.from(JSON.stringify(report));
@@ -385,9 +385,9 @@ export class CommandReporter extends EventEmitter<ReporterEvents> {
       const subscriber = Array.from(this.subscribers.values()).find(
         s => s.id === dest && s.connected
       );
-      if (subscriber) return true;
+      if (subscriber) {return true;}
 
-      if (this.coalitionEndpoints.has(dest)) return true;
+      if (this.coalitionEndpoints.has(dest)) {return true;}
     }
     return false;
   }
@@ -419,7 +419,7 @@ export class CommandReporter extends EventEmitter<ReporterEvents> {
   }
 
   private calculateDuration(workflow: Workflow): number {
-    if (!workflow.createdAt) return 0;
+    if (!workflow.createdAt) {return 0;}
 
     const endTime = workflow.tasks
       .filter(t => t.completedAt)

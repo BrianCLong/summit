@@ -1,0 +1,434 @@
+# Air-Gapped Deployment Profile for IntelGraph
+# This overlay provides a fully disconnected deployment configuration
+# Compatible with: helm/intelgraph/values.yaml
+
+# ==============================================================================
+# Federal/Air-Gap Configuration
+# ==============================================================================
+
+federal:
+  enabled: true
+  classification: "UNCLASSIFIED"  # Override: CONFIDENTIAL, SECRET
+
+  airGap:
+    enabled: true
+    mode: "STRICT"  # STRICT (no external), RESTRICTED (controlled), CONTROLLED (monitored)
+
+    offlineRegistry:
+      path: "/opt/intelgraph/registry"
+      maxSize: "50GB"
+      encryptionEnabled: true
+
+    updateProtocol:
+      transferMedia: "secure_usb"  # secure_usb, dvd_rom, tape_archive, paper_qr
+      requireMultipleApprovals: true
+      minimumApprovers: 3
+      quarantinePeriod: 24  # hours
+
+  breakGlass:
+    enabled: true
+    maxDuration: 4  # hours
+    requiredApprovers: 2
+    auditLevel: "COMPREHENSIVE"  # COMPREHENSIVE, DETAILED
+    emergencyNetworkOverride: false
+
+  compliance:
+    fipsRequired: true
+    sbomsRequired: true
+    signatureValidation: true
+    policyEnforcement: true
+
+# ==============================================================================
+# Network Isolation
+# ==============================================================================
+
+networkPolicy:
+  enabled: true
+  defaultDeny: true
+
+  # Only internal cluster communication allowed
+  egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: intelgraph
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: kube-system
+      ports:
+      - protocol: TCP
+        port: 53  # DNS
+      - protocol: UDP
+        port: 53  # DNS
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: monitoring
+      ports:
+      - protocol: TCP
+        port: 9090  # Prometheus
+      - protocol: TCP
+        port: 3000  # Grafana
+
+# ==============================================================================
+# Container Registry (Local/Internal Only)
+# ==============================================================================
+
+image:
+  # All images must be pulled from internal registry
+  registry: "registry.internal.local"  # Override with your internal registry
+  pullPolicy: "IfNotPresent"  # Never pull from external
+
+  app:
+    repository: "registry.internal.local/intelgraph/app"
+    tag: "v1.0.0"
+
+  web:
+    repository: "registry.internal.local/intelgraph/web"
+    tag: "v1.0.0"
+
+  syncService:
+    repository: "registry.internal.local/intelgraph/sync-service"
+    tag: "v1.0.0"
+
+imagePullSecrets: []  # No external registry access
+
+# ==============================================================================
+# Sync Service Configuration
+# ==============================================================================
+
+syncService:
+  enabled: true
+  replicaCount: 1
+
+  deployment:
+    id: "edge-001"  # Unique deployment identifier
+    name: "Edge Deployment 1"  # Human-readable name
+    environment: "edge"  # core or edge
+    classification: "UNCLASSIFIED"
+
+  bundleStorage:
+    size: "100Gi"
+    storageClass: "local-path"
+    path: "/opt/intelgraph/bundles"
+
+  crypto:
+    keyStorage: "pvc"  # pvc, secret, hsm
+    privateKeyPath: "/opt/intelgraph/keys/private.pem"
+    publicKeyPath: "/opt/intelgraph/keys/public.pem"
+
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+
+  service:
+    type: ClusterIP
+    port: 4020
+
+  env:
+    - name: NODE_ENV
+      value: "production"
+    - name: DEPLOYMENT_ID
+      value: "edge-001"
+    - name: DEPLOYMENT_NAME
+      value: "Edge Deployment 1"
+    - name: DEPLOYMENT_ENV
+      value: "edge"
+    - name: CLASSIFICATION
+      value: "UNCLASSIFIED"
+    - name: BUNDLE_STORAGE_PATH
+      value: "/opt/intelgraph/bundles"
+
+# ==============================================================================
+# Database Configuration (Local Only)
+# ==============================================================================
+
+postgres:
+  enabled: true
+  # Use internal/local PostgreSQL - NO external connections
+  image:
+    registry: "registry.internal.local"
+    repository: "postgres"
+    tag: "15-alpine"
+
+  primary:
+    persistence:
+      enabled: true
+      size: "50Gi"
+      storageClass: "local-path"
+
+  auth:
+    postgresPassword: ""  # Set via sealed secret
+    username: "intelgraph"
+    password: ""  # Set via sealed secret
+    database: "intelgraph"
+
+neo4j:
+  enabled: true
+  image:
+    registry: "registry.internal.local"
+    repository: "neo4j"
+    tag: "5.22.0-enterprise"
+
+  neo4j:
+    acceptLicenseAgreement: "yes"
+    password: ""  # Set via sealed secret
+
+  volumes:
+    data:
+      mode: "volume"
+      volume:
+        persistentVolumeClaim:
+          claimName: "neo4j-data"
+    size: "100Gi"
+
+redis:
+  enabled: true
+  image:
+    registry: "registry.internal.local"
+    repository: "redis"
+    tag: "7-alpine"
+
+  master:
+    persistence:
+      enabled: true
+      size: "10Gi"
+
+# ==============================================================================
+# Observability (Internal Only)
+# ==============================================================================
+
+monitoring:
+  enabled: true
+
+  prometheus:
+    enabled: true
+    # Internal metrics collection only - no remote write
+    remoteWrite: []
+    externalLabels: {}
+
+    storage:
+      size: "50Gi"
+
+  grafana:
+    enabled: true
+    # No external data sources
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus:9090
+        access: proxy
+        isDefault: true
+
+  loki:
+    enabled: true
+    # Local log aggregation only
+    storage:
+      size: "50Gi"
+
+# ==============================================================================
+# Security & Compliance
+# ==============================================================================
+
+# SPIRE (identity and attestation)
+spire:
+  enabled: true
+  trustDomain: "intelgraph.internal"
+
+  server:
+    image: "registry.internal.local/spiffe/spire-server:1.9.0"
+    dataStore:
+      sql:
+        databaseType: "postgres"
+        connectionString: ""  # Set via secret
+
+  agent:
+    image: "registry.internal.local/spiffe/spire-agent:1.9.0"
+
+# Gatekeeper (policy enforcement)
+gatekeeper:
+  enabled: true
+  image:
+    repository: "registry.internal.local/openpolicyagent/gatekeeper"
+    tag: "v3.15.0"
+
+  # Air-gap specific constraints
+  constraints:
+    - name: "airgap-enforcement"
+      enforcementAction: "deny"
+      match:
+        kinds:
+          - apiGroups: ["*"]
+            kinds: ["Pod"]
+    - name: "classification-enforcement"
+      enforcementAction: "deny"
+    - name: "fips-validation"
+      enforcementAction: "deny"
+
+# FIPS compliance
+fips:
+  enabled: true
+  mode: "enforced"  # enforced, audit
+  cryptoProvider: "openssl-fips"
+
+  validation:
+    enforceOnBoot: true
+    continuousMonitoring: true
+
+# ==============================================================================
+# Audit & Provenance
+# ==============================================================================
+
+audit:
+  enabled: true
+
+  # WORM storage for audit logs
+  storage:
+    type: "worm"  # write-once-read-many
+    size: "100Gi"
+    retentionDays: 2555  # 7 years
+    objectLock: true
+
+  # Log everything
+  levels:
+    - "Metadata"
+    - "Request"
+    - "RequestResponse"
+
+  # Chain integrity
+  merkleChain:
+    enabled: true
+    algorithm: "sha256"
+
+provenance:
+  enabled: true
+
+  service:
+    image: "registry.internal.local/intelgraph/prov-ledger"
+    tag: "v1.0.0"
+
+  storage:
+    size: "50Gi"
+
+# ==============================================================================
+# Ingress (Internal Only)
+# ==============================================================================
+
+ingress:
+  enabled: true
+  className: "nginx"  # Internal ingress controller
+
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+
+  hosts:
+    - host: "intelgraph.internal.local"
+      paths:
+        - path: /
+          pathType: Prefix
+          service:
+            name: intelgraph-web
+            port: 3000
+        - path: /api
+          pathType: Prefix
+          service:
+            name: intelgraph-server
+            port: 4000
+        - path: /sync
+          pathType: Prefix
+          service:
+            name: sync-service
+            port: 4020
+
+  tls:
+    - secretName: intelgraph-tls
+      hosts:
+        - "intelgraph.internal.local"
+
+# ==============================================================================
+# Resource Quotas & Limits
+# ==============================================================================
+
+resources:
+  namespace:
+    limits:
+      cpu: "32"
+      memory: "128Gi"
+      storage: "1Ti"
+    requests:
+      cpu: "16"
+      memory: "64Gi"
+      storage: "500Gi"
+
+# ==============================================================================
+# Pod Security
+# ==============================================================================
+
+podSecurityPolicy:
+  enabled: true
+
+  spec:
+    privileged: false
+    allowPrivilegeEscalation: false
+    requiredDropCapabilities:
+      - ALL
+    runAsUser:
+      rule: 'MustRunAsNonRoot'
+    seLinux:
+      rule: 'RunAsAny'
+    fsGroup:
+      rule: 'RunAsAny'
+    volumes:
+      - 'configMap'
+      - 'emptyDir'
+      - 'projected'
+      - 'secret'
+      - 'downwardAPI'
+      - 'persistentVolumeClaim'
+
+# ==============================================================================
+# Backup & Disaster Recovery (Offline)
+# ==============================================================================
+
+backup:
+  enabled: true
+
+  # Local backup to removable media
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention: 30  # days
+
+  targets:
+    - postgres
+    - neo4j
+    - redis
+    - bundles
+    - audit-logs
+
+  encryption:
+    enabled: true
+    algorithm: "AES-256-GCM"
+
+  verification:
+    enabled: true
+    testRestore: true
+
+# ==============================================================================
+# Environment Labels
+# ==============================================================================
+
+commonLabels:
+  deployment: "airgap"
+  environment: "edge"
+  classification: "UNCLASSIFIED"
+  managed-by: "helm"
+
+commonAnnotations:
+  "airgap.intelgraph.io/mode": "STRICT"
+  "security.intelgraph.io/fips-required": "true"
+  "compliance.intelgraph.io/audit-level": "COMPREHENSIVE"

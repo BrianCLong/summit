@@ -7,7 +7,6 @@
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "types": ["node", "jest"]
-    "types": []
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"]
 }
