@@ -1,0 +1,66 @@
+# PROD Environment Values
+# Guardrails: High availability, strict isolation, full progressive delivery.
+
+image:
+  tag: latest # Overridden by CI
+
+service:
+  type: ClusterIP
+  port: 4000
+
+env:
+  NEO4J_URI: bolt://neo4j-prod.companyos-prod.svc.cluster.local:7687
+  PG_CONNECTION_SECRET: db-credentials-prod
+
+ingress:
+  enabled: true
+  hosts:
+    - host: api.topicality.co
+      paths: [{ path: /, pathType: Prefix }]
+  tls:
+    - secretName: api-prod-tls
+      hosts: [api.topicality.co]
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+autoscaling:
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 60
+
+rollout:
+  strategy:
+    canary:
+      steps:
+        - setWeight: 20
+        - pause: { duration: 60s }
+        - analysis:
+            templates:
+              - templateName: slo-analysis-template
+            args:
+              - name: service-name
+                value: intelgraph-api
+        - setWeight: 40
+        - pause: { duration: 2m }
+        - analysis:
+            templates:
+              - templateName: slo-analysis-template
+            args:
+              - name: service-name
+                value: intelgraph-api
+        - setWeight: 80
+        - pause: { duration: 2m }
+        - analysis:
+            templates:
+              - templateName: slo-analysis-template
+            args:
+              - name: service-name
+                value: intelgraph-api
