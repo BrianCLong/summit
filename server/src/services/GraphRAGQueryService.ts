@@ -7,10 +7,10 @@
  * - Citation resolution and inline references
  * - Glass-box run capture for full observability
  * - Query editing and re-execution support
- * - Hallucination Mitigation (CoVe) integration
  */
 
 import type { Pool } from 'pg';
+import type { Redis } from 'ioredis';
 import type { Driver } from 'neo4j-driver';
 import { logger } from '../utils/logger.js';
 import { metrics } from '../observability/metrics.js';
@@ -18,7 +18,6 @@ import { GraphRAGService, type GraphRAGRequest, type GraphRAGResponse } from './
 import { QueryPreviewService, type CreatePreviewInput, type QueryPreview, type ExecutePreviewResult } from './QueryPreviewService.js';
 import { GlassBoxRunService, type GlassBoxRun } from './GlassBoxRunService.js';
 import { NlToCypherService } from '../ai/nl-to-cypher/nl-to-cypher.service.js';
-import { HallucinationMitigationService, HallucinationMitigationResponse, EvidenceMetrics } from './HallucinationMitigationService.js';
 
 export type GraphRAGQueryRequest = {
   investigationId: string;
@@ -33,8 +32,6 @@ export type GraphRAGQueryRequest = {
   // Execution options
   maxRows?: number;
   timeout?: number;
-  // Verification options
-  enableCoVe?: boolean;
 };
 
 export type EnrichedCitation = {
@@ -69,13 +66,6 @@ export type GraphRAGQueryResponse = {
     nodeCount: number;
     edgeCount: number;
   };
-  // Verification metadata
-  verificationStatus?: 'verified' | 'unverified' | 'conflicted';
-  inconsistencies?: string[];
-  corrections?: string[];
-  reasoningTrace?: string;
-  conflictDetails?: any;
-  evidenceMetrics?: EvidenceMetrics;
 };
 
 export type ExecutePreviewRequest = {
@@ -85,7 +75,6 @@ export type ExecutePreviewRequest = {
   dryRun?: boolean;
   maxRows?: number;
   timeout?: number;
-  enableCoVe?: boolean;
 };
 
 export class GraphRAGQueryService {
@@ -94,22 +83,19 @@ export class GraphRAGQueryService {
   private glassBoxService: GlassBoxRunService;
   private pool: Pool;
   private neo4jDriver: Driver;
-  private hallucinationMitigationService?: HallucinationMitigationService;
 
   constructor(
     graphRAGService: GraphRAGService,
     queryPreviewService: QueryPreviewService,
     glassBoxService: GlassBoxRunService,
     pool: Pool,
-    neo4jDriver: Driver,
-    hallucinationMitigationService?: HallucinationMitigationService
+    neo4jDriver: Driver
   ) {
     this.graphRAGService = graphRAGService;
     this.queryPreviewService = queryPreviewService;
     this.glassBoxService = glassBoxService;
     this.pool = pool;
     this.neo4jDriver = neo4jDriver;
-    this.hallucinationMitigationService = hallucinationMitigationService;
   }
 
   /**
@@ -123,7 +109,6 @@ export class GraphRAGQueryService {
       question: request.question,
       generatePreview: request.generateQueryPreview,
       autoExecute: request.autoExecute,
-      enableCoVe: request.enableCoVe
     }, 'Starting GraphRAG query');
 
     // Create glass-box run for observability
@@ -138,7 +123,6 @@ export class GraphRAGQueryService {
         maxHops: request.maxHops,
         generatePreview: request.generateQueryPreview,
         autoExecute: request.autoExecute,
-        enableCoVe: request.enableCoVe
       },
     });
 
@@ -219,37 +203,23 @@ export class GraphRAGQueryService {
       // Step 2: Execute GraphRAG query
       const ragStepId = await this.captureStep(
         run.id,
-        request.enableCoVe
-            ? 'Execute Chain-of-Verification (CoVe) pipeline'
-            : 'Execute GraphRAG retrieval and generation'
+        'Execute GraphRAG retrieval and generation'
       );
 
       const ragRequest: GraphRAGRequest = {
         investigationId: request.investigationId,
+        tenantId: request.tenantId,
         question: request.question,
         focusEntityIds: request.focusEntityIds,
         maxHops: request.maxHops || 2,
       };
 
-      let ragResponse: GraphRAGResponse | HallucinationMitigationResponse;
-
-      if (request.enableCoVe && this.hallucinationMitigationService) {
-        ragResponse = await this.hallucinationMitigationService.query({
-            ...ragRequest,
-            enableCoVe: true
-        });
-      } else {
-          if (request.enableCoVe) {
-              logger.warn('CoVe requested but HallucinationMitigationService not available');
-          }
-          ragResponse = await this.graphRAGService.answer(ragRequest);
-      }
+      const ragResponse = await this.graphRAGService.answer(ragRequest);
 
       await this.glassBoxService.completeStep(run.id, ragStepId, {
         confidence: ragResponse.confidence,
         citationCount: ragResponse.citations.entityIds.length,
         pathCount: ragResponse.why_paths?.length,
-        verificationStatus: (ragResponse as HallucinationMitigationResponse).verificationStatus
       });
 
       // Step 3: Enrich citations with entity details
@@ -260,7 +230,8 @@ export class GraphRAGQueryService {
 
       const enrichedCitations = await this.enrichCitations(
         ragResponse.citations.entityIds,
-        request.investigationId
+        request.investigationId,
+        request.tenantId
       );
 
       await this.glassBoxService.completeStep(run.id, enrichStepId, {
@@ -274,15 +245,6 @@ export class GraphRAGQueryService {
       );
 
       const executionTimeMs = Date.now() - startTime;
-
-      const verificationProps = request.enableCoVe ? {
-        verificationStatus: (ragResponse as HallucinationMitigationResponse).verificationStatus,
-        inconsistencies: (ragResponse as HallucinationMitigationResponse).inconsistencies,
-        corrections: (ragResponse as HallucinationMitigationResponse).corrections,
-        reasoningTrace: (ragResponse as HallucinationMitigationResponse).reasoningTrace,
-        conflictDetails: (ragResponse as HallucinationMitigationResponse).conflictDetails,
-        evidenceMetrics: (ragResponse as HallucinationMitigationResponse).evidenceMetrics
-      } : {};
 
       const response: GraphRAGQueryResponse = {
         answer: ragResponse.answer,
@@ -303,7 +265,6 @@ export class GraphRAGQueryService {
         runId: run.id,
         executionTimeMs,
         subgraphSize,
-        ...verificationProps
       };
 
       await this.glassBoxService.updateStatus(run.id, 'completed', response);
@@ -321,7 +282,6 @@ export class GraphRAGQueryService {
         citationCount: enrichedCitations.length,
         executionTimeMs,
         hasPreview: !!preview,
-        verificationStatus: response.verificationStatus
       }, 'Completed GraphRAG query');
 
       return response;
@@ -380,42 +340,51 @@ export class GraphRAGQueryService {
     }
 
     // Now execute GraphRAG with the original question
-    const ragRequest: GraphRAGQueryRequest = {
+    const ragRequest: GraphRAGRequest = {
       investigationId: preview.investigationId,
-      tenantId: preview.tenantId, // Assuming preview has tenantId
-      userId: request.userId,
+      tenantId: preview.tenantId,
       question: preview.naturalLanguageQuery,
       focusEntityIds: preview.parameters.focusEntityIds as string[] | undefined,
       maxHops: preview.parameters.maxHops as number | undefined,
-      enableCoVe: request.enableCoVe
     };
 
-    // Recursively call query to reuse logic
-    const ragResponse = await this.query({
-        ...ragRequest,
-        generateQueryPreview: false,
-        autoExecute: true
-    });
+    const ragResponse = await this.graphRAGService.answer(ragRequest);
 
-    // We override runId and executionTimeMs from the preview execution
-    // But actually, we want the result of the RAG query.
-    // The query() method creates a NEW run.
-    // We might want to link them?
+    // Enrich citations
+    const enrichedCitations = await this.enrichCitations(
+      ragResponse.citations.entityIds,
+      preview.investigationId,
+      preview.tenantId
+    );
 
-    return {
-        ...ragResponse,
-        preview: {
-            id: preview.id,
-            generatedQuery: request.useEditedQuery && preview.editedQuery
-              ? preview.editedQuery
-              : preview.generatedQuery,
-            queryExplanation: preview.queryExplanation,
-            costLevel: preview.costEstimate.level,
-            riskLevel: preview.riskAssessment.level,
-            canExecute: preview.canExecute,
-            requiresApproval: preview.requiresApproval,
-          }
+    const response: GraphRAGQueryResponse = {
+      answer: ragResponse.answer,
+      confidence: ragResponse.confidence,
+      citations: enrichedCitations,
+      why_paths: ragResponse.why_paths,
+      preview: {
+        id: preview.id,
+        generatedQuery: request.useEditedQuery && preview.editedQuery
+          ? preview.editedQuery
+          : preview.generatedQuery,
+        queryExplanation: preview.queryExplanation,
+        costLevel: preview.costEstimate.level,
+        riskLevel: preview.riskAssessment.level,
+        canExecute: preview.canExecute,
+        requiresApproval: preview.requiresApproval,
+      },
+      runId: execResult.runId,
+      executionTimeMs: Date.now() - startTime,
     };
+
+    logger.info({
+      previewId: request.previewId,
+      runId: execResult.runId,
+      citationCount: enrichedCitations.length,
+      executionTimeMs: response.executionTimeMs,
+    }, 'Executed preview successfully');
+
+    return response;
   }
 
   /**
@@ -467,7 +436,6 @@ export class GraphRAGQueryService {
         || originalRun.parameters.maxHops as number | undefined,
       generateQueryPreview: originalRun.parameters.generatePreview as boolean | undefined,
       autoExecute: true,
-      enableCoVe: originalRun.parameters.enableCoVe as boolean | undefined
     };
 
     return this.query(request);
@@ -502,12 +470,15 @@ export class GraphRAGQueryService {
    */
   private async enrichCitations(
     entityIds: string[],
-    investigationId: string
+    investigationId: string,
+    tenantId?: string
   ): Promise<EnrichedCitation[]> {
     if (entityIds.length === 0) {
       return [];
     }
 
+    // Ensure we enforce tenant isolation if tenantId is provided
+    const tenantFilter = tenantId ? 'AND e.tenant_id = $3' : '';
     const query = `
       SELECT
         e.id,
@@ -520,11 +491,15 @@ export class GraphRAGQueryService {
       FROM entities e
       WHERE e.id = ANY($1)
       AND e.props->>'investigationId' = $2
+      ${tenantFilter}
       ORDER BY array_position($1, e.id)
     `;
 
     try {
-      const result = await this.pool.query(query, [entityIds, investigationId]);
+      const params = [entityIds, investigationId];
+      if (tenantId) params.push(tenantId);
+
+      const result = await this.pool.query(query, params);
 
       return result.rows.map(row => ({
         entityId: row.id,

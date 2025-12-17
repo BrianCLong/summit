@@ -6,6 +6,7 @@
  */
 
 import { PIIType, SeverityLevel } from './types.js';
+// Added for Privacy Engine visibility
 
 /**
  * Hierarchical sensitivity classification levels
