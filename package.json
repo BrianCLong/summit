@@ -119,7 +119,10 @@
     "security:audit:fix": "pnpm audit --fix",
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",
     "security:scan": "pnpm run security:audit && pnpm run security:lint",
-    "security:outdated": "pnpm outdated"
+    "security:outdated": "pnpm outdated",
+    "schema:fingerprint": "node --loader ts-node/esm scripts/schema-fingerprint.ts --write latest --pretty",
+    "schema:verify": "node --loader ts-node/esm scripts/verify-migrations.ts",
+    "schema:migration": "node --loader ts-node/esm scripts/create-migration.ts"
   },
   "keywords": [
     "intelligence-analysis",
