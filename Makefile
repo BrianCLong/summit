@@ -1,10 +1,68 @@
-# ---- IntelGraph S25 Merge Orchestrator ---------------------------------------
-# Usage:
-#   make merge-s25          # end-to-end (idempotent)
-#   make merge-s25.resume   # resume from saved state
-#   make merge-s25.clean    # delete temp branches/state
-#   make pr-release         # force (re)open final release PR only
-# ------------------------------------------------------------------------------
+# Summit Platform Makefile
+# Standardized commands for Development and Operations
+
+.PHONY: up down restart logs shell clean
+.PHONY: dev test lint build
+.PHONY: db-migrate db-seed
+.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
+
+# --- Docker Compose Controls ---
+
+up:
+	@echo "Starting development environment..."
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+down:
+	@echo "Stopping development environment..."
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+
+restart: down up
+
+logs:
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+
+shell:
+	@echo "Opening shell in server container..."
+	docker compose -f docker-compose.yml -f docker-compose.dev.yml exec server /bin/bash
+
+clean:
+	@echo "Cleaning artifacts and stopped containers..."
+	docker system prune -f
+	rm -rf dist build coverage
+	# Merge clean
+	@echo "Cleaning merge state..."
+	@rm -rf "$(STATE_DIR)"
+	@git branch -D tmp/pr-* 2>/dev/null || true
+
+# --- Development Workflow ---
+
+dev:
+	@echo "Starting local dev server (host mode)..."
+	npm run dev
+
+test:
+	@echo "Running tests..."
+	npm run test
+
+lint:
+	@echo "Linting code..."
+	npm run lint
+
+build:
+	@echo "Building application..."
+	npm run build
+
+# --- Database ---
+
+db-migrate:
+	@echo "Running DB migrations..."
+	npm run db:migrate
+
+db-seed:
+	@echo "Seeding DB..."
+	npm run seed
+
+# ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
 SHELL := /usr/bin/env bash
 .ONESHELL:
@@ -22,10 +80,7 @@ STACK_REBRAND     ?= stack/rebrand-docs
 PR_TARGETS        ?= 1279 1261 1260 1259
 STATE_DIR         ?= .merge-evidence
 STATE_FILE        ?= $(STATE_DIR)/state.json
-
 NODE_VERSION      ?= 20
-
-.PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
 
 merge-s25: prereqs
 	@./scripts/merge_s25.sh \
@@ -46,10 +101,7 @@ merge-s25.resume: prereqs
 	  --resume \
 	  --node "$(NODE_VERSION)"
 
-merge-s25.clean:
-	@echo "Cleaning state and temp branches…"
-	@rm -rf "$(STATE_DIR)"
-	@git branch -D tmp/pr-* 2>/dev/null || true
+merge-s25.clean: clean
 
 pr-release:
 	@./scripts/merge_s25.sh \
@@ -93,16 +145,3 @@ prereqs:
 	@command -v pnpm >/dev/null 2>&1 || { echo "pnpm not found"; exit 1; }
 	@node -v | grep -q "v$(NODE_VERSION)" || echo "WARN: Node version differs from $(NODE_VERSION)"
 	@mkdir -p "$(STATE_DIR)"
-# ---- Local integration rig ----------------------------------------------------
-.PHONY: dev-up dev-down e2e-001
-
-dev-up:
-	@docker compose -f infra/dev/docker-compose.yml up -d
-
-# Stops containers but keeps volumes to speed up reseeds.
-dev-down:
-	@docker compose -f infra/dev/docker-compose.yml down
-
-# Placeholder for the end-to-end flow until services are wired.
-e2e-001:
-	@./scripts/e2e-001.sh
