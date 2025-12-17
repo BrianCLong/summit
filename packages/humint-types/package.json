@@ -31,7 +31,7 @@
     "typescript": "^5.3.3"
   },
   "peerDependencies": {
-    "@intelgraph/canonical-schema": "workspace:*",
+    "@summit/canonical-schema": "workspace:*",
     "react": "^18.0.0"
   },
   "peerDependenciesMeta": {

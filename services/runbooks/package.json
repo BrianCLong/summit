@@ -23,7 +23,6 @@
   "author": "IntelGraph Team",
   "license": "PROPRIETARY",
   "dependencies": {
-    "@intelgraph/runbook-engine": "workspace:*",
     "express": "^4.18.2",
     "uuid": "^9.0.0"
   },

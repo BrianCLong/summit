@@ -27,13 +27,13 @@
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "puppeteer-extra-plugin-recaptcha": "^3.6.8",
     "node-html-parser": "^6.1.13",
-    "robotstxt-parser": "^0.1.2",
-    "sitemap-parser": "^1.0.0",
+    "robots-parser": "^3.0.1",
+    "sitemap-parser": "^0.1.0",
     "difflib": "^0.2.4",
     "turndown": "^7.2.0",
-    "readability": "^0.5.0",
+    "readability": "^0.1.0",
     "wappalyzer": "^6.10.66",
-    "@mozilla/readability": "^0.5.0"
+    "@mozilla/readability": "^0.6.0"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
