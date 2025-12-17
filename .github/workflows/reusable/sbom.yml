@@ -1,0 +1,32 @@
+name: sbom
+
+on:
+  workflow_call:
+    secrets:
+      NODE_AUTH_TOKEN:
+        required: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  sbom:
+    name: sbom
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-spdx
+          path: sbom.spdx.json
+          retention-days: 7

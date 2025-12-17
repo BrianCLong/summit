@@ -1,0 +1,148 @@
+
+type GeoLocation {
+  lat: Float!
+  lon: Float!
+  alt: Float
+}
+
+type EWAsset {
+  id: ID!
+  name: String!
+  type: String!
+  location: GeoLocation!
+  capabilities: [String!]!
+  maxPower: Float!
+  frequencyRange: [Float!]!
+  status: String!
+  activeProtection: [String!]!
+}
+
+type SpectrumSignal {
+  id: ID!
+  frequency: Float!
+  bandwidth: Float!
+  power: Float!
+  modulation: String!
+  type: String!
+  sourceId: ID
+  location: GeoLocation
+  timestamp: String!
+  signature: String
+  content: String
+}
+
+type JammingMission {
+  id: ID!
+  assetId: ID!
+  targetFrequency: Float!
+  bandwidth: Float!
+  effect: String!
+  startTime: String!
+  durationSeconds: Float!
+  powerOutput: Float!
+  status: String!
+  effectiveness: Float
+}
+
+type InterceptReport {
+  id: ID!
+  signalId: ID!
+  interceptTime: String!
+  analyzedType: String!
+  confidence: Float!
+  content: String
+}
+
+type DirectionFindingResult {
+  signalId: ID!
+  estimatedLocation: GeoLocation!
+  errorRadius: Float!
+  triangulationPoints: Int!
+  timestamp: String!
+}
+
+type BattleSpaceView {
+  timestamp: String!
+  assets: [EWAsset!]!
+  signals: [SpectrumSignal!]!
+  activeJammers: [JammingMission!]!
+  intercepts: [InterceptReport!]!
+  spectrumUtilization: Float!
+}
+
+type EMPAnalysisReport {
+  event: String!
+  origin: GeoLocation!
+  yieldKt: Float!
+  estimatedRadiusKm: Float!
+  assetsAtRisk: [ID!]!
+  timestamp: String!
+}
+
+extend type Query {
+  """
+  Get the current status of the Electromagnetic Battle Space
+  """
+  ewBattleSpace: BattleSpaceView!
+
+  """
+  Analyze the potential impact of an EMP blast at a location
+  """
+  ewAnalyzeEMP(lat: Float!, lon: Float!, yieldKt: Float!): EMPAnalysisReport!
+}
+
+extend type Mutation {
+  """
+  Register a new EW Asset
+  """
+  ewRegisterAsset(
+    id: ID!
+    name: String!
+    type: String!
+    lat: Float!
+    lon: Float!
+    capabilities: [String!]!
+    maxPower: Float!
+    minFreq: Float!
+    maxFreq: Float!
+  ): EWAsset!
+
+  """
+  Deploy a Jamming Mission
+  """
+  ewDeployJammer(
+    assetId: ID!
+    targetFrequency: Float!
+    bandwidth: Float!
+    effect: String!
+    durationSeconds: Float
+  ): JammingMission!
+
+  """
+  Stop a Jamming Mission
+  """
+  ewStopJammer(missionId: ID!): Boolean!
+
+  """
+  Detect and Analyze a Signal (Simulation injection)
+  """
+  ewSimulateSignalDetection(
+    frequency: Float!
+    bandwidth: Float!
+    power: Float!
+    modulation: String!
+    type: String!
+    lat: Float
+    lon: Float
+  ): SpectrumSignal!
+
+  """
+  Perform Direction Finding on a Signal
+  """
+  ewTriangulateSignal(signalId: ID!): DirectionFindingResult
+
+  """
+  Activate Electronic Protection
+  """
+  ewActivateProtection(assetId: ID!, measure: String!): Boolean!
+}

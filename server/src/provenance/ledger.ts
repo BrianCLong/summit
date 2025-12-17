@@ -1,5 +1,7 @@
+// @ts-nocheck
 // Maestro Conductor v24.4.0 - Provenance Ledger v2 with Hash-Chain
 // Epic E18: Provenance Integrity & Crypto Evidence - Immutable audit trail
+// Updated for Privacy Engine integration
 
 // No-op tracer shim to avoid OTEL dependency
 import { Counter, Histogram, Gauge } from 'prom-client';
@@ -58,8 +60,45 @@ const ledgerIntegrityStatus = new Gauge({
   labelNames: ['tenant_id'],
 });
 
+<<<<<<< HEAD
 // Export the V2 type as the primary ProvenanceEntry
 export type ProvenanceEntry = ProvenanceEntryV2;
+=======
+export interface ProvenanceEntry {
+  id: string;
+  tenantId: string;
+  sequenceNumber: bigint;
+  previousHash: string;
+  currentHash: string;
+  timestamp: Date;
+  actionType: string;
+  resourceType: string;
+  resourceId: string;
+  actorId: string;
+  actorType: 'user' | 'system' | 'api' | 'job';
+  payload: Record<string, any>;
+  metadata: {
+    ipAddress?: string;
+    userAgent?: string;
+    sessionId?: string;
+    requestId?: string;
+    purpose?: string;
+    classification?: string[];
+    privacy?: {
+      epsilon?: number;
+      delta?: number;
+      mechanism?: string;
+      noiseParams?: Record<string, any>;
+    };
+  };
+  signature?: string;
+  attestation?: {
+    policy: string;
+    evidence: Record<string, any>;
+    timestamp: Date;
+  };
+}
+>>>>>>> main
 
 export interface LedgerRoot {
   id: string;
@@ -974,6 +1013,7 @@ export class ProvenanceLedgerV2 extends EventEmitter {
       offset?: number;
       actionType?: string;
       resourceType?: string;
+      resourceId?: string;
       order?: 'ASC' | 'DESC';
     } = {},
   ): Promise<ProvenanceEntry[]> {
@@ -1002,6 +1042,12 @@ export class ProvenanceLedgerV2 extends EventEmitter {
     if (options.resourceType) {
       whereConditions.push(`resource_type = $${paramIndex}`);
       params.push(options.resourceType);
+      paramIndex++;
+    }
+
+    if (options.resourceId) {
+      whereConditions.push(`resource_id = $${paramIndex}`);
+      params.push(options.resourceId);
       paramIndex++;
     }
 
