@@ -1,4 +1,6 @@
 import { Pool } from 'pg';
+import { ModelBenchmarkingService } from '../benchmarking/ModelBenchmarkingService.js';
+import { ModelRegistry } from '../benchmarking/ModelRegistry.js';
 export interface TrainingExample {
     entity1: any;
     entity2: any;
@@ -33,9 +35,15 @@ export interface ModelVersion {
     hyperparameters: Record<string, any>;
 }
 export declare class TrainingPipeline {
+    private readonly benchmarkingService?;
+    private readonly modelRegistry?;
     private pgPool;
     private modelsDir;
-    constructor(pgPool: Pool);
+<<<<<<< HEAD
+    constructor(pgPool: Pool, benchmarkingService?: ModelBenchmarkingService, modelRegistry?: ModelRegistry);
+=======
+    constructor(pgPool: Pool, benchmarkingService?: ModelBenchmarkingService | undefined, modelRegistry?: ModelRegistry | undefined);
+>>>>>>> main
     private ensureModelsDirectory;
     collectTrainingData(minExamples?: number): Promise<TrainingExample[]>;
     generateFeatures(examples: TrainingExample[]): Promise<TrainingExample[]>;
@@ -49,4 +57,5 @@ export declare class TrainingPipeline {
     activateModel(modelId: string): Promise<void>;
     getModelHistory(modelType?: string, limit?: number): Promise<ModelVersion[]>;
     scheduleTraining(cron: string, modelType: string): Promise<void>;
+    private recordPerformanceSnapshot;
 }

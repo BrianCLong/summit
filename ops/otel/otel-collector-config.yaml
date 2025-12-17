@@ -2,21 +2,61 @@ receivers:
   otlp:
     protocols:
       grpc:
-exporters:
-  otlp:
-    endpoint: jaeger:4317
-    tls: { insecure: true }
+      http:
   prometheus:
-    endpoint: 0.0.0.0:9464
+    config:
+      scrape_configs:
+        - job_name: intelgraph-services
+          kubernetes_sd_configs:
+            - role: pod
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              regex: "true"
+              action: keep
+            - source_labels: [__meta_kubernetes_namespace]
+              target_label: namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              target_label: pod
 processors:
   batch: {}
+  attributes/add_env:
+    actions:
+      - key: deployment.environment
+        value: ${DEPLOYMENT_ENVIRONMENT}
+        action: upsert
+exporters:
+  otlp/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true
+  otlp/elasticsearch:
+    endpoint: http://elasticsearch:9200
+    tls:
+      insecure: true
+  prometheus:
+    endpoint: 0.0.0.0:9464
+  prometheusremotewrite/main:
+    endpoint: http://prometheus.monitoring:9090/api/v1/write
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push
+    labels:
+      job: intelgraph
+  logging/metrics:
+    loglevel: warn
 service:
+  telemetry:
+    logs:
+      level: info
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [otlp]
+      processors: [batch, attributes/add_env]
+      exporters: [otlp/tempo]
     metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch, attributes/add_env]
+      exporters: [prometheus, prometheusremotewrite/main]
+    logs/intake:
       receivers: [otlp]
-      processors: [batch]
-      exporters: [prometheus]
+      processors: [batch, attributes/add_env]
+      exporters: [otlp/elasticsearch, loki, logging/metrics]

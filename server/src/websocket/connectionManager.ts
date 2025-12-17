@@ -1,5 +1,5 @@
 import promClient from 'prom-client';
-import { activeConnections as _activeConnections } from '../observability/metrics.js';
+import { activeConnections } from '../observability/metrics.js';
 
 export enum ConnectionState {
   CONNECTING = 'connecting',
@@ -36,7 +36,7 @@ interface ManagedConnectionOptions {
   maxRetryDelay?: number;
   backoffMultiplier?: number;
   jitter?: number;
-  _logger?: {
+  logger?: {
     info: (...args: any[]) => void;
     warn: (...args: any[]) => void;
     error: (...args: any[]) => void;
@@ -55,7 +55,7 @@ const DEFAULT_OPTIONS: Required<ManagedConnectionOptions> = {
   maxRetryDelay: 60_000,
   backoffMultiplier: 2,
   jitter: 0.3,
-  _logger: console,
+  logger: console,
 };
 
 interface ConnectionMetrics {
@@ -131,6 +131,11 @@ const createMetrics = (): ConnectionMetrics => ({
     'Reconnect delay duration in ms',
     ['tenant'],
   ),
+  connectionUptimeGauge: getOrCreateGauge(
+    'websocket_connection_uptime_seconds',
+    'Uptime of active connections',
+    ['tenant']
+  ),
   stateGauge: getOrCreateGauge(
     'websocket_connections_state',
     'Current WebSocket connections by state',
@@ -149,7 +154,8 @@ const createMetrics = (): ConnectionMetrics => ({
 });
 
 const enum TimerType {
-  _QUEUE_DRAIN,
+  QUEUE_DRAIN,
+  HEARTBEAT,
 }
 
 const READY_STATE_OPEN = 1;
@@ -168,8 +174,10 @@ export class ManagedConnection {
   private lastHeartbeat = Date.now();
   private lastStateChange = Date.now();
   private failureReason: string | null = null;
+  public subscriptions: Set<string> = new Set();
   private readonly onStateChange: () => void;
   private connectStartedAt = Date.now();
+  private connectionId: string;
 
   constructor(
     ws: any,
@@ -184,6 +192,8 @@ export class ManagedConnection {
     this.metrics = metrics;
     this.tokens = this.options.rateLimitPerSecond;
     this.onStateChange = onStateChange;
+    this.connectionId = context.id;
+    this.startHeartbeatMonitor();
   }
 
   getContext(): ManagedConnectionContext {
@@ -231,6 +241,8 @@ export class ManagedConnection {
     this.connectStartedAt = Date.now();
     this.transitionTo(ConnectionState.CONNECTED);
     this.flushQueue();
+    // Send initial sync/ack
+    this.sendJson({ type: 'connection_ack', connectionId: this.connectionId });
   }
 
   markReconnecting(reason: string): void {
@@ -295,6 +307,25 @@ export class ManagedConnection {
     }
     this.transitionTo(ConnectionState.DISCONNECTED);
     this.clearTimer(TimerType.QUEUE_DRAIN);
+    this.clearTimer(TimerType.HEARTBEAT);
+  }
+
+  private startHeartbeatMonitor() {
+      if (this.timers.has(TimerType.HEARTBEAT)) return;
+
+      const interval = setInterval(() => {
+          if (this.state === ConnectionState.CONNECTED) {
+              const uptime = (Date.now() - this.connectStartedAt) / 1000;
+              (this.metrics as any).connectionUptimeGauge?.labels(this.context.tenantId).set(uptime);
+
+              if (this.isHeartbeatExpired(this.options.heartbeatTimeout)) {
+                  this.options.logger.warn(`Heartbeat timeout for ${this.context.id}`);
+                  this.markFailed('heartbeat_timeout');
+                  this.close(4008, 'Heartbeat timeout');
+              }
+          }
+      }, 5000);
+      this.timers.set(TimerType.HEARTBEAT, interval);
   }
 
   sendJson(payload: Record<string, unknown>): boolean {

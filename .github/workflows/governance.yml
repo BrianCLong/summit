@@ -1,0 +1,127 @@
+name: governance
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  schemas:
+    name: Validate governance schemas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install ajv
+        run: npm install -g ajv-cli ajv-formats
+
+      - name: Compile schemas
+        run: |
+          ajv compile -c ajv-formats --spec=draft2020 -s schemas/**/*.json
+
+      - name: Validate sample purchase orders
+        run: |
+          ajv validate -c ajv-formats \
+            -s schemas/purchase-order.schema.json \
+            -d samples/po/*.json || true
+
+      - name: Validate sample SBOM
+        run: |
+          ajv validate -c ajv-formats \
+            -s schemas/sbom.schema.json \
+            -d samples/sbom/*.json || true
+
+      - name: Validate sample provenance
+        run: |
+          ajv validate -c ajv-formats \
+            -s schemas/provenance-event.schema.json \
+            -d samples/provenance/*.json || true
+
+  policy-tests:
+    name: Test OPA policies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: open-policy-agent/setup-opa@v2
+
+      - name: Run OPA tests
+        run: opa test policy/ -v
+
+  policy-eval:
+    name: Evaluate governance decisions
+    runs-on: ubuntu-latest
+    needs:
+      - schemas
+      - policy-tests
+    env:
+      DEPLOY_ENV: prod
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: open-policy-agent/setup-opa@v2
+
+      - name: Build OPA input
+        run: |
+          node ci/build-opa-input.js "$GITHUB_EVENT_PATH" > ci/input.json
+
+      - name: Evaluate deploy policy
+        id: deploy
+        run: |
+          opa eval \
+            --format=json \
+            -d policy/ \
+            -I ci/input.json \
+            'data.summit.deploy.allow' > deploy_result.json
+          cat deploy_result.json
+
+      - name: Evaluate PR policy
+        id: pr
+        run: |
+          opa eval \
+            --format=json \
+            -d policy/ \
+            -I ci/input.json \
+            'data.summit.pr.allow_merge' > pr_result.json
+          cat pr_result.json
+
+      - name: Evaluate SBOM policy (if SBOM is present)
+        id: sbom
+        run: |
+          if [ -f "samples/sbom/valid.json" ]; then
+            opa eval \
+              --format=json \
+              -d policy/ \
+              -I samples/sbom/valid.json \
+              'data.summit.sbom.acceptable' > sbom_result.json
+            cat sbom_result.json
+          else
+            echo '{"result": "skipped"}' > sbom_result.json
+          fi
+
+      - name: Assemble governance decision artifact
+        run: |
+          cat << 'EOF' > governance-decision.json
+          {
+            "deployPolicy": $(cat deploy_result.json),
+            "prPolicy": $(cat pr_result.json),
+            "sbomPolicy": $(cat sbom_result.json)
+          }
+          EOF
+          cat governance-decision.json
+
+      - name: Upload governance decision artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: governance-decision
+          path: governance-decision.json

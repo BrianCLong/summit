@@ -1,16 +1,119 @@
 name: Dependabot Auto Merge
+
 on:
-  pull_request: { types: [opened, synchronize] }
+  pull_request:
+    types: [opened, synchronize]
+  # Also trigger when checks complete to auto-merge after CI passes
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: ["CI", "Tests", "Lint", "Security"]
+    types: [completed]
+    branches-ignore: [main, master]
+
+permissions:
+  pull-requests: write
+  contents: write
+  checks: read
 
 jobs:
-  dependabot:
+  # Add label to dependabot PRs for easy filtering
+  label-dependabot:
     runs-on: ubuntu-latest
     if: ${{ github.actor == 'dependabot[bot]' }}
     permissions:
       pull-requests: write
-      contents: write
     steps:
-      - uses: fastify/github-action-merge-dependabot@9e3b0035baf695d18723687b4f9ed38e9978d28a # v3.10.1
+      - name: Add auto-merge label
+        uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          target: 'patch'
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['dependencies', 'auto-merge-candidate']
+            });
+
+  # Auto-approve dependabot PRs (patch and minor updates)
+  auto-approve:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-approve patch and minor updates
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+        run: gh pr review --approve "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Wait for CI checks and auto-merge when ready
+  auto-merge:
+    runs-on: ubuntu-latest
+    needs: [label-dependabot, auto-approve]
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    permissions:
+      pull-requests: write
+      contents: write
+      checks: read
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Wait for CI checks
+        uses: lewagon/wait-on-check-action@v1.3.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          check-regexp: '(CI|Tests|Lint|Security|Typecheck).*'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          wait-interval: 30
+          allowed-conclusions: success,skipped,neutral
+
+      - name: Enable auto-merge for patch updates
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-patch' }}
+        run: |
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for minor updates (after review)
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-minor' }}
+        run: |
+          # Minor updates require approval but can auto-merge after CI passes
+          gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on major updates
+        if: ${{ steps.metadata.outputs.update-type == 'version-update:semver-major' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `⚠️ **Major version update detected**
+
+              This PR updates \`${{ steps.metadata.outputs.dependency-names }}\` from \`${{ steps.metadata.outputs.previous-version }}\` to \`${{ steps.metadata.outputs.new-version }}\`.
+
+              Major updates may contain breaking changes. Please:
+              1. Review the changelog carefully
+              2. Test thoroughly
+              3. Manually approve and merge when ready
+
+              This PR will **NOT** be auto-merged.`
+            });

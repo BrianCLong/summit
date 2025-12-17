@@ -8,6 +8,7 @@ import {
   WebSocketConnectionPool,
 } from './connectionManager.js';
 import { activeConnections } from '../observability/metrics.js';
+import { YjsHandler } from '../yjs/YjsHandler.js';
 
 interface WebSocketClaims {
   tenantId: string;
@@ -20,7 +21,8 @@ interface WebSocketClaims {
 
 interface WebSocketConnection extends WebSocketClaims {
   ws: uWS.WebSocket;
-  subscriptions: Set<string>;
+  // Subscriptions are now managed in ManagedConnection for persistence
+  // subscriptions: Set<string>;
   lastHeartbeat: number;
   backpressure: number;
   meshRoute?: string;
@@ -45,6 +47,7 @@ export class WebSocketCore {
   private readonly HEARTBEAT_INTERVAL = 30000; // 30 seconds
   private readonly MAX_BACKPRESSURE = 64 * 1024; // 64KB
   private readonly TOPIC_PREFIX = 'maestro:';
+  private yjsHandler: YjsHandler;
 
   constructor() {
     this.JWT_SECRET = process.env.JWT_SECRET || 'dev-secret';
@@ -53,6 +56,7 @@ export class WebSocketCore {
       port: parseInt(process.env.REDIS_PORT || '6379'),
       password: process.env.REDIS_PASSWORD,
     });
+    this.yjsHandler = new YjsHandler(this.redis);
 
     this.connectionPool = new WebSocketConnectionPool({
       maxQueueSize: parseInt(process.env.WS_MAX_QUEUE_SIZE || '500', 10),
@@ -87,8 +91,8 @@ export class WebSocketCore {
         sub: decoded.sub,
         exp: decoded.exp,
       };
-    } catch (_error) {
-      // console.warn('JWT verification failed:', error);
+    } catch (error) {
+      console.warn('JWT verification failed:', error);
       return null;
     }
   }
@@ -155,8 +159,8 @@ export class WebSocketCore {
       });
 
       return allowed;
-    } catch (_error) {
-      // console.error('OPA check failed:', error);
+    } catch (error) {
+      console.error('OPA check failed:', error);
       return false; // Fail closed
     } finally {
       span?.end();
@@ -191,6 +195,73 @@ export class WebSocketCore {
         }),
     });
 
+    // Y.js WebSocket handler
+    this.app.ws('/yjs/:docName', {
+      upgrade: (res, req, context) => {
+        const span = otelService.createSpan('websocket.yjs.upgrade');
+        try {
+          // Extract docName from URL
+          const url = req.getUrl();
+          const docName = url.split('/yjs/')[1];
+
+          if (!docName) {
+            res.writeStatus('400 Bad Request').end();
+            return;
+          }
+
+          // Support both header and query param for auth (common in Y.js clients)
+          let token = req.getHeader('authorization')?.replace('Bearer ', '');
+          if (!token) {
+            const query = req.getQuery();
+            const params = new URLSearchParams(query);
+            token = params.get('token') || '';
+          }
+
+          if (!token) {
+            console.warn('Yjs upgrade failed: No token provided');
+            res.writeStatus('401 Unauthorized').end();
+            return;
+          }
+
+          const claims = this.verifyJWT(token);
+          if (!claims) {
+            console.warn('Yjs upgrade failed: Invalid token');
+            res.writeStatus('401 Unauthorized').end();
+            return;
+          }
+
+          res.upgrade(
+            {
+              ...claims,
+              docName,
+              isYjs: true,
+            },
+            req.getHeader('sec-websocket-key'),
+            req.getHeader('sec-websocket-protocol'),
+            req.getHeader('sec-websocket-extensions'),
+            context
+          );
+        } catch (error) {
+            console.error('Yjs upgrade error:', error);
+            res.writeStatus('500 Internal Server Error').end();
+        } finally {
+            span?.end();
+        }
+      },
+      open: (ws) => {
+        const docName = (ws as any).docName;
+        this.yjsHandler.handleConnection(ws, docName);
+      },
+      message: (ws, message, isBinary) => {
+        const buffer = Buffer.from(message);
+        const uint8Array = new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+        this.yjsHandler.handleMessage(ws, uint8Array);
+      },
+      close: (ws, code, message) => {
+        this.yjsHandler.handleClose(ws);
+      }
+    });
+
     this.app.ws('/*', {
       /* WebSocket upgrade handler */
       upgrade: (res, req, context) => {
@@ -199,36 +270,35 @@ export class WebSocketCore {
         try {
           const token = req.getHeader('authorization')?.replace('Bearer ', '');
           if (!token) {
-            // console.warn('WebSocket upgrade failed: No token provided');
+            console.warn('WebSocket upgrade failed: No token provided');
             res.writeStatus('401 Unauthorized').end();
             return;
           }
 
           const claims = this.verifyJWT(token);
           if (!claims) {
-            // console.warn('WebSocket upgrade failed: Invalid token');
+            console.warn('WebSocket upgrade failed: Invalid token');
             res.writeStatus('401 Unauthorized').end();
             return;
           }
 
           // Check token expiration
           if (Date.now() / 1000 > claims.exp) {
-            // console.warn('WebSocket upgrade failed: Token expired');
+            console.warn('WebSocket upgrade failed: Token expired');
             res.writeStatus('401 Unauthorized').end();
             return;
           }
 
           const meshRoute = this.getServiceMeshRoute(req);
 
-          // console.log(
-          //   `WebSocket upgrade: ${claims.userId}@${claims.tenantId}` +
-          //     (meshRoute ? ` via ${meshRoute}` : ''),
-          // );
+          console.log(
+            `WebSocket upgrade: ${claims.userId}@${claims.tenantId}` +
+              (meshRoute ? ` via ${meshRoute}` : ''),
+          );
 
           res.upgrade(
             {
               ...claims,
-              subscriptions: new Set<string>(),
               lastHeartbeat: Date.now(),
               backpressure: 0,
               meshRoute,
@@ -244,8 +314,8 @@ export class WebSocketCore {
             'websocket.user_id': claims.userId,
             'websocket.roles': claims.roles.join(','),
           });
-        } catch (_error) {
-          // console.error('WebSocket upgrade error:', error);
+        } catch (error) {
+          console.error('WebSocket upgrade error:', error);
           res.writeStatus('500 Internal Server Error').end();
         } finally {
           span?.end();
@@ -290,7 +360,7 @@ export class WebSocketCore {
             'websocket.user_id': connection.userId,
           });
         } catch (error) {
-          // console.error('WebSocket message error:', error);
+          console.error('WebSocket message error:', error);
           const errorPayload = {
             type: 'error',
             error: 'Message processing failed',
@@ -323,10 +393,22 @@ export class WebSocketCore {
         this.connections.set(connectionId, connection);
         activeConnections.inc({ tenant: connection.tenantId });
 
-        // console.log(
-        //   `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
-        //     (connection.meshRoute ? ` via ${connection.meshRoute}` : ''),
-        // );
+        // Restore subscriptions to Redis if reconnecting
+        if (manager.subscriptions.size > 0) {
+           for (const tenantTopic of manager.subscriptions) {
+               // manager.subscriptions already stores fully qualified "tenant.topic"
+               // We need to use connectionId to match pmessage logic
+               this.redis.sadd(
+                 `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
+                 connectionId,
+               ).catch(err => console.error('Error restoring subscription', err));
+           }
+        }
+
+        console.log(
+          `WebSocket opened: ${connection.userId}@${connection.tenantId}` +
+            (connection.meshRoute ? ` via ${connection.meshRoute}` : ''),
+        );
 
         const welcomeMessage = {
           type: 'welcome',
@@ -343,30 +425,71 @@ export class WebSocketCore {
       },
 
       /* WebSocket close handler */
-      close: (ws: any, code, _message) => {
+      close: (ws: any, code, message) => {
         const connection = ws as WebSocketConnection;
         const connectionId = connection.userId + '@' + connection.tenantId;
-
-        // Clean up subscriptions
-        for (const topic of connection.subscriptions) {
-          this.redis.srem(
-            `${this.TOPIC_PREFIX}${topic}:subscribers`,
-            connectionId,
-          );
-        }
 
         this.connections.delete(connectionId);
         activeConnections.dec({ tenant: connection.tenantId });
 
         if (code === 1000) {
+           // Graceful close: cleanup subscriptions
+           if (connection.manager) {
+             for (const topic of connection.manager.subscriptions) {
+                // connection.manager.subscriptions stores simple topic names,
+                // but Redis needs the full key. However, we reconstruct it in 'subscribe'
+                // Wait, connection.subscriptions previously stored "tenant.topic".
+                // We should be consistent.
+                // Let's assume manager.subscriptions stores the "tenant.topic" (fully qualified in context of Redis prefix)
+                // actually the subscribe logic below adds tenantId.
+                // Re-reading 'subscribe' block below:
+                // const tenantTopic = `${connection.tenantId}.${topic}`;
+                // connection.subscriptions.add(tenantTopic);
+                // So yes, it stores tenantTopic.
+
+                this.redis.srem(
+                  `${this.TOPIC_PREFIX}${topic}:subscribers`,
+                  connectionId,
+                ).catch(err => console.error('Error removing subscription', err));
+             }
+             connection.manager.subscriptions.clear();
+           }
           this.connectionPool.removeConnection(connectionId, 'graceful_close');
         } else {
-          connection.manager?.markReconnecting(`close_${code}`);
+          // Abnormal close: keep subscriptions for potential reconnect
+          // Do NOT remove from Redis yet. If they don't reconnect, they will eventually expire from Redis?
+          // No, Redis sets don't expire members individually.
+          // We rely on 'startHeartbeatCheck' to clean up stale connections.
+          // The heartbeat check calls pool.closeIdleConnections which calls removeConnection.
+
+          // But wait, removeConnection logic needs to clean up Redis too if called by heartbeat.
+          // The heartbeat cleaner calls connection.close() then pool.removeConnection.
+          // It doesn't call this 'close' handler of the websocket because the WS is already likely dead or this IS the close handler.
+
+          // Actually, if heartbeat times out, `pool.closeIdleConnections` is called.
+          // That calls `connection.close()`.
+          // `connection.close()` calls `ws.close()`.
+          // `ws.close()` triggers this handler.
+          // So if heartbeat kills it, code might be 4000 (from closeIdleConnections).
+          // We should handle that cleanup.
+
+          if (code === 4000) { // Heartbeat timeout
+             if (connection.manager) {
+                 for (const topic of connection.manager.subscriptions) {
+                     this.redis.srem(`${this.TOPIC_PREFIX}${topic}:subscribers`, connectionId)
+                        .catch(e => console.error('Error cleaning up stale sub', e));
+                 }
+                 connection.manager.subscriptions.clear();
+             }
+             this.connectionPool.removeConnection(connectionId, 'heartbeat_timeout');
+          } else {
+             connection.manager?.markReconnecting(`close_${code}`);
+          }
         }
 
-        // console.log(
-        //   `WebSocket closed: ${connectionId}, code: ${code}, reason: ${message || 'n/a'}`,
-        // );
+        console.log(
+          `WebSocket closed: ${connectionId}, code: ${code}, reason: ${message || 'n/a'}`,
+        );
       },
 
       /* Settings */
@@ -387,10 +510,10 @@ export class WebSocketCore {
 
     switch (msg.type) {
       case 'subscribe':
-        if (msg.topics) {
+        if (msg.topics && connection.manager) {
           for (const topic of msg.topics) {
             const tenantTopic = `${connection.tenantId}.${topic}`;
-            connection.subscriptions.add(tenantTopic);
+            connection.manager.subscriptions.add(tenantTopic);
             await this.redis.sadd(
               `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
               connectionId,
@@ -409,10 +532,10 @@ export class WebSocketCore {
         break;
 
       case 'unsubscribe':
-        if (msg.topics) {
+        if (msg.topics && connection.manager) {
           for (const topic of msg.topics) {
             const tenantTopic = `${connection.tenantId}.${topic}`;
-            connection.subscriptions.delete(tenantTopic);
+            connection.manager.subscriptions.delete(tenantTopic);
             await this.redis.srem(
               `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
               connectionId,
@@ -470,11 +593,11 @@ export class WebSocketCore {
   private setupRedisSubscriptions() {
     const subscriber = this.redis.duplicate();
 
-    subscriber.psubscribe(`${this.TOPIC_PREFIX}*`, (err, _count) => {
+    subscriber.psubscribe(`${this.TOPIC_PREFIX}*`, (err, count) => {
       if (err) {
-        // console.error('Redis psubscribe error:', err);
+        console.error('Redis psubscribe error:', err);
       } else {
-        // console.log(`Subscribed to ${count} Redis patterns`);
+        console.log(`Subscribed to ${count} Redis patterns`);
       }
     });
 
@@ -483,11 +606,16 @@ export class WebSocketCore {
       const subscribers = await this.redis.smembers(`${channel}:subscribers`);
 
       for (const connectionId of subscribers) {
+        // We need to find the manager, even if the specific connection object is transiently gone or replaced?
+        // this.connections holds the current active connection wrapper.
         const connection = this.connections.get(connectionId);
-        if (connection && connection.subscriptions.has(topic)) {
-          const sent = connection.manager?.sendRaw(message);
-          if (!sent && !connection.manager) {
-            connection.ws.send(message);
+
+        // If connection object exists, check manager subscriptions
+        if (connection && connection.manager && connection.manager.subscriptions.has(topic)) {
+          const sent = connection.manager.sendRaw(message);
+          if (!sent) {
+             // Fallback for direct WS if manager fails? (Unlikely if manager exists)
+             // connection.ws.send(message);
           }
         }
       }
@@ -505,7 +633,7 @@ export class WebSocketCore {
         if (connection) {
           activeConnections.dec({ tenant: connection.tenantId });
         }
-        // console.log(`Closing stale connection: ${connectionId}`);
+        console.log(`Closing stale connection: ${connectionId}`);
       }
     }, this.HEARTBEAT_INTERVAL);
   }
@@ -527,17 +655,17 @@ export class WebSocketCore {
           JSON.stringify(details),
         ],
       );
-    } catch (_error) {
-      // console.error('WebSocket audit logging failed:', error);
+    } catch (error) {
+      console.error('WebSocket audit logging failed:', error);
     }
   }
 
   public listen(port: number = 9001) {
     this.app.listen(port, (token) => {
       if (token) {
-        // console.log(`🚀 WebSocket Core listening on port ${port}`);
+        console.log(`🚀 WebSocket Core listening on port ${port}`);
       } else {
-        // console.error(`❌ Failed to listen to port ${port}`);
+        console.error(`❌ Failed to listen to port ${port}`);
       }
     });
   }
