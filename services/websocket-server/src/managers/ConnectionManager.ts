@@ -59,7 +59,7 @@ export class ConnectionManager extends EventEmitter {
    */
   public unregister(connectionId: string): void {
     const metadata = this.connections.get(connectionId);
-    if (!metadata) return;
+    if (!metadata) {return;}
 
     // Remove from user tracking
     const userConnections = this.userToConnections.get(metadata.userId);
