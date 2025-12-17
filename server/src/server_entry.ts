@@ -9,15 +9,23 @@ import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
+import { otelService } from './lib/observability/otel.js';
+
+// Initialize OpenTelemetry as early as possible
+otelService.initialize();
+
 import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
-import { getNeo4jDriver } from './db/neo4j.js';
+import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
-import { verifyStartupDependencies } from './utils/startup-readiness.js';
+import {
+  startTenantHotEmbeddingsRefresh,
+  stopTenantHotEmbeddingsRefresh,
+} from './jobs/hotEmbeddingsRefresh.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -42,8 +50,6 @@ const startServer = async () => {
       logger.warn('Kafka not available - running in minimal mode');
     }
   }
-  await verifyStartupDependencies();
-
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
@@ -65,6 +71,8 @@ const startServer = async () => {
     logger.warn('SSL not configured, falling back to HTTP (Not recommended for production)');
     httpServer = http.createServer(app);
   }
+
+  await initializeNeo4jDriver();
 
   // Subscriptions with Persisted Query validation
 
@@ -103,6 +111,7 @@ const startServer = async () => {
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
+    startTenantHotEmbeddingsRefresh();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
@@ -130,9 +139,11 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
+    await otelService.shutdown();
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
+    stopTenantHotEmbeddingsRefresh();
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),
@@ -153,7 +164,4 @@ const startServer = async () => {
   process.on('SIGTERM', shutdown);
 };
 
-startServer().catch((error) => {
-  logger.error({ error }, 'Fatal error during server startup');
-  process.exit(1);
-});
+startServer();
