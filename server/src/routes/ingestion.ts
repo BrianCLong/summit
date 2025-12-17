@@ -1,130 +1,64 @@
-import { Router } from 'express';
-import { pg } from '../db/pg.js';
-import { DLQService } from '../ingest/dlq.js';
-import { PipelineOrchestrator } from '../ingest/orchestrator.js';
-import { KnowledgeFabricRetrievalService } from '../rag/retrieval.js';
-import { pino } from 'pino';
+import express from 'express';
+import { PipelineOrchestrator } from '../ingestion/PipelineOrchestrator';
+import { RetrievalService } from '../services/RetrievalService';
+import { getRagContext } from '../services/rag';
+import { PipelineConfig } from '../data-model/types';
+import { Pool } from 'pg';
 
-const router = Router();
-const logger = pino({ name: 'IngestionAPI' });
-const dlqService = new DLQService(logger);
-const orchestrator = new PipelineOrchestrator(logger);
-const retrievalService = new KnowledgeFabricRetrievalService(logger);
+const router = express.Router();
+const orchestrator = new PipelineOrchestrator();
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
-// Middleware to ensure tenant context
-// In a real app, this is likely already done by auth middleware
-const ensureTenant = (req: any, res: any, next: any) => {
-  // Mocking tenant for now if not present, but relying on upstream auth usually
-  if (!req.user?.tenantId && !req.headers['x-tenant-id']) {
-     // Fallback for dev/testing if allowed, else 401
-     // req.user = { tenantId: 'default' };
-  }
-  next();
-};
-
-// --- Pipelines ---
-
-router.get('/pipelines', async (req, res) => {
-  const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
-  try {
-    const pipelines = await pg.manyOrNone(
-      'SELECT * FROM ingestion_pipelines WHERE tenant_id = $1',
-      [tenantId]
-    );
-    res.json(pipelines);
-  } catch (err) {
-    logger.error(err);
-    res.status(500).json({ error: 'Failed to fetch pipelines' });
-  }
-});
-
-router.post('/pipelines', async (req, res) => {
-  const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
-  const config = req.body;
-
-  try {
-    await pg.none(
-      `INSERT INTO ingestion_pipelines (key, tenant_id, name, source_config, stages, options)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       ON CONFLICT (key) DO UPDATE SET
-         name = EXCLUDED.name,
-         source_config = EXCLUDED.source_config,
-         stages = EXCLUDED.stages,
-         options = EXCLUDED.options,
-         updated_at = NOW()`,
-      [config.key, tenantId, config.name, config.source, config.stages, config.options]
-    );
-    res.json({ success: true, key: config.key });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).json({ error: 'Failed to save pipeline' });
-  }
-});
-
+// Trigger Pipeline Run
 router.post('/pipelines/:key/run', async (req, res) => {
-  const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
   const { key } = req.params;
+  // In a real app, we'd fetch config from DB
+  // For MVP/Demo, we accept config in body or mock it
+  const config = req.body as PipelineConfig;
 
-  try {
-    const pipeline = await pg.oneOrNone(
-      'SELECT * FROM ingestion_pipelines WHERE key = $1 AND tenant_id = $2',
-      [key, tenantId]
-    );
-
-    if (!pipeline) {
-      return res.status(404).json({ error: 'Pipeline not found' });
-    }
-
-    // Adapt DB row to PipelineConfig type
-    const config = {
-      ...pipeline,
-      source: pipeline.source_config,
-      tenantId
-    };
-
-    // Run async (fire and forget for API, but orchestrator handles logging)
-    orchestrator.runPipeline(config).catch(err => {
-      logger.error({ err, pipeline: key }, 'Pipeline run failed asynchronously');
-    });
-
-    res.json({ success: true, message: 'Pipeline run initiated' });
-  } catch (err) {
-    logger.error(err);
-    res.status(500).json({ error: 'Failed to start pipeline run' });
+  if (config.key !== key) {
+      return res.status(400).json({ error: 'Pipeline key mismatch' });
   }
+
+  // Run async (fire and forget for API)
+  orchestrator.runPipeline(config).catch(err => console.error(err));
+
+  res.json({ message: 'Pipeline run initiated', pipeline: key });
 });
 
-// --- DLQ ---
-
-router.get('/dlq', async (req, res) => {
-  const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
-  try {
-    const records = await dlqService.getDLQRecords(tenantId as string);
-    res.json(records);
-  } catch (err) {
-    logger.error(err);
-    res.status(500).json({ error: 'Failed to fetch DLQ' });
-  }
+// Get Pipelines
+router.get('/pipelines', async (req, res) => {
+   // Mock list
+   res.json([
+       { key: 'demo-file', name: 'Demo File Ingestion', type: 'file' },
+       { key: 'demo-api', name: 'Demo API Ingestion', type: 'api' }
+   ]);
 });
 
-// --- Retrieval / RAG ---
-
+// RAG Retrieval API
 router.post('/search/retrieve', async (req, res) => {
-  const tenantId = req.user?.tenantId || req.headers['x-tenant-id'];
-  const { query, limit, filters } = req.body;
+  const { query, tenantId } = req.body;
+  const retrieval = new RetrievalService();
+  const results = await retrieval.retrieve(query, tenantId);
+  res.json(results);
+});
 
-  try {
-    const results = await retrievalService.search({
-      tenantId: tenantId as string,
-      queryText: query,
-      limit,
-      filters
-    });
-    res.json(results);
-  } catch (err) {
-    logger.error(err);
-    res.status(500).json({ error: 'Retrieval failed' });
-  }
+// RAG Context API
+router.post('/search/context', async (req, res) => {
+  const { query, tenantId } = req.body;
+  const context = await getRagContext(query, tenantId);
+  res.json({ context });
+});
+
+// Get DLQ Records
+router.get('/dlq', async (req, res) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query('SELECT * FROM dlq_records ORDER BY created_at DESC LIMIT 50');
+        res.json(result.rows);
+    } finally {
+        client.release();
+    }
 });
 
 export default router;

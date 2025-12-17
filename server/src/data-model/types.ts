@@ -1,14 +1,14 @@
 export type TenantId = string;
 
 export type EntityKind =
-  | 'person'
-  | 'organization'
-  | 'location'
-  | 'asset'
-  | 'event'
-  | 'account'
-  | 'communication'
-  | 'custom';
+  | "person"
+  | "organization"
+  | "location"
+  | "asset"
+  | "event"
+  | "account"
+  | "communication"
+  | "custom";
 
 export interface Entity {
   id: string;
@@ -23,14 +23,14 @@ export interface Entity {
 }
 
 export type EdgeKind =
-  | 'owns'
-  | 'controls'
-  | 'located_at'
-  | 'communicated_with'
-  | 'member_of'
-  | 'funds'
-  | 'linked_to'
-  | 'custom';
+  | "owns"
+  | "controls"
+  | "located_at"
+  | "communicated_with"
+  | "member_of"
+  | "funds"
+  | "linked_to"
+  | "custom";
 
 export interface Edge {
   id: string;
@@ -50,57 +50,36 @@ export interface Document {
   title?: string;
   mimeType?: string;
   source: { system: string; id: string; uri?: string };
-  text: string; // canonical text representation
+  text: string;                  // canonical text representation
   metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
-  entityIds?: string[]; // entities mentioned or associated
+  entityIds?: string[];          // entities mentioned or associated
 }
 
-export interface DocumentChunk {
+export interface Chunk {
   id: string;
   tenantId: TenantId;
   documentId: string;
   text: string;
   embedding?: number[];
-  tokenCount: number;
-  offset: number;
   metadata: Record<string, unknown>;
-  entityIds?: string[];
+  offset: number;
 }
 
 export interface PipelineConfig {
-  key: string; // unique pipeline id
+  key: string;                          // unique pipeline id
   tenantId: TenantId;
   name: string;
-  schedule?: string; // cron/external trigger
-  source: { type: 'api' | 'file' | 'webhook' | 'db' | 'custom'; config: any };
-  stages: ('raw' | 'normalize' | 'enrich' | 'index')[];
+  schedule?: string;                    // cron/external trigger
+  source: { type: "api" | "file" | "webhook" | "db" | "custom"; config: any };
+  stages: ("raw" | "normalize" | "enrich" | "index")[];
   options?: Record<string, unknown>;
 }
 
-export interface IngestionRun {
-  id: string;
+export interface ConnectorContext {
   tenantId: TenantId;
   pipelineKey: string;
-  status: 'pending' | 'running' | 'completed' | 'failed' | 'partial';
-  startTime: string;
-  endTime?: string;
-  metrics: {
-    recordsProcessed: number;
-    recordsFailed: number;
-    durationMs: number;
-  };
-  error?: string;
-}
-
-export interface DLQRecord {
-  id: string;
-  tenantId: TenantId;
-  pipelineKey: string;
-  stage: string;
-  reason: string;
-  payload: any;
-  createdAt: string;
-  retryCount: number;
+  correlationId?: string;
+  logger: any; // Using any for now to avoid logger dependency circularity
 }
