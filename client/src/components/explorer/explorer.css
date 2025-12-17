@@ -1,0 +1,243 @@
+/**
+ * KG Explorer Styles
+ * Additional styles for the Knowledge Graph Explorer component
+ * Mobile-responsive design with Tailwind-compatible custom styles
+ */
+
+/* Graph container */
+.kg-explorer {
+  @apply flex flex-col h-full w-full;
+}
+
+.kg-explorer-canvas {
+  @apply relative flex-1 min-h-0;
+}
+
+.kg-explorer-canvas > div {
+  @apply absolute inset-0;
+}
+
+/* Mobile-responsive breakpoints */
+@media (max-width: 768px) {
+  .kg-explorer {
+    @apply flex-col;
+  }
+
+  /* Stack panels vertically on mobile */
+  .kg-explorer-main {
+    @apply flex-col;
+  }
+
+  /* Collapse right panel to bottom sheet on mobile */
+  .kg-explorer-panel {
+    @apply fixed bottom-0 left-0 right-0 h-[40vh] z-50 rounded-t-2xl shadow-2xl;
+    transform: translateY(calc(100% - 48px));
+    transition: transform 0.3s ease-out;
+  }
+
+  .kg-explorer-panel.expanded {
+    transform: translateY(0);
+  }
+
+  .kg-explorer-panel-handle {
+    @apply w-12 h-1 bg-muted-foreground/30 rounded-full mx-auto my-3;
+  }
+
+  /* Toolbar adjustments for mobile */
+  .kg-explorer-toolbar {
+    @apply flex-wrap gap-1 px-2 py-1;
+  }
+
+  .kg-explorer-toolbar .layout-buttons {
+    @apply hidden;
+  }
+
+  .kg-explorer-toolbar .layout-dropdown {
+    @apply block;
+  }
+
+  /* Hide search on very small screens */
+  @media (max-width: 480px) {
+    .kg-explorer-toolbar .search-input {
+      @apply w-full order-last mt-2;
+    }
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .kg-explorer-panel {
+    @apply w-72;
+  }
+}
+
+/* Desktop layout */
+@media (min-width: 1025px) {
+  .kg-explorer-panel {
+    @apply w-80 lg:w-96;
+  }
+}
+
+/* Cytoscape container styling */
+.cy-container {
+  @apply w-full h-full;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Touch-friendly controls for mobile */
+@media (pointer: coarse) {
+  .kg-explorer-zoom-controls button {
+    @apply w-12 h-12;
+  }
+
+  .kg-explorer-toolbar button {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Animations */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 1;
+  }
+}
+
+.node-pulse {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+
+/* Loading skeleton */
+.kg-explorer-skeleton {
+  @apply bg-muted animate-pulse rounded;
+}
+
+/* Graph legend */
+.kg-explorer-legend {
+  @apply absolute bottom-4 left-4 p-3 bg-background/90 backdrop-blur-sm border rounded-lg shadow-sm;
+  @apply hidden md:block;
+  max-width: 200px;
+}
+
+.kg-explorer-legend-item {
+  @apply flex items-center gap-2 text-xs py-1;
+}
+
+.kg-explorer-legend-color {
+  @apply w-3 h-3 rounded-full shrink-0;
+}
+
+/* Context menu styling */
+.kg-context-menu {
+  @apply absolute bg-popover border rounded-lg shadow-lg py-1 z-50;
+  min-width: 160px;
+}
+
+.kg-context-menu-item {
+  @apply flex items-center gap-2 px-3 py-2 text-sm cursor-pointer;
+  @apply hover:bg-accent transition-colors;
+}
+
+.kg-context-menu-item.danger {
+  @apply text-destructive hover:bg-destructive/10;
+}
+
+.kg-context-menu-separator {
+  @apply border-t my-1;
+}
+
+/* Edge label styling for long labels */
+.cy-edge-label {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Accessibility */
+.kg-explorer-canvas:focus {
+  @apply outline-none ring-2 ring-ring ring-offset-2;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .kg-explorer-canvas {
+    @apply border-2 border-foreground;
+  }
+
+  .kg-explorer-panel {
+    @apply border-2 border-foreground;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .kg-explorer * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .kg-explorer-toolbar,
+  .kg-explorer-panel {
+    @apply hidden;
+  }
+
+  .kg-explorer-canvas {
+    @apply w-full h-full;
+  }
+}
+
+/* Dark mode adjustments for graph */
+.dark .cy-container {
+  @apply bg-slate-900;
+}
+
+.dark .kg-explorer-legend {
+  @apply bg-slate-900/90;
+}
+
+/* Traversal path indicator */
+.traversal-indicator {
+  @apply absolute top-4 left-4 flex items-center gap-2 px-3 py-2;
+  @apply bg-primary text-primary-foreground rounded-full text-sm font-medium;
+  @apply shadow-lg;
+}
+
+.traversal-indicator::before {
+  content: '';
+  @apply w-2 h-2 bg-primary-foreground rounded-full animate-pulse;
+}
+
+/* RAG preview loading state */
+.rag-loading {
+  @apply relative overflow-hidden;
+}
+
+.rag-loading::after {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
