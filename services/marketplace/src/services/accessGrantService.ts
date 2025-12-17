@@ -112,8 +112,8 @@ export const accessGrantService = {
     // Check cache first
     const cached = await cache.get<AccessGrant>(`grant:${prefix}`);
     if (cached) {
-      if (cached.status !== 'active') return null;
-      if (cached.expiresAt && new Date(cached.expiresAt) < new Date()) return null;
+      if (cached.status !== 'active') {return null;}
+      if (cached.expiresAt && new Date(cached.expiresAt) < new Date()) {return null;}
       return cached;
     }
 
@@ -123,12 +123,12 @@ export const accessGrantService = {
       [prefix, hash]
     );
 
-    if (!result.rows[0]) return null;
+    if (!result.rows[0]) {return null;}
 
     const grant = mapRowToGrant(result.rows[0]);
 
     // Validate status and expiration
-    if (grant.status !== 'active') return null;
+    if (grant.status !== 'active') {return null;}
     if (grant.expiresAt && grant.expiresAt < new Date()) {
       await this.expire(grant.id);
       return null;

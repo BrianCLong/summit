@@ -1,0 +1,59 @@
+id: data-analysis-002
+name: Statistical Analysis
+description: Perform statistical analysis on dataset
+category: data_analysis
+difficulty: hard
+tags:
+  - statistics
+  - analysis
+  - visualization
+
+tools:
+  - name: code_interpreter
+    description: Execute Python for analysis
+    costPerCall: 0.002
+    avgLatencyMs: 300
+    capabilities:
+      - execute_code
+      - data_analysis
+      - visualization
+  - name: database_query
+    description: Query data
+    costPerCall: 0.0008
+    avgLatencyMs: 100
+    capabilities:
+      - sql
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      Given this dataset of exam scores, perform:
+      1. Calculate mean, median, standard deviation
+      2. Identify outliers using IQR method
+      3. Suggest if the distribution is normal
+
+      Scores: [78, 82, 85, 91, 77, 83, 88, 92, 79, 84, 86, 45, 89, 81, 87]
+    timeout: 20000
+    allowedTools:
+      - code_interpreter
+    constraints:
+      maxTokens: 2000
+      maxLatencyMs: 15000
+
+successCriteria:
+  - type: contains
+    value: "mean"
+  - type: contains
+    value: "standard deviation"
+  - type: contains
+    value: "outlier"
+
+constraints:
+  maxTotalTokens: 4000
+  maxTotalCostUsd: 0.06
+  maxToolCalls: 5
+
+metadata:
+  author: eval-platform
+  version: "1.0"
