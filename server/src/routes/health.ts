@@ -159,6 +159,16 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
     logger.warn({ error }, 'Readiness check failed: PostgreSQL unavailable');
   }
 
+  try {
+    const { getRedisClient } = await import('../db/redis.js');
+    const redis = getRedisClient();
+    await redis.ping();
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    failures.push(`Redis: ${msg}`);
+    logger.warn({ error }, 'Readiness check failed: Redis unavailable');
+  }
+
   if (failures.length > 0) {
     res.status(503).json({
       status: 'not ready',

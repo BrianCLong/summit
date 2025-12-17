@@ -17,6 +17,7 @@ import { featureFlagContextMiddleware } from './middleware/feature-flag-context.
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -62,6 +63,11 @@ export const createApp = async () => {
 
   const app = express();
 
+  const safetyState = await resolveSafetyState();
+  if (safetyState.killSwitch || safetyState.safeMode) {
+    appLogger.warn({ safetyState }, 'Safety gates enabled');
+  }
+
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
   app.use(featureFlagContextMiddleware);
@@ -105,6 +111,7 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
+  app.use(safetyModeMiddleware);
   // Standard audit logger for basic request tracking
   app.use(auditLogger);
   // Audit-First middleware for cryptographic stamping of sensitive operations
@@ -320,10 +327,17 @@ export const createApp = async () => {
     expressMiddleware(apollo, { context: getContext }),
   );
 
-  // Start background trust worker if enabled
-  startTrustWorker();
-  // Start retention worker if enabled
-  startRetentionWorker();
+  if (!safetyState.killSwitch && !safetyState.safeMode) {
+    // Start background trust worker if enabled
+    startTrustWorker();
+    // Start retention worker if enabled
+    startRetentionWorker();
+  } else {
+    appLogger.warn(
+      { safetyState },
+      'Skipping background workers because safety mode or kill switch is enabled',
+    );
+  }
 
   // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
   // In a real production setup, this might be in a separate process/container.
