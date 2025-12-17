@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { StructuredEventEmitter } from '@ga-graphai/common-types';
 import {
   OrchestrationKnowledgeGraph,
   type PipelineConnector,
@@ -22,9 +23,13 @@ describe('OrchestrationKnowledgeGraph', () => {
   let incidentConnector: IncidentConnector;
   let policyConnector: PolicyConnector;
   let costConnector: CostSignalConnector;
+  let eventTransport: ReturnType<typeof vi.fn>;
+  let emitter: StructuredEventEmitter;
 
   beforeEach(() => {
-    graph = new OrchestrationKnowledgeGraph();
+    eventTransport = vi.fn();
+    emitter = new StructuredEventEmitter({ transport: eventTransport });
+    graph = new OrchestrationKnowledgeGraph(emitter);
     pipelineConnector = {
       loadPipelines: vi.fn<[], Promise<PipelineRecord[]>>().mockResolvedValue([
         {
@@ -153,6 +158,15 @@ describe('OrchestrationKnowledgeGraph', () => {
     expect(context?.policies?.[0]?.id).toBe('policy-1');
     expect(context?.pipelines?.[0]?.id).toBe('pipeline-a');
     expect(context?.risk?.score).toBeLessThanOrEqual(1);
+  });
+
+  it('emits structured telemetry for IntelGraph queries', async () => {
+    await graph.refresh();
+    graph.queryService('svc-api');
+
+    expect(eventTransport).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'summit.intelgraph.query.executed' }),
+    );
   });
 
   it('returns undefined for unknown service', () => {

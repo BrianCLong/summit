@@ -20,7 +20,7 @@
     "@summit/canonical-entities": "workspace:*",
     "@intelgraph/identity-resolution": "workspace:*",
     "@intelgraph/common-types": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "pg": "^8.16.3",
     "ioredis": "^5.8.2",
     "kafkajs": "^2.2.4",

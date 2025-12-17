@@ -1,8 +1,4 @@
-import {
-  isSandboxMode,
-  preventMassMutation,
-  requiresConfirmation,
-} from '@ga-graphai/common-types';
+import { StructuredEventEmitter } from '@ga-graphai/common-types';
 import type { PolicyRule } from '@ga-graphai/common-types';
 
 type NodeType =
@@ -143,18 +139,6 @@ export interface GraphSnapshot {
   nodes: GraphNode[];
   edges: GraphEdge[];
   serviceRisk: Record<string, ServiceRiskProfile>;
-  sandbox: boolean;
-  namespace: string;
-  warnings?: string[];
-}
-
-export interface OrchestrationKnowledgeGraphOptions {
-  sandboxMode?: boolean;
-  sandboxNamespace?: string;
-  mutationThreshold?: number;
-  requireConfirmation?: boolean;
-  confirmationProvided?: boolean;
-  logger?: { warn?: (message: string) => void };
 }
 
 interface GraphState {
@@ -184,7 +168,9 @@ function edgeId(from: string, type: RelationshipType, to: string): string {
 }
 
 export class OrchestrationKnowledgeGraph {
-  private readonly productionState: GraphState = {
+  private readonly events: StructuredEventEmitter;
+
+  private readonly state: GraphState = {
     nodes: new Map(),
     edges: new Map(),
     pipelines: new Map(),
@@ -194,29 +180,6 @@ export class OrchestrationKnowledgeGraph {
     policies: new Map(),
     costSignals: new Map(),
   };
-
-  private readonly sandboxState: GraphState = {
-    nodes: new Map(),
-    edges: new Map(),
-    pipelines: new Map(),
-    services: new Map(),
-    environments: new Map(),
-    incidents: new Map(),
-    policies: new Map(),
-    costSignals: new Map(),
-  };
-
-  private readonly sandboxMode: boolean;
-  private readonly sandboxNamespace: string;
-  private readonly mutationThreshold: number;
-  private readonly requireConfirmation: boolean;
-  private readonly confirmationProvided: boolean;
-  private readonly logger?: { warn?: (message: string) => void };
-  private warnings: string[] = [];
-
-  private get state(): GraphState {
-    return this.sandboxMode ? this.sandboxState : this.productionState;
-  }
 
   private pipelineConnectors: PipelineConnector[] = [];
   private serviceConnectors: ServiceConnector[] = [];
@@ -226,20 +189,8 @@ export class OrchestrationKnowledgeGraph {
   private costSignalConnectors: CostSignalConnector[] = [];
   private version = 0;
 
-  constructor(options: OrchestrationKnowledgeGraphOptions = {}) {
-    this.sandboxMode = options.sandboxMode ?? isSandboxMode();
-    this.sandboxNamespace = options.sandboxNamespace ?? 'intelgraph-sandbox';
-    this.mutationThreshold = options.mutationThreshold ?? 500;
-    this.requireConfirmation = options.requireConfirmation ?? false;
-    this.confirmationProvided = options.confirmationProvided ?? false;
-    this.logger = options.logger;
-
-    if (this.sandboxMode) {
-      this.warnings.push(
-        `Sandbox mode active: graph writes isolated to namespace "${this.sandboxNamespace}" and not applied to production state.`,
-      );
-      this.logger?.warn?.(this.warnings[this.warnings.length - 1]);
-    }
+  constructor(events = new StructuredEventEmitter()) {
+    this.events = events;
   }
 
   registerPipelineConnector(connector: PipelineConnector): void {
@@ -267,22 +218,6 @@ export class OrchestrationKnowledgeGraph {
   }
 
   async refresh(): Promise<GraphSnapshot> {
-    this.warnings = [];
-
-    if (this.sandboxMode) {
-      const warning = `Sandbox mode active: graph writes isolated to namespace "${this.sandboxNamespace}" and not applied to production state.`;
-      this.warnings.push(warning);
-      this.logger?.warn?.(warning);
-    }
-
-    if (!this.sandboxMode && this.requireConfirmation) {
-      requiresConfirmation('intelgraph-refresh', {
-        confirmed: this.confirmationProvided,
-        logger: this.logger,
-        hint: 'Set confirmationProvided or CONFIRM_INTELGRAPH_REFRESH=true to proceed.',
-      });
-    }
-
     await Promise.all([
       this.ingestServices(),
       this.ingestEnvironments(),
@@ -300,20 +235,17 @@ export class OrchestrationKnowledgeGraph {
     const nodes = Array.from(this.state.nodes.values());
     const edges = Array.from(this.state.edges.values());
     const serviceRisk = this.calculateServiceRisk();
-    const namespace = this.sandboxMode ? this.sandboxNamespace : 'production';
     return {
       generatedAt: new Date().toISOString(),
       version: this.version,
       nodes,
       edges,
       serviceRisk,
-      sandbox: this.sandboxMode,
-      namespace,
-      warnings: this.warnings.length ? [...this.warnings] : undefined,
     };
   }
 
   queryService(serviceId: string) {
+    const startedAt = Date.now();
     const service = this.state.services.get(serviceId);
     if (!service) {
       return undefined;
@@ -332,7 +264,7 @@ export class OrchestrationKnowledgeGraph {
     const pipelines = Array.from(this.state.pipelines.values()).filter((pipeline) =>
       pipeline.stages.some((stage) => stage.serviceId === serviceId),
     );
-    return {
+    const snapshot = {
       service,
       environments,
       incidents,
@@ -340,6 +272,20 @@ export class OrchestrationKnowledgeGraph {
       pipelines,
       risk: this.calculateServiceRisk()[serviceId],
     };
+
+    const durationMs = Date.now() - startedAt;
+    const resultCount =
+      environments.length + incidents.length + policies.length + pipelines.length;
+    this.events.emitEvent('summit.intelgraph.query.executed', {
+      queryType: 'service',
+      subjectId: serviceId,
+      durationMs,
+      resultCount,
+      riskScore: snapshot.risk?.score ?? 0,
+      incidentCount: incidents.length,
+    });
+
+    return snapshot;
   }
 
   private async ingestServices(): Promise<void> {
@@ -423,12 +369,11 @@ export class OrchestrationKnowledgeGraph {
   }
 
   private rebuildGraph(): void {
-    const state = this.state;
-    const nodes = new Map<string, GraphNode>();
-    const edges = new Map<string, GraphEdge>();
+    this.state.nodes.clear();
+    this.state.edges.clear();
 
-    for (const service of state.services.values()) {
-      nodes.set(`service:${service.id}`, {
+    for (const service of this.state.services.values()) {
+      this.state.nodes.set(`service:${service.id}`, {
         id: `service:${service.id}`,
         type: 'service',
         data: service,
@@ -440,20 +385,20 @@ export class OrchestrationKnowledgeGraph {
           to: `service:${dependency}`,
           type: 'DEPENDS_ON' as const,
         } satisfies GraphEdge;
-        edges.set(edge.id, edge);
+        this.state.edges.set(edge.id, edge);
       }
     }
 
-    for (const environment of state.environments.values()) {
-      nodes.set(`env:${environment.id}`, {
+    for (const environment of this.state.environments.values()) {
+      this.state.nodes.set(`env:${environment.id}`, {
         id: `env:${environment.id}`,
         type: 'environment',
         data: environment,
       });
     }
 
-    for (const pipeline of state.pipelines.values()) {
-      nodes.set(`pipeline:${pipeline.id}`, {
+    for (const pipeline of this.state.pipelines.values()) {
+      this.state.nodes.set(`pipeline:${pipeline.id}`, {
         id: `pipeline:${pipeline.id}`,
         type: 'pipeline',
         data: pipeline,
@@ -464,14 +409,14 @@ export class OrchestrationKnowledgeGraph {
           type: 'stage',
           data: stage,
         };
-        nodes.set(stageNode.id, stageNode);
+        this.state.nodes.set(stageNode.id, stageNode);
         const containsEdge: GraphEdge = {
           id: edgeId(`pipeline:${pipeline.id}`, 'CONTAINS', stageNode.id),
           from: `pipeline:${pipeline.id}`,
           to: stageNode.id,
           type: 'CONTAINS',
         };
-        edges.set(containsEdge.id, containsEdge);
+        this.state.edges.set(containsEdge.id, containsEdge);
 
         const serviceEdge: GraphEdge = {
           id: edgeId(stageNode.id, 'TARGETS', `service:${stage.serviceId}`),
@@ -479,7 +424,7 @@ export class OrchestrationKnowledgeGraph {
           to: `service:${stage.serviceId}`,
           type: 'TARGETS',
         };
-        edges.set(serviceEdge.id, serviceEdge);
+        this.state.edges.set(serviceEdge.id, serviceEdge);
 
         const envEdge: GraphEdge = {
           id: edgeId(stageNode.id, 'RUNS_IN', `env:${stage.environmentId}`),
@@ -487,17 +432,17 @@ export class OrchestrationKnowledgeGraph {
           to: `env:${stage.environmentId}`,
           type: 'RUNS_IN',
         };
-        edges.set(envEdge.id, envEdge);
+        this.state.edges.set(envEdge.id, envEdge);
       }
     }
 
-    for (const incident of state.incidents.values()) {
+    for (const incident of this.state.incidents.values()) {
       const incidentNode: GraphNode = {
         id: `incident:${incident.id}`,
         type: 'incident',
         data: incident,
       };
-      nodes.set(incidentNode.id, incidentNode);
+      this.state.nodes.set(incidentNode.id, incidentNode);
       const serviceEdge: GraphEdge = {
         id: edgeId(incidentNode.id, 'AFFECTS', `service:${incident.serviceId}`),
         from: incidentNode.id,
@@ -505,23 +450,23 @@ export class OrchestrationKnowledgeGraph {
         type: 'AFFECTS',
         metadata: { severity: incident.severity, occurredAt: incident.occurredAt },
       };
-      edges.set(serviceEdge.id, serviceEdge);
+      this.state.edges.set(serviceEdge.id, serviceEdge);
       const envEdge: GraphEdge = {
         id: edgeId(incidentNode.id, 'OCCURRED_IN', `env:${incident.environmentId}`),
         from: incidentNode.id,
         to: `env:${incident.environmentId}`,
         type: 'OCCURRED_IN',
       };
-      edges.set(envEdge.id, envEdge);
+      this.state.edges.set(envEdge.id, envEdge);
     }
 
-    for (const policy of state.policies.values()) {
+    for (const policy of this.state.policies.values()) {
       const policyNode: GraphNode = {
         id: `policy:${policy.id}`,
         type: 'policy',
         data: policy,
       };
-      nodes.set(policyNode.id, policyNode);
+      this.state.nodes.set(policyNode.id, policyNode);
       for (const resource of policy.resources) {
         const targetId = resource.includes(':') ? resource : `service:${resource}`;
         const edge: GraphEdge = {
@@ -530,36 +475,25 @@ export class OrchestrationKnowledgeGraph {
           to: targetId,
           type: 'GOVERNS',
         };
-        edges.set(edge.id, edge);
+        this.state.edges.set(edge.id, edge);
       }
     }
 
-    for (const signal of state.costSignals.values()) {
+    for (const signal of this.state.costSignals.values()) {
       const signalNode: GraphNode = {
         id: `cost:${signal.serviceId}:${signal.timeBucket}`,
         type: 'cost-signal',
         data: signal,
       };
-      nodes.set(signalNode.id, signalNode);
+      this.state.nodes.set(signalNode.id, signalNode);
       const edge: GraphEdge = {
         id: edgeId(signalNode.id, 'OBSERVED_FOR', `service:${signal.serviceId}`),
         from: signalNode.id,
         to: `service:${signal.serviceId}`,
         type: 'OBSERVED_FOR',
       };
-      edges.set(edge.id, edge);
+      this.state.edges.set(edge.id, edge);
     }
-
-    const totalMutations = nodes.size + edges.size;
-    preventMassMutation(totalMutations, this.mutationThreshold, {
-      logger: this.logger,
-      reason: this.sandboxMode
-        ? 'Sandbox graph rebuild would exceed the guardrail threshold.'
-        : 'Graph rebuild would exceed the guardrail threshold.',
-    });
-
-    state.nodes = nodes;
-    state.edges = edges;
   }
 
   private calculateServiceRisk(): Record<string, ServiceRiskProfile> {
@@ -634,5 +568,4 @@ export type {
   ServiceConnector,
   ServiceRecord,
   ServiceRiskProfile,
-  OrchestrationKnowledgeGraphOptions,
 };

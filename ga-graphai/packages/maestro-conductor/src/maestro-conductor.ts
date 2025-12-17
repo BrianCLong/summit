@@ -1,10 +1,10 @@
-import { isSandboxMode, requiresConfirmation } from '@ga-graphai/common-types';
 import { AssetDiscoveryEngine } from './discovery';
 import { AnomalyDetector } from './anomaly';
 import { HealthMonitor } from './monitoring';
 import { SelfHealingOrchestrator } from './self-healing';
 import { CostLatencyOptimizer } from './optimization';
 import { JobRouter } from './job-router';
+import { StructuredEventEmitter } from '@ga-graphai/common-types';
 import {
   PredictiveInsightEngine,
   type PredictiveInsightEngineOptions,
@@ -20,7 +20,6 @@ import type {
   PolicyHook,
   ResponseStrategy,
   RoutingPlan,
-  SelfHealingPlan,
 } from './types';
 import type { AnomalyDetectorOptions } from './anomaly';
 import type { SelfHealingOrchestratorOptions } from './self-healing';
@@ -34,10 +33,7 @@ export interface MaestroConductorOptions {
   optimizer?: CostLatencyOptimizerOptions;
   jobRouter?: JobRouterOptions;
   insights?: PredictiveInsightEngineOptions;
-  sandboxMode?: boolean;
-  requireConfirmation?: boolean;
-  confirmationProvided?: boolean;
-  logger?: { warn?: (message: string) => void };
+  events?: StructuredEventEmitter;
 }
 
 export class MaestroConductor {
@@ -59,27 +55,16 @@ export class MaestroConductor {
 
   private readonly insights?: PredictiveInsightEngine;
 
-  private readonly sandboxMode: boolean;
-  private readonly requireConfirmation: boolean;
-  private readonly confirmationProvided: boolean;
-  private readonly logger?: { warn?: (message: string) => void };
+  private readonly events: StructuredEventEmitter;
 
   constructor(options?: MaestroConductorOptions) {
-    this.sandboxMode = options?.sandboxMode ?? isSandboxMode();
-    this.requireConfirmation = options?.requireConfirmation ?? false;
-    this.confirmationProvided = options?.confirmationProvided ?? false;
-    this.logger = options?.logger;
-
     this.anomaly = new AnomalyDetector(options?.anomaly);
     this.selfHealing = new SelfHealingOrchestrator(options?.selfHealing);
     this.optimizer = new CostLatencyOptimizer(options?.optimizer);
     this.jobRouter = new JobRouter(options?.jobRouter);
+    this.events = options?.events ?? new StructuredEventEmitter();
     if (options?.insights) {
       this.insights = new PredictiveInsightEngine(options.insights);
-    }
-
-    if (this.sandboxMode) {
-      this.logger?.warn?.('Sandbox mode active: Maestro self-healing actions will be recorded but not executed.');
     }
   }
 
@@ -215,23 +200,7 @@ export class MaestroConductor {
       snapshot,
       policies: this.policyHooks,
     };
-    const warnings: string[] = [];
-    if (this.sandboxMode) {
-      warnings.push('Sandbox mode active: response strategies evaluated but not executed.');
-      this.logger?.warn?.(warnings[warnings.length - 1]);
-    }
-
-    if (!this.sandboxMode && this.requireConfirmation) {
-      requiresConfirmation('maestro-self-heal', {
-        confirmed: this.confirmationProvided,
-        logger: this.logger,
-        hint: 'Set confirmationProvided or CONFIRM_MAESTRO_SELF_HEAL=true to run automations.',
-      });
-    }
-
-    const { plans } = this.sandboxMode
-      ? { plans: [] as SelfHealingPlan[] }
-      : await this.selfHealing.orchestrate(context);
+    const { plans } = await this.selfHealing.orchestrate(context);
     const incident: IncidentReport = {
       id: `${anomaly.assetId}:${anomaly.metric}:${Date.now()}`,
       asset,
@@ -239,9 +208,15 @@ export class MaestroConductor {
       snapshot,
       plans,
       timestamp: new Date(),
-      sandboxed: this.sandboxMode,
-      warnings: warnings.length ? warnings : undefined,
     };
+    this.events.emitEvent('summit.incident.detected', {
+      incidentId: incident.id,
+      assetId: incident.asset.id,
+      severity: incident.anomaly.severity,
+      metric: incident.anomaly.metric,
+      timestamp: incident.timestamp.toISOString(),
+      plans: plans.map((plan) => plan.strategyId),
+    });
     this.incidents.push(incident);
   }
 }

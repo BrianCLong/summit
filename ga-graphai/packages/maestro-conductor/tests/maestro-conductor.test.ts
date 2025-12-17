@@ -7,6 +7,7 @@ import type {
   ResponseStrategy,
 } from '../src/types';
 import { MaestroConductor } from '../src/maestro-conductor';
+import { StructuredEventEmitter } from '@ga-graphai/common-types';
 
 const assetAlpha: AssetDescriptor = {
   id: 'svc-alpha',
@@ -62,15 +63,16 @@ const assetBeta: AssetDescriptor = {
 describe('MaestroConductor meta-agent', () => {
   let conductor: MaestroConductor;
   let assets: AssetDescriptor[];
-  let provider: DiscoveryProvider;
-  let policyHook: PolicyHook;
-  let strategy: ResponseStrategy;
   const executed: string[] = [];
+  let events: StructuredEventEmitter;
+  let eventTransport: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     assets = [assetAlpha, assetBeta];
     executed.length = 0;
-    provider = {
+    eventTransport = vi.fn();
+    events = new StructuredEventEmitter({ transport: eventTransport });
+    const provider: DiscoveryProvider = {
       id: 'stub',
       description: 'stub discovery',
       async scan() {
@@ -88,11 +90,12 @@ describe('MaestroConductor meta-agent', () => {
         saturationThreshold: 0.7,
       },
       jobRouter: { latencyWeight: 0.4 },
+      events,
     });
 
     conductor.registerDiscoveryProvider(provider);
 
-    policyHook = {
+    const policyHook: PolicyHook = {
       id: 'sensitivity',
       description: 'require hipaa for sensitive workloads',
       evaluate: ({ asset, job }) => {
@@ -109,7 +112,7 @@ describe('MaestroConductor meta-agent', () => {
 
     conductor.registerPolicyHook(policyHook);
 
-    strategy = {
+    const strategy: ResponseStrategy = {
       id: 'auto-fallback',
       description: 'failover to paired service and launch runbook',
       supports: (asset) => Boolean(asset.metadata?.fallback),
@@ -240,30 +243,10 @@ describe('MaestroConductor meta-agent', () => {
     expect(plan.fallbacks.length).toBeLessThanOrEqual(1);
   });
 
-  it('records incidents without executing plans while in sandbox mode', async () => {
-    const warn = vi.fn();
-    const sandboxConductor = new MaestroConductor({
-      anomaly: { windowSize: 6, minSamples: 4, zThreshold: 1.2 },
-      selfHealing: { defaultCooldownMs: 1 },
-      optimizer: {
-        windowSize: 12,
-        latencyThresholdMs: 200,
-        errorRateThreshold: 0.08,
-        saturationThreshold: 0.7,
-      },
-      jobRouter: { latencyWeight: 0.4 },
-      sandboxMode: true,
-      logger: { warn },
-    });
-
-    sandboxConductor.registerDiscoveryProvider(provider);
-    sandboxConductor.registerPolicyHook(policyHook);
-    sandboxConductor.registerResponseStrategy(strategy);
-    await sandboxConductor.scanAssets();
-
+  it('emits structured incidents when anomalies are detected', async () => {
     const baselineLatencies = [110, 108, 112, 115];
     for (const [index, value] of baselineLatencies.entries()) {
-      await sandboxConductor.ingestHealthSignal({
+      await conductor.ingestHealthSignal({
         assetId: 'svc-alpha',
         metric: 'latency.p95',
         value,
@@ -272,99 +255,16 @@ describe('MaestroConductor meta-agent', () => {
       });
     }
 
-    await sandboxConductor.ingestHealthSignal({
+    await conductor.ingestHealthSignal({
       assetId: 'svc-alpha',
       metric: 'latency.p95',
-      value: 420,
+      value: 500,
       unit: 'ms',
       timestamp: new Date(),
     });
 
-    expect(executed).toHaveLength(0);
-    const incidents = sandboxConductor.getIncidents();
-    expect(incidents[0]?.sandboxed).toBe(true);
-    expect(incidents[0]?.warnings?.[0]).toContain('Sandbox mode active');
-    expect(warn).toHaveBeenCalled();
-  });
-
-  it('requires confirmation before running self-healing plans', async () => {
-    const guarded = new MaestroConductor({
-      anomaly: { windowSize: 6, minSamples: 4, zThreshold: 1.2 },
-      selfHealing: { defaultCooldownMs: 1 },
-      optimizer: {
-        windowSize: 12,
-        latencyThresholdMs: 200,
-        errorRateThreshold: 0.08,
-        saturationThreshold: 0.7,
-      },
-      jobRouter: { latencyWeight: 0.4 },
-      requireConfirmation: true,
-    });
-
-    guarded.registerDiscoveryProvider(provider);
-    guarded.registerPolicyHook(policyHook);
-    guarded.registerResponseStrategy(strategy);
-    await guarded.scanAssets();
-
-    const baselineLatencies = [110, 108, 112, 115];
-    for (const [index, value] of baselineLatencies.entries()) {
-      await guarded.ingestHealthSignal({
-        assetId: 'svc-alpha',
-        metric: 'latency.p95',
-        value,
-        unit: 'ms',
-        timestamp: new Date(Date.now() + index * 1000),
-      });
-    }
-
-    await expect(
-      guarded.ingestHealthSignal({
-        assetId: 'svc-alpha',
-        metric: 'latency.p95',
-        value: 420,
-        unit: 'ms',
-        timestamp: new Date(),
-      }),
-    ).rejects.toThrow(/confirmation required/);
-
-    const confirmed = new MaestroConductor({
-      anomaly: { windowSize: 6, minSamples: 4, zThreshold: 1.2 },
-      selfHealing: { defaultCooldownMs: 1 },
-      optimizer: {
-        windowSize: 12,
-        latencyThresholdMs: 200,
-        errorRateThreshold: 0.08,
-        saturationThreshold: 0.7,
-      },
-      jobRouter: { latencyWeight: 0.4 },
-      requireConfirmation: true,
-      confirmationProvided: true,
-    });
-
-    confirmed.registerDiscoveryProvider(provider);
-    confirmed.registerPolicyHook(policyHook);
-    confirmed.registerResponseStrategy(strategy);
-    await confirmed.scanAssets();
-
-    for (const [index, value] of baselineLatencies.entries()) {
-      await confirmed.ingestHealthSignal({
-        assetId: 'svc-alpha',
-        metric: 'latency.p95',
-        value,
-        unit: 'ms',
-        timestamp: new Date(Date.now() + index * 1000),
-      });
-    }
-
-    await expect(
-      confirmed.ingestHealthSignal({
-        assetId: 'svc-alpha',
-        metric: 'latency.p95',
-        value: 420,
-        unit: 'ms',
-        timestamp: new Date(),
-      }),
-    ).resolves.toBeUndefined();
-    expect(confirmed.getIncidents().length).toBeGreaterThan(0);
+    expect(eventTransport).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'summit.incident.detected' }),
+    );
   });
 });
