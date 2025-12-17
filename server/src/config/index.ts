@@ -36,7 +36,11 @@ const rawConfig = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
   },
   bcrypt: {
+<<<<<<< HEAD
+    rounds: parseInt(process.env.BCRYPT_ROUNDS || '14'),
+=======
     rounds: process.env.BCRYPT_ROUNDS,
+>>>>>>> main
   },
   rateLimit: {
     windowMs: process.env.RATE_LIMIT_WINDOW_MS,
