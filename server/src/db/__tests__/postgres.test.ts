@@ -52,6 +52,12 @@ describe('PostgreSQL Pool', () => {
     delete process.env.DATABASE_READ_REPLICAS;
     delete process.env.PG_WRITE_POOL_SIZE;
     delete process.env.PG_READ_POOL_SIZE;
+    delete process.env.PG_PREFERRED_READ_REGIONS;
+    delete process.env.PG_READ_REPLICA_REGION_BONUS;
+    delete process.env.PG_READ_REPLICA_HEALTH_THRESHOLD;
+    delete process.env.PG_READ_REPLICA_ALLOW_DEGRADED;
+    delete process.env.PG_FAILOVER_TO_WRITER;
+    delete process.env.CURRENT_REGION;
 
     // Mock client
     mockClient = {
@@ -83,6 +89,24 @@ describe('PostgreSQL Pool', () => {
       const pool = getPostgresPool();
 
       expect(pool).toBeDefined();
+    });
+
+    it('should parse read replica metadata for regions and priority', () => {
+      process.env.DATABASE_READ_REPLICAS =
+        'postgresql://read1:5432/db|region=us-east-1|priority=120,postgresql://read2:5432/db|region=eu-west-1|priority=80';
+
+      const replicas = __private.parseReadReplicaConfigs();
+
+      expect(replicas).toHaveLength(2);
+      expect(replicas[0]).toMatchObject({
+        region: 'us-east-1',
+        priority: 120,
+      });
+      expect(replicas[1]).toMatchObject({
+        name: 'read-replica-2',
+        region: 'eu-west-1',
+        priority: 80,
+      });
     });
 
     it('should parse individual connection parameters', () => {
@@ -396,6 +420,7 @@ describe('PostgreSQL Pool', () => {
         expect(typeof snapshot.activeConnections).toBe('number');
         expect(typeof snapshot.idleConnections).toBe('number');
         expect(typeof snapshot.queuedRequests).toBe('number');
+        expect(snapshot.healthScore).toBeDefined();
       });
     });
 
@@ -405,6 +430,27 @@ describe('PostgreSQL Pool', () => {
       const health = await pool.healthCheck();
 
       expect(health.some((h: any) => !h.healthy)).toBe(true);
+    });
+  });
+
+  describe('Replica Health', () => {
+    it('should expose health scoring with preferred region bias', async () => {
+      process.env.DATABASE_READ_REPLICAS =
+        'postgresql://read1:5432/db|region=us-east-1|priority=120,postgresql://read2:5432/db|region=eu-west-1|priority=80';
+      process.env.CURRENT_REGION = 'us-east-1';
+
+      const pool = getPostgresPool();
+
+      const { readPoolWrappers } = __private.getPoolsSnapshot();
+      __private.replicaHealthTracker.recordFailure(readPoolWrappers[1]);
+
+      const health = pool.replicaHealth();
+      const east = health.find((entry: any) => entry.region === 'us-east-1');
+      const eu = health.find((entry: any) => entry.region === 'eu-west-1');
+
+      expect(health.length).toBeGreaterThan(0);
+      expect((east?.healthScore ?? 0)).toBeGreaterThan(eu?.healthScore ?? 0);
+      expect(east?.priority).toBeGreaterThanOrEqual(eu?.priority ?? 0);
     });
   });
 

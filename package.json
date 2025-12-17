@@ -17,6 +17,7 @@
     "devkit:seed": "node scripts/devkit/seed-fixtures.js",
     "devkit:parity": "node scripts/devkit/check-parity.js",
     "devkit:smoke": "node smoke-test.js --ci",
+    "bootcamp:check": "node --loader ts-node/esm scripts/onboarding/bootcamp-check.ts",
     "docker:dev": "docker-compose -f docker-compose.dev.yml up",
     "docker:prod": "docker-compose up",
     "test:jest": "jest --config jest.projects.cjs --maxWorkers=50% --detectOpenHandles",
@@ -48,15 +49,16 @@
     "lint": "turbo run lint --cache-dir=.turbo --continue",
     "lint:fix": "eslint . --fix",
     "lint:check": "eslint .",
+    "lint:cache": "node tools/check-cache-usage.cjs",
     "lint:tests": "node scripts/guard-tests.js",
     "lint:server": "cd server && npm run lint",
     "lint:client": "cd client && npm run lint",
     "lint:py": "ruff check .",
     "lint:py:fix": "ruff check --fix .",
-    "typecheck": "tsc -b tsconfig.build.json",
-    "typecheck:legacy": "turbo run typecheck --cache-dir=.turbo --continue",
-    "typecheck:server": "cd server && tsc --noEmit",
-    "typecheck:client": "cd client && tsc --noEmit",
+    "typecheck": "turbo run typecheck --cache-dir=.turbo --continue",
+    "typecheck:build": "tsc -b tsconfig.build.json",
+    "typecheck:server": "cd server && npm run typecheck",
+    "typecheck:client": "cd client && npm run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:py": "ruff format",
@@ -99,7 +101,9 @@
     "build:all": "pnpm -w -r run build",
     "style:check": "pnpm run format:check && pnpm run lint:check",
     "style:fix": "pnpm run format && pnpm run lint:fix",
-    "ci": "pnpm run lint && pnpm run typecheck && pnpm run test",
+    "ci": "pnpm run lint && pnpm run typecheck && pnpm run contract:drift && pnpm run test",
+    "contract:drift": "node --loader ts-node/esm scripts/api/contract-drift.ts",
+    "contract:drift:autofix": "node --loader ts-node/esm scripts/api/contract-drift.ts --autofix --no-fail",
     "ci:prod-guard": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ci/prod-config-check.ts",
     "smoke": "node scripts/smoke-test.js",
     "smoke:ci": "NODE_ENV=test node scripts/smoke-test.js",
@@ -116,9 +120,9 @@
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",
     "security:scan": "pnpm run security:audit && pnpm run security:lint",
     "security:outdated": "pnpm outdated",
-    "drill:run": "npx tsx scripts/security/run-drill.ts",
-    "drill:all": "npx tsx scripts/security/run-drill.ts --all --env local --report",
-    "drill:dry-run": "npx tsx scripts/security/run-drill.ts --all --dry-run"
+    "schema:fingerprint": "node --loader ts-node/esm scripts/schema-fingerprint.ts --write latest --pretty",
+    "schema:verify": "node --loader ts-node/esm scripts/verify-migrations.ts",
+    "schema:migration": "node --loader ts-node/esm scripts/create-migration.ts"
   },
   "keywords": [
     "intelligence-analysis",
@@ -168,6 +172,9 @@
   },
   "devDependencies": {
     "@apollo/client": "^4.0.7",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^9.39.1",
@@ -184,6 +191,7 @@
     "@types/graphql-depth-limit": "^1.1.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^8.47.0",
     "@typescript-eslint/parser": "^8.47.0",
     "concurrently": "^9.2.0",
@@ -193,17 +201,19 @@
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.0.5",
+    "jest-junit": "^16.0.0",
     "jest-watch-typeahead": "^3.0.1",
     "lint-staged": "^16.1.5",
     "markdownlint-cli": "^0.46.0",
     "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
     "semantic-release": "^25.0.1",
-    "ts-jest": "^29.4.5",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "turbo": "^2.3.3",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.47.0"
+    "typescript-eslint": "^8.47.0",
+    "winston": "^3.19.0"
   },
   "husky": {
     "hooks": {
@@ -233,7 +243,39 @@
       "prettier --write"
     ]
   },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      [
+        "@semantic-release/changelog",
+        {
+          "changelogFile": "CHANGELOG.md"
+        }
+      ],
+      "@semantic-release/npm",
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "package.json",
+            "package-lock.json",
+            "CHANGELOG.md"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
+      "@semantic-release/github"
+    ]
+  },
   "dependencies": {
+    "@opentelemetry/auto-instrumentations-node": "^0.67.2",
+    "@opentelemetry/exporter-jaeger": "^2.2.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "axios": "^1.11.0",
@@ -241,13 +283,13 @@
     "docx": "^9.5.1",
     "dotenv": "^17.2.3",
     "graphql-depth-limit": "^1.1.0",
+    "ioredis": "^5.4.1",
     "jest-extended": "^7.0.0",
     "js-yaml": "^4.1.1",
-    "ioredis": "^5.4.1",
     "neo4j-driver": "6.0.1",
     "pg": "^8.16.3",
-    "prom-client": "^15.1.2",
     "redis": "^5.8.1",
+    "tiktoken": "^1.0.22",
     "ws": "^8.18.3"
   },
   "private": true,

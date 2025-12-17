@@ -164,6 +164,22 @@ const investigationOperations = new client.Counter({
   labelNames: ['operation', 'user_id'],
 });
 
+// Human-in-the-loop approvals
+const approvalsPending = new client.Gauge({
+  name: 'approvals_pending',
+  help: 'Current pending approvals requiring human review',
+});
+
+const approvalsApprovedTotal = new client.Counter({
+  name: 'approvals_approved_total',
+  help: 'Total approvals granted by human reviewers',
+});
+
+const approvalsRejectedTotal = new client.Counter({
+  name: 'approvals_rejected_total',
+  help: 'Total approvals rejected by human reviewers',
+});
+
 // Error tracking
 const applicationErrors = new client.Counter({
   name: 'application_errors_total',
@@ -227,6 +243,9 @@ register.registerMetric(websocketConnections);
 register.registerMetric(websocketMessages);
 register.registerMetric(investigationsActive);
 register.registerMetric(investigationOperations);
+register.registerMetric(approvalsPending);
+register.registerMetric(approvalsApprovedTotal);
+register.registerMetric(approvalsRejectedTotal);
 register.registerMetric(applicationErrors);
 register.registerMetric(memoryUsage);
 register.registerMetric(pipelineUptimeRatio);
@@ -464,6 +483,9 @@ export {
   websocketMessages,
   investigationsActive,
   investigationOperations,
+  approvalsPending,
+  approvalsApprovedTotal,
+  approvalsRejectedTotal,
   applicationErrors,
   tenantScopeViolationsTotal,
   memoryUsage,

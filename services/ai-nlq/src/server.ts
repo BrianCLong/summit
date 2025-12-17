@@ -1,15 +1,16 @@
-// services/ai-nlq/src/server.ts
-import express from 'express';
-import { safe, runSandbox } from './sandbox';
+import express from "express";
+import bodyParser from "body-parser";
 
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json());
 
-app.post("/sandbox/run",(req,res)=>{
-  const { cypher } = req.body||{};
-  const s = safe(cypher||"");
-  if(!s.ok) return res.status(400).json({ error: s.reason });
-  return res.json({ rows: runSandbox(cypher) });
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "ai-nlq" }));
+
+app.post("/generate", (req, res) => {
+  const { natural } = req.body || {};
+  if (!natural) return res.status(400).json({ error: "missing natural" });
+  const cypher = "MATCH (n) RETURN n LIMIT 10"; // placeholder
+  return res.json({ cypher, reasoning: "fallback template", cost_est: { nodes: 10, hops: 1 }, preview_sample: [{ id: "n1" }] });
 });
 
-export { app };
+app.listen(process.env.PORT || 8080);
