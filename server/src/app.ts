@@ -108,11 +108,19 @@ export const createApp = async () => {
   // await tracer.initialize();
 
   const app = express();
+<<<<<<< HEAD
+  const logger = pino();
+  const isProduction = cfg.NODE_ENV === 'production';
+  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+=======
 
   const safetyState = await resolveSafetyState();
   if (safetyState.killSwitch || safetyState.safeMode) {
     appLogger.warn({ safetyState }, 'Safety gates enabled');
   }
+>>>>>>> main
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
@@ -121,10 +129,25 @@ export const createApp = async () => {
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);
 
-  app.use(helmet());
-  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
+  app.use(
+    helmet({
+      contentSecurityPolicy: isProduction
+        ? {
+            directives: {
+              defaultSrc: ["'self'"],
+              objectSrc: ["'none'"],
+              imgSrc: ["'self'", 'data:'],
+              scriptSrc: ["'self'"],
+              styleSrc: ["'self'", "'unsafe-inline'"],
+              connectSrc: ["'self'", ...allowedOrigins],
+            },
+          }
+        : false,
+      referrerPolicy: { policy: 'no-referrer' },
+      hsts: isProduction ? undefined : false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.use(
     cors({
       origin: (origin, callback) => {
