@@ -287,7 +287,7 @@ export class FailoverController extends EventEmitter<FailoverEvents> {
   private scheduleFailback(toChannel: CommChannel, delayMs: number): void {
     // Clear existing failback timer
     const existing = this.failbackTimers.get(toChannel);
-    if (existing) clearTimeout(existing);
+    if (existing) {clearTimeout(existing);}
 
     const timer = setTimeout(() => {
       this.attemptFailback(toChannel);
@@ -317,7 +317,7 @@ export class FailoverController extends EventEmitter<FailoverEvents> {
 
   private considerFailback(recoveredChannel: CommChannel): void {
     const policy = this.getApplicablePolicy();
-    if (!policy?.autoFailback) return;
+    if (!policy?.autoFailback) {return;}
 
     // Check if recovered channel is higher priority than current
     const priorityList = policy.channelPriority;
@@ -379,7 +379,7 @@ export class FailoverController extends EventEmitter<FailoverEvents> {
   } {
     const healthyChannels: CommChannel[] = [];
     for (const [channel, healthy] of this.channelHealth) {
-      if (healthy) healthyChannels.push(channel);
+      if (healthy) {healthyChannels.push(channel);}
     }
 
     const now = Date.now();

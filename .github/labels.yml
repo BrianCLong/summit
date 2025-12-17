@@ -19,6 +19,7 @@
 
 - name: 'priority: critical'
   color: 'b60205'
+<<<<<<< HEAD
   description: 'Must handle immediately'
 - name: 'priority: high'
   color: 'ff0000'
@@ -27,6 +28,31 @@
   color: 'fbca04'
   description: 'Normal priority'
 - name: 'priority: low'
+=======
+  description: 'Monthly operational hygiene tasks'
+
+- name: needs-canary-plan
+  color: '0b7285'
+  description: 'Requires a documented canary and rollback plan before merge'
+
+- name: migration-gate
+  color: 'e11d48'
+  description: 'Schema-impacting change that must clear the migration gate'
+
+- name: 'cadence:weekly'
+  color: '5319e7'
+  description: 'Weekly recurring tasks'
+
+- name: 'cadence:monthly'
+  color: '5319e7'
+  description: 'Monthly recurring tasks'
+
+- name: 'priority:high'
+  color: 'b60205'
+  description: 'High priority items'
+
+- name: 'priority:normal'
+>>>>>>> main
   color: 'c2e0c6'
   description: 'Nice to have'
 
@@ -53,9 +79,35 @@
   color: 'bfdadc'
   description: 'Database, migration, data integrity'
 
+<<<<<<< HEAD
 - name: 'needs-canary-plan'
   color: 'bfd4f2'
   description: 'Requires a canary deployment plan before merge'
 - name: 'migration-gate'
   color: 'd93f0b'
   description: 'Contains database migrations, requires verification'
+=======
+- name: security
+  color: '6610f2'
+  description: 'Security-related tasks'
+
+# Ops hardening week 1 labels
+- name: needs-canary-plan
+  color: 'CC9900'
+  description: Canary plan required before merge
+- name: migration-gate
+  color: '5319e7'
+  description: DB/contract migration present — gate applies
+- name: ops/preview
+  color: '0e8a16'
+  description: Preview environment work
+- name: ops/release-train
+  color: '1f77b4'
+  description: Release train tasks
+- name: risk/high
+  color: 'd73a4a'
+  description: Elevated risk change
+- name: type/runbook
+  color: 'c2e0c6'
+  description: Documentation/runbook
+>>>>>>> main
