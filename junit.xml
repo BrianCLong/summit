@@ -1,31 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="10" failures="0" errors="0" time="31.446">
-  <testsuite name="CSVConnector" errors="0" failures="0" skipped="0" timestamp="2025-12-07T05:32:18" time="29.481" tests="2">
-    <testcase classname="CSVConnector should read CSV file" name="CSVConnector should read CSV file" time="0.043">
+<testsuites name="jest tests" tests="4" failures="0" errors="0" time="25.898">
+  <testsuite name="Canonical Data Model" errors="0" failures="0" skipped="0" timestamp="2025-12-08T18:51:21" time="25.761" tests="4">
+    <testcase classname="Canonical Data Model Temporal Logic isValidAt correctly identifies valid periods" name="Canonical Data Model Temporal Logic isValidAt correctly identifies valid periods" time="0.004">
     </testcase>
-    <testcase classname="CSVConnector should fetch schema" name="CSVConnector should fetch schema" time="0.004">
+    <testcase classname="Canonical Data Model Temporal Logic isValidAt handles open-ended validTo" name="Canonical Data Model Temporal Logic isValidAt handles open-ended validTo" time="0.001">
     </testcase>
-  </testsuite>
-  <testsuite name="ETLPipeline" errors="0" failures="0" skipped="0" timestamp="2025-12-07T05:32:18" time="29.983" tests="1">
-    <testcase classname="ETLPipeline should run pipeline end-to-end" name="ETLPipeline should run pipeline end-to-end" time="0.028">
+    <testcase classname="Canonical Data Model Temporal Logic wasKnownAt correctly identifies knowledge time" name="Canonical Data Model Temporal Logic wasKnownAt correctly identifies knowledge time" time="0.001">
     </testcase>
-  </testsuite>
-  <testsuite name="DataLicenseRegistry" errors="0" failures="0" skipped="0" timestamp="2025-12-07T05:32:48" time="0.736" tests="4">
-    <testcase classname="DataLicenseRegistry registerSourceLicense should insert license and update source" name="DataLicenseRegistry registerSourceLicense should insert license and update source" time="0.005">
-    </testcase>
-    <testcase classname="DataLicenseRegistry checkCompliance should return allowed if no license found" name="DataLicenseRegistry checkCompliance should return allowed if no license found" time="0.001">
-    </testcase>
-    <testcase classname="DataLicenseRegistry checkCompliance should block if license level is block" name="DataLicenseRegistry checkCompliance should block if license level is block" time="0.001">
-    </testcase>
-    <testcase classname="DataLicenseRegistry checkCompliance should block export if restricted" name="DataLicenseRegistry checkCompliance should block export if restricted" time="0.002">
-    </testcase>
-  </testsuite>
-  <testsuite name="BaseConnector" errors="0" failures="0" skipped="0" timestamp="2025-12-07T05:32:48" time="0.73" tests="3">
-    <testcase classname="BaseConnector should initialize with correct config" name="BaseConnector should initialize with correct config" time="0.002">
-    </testcase>
-    <testcase classname="BaseConnector healthCheck should return healthy when connected" name="BaseConnector healthCheck should return healthy when connected" time="0.002">
-    </testcase>
-    <testcase classname="BaseConnector metrics should start at zero" name="BaseConnector metrics should start at zero" time="0.002">
+    <testcase classname="Canonical Data Model Policy Labels Can create object with policy labels" name="Canonical Data Model Policy Labels Can create object with policy labels" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>

@@ -11,6 +11,7 @@ import { getNeo4jDriver } from '../../db/neo4j.js';
 import { getPostgresPool } from '../../db/postgres.js';
 import logger from '../../config/logger.js';
 import { z } from 'zod';
+import { resolveTenantId } from '../../tenancy/tenantScope.js';
 
 const resolverLogger = logger.child({ name: 'CoreResolvers' });
 
@@ -188,6 +189,7 @@ const EntityInputZ = z.object({
 
 const EntityUpdateZ = z.object({
   id: EntityIdZ,
+  tenantId: TenantIdZ.optional(),
   labels: z.array(z.string().max(100)).max(20, 'Maximum 20 labels').optional(),
   props: PropsZ.optional(),
 });
@@ -274,11 +276,10 @@ export const coreResolvers = {
     entity: async (_: any, args: any, context: any) => {
       // Validate and parse input arguments
       const parsed = EntityQueryArgsZ.parse(args);
-      const effectiveTenantId = parsed.tenantId || context.tenantId;
-
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        parsed.tenantId || context.tenantId,
+        'graphql.query.entity',
+      );
 
       // Validate tenant ID from context as well
       TenantIdZ.parse(effectiveTenantId);
@@ -290,11 +291,10 @@ export const coreResolvers = {
     entities: async (_: any, args: any, context: any) => {
       // Validate and parse input arguments
       const { input } = EntitiesQueryArgsZ.parse(args);
-      const effectiveTenantId = input.tenantId || context.tenantId;
-
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        input.tenantId || context.tenantId,
+        'graphql.query.entities',
+      );
 
       // Validate tenant ID from context as well
       TenantIdZ.parse(effectiveTenantId);
@@ -317,11 +317,10 @@ export const coreResolvers = {
     relationship: async (_: any, args: any, context: any) => {
       // Validate and parse input arguments
       const parsed = RelationshipQueryArgsZ.parse(args);
-      const effectiveTenantId = parsed.tenantId || context.tenantId;
-
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        parsed.tenantId || context.tenantId,
+        'graphql.query.relationship',
+      );
 
       // Validate tenant ID from context as well
       TenantIdZ.parse(effectiveTenantId);
@@ -333,11 +332,10 @@ export const coreResolvers = {
     relationships: async (_: any, args: any, context: any) => {
       // Validate and parse input arguments
       const { input } = RelationshipsQueryArgsZ.parse(args);
-      const effectiveTenantId = input.tenantId || context.tenantId;
-
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        input.tenantId || context.tenantId,
+        'graphql.query.relationships',
+      );
 
       // Validate tenant ID from context as well
       TenantIdZ.parse(effectiveTenantId);
@@ -361,11 +359,10 @@ export const coreResolvers = {
     investigation: async (_: any, args: any, context: any) => {
       // Validate and parse input arguments
       const parsed = InvestigationQueryArgsZ.parse(args);
-      const effectiveTenantId = parsed.tenantId || context.tenantId;
-
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        parsed.tenantId || context.tenantId,
+        'graphql.query.investigation',
+      );
 
       // Validate tenant ID from context as well
       TenantIdZ.parse(effectiveTenantId);
@@ -377,11 +374,10 @@ export const coreResolvers = {
     investigations: async (_: any, args: any, context: any) => {
       // Validate and parse input arguments
       const parsed = InvestigationsQueryArgsZ.parse(args);
-      const effectiveTenantId = parsed.tenantId || context.tenantId;
-
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        parsed.tenantId || context.tenantId,
+        'graphql.query.investigations',
+      );
 
       // Validate tenant ID from context as well
       TenantIdZ.parse(effectiveTenantId);
@@ -406,11 +402,10 @@ export const coreResolvers = {
   Mutation: {
     // Entity mutations
     createEntity: async (_: any, { input }: any, context: any) => {
-      const effectiveTenantId =
-        input.tenantId ||
-        context.tenantId ||
-        context.user?.tenantId ||
-        'default_tenant';
+      const effectiveTenantId = resolveTenantId(
+        input.tenantId || context.tenantId || context.user?.tenantId,
+        'graphql.mutation.createEntity',
+      );
       const parsed = EntityInputZ.parse({ ...input, tenantId: effectiveTenantId });
       const userId = context.user?.sub || context.user?.id || 'system';
 
@@ -427,14 +422,19 @@ export const coreResolvers = {
 
     updateEntity: async (_: any, { input }: any, context: any) => {
       const parsed = EntityUpdateZ.parse(input);
-      return await entityRepo.update(parsed);
+      const tenantId = resolveTenantId(
+        parsed.tenantId || context.tenantId || context.user?.tenantId,
+        'graphql.mutation.updateEntity',
+      );
+
+      return await entityRepo.update({ ...parsed, tenantId });
     },
 
     deleteEntity: async (_: any, { id, tenantId }: any, context: any) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        tenantId || context.tenantId,
+        'graphql.mutation.deleteEntity',
+      );
 
       // Verify entity belongs to tenant before deletion
       const entity = await entityRepo.findById(id, effectiveTenantId);
@@ -442,7 +442,7 @@ export const coreResolvers = {
         return false;
       }
 
-      return await entityRepo.delete(id);
+      return await entityRepo.delete(id, effectiveTenantId);
     },
 
     // Relationship mutations
@@ -490,13 +490,19 @@ export const coreResolvers = {
     // Investigation mutations
     createInvestigation: async (_: any, { input }: any, context: any) => {
       const userId = context.user?.sub || context.user?.id || 'system';
-      const tenantId =
-        context.tenantId || context.user?.tenantId || 'default_tenant';
+      const tenantId = resolveTenantId(
+        input.tenantId || context.tenantId || context.user?.tenantId,
+        'graphql.mutation.createInvestigation',
+      );
       return await investigationRepo.create({ ...input, tenantId }, userId);
     },
 
     updateInvestigation: async (_: any, { input }: any, context: any) => {
-      return await investigationRepo.update(input);
+      const tenantId = resolveTenantId(
+        input.tenantId || context.tenantId || context.user?.tenantId,
+        'graphql.mutation.updateInvestigation',
+      );
+      return await investigationRepo.update({ ...input, tenantId });
     },
 
     deleteInvestigation: async (
@@ -504,10 +510,10 @@ export const coreResolvers = {
       { id, tenantId }: any,
       context: any,
     ) => {
-      const effectiveTenantId = tenantId || context.tenantId;
-      if (!effectiveTenantId) {
-        throw new Error('Tenant ID is required');
-      }
+      const effectiveTenantId = resolveTenantId(
+        tenantId || context.tenantId,
+        'graphql.mutation.deleteInvestigation',
+      );
 
       // Verify investigation belongs to tenant before deletion
       const investigation = await investigationRepo.findById(
@@ -518,7 +524,7 @@ export const coreResolvers = {
         return false;
       }
 
-      return await investigationRepo.delete(id);
+      return await investigationRepo.delete(id, effectiveTenantId);
     },
   },
 
@@ -527,6 +533,10 @@ export const coreResolvers = {
     relationships: async (parent: any, args: any) => {
       // Validate and parse field arguments
       const parsed = EntityRelationshipsArgsZ.parse(args);
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.entity.relationships',
+      );
 
       const directionMap: Record<string, 'incoming' | 'outgoing' | 'both'> = {
         INCOMING: 'incoming',
@@ -536,13 +546,11 @@ export const coreResolvers = {
 
       // Validate parent entity ID
       EntityIdZ.parse(parent.id);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      TenantIdZ.parse(tenantId);
 
       return await relationshipRepo.findByEntityId(
         parent.id,
-        parent.tenantId,
+        tenantId,
         directionMap[parsed.direction],
       );
     },
@@ -550,13 +558,15 @@ export const coreResolvers = {
     relationshipCount: async (parent: any) => {
       // Validate parent entity ID
       EntityIdZ.parse(parent.id);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.entity.relationshipCount',
+      );
+      TenantIdZ.parse(tenantId);
 
       const counts = await relationshipRepo.getEntityRelationshipCount(
         parent.id,
-        parent.tenantId,
+        tenantId,
       );
       return {
         incoming: counts.incoming,
@@ -571,11 +581,13 @@ export const coreResolvers = {
 
       // Validate IDs
       InvestigationIdZ.parse(investigationId);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.entity.investigation',
+      );
+      TenantIdZ.parse(tenantId);
 
-      return await investigationRepo.findById(investigationId, parent.tenantId);
+      return await investigationRepo.findById(investigationId, tenantId);
     },
   },
 
@@ -583,21 +595,25 @@ export const coreResolvers = {
     source: async (parent: any) => {
       // Validate IDs from parent
       EntityIdZ.parse(parent.srcId);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.relationship.source',
+      );
+      TenantIdZ.parse(tenantId);
 
-      return await entityRepo.findById(parent.srcId, parent.tenantId);
+      return await entityRepo.findById(parent.srcId, tenantId);
     },
 
     destination: async (parent: any) => {
       // Validate IDs from parent
       EntityIdZ.parse(parent.dstId);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.relationship.destination',
+      );
+      TenantIdZ.parse(tenantId);
 
-      return await entityRepo.findById(parent.dstId, parent.tenantId);
+      return await entityRepo.findById(parent.dstId, tenantId);
     },
   },
 
@@ -605,25 +621,29 @@ export const coreResolvers = {
     stats: async (parent: any) => {
       // Validate IDs from parent
       InvestigationIdZ.parse(parent.id);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.investigation.stats',
+      );
+      TenantIdZ.parse(tenantId);
 
-      return await investigationRepo.getStats(parent.id, parent.tenantId);
+      return await investigationRepo.getStats(parent.id, tenantId);
     },
 
     entities: async (parent: any, args: any) => {
       // Validate and parse field arguments
       const parsed = InvestigationEntitiesArgsZ.parse(args);
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.investigation.entities',
+      );
 
       // Validate IDs from parent
       InvestigationIdZ.parse(parent.id);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      TenantIdZ.parse(tenantId);
 
       return await entityRepo.search({
-        tenantId: parent.tenantId,
+        tenantId,
         kind: parsed.kind,
         props: { investigationId: parent.id },
         limit: parsed.limit,
@@ -634,15 +654,17 @@ export const coreResolvers = {
     relationships: async (parent: any, args: any) => {
       // Validate and parse field arguments
       const parsed = InvestigationRelationshipsArgsZ.parse(args);
+      const tenantId = resolveTenantId(
+        parent.tenantId,
+        'graphql.investigation.relationships',
+      );
 
       // Validate IDs from parent
       InvestigationIdZ.parse(parent.id);
-      if (parent.tenantId) {
-        TenantIdZ.parse(parent.tenantId);
-      }
+      TenantIdZ.parse(tenantId);
 
       return await relationshipRepo.search({
-        tenantId: parent.tenantId,
+        tenantId,
         type: parsed.type,
         limit: parsed.limit,
         offset: parsed.offset,
