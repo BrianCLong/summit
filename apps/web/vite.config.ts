@@ -97,7 +97,6 @@ export default defineConfig({
       'react',
       'react-dom',
       'react-router-dom',
-      '@apollo/client',
       'zustand',
       // D3 modules for graph visualization
       'd3-selection',
@@ -106,6 +105,7 @@ export default defineConfig({
     exclude: [
       // Exclude heavy deps from pre-bundling (lazy loaded)
       'framer-motion',
+      '@apollo/client',
     ],
   },
 })
