@@ -1,0 +1,20 @@
+{
+  "name": "@intelgraph/predictive-diplomacy",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "@intelgraph/diplomatic-tracking": "workspace:*",
+    "@intelgraph/treaty-monitor": "workspace:*",
+    "@intelgraph/foreign-policy-analysis": "workspace:*",
+    "@intelgraph/bilateral-relations": "workspace:*",
+    "@intelgraph/multilateral-tracking": "workspace:*",
+    "@intelgraph/crisis-diplomacy": "workspace:*"
+  }
+}
