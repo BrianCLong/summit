@@ -193,7 +193,7 @@ export class InfrastructureGraph {
 
     while (queue.length > 0) {
       const current = queue.shift()!;
-      if (visited.has(current)) continue;
+      if (visited.has(current)) {continue;}
       visited.add(current);
 
       for (const neighborId of this.adjacencyList.get(current) ?? []) {
@@ -218,7 +218,7 @@ export class InfrastructureGraph {
 
     for (const node of this.nodes.values()) {
       nodesByType[node.type] = (nodesByType[node.type] ?? 0) + 1;
-      if (node.compromised) compromisedCount++;
+      if (node.compromised) {compromisedCount++;}
     }
 
     return {

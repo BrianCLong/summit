@@ -516,6 +516,14 @@ class RedisConnection {
     this.publisher = null;
     this.isConnected = false;
   }
+
+  getClient(): Redis {
+    if (!this.client) {
+      throw new Error('Redis client not initialized');
+    }
+
+    return this.client;
+  }
 }
 
 // Export singleton instance
