@@ -1,0 +1,607 @@
+# Chaos Engineering Experiments for Summit/IntelGraph Platform
+#
+# This file defines chaos experiments using Chaos Mesh to validate system resilience.
+# These experiments should be run in staging environment before production deployment.
+#
+# Prerequisites:
+# - Chaos Mesh installed in cluster
+# - RBAC permissions configured
+# - Monitoring and alerting active
+#
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chaos-testing
+  labels:
+    purpose: chaos-engineering
+    app.kubernetes.io/part-of: intelgraph
+---
+# Experiment 1: API Pod Kill
+# Validates that the system recovers when API pods are terminated
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: api-pod-kill
+  namespace: chaos-testing
+  labels:
+    experiment-type: availability
+    target-component: api
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  duration: "30s"
+---
+# Experiment 2: API Pod Failure (graceful)
+# Simulates graceful pod termination
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: api-pod-failure
+  namespace: chaos-testing
+  labels:
+    experiment-type: availability
+    target-component: api
+spec:
+  action: pod-failure
+  mode: fixed
+  value: "1"
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  duration: "2m"
+---
+# Experiment 3: PostgreSQL Pod Kill
+# Tests database failover capabilities
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: postgresql-pod-kill
+  namespace: chaos-testing
+  labels:
+    experiment-type: database-resilience
+    target-component: postgresql
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-db
+    labelSelectors:
+      app: postgresql
+      role: primary
+  duration: "30s"
+---
+# Experiment 4: Neo4j Pod Kill
+# Tests graph database recovery
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: neo4j-pod-kill
+  namespace: chaos-testing
+  labels:
+    experiment-type: database-resilience
+    target-component: neo4j
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-db
+    labelSelectors:
+      app: neo4j
+  duration: "30s"
+---
+# Experiment 5: Redis Pod Kill
+# Tests cache/queue recovery
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: redis-pod-kill
+  namespace: chaos-testing
+  labels:
+    experiment-type: cache-resilience
+    target-component: redis
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-db
+    labelSelectors:
+      app: redis
+      role: master
+  duration: "30s"
+---
+# Experiment 6: Network Partition - API to PostgreSQL
+# Simulates network issues between API and database
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-postgres-partition
+  namespace: chaos-testing
+  labels:
+    experiment-type: network-resilience
+    target-component: api-database
+spec:
+  action: partition
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  direction: to
+  target:
+    selector:
+      namespaces:
+        - intelgraph-db
+      labelSelectors:
+        app: postgresql
+  duration: "3m"
+---
+# Experiment 7: Network Latency - API to Neo4j
+# Adds latency to graph database calls
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: api-neo4j-latency
+  namespace: chaos-testing
+  labels:
+    experiment-type: network-resilience
+    target-component: api-neo4j
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  direction: to
+  target:
+    selector:
+      namespaces:
+        - intelgraph-db
+      labelSelectors:
+        app: neo4j
+  delay:
+    latency: "500ms"
+    correlation: "50"
+    jitter: "100ms"
+  duration: "5m"
+---
+# Experiment 8: Network Packet Loss
+# Simulates unreliable network conditions
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: network-packet-loss
+  namespace: chaos-testing
+  labels:
+    experiment-type: network-resilience
+    target-component: api
+spec:
+  action: loss
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  loss:
+    loss: "10"
+    correlation: "50"
+  duration: "5m"
+---
+# Experiment 9: CPU Stress on API
+# Tests behavior under high CPU load
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: api-cpu-stress
+  namespace: chaos-testing
+  labels:
+    experiment-type: resource-stress
+    target-component: api
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  stressors:
+    cpu:
+      workers: 2
+      load: 80
+  duration: "5m"
+---
+# Experiment 10: Memory Stress on API
+# Tests behavior under memory pressure
+apiVersion: chaos-mesh.org/v1alpha1
+kind: StressChaos
+metadata:
+  name: api-memory-stress
+  namespace: chaos-testing
+  labels:
+    experiment-type: resource-stress
+    target-component: api
+spec:
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  stressors:
+    memory:
+      workers: 2
+      size: "1GB"
+  duration: "3m"
+---
+# Experiment 11: Disk I/O Stress on PostgreSQL
+# Tests database performance under I/O pressure
+apiVersion: chaos-mesh.org/v1alpha1
+kind: IOChaos
+metadata:
+  name: postgres-io-latency
+  namespace: chaos-testing
+  labels:
+    experiment-type: io-resilience
+    target-component: postgresql
+spec:
+  action: latency
+  mode: one
+  selector:
+    namespaces:
+      - intelgraph-db
+    labelSelectors:
+      app: postgresql
+  volumePath: /var/lib/postgresql/data
+  path: "*"
+  delay: "100ms"
+  percent: 50
+  duration: "5m"
+---
+# Experiment 12: DNS Failure
+# Tests behavior when DNS resolution fails
+apiVersion: chaos-mesh.org/v1alpha1
+kind: DNSChaos
+metadata:
+  name: dns-failure
+  namespace: chaos-testing
+  labels:
+    experiment-type: dns-resilience
+    target-component: api
+spec:
+  action: error
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  patterns:
+    - "postgresql-primary.*"
+    - "neo4j.*"
+  duration: "2m"
+---
+# Experiment 13: Time Skew
+# Tests behavior when system time is incorrect
+apiVersion: chaos-mesh.org/v1alpha1
+kind: TimeChaos
+metadata:
+  name: time-skew
+  namespace: chaos-testing
+  labels:
+    experiment-type: time-resilience
+    target-component: api
+spec:
+  mode: all
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app: intelgraph-api
+  timeOffset: "+2h"
+  duration: "5m"
+---
+# Experiment 14: Container Kill (Multiple)
+# Tests recovery when multiple containers fail simultaneously
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: multi-container-kill
+  namespace: chaos-testing
+  labels:
+    experiment-type: availability
+    target-component: mixed
+spec:
+  action: container-kill
+  mode: fixed-percent
+  value: "30"
+  selector:
+    namespaces:
+      - intelgraph-staging
+    labelSelectors:
+      app.kubernetes.io/part-of: intelgraph
+  containerNames:
+    - intelgraph-api
+    - intelgraph-worker
+  duration: "1m"
+---
+# Scheduled Chaos Workflow - Monthly Drill
+# Runs a series of chaos experiments as part of monthly DR drill
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Workflow
+metadata:
+  name: monthly-chaos-drill
+  namespace: chaos-testing
+  labels:
+    drill-type: monthly
+spec:
+  entry: chaos-drill-entry
+  templates:
+    - name: chaos-drill-entry
+      templateType: Serial
+      deadline: "2h"
+      children:
+        - api-pod-kill-task
+        - wait-recovery-1
+        - postgres-failover-task
+        - wait-recovery-2
+        - network-partition-task
+        - wait-recovery-3
+        - stress-test-task
+
+    - name: api-pod-kill-task
+      templateType: PodChaos
+      deadline: "5m"
+      podChaos:
+        action: pod-kill
+        mode: one
+        selector:
+          namespaces:
+            - intelgraph-staging
+          labelSelectors:
+            app: intelgraph-api
+
+    - name: wait-recovery-1
+      templateType: Suspend
+      deadline: "5m"
+      suspend:
+        duration: "3m"
+
+    - name: postgres-failover-task
+      templateType: PodChaos
+      deadline: "10m"
+      podChaos:
+        action: pod-kill
+        mode: one
+        selector:
+          namespaces:
+            - intelgraph-db
+          labelSelectors:
+            app: postgresql
+            role: primary
+
+    - name: wait-recovery-2
+      templateType: Suspend
+      deadline: "10m"
+      suspend:
+        duration: "5m"
+
+    - name: network-partition-task
+      templateType: NetworkChaos
+      deadline: "10m"
+      networkChaos:
+        action: partition
+        mode: all
+        selector:
+          namespaces:
+            - intelgraph-staging
+          labelSelectors:
+            app: intelgraph-api
+        direction: to
+        target:
+          selector:
+            namespaces:
+              - intelgraph-db
+            labelSelectors:
+              app: postgresql
+        duration: "3m"
+
+    - name: wait-recovery-3
+      templateType: Suspend
+      deadline: "5m"
+      suspend:
+        duration: "3m"
+
+    - name: stress-test-task
+      templateType: StressChaos
+      deadline: "10m"
+      stressChaos:
+        mode: all
+        selector:
+          namespaces:
+            - intelgraph-staging
+          labelSelectors:
+            app: intelgraph-api
+        stressors:
+          cpu:
+            workers: 2
+            load: 70
+        duration: "5m"
+---
+# Schedule for Monthly Chaos Drill
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: monthly-chaos-drill-schedule
+  namespace: chaos-testing
+spec:
+  schedule: "0 10 1 * *"  # First day of month at 10:00 UTC
+  type: Workflow
+  historyLimit: 3
+  concurrencyPolicy: Forbid
+  workflow:
+    entry: chaos-drill-entry
+    templates:
+      - name: chaos-drill-entry
+        templateType: Serial
+        deadline: "2h"
+        children:
+          - notification-start
+          - api-availability-test
+          - database-failover-test
+          - network-resilience-test
+          - notification-end
+
+      - name: notification-start
+        templateType: Task
+        task:
+          container:
+            name: notify
+            image: curlimages/curl:latest
+            command:
+              - /bin/sh
+              - -c
+              - |
+                curl -X POST "$SLACK_WEBHOOK" \
+                  -H "Content-Type: application/json" \
+                  -d '{"text":"Monthly Chaos Drill Starting - IntelGraph Staging"}'
+            env:
+              - name: SLACK_WEBHOOK
+                valueFrom:
+                  secretKeyRef:
+                    name: chaos-notifications
+                    key: slack-webhook
+
+      - name: api-availability-test
+        templateType: PodChaos
+        deadline: "10m"
+        podChaos:
+          action: pod-kill
+          mode: fixed
+          value: "2"
+          selector:
+            namespaces:
+              - intelgraph-staging
+            labelSelectors:
+              app: intelgraph-api
+
+      - name: database-failover-test
+        templateType: PodChaos
+        deadline: "15m"
+        podChaos:
+          action: pod-kill
+          mode: one
+          selector:
+            namespaces:
+              - intelgraph-db
+            labelSelectors:
+              app: postgresql
+              role: primary
+
+      - name: network-resilience-test
+        templateType: NetworkChaos
+        deadline: "10m"
+        networkChaos:
+          action: delay
+          mode: all
+          selector:
+            namespaces:
+              - intelgraph-staging
+            labelSelectors:
+              app: intelgraph-api
+          delay:
+            latency: "200ms"
+            jitter: "50ms"
+          duration: "5m"
+
+      - name: notification-end
+        templateType: Task
+        task:
+          container:
+            name: notify
+            image: curlimages/curl:latest
+            command:
+              - /bin/sh
+              - -c
+              - |
+                curl -X POST "$SLACK_WEBHOOK" \
+                  -H "Content-Type: application/json" \
+                  -d '{"text":"Monthly Chaos Drill Completed - Check monitoring dashboards for results"}'
+            env:
+              - name: SLACK_WEBHOOK
+                valueFrom:
+                  secretKeyRef:
+                    name: chaos-notifications
+                    key: slack-webhook
+---
+# RBAC for Chaos Mesh
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: chaos-mesh-manager
+rules:
+  - apiGroups: ["chaos-mesh.org"]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["pods", "namespaces"]
+    verbs: ["get", "list", "watch"]
+---
+# Prometheus Rules for Chaos Experiments
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: chaos-engineering-alerts
+  namespace: monitoring
+  labels:
+    prometheus: main
+spec:
+  groups:
+    - name: chaos-engineering
+      rules:
+        - alert: ChaosExperimentActive
+          expr: chaos_mesh_experiments_total{status="running"} > 0
+          for: 1m
+          labels:
+            severity: info
+          annotations:
+            summary: "Chaos experiment is active"
+            description: "A chaos experiment is currently running in the cluster"
+
+        - alert: ChaosDrillRecoveryTooSlow
+          expr: |
+            (
+              time() - chaos_mesh_experiment_start_time{experiment=~".*-pod-kill"}
+            ) > 300
+            and
+            kube_deployment_status_replicas_available{deployment="intelgraph-api"} < 3
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Service recovery after chaos experiment is slow"
+            description: "Service has not fully recovered 5 minutes after chaos experiment"
+
+        - alert: ChaosDrillDataInconsistency
+          expr: |
+            sum(rate(intelgraph_db_errors_total[5m])) > 0.1
+            and
+            chaos_mesh_experiments_total{status="running"} > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Data errors detected during chaos drill"
+            description: "Database errors are occurring during an active chaos experiment"

@@ -10,6 +10,10 @@ on:
       - Makefile
       - docker-compose*.yml
 
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   packages: read
@@ -25,7 +29,6 @@ jobs:
           fetch-depth: 0
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
       - uses: actions/setup-node@v4
         with:
@@ -39,6 +42,13 @@ jobs:
           restore-keys: ${{ runner.os }}-pnpm-
       - name: Configure pnpm store
         run: pnpm config set store-dir $PNPM_CACHE_FOLDER
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
       - name: Install deps
         run: pnpm install --frozen-lockfile
       - name: Build workspace
@@ -48,8 +58,34 @@ jobs:
       - name: Package deployable bundle
         run: |
           tar -czf summit-bundle.tgz docker-compose.dev.yml docker-compose.ai.yml start.sh Makefile .env.example .env.production.sample observability/
+
+      - name: Generate evidence bundle
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_WORKFLOW: ${{ github.workflow }}
+          GITHUB_JOB: release
+          ARTIFACT_PATHS: summit-bundle.tgz
+          TEST_RESULTS_SUMMARY: "pnpm test executed as part of the release workflow."
+          SECURITY_SCAN_SUMMARY: "No additional release-time security scan configured."
+        run: pnpm exec ts-node scripts/ops/generate-evidence-bundle.ts
+
       - name: Upload release artifact
         uses: actions/upload-artifact@v4
         with:
           name: summit-bundle
           path: summit-bundle.tgz
+
+      - name: Upload release evidence bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-${{ github.sha }}
+          path: |
+            evidence-bundles/evidence-${{ github.sha }}.json
+            evidence-bundles/evidence-${{ github.sha }}.json.sig
+            evidence-bundles/evidence-${{ github.sha }}.json.crt

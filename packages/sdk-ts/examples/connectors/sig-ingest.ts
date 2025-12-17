@@ -13,7 +13,7 @@ export default defineConnector<
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ items }),
     });
-    if (!res.ok) throw new Error(`SIG ingest failed ${res.status}`);
+    if (!res.ok) {throw new Error(`SIG ingest failed ${res.status}`);}
     return res.json();
   },
 });

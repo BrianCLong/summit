@@ -1,0 +1,452 @@
+# Comprehensive Auto-Scaling Configuration for Summit/IntelGraph
+# Includes HPA and KEDA configurations for all major services
+
+---
+# API Server HPA with custom metrics
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-server-hpa
+  namespace: prod
+  labels:
+    app: api-server
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api-server
+  minReplicas: 3  # Increased from typical 2 for high availability
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70  # Conservative for cost optimization
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: '50'  # 50 RPS per pod
+    - type: Pods
+      pods:
+        metric:
+          name: graphql_query_rate
+        target:
+          type: AverageValue
+          averageValue: '30'
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5 minutes to prevent flapping
+      policies:
+        - type: Percent
+          value: 10  # Scale down 10% at a time
+          periodSeconds: 60
+        - type: Pods
+          value: 2  # Or 2 pods at a time
+          periodSeconds: 60
+      selectPolicy: Min  # Use the minimum of the two policies
+    scaleUp:
+      stabilizationWindowSeconds: 60  # Quick scale-up
+      policies:
+        - type: Percent
+          value: 100  # Double capacity
+          periodSeconds: 30
+        - type: Pods
+          value: 4  # Or add 4 pods
+          periodSeconds: 30
+      selectPolicy: Max  # Use the maximum for aggressive scale-up
+
+---
+# Web Frontend HPA
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-frontend-hpa
+  namespace: prod
+  labels:
+    app: web-frontend
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-frontend
+  minReplicas: 2
+  maxReplicas: 15
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 85
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Percent
+          value: 25
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 30
+      policies:
+        - type: Percent
+          value: 100
+          periodSeconds: 30
+
+---
+# GraphQL Gateway HPA with advanced metrics
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: graphql-gateway-hpa
+  namespace: prod
+  labels:
+    app: graphql-gateway
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: graphql-gateway
+  minReplicas: 2
+  maxReplicas: 25
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65  # Lower threshold for query-heavy workload
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 75
+    - type: Pods
+      pods:
+        metric:
+          name: graphql_operation_duration_p95
+        target:
+          type: AverageValue
+          averageValue: '500'  # Scale if p95 latency > 500ms
+    - type: Pods
+      pods:
+        metric:
+          name: graphql_concurrent_operations
+        target:
+          type: AverageValue
+          averageValue: '20'  # 20 concurrent operations per pod
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 180
+      policies:
+        - type: Percent
+          value: 15
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 45
+      policies:
+        - type: Percent
+          value: 200  # Triple capacity for query spikes
+          periodSeconds: 15
+
+---
+# Neo4j Query Workers - KEDA ScaledObject based on query queue
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: neo4j-query-worker-scaler
+  namespace: prod
+  labels:
+    app: neo4j-query-worker
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    name: neo4j-query-worker
+  minReplicaCount: 1  # At least one for monitoring
+  maxReplicaCount: 15
+  pollingInterval: 10  # Check every 10 seconds
+  cooldownPeriod: 120  # 2 minutes cooldown after scaling
+  idleReplicaCount: 1  # Scale to 1 when no activity
+  triggers:
+    - type: redis
+      metadata:
+        address: redis:6379
+        listName: neo4j_query_queue
+        listLength: '5'  # Scale up if 5+ queries queued
+        activationListLength: '1'  # Activate from 0 if any queries
+    - type: cpu
+      metricType: Utilization
+      metadata:
+        value: '70'
+
+---
+# Analytics Engine - KEDA with Prometheus metrics
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: analytics-engine-scaler
+  namespace: prod
+  labels:
+    app: analytics-engine
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    name: analytics-engine
+  minReplicaCount: 1
+  maxReplicaCount: 10
+  pollingInterval: 30
+  cooldownPeriod: 180
+  triggers:
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus:9090
+        metricName: analytics_jobs_pending
+        threshold: '10'
+        query: |
+          sum(rate(analytics_jobs_pending_total[1m]))
+
+---
+# AI Copilot Service - KEDA with token bucket rate limiting awareness
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: ai-copilot-scaler
+  namespace: prod
+  labels:
+    app: ai-copilot
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    name: ai-copilot
+  minReplicaCount: 1
+  maxReplicaCount: 8  # Limited to control AI costs
+  pollingInterval: 15
+  cooldownPeriod: 300  # 5 minutes - AI inference is expensive
+  triggers:
+    - type: redis
+      metadata:
+        address: redis:6379
+        listName: copilot_request_queue
+        listLength: '3'  # Low threshold - AI is resource-intensive
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus:9090
+        metricName: copilot_response_latency_p95
+        threshold: '3000'  # Scale if p95 > 3s
+        query: |
+          histogram_quantile(0.95,
+            rate(copilot_response_duration_seconds_bucket[5m]))
+
+---
+# Data Export Worker - KEDA with cron and queue triggers
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: export-worker-scaler
+  namespace: prod
+  labels:
+    app: export-worker
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    name: export-worker
+  minReplicaCount: 0  # Scale to zero when idle
+  maxReplicaCount: 10
+  pollingInterval: 30
+  cooldownPeriod: 300
+  idleReplicaCount: 0
+  triggers:
+    - type: redis
+      metadata:
+        address: redis:6379
+        listName: export_job_queue
+        listLength: '2'
+        activationListLength: '1'
+
+---
+# Webhook Delivery Worker - KEDA with external trigger
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: webhook-worker-scaler
+  namespace: prod
+  labels:
+    app: webhook-worker
+    cost-center: engineering
+    environment: production
+spec:
+  scaleTargetRef:
+    name: webhook-worker
+  minReplicaCount: 1
+  maxReplicaCount: 20
+  pollingInterval: 5  # Frequent polling for webhooks
+  cooldownPeriod: 60
+  triggers:
+    - type: redis
+      metadata:
+        address: redis:6379
+        listName: webhook_delivery_queue
+        listLength: '10'
+        activationListLength: '1'
+
+---
+# Vertical Pod Autoscaler for stateful services (Neo4j, PostgreSQL)
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: neo4j-vpa
+  namespace: prod
+  labels:
+    app: neo4j
+    cost-center: engineering
+    environment: production
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: neo4j
+  updatePolicy:
+    updateMode: "Auto"  # Automatically apply recommendations
+  resourcePolicy:
+    containerPolicies:
+      - containerName: neo4j
+        minAllowed:
+          cpu: 2000m
+          memory: 4Gi
+        maxAllowed:
+          cpu: 16000m
+          memory: 32Gi
+        controlledResources:
+          - cpu
+          - memory
+
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: postgres-vpa
+  namespace: prod
+  labels:
+    app: postgres
+    cost-center: engineering
+    environment: production
+spec:
+  targetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: postgres
+  updatePolicy:
+    updateMode: "Auto"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: postgres
+        minAllowed:
+          cpu: 1000m
+          memory: 2Gi
+        maxAllowed:
+          cpu: 8000m
+          memory: 16Gi
+        controlledResources:
+          - cpu
+          - memory
+
+---
+# PodDisruptionBudget to ensure availability during scale-down
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: api-server-pdb
+  namespace: prod
+spec:
+  minAvailable: 2  # Always keep at least 2 replicas
+  selector:
+    matchLabels:
+      app: api-server
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: graphql-gateway-pdb
+  namespace: prod
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: graphql-gateway
+
+---
+# Resource Quotas to prevent cost overruns
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: prod
+  labels:
+    cost-center: engineering
+    environment: production
+spec:
+  hard:
+    requests.cpu: "200"  # Max 200 CPUs
+    requests.memory: 400Gi  # Max 400GB RAM
+    limits.cpu: "400"
+    limits.memory: 800Gi
+    persistentvolumeclaims: "50"
+    requests.storage: 5Ti
+
+---
+# LimitRange to set defaults and prevent resource waste
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: default-limits
+  namespace: prod
+spec:
+  limits:
+    - max:
+        cpu: "8"
+        memory: 16Gi
+      min:
+        cpu: 100m
+        memory: 128Mi
+      default:
+        cpu: 500m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 250m
+        memory: 256Mi
+      type: Container
+    - max:
+        cpu: "16"
+        memory: 32Gi
+      min:
+        cpu: "1"
+        memory: 1Gi
+      type: Pod

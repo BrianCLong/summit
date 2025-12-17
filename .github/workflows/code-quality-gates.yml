@@ -1,0 +1,560 @@
+name: 🎯 Code Quality Gates
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '**.ts'
+      - '**.tsx'
+      - '**.js'
+      - '**.jsx'
+      - '**.py'
+      - '**.go'
+      - '**.rs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  NODE_VERSION: '20.x'
+  PNPM_VERSION: '9'
+
+jobs:
+  complexity-analysis:
+    name: 🧮 Complexity Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install complexity analysis tools
+        run: |
+          # TypeScript/JavaScript complexity
+          npm install -g complexity-report
+          npm install -g eslint-plugin-complexity
+
+          # Python complexity (if needed)
+          pip install radon mccabe flake8
+
+      - name: Analyze TypeScript/JavaScript complexity
+        id: js_complexity
+        run: |
+          echo "📊 Analyzing TypeScript/JavaScript complexity..."
+
+          # Get changed TS/JS files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E '\.(ts|tsx|js|jsx)$' || echo "")
+
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "No TypeScript/JavaScript files changed"
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Analyze each file
+          COMPLEX_FILES=""
+          MAX_COMPLEXITY=0
+
+          while IFS= read -r file; do
+            if [[ -f "$file" ]]; then
+              # Calculate cyclomatic complexity
+              COMPLEXITY=$(cr "$file" --format json 2>/dev/null | jq -r '.reports[0].aggregate.cyclomatic' || echo "0")
+
+              if [[ "$COMPLEXITY" =~ ^[0-9]+$ ]] && [[ $COMPLEXITY -gt 15 ]]; then
+                echo "⚠️ High complexity detected in $file: $COMPLEXITY"
+                COMPLEX_FILES="$COMPLEX_FILES\n- \`$file\`: Cyclomatic complexity = $COMPLEXITY"
+                if [[ $COMPLEXITY -gt $MAX_COMPLEXITY ]]; then
+                  MAX_COMPLEXITY=$COMPLEXITY
+                fi
+              fi
+            fi
+          done <<< "$CHANGED_FILES"
+
+          echo "max_complexity=$MAX_COMPLEXITY" >> $GITHUB_OUTPUT
+
+          if [[ -n "$COMPLEX_FILES" ]]; then
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+            echo -e "$COMPLEX_FILES" > /tmp/complex_files.txt
+          else
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+            echo "✅ All files have acceptable complexity"
+          fi
+
+      - name: Analyze Python complexity
+        id: py_complexity
+        run: |
+          echo "📊 Analyzing Python complexity..."
+
+          # Get changed Python files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E '\.py$' || echo "")
+
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "No Python files changed"
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Analyze with radon
+          COMPLEX_FILES=""
+          MAX_COMPLEXITY=0
+
+          while IFS= read -r file; do
+            if [[ -f "$file" ]]; then
+              # Calculate cyclomatic complexity (radon cc)
+              COMPLEXITY=$(radon cc -s -a "$file" | grep "Average complexity" | awk '{print $NF}' | tr -d '()' || echo "0")
+
+              # Check for high complexity functions
+              HIGH_COMPLEX=$(radon cc "$file" | grep -E " [CD] " || echo "")
+
+              if [[ -n "$HIGH_COMPLEX" ]]; then
+                echo "⚠️ High complexity detected in $file"
+                COMPLEX_FILES="$COMPLEX_FILES\n- \`$file\`:\n\`\`\`\n$HIGH_COMPLEX\n\`\`\`"
+              fi
+            fi
+          done <<< "$CHANGED_FILES"
+
+          if [[ -n "$COMPLEX_FILES" ]]; then
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+            echo -e "$COMPLEX_FILES" > /tmp/py_complex_files.txt
+          else
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+            echo "✅ All Python files have acceptable complexity"
+          fi
+
+      - name: Code duplication detection
+        id: duplication
+        run: |
+          echo "🔍 Detecting code duplication..."
+
+          # Install jscpd for duplication detection
+          npm install -g jscpd
+
+          # Run duplication detection on changed files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E '\.(ts|tsx|js|jsx|py)$' || echo "")
+
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "No code files to check"
+            echo "has_duplicates=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Create temporary file list
+          echo "$CHANGED_FILES" > /tmp/files_to_check.txt
+
+          # Run jscpd
+          jscpd --pattern "**/*.{ts,tsx,js,jsx,py}" --reporters json --output /tmp/jscpd || true
+
+          if [[ -f "/tmp/jscpd/jscpd-report.json" ]]; then
+            DUPLICATES=$(jq -r '.statistics.total.duplicates' /tmp/jscpd/jscpd-report.json 2>/dev/null || echo "0")
+            PERCENTAGE=$(jq -r '.statistics.total.percentage' /tmp/jscpd/jscpd-report.json 2>/dev/null || echo "0")
+
+            echo "duplicates=$DUPLICATES" >> $GITHUB_OUTPUT
+            echo "percentage=$PERCENTAGE" >> $GITHUB_OUTPUT
+
+            if (( $(echo "$PERCENTAGE > 5" | bc -l) )); then
+              echo "has_duplicates=true" >> $GITHUB_OUTPUT
+              echo "⚠️ Code duplication detected: ${PERCENTAGE}%"
+            else
+              echo "has_duplicates=false" >> $GITHUB_OUTPUT
+              echo "✅ Acceptable duplication level: ${PERCENTAGE}%"
+            fi
+          else
+            echo "has_duplicates=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Technical debt analysis
+        id: tech_debt
+        run: |
+          echo "💳 Analyzing technical debt..."
+
+          # Search for TODO, FIXME, HACK comments in changed files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+
+          TODO_COUNT=0
+          FIXME_COUNT=0
+          HACK_COUNT=0
+          DEBT_ITEMS=""
+
+          while IFS= read -r file; do
+            if [[ -f "$file" ]]; then
+              # Count debt markers
+              TODOS=$(grep -n -E "TODO|FIXME|HACK|XXX|NOTE" "$file" 2>/dev/null || echo "")
+
+              if [[ -n "$TODOS" ]]; then
+                while IFS= read -r line; do
+                  if [[ "$line" =~ "TODO" ]]; then
+                    ((TODO_COUNT++))
+                  elif [[ "$line" =~ "FIXME" ]]; then
+                    ((FIXME_COUNT++))
+                  elif [[ "$line" =~ "HACK" ]]; then
+                    ((HACK_COUNT++))
+                  fi
+
+                  # Extract line number and content
+                  LINE_NUM=$(echo "$line" | cut -d: -f1)
+                  CONTENT=$(echo "$line" | cut -d: -f2-)
+                  DEBT_ITEMS="$DEBT_ITEMS\n- \`$file:$LINE_NUM\`: $CONTENT"
+                done <<< "$TODOS"
+              fi
+            fi
+          done <<< "$CHANGED_FILES"
+
+          TOTAL_DEBT=$((TODO_COUNT + FIXME_COUNT + HACK_COUNT))
+          echo "todo_count=$TODO_COUNT" >> $GITHUB_OUTPUT
+          echo "fixme_count=$FIXME_COUNT" >> $GITHUB_OUTPUT
+          echo "hack_count=$HACK_COUNT" >> $GITHUB_OUTPUT
+          echo "total_debt=$TOTAL_DEBT" >> $GITHUB_OUTPUT
+
+          if [[ $TOTAL_DEBT -gt 0 ]]; then
+            echo -e "$DEBT_ITEMS" > /tmp/debt_items.txt
+            echo "✅ Found $TOTAL_DEBT technical debt markers"
+          else
+            echo "✅ No technical debt markers found"
+          fi
+
+      - name: Code maintainability index
+        id: maintainability
+        run: |
+          echo "📈 Calculating maintainability index..."
+
+          # Get changed TS/JS files
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E '\.(ts|tsx|js|jsx)$' || echo "")
+
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "No files to analyze"
+            exit 0
+          fi
+
+          LOW_MAINTAIN_FILES=""
+
+          while IFS= read -r file; do
+            if [[ -f "$file" ]]; then
+              # Calculate maintainability index (using complexity-report)
+              MI=$(cr "$file" --format json 2>/dev/null | jq -r '.reports[0].aggregate.maintainability' || echo "100")
+
+              # MI scale: 0-100 (higher is better)
+              # < 65 = difficult to maintain
+              # 65-85 = moderate maintainability
+              # > 85 = good maintainability
+
+              if (( $(echo "$MI < 65" | bc -l) )); then
+                echo "⚠️ Low maintainability: $file (MI: $MI)"
+                LOW_MAINTAIN_FILES="$LOW_MAINTAIN_FILES\n- \`$file\`: Maintainability Index = $MI (target: >65)"
+              fi
+            fi
+          done <<< "$CHANGED_FILES"
+
+          if [[ -n "$LOW_MAINTAIN_FILES" ]]; then
+            echo "has_issues=true" >> $GITHUB_OUTPUT
+            echo -e "$LOW_MAINTAIN_FILES" > /tmp/low_maintain_files.txt
+          else
+            echo "has_issues=false" >> $GITHUB_OUTPUT
+            echo "✅ All files have good maintainability"
+          fi
+
+      - name: Post quality analysis comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let comment = `## 🎯 Code Quality Analysis\n\n`;
+
+            // Complexity Analysis
+            const jsHasIssues = '${{ steps.js_complexity.outputs.has_issues }}' === 'true';
+            const pyHasIssues = '${{ steps.py_complexity.outputs.has_issues }}' === 'true';
+            const maxComplexity = '${{ steps.js_complexity.outputs.max_complexity }}';
+
+            comment += `### 🧮 Complexity Analysis\n`;
+
+            if (jsHasIssues || pyHasIssues) {
+              comment += `⚠️ **High complexity detected**\n\n`;
+
+              if (jsHasIssues) {
+                try {
+                  const complexFiles = fs.readFileSync('/tmp/complex_files.txt', 'utf8');
+                  comment += `**TypeScript/JavaScript files:**\n${complexFiles}\n\n`;
+                } catch (e) {}
+              }
+
+              if (pyHasIssues) {
+                try {
+                  const pyComplexFiles = fs.readFileSync('/tmp/py_complex_files.txt', 'utf8');
+                  comment += `**Python files:**\n${pyComplexFiles}\n\n`;
+                } catch (e) {}
+              }
+
+              comment += `**Recommendations:**\n`;
+              comment += `- Consider breaking down complex functions into smaller, focused functions\n`;
+              comment += `- Extract complex logic into separate helper functions\n`;
+              comment += `- Add unit tests for complex code paths\n`;
+              comment += `- Target cyclomatic complexity < 15\n\n`;
+            } else {
+              comment += `✅ All files have acceptable complexity levels\n\n`;
+            }
+
+            // Duplication Analysis
+            const hasDuplicates = '${{ steps.duplication.outputs.has_duplicates }}' === 'true';
+            const dupPercentage = '${{ steps.duplication.outputs.percentage }}';
+
+            comment += `### 🔍 Code Duplication\n`;
+
+            if (hasDuplicates) {
+              comment += `⚠️ **Code duplication detected: ${dupPercentage}%**\n\n`;
+              comment += `Consider extracting duplicated code into shared utilities or components.\n\n`;
+            } else {
+              comment += `✅ No significant code duplication detected\n\n`;
+            }
+
+            // Technical Debt
+            const totalDebt = parseInt('${{ steps.tech_debt.outputs.total_debt }}' || '0');
+            const todoCount = '${{ steps.tech_debt.outputs.todo_count }}';
+            const fixmeCount = '${{ steps.tech_debt.outputs.fixme_count }}';
+            const hackCount = '${{ steps.tech_debt.outputs.hack_count }}';
+
+            comment += `### 💳 Technical Debt Markers\n`;
+
+            if (totalDebt > 0) {
+              comment += `Found ${totalDebt} technical debt markers:\n`;
+              comment += `- TODO: ${todoCount}\n`;
+              comment += `- FIXME: ${fixmeCount}\n`;
+              comment += `- HACK: ${hackCount}\n\n`;
+
+              try {
+                const debtItems = fs.readFileSync('/tmp/debt_items.txt', 'utf8');
+                comment += `**Details:**\n${debtItems}\n\n`;
+              } catch (e) {}
+
+              comment += `💡 Consider addressing these items or creating follow-up issues.\n\n`;
+            } else {
+              comment += `✅ No technical debt markers found\n\n`;
+            }
+
+            // Maintainability
+            const maintainHasIssues = '${{ steps.maintainability.outputs.has_issues }}' === 'true';
+
+            comment += `### 📈 Maintainability Index\n`;
+
+            if (maintainHasIssues) {
+              comment += `⚠️ **Some files have low maintainability**\n\n`;
+
+              try {
+                const lowMaintainFiles = fs.readFileSync('/tmp/low_maintain_files.txt', 'utf8');
+                comment += `${lowMaintainFiles}\n\n`;
+              } catch (e) {}
+
+              comment += `**Recommendations:**\n`;
+              comment += `- Reduce function complexity\n`;
+              comment += `- Improve code documentation\n`;
+              comment += `- Reduce nesting levels\n`;
+              comment += `- Split large functions\n\n`;
+            } else {
+              comment += `✅ All files have good maintainability\n\n`;
+            }
+
+            comment += `---\n`;
+            comment += `<sub>💡 **Quality targets**: Cyclomatic complexity < 15, Maintainability Index > 65, Duplication < 5%</sub>\n`;
+
+            // Find existing comment
+            const comments = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.data.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Code Quality Analysis')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: comment,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment,
+              });
+            }
+
+  enhanced-linting:
+    name: 🔍 Enhanced Linting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run ESLint with sarif output
+        run: |
+          # Run ESLint and capture SARIF output
+          pnpm exec eslint . --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif || true
+
+          # Also run with standard output for PR comments
+          pnpm run lint 2>&1 | tee lint-output.txt || true
+
+      - name: Upload ESLint SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+          category: eslint
+
+      - name: Run Prettier check
+        run: |
+          pnpm exec prettier --check . || true
+
+      - name: Check for console statements
+        run: |
+          echo "🔍 Checking for console statements in production code..."
+
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E '\.(ts|tsx|js|jsx)$' | grep -v test | grep -v spec || echo "")
+
+          if [[ -z "$CHANGED_FILES" ]]; then
+            echo "No files to check"
+            exit 0
+          fi
+
+          CONSOLE_FOUND=""
+
+          while IFS= read -r file; do
+            if [[ -f "$file" ]]; then
+              CONSOLES=$(grep -n "console\." "$file" || echo "")
+              if [[ -n "$CONSOLES" ]]; then
+                CONSOLE_FOUND="$CONSOLE_FOUND\n$file:\n$CONSOLES\n"
+              fi
+            fi
+          done <<< "$CHANGED_FILES"
+
+          if [[ -n "$CONSOLE_FOUND" ]]; then
+            echo "⚠️ Console statements found in production code:"
+            echo -e "$CONSOLE_FOUND"
+            echo -e "$CONSOLE_FOUND" > /tmp/console_statements.txt
+          else
+            echo "✅ No console statements found"
+          fi
+
+  security-quality:
+    name: 🔒 Security & Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: Enable corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: |
+          echo "🔒 Running security audit..."
+          pnpm audit --audit-level=moderate --json > audit-results.json || true
+
+          # Check for critical/high vulnerabilities
+          CRITICAL=$(jq -r '.metadata.vulnerabilities.critical // 0' audit-results.json 2>/dev/null || echo "0")
+          HIGH=$(jq -r '.metadata.vulnerabilities.high // 0' audit-results.json 2>/dev/null || echo "0")
+
+          echo "Critical vulnerabilities: $CRITICAL"
+          echo "High vulnerabilities: $HIGH"
+
+          if [[ $CRITICAL -gt 0 || $HIGH -gt 0 ]]; then
+            echo "::warning::Found $CRITICAL critical and $HIGH high vulnerabilities"
+          else
+            echo "✅ No critical or high vulnerabilities found"
+          fi
+
+      - name: Check for hardcoded secrets
+        run: |
+          echo "🔍 Checking for hardcoded secrets..."
+
+          CHANGED_FILES=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+
+          # Patterns to search for
+          PATTERNS=(
+            "password.*=.*['\"][^'\"]+['\"]"
+            "api[_-]?key.*=.*['\"][^'\"]+['\"]"
+            "secret.*=.*['\"][^'\"]+['\"]"
+            "token.*=.*['\"][^'\"]+['\"]"
+            "AWS_ACCESS_KEY"
+            "AWS_SECRET"
+            "PRIVATE_KEY"
+          )
+
+          SECRETS_FOUND=false
+
+          for pattern in "${PATTERNS[@]}"; do
+            while IFS= read -r file; do
+              if [[ -f "$file" ]]; then
+                MATCHES=$(git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} -- "$file" | grep -E "$pattern" || echo "")
+                if [[ -n "$MATCHES" ]]; then
+                  echo "⚠️ Potential secret found in $file"
+                  SECRETS_FOUND=true
+                fi
+              fi
+            done <<< "$CHANGED_FILES"
+          done
+
+          if [[ "$SECRETS_FOUND" == "true" ]]; then
+            echo "::warning::Potential secrets detected in code changes"
+          else
+            echo "✅ No obvious secrets detected"
+          fi

@@ -1,0 +1,389 @@
+# Data Trading Marketplace GraphQL Schema
+
+scalar DateTime
+scalar JSON
+
+# Enums
+enum DataCategory {
+  FINANCIAL
+  HEALTHCARE
+  GEOSPATIAL
+  DEMOGRAPHIC
+  BEHAVIORAL
+  INDUSTRIAL
+  ENVIRONMENTAL
+  GOVERNMENT
+  RESEARCH
+  OTHER
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum Classification {
+  PUBLIC
+  INTERNAL
+  CONFIDENTIAL
+  RESTRICTED
+  TOP_SECRET
+}
+
+enum LicenseType {
+  SINGLE_USE
+  UNLIMITED
+  TIME_LIMITED
+  USAGE_BASED
+  ENTERPRISE
+}
+
+enum TransactionStatus {
+  PENDING_PAYMENT
+  PAYMENT_RECEIVED
+  COMPLIANCE_CHECK
+  PREPARING_DATA
+  DELIVERED
+  COMPLETED
+  DISPUTED
+  REFUNDED
+  CANCELLED
+}
+
+enum ConsentPurpose {
+  ANALYTICS
+  RESEARCH
+  MARKETING
+  AI_TRAINING
+  RESALE
+  INTERNAL_USE
+}
+
+enum Regulation {
+  GDPR
+  CCPA
+  HIPAA
+  SOX
+  PCI_DSS
+  FERPA
+  GLBA
+}
+
+# Types
+type DataProvider {
+  id: ID!
+  name: String!
+  type: String!
+  description: String
+  verified: Boolean!
+  verificationDate: DateTime
+  rating: Float
+  totalTransactions: Int!
+  products: [DataProduct!]!
+  reviews: [Review!]!
+  createdAt: DateTime!
+}
+
+type DataProduct {
+  id: ID!
+  provider: DataProvider!
+  name: String!
+  description: String
+  category: DataCategory!
+  tags: [String!]!
+
+  # Metadata
+  schema: JSON!
+  sampleData: String
+  rowCount: Int
+  sizeBytes: Int
+  lastUpdated: DateTime
+  updateFrequency: String
+
+  # Quality
+  qualityScore: Int
+  completeness: Float
+  accuracy: Float
+
+  # Compliance
+  riskAssessment: RiskAssessment
+  classification: Classification!
+  piiFields: [String!]!
+  regulations: [Regulation!]!
+
+  # Pricing
+  pricing: PricingInfo!
+
+  # Access
+  deliveryMethods: [String!]!
+  accessTypes: [String!]!
+
+  status: String!
+  publishedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PricingInfo {
+  model: String!
+  basePriceCents: Int!
+  currency: String!
+  usageTiers: [UsageTier!]
+}
+
+type UsageTier {
+  minUnits: Int!
+  maxUnits: Int
+  pricePerUnit: Int!
+}
+
+type RiskAssessment {
+  id: ID!
+  overallScore: Int!
+  riskLevel: RiskLevel!
+  piiScore: Int
+  sensitivityScore: Int
+  regulatoryScore: Int
+  reputationScore: Int
+  technicalScore: Int
+  findings: JSON
+  recommendations: [String!]!
+  automatedChecks: [AutomatedCheck!]!
+  assessedAt: DateTime!
+  assessedBy: String!
+}
+
+type AutomatedCheck {
+  name: String!
+  passed: Boolean!
+  details: String!
+}
+
+type Transaction {
+  id: ID!
+  buyer: User!
+  seller: DataProvider!
+  product: DataProduct!
+
+  agreedPriceCents: Int!
+  platformFeeCents: Int!
+  sellerPayoutCents: Int!
+  currency: String!
+
+  licenseType: LicenseType!
+  usageTerms: JSON!
+  durationDays: Int
+
+  status: TransactionStatus!
+  consentVerified: Boolean!
+  complianceChecked: Boolean!
+  contractHash: String
+
+  createdAt: DateTime!
+  completedAt: DateTime
+  expiresAt: DateTime
+}
+
+type ConsentRecord {
+  id: ID!
+  dataSubjectId: String!
+  product: DataProduct
+  provider: DataProvider!
+  purposes: [ConsentPurpose!]!
+  scope: JSON!
+  grantedAt: DateTime!
+  expiresAt: DateTime
+  revokedAt: DateTime
+  revocationReason: String
+  consentMethod: String!
+  evidenceHash: String!
+  version: Int!
+}
+
+type Review {
+  id: ID!
+  transaction: Transaction!
+  product: DataProduct!
+  provider: DataProvider!
+  reviewer: User!
+  overallRating: Int!
+  qualityRating: Int
+  accuracyRating: Int
+  title: String
+  content: String
+  helpfulCount: Int!
+  verifiedPurchase: Boolean!
+  createdAt: DateTime!
+}
+
+type User {
+  id: ID!
+  email: String!
+  name: String
+}
+
+type AccessGrant {
+  id: ID!
+  transaction: Transaction!
+  product: DataProduct!
+  accessType: String!
+  permissions: JSON!
+  apiCallsUsed: Int!
+  apiCallsLimit: Int
+  downloadsUsed: Int!
+  downloadsLimit: Int
+  grantedAt: DateTime!
+  expiresAt: DateTime
+  status: String!
+}
+
+# Search & Pagination
+type ProductSearchResult {
+  products: [DataProduct!]!
+  total: Int!
+  page: Int!
+  pageSize: Int!
+  hasMore: Boolean!
+}
+
+type TransactionList {
+  transactions: [Transaction!]!
+  total: Int!
+}
+
+input PaginationInput {
+  page: Int
+  pageSize: Int
+}
+
+input PriceRange {
+  min: Int
+  max: Int
+}
+
+# Inputs
+input CreateProductInput {
+  name: String!
+  description: String
+  category: DataCategory!
+  tags: [String!]
+  schema: JSON!
+  classification: Classification!
+  piiFields: [String!]
+  regulations: [Regulation!]
+  pricingModel: String!
+  basePriceCents: Int!
+  currency: String
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  tags: [String!]
+  schema: JSON
+  pricingModel: String
+  basePriceCents: Int
+}
+
+input InitiateTransactionInput {
+  productId: ID!
+  licenseType: LicenseType!
+  usageTerms: JSON!
+  durationDays: Int
+}
+
+input PaymentInput {
+  paymentMethodId: String!
+  savePaymentMethod: Boolean
+}
+
+input ConsentInput {
+  dataSubjectId: String!
+  productId: ID
+  providerId: ID!
+  purposes: [ConsentPurpose!]!
+  scope: JSON!
+  consentMethod: String!
+  expiresAt: DateTime
+}
+
+input ReviewInput {
+  transactionId: ID!
+  overallRating: Int!
+  qualityRating: Int
+  accuracyRating: Int
+  title: String
+  content: String
+}
+
+# Queries
+type Query {
+  # Catalog
+  searchProducts(
+    query: String
+    category: DataCategory
+    maxRiskLevel: RiskLevel
+    priceRange: PriceRange
+    regulations: [Regulation!]
+    pagination: PaginationInput
+  ): ProductSearchResult!
+
+  product(id: ID!): DataProduct
+
+  # Provider
+  provider(id: ID!): DataProvider
+  myListings: [DataProduct!]!
+
+  # Transactions
+  transaction(id: ID!): Transaction
+  myPurchases(status: TransactionStatus): TransactionList!
+  mySales(status: TransactionStatus): TransactionList!
+
+  # Consent
+  myConsents: [ConsentRecord!]!
+  productConsents(productId: ID!): [ConsentRecord!]!
+
+  # Access
+  myAccessGrants: [AccessGrant!]!
+
+  # Compliance
+  riskAssessment(productId: ID!): RiskAssessment
+  complianceReport(productId: ID!): JSON!
+}
+
+# Mutations
+type Mutation {
+  # Product Management
+  createProduct(input: CreateProductInput!): DataProduct!
+  updateProduct(id: ID!, input: UpdateProductInput!): DataProduct!
+  publishProduct(id: ID!): DataProduct!
+  archiveProduct(id: ID!): DataProduct!
+
+  # Transactions
+  initiateTransaction(input: InitiateTransactionInput!): Transaction!
+  confirmPayment(transactionId: ID!, payment: PaymentInput!): Transaction!
+  cancelTransaction(transactionId: ID!, reason: String): Transaction!
+
+  # Consent
+  recordConsent(input: ConsentInput!): ConsentRecord!
+  revokeConsent(id: ID!, reason: String): ConsentRecord!
+
+  # Reviews
+  submitReview(input: ReviewInput!): Review!
+  markReviewHelpful(id: ID!): Review!
+
+  # Risk Assessment
+  requestRiskAssessment(productId: ID!): RiskAssessment!
+
+  # Disputes
+  openDispute(transactionId: ID!, type: String!, description: String!): ID!
+}
+
+# Subscriptions
+type Subscription {
+  transactionUpdated(transactionId: ID!): Transaction!
+  newProductInCategory(category: DataCategory!): DataProduct!
+  accessGrantExpiring(daysUntilExpiry: Int!): AccessGrant!
+}

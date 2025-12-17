@@ -1,0 +1,31 @@
+{
+  "name": "@intelgraph/logger",
+  "version": "1.0.0",
+  "description": "Shared structured logging package for Summit with OpenTelemetry correlation",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.2.3",
+    "@opentelemetry/api": "^1.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  }
+}

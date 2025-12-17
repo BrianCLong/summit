@@ -41,6 +41,7 @@ import {
   Assessment,
   Settings,
   RocketLaunch,
+  PendingActions,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -49,27 +50,64 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
-import InteractiveGraphExplorer from './components/graph/InteractiveGraphExplorer';
-import IntelligentCopilot from './components/ai/IntelligentCopilot';
-import LiveCollaborationPanel from './components/collaboration/LiveCollaborationPanel';
-import InvestigationTimeline from './components/timeline/InvestigationTimeline';
-import ThreatAssessmentEngine from './components/threat/ThreatAssessmentEngine';
-import OsintFeedConfig from './components/admin/OSINTFeedConfig';
-import ExecutiveDashboard from './features/wargame/ExecutiveDashboard'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+import ErrorBoundary from './components/ErrorBoundary.tsx';
+
+// Lazy load heavy components for better initial load performance
+const InteractiveGraphExplorer = React.lazy(() =>
+  import('./components/graph/InteractiveGraphExplorer')
+);
+const IntelligentCopilot = React.lazy(() =>
+  import('./components/ai/IntelligentCopilot')
+);
+const LiveCollaborationPanel = React.lazy(() =>
+  import('./components/collaboration/LiveCollaborationPanel')
+);
+const InvestigationTimeline = React.lazy(() =>
+  import('./components/timeline/InvestigationTimeline')
+);
+const ThreatAssessmentEngine = React.lazy(() =>
+  import('./components/threat/ThreatAssessmentEngine')
+);
+const OsintFeedConfig = React.lazy(() =>
+  import('./components/admin/OSINTFeedConfig')
+);
+const ExecutiveDashboard = React.lazy(() =>
+  import('./features/wargame/ExecutiveDashboard')
+); // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+const AccessIntelPage = React.lazy(() =>
+  import('./features/rbac/AccessIntelPage.jsx')
+);
+const DisclosurePackagerPage = React.lazy(() =>
+  import('./pages/DisclosurePackagerPage')
+);
+const OrchestratorDashboard = React.lazy(() =>
+  import('./features/orchestrator/OrchestratorDashboard')
+);
+const AdminDashboard = React.lazy(() =>
+  import('./components/admin/AdminDashboard')
+);
+const ApprovalsPage = React.lazy(() =>
+  import('./features/approvals/ApprovalsPage')
+);
+
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import AccessIntelPage from './features/rbac/AccessIntelPage.jsx';
 import { Security } from '@mui/icons-material';
-import DisclosurePackagerPage from './pages/DisclosurePackagerPage';
-import OrchestratorDashboard from './features/orchestrator/OrchestratorDashboard';
 
 // Navigation items
 const ADMIN = 'ADMIN';
+const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/orchestrator', label: 'Orchestrator', icon: <RocketLaunch /> },
+  {
+    path: '/approvals',
+    label: 'Approvals',
+    icon: <PendingActions />,
+    roles: APPROVER_ROLES,
+  },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/disclosures', label: 'Disclosures', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
@@ -478,7 +516,9 @@ function DashboardPage() {
 
         {/* Live Collaboration Panel */}
         <Grid item xs={12} md={4}>
-          <LiveCollaborationPanel />
+          <React.Suspense fallback={<LinearProgress />}>
+            <LiveCollaborationPanel />
+          </React.Suspense>
         </Grid>
 
         {/* Platform Status */}
@@ -543,7 +583,9 @@ function DashboardPage() {
 function InvestigationsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InvestigationTimeline />
+      <ErrorBoundary componentName="InvestigationTimeline">
+        <InvestigationTimeline />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -551,7 +593,9 @@ function InvestigationsPage() {
 function GraphExplorerPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InteractiveGraphExplorer />
+      <ErrorBoundary componentName="InteractiveGraphExplorer">
+        <InteractiveGraphExplorer />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -559,7 +603,9 @@ function GraphExplorerPage() {
 function CopilotPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <IntelligentCopilot />
+      <ErrorBoundary componentName="IntelligentCopilot">
+        <IntelligentCopilot />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -615,31 +661,50 @@ function MainLayout() {
       />
 
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/investigations" element={<InvestigationsPage />} />
-            <Route path="/graph" element={<GraphExplorerPage />} />
-            <Route path="/copilot" element={<CopilotPage />} />
-            <Route path="/orchestrator" element={<OrchestratorPage />} />
-            <Route path="/threats" element={<ThreatsPage />} />
-            <Route path="/disclosures" element={<DisclosurePackagerPage />} />
-            <Route path="/access-intel" element={<AccessIntelPage />} />
-            <Route path="/geoint" element={<InvestigationsPage />} />
-            <Route path="/reports" element={<InvestigationsPage />} />
-            <Route element={<ProtectedRoute roles={['ADMIN']} />}>
-              <Route path="/system" element={<InvestigationsPage />} />
-              <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
-              <Route
-                path="/wargame-dashboard"
-                element={<ExecutiveDashboard />}
-              />
+        <React.Suspense
+          fallback={
+            <Box sx={{ width: '100%', mt: 2 }}>
+              <LinearProgress />
+              <Typography
+                variant="body2"
+                align="center"
+                sx={{ mt: 2 }}
+                color="text.secondary"
+              >
+                Loading component...
+              </Typography>
+            </Box>
+          }
+        >
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/investigations" element={<InvestigationsPage />} />
+              <Route path="/graph" element={<GraphExplorerPage />} />
+              <Route path="/copilot" element={<CopilotPage />} />
+              <Route path="/orchestrator" element={<OrchestratorPage />} />
+              <Route path="/threats" element={<ThreatsPage />} />
+              <Route path="/disclosures" element={<DisclosurePackagerPage />} />
+              <Route path="/access-intel" element={<AccessIntelPage />} />
+              <Route path="/geoint" element={<InvestigationsPage />} />
+              <Route path="/reports" element={<InvestigationsPage />} />
+              <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
+                <Route path="/approvals" element={<ApprovalsPage />} />
+              </Route>
+              <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+                <Route path="/system" element={<AdminDashboard />} />
+                <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
+                <Route
+                  path="/wargame-dashboard"
+                  element={<ExecutiveDashboard />}
+                />
+              </Route>
+              <Route path="*" element={<NotFoundPage />} />
             </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Routes>
+          </Routes>
+        </React.Suspense>
       </Box>
     </Box>
   );
@@ -681,10 +746,15 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Router IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
+    // eslint-disable-next-line no-console
     console.log('✅ Apollo GraphQL client initialized');
+    // eslint-disable-next-line no-console
     console.log('✅ React Router navigation enabled');
   }, []);
 
