@@ -22,7 +22,11 @@
   },
   "devDependencies": {
     "typescript": "^5.9.3",
+<<<<<<< HEAD
+    "tsx": "^4.20.6",
+=======
     "tsx": "^4.19.0",
+>>>>>>> main
     "@types/express": "^5.0.0",
     "@types/cors": "^2.8.17",
     "jest": "^30.2.0",
