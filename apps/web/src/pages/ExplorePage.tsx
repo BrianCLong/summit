@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react'
+<<<<<<< HEAD
 import { Search, Filter, Settings, Download, RefreshCw, Shield, FileCheck } from 'lucide-react'
+=======
+import { useSearchParams } from 'react-router-dom'
+import { Search, Filter, Settings, Download, RefreshCw, History } from 'lucide-react'
+>>>>>>> main
 import { Button } from '@/components/ui/Button'
 import { SearchBar } from '@/components/ui/SearchBar'
 import { EntityDrawer } from '@/components/panels/EntityDrawer'
@@ -9,6 +14,7 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { useEntities, useEntityUpdates } from '@/hooks/useGraphQL'
 import { ConnectionStatus } from '@/components/ConnectionStatus'
+import { SnapshotManager } from '@/components/features/investigation/SnapshotManager'
 import { trackGoldenPathStep } from '@/telemetry/metrics'
 import mockData from '@/mock/data.json'
 import type {
@@ -28,6 +34,8 @@ export default function ExplorePage() {
     refetch,
   } = useEntities()
   const { data: entityUpdates } = useEntityUpdates()
+  const [searchParams] = useSearchParams()
+  const investigationId = searchParams.get('investigation')
 
   const [entities, setEntities] = useState<Entity[]>([])
   const [relationships, setRelationships] = useState<Relationship[]>([])
@@ -40,11 +48,12 @@ export default function ExplorePage() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [filterPanelOpen, setFilterPanelOpen] = useState(true)
   const [timelineOpen, setTimelineOpen] = useState(true)
+  const [snapshotsOpen, setSnapshotsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [policyOverlay, setPolicyOverlay] = useState<'none' | 'purpose' | 'retention' | 'residency'>('none')
 
   // Graph state
-  const [graphLayout, setGraphLayout] = useState<GraphLayout>({
+  const [graphLayout] = useState<GraphLayout>({
     type: 'force',
     settings: {},
   })
@@ -111,28 +120,28 @@ export default function ExplorePage() {
       filters.entityTypes.length > 0 &&
       !filters.entityTypes.includes(entity.type)
     )
-      return false
+      {return false}
     if (
       filters.confidenceRange.min > entity.confidence ||
       filters.confidenceRange.max < entity.confidence
     )
-      return false
+      {return false}
     if (
       filters.tags.length > 0 &&
       !entity.tags?.some(tag => filters.tags.includes(tag))
     )
-      return false
+      {return false}
     if (
       filters.sources.length > 0 &&
       entity.source &&
       !filters.sources.includes(entity.source)
     )
-      return false
+      {return false}
     if (
       searchQuery &&
       !entity.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
-      return false
+      {return false}
     return true
   })
 
@@ -141,7 +150,7 @@ export default function ExplorePage() {
       filters.relationshipTypes.length > 0 &&
       !filters.relationshipTypes.includes(rel.type)
     )
-      return false
+      {return false}
     // Only include relationships where both entities are in filtered set
     return (
       filteredEntities.some(e => e.id === rel.sourceId) &&
@@ -318,6 +327,15 @@ export default function ExplorePage() {
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setSnapshotsOpen(!snapshotsOpen)}
+          >
+            <History className="h-4 w-4 mr-2" />
+            Snapshots
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleRefresh}
             disabled={loading}
           >
@@ -432,6 +450,16 @@ export default function ExplorePage() {
                 }
               }}
               className="m-4"
+            />
+          </div>
+        )}
+
+        {/* Far Right Sidebar - Snapshots (Overlay or separate panel) */}
+        {snapshotsOpen && (
+          <div className="w-96 border-l overflow-y-auto bg-background z-10">
+            <SnapshotManager
+              investigationId={investigationId || 'inv-1'}
+              onClose={() => setSnapshotsOpen(false)}
             />
           </div>
         )}
