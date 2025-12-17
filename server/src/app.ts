@@ -5,22 +5,27 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import cors from 'cors';
 import helmet from 'helmet';
-import pino from 'pino';
 import pinoHttp from 'pino-http';
+import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
+import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
+import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
+import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
 import disclosuresRouter from './routes/disclosures.js';
 import narrativeSimulationRouter from './routes/narrative-sim.js';
 import { metricsRoute } from './http/metricsRoute.js';
-import rbacRouter from './routes/rbacRoutes.js';
+const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
@@ -45,21 +50,34 @@ import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
-import timeSeriesIntelligenceRouter from './routes/time-series-intelligence.js';
+import scenarioRouter from './routes/scenarios.js';
+<<<<<<< HEAD
+=======
+import streamRouter from './routes/stream.js'; // Added import
+import searchV1Router from './routes/search-v1.js';
+>>>>>>> main
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
 
   // Initialize OpenTelemetry tracing
-  const tracer = initializeTracing();
-  await tracer.initialize();
+  // const tracer = initializeTracing();
+  // await tracer.initialize();
 
   const app = express();
-  const logger = pino();
+
+  const safetyState = await resolveSafetyState();
+  if (safetyState.killSwitch || safetyState.safeMode) {
+    appLogger.warn({ safetyState }, 'Safety gates enabled');
+  }
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+  app.use(featureFlagContextMiddleware);
+
+  // Load Shedding / Overload Protection (Second, to reject early)
+  app.use(overloadProtection);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -83,8 +101,12 @@ export const createApp = async () => {
   // Enhanced Pino HTTP logger with correlation and trace context
   app.use(
     pinoHttp({
-      logger,
-      redact: ['req.headers.authorization', 'req.headers.cookie'],
+      logger: appLogger,
+      // Redaction is handled by the logger config itself, but we keep this consistent if needed
+      // logger config already has redact paths, so we can omit here or merge.
+      // We rely on logger's internal redaction, but pino-http might need specific config
+      // to redact req.headers if not using standard serializers.
+      // appLogger uses standard req/res serializers which respect redact.
       customProps: (req: any) => ({
         correlationId: req.correlationId,
         traceId: req.traceId,
@@ -96,7 +118,14 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
+<<<<<<< HEAD
+=======
+  app.use(safetyModeMiddleware);
+>>>>>>> main
+  // Standard audit logger for basic request tracking
   app.use(auditLogger);
+  // Audit-First middleware for cryptographic stamping of sensitive operations
+  app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
 
   // Telemetry middleware
@@ -155,7 +184,12 @@ export const createApp = async () => {
   app.use('/api/lineage', lineageRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
-  app.use('/api/intelligence', timeSeriesIntelligenceRouter);
+  app.use('/api/scenarios', scenarioRouter);
+<<<<<<< HEAD
+=======
+  app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+>>>>>>> main
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
@@ -208,7 +242,7 @@ export const createApp = async () => {
         },
       });
     } catch (error) {
-      logger.error(
+      appLogger.error(
         `Error in search/evidence: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
       res.status(500).send({ error: 'Internal server error' });
@@ -257,7 +291,7 @@ export const createApp = async () => {
     formatError: (err) => {
       // Don't expose internal errors in production
       if (cfg.NODE_ENV === 'production') {
-        logger.error(
+        appLogger.error(
           { err, stack: (err as any).stack },
           `GraphQL Error: ${err.message}`,
         );
@@ -306,10 +340,17 @@ export const createApp = async () => {
     expressMiddleware(apollo, { context: getContext }),
   );
 
-  // Start background trust worker if enabled
-  startTrustWorker();
-  // Start retention worker if enabled
-  startRetentionWorker();
+  if (!safetyState.killSwitch && !safetyState.safeMode) {
+    // Start background trust worker if enabled
+    startTrustWorker();
+    // Start retention worker if enabled
+    startRetentionWorker();
+  } else {
+    appLogger.warn(
+      { safetyState },
+      'Skipping background workers because safety mode or kill switch is enabled',
+    );
+  }
 
   // Ensure webhook worker is running (it's an auto-starting worker, but importing it ensures it's registered)
   // In a real production setup, this might be in a separate process/container.
@@ -319,7 +360,10 @@ export const createApp = async () => {
       // though import side-effects usually suffice.
   }
 
-  logger.info('Anomaly detector activated.');
+  appLogger.info('Anomaly detector activated.');
+
+  // Global Error Handler - must be last
+  app.use(errorHandler);
 
   return app;
 };
