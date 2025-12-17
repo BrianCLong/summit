@@ -9,6 +9,14 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { createClient } from 'graphql-ws'
 import { setContext } from '@apollo/client/link/context'
+import { createPersistedQueryLink } from '@apollo/client/link/persisted-queries'
+import { sha256 } from 'crypto-hash'
+
+// Persisted Query Link
+const persistedQueryLink = createPersistedQueryLink({
+  sha256,
+  useGETForHashedQueries: true,
+})
 
 // HTTP Link for queries and mutations
 const httpLink = new HttpLink({
@@ -49,7 +57,7 @@ const splitLink = split(
     )
   },
   wsLink,
-  from([authLink, httpLink])
+  from([persistedQueryLink, authLink, httpLink])
 )
 
 // Apollo Client instance

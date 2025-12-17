@@ -1,0 +1,12 @@
+{
+  "period": "Sprint 36",
+  "targets": {
+    "graphql_p95": 1500,
+    "error_rate": 0.01
+  },
+  "actuals": {
+    "graphql_p95": 320,
+    "error_rate": 0.002
+  },
+  "compliant": true
+}
