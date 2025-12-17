@@ -69,6 +69,11 @@ export interface SandboxExecuteInput {
   policy: PolicyContext;
   dataset?: SandboxDataset;
   timeoutMs?: number;
+  featureFlags?: Record<string, boolean | string>;
+  traceId?: string;
+  requestId?: string;
+  userId?: string;
+  environment?: string;
 }
 
 export interface SandboxRow {

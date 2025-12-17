@@ -16,13 +16,15 @@ export class Maestro {
     private config: MaestroConfig,
   ) {}
 
-  async createRun(userId: string, requestText: string): Promise<Run> {
+  async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
     const run: Run = {
       id: crypto.randomUUID(),
       user: { id: userId },
       createdAt: new Date().toISOString(),
       requestText,
-    };
+      // Pass tenant context if available (will need DB schema update for full persistence)
+      ...(options?.tenantId ? { tenantId: options.tenantId } : {})
+    } as Run;
     await this.ig.createRun(run);
     return run;
   }
@@ -79,14 +81,26 @@ export class Maestro {
       let result: string = '';
 
       if (task.agent.kind === 'llm') {
-        result = await this.llm.callCompletion(task.runId, task.id, {
-          model: task.agent.modelId!,
-          messages: [
-            { role: 'system', content: 'You are an execution agent.' },
-            { role: 'user', content: task.description },
-            ...(task.input.requestText ? [{ role: 'user', content: String(task.input.requestText) }] : []),
-          ],
-        });
+        const llmResult = await this.llm.callCompletion(
+          task.runId,
+          task.id,
+          {
+            model: task.agent.modelId!,
+            messages: [
+              { role: 'system', content: 'You are an execution agent.' },
+              { role: 'user', content: task.description },
+              ...(task.input.requestText
+                ? [{ role: 'user', content: String(task.input.requestText) }]
+                : []),
+            ],
+          },
+          {
+            feature: `maestro_${task.kind}`,
+            tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
+            environment: process.env.NODE_ENV || 'unknown',
+          },
+        );
+        result = llmResult.content;
       } else {
         // TODO: shell tools, etc.
         result = 'TODO: implement non-LLM agent';
@@ -127,8 +141,8 @@ export class Maestro {
     }
   }
 
-  async runPipeline(userId: string, requestText: string) {
-    const run = await this.createRun(userId, requestText);
+  async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
+    const run = await this.createRun(userId, requestText, options);
     const tasks = await this.planRequest(run);
 
     const executable = tasks.filter(t => t.status === 'queued');
