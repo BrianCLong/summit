@@ -1,0 +1,27 @@
+models:
+  yolo:
+    version: "v8n"
+    batch_size: 16
+    quantization: "fp16"
+    acceleration: "tensorrt"
+    timeout_ms: 500
+
+  whisper:
+    version: "tiny"
+    distilled: true
+    batch_size: 8
+    quantization: "int8"
+    use_gpu: true
+    cache_ttl_seconds: 86400
+
+  spacy:
+    pipeline: ["ner"]
+    disable: ["tagger", "parser", "attribute_ruler", "lemmatizer"]
+    batch_size: 32
+    cache_ttl_seconds: 86400
+
+  sentence_transformers:
+    model: "all-MiniLM-L6-v2"
+    batch_size: 64
+    quantization: "int8"
+    embedding_dim: 384
