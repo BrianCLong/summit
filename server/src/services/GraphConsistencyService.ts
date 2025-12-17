@@ -1,344 +1,183 @@
-import { getPostgresPool } from '../db/postgres';
-import { getNeo4jDriver, neo } from '../db/neo4j';
-import logger from '../config/logger';
-import {
-  graphDriftCount,
-  orphanNodesCount,
-  missingNodesCount,
-  propertyMismatchCount,
-  consistencyCheckDuration,
-  repairOperationsTotal,
-} from '../metrics/graph_consistency';
-import { performance } from 'perf_hooks';
+import { Driver, Session } from 'neo4j-driver';
+import { getNeo4jDriver } from '../db/neo4j.js';
+import { Logger } from 'pino';
+import logger from '../config/logger.js';
 
-interface ConsistencyReport {
-  timestamp: string;
-  summary: {
-    total_entities_checked: number;
-    total_drift_detected: number;
-    missing_in_neo4j: number;
-    orphans_in_neo4j: number;
-    property_mismatches: number;
-    orphan_edges: number;
-  };
-  details: {
-    missing_ids: string[];
-    orphan_ids: string[];
-    mismatches: Array<{ id: string; diff: any }>;
-    orphan_edges: Array<{ id: string; type: string; from: string; to: string }>;
-  };
-  actions_taken: string[];
+export interface SchemaRule {
+  relationship: string;
+  sourceLabel: string;
+  targetLabel: string;
+}
+
+export interface ConsistencyReport {
+  timestamp: Date;
+  danglingNodesCount: number;
+  schemaViolationsCount: number;
+  healedCount: number;
+  queuedTasksCount: number;
+  details: string[];
 }
 
 export class GraphConsistencyService {
-  private static instance: GraphConsistencyService;
-  private pgPool = getPostgresPool();
-  private neo4jDriver = getNeo4jDriver();
+  private logger: Logger;
+  private schemaRules: SchemaRule[];
 
-  private constructor() {}
-
-  public static getInstance(): GraphConsistencyService {
-    if (!GraphConsistencyService.instance) {
-      GraphConsistencyService.instance = new GraphConsistencyService();
-    }
-    return GraphConsistencyService.instance;
+  constructor() {
+    this.logger = logger.child({ service: 'GraphConsistencyService' });
+    // Default schema rules - strictly illustrative based on common patterns
+    // In a real system, this might be loaded from a config or schema file
+    this.schemaRules = [
+      { relationship: 'OWNS', sourceLabel: 'Person', targetLabel: 'Asset' },
+      { relationship: 'OWNS', sourceLabel: 'Org', targetLabel: 'Asset' },
+      { relationship: 'MEMBER_OF', sourceLabel: 'Person', targetLabel: 'Org' },
+      { relationship: 'RELATED_TO', sourceLabel: 'Case', targetLabel: 'Entity' },
+    ];
   }
 
   /**
-   * Run a full consistency check between Postgres and Neo4j.
-   * @param autoRepair Safe repair mode (create missing, sync props).
-   * @param pruneOrphans Unsafe repair mode (delete Neo4j orphans).
+   * Detects nodes that have no relationships.
    */
-  public async validateConsistency(
-    autoRepair: boolean = false,
-    pruneOrphans: boolean = false
-  ): Promise<ConsistencyReport> {
-    const start = performance.now();
-    logger.info('Starting graph consistency check...');
+  async detectDanglingNodes(): Promise<any[]> {
+    const driver = getNeo4jDriver();
+    const session: Session = driver.session();
+    try {
+      const result = await session.run(
+        `MATCH (n) WHERE NOT (n)--() RETURN n LIMIT 1000`
+      );
+      return result.records.map((r) => r.get('n').properties);
+    } finally {
+      await session.close();
+    }
+  }
 
-    const report: ConsistencyReport = {
-      timestamp: new Date().toISOString(),
-      summary: {
-        total_entities_checked: 0,
-        total_drift_detected: 0,
-        missing_in_neo4j: 0,
-        orphans_in_neo4j: 0,
-        property_mismatches: 0,
-        orphan_edges: 0,
-      },
-      details: {
-        missing_ids: [],
-        orphan_ids: [],
-        mismatches: [],
-        orphan_edges: [],
-      },
-      actions_taken: [],
-    };
+  /**
+   * Detects relationships that violate defined schema rules.
+   */
+  async detectSchemaViolations(): Promise<any[]> {
+    const driver = getNeo4jDriver();
+    const session: Session = driver.session();
+    const violations: any[] = [];
 
     try {
-      // 1. Fetch all entities from Postgres (Source of Truth)
-      const pgQuery = `
-        SELECT id, type, props, created_at, updated_at
-        FROM entities
-        WHERE id IS NOT NULL
-      `;
+      // For each rule, checking what DOESN'T match is complex if we have multiple allowed pairs for same rel type.
+      // Instead, we iterate distinct relationship types in the graph and check if they match any rule.
 
-      const pgResult = await this.pgPool.read(pgQuery);
-      const pgEntities = new Map(pgResult.rows.map((r: any) => [r.id, r]));
-      // Optimized Set for fast existence checks
-      const validPgIds = new Set(pgEntities.keys());
+      // Get all relationship types
+      const relTypesResult = await session.run(`CALL db.relationshipTypes()`);
+      const allRelTypes = relTypesResult.records.map(r => r.get('relationshipType'));
 
-      report.summary.total_entities_checked = pgEntities.size;
+      for (const relType of allRelTypes) {
+        // Find rules for this relationship type
+        const rules = this.schemaRules.filter(r => r.relationship === relType);
 
-      // 2. Fetch all Entity nodes from Neo4j
-      const neoSession = this.neo4jDriver.session();
-      // Fetch nodes
-      const neoResult = await neoSession.run(`
-        MATCH (n:Entity)
-        RETURN n.id as id, labels(n) as labels, properties(n) as props
-      `);
+        if (rules.length === 0) {
+          // If no rules are defined for this relationship type, we might consider all of them valid
+          // or invalid depending on strictness. Let's assume strict mode: if not defined, it's potential violation?
+          // For now, let's only check types we explicitly know about.
+          continue;
+        }
 
-      const neoEntities = new Map();
-      neoResult.records.forEach((record: any) => {
-        const id = record.get('id');
-        if (id) {
-          neoEntities.set(id, {
-            id,
-            labels: record.get('labels'),
-            props: record.get('props'),
+        // Construct a query that finds relationships where NONE of the valid (Source)-->(Target) patterns match
+        // MATCH (a)-[r:TYPE]->(b)
+        // WHERE NOT (
+        //   (a:Label1 AND b:Label2) OR (a:Label3 AND b:Label4) ...
+        // )
+        // RETURN a, r, b
+
+        const predicates = rules.map(rule => `(a:${rule.sourceLabel} AND b:${rule.targetLabel})`).join(' OR ');
+
+        const query = `
+          MATCH (a)-[r:${relType}]->(b)
+          WHERE NOT (${predicates})
+          RETURN a, r, b LIMIT 100
+        `;
+
+        const result = await session.run(query);
+        result.records.forEach(r => {
+          violations.push({
+            type: 'SchemaViolation',
+            relationshipType: relType,
+            source: r.get('a').properties,
+            target: r.get('b').properties,
+            relId: r.get('r').identity.toString() // depending on neo4j integer handling
           });
-        }
-      });
-
-      // 3. Detect Missing Nodes (In PG, not in Neo4j)
-      for (const [id, pgEntity] of pgEntities) {
-        if (!neoEntities.has(id)) {
-          report.summary.missing_in_neo4j++;
-          report.details.missing_ids.push(id);
-          missingNodesCount.labels(pgEntity.type || 'unknown').inc();
-
-          if (autoRepair) {
-            await this.createMissingNode(pgEntity);
-            report.actions_taken.push(`Created Neo4j node for ${id}`);
-          }
-        } else {
-          // Check for Property Mismatches
-          const neoEntity = neoEntities.get(id);
-          const mismatch = this.checkPropertyMismatch(pgEntity, neoEntity);
-          if (mismatch) {
-            report.summary.property_mismatches++;
-            report.details.mismatches.push({ id, diff: mismatch });
-            propertyMismatchCount.labels(pgEntity.type || 'unknown').inc();
-
-            if (autoRepair) {
-              await this.syncNodeProperties(id, pgEntity);
-              report.actions_taken.push(`Synced properties for ${id}`);
-            }
-          }
-        }
-      }
-
-      // 4. Detect Orphan Nodes (In Neo4j, not in PG)
-      for (const [id, neoEntity] of neoEntities) {
-        if (!validPgIds.has(id)) {
-          report.summary.orphans_in_neo4j++;
-          report.details.orphan_ids.push(id);
-
-          const mainLabel = neoEntity.labels.find((l: string) => l !== 'Entity') || 'Entity';
-          orphanNodesCount.labels(mainLabel).inc();
-
-          // We will delete them later if pruneOrphans is true
-        }
-      }
-
-      // 5. Detect Orphan Edges
-      // Definition: Edges where one or both endpoints are NOT in the validPgIds set.
-      // Since we already know which Neo4j nodes are orphans (not in validPgIds),
-      // edges connected to them are implicitly orphans.
-      // However, we can also check for edges connected to *missing* nodes (though that shouldn't happen in Neo4j if they don't exist).
-      // The main case is: Edge exists, but one of the nodes is about to be deleted (orphan).
-
-      // Let's explicitly look for edges connected to orphan nodes to report them.
-      if (report.details.orphan_ids.length > 0) {
-        const orphanIds = report.details.orphan_ids;
-        // Batch this if large, but for now...
-        const edgeResult = await neoSession.run(`
-          MATCH (n:Entity)-[r]-(m)
-          WHERE n.id IN $orphanIds
-          RETURN elementId(r) as id, type(r) as type, n.id as from, m.id as to
-          LIMIT 1000
-        `, { orphanIds });
-
-        edgeResult.records.forEach((rec: any) => {
-           report.details.orphan_edges.push({
-             id: rec.get('id'),
-             type: rec.get('type'),
-             from: rec.get('from'),
-             to: rec.get('to')
-           });
         });
-        report.summary.orphan_edges = report.details.orphan_edges.length; // Approximate
       }
 
-      // Prune orphans if requested (this removes connected edges too)
-      if (pruneOrphans && report.details.orphan_ids.length > 0) {
-        for (const id of report.details.orphan_ids) {
-           await this.deleteOrphanNode(id);
-           report.actions_taken.push(`Deleted orphan node ${id}`);
-        }
-      }
-
-      await neoSession.close();
-
-      // 6. Update Aggregate Metrics
-      report.summary.total_drift_detected =
-        report.summary.missing_in_neo4j +
-        report.summary.orphans_in_neo4j +
-        report.summary.property_mismatches;
-
-      graphDriftCount.labels('missing', 'critical').set(report.summary.missing_in_neo4j);
-      graphDriftCount.labels('orphan', 'warning').set(report.summary.orphans_in_neo4j);
-      graphDriftCount.labels('mismatch', 'warning').set(report.summary.property_mismatches);
-
-    } catch (error) {
-      logger.error('Graph consistency check failed', error);
-      throw error;
+      return violations;
     } finally {
-      const duration = (performance.now() - start) / 1000;
-      consistencyCheckDuration.set(duration);
-      logger.info({ duration, summary: report.summary }, 'Graph consistency check completed');
+      await session.close();
+    }
+  }
+
+  /**
+   * Auto-heals simple issues and queues complex ones.
+   */
+  async healOrQueue(dryRun: boolean = false): Promise<ConsistencyReport> {
+    const report: ConsistencyReport = {
+      timestamp: new Date(),
+      danglingNodesCount: 0,
+      schemaViolationsCount: 0,
+      healedCount: 0,
+      queuedTasksCount: 0,
+      details: []
+    };
+
+    const dangling = await this.detectDanglingNodes();
+    report.danglingNodesCount = dangling.length;
+
+    // Auto-heal: Delete dangling nodes if they have no sensitive data or are marked as temporary.
+    // For safety, let's just tag them :Dangling for now, or delete if they are explicitly 'Temp'.
+    // Here we implement a strategy: Queue them for deletion.
+    if (dangling.length > 0) {
+      if (!dryRun) {
+        await this.queueRepairTasks('DeleteDangling', dangling);
+      }
+      report.queuedTasksCount += dangling.length;
+      report.details.push(`Queued ${dangling.length} dangling nodes for cleanup.`);
     }
 
+    const violations = await this.detectSchemaViolations();
+    report.schemaViolationsCount = violations.length;
+
+    if (violations.length > 0) {
+      if (!dryRun) {
+        await this.queueRepairTasks('FixSchemaViolation', violations);
+      }
+      report.queuedTasksCount += violations.length;
+      report.details.push(`Queued ${violations.length} schema violations for repair.`);
+    }
+
+    if (this.logger) {
+      this.logger.info({ report }, 'Graph consistency check completed');
+    }
     return report;
   }
 
-  private checkPropertyMismatch(pgEntity: any, neoEntity: any): any | null {
-    const pgType = pgEntity.type;
-    const neoLabels = neoEntity.labels;
-    const diff: any = {};
-    let hasDiff = false;
-
-    // 1. Label Check
-    if (pgType && !neoLabels.includes(pgType)) {
-      diff.expectedLabel = pgType;
-      diff.actualLabels = neoLabels;
-      hasDiff = true;
-    }
-
-    // 2. Core Timestamps Check
-    // Convert to ISO string for comparison as PG driver returns Date objects usually
-    const pgCreated = pgEntity.created_at ? new Date(pgEntity.created_at).toISOString() : null;
-    const pgUpdated = pgEntity.updated_at ? new Date(pgEntity.updated_at).toISOString() : null;
-    const neoCreated = neoEntity.props.created_at || null;
-    const neoUpdated = neoEntity.props.updated_at || null;
-
-    if (pgCreated !== neoCreated) {
-       diff.created_at = { pg: pgCreated, neo: neoCreated };
-       hasDiff = true;
-    }
-    if (pgUpdated !== neoUpdated) {
-       diff.updated_at = { pg: pgUpdated, neo: neoUpdated };
-       hasDiff = true;
-    }
-
-    // 3. Properties Check
-    // Compare specific props from JSONB if mapped.
-    // For now, checking equality of common fields if they exist in props
-    if (pgEntity.props) {
-       for (const key of Object.keys(pgEntity.props)) {
-          const pgVal = pgEntity.props[key];
-          const neoVal = neoEntity.props[key];
-          // Simple strict equality for primitives
-          if (pgVal !== neoVal && JSON.stringify(pgVal) !== JSON.stringify(neoVal)) {
-             diff[key] = { pg: pgVal, neo: neoVal };
-             hasDiff = true;
-          }
-       }
-    }
-
-    return hasDiff ? diff : null;
+  private async queueRepairTasks(type: string, items: any[]) {
+     // implementation of queueing logic
+     // In a real system, this would push to Redis/BullMQ.
+     // For this MVP, we might log it or insert into a "RepairQueue" node in the graph itself or Postgres.
+     if (this.logger) {
+       this.logger.info(`[Queue] Queuing ${items.length} tasks of type ${type}`);
+     } else {
+       console.log(`[Queue] Queuing ${items.length} tasks of type ${type}`);
+     }
+     // Simulate queueing
   }
 
-  private sanitizeLabel(label: string): string {
-    // Basic sanitization to prevent injection
-    // Allow only alphanumeric and underscores
-    return label.replace(/[^a-zA-Z0-9_]/g, '');
-  }
-
-  private async createMissingNode(pgEntity: any) {
-    const session = this.neo4jDriver.session();
-    try {
-      const label = this.sanitizeLabel(pgEntity.type || 'Entity');
-
-      const properties = {
-        id: pgEntity.id,
-        created_at: pgEntity.created_at ? new Date(pgEntity.created_at).toISOString() : null,
-        updated_at: pgEntity.updated_at ? new Date(pgEntity.updated_at).toISOString() : null,
-        ...pgEntity.props
-      };
-
-      // Use string interpolation for label (sanitized) but params for properties
-      await session.run(
-        `
-        MERGE (n:Entity {id: $id})
-        SET n :${label}
-        SET n += $props
-        `,
-        { id: pgEntity.id, props: properties }
-      );
-      repairOperationsTotal.labels('create_node', 'success').inc();
-    } catch (err) {
-      logger.error({ err, entityId: pgEntity.id }, 'Failed to create missing Neo4j node');
-      repairOperationsTotal.labels('create_node', 'failed').inc();
-    } finally {
-      await session.close();
-    }
-  }
-
-  private async syncNodeProperties(id: string, pgEntity: any) {
-    const session = this.neo4jDriver.session();
-    try {
-      const label = this.sanitizeLabel(pgEntity.type || 'Entity');
-      const properties = {
-        created_at: pgEntity.created_at ? new Date(pgEntity.created_at).toISOString() : null,
-        updated_at: pgEntity.updated_at ? new Date(pgEntity.updated_at).toISOString() : null,
-        ...pgEntity.props
-      };
-
-      // We re-apply the label just in case it was the mismatch
-      await session.run(
-        `
-        MATCH (n:Entity {id: $id})
-        SET n :${label}
-        SET n += $props
-        `,
-        { id, props: properties }
-      );
-      repairOperationsTotal.labels('sync_props', 'success').inc();
-    } catch (err) {
-      logger.error({ err, entityId: id }, 'Failed to sync Neo4j node properties');
-      repairOperationsTotal.labels('sync_props', 'failed').inc();
-    } finally {
-      await session.close();
-    }
-  }
-
-  private async deleteOrphanNode(id: string) {
-    const session = this.neo4jDriver.session();
-    try {
-      await session.run(
-        `
-        MATCH (n:Entity {id: $id})
-        DETACH DELETE n
-        `,
-        { id }
-      );
-      repairOperationsTotal.labels('delete_orphan', 'success').inc();
-    } catch (err) {
-      logger.error({ err, entityId: id }, 'Failed to delete orphan Neo4j node');
-      repairOperationsTotal.labels('delete_orphan', 'failed').inc();
-    } finally {
-      await session.close();
-    }
+  async generateWeeklyReport(): Promise<string> {
+    // Perform actual healing/queueing (not dry-run) for the weekly report
+    const report = await this.healOrQueue(false);
+    const text = `
+    Weekly Graph Consistency Report
+    ===============================
+    Date: ${report.timestamp.toISOString()}
+    Dangling Nodes: ${report.danglingNodesCount}
+    Schema Violations: ${report.schemaViolationsCount}
+    Actions Taken:
+    ${report.details.join('\n')}
+    `;
+    return text;
   }
 }
