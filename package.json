@@ -171,7 +171,8 @@
       "next": ">=16.0.7",
       "esbuild": "^0.25.0",
       "glob": "^11.1.0",
-      "moment": "^2.29.4"
+      "moment": "^2.29.4",
+      "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     }
   },
   "devDependencies": {
