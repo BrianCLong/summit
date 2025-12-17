@@ -1,6 +1,6 @@
 # Sprint Plan — CompanyOS Policy Spine (2 weeks)
 
-**Sprint theme:** "CompanyOS Policy Spine"
+**Sprint theme:** "CompanyOS Policy Spine"  
 **Horizon:** 2 weeks (Track A now-value + Track B moat-building)
 
 ## Sprint Goal

@@ -1,7 +1,7 @@
 # ATL (Adaptive Tariff Learner) — Model Card
 
-**Model Name:** Adaptive Tariff Learner (ATL)
-**Version:** v0.1
+**Model Name:** Adaptive Tariff Learner (ATL)  
+**Version:** v0.1  
 **Purpose:** Predict risk scores for incoming payloads (formatSig, timingSig, xformSig) to derive friction parameters (rateLimit, throttleMs, proofLevel).
 
 ---

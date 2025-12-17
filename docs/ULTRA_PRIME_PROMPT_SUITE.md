@@ -34,3 +34,4 @@ This document captures a distilled, production-ready prompt package for recursiv
 - Keep the suite under source control; prefer signed commits and immutable artifact storage for audit trails.
 - Run markdown linting in CI to prevent drift; treat the suite as code with versioned releases.
 - When using autonomous agents, pin the suite version and record provenance for each generated output.
+

@@ -87,8 +87,45 @@ export class PromptRegistry {
     // Validate inputs
     this.validateInputs(prompt, inputs);
 
+    // Sanitize inputs for prompt injection
+    const sanitizedInputs = this.sanitizeInputs(inputs);
+
     // Simple template rendering (replace {{variable}} with values)
-    return this.renderTemplate(prompt.template, inputs);
+    return this.renderTemplate(prompt.template, sanitizedInputs);
+  }
+
+  /**
+   * Sanitize inputs to prevent prompt injection attacks.
+   * Escapes delimiters and common injection patterns.
+   */
+  private sanitizeInputs(inputs: Record<string, any>): Record<string, any> {
+    const sanitized: Record<string, any> = {};
+
+    for (const [key, value] of Object.entries(inputs)) {
+      if (typeof value === 'string') {
+        sanitized[key] = this.sanitizeString(value);
+      } else if (Array.isArray(value)) {
+        sanitized[key] = value.map(item =>
+          typeof item === 'string' ? this.sanitizeString(item) : item
+        );
+      } else if (typeof value === 'object' && value !== null) {
+        sanitized[key] = this.sanitizeInputs(value);
+      } else {
+        sanitized[key] = value;
+      }
+    }
+
+    return sanitized;
+  }
+
+  private sanitizeString(str: string): string {
+    // Escape sequences that could be used to break out of prompt sections
+    // or simulate system instructions.
+    return str
+      .replace(/"""/g, '\\"\\"\\"')  // Escape triple quotes
+      .replace(/```/g, '\\`\\`\\`')  // Escape code blocks
+      .replace(/<\|endoftext\|>/g, '[END]') // Escape specific tokens
+      .replace(/System:/gi, 'System_User_Input:'); // Prevent role impersonation
   }
 
   private validateInputs(

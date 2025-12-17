@@ -1,7 +1,7 @@
 # ACS Learner — Model Card
 
-**Model Name:** Adaptive Counterintel Strategies Learner (ACS)
-**Version:** v0.1
+**Model Name:** Adaptive Counterintel Strategies Learner (ACS)  
+**Version:** v0.1  
 **Purpose:** To propose dynamic counterintelligence strategies (tariff adjustments, deception scheduling, sanction proposals) based on observed adversary tradecraft traces and system feedback.
 
 ---

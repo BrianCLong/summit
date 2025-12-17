@@ -4,14 +4,14 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy base config
-COPY tsconfig.base.json ./
+COPY tsconfig.base.json ./ 
 
 # Set up service directory
 WORKDIR /app/services/websocket-server
 
 # Copy package files
-COPY services/websocket-server/package*.json ./
-COPY services/websocket-server/tsconfig.json ./
+COPY services/websocket-server/package*.json ./ 
+COPY services/websocket-server/tsconfig.json ./ 
 
 # Install dependencies
 ENV NODE_ENV=development
@@ -41,7 +41,7 @@ WORKDIR /app
 RUN apk add --no-cache dumb-init
 
 # Copy package files and install production dependencies only
-COPY services/websocket-server/package*.json ./
+COPY services/websocket-server/package*.json ./ 
 RUN npm install --only=production && \
     npm cache clean --force
 

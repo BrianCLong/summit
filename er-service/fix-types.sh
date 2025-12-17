@@ -17,3 +17,4 @@ sed -i 's/constructor(private config: ScoringConfig)/constructor(config: Scoring
 
 # Fix z.record() calls
 sed -i 's/z\.record(z\.unknown())/z.record(z.string(), z.unknown())/g' src/types.ts
+
