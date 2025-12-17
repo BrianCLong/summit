@@ -2,6 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState, useEffect } from 'react'
+import config from '../config'
 
 interface GitHubMetrics {
   repository: {
@@ -108,19 +109,23 @@ export const useGitHubIntegration = (
   options: UseGitHubIntegrationOptions = {}
 ) => {
   const {
-    repository = process.env.NEXT_PUBLIC_GITHUB_REPO,
+    repository = config.integrations.github.repo,
     refreshInterval = 60000,
   } = options
   const queryClient = useQueryClient()
 
   const fetchGitHubMetrics = async (): Promise<GitHubMetrics> => {
+    const headers: Record<string, string> = {
+      Accept: 'application/vnd.github.v3+json',
+    }
+    if (config.integrations.github.token) {
+      headers.Authorization = `Bearer ${config.integrations.github.token}`
+    }
+
     const response = await fetch(
       `/api/integrations/github/metrics?repo=${repository}`,
       {
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-          Accept: 'application/vnd.github.v3+json',
-        },
+        headers,
       }
     )
 

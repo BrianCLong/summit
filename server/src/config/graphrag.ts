@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import config from './index.js';
 
 export interface UseCaseConfig {
   promptSchema: any;
@@ -30,15 +31,13 @@ const graphragConfig: {
   redisUrl?: string;
   useCases: Record<string, UseCaseConfig>;
 } = {
-  redisUrl: process.env.GRAPHRAG_REDIS_URL,
+  redisUrl: config.graphrag.redisUrl,
   useCases: {
     default: {
       promptSchema: defaultPrompt,
       outputSchema: defaultOutput,
-      tokenBudget: parseInt(process.env.GRAPHRAG_TOKEN_BUDGET || '2000'),
-      latencyBudgetMs: parseInt(
-        process.env.GRAPHRAG_LATENCY_BUDGET_MS || '2000',
-      ),
+      tokenBudget: config.graphrag.tokenBudget,
+      latencyBudgetMs: config.graphrag.latencyBudgetMs,
     },
   },
 };
