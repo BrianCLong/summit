@@ -196,9 +196,9 @@ export class SensorFusionEngine {
    * Validate sensor reading
    */
   private validateReading(reading: SensorReading): boolean {
-    if (!reading.id || !reading.sensorId) return false;
-    if (reading.qualityScore < 0 || reading.qualityScore > 1) return false;
-    if (!reading.timestamp) return false;
+    if (!reading.id || !reading.sensorId) {return false;}
+    if (reading.qualityScore < 0 || reading.qualityScore > 1) {return false;}
+    if (!reading.timestamp) {return false;}
     return true;
   }
 
@@ -206,13 +206,13 @@ export class SensorFusionEngine {
    * Find track to associate reading with
    */
   private associateWithTrack(reading: SensorReading): FusedTrack | null {
-    if (!reading.geolocation) return null;
+    if (!reading.geolocation) {return null;}
 
     let bestTrack: FusedTrack | null = null;
     let bestScore = Infinity;
 
     for (const track of this.activeTracks.values()) {
-      if (track.state === 'DROPPED' || track.state === 'MERGED') continue;
+      if (track.state === 'DROPPED' || track.state === 'MERGED') {continue;}
 
       // Predict track position to reading time
       const predictedState = this.predictState(
@@ -240,11 +240,11 @@ export class SensorFusionEngine {
    * Find tentative track to associate with
    */
   private associateWithTentative(reading: SensorReading): TentativeTrack | null {
-    if (!reading.geolocation) return null;
+    if (!reading.geolocation) {return null;}
 
     for (const tentative of this.tentativeTracks.values()) {
       const lastReading = tentative.readings[tentative.readings.length - 1];
-      if (!lastReading.geolocation) continue;
+      if (!lastReading.geolocation) {continue;}
 
       const distance = this.computeDistance(
         reading.geolocation,
@@ -455,7 +455,7 @@ export class SensorFusionEngine {
     predictedState: KinematicState,
     track: FusedTrack,
   ): number {
-    if (!reading.geolocation) return Infinity;
+    if (!reading.geolocation) {return Infinity;}
 
     // Distance component
     const distance = this.computeDistance(
@@ -591,7 +591,7 @@ export class SensorFusionEngine {
     timeMs: number,
   ): KalmanState {
     const dt = (timeMs - state.lastUpdateTime) / 1000;
-    if (dt <= 0) return state;
+    if (dt <= 0) {return state;}
 
     // State transition matrix
     const F = [
@@ -759,7 +759,7 @@ export class SensorFusionEngine {
    * Detect maneuver based on kinematic change
    */
   private detectManeuver(track: FusedTrack, reading: SensorReading): boolean {
-    if (!reading.bearing) return false;
+    if (!reading.bearing) {return false;}
 
     const headingChange = Math.abs(
       reading.bearing - track.kinematicState.headingDeg,

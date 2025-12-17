@@ -10,7 +10,7 @@
  * with clear contracts for future teams to integrate real data sources.
  */
 
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import {
   Layers,
   Network,
@@ -21,6 +21,7 @@ import {
   Download,
   Eye,
   EyeOff,
+  Maximize2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
@@ -29,9 +30,13 @@ import { Button } from '@/components/ui/Button'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { MapPane } from './MapPane'
-import { useShortcut } from '@/contexts/KeyboardShortcutsContext'
+import { useCollaboration } from '@/lib/yjs/useCollaboration'
+import { useGraphSync } from '@/lib/yjs/useGraphSync'
+import { CollaborationPanel } from '@/components/CollaborationPanel'
+import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
+import { useSnapshotHandler } from '@/features/snapshots'
 
 /**
  * Main TriPaneShell component
@@ -73,13 +78,55 @@ export function TriPaneShell({
   const [activePane, setActivePane] = useState<'graph' | 'timeline' | 'map'>(
     'graph'
   )
+  const [pinnedTools, setPinnedTools] = useState<string[]>([])
+  const [densityMode, setDensityMode] = useState<'comfortable' | 'compact'>('comfortable')
+
+  // Snapshot integration
+  useSnapshotHandler(
+    'triPane',
+    () => ({
+      syncState,
+      activePane,
+      showProvenance,
+      pinnedTools,
+      densityMode
+    }),
+    (data) => {
+      if (data.syncState) setSyncState(data.syncState)
+      if (data.activePane) setActivePane(data.activePane)
+      if (typeof data.showProvenance === 'boolean') setShowProvenance(data.showProvenance)
+      if (data.pinnedTools) setPinnedTools(data.pinnedTools)
+      if (data.densityMode) setDensityMode(data.densityMode)
+    }
+  )
+
+  // Auth context
+  const { user } = useAuth()
+  const token = localStorage.getItem('auth_token') || undefined
+
+  // Initialize collaboration
+  const { doc, users, isConnected, isSynced } = useCollaboration(
+    'main-graph', // TODO: Make dynamic based on workspace/investigation ID
+    user ? { id: user.id, name: user.name || user.email } : { id: 'anon', name: 'Anonymous' },
+    token
+  )
+
+  // Sync graph data
+  const {
+    entities: graphEntities,
+    relationships: graphRelationships,
+    updateEntityPosition
+  } = useGraphSync(doc, entities, relationships)
 
   // Filter data based on global time window
   const filteredData = useMemo(() => {
+    const currentEntities = graphEntities
+    const currentRelationships = graphRelationships
+
     if (!syncState.globalTimeWindow) {
       return {
-        entities,
-        relationships,
+        entities: currentEntities,
+        relationships: currentRelationships,
         timelineEvents,
         geospatialEvents,
       }
@@ -104,7 +151,7 @@ export function TriPaneShell({
       filteredTimelineEvents.map(e => e.entityId).filter(Boolean) as string[]
     )
 
-    const filteredEntities = entities.filter(entity => {
+    const filteredEntities = currentEntities.filter(entity => {
       if (relevantEntityIds.has(entity.id)) return true
 
       // Also include entities updated within the time window
@@ -118,7 +165,7 @@ export function TriPaneShell({
 
     // Filter relationships to only include those between filtered entities
     const filteredEntityIds = new Set(filteredEntities.map(e => e.id))
-    const filteredRelationships = relationships.filter(
+    const filteredRelationships = currentRelationships.filter(
       rel =>
         filteredEntityIds.has(rel.sourceId) &&
         filteredEntityIds.has(rel.targetId)
@@ -131,8 +178,8 @@ export function TriPaneShell({
       geospatialEvents: filteredGeospatialEvents,
     }
   }, [
-    entities,
-    relationships,
+    graphEntities,
+    graphRelationships,
     timelineEvents,
     geospatialEvents,
     syncState.globalTimeWindow,
@@ -256,72 +303,35 @@ export function TriPaneShell({
     }))
   }, [])
 
-  // Keyboard shortcuts implementation using useShortcut hook
-  useShortcut('g', () => setActivePane('graph'), {
-    id: 'pane-graph',
-    description: 'Focus Graph Pane',
-    category: 'View'
-  })
-
-  useShortcut('t', () => setActivePane('timeline'), {
-    id: 'pane-timeline',
-    description: 'Focus Timeline Pane',
-    category: 'View'
-  })
-
-  useShortcut('m', () => setActivePane('map'), {
-    id: 'pane-map',
-    description: 'Focus Map Pane',
-    category: 'View'
-  })
-
-  useShortcut('r', handleResetFilters, {
-    id: 'action-reset',
-    description: 'Reset Filters',
-    category: 'Actions'
-  })
-
-  useShortcut('e', () => onExport?.(), {
-    id: 'action-export',
-    description: 'Export Data',
-    category: 'Actions',
-    enabled: !!onExport
-  })
-
-  useShortcut('p', () => setShowProvenance(prev => !prev), {
-    id: 'view-provenance',
-    description: 'Toggle Provenance Overlay',
-    category: 'View'
-  })
-
-  useShortcut('=', () => {
-    setSyncState(prev => ({
-      ...prev,
-      map: {
-        ...prev.map,
-        zoom: (prev.map.zoom || 1) + 1
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only handle shortcuts when not in an input
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return
       }
-    }))
-  }, {
-    id: 'map-zoom-in',
-    description: 'Zoom In (Map)',
-    category: 'View'
-  })
 
-  useShortcut('-', () => {
-    setSyncState(prev => ({
-      ...prev,
-      map: {
-        ...prev.map,
-        zoom: Math.max(0, (prev.map.zoom || 1) - 1)
+      if (e.key === 'g' && !e.ctrlKey && !e.metaKey) {
+        setActivePane('graph')
+      } else if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
+        setActivePane('timeline')
+      } else if (e.key === 'm' && !e.ctrlKey && !e.metaKey) {
+        setActivePane('map')
+      } else if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+        handleResetFilters()
+      } else if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
+        onExport?.()
+      } else if (e.key === 'p' && !e.ctrlKey && !e.metaKey) {
+        setShowProvenance(prev => !prev)
       }
-    }))
-  }, {
-    id: 'map-zoom-out',
-    description: 'Zoom Out (Map)',
-    category: 'View'
-  })
+    }
 
+    window.addEventListener('keydown', handleKeyPress)
+    return () => window.removeEventListener('keydown', handleKeyPress)
+  }, [handleResetFilters, onExport])
 
   return (
     <div
@@ -470,6 +480,7 @@ export function TriPaneShell({
                 relationships={filteredData.relationships}
                 layout={syncState.graph.layout}
                 onEntitySelect={handleEntitySelect}
+                onNodeDragEnd={(node, pos) => updateEntityPosition(node.id, pos.x, pos.y)}
                 selectedEntityId={syncState.graph.selectedEntityId}
                 className="h-full"
               />
@@ -505,6 +516,8 @@ export function TriPaneShell({
         </div>
       </div>
 
+      <CollaborationPanel users={users} isConnected={isConnected} isSynced={isSynced} />
+
       {/* Status indicator for active filter */}
       {syncState.globalTimeWindow && (
         <div
@@ -517,6 +530,19 @@ export function TriPaneShell({
           {syncState.globalTimeWindow.end.toLocaleString()}
         </div>
       )}
+
+      {/* Keyboard shortcuts helper (hidden, for screen readers) */}
+      <div className="sr-only" role="complementary" aria-label="Keyboard shortcuts">
+        <h2>Keyboard Shortcuts</h2>
+        <ul>
+          <li>G: Focus graph pane</li>
+          <li>T: Focus timeline pane</li>
+          <li>M: Focus map pane</li>
+          <li>R: Reset all filters</li>
+          <li>E: Export data</li>
+          <li>P: Toggle provenance overlay</li>
+        </ul>
+      </div>
     </div>
   )
 }

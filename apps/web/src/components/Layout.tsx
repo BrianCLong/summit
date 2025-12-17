@@ -1,19 +1,13 @@
 import React from 'react'
-import { Outlet, Navigate, useNavigate } from 'react-router-dom'
+import { Outlet, Navigate } from 'react-router-dom'
 import { Navigation } from './Navigation'
 import { GlobalSearch } from './GlobalSearch'
 import { useAuth } from '@/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/Skeleton'
-import { CommandPalette } from '@/components/CommandPalette'
-import { KeyboardShortcutsHelp } from '@/components/KeyboardShortcutsHelp'
-// import { useShortcut } from '@/contexts/KeyboardShortcutsContext'
+import { SnapshotMenu } from '@/features/snapshots'
 
 export function Layout() {
   const { user, loading, isAuthenticated } = useAuth()
-  // const navigate = useNavigate()
-
-  // Removed global 'g' shortcuts to avoid conflict with local investigation shortcuts.
-  // Users should use Cmd+K (Command Palette) for global navigation.
 
   if (loading) {
     return (
@@ -38,6 +32,13 @@ export function Layout() {
 
   return (
     <div className="h-screen flex bg-background">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:top-0 focus:left-0 focus:p-4 focus:bg-background focus:text-primary focus:border focus:border-primary focus:shadow-lg focus:outline-none"
+      >
+        Skip to main content
+      </a>
+
       {/* Sidebar Navigation */}
       <Navigation user={user} />
 
@@ -52,6 +53,7 @@ export function Layout() {
 
             {/* Search trigger - actual search modal is rendered globally */}
             <div className="flex items-center gap-4">
+              <SnapshotMenu />
               <div className="text-sm text-muted-foreground">
                 Welcome back, {user?.name}
               </div>
@@ -60,19 +62,13 @@ export function Layout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">
+        <main id="main-content" className="flex-1 overflow-auto" tabIndex={-1}>
           <Outlet />
         </main>
       </div>
 
       {/* Global Search Modal */}
       <GlobalSearch />
-
-      {/* Command Palette */}
-      <CommandPalette />
-
-      {/* Keyboard Shortcuts Help */}
-      <KeyboardShortcutsHelp />
     </div>
   )
 }
