@@ -71,9 +71,9 @@ export class CitizenProfileAggregator {
    */
   async findByIdentifier(type: string, value: string): Promise<CitizenProfile | null> {
     for (const profile of this.profiles.values()) {
-      if (type === 'email' && profile.contact.email === value) return profile;
-      if (type === 'ssn' && profile.identifiers.ssn === value) return profile;
-      if (type === 'phone' && profile.contact.phone === value) return profile;
+      if (type === 'email' && profile.contact.email === value) {return profile;}
+      if (type === 'ssn' && profile.identifiers.ssn === value) {return profile;}
+      if (type === 'phone' && profile.contact.phone === value) {return profile;}
     }
     return null;
   }
@@ -101,29 +101,29 @@ export class CitizenProfileAggregator {
 
   private mapFieldsToProfile(profile: CitizenProfile, data: Record<string, unknown>): void {
     // Personal info mapping
-    if (data.firstName) profile.personal.firstName = String(data.firstName);
-    if (data.lastName) profile.personal.lastName = String(data.lastName);
-    if (data.middleName) profile.personal.middleName = String(data.middleName);
-    if (data.dateOfBirth) profile.personal.dateOfBirth = String(data.dateOfBirth);
-    if (data.dob) profile.personal.dateOfBirth = String(data.dob);
-    if (data.gender) profile.personal.gender = String(data.gender);
+    if (data.firstName) {profile.personal.firstName = String(data.firstName);}
+    if (data.lastName) {profile.personal.lastName = String(data.lastName);}
+    if (data.middleName) {profile.personal.middleName = String(data.middleName);}
+    if (data.dateOfBirth) {profile.personal.dateOfBirth = String(data.dateOfBirth);}
+    if (data.dob) {profile.personal.dateOfBirth = String(data.dob);}
+    if (data.gender) {profile.personal.gender = String(data.gender);}
 
     // Contact mapping
-    if (data.email) profile.contact.email = String(data.email);
-    if (data.phone) profile.contact.phone = String(data.phone);
-    if (data.phoneNumber) profile.contact.phone = String(data.phoneNumber);
+    if (data.email) {profile.contact.email = String(data.email);}
+    if (data.phone) {profile.contact.phone = String(data.phone);}
+    if (data.phoneNumber) {profile.contact.phone = String(data.phoneNumber);}
 
     // Address mapping
-    if (data.street) profile.address.street = String(data.street);
-    if (data.address) profile.address.street = String(data.address);
-    if (data.city) profile.address.city = String(data.city);
-    if (data.state) profile.address.state = String(data.state);
-    if (data.zipCode) profile.address.zipCode = String(data.zipCode);
-    if (data.zip) profile.address.zipCode = String(data.zip);
+    if (data.street) {profile.address.street = String(data.street);}
+    if (data.address) {profile.address.street = String(data.address);}
+    if (data.city) {profile.address.city = String(data.city);}
+    if (data.state) {profile.address.state = String(data.state);}
+    if (data.zipCode) {profile.address.zipCode = String(data.zipCode);}
+    if (data.zip) {profile.address.zipCode = String(data.zip);}
 
     // Identifiers
-    if (data.ssn) profile.identifiers.ssn = String(data.ssn);
-    if (data.driverLicense) profile.identifiers.driverLicense = String(data.driverLicense);
+    if (data.ssn) {profile.identifiers.ssn = String(data.ssn);}
+    if (data.driverLicense) {profile.identifiers.driverLicense = String(data.driverLicense);}
 
     // Employment
     if (data.employer || data.income) {
