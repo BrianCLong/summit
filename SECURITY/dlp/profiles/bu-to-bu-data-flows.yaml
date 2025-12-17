@@ -1,0 +1,525 @@
+# Business Unit to Business Unit Data Flow Policy
+# Enforces Chinese walls and information barriers between business units
+#
+# @policy bu-to-bu-data-flows
+# @version 1.0.0
+# @compliance SOX, SEC, FINRA, MAR
+
+apiVersion: dlp.intelgraph.io/v1
+kind: DLPPolicy
+metadata:
+  name: bu-to-bu-data-flows
+  description: |
+    Enforces information barriers (Chinese walls) between business units
+    to prevent conflicts of interest, insider trading, and unauthorized
+    access to material non-public information (MNPI).
+  labels:
+    compliance: sox,sec,finra
+    category: information-barriers
+    sensitivity: critical
+  annotations:
+    contact: compliance@company.com
+    review-date: "2026-01-01"
+    regulatory-basis: |
+      - Securities Exchange Act Section 15(g)
+      - FINRA Rule 5280 (Trading Ahead of Research Reports)
+      - MAR Article 9 (Legitimate Behaviour)
+
+spec:
+  enabled: true
+  priority: 50
+  mode: ENFORCE
+
+  # Business Unit Definitions
+  businessUnits:
+    # Investment Banking Division
+    investment_banking:
+      id: IBD
+      aliases: ["ibd", "investment-banking", "corp-fin"]
+      description: M&A advisory, underwriting, capital markets
+      dataTypes:
+        exclusive:
+          - DEAL_DOCUMENTS
+          - PITCH_MATERIALS
+          - VALUATION_MODELS
+          - TERM_SHEETS
+          - DUE_DILIGENCE
+        sensitive:
+          - CLIENT_FINANCIALS
+          - MNPI
+
+    # Research Division
+    research:
+      id: RESEARCH
+      aliases: ["equity-research", "fixed-income-research"]
+      description: Securities research and analysis
+      dataTypes:
+        exclusive:
+          - RESEARCH_REPORTS
+          - ANALYST_NOTES
+          - RATINGS_CHANGES
+          - PRICE_TARGETS
+        sensitive:
+          - COMPANY_ANALYSIS
+          - INDUSTRY_DATA
+
+    # Sales & Trading
+    trading:
+      id: TRADING
+      aliases: ["s&t", "sales-trading", "markets"]
+      description: Securities trading and sales
+      dataTypes:
+        exclusive:
+          - TRADING_POSITIONS
+          - ORDER_BOOK
+          - TRADING_ALGORITHMS
+          - CLIENT_ORDERS
+        sensitive:
+          - MARKET_DATA
+          - EXECUTION_DATA
+
+    # Private Equity / Principal Investments
+    private_equity:
+      id: PE
+      aliases: ["pi", "principal-investments"]
+      description: Principal investing activities
+      dataTypes:
+        exclusive:
+          - PORTFOLIO_COMPANY_DATA
+          - FUND_PERFORMANCE
+          - LP_INFORMATION
+          - INVESTMENT_MEMOS
+        sensitive:
+          - DEAL_FLOW
+
+    # Asset Management
+    asset_management:
+      id: AM
+      aliases: ["asset-mgmt", "wealth"]
+      description: Asset and wealth management
+      dataTypes:
+        exclusive:
+          - PORTFOLIO_HOLDINGS
+          - CLIENT_POSITIONS
+          - INVESTMENT_STRATEGIES
+        sensitive:
+          - AUM_DATA
+          - CLIENT_PREFERENCES
+
+    # Compliance
+    compliance:
+      id: COMPLIANCE
+      aliases: ["legal-compliance", "regulatory"]
+      description: Regulatory compliance and legal
+      permissions:
+        - CROSS_WALL_READ
+        - SURVEILLANCE
+      dataTypes:
+        accessible:
+          - ALL  # Compliance can access all for monitoring
+
+    # Risk Management
+    risk:
+      id: RISK
+      aliases: ["risk-mgmt", "enterprise-risk"]
+      description: Enterprise risk management
+      permissions:
+        - AGGREGATED_VIEW
+      dataTypes:
+        accessible:
+          - RISK_METRICS
+          - EXPOSURE_DATA
+          - AGGREGATED_POSITIONS
+
+  # Information Barrier Walls
+  walls:
+    # Primary wall: Investment Banking vs Research
+    - name: ibd-research-wall
+      description: |
+        Prevents MNPI from Investment Banking from influencing
+        Research analysts and vice versa
+      units:
+        - IBD
+        - RESEARCH
+      direction: BIDIRECTIONAL
+      strictness: ABSOLUTE
+      dataTypes:
+        blocked:
+          - DEAL_DOCUMENTS
+          - MNPI
+          - RATINGS_CHANGES
+          - PRICE_TARGETS
+      exceptions:
+        wall_cross:
+          requires:
+            - COMPLIANCE_APPROVAL
+            - BROUGHT_OVER_WALL_DOCUMENTATION
+          maxDuration: 30  # days
+          monitoring: ENHANCED
+
+    # Wall: Trading vs Research
+    - name: trading-research-wall
+      description: |
+        Prevents front-running of research recommendations
+      units:
+        - TRADING
+        - RESEARCH
+      direction: RESEARCH_TO_TRADING
+      strictness: ABSOLUTE
+      dataTypes:
+        blocked:
+          - RATINGS_CHANGES
+          - PRICE_TARGETS
+          - RESEARCH_REPORTS  # Before publication
+      timing:
+        embargoBeforePublication: 24  # hours
+        postPublicationRelease: true
+
+    # Wall: Investment Banking vs Trading
+    - name: ibd-trading-wall
+      description: |
+        Prevents trading on MNPI from deal activities
+      units:
+        - IBD
+        - TRADING
+      direction: BIDIRECTIONAL
+      strictness: ABSOLUTE
+      dataTypes:
+        blocked:
+          - DEAL_DOCUMENTS
+          - MNPI
+          - TERM_SHEETS
+
+    # Wall: Private Equity vs All Public-Side
+    - name: pe-public-wall
+      description: |
+        Isolates private equity from public market activities
+      units:
+        - PE
+      isolateFrom:
+        - TRADING
+        - RESEARCH
+        - AM
+      direction: BIDIRECTIONAL
+      strictness: ABSOLUTE
+
+    # Soft wall: Asset Management information flow
+    - name: am-trading-wall
+      description: |
+        Prevents client order information from impacting trading desk
+      units:
+        - AM
+        - TRADING
+      direction: AM_TO_TRADING
+      strictness: CONDITIONAL
+      dataTypes:
+        blocked:
+          - CLIENT_ORDERS
+          - REBALANCING_PLANS
+      exceptions:
+        execution:
+          allows: ORDER_ROUTING
+          requires: BEST_EXECUTION_DOCUMENTATION
+
+  # Cross-Wall Procedures
+  crossWallProcedures:
+    # Bringing someone over the wall
+    bringOverWall:
+      name: wall-crossing
+      description: Procedure to temporarily bring personnel over an information barrier
+      workflow:
+        - step: REQUEST
+          requiredFields:
+            - wallId
+            - personnelIds
+            - dealCode
+            - businessJustification
+            - expectedDuration
+          submitter: DEAL_TEAM_LEAD
+
+        - step: COMPLIANCE_REVIEW
+          reviewer: COMPLIANCE_OFFICER
+          sla: 4  # hours
+          checks:
+            - conflict_of_interest
+            - restricted_list
+            - watch_list
+            - previous_wall_crossings
+
+        - step: DOCUMENTATION
+          required:
+            - wall_crossing_agreement
+            - confidentiality_acknowledgment
+            - trading_restrictions_acknowledgment
+          signedBy: WALL_CROSSED_PERSONNEL
+
+        - step: CONTROLS_ACTIVATION
+          automatic:
+            - ADD_TO_RESTRICTED_LIST
+            - ENABLE_TRADE_MONITORING
+            - BLOCK_RESEARCH_ACCESS
+            - COMMUNICATION_MONITORING
+
+        - step: MONITORING
+          continuous: true
+          alerts:
+            - ATTEMPTED_TRADING
+            - EXTERNAL_COMMUNICATION
+            - UNAUTHORIZED_DATA_ACCESS
+
+        - step: CLEANSING
+          trigger: DEAL_COMPLETION_OR_EXPIRY
+          actions:
+            - REMOVE_FROM_RESTRICTED_LIST
+            - CLEANSING_PERIOD_START
+            - TRADING_REVIEW
+
+      cleansing:
+        minimumDays: 5
+        maxDays: 30
+        reviewRequired: true
+
+  # Rules for data flow enforcement
+  rules:
+    # Block cross-wall data transfer
+    - name: block-cross-wall-data
+      description: Block data transfer across information barriers
+      condition:
+        sourceUnit:
+          in: ["IBD", "RESEARCH", "TRADING", "PE"]
+        targetUnit:
+          differentFrom: sourceUnit
+        wallExists: true
+        notExempt: true
+      action: BLOCK
+      violation:
+        type: INFORMATION_BARRIER_VIOLATION
+        message: |
+          Data transfer blocked by information barrier.
+          Source: {source_unit}, Target: {target_unit}, Wall: {wall_id}
+        severity: CRITICAL
+      notification:
+        immediate:
+          - compliance
+          - security
+        delayed:
+          - legal
+
+    # Allow compliance surveillance
+    - name: allow-compliance-surveillance
+      description: Compliance can access data for surveillance purposes
+      condition:
+        actorUnit: COMPLIANCE
+        purpose: SURVEILLANCE
+        actorRole:
+          in: [COMPLIANCE_OFFICER, SURVEILLANCE_ANALYST]
+      action: ALLOW
+      obligations:
+        - type: AUDIT_ENHANCED
+          reason: SURVEILLANCE_ACCESS
+        - type: ACCESS_LOG_REVIEW
+          frequency: WEEKLY
+
+    # Allow risk aggregation
+    - name: allow-risk-aggregation
+      description: Risk management can access aggregated data
+      condition:
+        actorUnit: RISK
+        dataForm: AGGREGATED
+        purpose: RISK_MANAGEMENT
+      action: ALLOW
+      constraints:
+        noIndividualPositions: true
+        noClientIdentification: true
+
+    # MNPI detection and block
+    - name: mnpi-detection
+      description: Detect and block potential MNPI leakage
+      condition:
+        dataType: MNPI
+        operation:
+          in: [SHARE, EXTERNAL_TRANSFER, EMAIL]
+      action: BLOCK
+      detection:
+        keywords:
+          - "material"
+          - "non-public"
+          - "merger"
+          - "acquisition"
+          - "earnings"
+          - "guidance"
+          - "restructuring"
+        patterns:
+          - deal_code_format
+          - ticker_with_action
+      notification:
+        immediate:
+          - compliance
+          - legal
+
+    # Research embargo enforcement
+    - name: research-embargo
+      description: Enforce embargo on research before publication
+      condition:
+        sourceUnit: RESEARCH
+        dataType: RESEARCH_REPORTS
+        status: UNPUBLISHED
+        targetUnit:
+          in: [TRADING, SALES]
+      action: BLOCK
+      timing:
+        releaseAfter: PUBLICATION_TIME
+        notifyOnRelease: true
+
+    # Wall crossing request handling
+    - name: wall-cross-request
+      description: Handle wall crossing requests
+      condition:
+        operation: WALL_CROSS_REQUEST
+        wallId:
+          in: ["ibd-research-wall", "ibd-trading-wall", "pe-public-wall"]
+      action: REQUIRE_APPROVAL
+      approval:
+        workflow: bringOverWall
+        mandatory:
+          - COMPLIANCE_OFFICER
+          - LEGAL_COUNSEL
+        optional:
+          - DEPARTMENT_HEAD
+        slaHours: 8
+
+  # Monitoring and surveillance
+  monitoring:
+    # Communication monitoring
+    communications:
+      enabled: true
+      channels:
+        - EMAIL
+        - INSTANT_MESSAGE
+        - VOICE  # If available
+      crossWallPatterns:
+        - unit_to_unit_communication
+        - keyword_detection
+        - attachment_scanning
+
+    # Trading surveillance
+    trading:
+      enabled: true
+      checks:
+        - RESTRICTED_LIST_VIOLATIONS
+        - FRONT_RUNNING
+        - INSIDER_TRADING_PATTERNS
+        - UNUSUAL_VOLUME
+      correlation:
+        - WALL_CROSSING_EVENTS
+        - RESEARCH_PUBLICATION
+        - DEAL_ANNOUNCEMENTS
+
+    # Access pattern monitoring
+    access:
+      enabled: true
+      patterns:
+        - CROSS_WALL_ACCESS_ATTEMPTS
+        - UNUSUAL_DATA_VOLUME
+        - OFF_HOURS_ACCESS
+        - REPEATED_DENIED_ACCESS
+
+    # Metrics
+    metrics:
+      - name: wall_crossing_events_total
+        type: counter
+        labels: [wall_id, outcome]
+      - name: cross_wall_blocks_total
+        type: counter
+        labels: [source_unit, target_unit, data_type]
+      - name: mnpi_detection_total
+        type: counter
+        labels: [detection_method, action]
+      - name: surveillance_alerts_total
+        type: counter
+        labels: [alert_type, severity]
+
+    # Alerts
+    alerts:
+      - name: wall_breach_attempt
+        condition: cross_wall_blocks_total > 5 in 1h by actor
+        severity: critical
+        notification:
+          - compliance
+          - security
+          - legal
+
+      - name: unusual_cross_wall_pattern
+        condition: wall_crossing_events increase > 200% week_over_week
+        severity: warning
+        notification:
+          - compliance
+
+      - name: mnpi_leakage_suspected
+        condition: mnpi_detection_total > 0 with external_recipient
+        severity: critical
+        notification:
+          - compliance
+          - legal
+          - cco
+
+  # Audit configuration
+  audit:
+    enabled: true
+    level: COMPREHENSIVE
+    retention: 10  # years (regulatory requirement)
+    fields:
+      - timestamp
+      - actor_id
+      - actor_unit
+      - source_unit
+      - target_unit
+      - data_type
+      - operation
+      - wall_id
+      - action_taken
+      - justification
+      - approval_chain
+      - deal_code
+      - related_securities
+
+  # Reporting
+  reporting:
+    # Daily compliance report
+    daily:
+      name: daily-wall-activity
+      schedule: "0 6 * * *"  # 6 AM daily
+      recipients:
+        - compliance-team
+      content:
+        - wall_crossing_summary
+        - blocked_transfers
+        - active_wall_crossings
+        - expiring_wall_crossings
+
+    # Weekly regulatory report
+    weekly:
+      name: weekly-information-barrier-report
+      schedule: "0 8 * * MON"
+      recipients:
+        - compliance-team
+        - legal
+        - cco
+      content:
+        - wall_crossing_trends
+        - violation_summary
+        - surveillance_findings
+        - restricted_list_changes
+
+    # Regulatory examination support
+    onDemand:
+      name: regulatory-exam-report
+      availableFor:
+        - SEC_EXAMINATION
+        - FINRA_EXAMINATION
+        - INTERNAL_AUDIT
+      content:
+        - full_wall_crossing_history
+        - complete_audit_trail
+        - policy_version_history
+        - exception_documentation
