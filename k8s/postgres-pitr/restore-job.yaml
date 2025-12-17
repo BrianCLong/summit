@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: postgres-pitr-restore
+  namespace: summit
+  labels:
+    app: postgres-pitr
+    component: restore
+spec:
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: postgres-pitr
+        component: restore
+    spec:
+      restartPolicy: Never
+      serviceAccountName: postgres-backup
+      containers:
+        - name: postgres-pitr-restore
+          image: summit/postgres-pitr:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: TARGET_TIME
+              value: "2025-02-10T14:30:00Z" # override when launching the job
+            - name: BACKUP_NAME
+              value: "LATEST"
+            - name: PGDATA
+              value: /var/lib/postgresql/data
+            - name: AUTO_START
+              value: "false"
+          envFrom:
+            - secretRef:
+                name: s3-credentials
+            - secretRef:
+                name: postgres-credentials
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: walg-config
+              mountPath: /etc/wal-g.d
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data
+        - name: walg-config
+          configMap:
+            name: walg-config
+            items:
+              - key: walg.json
+                path: walg.json

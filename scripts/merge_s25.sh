@@ -78,8 +78,7 @@ cherry_pick_pr() {
     return 0
   }
   # list unique commits (oldest->newest)
-  # Fix: Use standard range BASE..PR_HEAD to select commits in PR but not in BASE
-  mapfile -t COMMITS < <(git rev-list --reverse --no-merges "${BASE}..tmp/pr-${pr}")
+  mapfile -t COMMITS < <(git rev-list --reverse --no-merges --cherry-pick --right-only "tmp/pr-${pr}...${BASE}")
 
   if [[ ${#COMMITS[@]} -eq 0 ]]; then
     echo "No unique commits for #$pr (already merged or empty)."
@@ -115,9 +114,9 @@ open_stack_prs() {
 
   # Open PRs only if not already open
   for spec in \
-    "$STACK_SERVER|stack/server: Express 5 + ESLint 9 migration|Upgrade to Express 5 (centralized async error); ESLint 9 Flat Config; update tests." \
-    "$STACK_ARTIFACTS|stack/ops: Artifacts pack v1 + SBOM + provenance verifier|Adds CycloneDX SBOM, signing (cosign), and provenance generation/verification in CI." \
-    "$STACK_CLIENT|stack/client: Vite 7 + React-Leaflet 5 compatibility|Map init/context fixes and Playwright tile-load stabilization." \
+    "$STACK_SERVER|stack/server: Express 5 + ESLint 9 migration|Upgrade to Express 5 (centralized async error); ESLint 9 Flat Config; update tests."
+    "$STACK_ARTIFACTS|stack/ops: Artifacts pack v1 + SBOM + provenance verifier|Adds CycloneDX SBOM, signing (cosign), and provenance generation/verification in CI."
+    "$STACK_CLIENT|stack/client: Vite 7 + React-Leaflet 5 compatibility|Map init/context fixes and Playwright tile-load stabilization."
     "$STACK_REBRAND|stack/docs: Rebrand apply + provenance references intact|Renames and docs without breaking provenance/export manifests."; do
     IFS="|" read -r head title body <<<"$spec"
     if gh pr list -R "$REPO" --state open --head "$head" --json number | jq -e 'length>0' >/dev/null; then
