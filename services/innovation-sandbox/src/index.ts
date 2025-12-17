@@ -167,7 +167,7 @@ app.get('/api/v1/sandboxes/:id/executions', async (req: Request, res: Response) 
   const executions: ExecutionResult[] = [];
   for (const execId of executionIds) {
     const exec = await registry.getExecution(req.params.id, execId);
-    if (exec) executions.push(exec);
+    if (exec) {executions.push(exec);}
   }
 
   res.json({ executions });
@@ -227,7 +227,7 @@ app.post('/api/v1/sandboxes/:id/migrate', traced('migrateSandbox', async (req: R
   const executions: ExecutionResult[] = [];
   for (const execId of executionIds) {
     const exec = await registry.getExecution(sandboxId, execId);
-    if (exec) executions.push(exec);
+    if (exec) {executions.push(exec);}
   }
 
   const status = await migrator.initiateMigration(config, executions, migrationConfig);

@@ -1,63 +1,47 @@
-
-import { cfg } from '../../config.js';
-
-interface RateLimitPolicy {
-  rpm: number;
-  burst: number;
-  windowMs: number;
+export interface Quota {
+    tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+    requestsPerMinute: number;
+    maxTokensPerRequest: number;
 }
-
-interface TenantConfig {
-  [tenantId: string]: RateLimitPolicy;
-}
-
-interface QuotaConfig {
-  limits: {
-    tenant_default: RateLimitPolicy;
-    tenant_overrides: TenantConfig;
-  };
-}
-
-// Hardcoded config for now, matching the plan example
-const DEFAULT_QUOTA_CONFIG: QuotaConfig = {
-  limits: {
-    tenant_default: {
-      rpm: 6000,
-      burst: 1200,
-      windowMs: 60000,
-    },
-    tenant_overrides: {
-      TENANT_ALPHA: {
-        rpm: 12000,
-        burst: 2400,
-        windowMs: 60000,
-      },
-    },
-  },
-};
 
 export class QuotaManager {
-  private config: QuotaConfig;
+    private static instance: QuotaManager;
+    private tenantTiers: Map<string, 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE'> = new Map();
 
-  constructor(config: QuotaConfig = DEFAULT_QUOTA_CONFIG) {
-    this.config = config;
-  }
-
-  getRateLimitPolicy(tenantId?: string): RateLimitPolicy {
-    if (tenantId && this.config.limits.tenant_overrides[tenantId]) {
-      return this.config.limits.tenant_overrides[tenantId];
+    private constructor() {
+        // Seed with some dummy data or defaults
+        // In production, this would load from DB or Redis
     }
-    return this.config.limits.tenant_default;
-  }
 
-  // Helper to convert to the format expected by RateLimiter
-  getRateLimitConfig(tenantId?: string) {
-    const policy = this.getRateLimitPolicy(tenantId);
-    return {
-      limit: policy.rpm, // Using RPM as the limit for the window
-      windowMs: policy.windowMs,
-    };
-  }
+    public static getInstance(): QuotaManager {
+        if (!QuotaManager.instance) {
+            QuotaManager.instance = new QuotaManager();
+        }
+        return QuotaManager.instance;
+    }
+
+    public getQuotaForTenant(tenantId: string): Quota {
+        const tier = this.tenantTiers.get(tenantId) || 'FREE';
+        return this.getQuotaForTier(tier);
+    }
+
+    public getQuotaForTier(tier: string): Quota {
+        switch (tier) {
+            case 'ENTERPRISE':
+                return { tier: 'ENTERPRISE', requestsPerMinute: 10000, maxTokensPerRequest: 32000 };
+            case 'PRO':
+                return { tier: 'PRO', requestsPerMinute: 1000, maxTokensPerRequest: 16000 };
+            case 'STARTER':
+                return { tier: 'STARTER', requestsPerMinute: 100, maxTokensPerRequest: 4000 };
+            case 'FREE':
+            default:
+                return { tier: 'FREE', requestsPerMinute: 20, maxTokensPerRequest: 1000 };
+        }
+    }
+
+    public setTenantTier(tenantId: string, tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE') {
+        this.tenantTiers.set(tenantId, tier);
+    }
 }
 
-export const quotaManager = new QuotaManager();
+export default QuotaManager.getInstance();

@@ -12,7 +12,8 @@ jobs:
     steps:
       - uses: actions/stale@a4a55723a6625699a65c3ac8915a36a555890600 # v9.0.0
         with:
-          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity.'
+          stale-issue-message: 'This issue is stale because it has been open 30 days with no activity. Add the `release-train` or `hygiene` label to keep it on the train, otherwise it will auto-close.'
           days-before-stale: 30
           days-before-close: 14
+          stale-issue-label: 'stale'
           exempt-issue-labels: 'pinned,security'
