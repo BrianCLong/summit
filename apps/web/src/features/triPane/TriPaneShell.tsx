@@ -21,28 +21,21 @@ import {
   Download,
   Eye,
   EyeOff,
-  AlertTriangle,
-  GitBranch,
-  HelpCircle,
-  X,
-  Keyboard
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/Dialog'
 import { GraphCanvas } from '@/graphs/GraphCanvas'
 import { TimelineRail } from '@/components/panels/TimelineRail'
 import { MapPane } from './MapPane'
+import { useCollaboration } from '@/lib/yjs/useCollaboration'
+import { useGraphSync } from '@/lib/yjs/useGraphSync'
+import { CollaborationPanel } from '@/components/CollaborationPanel'
+import { useAuth } from '@/contexts/AuthContext'
 import type { Entity, TimelineEvent } from '@/types'
 import type { TriPaneShellProps, TriPaneSyncState, TimeWindow } from './types'
+import { useSnapshotHandler } from '@/features/snapshots'
 
 /**
  * Main TriPaneShell component
@@ -80,22 +73,59 @@ export function TriPaneShell({
     globalTimeWindow: initialSyncState?.globalTimeWindow,
   })
 
-  // View States
   const [showProvenance, setShowProvenance] = useState(showProvenanceOverlay)
-  const [showRiskSignals, setShowRiskSignals] = useState(false)
-  const [showNarrativeFlows, setShowNarrativeFlows] = useState(false)
-  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false)
-
   const [activePane, setActivePane] = useState<'graph' | 'timeline' | 'map'>(
     'graph'
   )
+  const [pinnedTools, setPinnedTools] = useState<string[]>([])
+  const [densityMode, setDensityMode] = useState<'comfortable' | 'compact'>('comfortable')
+
+  // Snapshot integration
+  useSnapshotHandler(
+    'triPane',
+    () => ({
+      syncState,
+      activePane,
+      showProvenance,
+      pinnedTools,
+      densityMode
+    }),
+    (data) => {
+      if (data.syncState) setSyncState(data.syncState)
+      if (data.activePane) setActivePane(data.activePane)
+      if (typeof data.showProvenance === 'boolean') setShowProvenance(data.showProvenance)
+      if (data.pinnedTools) setPinnedTools(data.pinnedTools)
+      if (data.densityMode) setDensityMode(data.densityMode)
+    }
+  )
+
+  // Auth context
+  const { user } = useAuth()
+  const token = localStorage.getItem('auth_token') || undefined
+
+  // Initialize collaboration
+  const { doc, users, isConnected, isSynced } = useCollaboration(
+    'main-graph', // TODO: Make dynamic based on workspace/investigation ID
+    user ? { id: user.id, name: user.name || user.email } : { id: 'anon', name: 'Anonymous' },
+    token
+  )
+
+  // Sync graph data
+  const {
+    entities: graphEntities,
+    relationships: graphRelationships,
+    updateEntityPosition
+  } = useGraphSync(doc, entities, relationships)
 
   // Filter data based on global time window
   const filteredData = useMemo(() => {
+    const currentEntities = graphEntities
+    const currentRelationships = graphRelationships
+
     if (!syncState.globalTimeWindow) {
       return {
-        entities,
-        relationships,
+        entities: currentEntities,
+        relationships: currentRelationships,
         timelineEvents,
         geospatialEvents,
       }
@@ -120,8 +150,13 @@ export function TriPaneShell({
       filteredTimelineEvents.map(e => e.entityId).filter(Boolean) as string[]
     )
 
+<<<<<<< HEAD
     const filteredEntities = entities.filter(entity => {
+      if (relevantEntityIds.has(entity.id)) {return true}
+=======
+    const filteredEntities = currentEntities.filter(entity => {
       if (relevantEntityIds.has(entity.id)) return true
+>>>>>>> main
 
       // Also include entities updated within the time window
       if (entity.updatedAt) {
@@ -134,7 +169,7 @@ export function TriPaneShell({
 
     // Filter relationships to only include those between filtered entities
     const filteredEntityIds = new Set(filteredEntities.map(e => e.id))
-    const filteredRelationships = relationships.filter(
+    const filteredRelationships = currentRelationships.filter(
       rel =>
         filteredEntityIds.has(rel.sourceId) &&
         filteredEntityIds.has(rel.targetId)
@@ -147,8 +182,8 @@ export function TriPaneShell({
       geospatialEvents: filteredGeospatialEvents,
     }
   }, [
-    entities,
-    relationships,
+    graphEntities,
+    graphRelationships,
     timelineEvents,
     geospatialEvents,
     syncState.globalTimeWindow,
@@ -283,30 +318,18 @@ export function TriPaneShell({
         return
       }
 
-      // Help Dialog (?)
-      if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
-        setShowShortcutsDialog(true)
-      }
-
-      // Pane Focus
       if (e.key === 'g' && !e.ctrlKey && !e.metaKey) {
         setActivePane('graph')
       } else if (e.key === 't' && !e.ctrlKey && !e.metaKey) {
         setActivePane('timeline')
       } else if (e.key === 'm' && !e.ctrlKey && !e.metaKey) {
         setActivePane('map')
-      }
-      // Actions
-      else if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+      } else if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
         handleResetFilters()
       } else if (e.key === 'e' && !e.ctrlKey && !e.metaKey) {
         onExport?.()
       } else if (e.key === 'p' && !e.ctrlKey && !e.metaKey) {
         setShowProvenance(prev => !prev)
-      } else if (e.key === '!' && e.shiftKey) { // Shift + 1
-        setShowRiskSignals(prev => !prev)
-      } else if (e.key === '@' && e.shiftKey) { // Shift + 2
-        setShowNarrativeFlows(prev => !prev)
       }
     }
 
@@ -357,43 +380,23 @@ export function TriPaneShell({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Visual Overlays Toggles */}
-          <div className="flex items-center border-r pr-2 mr-2 gap-1">
-             <Button
-              variant={showRiskSignals ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setShowRiskSignals(!showRiskSignals)}
-              title="Toggle Risk Signals (Shift+1)"
-              aria-pressed={showRiskSignals}
-            >
-              <AlertTriangle className={cn("h-4 w-4", showRiskSignals && "text-destructive")} />
-            </Button>
-            <Button
-              variant={showNarrativeFlows ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setShowNarrativeFlows(!showNarrativeFlows)}
-              title="Toggle Narrative Flows (Shift+2)"
-              aria-pressed={showNarrativeFlows}
-            >
-              <GitBranch className={cn("h-4 w-4", showNarrativeFlows && "text-blue-500")} />
-            </Button>
-             <Button
-              variant={showProvenance ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => setShowProvenance(!showProvenance)}
-              title="Toggle Provenance (P)"
-              aria-pressed={showProvenance}
-            >
-               {showProvenance ? (
-                <Eye className="h-4 w-4 text-green-600" />
-              ) : (
-                <EyeOff className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowProvenance(!showProvenance)}
+            aria-label={`${showProvenance ? 'Hide' : 'Show'} provenance overlay`}
+            title="Toggle provenance overlay (P)"
+          >
+            {showProvenance ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
+            <span className="ml-1">Provenance</span>
+          </Button>
 
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={handleResetFilters}
             disabled={!syncState.globalTimeWindow}
@@ -401,29 +404,21 @@ export function TriPaneShell({
             title="Reset filters (R)"
           >
             <RefreshCw className="h-4 w-4" />
+            <span className="ml-1">Reset</span>
           </Button>
 
           {onExport && (
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={onExport}
               aria-label="Export data"
               title="Export data (E)"
             >
               <Download className="h-4 w-4" />
+              <span className="ml-1">Export</span>
             </Button>
           )}
-
-           <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowShortcutsDialog(true)}
-            aria-label="Keyboard Shortcuts"
-            title="Keyboard Shortcuts (?)"
-          >
-            <Keyboard className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -431,14 +426,19 @@ export function TriPaneShell({
       <div className="flex-1 grid grid-cols-12 gap-4 min-h-0">
         {/* Timeline Pane */}
         <div className="col-span-3 flex flex-col min-h-0">
-          <Card className={cn("flex-1 flex flex-col min-h-0", activePane === 'timeline' && "ring-2 ring-primary ring-offset-2")}>
+          <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4" />
+              <CardTitle className="flex items-center gap-2 text-sm" role="heading" aria-level={2}>
+                <Clock className="h-4 w-4" aria-hidden="true" />
                 Timeline
                 {syncState.globalTimeWindow && (
                   <Badge variant="secondary" className="text-xs">
                     Filtered
+                  </Badge>
+                )}
+                {activePane === 'timeline' && (
+                  <Badge variant="default" className="text-xs">
+                    Active (T)
                   </Badge>
                 )}
               </CardTitle>
@@ -458,24 +458,24 @@ export function TriPaneShell({
 
         {/* Graph Pane */}
         <div className="col-span-6 flex flex-col min-h-0">
-          <Card className={cn("flex-1 flex flex-col min-h-0", activePane === 'graph' && "ring-2 ring-primary ring-offset-2")}>
+          <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <Network className="h-4 w-4" />
                 Entity Graph
                 {showProvenance && (
-                  <Badge variant="outline" className="text-xs border-green-500 text-green-600">
-                    Provenance On
+                  <Badge variant="secondary" className="text-xs">
+                    Provenance
                   </Badge>
                 )}
-                 {showRiskSignals && (
-                  <Badge variant="outline" className="text-xs border-red-500 text-red-600">
-                    Risk Signals
+                {activePane === 'graph' && (
+                  <Badge variant="default" className="text-xs">
+                    Active (G)
                   </Badge>
                 )}
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-0 flex-1 min-h-0 relative">
+            <CardContent className="p-0 flex-1 min-h-0">
               <GraphCanvas
                 entities={filteredData.entities.map(entity => ({
                   ...entity,
@@ -484,10 +484,8 @@ export function TriPaneShell({
                 relationships={filteredData.relationships}
                 layout={syncState.graph.layout}
                 onEntitySelect={handleEntitySelect}
+                onNodeDragEnd={(node, pos) => updateEntityPosition(node.id, pos.x, pos.y)}
                 selectedEntityId={syncState.graph.selectedEntityId}
-                // Pass overlay props
-                showRiskSignals={showRiskSignals}
-                showNarrativeFlows={showNarrativeFlows}
                 className="h-full"
               />
             </CardContent>
@@ -496,11 +494,16 @@ export function TriPaneShell({
 
         {/* Map Pane */}
         <div className="col-span-3 flex flex-col min-h-0">
-          <Card className={cn("flex-1 flex flex-col min-h-0", activePane === 'map' && "ring-2 ring-primary ring-offset-2")}>
+          <Card className="flex-1 flex flex-col min-h-0">
             <CardHeader className="pb-3 flex-shrink-0">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <MapPin className="h-4 w-4" />
                 Geographic View
+                {activePane === 'map' && (
+                  <Badge variant="default" className="text-xs">
+                    Active (M)
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1 min-h-0">
@@ -517,6 +520,8 @@ export function TriPaneShell({
         </div>
       </div>
 
+      <CollaborationPanel users={users} isConnected={isConnected} isSynced={isSynced} />
+
       {/* Status indicator for active filter */}
       {syncState.globalTimeWindow && (
         <div
@@ -530,48 +535,18 @@ export function TriPaneShell({
         </div>
       )}
 
-      {/* Shortcuts Dialog */}
-      <Dialog open={showShortcutsDialog} onOpenChange={setShowShortcutsDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Keyboard className="h-5 w-5" />
-              Keyboard Shortcuts
-            </DialogTitle>
-            <DialogDescription>
-              Quick navigation for power users.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground">Navigation</h4>
-                <ul className="space-y-1 text-sm">
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">g</span> <span>Focus Graph</span></li>
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">t</span> <span>Focus Timeline</span></li>
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">m</span> <span>Focus Map</span></li>
-                </ul>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-medium text-sm text-muted-foreground">Actions</h4>
-                 <ul className="space-y-1 text-sm">
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">r</span> <span>Reset Filters</span></li>
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">e</span> <span>Export</span></li>
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">?</span> <span>Show Shortcuts</span></li>
-                </ul>
-              </div>
-              <div className="space-y-2 col-span-2">
-                 <h4 className="font-medium text-sm text-muted-foreground">Overlays</h4>
-                 <ul className="space-y-1 text-sm grid grid-cols-2 gap-4">
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">p</span> <span>Toggle Provenance</span></li>
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">Shift+1</span> <span>Toggle Risk Signals</span></li>
-                   <li className="flex justify-between"><span className="font-mono bg-muted px-1 rounded">Shift+2</span> <span>Toggle Narrative Flows</span></li>
-                 </ul>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Keyboard shortcuts helper (hidden, for screen readers) */}
+      <div className="sr-only" role="complementary" aria-label="Keyboard shortcuts">
+        <h2>Keyboard Shortcuts</h2>
+        <ul>
+          <li>G: Focus graph pane</li>
+          <li>T: Focus timeline pane</li>
+          <li>M: Focus map pane</li>
+          <li>R: Reset all filters</li>
+          <li>E: Export data</li>
+          <li>P: Toggle provenance overlay</li>
+        </ul>
+      </div>
     </div>
   )
 }

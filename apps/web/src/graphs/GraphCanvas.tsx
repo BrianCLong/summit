@@ -1,5 +1,46 @@
 import React, { useRef, useEffect, useState } from 'react'
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
 import * as d3 from 'd3'
+=======
+// Tree-shaken D3 imports for better bundle size
+import { select } from 'd3-selection'
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  forceRadial,
+  forceY,
+  forceX,
+  type Simulation,
+  type SimulationNodeDatum,
+  type SimulationLinkDatum,
+} from 'd3-force'
+import { zoom } from 'd3-zoom'
+import { drag } from 'd3-drag'
+>>>>>>> main
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
@@ -12,23 +53,18 @@ interface GraphCanvasProps {
   width?: number
   height?: number
   className?: string
-  // Overlays
-  showRiskSignals?: boolean
-  showNarrativeFlows?: boolean
 }
 
-interface GraphNode extends d3.SimulationNodeDatum {
+interface GraphNode extends SimulationNodeDatum {
   id: string
   entity: Entity
   x?: number
   y?: number
   fx?: number | null
   fy?: number | null
-  // Delta rendering support
-  isNew?: boolean
 }
 
-interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
+interface GraphLink extends SimulationLinkDatum<GraphNode> {
   id: string
   relationship: Relationship
   source: GraphNode
@@ -42,16 +78,60 @@ export function GraphCanvas({
   onEntitySelect,
   selectedEntityId,
   className,
-  showRiskSignals = false,
-  showNarrativeFlows = false,
 }: GraphCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
-  const [zoomLevel, setZoomLevel] = useState(1) // 1 = 100%
+  const [fps, setFps] = useState(0)
+  const [debugMode, setDebugMode] = useState(false)
+  const frameCountRef = useRef(0)
+  const lastTimeRef = useRef(performance.now())
 
-  // Track previous entities to detect changes (Delta rendering)
-  const prevEntitiesRef = useRef<Set<string>>(new Set());
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+  // Calculate FPS
+  useEffect(() => {
+    if (!debugMode) return
 
+    let animationFrameId: number
+
+    const renderLoop = (time: number) => {
+      frameCountRef.current++
+      if (time - lastTimeRef.current >= 1000) {
+        setFps(
+          Math.round((frameCountRef.current * 1000) / (time - lastTimeRef.current))
+        )
+        frameCountRef.current = 0
+        lastTimeRef.current = time
+      }
+      animationFrameId = requestAnimationFrame(renderLoop)
+    }
+
+    animationFrameId = requestAnimationFrame(renderLoop)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [debugMode])
+
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
   // Update dimensions on resize
   useEffect(() => {
     const updateDimensions = () => {
@@ -67,118 +147,296 @@ export function GraphCanvas({
   }, [])
 
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) return
+    if (!svgRef.current || entities.length === 0) {return}
 
-    const svg = d3.select(svgRef.current)
-    // Clear previous render - simple approach.
-    // Optimization: could be improved to use enter/update/exit better, but keeping it robust for now.
+    const svg = select(svgRef.current)
     svg.selectAll('*').remove()
 
     const { width, height } = dimensions
 
-    // Delta Rendering: Mark new entities
-    const currentEntityIds = new Set(entities.map(e => e.id));
-    const entitiesWithMeta = entities.map(entity => ({
-        ...entity,
-        isNew: !prevEntitiesRef.current.has(entity.id) && prevEntitiesRef.current.size > 0
-    }));
-    prevEntitiesRef.current = currentEntityIds;
+    // Create nodes and links
+    const nodes: GraphNode[] = entities.map(entity => ({
+      id: entity.id,
+      entity,
+    }))
 
-    // LOD & Clustering Logic
-    // If zoom level is very low (< 0.5), we might want to cluster nodes
-    const shouldCluster = zoomLevel < 0.5 && entities.length > 50;
-
-    let nodesToRender: GraphNode[];
-    let linksToRender: GraphLink[];
-
-    if (shouldCluster) {
-        // Simple clustering: group by type
-        // This is a visual simplification only for the demo
-        // Real implementation would be more complex
-        const clusters = d3.group(entitiesWithMeta, d => d.type);
-        nodesToRender = Array.from(clusters).map(([type, group], i) => ({
-            id: `cluster-${type}`,
-            entity: {
-                id: `cluster-${type}`,
-                type: type,
-                name: `${type} (${group.length})`,
-                confidence: 1,
-                // Metadata to indicate it's a cluster
-                metadata: { isCluster: true, count: group.length }
-            } as any,
-             // preserve somewhat stable positions if possible (not implemented here)
-        }));
-        // Simplified links between clusters?
-        // For now, no links in cluster mode to keep it clean or just intra-cluster
-         linksToRender = [];
-    } else {
-        nodesToRender = entitiesWithMeta.map(entity => ({
-            id: entity.id,
-            entity,
-            isNew: (entity as any).isNew
-        }));
-
-        linksToRender = relationships
-        .filter(rel => {
-            const sourceNode = nodesToRender.find(n => n.id === rel.sourceId)
-            const targetNode = nodesToRender.find(n => n.id === rel.targetId)
-            return sourceNode && targetNode
-        })
-        .map(rel => ({
-            id: rel.id,
-            relationship: rel,
-            source: nodesToRender.find(n => n.id === rel.sourceId)!,
-            target: nodesToRender.find(n => n.id === rel.targetId)!,
-        }));
-    }
-
+    const links: GraphLink[] = relationships
+      .filter(rel => {
+        const sourceNode = nodes.find(n => n.id === rel.sourceId)
+        const targetNode = nodes.find(n => n.id === rel.targetId)
+        return sourceNode && targetNode
+      })
+      .map(rel => ({
+        id: rel.id,
+        relationship: rel,
+        source: nodes.find(n => n.id === rel.sourceId)!,
+        target: nodes.find(n => n.id === rel.targetId)!,
+      }))
 
     // Create simulation based on layout type
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     let simulation: d3.Simulation<GraphNode, GraphLink>
-
-    const chargeStrength = shouldCluster ? -500 : -300;
-    const linkDistance = shouldCluster ? 200 : 100;
 
     switch (layout.type) {
       case 'force':
         simulation = d3
-          .forceSimulation(nodesToRender)
+          .forceSimulation(nodes)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+    let simulation: Simulation<GraphNode, GraphLink>
+
+    switch (layout.type) {
+      case 'force':
+        simulation = forceSimulation(nodes)
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(linksToRender)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
-              .distance(linkDistance)
+              .distance(100)
           )
-          .force('charge', d3.forceManyBody().strength(chargeStrength))
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+          .force('charge', d3.forceManyBody().strength(-300))
           .force('center', d3.forceCenter(width / 2, height / 2))
-          .force('collision', d3.forceCollide().radius(shouldCluster ? 50 : 30))
+          .force('collision', d3.forceCollide().radius(30))
         break
 
       case 'radial':
         simulation = d3
-          .forceSimulation(nodesToRender)
+          .forceSimulation(nodes)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+          .force('charge', forceManyBody().strength(-300))
+          .force('center', forceCenter(width / 2, height / 2))
+          .force('collision', forceCollide().radius(30))
+        break
+
+      case 'radial':
+        simulation = forceSimulation(nodes)
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(linksToRender)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(80)
           )
+<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+          .force('charge', forceManyBody().strength(-200))
+          .force('radial', forceRadial(150, width / 2, height / 2))
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
         break
 
-      // ... (other cases like hierarchic remain similar)
-      default:
-         simulation = d3
-          .forceSimulation(nodesToRender)
+      case 'hierarchic':
+        // Simple hierarchical layout - in a real app you'd use dagre or similar
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
+        simulation = forceSimulation(nodes)
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
           .force(
             'link',
-            d3.forceLink<GraphNode, GraphLink>(linksToRender).id(d => d.id)
+            forceLink<GraphNode, GraphLink>(links)
+              .id(d => d.id)
+              .distance(60)
           )
-          .force('charge', d3.forceManyBody())
-          .force('center', d3.forceCenter(width / 2, height / 2))
+          .force('charge', forceManyBody().strength(-100))
+          .force(
+            'y',
+            forceY<GraphNode>().y(d => (d.index || 0) * 80 + 100)
+          )
+          .force('x', forceX(width / 2))
+        break
+
+      default:
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+        simulation = forceSimulation(nodes)
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+          .force(
+            'link',
+            forceLink<GraphNode, GraphLink>(links).id(d => d.id)
+          )
+          .force('charge', forceManyBody())
+          .force('center', forceCenter(width / 2, height / 2))
     }
 
     // Create container groups
@@ -186,25 +444,19 @@ export function GraphCanvas({
     const linksGroup = container.append('g').attr('class', 'links')
     const nodesGroup = container.append('g').attr('class', 'nodes')
 
-    // Overlay Groups
-    const narrativeFlowGroup = container.append('g').attr('class', 'narrative-flows')
-    const riskSignalGroup = container.append('g').attr('class', 'risk-signals')
-
     // Add zoom behavior
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on('zoom', event => {
         container.attr('transform', event.transform)
-        setZoomLevel(event.transform.k); // Update zoom state for LOD
       })
 
-    svg.call(zoom)
+    svg.call(zoomBehavior)
 
     // Draw links
     const link = linksGroup
       .selectAll<SVGLineElement, GraphLink>('line')
-      .data(linksToRender)
+      .data(links)
       .enter()
       .append('line')
       .attr('class', 'link')
@@ -212,17 +464,17 @@ export function GraphCanvas({
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', d => Math.sqrt(d.relationship.confidence * 3))
 
-    // Draw link labels (LOD: hide labels when zoomed out)
+    // Draw link labels
     const linkLabel = linksGroup
       .selectAll<SVGTextElement, GraphLink>('text')
-      .data(linksToRender)
+      .data(links)
       .enter()
       .append('text')
       .attr('class', 'link-label')
       .attr('font-size', '10px')
       .attr('fill', '#666')
       .attr('text-anchor', 'middle')
-      .text(d => zoomLevel > 0.8 ? d.relationship.type.replace('_', ' ').toLowerCase() : '') // LOD check
+      .text(d => d.relationship.type.replace('_', ' ').toLowerCase())
 
     // Entity type to color mapping
     const getEntityColor = (type: string) => {
@@ -259,16 +511,15 @@ export function GraphCanvas({
     // Draw nodes
     const node = nodesGroup
       .selectAll<SVGGElement, GraphNode>('g')
-      .data(nodesToRender)
+      .data(nodes)
       .enter()
       .append('g')
       .attr('class', 'node')
       .style('cursor', 'pointer')
       .call(
-        d3
-          .drag<SVGGElement, GraphNode>()
+        drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0.3).restart()
+            if (!event.active) {simulation.alphaTarget(0.3).restart()}
             d.fx = d.x
             d.fy = d.y
           })
@@ -277,7 +528,7 @@ export function GraphCanvas({
             d.fy = event.y
           })
           .on('end', (event, d) => {
-            if (!event.active) simulation.alphaTarget(0)
+            if (!event.active) {simulation.alphaTarget(0)}
             d.fx = null
             d.fy = null
           })
@@ -286,39 +537,27 @@ export function GraphCanvas({
     // Node circles
     node
       .append('circle')
-      .attr('r', d => {
-          if ((d.entity as any).metadata?.isCluster) return 30;
-          return 15 + d.entity.confidence * 10
-      })
+      .attr('r', d => 15 + d.entity.confidence * 10)
       .attr('fill', d => getEntityColor(d.entity.type))
-      .attr('stroke', d => {
-        if (d.isNew) return '#22c55e'; // Green stroke for new nodes
-        return selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
-      })
-      .attr('stroke-width', d => (selectedEntityId === d.entity.id || d.isNew ? 3 : 2))
+      .attr('stroke', d =>
+        selectedEntityId === d.entity.id ? '#fbbf24' : '#fff'
+      )
+      .attr('stroke-width', d => (selectedEntityId === d.entity.id ? 3 : 2))
       .style('filter', d =>
         selectedEntityId === d.entity.id
           ? 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.6))'
           : 'none'
       )
-      // Pulse animation for new nodes
-      .filter(d => !!d.isNew)
-      .append('animate')
-      .attr('attributeName', 'r')
-      .attr('values', d => `${15 + d.entity.confidence * 10};${20 + d.entity.confidence * 10};${15 + d.entity.confidence * 10}`)
-      .attr('dur', '1.5s')
-      .attr('repeatCount', '3');
 
-
-    // Node icons (LOD: hide icons when very zoomed out if crowded)
+    // Node icons (using text for simplicity)
     node
       .append('text')
       .attr('text-anchor', 'middle')
       .attr('dy', '.35em')
       .attr('font-size', '12px')
-      .text(d => zoomLevel > 0.4 ? getEntityIcon(d.entity.type) : '')
+      .text(d => getEntityIcon(d.entity.type))
 
-    // Node labels (LOD: Hide labels if zoomed out)
+    // Node labels
     node
       .append('text')
       .attr('text-anchor', 'middle')
@@ -327,14 +566,13 @@ export function GraphCanvas({
       .attr('font-weight', 'bold')
       .attr('fill', '#333')
       .style('pointer-events', 'none')
-      .text(d => {
-        if (zoomLevel < 0.6 && !(selectedEntityId === d.entity.id)) return ''; // Hide labels when zoomed out unless selected
-        return d.entity.name.length > 15
-          ? d.entity.name.slice(0, 15) + '...'
+      .text(d =>
+        d.entity.name.length > 15
+          ? `${d.entity.name.slice(0, 15)  }...`
           : d.entity.name
-      })
+      )
 
-    // Confidence indicator (LOD: Only show when zoomed in)
+    // Confidence indicator
     node
       .append('text')
       .attr('text-anchor', 'middle')
@@ -342,10 +580,7 @@ export function GraphCanvas({
       .attr('font-size', '9px')
       .attr('fill', '#666')
       .style('pointer-events', 'none')
-      .text(d => {
-           if (zoomLevel < 1.2) return '';
-           return `${Math.round(d.entity.confidence * 100)}%`
-      })
+      .text(d => `${Math.round(d.entity.confidence * 100)}%`)
 
     // Click handler for nodes
     node.on('click', (event, d) => {
@@ -355,7 +590,7 @@ export function GraphCanvas({
 
     // Hover effects
     node.on('mouseenter', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -368,7 +603,7 @@ export function GraphCanvas({
     })
 
     node.on('mouseleave', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -397,62 +632,6 @@ export function GraphCanvas({
         )
 
       node.attr('transform', d => `translate(${d.x},${d.y})`)
-
-      // Update Overlays
-      if (showRiskSignals) {
-         riskSignalGroup.selectAll('*').remove();
-         // Simulate risk based on confidence < 0.8 for demo
-         const riskyNodes = nodesToRender.filter(n => n.entity.confidence < 0.8);
-         riskyNodes.forEach(n => {
-             if (n.x && n.y) {
-                 riskSignalGroup.append('circle')
-                    .attr('cx', n.x)
-                    .attr('cy', n.y)
-                    .attr('r', 25)
-                    .attr('fill', 'none')
-                    .attr('stroke', 'red')
-                    .attr('stroke-width', 2)
-                    .attr('stroke-dasharray', '4 2')
-                    .append('animateTransform')
-                    .attr('attributeName', 'transform')
-                    .attr('type', 'rotate')
-                    .attr('from', `0 ${n.x} ${n.y}`)
-                    .attr('to', `360 ${n.x} ${n.y}`)
-                    .attr('dur', '10s')
-                    .attr('repeatCount', 'indefinite');
-             }
-         });
-      } else {
-          riskSignalGroup.selectAll('*').remove();
-      }
-
-      if (showNarrativeFlows) {
-           narrativeFlowGroup.selectAll('*').remove();
-           // Draw a path connecting nodes in order of creation/index (mock flow)
-           if (nodesToRender.length > 1) {
-               const pathGenerator = d3.line<GraphNode>()
-                 .x(d => d.x!)
-                 .y(d => d.y!)
-                 .curve(d3.curveCatmullRom);
-
-                // Just take first 5 nodes as a 'narrative'
-                const flowNodes = nodesToRender.slice(0, 5);
-
-                if (flowNodes.every(n => n.x && n.y)) {
-                    narrativeFlowGroup.append('path')
-                        .datum(flowNodes)
-                        .attr('d', pathGenerator)
-                        .attr('fill', 'none')
-                        .attr('stroke', '#3b82f6')
-                        .attr('stroke-width', 4)
-                        .attr('stroke-opacity', 0.3)
-                        .attr('stroke-dasharray', '10 5')
-                        .attr('class', 'flow-line');
-                }
-           }
-      } else {
-          narrativeFlowGroup.selectAll('*').remove();
-      }
     })
 
     // Cleanup
@@ -466,14 +645,6 @@ export function GraphCanvas({
     dimensions,
     selectedEntityId,
     onEntitySelect,
-    showRiskSignals,
-    showNarrativeFlows,
-    // zoomLevel triggers re-render only if thresholds crossed, managed by setZoomLevel but here we just depend on entities/layout mainly.
-    // Ideally we would want to re-run sim only if structure changes, but for LOD labels/icons we might need re-render or d3 update.
-    // For simplicity in this React wrapper, we re-run sim if entities change.
-    // For pure visual LOD (labels), we can use a separate effect or just let D3 handle it via classes/css or update selections.
-    // Here we include zoomLevel in dep array to force re-render of labels/icons.
-    zoomLevel < 0.5 // crude dependency to trigger re-render on major zoom change for clustering
   ])
 
   return (
@@ -488,24 +659,108 @@ export function GraphCanvas({
       />
 
       {/* Graph controls overlay */}
-      <div className="absolute top-4 right-4 flex flex-col gap-2 pointer-events-none">
-        <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm pointer-events-auto">
+      <div className="absolute top-4 right-4 flex flex-col gap-2">
+        <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
+<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
+=======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
+          <div className="flex justify-between items-center mb-1 gap-2">
+            <div className="text-xs font-medium text-muted-foreground">
+              Graph Info
+            </div>
+            <button
+              onClick={() => setDebugMode(!debugMode)}
+              className="text-[10px] px-1.5 py-0.5 rounded border hover:bg-muted transition-colors"
+            >
+              {debugMode ? 'Debug: ON' : 'Debug'}
+            </button>
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
           </div>
           <div className="text-xs space-y-1">
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
-            <div>Zoom: {Math.round(zoomLevel * 100)}%</div>
-             {showRiskSignals && <div className="text-red-500 font-bold">Risk Signals ON</div>}
-             {showNarrativeFlows && <div className="text-blue-500 font-bold">Narrative Flows ON</div>}
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+            {debugMode && (
+              <>
+                <div className="border-t my-1 pt-1 border-muted" />
+                <div className="font-mono text-[10px]">FPS: {fps}</div>
+                <div className="font-mono text-[10px]">
+                  Density:{' '}
+                  {entities.length > 1
+                    ? (
+                        (2 * relationships.length) /
+                        (entities.length * (entities.length - 1))
+                      ).toFixed(4)
+                    : '0.0000'}
+                </div>
+              </>
+            )}
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
           </div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border rounded-lg p-3 shadow-sm pointer-events-auto">
+      <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm border rounded-lg p-3 shadow-sm">
         <div className="text-xs font-medium text-muted-foreground mb-2">
           Entity Types
         </div>

@@ -1,0 +1,53 @@
+name: Schema Drift Governance
+
+on:
+  pull_request:
+    paths:
+      - 'migrations/**'
+      - 'scripts/schema-*.ts'
+      - 'scripts/create-migration.ts'
+      - '.github/workflows/schema-drift.yml'
+      - 'schema-fingerprints/**'
+      - 'server/src/db/**'
+      - 'server/db/**'
+      - 'packages/**'
+      - 'schemas/**'
+      - 'docs/ops/schema-evolution-governance.md'
+      - 'package.json'
+  push:
+    branches:
+      - main
+    paths:
+      - 'migrations/**'
+      - 'scripts/schema-*.ts'
+      - 'scripts/create-migration.ts'
+      - '.github/workflows/schema-drift.yml'
+      - 'schema-fingerprints/**'
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: Verify schema governance
+        run: |
+          BASE_REF="${{ github.event.pull_request.base.sha || '' }}"
+          if [ -z "$BASE_REF" ]; then
+            BASE_REF=origin/main
+          fi
+          SCHEMA_DRIFT_BASE="$BASE_REF" pnpm run schema:verify
