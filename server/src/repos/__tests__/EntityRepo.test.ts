@@ -12,13 +12,13 @@
 
 import { jest } from '@jest/globals';
 import { EntityRepo, type Entity, type EntityInput } from '../EntityRepo';
-import type { Pool, PoolClient } from 'pg';
+import type { Pool } from 'pg';
 import type { Driver, Session } from 'neo4j-driver';
 
 describe('EntityRepo', () => {
   let entityRepo: EntityRepo;
   let mockPgPool: jest.Mocked<Pool>;
-  let mockPgClient: jest.Mocked<PoolClient>;
+  let mockPgClient: any;
   let mockNeo4jDriver: jest.Mocked<Driver>;
   let mockNeo4jSession: jest.Mocked<Session>;
 
@@ -31,7 +31,7 @@ describe('EntityRepo', () => {
 
     // Mock PostgreSQL pool
     mockPgPool = {
-      connect: jest.fn().mockResolvedValue(mockPgClient),
+      connect: (jest.fn() as any).mockResolvedValue(mockPgClient),
       query: jest.fn(),
     } as any;
 

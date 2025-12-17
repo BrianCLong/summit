@@ -1,0 +1,55 @@
+{
+  "name": "@companyos/scaffold-cli",
+  "version": "1.0.0",
+  "description": "Golden Path Platform scaffolding CLI for CompanyOS services",
+  "type": "module",
+  "bin": {
+    "companyos": "./dist/index.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -b",
+    "start": "node dist/index.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0",
+    "enquirer": "^2.4.1",
+    "fs-extra": "^11.2.0",
+    "handlebars": "^4.7.8",
+    "ora": "^8.0.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^20.10.0",
+    "@types/jest": "^29.5.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "eslint": "^9.0.0"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "keywords": [
+    "scaffold",
+    "cli",
+    "golden-path",
+    "companyos",
+    "platform"
+  ],
+  "author": "CompanyOS Platform Team",
+  "license": "UNLICENSED",
+  "private": true
+}

@@ -7,6 +7,7 @@ import {
   evaluationEngine,
   GoldenTask,
   EvaluationResult,
+  QualityMetrics,
 } from './golden-tasks';
 
 // QualityMetrics is calculated dynamically by evaluationEngine.calculateQualityMetrics()

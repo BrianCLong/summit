@@ -98,6 +98,15 @@ router.post('/runs', requirePermission('run:create'), async (req, res) => {
       });
     }
 
+    //
+    // TODO: This is a placeholder for the quota service
+    //
+    // await quotaService.assert({
+    //   tenantId,
+    //   dimension: 'maestro.runs',
+    //   quantity: 1,
+    // });
+
     const run = await runsRepo.create({
       ...validation.data,
       tenant_id: tenantId,
@@ -127,6 +136,25 @@ router.get('/runs/:id', requirePermission('run:read'), async (req, res) => {
     if (!run) {
       return res.status(404).json({ error: 'Run not found' });
     }
+
+    //
+    // TODO: This is a placeholder for the usage metering service
+    //
+    // if (run.status === 'succeeded') {
+    //   await usageMeteringService.record({
+    //     id: '',
+    //     tenantId,
+    //     dimension: 'maestro.runs',
+    //     quantity: 1,
+    //     unit: 'count',
+    //     source: 'maestro',
+    //     metadata: {
+    //       pipeline_id: run.pipeline_id,
+    //     },
+    //     occurredAt: new Date().toISOString(),
+    //     recordedAt: new Date().toISOString(),
+    //   });
+    // }
 
     res.json(run);
   } catch (error) {
