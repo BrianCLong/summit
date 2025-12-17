@@ -16,13 +16,15 @@ export class Maestro {
     private config: MaestroConfig,
   ) {}
 
-  async createRun(userId: string, requestText: string): Promise<Run> {
+  async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
     const run: Run = {
       id: crypto.randomUUID(),
       user: { id: userId },
       createdAt: new Date().toISOString(),
       requestText,
-    };
+      // Pass tenant context if available (will need DB schema update for full persistence)
+      ...(options?.tenantId ? { tenantId: options.tenantId } : {})
+    } as Run;
     await this.ig.createRun(run);
     return run;
   }
@@ -127,8 +129,8 @@ export class Maestro {
     }
   }
 
-  async runPipeline(userId: string, requestText: string) {
-    const run = await this.createRun(userId, requestText);
+  async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
+    const run = await this.createRun(userId, requestText, options);
     const tasks = await this.planRequest(run);
 
     const executable = tasks.filter(t => t.status === 'queued');

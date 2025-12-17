@@ -28,6 +28,7 @@ import resolvers from './graphql/resolvers/index.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
+import { unifiedAuthMiddleware } from './middleware/unifiedAuth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Request, Response, NextFunction } from 'express'; // Import types for middleware
@@ -147,6 +148,11 @@ export const createApp = async () => {
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
+
+  // Apply Unified Auth to /api routes
+  // We apply it here for all /api endpoints to ensure consistent identity handling
+  app.use('/api', unifiedAuthMiddleware);
+
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
   app.use('/api/narrative-sim', narrativeSimulationRouter);
