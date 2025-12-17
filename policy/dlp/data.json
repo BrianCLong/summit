@@ -1,0 +1,202 @@
+{
+  "barriers": {
+    "business_unit_walls": [
+      {
+        "name": "trading_research_wall",
+        "units": ["TRADING", "RESEARCH", "INVESTMENT_BANKING"],
+        "description": "Chinese wall between trading and research divisions",
+        "direction": "BIDIRECTIONAL",
+        "data_types": ["TRADING_DATA", "RESEARCH_REPORTS", "INVESTMENT_RECOMMENDATIONS"],
+        "enabled": true
+      },
+      {
+        "name": "hr_confidential_wall",
+        "units": ["HR"],
+        "description": "HR data isolation from other business units",
+        "direction": "OUTBOUND_ONLY",
+        "data_types": ["HR_RECORDS", "SALARY_DATA", "PERFORMANCE_REVIEWS"],
+        "enabled": true
+      },
+      {
+        "name": "legal_privileged_wall",
+        "units": ["LEGAL"],
+        "description": "Attorney-client privilege protection",
+        "direction": "OUTBOUND_ONLY",
+        "data_types": ["LEGAL_PRIVILEGED", "LITIGATION_MATTERS"],
+        "enabled": true
+      },
+      {
+        "name": "ma_deal_wall",
+        "units": ["MA_TEAM", "CORPORATE_DEVELOPMENT"],
+        "description": "M&A deal team isolation",
+        "direction": "BIDIRECTIONAL",
+        "data_types": ["MA_DOCUMENTS", "DEAL_TERMS", "VALUATION_MODELS"],
+        "enabled": true
+      }
+    ],
+    "jurisdiction_rules": [
+      {
+        "from": "US",
+        "to": "US",
+        "allowed": true,
+        "conditions": []
+      },
+      {
+        "from": "EU",
+        "to": "EU",
+        "allowed": true,
+        "conditions": []
+      },
+      {
+        "from": "EU",
+        "to": "US",
+        "allowed": true,
+        "conditions": ["SCCs", "DPF_CERTIFIED"]
+      },
+      {
+        "from": "US",
+        "to": "EU",
+        "allowed": true,
+        "conditions": ["GDPR_COMPLIANT"]
+      },
+      {
+        "from": "EU",
+        "to": "UK",
+        "allowed": true,
+        "conditions": ["UK_ADEQUACY"]
+      },
+      {
+        "from": "US",
+        "to": "CN",
+        "allowed": false,
+        "conditions": [],
+        "reason": "Data localization requirements"
+      },
+      {
+        "from": "EU",
+        "to": "CN",
+        "allowed": false,
+        "conditions": [],
+        "reason": "No adequacy decision"
+      },
+      {
+        "from": "*",
+        "to": "RU",
+        "allowed": false,
+        "conditions": [],
+        "reason": "Sanctions compliance"
+      }
+    ]
+  },
+  "dlp": {
+    "blocked_destinations": [
+      "pastebin.com",
+      "hastebin.com",
+      "ghostbin.com",
+      "privatebin.net",
+      "file.io",
+      "transfer.sh",
+      "wetransfer.com",
+      "mega.nz",
+      "anonfiles.com",
+      "dropmefiles.com",
+      "sendspace.com",
+      "mediafire.com",
+      "4shared.com",
+      "rapidshare.com",
+      "personal-gmail.com",
+      "personal-outlook.com",
+      "protonmail.com",
+      "tutanota.com",
+      "guerrillamail.com",
+      "tempmail.com"
+    ],
+    "allowed_external_destinations": [
+      "compliance-portal.sec.gov",
+      "edgar-online.sec.gov",
+      "efile.fincen.gov",
+      "efiling.courts.gov",
+      "approved-vendor-1.com",
+      "approved-vendor-2.com",
+      "auditor-portal.kpmg.com",
+      "auditor-portal.pwc.com",
+      "auditor-portal.deloitte.com",
+      "auditor-portal.ey.com"
+    ],
+    "redaction_rules": {
+      "SSN": {
+        "strategy": "FULL_MASK",
+        "mask_char": "X",
+        "preserve_format": true,
+        "example": "XXX-XX-XXXX"
+      },
+      "CREDIT_CARD": {
+        "strategy": "PARTIAL_MASK",
+        "preserve_last": 4,
+        "mask_char": "*",
+        "example": "****-****-****-1234"
+      },
+      "EMAIL": {
+        "strategy": "PARTIAL_MASK",
+        "preserve_domain": true,
+        "mask_char": "*",
+        "example": "j***@example.com"
+      },
+      "PHONE": {
+        "strategy": "PARTIAL_MASK",
+        "preserve_area_code": true,
+        "mask_char": "*",
+        "example": "(555) ***-****"
+      },
+      "DATE_OF_BIRTH": {
+        "strategy": "GENERALIZE",
+        "generalization": "YEAR_ONLY",
+        "example": "****-**-1990"
+      },
+      "ADDRESS": {
+        "strategy": "PARTIAL_MASK",
+        "preserve": ["city", "state"],
+        "mask_char": "*",
+        "example": "***, San Francisco, CA"
+      },
+      "IP_ADDRESS": {
+        "strategy": "PARTIAL_MASK",
+        "preserve_octets": 2,
+        "mask_char": "*",
+        "example": "192.168.*.*"
+      },
+      "BANK_ACCOUNT": {
+        "strategy": "PARTIAL_MASK",
+        "preserve_last": 4,
+        "mask_char": "*",
+        "example": "******1234"
+      },
+      "PASSPORT": {
+        "strategy": "FULL_MASK",
+        "mask_char": "X",
+        "preserve_format": false,
+        "example": "XXXXXXXXX"
+      },
+      "DRIVER_LICENSE": {
+        "strategy": "PARTIAL_MASK",
+        "preserve_state": true,
+        "mask_char": "*",
+        "example": "CA-*******"
+      },
+      "API_KEY": {
+        "strategy": "FULL_MASK",
+        "mask_char": "*",
+        "preserve_prefix": 4,
+        "example": "sk-*************************"
+      },
+      "PASSWORD": {
+        "strategy": "FULL_MASK",
+        "mask_char": "*",
+        "fixed_length": 8,
+        "example": "********"
+      }
+    }
+  },
+  "exceptions": [],
+  "approvals": {}
+}

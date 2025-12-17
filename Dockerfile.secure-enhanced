@@ -12,14 +12,14 @@ ARG VCS_REF
 ARG DISTROLESS_TAG=nonroot-debug
 
 # ===== SECURITY SCANNING STAGE =====
-FROM aquasec/trivy:0.51.1 as security-scanner
+FROM aquasec/trivy:0.68.1 as security-scanner
 WORKDIR /scan
 COPY package*.json ./
 # Scan for vulnerabilities before building
 RUN trivy fs --exit-code 1 --severity HIGH,CRITICAL --format sarif --output /scan/results.sarif .
 
 # ===== SBOM GENERATION STAGE =====
-FROM anchore/syft:v0.105.1 as sbom-generator
+FROM anchore/syft:v1.38.2 as sbom-generator
 WORKDIR /sbom
 COPY package*.json ./
 COPY --from=security-scanner /scan/results.sarif ./

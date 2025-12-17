@@ -1,5 +1,8 @@
 const fs = require('fs');
 
+// Import jest-dom for extended matchers (toBeInTheDocument, toHaveTextContent, etc.)
+require('@testing-library/jest-dom');
+
 // Configure JSDOM environment for client tests
 if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'matchMedia', {
