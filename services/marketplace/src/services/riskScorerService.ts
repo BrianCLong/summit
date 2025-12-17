@@ -185,9 +185,9 @@ function assessTechnicalControls(product: DataProduct): number {
 function getRiskLevel(
   score: number
 ): 'low' | 'medium' | 'high' | 'critical' {
-  if (score <= 25) return 'low';
-  if (score <= 50) return 'medium';
-  if (score <= 75) return 'high';
+  if (score <= 25) {return 'low';}
+  if (score <= 50) {return 'medium';}
+  if (score <= 75) {return 'high';}
   return 'critical';
 }
 
@@ -276,7 +276,7 @@ function runAutomatedChecks(
     },
     {
       name: 'classification_set',
-      passed: !!product.classification,
+      passed: Boolean(product.classification),
       details: 'Data classification must be specified',
     },
     {
