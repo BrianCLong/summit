@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { getNeo4jDriver, isNeo4jMockMode } from '../../db/neo4j.js';
+import neo4j from 'neo4j-driver';
 import { randomUUID as uuidv4 } from 'node:crypto';
 import pino from 'pino';
 import {
@@ -13,6 +14,7 @@ import { getPostgresPool } from '../../db/postgres.js';
 import axios from 'axios';
 import { GraphQLError } from 'graphql';
 import { getMockEntity, getMockEntities } from './__mocks__/entityMocks.js';
+import { withCache, listCacheKey } from '../../utils/cacheHelper.js';
 
 const logger = pino();
 const driver = getNeo4jDriver();
@@ -47,66 +49,85 @@ const entityResolvers = {
         return getMockEntity(id);
       }
     },
-    entities: async (
-      _: any,
-      {
-        type,
-        q,
-        limit,
-        offset,
-      }: { type?: string; q?: string; limit: number; offset: number },
-      context: any,
-    ) => {
-      // Return mock data if database is not available
-      if (isNeo4jMockMode()) {
-        return getMockEntities(type, q, limit, offset);
-      }
-
-      const session = driver.session();
-      try {
-        const tenantId = requireTenant(context);
-        let query = 'MATCH (n:Entity) WHERE n.tenantId = $tenantId';
-        const params: any = { tenantId };
-
-        if (type) {
-          query += ' AND n.type = $type';
-          params.type = type;
+    entities: withCache(
+      // Cache key generator
+      (_parent, args, context) => {
+        const tenantId = context?.user?.tenant || 'default';
+        return listCacheKey('entities', { ...args, tenantId });
+      },
+      // Resolver implementation
+      async (
+        _: any,
+        {
+          type,
+          q,
+          limit,
+          offset,
+        }: { type?: string; q?: string; limit: number; offset: number },
+        context: any,
+      ) => {
+        // Return mock data if database is not available
+        if (isNeo4jMockMode()) {
+          return getMockEntities(type, q, limit, offset);
         }
 
-        if (q) {
-          // Simple full-text search on properties
-          // For better performance, consider using a full-text search index.
-          // See: https://neo4j.com/docs/cypher-manual/current/indexes-for-full-text-search/
-          query +=
-            ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
-          params.q = q;
+        const session = driver.session();
+        try {
+          const tenantId = requireTenant(context);
+          // Optimized: Use labels in MATCH if type is provided
+          // MATCH (n:Entity) -> MATCH (n:Entity:Type)
+          let query = 'MATCH (n:Entity';
+          const params: any = { tenantId };
+
+          if (type) {
+             // Validating type to prevent injection (simple alphanumeric check)
+             if (/^[a-zA-Z0-9_]+$/.test(type)) {
+                 query += `:${type}`;
+             }
+          }
+
+          query += ') WHERE n.tenantId = $tenantId';
+
+          if (q) {
+            // Optimization: Prefer index usage if possible.
+            // `CONTAINS` is slow without a fulltext index.
+            // If fulltext index exists, use: CALL db.index.fulltext.queryNodes("entity_idx", $q) ...
+            // Falling back to existing logic but adding comments for optimization
+
+            // Note: Efficient `CONTAINS` requires specific index setup or fulltext search.
+            query +=
+              ' AND (ANY(prop IN keys(n) WHERE toString(n[prop]) CONTAINS $q))';
+            params.q = q;
+          }
+
+          query += ' RETURN n SKIP $offset LIMIT $limit';
+          params.limit = neo4j.int(limit);
+          params.offset = neo4j.int(offset);
+
+          const result = await session.run(query, params);
+          return result.records.map((record) => {
+            const entity = record.get('n');
+            return {
+              id: entity.properties.id,
+              type: entity.labels[0],
+              props: entity.properties,
+              createdAt: entity.properties.createdAt,
+              updatedAt: entity.properties.updatedAt,
+            };
+          });
+        } catch (error) {
+          logger.error(
+            { error, type, q, limit, offset },
+            'Error fetching entities',
+          );
+          throw new Error(`Failed to fetch entities: ${error.message}`);
+        } finally {
+          await session.close();
         }
-
-        query += ' RETURN n SKIP $offset LIMIT $limit';
-        params.limit = limit;
-        params.offset = offset;
-
-        const result = await session.run(query, params);
-        return result.records.map((record) => {
-          const entity = record.get('n');
-          return {
-            id: entity.properties.id,
-            type: entity.labels[0],
-            props: entity.properties,
-            createdAt: entity.properties.createdAt,
-            updatedAt: entity.properties.updatedAt,
-          };
-        });
-      } catch (error) {
-        logger.error(
-          { error, type, q, limit, offset },
-          'Error fetching entities',
-        );
-        throw new Error(`Failed to fetch entities: ${error.message}`);
-      } finally {
-        await session.close();
-      }
-    },
+      },
+      // Cache options
+      { ttl: 30, tenantId: 'context' } // 30s TTL
+    ),
     semanticSearch: async (
       _: any,
       {
