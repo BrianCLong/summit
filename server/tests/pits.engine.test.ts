@@ -1,4 +1,5 @@
 import { PrivacyIncidentDrillEngine, defaultScenario } from '@server/pits';
+import { describe, it, expect } from '@jest/globals';
 
 describe('PrivacyIncidentDrillEngine', () => {
   it('produces deterministic outputs when the seed is fixed', () => {
