@@ -1,20 +1,77 @@
-# Golden test fixtures
+# Test Data Directory
 
-This directory holds deterministic fixtures for IntelGraph and Maestro integration tests.
+This directory contains test fixtures and oracle scenarios for validating IntelGraph functionality.
 
-## IntelGraph
-- **File**: `intelgraph/golden-graph.json`
-- **Scenarios**:
-  - `toy`: single-tenant, single-service sanity checks.
-  - `realistic-medium`: multi-tenant pipeline with open/closed incidents and cost signals.
-  - `edge-cases`: disconnected components plus a dense dependency hub.
-- **Use with**: `scripts/testing/load-golden-intelgraph.ts`
+## Structure
 
-## Maestro
-- **File**: `maestro/golden-runs.json`
-- **Scenarios**:
-  - `control-loop`: two orchestrator services with HIPAA-aware policy and fallback plan.
-  - `edge-burst`: saturated hub service with cost spikes and cold spare.
-- **Use with**: `scripts/testing/load-golden-maestro.ts`
+```
+testdata/
+├── README.md                      # This file
+└── intelgraph/
+    └── oracle-scenarios.json      # Graph Query Oracle scenarios
+```
 
-All fixtures use synthetic identifiers, stable timestamps, and consistent IDs to keep tests deterministic.
+## IntelGraph Oracle Scenarios
+
+The `intelgraph/oracle-scenarios.json` file contains the test scenarios for the Graph Query Correctness Oracle.
+
+### Running the Oracle
+
+```bash
+# Run all scenarios
+pnpm oracle:graph
+
+# Run with verbose output
+pnpm oracle:graph:verbose
+
+# Run specific scenario
+pnpm oracle:graph -- --scenario path-1.1
+
+# Run specific category
+pnpm oracle:graph -- --category pathfinding
+```
+
+### Adding New Scenarios
+
+1. Edit `intelgraph/oracle-scenarios.json`
+2. Add a new scenario following the schema:
+
+```json
+{
+  "id": "unique-id",
+  "category": "category-name",
+  "name": "Human Readable Name",
+  "description": "Description of what this scenario tests",
+  "enabled": true,
+  "query": {
+    "type": "graphql",
+    "operation": "operationName",
+    "document": "query Document { ... }",
+    "variables": {}
+  },
+  "expected": {
+    "validation": [
+      { "type": "exact", "field": "path.to.field", "value": "expected" }
+    ],
+    "performance": {
+      "maxLatencyMs": 1000
+    }
+  }
+}
+```
+
+### Validation Types
+
+- `exact` - Exact value match
+- `gte` / `lte` - Greater/less than or equal
+- `contains` - Array contains specified values
+- `set` - Array matches set (order independent)
+- `ordered` - Array matches in exact order
+- `allMatch` - All array elements match value
+- `null` / `notNull` - Null checking
+- `descending` - Array is in descending order
+
+### Reference
+
+- [Oracle Spec](../docs/testing/graph-query-oracle.md)
+- [Golden Dataset](../data/golden-path/demo-investigation.json)

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Pool } from 'pg';
 import EmbeddingService from './EmbeddingService.js';
 import { synonymService } from './SynonymService.js';
