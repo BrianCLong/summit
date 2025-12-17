@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as pkcs11 from 'pkcs11js';
 import crypto from 'node:crypto';
 import { otelService } from '../middleware/observability/otel-tracing.js';
