@@ -51,10 +51,14 @@
     "@opentelemetry/exporter-prometheus": "0.208.0",
     "@opentelemetry/resources": "^2.2.0",
     "@opentelemetry/sdk-node": "0.208.0",
+<<<<<<< HEAD
+    "@opentelemetry/semantic-conventions": "^1.38.0",
+=======
     "@opentelemetry/semantic-conventions": "1.38.0",
 <<<<<<< HEAD
     "@react-email/components": "^0.0.25",
 =======
+>>>>>>> main
     "@react-email/components": "^1.0.1",
 >>>>>>> main
     "@react-email/render": "^1.0.1",
@@ -114,7 +118,6 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
-    "etag": "^1.8.1",
 =======
 <<<<<<< HEAD
     "etag": "^1.8.1",
@@ -123,6 +126,10 @@
     "etag": "^1.8.1",
 =======
 <<<<<<< HEAD
+    "etag": "^1.8.1",
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -243,8 +250,13 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "tesseract.js": "6.0.1",
+<<<<<<< HEAD
+    "uuid": "^13.0.0",
+    "winston": "3.18.3",
+=======
     "uuid": "13.0.0",
     "winston": "^3.18.3",
+>>>>>>> main
     "ws": "8.18.3",
     "zod": "4.1.12",
     "@intelgraph/attack-surface": "workspace:*"
@@ -318,9 +330,13 @@
     "@types/pg": "8.15.6",
     "@types/pino-http": "6.1.0",
     "@types/supertest": "6.0.3",
+<<<<<<< HEAD
+    "@types/uuid": "^11.0.0",
+=======
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "11.0.0",
+>>>>>>> main
     "@types/ws": "8.18.1",
     "@typescript-eslint/eslint-plugin": "8.46.4",
     "@typescript-eslint/parser": "8.46.4",
