@@ -9,17 +9,22 @@ import type {
   StoryArc,
   TimeVariantParameter,
   SimulationEntity,
-  Negotiation,
-  ScenarioDefinition,
-  ScenarioResult,
-  TelemetryInput,
 } from './types.js';
 import {
   LLMDrivenNarrativeGenerator,
   NarrativeGenerator,
   RuleBasedNarrativeGenerator,
 } from './generators.js';
-import { PredictivePsyOpsLayer } from './psyops-layer.js';
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+import { LLMAgent, RuleBasedAgent, SimulationAgent } from './agents.js';
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
 
 const HISTORY_LIMIT = 64;
 const MOMENTUM_SENSITIVITY = 0.05;
@@ -27,9 +32,8 @@ const MOMENTUM_SENSITIVITY = 0.05;
 export class NarrativeSimulationEngine {
   private state: NarrativeState;
   private generator: NarrativeGenerator;
-  private psyOpsLayer: PredictivePsyOpsLayer;
   private readonly eventQueue: NarrativeEvent[] = [];
-  private readonly scenarioDefinitions: Map<string, ScenarioDefinition> = new Map();
+  private readonly agents: SimulationAgent[] = [];
 
   constructor(private readonly config: SimulationConfig) {
     const start = new Date();
@@ -39,6 +43,23 @@ export class NarrativeSimulationEngine {
         this.bootstrapEntityState(entity),
       ]),
     );
+
+    if (config.agents) {
+      config.agents.forEach((agentConfig) => {
+        const entity = config.initialEntities.find(
+          (e) => e.id === agentConfig.entityId,
+        );
+        if (entity) {
+          if (agentConfig.type === 'llm' && config.llmClient) {
+            this.agents.push(
+              new LLMAgent(agentConfig, entity, config.llmClient),
+            );
+          } else {
+            this.agents.push(new RuleBasedAgent(agentConfig, entity));
+          }
+        }
+      });
+    }
 
     const parameters = Object.fromEntries(
       (config.initialParameters ?? []).map((parameter) => [
@@ -59,9 +80,6 @@ export class NarrativeSimulationEngine {
       parameters,
       arcs: [],
       recentEvents: [],
-      negotiations: {},
-      scenarios: [],
-      psyOpsForecasts: [],
       narrative: {
         mode: 'rule-based',
         summary: 'Simulation initialized.',
@@ -73,7 +91,6 @@ export class NarrativeSimulationEngine {
     };
 
     this.generator = this.createGenerator(config.generatorMode, config);
-    this.psyOpsLayer = new PredictivePsyOpsLayer(this);
     this.state.arcs = this.computeArcs();
   }
 
@@ -103,24 +120,6 @@ export class NarrativeSimulationEngine {
     });
   }
 
-  registerScenario(definition: ScenarioDefinition): void {
-    this.scenarioDefinitions.set(definition.id, definition);
-  }
-
-  ingestTelemetry(input: TelemetryInput): void {
-    const event: NarrativeEvent = {
-      id: randomUUID(),
-      type: 'telemetry',
-      theme: 'system',
-      intensity: Math.min(Math.abs(input.value), 1), // Normalize roughly
-      description: `Telemetry update from ${input.source}: ${input.metric} = ${input.value}`,
-      metadata: { ...input.metadata, telemetry: input },
-      // Map to entity if provided
-      actorId: input.entityMapping,
-    };
-    this.queueEvent(event);
-  }
-
   queueEvent(event: NarrativeEvent): void {
     const scheduledTick = event.scheduledTick ?? this.state.tick + 1;
     this.eventQueue.push({ ...event, scheduledTick });
@@ -128,30 +127,37 @@ export class NarrativeSimulationEngine {
 
   async tick(steps = 1): Promise<NarrativeState> {
     for (let index = 0; index < steps; index += 1) {
-      this.advanceClock();
+      await this.resolveAgentActions();
 
-      this.processNegotiations();
+      this.advanceClock();
 
       const ready = this.dequeueReadyEvents();
       ready.forEach((event) => this.applyEvent(event));
-
-      this.evaluateScenarios();
-
       this.state.recentEvents = [...this.state.recentEvents, ...ready].slice(
         -HISTORY_LIMIT,
       );
       this.state.arcs = this.computeArcs();
-
-      // Run PsyOps forecast every 5 ticks to save resources
-      if (this.state.tick % 5 === 0) {
-        this.state.psyOpsForecasts = this.psyOpsLayer.generateForecast(10);
-      }
-
       await this.refreshNarrative(ready);
       this.applyNaturalDynamics();
     }
 
     return this.state;
+  }
+
+  private async resolveAgentActions(): Promise<void> {
+    for (const agent of this.agents) {
+      try {
+        const event = await agent.decideAction(this.state);
+        if (event) {
+          this.queueEvent(event);
+        }
+      } catch (error) {
+        console.error(
+          `Agent ${agent.id} failed to decide action:`,
+          error instanceof Error ? error.message : error,
+        );
+      }
+    }
   }
 
   injectActorAction(
@@ -177,104 +183,11 @@ export class NarrativeSimulationEngine {
     this.queueEvent(action);
   }
 
-  startNegotiation(initiatorId: string, targetIds: string[], topic: string): string {
-    const id = randomUUID();
-    const negotiation: Negotiation = {
-      id,
-      initiatorId,
-      targetIds,
-      topic,
-      status: 'proposed',
-      startTick: this.state.tick,
-      lastUpdateTick: this.state.tick,
-      turns: 0,
-      currentOffers: {},
-    };
-    this.state.negotiations[id] = negotiation;
-    return id;
-  }
-
   updateEntityProfile(entity: SimulationEntity): void {
     this.state.entities[entity.id] = {
       ...this.bootstrapEntityState(entity),
       history: this.state.entities[entity.id]?.history ?? [],
     };
-  }
-
-  private processNegotiations(): void {
-    Object.values(this.state.negotiations).forEach((neg) => {
-      if (neg.status === 'active' || neg.status === 'proposed') {
-        neg.turns += 1;
-        neg.lastUpdateTick = this.state.tick;
-
-        // Simple simulation logic: random chance to progress or fail
-        // In a real system, this would use agent logic or LLM calls
-        if (neg.turns > 10) {
-           neg.status = 'stalemate';
-        } else {
-           // Simulate offer updates
-           const entities = [neg.initiatorId, ...neg.targetIds];
-           entities.forEach(eid => {
-               const ent = this.state.entities[eid];
-               const currentOffer = neg.currentOffers[eid] || 0.5;
-               // Stance affects offer delta
-               let delta = 0;
-               if (ent.negotiationStance === 'aggressive') delta = 0.05;
-               else if (ent.negotiationStance === 'cooperative') delta = -0.05;
-
-               neg.currentOffers[eid] = this.clamp(currentOffer + (Math.random() * 0.1 - 0.05) + delta, 0, 1);
-           });
-
-           // Check for agreement (convergence of offers)
-           const offers = Object.values(neg.currentOffers);
-           if (offers.length > 1) {
-             const min = Math.min(...offers);
-             const max = Math.max(...offers);
-             if (max - min < 0.1) {
-               neg.status = 'agreement';
-               this.queueEvent({
-                 id: randomUUID(),
-                 type: 'social',
-                 theme: 'negotiation',
-                 intensity: 0.8,
-                 description: `Negotiation on ${neg.topic} reached agreement.`,
-                 actorId: neg.initiatorId,
-                 targetIds: neg.targetIds,
-                 sentimentShift: 0.2,
-               });
-             }
-           }
-        }
-      }
-    });
-  }
-
-  private evaluateScenarios(): void {
-    for (const def of this.scenarioDefinitions.values()) {
-      try {
-        if (def.condition(this.state)) {
-           // Check if already triggered recently to avoid spam?
-           // For now, just record it.
-           const result: ScenarioResult = {
-             scenarioId: def.id,
-             triggered: true,
-             tick: this.state.tick,
-           };
-           this.state.scenarios.push(result);
-
-           // Also trigger a system event
-           this.queueEvent({
-             id: randomUUID(),
-             type: 'system',
-             theme: 'scenario',
-             intensity: 1.0,
-             description: `Scenario triggered: ${def.name}`,
-           });
-        }
-      } catch (e) {
-        console.error(`Error evaluating scenario ${def.id}:`, e);
-      }
-    }
   }
 
   private async refreshNarrative(recent: NarrativeEvent[]): Promise<void> {
@@ -349,7 +262,9 @@ export class NarrativeSimulationEngine {
   }
 
   private applyEvent(event: NarrativeEvent): void {
-    // Primary application
+    // If it is a suppression event, we might want to handle it differently.
+    // E.g. targeting an actor to reduce their influence.
+
     if (event.actorId && this.state.entities[event.actorId]) {
       this.adjustEntityState(this.state.entities[event.actorId], event, 1);
     }
@@ -361,7 +276,6 @@ export class NarrativeSimulationEngine {
       }
     });
 
-    // Parameter adjustments
     if (event.parameterAdjustments?.length) {
       event.parameterAdjustments.forEach((param) => {
         const existing =
@@ -374,33 +288,38 @@ export class NarrativeSimulationEngine {
       });
     }
 
-    // Propagation (Multi-agent influence)
-    if (event.actorId) {
+    // Propagation logic
+    // We only propagate if the event is "loud" enough.
+    // Suppression events might not propagate in the same way, or they might propagate as "censorship news".
+    // For now, allow suppression to propagate but with potentially negative effects handled in adjustEntityState.
+    if (event.actorId && event.intensity > 0.05) {
       const actor = this.state.entities[event.actorId];
       if (actor) {
         actor.relationships.forEach((edge) => {
           const related = this.state.entities[edge.targetId];
           if (!related) return;
 
-          // Enhanced propagation logic
-          const decay = 0.5;
-          const propagatedIntensity = event.intensity * edge.strength * decay;
+          // Decay intensity
+          const newIntensity = event.intensity * edge.strength * 0.5;
 
-          if (propagatedIntensity > 0.1) { // Threshold to prevent infinite ripple of tiny events
-             const propagatedEvent: NarrativeEvent = {
-               ...event,
-               id: `${event.id}:${edge.targetId}`,
-               actorId: related.id,
-               targetIds: [], // Don't propagate further targeting from here automatically to avoid loops in this simple model
-               intensity: propagatedIntensity,
-               sentimentShift: (event.sentimentShift ?? 0) * edge.strength * related.resilience,
-               influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
-               description: `(Ripple) ${event.description}`,
-             };
-             // Add to recentEvents to ensure it is detectable in tests/history
-             this.state.recentEvents.push(propagatedEvent);
-             this.adjustEntityState(related, propagatedEvent, edge.strength * decay);
-          }
+          // If intensity drops below threshold, stop propagating
+          if (newIntensity < 0.01) return;
+
+          const propagatedEvent: NarrativeEvent = {
+            ...event,
+            id: `${event.id}:${edge.targetId}`,
+            actorId: related.id, // Neighbor becomes the "actor" of the propagated event (re-transmission)
+            targetIds: [], // Clear specific targets
+            intensity: newIntensity,
+            sentimentShift:
+              (event.sentimentShift ?? 0) * edge.strength * related.resilience,
+            influenceShift: (event.influenceShift ?? 0) * edge.strength * 0.5,
+            scheduledTick: this.state.tick + 1, // Queue for NEXT tick (simulating travel time)
+          };
+
+          // Queue the event instead of applying immediately.
+          // This enables multi-hop propagation in subsequent ticks.
+          this.queueEvent(propagatedEvent);
         });
       }
     }
@@ -411,13 +330,27 @@ export class NarrativeSimulationEngine {
     event: NarrativeEvent,
     weight: number,
   ): void {
-    const sentimentDelta =
+    let sentimentDelta =
       (event.sentimentShift ?? 0) *
       event.intensity *
       weight *
       (1 - entity.resilience * 0.5);
-    const influenceDelta =
+
+    let influenceDelta =
       (event.influenceShift ?? 0) * weight * (1 - entity.volatility * 0.5);
+
+    // Special handling for suppression events
+    if (event.type === 'suppression') {
+        // Suppression intends to reduce influence and dampen sentiment shifts.
+        // If I am targeted by suppression, my influence drops.
+        // If I am just hearing about suppression (propagated), maybe I get scared (volatility drops)?
+
+        // If I am the target of suppression:
+        if (event.targetIds?.includes(entity.id)) {
+             influenceDelta = -Math.abs(event.intensity * weight * 0.5); // Force influence down
+             sentimentDelta = 0; // Suppression doesn't necessarily change my mind, just my voice
+        }
+    }
 
     entity.sentiment = this.clamp(entity.sentiment + sentimentDelta, -1, 1);
     entity.influence = this.clamp(entity.influence + influenceDelta, 0, 1.5);

@@ -1,5 +1,19 @@
 export type NarrativeGeneratorMode = 'rule-based' | 'llm';
 
+export type AgentType = 'rule-based' | 'llm';
+
+export interface AgentConfig {
+  entityId: string;
+  type: AgentType;
+  role: string;
+  goal: string;
+  llmConfig?: {
+    model: string;
+    temperature: number;
+    promptTemplate?: string;
+  };
+}
+
 export interface RelationshipEdge {
   targetId: string;
   strength: number;
@@ -20,7 +34,6 @@ export interface SimulationEntity {
   resilience: number;
   themes: EntityThemeVector;
   relationships: RelationshipEdge[];
-  negotiationStance?: 'aggressive' | 'cooperative' | 'isolationist' | 'pragmatic';
   metadata?: Record<string, unknown>;
 }
 
@@ -52,8 +65,7 @@ export type NarrativeEventType =
   | 'information'
   | 'intervention'
   | 'system'
-  | 'negotiation'
-  | 'telemetry';
+  | 'suppression';
 
 export interface NarrativeEvent {
   id: string;
@@ -93,52 +105,6 @@ export interface NarrativeNarration {
   opportunities: string[];
 }
 
-export interface Negotiation {
-  id: string;
-  initiatorId: string;
-  targetIds: string[];
-  topic: string;
-  status: 'proposed' | 'active' | 'stalemate' | 'agreement' | 'failed';
-  startTick: number;
-  lastUpdateTick: number;
-  turns: number;
-  currentOffers: Record<string, number>;
-  deadlineTick?: number;
-  result?: Record<string, unknown>;
-}
-
-export interface ScenarioResult {
-  scenarioId: string;
-  triggered: boolean;
-  tick: number;
-  details?: Record<string, unknown>;
-}
-
-export interface ScenarioDefinition {
-  id: string;
-  name: string;
-  description?: string;
-  condition: (state: NarrativeState) => boolean;
-}
-
-export interface TelemetryInput {
-  source: string;
-  metric: string;
-  value: number;
-  timestamp: Date;
-  entityMapping?: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface PsyOpsForecast {
-  tick: number;
-  scenarioId: string;
-  probability: number;
-  impact: number;
-  confidence: number;
-  mitigationSuggestions: string[];
-}
-
 export interface NarrativeState {
   id: string;
   name: string;
@@ -151,9 +117,6 @@ export interface NarrativeState {
   parameters: Record<string, TimeVariantParameter>;
   arcs: StoryArc[];
   recentEvents: NarrativeEvent[];
-  negotiations: Record<string, Negotiation>;
-  scenarios: ScenarioResult[];
-  psyOpsForecasts?: PsyOpsForecast[];
   narrative: NarrativeNarration;
   metadata?: Record<string, unknown>;
 }
@@ -165,6 +128,7 @@ export interface SimulationConfig {
   tickIntervalMinutes: number;
   initialEntities: SimulationEntity[];
   initialParameters?: Array<{ name: string; value: number }>;
+  agents?: AgentConfig[];
   generatorMode?: NarrativeGeneratorMode;
   llmClient?: LLMClient;
   metadata?: Record<string, unknown>;
