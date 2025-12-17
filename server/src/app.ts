@@ -51,8 +51,11 @@ import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
+<<<<<<< HEAD
+=======
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+>>>>>>> main
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -115,7 +118,10 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
+<<<<<<< HEAD
+=======
   app.use(safetyModeMiddleware);
+>>>>>>> main
   // Standard audit logger for basic request tracking
   app.use(auditLogger);
   // Audit-First middleware for cryptographic stamping of sensitive operations
@@ -179,8 +185,11 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
+<<<<<<< HEAD
+=======
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+>>>>>>> main
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {

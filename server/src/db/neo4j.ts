@@ -28,6 +28,8 @@ const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
+<<<<<<< HEAD
+=======
 const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
 const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
 
@@ -35,6 +37,7 @@ const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 
 const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
 const POOL_CONNECTION_TIMEOUT = Number(process.env.NEO4J_POOL_CONNECTION_TIMEOUT || 30000);
 const POOL_ACQUISITION_TIMEOUT = Number(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT || 30000);
+>>>>>>> main
 
 let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;

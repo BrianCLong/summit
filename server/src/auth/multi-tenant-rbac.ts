@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 // @ts-nocheck
+>>>>>>> main
 /**
  * Multi-Tenant RBAC (Role-Based Access Control) System
  *
@@ -123,10 +126,13 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
     permissions: ['*'],
     inherits: [],
   },
+<<<<<<< HEAD
+=======
   'tenant-owner': {
     permissions: ['*'], // Full access within tenant
     inherits: ['tenant-admin'],
   },
+>>>>>>> main
   'tenant-admin': {
     permissions: [
       'tenant:manage',
@@ -134,6 +140,11 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
       'role:assign', 'role:revoke',
       'audit:read', 'audit:export',
       'config:read', 'config:update',
+<<<<<<< HEAD
+    ],
+    inherits: ['supervisor'],
+  },
+=======
       'api_key:create', 'api_key:view', 'api_key:delete', // API Key management
       'service_account:create', 'service_account:view', 'service_account:delete', // Service Account management
       'billing:read',
@@ -159,6 +170,7 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
     ],
     inherits: ['analyst'],
   },
+>>>>>>> main
   'supervisor': {
     permissions: [
       'investigation:read', 'investigation:create', 'investigation:update', 'investigation:delete',
