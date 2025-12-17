@@ -1,0 +1,53 @@
+version: '3.9'
+
+services:
+  innovation-sandbox:
+    build:
+      context: ./services/innovation-sandbox
+      dockerfile: Dockerfile
+    container_name: summit-innovation-sandbox
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3100
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      REDIS_URL: redis://redis:6379
+      PROV_LEDGER_URL: http://prov-ledger:3000
+      PROV_SIGNING_KEY: ${PROV_SIGNING_KEY:-dev-signing-key}
+    ports:
+      - '3100:3100'
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:3100/health']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - summit
+    labels:
+      - 'prometheus.job=innovation_sandbox'
+      - 'prometheus.port=3100'
+      - 'prometheus.path=/metrics'
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+      - /sandbox:size=500M,mode=1777
+
+networks:
+  summit:
+    external: true
+
+# Usage: docker-compose -f docker-compose.dev.yml -f docker-compose.sandbox.yml up -d

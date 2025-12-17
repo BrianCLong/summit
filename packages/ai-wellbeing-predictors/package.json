@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/ai-wellbeing-predictors",
+  "version": "1.0.0",
+  "description": "AI-driven prediction tools for proactive citizen wellbeing forecasting and early interventions",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "wellbeing",
+    "prediction",
+    "ai",
+    "citizen-services",
+    "early-intervention",
+    "resource-allocation"
+  ]
+}

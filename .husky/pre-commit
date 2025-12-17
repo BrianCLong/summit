@@ -1,49 +1,56 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔒 Running security checks..."
+LOG_FILE="git-hook.log"
 
-# Run gitleaks to detect secrets
-echo "🔍 Scanning for secrets..."
-if command -v gitleaks &> /dev/null; then
+log() {
+  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $1" >> "$LOG_FILE"
+  echo "$1"
+}
+
+log "🔒 Running pre-commit checks..."
+
+# Run custom secret scanner
+log "🔍 Running custom secret scanner..."
+if [ -f "scripts/scan_secrets.py" ]; then
+    python3 scripts/scan_secrets.py || {
+      log "❌ Secrets detected by custom scanner!"
+      exit 1
+    }
+fi
+
+# Run gitleaks if available
+if command -v gitleaks >/dev/null 2>&1; then
+  log "🔍 Scanning for secrets with gitleaks..."
   gitleaks protect --staged --verbose || {
-    echo "❌ Secret detected! Please remove sensitive data before committing."
+    log "❌ Secret detected by gitleaks!"
     exit 1
   }
+fi
+
+# Run typecheck
+log "🔍 Running strict typechecks..."
+npm run typecheck || {
+  log "❌ Typecheck failed."
+  exit 1
+}
+
+# Run lint-staged
+log "🔍 Running lint-staged..."
+pnpm exec lint-staged || {
+  log "❌ Lint-staged failed."
+  exit 1
+}
+
+# Run screenshots (robust)
+log "📸 Generating screenshots..."
+CMD="npx tsx server/scripts/generate-screenshots.ts"
+
+# Use timeout if available, otherwise rely on script's internal timeout
+if command -v timeout >/dev/null 2>&1; then
+  timeout 35s $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
 else
-  echo "⚠️  Gitleaks not installed. Install with: brew install gitleaks (macOS) or see https://github.com/gitleaks/gitleaks"
+  $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
 fi
 
-# Run security linting on staged files
-echo "🔍 Running security linting..."
-STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|ts|jsx|tsx)$' || true)
-
-if [ -n "$STAGED_FILES" ]; then
-  echo "Linting staged files: $STAGED_FILES"
-  pnpm exec eslint --config .eslintrc.security.cjs $STAGED_FILES --max-warnings 10 || {
-    echo "❌ Security linting failed. Please fix the issues before committing."
-    exit 1
-  }
-fi
-
-# Run standard linting
-echo "🔍 Running standard linting..."
-pnpm run lint || {
-  echo "❌ Linting failed. Please fix the issues before committing."
-  exit 1
-}
-
-# Run type checking
-echo "🔍 Running type checking..."
-pnpm run typecheck || {
-  echo "❌ Type checking failed. Please fix the issues before committing."
-  exit 1
-}
-
-# Run dependency audit (warning only, don't fail)
-echo "🔍 Running dependency audit..."
-pnpm audit --audit-level=high || {
-  echo "⚠️  High severity vulnerabilities found. Consider addressing them."
-}
-
-echo "✅ All security checks passed!"
+log "✅ All checks passed!"

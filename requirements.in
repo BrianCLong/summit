@@ -15,3 +15,8 @@ PyYAML==6.0.1
 prometheus_client
 langchain_community
 pytest-cov
+requests
+<<<<<<< HEAD
+=======
+urllib3>=2.6.0
+>>>>>>> main

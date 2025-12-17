@@ -1,0 +1,40 @@
+{
+  "name": "@intelgraph/digital-twin",
+  "version": "0.1.0",
+  "description": "Next-generation Digital Twin platform for Summit/IntelGraph",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "neo4j-driver": "6.0.1",
+    "pg": "^8.16.3",
+    "redis": "^5.8.1",
+    "kafkajs": "^2.2.4",
+    "express": "^4.18.2",
+    "@apollo/server": "^4.11.0",
+    "graphql": "^16.8.1",
+    "zod": "^3.22.4",
+    "pino": "^8.17.2",
+    "uuid": "^9.0.1",
+    "rxjs": "^7.8.1",
+    "@opentelemetry/api": "1.7.0"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^9.0.8",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,84 @@
+id: agentic-flow-001
+name: Autonomous Bug Investigation
+description: Autonomously investigate and fix a bug through multiple steps
+category: agentic_flow
+difficulty: expert
+tags:
+  - agentic
+  - autonomous
+  - debugging
+
+tools:
+  - name: file_search
+    description: Search through codebase
+    costPerCall: 0.0005
+    avgLatencyMs: 50
+    capabilities:
+      - search
+      - grep
+  - name: code_interpreter
+    description: Execute and analyze code
+    costPerCall: 0.001
+    avgLatencyMs: 150
+    capabilities:
+      - execute_code
+      - analyze_code
+  - name: file_edit
+    description: Edit files
+    costPerCall: 0.0008
+    avgLatencyMs: 100
+    capabilities:
+      - write
+      - edit
+  - name: test_runner
+    description: Run tests
+    costPerCall: 0.002
+    avgLatencyMs: 500
+    capabilities:
+      - test
+      - validate
+
+steps:
+  - id: step-1
+    type: prompt
+    input: |
+      A user reports: "The calculateDiscount function returns wrong values
+      for orders over $100."
+
+      Investigate the issue by:
+      1. Finding the function definition
+      2. Identifying the bug
+      3. Proposing a fix
+      4. Writing a test case
+    timeout: 30000
+    allowedTools:
+      - file_search
+      - code_interpreter
+      - file_edit
+      - test_runner
+    constraints:
+      maxTokens: 3000
+      maxLatencyMs: 25000
+
+  - id: step-2
+    type: assertion
+    input:
+      check: fix_proposed
+    expectedOutput: true
+
+successCriteria:
+  - type: contains
+    value: "calculateDiscount"
+  - type: contains
+    value: "fix"
+  - type: contains
+    value: "test"
+
+constraints:
+  maxTotalTokens: 8000
+  maxTotalCostUsd: 0.15
+  maxToolCalls: 15
+
+metadata:
+  author: eval-platform
+  version: "1.0"

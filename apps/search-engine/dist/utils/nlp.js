@@ -1,7 +1,8 @@
 import compromise from 'compromise';
 import * as natural from 'natural';
-import * as stopword from 'stopword';
-import { en, removeStopwords } from 'stopword';
+import stopword from 'stopword';
+const stopwordModule = stopword;
+const { en, removeStopwords } = stopwordModule;
 export class NLPProcessor {
     tokenizer;
     stemmer;
@@ -142,7 +143,7 @@ export class NLPProcessor {
         ];
         const scores = {};
         languages.forEach((lang) => {
-            const langStopwords = stopword[lang] || [];
+            const langStopwords = stopwordModule[lang] || [];
             const tokens = this.tokenize(text);
             const stopwordCount = tokens.filter((token) => langStopwords.includes(token)).length;
             scores[lang] = stopwordCount / tokens.length;
