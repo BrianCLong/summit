@@ -1,38 +1,125 @@
-import { Logger } from 'pino';
-import { ConnectorContext, SourceConnector, StateStore } from './types.js';
 
-export abstract class BaseSourceConnector implements SourceConnector {
-  abstract fetchBatch(
-    ctx: ConnectorContext,
-    cursor?: string | null,
-  ): Promise<{
-    records: any[];
-    nextCursor?: string | null;
-  }>;
+import { EventEmitter } from 'events';
+import { Readable } from 'stream';
+import {
+  ConnectorConfig,
+  ConnectorSchema,
+  ConnectorHealth,
+  ConnectorMetrics,
+  IngestionEvent
+} from './types';
+import logger from '../config/logger';
 
-  protected handleError(ctx: ConnectorContext, error: unknown) {
-    ctx.logger.error({ err: error }, 'Connector error');
-    // Basic error normalization could happen here
+export abstract class BaseConnector extends EventEmitter {
+  protected config: ConnectorConfig;
+  protected metrics: ConnectorMetrics;
+  protected isConnected: boolean = false;
+  protected logger: any;
+
+  constructor(config: ConnectorConfig) {
+    super();
+    this.config = config;
+    this.metrics = {
+      recordsProcessed: 0,
+      bytesProcessed: 0,
+      errors: 0,
+      latency: 0
+    };
+    this.logger = logger.child({
+      connectorId: config.id,
+      connectorType: config.type,
+      tenantId: config.tenantId
+    });
   }
-}
 
-export class InMemoryStateStore implements StateStore {
-  private store = new Map<string, any>();
-  private cursor: string | null = null;
-
-  async get<T>(key: string): Promise<T | null> {
-    return this.store.get(key) || null;
+  /**
+   * Rate limiting helper
+   * Basic token bucket implementation or delay
+   */
+  protected async throttle(): Promise<void> {
+      // Simple delay for now to prevent overwhelming sources
+      // In production this would be a real rate limiter
+      await new Promise(resolve => setTimeout(resolve, 50));
   }
 
-  async set<T>(key: string, value: T): Promise<void> {
-    this.store.set(key, value);
+  /**
+   * Initialize the connection to the source
+   */
+  abstract connect(): Promise<void>;
+
+  /**
+   * Close the connection
+   */
+  abstract disconnect(): Promise<void>;
+
+  /**
+   * Test the connection parameters
+   */
+  abstract testConnection(): Promise<boolean>;
+
+  /**
+   * Fetch the schema of the source data
+   */
+  abstract fetchSchema(): Promise<ConnectorSchema>;
+
+  /**
+   * Read data from the source as a stream of records
+   */
+  abstract readStream(options?: any): Promise<Readable>;
+
+  /**
+   * Check the health of the connector
+   */
+  async healthCheck(): Promise<ConnectorHealth> {
+    try {
+      const start = Date.now();
+      const connected = await this.testConnection();
+      const latency = Date.now() - start;
+
+      return {
+        status: connected ? 'healthy' : 'unhealthy',
+        latencyMs: latency,
+        timestamp: new Date()
+      };
+    } catch (err) {
+      return {
+        status: 'unhealthy',
+        error: err instanceof Error ? err.message : 'Unknown error',
+        timestamp: new Date()
+      };
+    }
   }
 
-  async getCursor(): Promise<string | null> {
-    return this.cursor;
+  /**
+   * Validate configuration
+   */
+  validateConfig(): boolean {
+    return !!this.config.id && !!this.config.type;
   }
 
-  async setCursor(cursor: string): Promise<void> {
-    this.cursor = cursor;
+  /**
+   * Wrap data in a standard ingestion event structure with provenance
+   */
+  protected wrapEvent(data: any): IngestionEvent {
+    return {
+      id: `evt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      sourceId: this.config.id,
+      timestamp: new Date(),
+      data,
+      metadata: {},
+      provenance: {
+        source: this.config.name,
+        sourceId: this.config.id,
+        ingestTimestamp: new Date(),
+        connectorType: this.config.type
+      }
+    };
+  }
+
+  /**
+   * Get current metrics
+   */
+  getMetrics(): ConnectorMetrics {
+    return { ...this.metrics };
   }
 }

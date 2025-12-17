@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@ga-graphai/prov-ledger": "file:../prov-ledger",
-    "common-types": "file:../common-types"
+    "common-types": "file:../common-types",
+    "prom-client": "^14.2.0"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",

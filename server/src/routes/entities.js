@@ -1,10 +1,8 @@
 const express = require('express');
 const { v4: uuidv4 } = require('uuid');
 const { getNeo4jDriver, getPostgresPool } = require('../config/database');
-const {
-  ensureAuthenticated,
-  requirePermission,
-} = require('../middleware/auth');
+const { ensureAuthenticated } = require('../middleware/auth');
+const { authorize } = require('../middleware/authorization');
 const sanitize = require('../middleware/sanitize').default;
 
 const {
@@ -156,7 +154,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', requirePermission('entity:create'), async (req, res) => {
+router.post('/', authorize('write_graph'), async (req, res) => {
   const {
     type = 'CUSTOM',
     label,
@@ -195,7 +193,7 @@ router.post('/', requirePermission('entity:create'), async (req, res) => {
   }
 });
 
-router.patch('/:id', requirePermission('entity:update'), async (req, res) => {
+router.patch('/:id', authorize('write_graph'), async (req, res) => {
   const id = req.params.id;
   const { label, description, properties, position, verified } = req.body || {};
   const now = new Date().toISOString();
@@ -225,7 +223,7 @@ router.patch('/:id', requirePermission('entity:update'), async (req, res) => {
   }
 });
 
-router.delete('/:id', requirePermission('entity:delete'), async (req, res) => {
+router.delete('/:id', authorize('write_graph'), async (req, res) => {
   const id = req.params.id;
   const driver = getNeo4jDriver();
   const session = driver.session();

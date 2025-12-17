@@ -1,36 +1,52 @@
-import { Logger } from 'pino';
-import { TenantId } from '../data-model/types.js';
 
-export interface ConnectorContext {
-  tenantId: TenantId;
-  pipelineKey: string;
-  correlationId?: string;
-  logger: Logger;
-  stateStore: StateStore;
+import { Readable } from 'stream';
+
+export interface ConnectorConfig {
+  id: string;
+  name: string;
+  type: string;
+  tenantId: string;
+  config: Record<string, any>;
+  metadata?: Record<string, any>;
 }
 
-export interface StateStore {
-  get<T>(key: string): Promise<T | null>;
-  set<T>(key: string, value: T): Promise<void>;
-  getCursor(): Promise<string | null>;
-  setCursor(cursor: string): Promise<void>;
+export interface ConnectorSchema {
+  fields: SchemaField[];
+  metadata?: Record<string, any>;
 }
 
-export interface ConnectorResult {
-  success: boolean;
+export interface SchemaField {
+  name: string;
+  type: string;
+  nullable: boolean;
+  description?: string;
+  piiCategory?: string;
+}
+
+export interface ConnectorMetrics {
   recordsProcessed: number;
-  recordsFailed?: number;
-  newCursor?: string | null;
-  error?: Error;
+  bytesProcessed: number;
+  errors: number;
+  latency: number;
 }
 
-export interface SourceConnector {
-  fetchBatch(ctx: ConnectorContext, cursor?: string | null): Promise<{
-    records: any[];
-    nextCursor?: string | null;
-  }>;
+export interface IngestionEvent {
+  id: string;
+  sourceId: string;
+  timestamp: Date;
+  data: any;
+  metadata: Record<string, any>;
+  provenance: {
+    source: string;
+    sourceId: string;
+    ingestTimestamp: Date;
+    connectorType: string;
+  };
 }
 
-export interface SinkConnector {
-  writeBatch(ctx: ConnectorContext, records: any[]): Promise<void>;
+export interface ConnectorHealth {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  latencyMs?: number;
+  error?: string;
+  timestamp: Date;
 }
