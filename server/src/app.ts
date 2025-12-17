@@ -13,6 +13,7 @@ import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
@@ -49,12 +50,7 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
-import { buildMaestroRouter } from './routes/maestro.js';
-import { buildApprovalsRouter } from './routes/approvals.js';
-import { IntelGraphClientImpl } from './intelgraph/client.js';
-import { CostMeter } from './maestro/cost_meter.js';
-import { OpenAILLM } from './maestro/adapters/llm_openai.js';
-import { Maestro } from './maestro/core.js';
+import searchV1Router from './routes/search-v1.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -66,22 +62,9 @@ export const createApp = async () => {
 
   const app = express();
 
-  // Maestro + HITL setup
-  const intelGraphClient = new IntelGraphClientImpl();
-  const costMeter = new CostMeter(intelGraphClient, {
-    'openai:gpt-4.1': { inputPer1K: 0.01, outputPer1K: 0.03 },
-  });
-  const llm = new OpenAILLM(
-    cfg.OPENAI_API_KEY || 'dev-placeholder-maestro-key',
-    costMeter,
-  );
-  const maestro = new Maestro(intelGraphClient, costMeter, llm, {
-    defaultPlannerAgent: 'openai:gpt-4.1',
-    defaultActionAgent: 'openai:gpt-4.1',
-  });
-
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+  app.use(featureFlagContextMiddleware);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -169,8 +152,6 @@ export const createApp = async () => {
   app.use('/monitoring', monitoringRouter);
   app.use('/api/ai', aiRouter);
   app.use('/api/ai/nl-graph-query', nlGraphQueryRouter);
-  app.use('/api/maestro', buildMaestroRouter(maestro));
-  app.use('/api/approvals', buildApprovalsRouter(maestro));
   app.use('/api/narrative-sim', narrativeSimulationRouter);
   app.use('/disclosures', disclosuresRouter);
   app.use('/rbac', rbacRouter);
@@ -188,6 +169,7 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
