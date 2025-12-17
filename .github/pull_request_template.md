@@ -1,28 +1,16 @@
-## Summary
+# Overview
+- [ ] Feature flag name(s):
+- [ ] Breaking changes: NO
+- [ ] Preview env URL(s):
 
-<!-- What changed and why -->
+## Acceptance & Tests
+- [ ] Unit ≥ target
+- [ ] Contract tests updated
+- [ ] E2E scenario link
+- [ ] Perf smoke results
+- [ ] Security notes (authz, PII)
 
-## Type
-
-- [ ] Feature
-- [ ] Fix
-- [ ] Chore
-- [ ] Mergefix (Express5)
-
-## Validation
-
-- [ ] Unit tests green
-- [ ] E2E (Playwright) green
-- [ ] Lint (ESLint 9) clean
-- [ ] GraphQL contracts unchanged or baselined
-- [ ] OPA policy sim PASS
-- [ ] SBOM + provenance generated & verified
-
-## Risk
-
-- Blast radius:
-- Rollback plan:
-
-## Notes for Reviewers
-
-- Conflict patterns addressed (link): docs/merge/express5_conflict_cookbook.md
+## Rollout
+- [ ] Runbook updated
+- [ ] Metrics + dashboards added
+- [ ] Feature flag default: OFF

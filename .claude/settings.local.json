@@ -1,7 +1,9 @@
 {
   "$schema": "https://claude.ai/schemas/claude-code-settings-local.json",
   "permissions": {
-    "allow": ["Bash(tee:*)"],
+    "allow": [
+      "Bash(npx tsc:*)"
+    ],
     "deny": [],
     "ask": []
   },

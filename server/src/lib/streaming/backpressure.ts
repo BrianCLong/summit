@@ -15,7 +15,7 @@ export class BackpressureStream<T> extends Transform {
   constructor(options: BackpressureStreamOptions = {}) {
     super({
       objectMode: true,
-      highWatermark: options.highWatermark ?? 100,
+      highWaterMark: options.highWatermark ?? 100,
     });
     this.memoryThreshold = options.memoryThreshold ?? 0.8; // Default to 80% heap usage
     this.delayMs = options.delayMs ?? 100; // Default to 100ms
@@ -27,7 +27,7 @@ export class BackpressureStream<T> extends Transform {
     return usage > this.memoryThreshold;
   }
 
-  _transform(chunk: T, encoding: BufferEncoding, callback: TransformCallback): void {
+  _transform(chunk: T, encoding: NodeJS.BufferEncoding, callback: TransformCallback): void {
     if (this.isUnderPressure()) {
       // If memory is high, slow down the stream by introducing a delay.
       // This will cause the internal buffer to fill up and signal

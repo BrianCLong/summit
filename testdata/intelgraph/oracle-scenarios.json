@@ -1,0 +1,730 @@
+{
+  "$schema": "./oracle-scenarios.schema.json",
+  "version": "1.0.0",
+  "description": "IntelGraph Query Correctness Oracle Scenarios",
+  "goldenDatasetRef": "data/golden-path/demo-investigation.json",
+  "scenarios": [
+    {
+      "id": "path-1.1",
+      "category": "pathfinding",
+      "name": "Direct Path - Person to Organization",
+      "description": "Find the shortest path from Avery Patel to Helios Trust",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "findShortestPath",
+        "document": "query FindPath($sourceId: UUID!, $targetId: UUID!, $maxDepth: Int) { shortestPath(sourceId: $sourceId, targetId: $targetId, maxDepth: $maxDepth) { nodes { id label entityType } relationships { id type } length } }",
+        "variables": {
+          "sourceId": "{{entities.avery_patel.id}}",
+          "targetId": "{{entities.helios_trust.id}}",
+          "maxDepth": 5
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "exact",
+            "field": "shortestPath.length",
+            "value": 1
+          },
+          {
+            "type": "exact",
+            "field": "shortestPath.nodes.length",
+            "value": 2
+          },
+          {
+            "type": "exact",
+            "field": "shortestPath.relationships.length",
+            "value": 1
+          },
+          {
+            "type": "contains",
+            "field": "shortestPath.nodes[*].entityType",
+            "values": ["Person", "Organization"]
+          },
+          {
+            "type": "exact",
+            "field": "shortestPath.relationships[0].type",
+            "value": "REPRESENTS"
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 1000,
+          "p95LatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "path-1.2",
+      "category": "pathfinding",
+      "name": "Two-Hop Path - Person to Location",
+      "description": "Find the shortest path from Avery Patel to Lisbon (2 hops)",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "findShortestPath",
+        "document": "query FindPath($sourceId: UUID!, $targetId: UUID!, $maxDepth: Int) { shortestPath(sourceId: $sourceId, targetId: $targetId, maxDepth: $maxDepth) { nodes { id label entityType } relationships { id type } length } }",
+        "variables": {
+          "sourceId": "{{entities.avery_patel.id}}",
+          "targetId": "{{entities.lisbon.id}}",
+          "maxDepth": 5
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "exact",
+            "field": "shortestPath.length",
+            "value": 2
+          },
+          {
+            "type": "exact",
+            "field": "shortestPath.nodes.length",
+            "value": 3
+          },
+          {
+            "type": "exact",
+            "field": "shortestPath.relationships.length",
+            "value": 2
+          },
+          {
+            "type": "ordered",
+            "field": "shortestPath.nodes[*].entityType",
+            "values": ["Person", "Organization", "Location"]
+          },
+          {
+            "type": "set",
+            "field": "shortestPath.relationships[*].type",
+            "values": ["REPRESENTS", "OPERATES_IN"]
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 1000,
+          "p95LatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "path-1.3",
+      "category": "pathfinding",
+      "name": "No Path Exists",
+      "description": "Query for a path to a non-existent entity",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "findShortestPath",
+        "document": "query FindPath($sourceId: UUID!, $targetId: UUID!, $maxDepth: Int) { shortestPath(sourceId: $sourceId, targetId: $targetId, maxDepth: $maxDepth) { nodes { id } length } }",
+        "variables": {
+          "sourceId": "{{entities.avery_patel.id}}",
+          "targetId": "00000000-0000-0000-0000-000000000000",
+          "maxDepth": 5
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "null",
+            "field": "shortestPath"
+          }
+        ],
+        "noError": true,
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "path-1.4",
+      "category": "pathfinding",
+      "name": "Same Source and Target",
+      "description": "Find path from an entity to itself",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "findShortestPath",
+        "document": "query FindPath($sourceId: UUID!, $targetId: UUID!, $maxDepth: Int) { shortestPath(sourceId: $sourceId, targetId: $targetId, maxDepth: $maxDepth) { nodes { id } relationships { id } length } }",
+        "variables": {
+          "sourceId": "{{entities.avery_patel.id}}",
+          "targetId": "{{entities.avery_patel.id}}",
+          "maxDepth": 5
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "exact",
+            "field": "shortestPath.length",
+            "value": 0
+          },
+          {
+            "type": "exact",
+            "field": "shortestPath.nodes.length",
+            "value": 1
+          },
+          {
+            "type": "exact",
+            "field": "shortestPath.relationships.length",
+            "value": 0
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "nbr-2.1",
+      "category": "neighborhood",
+      "name": "Depth-1 Neighborhood",
+      "description": "Query the neighborhood of Helios Trust at depth 1",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "neighborhood",
+        "document": "query Neighborhood($query: NeighborhoodQueryInput!) { neighborhood(query: $query) { center { id label } entitiesByDepth { id label entityType } relationships { id type } totalEntities totalRelationships truncated } }",
+        "variables": {
+          "query": {
+            "entityId": "{{entities.helios_trust.id}}",
+            "depth": 1
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "exact",
+            "field": "neighborhood.totalEntities",
+            "value": 3
+          },
+          {
+            "type": "exact",
+            "field": "neighborhood.totalRelationships",
+            "value": 2
+          },
+          {
+            "type": "exact",
+            "field": "neighborhood.truncated",
+            "value": false
+          },
+          {
+            "type": "contains",
+            "field": "neighborhood.entitiesByDepth[0][*].entityType",
+            "values": ["Person", "Location"]
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 2000,
+          "p95LatencyMs": 1000
+        }
+      }
+    },
+    {
+      "id": "nbr-2.2",
+      "category": "neighborhood",
+      "name": "Filtered Neighborhood by Entity Type",
+      "description": "Query neighborhood of Helios Trust, filtered to Person type only",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "neighborhood",
+        "document": "query Neighborhood($query: NeighborhoodQueryInput!) { neighborhood(query: $query) { center { id } entitiesByDepth { id entityType } totalEntities truncated } }",
+        "variables": {
+          "query": {
+            "entityId": "{{entities.helios_trust.id}}",
+            "depth": 1,
+            "entityTypes": ["Person"]
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "exact",
+            "field": "neighborhood.totalEntities",
+            "value": 2
+          },
+          {
+            "type": "allMatch",
+            "field": "neighborhood.entitiesByDepth[0][*].entityType",
+            "value": "Person"
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 2000
+        }
+      }
+    },
+    {
+      "id": "nbr-2.3",
+      "category": "neighborhood",
+      "name": "Filtered Neighborhood by Relationship Type",
+      "description": "Query neighborhood filtering by REPRESENTS relationships",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "neighborhood",
+        "document": "query Neighborhood($query: NeighborhoodQueryInput!) { neighborhood(query: $query) { center { id } relationships { id type } totalRelationships } }",
+        "variables": {
+          "query": {
+            "entityId": "{{entities.helios_trust.id}}",
+            "depth": 1,
+            "relationshipTypes": ["REPRESENTS"]
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "allMatch",
+            "field": "neighborhood.relationships[*].type",
+            "value": "REPRESENTS"
+          },
+          {
+            "type": "exact",
+            "field": "neighborhood.totalRelationships",
+            "value": 1
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 2000
+        }
+      }
+    },
+    {
+      "id": "nbr-2.4",
+      "category": "neighborhood",
+      "name": "Max Depth Enforcement",
+      "description": "Query neighborhood with depth = 5 (beyond graph size)",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "neighborhood",
+        "document": "query Neighborhood($query: NeighborhoodQueryInput!) { neighborhood(query: $query) { center { id } totalEntities truncated } }",
+        "variables": {
+          "query": {
+            "entityId": "{{entities.helios_trust.id}}",
+            "depth": 5
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "gte",
+            "field": "neighborhood.totalEntities",
+            "value": 3
+          },
+          {
+            "type": "exact",
+            "field": "neighborhood.truncated",
+            "value": false
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 2000
+        }
+      }
+    },
+    {
+      "id": "entity-3.1",
+      "category": "entity",
+      "name": "Get Entity by ID",
+      "description": "Retrieve an entity by its exact ID",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "entity",
+        "document": "query GetEntity($id: UUID!) { entity(id: $id) { id label entityType properties } }",
+        "variables": {
+          "id": "{{entities.avery_patel.id}}"
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "exact",
+            "field": "entity.label",
+            "value": "Avery Patel"
+          },
+          {
+            "type": "exact",
+            "field": "entity.entityType",
+            "value": "Person"
+          },
+          {
+            "type": "notNull",
+            "field": "entity.id"
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "entity-3.2",
+      "category": "entity",
+      "name": "Entity Not Found",
+      "description": "Query for a non-existent entity ID",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "entity",
+        "document": "query GetEntity($id: UUID!) { entity(id: $id) { id label } }",
+        "variables": {
+          "id": "00000000-0000-0000-0000-000000000000"
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "null",
+            "field": "entity"
+          }
+        ],
+        "noError": true,
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "entity-3.3",
+      "category": "entity",
+      "name": "List Entities by Type",
+      "description": "Query all entities of type Organization",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "entities",
+        "document": "query ListEntities($filter: EntityFilterInput) { entities(filter: $filter) { nodes { id label entityType } totalCount hasMore } }",
+        "variables": {
+          "filter": {
+            "entityTypes": ["Organization"]
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "gte",
+            "field": "entities.totalCount",
+            "value": 1
+          },
+          {
+            "type": "allMatch",
+            "field": "entities.nodes[*].entityType",
+            "value": "Organization"
+          },
+          {
+            "type": "contains",
+            "field": "entities.nodes[*].label",
+            "values": ["Helios Trust"]
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 1000
+        }
+      }
+    },
+    {
+      "id": "rel-4.1",
+      "category": "relationship",
+      "name": "Get Outgoing Relationships",
+      "description": "Get all outgoing relationships from Helios Trust",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "entityRelationships",
+        "document": "query GetRelationships($entityId: UUID!, $direction: String) { entity(id: $entityId) { outgoingRelationships { id type toEntity { id label entityType } } } }",
+        "variables": {
+          "entityId": "{{entities.helios_trust.id}}"
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "gte",
+            "field": "entity.outgoingRelationships.length",
+            "value": 1
+          },
+          {
+            "type": "contains",
+            "field": "entity.outgoingRelationships[*].type",
+            "values": ["OPERATES_IN"]
+          },
+          {
+            "type": "contains",
+            "field": "entity.outgoingRelationships[*].toEntity.label",
+            "values": ["Lisbon"]
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "rel-4.2",
+      "category": "relationship",
+      "name": "Get Incoming Relationships",
+      "description": "Get all incoming relationships to Helios Trust",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "entityRelationships",
+        "document": "query GetRelationships($entityId: UUID!) { entity(id: $entityId) { incomingRelationships { id type fromEntity { id label entityType } } } }",
+        "variables": {
+          "entityId": "{{entities.helios_trust.id}}"
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "gte",
+            "field": "entity.incomingRelationships.length",
+            "value": 1
+          },
+          {
+            "type": "contains",
+            "field": "entity.incomingRelationships[*].type",
+            "values": ["REPRESENTS"]
+          },
+          {
+            "type": "contains",
+            "field": "entity.incomingRelationships[*].fromEntity.label",
+            "values": ["Avery Patel"]
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "rel-4.3",
+      "category": "relationship",
+      "name": "Filter Relationships by Type",
+      "description": "Query relationships filtered by REPRESENTS type",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "relationships",
+        "document": "query ListRelationships($filter: RelationshipFilterInput) { relationships(filter: $filter) { nodes { id type fromEntityId toEntityId } totalCount } }",
+        "variables": {
+          "filter": {
+            "types": ["REPRESENTS"]
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "gte",
+            "field": "relationships.totalCount",
+            "value": 1
+          },
+          {
+            "type": "allMatch",
+            "field": "relationships.nodes[*].type",
+            "value": "REPRESENTS"
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 1000
+        }
+      }
+    },
+    {
+      "id": "stats-5.1",
+      "category": "statistics",
+      "name": "Store Statistics",
+      "description": "Query overall graph statistics",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "stats",
+        "document": "query GetStats { stats { entityCount relationshipCount entitiesByType relationshipsByType } }",
+        "variables": {}
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "gte",
+            "field": "stats.entityCount",
+            "value": 3
+          },
+          {
+            "type": "gte",
+            "field": "stats.relationshipCount",
+            "value": 2
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 1000
+        }
+      }
+    },
+    {
+      "id": "centrality-6.1",
+      "category": "centrality",
+      "name": "Degree Centrality",
+      "description": "Calculate degree centrality for all nodes",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "calculateCentrality",
+        "document": "query Centrality($algorithm: String!, $limit: Int) { centrality(algorithm: $algorithm, limit: $limit) { nodeId score } }",
+        "variables": {
+          "algorithm": "degree",
+          "limit": 10
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "gte",
+            "field": "centrality.length",
+            "value": 1
+          },
+          {
+            "type": "descending",
+            "field": "centrality[*].score"
+          },
+          {
+            "type": "gte",
+            "field": "centrality[0].score",
+            "value": 1
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 2000
+        }
+      }
+    },
+    {
+      "id": "edge-7.1",
+      "category": "edge-cases",
+      "name": "Empty Filter Results",
+      "description": "Query with filter that matches no entities",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "entities",
+        "document": "query ListEntities($filter: EntityFilterInput) { entities(filter: $filter) { nodes { id } totalCount } }",
+        "variables": {
+          "filter": {
+            "entityTypes": ["Campaign"]
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "exact",
+            "field": "entities.totalCount",
+            "value": 0
+          },
+          {
+            "type": "exact",
+            "field": "entities.nodes.length",
+            "value": 0
+          }
+        ],
+        "noError": true,
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    },
+    {
+      "id": "edge-7.2",
+      "category": "edge-cases",
+      "name": "Pagination Limits",
+      "description": "Test pagination with limit and offset",
+      "enabled": true,
+      "query": {
+        "type": "graphql",
+        "operation": "entities",
+        "document": "query ListEntities($pagination: PaginationInput) { entities(pagination: $pagination) { nodes { id } totalCount hasMore } }",
+        "variables": {
+          "pagination": {
+            "limit": 1,
+            "offset": 0
+          }
+        }
+      },
+      "expected": {
+        "validation": [
+          {
+            "type": "lte",
+            "field": "entities.nodes.length",
+            "value": 1
+          },
+          {
+            "type": "gte",
+            "field": "entities.totalCount",
+            "value": 3
+          },
+          {
+            "type": "exact",
+            "field": "entities.hasMore",
+            "value": true
+          }
+        ],
+        "performance": {
+          "maxLatencyMs": 500
+        }
+      }
+    }
+  ],
+  "entityReferences": {
+    "avery_patel": {
+      "index": 0,
+      "type": "PERSON",
+      "name": "Avery Patel"
+    },
+    "helios_trust": {
+      "index": 1,
+      "type": "ORGANIZATION",
+      "name": "Helios Trust"
+    },
+    "lisbon": {
+      "index": 2,
+      "type": "LOCATION",
+      "name": "Lisbon"
+    }
+  },
+  "performanceBaselines": {
+    "pathfinding": {
+      "maxLatencyMs": 1000,
+      "p95LatencyMs": 500,
+      "p99LatencyMs": 800
+    },
+    "neighborhood": {
+      "maxLatencyMs": 2000,
+      "p95LatencyMs": 1000,
+      "p99LatencyMs": 1500
+    },
+    "entity": {
+      "maxLatencyMs": 500,
+      "p95LatencyMs": 200,
+      "p99LatencyMs": 400
+    },
+    "relationship": {
+      "maxLatencyMs": 500,
+      "p95LatencyMs": 200,
+      "p99LatencyMs": 400
+    },
+    "statistics": {
+      "maxLatencyMs": 1000,
+      "p95LatencyMs": 500,
+      "p99LatencyMs": 800
+    },
+    "centrality": {
+      "maxLatencyMs": 2000,
+      "p95LatencyMs": 1000,
+      "p99LatencyMs": 1500
+    }
+  }
+}

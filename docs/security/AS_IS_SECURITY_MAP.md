@@ -1,45 +1,62 @@
-# As-Is Security & Policy Map
+# Summit Security & Supply Chain Map (As-Is)
 
-## 1. Secrets Management
-*   **Current State**: Secrets are loaded from `process.env` via `server/src/config/index.ts`.
-*   **Storage**: Relies on `.env` files and environment variables in deployment.
-*   **Risks**:
-    *   Default passwords (`devpassword`, `dev_jwt_secret_12345`) are present in `config/index.ts` (though guarded by `REQUIRE_REAL_DBS`).
-    *   No centralized secret rotation mechanism.
-    *   Secrets are accessed directly via `process.env` in some places (though mostly centralized in `config`).
+## 1. Authentication & Authorization
 
-## 2. Authentication & Authorization
-*   **Current State**: Handled by `server/src/services/AuthService.ts`.
-*   **AuthN**: JWT-based (Access + Refresh tokens). Argon2 for passwords.
-*   **AuthZ**: RBAC with hardcoded roles (`ADMIN`, `ANALYST`, `VIEWER`) in `AuthService.ts`.
-*   **Risks**:
-    *   Role permissions are hardcoded in code, making them hard to update without deployment.
-    *   No fine-grained ABAC (Attribute-Based Access Control).
-    *   Tenant isolation relies on manual query filtering (e.g., `WHERE tenant_id = $1`).
+### Existing Capabilities
+*   **Authentication**:
+    *   `server/src/auth` provides multi-tenant RBAC and OIDC integration.
+    *   JWT-based authentication is standard.
+*   **Authorization**:
+    *   `server/src/services/AccessControl.js` provides basic rule-based access control (PBAC) with OPA fallback.
+    *   `server/src/services/PolicyService.ts` wraps GraphQL resolvers to enforce access control.
 
-## 3. Policy & Governance
-*   **Current State**: Some OPA policies exist in `policy/` but integration appears to be largely via CI checks or unused `zero-trust` modules.
-*   **Risks**:
-    *   No runtime policy enforcement engine (Policy-as-Code) active in the main server path.
-    *   Logic is scattered across services/controllers.
+### Gaps & Risks
+*   **Fragmentation**: Authorization logic is split between `AccessControl.js` (CommonJS, simple rules) and `PolicyService.ts` (GraphQL-specific).
+*   **Lack of Centralization**: No unified engine for non-GraphQL decisions (e.g., API routes, background jobs, LLM safety).
 
-## 4. Supply Chain & CI/CD
-*   **Current State**:
-    *   `pnpm` is used.
-    *   GitHub Actions workflows exist (`.github/workflows/`).
-    *   Some evidence of OPA usage in archived workflows.
-*   **Risks**:
-    *   Lack of explicit SBOM generation in active pipelines.
-    *   No image signing (Cosign) verification enforced on deployment (implied by task).
+## 2. Secrets & Key Management
 
-## 5. Logging & Audit
-*   **Current State**: `logger.ts` (likely Pino) used for application logs.
-*   **Risks**:
-    *   No dedicated `audit_log` table for immutable security events.
-    *   Security events (login success/fail) are logged as standard application logs, mixed with debug info.
+### Existing Capabilities
+*   **Secrets Management**:
+    *   `server/src/lib/secrets/SecretManager.ts` provides a robust abstraction for Secrets (Vault/Env).
+    *   `server/src/config/secrets.ts` uses Zod to validate environment variables and prevent insecure defaults in production.
+*   **Key Management**:
+    *   `server/src/services/KeyVaultService.js` exists for managing API keys.
 
-## Prioritized Risk List
-1.  **Secrets**: Default credentials in code.
-2.  **Audit**: Lack of structured, persistent security audit log.
-3.  **Policy**: Hardcoded RBAC limits flexibility and visibility.
-4.  **Supply Chain**: Missing SBOM/Signing for verifiable provenance.
+### Gaps & Risks
+*   **High Risk - Plaintext Keys**: `KeyVaultService.js` stores API keys in plaintext in the PostgreSQL database (`api_keys` table). This is a critical vulnerability.
+*   **Lack of Key Rotation**: While `SecretManager` has a `rotateSecret` method, it relies on the provider. `KeyVaultService` has a `rotateKey` method but it just adds a new one; automated rotation policies are missing.
+*   **No Unified KeyService**: There is no central service for *generating* secure keys (hashing, entropy) for internal use.
+
+## 3. Supply Chain Integrity
+
+### Existing Capabilities
+*   **CI/CD**: Extensive GitHub Actions workflows in `.github/workflows`.
+*   **Scanning**:
+    *   `gitleaks` for secret scanning.
+    *   `trivy` for filesystem/dependency scanning.
+*   **Hardening**:
+    *   `slsa-attestation.yml` implements SLSA Level 3 provenance generation and signing with Cosign.
+    *   `sbom.yml` generates CycloneDX SBOMs.
+    *   `Dockerfile` uses Chainguard images (distroless/hardened).
+
+### Gaps & Risks
+*   **Enforcement**: While the workflows exist, it's unclear if admission controllers (e.g., Kyverno/Gatekeeper) are actually configured in the deployment manifests to *enforce* that only signed images run.
+*   **Consistency**: Need to ensure these security workflows are triggered for *all* release artifacts, not just on demand.
+
+## 4. Policy & Runtime Security
+
+### Existing Capabilities
+*   **Audit**: `server/src/utils/audit.ts` provides structured audit logging.
+*   **Runtime**: Basic Helm charts and Kubernetes manifests exist.
+
+### Gaps & Risks
+*   **Network Policies**: No evidence of default-deny NetworkPolicies in the codebase (need to verify `k8s/` or `helm/` deeply).
+*   **LLM Safety**: `SecuredLLMService.ts` exists but needs to be integrated with a central `PolicyService` for consistent prompt safety/redaction.
+
+## 5. Action Plan
+
+1.  **Core Services**: Unify `PolicyService` and `AccessControl`. Create `KeyService` to replace insecure parts of `KeyVaultService`.
+2.  **Remediation**: Fix plaintext key storage.
+3.  **Integration**: Wire LLM services to use the new `PolicyService`.
+4.  **Enforcement**: Document how to enforce supply chain artifacts in K8s.

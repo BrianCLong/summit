@@ -1,4 +1,4 @@
-const Sentiment = require('sentiment');
+import Sentiment from 'sentiment';
 
 class MultimodalSentimentService {
   constructor() {
@@ -53,4 +53,4 @@ class MultimodalSentimentService {
   }
 }
 
-module.exports = MultimodalSentimentService;
+export default MultimodalSentimentService;

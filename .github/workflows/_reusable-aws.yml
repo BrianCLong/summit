@@ -1,0 +1,92 @@
+name: Reusable AWS Operations
+
+on:
+  workflow_call:
+    inputs:
+      operation:
+        description: 'AWS operation to perform (upload, deploy, sync)'
+        required: true
+        type: string
+      source_path:
+        description: 'Source path for files'
+        required: false
+        type: string
+        default: '.'
+      s3_path:
+        description: 'S3 path for operations'
+        required: false
+        type: string
+      aws_region:
+        description: 'AWS region'
+        required: false
+        type: string
+        default: 'us-east-1'
+      has_aws:
+        description: 'Whether AWS credentials are available'
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        description: 'AWS Access Key ID'
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        description: 'AWS Secret Access Key'
+        required: false
+      AWS_REGION:
+        description: 'AWS Region'
+        required: false
+      S3_BUCKET:
+        description: 'S3 Bucket name'
+        required: false
+
+env:
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION || inputs.aws_region }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
+jobs:
+  aws-operation:
+    name: AWS ${{ inputs.operation }}
+    runs-on: ubuntu-latest
+    if: ${{ inputs.has_aws }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        if: ${{ env.AWS_ACCESS_KEY_ID != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_DEFAULT_REGION }}
+          mask-aws-account-id: true
+
+      - name: S3 Upload
+        if: ${{ inputs.operation == 'upload' && env.AWS_ACCESS_KEY_ID != '' }}
+        run: |
+          if [ -n "${{ inputs.s3_path }}" ] && [ -n "${{ env.S3_BUCKET }}" ]; then
+            aws s3 cp "${{ inputs.source_path }}" "s3://${{ env.S3_BUCKET }}/${{ inputs.s3_path }}" --recursive
+            echo "✅ Files uploaded to s3://${{ env.S3_BUCKET }}/${{ inputs.s3_path }}"
+          else
+            echo "❌ S3 path or bucket not specified"
+            exit 1
+          fi
+
+      - name: S3 Sync
+        if: ${{ inputs.operation == 'sync' && env.AWS_ACCESS_KEY_ID != '' }}
+        run: |
+          if [ -n "${{ inputs.s3_path }}" ] && [ -n "${{ env.S3_BUCKET }}" ]; then
+            aws s3 sync "${{ inputs.source_path }}" "s3://${{ env.S3_BUCKET }}/${{ inputs.s3_path }}" --delete
+            echo "✅ Files synced to s3://${{ env.S3_BUCKET }}/${{ inputs.s3_path }}"
+          else
+            echo "❌ S3 path or bucket not specified"
+            exit 1
+          fi
+
+      - name: Skip AWS operations
+        if: ${{ env.AWS_ACCESS_KEY_ID == '' }}
+        run: |
+          echo "⏭️ AWS credentials not available, skipping ${{ inputs.operation }}"

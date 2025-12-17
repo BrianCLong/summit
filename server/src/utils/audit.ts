@@ -3,6 +3,13 @@ import { getPostgresPool } from '../config/database.js';
 
 type JsonObject = Record<string, unknown>;
 
+/**
+ * Computes a deep difference between two JSON objects.
+ *
+ * @param before - The original object.
+ * @param after - The modified object.
+ * @returns An object representing the changed keys and their values.
+ */
 function deepDiff(before: JsonObject = {}, after: JsonObject = {}): JsonObject {
   // Simple structural diff capturing changed keys only
   const changed: JsonObject = {};
@@ -25,6 +32,13 @@ function deepDiff(before: JsonObject = {}, after: JsonObject = {}): JsonObject {
   return changed;
 }
 
+/**
+ * Signs the audit payload using an HMAC-SHA256 signature for integrity verification.
+ *
+ * @param payload - The payload to sign.
+ * @param secret - The signing secret.
+ * @returns The Base64 encoded signature, or null if signing fails.
+ */
 function signAuditPayload(payload: JsonObject, secret?: string): string | null {
   try {
     const h = crypto.createHmac('sha256', String(secret));
@@ -35,28 +49,48 @@ function signAuditPayload(payload: JsonObject, secret?: string): string | null {
   }
 }
 
+/**
+ * Parameters for recording an audit log entry.
+ */
 interface WriteAuditParams {
+  /** The ID of the user performing the action. */
   userId?: string;
-  userEmail?: string;
-  tenantId?: string;
+  /** The type of action performed (e.g., 'CREATE', 'UPDATE', 'LOGIN'). */
   action: string;
+  /** The type of resource affected (e.g., 'USER', 'DOCUMENT'). */
   resourceType?: string;
+  /** The ID of the resource affected. */
   resourceId?: string;
+  /** Additional details about the action. */
   details?: JsonObject;
+  /** The IP address of the actor. */
   ip?: string;
+  /** The user agent string of the actor. */
   userAgent?: string;
+  /** The role of the actor at the time of the action. */
   actorRole?: string;
+  /** The session ID of the actor. */
   sessionId?: string;
+  /** The state of the resource before the action. */
   before?: JsonObject;
+  /** The state of the resource after the action. */
   after?: JsonObject;
-  success?: boolean;
-  errorMessage?: string;
 }
 
+/**
+ * Writes an audit log entry to the database.
+ *
+ * It automatically computes the diff between `before` and `after` states if provided,
+ * and signs the payload if an audit signing secret is configured.
+ *
+ * Failures to write to the audit log are swallowed to prevent breaking the main application flow,
+ * but should be monitored.
+ *
+ * @param params - The audit log parameters.
+ * @returns A Promise that resolves when the log entry is written (or silently fails).
+ */
 async function writeAudit({
   userId,
-  userEmail,
-  tenantId,
   action,
   resourceType,
   resourceId,
@@ -67,8 +101,6 @@ async function writeAudit({
   sessionId,
   before,
   after,
-  success = true,
-  errorMessage,
 }: WriteAuditParams): Promise<void> {
   try {
     const pool = getPostgresPool();
@@ -99,31 +131,20 @@ async function writeAudit({
     }
 
     await pool.query(
-      `INSERT INTO audit_events (
-        user_id, user_email, tenant_id, action, resource_type, resource_id,
-        resource_data, old_values, new_values, success, error_message, ip_address, user_agent, session_id
-      )
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+      `INSERT INTO audit_logs (user_id, action, resource_type, resource_id, details, ip_address, user_agent)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
       [
-        userId || 'system',
-        userEmail || 'system',
-        tenantId || 'system',
+        userId || null,
         action,
-        resourceType || 'unknown',
+        resourceType || null,
         resourceId || null,
         enrichedDetails,
-        before || null,
-        after || null,
-        success,
-        errorMessage || null,
         ip || null,
         userAgent || null,
-        sessionId || null
       ],
     );
   } catch (e) {
-    // non-fatal, avoid throwing in hot paths, but log it
-    console.error('Audit write failed:', e);
+    // non-fatal, avoid throwing in hot paths
   }
 }
 
