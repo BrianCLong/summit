@@ -107,7 +107,7 @@ export class TrainingOrchestrator extends EventEmitter {
    */
   private async simulateTraining(jobId: string): Promise<void> {
     const run = this.runs.get(jobId);
-    if (!run) return;
+    if (!run) {return;}
 
     const epochs = run.config.batchSize || 10;
 
@@ -229,7 +229,7 @@ export class TrainingOrchestrator extends EventEmitter {
     const run = this.runs.get(jobId);
     const job = this.jobs.get(jobId);
 
-    if (!run || !job) return;
+    if (!run || !job) {return;}
 
     run.endTime = new Date();
     run.status = 'completed';

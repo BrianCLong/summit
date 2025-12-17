@@ -1,58 +1,73 @@
-import express, { Request, Response } from 'express';
-import { predictiveThreatService } from '../services/PredictiveThreatService.js';
-import logger from '../utils/logger.js';
+import express from 'express';
+import { PredictiveService } from '../predictive/PredictiveService';
+import { ForecastRequest, WhatIfRequest, SimulationRequest } from '../contracts/predictive/types';
+
+// Assuming we have some auth middleware available, otherwise we skip for now
+// or implement a mock one. Prompt says "All APIs must accept a 'legal basis' token".
+// We'll extract it from body or headers.
 
 const router = express.Router();
+const service = new PredictiveService();
 
-/**
- * GET /forecast/:signal
- * Get a forecast for a specific signal.
- * Query params:
- * - horizon: number of hours to forecast (default: 24)
- */
-router.get('/forecast/:signal', async (req: Request, res: Response) => {
-  try {
-    const signal = req.params.signal;
-    const horizon = parseInt(req.query.horizon as string) || 24;
+import { auditLogger } from '../middleware/audit-logger';
 
-    const result = await predictiveThreatService.forecastSignal(signal, horizon);
-    res.json(result);
-  } catch (error) {
-    logger.error('Error fetching forecast:', error);
-    // Handle known errors (like missing signal) with 404 or 400
-    if (error instanceof Error && error.message.includes('No historical data')) {
-      res.status(404).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: 'Internal Server Error' });
+// Middleware to ensure legal basis is present
+const requireLegalBasis = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const legalBasis = req.body.legalBasis;
+    if (!legalBasis || !legalBasis.purpose || !legalBasis.policyId) {
+        return res.status(403).json({ error: "Missing or invalid Legal Basis token" });
     }
-  }
+
+    // Log the legal basis context for audit compliance
+    // Forwarding to Security/Governance via audit log
+    // In a future iteration, this would be a synchronous check against OPA or PolicyService
+    // For now, we ensure it's recorded.
+    if ((req as any).log) {
+       (req as any).log.info({ legalBasis }, "Predictive Service Access Authorized via Legal Basis");
+    } else {
+       console.info("Predictive Service Access Authorized via Legal Basis", legalBasis);
+    }
+
+    next();
+};
+
+router.post('/forecast/risk', requireLegalBasis, async (req, res) => {
+    try {
+        const body = req.body as ForecastRequest;
+        if (body.horizon > 365) {
+            return res.status(400).json({ error: "Horizon limit exceeded (max 365)" });
+        }
+        const result = await service.forecastRisk(body);
+        res.json(result);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-/**
- * POST /simulate
- * Run a counterfactual simulation.
- * Body:
- * - signal: string
- * - action: string
- * - impactFactor: number (e.g. -0.2 for 20% reduction)
- */
-router.post('/simulate', async (req: Request, res: Response) => {
-  try {
-    const { signal, action, impactFactor } = req.body;
-
-    if (!signal || !action || impactFactor === undefined) {
-      return res.status(400).json({ error: 'Missing required parameters: signal, action, impactFactor' });
+router.post('/simulate/what-if', requireLegalBasis, async (req, res) => {
+    try {
+        const body = req.body as WhatIfRequest;
+        if (body.injectedNodes && body.injectedNodes.length > 1000) {
+            return res.status(400).json({ error: "Injection limit exceeded (max 1000 nodes)" });
+        }
+        const result = await service.simulateWhatIf(body);
+        res.json(result);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
     }
+});
 
-    const result = await predictiveThreatService.simulateCounterfactual(signal, {
-      action,
-      impactFactor
-    });
-    res.json(result);
-  } catch (error) {
-    logger.error('Error running simulation:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
+router.post('/simulate/campaign', requireLegalBasis, async (req, res) => {
+    try {
+        const body = req.body as SimulationRequest;
+        if (body.steps > 100) {
+            return res.status(400).json({ error: "Simulation steps limit exceeded (max 100)" });
+        }
+        const result = await service.simulateCampaign(body);
+        res.json(result);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 export default router;

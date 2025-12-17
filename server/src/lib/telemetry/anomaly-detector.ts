@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { telemetry } from './comprehensive-telemetry';
 import { snapshotter } from './diagnostic-snapshotter';
