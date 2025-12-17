@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../config/logger.js';
+import { logger, metrics } from '../observability/index.js';
 import { cfg } from '../config.js';
 import { UserFacingError, AppError } from '../lib/errors.js';
 
@@ -9,26 +9,26 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  // Use request-scoped logger if available (includes correlationId), otherwise fallback to global logger
-  const log = req.log || logger;
-
   const statusCode = err.statusCode || err.status || 500;
   const correlationId = req.correlationId;
   const traceId = req.traceId;
 
-  // Structured error log
-  log.error({
-    msg: err.message,
-    err, // Serialized error object
+  // Emit metric
+  metrics.incrementCounter('summit_errors_total', {
+    code: statusCode.toString(),
+    component: 'http.server',
+    tenantId: (req as any).user?.tenant_id || (req as any).tenantId
+  });
+
+  // Structured error log using the new Observability Logger which auto-injects context
+  // We explicitly pass err object for serialization
+  logger.error(err.message, {
+    err,
     stack: err.stack,
-    correlationId,
-    traceId,
     path: req.path,
     method: req.method,
     statusCode,
-    userId: (req as any).user?.sub || (req as any).user?.id,
-    tenantId: (req as any).user?.tenant_id,
-  }, `Request failed: ${err.message}`);
+  });
 
   // Response to client
   const response: any = {
