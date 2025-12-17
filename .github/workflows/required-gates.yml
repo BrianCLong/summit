@@ -1,0 +1,26 @@
+name: required-gates
+on:
+  pull_request:
+    branches: [main, feature/merge-closed-prs-s25]
+jobs:
+  gates:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20", cache: "pnpm" }
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
+      - run: pnpm install --frozen-lockfile
+      - name: Lint & unit
+        run: pnpm lint && pnpm test -- --ci
+      - name: Contracts
+        run: pnpm jest contracts/graphql/__tests__/schema.contract.ts --runInBand
+      - name: E2E
+        run: pnpm playwright install --with-deps && pnpm e2e
+      - name: Policy sim
+        run: |
+          curl -sL -o opa https://openpolicyagent.org/downloads/latest/opa_linux_amd64 && chmod +x ./opa
+          ./opa test policies/ -v
+      - name: SBOM + provenance
+        run: pnpm cyclonedx-npm --output-format JSON --output-file sbom.json && node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
