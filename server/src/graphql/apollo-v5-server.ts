@@ -17,6 +17,7 @@ import logger from '../utils/logger.js';
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
 import resolvers from './resolvers-combined.js';
+import { authDirectiveTransformer } from './authDirective.js';
 
 // Import DataLoaders
 import { createDataLoaders, type DataLoaders } from './dataloaders/index.js';
@@ -25,9 +26,11 @@ import { getPostgresPool } from '../db/postgres.js';
 
 // Import performance optimization plugins
 import { createQueryComplexityPlugin, getMaxComplexityByRole } from './plugins/queryComplexityPlugin.js';
+import { createInputSanitizationPlugin } from './plugins/inputSanitizationPlugin.js';
 import { createAPQPlugin } from './plugins/apqPlugin.js';
 import { createPerformanceMonitoringPlugin } from './plugins/performanceMonitoringPlugin.js';
 import resolverMetricsPlugin from './plugins/resolverMetrics.js';
+import depthLimit from 'graphql-depth-limit';
 
 // Enhanced context type for Apollo v5
 export interface GraphQLContext {
@@ -70,13 +73,16 @@ const permissions = shield({
 
 // Create enhanced GraphQL schema with security
 function createSecureSchema() {
-  const baseSchema = makeExecutableSchema({
+  let schema = makeExecutableSchema({
     typeDefs,
     resolvers,
   });
 
+  // Apply Auth Directive
+  schema = authDirectiveTransformer(schema);
+
   // Apply security middleware
-  return applyMiddleware(baseSchema, permissions);
+  return applyMiddleware(schema, permissions);
 }
 
 // Context function for Apollo v5
@@ -118,6 +124,10 @@ export function createApolloV5Server(
 
   const server = new ApolloServer<GraphQLContext>({
     schema,
+    validationRules: [
+      // Recursion and Depth limiting against deep query abuse
+      depthLimit(10),
+    ],
     plugins: [
       // Graceful shutdown
       ApolloServerPluginDrainHttpServer({ httpServer }),
@@ -126,6 +136,14 @@ export function createApolloV5Server(
       ...(process.env.NODE_ENV === 'development'
         ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
         : []),
+
+      // Input Sanitization Plugin (Injection & Recursive Input Abuse)
+      createInputSanitizationPlugin({
+        maxInputDepth: 10,
+        maxStringLength: 10000,
+        trimStrings: true,
+        removeNullBytes: true,
+      }),
 
       // Performance optimization plugins
       createQueryComplexityPlugin({

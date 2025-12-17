@@ -21,6 +21,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set up Node.js for evidence bundle generation
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install ts-node runtime
+        run: npm install -g ts-node typescript
+
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
@@ -48,6 +56,27 @@ jobs:
           echo "No specific linting rules defined yet. Add your linting commands (e.g., flake8, black) here."
           # flake8 .
           # black --check .
+
+      - name: Generate evidence bundle
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_RUN_ATTEMPT: ${{ github.run_attempt }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_WORKFLOW: ${{ github.workflow }}
+          GITHUB_JOB: build-and-test
+          TEST_RESULTS_SUMMARY: "Placeholder: add pytest command when available."
+          SECURITY_SCAN_SUMMARY: "Security scans not yet configured for this job."
+        run: ts-node scripts/ops/generate-evidence-bundle.ts
+
+      - name: Upload evidence bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-bundle-${{ github.sha }}
+          path: evidence-bundles/evidence-${{ github.sha }}.json
 
   build-and-deploy:
     needs: build-and-test

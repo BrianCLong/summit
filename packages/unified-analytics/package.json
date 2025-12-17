@@ -1,0 +1,21 @@
+{
+  "name": "@summit/unified-analytics",
+  "version": "1.0.0",
+  "description": "Unified analytics engine for lakehouse queries",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@summit/lakehouse": "workspace:*",
+    "zod": "^4.1.12",
+    "pino": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}
