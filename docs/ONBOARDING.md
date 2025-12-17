@@ -1,76 +1,111 @@
-# ⚡️ Summit Developer Onboarding: The 10-Minute Golden Path
+# 🚀 Summit: 10-Minute Developer Onboarding
 
-**Goal:** Go from `git clone` to a fully verified, running environment in **under 10 minutes**.
+Welcome to the Summit Platform! This guide will get you from a fresh `git clone` to a running, validated local environment in under 10 minutes.
 
-> **🛑 Stop!** Do you have the prerequisites?
-> - **Docker Desktop** (Running, ≥ 8GB RAM allocated)
-> - **Node.js** (≥ v18)
-> - **pnpm** (≥ v9, enable with `corepack enable`)
-> - **Make**
+Our core principle is **Deployable First**: if the local environment is broken, we stop and fix it. Every developer is a guardian of the golden path.
+
+> 📚 **AI Assistants:** For deep context, conventions, and architecture, see [`CLAUDE.md`](../CLAUDE.md).
 
 ---
 
-## 🚀 Quick Start (The Golden Path)
+### ✅ Step 1: Validate Your Local Environment
 
-Run these **4 commands** in order. If any fail, stop and check [Troubleshooting](#-troubleshooting-faq).
+Before you begin, run the environment validator to ensure your machine has the required dependencies and available ports. This script checks for Docker, Node.js, pnpm, Python, and verifies that critical ports are free.
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/BrianCLong/summit.git && cd summit
-
-# 2. Bootstrap dependencies & secrets (approx. 2 mins)
-make bootstrap
-
-# 3. Start the stack (approx. 2-5 mins)
-make up
-
-# 4. Verify everything works (approx. 1 min)
-make smoke
+./scripts/validate-env.sh
 ```
 
-### 🎉 Definition of Done
-If `make smoke` prints **"All smoke tests passed!"**, you are ready to code.
-- **UI:** [http://localhost:3000](http://localhost:3000)
-- **API:** [http://localhost:4000/graphql](http://localhost:4000/graphql)
+If the script reports any failures, resolve them before proceeding. Common issues include:
+- **Docker not running**: Start Docker Desktop.
+- **Missing dependencies**: Install the required versions (Node 18+, pnpm 9+, Python 3.11+).
+- **Port conflicts**: Shut down services using ports 3000, 4000, 5432, 6379, 7474, 7687, or 8080.
 
 ---
 
-## 🛠️ Common Tasks
+### 📦 Step 2: Bootstrap and Start the Platform
 
-| Goal | Command |
-| :--- | :--- |
-| **Start Environment** | `make up` |
-| **Stop Environment** | `make down` |
-| **Reset Everything** (Nuclear Option) | `make clean && make bootstrap && make up` |
-| **Run Tests** | `npm test` (Unit) or `make smoke` (E2E) |
-| **View Logs** | `docker compose logs -f api` |
+The `start.sh` script is your golden path to a running environment. It automates dependency installation, environment file setup, Docker container startup, and initial health checks.
 
----
+```bash
+./start.sh
+```
+This single command will:
+1.  **Run Validator**: Execute the environment check from Step 1.
+2.  **Install Dependencies**: Run `pnpm install` for all workspace packages.
+3.  **Create `.env`**: Copy `.env.example` to `.env` if it doesn't exist.
+4.  **Launch Services**: Start the entire stack (API, UI, databases, etc.) using Docker Compose.
+5.  **Run Migrations & Seeds**: Apply database migrations and seed the `quickstart-investigation` dataset.
+6.  **Run Smoke Test**: Automatically validate the core workflow against the seeded data.
 
-## ❓ Troubleshooting FAQ (Single-Command Fixes)
+When the script finishes, you will have a fully functional development environment.
 
-**Q: "Docker is not running" or connection refused?**
-**A:** `open -a Docker` (macOS) or start Docker Desktop manually.
-
-**Q: "Missing dependencies" or weird build errors?**
-**A:** `make bootstrap`
-
-**Q: Containers are unhealthy or stuck?**
-**A:** `make down && make up`
-
-**Q: "Address already in use" (Port 3000/4000/5432)?**
-**A:** `lsof -ti:4000 | xargs kill -9` (Replace port number as needed)
-
-**Q: Database/Migrations seem broken?**
-**A:** `make db-reset` (Warning: deletes all local data)
-
-**Q: Tests are flaky or failing mysteriously?**
-**A:** `make smoke` (Runs the canonical verification suite)
+- **Optional AI Stack**: To include AI/ML services, run `./start.sh --ai`.
+- **Manual Mode**: If you prefer, you can run the steps manually: `make bootstrap`, `make up`, and `make smoke`.
 
 ---
 
-## 📚 Next Steps
+### 🔬 Step 3: Explore the Golden Path Workflow
 
-1. **Activate Features:** See [Admin Configuration](./ADMIN-CONFIG.md) to tweak settings.
-2. **Explore the Graph:** Go to the "Investigation" tab in the UI.
-3. **Read the Manual:** Check [COMMAND_REFERENCE.md](./COMMAND_REFERENCE.md) for advanced usage.
+The smoke test in the previous step already validated the core application workflow. Now, walk through it yourself to understand the user experience.
+
+**Golden Path**: **Investigation → Entities → Relationships → Copilot → Results**
+
+1.  **Open the Frontend**: Navigate to **http://localhost:3000**.
+2.  **Find the Demo Investigation**: On the dashboard, you'll find the pre-seeded "Quickstart Investigation". Click to open it.
+3.  **Explore the Graph**:
+    - The graph explorer will display entities and relationships from the `quickstart-investigation` dataset.
+    - Click on nodes and edges to see their properties.
+    - Use the layout tools to rearrange the graph.
+4.  **Run the Copilot**:
+    - In the investigation panel, click the "Run Copilot Goal" button.
+    - This will trigger an AI-driven analysis based on a predefined goal for the dataset.
+5.  **View the Results**:
+    - Observe as the Copilot streams its findings into the results panel.
+    - The graph may update in real time with newly discovered entities or relationships.
+
+This workflow is the backbone of the Summit platform. `make smoke` automates these exact steps, ensuring that our core functionality is always working.
+
+---
+
+### 🧑‍💻 Your First Commit: Development Workflow
+
+Now that your environment is running and validated, you're ready to contribute.
+
+1.  **Create a Branch**: Use the format `feature/<thing>` or `fix/<thing>`.
+    ```bash
+    git checkout -b feature/my-new-feature
+    ```
+2.  **Write Code**: Make your changes to the codebase. The `client/` and `server/` directories are the primary application folders.
+3.  **Run Tests**: Before committing, run local checks.
+    ```bash
+    make smoke      # Always run the smoke test
+    pnpm test       # Run unit/integration tests
+    pnpm lint       # Check for linting errors
+    ```
+4.  **Commit Your Changes**: Use the [Conventional Commits](https://www.conventionalcommits.org/) format.
+    ```bash
+    git commit -m "feat: add user profile page"
+    ```
+5.  **Open a Pull Request**: Push your branch to GitHub and create a PR against `main`. Ensure all CI checks pass.
+
+---
+
+### 🛠️ Helpful Commands
+
+- `make help`: Display all available `make` commands.
+- `make up`: Start all services.
+- `make down`: Stop and remove all services.
+- `make smoke`: Run the end-to-end smoke test.
+- `pnpm test`: Run unit and integration tests.
+- `docker-compose logs -f <service-name>`: Tail logs for a specific service (e.g., `api`, `client`).
+
+---
+
+### 🆘 Troubleshooting
+
+- **`make smoke` fails**: Run `pnpm smoke` for a more detailed, verbose output to pinpoint the failure.
+- **Health checks failing**: Use `curl http://localhost:4000/health/detailed | jq` to see the status of all backend services.
+- **Docker issues**: A clean restart often helps. Run `make down` followed by `./start.sh`.
+
+For more detailed guides, see the [documentation index](./README.md). Welcome to the team!

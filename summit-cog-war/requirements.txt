@@ -1,0 +1,20 @@
+# Core Application
+streamlit
+
+# Testing
+pytest
+playwright
+
+# AI/ML
+# Using 2.12.1+ to address CVE-2023-25668 and CVE-2023-33976
+tensorflow==2.12.1
+torch
+transformers
+# For NeuroGraph/LLM hybrids
+dgl
+networkx
+spacy
+# For EvoForge
+numpy
+pandas
+scikit-learn
