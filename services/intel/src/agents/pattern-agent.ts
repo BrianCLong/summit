@@ -258,8 +258,8 @@ export class PatternAgent {
 
     // Find nearby signals
     const nearbySignals = this.signalHistory.filter((h) => {
-      if (h.signal.id === signal.id) return false;
-      if (h.signal.detectionLocations.length === 0) return false;
+      if (h.signal.id === signal.id) {return false;}
+      if (h.signal.detectionLocations.length === 0) {return false;}
 
       const distance = this.computeDistance(
         signalLocation,
@@ -341,7 +341,7 @@ export class PatternAgent {
   ): DetectedPattern | null {
     // Look for signals with same characteristics but different frequencies
     const candidates = this.signalHistory.filter((h) => {
-      if (h.signal.id === signal.id) return false;
+      if (h.signal.id === signal.id) {return false;}
 
       // Same modulation but different frequency
       const sameMod =
@@ -401,7 +401,7 @@ export class PatternAgent {
     signal: SignalOfInterest,
   ): DetectedPattern | null {
     // Look for coordinated on/off patterns
-    if (signal.occurrenceCount < 3) return null;
+    if (signal.occurrenceCount < 3) {return null;}
 
     // Check if signal has regular on/off periods
     const avgDuration = signal.averageDurationMs;
@@ -446,7 +446,7 @@ export class PatternAgent {
 
     // Compute signal statistics
     const stats = this.computeSignalStatistics();
-    if (!stats) return patterns;
+    if (!stats) {return patterns;}
 
     // Check for frequency anomaly
     const freqZScore =
@@ -515,7 +515,7 @@ export class PatternAgent {
 
     // Find tracks with similar movement characteristics
     const similarTracks = this.trackHistory.filter((h) => {
-      if (h.track.id === track.id) return false;
+      if (h.track.id === track.id) {return false;}
 
       // Similar heading (within 30 degrees)
       const headingDiff = Math.abs(
@@ -572,10 +572,10 @@ export class PatternAgent {
     const used = new Set<string>();
 
     for (const item of signals) {
-      if (used.has(item.signal.id)) continue;
+      if (used.has(item.signal.id)) {continue;}
 
       const group = signals.filter((other) => {
-        if (used.has(other.signal.id)) return false;
+        if (used.has(other.signal.id)) {return false;}
         const timeDiff = Math.abs(
           item.timestamp.getTime() - other.timestamp.getTime(),
         );
@@ -597,7 +597,7 @@ export class PatternAgent {
   private computeAverageInterval(
     signals: Array<{ signal: SignalOfInterest; timestamp: Date }>,
   ): number {
-    if (signals.length < 2) return 0;
+    if (signals.length < 2) {return 0;}
 
     const sorted = [...signals].sort(
       (a, b) => a.timestamp.getTime() - b.timestamp.getTime(),
@@ -657,8 +657,8 @@ export class PatternAgent {
   private computeTemporalConfidence(
     signals: Array<{ signal: SignalOfInterest; timestamp: Date }>,
   ): ConfidenceLevel {
-    if (signals.length >= 5) return 'HIGH';
-    if (signals.length >= 3) return 'MEDIUM';
+    if (signals.length >= 5) {return 'HIGH';}
+    if (signals.length >= 3) {return 'MEDIUM';}
     return 'LOW';
   }
 
@@ -668,8 +668,8 @@ export class PatternAgent {
   private computeSpatialConfidence(
     signals: Array<{ signal: SignalOfInterest; timestamp: Date }>,
   ): ConfidenceLevel {
-    if (signals.length >= 5) return 'HIGH';
-    if (signals.length >= 3) return 'MEDIUM';
+    if (signals.length >= 5) {return 'HIGH';}
+    if (signals.length >= 3) {return 'MEDIUM';}
     return 'LOW';
   }
 
@@ -682,7 +682,7 @@ export class PatternAgent {
     meanBandwidth: number;
     stdBandwidth: number;
   } | null {
-    if (this.signalHistory.length < 10) return null;
+    if (this.signalHistory.length < 10) {return null;}
 
     const frequencies = this.signalHistory.map(
       (h) => h.signal.waveform.centerFrequencyHz,
@@ -721,7 +721,7 @@ export class PatternAgent {
    */
   private findSimilarPattern(pattern: DetectedPattern): DetectedPattern | null {
     for (const existing of this.detectedPatterns.values()) {
-      if (existing.type !== pattern.type) continue;
+      if (existing.type !== pattern.type) {continue;}
 
       // Check for overlapping signals/tracks
       const signalOverlap = pattern.involvedSignals.filter((s) =>
@@ -787,7 +787,7 @@ export class PatternAgent {
    * Generate alert for new pattern
    */
   private async generatePatternAlert(pattern: DetectedPattern): Promise<void> {
-    if (!this.alertCallback) return;
+    if (!this.alertCallback) {return;}
 
     const alert: IntelAlert = {
       id: uuidv4(),

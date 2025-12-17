@@ -39,7 +39,11 @@ services:
       - summit
 
   neo4j:
+<<<<<<< HEAD
+    image: neo4j:5.24
+=======
     image: neo4j:5-community
+>>>>>>> main
     container_name: summit-neo4j
     restart: unless-stopped
     environment:
@@ -244,7 +248,7 @@ services:
       - 'prometheus.port=9001'
 
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.54.1
     container_name: summit-prometheus
     restart: unless-stopped
     volumes:

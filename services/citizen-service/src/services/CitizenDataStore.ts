@@ -134,9 +134,9 @@ export class CitizenDataStore {
   async hasConsent(citizenId: string, domain: ServiceDomain): Promise<boolean> {
     const consents = this.consents.get(citizenId) || [];
     const consent = consents.find((c) => c.domain === domain);
-    if (!consent) return false;
-    if (!consent.consentGiven) return false;
-    if (consent.expiryDate && new Date(consent.expiryDate) < new Date()) return false;
+    if (!consent) {return false;}
+    if (!consent.consentGiven) {return false;}
+    if (consent.expiryDate && new Date(consent.expiryDate) < new Date()) {return false;}
     return true;
   }
 

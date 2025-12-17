@@ -19,7 +19,7 @@ export function WidgetRenderer({ widget, className = '' }: WidgetRendererProps) 
   const isSelected = selectedWidgets.has(widget.id);
 
   const handleClick = (e: React.MouseEvent) => {
-    if (!editMode) return;
+    if (!editMode) {return;}
 
     if (e.ctrlKey || e.metaKey) {
       // Multi-select
