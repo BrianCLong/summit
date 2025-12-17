@@ -12,7 +12,7 @@
       "client:dev": "cd client && npm run dev",
       "devkit:seed": "node scripts/devkit/seed-fixtures.js",
       "devkit:parity": "node scripts/devkit/check-parity.js",
-      "devkit:smoke": "node smoke-test.js --ci",
+      "devkit:smoke": "node smoke-test.cjs --ci",
       "docker:dev": "docker-compose -f docker-compose.dev.yml up",
       "docker:prod": "docker-compose up",
       "test:jest": "jest --config jest.projects.cjs --maxWorkers=50% --detectOpenHandles",

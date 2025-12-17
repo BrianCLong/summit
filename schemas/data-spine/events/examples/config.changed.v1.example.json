@@ -1,0 +1,23 @@
+{
+  "event_id": "aa6a5dea-4bfd-4f96-8c88-7f216a5722a7",
+  "event_type": "config.changed.v1",
+  "event_version": "v1",
+  "occurred_at": "2025-01-10T18:18:45Z",
+  "recorded_at": "2025-01-10T18:18:45Z",
+  "tenant_id": "tenant-acme",
+  "subject_id": "feature-admin-2",
+  "source_service": "config-service",
+  "trace_id": "trace-config-77",
+  "correlation_id": "ticket-4421",
+  "region": "us-east-1",
+  "data": {
+    "config_key": "authz.rollout_engine",
+    "scope": "tenant",
+    "change_type": "update",
+    "previous_value": "v1",
+    "new_value": "v2",
+    "changed_by": "feature-admin-2",
+    "change_ticket": "CHG-4421",
+    "approval_reference": "CAB-2025-01-10"
+  }
+}

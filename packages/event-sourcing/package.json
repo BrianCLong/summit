@@ -1,0 +1,37 @@
+{
+  "name": "@intelgraph/event-sourcing",
+  "version": "1.0.0",
+  "description": "Enterprise event sourcing framework with event store, versioning, and replay",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "dev": "tsc --watch",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "event-sourcing",
+    "event-store",
+    "cqrs",
+    "aggregate",
+    "replay",
+    "versioning"
+  ],
+  "dependencies": {
+    "uuid": "^10.0.0",
+    "pino": "^9.0.0",
+    "pg": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^10.0.0",
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "ts-jest": "^29.4.5"
+  }
+}
