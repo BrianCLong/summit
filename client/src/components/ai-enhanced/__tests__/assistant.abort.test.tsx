@@ -43,7 +43,6 @@ test('aborts first stream when a new prompt is sent', async () => {
     ],
     { mode: 'microtask' },
   );
-  // eslint-disable-next-line testing-library/no-node-access
   (screen.getByRole('region', { name: /ai assistant/i }) as any).ownerDocument
     .defaultView; // noop, keeps TS quiet
 

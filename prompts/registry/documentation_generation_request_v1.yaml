@@ -1,0 +1,39 @@
+id: documentation_generation_request_v1
+version: 1.0.0
+owner: documentation
+module: ai-content-assistant
+type: system
+description: System message for end-to-end documentation generation requests.
+riskTier: medium
+tags:
+  - generation
+  - planning
+variables:
+  - request_type
+  - target_audience
+  - style
+  - length
+  - language
+  - format
+  - include_examples
+  - include_code
+  - functions
+  - source_material
+template: |
+  Generate {{request_type}} documentation with the following requirements:
+
+  Target Audience: {{target_audience}}
+  Writing Style: {{style}}
+  Content Length: {{length}}
+  Language: {{language}}
+  Format: {{format}}
+  Include Examples: {{include_examples}}
+  Include Code Snippets: {{include_code}}
+
+  Functions to document:
+  {{functions}}
+
+  Source Material:
+  {{source_material}}
+
+  Generate comprehensive, accurate documentation that helps users understand and use this functionality effectively.

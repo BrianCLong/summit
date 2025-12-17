@@ -1,144 +1,109 @@
-# Sprint 14 — “Copilot & Controls” (Dec 1–12, 2025, America/Denver)
+By the runes of Scrum, we conjure a crisp, two-week sprint that delivers a thin, end-to-end “golden path” across ingest → provenance → NL graph query → evidence-backed brief.
 
-> **Window:** Mon, Dec 1 → Fri, Dec 12, 2025 (10 business days)
-> **Theme:** Ship the first analyst-visible **NL Graph Querying** MVP, a **one-path CSV Ingest Wizard** with license/PII guardrails, and core **Audit/Governance** hooks (reason-for-access + OPA/ABAC). These align with the near-term roadmap (Core GA: ingest/graph/analytics/copilot; ABAC/OPA; audit) and keep tri-pane UI as a stretch.
+# Sprint: Dec 1–12, 2025 (America/Denver) — “Golden Path Alpha”
 
----
-
-## 1) Sprint Goals
-
-- **NL Graph Querying (MVP):** prompt → generated **Cypher preview** with row/cost estimates; sandboxed execution; undo/rollback. **Acceptance:** ≥95% syntactic validity on test prompts; rollback supported.
-- **Ingest Wizard (CSV happy-path):** map flat CSV→canonical entities with **AI mapping hints**, **PII classification**, and **license rules**; record lineage. **Acceptance:** CSV/JSON mapped ≤10 min; PII flags; blocked fields show policy reasons.
-- **Data License Registry (MVP):** track license on source; **block export** with human-readable reason + appeal path. **Acceptance:** blocked export shows clause/owner/override workflow.
-- **Audit & Governance Hooks:** ABAC/RBAC + externalized **OPA** policies; **reason-for-access prompts** in UI; log who/what/why/when.
-- **Observability & Cost Guard (instrumentation):** OTEL traces, Prom metrics, latency heatmap scaffolding; enable query budgeter/slow-query killer flags.
-
-**Out of scope (tracked as next):** Graph-XAI overlays, predictive suite alpha, multi-graph federation; adhere to “Won’t Build” ethics gate.
+**Sprint Goal:** Prove an end-to-end workflow that (1) maps a CSV to canonical entities with lineage, (2) enforces data-license rules at export, (3) executes a natural-language graph query with generated Cypher preview, and (4) publishes a brief with validated citations. This aligns directly to the Wishbook’s core capability map and acceptance gates.  
 
 ---
 
-## 2) Epics → Stories (Definition of Done included)
+## Sprint Backlog (stories, AC, estimate)
 
-### Epic A — NL Graph Querying (Copilot)
+1. **Ingest Wizard v0 — CSV→Entities in ≤10 min** — *8 pts*
+   As an analyst, I can map a CSV/JSON to canonical entities with PII flags and see policy reasons for blocked fields; lineage is recorded.
+   **Acceptance:** “user maps a CSV/JSON→canonical entities in ≤10 min; PII flags; blocked fields show policy reasons; lineage recorded.” 
 
-- **A1. Prompt → Cypher generator service (Node/Apollo):** deterministic templates; returns `cypher`, `rowEstimate`, `costHint`.
-  - **DoD:** 50 gold prompts → ≥95% syntactic pass; failing prompts surface fix hints.
-- **A2. Sandbox executor:** read-only, result row cap, timed cancel, **undo/rollback** for any write classes (guarded off for MVP).
-  - **DoD:** killing long queries works; budget hints logged.
-- **A3. Web UI panel (React 18 + MUI + Cytoscape.js + jQuery for interactions):** left = prompt, middle = **Cypher preview**, right = results/row estimates; **diff vs manual** query.
-  - **DoD:** keyboard-first; accessible labels; preview must match executed query.
-- **A4. Unit/contract tests:** prompt fixtures; Cypher schema safety checks; cost hint bounds.
-  - **DoD:** Jest ≥90% statements, golden fixtures in repo.
+2. **Data License Registry — Export Blockers** — *5 pts*
+   As a compliance lead, I see human-readable reasons when an export is blocked (license clause, owner, override workflow).
+   **Acceptance:** “blocked export shows license clause, owner, override workflow.” 
 
-### Epic B — Ingest Wizard (CSV Happy-Path)
+3. **Provenance & Claim Ledger — Verifiable Manifest** — *8 pts*
+   As a reviewer, exported bundles include a hash-tree + transform-chain manifest verifiable offline.
+   **Acceptance:** “export produces manifest (hash tree, transform chain), verifiable by external verifier.” 
 
-- **B1. Upload→Schema map step:** AI field suggestions; manual overrides; **PII classifier** tags; DPIA checklist saved.
-  - **DoD:** demo CSV (people/orgs/events) maps in ≤10 minutes; lineage captured.
-- **B2. License attach & enforcement:** source select → license bound to dataset; blocked fields explain **why**.
-  - **DoD:** export attempt from licensed dataset shows clear reason/appeal path.
-- **B3. ETL enrichers (scaffold):** GeoIP + hash + OCR stub wired; EXIF scrub.
-  - **DoD:** enrich steps recorded in lineage; toggles visible.
+4. **NL Graph Querying — Cypher Preview + Sandbox** — *8 pts*
+   As an analyst, I type a natural-language question, view generated Cypher + cost/row estimate, then run it in a sandbox.
+   **Acceptance:** “≥95% syntactic validity on test prompts; rollback/undo supported.” 
 
-### Epic C — Audit, Access & Governance
+5. **GraphRAG — Evidence-First Citations Gate** — *5 pts*
+   As a brief author, responses must cite resolvable evidence; missing citations block publication.
+   **Acceptance:** “citations always resolve to evidence; missing citations block publication.” 
 
-- **C1. ABAC/RBAC + OPA integration:** policy labels + case roles; **step-up auth** hooks (stub).
-  - **DoD:** policy unit tests; blocking paths verified in stage.
-- **C2. Reason-for-access prompt (UI modal + API):** capture purpose string; write to immutable audit.
-  - **DoD:** audit shows who/what/**why**/when; search by purpose.
-- **C3. Export blocker (License/Authority):** **authority/permit** required at export; refusal returns actionable message + appeal link.
-  - **DoD:** simulated export without proper basis fails with readable rationale.
+6. **Brief/Report Studio — Manifest Validation on Export** — *5 pts*
+   As a case owner, I export a redacted PDF/HTML brief; all edits/audits are visible and the export is validated via the manifest verifier.
+   **Acceptance:** “all edits/audits visible; export validated via manifest verifier.” 
 
-### Stretch — Tri-Pane UX scaffold
-
-- Sync **timeline + map + graph** cursors; save/pin views; “Explain this view” placeholder.
-  - **Acceptance basis:** synchronized brushing + usability metrics tracked.
+**Stretch (time-boxed):** Hook a minimal Proof-Carrying Analytics (*.pcq*) manifest from the deterministic DAG runner into #3 (export pipeline). 
 
 ---
 
-## 3) Engineering Plan (by layer)
+## Definition of Done (DoD)
 
-**Frontend (React 18 + MUI + Cytoscape.js; jQuery for DOM/events)**
+* Feature behind a flag, documented, and demoable on stage env; passes acceptance criteria cited above.
+* Unit/contract tests + E2E: *ingest → resolve → runbook → report* with screenshot diffs; Cypher tests on ephemeral DB. 
+* Security & governance: STRIDE controls mapped; no criticals outstanding. 
+* Observability: traces/metrics/logs wired; SLO dashboards updated. 
 
-- Copilot panel & schema-mapper wizard; accessible forms; keyboard-first; jQuery `$.ajax` wrappers for executor calls.
-- Guard any data export buttons with license/authority checks and reason-for-access prompt.
+## Definition of Ready (DoR)
 
-**Graph/Backend (Node 18, Apollo GraphQL, Neo4j driver)**
-
-- Services: `/copilot/generateCypher`, `/query/sandbox`, `/audit/log`, `/license/check`.
-- Policy middleware: OPA evaluation pre-query; attach **purpose** to context; record immutable audit.
-
-**ETL/Enrichers**
-
-- CSV parser with mapping presets; PII classifier stub + flags; enrichers (GeoIP/hash/EXIF scrub) chained with provenance nodes.
-
-**Security/Governance**
-
-- ABAC policy schema + role matrix; start warrant/authority fields on queries; export refusals show clause/owner/review path.
-
-**Observability & Cost**
-
-- OTEL tracing, Prom metrics; latency heatmap endpoint; flip on **query budgeter/slow-query killer** (feature-flag).
+* User story has measurable AC; dependencies and flags listed; test data identified; design notes or wire stub attached per PRD hygiene. 
 
 ---
 
-## 4) Acceptance & Demo Plan
+## Capacity & Forecast
 
-**Demo script (Fri, Dec 12):**
-
-1. Load sample CSV → map fields with AI suggestions; see **PII flags**; run DPIA checklist; import completes ≤10 minutes.
-2. Ask Copilot: “Show orgs within 2 hops of *X* active in 2024” → preview **Cypher & row/cost**; execute sandbox; undo. **Pass if** syntactic validity ≥95% on the gold set.
-3. Attempt export on licensed data **without authority** → export blocked with human-readable reason and appeal path.
-4. Show **reason-for-access** audit for a sensitive view.
+* Team cap: ~40–45 pts/2 weeks (5 devs, 1 QA, 1 designer, 1 PM). Backlog above totals ~39–44 pts (stretch optional).
+* Success KPIs this sprint: % exports with valid manifests; % NL queries that compile; blocked-export clarity rate; E2E demo pass. 
 
 ---
 
-## 5) Risks & Mitigations
+## Ceremonies & Calendar (America/Denver)
 
-- **Prompt→Cypher hallucinations** → start with constrained templates & fixtures; non-passing prompts fall back to manual query diff.
-- **Export compliance complexity** → keep MVP to license/authority gates only; appeals logged for ombuds.
-- **Performance regressions** → enable cost guard + SLO dashboards early.
-
----
-
-## 6) Tracking Artifacts (proposed)
-
-- **Branches:**
-  - `feature/copilot-nl-cypher`, `feature/ingest-wizard-csv`, `feature/audit-opa`
-- **PR labels:** `area:copilot`, `area:ingest`, `area:audit`, `type:feature`, `needs:security-review`
-- **CI gates:** unit tests; GraphQL contract tests; schema migration check; axe-core accessibility scan.
+* **Sprint Planning:** Mon Dec 1, 09:30–11:00
+* **Daily Stand-up:** 09:15–09:30 (15 min)
+* **Backlog Refinement:** Thu Dec 4, 14:00–14:45
+* **Sprint Review + Live Demo:** Fri Dec 12, 10:00–11:00
+* **Retro:** Fri Dec 12, 11:15–12:00
 
 ---
 
-## 7) Metrics (sprint exit)
+## Release/Env, Flags & Data
 
-- **Copilot validity:** ≥95% syntactic pass on 50 prompts.
-- **Ingest time:** CSV→entities ≤10 minutes; lineage present.
-- **Audit coverage:** 100% of sensitive queries capture **reason-for-access**.
-- **Ops:** latency heatmap visible; cost guard flags enabled.
-
----
-
-## 8) Stretch Goals (if ahead)
-
-- **Provenance/Claim Ledger (beta)** export manifest for the CSV import.
-- **Tri-pane sync** (timeline/map/graph) with minimal brushing.
+* **Envs:** dev → stage; canary to stage with auto-rollback + schema gates. 
+* **Feature flags:** `ingestWizardV0`, `licenseRegistryV0`, `provManifestV0`, `nlCypherV0`, `graphRagGateV0`, `reportManifestCheckV0`.
+* **Test data:** Sample CSV + golden fixtures for mapping/ETL and evidence bundles; demo corpus aligned to “Final Product” asks. 
 
 ---
 
-## 9) Definition of Done (global)
+## QA Plan (what we’ll test)
 
-- Meets stated acceptance criteria; passes security & ethics gate (**no “won’t build” violations**); artifacts logged in immutable audit; docs updated; demo delivered.
+* **Functional:** Wizard mapping (goldens), export blockers (license clause surfaces), manifest verification, Cypher compile rate, citation resolution.   
+* **E2E:** ingest → brief export with manifest check. 
+* **Non-functional:** SLO smoke (p95 graph query & ingest timing), red-team prompts archived.  
 
 ---
 
-### Revised prompt (for next time)
+## Risks & Mitigations
 
-> “Plan a 2-week IntelGraph sprint (Dec 1–12, 2025) to ship NL Graph Querying MVP, CSV Ingest Wizard with PII & license enforcement, and audit/OPA hooks. Include epics→stories with DoD, demo plan, risks, metrics, and citations to the Council Wishbooks.”
+* **Cypher validity <95% on real prompts** → seed prompt set + rollback/undo path; sandbox first. 
+* **Export blocker UX confusion** → ensure human-readable reasons + owner/override path in UI copy. 
+* **Manifest verifier drift** → lock schema and include golden transform chain in fixtures. 
 
-### Quick questions to sharpen execution
+---
 
-1. Which sample CSV schema should we standardize on for the demo (people/orgs/events or different)?
-2. Any must-have gold prompts beyond basic 2–3 hop and time-slice queries?
-3. Do you want the tri-pane sync as stretch or move it into core this sprint?
+## Reporting Artifacts (to produce during sprint)
 
-*(All planning choices above trace directly to the Council backlogs and acceptance criteria for NL Querying, Ingest Wizard, License/Authority enforcement, Audit/OPA, and Ops/Cost Guard.)*
+* **Burndown + throughput chart**, **DOR/DOD checklist run**, **demo script**, and **mini-PRD addendum** covering scope, AC, KPIs, and risks per PRD template.  
+
+---
+
+## Alignment & Road-Ahead
+
+* Matches Near-Term road-map: Provenance-Ledger beta, core ingest/graph/copilot, and auditability. 
+* Sets up next sprints: Proof-Carrying Analytics (*.pcq*), Authority Compiler, and selective disclosure wallets. 
+* Long-horizon inspiration (future epics): Counterfactual proof cartridges & dialectic co-agents (Vol III) and quantum-safe proofing (Vol IV).  
+
+---
+
+### Done this sprint = a shippable increment
+
+A running “golden path” showcasing: wizarded ingest → license-aware governance → verifiable provenance → NL graph query → evidence-validated brief. This directly reflects the Council’s end-state vision and master backlog structure.  
