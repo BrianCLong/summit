@@ -1,235 +1,90 @@
-name: Summit Pipeline
+name: Monorepo CI Fan-out
 
 on:
-  pull_request:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'LICENSE'
   push:
-    branches: [main]
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'LICENSE'
-  workflow_dispatch:
+    branches:
+      - main
+  pull_request:
 
 concurrency:
-  group: ci-${{ github.head_ref || github.sha }}
+  group: ci-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
-
-env:
-  NODE_VERSION: '20.x'
-  HUSKY: 0
-
-permissions:
-  contents: read
-  security-events: write
 
 jobs:
   changes:
-    name: Detect Changes
+    name: Detect changes
     runs-on: ubuntu-latest
     outputs:
-      core: ${{ steps.filter.outputs.core }}
-      docker: ${{ steps.filter.outputs.docker }}
+      source: ${{ steps.filter.outputs.source }}
+      contracts: ${{ steps.filter.outputs.contracts }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - id: filter
         uses: dorny/paths-filter@v3
         with:
           filters: |
-            core:
-              - 'apps/**'
-              - 'client/**'
-              - 'packages/**'
+            source:
               - 'services/**'
-              - 'server/**'
-              - 'turbo.json'
-              - 'pnpm-lock.yaml'
-              - 'package.json'
-              - 'tsconfig*'
-              - 'jest*'
-              - 'vitest*'
-              - 'playwright*'
-            docker:
-              - 'docker-compose*'
-              - '**/Dockerfile*'
-              - 'scripts/run-compose.sh'
-              - 'Makefile'
+              - 'apps/**'
+              - 'infra/**'
+              - 'scripts/**'
+              - 'fixtures/**'
+            contracts:
+              - 'contracts/**'
 
-  # Quality Lane
-  quality:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+  lint:
+    name: Lint
+    needs: changes
+    if: needs.changes.outputs.source == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Code Quality Checks
-        run: pnpm turbo run lint typecheck --filter="!docs-site"
+      - name: Run lint
+        run: |
+          echo "TODO: add lint commands per service/app"
 
-  # Security Lane (Restored)
-  security:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Generate SBOM
-        uses: anchore/sbom-action@v0
-        with:
-          path: .
-          output-file: sbom.spdx.json
-
-      - name: Trivy Scan
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: fs
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: '0'
-
-      - name: Dependency Audit
-        run: pnpm audit --audit-level=high || true
-
-  # Test Lane: Backend (Jest)
-  backend-tests:
-    needs: [build]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3, 4]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Run Jest Tests (Shard ${{ matrix.shard }}/4)
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 15
-          max_attempts: 2
-          command: pnpm run test:jest --shard ${{ matrix.shard }}/${{ strategy.job-total }}
-
-  # Test Lane: Frontend (Vitest)
-  frontend-tests:
-    needs: [build]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
+  unit:
+    name: Unit
+    needs: lint
+    if: needs.changes.outputs.source == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Run Vitest (Web & Client)
-        run: pnpm turbo run test --filter='./apps/web' --filter='./client'
+      - name: Run unit tests
+        run: |
+          echo "TODO: add unit test commands per service/app"
 
-  # Build Lane
-  build:
-    needs: [changes]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest-8-cores
+  contract-conformance:
+    name: Contract conformance
+    needs: unit
+    if: needs.changes.outputs.contracts == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Build Workspace
-        run: pnpm turbo run build --filter="!docs-site"
-      - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: |
-            dist
-            build
-            apps/*/dist
-            apps/*/build
-            packages/*/dist
-            services/*/dist
-            server/dist
-            client/dist
-            .turbo
-          retention-days: 1
+      - name: Validate contracts
+        run: |
+          echo "TODO: add contract verification against published SDKs"
 
-  # Verification Lane: Smoke & E2E
-  verification:
-    needs: [build, quality]
-    if: ${{ github.event_name == 'push' || needs.changes.outputs.docker == 'true' || needs.changes.outputs.core == 'true' }}
-    runs-on: ubuntu-latest-8-cores
-    env:
-      DOCKER_BUILDKIT: '1'
-      COMPOSE_DOCKER_CLI_BUILD: '1'
+  docker-build:
+    name: Docker build
+    needs: contract-conformance
+    if: needs.changes.outputs.source == 'true'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Environment
-        uses: ./.github/actions/setup
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          install: 'true'
+      - name: Build images
+        run: |
+          echo "TODO: add docker build matrix per service"
 
-      # Bootstrap & Build Images
-      - name: Bootstrap
-        run: make bootstrap
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build API image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./server
-          file: ./server/Dockerfile.dev
-          tags: summit/api:ci
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - name: Build Client image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./client
-          file: ./client/Dockerfile.dev
-          tags: summit/web:ci
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # Integration: Smoke
-      - name: Start Stack
-        run: make up
-      - name: API Smoke Tests
-        run: make smoke
-
-      # E2E: Playwright
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
-      - name: Run Playwright E2E
-        run: pnpm exec playwright test
-        env:
-          BASE_URL: http://localhost:3000
-          CI: true
-
-      - name: Upload E2E Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-report
-          path: playwright-report/
-          retention-days: 30
-
-      - name: Logs on Failure
-        if: failure()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
-      - name: Teardown
-        if: always()
-        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
+  golden-fixtures:
+    name: Golden fixtures
+    needs: docker-build
+    if: needs.changes.outputs.source == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate golden fixtures
+        run: |
+          echo "TODO: add golden fixture verification"

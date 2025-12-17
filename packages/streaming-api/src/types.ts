@@ -2,7 +2,6 @@
  * Streaming API Type Definitions
  */
 
-import type { IncomingMessage } from 'http';
 import type { WebSocket } from 'ws';
 
 // ===== WebSocket Types =====
@@ -157,7 +156,11 @@ export type ServerMessage =
   | ErrorMessage
   | AckResponseMessage
   | PongMessage
-  | QueryResultMessage;
+  | QueryResultMessage
+  | ConnectedMessage
+  | SubscribedResponseMessage
+  | UnsubscribedResponseMessage
+  | PingMessage;
 
 export interface DataMessage {
   type: 'data';
@@ -188,6 +191,26 @@ export interface QueryResultMessage {
   data: any;
   complete: boolean;
   cursor?: string;
+}
+
+export interface ConnectedMessage {
+  type: 'connected';
+  id: string;
+  timestamp: string;
+}
+
+export interface SubscribedResponseMessage {
+  type: 'subscribed';
+  id: string;
+  topic: string;
+  timestamp: string;
+}
+
+export interface UnsubscribedResponseMessage {
+  type: 'unsubscribed';
+  id: string;
+  topic: string;
+  timestamp: string;
 }
 
 // ===== Protocol Types =====
