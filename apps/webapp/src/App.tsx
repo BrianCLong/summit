@@ -15,6 +15,7 @@ import { GraphPane } from './panes/GraphPane';
 import { TimelinePane } from './panes/TimelinePane';
 import { MapPane } from './panes/MapPane';
 import { CommandPalette } from './components/CommandPalette';
+import { SelectionSummary } from './components/SelectionSummary';
 
 export function App() {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
@@ -28,11 +29,18 @@ export function App() {
         <CssBaseline />
         <BrowserRouter>
           <CommandPalette />
-          <Box display="flex" justifyContent="flex-end" p={1}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            p={1}
+          >
+            <SelectionSummary />
             <IconButton
               onClick={toggleMode}
               color="inherit"
               aria-label="toggle theme"
+              data-testid="theme-toggle"
             >
               {mode === 'light' ? <Brightness4Icon /> : <Brightness7Icon />}
             </IconButton>
@@ -46,19 +54,25 @@ export function App() {
                   gridTemplateColumns="2fr 1fr"
                   gridTemplateRows="1fr 1fr"
                   gridTemplateAreas="'graph timeline' 'graph map'"
-                  height="calc(100vh - 48px)"
+                  height="calc(100vh - 56px)"
                 >
-                  <Box gridArea="graph" borderRight={1} borderColor="divider">
+                  <Box
+                    gridArea="graph"
+                    borderRight={1}
+                    borderColor="divider"
+                    data-testid="graph-pane"
+                  >
                     <GraphPane />
                   </Box>
                   <Box
                     gridArea="timeline"
                     borderBottom={1}
                     borderColor="divider"
+                    data-testid="timeline-pane"
                   >
                     <TimelinePane />
                   </Box>
-                  <Box gridArea="map">
+                  <Box gridArea="map" data-testid="map-pane">
                     <MapPane />
                   </Box>
                 </Box>

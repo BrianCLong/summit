@@ -1,4 +1,5 @@
 import {
+import { describe, it, expect } from '@jest/globals';
   ActorAwarenessResult,
   ActorSignal,
   StochasticActorAwareness,
