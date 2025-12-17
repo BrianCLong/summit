@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+# Auto-close stale issues and PRs while exempting critical release tasks.
+>>>>>>> main
 daysUntilStale: 45
 daysUntilClose: 14
 exemptLabels:

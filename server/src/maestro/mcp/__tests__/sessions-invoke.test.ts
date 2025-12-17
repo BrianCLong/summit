@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import sessionsRouter, { requireScope } from '../sessions-api.js';
 import invokeRouter from '../invoke-api.js';
+import { jest, describe, it, expect } from '@jest/globals';
 
 // Mock conductor MCP client
 jest.unstable_mockModule('../../../conductor/mcp/client.js', () => ({

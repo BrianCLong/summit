@@ -5,7 +5,7 @@ import {
   applyRedactions,
 } from '../../../../packages/sdk/privacy-js/index.js'
 
-$(function () {
+$(() => {
   $('#scan').on('click', async () => {
     const text = $('#input').val()
     const result = await scan(text)
