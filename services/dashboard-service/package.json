@@ -10,7 +10,14 @@
     "test": "jest"
   },
   "dependencies": {
+<<<<<<< HEAD
     "express": "^5.1.0",
+<<<<<<< HEAD
+=======
+=======
+    "express": "^5.2.0",
+>>>>>>> main
+>>>>>>> main
     "apollo-server-express": "^3.13.0",
     "graphql": "^16.8.1",
     "pg": "^8.16.3",
@@ -27,7 +34,15 @@
     "typescript": "^5.9.3",
     "@types/node": "^24.10.1",
     "@types/express": "^5.0.0",
+<<<<<<< HEAD
     "@types/cors": "^2.8.17",
+=======
+<<<<<<< HEAD
+    "@types/cors": "^2.8.19",
+=======
+    "@types/cors": "^2.8.17",
+>>>>>>> main
+>>>>>>> main
     "@types/compression": "^1.7.5",
     "ts-node-dev": "^2.0.0"
   }

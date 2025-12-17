@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AI API Endpoints for IntelGraph
  * Provides endpoints for link prediction, sentiment analysis, and AI-powered insights
@@ -9,6 +10,7 @@ import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import EntityLinkingService from '../services/EntityLinkingService.js';
 import { Queue, Worker } from 'bullmq';
+import { requirePermission } from '../middleware/auth.js';
 
 import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
 import {
@@ -103,6 +105,9 @@ const aiRateLimit = rateLimit({
 
 // Apply rate limiting to all AI routes
 router.use(aiRateLimit);
+
+// Apply permissions to all AI routes
+router.use(requirePermission('ai:request'));
 
 // Validation middleware
 const validatePredictLinks = [

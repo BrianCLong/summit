@@ -106,7 +106,7 @@ export class TalentRepository {
     updates: Partial<TalentProfile>,
   ): Promise<TalentProfile | null> {
     const existing = talentStore.get(id);
-    if (!existing) return null;
+    if (!existing) {return null;}
 
     const updated: TalentProfile = {
       ...existing,

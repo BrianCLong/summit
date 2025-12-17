@@ -4,6 +4,7 @@
 
 import sanitizeRequest from '../sanitize';
 import { requestFactory, responseFactory, nextFactory } from '../../../../tests/factories/requestFactory';
+import { describe, it, test, expect } from '@jest/globals';
 
 describe('sanitize middleware', () => {
   describe('HTML sanitization', () => {

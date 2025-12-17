@@ -136,7 +136,7 @@ export class PreferenceLearningService {
    * Compute similarity between two embeddings
    */
   computeSimilarity(embedding1: number[], embedding2: number[]): number {
-    if (embedding1.length !== embedding2.length) return 0;
+    if (embedding1.length !== embedding2.length) {return 0;}
 
     let dotProduct = 0;
     for (let i = 0; i < embedding1.length; i++) {
