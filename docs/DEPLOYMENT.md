@@ -1,123 +1,73 @@
-# Deployment Quick Start Guide
+# Zero-Downtime Deployment Strategy
 
-This guide covers the procedures for deploying the Summit Platform (IntelGraph) across different environments.
+This document outlines the zero-downtime deployment strategy with automatic rollback for the Summit platform.
+The strategy supports both **Kubernetes** (using Ingress/Service Mesh) and **VM/Bare Metal** (using Nginx) environments.
 
-For configuration details, see [Environment Configuration Reference](./ENV-CONFIG.md).
-For issues, see [Troubleshooting Runbook](./TROUBLESHOOTING.md).
+## Strategy: Blue-Green Deployment
 
-## 1. Prerequisites Checklist
+We utilize a **Blue-Green Deployment** strategy to ensure zero downtime.
+- **Blue (Current)**: The version currently serving live traffic.
+- **Green (New)**: The new version being deployed.
 
-Before you begin, ensure your local or CI environment has the following tools installed:
+### The Process
 
-- **Node.js**: Version 18.18 or higher
-- **Docker**: Latest version (Desktop or Engine)
-- **kubectl**: For interacting with Kubernetes clusters
-- **Helm**: Version 3.x for chart management
-- **Git**: For version control
+1.  **Provision Green**: The new version (Green) is spun up alongside the existing version (Blue).
+2.  **Health Check**: The deployment orchestrator waits for Green to become healthy (passing `/health/ready` checks).
+3.  **Smoke Tests**: Automated smoke tests run against the Green environment to verify critical functionality.
+4.  **Traffic Switch**: The load balancer is updated to switch 100% of traffic from Blue to Green. This is atomic or near-atomic.
+5.  **Monitoring**: The orchestrator monitors error rates and latency for a "soak time".
+6.  **Completion**: If stable, Blue is decommissioned. If unstable, traffic is instantly reverted to Blue (Rollback).
 
-Verify installations:
+## Automatic Rollback
 
-```bash
-node --version
-docker --version
-kubectl version --client
-helm version
+The `RollbackEngine` handles failures at any stage:
+- **Pre-Switch Failure**: If Green fails health checks, deployment is aborted. No traffic is impacted.
+- **Post-Switch Failure**: If Green shows high error rates or latency after the switch, the Load Balancer is immediately reverted to point to Blue.
+- **Database Rollback**: If database migrations were applied, the `RollbackEngine` attempts to revert them using the `db_rollback.cjs` script.
+
+## Infrastructure Configuration
+
+### Option A: VM / Bare Metal (Nginx)
+
+The `NginxLoadBalancerAdapter` manages an Nginx upstream configuration file.
+
+```nginx
+upstream backend {
+    # Blue (Active)
+    server 127.0.0.1:3000;
+    # Green (Inactive)
+    # server 127.0.0.1:3001;
+}
+
+server {
+    listen 80;
+    location / {
+        proxy_pass http://backend;
+    }
+}
 ```
 
-## 2. Local Development Setup
+### Option B: Kubernetes (K8s)
 
-To run the platform locally for development:
+In Kubernetes, this strategy is implemented using **Argo Rollouts** or **Ingress Controllers** (e.g., Nginx Ingress).
 
-1.  **Install Dependencies:**
-    ```bash
-    npm install
-    ```
+1.  **ReplicaSets**: Two ReplicaSets coexist (Blue and Green).
+2.  **Service**: The Service selector is updated to point to the Green ReplicaSet.
+3.  **Ingress**: For weighted traffic splitting (Canary), the Ingress annotations (e.g., `nginx.ingress.kubernetes.io/canary-weight`) are updated.
 
-2.  **Start Infrastructure Services (Postgres, Neo4j, Redis, etc.):**
-    ```bash
-    npm run docker:dev
-    ```
-    *Note: This runs `docker-compose -f docker-compose.dev.yml up`.*
+*Note: The current `BlueGreenDeployer` implementation simulates the Nginx approach but can be extended with a `KubernetesAdapter`.*
 
-3.  **Start Application Servers (API + Client):**
-    ```bash
-    npm run dev
-    ```
+## Tools & Scripts
 
-    - **Frontend:** http://localhost:3000
-    - **API:** http://localhost:4000
-    - **Neo4j Browser:** http://localhost:7474
-    - **Grafana:** http://localhost:8080 (mapped to host)
+- `server/lib/deployment/blue-green-deployer.ts`: Core orchestration logic.
+- `server/lib/deployment/rollback-engine.ts`: Logic for reverting state.
+- `server/scripts/db_rollback.cjs`: Simulates database migration rollback.
+- `scripts/simulate-deployment.ts`: Runs a simulation of the process for testing/dev.
 
-## 3. Preview Environment Deployment
+## Usage
 
-Preview environments are ephemeral deployments triggered by Pull Requests.
-
-To manually deploy a preview environment using Helm:
+To run the deployment simulation:
 
 ```bash
-# Update dependencies
-helm dependency update charts/ig-platform
-
-# Install/Upgrade the preview release
-helm upgrade --install preview charts/ig-platform \
-  --set global.env=preview \
-  --set ingress.host=preview.summit.local \
-  --namespace preview --create-namespace
+npx tsx scripts/simulate-deployment.ts
 ```
-
-## 4. Canary Deployment to Staging
-
-Canary deployments allow us to test new features with a subset of traffic. This is typically handled by our CI/CD pipelines (GitHub Actions).
-
-**Triggering a Canary Deployment:**
-
-1.  Create a release tag:
-    ```bash
-    git tag v1.1.0-rc.1
-    git push origin v1.1.0-rc.1
-    ```
-2.  The `canary-deployment.yml` workflow will automatically trigger.
-
-**Manual Verification:**
-Check the canary health endpoints or logs via the CI console.
-
-## 5. Production Rollout Procedure
-
-Production deployments are gated and require approval.
-
-1.  **Trigger Release:**
-    Merge the release candidate into `main` or create a production tag (e.g., `v1.1.0`).
-
-2.  **Approval Gate:**
-    Go to GitHub Actions -> `deploy-production` workflow.
-    Review the plan and click **Approve** if all checks pass.
-
-3.  **Monitoring:**
-    Watch the deployment progress in the Actions log.
-    Verify health status via Grafana Dashboards or the `/health` endpoint.
-
-## 6. Rollback Procedure
-
-If a critical issue is detected post-deployment:
-
-**Automated Rollback:**
-The CI pipeline is configured to auto-rollback if the smoke tests fail immediately after deployment.
-
-**Manual Rollback (Helm):**
-
-```bash
-# List history
-helm history production -n production
-
-# Rollback to previous revision (e.g., revision 5)
-helm rollback production 5 -n production
-```
-
-## 7. Common Troubleshooting
-
-| Issue | Check | Resolution |
-| :--- | :--- | :--- |
-| **Ports in Use** | `lsof -i :<port>` | Stop conflicting services or change ports in `.env`. Common ports: 3000 (UI), 4000 (API), 5432 (PG). |
-| **Permission Denied** | File ownership | Run `sudo chown -R $USER:$USER .` or check Docker volume permissions. |
-| **Container Crashing** | `docker logs <container>` | Check for missing env vars or DB connection failures. |
