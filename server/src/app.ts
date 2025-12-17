@@ -13,10 +13,10 @@ import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
-import { ensureTenant } from './middleware/ensureTenant.js';
 import monitoringRouter from './routes/monitoring.js';
 import aiRouter from './routes/ai.js';
 import nlGraphQueryRouter from './routes/nl-graph-query.js';
@@ -50,7 +50,7 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
-import adminIdentityRouter from './routes/admin/identity.js';
+import searchV1Router from './routes/search-v1.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -64,6 +64,7 @@ export const createApp = async () => {
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+  app.use(featureFlagContextMiddleware);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -109,12 +110,6 @@ export const createApp = async () => {
   // Audit-First middleware for cryptographic stamping of sensitive operations
   app.use(auditFirstMiddleware);
   app.use(httpCacheMiddleware);
-  // Ensure Tenant Context is present (or handled)
-  // We apply this early so subsequent middleware/routes have tenantId
-  // BUT after auth if auth provides the tenantId.
-  // Currently app.ts structure is complex with conditional auth.
-  // For now we add it here, and ensureTenant handles missing auth cases gracefully (e.g. public routes).
-  app.use(ensureTenant);
 
   // Telemetry middleware
   app.use((req, res, next) => {
@@ -174,7 +169,7 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
-  app.use('/api/v1/admin', adminIdentityRouter);
+  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
