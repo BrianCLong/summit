@@ -1,7 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react'
-// Tree-shakeable D3 imports - only import what we need (~55KB vs ~300KB full D3)
+// Tree-shaken D3 imports for better bundle size
 import { select } from 'd3-selection'
-import 'd3-transition' // Side-effect import: adds transition() to selections
 import {
   forceSimulation,
   forceLink,
@@ -9,12 +8,14 @@ import {
   forceCenter,
   forceCollide,
   forceRadial,
-  forceX,
   forceY,
+  forceX,
+  type Simulation,
+  type SimulationNodeDatum,
+  type SimulationLinkDatum,
 } from 'd3-force'
-import type { Simulation, SimulationNodeDatum, SimulationLinkDatum } from 'd3-force'
-import { zoom as d3Zoom } from 'd3-zoom'
-import { drag as d3Drag } from 'd3-drag'
+import { zoom } from 'd3-zoom'
+import { drag } from 'd3-drag'
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
@@ -185,7 +186,7 @@ export function GraphCanvas({
     const nodesGroup = container.append('g').attr('class', 'nodes')
 
     // Add zoom behavior
-    const zoomBehavior = d3Zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on('zoom', event => {
         container.attr('transform', event.transform)
@@ -257,7 +258,7 @@ export function GraphCanvas({
       .attr('class', 'node')
       .style('cursor', 'pointer')
       .call(
-        d3Drag<SVGGElement, GraphNode>()
+        drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
             if (!event.active) simulation.alphaTarget(0.3).restart()
             d.fx = d.x

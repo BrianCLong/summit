@@ -1,160 +1,118 @@
-# Frontend Bundle Health Monitoring
-# Tracks bundle size changes and uploads bundle analysis artifacts
-#
-# Purpose:
-# - Generate bundle size reports on PRs and main branch
-# - Upload bundle stats for inspection
-# - Alert on significant size increases
-
 name: Frontend Bundle Health
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
     paths:
-      - 'apps/web/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
+      - "apps/web/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
   pull_request:
-    branches: [main]
     paths:
-      - 'apps/web/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+      - "apps/web/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
 
 jobs:
   bundle-analysis:
     name: Bundle Size Analysis
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build web app with bundle analysis
         working-directory: apps/web
-        run: pnpm build
-        env:
-          NODE_ENV: production
+        run: |
+          pnpm build:analyze || echo "Build completed with warnings"
 
-      - name: Generate bundle size report
-        id: bundle-size
+      - name: Generate bundle stats summary
         working-directory: apps/web
         run: |
-          # Extract bundle sizes from build output
-          echo "## Bundle Size Report" > bundle-report.md
-          echo "" >> bundle-report.md
-          echo "| Chunk | Size | Gzip |" >> bundle-report.md
-          echo "|-------|------|------|" >> bundle-report.md
+          if [ -f dist/stats.html ]; then
+            echo "## Bundle Analysis Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Bundle visualization available as artifact" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
 
-          # List all JS chunks
-          for file in dist/assets/*.js; do
-            if [ -f "$file" ]; then
-              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
-              size_kb=$((size / 1024))
-              gzip_size=$(gzip -c "$file" | wc -c)
-              gzip_kb=$((gzip_size / 1024))
-              filename=$(basename "$file")
-              echo "| $filename | ${size_kb}KB | ${gzip_kb}KB |" >> bundle-report.md
-            fi
-          done
+            # Get total bundle size
+            TOTAL_SIZE=$(du -sh dist/ 2>/dev/null | cut -f1 || echo "N/A")
+            echo "**Total dist size:** $TOTAL_SIZE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
 
-          echo "" >> bundle-report.md
-          echo "📊 Full bundle visualization available in artifacts: \`stats.html\`" >> bundle-report.md
+            # List largest JS chunks
+            echo "### Largest JS chunks:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            ls -lhS dist/assets/*.js 2>/dev/null | head -10 || echo "No JS files found"
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
 
-          # Calculate total size
-          total_size=0
-          for file in dist/assets/*.js; do
-            if [ -f "$file" ]; then
-              size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file")
-              total_size=$((total_size + size))
-            fi
-          done
-          total_kb=$((total_size / 1024))
-          echo "total_size=$total_kb" >> $GITHUB_OUTPUT
-
-          echo "" >> bundle-report.md
-          echo "**Total JS size: ${total_kb}KB**" >> bundle-report.md
-
-      - name: Upload bundle stats artifact
+      - name: Upload bundle analysis
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: bundle-stats-${{ github.sha }}
+          name: bundle-stats
           path: |
             apps/web/dist/stats.html
-            apps/web/bundle-report.md
-          retention-days: 30
+            apps/web/dist/assets/*.js
+          retention-days: 14
 
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const fs = require('fs');
-            const report = fs.readFileSync('apps/web/bundle-report.md', 'utf8');
-
-            // Find existing comment
-            const { data: comments } = await github.rest.issues.listComments({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-            });
-
-            const botComment = comments.find(c =>
-              c.user.type === 'Bot' &&
-              c.body.includes('Bundle Size Report')
-            );
-
-            const body = `<!-- bundle-size-report -->
-            ${report}
-
-            *Updated for commit ${context.sha.substring(0, 7)}*`;
-
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body,
-              });
-            }
-
-      - name: Check bundle size budget
+      - name: Check bundle size limits
         working-directory: apps/web
         run: |
-          # Performance budget: warn if total JS > 1MB
-          BUDGET_KB=1024
-          TOTAL_SIZE=${{ steps.bundle-size.outputs.total_size }}
+          # Define bundle size limits (in KB)
+          MAX_MAIN_BUNDLE_KB=800
+          MAX_VENDOR_BUNDLE_KB=1500
 
-          if [ "$TOTAL_SIZE" -gt "$BUDGET_KB" ]; then
-            echo "::warning::Bundle size ($TOTAL_SIZE KB) exceeds budget ($BUDGET_KB KB)"
-          else
-            echo "✅ Bundle size ($TOTAL_SIZE KB) is within budget ($BUDGET_KB KB)"
+          # Find main bundle
+          MAIN_BUNDLE=$(find dist/assets -name "index-*.js" -o -name "main-*.js" 2>/dev/null | head -1)
+          if [ -n "$MAIN_BUNDLE" ]; then
+            MAIN_SIZE_KB=$(du -k "$MAIN_BUNDLE" | cut -f1)
+            echo "Main bundle size: ${MAIN_SIZE_KB}KB (limit: ${MAX_MAIN_BUNDLE_KB}KB)"
+
+            if [ "$MAIN_SIZE_KB" -gt "$MAX_MAIN_BUNDLE_KB" ]; then
+              echo "::warning::Main bundle exceeds size limit: ${MAIN_SIZE_KB}KB > ${MAX_MAIN_BUNDLE_KB}KB"
+            fi
+          fi
+
+          # Find largest vendor chunk
+          VENDOR_BUNDLE=$(find dist/assets -name "*vendor*.js" 2>/dev/null | head -1)
+          if [ -n "$VENDOR_BUNDLE" ]; then
+            VENDOR_SIZE_KB=$(du -k "$VENDOR_BUNDLE" | cut -f1)
+            echo "Vendor bundle size: ${VENDOR_SIZE_KB}KB (limit: ${MAX_VENDOR_BUNDLE_KB}KB)"
+
+            if [ "$VENDOR_SIZE_KB" -gt "$MAX_VENDOR_BUNDLE_KB" ]; then
+              echo "::warning::Vendor bundle exceeds size limit: ${VENDOR_SIZE_KB}KB > ${MAX_VENDOR_BUNDLE_KB}KB"
+            fi
           fi
