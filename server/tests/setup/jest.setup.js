@@ -6,7 +6,7 @@
 // Extend Jest with additional matchers from jest-extended
 require('jest-extended');
 
-// Mock ioredis globally
+// Mock ioredis globally - using a simple mock implementation since module resolution fails
 jest.mock('ioredis', () => {
   const EventEmitter = require('events');
   class MockRedis extends EventEmitter {
@@ -38,7 +38,7 @@ jest.mock('ioredis', () => {
     }
   }
   return MockRedis;
-});
+}, { virtual: true }); // Use virtual mock to avoid requiring the actual module
 
 // Mock pg globally to avoid connection errors in tests that don't need real DB
 jest.mock('pg', () => {
