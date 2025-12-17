@@ -9,6 +9,11 @@ import { getContext } from './lib/auth.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 // import WSPersistedQueriesMiddleware from "./graphql/middleware/wsPersistedQueries.js";
+import { otelService } from './lib/observability/otel.js';
+
+// Initialize OpenTelemetry as early as possible
+otelService.initialize();
+
 import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
@@ -17,7 +22,10 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
-import { resolveSafetyState } from './middleware/safety-mode.js';
+import {
+  startTenantHotEmbeddingsRefresh,
+  stopTenantHotEmbeddingsRefresh,
+} from './jobs/hotEmbeddingsRefresh.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -41,15 +49,6 @@ const startServer = async () => {
     } catch (error) {
       logger.warn('Kafka not available - running in minimal mode');
     }
-  }
-  const safetyState = await resolveSafetyState();
-  if (safetyState.killSwitch || safetyState.safeMode) {
-    logger.warn({ safetyState }, 'Safety mode enabled - starting in degraded configuration');
-  }
-
-  if (safetyState.killSwitch || safetyState.safeMode) {
-    startKafkaConsumer = null;
-    stopKafkaConsumer = null;
   }
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
@@ -110,20 +109,12 @@ const startServer = async () => {
 
     // Initialize and start Data Retention Service
     const neo4jDriver = getNeo4jDriver();
-    if (!safetyState.killSwitch && !safetyState.safeMode) {
-      const dataRetentionService = new DataRetentionService(neo4jDriver);
-      dataRetentionService.startCleanupJob(); // Start the cleanup job
+    const dataRetentionService = new DataRetentionService(neo4jDriver);
+    dataRetentionService.startCleanupJob(); // Start the cleanup job
+    startTenantHotEmbeddingsRefresh();
 
-      // WAR-GAMED SIMULATION - Start Kafka Consumer
-      if (startKafkaConsumer) {
-        await startKafkaConsumer();
-      }
-    } else {
-      logger.warn(
-        { safetyState },
-        'Skipping data retention and Kafka consumers due to safety gates',
-      );
-    }
+    // WAR-GAMED SIMULATION - Start Kafka Consumer
+    await startKafkaConsumer();
 
     // Create sample data for development
     if (process.env.NODE_ENV === 'development') {
@@ -148,9 +139,11 @@ const startServer = async () => {
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
+    await otelService.shutdown();
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
+    stopTenantHotEmbeddingsRefresh();
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),

@@ -13,6 +13,7 @@ import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
+import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
@@ -50,6 +51,7 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 import streamRouter from './routes/stream.js'; // Added import
+import searchV1Router from './routes/search-v1.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -68,6 +70,7 @@ export const createApp = async () => {
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+  app.use(featureFlagContextMiddleware);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
@@ -173,6 +176,7 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
   app.use('/api/stream', streamRouter); // Register stream route
+  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
   app.get('/metrics', metricsRoute);
 
   app.get('/search/evidence', async (req, res) => {
