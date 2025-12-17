@@ -3,6 +3,7 @@
  */
 
 import { StrategicForesightClient } from '../strategic-foresight-client';
+import { jest, describe, it, test, expect, beforeEach } from '@jest/globals';
 
 // Mock fetch globally
 const mockFetch = jest.fn();
