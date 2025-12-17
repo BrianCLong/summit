@@ -41,6 +41,7 @@ import {
   Assessment,
   Settings,
   RocketLaunch,
+  PendingActions,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -49,6 +50,7 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -81,18 +83,31 @@ const DisclosurePackagerPage = React.lazy(() =>
 const OrchestratorDashboard = React.lazy(() =>
   import('./features/orchestrator/OrchestratorDashboard')
 );
+const AdminDashboard = React.lazy(() =>
+  import('./components/admin/AdminDashboard')
+);
+const ApprovalsPage = React.lazy(() =>
+  import('./features/approvals/ApprovalsPage')
+);
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 
 // Navigation items
 const ADMIN = 'ADMIN';
+const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/orchestrator', label: 'Orchestrator', icon: <RocketLaunch /> },
+  {
+    path: '/approvals',
+    label: 'Approvals',
+    icon: <PendingActions />,
+    roles: APPROVER_ROLES,
+  },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/disclosures', label: 'Disclosures', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
@@ -568,7 +583,9 @@ function DashboardPage() {
 function InvestigationsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InvestigationTimeline />
+      <ErrorBoundary componentName="InvestigationTimeline">
+        <InvestigationTimeline />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -576,7 +593,9 @@ function InvestigationsPage() {
 function GraphExplorerPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InteractiveGraphExplorer />
+      <ErrorBoundary componentName="InteractiveGraphExplorer">
+        <InteractiveGraphExplorer />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -584,7 +603,9 @@ function GraphExplorerPage() {
 function CopilotPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <IntelligentCopilot />
+      <ErrorBoundary componentName="IntelligentCopilot">
+        <IntelligentCopilot />
+      </ErrorBoundary>
     </Container>
   );
 }
@@ -669,8 +690,11 @@ function MainLayout() {
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
+              <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
+                <Route path="/approvals" element={<ApprovalsPage />} />
+              </Route>
               <Route element={<ProtectedRoute roles={['ADMIN']} />}>
-                <Route path="/system" element={<InvestigationsPage />} />
+                <Route path="/system" element={<AdminDashboard />} />
                 <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
                 <Route
                   path="/wargame-dashboard"
@@ -722,10 +746,15 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Router IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
+    // eslint-disable-next-line no-console
     console.log('✅ Apollo GraphQL client initialized');
+    // eslint-disable-next-line no-console
     console.log('✅ React Router navigation enabled');
   }, []);
 

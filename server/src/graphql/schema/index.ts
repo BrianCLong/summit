@@ -10,6 +10,9 @@ import evidenceTypeDefs from '../schema.evidence.js';
 import evidenceOkTypeDefs from '../schema.evidenceOk.js';
 import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
 const { graphTypeDefs } = graphModule as { graphTypeDefs: any };
@@ -19,6 +22,13 @@ const { annotationsTypeDefs } = annotationsModule as {
 };
 const graphragTypes =
   (graphragTypesModule as any).default || graphragTypesModule;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Load EW schema
+const ewSchemaPath = path.join(__dirname, '../schemas/electronic-warfare.graphql');
+const ewTypeDefs = fs.readFileSync(ewSchemaPath, 'utf8');
 
 const base = gql`
   scalar JSON
@@ -50,6 +60,7 @@ export const typeDefs = [
   evidenceOkTypeDefs,
   trustRiskTypeDefs,
   provenanceTypeDefs,
+  ewTypeDefs,
 ];
 
 export default typeDefs;

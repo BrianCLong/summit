@@ -117,7 +117,7 @@ export class DataProfiler {
   private static inferColumnType(
     values: any[]
   ): 'numerical' | 'categorical' | 'datetime' | 'text' {
-    if (values.length === 0) return 'categorical';
+    if (values.length === 0) {return 'categorical';}
 
     // Check if numerical
     const numericValues = values.filter(v => typeof v === 'number' && !isNaN(v));
@@ -146,7 +146,7 @@ export class DataProfiler {
    * Check if string is a date
    */
   private static isDateString(value: any): boolean {
-    if (typeof value !== 'string') return false;
+    if (typeof value !== 'string') {return false;}
     const date = new Date(value);
     return !isNaN(date.getTime());
   }
@@ -308,7 +308,7 @@ export class DataProfiler {
 
   private static pearsonCorrelation(x: number[], y: number[]): number {
     const n = Math.min(x.length, y.length);
-    if (n === 0) return 0;
+    if (n === 0) {return 0;}
 
     const meanX = x.reduce((sum, v) => sum + v, 0) / n;
     const meanY = y.reduce((sum, v) => sum + v, 0) / n;

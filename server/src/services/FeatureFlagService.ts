@@ -8,9 +8,10 @@
  */
 
 import { readFileSync } from 'fs';
-import { join } from 'path';
+import { resolve, isAbsolute } from 'path';
+// @ts-ignore
 import * as LaunchDarkly from 'launchdarkly-node-server-sdk';
-import { Logger } from '../utils/logger';
+import { Logger } from '../utils/logger.js';
 
 /**
  * Feature flag configuration
@@ -185,7 +186,7 @@ export class FeatureFlagService {
     this.logger.info(`Loading feature flags from file: ${file}`);
 
     try {
-      const configPath = join(process.cwd(), file);
+      const configPath = isAbsolute(file) ? file : resolve(process.cwd(), file);
       const configData = readFileSync(configPath, 'utf-8');
       const config = JSON.parse(configData);
 
