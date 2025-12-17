@@ -516,6 +516,8 @@ export {
   intelgraphGlassBoxCacheHits,
   intelgraphCacheHits,
   intelgraphCacheMisses,
+  copilotApiRequestTotal,
+  copilotApiRequestDurationMs,
 };
 
 // Legacy IntelGraph metrics (merged from observability/metrics.ts)
@@ -621,6 +623,20 @@ const intelgraphCacheMisses = new client.Counter({
   help: 'Total cache misses',
 });
 
+// Copilot API metrics
+const copilotApiRequestTotal = new client.Counter({
+  name: 'copilot_api_request_total',
+  help: 'Total number of AI Copilot API requests',
+  labelNames: ['endpoint', 'mode', 'status'],
+});
+
+const copilotApiRequestDurationMs = new client.Histogram({
+  name: 'copilot_api_request_duration_ms',
+  help: 'AI Copilot API request duration in milliseconds',
+  labelNames: ['endpoint', 'mode'],
+  buckets: [50, 100, 250, 500, 1000, 2000, 5000, 10000, 30000],
+});
+
 // Register metrics
 register.registerMetric(intelgraphJobsProcessed);
 register.registerMetric(intelgraphOutboxSyncLatency);
@@ -638,3 +654,5 @@ register.registerMetric(intelgraphGlassBoxRunDurationMs);
 register.registerMetric(intelgraphGlassBoxCacheHits);
 register.registerMetric(intelgraphCacheHits);
 register.registerMetric(intelgraphCacheMisses);
+register.registerMetric(copilotApiRequestTotal);
+register.registerMetric(copilotApiRequestDurationMs);
