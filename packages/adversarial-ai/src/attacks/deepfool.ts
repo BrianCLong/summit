@@ -34,7 +34,7 @@ export class DeepFoolAttack {
       const f: number[] = [];
 
       for (let k = 0; k < logits.length; k++) {
-        if (k === currentClass) continue;
+        if (k === currentClass) {continue;}
 
         // Get gradients for current class and class k
         const gradCurrent = await getGradients(perturbedInput, currentClass);
@@ -127,7 +127,7 @@ export class DeepFoolAttack {
       const f: number[] = [];
 
       for (let k = 0; k < logits.length; k++) {
-        if (k === originalClass) continue;
+        if (k === originalClass) {continue;}
 
         const gradCurrent = await getGradients(perturbedInput, currentClass);
         const gradK = await getGradients(perturbedInput, k);

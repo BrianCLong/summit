@@ -148,7 +148,7 @@ export class RollbackManager {
     },
   ): Promise<boolean> {
     const triggerConfig = this.config.triggers.find((t) => t.trigger === trigger);
-    if (!triggerConfig || !triggerConfig.enabled) return false;
+    if (!triggerConfig || !triggerConfig.enabled) {return false;}
 
     const key = this.getTriggerKey(trigger, context.agentId, context.fleetId);
 
@@ -590,7 +590,7 @@ export class RollbackManager {
   private getCheckpointById(id: string): Checkpoint | null {
     for (const checkpoints of this.checkpoints.values()) {
       const found = checkpoints.find((c) => c.id === id);
-      if (found) return found;
+      if (found) {return found;}
     }
     return null;
   }
@@ -605,7 +605,7 @@ export class RollbackManager {
   ): Checkpoint | null {
     const key = this.getCheckpointKey(scope, agentId, fleetId);
     const checkpoints = this.checkpoints.get(key);
-    if (!checkpoints || checkpoints.length === 0) return null;
+    if (!checkpoints || checkpoints.length === 0) {return null;}
     return checkpoints[checkpoints.length - 1];
   }
 
@@ -629,7 +629,7 @@ export class RollbackManager {
    */
   cancelRollback(rollbackId: string, canceller: string): boolean {
     const rollback = this.rollbacks.get(rollbackId);
-    if (!rollback || rollback.status !== 'pending') return false;
+    if (!rollback || rollback.status !== 'pending') {return false;}
 
     rollback.status = 'cancelled';
     rollback.completedAt = new Date();
