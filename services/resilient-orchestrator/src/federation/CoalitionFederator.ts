@@ -264,7 +264,7 @@ export class CoalitionFederator extends EventEmitter<FederationEvents> {
 
     for (const [taskId, partnerIds] of partnerAssignments) {
       const task = workflow.tasks.find(t => t.id === taskId);
-      if (!task) continue;
+      if (!task) {continue;}
 
       for (const partnerId of partnerIds) {
         await this.delegateTask(task, partnerId);
@@ -289,7 +289,7 @@ export class CoalitionFederator extends EventEmitter<FederationEvents> {
    */
   updateTrustLevel(partnerId: string, delta: number): void {
     const partner = this.partners.get(partnerId);
-    if (!partner) return;
+    if (!partner) {return;}
 
     partner.trustLevel = Math.max(0, Math.min(1, partner.trustLevel + delta));
     this.emit('partner:trust-updated', partnerId, partner.trustLevel);
@@ -382,7 +382,7 @@ export class CoalitionFederator extends EventEmitter<FederationEvents> {
 
   private scheduleReconnect(partnerId: string): void {
     const partner = this.partners.get(partnerId);
-    if (!partner) return;
+    if (!partner) {return;}
 
     const conn = this.connections.get(partnerId);
     const attempts = conn?.reconnectAttempts ?? 0;
