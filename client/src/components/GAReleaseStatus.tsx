@@ -92,6 +92,7 @@ const GAReleaseStatus: React.FC = () => {
         // Refresh status after SBOM generation
         fetchReleaseData();
       }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
       setError('Failed to generate SBOM');
     }

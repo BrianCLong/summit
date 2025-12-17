@@ -1,14 +1,10 @@
-import { IntelGraphClient } from '../intelgraph/client.js';
-import { CostMeter } from './cost_meter.js';
-import { MaestroRunResponse, Run, Task, Artifact } from './types.js';
-import { MaestroQueries } from './queries.js';
-
-export interface LLMClient {
-  callCompletion(prompt: string, model: string): Promise<string>;
-}
+import { IntelGraphClient } from '../intelgraph/client';
+import { Task, Run, Artifact, TaskStatus } from './types';
+import { CostMeter } from './cost_meter';
+import { OpenAILLM } from './adapters/llm_openai';
 
 export interface MaestroConfig {
-  defaultPlannerAgent: string;
+  defaultPlannerAgent: string;   // e.g. "openai:gpt-4.1"
   defaultActionAgent: string;
 }
 
@@ -16,106 +12,158 @@ export class Maestro {
   constructor(
     private ig: IntelGraphClient,
     private costMeter: CostMeter,
-    private llm: LLMClient,
-    private config: MaestroConfig
+    private llm: OpenAILLM,
+    private config: MaestroConfig,
   ) {}
 
-  async runPipeline(userId: string, requestText: string): Promise<MaestroRunResponse> {
-    const runId = `run-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  async createRun(userId: string, requestText: string, options?: { tenantId?: string }): Promise<Run> {
     const run: Run = {
-      id: runId,
+      id: crypto.randomUUID(),
       user: { id: userId },
       createdAt: new Date().toISOString(),
       requestText,
-      status: 'running'
+      // Pass tenant context if available (will need DB schema update for full persistence)
+      ...(options?.tenantId ? { tenantId: options.tenantId } : {})
+    } as Run;
+    await this.ig.createRun(run);
+    return run;
+  }
+
+  async planRequest(run: Run): Promise<Task[]> {
+    // Here you can do something simple at first: single action task
+    const planTask: Task = {
+      id: crypto.randomUUID(),
+      runId: run.id,
+      status: 'succeeded',        // planning is instant for v0.1
+      agent: {
+        id: this.config.defaultPlannerAgent,
+        name: 'planner',
+        kind: 'llm',
+        modelId: this.config.defaultPlannerAgent,
+      },
+      kind: 'plan',
+      description: `Plan for: ${run.requestText}`,
+      input: { requestText: run.requestText },
+      output: { steps: ['single_action'] },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
-    await this.ig.createRun(run);
+    const actionTask: Task = {
+      id: crypto.randomUUID(),
+      runId: run.id,
+      parentTaskId: planTask.id,
+      status: 'queued',
+      agent: {
+        id: this.config.defaultActionAgent,
+        name: 'action-llm',
+        kind: 'llm',
+        modelId: this.config.defaultActionAgent,
+      },
+      kind: 'action',
+      description: `Execute user request: ${run.requestText}`,
+      input: { requestText: run.requestText },
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await this.ig.createTask(planTask);
+    await this.ig.createTask(actionTask);
+
+    return [planTask, actionTask];
+  }
+
+  async executeTask(task: Task): Promise<{ task: Task; artifact: Artifact | null }> {
+    const now = new Date().toISOString();
+    await this.ig.updateTask(task.id, { status: 'running', updatedAt: now });
 
     try {
-      // 1. Plan (simulate planning by creating a fixed set of tasks for now, or use LLM)
-      // For the vertical slice, we'll create a Planner task and an Action task.
+      let result: string = '';
 
-      const plannerTaskId = `task-plan-${Date.now()}`;
-      const plannerTask: Task = {
-        id: plannerTaskId,
-        runId,
-        status: 'succeeded',
-        kind: 'planner',
-        description: 'Plan execution',
-        input: { requestText },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        agent: { id: 'planner', name: 'Planner', kind: 'llm' }
-      };
-      await this.ig.createTask(plannerTask);
-
-      // Record planner cost (simulated)
-      await this.costMeter.record(runId, this.config.defaultPlannerAgent, 100, 50, plannerTaskId);
-
-      // 2. Execute Action
-      const actionTaskId = `task-act-${Date.now()}`;
-      const actionTask: Task = {
-        id: actionTaskId,
-        runId,
-        status: 'running',
-        kind: 'action',
-        description: 'Execute user request: ' + requestText,
-        input: { requestText },
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        agent: { id: 'action', name: 'Action', kind: 'llm' }
-      };
-      await this.ig.createTask(actionTask);
-
-      let output: string;
-      try {
-        output = await this.llm.callCompletion(requestText, this.config.defaultActionAgent);
-
-        actionTask.status = 'succeeded';
-        actionTask.output = output;
-        actionTask.updatedAt = new Date().toISOString();
-        await this.ig.updateTask(actionTaskId, { status: 'succeeded', output, updatedAt: new Date().toISOString() });
-
-        // Record action cost
-        await this.costMeter.record(runId, this.config.defaultActionAgent, 50, 100, actionTaskId);
-
-        // Create Artifact
-        const artifact: Artifact = {
-          id: `art-${Date.now()}`,
-          runId,
-          taskId: actionTaskId,
-          kind: 'text',
-          label: 'task-output',
-          data: output,
-          createdAt: new Date().toISOString()
-        };
-        await this.ig.createArtifact(artifact);
-
-      } catch (error: any) {
-        actionTask.status = 'failed';
-        actionTask.errorMessage = error.message;
-        actionTask.updatedAt = new Date().toISOString();
-        await this.ig.updateTask(actionTaskId, { status: 'failed', errorMessage: error.message, updatedAt: new Date().toISOString() });
-        run.status = 'failed';
-        await this.ig.updateRun(runId, { status: 'failed' });
-        // Re-throw if we want the outer catch to handle it, but for pipeline we might want to return partial result
-        // The user test expects 'failed' status in result.
+      if (task.agent.kind === 'llm') {
+        const llmResult = await this.llm.callCompletion(
+          task.runId,
+          task.id,
+          {
+            model: task.agent.modelId!,
+            messages: [
+              { role: 'system', content: 'You are an execution agent.' },
+              { role: 'user', content: task.description },
+              ...(task.input.requestText
+                ? [{ role: 'user', content: String(task.input.requestText) }]
+                : []),
+            ],
+          },
+          {
+            feature: `maestro_${task.kind}`,
+            tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
+            environment: process.env.NODE_ENV || 'unknown',
+          },
+        );
+        result = llmResult.content;
+      } else {
+        // TODO: shell tools, etc.
+        result = 'TODO: implement non-LLM agent';
       }
 
-      run.status = run.status === 'failed' ? 'failed' : 'completed';
-      await this.ig.updateRun(runId, { status: run.status });
+      const artifact: Artifact = {
+        id: crypto.randomUUID(),
+        runId: task.runId,
+        taskId: task.id,
+        kind: 'text',
+        label: 'task-output',
+        data: result,
+        createdAt: new Date().toISOString(),
+      };
 
-      // Build response
-      const queries = new MaestroQueries(this.ig);
-      const response = await queries.getRunResponse(runId);
-      if (!response) throw new Error('Failed to retrieve run response');
-      return response;
+      const updatedTask: Partial<Task> = {
+        status: 'succeeded',
+        output: { result },
+        updatedAt: new Date().toISOString(),
+      };
 
-    } catch (error: any) {
-       // If run creation failed or something catastrophic
-       console.error("Pipeline error", error);
-       throw error;
+      await this.ig.createArtifact(artifact);
+      await this.ig.updateTask(task.id, updatedTask);
+
+      return {
+        task: { ...task, ...updatedTask } as Task,
+        artifact,
+      };
+    } catch (err: any) {
+      const updatedTask: Partial<Task> = {
+        status: 'failed',
+        errorMessage: err?.message ?? String(err),
+        updatedAt: new Date().toISOString(),
+      };
+      await this.ig.updateTask(task.id, updatedTask);
+
+      return { task: { ...task, ...updatedTask } as Task, artifact: null };
     }
+  }
+
+  async runPipeline(userId: string, requestText: string, options?: { tenantId?: string }) {
+    const run = await this.createRun(userId, requestText, options);
+    const tasks = await this.planRequest(run);
+
+    const executable = tasks.filter(t => t.status === 'queued');
+
+    const results = [];
+    for (const task of executable) {
+      const res = await this.executeTask(task);
+      results.push(res);
+    }
+
+    const costSummary = await this.costMeter.summarize(run.id);
+
+    return {
+      run,
+      tasks: tasks.map(t => ({
+        id: t.id,
+        status: t.status,
+        description: t.description,
+      })),
+      results,
+      costSummary,
+    };
   }
 }

@@ -1,20 +1,34 @@
+export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed';
+
+export interface UserRef {
+  id: string;
+}
+
+export interface AgentRef {
+  id: string;
+  name: string;
+  kind: 'llm' | 'tool' | 'workflow' | 'graph-engine';
+  modelId?: string;        // e.g. "openai:gpt-4.1"
+  toolName?: string;       // e.g. "bash-shell"
+}
+
 export interface Run {
   id: string;
-  user?: { id: string };
+  user: UserRef;
   createdAt: string;
   requestText: string;
-  status?: 'running' | 'completed' | 'failed';
 }
 
 export interface Task {
   id: string;
   runId: string;
-  status: 'pending' | 'queued' | 'running' | 'succeeded' | 'failed';
-  agent?: { id: string; name: string; kind: string };
-  kind: 'planner' | 'action';
+  parentTaskId?: string;
+  status: TaskStatus;
+  agent: AgentRef;
+  kind: 'plan' | 'action' | 'subworkflow' | 'graph.analysis';
   description: string;
-  input?: any;
-  output?: any;
+  input: Record<string, unknown>;
+  output?: Record<string, unknown>;
   errorMessage?: string;
   createdAt: string;
   updatedAt: string;
@@ -24,26 +38,26 @@ export interface Artifact {
   id: string;
   runId: string;
   taskId: string;
-  kind: string; // e.g. 'text', 'json', 'image'
+  kind: 'text' | 'json' | 'file' | 'graph';
   label: string;
-  data: any;
+  data: unknown; // or a typed union if you want stricter types
   createdAt: string;
 }
 
 export interface CostSample {
+  id: string;
   runId: string;
-  taskId?: string;
+  taskId: string;
   model: string;
+  vendor: 'openai' | 'anthropic' | 'google' | 'local';
   inputTokens: number;
   outputTokens: number;
-  costUSD: number;
-  createdAt?: string;
-}
-
-export interface ModelCostSummary {
-  costUSD: number;
-  inputTokens: number;
-  outputTokens: number;
+  currency: 'USD';
+  cost: number;
+  createdAt: string;
+  feature?: string;
+  tenantId?: string;
+  environment?: string;
 }
 
 export interface RunCostSummary {
@@ -51,22 +65,9 @@ export interface RunCostSummary {
   totalCostUSD: number;
   totalInputTokens: number;
   totalOutputTokens: number;
-  byModel: Record<string, ModelCostSummary>;
-}
-
-export interface TaskResult {
-  task: {
-    id: string;
-    status: string;
-    description: string;
-    errorMessage?: string;
-  };
-  artifact: Artifact | null;
-}
-
-export interface MaestroRunResponse {
-  run: Run;
-  tasks: { id: string; status: string; description: string }[];
-  results: TaskResult[];
-  costSummary: RunCostSummary;
+  byModel: Record<string, {
+    costUSD: number;
+    inputTokens: number;
+    outputTokens: number;
+  }>;
 }
