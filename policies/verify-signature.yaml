@@ -1,21 +1,22 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: verify-image-signature
+  name: require-cosign-signature
 spec:
-  validationFailureAction: Audit # Changed from Enforce to Audit for safety
-  background: false
-  webhookTimeoutSeconds: 30
+  validationFailureAction: Enforce
+  background: true
   rules:
-    - name: check-image-signature
+    - name: verify-signature
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds: [Deployment, StatefulSet, Job, CronJob]
       verifyImages:
-      - repository: "ghcr.io/intelgraph/*"
-        key: |-
-          -----BEGIN PUBLIC KEY-----
-          YOUR_COSIGN_PUBLIC_KEY_HERE
-          -----END PUBLIC KEY-----
+        - imageReferences:
+            - "ghcr.io/**"
+          attestors:
+            - entries:
+                - keyless:
+                    issuer: "https://token.actions.githubusercontent.com"
+                    subject: "*"
+          repository: "sigstore"

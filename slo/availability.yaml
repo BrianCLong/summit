@@ -1,23 +1,18 @@
-apiVersion: openslo/v1
-kind: SLO
+apiVersion: sloth.slok.dev/v1
+kind: PrometheusServiceLevel
 metadata:
-  name: global-availability
-  displayName: Global Availability
+  name: summit-availability
 spec:
-  service: gateway
-  description: "99.5% availability across all public APIs"
-  budgetingMethod: Occurrences
-  objectives:
-    - ratioMetrics:
-        good:
-          source: prometheus
-          queryType: promql
-          query: sum(rate(http_requests_total{status!~"5.."}[5m]))
-        total:
-          source: prometheus
-          queryType: promql
-          query: sum(rate(http_requests_total[5m]))
-      target: 0.995
-      timeWindow:
-        - duration: 28d
-          isRolling: true
+  service: summit
+  slos:
+    - name: availability
+      objective: 99.5
+      sli:
+        events:
+          errorQuery: sum(rate(http_requests_total{app="summit",status=~"5.."}[5m]))
+          totalQuery: sum(rate(http_requests_total{app="summit"}[5m]))
+      alerting:
+        name: AppAvailability
+        labels: { severity: critical }
+        annotations:
+          summary: "App availability SLO burn"

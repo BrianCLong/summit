@@ -1,38 +1,16 @@
-name: Chaos Smoke Test
+name: Chaos Smoke (Stage)
 on:
-  schedule:
-    - cron: '0 4 * * 0' # Weekly on Sunday
-  workflow_dispatch:
-
+  workflow_dispatch: {}
 jobs:
-  chaos-experiment:
+  kill-one-pod:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Kubernetes (Kind/Staging Access Stub)
-        run: echo "Connecting to staging cluster..."
-
-      - name: Install/Verify Chaos Mesh (Stub)
-        run: |
-          # Stub: Ensure chaos-mesh is installed
-          # In real run: helm install chaos-mesh ...
-          echo "Chaos Mesh assumed installed"
-
-      - name: Run Random Pod Kill
-        run: |
-          # Apply a transient chaos experiment
-          # In real run: kubectl apply -f ...
-          echo "Applying PodChaos..."
-
-      - name: Wait for Chaos
-        run: sleep 30
-
-      - name: Verify Availability (SLO Check)
-        uses: grafana/k6-action@v0.3.1
-        with:
-          filename: load/k6-smoke.js
-
-      - name: Cleanup (Stub)
-        if: always()
-        run: echo "Deleting chaos experiment..."
+      - uses: azure/setup-kubectl@v4
+      - run: |
+          echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+        env: { KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_STAGE_B64 }} }
+      - run: |
+          pod=$(kubectl -n stage get po -l app.kubernetes.io/name=summit -o jsonpath='{.items[0].metadata.name}')
+          kubectl -n stage delete pod "$pod"
+      - name: Smoke
+        run: bash scripts/smoke.sh https://summit-stage.example.com

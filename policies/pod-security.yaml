@@ -1,19 +1,18 @@
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
 metadata:
-  name: enforce-pod-security-standard
+  name: baseline-hardening
 spec:
   validationFailureAction: Enforce
   background: true
   rules:
-    - name: restricted-profile
+    - name: require-security-context
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds: [Pod, Deployment, StatefulSet, DaemonSet, Job, CronJob]
       validate:
-        message: "Pod violates Restricted Pod Security Standard."
+        message: Must set non-root user, read-only rootfs, drop CAP_SYS_ADMIN
         pattern:
           spec:
             securityContext:
@@ -21,6 +20,6 @@ spec:
             containers:
               - securityContext:
                   allowPrivilegeEscalation: false
+                  readOnlyRootFilesystem: true
                   capabilities:
                     drop: ["ALL"]
-                  readOnlyRootFilesystem: true

@@ -1,17 +1,15 @@
-name: Preview Environment Janitor
+name: Preview Janitor
 on:
   schedule:
-    - cron: '0 * * * *' # Hourly
-  workflow_dispatch:
-
+    - cron: '0 3 * * *'
+  workflow_dispatch: {}
 jobs:
-  cleanup:
+  janitor:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Authenticate K8s
-        run: echo "Stub: Authenticate to cluster"
-      - name: Run Janitor
-        run: |
-          chmod +x scripts/preview-janitor.sh
-          ./scripts/preview-janitor.sh
+      - uses: azure/setup-kubectl@v4
+      - run: |
+          mkdir -p ~/.kube && echo "${KUBECONFIG_DATA}" | base64 -d > ~/.kube/config
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBECONFIG_DEV_B64 }}
+      - run: bash scripts/preview-janitor.sh 7

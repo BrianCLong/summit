@@ -1,46 +1,20 @@
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    groups:
-      dependencies:
-        patterns:
-          - "*"
-    open-pull-requests-limit: 10
-    commit-message:
-      prefix: "deps(npm)"
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
-    groups:
-      actions:
-        patterns:
-          - "*"
-    commit-message:
-      prefix: "deps(actions)"
-
-  - package-ecosystem: "docker"
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     groups:
-      images:
-        patterns:
-          - "*"
-    commit-message:
-      prefix: "deps(docker)"
-
+      minor-and-patch:
+        update-types: ["minor", "patch"]
   - package-ecosystem: "gomod"
     directory: "/"
     schedule:
       interval: "weekly"
     groups:
-      go-deps:
-        patterns:
-          - "*"
-    commit-message:
-      prefix: "deps(go)"
+      minor-and-patch:
+        update-types: ["minor", "patch"]
