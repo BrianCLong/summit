@@ -47,9 +47,9 @@ export default [
     },
     rules: {
       // Code Quality
-      'no-console': 'warn',
+      'no-console': ['error', { allow: ['warn', 'error', 'info'] }],
       'no-debugger': 'error',
-      'no-alert': 'warn',
+      'no-alert': 'error',
       'no-var': 'error',
       'prefer-const': 'warn',
       'prefer-arrow-callback': 'warn',
@@ -74,7 +74,7 @@ export default [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      '@typescript-eslint/no-explicit-any': 'off', // Pragmatic for gradual migration
+      '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-expressions': [
         'error',
         {
@@ -84,7 +84,7 @@ export default [
       ],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-non-null-assertion': 'warn',
+      '@typescript-eslint/no-non-null-assertion': 'error',
 
       // Best Practices
       curly: ['warn', 'all'],

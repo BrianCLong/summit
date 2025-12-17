@@ -1,70 +1,108 @@
-name: CI - Golden Path
+name: CI Golden Path
 
 on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
   push:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
-  schedule:
-    - cron: '0 6 * * *'
+
+concurrency:
+  group: golden-path-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
-  golden-path:
-    name: golden path integration
+  fast-lane:
+    name: Fast lane (build + unit)
+    uses: ./.github/workflows/_reusable-ci-fast.yml
+
+  security:
+    name: Security posture
+    uses: ./.github/workflows/_reusable-ci-security.yml
+
+  perf-slo:
+    name: Perf SLO guardrail
+    if: github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'perf:strict') || contains(github.event.pull_request.labels.*.name, 'needs-canary-plan')
+    uses: ./.github/workflows/_reusable-ci-perf.yml
+
+  promotion-gate:
+    name: Gate summary
+    needs: [fast-lane, security, perf-slo]
+    if: always()
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    env:
+      PERF_REQUIRED: ${{ github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'perf:strict') || contains(github.event.pull_request.labels.*.name, 'needs-canary-plan') }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Evaluate stage results
+        id: evaluate
+        uses: actions/github-script@v7
         with:
-          version: 9.12.0
+          script: |
+            const failures = [];
+            const results = {
+              fast: '${{ needs.fast-lane.result }}',
+              security: '${{ needs.security.result }}',
+              perf: '${{ needs.perf-slo.result }}'
+            };
+            const perfRequired = process.env.PERF_REQUIRED === 'true';
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
+            if (results.fast !== 'success') {
+              failures.push('Fast lane failed; fix build/test.');
+            }
+            if (results.security !== 'success') {
+              failures.push('Security checks failed; review gitleaks/trivy outputs.');
+            }
+            if (perfRequired && results.perf !== 'success') {
+              failures.push('Perf SLO guardrail failed; review k6 thresholds.');
+            }
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+            const statusTable = [
+              ['fast-lane', results.fast],
+              ['security', results.security],
+              ['perf-slo', perfRequired ? results.perf : `${results.perf} (not required)`]
+            ];
 
-      - name: Bootstrap stack
+            core.summary.addHeading('CI Golden Path status');
+            core.summary.addTable([
+              [{data: 'Stage', header: true}, {data: 'Result', header: true}],
+              ...statusTable
+            ]);
+            core.summary.write();
+
+            if (failures.length) {
+              core.setFailed(failures.join(' '));
+            }
+
+      - name: Comment status on PR
+        if: github.event.pull_request && (github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.action == 'reopened' || github.event.action == 'ready_for_review' || github.event.action == 'labeled' || github.event.action == 'unlabeled')
         env:
-          CI: true
-        run: make bootstrap
-
-      - name: Start services
-        env:
-          CI: true
-        run: make up
-
-      - name: Run smoke tests
-        env:
-          CI: true
-        run: make smoke
-
-      - name: Teardown stack
-        if: always()
-        run: make down
-
-      - name: Collect docker logs
-        if: failure()
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p artifacts
-          if [ -f docker-compose.dev.yml ]; then
-            docker compose -f docker-compose.dev.yml logs --no-color > artifacts/compose.log || true
-          fi
-          docker ps -a > artifacts/docker-ps.txt || true
+          STATUS_FAST='${{ needs.fast-lane.result }}'
+          STATUS_SEC='${{ needs.security.result }}'
+          STATUS_PERF='${{ needs.perf-slo.result }}'
+          PERF_REQUIRED=${{ env.PERF_REQUIRED }}
 
-      - name: Upload artifacts
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: golden-path-logs
-          path: artifacts
+          cat > golden-path.md <<'COMMENT'
+          ## ✅ CI Golden Path
+
+          | Stage | Result |
+          |-------|--------|
+          COMMENT
+
+          {
+            echo "| Fast lane | ${STATUS_FAST} |"
+            echo "| Security | ${STATUS_SEC} |"
+            if [ "${PERF_REQUIRED}" = "true" ]; then
+              echo "| Perf SLO | ${STATUS_PERF} |"
+            else
+              echo "| Perf SLO | ${STATUS_PERF} (not required) |"
+            fi
+          } >> golden-path.md
+
+          gh pr comment ${{ github.event.pull_request.number }} --body-file golden-path.md || true

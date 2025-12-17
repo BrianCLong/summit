@@ -1,44 +1,38 @@
-# CI Simplification Plan
+# CI Plan
 
-## Goals
-- Provide a clear, fast PR lane that runs lint, type checks, and unit-level tests on every push and pull request.
-- Protect `main` with a golden-path workflow that mirrors `make bootstrap && make up && make smoke` and captures logs on failure.
-- Consolidate security checks into an explicit lane and clarify which workflows are required for branch protection.
-- Establish a safe merge-train/automerge approach for healthy PRs without rewriting history.
+This document captures the proposed consolidation of Summit CI into three clear lanes plus merge-train support. It is intended to be the source of truth for near-term CI refactors and required checks.
 
-## Current Signals (Recon)
-- Multiple CI workflows exist for targeted checks (linting, validation, performance, release gates) alongside automation helpers (auto-merge, queue management, stale handling).
-- Golden-path commands are documented in the Makefile (`bootstrap`, `up`, `smoke`) with health/wait scripts under `scripts/`.
-- `pnpm@9` is the declared package manager; Node 18+ is required. Make targets expect Docker and compose availability.
+## Overview
 
-## Target Model
-### Fast Lane (PR protection)
-- Workflow: `.github/workflows/ci-lint-and-unit.yml`
-- Triggers: `pull_request` to `main`, `push` to `main`.
-- Tooling: Node 20 LTS + pnpm 9 with cached installs.
-- Steps: `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test:quick`.
+- **Fast lane (PR protection)**: A single workflow (planned name: `ci-lint-and-unit.yml`) that runs on `pull_request` and `push` to `main`. It installs with pnpm on Node 20, caches dependencies, and runs type-check, lint, and unit tests only. This replaces legacy fast-path workflows once landed.
+- **Golden path (integration)**: A workflow (`ci-golden-path.yml`) that mirrors the developer golden path: `make bootstrap`, `make up`, `make smoke`, with health checks and artifacted docker logs. It runs on `push` to `main`, manual dispatch, and nightly schedule.
+- **Security lane**: A consolidated security workflow (`security.yml` or equivalent) covering SCA and secret scanning. Runs on `push` to `main` and a weekly schedule. Existing overlapping security workflows will be retired or routed through this job.
 
-### Golden Path / Integration Lane
-- Workflow: `.github/workflows/ci-golden-path.yml`
-- Triggers: `push` to `main`, nightly schedule, manual dispatch.
-- Steps: dependency install, `make bootstrap`, `make up`, `make smoke`, always `make down` for cleanup.
-- Failure artifacts: compose logs and `docker ps` snapshot.
+## Required checks for branch protection
 
-### Security Lane
-- Keep existing security scanning workflows but converge required checks to a single gate (e.g., `security.yml`).
-- Run on `push` to `main` and scheduled cadence; avoid PR blocking unless labelled `security-critical`.
+Set the following jobs as required on `main` once the workflows are in place:
 
-## Merge-Train and Auto-Update Strategy
-- Label `automerge-safe` for PRs that are conflict-free, green on required checks, and lack blocking labels.
-- Use existing auto-update automation (e.g., `auto-update-prs.yml`) to rebase/merge `main` into labelled branches when stale.
-- Queue-based merges: process `merge-train` labelled PRs sequentially—update from `main`, wait for `ci-lint-and-unit`, then optional `ci-golden-path` if stack files change. Stop the train on the first failure for manual intervention.
-- Never force-push `main`; only use `--force-with-lease` on contributor branches when explicitly coordinating.
+- `ci-lint-and-unit / lint-and-unit`
+- `ci-golden-path / golden-path`
+- `security / security-scan`
 
-## Branch Protection Recommendations
-- Require checks: `CI - Lint and Unit / lint, typecheck, and unit tests`; `CI - Golden Path / golden path integration`; plus chosen security gate (e.g., `security / security-scan`).
-- Optional informational checks: doc linting, coverage deltas, performance probes.
+Job names will be kept stable to avoid frequent branch protection updates.
 
-## Follow-Ups
-- Deprecate redundant workflows by converting them to dispatch-only stubs that reference the new lanes.
-- Align labels (`automerge-safe`, `merge-train`, `security-critical`) and document expectations in contributor guides.
-- Add dashboards for CI health and merge-train queue stats.
+## Merge-train and auto-update strategy
+
+- Keep the existing **“Auto Update PRs (safe)”** workflow to rebase/merge `main` into open PRs; prefer updates via labels instead of blanket rebases.
+- Define a label such as `automerge-safe` or `merge-train` to opt PRs into automated sequencing.
+- A lightweight train runner should iterate through labelled PRs, update from `main`, wait for the required checks above, and auto-merge when clean. The train stops on the first failure to keep `main` green.
+- Exclude PRs with conflict markers or “danger” labels (`do-not-merge`, `wip`, `needs-design`).
+
+## Cleanup scope
+
+- Deprecate or delete legacy fast lanes that duplicate lint/type/test (e.g., `ci.yml`, `ci.main.yml`, `ci-main.yml`, `dev-ci.yml`, `lane-fast.yml`) after the new fast lane is validated.
+- Keep golden-path variants (`golden-path-ci.yml`, `ci-golden-path.yml`, `golden-pr-tests.yml`) but route them through the new canonical `ci-golden-path.yml` to avoid drift.
+- Consolidate security workflows into one canonical file; stub superseded workflows with comments pointing to the new location if immediate deletion is risky.
+
+## Documentation and onboarding
+
+- Update README with a concise CI & merge policy section (required checks, golden-path enforcement on `main`, and the auto-merge label policy).
+- Maintain a runbook (`RUNBOOKS/CI.md`) describing workflows, debugging tips, and local pre-flight commands (`./start.sh` or `make bootstrap && make up && make smoke`).
+- Keep workflow names and job names human-readable and consistent with the required-checks list above.

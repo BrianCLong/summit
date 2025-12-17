@@ -1,49 +1,58 @@
 # CI Runbook
 
-This runbook documents the streamlined CI lanes and operational expectations for Summit.
+This runbook documents the streamlined CI model for Summit, how to debug failures, and what contributors must run locally.
 
-## Lanes
-- **CI - Lint and Unit** (`.github/workflows/ci-lint-and-unit.yml`)
-  - Trigger: `pull_request` to `main`, `push` to `main`.
-  - Steps: pnpm install (cached), `pnpm lint`, `pnpm typecheck`, `pnpm test:quick`.
-  - Purpose: fast feedback for branch protection.
-- **CI - Golden Path** (`.github/workflows/ci-golden-path.yml`)
-  - Trigger: `push` to `main`, nightly schedule, manual dispatch.
-  - Steps: pnpm install, `make bootstrap`, `make up`, `make smoke`, always `make down`; collect compose logs on failure.
-  - Purpose: enforce the deployable-first workflow on `main` and nightly drift detection.
-- **Security Gate** (`security.yml` or equivalent)
-  - Trigger: `push` to `main`, scheduled cadence.
-  - Scope: SCA/secret scanning; avoid blocking PRs unless labelled `security-critical`.
+## Workflows and responsibilities
 
-## Required Checks for Branch Protection
-- `CI - Lint and Unit / lint, typecheck, and unit tests`
-- `CI - Golden Path / golden path integration`
-- `security / security-scan` (or the chosen consolidated security job)
+- **Fast lane**: `ci-lint-and-unit.yml`
+  - Triggers: `pull_request` → `main`, `push` → `main`.
+  - Steps: Node 20 + pnpm install with cache, TypeScript type-check, ESLint, and unit tests.
+  - Purpose: quick feedback for PRs and branch protection.
 
-## Merge Train & Auto-Update
-1. Label PRs `automerge-safe` when they are conflict-free, green on required checks, and free of blocking labels (WIP, do-not-merge).
-2. Use the existing auto-update workflow (`auto-update-prs.yml`) to rebase/merge `main` into stale PR branches.
-3. For `merge-train` labelled PRs:
-   - Update branch from `main`.
-   - Wait for `CI - Lint and Unit` to pass; run `CI - Golden Path` when stack/deployment files change.
-   - Auto-merge when green; stop the train at the first failure and request fixes.
+- **Golden path**: `ci-golden-path.yml`
+  - Triggers: `push` → `main`, `workflow_dispatch`, nightly schedule.
+  - Steps: `make bootstrap`, `make up`, wait for health endpoints, `make smoke`, collect docker logs as artifacts, tear down stack.
+  - Purpose: enforce the deployable-first golden path on `main`.
 
-## Debugging Playbook
-- **Fast lane failures**
-  - Re-run locally: `pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test:quick`.
-  - Clear turborepo cache if needed: `rm -rf .turbo`.
-- **Golden path failures**
-  - Download `golden-path-logs` artifact for compose output and `docker ps` snapshot.
-  - Re-run locally: `make bootstrap && make up && make smoke`; inspect health endpoints via `scripts/wait-for-stack.sh` guidance.
-  - Clean stack: `make down && docker system prune -f` if residue is suspected.
-- **Security failures**
-  - Address reported vulnerabilities; rerun the relevant security script (`pnpm run security:scan` or workflow-specific command).
+- **Security**: `security.yml` (or the current canonical security workflow)
+  - Triggers: `push` → `main`, weekly schedule.
+  - Steps: dependency and secret scanning; may reuse existing security composite actions.
+  - Purpose: continuous SCA coverage without slowing PR velocity.
 
-## Onboarding Expectations
-- New contributors should run `make bootstrap && make up && make smoke` (or `./start.sh` if available) before pushing.
-- PRs should target `main` and keep scope narrow; enable `automerge-safe` only when CI is green.
+- **Auto update + merge train**
+  - Workflow: “Auto Update PRs (safe)” keeps PRs current with `main` when opted in by label.
+  - Label `automerge-safe` (or `merge-train`) gates the merge train; the train updates from `main`, waits for the required checks above, merges clean PRs, and stops on the first failure to keep `main` green.
 
-## Operational Notes
-- Do not force-push `main`.
-- Prefer `--force-with-lease` on contributor branches only when coordinating conflict resolution.
-- Keep workflow job names stable to preserve branch protection settings.
+## Required checks for `main`
+
+Set the following GitHub required status checks once the workflows are active:
+
+- `ci-lint-and-unit / lint-and-unit`
+- `ci-golden-path / golden-path`
+- `security / security-scan`
+
+## Local pre-flight commands
+
+Run the golden path locally before opening a PR:
+
+```bash
+./start.sh
+# or
+make bootstrap && make up && make smoke
+```
+
+For quick iteration on app code, you can also run targeted checks:
+
+```bash
+pnpm -w install
+pnpm lint
+pnpm test
+pnpm typecheck
+```
+
+## Debugging tips
+
+- **Fast lane failures**: Check ESLint/type errors in the failing package. Re-run `pnpm lint`, `pnpm test`, and `pnpm typecheck` locally with `pnpm -w install` to ensure workspace deps are available.
+- **Golden path failures**: Review attached docker logs (API, web, DB). Reproduce locally with `make bootstrap && make up && make smoke`. Ensure `scripts/wait-for-*` probes succeed and ports are free.
+- **Security failures**: Update vulnerable packages, regenerate lockfiles, or mark false positives per tool guidance. Re-run the security workflow locally if a script is available under `.ci/`.
+- **Merge train stalls**: If a PR consistently fails, remove the `automerge-safe` label and leave a comment with the failing check. Resolve conflicts before re-queuing.
