@@ -30,7 +30,7 @@ export class SmartContractBridge {
 
   async executeDataPurchase(purchase: Purchase): Promise<BlockchainTx> {
     // Simulate blockchain transaction
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
+    const txHash = `0x${  crypto.randomBytes(32).toString('hex')}`;
     const blockNumber = Math.floor(Date.now() / 1000);
 
     const tx: BlockchainTx = {
@@ -70,7 +70,7 @@ export class SmartContractBridge {
     owner: string,
     metadata: Record<string, unknown>,
   ): Promise<BlockchainTx> {
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
+    const txHash = `0x${  crypto.randomBytes(32).toString('hex')}`;
     const tx: BlockchainTx = {
       txHash,
       blockNumber: Math.floor(Date.now() / 1000),
@@ -88,7 +88,7 @@ export class SmartContractBridge {
     userId: string,
     rights: string[],
   ): Promise<BlockchainTx> {
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
+    const txHash = `0x${  crypto.randomBytes(32).toString('hex')}`;
     const tx: BlockchainTx = {
       txHash,
       blockNumber: Math.floor(Date.now() / 1000),
@@ -102,7 +102,7 @@ export class SmartContractBridge {
   }
 
   async revokeAccess(poolId: string, userId: string): Promise<BlockchainTx> {
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
+    const txHash = `0x${  crypto.randomBytes(32).toString('hex')}`;
     const tx: BlockchainTx = {
       txHash,
       blockNumber: Math.floor(Date.now() / 1000),
