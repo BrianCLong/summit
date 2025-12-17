@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/strategic-foresight",
+  "name": "@intelgraph/strategic-foresight-pkg",
   "version": "0.1.0",
   "type": "module",
   "main": "dist/index.js",
