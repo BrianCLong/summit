@@ -2,9 +2,16 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'services/*'
-  - 'contracts/*'
-  - 'server'
-  - 'client'
   - 'tools/*'
+<<<<<<< HEAD
 exclude:
   - 'archive/**'
+  - 'tools/summitctl'
+=======
+  - 'client'
+  - 'server'
+  - 'intelgraph-mvp/ui'
+  - '!**/test/**'
+  - '!**/tests/**'
+  - '!**/node_modules/**'
+>>>>>>> main

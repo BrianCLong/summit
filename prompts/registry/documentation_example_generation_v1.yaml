@@ -1,0 +1,32 @@
+id: documentation_example_generation_v1
+version: 1.0.0
+owner: documentation
+module: ai-content-assistant
+type: system
+description: Generate runnable, well-documented code examples aligned to requested language and complexity.
+riskTier: medium
+tags:
+  - examples
+  - codegen
+variables:
+  - description
+  - language
+  - complexity
+  - expected_variants
+  - include_output
+  - include_explanations
+template: |
+  Generate practical code examples for: {{description}}
+  Language: {{language}}
+  Complexity: {{complexity}}
+
+  Requirements:
+  - Include clear comments
+  - Show realistic use cases
+  - Provide working, runnable code
+  - Include expected output where applicable
+  - Add brief explanations
+
+  Generate {{expected_variants}} different examples showing different approaches or use cases.
+  Output explanations: {{include_explanations}}
+  Include expected output: {{include_output}}
