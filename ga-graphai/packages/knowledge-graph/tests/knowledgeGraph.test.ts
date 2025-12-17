@@ -172,4 +172,62 @@ describe('OrchestrationKnowledgeGraph', () => {
   it('returns undefined for unknown service', () => {
     expect(graph.queryService('unknown')).toBeUndefined();
   });
+
+  it('isolates graph refresh when sandbox mode is enabled', async () => {
+    const logger = { warn: vi.fn() };
+    graph = new OrchestrationKnowledgeGraph({ sandboxMode: true, logger });
+
+    graph.registerPipelineConnector(pipelineConnector);
+    graph.registerServiceConnector(serviceConnector);
+    graph.registerEnvironmentConnector(environmentConnector);
+    graph.registerIncidentConnector(incidentConnector);
+    graph.registerPolicyConnector(policyConnector);
+    graph.registerCostSignalConnector(costConnector);
+
+    const snapshot = await graph.refresh();
+
+    expect(snapshot.sandbox).toBe(true);
+    expect(snapshot.namespace).toContain('sandbox');
+    expect(snapshot.warnings?.[0]).toContain('Sandbox mode active');
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('blocks unsafe graph rewrites when confirmation is required', async () => {
+    graph = new OrchestrationKnowledgeGraph({ requireConfirmation: true });
+
+    graph.registerPipelineConnector(pipelineConnector);
+    graph.registerServiceConnector(serviceConnector);
+    graph.registerEnvironmentConnector(environmentConnector);
+    graph.registerIncidentConnector(incidentConnector);
+    graph.registerPolicyConnector(policyConnector);
+    graph.registerCostSignalConnector(costConnector);
+
+    await expect(graph.refresh()).rejects.toThrow(/confirmation required/);
+
+    const confirmedGraph = new OrchestrationKnowledgeGraph({
+      requireConfirmation: true,
+      confirmationProvided: true,
+    });
+    confirmedGraph.registerPipelineConnector(pipelineConnector);
+    confirmedGraph.registerServiceConnector(serviceConnector);
+    confirmedGraph.registerEnvironmentConnector(environmentConnector);
+    confirmedGraph.registerIncidentConnector(incidentConnector);
+    confirmedGraph.registerPolicyConnector(policyConnector);
+    confirmedGraph.registerCostSignalConnector(costConnector);
+
+    await expect(confirmedGraph.refresh()).resolves.toBeDefined();
+  });
+
+  it('prevents mass mutations when thresholds are exceeded', async () => {
+    graph = new OrchestrationKnowledgeGraph({ mutationThreshold: 1 });
+
+    graph.registerPipelineConnector(pipelineConnector);
+    graph.registerServiceConnector(serviceConnector);
+    graph.registerEnvironmentConnector(environmentConnector);
+    graph.registerIncidentConnector(incidentConnector);
+    graph.registerPolicyConnector(policyConnector);
+    graph.registerCostSignalConnector(costConnector);
+
+    await expect(graph.refresh()).rejects.toThrow(/Refusing to mutate/);
+  });
 });
