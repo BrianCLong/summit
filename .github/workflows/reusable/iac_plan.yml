@@ -1,3 +1,15 @@
+<<<<<<< HEAD
+name: Reusable iac_plan
+on:
+  workflow_call:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Placeholder for iac_plan
+        run: echo "Running iac_plan workflow placeholder"
+=======
 name: iac_plan
 
 on:
@@ -61,3 +73,4 @@ jobs:
             core.summary.addHeading('IaC Plan')
             core.summary.addRaw('No Terraform changes detected; plan skipped.')
             await core.summary.write()
+>>>>>>> main

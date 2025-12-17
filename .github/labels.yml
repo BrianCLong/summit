@@ -1,3 +1,23 @@
+<<<<<<< HEAD
+- name: needs-canary-plan
+  color: CC9900
+  description: Canary plan required before merge
+- name: migration-gate
+  color: 5319e7
+  description: DB/contract migration present — gate applies
+- name: ops/preview
+  color: 0e8a16
+  description: Preview environment work
+- name: ops/release-train
+  color: 1f77b4
+  description: Release train tasks
+- name: risk/high
+  color: d73a4a
+  description: Elevated risk change
+- name: type/runbook
+  color: c2e0c6
+  description: Documentation/runbook
+=======
 # Standard set of labels for Summit repo
 # Use with actions/labeler or a label sync tool
 
@@ -110,4 +130,5 @@
 - name: type/runbook
   color: 'c2e0c6'
   description: Documentation/runbook
+>>>>>>> main
 >>>>>>> main
