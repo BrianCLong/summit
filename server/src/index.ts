@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import http from 'http';
 import express from 'express';
 import { useServer } from 'graphql-ws/use/ws';
@@ -20,23 +21,28 @@ import { checkNeo4jIndexes } from './db/indexManager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
+=======
+import { bootstrapSecrets } from './bootstrap-secrets.js';
+import { logger } from './config/logger.js';
+import { logConfigSummary } from './config/index.js';
+>>>>>>> main
 
-const startServer = async () => {
-  // Optional Kafka consumer import - only when AI services enabled
-  let startKafkaConsumer: any = null;
-  let stopKafkaConsumer: any = null;
-  if (
-    process.env.AI_ENABLED === 'true' ||
-    process.env.KAFKA_ENABLED === 'true'
-  ) {
-    try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
-      startKafkaConsumer = kafkaModule.startKafkaConsumer;
-      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
-      logger.warn('Kafka not available - running in minimal mode');
-    }
+(async () => {
+  try {
+    // 1. Load Secrets (Environment or Vault)
+    await bootstrapSecrets();
+
+    // Log Config
+    logConfigSummary();
+
+    // 2. Start Server
+    logger.info('Secrets loaded. Starting server...');
+    await import('./server_entry.js');
+  } catch (err) {
+    logger.error(`Fatal error during startup: ${err}`);
+    process.exit(1);
   }
+<<<<<<< HEAD
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
@@ -138,3 +144,6 @@ const startServer = async () => {
 };
 
 startServer();
+=======
+})();
+>>>>>>> main
