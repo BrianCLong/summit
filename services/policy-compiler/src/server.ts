@@ -1,16 +1,18 @@
-import express from 'express';
-import { middleware, PolicyCompiler } from './index';
+import express from "express";
+import bodyParser from "body-parser";
 
 const app = express();
-const compiler = new PolicyCompiler();
-app.use(express.json());
-app.get('/healthz', (_req, res) => {
-  res.json({ ok: true, service: 'policy-compiler' });
-});
-app.use('/policies/demo', middleware('demo', compiler));
+app.use(bodyParser.json());
 
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-  // eslint-disable-next-line no-console
-  console.log(`policy-compiler listening on ${port}`);
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "policy-compiler" }));
+
+app.post("/decide", (req, res) => {
+  const { query, caller } = req.body || {};
+  if (!query) return res.status(400).json({ allow: false, reason: "missing query" });
+  if ((caller && caller.purpose) === "investigation" && !/mutation|export/i.test(query)) {
+    return res.json({ allow: true, reason: "allow: read for investigation" });
+  }
+  return res.status(403).json({ allow: false, reason: "deny: policy default" });
 });
+
+app.listen(process.env.PORT || 8080);

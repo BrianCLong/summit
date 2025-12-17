@@ -1,7 +1,7 @@
-import helmet from 'helmet';
+import helmet from "helmet";
 
 export const security = helmet({
   contentSecurityPolicy: false,
-  referrerPolicy: { policy: 'no-referrer' },
-  crossOriginResourcePolicy: { policy: 'same-site' }
+  referrerPolicy: { policy: "no-referrer" },
+  crossOriginResourcePolicy: { policy: "same-site" }
 });

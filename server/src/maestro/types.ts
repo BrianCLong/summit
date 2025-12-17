@@ -55,6 +55,9 @@ export interface CostSample {
   currency: 'USD';
   cost: number;
   createdAt: string;
+  feature?: string;
+  tenantId?: string;
+  environment?: string;
 }
 
 export interface RunCostSummary {

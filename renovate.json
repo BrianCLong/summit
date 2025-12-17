@@ -5,5 +5,7 @@
   "labels": ["dependencies"],
   "prHourlyLimit": 4,
   "separateMajorMinor": true,
-  "packageRules": [{ "matchManagers": ["npm","pip_requirements"], "labels": ["deps","automerge-safe"] }]
+  "packageRules": [
+    { "matchManagers": ["npm", "pip_requirements"], "labels": ["deps", "automerge-safe"] }
+  ]
 }
