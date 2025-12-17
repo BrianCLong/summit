@@ -1,4 +1,5 @@
 import { MissionControlConflictResolver } from '../mission-control/conflict-resolution';
+import { describe, it, expect } from '@jest/globals';
 
 describe('MissionControlConflictResolver', () => {
   const resolver = new MissionControlConflictResolver();

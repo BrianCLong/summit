@@ -6,23 +6,33 @@ export default defineConfig({
   testDir: 'e2e',
   testMatch: [
     'e2e/maestro.spec.ts',
+<<<<<<< HEAD
+    'e2e/golden-path.spec.ts',
+=======
+    'e2e/osint/**/*.spec.ts',
+>>>>>>> main
     'e2e/**/*.a11y.spec.ts',
     'tests/e2e/**/*.spec.ts',
+    'e2e/simple.spec.ts',
   ],
   timeout: 30_000,
   retries: 2,
   reporter: [['html', { outputFolder: 'reports/playwright' }], ['list']],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:5173',
+<<<<<<< HEAD
+    baseURL: process.env.BASE_URL || (process.env.CI ? 'http://localhost:3000' : 'http://localhost:5173'),
+=======
+    baseURL: process.env.BASE_URL || 'http://localhost:3000', // Defaulting to 3000 for apps/web
+>>>>>>> main
     trace: 'retain-on-failure',
-    video: 'retain-on-failure',
+    video: 'on',
   },
   ...(useWebServer
     ? {
         webServer: [
           {
-            command: 'npm run client:dev',
-            port: 5173,
+            command: 'npm run web:dev',
+            port: 3000,
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },
@@ -35,4 +45,15 @@ export default defineConfig({
         ],
       }
     : {}),
+  // In CI, we use docker-compose which exposes port 3000, so we just check it
+  ...((process.env.CI && !useWebServer)
+    ? {
+        webServer: {
+          command: 'echo "CI uses make up"',
+          url: 'http://localhost:3000',
+          reuseExistingServer: true,
+          timeout: 120_000,
+        }
+      }
+    : {})
 });
