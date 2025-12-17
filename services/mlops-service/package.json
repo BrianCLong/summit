@@ -17,7 +17,7 @@
     "@intelgraph/model-monitoring": "workspace:*",
     "@intelgraph/model-explainability": "workspace:*",
     "@intelgraph/training-orchestration": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",
     "compression": "^1.7.4",

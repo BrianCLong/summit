@@ -43,7 +43,8 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
-import { getAuditSystem } from '../audit/advanced-audit-system.js';
+import { secretsService } from './SecretsService.js';
+import { SECRETS } from '../config/secretRefs.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
@@ -91,6 +92,7 @@ interface User {
   lastName?: string;
   fullName?: string;
   role: string;
+  defaultTenantId?: string;
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
@@ -111,6 +113,7 @@ interface DatabaseUser {
   first_name?: string;
   last_name?: string;
   role: string;
+  default_tenant_id?: string;
   is_active: boolean;
   last_login?: Date;
   created_at: Date;
@@ -195,6 +198,9 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'graph:read',
     'graph:export',
     'ai:request',
+    'support:read',
+    'support:create',
+    'support:update',
   ],
   VIEWER: [
     'investigation:read',
@@ -295,24 +301,19 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
+
+      // Auto-assign to default tenant if configured or just 'global'
+      // This ensures the new user has at least one tenant membership
+      await client.query(
+        `INSERT INTO user_tenants (user_id, tenant_id, roles)
+         VALUES ($1, 'global', $2)
+         ON CONFLICT DO NOTHING`,
+        [user.id, [user.role]]
+      );
+
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
-
-      try {
-        getAuditSystem().recordEvent({
-          eventType: 'user_login', // Auto-login after register
-          action: 'register',
-          outcome: 'success',
-          userId: user.id,
-          tenantId: 'system',
-          serviceId: 'auth-service',
-          message: 'User registered successfully',
-          level: 'info',
-        });
-      } catch (auditError) {
-        logger.error('Failed to log audit event', auditError);
-      }
 
       return {
         user: this.formatUser(user),
@@ -352,6 +353,8 @@ export class AuthService {
    *   console.error('Login failed:', error.message);
    * }
    * ```
+   *
+   * @trace REQ-AUTH-001
    */
   async login(
     email: string,
@@ -385,26 +388,6 @@ export class AuthService {
 
       const { token, refreshToken } = await this.generateTokens(user, client);
 
-      try {
-        getAuditSystem().recordEvent({
-          eventType: 'user_login',
-          action: 'login',
-          outcome: 'success',
-          userId: user.id,
-          tenantId: 'system', // TODO: multi-tenant support if user has tenant_id
-          serviceId: 'auth-service',
-          ipAddress,
-          userAgent,
-          message: 'User logged in successfully',
-          level: 'info',
-        });
-      } catch (auditError) {
-        // Fallback or ignore if audit system not ready in test env
-        if (process.env.NODE_ENV !== 'test') {
-           logger.error('Failed to log audit event', auditError);
-        }
-      }
-
       return {
         user: this.formatUser(user),
         token,
@@ -413,28 +396,6 @@ export class AuthService {
       };
     } catch (error) {
       logger.error('Error logging in user:', error);
-
-      try {
-        // Log failed login attempt
-        getAuditSystem().recordEvent({
-          eventType: 'user_login_failed',
-          action: 'login',
-          outcome: 'failure',
-          userId: email, // Use email as user ID identifier for failed attempts
-          tenantId: 'system',
-          serviceId: 'auth-service',
-          ipAddress,
-          userAgent,
-          message: `Login failed: ${(error as Error).message}`,
-          level: 'warn',
-          details: { error: (error as Error).message }
-        });
-      } catch (auditError) {
-        if (process.env.NODE_ENV !== 'test') {
-           logger.error('Failed to log audit event', auditError);
-        }
-      }
-
       throw error;
     } finally {
       client.release();
@@ -462,8 +423,10 @@ export class AuthService {
       role: user.role,
     };
 
+    const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+
     // @ts-ignore - jwt.sign overload mismatch
-    const token = jwt.sign(tokenPayload, config.jwt.secret, {
+    const token = jwt.sign(tokenPayload, jwtSecret, {
       expiresIn: config.jwt.expiresIn,
     });
 
@@ -503,7 +466,8 @@ export class AuthService {
     try {
       if (!token) return null;
 
-      const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
+      const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+      const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
 
       // Check if token is blacklisted
       const blacklistCheck = await this.pool.query(
@@ -531,7 +495,7 @@ export class AuthService {
 
       return this.formatUser(userResult.rows[0] as DatabaseUser);
     } catch (error: any) {
-      // logger.warn('Invalid token:', error.message);
+      logger.warn('Invalid token:', error.message);
       return null;
     }
   }
@@ -657,23 +621,6 @@ export class AuthService {
 
       await client.query('COMMIT');
 
-      try {
-        getAuditSystem().recordEvent({
-          eventType: 'user_logout',
-          action: 'logout',
-          outcome: 'success',
-          userId: userId,
-          tenantId: 'system',
-          serviceId: 'auth-service',
-          message: 'User logged out successfully',
-          level: 'info',
-        });
-      } catch (auditError) {
-        if (process.env.NODE_ENV !== 'test') {
-           logger.error('Failed to log audit event', auditError);
-        }
-      }
-
       logger.info('User logged out successfully', { userId });
       return true;
     } catch (error) {
@@ -748,6 +695,7 @@ export class AuthService {
       lastName: user.last_name,
       fullName: `${user.first_name} ${user.last_name}`,
       role: user.role,
+      defaultTenantId: user.default_tenant_id,
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,

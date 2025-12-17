@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import http from 'http';
 import express from 'express';
 import { useServer } from 'graphql-ws/use/ws';
@@ -13,53 +14,35 @@ import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
-import { getPostgresPool } from './db/postgres.js';
-import { getRedisClient } from './db/redis.js';
-import { initializeAuditSystem } from './audit/advanced-audit-system.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import { BackupManager } from './backup/BackupManager.js';
+import { checkNeo4jIndexes } from './db/indexManager.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
+=======
+import { bootstrapSecrets } from './bootstrap-secrets.js';
+import { logger } from './config/logger.js';
+import { logConfigSummary } from './config/index.js';
+>>>>>>> main
 
-const startServer = async () => {
-  // Initialize Audit System
-  let signingKey = process.env.AUDIT_SIGNING_KEY;
-  let encryptionKey = process.env.AUDIT_ENCRYPTION_KEY;
+(async () => {
+  try {
+    // 1. Load Secrets (Environment or Vault)
+    await bootstrapSecrets();
 
-  if (cfg.NODE_ENV === 'production') {
-    if (!signingKey || !encryptionKey) {
-      logger.error('Missing required audit keys in production. Please set AUDIT_SIGNING_KEY and AUDIT_ENCRYPTION_KEY.');
-      process.exit(1);
-    }
-  } else {
-    signingKey = signingKey || 'default-audit-signing-key';
-    encryptionKey = encryptionKey || 'default-audit-encryption-key';
+    // Log Config
+    logConfigSummary();
+
+    // 2. Start Server
+    logger.info('Secrets loaded. Starting server...');
+    await import('./server_entry.js');
+  } catch (err) {
+    logger.error(`Fatal error during startup: ${err}`);
+    process.exit(1);
   }
-
-  initializeAuditSystem(
-    getPostgresPool().pool, // Use the raw pool from managed pool
-    getRedisClient(),
-    logger,
-    signingKey,
-    encryptionKey
-  );
-
-  // Optional Kafka consumer import - only when AI services enabled
-  let startKafkaConsumer: any = null;
-  let stopKafkaConsumer: any = null;
-  if (
-    process.env.AI_ENABLED === 'true' ||
-    process.env.KAFKA_ENABLED === 'true'
-  ) {
-    try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
-      startKafkaConsumer = kafkaModule.startKafkaConsumer;
-      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
-      logger.warn('Kafka not available - running in minimal mode');
-    }
-  }
+<<<<<<< HEAD
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
@@ -103,6 +86,13 @@ const startServer = async () => {
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
+
+    // Initialize Backup Manager
+    const backupManager = new BackupManager();
+    backupManager.startScheduler();
+
+    // Check Neo4j Indexes
+    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
@@ -154,3 +144,6 @@ const startServer = async () => {
 };
 
 startServer();
+=======
+})();
+>>>>>>> main
