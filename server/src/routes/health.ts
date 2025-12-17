@@ -19,10 +19,18 @@ interface ServiceHealthError {
  *   get:
  *     tags:
  *       - Health
+<<<<<<< HEAD
+ *     summary: Basic health check endpoint
+ *     description: Returns 200 OK if the service is running.
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+=======
  *     description: Basic health check endpoint
  *     responses:
  *       200:
  *         description: Service is running
+>>>>>>> main
  *         content:
  *           application/json:
  *             schema:
@@ -33,6 +41,10 @@ interface ServiceHealthError {
  *                   example: ok
  *                 timestamp:
  *                   type: string
+<<<<<<< HEAD
+ *                   format: date-time
+=======
+>>>>>>> main
  *                 uptime:
  *                   type: number
  *                 environment:
@@ -53,12 +65,39 @@ router.get('/health', async (_req: Request, res: Response) => {
  *   get:
  *     tags:
  *       - Health
+<<<<<<< HEAD
+ *     summary: Detailed health check
+ *     description: Checks database connections and external dependencies.
+ *     responses:
+ *       200:
+ *         description: Service is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 services:
+ *                   type: object
+ *                   properties:
+ *                     neo4j:
+ *                       type: string
+ *                     postgres:
+ *                       type: string
+ *                     redis:
+ *                       type: string
+ *       503:
+ *         description: Service is degraded or unhealthy
+=======
  *     description: Detailed health check with dependency status
  *     responses:
  *       200:
  *         description: System is healthy
  *       503:
  *         description: System is degraded
+>>>>>>> main
  */
 router.get('/health/detailed', async (_req: Request, res: Response) => {
   const errors: ServiceHealthError[] = [];
@@ -168,10 +207,26 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
  *   get:
  *     tags:
  *       - Health
+<<<<<<< HEAD
+ *     summary: Readiness probe for Kubernetes
+ *     description: Returns 200 when the service is ready to accept traffic.
+ *     responses:
+ *       200:
+ *         description: Service is ready
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ready
+=======
  *     description: Kubernetes readiness probe
  *     responses:
  *       200:
  *         description: Service is ready
+>>>>>>> main
  *       503:
  *         description: Service is not ready
  */
@@ -225,10 +280,26 @@ router.get('/health/ready', async (_req: Request, res: Response) => {
  *   get:
  *     tags:
  *       - Health
+<<<<<<< HEAD
+ *     summary: Liveness probe for Kubernetes
+ *     description: Returns 200 if the process is alive.
+ *     responses:
+ *       200:
+ *         description: Service is alive
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: alive
+=======
  *     description: Kubernetes liveness probe
  *     responses:
  *       200:
  *         description: Service is alive
+>>>>>>> main
  */
 router.get('/health/live', (_req: Request, res: Response) => {
   res.status(200).json({ status: 'alive' });
