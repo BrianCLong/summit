@@ -11,7 +11,7 @@ concurrency: prod-deploy
 
 env:
   NAMESPACE: prod
-  RELEASE: summit
+  RELEASE: app
 
 jobs:
   deploy:
@@ -32,9 +32,9 @@ jobs:
 
       - name: Canary 10%
         run: |
-          helm upgrade --install $RELEASE charts/summit \
+          helm upgrade --install $RELEASE charts/app \
             --namespace $NAMESPACE \
-            -f charts/summit/values.prod.yaml \
+            -f charts/app/values.prod.yaml \
             --set image.tag=${{ inputs.image }} \
             --set canary.enabled=true --set canary.replicas=1
 
@@ -46,14 +46,14 @@ jobs:
 
       - name: Promote to 100%
         run: |
-          helm upgrade $RELEASE charts/summit \
+          helm upgrade $RELEASE charts/app \
             --namespace $NAMESPACE \
-            -f charts/summit/values.prod.yaml \
+            -f charts/app/values.prod.yaml \
             --set image.tag=${{ inputs.image }} \
             --set canary.enabled=false
 
       - name: Post-deploy smoke
-        run: bash scripts/smoke.sh https://summit.example.com
+        run: bash scripts/smoke-deploy.sh https://example.com
 
       - name: Tag release
         run: |

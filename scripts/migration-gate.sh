@@ -1,20 +1,28 @@
 #!/usr/bin/env bash
-set -euo pipefail
-ENV=${1:-}
-MODE=${2:-run}
+set -e
 
-if [[ -z "$ENV" ]]; then
-  echo "usage: $0 <env> [--dry-run]"; exit 2; fi
+# scripts/migration-gate.sh
+# Enforces safety checks on schema migrations before allowing deployment.
 
-if [[ "$MODE" == "--dry-run" ]]; then
-  echo "[migration-gate] DRY RUN for $ENV — validating migrations plan..."
-  exit 0
-fi
+echo "🔒 Verifying schema migration safety..."
 
-# Example: block if a breaking migration is detected without feature flag
-if grep -R "DROP TABLE" -n migrations/ >/dev/null 2>&1; then
-  echo "[migration-gate] blocking deploy: destructive migration found without approval" >&2
-  exit 1
-fi
+MIGRATIONS_DIR="server/db/migrations/postgres"
 
-echo "[migration-gate] ok"
+# 1. Check for destructive SQL
+echo "Checking for destructive SQL..."
+node scripts/check-destructive-sql.cjs "$MIGRATIONS_DIR"
+
+# 2. Check migration plan safety (locks, etc.)
+echo "Checking migration plan safety..."
+node scripts/check-migration-plan.cjs "$MIGRATIONS_DIR"
+
+# 3. Enforce Rollback Scripts
+echo "Verifying rollback scripts..."
+node scripts/check-rollbacks.cjs "$MIGRATIONS_DIR"
+
+# 4. (Optional) Dry-run logic could be added here
+# echo "Running migration dry-run..."
+# ...
+
+echo "✅ Migration gate checks passed."
+exit 0

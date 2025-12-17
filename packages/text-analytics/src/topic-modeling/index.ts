@@ -51,7 +51,7 @@ export class TopicModeler {
   hierarchical(documents: string[], depth: number = 3): Map<string, Topic[]> {
     const hierarchy = new Map<string, Topic[]>();
 
-    let currentDocs = documents;
+    const currentDocs = documents;
     for (let level = 0; level < depth; level++) {
       const topics = this.lda(currentDocs, 5);
       hierarchy.set(`level_${level}`, topics);

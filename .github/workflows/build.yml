@@ -5,8 +5,8 @@ on:
   workflow_dispatch: {}
 
 env:
-  REGISTRY: ${{ secrets.REGISTRY }}
-  IMAGE_NAME: summit
+  REGISTRY: ${{ secrets.REGISTRY }}            # e.g. ghcr.io/owner
+  IMAGE_NAME: app                               # replace per service
 
 jobs:
   build:
