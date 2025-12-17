@@ -1,35 +1,11 @@
-// Initialize OpenTelemetry BEFORE importing other modules
-import './instrumentation';
+import express from "express";
+import { security } from "./security";
+import { policyGuard } from "./middleware/policyGuard";
 
-import { ApolloServer } from '@apollo/server';
-import { ApolloGateway, IntrospectAndCompose } from '@apollo/gateway';
-import { persistedOnlyPlugin } from './plugins/persistedOnly';
-import { costLimitPlugin } from './plugins/costLimit';
-import { metricsPlugin } from './plugins/metricsPlugin';
+const app = express();
+app.use(express.json({ limit: "1mb" }));
+app.use(security);
+app.use(policyGuard);
+app.get("/healthz", (_req, res) => res.json({ ok: true, service: "gateway" }));
 
-function rateLimitPlugin() {
-  return {
-    async requestDidStart() {
-      return {
-        async willSendResponse() {
-          /* placeholder */
-        },
-      };
-    },
-  };
-}
-
-const gateway = new ApolloGateway({
-  supergraphSdl: new IntrospectAndCompose({ subgraphs: [] }),
-});
-
-export const server = new ApolloServer({
-  gateway,
-  includeStacktraceInErrorResponses: false,
-  plugins: [
-    metricsPlugin({ enableComplexityTracking: true }),
-    rateLimitPlugin(),
-    persistedOnlyPlugin(),
-    costLimitPlugin(),
-  ],
-});
+export default app;
