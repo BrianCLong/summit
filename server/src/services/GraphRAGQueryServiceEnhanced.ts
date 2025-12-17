@@ -6,6 +6,7 @@
  * 2. Provenance tracking - links citations to evidence via prov-ledger
  * 3. Enhanced guardrails - GraphRAG-specific safety checks
  * 4. Policy enforcement - respects classification labels
+ * 5. Hallucination Mitigation (CoVe)
  *
  * Architecture:
  * User Query → Preview → [Redaction Filter] → GraphRAG → [Citation Enrichment] → Answer
@@ -23,6 +24,7 @@ import { RedactionService } from '../redaction/redact.js';
 import { ProvLedgerClient } from '../prov-ledger-client/client.js';
 import { LLMGuardrailsService } from '../security/llm-guardrails.js';
 import type { Evidence, Claim, ProvenanceChain } from '../prov-ledger-client/types.js';
+import { HallucinationMitigationService, HallucinationMitigationResponse, EvidenceMetrics } from './HallucinationMitigationService.js';
 
 export interface RedactionPolicy {
   enabled: boolean;
@@ -64,6 +66,9 @@ export type GraphRAGQueryRequestEnhanced = {
   // Guardrail options
   enableGuardrails?: boolean;
   riskTolerance?: 'low' | 'medium' | 'high';
+
+  // Verification options
+  enableCoVe?: boolean;
 };
 
 export type EnrichedCitationWithProvenance = {
@@ -127,6 +132,14 @@ export type GraphRAGQueryResponseEnhanced = {
   // Guardrail metadata
   guardrailsPassed?: boolean;
   guardrailWarnings?: string[];
+
+  // Verification metadata
+  verificationStatus?: 'verified' | 'unverified' | 'conflicted';
+  inconsistencies?: string[];
+  corrections?: string[];
+  reasoningTrace?: string;
+  conflictDetails?: any;
+  evidenceMetrics?: EvidenceMetrics;
 };
 
 export class GraphRAGQueryServiceEnhanced {
@@ -139,6 +152,7 @@ export class GraphRAGQueryServiceEnhanced {
   private pool: Pool;
   private neo4jDriver: Driver;
   private redis?: Redis;
+  private hallucinationMitigationService?: HallucinationMitigationService;
 
   constructor(
     graphRAGService: GraphRAGService,
@@ -149,7 +163,8 @@ export class GraphRAGQueryServiceEnhanced {
     guardrailsService: LLMGuardrailsService,
     pool: Pool,
     neo4jDriver: Driver,
-    redis?: Redis
+    redis?: Redis,
+    hallucinationMitigationService?: HallucinationMitigationService
   ) {
     this.graphRAGService = graphRAGService;
     this.queryPreviewService = queryPreviewService;
@@ -160,6 +175,7 @@ export class GraphRAGQueryServiceEnhanced {
     this.pool = pool;
     this.neo4jDriver = neo4jDriver;
     this.redis = redis;
+    this.hallucinationMitigationService = hallucinationMitigationService;
   }
 
   /**
@@ -174,6 +190,7 @@ export class GraphRAGQueryServiceEnhanced {
       redactionEnabled: request.redactionPolicy?.enabled,
       provenanceEnabled: !!request.provenanceContext,
       guardrailsEnabled: request.enableGuardrails !== false,
+      enableCoVe: request.enableCoVe
     }, 'Starting enhanced GraphRAG query');
 
     // Create glass-box run for observability
@@ -189,6 +206,7 @@ export class GraphRAGQueryServiceEnhanced {
         redactionEnabled: request.redactionPolicy?.enabled,
         provenanceEnabled: !!request.provenanceContext,
         registerClaim: request.registerClaim,
+        enableCoVe: request.enableCoVe,
       },
     });
 
@@ -298,7 +316,9 @@ export class GraphRAGQueryServiceEnhanced {
       // Step 3: Execute GraphRAG query
       const ragStepId = await this.captureStep(
         run.id,
-        'Execute GraphRAG retrieval and generation'
+        request.enableCoVe
+            ? 'Execute Chain-of-Verification (CoVe) pipeline'
+            : 'Execute GraphRAG retrieval and generation'
       );
 
       const ragRequest: GraphRAGRequest = {
@@ -308,12 +328,22 @@ export class GraphRAGQueryServiceEnhanced {
         maxHops: request.maxHops || 2,
       };
 
-      const ragResponse = await this.graphRAGService.answer(ragRequest);
+      let ragResponse: GraphRAGResponse | HallucinationMitigationResponse;
+
+      if (request.enableCoVe && this.hallucinationMitigationService) {
+        ragResponse = await this.hallucinationMitigationService.query({
+            ...ragRequest,
+            enableCoVe: true
+        });
+      } else {
+        ragResponse = await this.graphRAGService.answer(ragRequest);
+      }
 
       await this.glassBoxService.completeStep(run.id, ragStepId, {
         confidence: ragResponse.confidence,
         citationCount: ragResponse.citations.entityIds.length,
         pathCount: ragResponse.why_paths?.length,
+        verificationStatus: (ragResponse as HallucinationMitigationResponse).verificationStatus,
       });
 
       // Step 4: Apply redaction if enabled
@@ -394,6 +424,15 @@ export class GraphRAGQueryServiceEnhanced {
 
       const executionTimeMs = Date.now() - startTime;
 
+      const verificationProps = request.enableCoVe ? {
+        verificationStatus: (ragResponse as HallucinationMitigationResponse).verificationStatus,
+        inconsistencies: (ragResponse as HallucinationMitigationResponse).inconsistencies,
+        corrections: (ragResponse as HallucinationMitigationResponse).corrections,
+        reasoningTrace: (ragResponse as HallucinationMitigationResponse).reasoningTrace,
+        conflictDetails: (ragResponse as HallucinationMitigationResponse).conflictDetails,
+        evidenceMetrics: (ragResponse as HallucinationMitigationResponse).evidenceMetrics
+      } : {};
+
       const response: GraphRAGQueryResponseEnhanced = {
         answer: redactedAnswer,
         confidence: ragResponse.confidence,
@@ -425,6 +464,7 @@ export class GraphRAGQueryServiceEnhanced {
 
         guardrailsPassed,
         guardrailWarnings,
+        ...verificationProps
       };
 
       await this.glassBoxService.updateStatus(run.id, 'completed', response);
@@ -448,6 +488,7 @@ export class GraphRAGQueryServiceEnhanced {
         executionTimeMs,
         redactionApplied,
         provenanceVerified: response.provenanceVerified,
+        verificationStatus: response.verificationStatus
       }, 'Completed enhanced GraphRAG query');
 
       return response;

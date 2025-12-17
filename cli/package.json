@@ -7,10 +7,11 @@
   "types": "dist/index.d.ts",
   "bin": {
     "intelgraph": "./dist/cli.js",
-    "ig": "./dist/cli.js"
+    "ig": "./dist/cli.js",
+    "summit": "./dist/summit.js"
   },
   "scripts": {
-    "build": "tsc && chmod +x dist/cli.js",
+    "build": "tsc && chmod +x dist/cli.js dist/summit.js",
     "dev": "tsx watch src/cli.ts",
     "start": "node dist/cli.js",
     "test": "jest",

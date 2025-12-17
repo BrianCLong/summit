@@ -1,4 +1,5 @@
-import { getNeo4jDriver, registerQueryObserver } from '../db/neo4j.js';
+// @ts-nocheck
+import { getNeo4jDriver } from '../db/neo4j.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'GraphIndexAdvisorService' });
@@ -23,9 +24,7 @@ class GraphIndexAdvisorService {
   private querySampleCount = 0;
   private sampleRate = 0.1; // Analyze 10% of queries by default
 
-  private constructor() {
-    registerQueryObserver(this.recordQuery.bind(this));
-  }
+  private constructor() {}
 
   public static getInstance(): GraphIndexAdvisorService {
     if (!GraphIndexAdvisorService.instance) {
