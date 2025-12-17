@@ -1,0 +1,2 @@
+ingress:
+  host: "pr-{{PR_NUMBER}}.preview.intelgraph.local"
