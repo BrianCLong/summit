@@ -4,6 +4,7 @@ import {
   graphragCacheHitRatio,
 } from '../monitoring/metrics.js';
 import { UserFacingError } from '../lib/errors.js';
+import { jest, describe, test, expect, beforeEach } from '@jest/globals';
 
 describe('GraphRAGService', () => {
   const baseRequest = {

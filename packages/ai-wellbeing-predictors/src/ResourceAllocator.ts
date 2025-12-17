@@ -110,7 +110,7 @@ export class ResourceAllocator {
         const current = needs.get(d) || { totalScore: 0, count: 0, atRisk: 0 };
         current.totalScore += score;
         current.count++;
-        if (score < 50) current.atRisk++;
+        if (score < 50) {current.atRisk++;}
         needs.set(d, current);
       }
     }

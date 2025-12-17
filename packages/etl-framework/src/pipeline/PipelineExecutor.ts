@@ -83,7 +83,7 @@ export class PipelineExecutor extends EventEmitter {
               !validationResult.failedRecords.includes(idx)
             );
 
-            if (validRecords.length === 0) continue;
+            if (validRecords.length === 0) {continue;}
           }
 
           // 4. Enrichment phase

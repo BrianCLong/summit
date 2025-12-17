@@ -221,9 +221,9 @@ export function formatDate(date: Date, format: string = 'short'): string {
 }
 
 export function formatLargeNumber(value: number): string {
-  if (value >= 1e9) return `${(value / 1e9).toFixed(1)}B`;
-  if (value >= 1e6) return `${(value / 1e6).toFixed(1)}M`;
-  if (value >= 1e3) return `${(value / 1e3).toFixed(1)}K`;
+  if (value >= 1e9) {return `${(value / 1e9).toFixed(1)}B`;}
+  if (value >= 1e6) {return `${(value / 1e6).toFixed(1)}M`;}
+  if (value >= 1e3) {return `${(value / 1e3).toFixed(1)}K`;}
   return value.toString();
 }
 
@@ -320,7 +320,7 @@ export async function exportToPNG(
 ): Promise<void> {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) {return;}
 
   const svgRect = svgElement.getBoundingClientRect();
   canvas.width = svgRect.width * scale;
@@ -358,7 +358,7 @@ export function exportToCSV<T extends Record<string, any>>(
   data: T[],
   filename: string = 'data.csv'
 ): void {
-  if (data.length === 0) return;
+  if (data.length === 0) {return;}
 
   const headers = Object.keys(data[0]);
   const csv = [
@@ -391,7 +391,7 @@ export function debounce<T extends (...args: any[]) => any>(
   let timeout: NodeJS.Timeout | null = null;
 
   return function(...args: Parameters<T>) {
-    if (timeout) clearTimeout(timeout);
+    if (timeout) {clearTimeout(timeout);}
     timeout = setTimeout(() => func(...args), wait);
   };
 }
