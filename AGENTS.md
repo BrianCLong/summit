@@ -9,12 +9,12 @@
 
 ## Build, Test, and Development Commands
 
-- Install: `npm install && (cd server && npm install) && (cd client && npm install)`.
-- Dev: `npm run dev` (runs server and client concurrently).
-- Test: `npm test` (server+client), server only: `cd server && npm test`.
-- Lint/Format: `npm run lint && npm run format`.
-- DB: `npm run db:migrate` and `npm run db:seed` (from repo root or `server/`).
-- Docker: `npm run docker:dev` or `npm run docker:prod`.
+- Install: `pnpm install`.
+- Dev: `pnpm run dev` (runs server and client concurrently).
+- Test: `pnpm test` (server+client), server only: `pnpm --filter intelgraph-server test`.
+- Lint/Format: `pnpm run lint && pnpm run format`.
+- DB: `pnpm run db:migrate` and `pnpm run db:seed` (from repo root).
+- Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
 
 ## Coding Style & Naming Conventions
 
@@ -24,8 +24,8 @@
 
 ## Testing Guidelines
 
-- Backend: Jest (`server/tests`), run with coverage: `cd server && npm run test:coverage`.
-- Frontend: see client tests; e2e via Playwright: `npm run test:e2e`.
+- Backend: Jest (`server/tests`), run with coverage: `pnpm --filter intelgraph-server test:coverage`.
+- Frontend: see client tests; e2e via Playwright: `pnpm run test:e2e`.
 - Naming: `*.spec.ts`/`*.test.js` (client), `*.test.js` (server). Target ≥80% coverage for changed code.
 
 ## Commit & Pull Request Guidelines

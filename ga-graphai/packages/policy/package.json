@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "common-types": "file:../common-types",
+    "secrets": "file:../secrets",
     "yaml": "^2.4.2"
   },
   "devDependencies": {
