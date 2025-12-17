@@ -5,7 +5,8 @@
  * for Neo4j graph database operations.
  */
 
-import neo4j, { Driver, Session, auth, Config, SessionConfig } from 'neo4j-driver';
+import neo4j, { Driver, Session } from 'neo4j-driver';
+
 import pino from 'pino';
 import { performance } from 'node:perf_hooks';
 
@@ -69,7 +70,7 @@ export class Neo4jConnectionManager {
    */
   private initializeDriver(): void {
     try {
-      const driverConfig: Config = {
+      const driverConfig: any = {
         maxConnectionPoolSize: this.config.maxConnectionPoolSize || 50,
         maxConnectionLifetime: this.config.maxConnectionLifetime || 3600000, // 1 hour
         connectionAcquisitionTimeout: this.config.connectionAcquisitionTimeout || 60000,
@@ -99,7 +100,7 @@ export class Neo4jConnectionManager {
 
       this.driver = neo4j.driver(
         this.config.uri,
-        auth.basic(this.config.username, this.config.password),
+        neo4j.auth.basic(this.config.username, this.config.password),
         driverConfig,
       );
 
@@ -158,7 +159,7 @@ export class Neo4jConnectionManager {
     let session: Session | null = null;
 
     try {
-      const sessionConfig: SessionConfig = {
+      const sessionConfig: any = {
         defaultAccessMode: accessMode === 'READ'
           ? neo4j.session.READ
           : neo4j.session.WRITE,
