@@ -1,8 +1,8 @@
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
 // @ts-ignore - pg type imports
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import baseLogger from '../config/logger';
 
 dotenv.config();
@@ -137,6 +137,13 @@ interface PoolConfig {
   port?: number;
 }
 
+interface ExtendedPoolClient {
+  connectedAt?: number;
+  release(err?: boolean | Error): void;
+  query(...args: any[]): Promise<any>;
+  [key: string]: any;
+}
+
 class CircuitBreaker {
   private failureCount = 0;
   private state: CircuitState = 'closed';
@@ -147,7 +154,7 @@ class CircuitBreaker {
     private readonly name: string,
     private readonly failureThreshold: number,
     private readonly cooldownMs: number,
-  ) {}
+  ) { }
 
   canExecute(): boolean {
     if (this.state === 'open') {
@@ -216,7 +223,7 @@ class PoolMonitor {
   private intervalId?: NodeJS.Timeout;
   private pools: PoolWrapper[] = [];
 
-  constructor() {}
+  constructor() { }
 
   register(pool: PoolWrapper) {
     this.pools.push(pool);
@@ -490,7 +497,7 @@ function createManagedPool(
         try {
           // Use withManagedClient to leverage validation logic
           await withManagedClient(wrapper, 1000, async (client) => {
-             await client.query('SELECT 1');
+            await client.query('SELECT 1');
           });
         } catch (error) {
           snapshot.healthy = false;
@@ -705,7 +712,7 @@ async function withManagedClient<T>(
     return result;
   } finally {
     if (!options.skipRelease) {
-       try {
+      try {
         await client.query('RESET statement_timeout');
         client.release();
       } catch (error) {

@@ -1,9 +1,7 @@
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
-import neo4j, { Driver, Session } from 'neo4j-driver';
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
-import neo4j from 'neo4j-driver';
-import dotenv from 'dotenv';
-import pino from 'pino';
+import neo4j, { Driver, Session } from 'neo4j-driver';
+import * as dotenv from 'dotenv';
+import { default as pino } from 'pino';
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
@@ -14,6 +12,7 @@ import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 
 dotenv.config();
 
+// @ts-ignore
 const logger: ReturnType<typeof pino> = pino();
 
 type Neo4jDriver = neo4j.Driver;
@@ -145,7 +144,7 @@ export async function closeNeo4jDriver(): Promise<void> {
 }
 
 export class Neo4jService {
-  constructor(private readonly _driver: Neo4jDriver = getNeo4jDriver()) {}
+  constructor(private readonly _driver: Neo4jDriver = getNeo4jDriver()) { }
 
   getSession(options?: Parameters<Neo4jDriver['session']>[0]) {
     return this._driver.session(options as any);
@@ -189,8 +188,8 @@ async function connectToNeo4j(): Promise<void> {
         connectionTimeout: POOL_CONNECTION_TIMEOUT,
         connectionAcquisitionTimeout: POOL_ACQUISITION_TIMEOUT,
         logging: {
-            level: 'info',
-            logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
+          level: 'info',
+          logger: (level, message) => logger.debug(`Neo4j Driver: ${message}`)
         }
       }
     );
@@ -205,7 +204,7 @@ async function connectToNeo4j(): Promise<void> {
     await notifyDriverReady(hasEmittedReadyEvent ? 'reconnected' : 'initial');
   } catch (error) {
     if (candidate) {
-      await candidate.close().catch(() => {});
+      await candidate.close().catch(() => { });
     }
 
     isMockMode = true;
@@ -280,7 +279,7 @@ function createDriverFacade(): Neo4jDriver {
   }) as Neo4jDriver['verifyConnectivity'];
 
   return facade as Neo4jDriver;
-} 
+}
 
 function createMockSession(): Neo4jSession {
   return {
@@ -293,18 +292,18 @@ function createMockSession(): Neo4jSession {
         summary: { counters: { nodesCreated: 0, relationshipsCreated: 0 } },
       } as any;
     },
-    close: async () => {},
+    close: async () => { },
     beginTransaction: () => createMockTransaction(),
     readTransaction: async (fn: any) => fn(createMockTransaction()),
     writeTransaction: async (fn: any) => fn(createMockTransaction()),
     executeRead: async (fn: any) => fn(createMockTransaction()),
     executeWrite: async (fn: any) => {
-        // Mock invalidation trigger
-        import('./queryOptimizer').then(({ queryOptimizer }) => {
-             // In a real scenario we'd extract labels from the mutation
-             queryOptimizer.invalidateForLabels('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-        });
-        return fn(createMockTransaction());
+      // Mock invalidation trigger
+      import('./queryOptimizer').then(({ queryOptimizer }) => {
+        // In a real scenario we'd extract labels from the mutation
+        queryOptimizer.invalidateForLabels('mock-tenant', ['*']).catch(err => logger.warn('Cache invalidation error', err));
+      });
+      return fn(createMockTransaction());
     },
   } as unknown as Neo4jSession;
 }
@@ -312,8 +311,8 @@ function createMockSession(): Neo4jSession {
 function createMockTransaction() {
   return {
     run: async () => ({ records: [] }),
-    commit: async () => {},
-    rollback: async () => {},
+    commit: async () => { },
+    rollback: async () => { },
   } as any;
 }
 
@@ -323,59 +322,59 @@ function instrumentSession(session: any) {
   const originalBeginTransaction = session.beginTransaction?.bind(session);
 
   if (originalBeginTransaction) {
-      session.beginTransaction = (config?: any) => {
-          const tx = originalBeginTransaction(config);
-          const originalTxRun = tx.run.bind(tx);
-          const originalTxCommit = tx.commit.bind(tx);
-          let writesDetected = false;
+    session.beginTransaction = (config?: any) => {
+      const tx = originalBeginTransaction(config);
+      const originalTxRun = tx.run.bind(tx);
+      const originalTxCommit = tx.commit.bind(tx);
+      let writesDetected = false;
 
-          tx.run = async (cypher: string, params?: any) => {
-              const lower = cypher.toLowerCase();
-              if (lower.includes('create') ||
-                  lower.includes('merge') ||
-                  lower.includes('delete') ||
-                  lower.includes('set') ||
-                  lower.includes('remove') ||
-                  lower.includes('call')) {
-                  writesDetected = true;
-              }
-              return originalTxRun(cypher, params);
-          };
-
-          tx.commit = async () => {
-              // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
-              // But Neo4j commits first. So we commit, then invalidate, then return.
-              const result = await originalTxCommit();
-              if (writesDetected) {
-                  try {
-                       const { queryOptimizer } = await import('./queryOptimizer');
-                       // Await invalidation to ensure subsequent reads see freshness
-                       await queryOptimizer.invalidateForLabels('global', ['*']);
-                  } catch (err) {
-                       logger.warn('Cache invalidation error', err);
-                  }
-              }
-              return result;
-          };
-
-          return tx;
+      tx.run = async (cypher: string, params?: any) => {
+        const lower = cypher.toLowerCase();
+        if (lower.includes('create') ||
+          lower.includes('merge') ||
+          lower.includes('delete') ||
+          lower.includes('set') ||
+          lower.includes('remove') ||
+          lower.includes('call')) {
+          writesDetected = true;
+        }
+        return originalTxRun(cypher, params);
       };
+
+      tx.commit = async () => {
+        // Invalidate BEFORE returning result to ensure Read-Your-Own-Writes consistency if possible
+        // But Neo4j commits first. So we commit, then invalidate, then return.
+        const result = await originalTxCommit();
+        if (writesDetected) {
+          try {
+            const { queryOptimizer } = await import('./queryOptimizer');
+            // Await invalidation to ensure subsequent reads see freshness
+            await queryOptimizer.invalidateForLabels('global', ['*']);
+          } catch (err) {
+            logger.warn('Cache invalidation error', err);
+          }
+        }
+        return result;
+      };
+
+      return tx;
+    };
   }
 
   if (originalExecuteWrite) {
-      session.executeWrite = async (fn: any) => {
-          try {
-              const result = await originalExecuteWrite(fn);
-               import('./queryOptimizer').then(({ queryOptimizer }) => {
-                   // Attempt to fallback to a broad invalidation since we lack tenant context here
-                   // ideally the transaction function would provide hints.
-                   queryOptimizer.invalidateForLabels('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
-               });
-              return result;
-          } catch (error) {
-              throw error;
-          }
-      };
+    session.executeWrite = async (fn: any) => {
+      try {
+        const result = await originalExecuteWrite(fn);
+        import('./queryOptimizer').then(({ queryOptimizer }) => {
+          // Attempt to fallback to a broad invalidation since we lack tenant context here
+          // ideally the transaction function would provide hints.
+          queryOptimizer.invalidateForLabels('global', ['*']).catch(err => logger.warn('Cache invalidation error', err));
+        });
+        return result;
+      } catch (error) {
+        throw error;
+      }
+    };
   }
 
   session.run = (
@@ -392,90 +391,90 @@ function instrumentSession(session: any) {
     // Bypass optimization for EXPLAIN queries to prevent infinite recursion
     // Also bypass if specific flag set in params to avoid buffering in GraphStreamer
     if (lowerQuery.startsWith('explain') || params?._skipCache) {
-        return originalRun(cypher, params);
+      return originalRun(cypher, params);
     }
 
     const isWrite = lowerQuery.includes('create') ||
-                    lowerQuery.includes('merge') ||
-                    lowerQuery.includes('delete') ||
-                    lowerQuery.includes('set') ||
-                    lowerQuery.includes('remove') ||
-                    lowerQuery.includes('call');
+      lowerQuery.includes('merge') ||
+      lowerQuery.includes('delete') ||
+      lowerQuery.includes('set') ||
+      lowerQuery.includes('remove') ||
+      lowerQuery.includes('call');
 
     if (isWrite) {
-         // Fire-and-forget invalidation for raw queries
-         // Note: For strict consistency, use executeWrite/beginTransaction
-         import('./queryOptimizer').then(({ queryOptimizer }) => {
-             queryOptimizer.invalidateForLabels(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
-         });
-         return originalRun(cypher, params);
+      // Fire-and-forget invalidation for raw queries
+      // Note: For strict consistency, use executeWrite/beginTransaction
+      import('./queryOptimizer').then(({ queryOptimizer }) => {
+        queryOptimizer.invalidateForLabels(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
+      });
+      return originalRun(cypher, params);
     } else if (lowerQuery.includes('match') || lowerQuery.includes('return')) {
-        // Return a Promise that mimics a Result (optimistic optimization)
-        // We use an async IIFE to handle the logic but return the promise immediately
-        const promise: any = (async () => {
-            const startTime = Date.now();
-            try {
-                const { queryOptimizer } = await import('./queryOptimizer');
-                const context = {
-                    tenantId,
-                    queryType: 'cypher' as const,
-                    priority: 'medium' as const,
-                    cacheEnabled: true
-                };
+      // Return a Promise that mimics a Result (optimistic optimization)
+      // We use an async IIFE to handle the logic but return the promise immediately
+      const promise: any = (async () => {
+        const startTime = Date.now();
+        try {
+          const { queryOptimizer } = await import('./queryOptimizer');
+          const context = {
+            tenantId,
+            queryType: 'cypher' as const,
+            priority: 'medium' as const,
+            cacheEnabled: true
+          };
 
-                const result = await queryOptimizer.executeCachedQuery(cypher, params, context, (q, p) => originalRun(q, p));
+          const result = await queryOptimizer.executeCachedQuery(cypher, params, context, (q, p) => originalRun(q, p));
 
-                // Shim the records to behave like Neo4j Records (implementing .get, .toObject)
-                // This ensures compatibility with existing driver code
-                if (result && Array.isArray(result.records)) {
-                    result.records = result.records.map((rec: any) => {
-                        // If it already looks like a record (has .get), return it
-                        if (typeof rec.get === 'function') return rec;
+          // Shim the records to behave like Neo4j Records (implementing .get, .toObject)
+          // This ensures compatibility with existing driver code
+          if (result && Array.isArray(result.records)) {
+            result.records = result.records.map((rec: any) => {
+              // If it already looks like a record (has .get), return it
+              if (typeof rec.get === 'function') return rec;
 
-                        // Otherwise wrap plain object
-                        return {
-                            get: (key: string) => rec[key],
-                            toObject: () => rec,
-                            keys: Object.keys(rec),
-                            has: (key: string) => Object.prototype.hasOwnProperty.call(rec, key),
-                            ...rec // Spread properties for direct access if needed, though idiomatic Neo4j usage is via .get()
-                        };
-                    });
-                }
-
-                return result;
-            } catch (error) {
-                logger.warn('Query optimization failed, falling back to direct execution', error);
-                return await originalRun(cypher, params);
-            } finally {
-                telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
-            }
-        })();
-
-        // Shim .subscribe for compatibility
-        // Note: Caching buffers the whole result, so subscribe will receive everything at once
-        promise.subscribe = (observer: any) => {
-            promise.then((result: any) => {
-                if (result.records) {
-                    result.records.forEach((r: any) => observer.onNext && observer.onNext(r));
-                }
-                if (observer.onCompleted) observer.onCompleted();
-            }).catch((err: any) => {
-                if (observer.onError) observer.onError(err);
+              // Otherwise wrap plain object
+              return {
+                get: (key: string) => rec[key],
+                toObject: () => rec,
+                keys: Object.keys(rec),
+                has: (key: string) => Object.prototype.hasOwnProperty.call(rec, key),
+                ...rec // Spread properties for direct access if needed, though idiomatic Neo4j usage is via .get()
+              };
             });
-        };
+          }
 
-        // Shim Async Iterator for compatibility
-        promise[Symbol.asyncIterator] = async function* () {
-            const result = await promise;
-            if (result.records) {
-                for (const record of result.records) {
-                    yield record;
-                }
-            }
-        };
+          return result;
+        } catch (error) {
+          logger.warn('Query optimization failed, falling back to direct execution', error);
+          return await originalRun(cypher, params);
+        } finally {
+          telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
+        }
+      })();
 
-        return promise;
+      // Shim .subscribe for compatibility
+      // Note: Caching buffers the whole result, so subscribe will receive everything at once
+      promise.subscribe = (observer: any) => {
+        promise.then((result: any) => {
+          if (result.records) {
+            result.records.forEach((r: any) => observer.onNext && observer.onNext(r));
+          }
+          if (observer.onCompleted) observer.onCompleted();
+        }).catch((err: any) => {
+          if (observer.onError) observer.onError(err);
+        });
+      };
+
+      // Shim Async Iterator for compatibility
+      promise[Symbol.asyncIterator] = async function* () {
+        const result = await promise;
+        if (result.records) {
+          for (const record of result.records) {
+            yield record;
+          }
+        }
+      };
+
+      return promise;
     }
 
     // Default Fallback

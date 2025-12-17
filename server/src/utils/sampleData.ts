@@ -1,9 +1,7 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { randomUUID as uuidv4 } from 'crypto';
-import pino from 'pino';
-
-const logger = pino();
+import { logger } from './logger.js';
 
 export async function createSampleData(): Promise<void> {
   logger.info('Creating sample data for development...');

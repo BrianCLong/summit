@@ -57,16 +57,16 @@ describe('Security Middleware', () => {
         'content-length': '100',
         'user-agent': 'test-agent',
       },
-      get: jest.fn((header: string) => {
+      get: jest.fn(((header: string) => {
         const headers: Record<string, string> = {
           'User-Agent': 'test-agent',
           'Content-Length': '100',
         };
         return headers[header];
-      }),
+      }) as any),
       query: {},
       body: {},
-      connection: { remoteAddress: '127.0.0.1' },
+      connection: { remoteAddress: '127.0.0.1' } as any,
     };
 
     mockResponse = {
@@ -193,7 +193,7 @@ describe('Security Middleware', () => {
 
   describe('ipWhitelist', () => {
     it('should allow localhost by default', () => {
-      mockRequest.ip = '127.0.0.1';
+      (mockRequest as any).ip = '127.0.0.1';
       const middleware = ipWhitelist([]);
 
       middleware(
@@ -206,7 +206,7 @@ describe('Security Middleware', () => {
     });
 
     it('should allow IPv6 localhost', () => {
-      mockRequest.ip = '::1';
+      (mockRequest as any).ip = '::1';
       const middleware = ipWhitelist([]);
 
       middleware(
@@ -219,7 +219,7 @@ describe('Security Middleware', () => {
     });
 
     it('should allow whitelisted IPs', () => {
-      mockRequest.ip = '192.168.1.100';
+      (mockRequest as any).ip = '192.168.1.100';
       const middleware = ipWhitelist(['192.168.1.100']);
 
       middleware(
@@ -232,7 +232,7 @@ describe('Security Middleware', () => {
     });
 
     it('should block non-whitelisted IPs', () => {
-      mockRequest.ip = '10.0.0.1';
+      (mockRequest as any).ip = '10.0.0.1';
       const middleware = ipWhitelist(['192.168.1.100']);
 
       middleware(
@@ -251,8 +251,8 @@ describe('Security Middleware', () => {
     });
 
     it('should handle undefined IP', () => {
-      mockRequest.ip = undefined;
-      mockRequest.connection = { remoteAddress: undefined };
+      (mockRequest as any).ip = undefined;
+      mockRequest.connection = { remoteAddress: undefined } as any;
       const middleware = ipWhitelist([]);
 
       middleware(
@@ -486,11 +486,12 @@ describe('Security Middleware', () => {
   describe('requestLogger', () => {
     it('should log requests', () => {
       const finishCallback = jest.fn();
-      mockResponse.on = jest.fn().mockImplementation((event, callback) => {
+      mockResponse.on = jest.fn().mockImplementation((event: any, callback: any) => {
         if (event === 'finish') {
           finishCallback.mockImplementation(callback);
         }
-      });
+        return mockResponse;
+      }) as any;
 
       requestLogger(
         mockRequest as Request,

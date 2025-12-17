@@ -93,6 +93,7 @@ export function auditFirstMiddleware(
       // Append to Provenance Ledger
       await provenanceLedger.appendEntry({
         tenantId,
+        timestamp: new Date(),
         actionType: `API_${req.method}`,
         resourceType: 'API_ROUTE',
         resourceId: req.path,
@@ -100,8 +101,8 @@ export function auditFirstMiddleware(
         actorType: user ? 'user' : 'system', // or 'unknown'
         payload,
         metadata: {
-          requestId: (req as any).id || req.headers['x-request-id'],
-          correlationId: (req as any).correlationId || req.headers['x-correlation-id'],
+          requestId: (req as any).id || (req.headers['x-request-id'] as string),
+          correlationId: (req as any).correlationId || (req.headers['x-correlation-id'] as string),
           sessionId: (req as any).sessionID,
         },
       });

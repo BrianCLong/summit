@@ -1,9 +1,10 @@
 import Redis from 'ioredis';
-import dotenv from 'dotenv';
-import pino from 'pino';
+import * as dotenv from 'dotenv';
+import { default as pino } from 'pino';
 
 dotenv.config();
 
+// @ts-ignore
 const logger: pino.Logger = pino();
 
 const REDIS_HOST = process.env.REDIS_HOST || 'redis';
@@ -87,9 +88,9 @@ function createMockRedisClient() {
       logger.debug(`Mock Redis EXPIRE: Key: ${key}, Seconds: ${seconds}`);
       return 1;
     },
-    quit: async () => {},
-    on: () => {},
-    connect: async () => {},
+    quit: async () => { },
+    on: () => { },
+    connect: async () => { },
   };
 }
 

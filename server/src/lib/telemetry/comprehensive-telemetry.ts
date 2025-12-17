@@ -15,7 +15,7 @@ import {
 } from '@opentelemetry/sdk-metrics';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
-import os from 'os';
+import * as os from 'os';
 
 class ComprehensiveTelemetry {
   private static instance: ComprehensiveTelemetry;
