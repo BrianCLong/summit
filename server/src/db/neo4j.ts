@@ -418,6 +418,9 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
 <<<<<<< HEAD
     telemetry.subsystems.database.queries.add(1);
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
     const startTime = Date.now();
     try {
       return await originalRun(cypher, params);

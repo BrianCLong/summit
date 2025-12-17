@@ -2,7 +2,10 @@
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 // @ts-nocheck
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 /**
@@ -133,10 +136,13 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
   'tenant-owner': {
     permissions: ['*'], // Full access within tenant
     inherits: ['tenant-admin'],
   },
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
   'tenant-admin': {
@@ -146,6 +152,11 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
       'role:assign', 'role:revoke',
       'audit:read', 'audit:export',
       'config:read', 'config:update',
+<<<<<<< HEAD
+    ],
+    inherits: ['supervisor'],
+  },
+=======
 <<<<<<< HEAD
     ],
     inherits: ['supervisor'],
@@ -181,6 +192,7 @@ const DEFAULT_ROLES: Record<string, { permissions: string[]; inherits?: string[]
     ],
     inherits: ['analyst'],
   },
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
   'supervisor': {

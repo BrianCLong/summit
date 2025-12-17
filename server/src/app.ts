@@ -55,6 +55,8 @@ import { abyssRouter } from './routes/abyss.js';
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
 import resourceCostsRouter from './routes/resource-costs.js';
 =======
 <<<<<<< HEAD
@@ -64,6 +66,7 @@ import queryReplayRouter from './routes/query-replay.js';
 =======
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -133,7 +136,10 @@ export const createApp = async () => {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
   app.use(safetyModeMiddleware);
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
   // Standard audit logger for basic request tracking
@@ -220,6 +226,8 @@ export const createApp = async () => {
   app.use('/api/abyss', abyssRouter);
   app.use('/api/scenarios', scenarioRouter);
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
   app.use('/api/costs', resourceCostsRouter);
 =======
 <<<<<<< HEAD
@@ -229,6 +237,7 @@ export const createApp = async () => {
 =======
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

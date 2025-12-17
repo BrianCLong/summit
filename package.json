@@ -185,6 +185,9 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
     "@playwright/test": "^1.56.1",
@@ -302,10 +305,13 @@
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
     "@opentelemetry/auto-instrumentations-node": "^0.67.2",
     "@opentelemetry/exporter-jaeger": "^2.2.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
     "@opentelemetry/sdk-node": "^0.208.0",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
     "ajv": "^8.12.0",
@@ -318,7 +324,11 @@
     "graphql-depth-limit": "^1.1.0",
 =======
 <<<<<<< HEAD
+    "graphql-depth-limit": "^1.1.0",
+=======
+<<<<<<< HEAD
     "eslint-config-prettier": "^10.1.8",
+>>>>>>> main
 >>>>>>> main
     "jest-extended": "^7.0.0",
     "jest-junit": "^16.0.0",

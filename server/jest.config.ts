@@ -42,6 +42,9 @@ const config: Config = {
         tsconfig: 'tsconfig.json',
 =======
 <<<<<<< HEAD
+        tsconfig: 'tsconfig.json',
+=======
+<<<<<<< HEAD
         tsconfig: {
             target: 'ES2022',
             module: 'ESNext',
@@ -59,6 +62,7 @@ const config: Config = {
         tsconfig: 'tsconfig.json',
 =======
         tsconfig: 'tsconfig.test.json',
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
