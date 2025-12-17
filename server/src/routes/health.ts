@@ -2,6 +2,7 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { logger } from '../utils/logger.js';
+import { getVariant, isEnabled } from '../lib/featureFlags.js';
 
 const router = Router();
 
@@ -31,7 +32,15 @@ router.get('/health', async (_req: Request, res: Response) => {
  */
 router.get('/health/detailed', async (_req: Request, res: Response) => {
   const errors: ServiceHealthError[] = [];
-  const health = {
+  const health: {
+    status: string;
+    timestamp: string;
+    uptime: number;
+    environment: string;
+    services: Record<string, string>;
+    memory: { used: number; total: number; unit: string };
+    errors: ServiceHealthError[];
+  } = {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
@@ -46,7 +55,7 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
       total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024),
       unit: 'MB',
     },
-    errors: [] as ServiceHealthError[],
+    errors: [],
   };
 
   // Check Neo4j connection
@@ -104,6 +113,20 @@ router.get('/health/detailed', async (_req: Request, res: Response) => {
 
   // Include errors in response for debugging
   health.errors = errors;
+
+  const graphQueryOptimizer = isEnabled('graph-query-optimizer', {
+    userId: 'health-check',
+  });
+  if (graphQueryOptimizer) {
+    health.services['graph-query-optimizer'] = 'enabled';
+  }
+
+  const cacheStrategy = getVariant('cache-strategy', {
+    userId: 'health-check',
+  });
+  if (cacheStrategy && cacheStrategy !== 'control') {
+    health.services['cache-strategy'] = cacheStrategy;
+  }
 
   const statusCode = health.status === 'ok' ? 200 : 503;
   res.status(statusCode).json(health);
