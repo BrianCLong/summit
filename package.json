@@ -107,6 +107,7 @@
     "ci:prod-guard": "TS_NODE_TRANSPILE_ONLY=1 node --loader ts-node/esm scripts/ci/prod-config-check.ts",
     "smoke": "node scripts/smoke-test.js",
     "smoke:ci": "NODE_ENV=test node scripts/smoke-test.js",
+    "summitctl": "node tools/summitctl/dist/index.js",
     "bootstrap": "make bootstrap",
     "metrics:report": "node scripts/maintainability-report.js",
     "metrics:report:json": "node scripts/maintainability-report.js --json",
@@ -189,6 +190,9 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -316,10 +320,13 @@
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
     "@opentelemetry/auto-instrumentations-node": "^0.67.2",
     "@opentelemetry/exporter-jaeger": "^2.2.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
     "@opentelemetry/sdk-node": "^0.208.0",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

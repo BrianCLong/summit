@@ -3,9 +3,15 @@ packages:
   - 'packages/*'
   - 'services/*'
   - 'tools/*'
+<<<<<<< HEAD
+exclude:
+  - 'archive/**'
+  - 'tools/summitctl'
+=======
   - 'client'
   - 'server'
   - 'intelgraph-mvp/ui'
   - '!**/test/**'
   - '!**/tests/**'
   - '!**/node_modules/**'
+>>>>>>> main

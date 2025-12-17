@@ -85,6 +85,10 @@
     "etag": "^1.8.1",
 =======
 <<<<<<< HEAD
+    "etag": "^1.8.1",
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
     "dotenv": "17.2.3",
     "express": "^5.1.0",
@@ -151,10 +155,14 @@
     "nodemailer": "^7.0.7",
 =======
 <<<<<<< HEAD
+    "nodemailer": "^7.0.7",
+=======
+<<<<<<< HEAD
     "nodemailer": "^6.9.16",
 =======
     "nodemailer": "^7.0.11",
     "p-limit": "^6.1.0",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
     "parquetjs": "0.11.2",
@@ -190,6 +198,8 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
     "@jest/globals": "^30.2.0",
 =======
 <<<<<<< HEAD
@@ -197,6 +207,7 @@
     "@jest-mock/express": "^3.0.0",
     "@jest/globals": "^30.2.0",
     "@opentelemetry/api": "^1.9.0",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -262,6 +273,9 @@
     "supertest": "7.1.4",
     "testcontainers": "^11.7.1",
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
     "ts-jest": "^29.4.5",
     "ts-node": "10.9.2",
 =======
