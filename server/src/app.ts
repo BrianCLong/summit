@@ -16,6 +16,7 @@ import { correlationIdMiddleware } from './middleware/correlation-id.js';
 import { featureFlagContextMiddleware } from './middleware/feature-flag-context.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { rateLimitMiddleware } from './middleware/rateLimit.js';
+import { overloadProtection } from './middleware/overloadProtection.js';
 import { httpCacheMiddleware } from './middleware/httpCache.js';
 import { safetyModeMiddleware, resolveSafetyState } from './middleware/safety-mode.js';
 import monitoringRouter from './routes/monitoring.js';
@@ -71,6 +72,9 @@ export const createApp = async () => {
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
   app.use(featureFlagContextMiddleware);
+
+  // Load Shedding / Overload Protection (Second, to reject early)
+  app.use(overloadProtection);
 
   app.use(helmet());
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
