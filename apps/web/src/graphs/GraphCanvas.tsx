@@ -12,6 +12,9 @@ import React, { useRef, useEffect, useState } from 'react'
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -97,6 +100,8 @@ export function GraphCanvas({
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
   // Calculate FPS
   useEffect(() => {
     if (!debugMode) return
@@ -119,6 +124,7 @@ export function GraphCanvas({
     return () => cancelAnimationFrame(animationFrameId)
   }, [debugMode])
 
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -181,6 +187,9 @@ export function GraphCanvas({
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -205,12 +214,15 @@ export function GraphCanvas({
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
     let simulation: Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
       case 'force':
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -237,6 +249,9 @@ export function GraphCanvas({
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -263,6 +278,8 @@ export function GraphCanvas({
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
           .force('charge', forceManyBody().strength(-300))
           .force('center', forceCenter(width / 2, height / 2))
@@ -271,6 +288,7 @@ export function GraphCanvas({
 
       case 'radial':
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -312,8 +330,13 @@ export function GraphCanvas({
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
 =======
+<<<<<<< HEAD
+          .force('charge', d3.forceManyBody().strength(-200))
+          .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
           .force('charge', forceManyBody().strength(-200))
           .force('radial', forceRadial(150, width / 2, height / 2))
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -353,7 +376,12 @@ export function GraphCanvas({
         simulation = d3
           .forceSimulation(nodes)
 =======
+<<<<<<< HEAD
+        simulation = d3
+          .forceSimulation(nodes)
+=======
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -391,8 +419,11 @@ export function GraphCanvas({
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
         simulation = forceSimulation(nodes)
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -658,6 +689,10 @@ export function GraphCanvas({
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
 =======
+<<<<<<< HEAD
+          <div className="text-xs font-medium text-muted-foreground mb-1">
+            Graph Info
+=======
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info
@@ -675,11 +710,14 @@ export function GraphCanvas({
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
           </div>
           <div className="text-xs space-y-1">
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
+<<<<<<< HEAD
+=======
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
@@ -709,6 +747,7 @@ export function GraphCanvas({
                 </div>
               </>
             )}
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

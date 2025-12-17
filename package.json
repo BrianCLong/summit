@@ -192,6 +192,9 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -322,10 +325,13 @@
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
     "@opentelemetry/auto-instrumentations-node": "^0.67.2",
     "@opentelemetry/exporter-jaeger": "^2.2.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
     "@opentelemetry/sdk-node": "^0.208.0",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
