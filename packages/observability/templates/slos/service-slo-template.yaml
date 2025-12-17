@@ -1,0 +1,323 @@
+# CompanyOS Service SLO Template
+#
+# Usage:
+# 1. Copy this file to your service's monitoring directory
+# 2. Replace all ${VARIABLE} placeholders with actual values
+# 3. Deploy to Prometheus via PrometheusRule CRD
+#
+# Variables:
+#   ${SERVICE_NAME}     - Your service name (e.g., "user-api")
+#   ${NAMESPACE}        - Kubernetes namespace
+#   ${TEAM}             - Owning team name
+#   ${AVAILABILITY_TARGET} - Availability SLO target (e.g., 99.9)
+#   ${LATENCY_THRESHOLD}   - Latency threshold in seconds (e.g., 0.5)
+#   ${LATENCY_TARGET}      - Latency SLO target percentage (e.g., 99)
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: ${SERVICE_NAME}-slos
+  namespace: ${NAMESPACE}
+  labels:
+    role: alert-rules
+    app: ${SERVICE_NAME}
+    team: ${TEAM}
+    prometheus: main
+spec:
+  groups:
+    # =========================================================================
+    # RECORDING RULES
+    # =========================================================================
+    - name: ${SERVICE_NAME}.slo.recording
+      rules:
+        # Availability SLI - Success rate over various windows
+        - record: slo:${SERVICE_NAME}:availability:ratio_rate5m
+          expr: |
+            sum(rate(http_requests_total{service="${SERVICE_NAME}",status_code!~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{service="${SERVICE_NAME}"}[5m]))
+
+        - record: slo:${SERVICE_NAME}:availability:ratio_rate30m
+          expr: |
+            sum(rate(http_requests_total{service="${SERVICE_NAME}",status_code!~"5.."}[30m]))
+            /
+            sum(rate(http_requests_total{service="${SERVICE_NAME}"}[30m]))
+
+        - record: slo:${SERVICE_NAME}:availability:ratio_rate1h
+          expr: |
+            sum(rate(http_requests_total{service="${SERVICE_NAME}",status_code!~"5.."}[1h]))
+            /
+            sum(rate(http_requests_total{service="${SERVICE_NAME}"}[1h]))
+
+        - record: slo:${SERVICE_NAME}:availability:ratio_rate6h
+          expr: |
+            sum(rate(http_requests_total{service="${SERVICE_NAME}",status_code!~"5.."}[6h]))
+            /
+            sum(rate(http_requests_total{service="${SERVICE_NAME}"}[6h]))
+
+        - record: slo:${SERVICE_NAME}:availability:ratio_rate1d
+          expr: |
+            sum(rate(http_requests_total{service="${SERVICE_NAME}",status_code!~"5.."}[1d]))
+            /
+            sum(rate(http_requests_total{service="${SERVICE_NAME}"}[1d]))
+
+        - record: slo:${SERVICE_NAME}:availability:ratio_rate3d
+          expr: |
+            sum(rate(http_requests_total{service="${SERVICE_NAME}",status_code!~"5.."}[3d]))
+            /
+            sum(rate(http_requests_total{service="${SERVICE_NAME}"}[3d]))
+
+        # Latency SLI - % of requests under threshold
+        - record: slo:${SERVICE_NAME}:latency:ratio_rate5m
+          expr: |
+            sum(rate(http_request_duration_seconds_bucket{service="${SERVICE_NAME}",le="${LATENCY_THRESHOLD}"}[5m]))
+            /
+            sum(rate(http_request_duration_seconds_count{service="${SERVICE_NAME}"}[5m]))
+
+        - record: slo:${SERVICE_NAME}:latency:ratio_rate1h
+          expr: |
+            sum(rate(http_request_duration_seconds_bucket{service="${SERVICE_NAME}",le="${LATENCY_THRESHOLD}"}[1h]))
+            /
+            sum(rate(http_request_duration_seconds_count{service="${SERVICE_NAME}"}[1h]))
+
+        - record: slo:${SERVICE_NAME}:latency:ratio_rate6h
+          expr: |
+            sum(rate(http_request_duration_seconds_bucket{service="${SERVICE_NAME}",le="${LATENCY_THRESHOLD}"}[6h]))
+            /
+            sum(rate(http_request_duration_seconds_count{service="${SERVICE_NAME}"}[6h]))
+
+        # Latency percentiles
+        - record: slo:${SERVICE_NAME}:latency:p50
+          expr: |
+            histogram_quantile(0.50,
+              sum by (le) (rate(http_request_duration_seconds_bucket{service="${SERVICE_NAME}"}[5m]))
+            )
+
+        - record: slo:${SERVICE_NAME}:latency:p95
+          expr: |
+            histogram_quantile(0.95,
+              sum by (le) (rate(http_request_duration_seconds_bucket{service="${SERVICE_NAME}"}[5m]))
+            )
+
+        - record: slo:${SERVICE_NAME}:latency:p99
+          expr: |
+            histogram_quantile(0.99,
+              sum by (le) (rate(http_request_duration_seconds_bucket{service="${SERVICE_NAME}"}[5m]))
+            )
+
+        # Error budget consumption
+        - record: slo:${SERVICE_NAME}:error_budget:consumed_ratio
+          expr: |
+            (
+              (${AVAILABILITY_TARGET}/100) - slo:${SERVICE_NAME}:availability:ratio_rate30d
+            ) / (1 - ${AVAILABILITY_TARGET}/100)
+
+    # =========================================================================
+    # ALERTING RULES
+    # =========================================================================
+    - name: ${SERVICE_NAME}.slo.alerts
+      rules:
+        # ---------------------------------------------------------------------
+        # CRITICAL: 14.4x burn rate (budget exhausted in ~2 days)
+        # ---------------------------------------------------------------------
+        - alert: ${SERVICE_NAME}AvailabilityBurnCritical
+          expr: |
+            (1 - slo:${SERVICE_NAME}:availability:ratio_rate1h) > 14.4 * (1 - ${AVAILABILITY_TARGET}/100)
+            and
+            (1 - slo:${SERVICE_NAME}:availability:ratio_rate5m) > 14.4 * (1 - ${AVAILABILITY_TARGET}/100)
+          for: 2m
+          labels:
+            severity: critical
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: availability
+            alert_type: burn_rate
+          annotations:
+            summary: "${SERVICE_NAME} availability burn rate critical"
+            description: |
+              Service ${SERVICE_NAME} is burning error budget at 14.4x the sustainable rate.
+              At this rate, the 30-day error budget will be exhausted in ~2 days.
+              Current 1h availability: {{ printf "%.4f" $value }}
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/slo-availability-critical"
+            dashboard_url: "https://grafana.companyos.dev/d/companyos-slo-overview?var-service=${SERVICE_NAME}"
+
+        - alert: ${SERVICE_NAME}LatencyBurnCritical
+          expr: |
+            (1 - slo:${SERVICE_NAME}:latency:ratio_rate1h) > 14.4 * (1 - ${LATENCY_TARGET}/100)
+            and
+            (1 - slo:${SERVICE_NAME}:latency:ratio_rate5m) > 14.4 * (1 - ${LATENCY_TARGET}/100)
+          for: 2m
+          labels:
+            severity: critical
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: latency
+            alert_type: burn_rate
+          annotations:
+            summary: "${SERVICE_NAME} latency burn rate critical"
+            description: |
+              Service ${SERVICE_NAME} latency SLO is burning error budget at 14.4x rate.
+              Current 1h latency SLI: {{ printf "%.4f" $value }}
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/slo-latency-critical"
+
+        # ---------------------------------------------------------------------
+        # HIGH: 6x burn rate (budget exhausted in ~5 days)
+        # ---------------------------------------------------------------------
+        - alert: ${SERVICE_NAME}AvailabilityBurnHigh
+          expr: |
+            (1 - slo:${SERVICE_NAME}:availability:ratio_rate6h) > 6 * (1 - ${AVAILABILITY_TARGET}/100)
+            and
+            (1 - slo:${SERVICE_NAME}:availability:ratio_rate30m) > 6 * (1 - ${AVAILABILITY_TARGET}/100)
+          for: 5m
+          labels:
+            severity: warning
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: availability
+            alert_type: burn_rate
+          annotations:
+            summary: "${SERVICE_NAME} availability burn rate high"
+            description: |
+              Service ${SERVICE_NAME} is burning error budget at 6x the sustainable rate.
+              At this rate, the 30-day error budget will be exhausted in ~5 days.
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/slo-availability-high"
+
+        - alert: ${SERVICE_NAME}LatencyBurnHigh
+          expr: |
+            (1 - slo:${SERVICE_NAME}:latency:ratio_rate6h) > 6 * (1 - ${LATENCY_TARGET}/100)
+            and
+            (1 - slo:${SERVICE_NAME}:latency:ratio_rate30m) > 6 * (1 - ${LATENCY_TARGET}/100)
+          for: 5m
+          labels:
+            severity: warning
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: latency
+            alert_type: burn_rate
+          annotations:
+            summary: "${SERVICE_NAME} latency burn rate high"
+            description: |
+              Service ${SERVICE_NAME} latency SLO is burning error budget at 6x rate.
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/slo-latency-high"
+
+        # ---------------------------------------------------------------------
+        # MEDIUM: 1x burn rate over 3 days (on track to exhaust budget)
+        # ---------------------------------------------------------------------
+        - alert: ${SERVICE_NAME}AvailabilityBurnMedium
+          expr: |
+            (1 - slo:${SERVICE_NAME}:availability:ratio_rate3d) > 1 * (1 - ${AVAILABILITY_TARGET}/100)
+            and
+            (1 - slo:${SERVICE_NAME}:availability:ratio_rate6h) > 1 * (1 - ${AVAILABILITY_TARGET}/100)
+          for: 30m
+          labels:
+            severity: warning
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: availability
+            alert_type: burn_rate
+          annotations:
+            summary: "${SERVICE_NAME} availability degraded"
+            description: |
+              Service ${SERVICE_NAME} is consuming error budget at the sustainable rate.
+              If this continues, budget will be exhausted by end of window.
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/slo-availability-medium"
+
+        # ---------------------------------------------------------------------
+        # ERROR BUDGET ALERTS
+        # ---------------------------------------------------------------------
+        - alert: ${SERVICE_NAME}ErrorBudgetExhausted
+          expr: |
+            slo:${SERVICE_NAME}:error_budget:consumed_ratio >= 1
+          for: 5m
+          labels:
+            severity: critical
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: availability
+            alert_type: budget_exhausted
+          annotations:
+            summary: "${SERVICE_NAME} error budget exhausted"
+            description: |
+              Service ${SERVICE_NAME} has consumed 100% of its 30-day error budget.
+              Feature releases should be frozen until budget recovers.
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/budget-exhausted"
+
+        - alert: ${SERVICE_NAME}ErrorBudgetLow
+          expr: |
+            slo:${SERVICE_NAME}:error_budget:consumed_ratio >= 0.75
+            and
+            slo:${SERVICE_NAME}:error_budget:consumed_ratio < 1
+          for: 30m
+          labels:
+            severity: warning
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: availability
+            alert_type: budget_low
+          annotations:
+            summary: "${SERVICE_NAME} error budget low"
+            description: |
+              Service ${SERVICE_NAME} has consumed 75%+ of its 30-day error budget.
+              Budget consumed: {{ printf "%.1f" (mul $value 100) }}%
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/budget-low"
+
+        # ---------------------------------------------------------------------
+        # ABSOLUTE THRESHOLD ALERTS
+        # ---------------------------------------------------------------------
+        - alert: ${SERVICE_NAME}AvailabilityBreach
+          expr: |
+            slo:${SERVICE_NAME}:availability:ratio_rate1h < ${AVAILABILITY_TARGET}/100
+          for: 5m
+          labels:
+            severity: critical
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: availability
+            alert_type: breach
+          annotations:
+            summary: "${SERVICE_NAME} availability below SLO"
+            description: |
+              Service ${SERVICE_NAME} availability is below ${AVAILABILITY_TARGET}% SLO target.
+              Current availability: {{ printf "%.2f" (mul $value 100) }}%
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/availability-breach"
+
+        - alert: ${SERVICE_NAME}LatencyBreach
+          expr: |
+            slo:${SERVICE_NAME}:latency:p99 > ${LATENCY_THRESHOLD}
+          for: 5m
+          labels:
+            severity: warning
+            service: ${SERVICE_NAME}
+            team: ${TEAM}
+            slo: latency
+            alert_type: breach
+          annotations:
+            summary: "${SERVICE_NAME} latency exceeds threshold"
+            description: |
+              Service ${SERVICE_NAME} P99 latency exceeds ${LATENCY_THRESHOLD}s threshold.
+              Current P99: {{ printf "%.3f" $value }}s
+            runbook_url: "https://runbooks.companyos.dev/services/${SERVICE_NAME}/latency-breach"
+
+---
+# Example instantiation for user-api service:
+#
+# apiVersion: monitoring.coreos.com/v1
+# kind: PrometheusRule
+# metadata:
+#   name: user-api-slos
+#   namespace: production
+#   labels:
+#     role: alert-rules
+#     app: user-api
+#     team: platform
+#     prometheus: main
+# spec:
+#   groups:
+#     - name: user-api.slo.recording
+#       rules:
+#         - record: slo:user_api:availability:ratio_rate5m
+#           expr: |
+#             sum(rate(http_requests_total{service="user-api",status_code!~"5.."}[5m]))
+#             /
+#             sum(rate(http_requests_total{service="user-api"}[5m]))
+#         # ... rest of rules with variables substituted
