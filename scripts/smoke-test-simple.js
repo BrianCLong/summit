@@ -243,7 +243,7 @@ class SimpleSmokeTest {
         '../client/package.json',
         '../docker-compose.dev.yml',
         '../.env.example',
-        './smoke-test.js',
+        './smoke-test.cjs',
       ];
 
       let missingPaths = [];
