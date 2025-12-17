@@ -600,7 +600,7 @@ type ${typeName}ImportResult {
 
     // Generate mappings for all supported languages
     for (const targetLocale of this.config.supportedLanguages) {
-      if (targetLocale === sourceLocale) continue;
+      if (targetLocale === sourceLocale) {continue;}
 
       mappings.push(
         {
@@ -845,7 +845,7 @@ masked_response := response if {
    */
   private async runHealthChecks(): Promise<void> {
     for (const [partnerId, partner] of this.partners) {
-      if (partner.status !== 'active') continue;
+      if (partner.status !== 'active') {continue;}
 
       try {
         const healthy = await this.checkPartnerHealth(partner);

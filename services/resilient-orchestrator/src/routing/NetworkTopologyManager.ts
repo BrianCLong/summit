@@ -63,7 +63,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
    */
   removeNode(nodeId: string): boolean {
     const node = this.nodes.get(nodeId);
-    if (!node) return false;
+    if (!node) {return false;}
 
     this.nodes.delete(nodeId);
     this.adjacencyMatrix.delete(nodeId);
@@ -86,7 +86,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
    */
   updateNodeCondition(nodeId: string, condition: NetworkCondition): void {
     const node = this.nodes.get(nodeId);
-    if (!node) return;
+    if (!node) {return;}
 
     const previousCondition = node.condition;
     node.condition = condition;
@@ -147,7 +147,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
         }
       }
 
-      if (minNode === null || minNode === destId) break;
+      if (minNode === null || minNode === destId) {break;}
 
       unvisited.delete(minNode);
 
@@ -155,7 +155,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
       const neighbors = this.adjacencyMatrix.get(minNode);
       if (neighbors) {
         for (const [neighborId, weight] of neighbors) {
-          if (!unvisited.has(neighborId)) continue;
+          if (!unvisited.has(neighborId)) {continue;}
 
           const alt = (distances.get(minNode) ?? 0) + weight;
           if (alt < (distances.get(neighborId) ?? Infinity)) {
@@ -294,13 +294,13 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
         }
       }
 
-      if (minNode === null || minNode === destId) break;
+      if (minNode === null || minNode === destId) {break;}
       unvisited.delete(minNode);
 
       const neighbors = this.adjacencyMatrix.get(minNode);
       if (neighbors) {
         for (const [neighborId, weight] of neighbors) {
-          if (!unvisited.has(neighborId) || excludeNodes.has(neighborId)) continue;
+          if (!unvisited.has(neighborId) || excludeNodes.has(neighborId)) {continue;}
 
           const alt = (distances.get(minNode) ?? 0) + weight;
           if (alt < (distances.get(neighborId) ?? Infinity)) {
@@ -319,7 +319,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
       current = previous.get(current);
     }
 
-    if (current !== sourceId || path.length === 0) return null;
+    if (current !== sourceId || path.length === 0) {return null;}
     path.unshift(sourceId);
 
     return {
@@ -349,7 +349,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
       const node = this.nodes.get(nodeId);
       if (node?.condition === 'degraded') {
         const hasMesh = node.endpoints.some(e => e.protocol === 'mesh' && e.available);
-        if (hasMesh) return 'mesh';
+        if (hasMesh) {return 'mesh';}
       }
     }
 
@@ -410,8 +410,8 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
   private calculatePriority(source: NetworkNode, dest: NetworkNode): number {
     // Higher priority for command nodes
     let priority = 0;
-    if (source.type === 'command' || dest.type === 'command') priority += 2;
-    if (source.type === 'coalition' || dest.type === 'coalition') priority += 1;
+    if (source.type === 'command' || dest.type === 'command') {priority += 2;}
+    if (source.type === 'coalition' || dest.type === 'coalition') {priority += 1;}
     return priority;
   }
 
@@ -424,7 +424,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
 
       // Connect to other nodes based on capabilities and conditions
       for (const [otherNodeId, otherNode] of this.nodes) {
-        if (nodeId === otherNodeId) continue;
+        if (nodeId === otherNodeId) {continue;}
 
         const weight = this.calculateEdgeWeight(node, otherNode);
         if (weight < Infinity) {
@@ -440,7 +440,7 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
       to.endpoints.some(te => te.protocol === fe.protocol && fe.available && te.available)
     );
 
-    if (compatibleProtocols.length === 0) return Infinity;
+    if (compatibleProtocols.length === 0) {return Infinity;}
 
     // Calculate weight based on latency and conditions
     let weight = 1;
@@ -448,8 +448,8 @@ export class NetworkTopologyManager extends EventEmitter<TopologyEvents> {
     const minLatency = Math.min(...compatibleProtocols.map(e => e.latencyMs));
     weight += minLatency / 100;
 
-    if (from.condition === 'degraded' || to.condition === 'degraded') weight *= 2;
-    if (from.condition === 'satellite-only' || to.condition === 'satellite-only') weight *= 1.5;
+    if (from.condition === 'degraded' || to.condition === 'degraded') {weight *= 2;}
+    if (from.condition === 'satellite-only' || to.condition === 'satellite-only') {weight *= 1.5;}
 
     return weight;
   }
