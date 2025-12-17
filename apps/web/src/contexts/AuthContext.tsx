@@ -24,30 +24,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check for stored auth token
-    const token = localStorage.getItem('auth_token')
-    if (token) {
-      // Fetch user data
-      fetchCurrentUser()
-    } else {
-      setLoading(false)
+    let isMounted = true
+
+    const restoreSession = async () => {
+      await fetchCurrentUser(() => isMounted)
+    }
+
+    restoreSession()
+
+    return () => {
+      isMounted = false
     }
   }, [])
 
-  const fetchCurrentUser = async () => {
+  const fetchCurrentUser = async (isMountedRef: () => boolean = () => true) => {
+    const token = localStorage.getItem('auth_token')
+
     try {
-      const response = await fetch('/users/me')
+      const response = await fetch('/users/me', {
+        credentials: 'include',
+        headers: token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : undefined,
+      })
+      if (!isMountedRef()) {
+        return
+      }
       if (response.ok) {
         const userData = await response.json()
         setUser(userData)
-      } else {
+      } else if (
+        token &&
+        (response.status === 401 || response.status === 403)
+      ) {
         localStorage.removeItem('auth_token')
       }
     } catch (error) {
-      console.error('Failed to fetch current user:', error)
-      localStorage.removeItem('auth_token')
+      if (isMountedRef()) {
+        console.error('Failed to fetch current user:', error)
+      }
     } finally {
-      setLoading(false)
+      if (isMountedRef()) {
+        setLoading(false)
+      }
     }
   }
 
@@ -58,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
 
@@ -77,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/auth/logout', { method: 'POST' })
+      await fetch('/auth/logout', { method: 'POST', credentials: 'include' })
     } catch (error) {
       console.error('Logout error:', error)
     } finally {

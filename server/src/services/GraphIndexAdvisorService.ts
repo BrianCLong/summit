@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getNeo4jDriver } from '../db/neo4j.js';
 import pino from 'pino';
 

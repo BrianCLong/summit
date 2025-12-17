@@ -43,7 +43,8 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
-import { userHasPermission } from '../security/permissions.js';
+import { secretsService } from './SecretsService.js';
+import { SECRETS } from '../config/secretRefs.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
 
@@ -91,6 +92,7 @@ interface User {
   lastName?: string;
   fullName?: string;
   role: string;
+  defaultTenantId?: string;
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
@@ -111,6 +113,7 @@ interface DatabaseUser {
   first_name?: string;
   last_name?: string;
   role: string;
+  default_tenant_id?: string;
   is_active: boolean;
   last_login?: Date;
   created_at: Date;
@@ -158,6 +161,53 @@ interface TokenPair {
   token: string;
   refreshToken: string;
 }
+
+/**
+ * Role-based permission mappings for RBAC enforcement
+ *
+ * Permissions follow the pattern: `resource:action`
+ *
+ * @constant
+ * @type {Record<string, string[]>}
+ *
+ * @example
+ * // Available roles and their permissions:
+ * // - ADMIN: '*' (all permissions)
+ * // - ANALYST: investigation, entity, relationship, tag CRUD + graph + AI
+ * // - VIEWER: read-only access to investigations, entities, relationships, tags, graph
+ */
+const ROLE_PERMISSIONS: Record<string, string[]> = {
+  ADMIN: [
+    '*', // Admin has all permissions
+  ],
+  ANALYST: [
+    'investigation:create',
+    'investigation:read',
+    'investigation:update',
+    'entity:create',
+    'entity:read',
+    'entity:update',
+    'entity:delete',
+    'relationship:create',
+    'relationship:read',
+    'relationship:update',
+    'relationship:delete',
+    'tag:create',
+    'tag:read',
+    'tag:delete',
+    'graph:read',
+    'graph:export',
+    'ai:request',
+  ],
+  VIEWER: [
+    'investigation:read',
+    'entity:read',
+    'relationship:read',
+    'tag:read',
+    'graph:read',
+    'graph:export',
+  ],
+};
 
 /**
  * Authentication and Authorization Service
@@ -248,6 +298,16 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
+
+      // Auto-assign to default tenant if configured or just 'global'
+      // This ensures the new user has at least one tenant membership
+      await client.query(
+        `INSERT INTO user_tenants (user_id, tenant_id, roles)
+         VALUES ($1, 'global', $2)
+         ON CONFLICT DO NOTHING`,
+        [user.id, [user.role]]
+      );
+
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
@@ -360,8 +420,10 @@ export class AuthService {
       role: user.role,
     };
 
+    const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+
     // @ts-ignore - jwt.sign overload mismatch
-    const token = jwt.sign(tokenPayload, config.jwt.secret, {
+    const token = jwt.sign(tokenPayload, jwtSecret, {
       expiresIn: config.jwt.expiresIn,
     });
 
@@ -401,7 +463,8 @@ export class AuthService {
     try {
       if (!token) return null;
 
-      const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
+      const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+      const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
 
       // Check if token is blacklisted
       const blacklistCheck = await this.pool.query(
@@ -603,7 +666,11 @@ export class AuthService {
    * ```
    */
   hasPermission(user: User | null, permission: string): boolean {
-    return userHasPermission(user, permission);
+    if (!user || !user.role) return false;
+    const userPermissions = ROLE_PERMISSIONS[user.role.toUpperCase()];
+    if (!userPermissions) return false;
+    if (userPermissions.includes('*')) return true; // Admin or super role
+    return userPermissions.includes(permission);
   }
 
   /**
@@ -625,6 +692,7 @@ export class AuthService {
       lastName: user.last_name,
       fullName: `${user.first_name} ${user.last_name}`,
       role: user.role,
+      defaultTenantId: user.default_tenant_id,
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,

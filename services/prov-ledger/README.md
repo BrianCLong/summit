@@ -48,6 +48,22 @@ Development mode with hot-reload:
 npm run dev
 ```
 
+### CLI helper
+
+`provctl` offers offline utilities for local development:
+
+```bash
+# ingest evidence from a file
+npx provctl ingest ./testdata/evidence-1.txt
+
+# create a claim that references evidence ids
+npx provctl claim --evidence evidence_123,evidence_456 --assertion '{"summary":"analysis"}'
+
+# export + verify a manifest offline
+npx provctl export --claim claim_123 --out ./manifest.json
+npx provctl verify ./manifest.json
+```
+
 Production build and start:
 ```bash
 npm run build
@@ -66,7 +82,7 @@ POLICY_DRY_RUN=false                # Dry-run mode for policy enforcement
 
 ## API Reference
 
-The service provides both **REST** and **GraphQL** APIs for flexibility.
+The service exposes signed REST endpoints for evidence ingest, claim linking, manifest export, and verification. The legacy GraphQL surface is disabled in this build.
 
 ### Authentication
 
