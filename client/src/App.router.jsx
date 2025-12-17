@@ -41,6 +41,7 @@ import {
   Assessment,
   Settings,
   RocketLaunch,
+  PendingActions,
 } from '@mui/icons-material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
@@ -85,18 +86,28 @@ const OrchestratorDashboard = React.lazy(() =>
 const AdminDashboard = React.lazy(() =>
   import('./components/admin/AdminDashboard')
 );
+const ApprovalsPage = React.lazy(() =>
+  import('./features/approvals/ApprovalsPage')
+);
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
 
 // Navigation items
 const ADMIN = 'ADMIN';
+const APPROVER_ROLES = [ADMIN, 'SECURITY_ADMIN', 'OPERATIONS', 'SAFETY'];
 const navigationItems = [
   { path: '/dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { path: '/investigations', label: 'Timeline', icon: <Search /> },
   { path: '/graph', label: 'Graph Explorer', icon: <Timeline /> },
   { path: '/copilot', label: 'AI Copilot', icon: <Psychology /> },
   { path: '/orchestrator', label: 'Orchestrator', icon: <RocketLaunch /> },
+  {
+    path: '/approvals',
+    label: 'Approvals',
+    icon: <PendingActions />,
+    roles: APPROVER_ROLES,
+  },
   { path: '/threats', label: 'Threat Assessment', icon: <Assessment /> },
   { path: '/disclosures', label: 'Disclosures', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
@@ -679,6 +690,9 @@ function MainLayout() {
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
+              <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
+                <Route path="/approvals" element={<ApprovalsPage />} />
+              </Route>
               <Route element={<ProtectedRoute roles={['ADMIN']} />}>
                 <Route path="/system" element={<AdminDashboard />} />
                 <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
@@ -732,10 +746,15 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Router IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
+    // eslint-disable-next-line no-console
     console.log('✅ Apollo GraphQL client initialized');
+    // eslint-disable-next-line no-console
     console.log('✅ React Router navigation enabled');
   }, []);
 

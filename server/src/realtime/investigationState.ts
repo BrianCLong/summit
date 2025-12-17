@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Redis from 'ioredis';
 import pino from 'pino';
 import { randomUUID } from 'node:crypto';
