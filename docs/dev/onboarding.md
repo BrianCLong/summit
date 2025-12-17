@@ -6,8 +6,6 @@ Welcome to the **Summit / IntelGraph / Maestro** platform. This guide will get y
 
 The fastest way to get started is using the `make` commands defined in the root `Makefile`.
 
-> **See also**: [DEV_EXPERIENCE_FAST_LANE.md](./DEV_EXPERIENCE_FAST_LANE.md) for canonical commands and workflows.
-
 ### Prerequisites
 
 - **Node.js**: v20+
@@ -17,36 +15,36 @@ The fastest way to get started is using the `make` commands defined in the root 
 
 ### 1. Bootstrap the Environment
 
-Initialize dependencies and configuration:
+Run a single bootstrap to install and scaffold everything:
 
 ```bash
-make bootstrap
+make dev-setup
 ```
 
-This command will:
-- Install Node.js dependencies (`pnpm install`).
-- Set up Python virtual environments.
-- Create `.env` files from examples.
+What it does (no extra steps needed): installs Node dependencies, sets up Python venvs, and copies `.env` templates.
 
 ### 2. Start Services
 
 Spin up the local development stack:
 
 ```bash
-make up
+make dev-run
 ```
 
-This starts:
-- **Server**: Node.js/Express (port 4000)
-- **Client**: Vite/React (port 3000)
-- **Infrastructure**: Postgres, Neo4j, Redis (via Docker Compose)
+You will get the server on port 4000, client on 5173, and data services via Docker Compose.
 
 ### 3. Verify Setup
 
 Run the smoke tests to ensure everything is working:
 
 ```bash
-make smoke
+make dev-test
+```
+
+If you are trialing the AI refactor tooling, you can also dry-run prompts without writing changes:
+
+```bash
+pnpm ts-node scripts/ai/run-refactor.ts --dry-run
 ```
 
 ## 🤖 Agent Roles

@@ -2,7 +2,7 @@
 # Multi-stage build for minimal attack surface and security hardening
 # Version: 1.0.0
 
-FROM python:3.12-slim as base
+FROM python:3.14-slim as base
 
 # Security hardening - create non-root user
 RUN groupadd -r sandbox && \
@@ -47,7 +47,7 @@ RUN echo "127.0.0.1 localhost" > /etc/hosts && \
     echo "::1 localhost" >> /etc/hosts
 
 # Final stage - minimal runtime
-FROM python:3.12-slim as runtime
+FROM python:3.14-slim as runtime
 
 # Copy security configurations and user setup
 COPY --from=base /etc/passwd /etc/passwd

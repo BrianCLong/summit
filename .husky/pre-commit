@@ -1,48 +1,56 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# ==============================================================================
-# Pre-commit hook - FAST checks only (< 5 seconds target)
-#
-# This hook is designed to be fast. Slow checks (tests, typecheck, screenshots)
-# are intentionally NOT run here. Use 'make ci-fast' before pushing.
-#
-# See docs/dev/DEV_EXPERIENCE_FAST_LANE.md for details.
-# ==============================================================================
+LOG_FILE="git-hook.log"
 
-echo "🔒 Pre-commit: Running fast checks..."
+log() {
+  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $1" >> "$LOG_FILE"
+  echo "$1"
+}
 
-# 1. Secret scanning (fast - only checks staged files)
-# Run gitleaks if available (preferred)
+log "🔒 Running pre-commit checks..."
+
+# Run custom secret scanner
+log "🔍 Running custom secret scanner..."
+if [ -f "scripts/scan_secrets.py" ]; then
+    python3 scripts/scan_secrets.py || {
+      log "❌ Secrets detected by custom scanner!"
+      exit 1
+    }
+fi
+
+# Run gitleaks if available
 if command -v gitleaks >/dev/null 2>&1; then
-  echo "🔍 Scanning for secrets..."
+  log "🔍 Scanning for secrets with gitleaks..."
   gitleaks protect --staged --verbose || {
-    echo "❌ Secret detected! Remove sensitive data before committing."
-    exit 1
-  }
-# Fallback to custom scanner
-elif [ -f "scripts/scan_secrets.py" ]; then
-  python3 scripts/scan_secrets.py || {
-    echo "❌ Secrets detected by scanner!"
+    log "❌ Secret detected by gitleaks!"
     exit 1
   }
 fi
 
-# 2. Lint-staged (fast - only checks staged files)
-echo "🔍 Running lint-staged..."
-pnpm exec lint-staged || {
-  echo "❌ Lint-staged failed. Run 'make format' to auto-fix."
+# Run typecheck
+log "🔍 Running strict typechecks..."
+npm run typecheck || {
+  log "❌ Typecheck failed."
   exit 1
 }
 
-echo "✅ Pre-commit checks passed!"
+# Run lint-staged
+log "🔍 Running lint-staged..."
+pnpm exec lint-staged || {
+  log "❌ Lint-staged failed."
+  exit 1
+}
 
-# ==============================================================================
-# NOTE: Screenshot generation has been moved to CI.
-#
-# If you need to generate screenshots locally, run:
-#   npx tsx server/scripts/generate-screenshots.ts
-#
-# This change keeps commits fast while ensuring screenshots are still generated
-# in the CI pipeline before deployment.
-# ==============================================================================
+# Run screenshots (robust)
+log "📸 Generating screenshots..."
+CMD="npx tsx server/scripts/generate-screenshots.ts"
+
+# Use timeout if available, otherwise rely on script's internal timeout
+if command -v timeout >/dev/null 2>&1; then
+  timeout 35s $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
+else
+  $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
+fi
+
+log "✅ All checks passed!"
