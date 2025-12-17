@@ -1,0 +1,88 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "type": "entity.created",
+    "source": "intelligence-platform",
+    "timestamp": 1700000000000,
+    "data": {
+      "entityId": "person-001",
+      "entityType": "Person",
+      "name": "John Doe",
+      "attributes": {
+        "nationality": "USA",
+        "dateOfBirth": "1980-01-15"
+      }
+    },
+    "metadata": {
+      "version": "1.0.0",
+      "userId": "analyst-001",
+      "tenantId": "tenant-001"
+    },
+    "provenance": {
+      "policyTags": ["PII", "SENSITIVE"],
+      "classification": "CONFIDENTIAL",
+      "source": "intelligence-platform"
+    }
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "type": "relationship.created",
+    "source": "intelligence-platform",
+    "timestamp": 1700000060000,
+    "data": {
+      "relationshipId": "rel-001",
+      "fromEntityId": "person-001",
+      "toEntityId": "org-001",
+      "relationshipType": "WORKS_FOR",
+      "attributes": {
+        "startDate": "2020-01-01",
+        "position": "Senior Analyst"
+      }
+    },
+    "metadata": {
+      "version": "1.0.0",
+      "userId": "analyst-001",
+      "tenantId": "tenant-001",
+      "correlationId": "550e8400-e29b-41d4-a716-446655440001"
+    },
+    "provenance": {
+      "policyTags": ["RELATIONAL_DATA"],
+      "classification": "CONFIDENTIAL",
+      "source": "intelligence-platform"
+    }
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440003",
+    "type": "analytics.completed",
+    "source": "copilot-service",
+    "timestamp": 1700000120000,
+    "data": {
+      "analysisId": "analysis-001",
+      "entityId": "person-001",
+      "analysisType": "risk-assessment",
+      "results": {
+        "riskScore": 0.45,
+        "confidence": 0.87,
+        "factors": ["employment", "travel-history"]
+      }
+    },
+    "metadata": {
+      "version": "1.0.0",
+      "userId": "system",
+      "tenantId": "tenant-001",
+      "causationId": "550e8400-e29b-41d4-a716-446655440001"
+    },
+    "provenance": {
+      "policyTags": ["AI_GENERATED", "ANALYTICS"],
+      "classification": "CONFIDENTIAL",
+      "source": "copilot-service",
+      "transformations": [
+        {
+          "operation": "ml-inference",
+          "timestamp": 1700000115000,
+          "userId": "system"
+        }
+      ]
+    }
+  }
+]
