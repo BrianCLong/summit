@@ -1,0 +1,20 @@
+{
+  "name": "@ga-graphai/dth",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "dth": "./src/cli.js"
+  },
+  "exports": {
+    ".": "./src/index.js",
+    "./cli": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0",
+    "toml": "^3.0.0"
+  }
+}
