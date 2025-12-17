@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
 import { cfg } from '../config.js';
+import QuotaManager from '../lib/resources/quota-manager.js';
 
 interface RateLimitConfig {
   windowMs: number;
@@ -11,7 +12,6 @@ interface RateLimitConfig {
 /**
  * Rate limiting middleware.
  * Prioritizes authenticated user limits over IP limits.
- * Enforces tenant-specific quotas where applicable.
  */
 export const rateLimitMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   // Skip if it's a health check (usually handled before, but safe to check)
@@ -27,20 +27,16 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
   // @ts-ignore - req.user is populated by auth middleware
   const user = req.user;
 
-  // @ts-ignore - req.user is populated by auth middleware
-  const tenantId = user?.tenant_id || user?.tenantId;
-
   if (user) {
+    key = `user:${user.id || user.sub}`;
+    // Dynamic tier-based limit
+    // @ts-ignore - tenantId usually available on user or context
+    const tenantId = user.tenantId || req.headers['x-tenant-id'];
     if (tenantId) {
-      // Tenant-scoped rate limiting
-      key = `tenant:${tenantId}:user:${user.id || user.sub}`;
-      // In a real implementation, we would fetch the tenant's tier and set limit accordingly
-      // For now, we apply the authenticated user limit
-      limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+        const quota = QuotaManager.getQuotaForTenant(tenantId);
+        limit = quota.requestsPerMinute; // Assuming window is 1 minute, else adjust
     } else {
-      key = `user:${user.id || user.sub}`;
-      // Higher limit for authenticated users
-      limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
+        limit = cfg.RATE_LIMIT_MAX_AUTHENTICATED;
     }
   } else {
     key = `ip:${req.ip}`;
