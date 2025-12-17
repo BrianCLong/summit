@@ -41,16 +41,16 @@ mt-health: ## Check merge train health metrics
 	@echo "$(YELLOW)=== Merge Train: Health Check ===$(RESET)"
 	@echo ""
 	@echo "$(GREEN)Open PRs:$(RESET)"
-	@gh pr list --state open --limit 500 --json number | jq 'length'
+	@gh pr list --state open --limit 1000 --json number | jq 'length'
 	@echo ""
 	@echo "$(GREEN)Conflicting PRs:$(RESET)"
-	@gh pr list --state open --limit 500 --json number,mergeable | jq '[.[] | select(.mergeable == "CONFLICTING")] | length'
+	@gh pr list --state open --limit 1000 --json number,mergeable | jq '[.[] | select(.mergeable == "CONFLICTING")] | length'
 	@echo ""
 	@echo "$(GREEN)Average PR age (days):$(RESET)"
-	@gh pr list --state open --limit 500 --json createdAt,number | jq 'map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length' | awk '{printf "%.1f\n", $$1}'
+	@gh pr list --state open --limit 1000 --json createdAt,number | jq 'map((now - (.createdAt | fromdateiso8601)) / 86400) | add / length' | awk '{printf "%.1f\n", $$1}'
 	@echo ""
 	@echo "$(GREEN)Merges this week:$(RESET)"
-	@gh pr list --state merged --search "merged:>=$$(date -d '7 days ago' +%Y-%m-%d 2>/dev/null || date -v-7d +%Y-%m-%d)" --limit 500 --json number | jq 'length'
+	@gh pr list --state merged --search "merged:>=$$(date -d '7 days ago' +%Y-%m-%d 2>/dev/null || date -v-7d +%Y-%m-%d)" --limit 1000 --json number | jq 'length'
 	@echo ""
 	@echo "$(GREEN)PRs ready to merge (green CI, no conflicts):$(RESET)"
 	@gh pr list --state open --limit 50 --json number,mergeable,statusCheckRollup | \
@@ -59,12 +59,12 @@ mt-health: ## Check merge train health metrics
 mt-close-stale: ## Close stale draft PRs (>30 days)
 	@echo "$(YELLOW)=== Merge Train: Close Stale Drafts ===$(RESET)"
 	@echo "$(GREEN)Finding drafts older than 30 days...$(RESET)"
-	@gh pr list --state open --draft --limit 500 --json number,createdAt,title | \
+	@gh pr list --state open --draft --limit 1000 --json number,createdAt,title | \
 		jq '.[] | select((.createdAt | fromdateiso8601) < (now - 2592000)) | {number, title, age_days: ((now - (.createdAt | fromdateiso8601)) / 86400 | floor)}'
 	@echo ""
 	@read -p "Close these stale drafts? (y/N) " confirm && [ "$$confirm" = "y" ] || exit 0
 	@echo "$(GREEN)Closing stale drafts...$(RESET)"
-	@gh pr list --state open --draft --limit 500 --json number,createdAt | \
+	@gh pr list --state open --draft --limit 1000 --json number,createdAt | \
 		jq -r '.[] | select((.createdAt | fromdateiso8601) < (now - 2592000)) | .number' | \
 		xargs -I {} gh pr close {} --comment "Closing stale draft PR (>30 days). Reopen if still needed."
 	@echo "$(GREEN)✓ Stale drafts closed$(RESET)"

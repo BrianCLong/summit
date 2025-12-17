@@ -13,7 +13,11 @@ const config = {
     '^dompurify$': '<rootDir>/__mocks__/dompurify.js',
   },
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      tsconfig: {
+        jsx: 'react-jsx'
+      }
+    }],
     '^.+\\.(js|jsx)$': 'babel-jest', // Assuming you might have some JS/JSX files
   },
   testMatch: [
