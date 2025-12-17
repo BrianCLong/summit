@@ -14,8 +14,13 @@
   },
   "dependencies": {
     "@summit/extensions": "workspace:*",
+<<<<<<< HEAD
+    "@summit/i18n": "workspace:*",
+    "@summit/graph-ai-core": "workspace:*",
+=======
     "@intelgraph/i18n": "workspace:*",
     "@intelgraph/graph-ai-core": "workspace:*",
+>>>>>>> main
     "zod": "^3.22.4",
     "uuid": "^9.0.0"
   },
