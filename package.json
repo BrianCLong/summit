@@ -120,6 +120,8 @@
     "security:lint": "eslint --config .eslintrc.security.cjs 'server/src/**/*.{js,ts}' --max-warnings 0",
     "security:scan": "pnpm run security:audit && pnpm run security:lint",
     "security:outdated": "pnpm outdated",
+    "sbom": "bash scripts/generate-sbom.sh . sbom.json",
+    "verify:deps": "pnpm audit --audit-level=critical",
     "drill:run": "npx tsx scripts/security/run-drill.ts",
     "drill:all": "npx tsx scripts/security/run-drill.ts --all --env local --report",
     "drill:dry-run": "npx tsx scripts/security/run-drill.ts --all --dry-run",
