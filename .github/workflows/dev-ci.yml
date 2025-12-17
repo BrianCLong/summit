@@ -21,7 +21,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - run: pnpm -v && node -v
 
   lint:
@@ -32,7 +31,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm run lint
 
@@ -44,7 +42,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm run typecheck
 
@@ -62,7 +59,6 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 20, cache: 'pnpm' }
       - uses: pnpm/action-setup@v4
-        with: { version: 9 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm run test -- --ci --reporters=default --reporters=jest-junit || pnpm run test:ci || true
       - uses: actions/upload-artifact@v4
