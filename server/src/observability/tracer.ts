@@ -5,7 +5,7 @@
  */
 
 import { NodeSDK } from '@opentelemetry/sdk-node';
-import * as OpenTelemetryResources from '@opentelemetry/resources';
+import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -52,7 +52,7 @@ export class IntelGraphTracer {
 
     try {
       // Create resource with service metadata
-      const resource = new OpenTelemetryResources.Resource({
+      const resource = new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
         [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
         [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
@@ -104,7 +104,7 @@ export class IntelGraphTracer {
       this.initialized = true;
       logger.info('OpenTelemetry tracing initialized successfully');
     } catch (error) {
-      logger.error('Failed to initialize tracing:', error);
+      logger.error('Failed to initialize tracing:', error as any);
       // Don't throw - allow service to start without tracing
     }
   }
