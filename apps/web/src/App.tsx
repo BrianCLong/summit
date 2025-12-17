@@ -5,7 +5,7 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom'
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { TooltipProvider } from '@/components/ui/Tooltip'
 import { Layout } from '@/components/Layout'
 
@@ -35,13 +35,29 @@ const ChangelogPage = React.lazy(() => import('@/pages/ChangelogPage'))
 const SignInPage = React.lazy(() => import('@/pages/SignInPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ErrorBoundary, NotFound } from '@/components/error'
+import Explain from '@/components/Explain'
 
 function App() {
+  const [showPalette, setShowPalette] = React.useState(false);
+  const [showExplain, setShowExplain] = React.useState(false);
+
+  React.useEffect(()=>{
+    const onKey=(e:KeyboardEvent)=>{
+      if((e.key==='k' || e.key==='K') && (e.ctrlKey||e.metaKey)){
+        e.preventDefault();
+        setShowPalette(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return ()=>window.removeEventListener('keydown', onKey);
+  },[]);
+
   return (
     <ApolloProvider client={apolloClient}>
       <SocketProvider>
@@ -62,6 +78,19 @@ function App() {
                       </div>
                     }
                   >
+                    {/* Explain overlay stub */}
+                    {showPalette && (
+                       <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={()=>setShowPalette(false)}>
+                         <div className="bg-white p-4 rounded shadow-lg w-96" onClick={e=>e.stopPropagation()}>
+                           <input type="text" placeholder="Command..." className="w-full border p-2 mb-2" autoFocus />
+                           <button onClick={()=>{ setShowPalette(false); setShowExplain(true); }} className="block w-full text-left p-2 hover:bg-gray-100">
+                             Explain this view
+                           </button>
+                         </div>
+                       </div>
+                    )}
+                    {showExplain && <Explain facts={["Linked via shared IP (1.2.3.4)", "Match score: 0.98"]} />}
+
                     <Routes>
                       {/* Auth routes */}
                     <Route path="/signin" element={<SignInPage />} />
@@ -79,6 +108,12 @@ function App() {
                       <Route
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
+                      />
+
+                      {/* Narrative Intelligence */}
+                      <Route
+                        path="analysis/narrative"
+                        element={<NarrativeIntelligencePage />}
                       />
 
                       {/* Alerts */}
