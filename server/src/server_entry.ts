@@ -17,6 +17,10 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
+import {
+  startTenantHotEmbeddingsRefresh,
+  stopTenantHotEmbeddingsRefresh,
+} from './jobs/hotEmbeddingsRefresh.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
@@ -102,6 +106,7 @@ const startServer = async () => {
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
+    startTenantHotEmbeddingsRefresh();
 
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
@@ -132,6 +137,7 @@ const startServer = async () => {
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
+    stopTenantHotEmbeddingsRefresh();
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
     await Promise.allSettled([
       closeNeo4jDriver(),
