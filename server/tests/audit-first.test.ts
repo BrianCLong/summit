@@ -1,6 +1,10 @@
 
 import { auditFirstMiddleware } from '../src/middleware/audit-first.js';
 import { provenanceLedger } from '../src/provenance/ledger.js';
+<<<<<<< HEAD
+=======
+// @ts-ignore
+>>>>>>> main
 import { getMockReq, getMockRes } from '@jest-mock/express';
 
 jest.mock('../src/provenance/ledger.js', () => ({

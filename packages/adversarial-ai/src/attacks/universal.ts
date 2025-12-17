@@ -236,7 +236,7 @@ export class UniversalPerturbationAttack {
     const f: number[] = [];
 
     for (let k = 0; k < logits.length; k++) {
-      if (k === currentClass) continue;
+      if (k === currentClass) {continue;}
 
       const gradCurrent = await getGradients(input, currentClass);
       const gradK = await getGradients(input, k);
