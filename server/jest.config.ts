@@ -5,6 +5,9 @@ const config: Config = {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
+<<<<<<< HEAD
+    '<rootDir>/tests/setup/jest.setup.cjs',
+=======
     '<rootDir>/tests/setup/jest.setup.js',
     // 'jest-extended/all' is loaded via require in jest.setup.js to handle resolution issues safely
 =======
@@ -13,6 +16,7 @@ const config: Config = {
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.ts',
+>>>>>>> main
     'jest-extended/all',
 >>>>>>> main
   ],
