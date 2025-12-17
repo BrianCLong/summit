@@ -20,15 +20,13 @@ servers:
 
 tags:
   - name: Claims
-    description: Claim registration and retrieval
+    description: Claim registration
   - name: Evidence
-    description: Evidence registration with checksums
-  - name: Bundles
-    description: Disclosure bundle generation
-  - name: Provenance
-    description: Provenance chain tracking
-  - name: Verification
-    description: Hash verification utilities
+    description: Evidence registration
+  - name: Transforms
+    description: Transformation registration
+  - name: Manifests
+    description: Bundle generation and verification
   - name: Health
     description: Service health checks
 
@@ -40,7 +38,7 @@ paths:
     get:
       tags: [Health]
       summary: Health check
-      description: Returns service health status and database connectivity
+      description: Returns service health status
       security: []
       responses:
         '200':
@@ -49,75 +47,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthResponse'
-        '503':
-          description: Service is unhealthy
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthResponse'
-
-  /claims:
-    post:
-      tags: [Claims]
-      summary: Create a claim
-      description: Register a new claim with content and metadata
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateClaimRequest'
-      responses:
-        '200':
-          description: Claim created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Claim'
-        '400':
-          description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: Policy violation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PolicyError'
-
-  /claims/{id}:
-    get:
-      tags: [Claims]
-      summary: Get claim by ID
-      description: Retrieve a claim's details
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^claim_'
-      responses:
-        '200':
-          description: Claim found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Claim'
-        '404':
-          description: Claim not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
   /evidence:
     post:
       tags: [Evidence]
       summary: Register evidence
-      description: Register evidence with checksum and optional transform chain
+      description: Accepts a blob or URL + source info, license, and hash. Returns evidenceId.
       requestBody:
         required: true
         content:
@@ -125,146 +60,79 @@ paths:
             schema:
               $ref: '#/components/schemas/CreateEvidenceRequest'
       responses:
-        '200':
-          description: Evidence registered successfully
+        '201':
+          description: Evidence registered
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Evidence'
+                $ref: '#/components/schemas/EvidenceResponse'
         '400':
           description: Invalid request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: Evidence with this checksum already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal error
 
-  /evidence/{id}:
-    get:
-      tags: [Evidence]
-      summary: Get evidence by ID
-      description: Retrieve evidence details including transform chain
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^evidence_'
-      responses:
-        '200':
-          description: Evidence found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Evidence'
-        '404':
-          description: Evidence not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /bundles/{caseId}:
-    get:
-      tags: [Bundles]
-      summary: Get disclosure bundle for case
-      description: Generate a disclosure bundle manifest with hash tree and merkle root
-      parameters:
-        - name: caseId
-          in: path
-          required: true
-          schema:
-            type: string
-            pattern: '^case_'
-      responses:
-        '200':
-          description: Bundle generated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DisclosureBundle'
-        '404':
-          description: Case not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /provenance:
-    get:
-      tags: [Provenance]
-      summary: Get provenance chains
-      description: Retrieve provenance chains for a claim
-      parameters:
-        - name: claimId
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Provenance chains found
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProvenanceChain'
+  /transform:
     post:
-      tags: [Provenance]
-      summary: Create provenance chain
-      description: Register a new provenance chain for a claim
+      tags: [Transforms]
+      summary: Register transformation
+      description: Records a transformation (inputs, tool, params, outputs). Returns transformId.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateProvenanceRequest'
+              $ref: '#/components/schemas/CreateTransformRequest'
       responses:
-        '200':
-          description: Provenance chain created
+        '201':
+          description: Transformation registered
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProvenanceChain'
+                $ref: '#/components/schemas/TransformResponse'
+        '400':
+          description: Invalid request
 
-  /hash/verify:
+  /claim:
     post:
-      tags: [Verification]
-      summary: Verify content hash
-      description: Verify that content matches expected hash
+      tags: [Claims]
+      summary: Register claim
+      description: Records a claim (subject, predicate, object, evidenceRefs). Returns claimId.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/VerifyHashRequest'
+              $ref: '#/components/schemas/CreateClaimRequest'
       responses:
-        '200':
-          description: Verification result
+        '201':
+          description: Claim registered
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/VerifyHashResponse'
+                $ref: '#/components/schemas/ClaimResponse'
+        '400':
+          description: Invalid request
 
-  /export/manifest:
+  /manifest/{bundleId}:
     get:
-      tags: [Verification]
-      summary: Export manifest
-      description: Get export manifest with all claims and hash chain
+      tags: [Manifests]
+      summary: Get deterministic Merkle manifest
+      description: Returns a hash tree of inputs -> transforms -> claims.
+      parameters:
+        - name: bundleId
+          in: path
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Manifest generated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Manifest'
+                $ref: '#/components/schemas/ManifestResponse'
+        '404':
+          description: Bundle not found
 
 components:
   securitySchemes:
@@ -272,10 +140,6 @@ components:
       type: apiKey
       in: header
       name: x-authority-id
-      description: |
-        Requires two headers:
-        - x-authority-id: Authority identifier
-        - x-reason-for-access: Reason for accessing the resource
 
   schemas:
     HealthResponse:
@@ -284,307 +148,112 @@ components:
         status:
           type: string
           enum: [healthy, unhealthy]
-        timestamp:
-          type: string
-          format: date-time
-        version:
-          type: string
-        dependencies:
-          type: object
-          properties:
-            database:
-              type: string
-              enum: [healthy, unhealthy]
-
-    CreateClaimRequest:
-      type: object
-      required:
-        - content
-      properties:
-        content:
-          type: object
-          description: Claim content (arbitrary JSON)
-        signature:
-          type: string
-          description: Optional cryptographic signature
-        metadata:
-          type: object
-          description: Additional metadata
-        sourceRef:
-          type: string
-          description: Reference to source (e.g., file://path)
-        licenseId:
-          type: string
-          description: Associated license ID
-        policyLabels:
-          type: array
-          items:
-            type: string
-          description: Policy classification labels
-
-    Claim:
-      type: object
-      properties:
-        id:
-          type: string
-          pattern: '^claim_'
-        content:
-          type: object
-        hash:
-          type: string
-          description: SHA-256 hash of content
-        signature:
-          type: string
-        metadata:
-          type: object
-        sourceRef:
-          type: string
-        licenseId:
-          type: string
-        policyLabels:
-          type: array
-          items:
-            type: string
-        created_at:
-          type: string
-          format: date-time
-
-    TransformStep:
-      type: object
-      required:
-        - transformType
-        - timestamp
-        - actorId
-      properties:
-        transformType:
-          type: string
-          description: Type of transformation (e.g., ocr, redaction)
-        timestamp:
-          type: string
-          format: date-time
-        actorId:
-          type: string
-          description: ID of actor that performed transform
-        config:
-          type: object
-          description: Transform-specific configuration
+        pcl_enabled:
+          type: boolean
 
     CreateEvidenceRequest:
       type: object
       required:
-        - sourceRef
+        - source
+        - hash
       properties:
-        caseId:
+        url:
           type: string
-          description: Optional case ID to link evidence
-        sourceRef:
+          description: URL to the evidence file
+        blob:
           type: string
-          description: Reference to source file/data
-        content:
-          description: Content to compute checksum from (if checksum not provided)
-        checksum:
+          description: Base64 encoded content (optional if URL provided)
+        source:
           type: string
-          description: SHA-256 checksum (computed if not provided)
-        checksumAlgorithm:
+          description: Source identifier
+        license:
           type: string
-          default: sha256
-        contentType:
+          description: License identifier
+        hash:
           type: string
-          description: MIME type
-        fileSize:
-          type: integer
-          description: File size in bytes
-        transformChain:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransformStep'
-        licenseId:
-          type: string
-        policyLabels:
-          type: array
-          items:
-            type: string
-        metadata:
-          type: object
+          description: SHA-256 hash of the content
 
-    Evidence:
+    EvidenceResponse:
       type: object
       properties:
-        id:
+        evidenceId:
           type: string
-          pattern: '^evidence_'
-        caseId:
-          type: string
-        sourceRef:
-          type: string
-        checksum:
-          type: string
-        checksumAlgorithm:
-          type: string
-        contentType:
-          type: string
-        fileSize:
-          type: integer
-        transformChain:
-          type: array
-          items:
-            $ref: '#/components/schemas/TransformStep'
-        licenseId:
-          type: string
-        policyLabels:
-          type: array
-          items:
-            type: string
-        authorityId:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-        metadata:
-          type: object
 
-    DisclosureBundle:
-      type: object
-      properties:
-        caseId:
-          type: string
-        version:
-          type: string
-        evidence:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-              sourceRef:
-                type: string
-              checksum:
-                type: string
-              transformChain:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TransformStep'
-        hashTree:
-          type: array
-          items:
-            type: string
-          description: List of all evidence checksums
-        merkleRoot:
-          type: string
-          description: Merkle tree root hash for tamper-evidence
-        generated_at:
-          type: string
-          format: date-time
-
-    CreateProvenanceRequest:
+    CreateTransformRequest:
       type: object
       required:
-        - claimId
-        - transforms
-        - sources
-        - lineage
+        - inputs
+        - tool
+        - outputs
+        - operatorId
+      properties:
+        inputs:
+          type: array
+          items:
+            type: string
+          description: List of input Evidence/Claim IDs
+        tool:
+          type: string
+          description: Name of the tool used
+        params:
+          type: object
+          description: Parameters passed to the tool
+        outputs:
+          type: array
+          items:
+            type: string
+          description: List of output Evidence/Claim IDs (if known, or placeholders)
+        operatorId:
+          type: string
+
+    TransformResponse:
+      type: object
+      properties:
+        transformId:
+          type: string
+
+    CreateClaimRequest:
+      type: object
+      required:
+        - subject
+        - predicate
+        - object
+        - evidenceRefs
+        - confidence
+        - licenseId
+      properties:
+        subject:
+          type: string
+        predicate:
+          type: string
+        object:
+          type: string
+        evidenceRefs:
+          type: array
+          items:
+            type: string
+          description: List of supporting Evidence IDs
+        confidence:
+          type: number
+          format: float
+        licenseId:
+          type: string
+
+    ClaimResponse:
+      type: object
       properties:
         claimId:
           type: string
-        transforms:
-          type: array
-          items:
-            type: string
-        sources:
-          type: array
-          items:
-            type: string
-        lineage:
-          type: object
 
-    ProvenanceChain:
+    ManifestResponse:
       type: object
       properties:
-        id:
+        bundleId:
           type: string
-          pattern: '^prov_'
-        claim_id:
+        merkleRoot:
           type: string
-        transforms:
-          type: array
-          items:
-            type: string
-        sources:
-          type: array
-          items:
-            type: string
-        lineage:
-          type: object
-        created_at:
-          type: string
-          format: date-time
-
-    VerifyHashRequest:
-      type: object
-      required:
-        - content
-        - expectedHash
-      properties:
-        content:
-          description: Content to hash
-        expectedHash:
-          type: string
-
-    VerifyHashResponse:
-      type: object
-      properties:
-        valid:
-          type: boolean
-        expected_hash:
-          type: string
-        actual_hash:
-          type: string
-        verified_at:
-          type: string
-          format: date-time
-
-    Manifest:
-      type: object
-      properties:
-        version:
-          type: string
-        claims:
+        entries:
           type: array
           items:
             type: object
-            properties:
-              id:
-                type: string
-              hash:
-                type: string
-              transforms:
-                type: array
-                items:
-                  type: string
-        hash_chain:
-          type: string
-          description: Hash of all claim hashes
-        signature:
-          type: string
-        generated_at:
-          type: string
-          format: date-time
-
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Human-readable error message
-
-    PolicyError:
-      type: object
-      properties:
-        error:
-          type: string
-        reason:
-          type: string
-        appealPath:
-          type: string
-          description: Path to appeal policy decision
+            description: Ordered list of entries in the bundle

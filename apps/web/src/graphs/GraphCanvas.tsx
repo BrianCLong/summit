@@ -1,5 +1,25 @@
 import React, { useRef, useEffect, useState } from 'react'
+<<<<<<< HEAD
 import * as d3 from 'd3'
+=======
+// Tree-shaken D3 imports for better bundle size
+import { select } from 'd3-selection'
+import {
+  forceSimulation,
+  forceLink,
+  forceManyBody,
+  forceCenter,
+  forceCollide,
+  forceRadial,
+  forceY,
+  forceX,
+  type Simulation,
+  type SimulationNodeDatum,
+  type SimulationLinkDatum,
+} from 'd3-force'
+import { zoom } from 'd3-zoom'
+import { drag } from 'd3-drag'
+>>>>>>> main
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
@@ -14,7 +34,7 @@ interface GraphCanvasProps {
   className?: string
 }
 
-interface GraphNode extends d3.SimulationNodeDatum {
+interface GraphNode extends SimulationNodeDatum {
   id: string
   entity: Entity
   x?: number
@@ -23,7 +43,7 @@ interface GraphNode extends d3.SimulationNodeDatum {
   fy?: number | null
 }
 
-interface GraphLink extends d3.SimulationLinkDatum<GraphNode> {
+interface GraphLink extends SimulationLinkDatum<GraphNode> {
   id: string
   relationship: Relationship
   source: GraphNode
@@ -40,7 +60,36 @@ export function GraphCanvas({
 }: GraphCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
+  const [fps, setFps] = useState(0)
+  const [debugMode, setDebugMode] = useState(false)
+  const frameCountRef = useRef(0)
+  const lastTimeRef = useRef(performance.now())
 
+<<<<<<< HEAD
+=======
+  // Calculate FPS
+  useEffect(() => {
+    if (!debugMode) return
+
+    let animationFrameId: number
+
+    const renderLoop = (time: number) => {
+      frameCountRef.current++
+      if (time - lastTimeRef.current >= 1000) {
+        setFps(
+          Math.round((frameCountRef.current * 1000) / (time - lastTimeRef.current))
+        )
+        frameCountRef.current = 0
+        lastTimeRef.current = time
+      }
+      animationFrameId = requestAnimationFrame(renderLoop)
+    }
+
+    animationFrameId = requestAnimationFrame(renderLoop)
+    return () => cancelAnimationFrame(animationFrameId)
+  }, [debugMode])
+
+>>>>>>> main
   // Update dimensions on resize
   useEffect(() => {
     const updateDimensions = () => {
@@ -58,7 +107,7 @@ export function GraphCanvas({
   useEffect(() => {
     if (!svgRef.current || entities.length === 0) return
 
-    const svg = d3.select(svgRef.current)
+    const svg = select(svgRef.current)
     svg.selectAll('*').remove()
 
     const { width, height } = dimensions
@@ -83,19 +132,27 @@ export function GraphCanvas({
       }))
 
     // Create simulation based on layout type
+<<<<<<< HEAD
     let simulation: d3.Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
       case 'force':
         simulation = d3
           .forceSimulation(nodes)
+=======
+    let simulation: Simulation<GraphNode, GraphLink>
+
+    switch (layout.type) {
+      case 'force':
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(100)
           )
+<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-300))
           .force('center', d3.forceCenter(width / 2, height / 2))
           .force('collision', d3.forceCollide().radius(30))
@@ -104,45 +161,65 @@ export function GraphCanvas({
       case 'radial':
         simulation = d3
           .forceSimulation(nodes)
+=======
+          .force('charge', forceManyBody().strength(-300))
+          .force('center', forceCenter(width / 2, height / 2))
+          .force('collision', forceCollide().radius(30))
+        break
+
+      case 'radial':
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(80)
           )
+<<<<<<< HEAD
           .force('charge', d3.forceManyBody().strength(-200))
           .force('radial', d3.forceRadial(150, width / 2, height / 2))
+=======
+          .force('charge', forceManyBody().strength(-200))
+          .force('radial', forceRadial(150, width / 2, height / 2))
+>>>>>>> main
         break
 
       case 'hierarchic':
         // Simple hierarchical layout - in a real app you'd use dagre or similar
+<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
+=======
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3
-              .forceLink<GraphNode, GraphLink>(links)
+            forceLink<GraphNode, GraphLink>(links)
               .id(d => d.id)
               .distance(60)
           )
-          .force('charge', d3.forceManyBody().strength(-100))
+          .force('charge', forceManyBody().strength(-100))
           .force(
             'y',
-            d3.forceY().y(d => (d.index || 0) * 80 + 100)
+            forceY<GraphNode>().y(d => (d.index || 0) * 80 + 100)
           )
-          .force('x', d3.forceX(width / 2))
+          .force('x', forceX(width / 2))
         break
 
       default:
+<<<<<<< HEAD
         simulation = d3
           .forceSimulation(nodes)
+=======
+        simulation = forceSimulation(nodes)
+>>>>>>> main
           .force(
             'link',
-            d3.forceLink<GraphNode, GraphLink>(links).id(d => d.id)
+            forceLink<GraphNode, GraphLink>(links).id(d => d.id)
           )
-          .force('charge', d3.forceManyBody())
-          .force('center', d3.forceCenter(width / 2, height / 2))
+          .force('charge', forceManyBody())
+          .force('center', forceCenter(width / 2, height / 2))
     }
 
     // Create container groups
@@ -151,14 +228,13 @@ export function GraphCanvas({
     const nodesGroup = container.append('g').attr('class', 'nodes')
 
     // Add zoom behavior
-    const zoom = d3
-      .zoom<SVGSVGElement, unknown>()
+    const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
       .on('zoom', event => {
         container.attr('transform', event.transform)
       })
 
-    svg.call(zoom)
+    svg.call(zoomBehavior)
 
     // Draw links
     const link = linksGroup
@@ -224,8 +300,7 @@ export function GraphCanvas({
       .attr('class', 'node')
       .style('cursor', 'pointer')
       .call(
-        d3
-          .drag<SVGGElement, GraphNode>()
+        drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
             if (!event.active) simulation.alphaTarget(0.3).restart()
             d.fx = d.x
@@ -298,7 +373,7 @@ export function GraphCanvas({
 
     // Hover effects
     node.on('mouseenter', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -311,7 +386,7 @@ export function GraphCanvas({
     })
 
     node.on('mouseleave', function (event, d) {
-      d3.select(this)
+      select(this)
         .select('circle')
         .transition()
         .duration(200)
@@ -369,13 +444,44 @@ export function GraphCanvas({
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
+<<<<<<< HEAD
           <div className="text-xs font-medium text-muted-foreground mb-1">
             Graph Info
+=======
+          <div className="flex justify-between items-center mb-1 gap-2">
+            <div className="text-xs font-medium text-muted-foreground">
+              Graph Info
+            </div>
+            <button
+              onClick={() => setDebugMode(!debugMode)}
+              className="text-[10px] px-1.5 py-0.5 rounded border hover:bg-muted transition-colors"
+            >
+              {debugMode ? 'Debug: ON' : 'Debug'}
+            </button>
+>>>>>>> main
           </div>
           <div className="text-xs space-y-1">
             <div>Entities: {entities.length}</div>
             <div>Relationships: {relationships.length}</div>
             <div>Layout: {layout.type}</div>
+<<<<<<< HEAD
+=======
+            {debugMode && (
+              <>
+                <div className="border-t my-1 pt-1 border-muted" />
+                <div className="font-mono text-[10px]">FPS: {fps}</div>
+                <div className="font-mono text-[10px]">
+                  Density:{' '}
+                  {entities.length > 1
+                    ? (
+                        (2 * relationships.length) /
+                        (entities.length * (entities.length - 1))
+                      ).toFixed(4)
+                    : '0.0000'}
+                </div>
+              </>
+            )}
+>>>>>>> main
           </div>
         </div>
       </div>
