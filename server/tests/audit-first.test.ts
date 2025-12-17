@@ -7,7 +7,10 @@ import { provenanceLedger } from '../src/provenance/ledger.js';
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 // @ts-ignore
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

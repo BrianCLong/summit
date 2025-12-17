@@ -1,5 +1,19 @@
 import { test, expect } from '@playwright/test';
 
+<<<<<<< HEAD
+test.describe('Golden Path E2E', () => {
+  test('User can access the main dashboard and verify core layout', async ({ page }) => {
+    // 1. Visit Home
+    await page.goto('/');
+    await expect(page).toHaveTitle(/Maestro|IntelGraph|Platform/i);
+
+    // 2. Visit Dashboard
+    await page.goto('/dashboard');
+    await expect(page).toHaveURL(/.*dashboard/);
+
+    // 3. Take a screenshot for evidence
+    await page.screenshot({ path: 'test-results/golden-path-dashboard.png' });
+=======
 test.describe('Golden Path Workflow', () => {
   test('User can login and view dashboard', async ({ page }) => {
     // 1. Visit Home
@@ -36,5 +50,6 @@ test.describe('Golden Path Workflow', () => {
     // Check for critical UI elements
     // const nav = page.locator('nav');
     // await expect(nav).toBeVisible();
+>>>>>>> main
   });
 });

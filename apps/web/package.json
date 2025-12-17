@@ -76,9 +76,6 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
 =======
 <<<<<<< HEAD
     "@testing-library/jest-dom": "^6.9.1",
@@ -86,6 +83,12 @@
     "@testing-library/user-event": "^14.6.1",
 =======
 <<<<<<< HEAD
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -127,11 +130,14 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
     "rollup-plugin-visualizer": "^6.0.5",
 =======
 <<<<<<< HEAD
 =======
     "rollup-plugin-visualizer": "^6.0.5",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -150,6 +156,9 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

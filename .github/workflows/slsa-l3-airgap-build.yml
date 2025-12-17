@@ -55,6 +55,12 @@ on:
     tags:
       - 'airgap-v*'
 =======
+<<<<<<< HEAD
+  push:
+    tags:
+      - 'airgap-v*'
+=======
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -75,6 +81,9 @@ env:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -96,12 +105,15 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
   IMAGE_NAME_SERVER: ${{ github.repository }}/server
   IMAGE_NAME_WEB: ${{ github.repository }}/web
   BUNDLE_NAME: intelgraph-airgap-bundle
 
 jobs:
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -118,6 +130,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -189,6 +204,8 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
     steps:
       - uses: actions/checkout@v4
@@ -204,6 +221,7 @@ jobs:
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
     needs: preflight
     runs-on: ubuntu-latest
     outputs:
@@ -215,6 +233,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -240,11 +261,14 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -260,6 +284,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -345,6 +372,8 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
       - name: Build Server
         id: build
@@ -379,6 +408,7 @@ jobs:
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -390,6 +420,9 @@ jobs:
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -791,6 +824,8 @@ jobs:
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
       - name: Build Web
         id: build
@@ -842,6 +877,7 @@ jobs:
         with:
           name: airgap-bundle
           path: airgap-bundle.tar.gz
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

@@ -93,6 +93,8 @@ import { logConfigSummary } from './config/index.js';
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
     // Initialize Backup Manager
     const backupManager = new BackupManager();
     backupManager.startScheduler();
@@ -100,6 +102,7 @@ import { logConfigSummary } from './config/index.js';
     // Check Neo4j Indexes
     checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
 
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

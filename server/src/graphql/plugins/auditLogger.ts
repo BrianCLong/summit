@@ -13,7 +13,10 @@ import { provenanceLedger } from '../../provenance/ledger.js';
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 import { getAuditSystem } from '../../audit/advanced-audit-system.js';
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -58,8 +61,11 @@ const auditLoggerPlugin: ApolloServerPlugin = {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
         const requestId = ctx.request.http?.headers.get('x-request-id') || undefined;
         const correlationId = ctx.request.http?.headers.get('x-correlation-id') || undefined;
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -108,6 +114,8 @@ const auditLoggerPlugin: ApolloServerPlugin = {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
         // Log to Advanced Audit System
         try {
           getAuditSystem().recordEvent({
@@ -139,6 +147,7 @@ const auditLoggerPlugin: ApolloServerPlugin = {
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
         // Stamp to Provenance Ledger
         try {
           await provenanceLedger.appendEntry({
@@ -162,8 +171,13 @@ const auditLoggerPlugin: ApolloServerPlugin = {
               requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
               correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
 =======
+<<<<<<< HEAD
+              requestId: ctx.request.http?.headers.get('x-request-id') || undefined,
+              correlationId: ctx.request.http?.headers.get('x-correlation-id') || undefined,
+=======
               requestId,
               correlationId,
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

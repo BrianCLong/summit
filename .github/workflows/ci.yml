@@ -155,6 +155,8 @@ jobs:
         continue-on-error: true
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
       - name: Bootstrap repo (make bootstrap)
         run: make bootstrap
       - name: Cache Docker layers
@@ -189,7 +191,35 @@ jobs:
       - name: Run unit tests
 >>>>>>> main
         run: |
+<<<<<<< HEAD
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
+      - name: Bring up stack (make up)
+        run: make up
+      - name: Golden path smoke tests (API)
+        run: make smoke
+      - name: Playwright E2E tests (UI Video Recording)
+        run: npx playwright test e2e/golden-path.spec.ts
+        env:
+          CI: true
+      - name: Upload Playwright artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
+      - name: Compose logs on failure
+        if: failure()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
+      - name: Tear down stack
+        if: always()
+        run: ./scripts/run-compose.sh -f docker-compose.dev.yml down -v
+=======
           echo "TODO: add unit test commands per service/app"
+>>>>>>> main
 
   contract-conformance:
     name: Contract conformance
