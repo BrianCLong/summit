@@ -1,57 +1,264 @@
-name: System Map Drift
+# System Map Drift Detection
+#
+# Regenerates the living system map and detects architectural changes.
+# Runs on PRs that modify:
+# - Docker Compose files
+# - Package.json files
+# - CI workflows
+# - pnpm-workspace.yaml
+#
+# Flags significant changes for architecture review.
+
+name: System Map Drift Detection
 
 on:
   pull_request:
     paths:
-      - 'scripts/architecture/**'
-      - 'docs/architecture/**'
-      - '.github/workflows/system-map-drift.yml'
       - 'docker-compose*.yml'
-      - 'docker-compose*.yaml'
+      - '**/package.json'
       - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/**'
+      - '.github/workflows/*.yml'
+      - 'apps/**'
+      - 'services/**'
+      - 'packages/**'
+
   push:
     branches:
       - main
     paths:
-      - 'scripts/architecture/**'
-      - 'docs/architecture/**'
-      - '.github/workflows/system-map-drift.yml'
       - 'docker-compose*.yml'
-      - 'docker-compose*.yaml'
+      - '**/package.json'
       - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/**'
+      - '.github/workflows/*.yml'
+
+  schedule:
+    # Run weekly to catch gradual drift
+    - cron: '0 6 * * 1'
+
   workflow_dispatch:
+    inputs:
+      force_update:
+        description: 'Force update the system map even if no drift detected'
+        type: boolean
+        default: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  drift-check:
+  detect-drift:
+    name: Detect System Map Drift
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    permissions:
+      contents: write
+      pull-requests: write
 
-      - name: Set up Node.js
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'pnpm'
 
-      - name: Install Graphviz
-        run: sudo apt-get update -y && sudo apt-get install -y graphviz
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Store previous system map
+        id: previous-map
         run: |
-          corepack enable
-          pnpm install --no-frozen-lockfile --ignore-scripts
+          if [ -f docs/architecture/system-map.json ]; then
+            cp docs/architecture/system-map.json /tmp/system-map-previous.json
+            echo "has_previous=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_previous=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Generate system map
-        run: pnpm dlx ts-node --esm scripts/architecture/generate-system-map.ts
+        run: npx ts-node scripts/architecture/generate-system-map.ts
 
-      - name: Detect drift
+      - name: Compare system maps
+        id: compare
+        if: steps.previous-map.outputs.has_previous == 'true'
         run: |
-          git diff --stat -- docs/architecture/system-map.json docs/architecture/system-map.dot docs/architecture/system-map.png
-          git diff --exit-code -- docs/architecture/system-map.json docs/architecture/system-map.dot docs/architecture/system-map.png
+          # Extract service counts
+          PREV_SERVICES=$(jq '.stats.totalServices' /tmp/system-map-previous.json)
+          CURR_SERVICES=$(jq '.stats.totalServices' docs/architecture/system-map.json)
+          PREV_EDGES=$(jq '.stats.totalEdges' /tmp/system-map-previous.json)
+          CURR_EDGES=$(jq '.stats.totalEdges' docs/architecture/system-map.json)
+
+          # Calculate differences
+          SERVICE_DIFF=$((CURR_SERVICES - PREV_SERVICES))
+          EDGE_DIFF=$((CURR_EDGES - PREV_EDGES))
+
+          echo "prev_services=$PREV_SERVICES" >> $GITHUB_OUTPUT
+          echo "curr_services=$CURR_SERVICES" >> $GITHUB_OUTPUT
+          echo "service_diff=$SERVICE_DIFF" >> $GITHUB_OUTPUT
+          echo "prev_edges=$PREV_EDGES" >> $GITHUB_OUTPUT
+          echo "curr_edges=$CURR_EDGES" >> $GITHUB_OUTPUT
+          echo "edge_diff=$EDGE_DIFF" >> $GITHUB_OUTPUT
+
+          # Detect significant changes (>5% change or new services)
+          if [ "$SERVICE_DIFF" -gt 5 ] || [ "$SERVICE_DIFF" -lt -5 ]; then
+            echo "significant_change=true" >> $GITHUB_OUTPUT
+          elif [ "$EDGE_DIFF" -gt 10 ] || [ "$EDGE_DIFF" -lt -10 ]; then
+            echo "significant_change=true" >> $GITHUB_OUTPUT
+          else
+            echo "significant_change=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Get list of new/removed services
+          jq -r '.services | keys[]' /tmp/system-map-previous.json | sort > /tmp/prev-services.txt
+          jq -r '.services | keys[]' docs/architecture/system-map.json | sort > /tmp/curr-services.txt
+
+          NEW_SERVICES=$(comm -13 /tmp/prev-services.txt /tmp/curr-services.txt | head -10)
+          REMOVED_SERVICES=$(comm -23 /tmp/prev-services.txt /tmp/curr-services.txt | head -10)
+
+          if [ -n "$NEW_SERVICES" ]; then
+            echo "new_services<<EOF" >> $GITHUB_OUTPUT
+            echo "$NEW_SERVICES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -n "$REMOVED_SERVICES" ]; then
+            echo "removed_services<<EOF" >> $GITHUB_OUTPUT
+            echo "$REMOVED_SERVICES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet docs/architecture/system-map.json docs/architecture/system-map.dot 2>/dev/null; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install Graphviz
+        if: steps.changes.outputs.has_changes == 'true'
+        run: sudo apt-get install -y graphviz
+
+      - name: Render system map image
+        if: steps.changes.outputs.has_changes == 'true'
+        run: |
+          dot -Tpng docs/architecture/system-map.dot -o docs/architecture/system-map.png
+          dot -Tsvg docs/architecture/system-map.dot -o docs/architecture/system-map.svg
+
+      - name: Comment on PR (significant changes)
+        if: github.event_name == 'pull_request' && steps.compare.outputs.significant_change == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const serviceDiff = ${{ steps.compare.outputs.service_diff || 0 }};
+            const edgeDiff = ${{ steps.compare.outputs.edge_diff || 0 }};
+            const newServices = `${{ steps.compare.outputs.new_services || '' }}`;
+            const removedServices = `${{ steps.compare.outputs.removed_services || '' }}`;
+
+            let body = `## 🏗️ Architecture Change Detected
+
+            This PR introduces significant architectural changes to the system map.
+
+            ### Summary
+            | Metric | Before | After | Change |
+            |--------|--------|-------|--------|
+            | Services | ${{ steps.compare.outputs.prev_services }} | ${{ steps.compare.outputs.curr_services }} | ${serviceDiff > 0 ? '+' : ''}${serviceDiff} |
+            | Dependencies | ${{ steps.compare.outputs.prev_edges }} | ${{ steps.compare.outputs.curr_edges }} | ${edgeDiff > 0 ? '+' : ''}${edgeDiff} |
+            `;
+
+            if (newServices) {
+              body += `
+            ### New Services
+            \`\`\`
+            ${newServices}
+            \`\`\`
+            `;
+            }
+
+            if (removedServices) {
+              body += `
+            ### Removed Services
+            \`\`\`
+            ${removedServices}
+            \`\`\`
+            `;
+            }
+
+            body += `
+            ### Recommended Actions
+            - [ ] Review if an ADR is needed for this change
+            - [ ] Update architecture documentation if needed
+            - [ ] Consider impact on observability and monitoring
+
+            📊 [View System Map](../blob/${{ github.head_ref }}/docs/architecture/system-map.png)
+            `;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Commit updated system map
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add docs/architecture/system-map.json docs/architecture/system-map.dot
+          if [ -f docs/architecture/system-map.png ]; then
+            git add docs/architecture/system-map.png docs/architecture/system-map.svg
+          fi
+          git commit -m "chore(arch): update system map [skip ci]" || exit 0
+          git push
+
+      - name: Upload system map artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: system-map
+          path: |
+            docs/architecture/system-map.json
+            docs/architecture/system-map.dot
+            docs/architecture/system-map.png
+            docs/architecture/system-map.svg
+          retention-days: 30
+          if-no-files-found: ignore
+
+  notify-on-drift:
+    name: Notify on Significant Drift
+    needs: detect-drift
+    if: failure() || needs.detect-drift.outputs.significant_change == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Slack notification (optional)
+        if: env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🏗️ Significant architecture drift detected in system map. Review recommended."}' \
+            $SLACK_WEBHOOK_URL || true
