@@ -9,6 +9,7 @@ export * from './types/index.js';
 // Classifiers
 export { RandomForestClassifier, type RandomForestConfig } from './classifiers/random-forest.js';
 export { GradientBoostingClassifier, type GradientBoostingConfig } from './classifiers/gradient-boosting.js';
+export { SVMClassifier, SVMRegressor, type SVMConfig } from './classifiers/svm.js';
 
 // Regressors
 export { LinearRegression, RidgeRegression, LassoRegression, type RegressionConfig } from './regressors/linear-regression.js';
