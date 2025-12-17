@@ -8,6 +8,8 @@ import {
 import { LifecycleManager } from '../services/lifecycle-listeners.js';
 import { webhookService, CreateWebhookSchema, UpdateWebhookSchema } from '../webhooks/webhook.service.js';
 import { z } from 'zod/v4';
+import { logger, metrics, tracer } from '../observability/index.js';
+import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 
 const router = Router();
 
@@ -138,25 +140,35 @@ router.post(
   body('pull_request').optional().isObject(),
   body('issue').optional().isObject(),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    return tracer.trace('webhook.receive', async (span) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'Validation failed' });
+        return res.status(400).json({ errors: errors.array() });
+      }
 
-    try {
-      const { action, pull_request, issue, repository } = req.body;
-
-      console.log(`Received GitHub webhook: ${action}`, {
-        pr: pull_request?.number,
-        issue: issue?.number,
-        repo: repository?.name,
+      span.setAttributes({
+        'webhook.provider': 'github',
+        'webhook.event': req.body.action
       });
 
-      // Handle PR events
-      if (
-        pull_request &&
-        (action === 'opened' || action === 'closed' || action === 'merged')
-      ) {
+      try {
+        const { action, pull_request, issue, repository } = req.body;
+
+        logger.info(`Received GitHub webhook: ${action}`, {
+          pr: pull_request?.number,
+          issue: issue?.number,
+          repo: repository?.name,
+          provider: 'github'
+        });
+
+        metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'received', provider: 'github' });
+
+        // Handle PR events
+        if (
+          pull_request &&
+          (action === 'opened' || action === 'closed' || action === 'merged')
+        ) {
         const prUrl = pull_request.html_url;
         const prBody = pull_request.body || '';
 
@@ -200,10 +212,21 @@ router.post(
       }
 
       res.status(200).json({ status: 'processed' });
-    } catch (error) {
-      console.error('GitHub webhook error:', error);
+    } catch (error: any) {
+      logger.error('GitHub webhook error:', { error: error.message });
+      metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'failed', provider: 'github' });
+
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+
       res.status(500).json({ error: 'Webhook processing failed' });
     }
+    }, {
+        kind: SpanKind.SERVER,
+        attributes: {
+            'webhook.provider': 'github'
+        }
+    });
   },
 );
 

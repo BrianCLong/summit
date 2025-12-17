@@ -1,0 +1,76 @@
+{
+  "epic": "Ops Observability & Cost Guard (SRE Pack)",
+  "key": "OPS-EPIC",
+  "archiveName": "ops-observability-epic.zip",
+  "repo": "ops/observability-pack/",
+  "additionalPaths": ["infra/helm/*"],
+  "description": "SLO dashboards, OTEL/Prom telemetry, slow-query killer, budget caps - no product code edits.",
+  "stories": [
+    {
+      "key": "OPS-1",
+      "summary": "OTEL instrumentation standards",
+      "description": "Define OTEL instrumentation standards and code examples for services."
+    },
+    {
+      "key": "OPS-2",
+      "summary": "Prometheus rules and Grafana dashboards",
+      "description": "Create Prometheus rules, Grafana dashboards, and alert policies."
+    },
+    {
+      "key": "OPS-3",
+      "summary": "Slow-query killer and budget caps",
+      "description": "Implement slow-query killer + kill switch; capped budgets with alerts."
+    },
+    {
+      "key": "OPS-4",
+      "summary": "Canary/rollback scripts",
+      "description": "Create canary/rollback scripts; Terraform/Helm modules."
+    },
+    {
+      "key": "OPS-5",
+      "summary": "Incident runbooks",
+      "description": "Create runbooks for perf regression, ingest backlog, authz drift, cost spike."
+    },
+    {
+      "key": "OPS-6",
+      "summary": "Chaos drills and pass criteria",
+      "description": "Define chaos drills and pass criteria; execute at least one drill."
+    }
+  ],
+  "definitionOfDone": [
+    "Dashboards render with synthetic + staging data",
+    "One-button canary + documented rollback",
+    "Runbooks battle-tested in tabletop + chaos drill"
+  ],
+  "acceptanceTests": [
+    {
+      "name": "SLO breach alert",
+      "expected": "Trigger synthetic SLO breach -> alert fired, runbook followed"
+    },
+    {
+      "name": "Slow query detection",
+      "expected": "Slow query detected -> auto-killed, alert includes sample"
+    },
+    {
+      "name": "Budget cap enforcement",
+      "expected": "Budget cap hit -> CI blocks scale-up; override requires ticket"
+    }
+  ],
+  "testEvidence": [
+    {
+      "type": "dashboard",
+      "path": "ops/observability-pack/dashboards/",
+      "artifact": "test-results/dashboards/render-test.json"
+    },
+    {
+      "type": "chaos",
+      "path": "ops/observability-pack/chaos/",
+      "artifact": "test-results/chaos/drill-report.json"
+    },
+    {
+      "type": "runbook",
+      "path": "RUNBOOKS/",
+      "artifact": "test-results/runbooks/tabletop-results.json"
+    }
+  ]
+}
