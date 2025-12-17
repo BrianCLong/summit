@@ -123,7 +123,7 @@ export function createAuthorityMiddleware(options: AuthorityMiddlewareOptions) {
       // Check if conditions are satisfied
       const conditionsSatisfied = decision.conditions.every((condition) => {
         if (condition === 'Justification required') {
-          return !!context.request.justification;
+          return Boolean(context.request.justification);
         }
         return true;
       });
