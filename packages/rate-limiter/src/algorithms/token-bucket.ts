@@ -106,6 +106,6 @@ export class TokenBucketLimiter {
    * Reset bucket for a key
    */
   async reset(key: string): Promise<void> {
-    await this.store.reset('tb:' + key);
+    await this.store.reset(`tb:${  key}`);
   }
 }

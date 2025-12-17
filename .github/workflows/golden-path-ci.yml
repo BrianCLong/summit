@@ -1,94 +1,130 @@
-name: CI Golden Path
+name: Golden Path CI/CD
 
 on:
-  pull_request:
-    branches: [ main ]
   push:
-    branches: [ main ]
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  ci:
+  lint:
+    name: Lint Check
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node (if needed)
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-        if: ${{ hashFiles('**/package.json') != '' }}
+          node-version: 18
+          cache: 'npm'
 
-      - name: Setup Go (if needed)
-        uses: actions/setup-go@v5
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          go-version: '1.22'
-        if: ${{ hashFiles('**/go.mod') != '' }}
+          node-version: 18
+          cache: 'npm'
 
-      - name: Cache dependencies
-        uses: actions/cache@v4
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: npm run test
+
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
         with:
-          path: |
-            ~/.npm
-            ~/.cache/go-build
-            ~/go/pkg/mod
-            ~/.pnpm-store
-          key: ${{ runner.os }}-deps-${{ hashFiles('**/package-lock.json', '**/go.sum', '**/pnpm-lock.yaml') }}
-
-      - name: Enable corepack
-        run: corepack enable
-        if: ${{ hashFiles('**/pnpm-lock.yaml') != '' }}
-
-      - name: Install deps (Node - pnpm)
-        run: pnpm install --frozen-lockfile
-        if: ${{ hashFiles('**/pnpm-lock.yaml') != '' }}
-
-      - name: Install deps (Node - npm)
-        run: npm ci --ignore-scripts
-        if: ${{ hashFiles('**/package-lock.json') != '' }}
-
-      - name: Unit tests (Node - pnpm)
-        run: pnpm test --if-present -- --ci
-        if: ${{ hashFiles('**/pnpm-lock.yaml') != '' }}
-
-      - name: Unit tests (Node - npm)
-        run: npm test --if-present -- --ci
-        if: ${{ hashFiles('**/package-lock.json') != '' }}
-
-      - name: Go tests
-        run: go test ./...
-        if: ${{ hashFiles('**/go.mod') != '' }}
-
-      - name: Lint (ESLint)
-        run: npx eslint . || true
-        if: ${{ hashFiles('**/.eslintrc*') != '' }}
-
-      - name: Static analysis (Go vet)
-        run: go vet ./...
-        if: ${{ hashFiles('**/go.mod') != '' }}
-
-      - name: Build SBOM
-        uses: anchore/sbom-action@v0
-        with:
-          artifact-name: sbom.spdx.json
-
-      - name: Upload SBOM
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom
-          path: sbom.spdx.json
-
-      - name: Trivy FS scan
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: fs
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'table'
+          exit-code: '1'
           ignore-unfixed: true
-          format: sarif
-          output: trivy-fs.sarif
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Check for secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Build Artifacts
+    runs-on: ubuntu-latest
+    needs: [test, security]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker images
+        run: |
+          docker compose -f docker-compose.yml build
+
+  canary-deploy:
+    name: Canary Deployment
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
         with:
-          sarif_file: trivy-fs.sarif
+          version: 'v3.11.1'
+
+      - name: Deploy Canary
+        env:
+          KUBECONFIG: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          echo "Deploying canary release..."
+          # helm upgrade --install summit-canary ./deploy/helm/summit-chart --namespace summit-canary --create-namespace --set environment=canary
+          echo "Canary deployment simulation complete."
+
+      - name: Run Canary Gates
+        run: |
+          chmod +x ./deploy/gates/*.sh
+          ./deploy/gates/health-check.sh
+          ./deploy/gates/security-baseline.sh
+          ./deploy/gates/smoke-test.sh
+
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+    needs: [canary-deploy]
+    if: always()
+    steps:
+      - name: Slack Notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()

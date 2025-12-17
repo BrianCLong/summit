@@ -1,63 +1,44 @@
-image:
-  repository: ghcr.io/owner/app
-  tag: "latest"
-  pullPolicy: IfNotPresent
+rollout:
+  enabled: true
 
-replicaCount: 2
+podSecurityContext:
+  fsGroup: 2000
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
 
-service:
-  type: ClusterIP
-  port: 80
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
 
 resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 100m
-    memory: 256Mi
-
-autoscaling:
+  requests: { cpu: 100m, memory: 256Mi }
+  limits: { cpu: 500m, memory: 512Mi }
+hpa:
   enabled: true
   minReplicas: 2
-  maxReplicas: 10
+  maxReplicas: 8
   targetCPUUtilizationPercentage: 70
-
-podDisruptionBudget:
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Pods
+      pods:
+        metricName: http_requests_total
+        target:
+          type: AverageValue
+          averageValue: 100m
+pdb:
+  enabled: true
   minAvailable: 1
-
-ingress:
-  enabled: true
-  className: ""
-  hosts:
-    - host: app.local
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
-
-env: {}
-
-canary:
-  enabled: false
-  replicas: 1
-
-otel:
-  enabled: true
-  annotations:
-    sidecar.opentelemetry.io/inject: "true"
-    otel.service.name: "app"
-
-prometheus:
-  serviceMonitor:
-    enabled: true
-    interval: 30s
-
-networkPolicy:
-  enabled: true
-  egress:
-    - to:
-        - namespaceSelector: {}
-      ports:
-        - port: 443
-          protocol: TCP
+env:
+  DB_AUTH_MODE: iam
