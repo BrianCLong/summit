@@ -101,8 +101,8 @@ services:
       - AI_ENABLED=${AI_ENABLED:-false}
       - KAFKA_ENABLED=${KAFKA_ENABLED:-false}
       # Security Configuration
-      - JWT_SECRET=${JWT_SECRET:-change_this_in_production_jwt_secret_key_must_be_at_least_32_chars_long}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-change_this_in_production_refresh_secret_key_must_be_different}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET environment variable is required - must be at least 32 chars}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET environment variable is required - must be different from JWT_SECRET}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-https://app.intelgraph.com}
       - CORS_ORIGIN=${CORS_ORIGIN:-https://app.intelgraph.com}
       - RATE_LIMIT_WINDOW_MS=${RATE_LIMIT_WINDOW_MS:-900000}

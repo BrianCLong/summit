@@ -10,8 +10,8 @@
  * - Edge cases
  */
 
-import { FeatureFlagService, resetFeatureFlagService, getFeatureFlagService } from '../FeatureFlagService';
-import { Logger } from '../../utils/logger';
+import { FeatureFlagService, resetFeatureFlagService, getFeatureFlagService } from '../FeatureFlagService.js';
+import { Logger } from '../../utils/logger.js';
 import { writeFileSync, unlinkSync, mkdirSync } from 'fs';
 import { join } from 'path';
 

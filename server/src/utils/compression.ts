@@ -15,10 +15,14 @@ export class CompressionUtils {
   private static readonly COMPRESSION_THRESHOLD = 1024; // 1KB
 
   /**
-   * Compresses data if it exceeds the threshold.
-   * Returns a Buffer containing the compressed data, prefixed with a marker if compressed.
-   * Format: [1 byte marker][compressed data]
-   * Marker: 1 = GZIP, 0 = Uncompressed
+   * Compresses input data if it exceeds the compression threshold (1KB).
+   *
+   * The output is a Buffer prefixed with a 1-byte marker indicating the compression state:
+   * - 0: Uncompressed
+   * - 1: GZIP compressed
+   *
+   * @param data - The data to compress. Can be a string, Buffer, or object (which will be JSON stringified).
+   * @returns A Promise resolving to a Buffer containing the marker and the (potentially) compressed data.
    */
   static async compress(data: string | Buffer | object): Promise<Buffer> {
     let buffer: Buffer;
@@ -49,7 +53,11 @@ export class CompressionUtils {
   }
 
   /**
-   * Decompresses data based on the prefix marker.
+   * Decompresses data based on the prefix marker found in the Buffer.
+   *
+   * @param data - The compressed Buffer (including the 1-byte marker).
+   * @returns A Promise resolving to the original uncompressed Buffer.
+   * @throws Error if the compression marker is unknown.
    */
   static async decompress(data: Buffer): Promise<Buffer> {
     if (data.length === 0) return Buffer.alloc(0);
@@ -66,11 +74,24 @@ export class CompressionUtils {
     }
   }
 
+  /**
+   * Compresses an object and encodes the result as a Base64 string.
+   *
+   * @param data - The object to compress.
+   * @returns A Promise resolving to a Base64 encoded string of the compressed data.
+   */
   static async compressToString(data: object): Promise<string> {
     const buffer = await this.compress(data);
     return buffer.toString('base64');
   }
 
+  /**
+   * Decodes a Base64 string, decompresses it, and parses the JSON result.
+   *
+   * @typeParam T - The expected type of the parsed object.
+   * @param data - The Base64 encoded compressed string.
+   * @returns A Promise resolving to the parsed object.
+   */
   static async decompressFromString<T>(data: string): Promise<T> {
     const buffer = Buffer.from(data, 'base64');
     const decompressed = await this.decompress(buffer);
