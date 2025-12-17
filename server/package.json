@@ -9,7 +9,7 @@
     "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
     "dev:worker": "cross-env NODE_ENV=development CONDUCTOR_ROLE=worker WORKER_PORT=4100 nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm' src/conductor/worker-entrypoint.ts",
     "build": "tsc -p tsconfig.build.json",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.strict.json --noEmit",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
     "test": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules --max-old-space-size=8192\" jest --config=jest.config.ts",
     "test:watch": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules --max-old-space-size=8192\" jest --config=jest.config.ts --watch",
@@ -25,7 +25,8 @@
     "seed": "ts-node scripts/seed-data.ts",
     "seed:demo": "ts-node scripts/seed-demo.ts",
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
-    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts"
+    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts",
+    "feature-flags": "node --loader ts-node/esm scripts/feature-flags.ts"
   },
   "bin": {
     "maestro-run": "dist/cli/maestro_run.js"
@@ -46,6 +47,7 @@
     "@react-email/components": "^1.0.1",
     "@react-email/render": "^1.0.1",
     "@socket.io/redis-adapter": "8.3.0",
+    "@summit/connector-sdk": "file:../packages/connector-sdk",
     "@turf/area": "7.3.0",
     "@turf/bbox": "7.3.0",
     "@turf/boolean-point-in-polygon": "7.3.0",
@@ -66,10 +68,11 @@
     "canvas": "3.2.0",
     "compression": "1.8.1",
     "cors": "2.8.5",
+    "csv-parse": "^5.5.3",
     "dataloader": "^2.2.2",
     "dotenv": "17.2.3",
     "etag": "^1.8.1",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "express-rate-limit": "8.2.1",
     "express-validator": "7.3.0",
     "ffmpeg-static": "5.3.0",
@@ -101,6 +104,7 @@
     "node-fetch": "3.3.2",
     "node-nlp": "^4.27.0",
     "nodemailer": "^7.0.11",
+    "p-limit": "^6.1.0",
     "parquetjs": "0.11.2",
     "pg": "8.16.3",
     "pgvector": "0.2.1",
@@ -117,10 +121,7 @@
     "uuid": "13.0.0",
     "winston": "^3.18.3",
     "ws": "8.18.3",
-    "zod": "4.1.12",
-    "@summit/connector-sdk": "workspace:*",
-    "p-limit": "^6.1.0",
-    "csv-parse": "^5.5.3"
+    "zod": "4.1.12"
   },
   "devDependencies": {
     "@eslint/js": "9.39.1",
@@ -129,6 +130,7 @@
     "@graphql-codegen/typescript": "5.0.4",
     "@graphql-codegen/typescript-resolvers": "5.1.2",
     "@jest-mock/express": "^3.0.0",
+    "@jest/globals": "^30.2.0",
     "@opentelemetry/api": "^1.9.0",
     "@playwright/test": "1.56.1",
     "@testcontainers/neo4j": "^11.9.0",
@@ -136,8 +138,10 @@
     "@types/express": "^5.0.3",
     "@types/express-rate-limit": "6.0.2",
     "@types/graphql-depth-limit": "^1.1.6",
+    "@types/html-to-text": "^9.0.4",
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.7",
+    "@types/luxon": "^3.7.1",
     "@types/node": "24.10.1",
     "@types/nodemailer": "^6.4.16",
     "@types/pg": "8.15.6",
