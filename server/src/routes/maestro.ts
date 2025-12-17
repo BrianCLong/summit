@@ -1,91 +1,120 @@
-// server/src/routes/maestro.ts
 
 import { Router } from 'express';
+import { ensureAuthenticated } from '../middleware/auth';
+import { MaestroEngine } from '../maestro/engine';
+import { MaestroTemplate } from '../maestro/model';
+import { Pool } from 'pg';
+import { logger } from '../utils/logger';
 
-const router = Router();
+// Note: This assumes `req.user` is populated by auth middleware
+// and `engine` and `db` are injected or available via singleton/context.
+// For this file, I'll export a factory function.
 
-// Mock data to simulate Maestro execution
-router.post('/runs', async (req, res) => {
-  try {
-    const { userId, requestText } = req.body;
+export const createMaestroRouter = (engine: MaestroEngine, db: Pool) => {
+  const router = Router();
 
-    // Simulate delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+  // --- Runs ---
 
-    const runId = `run_${Date.now()}`;
-    const taskIds = ['task_plan', 'task_exec_1', 'task_exec_2', 'task_summary'];
+  router.post('/runs', ensureAuthenticated, async (req, res) => {
+    try {
+      const { templateId, input } = req.body;
+      const tenantId = (req as any).user.tenantId;
+      const principalId = (req as any).user.id;
 
-    // Mock response structure matching MaestroRunResponse
-    const response = {
-      run: {
-        id: runId,
-        user: { id: userId },
+      if (!templateId) return res.status(400).json({ error: 'templateId required' });
+
+      const run = await engine.createRun(tenantId, templateId, input, principalId);
+      res.status(201).json(run);
+    } catch (err: any) {
+      logger.error('Failed to create run', err);
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.get('/runs/:runId', ensureAuthenticated, async (req, res) => {
+    try {
+      const { runId } = req.params;
+      const tenantId = (req as any).user.tenantId;
+
+      const result = await db.query(
+        `SELECT * FROM maestro_runs WHERE id = $1 AND tenant_id = $2`,
+        [runId, tenantId]
+      );
+
+      if (result.rows.length === 0) return res.status(404).json({ error: 'Run not found' });
+      res.json(result.rows[0]);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.get('/runs', ensureAuthenticated, async (req, res) => {
+    try {
+      const tenantId = (req as any).user.tenantId;
+      const { templateId, status, limit = 20 } = req.query;
+
+      let query = `SELECT * FROM maestro_runs WHERE tenant_id = $1`;
+      const params: any[] = [tenantId];
+      let idx = 2;
+
+      if (templateId) {
+        query += ` AND template_id = $${idx++}`;
+        params.push(templateId);
+      }
+      if (status) {
+        query += ` AND status = $${idx++}`;
+        params.push(status);
+      }
+
+      query += ` ORDER BY started_at DESC LIMIT $${idx}`;
+      params.push(limit);
+
+      const result = await db.query(query, params);
+      res.json(result.rows);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // --- Templates ---
+
+  router.get('/templates', ensureAuthenticated, async (req, res) => {
+    try {
+      const tenantId = (req as any).user.tenantId;
+      const result = await db.query(
+        `SELECT * FROM maestro_templates WHERE tenant_id = $1 ORDER BY created_at DESC`,
+        [tenantId]
+      );
+      res.json(result.rows);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  router.post('/templates', ensureAuthenticated, async (req, res) => {
+    try {
+      const tenantId = (req as any).user.tenantId;
+      const template: MaestroTemplate = {
+        ...req.body,
+        id: req.body.id || crypto.randomUUID(),
+        tenantId,
         createdAt: new Date().toISOString(),
-        requestText,
-      },
-      tasks: [
-        { id: taskIds[0], status: 'succeeded', description: 'Plan execution strategy' },
-        { id: taskIds[1], status: 'succeeded', description: 'Analyze request intent' },
-        { id: taskIds[2], status: 'succeeded', description: 'Execute search across Graph' },
-        { id: taskIds[3], status: 'succeeded', description: 'Synthesize final answer' },
-      ],
-      results: [
-        {
-          task: { id: taskIds[0], status: 'succeeded', description: 'Plan execution strategy' },
-          artifact: {
-            id: 'art_1',
-            kind: 'json',
-            label: 'Execution Plan',
-            data: { strategy: 'parallel_search', complexity: 'medium' },
-            createdAt: new Date().toISOString(),
-          },
-        },
-        {
-          task: { id: taskIds[1], status: 'succeeded', description: 'Analyze request intent' },
-          artifact: {
-            id: 'art_2',
-            kind: 'text',
-            label: 'Intent Analysis',
-            data: 'User is requesting a summary of recent PRs with a focus on risk.',
-            createdAt: new Date().toISOString(),
-          },
-        },
-        {
-          task: { id: taskIds[2], status: 'succeeded', description: 'Execute search across Graph' },
-          artifact: {
-            id: 'art_3',
-            kind: 'json',
-            label: 'Search Results',
-            data: { hits: 5, sources: ['github', 'jira'] },
-            createdAt: new Date().toISOString(),
-          },
-        },
-        {
-          task: { id: taskIds[3], status: 'succeeded', description: 'Synthesize final answer' },
-          artifact: {
-            id: 'art_4',
-            kind: 'text',
-            label: 'Final Summary',
-            data: 'Based on the analysis of 5 recent PRs, the risk level is moderate. Suggested follow-up: Increase test coverage for the payment module.',
-            createdAt: new Date().toISOString(),
-          },
-        },
-      ],
-      costSummary: {
-        runId,
-        totalCostUSD: 0.0452,
-        totalInputTokens: 1540,
-        totalOutputTokens: 850,
-        byModel: {
-          'gpt-4o': { costUSD: 0.0452, inputTokens: 1540, outputTokens: 850 },
-        },
-      },
-    };
+        updatedAt: new Date().toISOString()
+      };
 
-    res.json(response);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
-});
+      // TODO: Validate Spec via MaestroDSL.validate(template.spec)
 
-export default router;
+      await db.query(
+        `INSERT INTO maestro_templates (id, tenant_id, name, version, kind, input_schema, output_schema, spec, metadata)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+        [template.id, template.tenantId, template.name, template.version || 1, template.kind, template.inputSchema, template.outputSchema, template.spec, template.metadata]
+      );
+
+      res.status(201).json(template);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  return router;
+};
