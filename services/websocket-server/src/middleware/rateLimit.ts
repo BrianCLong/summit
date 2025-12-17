@@ -1,4 +1,3 @@
-
 import { AuthenticatedSocket } from '../types/index.js';
 import { logger } from '../utils/logger.js';
 import { AdaptiveRateLimiter } from '../../../../lib/streaming/rate-limiter.js';
@@ -11,9 +10,9 @@ export function createRateLimitMiddleware(rateLimiter: AdaptiveRateLimiter) {
     } catch (error) {
       logger.warn(
         {
-          connectionId: socket.connectionId,
           tenantId: socket.tenantId,
           userId: socket.user.userId,
+          error,
         },
         'Rate limit exceeded for connection'
       );
