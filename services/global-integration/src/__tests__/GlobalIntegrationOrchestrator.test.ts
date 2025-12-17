@@ -2,6 +2,7 @@
  * Tests for Global Integration Orchestrator
  */
 
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 import { GlobalIntegrationOrchestrator } from '../GlobalIntegrationOrchestrator';
 import type { GlobalPartner, GlobalIntegrationConfig } from '../types';
 
@@ -72,7 +73,7 @@ describe('GlobalIntegrationOrchestrator', () => {
       await orchestrator.generateIntegration(mockPartner);
 
       expect(eventHandler).toHaveBeenCalled();
-      expect(eventHandler.mock.calls[0][0].partnerId).toBe(mockPartner.id);
+      expect((eventHandler.mock.calls[0][0] as { partnerId: string }).partnerId).toBe(mockPartner.id);
     });
 
     it('should generate appropriate rate limits based on partner type', async () => {
