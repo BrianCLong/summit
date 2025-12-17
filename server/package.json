@@ -82,6 +82,10 @@
     "csv-parse": "^5.5.3",
     "dataloader": "^2.2.2",
 <<<<<<< HEAD
+    "etag": "^1.8.1",
+=======
+<<<<<<< HEAD
+>>>>>>> main
     "dotenv": "17.2.3",
     "express": "^5.1.0",
 =======
@@ -144,10 +148,14 @@
     "node-fetch": "3.3.2",
     "node-nlp": "^4.27.0",
 <<<<<<< HEAD
+    "nodemailer": "^7.0.7",
+=======
+<<<<<<< HEAD
     "nodemailer": "^6.9.16",
 =======
     "nodemailer": "^7.0.11",
     "p-limit": "^6.1.0",
+>>>>>>> main
 >>>>>>> main
     "parquetjs": "0.11.2",
     "pg": "8.16.3",
@@ -180,6 +188,8 @@
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
     "@jest/globals": "^30.2.0",
 =======
 <<<<<<< HEAD
@@ -187,6 +197,7 @@
     "@jest-mock/express": "^3.0.0",
     "@jest/globals": "^30.2.0",
     "@opentelemetry/api": "^1.9.0",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -250,8 +261,13 @@
     "prettier": "3.6.2",
     "supertest": "7.1.4",
     "testcontainers": "^11.7.1",
+<<<<<<< HEAD
+    "ts-jest": "^29.4.5",
+    "ts-node": "10.9.2",
+=======
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
+>>>>>>> main
     "typescript": "5.9.3",
     "typescript-eslint": "8.46.4",
     "wait-for-expect": "4.0.0"

@@ -65,7 +65,11 @@ describe('MCPClient', () => {
 <<<<<<< HEAD
     } as any;
 =======
+<<<<<<< HEAD
+    } as any;
+=======
     };
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -91,9 +95,13 @@ describe('MCPClient', () => {
       mockWs.once.mockImplementation((event: string, callback: Function) => {
 =======
 <<<<<<< HEAD
+      mockWs.once.mockImplementation((event: string, callback: Function) => {
+=======
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
 =======
       mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -123,9 +131,13 @@ describe('MCPClient', () => {
       mockWs.once.mockImplementation((event: string, callback: Function) => {
 =======
 <<<<<<< HEAD
+      mockWs.once.mockImplementation((event: string, callback: Function) => {
+=======
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
 =======
       mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -159,9 +171,13 @@ describe('MCPClient', () => {
       mockWs.once.mockImplementation((event: string, callback: Function) => {
 =======
 <<<<<<< HEAD
+      mockWs.once.mockImplementation((event: string, callback: Function) => {
+=======
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
 =======
       mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -190,9 +206,13 @@ describe('MCPClient', () => {
       mockWs.once.mockImplementation((event: string, callback: Function) => {
 =======
 <<<<<<< HEAD
+      mockWs.once.mockImplementation((event: string, callback: Function) => {
+=======
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
 =======
       mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -291,9 +311,13 @@ describe('MCPClient', () => {
       mockWs.once.mockImplementation((event: string, callback: Function) => {
 =======
 <<<<<<< HEAD
+      mockWs.once.mockImplementation((event: string, callback: Function) => {
+=======
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
 =======
       mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -328,9 +352,13 @@ describe('MCPClient', () => {
       mockWs.once.mockImplementation((event: string, callback: Function) => {
 =======
 <<<<<<< HEAD
+      mockWs.once.mockImplementation((event: string, callback: Function) => {
+=======
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
 =======
       mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -390,9 +418,13 @@ describe('MCPClient', () => {
       mockWs.once.mockImplementation((event: string, callback: Function) => {
 =======
 <<<<<<< HEAD
+      mockWs.once.mockImplementation((event: string, callback: Function) => {
+=======
+<<<<<<< HEAD
       mockWs.once.mockImplementation((event: string | symbol, callback: (...args: any[]) => void) => {
 =======
       mockWs.once.mockImplementation((event: string, callback: any) => {
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

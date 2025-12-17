@@ -4,6 +4,9 @@ module.exports = {
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
   preset: 'ts-jest/presets/default-esm',
@@ -112,6 +115,8 @@ module.exports = {
 =======
 <<<<<<< HEAD
 =======
+<<<<<<< HEAD
+=======
 =======
   testEnvironment: 'node',
   transform: {
@@ -128,6 +133,7 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

@@ -432,6 +432,9 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
 <<<<<<< HEAD
 =======
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
     const startTime = Date.now();
     try {

@@ -63,7 +63,11 @@
     "react-native-keychain": "^9.0.3",
     "react-native-biometrics": "^3.0.1",
     "react-native-device-info": "^14.0.2",
+<<<<<<< Updated upstream
     "@react-native-community/hooks": "^3.0.0",
+=======
+    "@react-native-community/hooks": "^100.1.0",
+>>>>>>> Stashed changes
     "react-native-mmkv": "^3.1.0",
     "react-native-fast-image": "^8.6.3",
     "react-native-svg": "^15.15.0",
