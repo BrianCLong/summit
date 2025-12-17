@@ -1,40 +1,53 @@
 import express from 'express';
-import { EntityResolutionService } from '../services/EntityResolutionService.js';
-import { logger } from '../config/logger.js';
+import { EntityResolutionService } from '../services/entity-resolution/service';
+import { DataQualityService } from '../services/entity-resolution/quality';
 
 const router = express.Router();
-const entityResolutionService = new EntityResolutionService(); // Or import singleton if available
+const erService = new EntityResolutionService();
+const dqService = new DataQualityService();
 
-router.get('/review-queue', async (req, res) => {
-  const tenantId = (req as any).user?.tenant_id;
-
-  if (!tenantId) {
-    return res.status(400).json({ error: 'Tenant ID required' });
-  }
-
+// Batch Resolution Endpoint
+router.post('/resolve-batch', async (req, res) => {
   try {
-    const queue = await entityResolutionService.getReviewQueue(tenantId as string);
-    res.json(queue);
+    const { entities } = req.body;
+    if (!Array.isArray(entities)) {
+      return res.status(400).json({ error: 'Entities must be an array' });
+    }
+
+    // Inject tenantId from authenticated user context if not present on entities
+    // Assuming req.user is populated by auth middleware
+    const tenantId = (req as any).user?.tenantId;
+
+    const enrichedEntities = entities.map(e => ({
+        ...e,
+        tenantId: e.tenantId || tenantId
+    }));
+
+    if (enrichedEntities.some(e => !e.tenantId)) {
+        return res.status(400).json({ error: 'Tenant ID missing on some entities' });
+    }
+
+    const decisions = await erService.resolveBatch(enrichedEntities);
+    res.json({ decisions });
   } catch (error) {
-    logger.error(error);
-    res.status(500).json({ error: 'Failed to fetch review queue' });
+    console.error('Batch resolution error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-router.post('/review-decision', async (req, res) => {
-  const { reviewId, decision, notes } = req.body;
-  const reviewerId = (req as any).user?.id || 'unknown'; // Should come from auth
-
-  if (!reviewId || !decision) {
-    return res.status(400).json({ error: 'Review ID and decision required' });
-  }
-
+// Data Quality Metrics Endpoint
+router.get('/quality/metrics', async (req, res) => {
   try {
-    await entityResolutionService.submitReviewDecision(reviewId, decision, reviewerId, notes);
-    res.json({ success: true });
+    const tenantId = (req as any).user?.tenantId;
+    if (!tenantId) {
+        return res.status(400).json({ error: 'Tenant context required' });
+    }
+
+    const metrics = await dqService.getQualityMetrics(tenantId);
+    res.json({ metrics });
   } catch (error) {
-    logger.error(error);
-    res.status(500).json({ error: 'Failed to submit decision' });
+    console.error('Quality metrics error:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
