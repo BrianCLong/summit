@@ -1,0 +1,25 @@
+{
+  "event_id": "82e56e2a-9c5c-4c5b-9e53-690b0dcb5d01",
+  "tenant_id": "demo-tenant",
+  "feature": "approvals.request",
+  "quantity": 1,
+  "unit": "request",
+  "timestamp": "2026-07-07T12:00:05Z",
+  "source_service": "approvals-api",
+  "trace_id": "trace-abc-123",
+  "resource_id": "approval-req-9842",
+  "flow_id": "supply-chain-po",
+  "provenance_receipt_id": "prov-rec-441",
+  "dedupe_key": "demo-tenant|approvals.request|approvals-api|trace-abc-123",
+  "schema_version": "1.0.0",
+  "cost_hint": {
+    "cpu_ms": 12,
+    "db_write_ops": 4,
+    "email_notifications": 1
+  },
+  "signature": "base64-encoded-sha256",
+  "metadata": {
+    "policy_version": "opa-2026-07-07-01",
+    "risk_score": 0.12
+  }
+}

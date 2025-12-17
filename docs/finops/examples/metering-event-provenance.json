@@ -1,0 +1,23 @@
+{
+  "event_id": "a1c3bb1a-2c6e-4d8e-93fa-7efb9fe91b5f",
+  "tenant_id": "demo-tenant",
+  "feature": "provenance.write",
+  "quantity": 5242880,
+  "unit": "byte",
+  "timestamp": "2026-07-07T12:00:07Z",
+  "source_service": "prov-ledger",
+  "trace_id": "trace-abc-123",
+  "resource_id": "receipt-8821",
+  "provenance_receipt_id": "prov-rec-8821",
+  "dedupe_key": "demo-tenant|provenance.write|prov-ledger|trace-abc-123",
+  "schema_version": "1.0.0",
+  "cost_hint": {
+    "bytes_written": 5242880,
+    "db_write_ops": 18
+  },
+  "signature": "base64-encoded-sha256",
+  "metadata": {
+    "compression": "zstd",
+    "retention_policy": "default-13mo"
+  }
+}
