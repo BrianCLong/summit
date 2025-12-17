@@ -1,0 +1,44 @@
+name: Platform Health Score
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Nightly
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  health-score:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install tsx -D
+
+      # Note: In a production environment, this workflow would depend on test/build workflows
+      # and use actions/download-artifact to retrieve:
+      # - test-summary-junit.xml (from unit tests)
+      # - slo-results.json (from slo-exporter or similar)
+      # - vulns-*.txt (from security scans)
+      #
+      # For now, the calculator script will use defaults or file artifacts committed/present in the repo.
+
+      - name: Compute Health Score
+        run: npx tsx scripts/ops/compute-health-score.ts
+
+      - name: Archive Health Score
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-score
+          path: |
+            health-score.json
+            docs/ops/dashboard-health.md
+
+      - name: Summary
+        run: cat docs/ops/dashboard-health.md >> $GITHUB_STEP_SUMMARY

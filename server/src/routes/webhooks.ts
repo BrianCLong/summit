@@ -8,6 +8,8 @@ import {
 import { LifecycleManager } from '../services/lifecycle-listeners.js';
 import { webhookService, CreateWebhookSchema, UpdateWebhookSchema } from '../webhooks/webhook.service.js';
 import { z } from 'zod/v4';
+import { logger, metrics, tracer } from '../observability/index.js';
+import { SpanKind, SpanStatusCode } from '@opentelemetry/api';
 
 const router = Router();
 
@@ -23,13 +25,13 @@ const validate = (schema: any) => (req: any, res: any, next: any) => {
 
 // Helper for tenant ID (assuming it's in req.user or req.headers)
 const getTenantId = (req: any) => {
-    // In production, strict auth is enforced and tenantId comes from req.user
-    // In dev/testing, we allow header override IF req.user is missing
-    if (req.user?.tenantId) {
-        return req.user.tenantId;
+    // Strict auth is enforced via app.ts, so req.user should always be populated
+    if (req.user?.tenantId || req.user?.tenant_id) {
+        return req.user.tenantId || req.user.tenant_id;
     }
-    // Fallback for development/testing purposes ONLY
-    return req.headers['x-tenant-id'] || 'default-tenant';
+    // Fallback only if configured for strict dev bypassing, but now we enforce auth even in dev (mock user)
+    // We throw error if tenant identification fails for security
+    throw new Error('Tenant ID not found in authenticated session');
 };
 
 // --- New Webhook Management Routes ---
@@ -329,25 +331,35 @@ router.post(
   body('pull_request').optional().isObject(),
   body('issue').optional().isObject(),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+    return tracer.trace('webhook.receive', async (span) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        span.setStatus({ code: SpanStatusCode.ERROR, message: 'Validation failed' });
+        return res.status(400).json({ errors: errors.array() });
+      }
 
-    try {
-      const { action, pull_request, issue, repository } = req.body;
-
-      console.log(`Received GitHub webhook: ${action}`, {
-        pr: pull_request?.number,
-        issue: issue?.number,
-        repo: repository?.name,
+      span.setAttributes({
+        'webhook.provider': 'github',
+        'webhook.event': req.body.action
       });
 
-      // Handle PR events
-      if (
-        pull_request &&
-        (action === 'opened' || action === 'closed' || action === 'merged')
-      ) {
+      try {
+        const { action, pull_request, issue, repository } = req.body;
+
+        logger.info(`Received GitHub webhook: ${action}`, {
+          pr: pull_request?.number,
+          issue: issue?.number,
+          repo: repository?.name,
+          provider: 'github'
+        });
+
+        metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'received', provider: 'github' });
+
+        // Handle PR events
+        if (
+          pull_request &&
+          (action === 'opened' || action === 'closed' || action === 'merged')
+        ) {
         const prUrl = pull_request.html_url;
         const prBody = pull_request.body || '';
 
@@ -391,10 +403,21 @@ router.post(
       }
 
       res.status(200).json({ status: 'processed' });
-    } catch (error) {
-      console.error('GitHub webhook error:', error);
+    } catch (error: any) {
+      logger.error('GitHub webhook error:', { error: error.message });
+      metrics.incrementCounter('summit_webhook_deliveries_total', { status: 'failed', provider: 'github' });
+
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+
       res.status(500).json({ error: 'Webhook processing failed' });
     }
+    }, {
+        kind: SpanKind.SERVER,
+        attributes: {
+            'webhook.provider': 'github'
+        }
+    });
   },
 );
 

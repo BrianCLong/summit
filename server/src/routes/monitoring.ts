@@ -7,6 +7,7 @@ import {
   register,
   webVitalValue,
   goldenPathStepTotal,
+  uiErrorBoundaryCatchTotal,
   maestroDeploymentsTotal,
   maestroPrLeadTimeHours,
   maestroChangeFailureRate,
@@ -27,6 +28,7 @@ import {
   recordBusinessEvent,
   type BusinessMetricEvent,
 } from '../monitoring/businessMetrics.js';
+import { requirePermission } from '../middleware/auth.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -59,7 +61,7 @@ router.use(express.json());
  *                 details:
  *                   type: string
  */
-router.get('/metrics', async (req: Request, res: Response) => {
+router.get('/metrics', requirePermission('system:metrics'), async (req: Request, res: Response) => {
   try {
     res.set('Content-Type', register.contentType);
     const metrics = await register.metrics();
@@ -485,6 +487,19 @@ router.post('/telemetry/events', (req: Request, res: Response) => {
         step: labels?.step || 'unknown',
         status: labels?.status || 'success',
         tenant_id: tenantId,
+      });
+    } else if (event === 'ui_error_boundary') {
+      uiErrorBoundaryCatchTotal.inc({
+        component: labels?.component || 'unknown',
+        tenant_id: tenantId,
+      });
+      // Log full error details for debugging (the metric only tracks counts)
+      console.error('🚨 UI Error Boundary Caught Exception:', {
+        component: labels?.component,
+        message: labels?.message,
+        stack: labels?.stack,
+        tenantId,
+        timestamp: new Date().toISOString(),
       });
     }
 

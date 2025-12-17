@@ -1,9 +1,0 @@
-
-> intelgraph-server@1.0.0 dev
-> cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts
-
-[33m[nodemon] 3.1.11[39m
-[33m[nodemon] to restart at any time, enter `rs`[39m
-[33m[nodemon] watching path(s): src/**/*[39m
-[33m[nodemon] watching extensions: ts,json[39m
-[32m[nodemon] starting `npx tsx src/index.ts`[39m
