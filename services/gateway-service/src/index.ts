@@ -84,14 +84,14 @@ async function startGatewayService() {
     keyGenerator: (req) => {
       // Use API key, JWT subject, or IP address
       const apiKey = req.headers['x-api-key'] as string;
-      if (apiKey) return `apikey:${apiKey}`;
+      if (apiKey) {return `apikey:${apiKey}`;}
 
       const authHeader = req.headers.authorization;
       if (authHeader?.startsWith('Bearer ')) {
         try {
           const token = authHeader.substring(7);
           const payload = jwtManager.decodeToken(token);
-          if (payload?.sub) return `user:${payload.sub}`;
+          if (payload?.sub) {return `user:${payload.sub}`;}
         } catch {}
       }
 

@@ -36,6 +36,20 @@ export const cacheLocalSize = new Gauge({
   registers: [registry],
 });
 
+export const cacheEvictions = new Counter({
+  name: 'cache_evictions_total',
+  help: 'Cache evictions',
+  labelNames: ['store', 'reason'] as const,
+  registers: [registry],
+});
+
+export const cacheHitRatio = new Gauge({
+  name: 'cache_hit_ratio',
+  help: 'Hit ratio for cache namespaces',
+  labelNames: ['store', 'op'] as const,
+  registers: [registry],
+});
+
 export function recHit(store: string, op: string, tenant?: string) {
   cacheHits.labels(store, op, tenant ?? 'unknown').inc();
 }
@@ -47,4 +61,13 @@ export function recSet(store: string, op: string, tenant?: string) {
 }
 export function recInvalidation(pattern: string, tenant?: string) {
   cacheInvalidations.labels(pattern, tenant ?? 'unknown').inc();
+}
+
+export function recEviction(store: string, reason: string) {
+  cacheEvictions.labels(store, reason).inc();
+}
+
+export function setHitRatio(store: string, op: string, hits: number, misses: number) {
+  const total = hits + misses;
+  cacheHitRatio.labels(store, op).set(total === 0 ? 0 : hits / total);
 }

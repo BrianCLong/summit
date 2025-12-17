@@ -1,24 +1,56 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-echo "🔒 Running pre-commit checks..."
+LOG_FILE="git-hook.log"
 
-# Run gitleaks to detect secrets
-echo "🔍 Scanning for secrets..."
-if command -v gitleaks &> /dev/null; then
-  gitleaks protect --staged --verbose || {
-    echo "❌ Secret detected! Please remove sensitive data before committing."
-    exit 1
-  }
-else
-  echo "⚠️  Gitleaks not installed. Install with: brew install gitleaks (macOS) or see https://github.com/gitleaks/gitleaks"
+log() {
+  echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] $1" >> "$LOG_FILE"
+  echo "$1"
+}
+
+log "🔒 Running pre-commit checks..."
+
+# Run custom secret scanner
+log "🔍 Running custom secret scanner..."
+if [ -f "scripts/scan_secrets.py" ]; then
+    python3 scripts/scan_secrets.py || {
+      log "❌ Secrets detected by custom scanner!"
+      exit 1
+    }
 fi
 
-# Run lint-staged to check only staged files (fast!)
-echo "🔍 Running lint-staged..."
-pnpm exec lint-staged || {
-  echo "❌ Lint-staged checks failed. Please fix the issues before committing."
+# Run gitleaks if available
+if command -v gitleaks >/dev/null 2>&1; then
+  log "🔍 Scanning for secrets with gitleaks..."
+  gitleaks protect --staged --verbose || {
+    log "❌ Secret detected by gitleaks!"
+    exit 1
+  }
+fi
+
+# Run typecheck
+log "🔍 Running strict typechecks..."
+npm run typecheck || {
+  log "❌ Typecheck failed."
   exit 1
 }
 
-echo "✅ All pre-commit checks passed!"
+# Run lint-staged
+log "🔍 Running lint-staged..."
+pnpm exec lint-staged || {
+  log "❌ Lint-staged failed."
+  exit 1
+}
+
+# Run screenshots (robust)
+log "📸 Generating screenshots..."
+CMD="npx tsx server/scripts/generate-screenshots.ts"
+
+# Use timeout if available, otherwise rely on script's internal timeout
+if command -v timeout >/dev/null 2>&1; then
+  timeout 35s $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
+else
+  $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
+fi
+
+log "✅ All checks passed!"
