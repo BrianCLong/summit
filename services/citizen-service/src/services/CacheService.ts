@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { CacheClient, createCacheClient } from '@packages/cache';
 import pino from 'pino';
 import type { CitizenProfile } from '../schemas/citizen.js';
 
@@ -9,111 +9,87 @@ const logger = pino({ name: 'citizen-cache' });
  * Improves performance for frequently accessed profiles
  */
 export class CacheService {
-  private redis: Redis | null = null;
+  private cache: CacheClient;
   private readonly prefix = 'citizen:';
   private readonly defaultTTL = 3600; // 1 hour
 
   constructor(
     private redisUrl: string = process.env.REDIS_URL || 'redis://localhost:6379'
-  ) {}
+  ) {
+    this.cache = createCacheClient({
+      redisUrl: this.redisUrl,
+      namespace: 'citizen-service',
+      cacheClass: 'critical_path',
+      defaultTTLSeconds: this.defaultTTL,
+      logger,
+    });
+  }
 
   async connect(): Promise<void> {
-    try {
-      this.redis = new Redis(this.redisUrl, {
-        maxRetriesPerRequest: 3,
-        lazyConnect: true,
-      });
+    if (process.env.CACHE_DISABLED === 'true') {
+      logger.warn('Cache disabled via env switch');
+      return;
+    }
 
-      await this.redis.connect();
-      logger.info('Connected to Redis cache');
-    } catch (error) {
-      logger.warn({ error }, 'Redis connection failed, running without cache');
-      this.redis = null;
+    const healthy = await this.cache.ping();
+    if (!healthy) {
+      logger.warn('Redis connection failed, running with in-memory cache');
+    } else {
+      logger.info('Connected to cache backend');
     }
   }
 
   async disconnect(): Promise<void> {
-    if (this.redis) {
-      await this.redis.quit();
-      this.redis = null;
-    }
+    await this.cache.close();
   }
 
   async getCitizen(id: string): Promise<CitizenProfile | null> {
-    if (!this.redis) return null;
+    const cached = await this.cache.get<string>(`${this.prefix}${id}`);
+    if (!cached) return null;
 
     try {
-      const data = await this.redis.get(`${this.prefix}${id}`);
-      if (data) {
-        logger.debug({ id }, 'Cache hit for citizen');
-        return JSON.parse(data);
-      }
-      return null;
+      return typeof cached === 'string' ? (JSON.parse(cached) as CitizenProfile) : (cached as CitizenProfile);
     } catch (error) {
-      logger.warn({ error, id }, 'Cache get failed');
+      logger.warn({ error, id }, 'Cache parse failed');
       return null;
     }
   }
 
   async setCitizen(citizen: CitizenProfile, ttl: number = this.defaultTTL): Promise<void> {
-    if (!this.redis) return;
-
-    try {
-      await this.redis.setex(
-        `${this.prefix}${citizen.id}`,
-        ttl,
-        JSON.stringify(citizen)
-      );
-      // Also index by nationalId
-      await this.redis.setex(
-        `${this.prefix}national:${citizen.nationalId}`,
-        ttl,
-        citizen.id
-      );
-      logger.debug({ id: citizen.id }, 'Cached citizen');
-    } catch (error) {
-      logger.warn({ error, id: citizen.id }, 'Cache set failed');
-    }
+    await this.cache.set(`${this.prefix}${citizen.id}`, citizen, {
+      ttlSeconds: ttl,
+      cacheClass: 'critical_path',
+      namespace: 'citizen-service',
+    });
+    await this.cache.set(`${this.prefix}national:${citizen.nationalId}`, citizen.id, {
+      ttlSeconds: ttl,
+      cacheClass: 'critical_path',
+      namespace: 'citizen-service',
+    });
+    logger.debug({ id: citizen.id }, 'Cached citizen');
   }
 
   async invalidate(id: string): Promise<void> {
-    if (!this.redis) return;
-
-    try {
-      await this.redis.del(`${this.prefix}${id}`);
-      logger.debug({ id }, 'Cache invalidated');
-    } catch (error) {
-      logger.warn({ error, id }, 'Cache invalidation failed');
-    }
+    await this.cache.delete(`${this.prefix}${id}`, {
+      cacheClass: 'critical_path',
+      namespace: 'citizen-service',
+    });
+    logger.debug({ id }, 'Cache invalidated');
   }
 
   async getByNationalId(nationalId: string): Promise<string | null> {
-    if (!this.redis) return null;
-
-    try {
-      return await this.redis.get(`${this.prefix}national:${nationalId}`);
-    } catch (error) {
-      logger.warn({ error, nationalId }, 'Cache lookup failed');
-      return null;
-    }
+    return this.cache.get<string>(`${this.prefix}national:${nationalId}`);
   }
 
   async healthCheck(): Promise<{ status: 'pass' | 'fail'; latency: number }> {
-    if (!this.redis) {
-      return { status: 'fail', latency: 0 };
-    }
-
     const start = Date.now();
-    try {
-      await this.redis.ping();
-      return { status: 'pass', latency: Date.now() - start };
-    } catch {
-      return { status: 'fail', latency: Date.now() - start };
-    }
+    const healthy = await this.cache.ping();
+
+    return { status: healthy ? 'pass' : 'fail', latency: Date.now() - start };
   }
 
   isConnected(): boolean {
-    return this.redis !== null && this.redis.status === 'ready';
+    return this.cache.isRedisConnected();
   }
 }
 

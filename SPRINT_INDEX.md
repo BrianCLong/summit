@@ -122,6 +122,18 @@ Located in repository root (`/SPRINT_*.md`)
 - Consistency validation
 - Performance benchmarking
 
+### Governance & Platform Series
+
+| Sprint | File | Focus | Status |
+|--------|------|-------|--------|
+| **Paved Road + Governance** | `docs/sprints/SPRINT_PAVED_ROAD_GOVERNANCE.md` | Service Templates + OPA/SBOM | 🔄 In Progress |
+
+**Key Deliverables:**
+- Paved-Road Service Template (Node/TS)
+- SBOM & Signing in CI
+- OPA Policy Gates
+- Evidence Pack v0.1
+
 ---
 
 ## Chronological Sprint Timeline
@@ -164,7 +176,7 @@ Located in `/docs/sprints/`
 | **Sprint 2026-01-19** | Jan 19-30 | `sprint_plan_jan_19_30_2026_america_denver.md` | Federation v2 |
 | **Sprint 2026-02-02** | Feb 2-13 | `sprint_plan_feb_2_13_2026_america_denver.md` | Privacy enhancements |
 | **Sprint 2026-02-16** | Feb 16-27 | `sprint_plan_feb_16_27_2026_america_denver.md` | Policy Intelligence v1.5 |
-| **Sprint 2026-03-02** | Mar 2-13 | `sprint_plan_mar_2_13_2026_america_denver.md` | Graph UI v2.3 |
+| **Sprint 2026-03-02** | Mar 2-13 | `sprint_plan_mar_2_13_2026_america_denver.md` | Early Access Launch |
 
 **Key Themes:** Advanced federation, privacy, policy maturity
 
@@ -173,7 +185,7 @@ Located in `/docs/sprints/`
 | Sprint | Dates | File | Focus Areas |
 |--------|-------|------|-------------|
 | **Sprint 2026-04-13** | Apr 13-24 | `sprint_plan_apr_13_24_2026_america_denver.md` | Advanced analytics |
-| **Sprint 2026-04-27** | Apr 27 - May 8 | `sprint_plan_apr_27_may_8_2026_america_denver.md` | XAI improvements |
+| **Sprint 34 (2026-04-27)** | Apr 27 - May 8 | `sprint_plan_apr_27_may_8_2026_america_denver.md` | Write-Quorum, Migrator, ER v1.5 |
 | **Sprint 2026-05-11** | May 11-22 | `sprint_plan_may_11_22_2026_america_denver.md` | Performance optimization |
 | **Sprint 2026-05-25** | May 25 - Jun 5 | `sprint_plan_may_25_jun_5_2026_america_denver.md` | Scale testing |
 | **Sprint 2026-06-08** | Jun 8-19 | `sprint_plan_jun_8_19_2026_america_denver.md` | Production hardening |
