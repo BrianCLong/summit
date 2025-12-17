@@ -1,5 +1,19 @@
 export type NarrativeGeneratorMode = 'rule-based' | 'llm';
 
+export type AgentType = 'rule-based' | 'llm';
+
+export interface AgentConfig {
+  entityId: string;
+  type: AgentType;
+  role: string;
+  goal: string;
+  llmConfig?: {
+    model: string;
+    temperature: number;
+    promptTemplate?: string;
+  };
+}
+
 export interface RelationshipEdge {
   targetId: string;
   strength: number;
@@ -51,7 +65,7 @@ export type NarrativeEventType =
   | 'information'
   | 'intervention'
   | 'system'
-  | 'shock';
+  | 'suppression';
 
 export interface NarrativeEvent {
   id: string;
@@ -69,19 +83,6 @@ export interface NarrativeEvent {
   description: string;
   scheduledTick?: number;
   metadata?: Record<string, unknown>;
-  // V2 fields
-  parentEventId?: string;
-  mutationIndex?: number;
-  tags?: string[];
-}
-
-export interface ShockDefinition {
-  type: string;
-  targetTag?: string; // e.g. "financial", "media"
-  targetIds?: string[];
-  intensity: number;
-  duration?: number;
-  description: string;
 }
 
 export interface StoryArc {
@@ -127,6 +128,7 @@ export interface SimulationConfig {
   tickIntervalMinutes: number;
   initialEntities: SimulationEntity[];
   initialParameters?: Array<{ name: string; value: number }>;
+  agents?: AgentConfig[];
   generatorMode?: NarrativeGeneratorMode;
   llmClient?: LLMClient;
   metadata?: Record<string, unknown>;
@@ -148,20 +150,4 @@ export interface SimulationSummary {
   themes: string[];
   activeEntities: number;
   activeEvents: number;
-}
-
-export interface ScenarioCluster {
-  label: string; // e.g., "High Volatility"
-  count: number;
-  representativeStateId: string;
-  avgSentiment: number;
-  avgInfluence: number;
-  sampleIds: string[];
-}
-
-export interface ScenarioResult {
-  scenarioId: string;
-  totalRuns: number;
-  clusters: ScenarioCluster[];
-  allStates: NarrativeState[]; // Note: might be heavy
 }
