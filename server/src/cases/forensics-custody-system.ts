@@ -461,6 +461,7 @@ export class ForensicsCustodySystem {
     const eventHash = createHash('sha256')
       .update(prevHash + JSON.stringify(payload))
       .digest('hex');
+    // @ts-ignore - crypto.sign() returns Buffer, which has toString(encoding)
     const signature = sign(null, Buffer.from(eventHash), this.signer.privateKey)
       .toString('base64');
     const record: CustodyEventRecord = {
