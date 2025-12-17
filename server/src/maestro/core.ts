@@ -81,14 +81,26 @@ export class Maestro {
       let result: string = '';
 
       if (task.agent.kind === 'llm') {
-        result = await this.llm.callCompletion(task.runId, task.id, {
-          model: task.agent.modelId!,
-          messages: [
-            { role: 'system', content: 'You are an execution agent.' },
-            { role: 'user', content: task.description },
-            ...(task.input.requestText ? [{ role: 'user', content: String(task.input.requestText) }] : []),
-          ],
-        });
+        const llmResult = await this.llm.callCompletion(
+          task.runId,
+          task.id,
+          {
+            model: task.agent.modelId!,
+            messages: [
+              { role: 'system', content: 'You are an execution agent.' },
+              { role: 'user', content: task.description },
+              ...(task.input.requestText
+                ? [{ role: 'user', content: String(task.input.requestText) }]
+                : []),
+            ],
+          },
+          {
+            feature: `maestro_${task.kind}`,
+            tenantId: typeof task.input?.tenantId === 'string' ? task.input.tenantId : undefined,
+            environment: process.env.NODE_ENV || 'unknown',
+          },
+        );
+        result = llmResult.content;
       } else {
         // TODO: shell tools, etc.
         result = 'TODO: implement non-LLM agent';
