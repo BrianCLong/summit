@@ -17,7 +17,7 @@ export class SpamDetector {
     const lower = text.toLowerCase();
 
     for (const indicator of spamIndicators) {
-      if (lower.includes(indicator)) spamScore += 0.2;
+      if (lower.includes(indicator)) {spamScore += 0.2;}
     }
 
     return {

@@ -132,13 +132,13 @@ export class FaceAnalyzer extends BaseComputerVisionModel implements IFaceAnalyz
     let clusterId = 0;
 
     for (let i = 0; i < faces.length; i++) {
-      if (assigned.has(i) || !faces[i].embedding) continue;
+      if (assigned.has(i) || !faces[i].embedding) {continue;}
 
       const cluster: Face[] = [faces[i]];
       assigned.add(i);
 
       for (let j = i + 1; j < faces.length; j++) {
-        if (assigned.has(j) || !faces[j].embedding) continue;
+        if (assigned.has(j) || !faces[j].embedding) {continue;}
 
         const similarity = await this.compareFaces(faces[i], faces[j]);
         if (similarity >= threshold) {
