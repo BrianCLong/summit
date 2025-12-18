@@ -44,3 +44,19 @@ def test_ci_gate_blocks_regressions() -> None:
     # Within tolerance passes
     candidate["summary"]["precision"] += 0.015
     _assert_thresholds(baseline, candidate, ["precision"], max_drop=0.01)
+
+
+def test_ci_gate_requires_expected_metrics() -> None:
+    baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    candidate = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    candidate["summary"].pop("precision", None)
+    with pytest.raises(SystemExit):
+        _assert_thresholds(baseline, candidate, ["precision"], max_drop=0.01)
+
+
+def test_ci_gate_validates_numeric_values() -> None:
+    baseline = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    candidate = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    candidate["summary"]["precision"] = "not-a-number"
+    with pytest.raises(SystemExit):
+        _assert_thresholds(baseline, candidate, ["precision"], max_drop=0.01)
