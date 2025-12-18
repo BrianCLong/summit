@@ -87,8 +87,8 @@ function HealthCard({
   }
 
   const getTrendIcon = () => {
-    if (trend === 'up') return '↗'
-    if (trend === 'down') return '↘'
+    if (trend === 'up') {return '↗'}
+    if (trend === 'down') {return '↘'}
     return ''
   }
 
