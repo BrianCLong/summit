@@ -3,6 +3,7 @@ import express from 'express';
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
+import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
@@ -31,6 +32,7 @@ import { metricsRoute } from './http/metricsRoute.js';
 const rbacRouter = require('./routes/rbacRoutes.js');
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
+import { licenseRuleValidationMiddleware } from './graphql/middleware/licenseRuleValidationMiddleware.js';
 import { getContext } from './lib/auth.js';
 import { getNeo4jDriver } from './db/neo4j.js';
 import { initializeTracing, getTracer } from './observability/tracer.js';
@@ -483,10 +485,12 @@ export const createApp = async () => {
     }
   });
 
-  const schema = makeExecutableSchema({
+  const executableSchema = makeExecutableSchema({
     typeDefs: typeDefs as any,
     resolvers: resolvers as any,
   });
+
+  const schema = applyMiddleware(executableSchema, licenseRuleValidationMiddleware);
 
   // GraphQL over HTTP
   const { persistedQueriesPlugin } = await import(
