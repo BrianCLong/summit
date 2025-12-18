@@ -1,0 +1,10 @@
+{
+  "alert": "HighMemoryUsage",
+  "description": "Memory usage is {{ $value }}% on instance {{ $labels.instance }}",
+  "expr": "(\n  memory_usage_bytes / memory_total_bytes * 100\n) > 85\n",
+  "runbook_url": null,
+  "service": "infrastructure",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "High memory usage detected"
+}

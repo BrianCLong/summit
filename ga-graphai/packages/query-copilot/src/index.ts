@@ -4,10 +4,7 @@ export { sandboxExecute } from './sandbox.js';
 export { UndoRedoManager } from './undoRedo.js';
 export { buildSelfEditEvaluationPlan } from './selfEditPlanner.js';
 export {
-  buildCopilotCostPreview,
-  type CopilotCostPreview,
-  type CopilotCostPreviewInput,
-  type ModelPricing,
-  type ModelSelectionImpact,
-  type TokenEstimates,
-} from './costPreview.js';
+  IntelGraphQueryMonitor,
+  defaultQueryMonitor,
+  type QueryMonitoringResult,
+} from './queryMonitor.js';
