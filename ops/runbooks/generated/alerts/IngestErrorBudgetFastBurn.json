@@ -1,0 +1,10 @@
+{
+  "alert": "IngestErrorBudgetFastBurn",
+  "description": "Streaming ingest burn rate >8x (5m). Canary rollback recommended.",
+  "expr": "(1 - (sum(rate(ingest_success_total[5m])) /\n  sum(rate(ingest_attempts_total[5m])))) / 0.005 > 8\n",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/observability-sre",
+  "service": "intelgraph-ingest",
+  "severity": "critical",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "Ingest error budget fast burn"
+}

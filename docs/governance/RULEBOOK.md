@@ -1,23 +1,34 @@
 # The Living Rulebook
 
-**Custodian:** Jules (Lawmaker)
-**Status:** Active
-**Version:** 1.0.0
+**Custodian:** Jules (Fundamental Lawmaker)
 
-This index organizes the complete body of law and governance for the ecosystem.
+This Rulebook is the central repository for all laws, standards, and protocols governing the ecosystem. It is maintained to ensure the **Law of Clarity** and **Law of Alignment**.
 
 ## I. Constitutional Layer
-*   **[The Constitution](CONSTITUTION.md):** The supreme law, defining purpose, identity, and the 9 Foundational Laws.
 
-## II. Governance Framework
-*   **[Meta-Governance Framework](META_GOVERNANCE.md):** Protocols for decision-making, standardization, conflict resolution, and risk management.
-*   **[Agent Mandates & Jurisdictions](AGENT_MANDATES.md):** Defined powers, limits, and roles for all agents.
+*   **[The Constitution](CONSTITUTION.md):** The supreme law, defining Identity, Purpose, and Foundational Laws.
+*   **[Meta-Governance Framework](META_GOVERNANCE.md):** The structure and protocols for decision-making and evolution.
+*   **[Agent Mandates](AGENT_MANDATES.md):** The powers, limits, and jurisdictions of all agent types.
 
-## III. Policy Library (External Links)
-These documents codify specific operational rules:
-*   [Security Policy](../SECURITY.md)
-*   [Contribution Guidelines](../../CONTRIBUTING.md)
-*   [Code of Conduct](../../CODE_OF_CONDUCT.md)
+## II. The Law Library (Technical Standards & Policies)
 
-## IV. Governance Log
-*   **2025-10-02:** Constitution ratified. Meta-Governance Framework established. Agent Mandates defined.
+*   **[Governance Charter](charter.md):** Specific project charter (IntelGraph GA Core).
+*   **[Mission, Vision & Values](mission-vision-values.md):** The moral compass of the organization.
+*   **[Data Retention Policy](data-retention-policy.md):** Rules for data lifecycle.
+*   **[Documentation Charter](documentation-charter.md):** Standards for documentation.
+*   **[Quality Assurance](quality-assurance.md):** QA standards and processes.
+*   **[Style Guide](style-guide.md):** Content and coding style guides.
+*   **[Project Structure](../AGENTS.md):** Technical guidelines for the repository.
+*   **[Security Policy](../SECURITY.md):** Security standards and reporting.
+*   **[Contribution Guidelines](../CONTRIBUTING.md):** Rules for contributing to the codebase.
+
+## III. Governance Records
+
+*   **[Service Inventory](SERVICE_INVENTORY.md):** List of governed services.
+*   **[Integration Points](INTEGRATION_POINTS.md):** System boundary definitions.
+*   **[Stakeholders](stakeholders.md):** Registry of project stakeholders.
+*   **[Benefits Register](benefits-register.md):** Tracked value realization.
+
+---
+
+*This Rulebook is a living document. Changes must follow the [Protocol for Standardization](META_GOVERNANCE.md#21-protocol-for-standardization).*

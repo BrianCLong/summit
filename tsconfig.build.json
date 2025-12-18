@@ -30,6 +30,13 @@
     { "path": "./packages/sdk-ts" },
     { "path": "./packages/types" },
 
+    // MLOps packages
+    { "path": "./packages/mlops-platform" },
+    { "path": "./packages/model-serving" },
+    { "path": "./packages/model-monitoring" },
+    { "path": "./packages/model-explainability" },
+    { "path": "./packages/training-orchestration" },
+
     // Services workspace
     { "path": "./services/agent-runtime" },
     { "path": "./services/api-gateway" },
@@ -43,6 +50,10 @@
     { "path": "./services/privacy" },
     { "path": "./services/prov-ledger" },
     { "path": "./services/spar" },
-    { "path": "./services/trr" }
+    { "path": "./services/trr" },
+
+    // MLOps services
+    { "path": "./services/mlops-service" },
+    { "path": "./services/model-registry-service" }
   ]
 }
