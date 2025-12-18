@@ -92,3 +92,9 @@ main().catch((error) => {
 // Export for use as a library
 export { QueueManager, QueueManagerAPI, JobPriority };
 export * from './types/index.js';
+
+// Export distributed queue components
+export * from './distributed/index.js';
+export * from './notifications/index.js';
+export * from './orchestration/index.js';
+export * from './e2e/index.js';

@@ -68,3 +68,7 @@ echo "  1. PRs will auto-merge when 'Stabilization: Build & Unit Tests' passes"
 echo "  2. Auto-green workflow will auto-fix formatting/linting on each PR"
 echo "  3. Monitor progress: gh pr list --state open"
 echo ""
+
+  # Run the backlog monitor
+  echo "Running Backlog Monitor..."
+  ./scripts/monitor-backlog.sh
