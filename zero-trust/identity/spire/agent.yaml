@@ -1,0 +1,300 @@
+# SPIRE Agent DaemonSet
+# Runs on every node to provide workload identity
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: spire-agent
+  namespace: spire-system
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: spire-agent-cluster-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "nodes/proxy"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: spire-agent-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: spire-agent-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: spire-agent
+    namespace: spire-system
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-agent-config
+  namespace: spire-system
+data:
+  agent.conf: |
+    agent {
+      data_dir = "/run/spire"
+      log_level = "INFO"
+      log_format = "json"
+      server_address = "spire-server.spire-system.svc.cluster.local"
+      server_port = "8081"
+      socket_path = "/run/spire/sockets/agent.sock"
+      trust_domain = "intelgraph.local"
+
+      # Enable admin API for SVID management
+      admin_socket_path = "/run/spire/sockets/admin.sock"
+
+      # Authorized delegates for workload API
+      authorized_delegates = [
+        "spiffe://intelgraph.local/ns/istio-system/sa/istio-proxy"
+      ]
+    }
+
+    plugins {
+      # Node attestor - Kubernetes PSAT
+      NodeAttestor "k8s_psat" {
+        plugin_data {
+          cluster = "intelgraph-prod"
+          token_path = "/var/run/secrets/tokens/spire-agent"
+        }
+      }
+
+      # Workload attestor - Kubernetes
+      WorkloadAttestor "k8s" {
+        plugin_data {
+          skip_kubelet_verification = false
+          disable_container_selectors = false
+          use_new_container_locator = true
+          verbose_container_locator_logs = false
+        }
+      }
+
+      # Key manager
+      KeyManager "memory" {
+        plugin_data {}
+      }
+    }
+
+    # Health checks
+    health_checks {
+      listener_enabled = true
+      bind_address = "0.0.0.0"
+      bind_port = "8080"
+      live_path = "/live"
+      ready_path = "/ready"
+    }
+
+    # Telemetry
+    telemetry {
+      Prometheus {
+        host = "0.0.0.0"
+        port = 9988
+      }
+    }
+
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: spire-agent
+  namespace: spire-system
+  labels:
+    app: spire-agent
+    app.kubernetes.io/name: spire-agent
+    app.kubernetes.io/component: identity
+spec:
+  selector:
+    matchLabels:
+      app: spire-agent
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: spire-agent
+        app.kubernetes.io/name: spire-agent
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9988"
+    spec:
+      serviceAccountName: spire-agent
+      hostPID: true
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      priorityClassName: system-node-critical
+      initContainers:
+        - name: init-socket
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              mkdir -p /run/spire/sockets
+              chmod 755 /run/spire/sockets
+          volumeMounts:
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+          securityContext:
+            runAsUser: 0
+      containers:
+        - name: spire-agent
+          image: ghcr.io/spiffe/spire-agent:1.9.0
+          args: ["-config", "/run/spire/config/agent.conf"]
+          ports:
+            - name: health
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9988
+              protocol: TCP
+          volumeMounts:
+            - name: spire-config
+              mountPath: /run/spire/config
+              readOnly: true
+            - name: spire-bundle
+              mountPath: /run/spire/bundle
+              readOnly: true
+            - name: spire-agent-socket
+              mountPath: /run/spire/sockets
+            - name: spire-token
+              mountPath: /var/run/secrets/tokens
+          livenessProbe:
+            httpGet:
+              path: /live
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+          securityContext:
+            privileged: true
+      volumes:
+        - name: spire-config
+          configMap:
+            name: spire-agent-config
+        - name: spire-bundle
+          configMap:
+            name: spire-bundle
+        - name: spire-agent-socket
+          hostPath:
+            path: /run/spire/sockets
+            type: DirectoryOrCreate
+        - name: spire-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  audience: spire-server
+                  expirationSeconds: 7200
+                  path: spire-agent
+
+---
+# CSI Driver for workload socket injection
+apiVersion: storage.k8s.io/v1
+kind: CSIDriver
+metadata:
+  name: "csi.spiffe.io"
+spec:
+  attachRequired: false
+  podInfoOnMount: true
+  fsGroupPolicy: None
+  volumeLifecycleModes:
+    - Ephemeral
+
+---
+# Network Policy for SPIRE Agent
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: spire-agent-network-policy
+  namespace: spire-system
+spec:
+  podSelector:
+    matchLabels:
+      app: spire-agent
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow workload API from all namespaces
+    - from:
+        - namespaceSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080
+    # Allow metrics scraping
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9988
+  egress:
+    # Allow to SPIRE server
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: spire-system
+          podSelector:
+            matchLabels:
+              app: spire-server
+      ports:
+        - protocol: TCP
+          port: 8081
+    # Allow DNS
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow Kubelet API
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 10250
+
+---
+# ServiceMonitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: spire-agent-monitor
+  namespace: spire-system
+  labels:
+    app: spire-agent
+spec:
+  selector:
+    matchLabels:
+      app: spire-agent
+  endpoints:
+    - port: metrics
+      interval: 30s
+      path: /metrics
