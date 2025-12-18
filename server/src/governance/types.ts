@@ -1,52 +1,49 @@
-export type AgentStatus = 'DRAFT' | 'ACTIVE' | 'REVOKED' | 'DEPRECATED';
+export type PolicyAction = 'ALLOW' | 'DENY' | 'ESCALATE';
+export type Stage = 'data' | 'train' | 'alignment' | 'runtime';
 
-export type PolicyType = 'OPA_REGO' | 'MANUAL_APPROVAL' | 'THRESHOLD';
+export interface PolicyRule {
+  field: string;
+  operator: 'eq' | 'neq' | 'lt' | 'gt' | 'in' | 'not_in' | 'contains';
+  value: any;
+}
 
-export interface AgentIdentity {
+export interface Policy {
   id: string;
-  tenantId: string;
-  name: string;
   description?: string;
-  version: string;
-  capabilities: string[];
-  complianceTags: string[];
-  status: AgentStatus;
-  ownerId?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  scope: {
+    stages: Stage[];
+    tenants: string[]; // "*" for all
+  };
+  rules: PolicyRule[];
+  action: PolicyAction; // Action to take if rules match (or if rules FAIL? usually rules define violation)
+  // Let's assume rules define "Allowed" conditions or "Blocked" conditions.
+  // For simplicity: If ALL rules match, the policy applies.
+  // Wait, usually policies are "Block if toxicity > 0.8".
+  // So if rules match, we return the action (e.g., DENY).
 }
 
-export interface AgentPolicy {
-  id: string;
-  agentId: string;
-  name: string;
-  policyType: PolicyType;
-  configuration: Record<string, any>;
-  isBlocking: boolean;
-  createdAt: Date;
-}
-
-export interface AgentROIMetric {
-  id: string;
-  agentId: string;
-  metricType: string;
-  value: number;
-  context?: Record<string, any>;
-  recordedAt: Date;
-}
-
-export interface CreateAgentInput {
-  name: string;
+export interface PolicyContext {
+  stage: Stage;
   tenantId: string;
-  description?: string;
-  capabilities?: string[];
-  complianceTags?: string[];
-  ownerId?: string;
+  region?: string;
+  // Dynamic payload to check against rules
+  payload: Record<string, any>;
 }
 
-export interface UpdateAgentInput {
-  name?: string;
-  status?: AgentStatus;
-  capabilities?: string[];
-  complianceTags?: string[];
+export interface GovernanceDecision {
+  action: PolicyAction;
+  reasons: string[];
+  policyIds: string[];
+}
+
+export interface TelemetryEvent {
+  id: string;
+  kind: string; // e.g., 'policy_violation', 'inference', 'training_step'
+  runId: string;
+  modelId?: string;
+  tenantId?: string;
+  timestamp: string;
+  details: Record<string, any>;
+  // For graph linking
+  previousEventId?: string;
 }

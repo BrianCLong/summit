@@ -289,7 +289,7 @@ export function detectCommunitiesLabelPropagation(
     for (const node of shuffledNodes) {
       const neighbors = adjacency.get(node) || new Map();
 
-      if (neighbors.size === 0) continue;
+      if (neighbors.size === 0) {continue;}
 
       // Count label frequencies weighted by edge weight
       const labelWeights = new Map<number, number>();
@@ -410,7 +410,7 @@ function calculateModularity(
   totalWeight: number,
   resolution: number,
 ): number {
-  if (totalWeight === 0) return 0;
+  if (totalWeight === 0) {return 0;}
 
   // Calculate sum of weights within each community
   let modularity = 0;
@@ -452,7 +452,7 @@ function modularityGain(
   totalWeight: number,
   resolution: number,
 ): number {
-  if (fromCommunity === toCommunity) return 0;
+  if (fromCommunity === toCommunity) {return 0;}
 
   const neighbors = edges.nodes.get(node) || new Map();
   const nodeWeight = nodeWeights.get(node) || 0;
