@@ -65,7 +65,7 @@ export class SandboxRegistry {
    */
   async get(id: string): Promise<SandboxConfig | null> {
     const data = await this.redis.get(this.keyPrefix + id);
-    if (!data) return null;
+    if (!data) {return null;}
 
     const parsed = JSON.parse(data);
     return {
@@ -80,7 +80,7 @@ export class SandboxRegistry {
    */
   async delete(id: string): Promise<boolean> {
     const config = await this.get(id);
-    if (!config) return false;
+    if (!config) {return false;}
 
     await this.redis.del(this.keyPrefix + id);
     await this.redis.srem(`tenant:${config.tenantId}:sandboxes`, id);
@@ -128,7 +128,7 @@ export class SandboxRegistry {
    */
   async getExecution(sandboxId: string, executionId: string): Promise<ExecutionResult | null> {
     const data = await this.redis.get(`execution:${sandboxId}:${executionId}`);
-    if (!data) return null;
+    if (!data) {return null;}
 
     const parsed = JSON.parse(data);
     return {
@@ -149,7 +149,7 @@ export class SandboxRegistry {
    */
   async extendTTL(id: string, additionalSeconds: number): Promise<boolean> {
     const ttl = await this.redis.ttl(this.keyPrefix + id);
-    if (ttl < 0) return false;
+    if (ttl < 0) {return false;}
 
     await this.redis.expire(this.keyPrefix + id, ttl + additionalSeconds);
     return true;
@@ -159,7 +159,7 @@ export class SandboxRegistry {
    * Get registry stats
    */
   async getStats(): Promise<{ activeSandboxes: number; totalExecutions: number }> {
-    const keys = await this.redis.keys(this.keyPrefix + '*');
+    const keys = await this.redis.keys(`${this.keyPrefix  }*`);
     const execKeys = await this.redis.keys('execution:*');
 
     return {
