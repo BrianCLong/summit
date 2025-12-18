@@ -53,6 +53,9 @@ import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 <<<<<<< HEAD
+import siemPlatformRouter from './routes/siem-platform.js';
+=======
+<<<<<<< HEAD
 import maestroRouter from './routes/maestro.js';
 =======
 <<<<<<< HEAD
@@ -98,6 +101,7 @@ import queryReplayRouter from './routes/query-replay.js';
 =======
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -326,6 +330,9 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
 <<<<<<< HEAD
+  app.use('/api/siem-platform', siemPlatformRouter);
+=======
+<<<<<<< HEAD
   app.use('/api/maestro', maestroRouter);
 =======
 <<<<<<< HEAD
@@ -363,6 +370,7 @@ export const createApp = async () => {
 =======
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
