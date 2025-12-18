@@ -21,16 +21,17 @@ export function registerRoomHandlers(
       socket,
       rateLimiter,
       async (
-        data: { room: string; metadata?: Record<string, unknown> },
+        data: { room: string; metadata?: unknown },
         ack?: (response: { success: boolean; error?: string }) => void
       ) => {
         const startTime = Date.now();
 
         try {
           const { room, metadata } = data;
+          const validMetadata = metadata as Record<string, unknown> | undefined;
 
           // Join room via room manager
-          const result = await roomManager.join(socket, room, metadata);
+          const result = await roomManager.join(socket, room, validMetadata);
 
           if (!result.success) {
             ack?.({ success: false, error: result.error });

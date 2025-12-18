@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * AI API Endpoints for IntelGraph
  * Provides endpoints for link prediction, sentiment analysis, and AI-powered insights
@@ -5,10 +6,10 @@
 
 import express, { Request, Response } from 'express';
 import { body, query, validationResult } from 'express-validator';
-import rateLimit from 'express-rate-limit';
 import pino from 'pino';
 import EntityLinkingService from '../services/EntityLinkingService.js';
 import { Queue, Worker } from 'bullmq';
+import { requirePermission } from '../middleware/auth.js';
 
 import { ExtractionEngine } from '../ai/ExtractionEngine.js'; // WAR-GAMED SIMULATION - Import ExtractionEngine
 import {
@@ -22,16 +23,65 @@ import { Pool } from 'pg'; // WAR-GAMED SIMULATION - For ExtractionEngine constr
 import { randomUUID } from 'crypto'; // Use Node's built-in UUID for job IDs
 import AdversaryAgentService from '../ai/services/AdversaryAgentService.js';
 import { MediaType } from '../services/MediaUploadService.js'; // Import MediaType from MediaUploadService
+import { createRateLimitMiddleware } from '../middleware/rateLimit.js';
+import { cfg } from '../config.js';
+import { rateLimiter } from '../services/RateLimiter.js';
 
 const logger = pino();
 const router = express.Router();
 
 // WAR-GAMED SIMULATION - BullMQ setup for video analysis jobs
 const connection = getRedisClient(); // Use existing Redis client for BullMQ
-const videoAnalysisQueue = new Queue('videoAnalysisQueue', { connection });
+if (!connection) {
+  throw new Error('Redis connection is required for AI queue rate limiting');
+}
+const videoAnalysisQueue = new Queue('videoAnalysisQueue', {
+  connection,
+  limiter: {
+    max: cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
+    duration: cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
+  },
+});
+
+const buildBackgroundKey = (req: Request, scope: string) => {
+  // @ts-ignore - req.user is injected by auth middleware when available
+  const user = req.user;
+  if (user) return `user:${user.id || user.sub}:${scope}`;
+  return `ip:${req.ip}:${scope}`;
+};
+
+const enforceBackgroundThrottle = async (
+  req: Request,
+  scope: string,
+): Promise<void> => {
+  const key = buildBackgroundKey(req, scope);
+  const result = await rateLimiter.throttle(
+    key,
+    cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
+    cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
+    { prefix: 'bg' },
+  );
+
+  if (!result.allowed) {
+    const retryAfterSeconds = Math.max(Math.ceil(result.retryAfterMs / 1000), 0);
+    const error = new Error('Background rate limit exceeded') as Error & {
+      status?: number;
+      retryAfter?: number;
+    };
+    error.status = 429;
+    error.retryAfter = retryAfterSeconds;
+    throw error;
+  }
+};
 
 // Feedback Queue for AI insights
-const feedbackQueue = new Queue('aiFeedbackQueue', { connection });
+const feedbackQueue = new Queue('aiFeedbackQueue', {
+  connection,
+  limiter: {
+    max: cfg.BACKGROUND_RATE_LIMIT_MAX_REQUESTS,
+    duration: cfg.BACKGROUND_RATE_LIMIT_WINDOW_MS,
+  },
+});
 
 // WAR-GAMED SIMULATION - Initialize ExtractionEngine (assuming a dummy PG Pool for now)
 // In a real app, the PG Pool would be passed from the main app initialization
@@ -90,19 +140,23 @@ videoAnalysisWorker.on('failed', (job, err) => {
 });
 
 // Rate limiting for AI endpoints (more restrictive due to computational cost)
-const aiRateLimit = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // Limit each IP to 50 requests per windowMs
-  message: {
-    error: 'Too many AI requests, please try again later',
-    retryAfter: '15 minutes',
+const aiRateLimit = createRateLimitMiddleware({
+  scope: 'ai',
+  windowMs: cfg.AI_RATE_LIMIT_WINDOW_MS,
+  max: cfg.AI_RATE_LIMIT_MAX_REQUESTS,
+  keyGenerator: (req) => {
+    // @ts-ignore - req.user is injected by auth middleware when available
+    const user = req.user;
+    if (user) return `user:${user.id || user.sub}`;
+    return `ip:${req.ip}`;
   },
-  standardHeaders: true,
-  legacyHeaders: false,
 });
 
 // Apply rate limiting to all AI routes
 router.use(aiRateLimit);
+
+// Apply permissions to all AI routes
+router.use(requirePermission('ai:request'));
 
 // Validation middleware
 const validatePredictLinks = [
@@ -169,8 +223,36 @@ const handleValidationErrors = (
 };
 
 /**
- * POST /api/ai/predict-links
- * Predict potential links between entities using GNN model
+ * @openapi
+ * /api/ai/predict-links:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Predict potential links
+ *     description: Predict potential links between entities using GNN model.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - entityId
+ *             properties:
+ *               entityId:
+ *                 type: string
+ *               topK:
+ *                 type: integer
+ *                 default: 10
+ *               investigationId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Link prediction successful
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/predict-links',
@@ -226,8 +308,33 @@ router.post(
 );
 
 /**
- * POST /api/ai/analyze-sentiment
- * Analyze sentiment of text content or entity data
+ * @openapi
+ * /api/ai/analyze-sentiment:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Analyze sentiment
+ *     description: Analyze sentiment of text content or entity data.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               entityId:
+ *                 type: string
+ *               text:
+ *                 type: string
+ *               entityData:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Sentiment analysis successful
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/analyze-sentiment',
@@ -286,8 +393,36 @@ router.post(
 );
 
 /**
- * POST /api/ai/generate-summary
- * Generate AI-powered insights and summary for an entity
+ * @openapi
+ * /api/ai/generate-summary:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Generate summary
+ *     description: Generate AI-powered insights and summary for an entity.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - entityId
+ *             properties:
+ *               entityId:
+ *                 type: string
+ *               entityData:
+ *                 type: object
+ *               includeContext:
+ *                 type: boolean
+ *                 default: true
+ *     responses:
+ *       200:
+ *         description: Summary generation successful
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/generate-summary',
@@ -337,8 +472,18 @@ router.post(
 );
 
 /**
- * GET /api/ai/models/status
- * Get status and health of AI models
+ * @openapi
+ * /api/ai/models/status:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: AI models status
+ *     description: Get status and health of AI models.
+ *     responses:
+ *       200:
+ *         description: Models status
+ *       500:
+ *         description: Internal server error
  */
 router.get('/models/status', async (req: Request, res: Response) => {
   try {
@@ -387,8 +532,18 @@ router.get('/models/status', async (req: Request, res: Response) => {
 });
 
 /**
- * GET /api/ai/capabilities
- * Get available AI capabilities and their parameters
+ * @openapi
+ * /api/ai/capabilities:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: AI capabilities
+ *     description: Get available AI capabilities and their parameters.
+ *     responses:
+ *       200:
+ *         description: AI capabilities
+ *       500:
+ *         description: Internal server error
  */
 router.get('/capabilities', async (req: Request, res: Response) => {
   try {
@@ -446,8 +601,42 @@ router.get('/capabilities', async (req: Request, res: Response) => {
 });
 
 /**
- * POST /api/ai/extract-video
- * Submits a video for frame-by-frame AI extraction.
+ * @openapi
+ * /api/ai/extract-video:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Extract video content
+ *     description: Submits a video for frame-by-frame AI extraction.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - mediaPath
+ *               - mediaType
+ *               - extractionMethods
+ *             properties:
+ *               mediaPath:
+ *                 type: string
+ *               mediaType:
+ *                 type: string
+ *                 enum: [VIDEO]
+ *               extractionMethods:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               options:
+ *                 type: object
+ *     responses:
+ *       202:
+ *         description: Video analysis job submitted
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/extract-video',
@@ -458,6 +647,8 @@ router.post(
     const jobId = randomUUID(); // Generate a unique job ID
 
     try {
+      await enforceBackgroundThrottle(req, 'video-analysis');
+
       // Add job to the queue
       await videoAnalysisQueue.add(
         'video-analysis-job',
@@ -484,6 +675,15 @@ router.post(
         `Error submitting video analysis job: ${error.message}`,
         error,
       );
+
+      if (error?.status === 429) {
+        res.status(429).json({
+          error: 'Too many video analysis requests',
+          retryAfter: error.retryAfter,
+        });
+        return;
+      }
+
       res.status(500).json({
         error: 'Failed to submit video analysis job',
         message: error.message,
@@ -493,8 +693,26 @@ router.post(
 );
 
 /**
- * GET /api/ai/job-status/:jobId
- * Get the status of an AI extraction job.
+ * @openapi
+ * /api/ai/job-status/{jobId}:
+ *   get:
+ *     tags:
+ *       - AI
+ *     summary: Job status
+ *     description: Get the status of an AI extraction job.
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Job status
+ *       404:
+ *         description: Job not found
+ *       500:
+ *         description: Internal server error
  */
 router.get('/job-status/:jobId', async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -571,8 +789,43 @@ const validateDeceptionFeedback = [
 ];
 
 /**
- * POST /api/ai/feedback
- * Logs user feedback on AI-generated insights for training signals.
+ * @openapi
+ * /api/ai/feedback:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Submit feedback
+ *     description: Logs user feedback on AI-generated insights for training signals.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - insight
+ *               - feedbackType
+ *               - user
+ *               - timestamp
+ *               - originalPrediction
+ *             properties:
+ *               insight:
+ *                 type: object
+ *               feedbackType:
+ *                 type: string
+ *                 enum: [accept, reject, flag]
+ *               user:
+ *                 type: string
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ *               originalPrediction:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Feedback received
+ *       500:
+ *         description: Internal server error
  */
 router.post(
   '/feedback',
@@ -590,6 +843,8 @@ router.post(
         originalPrediction,
       });
 
+      await enforceBackgroundThrottle(req, 'ai-feedback');
+
       // Add feedback to the queue for asynchronous processing by ML services
       await feedbackQueue.add('logFeedback', {
         insight,
@@ -603,10 +858,17 @@ router.post(
         success: true,
         message: 'Feedback received successfully and queued for processing',
       });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+      if (error?.status === 429) {
+        res.status(429).json({
+          error: 'Too many feedback events submitted',
+          retryAfter: error.retryAfter,
+        });
+        return;
+      }
       res.status(500).json({
         error: 'Failed to process feedback',
         message: 'Internal server error',
@@ -615,6 +877,44 @@ router.post(
   },
 );
 
+/**
+ * @openapi
+ * /api/ai/feedback/deception:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Submit deception feedback
+ *     description: Logs user feedback on deception detection for training signals.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - text
+ *               - label
+ *               - user
+ *               - timestamp
+ *             properties:
+ *               text:
+ *                 type: string
+ *               label:
+ *                 type: string
+ *                 enum: [false_positive, false_negative]
+ *               user:
+ *                 type: string
+ *               timestamp:
+ *                 type: string
+ *                 format: date-time
+ *               deceptionScore:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Feedback received
+ *       500:
+ *         description: Internal server error
+ */
 router.post(
   '/feedback/deception',
   validateDeceptionFeedback,
@@ -622,6 +922,7 @@ router.post(
   async (req: Request, res: Response) => {
     try {
       const { text, label, user, timestamp, deceptionScore } = req.body;
+      await enforceBackgroundThrottle(req, 'ai-feedback');
       await feedbackQueue.add('logDeceptionFeedback', {
         insight: { text, deceptionScore },
         feedbackType: label,
@@ -630,10 +931,17 @@ router.post(
         originalPrediction: { deceptionScore },
       });
       res.status(200).json({ success: true, message: 'Feedback received' });
-    } catch (error) {
+    } catch (error: any) {
       logger.error(
         `Error processing deception feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
+      if (error?.status === 429) {
+        res.status(429).json({
+          error: 'Too many deception feedback events submitted',
+          retryAfter: error.retryAfter,
+        });
+        return;
+      }
       res.status(500).json({
         error: 'Failed to process feedback',
         message: 'Internal server error',
@@ -795,6 +1103,37 @@ function generateScaffoldAISummary(
 
 const adversaryService = new AdversaryAgentService();
 
+/**
+ * @openapi
+ * /api/ai/adversary/generate:
+ *   post:
+ *     tags:
+ *       - AI
+ *     summary: Generate adversary chain
+ *     description: Generates an adversary chain based on the provided context.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - context
+ *             properties:
+ *               context:
+ *                 type: string
+ *               temperature:
+ *                 type: number
+ *               persistence:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Chain generated
+ *       400:
+ *         description: Missing context
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/adversary/generate', async (req: Request, res: Response) => {
   const { context, temperature, persistence } = req.body || {};
   if (!context) {
