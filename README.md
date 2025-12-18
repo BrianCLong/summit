@@ -58,6 +58,11 @@ make smoke              # golden path automation against seeded data
 - `docs/ONBOARDING.md` – day-one onboarding.
 - `docs/README.md` – documentation index, policies, and archived plans.
 
+### Repo Map
+
+- [Shipping Graph](docs/SHIPPING_GRAPH.md) – canonical buildable units and how they compose.
+- [Repository Boundaries](docs/REPO_BOUNDARIES.md) – definitions for shipping vs. labs vs. archive.
+
 ### Production Secrets & Guardrails
 
 - `.env.example` is **DEV-ONLY** and documents every credential. `.env.production.sample` contains empty placeholders for production charts and pipelines.
