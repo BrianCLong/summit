@@ -23,11 +23,13 @@ Use this page as the fast path to the docs you need. The golden path details liv
 ## Security & Governance
 
 - **[SECURITY_AND_PRIVACY.md](SECURITY_AND_PRIVACY.md)** – Security posture and privacy controls.
+- **[AI_GOVERNANCE_AGENT_FLEET.md](AI_GOVERNANCE_AGENT_FLEET.md)** – AI governance framework, agent fleet management, and incident response procedures.
 - **[COMPLIANCE.md](COMPLIANCE.md)** and **[DATA_RETENTION_POLICY.md](DATA_RETENTION_POLICY.md)** – Compliance, retention, and auditing references.
 - **[CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md)** – Expected behavior and reporting channels.
 
 ## Product & Architecture References
 
+- **[RFI_CAPABILITIES_SUMMARY.md](RFI_CAPABILITIES_SUMMARY.md)** – RFI-ready capabilities summary with metrics and differentiators.
 - **[ARCHITECTURE.md](ARCHITECTURE.md)** – Core components, data flows, and dependencies.
 - **[DATA_MODEL.md](DATA_MODEL.md)** – Graph schema and storage expectations.
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** and **[README-DEPLOY.md](README-DEPLOY.md)** – Deployment topologies and environment guidance.

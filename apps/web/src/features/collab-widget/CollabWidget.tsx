@@ -67,9 +67,9 @@ export const CollabWidget: React.FC<Props> = ({ entityId, client }) => {
 
   const onKey = (e: React.KeyboardEvent<HTMLLIElement>) => {
     if (e.key === 'ArrowDown')
-      (e.currentTarget.nextElementSibling as HTMLElement)?.focus()
+      {(e.currentTarget.nextElementSibling as HTMLElement)?.focus()}
     if (e.key === 'ArrowUp')
-      (e.currentTarget.previousElementSibling as HTMLElement)?.focus()
+      {(e.currentTarget.previousElementSibling as HTMLElement)?.focus()}
   }
 
   return (
