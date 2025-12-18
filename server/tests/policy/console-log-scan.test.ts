@@ -1,3 +1,4 @@
+import { describe, test, expect } from '@jest/globals';
 describe('findConsoleLogViolations', () => {
   test('flags console.log calls on added lines', () => {
     const {

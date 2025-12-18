@@ -1,8 +1,16 @@
 module.exports = {
-  extends: ['../../.eslintrc.cjs'],
+  env: {
+    node: true,
+    es2022: true
+  },
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: ['./tsconfig.json'],
-    tsconfigRootDir: __dirname
+    sourceType: 'module'
+  },
+  plugins: ['@typescript-eslint', 'import'],
+  extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:import/recommended', 'prettier'],
+  rules: {
+    'import/no-unresolved': 'off'
   },
   ignorePatterns: ['dist']
 };
