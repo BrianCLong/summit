@@ -1,6 +1,6 @@
 {
   "name": "@summit/cryptanalysis-engine",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Cryptographic analysis - Training Framework",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
