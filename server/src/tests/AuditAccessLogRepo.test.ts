@@ -5,6 +5,7 @@
 
 import { Pool } from 'pg';
 import { AuditAccessLogRepo, AuditAccessLogInput } from '../repos/AuditAccessLogRepo';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('AuditAccessLogRepo', () => {
   let mockPool: jest.Mocked<Pool>;

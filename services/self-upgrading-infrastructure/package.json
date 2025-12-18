@@ -1,6 +1,6 @@
 {
   "name": "@summit/self-upgrading-infrastructure",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Self-upgrading digital infrastructure that senses market trends, competitive threats, and regulatory changes",
   "type": "module",
   "main": "dist/index.js",

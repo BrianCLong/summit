@@ -1,0 +1,19 @@
+FROM node:20-alpine AS base
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY companyos ./companyos
+
+RUN corepack enable && pnpm install --filter @companyos/companyos-api...
+
+RUN pnpm --filter @companyos/companyos-api build
+
+FROM node:20-alpine
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=base /app/companyos/services/companyos-api/dist ./dist
+COPY companyos/services/companyos-api/package.json ./
+
+CMD ["node", "dist/index.js"]

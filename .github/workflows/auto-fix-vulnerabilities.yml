@@ -1,0 +1,287 @@
+name: Auto-Fix Vulnerabilities
+
+on:
+  workflow_dispatch:
+    inputs:
+      severity_threshold:
+        description: 'Minimum severity to fix'
+        type: choice
+        options:
+          - critical
+          - high
+          - medium
+        default: high
+      max_fixes:
+        description: 'Maximum number of fixes to apply'
+        type: number
+        default: 10
+      create_pr:
+        description: 'Create pull request with fixes'
+        type: boolean
+        default: true
+      dry_run:
+        description: 'Dry run mode (preview only)'
+        type: boolean
+        default: false
+  schedule:
+    # Run weekly on Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+
+permissions:
+  contents: write
+  pull-requests: write
+  security-events: read
+
+jobs:
+  scan-and-fix:
+    name: Scan and Auto-Fix
+    runs-on: ubuntu-latest
+    outputs:
+      fixes-applied: ${{ steps.fix.outputs.count }}
+      pr-url: ${{ steps.pr.outputs.url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run vulnerability scan
+        id: scan
+        run: |
+          # Install Trivy
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+          # Run scan
+          trivy fs . \
+            --format json \
+            --output trivy-scan.json \
+            --severity "CRITICAL,HIGH,MEDIUM" \
+            --scanners vuln \
+            || true
+
+          # Count vulnerabilities by severity
+          CRITICAL=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy-scan.json)
+          HIGH=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy-scan.json)
+          MEDIUM=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' trivy-scan.json)
+          FIXABLE=$(jq '[.Results[]?.Vulnerabilities[]? | select(.FixedVersion != null and .FixedVersion != "")] | length' trivy-scan.json)
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "medium=$MEDIUM" >> $GITHUB_OUTPUT
+          echo "fixable=$FIXABLE" >> $GITHUB_OUTPUT
+
+          echo "📊 Vulnerability Scan Results:"
+          echo "   Critical: $CRITICAL"
+          echo "   High: $HIGH"
+          echo "   Medium: $MEDIUM"
+          echo "   Fixable: $FIXABLE"
+
+      - name: Configure Git
+        if: steps.scan.outputs.fixable > 0
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Apply vulnerability fixes
+        id: fix
+        if: steps.scan.outputs.fixable > 0
+        env:
+          SEVERITY_THRESHOLD: ${{ github.event.inputs.severity_threshold || 'high' }}
+          MAX_FIXES: ${{ github.event.inputs.max_fixes || '10' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+        run: |
+          BRANCH_NAME="security/auto-fix-$(date +%Y%m%d-%H%M%S)"
+          FIXES_APPLIED=0
+          FIXES_LOG=""
+
+          # Filter vulnerabilities based on severity threshold
+          case "$SEVERITY_THRESHOLD" in
+            critical)
+              SEVERITY_FILTER='select(.Severity == "CRITICAL")'
+              ;;
+            high)
+              SEVERITY_FILTER='select(.Severity == "CRITICAL" or .Severity == "HIGH")'
+              ;;
+            medium)
+              SEVERITY_FILTER='select(.Severity == "CRITICAL" or .Severity == "HIGH" or .Severity == "MEDIUM")'
+              ;;
+          esac
+
+          # Get fixable vulnerabilities
+          VULNS=$(jq -r ".Results[]?.Vulnerabilities[]? | $SEVERITY_FILTER | select(.FixedVersion != null and .FixedVersion != \"\") | \"\(.VulnerabilityID)|\(.PkgName)|\(.InstalledVersion)|\(.FixedVersion)|\(.Severity)\"" trivy-scan.json | sort -u | head -n "$MAX_FIXES")
+
+          if [ -z "$VULNS" ]; then
+            echo "No fixable vulnerabilities found matching criteria"
+            echo "count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [ "$DRY_RUN" == "true" ]; then
+            echo "🔍 DRY RUN MODE - No changes will be made"
+            echo ""
+            echo "Would fix the following vulnerabilities:"
+            echo "$VULNS" | while IFS='|' read -r CVE PKG CURRENT FIXED SEV; do
+              echo "  - $CVE: $PKG $CURRENT → $FIXED ($SEV)"
+            done
+            echo "count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Create fix branch
+          git checkout -b "$BRANCH_NAME"
+
+          echo "$VULNS" | while IFS='|' read -r CVE PKG CURRENT FIXED SEV; do
+            echo "🔧 Fixing $CVE: $PKG $CURRENT → $FIXED"
+
+            # Try pnpm update first
+            if pnpm update "$PKG" 2>/dev/null; then
+              # Check if changes were made
+              if git diff --quiet; then
+                echo "   ⚠️ No changes detected for $PKG"
+                continue
+              fi
+
+              git add -A
+              git commit -m "fix(security): update $PKG to fix $CVE
+
+Vulnerability: $CVE
+Severity: $SEV
+Package: $PKG
+Previous Version: $CURRENT
+Fixed Version: $FIXED
+
+This fix was automatically applied by the security auto-fix workflow."
+
+              FIXES_APPLIED=$((FIXES_APPLIED + 1))
+              FIXES_LOG="$FIXES_LOG
+- **$CVE** ($SEV): \`$PKG\` $CURRENT → $FIXED"
+
+              echo "   ✅ Fixed $CVE"
+            else
+              echo "   ❌ Failed to update $PKG"
+            fi
+          done
+
+          echo "count=$FIXES_APPLIED" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "log<<EOF" >> $GITHUB_OUTPUT
+          echo "$FIXES_LOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          if [ "$FIXES_APPLIED" -gt 0 ]; then
+            git push -u origin "$BRANCH_NAME"
+            echo "📤 Pushed $FIXES_APPLIED fixes to $BRANCH_NAME"
+          fi
+
+      - name: Run tests after fixes
+        if: steps.fix.outputs.count > 0
+        continue-on-error: true
+        run: |
+          pnpm test:quick 2>&1 | tee test-output.txt || true
+
+          if grep -q "PASS\|passed" test-output.txt; then
+            echo "tests_passed=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests_passed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        id: pr
+        if: steps.fix.outputs.count > 0 && (github.event.inputs.create_pr == 'true' || github.event.inputs.create_pr == '')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FIXES_COUNT=${{ steps.fix.outputs.count }}
+          BRANCH=${{ steps.fix.outputs.branch }}
+
+          PR_BODY="## 🔒 Security Auto-Fix
+
+          This PR automatically addresses **$FIXES_COUNT** security vulnerabilities.
+
+          ### Vulnerabilities Fixed
+          ${{ steps.fix.outputs.log }}
+
+          ### Scan Summary
+          | Severity | Before Fix |
+          |----------|------------|
+          | Critical | ${{ steps.scan.outputs.critical }} |
+          | High | ${{ steps.scan.outputs.high }} |
+          | Medium | ${{ steps.scan.outputs.medium }} |
+          | Fixable | ${{ steps.scan.outputs.fixable }} |
+
+          ### Verification
+          - Workflow Run: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - Generated: $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)
+
+          ### Review Checklist
+          - [ ] All tests pass
+          - [ ] No breaking changes introduced
+          - [ ] Dependencies are compatible
+          - [ ] Security scan shows improvement
+
+          ---
+          *This PR was automatically generated by the [Auto-Fix Vulnerabilities](${{ github.server_url }}/${{ github.repository }}/actions/workflows/auto-fix-vulnerabilities.yml) workflow.*"
+
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "fix(security): auto-fix $FIXES_COUNT vulnerabilities" \
+            --body "$PR_BODY" \
+            --label "security,automated,dependencies")
+
+          echo "url=$PR_URL" >> $GITHUB_OUTPUT
+          echo "🔗 Pull Request created: $PR_URL"
+
+      - name: Summary
+        run: |
+          echo "## 🔒 Auto-Fix Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | ${{ steps.scan.outputs.critical }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| High | ${{ steps.scan.outputs.high }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Medium | ${{ steps.scan.outputs.medium }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fixable | ${{ steps.scan.outputs.fixable }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Actions Taken" >> $GITHUB_STEP_SUMMARY
+          echo "- Fixes Applied: ${{ steps.fix.outputs.count || 0 }}" >> $GITHUB_STEP_SUMMARY
+          if [ -n "${{ steps.pr.outputs.url }}" ]; then
+            echo "- Pull Request: ${{ steps.pr.outputs.url }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  notify:
+    name: Notify Results
+    runs-on: ubuntu-latest
+    needs: scan-and-fix
+    if: always()
+
+    steps:
+      - name: Send notification
+        run: |
+          FIXES="${{ needs.scan-and-fix.outputs.fixes-applied || 0 }}"
+          PR_URL="${{ needs.scan-and-fix.outputs.pr-url }}"
+
+          if [ "$FIXES" -gt 0 ]; then
+            echo "✅ Auto-fix completed: $FIXES vulnerabilities fixed"
+            if [ -n "$PR_URL" ]; then
+              echo "📝 Pull Request: $PR_URL"
+            fi
+          else
+            echo "ℹ️ No vulnerabilities were auto-fixed"
+          fi

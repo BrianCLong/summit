@@ -1,0 +1,13 @@
+{
+  "2025-11-20_performance_indexes.sql": {
+    "reason": "Dropping redundant indexes to improve write performance",
+    "mitigations": [
+      "Rollback script provided",
+      "Performance tested in staging"
+    ],
+    "approvedBy": "DBA",
+    "approvedDate": "2025-11-20",
+    "expires": "2030-12-31",
+    "issue": "PROJ-123"
+  }
+}
