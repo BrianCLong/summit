@@ -18,12 +18,16 @@ import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
+<<<<<<< HEAD
+import { startOTEL, stopOTEL } from '../otel.js';
+=======
 import { streamingRateLimiter } from './routes/streaming.js';
 <<<<<<< HEAD
 import { startOSINTWorkers } from './services/OSINTQueueService.js';
 =======
 import { BackupManager } from './backup/BackupManager.js';
 import { checkNeo4jIndexes } from './db/indexManager.js';
+>>>>>>> main
 >>>>>>> main
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,6 +38,24 @@ import { logger } from './config/logger.js';
 import { logConfigSummary } from './config/index.js';
 >>>>>>> main
 
+<<<<<<< HEAD
+const startServer = async () => {
+  await startOTEL();
+  // Optional Kafka consumer import - only when AI services enabled
+  let startKafkaConsumer: any = null;
+  let stopKafkaConsumer: any = null;
+  if (
+    process.env.AI_ENABLED === 'true' ||
+    process.env.KAFKA_ENABLED === 'true'
+  ) {
+    try {
+      const kafkaModule = await import('./realtime/kafkaConsumer.js');
+      startKafkaConsumer = kafkaModule.startKafkaConsumer;
+      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
+    } catch (error) {
+      logger.warn('Kafka not available - running in minimal mode');
+    }
+=======
 (async () => {
   try {
     // 1. Load Secrets (Environment or Vault)
@@ -48,6 +70,7 @@ import { logConfigSummary } from './config/index.js';
   } catch (err) {
     logger.error(`Fatal error during startup: ${err}`);
     process.exit(1);
+>>>>>>> main
   }
 <<<<<<< HEAD
   const app = await createApp();
@@ -207,6 +230,7 @@ import { logConfigSummary } from './config/index.js';
   // Graceful shutdown
   const shutdown = async (sig: NodeJS.Signals) => {
     logger.info(`Shutting down. Signal: ${sig}`);
+    await stopOTEL();
     wss.close();
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
