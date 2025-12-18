@@ -1,19 +1,25 @@
 {
   "name": "intelgraph-server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "IntelGraph Platform Backend API",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "start": "node dist/index.js",
-    "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --exec 'npx tsx' src/index.ts",
+    "dev": "cross-env PORT=4000 nodemon --watch 'src/**/*' --delay 1 --exec 'npx tsx' src/index.ts",
     "dev:worker": "cross-env NODE_ENV=development CONDUCTOR_ROLE=worker WORKER_PORT=4100 nodemon --watch 'src/**/*.ts' --exec 'node --loader ts-node/esm' src/conductor/worker-entrypoint.ts",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.strict.json --noEmit",
     "typecheck:core": "tsc -p tsconfig.core.json --noEmit",
-    "test": "jest --config=jest.config.ts",
-    "test:watch": "jest --config=jest.config.ts --watch",
-    "test:coverage": "jest --config=jest.config.ts --coverage",
+<<<<<<< HEAD
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.ts",
+    "test:watch": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.ts --watch",
+    "test:coverage": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --config=jest.config.ts --coverage",
+=======
+    "test": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules --max-old-space-size=8192\" jest --config=jest.config.ts",
+    "test:watch": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules --max-old-space-size=8192\" jest --config=jest.config.ts --watch",
+    "test:coverage": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules --max-old-space-size=8192\" jest --config=jest.config.ts --coverage",
+>>>>>>> main
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -24,25 +30,41 @@
     "seed": "ts-node scripts/seed-data.ts",
     "seed:demo": "ts-node scripts/seed-demo.ts",
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
-    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts"
+    "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts",
+    "feature-flags": "node --loader ts-node/esm scripts/feature-flags.ts"
+  },
+  "bin": {
+    "maestro-run": "dist/cli/maestro_run.js"
   },
   "dependencies": {
     "@apollo/server": "5.1.0",
     "@as-integrations/express4": "1.1.2",
+    "@aws-sdk/client-s3": "^3.940.0",
     "@bull-board/api": "6.14.2",
     "@bull-board/express": "6.14.2",
     "@graphql-tools/merge": "^9.1.1",
     "@graphql-tools/schema": "10.0.29",
     "@graphql-tools/utils": "^10.10.3",
+    "@intelgraph/feature-flags": "workspace:*",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.67.0",
     "@opentelemetry/exporter-jaeger": "2.2.0",
     "@opentelemetry/exporter-prometheus": "0.208.0",
+    "@opentelemetry/resources": "^2.2.0",
     "@opentelemetry/sdk-node": "0.208.0",
+<<<<<<< HEAD
+    "@opentelemetry/semantic-conventions": "^1.38.0",
+=======
     "@opentelemetry/semantic-conventions": "1.38.0",
+<<<<<<< HEAD
+    "@react-email/components": "^0.0.25",
+=======
+>>>>>>> main
     "@react-email/components": "^1.0.1",
+>>>>>>> main
     "@react-email/render": "^1.0.1",
     "@socket.io/redis-adapter": "8.3.0",
+    "@summit/connector-sdk": "file:../packages/connector-sdk",
     "@turf/area": "7.3.0",
     "@turf/bbox": "7.3.0",
     "@turf/boolean-point-in-polygon": "7.3.0",
@@ -52,93 +74,284 @@
     "@turf/distance": "7.3.0",
     "@turf/helpers": "7.3.0",
     "@turf/intersect": "7.3.0",
+    "@turf/turf": "^7.3.1",
     "@turf/union": "7.3.0",
+    "@types/helmet": "^0.0.48",
     "@types/js-yaml": "^4.0.0",
+    "@types/papaparse": "^5.5.0",
     "ajv": "^8.17.1",
     "apollo-server-express": "3.13.0",
     "archiver": "7.0.1",
     "argon2": "0.44.0",
-    "axios": "^1.12.2",
-    "docx": "^9.2.2",
+    "axios": "^1.13.2",
     "bullmq": "5.63.2",
     "canvas": "3.2.0",
+    "commander": "^12.1.0",
     "compression": "1.8.1",
     "cors": "2.8.5",
+    "csv-parse": "^5.5.3",
     "dataloader": "^2.2.2",
-    "exceljs": "^4.4.0",
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
     "etag": "^1.8.1",
+=======
+<<<<<<< HEAD
+    "etag": "^1.8.1",
+=======
+<<<<<<< HEAD
+    "etag": "^1.8.1",
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "dotenv": "17.2.3",
+    "etag": "^1.8.1",
     "express": "^5.1.0",
+=======
+    "dotenv": "^17.2.3",
+    "etag": "^1.8.1",
+    "express": "^5.2.0",
+>>>>>>> main
     "express-rate-limit": "8.2.1",
     "express-validator": "7.3.0",
     "ffmpeg-static": "5.3.0",
     "ffprobe-static": "3.1.0",
     "fluent-ffmpeg": "2.1.3",
-    "geolib": "3.3.4",
+    "geolib": "^3.3.4",
     "graphql": "16.12.0",
+<<<<<<< HEAD
+    "graphql-depth-limit": "^1.1.0",
+=======
+<<<<<<< HEAD
+    "graphql-depth-limit": "^1.1.0",
+=======
+<<<<<<< HEAD
+    "graphql-depth-limit": "^1.1.0",
+=======
+<<<<<<< HEAD
+    "graphql-depth-limit": "^1.1.0",
+=======
+<<<<<<< HEAD
+=======
+    "graphql-depth-limit": "^1.1.0",
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "graphql-query-complexity": "^0.12.0",
     "graphql-scalars": "^1.25.0",
     "graphql-subscriptions": "3.0.0",
     "graphql-tag": "2.12.6",
     "graphql-upload-ts": "2.1.3",
     "graphql-ws": "6.0.6",
-    "helmet": "8.1.0",
+    "helmet": "^8.1.0",
     "html-to-text": "^9.0.5",
     "ioredis": "5.8.2",
     "joi": "18.0.1",
     "js-yaml": "^4.1.0",
     "json2csv": "5.0.7",
+<<<<<<< HEAD
     "jsonwebtoken": "9.0.2",
+=======
+    "jsonwebtoken": "9.0.3",
+>>>>>>> main
     "juice": "^11.0.1",
     "lodash": "4.17.21",
     "luxon": "^3.7.2",
-    "node-cron": "^3.0.3",
     "mjml": "^4.15.3",
     "morgan": "^1.10.1",
-    "nunjucks": "^3.2.4",
     "natural": "8.1.0",
+<<<<<<< HEAD
+    "neo4j-driver": "^6.0.1",
+=======
     "neo4j-driver": "6.0.1",
+    "node-cron": "^4.2.1",
+>>>>>>> main
     "node-fetch": "3.3.2",
     "node-nlp": "^4.27.0",
+<<<<<<< HEAD
     "nodemailer": "^7.0.7",
-    "pdfkit": "^0.15.0",
+<<<<<<< HEAD
+    "papaparse": "^5.5.3",
+=======
+=======
+<<<<<<< HEAD
+    "nodemailer": "^7.0.7",
+=======
+<<<<<<< HEAD
+    "nodemailer": "^7.0.7",
+=======
+<<<<<<< HEAD
+    "nodemailer": "^6.9.16",
+=======
+    "nodemailer": "^7.0.11",
+    "p-limit": "^6.1.0",
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "parquetjs": "0.11.2",
     "pg": "8.16.3",
     "pgvector": "0.2.1",
-    "pino": "10.1.0",
+    "pino": "^10.1.0",
     "pino-http": "11.0.0",
-    "prom-client": "15.1.3",
+    "prom-client": "^15.1.3",
     "puppeteer": "^24.25.0",
     "python-shell": "5.0.0",
     "sentiment": "5.0.2",
     "sharp": "0.34.5",
     "socket.io": "^4.8.1",
     "socket.io-client": "4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "tesseract.js": "6.0.1",
-    "uuid": "13.0.0",
-    "pptxgenjs": "^3.13.0",
+<<<<<<< HEAD
+    "uuid": "^13.0.0",
     "winston": "3.18.3",
+=======
+    "uuid": "13.0.0",
+    "winston": "^3.18.3",
+>>>>>>> main
     "ws": "8.18.3",
-    "zod": "4.1.12"
+<<<<<<< HEAD
+    "zod": "^4.1.12"
+=======
+    "zod": "4.1.12",
+    "@intelgraph/attack-surface": "workspace:*"
+>>>>>>> main
   },
   "devDependencies": {
+    "node-gyp": "^10.0.0",
     "@eslint/js": "9.39.1",
     "@graphql-codegen/cli": "6.0.2",
     "@graphql-codegen/introspection": "5.0.0",
     "@graphql-codegen/typescript": "5.0.4",
     "@graphql-codegen/typescript-resolvers": "5.1.2",
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    "@jest/globals": "^30.2.0",
+=======
+<<<<<<< HEAD
+=======
+    "@jest-mock/express": "^3.0.0",
+    "@jest/globals": "^30.2.0",
+    "@opentelemetry/api": "^1.9.0",
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "@playwright/test": "1.56.1",
+    "@testcontainers/neo4j": "^11.9.0",
     "@types/cors": "2.8.19",
     "@types/express": "^5.0.3",
     "@types/express-rate-limit": "6.0.2",
+    "@types/graphql-depth-limit": "^1.1.6",
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "@types/jest": "30.0.0",
+=======
+    "@types/html-to-text": "^9.0.4",
+    "@types/jest": "^30.0.0",
+>>>>>>> main
     "@types/jsonwebtoken": "^9.0.7",
+<<<<<<< HEAD
+=======
+    "@types/luxon": "^3.7.1",
+>>>>>>> main
     "@types/node": "24.10.1",
     "@types/nodemailer": "^6.4.16",
     "@types/pg": "8.15.6",
     "@types/pino-http": "6.1.0",
     "@types/supertest": "6.0.3",
+<<<<<<< HEAD
+    "@types/uuid": "^11.0.0",
+=======
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "@types/uuid": "11.0.0",
+>>>>>>> main
     "@types/ws": "8.18.1",
     "@typescript-eslint/eslint-plugin": "8.46.4",
     "@typescript-eslint/parser": "8.46.4",
@@ -150,20 +363,55 @@
     "eslint-plugin-react-hooks": "7.0.1",
     "eslint-plugin-react-refresh": "0.4.24",
     "fast-check": "^3.23.2",
+    "globals": "^16.5.0",
     "jest": "30.2.0",
     "jest-environment-node": "30.2.0",
     "jest-extended": "7.0.0",
     "jest-junit": "^16.0.0",
-    "json-schema-to-typescript": "^11.0.2",
     "mongodb-memory-server": "10.3.0",
     "nock": "14.0.10",
     "nodemon": "3.1.11",
     "prettier": "3.6.2",
     "supertest": "7.1.4",
     "testcontainers": "^11.7.1",
+<<<<<<< HEAD
+    "ts-jest": "^29.4.6",
+=======
+<<<<<<< HEAD
+    "ts-jest": "^29.4.6",
+=======
+<<<<<<< HEAD
+    "ts-jest": "^29.4.6",
+=======
+<<<<<<< HEAD
+    "ts-jest": "^29.4.6",
+=======
+<<<<<<< HEAD
+    "ts-jest": "^29.4.6",
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
     "ts-jest": "^29.4.5",
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "ts-node": "10.9.2",
+<<<<<<< HEAD
+    "typescript": "^5.9.3",
+=======
+=======
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+>>>>>>> main
     "typescript": "5.9.3",
+>>>>>>> main
     "typescript-eslint": "8.46.4",
     "wait-for-expect": "4.0.0"
   },
