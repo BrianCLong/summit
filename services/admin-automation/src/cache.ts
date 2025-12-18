@@ -14,7 +14,7 @@ export class ProfileCache<T> {
 
   get(key: string): T | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (!entry) {return null;}
 
     if (Date.now() > entry.expiresAt) {
       this.cache.delete(key);
@@ -32,7 +32,7 @@ export class ProfileCache<T> {
     // Evict oldest if at capacity
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
-      if (firstKey) this.cache.delete(firstKey);
+      if (firstKey) {this.cache.delete(firstKey);}
     }
 
     this.cache.set(key, {
@@ -58,7 +58,7 @@ export class ProfileCache<T> {
    */
   async getOrCompute(key: string, compute: () => Promise<T>): Promise<T> {
     const cached = this.get(key);
-    if (cached !== null) return cached;
+    if (cached !== null) {return cached;}
 
     const value = await compute();
     this.set(key, value);
