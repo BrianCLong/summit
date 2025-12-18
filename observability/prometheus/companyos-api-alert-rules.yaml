@@ -30,3 +30,13 @@ groups:
         annotations:
           summary: "High latency (p95) on companyos-api"
           description: "p95 latency > 300ms for 15m. Investigate recent changes."
+
+      - alert: CompanyOSApiAvailabilityDrop
+        expr: companyos_api:availability:ratio5m < 0.995
+        for: 30m
+        labels:
+          severity: critical
+          service: companyos-api
+        annotations:
+          summary: "Availability below SLO for companyos-api"
+          description: "Availability SLO (99.5%) missed for 30m. Consider halt or rollback."

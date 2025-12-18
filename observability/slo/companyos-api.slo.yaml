@@ -34,5 +34,7 @@ error_budget_policies:
 canary_thresholds:
   # relative limits compared to previous window / baseline
   error_rate_factor: 2.0         # 2x error rate -> fail canary
+  error_rate_abs: 0.02           # >2% absolute failure rate trips gate when baseline ~0
   latency_factor: 2.0            # 2x p95 latency -> fail canary
+  latency_abs_seconds: 0.3       # 300ms absolute guardrail when baseline ~0
   evaluation_window: 10m

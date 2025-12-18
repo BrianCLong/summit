@@ -1,23 +1,121 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-import { readFile } from "fs/promises";
-import path from "path";
-import { fileURLToPath } from "url";
+import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import fetch from "node-fetch";
-import yaml from "js-yaml";
+import YAML from "yaml";
 
 const PROM_URL =
   process.env.PROM_URL || "http://prometheus:9090/api/v1/query";
 
 const SERVICE = process.env.SERVICE || "companyos-api";
+const FALLBACK_WINDOW = "10m";
 const BASELINE = process.env.BASELINE_WINDOW || "60m";
-const ERROR_FACTOR = Number(process.env.CANARY_ERROR_FACTOR || "2");
-const LATENCY_FACTOR = Number(process.env.CANARY_LATENCY_FACTOR || "2");
-const SLO_FILE =
-  process.env.SLO_FILE || "observability/slo/companyos-api.slo.yaml";
+const FALLBACK_ERROR_FACTOR = 2;
+const FALLBACK_LATENCY_FACTOR = 2;
+const FALLBACK_LATENCY_ABS = 0.3; // 300ms
+const FALLBACK_ERROR_ABS = 0.02; // 2%
+const FALLBACK_AVAILABILITY = 0.995; // 99.5%
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const DEFAULT_SLO_CONFIG = process.env.SLO_CONFIG_PATH
+  ? resolve(process.env.SLO_CONFIG_PATH)
+  : resolve(
+      process.cwd(),
+      "observability",
+      "slo",
+      `${SERVICE}.slo.yaml`
+    );
+
+async function loadSloConfig() {
+  try {
+    const raw = await readFile(DEFAULT_SLO_CONFIG, "utf8");
+    return YAML.parse(raw) || {};
+  } catch (err) {
+    console.warn(
+      `⚠️  Could not load SLO config at ${DEFAULT_SLO_CONFIG}; using defaults`,
+      err?.message
+    );
+    return {};
+  }
+}
+
+function extractAvailabilityObjective(sloConfig) {
+  if (!sloConfig?.slos) return FALLBACK_AVAILABILITY;
+  const availability = sloConfig.slos.find(slo => slo.name === "availability");
+  return Number(availability?.objective) || FALLBACK_AVAILABILITY;
+}
+
+function resolveThresholds(sloConfig) {
+  const canaryThresholds = sloConfig.canary_thresholds || {};
+  return {
+    window:
+      process.env.CANARY_WINDOW ||
+      canaryThresholds.evaluation_window ||
+      FALLBACK_WINDOW,
+    baseline: BASELINE,
+    errorFactor:
+      Number(process.env.CANARY_ERROR_FACTOR) ||
+      Number(canaryThresholds.error_rate_factor) ||
+      FALLBACK_ERROR_FACTOR,
+    latencyFactor:
+      Number(process.env.CANARY_LATENCY_FACTOR) ||
+      Number(canaryThresholds.latency_factor) ||
+      FALLBACK_LATENCY_FACTOR,
+    latencyAbsoluteLimitSec:
+      Number(canaryThresholds.latency_abs_seconds) || FALLBACK_LATENCY_ABS,
+    errorAbsoluteLimit:
+      Number(canaryThresholds.error_rate_abs) || FALLBACK_ERROR_ABS,
+    availabilityObjective: extractAvailabilityObjective(sloConfig)
+  };
+}
+
+function buildQueries(service, window, baseline) {
+  return {
+    errorNow: `
+    (
+      sum(rate(http_requests_total{job="${service}",status_code=~"5.."}[${window}]))
+    )
+    /
+    (
+      sum(rate(http_requests_total{job="${service}"}[${window}]))
+    )
+  `,
+    errorBaseline: `
+    (
+      sum(rate(http_requests_total{job="${service}",status_code=~"5.."}[${baseline}]))
+    )
+    /
+    (
+      sum(rate(http_requests_total{job="${service}"}[${baseline}]))
+    )
+  `,
+    latencyNow: `
+    histogram_quantile(
+      0.95,
+      sum by (le) (
+        rate(http_request_duration_seconds_bucket{job="${service}"}[${window}])
+      )
+    )
+  `,
+    latencyBaseline: `
+    histogram_quantile(
+      0.95,
+      sum by (le) (
+        rate(http_request_duration_seconds_bucket{job="${service}"}[${baseline}])
+      )
+    )
+  `,
+    availabilityNow: `
+    (
+      sum(rate(http_requests_total{job="${service}",status_code!~"5.."}[${window}]))
+    )
+    /
+    (
+      sum(rate(http_requests_total{job="${service}"}[${window}]))
+    )
+  `
+  };
+}
 
 async function promQuery(query) {
   const url = `${PROM_URL}?query=${encodeURIComponent(query)}`;
@@ -34,138 +132,91 @@ async function promQuery(query) {
   return Number(result[0].value[1]);
 }
 
-async function loadSloConfig() {
-  const sloPath = path.isAbsolute(SLO_FILE)
-    ? SLO_FILE
-    : path.join(__dirname, "..", "..", SLO_FILE);
-  const file = await readFile(sloPath, "utf8");
-  const config = yaml.load(file);
-  if (!config?.slos) {
-    throw new Error(`Invalid SLO file: missing slos in ${sloPath}`);
-  }
-  const availability = config.slos.find(slo => slo.name === "availability");
-  const latency = config.slos.find(slo => slo.name === "latency_p95");
-  const canary = config.canary_thresholds || {};
-
-  return {
-    evaluationWindow: canary.evaluation_window || "10m",
-    errorFactor: canary.error_rate_factor || ERROR_FACTOR,
-    latencyFactor: canary.latency_factor || LATENCY_FACTOR,
-    availability,
-    latency
-  };
-}
-
-function buildErrorQueries(window) {
-  return [
-    `(
-      sum(rate(http_requests_total{job="${SERVICE}",status_code=~"5.."}[${window}]))
-    )
-    /
-    (
-      sum(rate(http_requests_total{job="${SERVICE}"}[${window}]))
-    )`,
-    `(
-      sum(rate(http_requests_total{job="${SERVICE}",status_code=~"5.."}[${BASELINE}]))
-    )
-    /
-    (
-      sum(rate(http_requests_total{job="${SERVICE}"}[${BASELINE}]))
-    )`
-  ];
-}
-
-function buildLatencyQueries(window) {
-  return [
-    `histogram_quantile(
-      0.95,
-      sum by (le) (
-        rate(http_request_duration_seconds_bucket{job="${SERVICE}"}[${window}])
-      )
-    )`,
-    `histogram_quantile(
-      0.95,
-      sum by (le) (
-        rate(http_request_duration_seconds_bucket{job="${SERVICE}"}[${BASELINE}])
-      )
-    )`
-  ];
-}
-
-function formatPercent(value) {
-  return `${(value * 100).toFixed(2)}%`;
-}
-
-async function evaluate(errorNow, errorBaseline, targetErrorRate, errorFactor) {
+function evaluateCanary(metrics, thresholds) {
   const problems = [];
-  if (errorBaseline != null && errorNow != null) {
-    if (targetErrorRate && errorNow > targetErrorRate) {
-      problems.push(
-        `Error rate ${formatPercent(errorNow)} exceeds SLO target ${formatPercent(
-          targetErrorRate
-        )}`
-      );
-    }
 
-    if (errorBaseline === 0 && errorNow > 0.02) {
+  if (metrics.errorBaseline != null && metrics.errorNow != null) {
+    if (metrics.errorBaseline === 0 && metrics.errorNow > thresholds.errorAbsoluteLimit) {
       problems.push(
-        `Error rate went from ~0 to ${formatPercent(errorNow)} (absolute threshold 2%)`
+        `Error rate went from ~0 to ${metrics.errorNow.toFixed(
+          4
+        )} (absolute threshold ${(thresholds.errorAbsoluteLimit * 100).toFixed(1)}%)`
       );
-    } else if (errorBaseline > 0 && errorNow > errorBaseline * errorFactor) {
+    } else if (
+      metrics.errorBaseline > 0 &&
+      metrics.errorNow > metrics.errorBaseline * thresholds.errorFactor
+    ) {
       problems.push(
-        `Error rate ratio exceeded: now=${formatPercent(
-          errorNow
-        )}, baseline=${formatPercent(errorBaseline)}, factor=${errorFactor}`
+        `Error rate ratio exceeded: now=${metrics.errorNow.toFixed(
+          4
+        )}, baseline=${metrics.errorBaseline.toFixed(4)}, factor=${thresholds.errorFactor}`
       );
     }
   }
-  return problems;
-}
 
-async function evaluateLatency(latNow, latBaseline, targetMs, latencyFactor) {
-  const problems = [];
-  if (latBaseline != null && latNow != null) {
-    if (targetMs && latNow * 1000 > targetMs) {
+  if (metrics.latencyBaseline != null && metrics.latencyNow != null) {
+    if (
+      metrics.latencyBaseline === 0 &&
+      metrics.latencyNow > thresholds.latencyAbsoluteLimitSec
+    ) {
       problems.push(
-        `p95 latency ${Math.round(latNow * 1000)}ms exceeds target ${targetMs}ms`
+        `Latency went from ~0 to ${metrics.latencyNow.toFixed(
+          3
+        )}s (absolute threshold ${(thresholds.latencyAbsoluteLimitSec * 1000).toFixed(0)}ms)`
       );
-    }
-    if (latBaseline === 0 && latNow > 0.3) {
+    } else if (
+      metrics.latencyBaseline > 0 &&
+      metrics.latencyNow > metrics.latencyBaseline * thresholds.latencyFactor
+    ) {
       problems.push(
-        `Latency went from ~0 to ${(latNow * 1000).toFixed(
-          1
-        )}ms (absolute threshold 300ms)`
-      );
-    } else if (latBaseline > 0 && latNow > latBaseline * latencyFactor) {
-      problems.push(
-        `Latency ratio exceeded: now=${(latNow * 1000).toFixed(
-          1
-        )}ms, baseline=${(latBaseline * 1000).toFixed(1)}ms, factor=${latencyFactor}`
+        `Latency ratio exceeded: now=${metrics.latencyNow.toFixed(
+          3
+        )}s, baseline=${metrics.latencyBaseline.toFixed(
+          3
+        )}s, factor=${thresholds.latencyFactor}`
       );
     }
   }
+
+  if (metrics.availabilityNow != null) {
+    if (metrics.availabilityNow < thresholds.availabilityObjective) {
+      problems.push(
+        `Availability ${metrics.availabilityNow.toFixed(
+          4
+        )} is below objective ${thresholds.availabilityObjective}`
+      );
+    }
+  }
+
   return problems;
 }
 
 async function main() {
-  const { evaluationWindow, availability, latency, errorFactor, latencyFactor } =
-    await loadSloConfig();
+  const sloConfig = await loadSloConfig();
+  const thresholds = resolveThresholds(sloConfig);
 
   console.log(
-    `Checking canary SLOs for ${SERVICE} (window=${evaluationWindow}, baseline=${BASELINE})...`
+    `Checking canary SLOs for ${SERVICE} using window ${thresholds.window} (baseline ${thresholds.baseline})...`
   );
 
-  const [errorNowQuery, errorBaselineQuery] = buildErrorQueries(evaluationWindow);
-  const [latencyNowQuery, latencyBaselineQuery] = buildLatencyQueries(
-    evaluationWindow
-  );
+  const queries = buildQueries(SERVICE, thresholds.window, thresholds.baseline);
 
-  const [errorNow, errorBaseline, latNow, latBaseline] = await Promise.all([
-    promQuery(errorNowQuery),
-    promQuery(errorBaselineQuery),
-    promQuery(latencyNowQuery),
-    promQuery(latencyBaselineQuery)
-  ]);
+  const [errorNow, errorBaseline, latNow, latBaseline, availabilityNow] =
+    await Promise.all([
+      promQuery(queries.errorNow),
+      promQuery(queries.errorBaseline),
+      promQuery(queries.latencyNow),
+      promQuery(queries.latencyBaseline),
+      promQuery(queries.availabilityNow)
+    ]);
+
+  const metrics = {
+    errorNow,
+    errorBaseline,
+    latencyNow: latNow,
+    latencyBaseline: latBaseline,
+    availabilityNow
+  };
 
   console.log(
     `Error rate now=${errorNow ?? "N/A"}, baseline=${errorBaseline ?? "N/A"}`
@@ -173,21 +224,11 @@ async function main() {
   console.log(
     `Latency p95 now=${latNow ?? "N/A"}s, baseline=${latBaseline ?? "N/A"}s`
   );
+  console.log(
+    `Availability now=${availabilityNow ?? "N/A"}, objective=${thresholds.availabilityObjective}`
+  );
 
-  const problems = [
-    ...(await evaluate(
-      errorNow,
-      errorBaseline,
-      availability ? 1 - availability.objective : null,
-      errorFactor
-    )),
-    ...(await evaluateLatency(
-      latNow,
-      latBaseline,
-      latency?.target_ms,
-      latencyFactor
-    ))
-  ];
+  const problems = evaluateCanary(metrics, thresholds);
 
   if (problems.length) {
     console.error("❌ Canary SLO check failed:");
@@ -199,7 +240,17 @@ async function main() {
   process.exit(0);
 }
 
-main().catch(err => {
-  console.error("❌ Canary SLO check error:", err);
-  process.exit(1);
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(err => {
+    console.error("❌ Canary SLO check error:", err);
+    process.exit(1);
+  });
+}
+
+export {
+  buildQueries,
+  evaluateCanary,
+  extractAvailabilityObjective,
+  loadSloConfig,
+  resolveThresholds
+};

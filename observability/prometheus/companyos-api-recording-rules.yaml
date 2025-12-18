@@ -16,6 +16,16 @@ groups:
             sum(rate(http_requests_total{job="companyos-api"}[5m]))
           )
 
+      - record: companyos_api:availability:ratio5m
+        expr: |
+          (
+            sum(rate(http_requests_total{job="companyos-api", status_code!~"5.."}[5m]))
+          )
+          /
+          (
+            sum(rate(http_requests_total{job="companyos-api"}[5m]))
+          )
+
       - record: companyos_api:latency_p95:seconds5m
         expr: |
           histogram_quantile(
