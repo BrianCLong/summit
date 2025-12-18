@@ -1,13 +1,13 @@
 {
   "name": "@intelgraph/connectors",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Integration connectors framework for workflow automation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest",
+    "test": "vitest run",
     "lint": "eslint src"
   },
   "dependencies": {
@@ -25,7 +25,8 @@
     "@types/uuid": "^11.0.0",
     "@types/pg": "^8.15.6",
     "@types/nodemailer": "^7.0.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.9"
   },
   "keywords": [
     "connectors",

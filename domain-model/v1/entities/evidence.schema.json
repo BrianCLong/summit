@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./evidence.schema.json",
+  "title": "Evidence (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Evidence" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "caseId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "artifactType": { "type": "string" },
+    "uri": { "type": "string", "format": "uri" },
+    "hash": { "type": "string" },
+    "collectedAt": { "$ref": "../base.schema.json#/$defs/Timestamp" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" },
+    "external": {
+      "type": "array",
+      "items": { "$ref": "../base.schema.json#/$defs/ExternalReference" }
+    }
+  },
+  "required": ["id", "schemaVersion", "entityType", "title", "artifactType"],
+  "additionalProperties": false
+}
