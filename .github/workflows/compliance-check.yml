@@ -1,0 +1,41 @@
+name: Compliance Automation
+
+on:
+  schedule:
+    - cron: '0 4 * * *'
+  workflow_dispatch:
+
+jobs:
+  compliance-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          run_install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run compliance control checks
+        run: |
+          pnpm ts-node --esm scripts/compliance/check-controls.ts \
+            --output artifacts/compliance-report-$(date +%Y%m%d).json \
+            --markdown artifacts/compliance-report-$(date +%Y%m%d).md
+
+      - name: Upload compliance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-report
+          path: |
+            artifacts/compliance-report-*.json
+            artifacts/compliance-report-*.md
