@@ -1,0 +1,32 @@
+{
+  "name": "@intelgraph/threat-detection-core",
+  "version": "1.0.0",
+  "description": "Core types and interfaces for advanced threat detection system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@intelgraph/common-types": "workspace:*",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.11",
+    "eslint": "^8.56.0"
+  },
+  "keywords": [
+    "threat-detection",
+    "security",
+    "anomaly-detection",
+    "cybersecurity"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY"
+}
