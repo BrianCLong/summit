@@ -1,0 +1,256 @@
+"""
+Post-Quantum Cryptography GraphQL Schema
+NIST PQC standardized algorithms for Summit platform
+"""
+
+enum PQCAlgorithm {
+  KYBER_512
+  KYBER_768
+  KYBER_1024
+  DILITHIUM_2
+  DILITHIUM_3
+  DILITHIUM_5
+  FALCON_512
+  FALCON_1024
+  SPHINCS_PLUS_128F
+  SPHINCS_PLUS_128S
+  SPHINCS_PLUS_192F
+  SPHINCS_PLUS_192S
+  SPHINCS_PLUS_256F
+  SPHINCS_PLUS_256S
+}
+
+enum SecurityLevel {
+  LEVEL_1
+  LEVEL_2
+  LEVEL_3
+  LEVEL_4
+  LEVEL_5
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+"""
+A post-quantum cryptographic key stored in the system
+"""
+type PQCKey {
+  keyId: ID!
+  algorithm: PQCAlgorithm!
+  publicKey: String!
+  createdAt: String!
+  expiresAt: String
+  metadata: JSON
+  isHybrid: Boolean!
+}
+
+"""
+Result of an encapsulation operation
+"""
+type EncapsulationResult {
+  ciphertext: String!
+  sharedSecretHash: String!
+}
+
+"""
+Result of a signing operation
+"""
+type SignatureResult {
+  signature: String!
+  algorithm: PQCAlgorithm!
+  timestamp: String!
+  metadata: JSON
+}
+
+"""
+Result of a verification operation
+"""
+type VerificationResult {
+  isValid: Boolean!
+  algorithm: PQCAlgorithm!
+  timestamp: String!
+}
+
+"""
+PQC operation log entry
+"""
+type PQCOperation {
+  operation: String!
+  algorithm: PQCAlgorithm!
+  success: Boolean!
+  timestamp: String!
+  durationMs: Float!
+  error: String
+}
+
+"""
+Quantum risk assessment report
+"""
+type QuantumRiskReport {
+  timestamp: String!
+  vulnerableAssets: Int!
+  migratedAssets: Int!
+  pendingMigrations: Int!
+  recommendations: [String!]!
+  overallRiskLevel: RiskLevel!
+}
+
+"""
+PQC service statistics
+"""
+type PQCStatistics {
+  totalKeys: Int!
+  keysByAlgorithm: JSON!
+  operations: PQCOperationStats!
+  recentOperations: [PQCOperation!]!
+}
+
+type PQCOperationStats {
+  total: Int!
+  successful: Int!
+  failed: Int!
+  byOperation: JSON!
+}
+
+"""
+Supported algorithms information
+"""
+type SupportedAlgorithms {
+  kem: [PQCAlgorithm!]!
+  signature: [PQCAlgorithm!]!
+}
+
+"""
+Algorithm benchmark result
+"""
+type BenchmarkResult {
+  algorithm: PQCAlgorithm!
+  formattedResults: String!
+}
+
+"""
+Algorithm validation result
+"""
+type ValidationResult {
+  algorithm: PQCAlgorithm!
+  isValid: Boolean!
+  testedAt: String!
+}
+
+extend type Query {
+  """
+  Get a PQC key by ID
+  """
+  pqcKey(keyId: ID!): PQCKey
+
+  """
+  Get public key for a key ID (safe to share)
+  """
+  pqcPublicKey(keyId: ID!): String
+
+  """
+  List all PQC keys with optional filtering
+  """
+  pqcKeys(algorithm: PQCAlgorithm, includeExpired: Boolean): [PQCKey!]!
+
+  """
+  Get supported PQC algorithms
+  """
+  pqcSupportedAlgorithms: SupportedAlgorithms!
+
+  """
+  Get PQC service statistics
+  """
+  pqcStatistics: PQCStatistics!
+
+  """
+  Get quantum risk assessment report
+  """
+  pqcQuantumRiskReport: QuantumRiskReport!
+}
+
+extend type Mutation {
+  """
+  Generate a new PQC key pair
+  """
+  pqcGenerateKeyPair(
+    algorithm: PQCAlgorithm!
+    keyId: String
+    expiresInDays: Int
+    metadata: JSON
+  ): PQCKey!
+
+  """
+  Generate a hybrid (classical + quantum) key pair
+  """
+  pqcGenerateHybridKeyPair(
+    classicalAlgorithm: String
+    quantumSecurityLevel: SecurityLevel
+    expiresInDays: Int
+  ): PQCKey!
+
+  """
+  Encapsulate a shared secret using KEM
+  """
+  pqcEncapsulate(keyId: ID!): EncapsulationResult!
+
+  """
+  Decapsulate a shared secret using KEM
+  """
+  pqcDecapsulate(keyId: ID!, ciphertext: String!): String!
+
+  """
+  Sign a message using a PQC signature scheme
+  """
+  pqcSign(keyId: ID!, message: String!): SignatureResult!
+
+  """
+  Verify a signature using a PQC signature scheme
+  """
+  pqcVerify(
+    keyId: ID!
+    message: String!
+    signature: String!
+  ): VerificationResult!
+
+  """
+  Delete a PQC key
+  """
+  pqcDeleteKey(keyId: ID!): Boolean!
+
+  """
+  Rotate a PQC key
+  """
+  pqcRotateKey(keyId: ID!): PQCKey!
+
+  """
+  Run validation tests on an algorithm
+  """
+  pqcValidateAlgorithm(algorithm: PQCAlgorithm!): ValidationResult!
+
+  """
+  Run performance benchmark on an algorithm
+  """
+  pqcBenchmarkAlgorithm(algorithm: PQCAlgorithm!): BenchmarkResult!
+}
+
+type Subscription {
+  """
+  Subscribe to key generation events
+  """
+  pqcKeyGenerated: PQCKey!
+
+  """
+  Subscribe to key expiration warnings
+  """
+  pqcKeyExpiringWarning: PQCKey!
+
+  """
+  Subscribe to PQC operation events
+  """
+  pqcOperation: PQCOperation!
+}

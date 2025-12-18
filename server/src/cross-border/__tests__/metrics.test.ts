@@ -3,6 +3,7 @@
  */
 
 import { CrossBorderMetrics, recordHandover, recordTranslation } from '../metrics.js';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('CrossBorderMetrics', () => {
   let metrics: CrossBorderMetrics;
