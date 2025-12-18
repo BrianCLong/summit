@@ -1,0 +1,38 @@
+{
+  "id": "nlq-copilot",
+  "name": "NL Graph Querying Copilot",
+  "version": "1.0.0",
+  "description": "Natural language to Cypher query compiler with RAG mode and evidence-first citations",
+  "permissions": [
+    "graph:read",
+    "schema:read"
+  ],
+  "entrypoints": {
+    "job": "./dist/index.js",
+    "ui": "./dist/ui/index.js"
+  },
+  "panels": [
+    {
+      "id": "nlq-sidebar",
+      "name": "Query Copilot",
+      "component": "NLQSidebar"
+    },
+    {
+      "id": "nlq-editor",
+      "name": "Query Editor",
+      "component": "NLQEditor"
+    }
+  ],
+  "settings": {
+    "ragModeDefault": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enable RAG mode by default (requires citations)"
+    },
+    "maxQueryCost": {
+      "type": "number",
+      "default": 1000,
+      "description": "Maximum estimated query cost before warning"
+    }
+  }
+}
