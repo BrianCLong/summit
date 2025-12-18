@@ -91,6 +91,7 @@
     "argon2": "0.44.0",
     "axios": "^1.13.2",
     "bullmq": "5.63.2",
+    "ioredis": "5.8.2",
     "canvas": "3.2.0",
     "commander": "^12.1.0",
     "compression": "1.8.1",
