@@ -1,0 +1,22 @@
+# Neo4j Query Optimization
+
+# Index Recommendations
+indexes:
+  - label: Entity
+    property: id
+    type: CONSTRAINT
+  - label: Entity
+    property: uuid
+    type: CONSTRAINT
+  - label: Entity
+    property: type
+    type: INDEX
+  - label: Investigation
+    property: status
+    type: INDEX
+
+# Query Monitoring
+monitoring:
+  slow_query_threshold_ms: 500
+  explain_threshold_ms: 1000
+  log_level: info
