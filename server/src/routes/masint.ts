@@ -37,15 +37,20 @@ router.post('/ingest', ensureAuthenticated, async (req, res) => {
  * @desc Retrieve analysis result for a specific signal
  * @access Private
  */
-router.get('/analysis/:id', ensureAuthenticated, (req, res) => {
+router.get('/analysis/:id', ensureAuthenticated, async (req, res) => {
   const { id } = req.params;
-  const result = masintService.getAnalysis(id);
+  try {
+    const result = await masintService.getAnalysis(id);
 
-  if (!result) {
-    return res.status(404).json({ error: 'Analysis not found' });
+    if (!result) {
+      return res.status(404).json({ error: 'Analysis not found' });
+    }
+
+    res.json(result);
+  } catch (error) {
+    logger.error({ error, id }, 'Error retrieving analysis');
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-
-  res.json(result);
 });
 
 export default router;

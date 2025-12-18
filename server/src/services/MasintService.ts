@@ -12,6 +12,7 @@ import {
 } from '../types/masint.types.js';
 import { z } from 'zod';
 import logger from '../utils/logger.js';
+import { getPostgresPool } from '../config/database.js';
 
 // Define a simple AnalysisResult interface
 export interface AnalysisResult {
@@ -27,7 +28,6 @@ export interface AnalysisResult {
 
 export class MasintService {
   private static instance: MasintService;
-  private processedSignals: Map<string, AnalysisResult> = new Map();
 
   private constructor() {}
 
@@ -46,6 +46,24 @@ export class MasintService {
     let result: AnalysisResult;
 
     logger.info({ type, id: data.id }, 'Processing MASINT signal');
+
+    // Persist raw signal
+    try {
+      const pool = getPostgresPool();
+      await pool.query(
+        'INSERT INTO masint_signals (id, type, data, timestamp) VALUES ($1, $2, $3, $4)',
+        [data.id, type, data, new Date(data.timestamp || new Date())]
+      );
+    } catch (err) {
+      logger.error({ err, id: data.id }, 'Failed to persist raw MASINT signal');
+      // Continue processing even if persistence fails? strictly speaking, we should probably fail.
+      // But for robustness in this demo, we'll log and proceed, or throw.
+      // Let's throw to ensure data integrity.
+      throw new Error('Failed to persist signal');
+    }
+
+    // Find correlations
+    const correlations = await this.findCorrelations(signalWrapper);
 
     switch (type) {
       case 'rf':
@@ -79,9 +97,86 @@ export class MasintService {
         throw new Error(`Unknown signal type: ${type}`);
     }
 
-    // Store result (in memory for now, would be DB in production)
-    this.processedSignals.set(data.id, result);
+    if (correlations.length > 0) {
+      result.correlatedEvents = correlations;
+      result.recommendations.push(`Correlate with events: ${correlations.join(', ')}`);
+    }
+
+    // Persist analysis result
+    try {
+      const pool = getPostgresPool();
+      await pool.query(
+        'INSERT INTO masint_analysis (signal_id, result) VALUES ($1, $2)',
+        [data.id, result]
+      );
+    } catch (err) {
+      logger.error({ err, id: data.id }, 'Failed to persist MASINT analysis');
+    }
+
     return result;
+  }
+
+  private async findCorrelations(signalWrapper: MasintSignal): Promise<string[]> {
+    const { data } = signalWrapper;
+    const pool = getPostgresPool();
+    const correlations: string[] = [];
+
+    let lat: number | undefined;
+    let lon: number | undefined;
+
+    // Handle standard 'location' property
+    if ('location' in data && data.location) {
+      lat = data.location.latitude;
+      lon = data.location.longitude;
+    }
+    // Handle 'epicenter' property for Seismic signals
+    else if ('epicenter' in data && data.epicenter) {
+      lat = data.epicenter.latitude;
+      lon = data.epicenter.longitude;
+    }
+
+    // If no location, skip spatial correlation
+    if (lat === undefined || lon === undefined) {
+      return [];
+    }
+
+    try {
+      // JSONB query to find nearby signals.
+      // Note: precise geospatial query requires PostGIS. This is a rough approximation using simple lat/lon matching in JSON.
+      // We check both 'location' and 'epicenter' paths in the JSONB.
+      // Assuming 1 degree approx 111km. 0.1 degree approx 11km.
+      const query = `
+        SELECT id FROM masint_signals
+        WHERE id != $1
+        AND timestamp > $2::timestamp - INTERVAL '5 minutes'
+        AND timestamp < $2::timestamp + INTERVAL '5 minutes'
+        AND (
+          (
+            ABS(CAST(data->'location'->>'latitude' AS FLOAT) - $3) < 0.1
+            AND ABS(CAST(data->'location'->>'longitude' AS FLOAT) - $4) < 0.1
+          )
+          OR
+          (
+            ABS(CAST(data->'epicenter'->>'latitude' AS FLOAT) - $3) < 0.1
+            AND ABS(CAST(data->'epicenter'->>'longitude' AS FLOAT) - $4) < 0.1
+          )
+        )
+        LIMIT 5
+      `;
+
+      const res = await pool.query(query, [
+        data.id,
+        data.timestamp || new Date(),
+        lat,
+        lon
+      ]);
+
+      res.rows.forEach(row => correlations.push(row.id));
+    } catch (err) {
+      logger.warn({ err }, 'Error finding correlations');
+    }
+
+    return correlations;
   }
 
   private async analyzeRF(signal: RFSignal): Promise<AnalysisResult> {
@@ -208,7 +303,19 @@ export class MasintService {
   /**
    * Retrieve past analysis result.
    */
-  public getAnalysis(signalId: string): AnalysisResult | undefined {
-    return this.processedSignals.get(signalId);
+  public async getAnalysis(signalId: string): Promise<AnalysisResult | undefined> {
+    const pool = getPostgresPool();
+    try {
+      const res = await pool.query(
+        'SELECT result FROM masint_analysis WHERE signal_id = $1',
+        [signalId]
+      );
+      if (res.rows.length > 0) {
+        return res.rows[0].result as AnalysisResult;
+      }
+    } catch (err) {
+      logger.error({ err, signalId }, 'Error retrieving analysis');
+    }
+    return undefined;
   }
 }
