@@ -1,5 +1,5 @@
-const express = require('express');
-const { ensureAuthenticated } = require('../middleware/auth');
+import express from 'express';
+import { ensureAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
 router.use(ensureAuthenticated);
@@ -30,4 +30,4 @@ router.post('/simulate', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
