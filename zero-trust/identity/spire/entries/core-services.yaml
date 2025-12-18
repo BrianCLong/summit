@@ -1,0 +1,329 @@
+# SPIFFE Entry Registrations - Core Services
+# Registers workload identities for core platform services
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spire-entries-core
+  namespace: spire-system
+  labels:
+    app.kubernetes.io/name: spire-entries
+    app.kubernetes.io/component: identity
+data:
+  register-entries.sh: |
+    #!/bin/bash
+    set -euo pipefail
+
+    SPIRE_SERVER="spire-server.spire-system.svc.cluster.local:8081"
+
+    echo "Registering SPIFFE entries for core services..."
+
+    # Function to register entry
+    register_entry() {
+      local spiffe_id="$1"
+      local parent_id="$2"
+      local namespace="$3"
+      local service_account="$4"
+      local selectors="${5:-}"
+
+      echo "Registering: $spiffe_id"
+
+      /opt/spire/bin/spire-server entry create \
+        -spiffeID "$spiffe_id" \
+        -parentID "$parent_id" \
+        -selector "k8s:ns:$namespace" \
+        -selector "k8s:sa:$service_account" \
+        $selectors \
+        -socketPath /tmp/spire-server/private/api.sock \
+        2>/dev/null || echo "Entry may already exist: $spiffe_id"
+    }
+
+    # Parent ID for all workloads
+    PARENT_ID="spiffe://intelgraph.local/spire/agent/k8s_psat/intelgraph-prod"
+
+    #############################################
+    # CORE PLATFORM SERVICES
+    #############################################
+
+    # API Gateway
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-gateway" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-gateway"
+
+    # API Server
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/intelgraph-api" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "intelgraph-api"
+
+    # AdminSec (Authentication)
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-adminsec" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-adminsec"
+
+    # Authorization Gateway
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/authz-gateway" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "authz-gateway"
+
+    # Client Frontend
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/intelgraph-client" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "intelgraph-client"
+
+    #############################################
+    # INTELLIGENCE SERVICES
+    #############################################
+
+    # GraphAI
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-graphai" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-graphai"
+
+    # OSINT Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-osint" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-osint"
+
+    # FinTel Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-fintel" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-fintel"
+
+    # Cyber Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-cyber" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-cyber"
+
+    # Tradecraft Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-tradecraft" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-tradecraft"
+
+    # Forensics Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-forensics" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-forensics"
+
+    # Worker Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ga/sa/ga-worker" \
+      "$PARENT_ID" \
+      "intelgraph-ga" \
+      "ga-worker"
+
+    #############################################
+    # DATA SERVICES
+    #############################################
+
+    # Graph Core
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-data/sa/graph-core" \
+      "$PARENT_ID" \
+      "intelgraph-data" \
+      "graph-core"
+
+    # Neo4j
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-data/sa/neo4j" \
+      "$PARENT_ID" \
+      "intelgraph-data" \
+      "neo4j"
+
+    # PostgreSQL
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-data/sa/postgresql" \
+      "$PARENT_ID" \
+      "intelgraph-data" \
+      "postgresql"
+
+    # Redis
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-data/sa/redis" \
+      "$PARENT_ID" \
+      "intelgraph-data" \
+      "redis"
+
+    # Kafka
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-data/sa/kafka" \
+      "$PARENT_ID" \
+      "intelgraph-data" \
+      "kafka"
+
+    #############################################
+    # ANALYTICS SERVICES
+    #############################################
+
+    # Analytics Engine
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-analytics/sa/analytics-engine" \
+      "$PARENT_ID" \
+      "intelgraph-analytics" \
+      "analytics-engine"
+
+    # Stream Processor
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-analytics/sa/stream-processor" \
+      "$PARENT_ID" \
+      "intelgraph-analytics" \
+      "stream-processor"
+
+    #############################################
+    # AI SERVICES
+    #############################################
+
+    # AI Service Platform
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ai/sa/ai-service-platform" \
+      "$PARENT_ID" \
+      "intelgraph-ai" \
+      "ai-service-platform"
+
+    # NLP Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ai/sa/nlp-service" \
+      "$PARENT_ID" \
+      "intelgraph-ai" \
+      "nlp-service"
+
+    # Model Serving
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ai/sa/model-serving" \
+      "$PARENT_ID" \
+      "intelgraph-ai" \
+      "model-serving"
+
+    # Prediction Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ai/sa/prediction-service" \
+      "$PARENT_ID" \
+      "intelgraph-ai" \
+      "prediction-service"
+
+    # Copilot
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-ai/sa/copilot" \
+      "$PARENT_ID" \
+      "intelgraph-ai" \
+      "copilot"
+
+    #############################################
+    # SYSTEM SERVICES
+    #############################################
+
+    # Audit Service
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-system/sa/audit-svc" \
+      "$PARENT_ID" \
+      "intelgraph-system" \
+      "audit-svc"
+
+    # Provenance Ledger
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-system/sa/prov-ledger" \
+      "$PARENT_ID" \
+      "intelgraph-system" \
+      "prov-ledger"
+
+    # Exporter
+    register_entry \
+      "spiffe://intelgraph.local/ns/intelgraph-system/sa/exporter" \
+      "$PARENT_ID" \
+      "intelgraph-system" \
+      "exporter"
+
+    #############################################
+    # OBSERVABILITY SERVICES
+    #############################################
+
+    # Prometheus
+    register_entry \
+      "spiffe://intelgraph.local/ns/monitoring/sa/prometheus" \
+      "$PARENT_ID" \
+      "monitoring" \
+      "prometheus"
+
+    # Grafana
+    register_entry \
+      "spiffe://intelgraph.local/ns/monitoring/sa/grafana" \
+      "$PARENT_ID" \
+      "monitoring" \
+      "grafana"
+
+    # OpenTelemetry Collector
+    register_entry \
+      "spiffe://intelgraph.local/ns/observability/sa/otel-collector" \
+      "$PARENT_ID" \
+      "observability" \
+      "otel-collector"
+
+    echo "SPIFFE entry registration complete!"
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: spire-entry-registration
+  namespace: spire-system
+  labels:
+    app.kubernetes.io/name: spire-entry-registration
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      serviceAccountName: spire-server
+      restartPolicy: OnFailure
+      initContainers:
+        - name: wait-for-server
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for SPIRE server..."
+              until nc -z spire-server.spire-system.svc.cluster.local 8081; do
+                echo "SPIRE server not ready, waiting..."
+                sleep 5
+              done
+              echo "SPIRE server is ready!"
+      containers:
+        - name: register-entries
+          image: ghcr.io/spiffe/spire-server:1.9.0
+          command: ["/bin/bash", "/scripts/register-entries.sh"]
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            - name: spire-socket
+              mountPath: /tmp/spire-server/private
+      volumes:
+        - name: scripts
+          configMap:
+            name: spire-entries-core
+            defaultMode: 0755
+        - name: spire-socket
+          hostPath:
+            path: /tmp/spire-server/private
+            type: Directory

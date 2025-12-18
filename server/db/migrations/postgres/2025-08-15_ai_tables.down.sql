@@ -1,0 +1,1 @@
+-- Undo for 2025-08-15_ai_tables.sql

@@ -43,8 +43,11 @@ import { randomUUID as uuidv4 } from 'node:crypto';
 import { getPostgresPool } from '../config/database.js';
 import config from '../config/index.js';
 import logger from '../utils/logger.js';
+import { secretsService } from './SecretsService.js';
+import { SECRETS } from '../config/secretRefs.js';
 // @ts-ignore - pg type imports
 import { Pool, PoolClient } from 'pg';
+import { metrics } from '../observability/metrics.js';
 
 /**
  * User registration data payload
@@ -90,6 +93,7 @@ interface User {
   lastName?: string;
   fullName?: string;
   role: string;
+  defaultTenantId?: string;
   isActive: boolean;
   lastLogin?: Date;
   createdAt: Date;
@@ -110,10 +114,12 @@ interface DatabaseUser {
   first_name?: string;
   last_name?: string;
   role: string;
+  default_tenant_id?: string;
   is_active: boolean;
   last_login?: Date;
   created_at: Date;
   updated_at?: Date;
+  tenant_id?: string;
 }
 
 /**
@@ -194,6 +200,9 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     'graph:read',
     'graph:export',
     'ai:request',
+    'support:read',
+    'support:create',
+    'support:update',
   ],
   VIEWER: [
     'investigation:read',
@@ -294,6 +303,16 @@ export class AuthService {
       );
 
       const user = userResult.rows[0] as DatabaseUser;
+
+      // Auto-assign to default tenant if configured or just 'global'
+      // This ensures the new user has at least one tenant membership
+      await client.query(
+        `INSERT INTO user_tenants (user_id, tenant_id, roles)
+         VALUES ($1, 'global', $2)
+         ON CONFLICT DO NOTHING`,
+        [user.id, [user.role]]
+      );
+
       const { token, refreshToken } = await this.generateTokens(user, client);
 
       await client.query('COMMIT');
@@ -336,6 +355,8 @@ export class AuthService {
    *   console.error('Login failed:', error.message);
    * }
    * ```
+   *
+   * @trace REQ-AUTH-001
    */
   async login(
     email: string,
@@ -344,6 +365,7 @@ export class AuthService {
     userAgent?: string,
   ): Promise<AuthResponse> {
     const client = await this.pool.connect();
+    let tenantId = 'unknown';
 
     try {
       const userResult = await client.query(
@@ -356,6 +378,7 @@ export class AuthService {
       }
 
       const user = userResult.rows[0] as DatabaseUser;
+      tenantId = user.tenant_id || 'unknown';
       const validPassword = await argon2.verify(user.password_hash, password);
 
       if (!validPassword) {
@@ -369,6 +392,7 @@ export class AuthService {
 
       const { token, refreshToken } = await this.generateTokens(user, client);
 
+      metrics.userLoginsTotal.inc({ tenant_id: tenantId, result: 'success' });
       return {
         user: this.formatUser(user),
         token,
@@ -377,6 +401,7 @@ export class AuthService {
       };
     } catch (error) {
       logger.error('Error logging in user:', error);
+      metrics.userLoginsTotal.inc({ tenant_id: tenantId, result: 'failure' });
       throw error;
     } finally {
       client.release();
@@ -404,8 +429,10 @@ export class AuthService {
       role: user.role,
     };
 
+    const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+
     // @ts-ignore - jwt.sign overload mismatch
-    const token = jwt.sign(tokenPayload, config.jwt.secret, {
+    const token = jwt.sign(tokenPayload, jwtSecret, {
       expiresIn: config.jwt.expiresIn,
     });
 
@@ -445,7 +472,8 @@ export class AuthService {
     try {
       if (!token) return null;
 
-      const decoded = jwt.verify(token, config.jwt.secret) as TokenPayload;
+      const jwtSecret = await secretsService.getSecret(SECRETS.JWT_SECRET);
+      const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
 
       // Check if token is blacklisted
       const blacklistCheck = await this.pool.query(
@@ -587,10 +615,19 @@ export class AuthService {
       await client.query('BEGIN');
 
       // Revoke all refresh tokens for user
-      await client.query(
-        'UPDATE user_sessions SET is_revoked = true WHERE user_id = $1',
+      const result = await client.query(
+        'UPDATE user_sessions SET is_revoked = true WHERE user_id = $1 RETURNING (SELECT tenant_id, last_login FROM users WHERE id = $1)',
         [userId],
       );
+
+      const userData = result.rows[0];
+      const tenantId = userData?.tenant_id || 'unknown';
+      metrics.userLogoutsTotal.inc({ tenant_id: tenantId });
+
+      if (userData?.last_login) {
+        const sessionDuration = (new Date().getTime() - new Date(userData.last_login).getTime()) / 1000;
+        metrics.userSessionDurationSeconds.observe({ tenant_id: tenantId }, sessionDuration);
+      }
 
       // Blacklist current access token if provided
       if (currentToken) {
@@ -673,6 +710,7 @@ export class AuthService {
       lastName: user.last_name,
       fullName: `${user.first_name} ${user.last_name}`,
       role: user.role,
+      defaultTenantId: user.default_tenant_id,
       isActive: user.is_active,
       lastLogin: user.last_login,
       createdAt: user.created_at,
