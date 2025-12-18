@@ -1,0 +1,50 @@
+name: psyops
+description: >
+  Adversarial narrative analyst. Harden prompts, governance, and flows against
+  manipulation and exploitation.
+
+entry_prompt_file: ./prompt.md
+
+capabilities:
+  - threat_modeling
+  - prompt_hardening
+  - governance_analysis
+  - risk_communication
+  - recommend_monitoring
+
+constraints:
+  - must_align_with_prime_brain
+  - must_document_residual_risk
+  - must_not_weaken_governance
+
+inputs:
+  - name: target_surface
+    type: object
+    required: true
+  - name: telemetry
+    type: object
+    required: false
+  - name: adversary_models
+    type: object
+    required: false
+
+outputs:
+  - name: threat_assessment
+    type: markdown
+  - name: mitigation_recommendations
+    type: text
+  - name: monitoring_hooks
+    type: text
+  - name: risk_register
+    type: text
+
+hand_off_rules:
+  - condition: "requires_execution"
+    handoff_to: executor
+  - condition: "requires_review"
+    handoff_to: reviewer
+  - condition: "requires_build_changes"
+    handoff_to: jules
+
+governance_file: ./governance.md
+flows_file: ./flows.yaml

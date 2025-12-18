@@ -1,0 +1,476 @@
+digraph SystemMap {
+  rankdir=TB;
+  node [shape=box, style=filled];
+  graph [compound=true, splines=ortho];
+
+  subgraph cluster_database {
+    label="DATABASE";
+    style=filled;
+    fillcolor="#4A90D920";
+    color="#4A90D9";
+
+    postgres [label="postgres", fillcolor="#4A90D9", tooltip="postgres"];
+    neo4j [label="neo4j", fillcolor="#4A90D9", tooltip="neo4j"];
+  }
+
+  subgraph cluster_cache {
+    label="CACHE";
+    style=filled;
+    fillcolor="#7B68EE20";
+    color="#7B68EE";
+
+    redis [label="redis", fillcolor="#7B68EE", tooltip="redis"];
+  }
+
+  subgraph cluster_search {
+    label="SEARCH";
+    style=filled;
+    fillcolor="#48D1CC20";
+    color="#48D1CC";
+
+    elasticsearch [label="elasticsearch", fillcolor="#48D1CC", tooltip="elasticsearch"];
+  }
+
+  subgraph cluster_api {
+    label="API";
+    style=filled;
+    fillcolor="#32CD3220";
+    color="#32CD32";
+
+    api [label="api", fillcolor="#32CD32", tooltip="api"];
+    gateway [label="gateway", fillcolor="#32CD32", tooltip="gateway"];
+    _companyos_intelgraph_api [label="@companyos/intelgraph-api", fillcolor="#32CD32", tooltip="@companyos/intelgraph-api"];
+    apps_server [label="apps-server", fillcolor="#32CD32", tooltip="IntelGraph GraphQL Server"];
+  }
+
+  subgraph cluster_frontend {
+    label="FRONTEND";
+    style=filled;
+    fillcolor="#FF69B420";
+    color="#FF69B4";
+
+    web [label="web", fillcolor="#FF69B4", tooltip="web"];
+    websocket_server [label="websocket-server", fillcolor="#FF69B4", tooltip="websocket-server"];
+    _intelgraph_web [label="web", fillcolor="#FF69B4", tooltip="@intelgraph/web"];
+    webapp [label="webapp", fillcolor="#FF69B4", tooltip="Analyst tri-pane web app"];
+  }
+
+  subgraph cluster_observability {
+    label="OBSERVABILITY";
+    style=filled;
+    fillcolor="#FFA50020";
+    color="#FFA500";
+
+    prometheus [label="prometheus", fillcolor="#FFA500", tooltip="prometheus"];
+    grafana [label="grafana", fillcolor="#FFA500", tooltip="grafana"];
+    jaeger [label="jaeger", fillcolor="#FFA500", tooltip="jaeger"];
+    loki [label="loki", fillcolor="#FFA500", tooltip="loki"];
+    alertmanager [label="alertmanager", fillcolor="#FFA500", tooltip="alertmanager"];
+  }
+
+  subgraph cluster_ai {
+    label="AI";
+    style=filled;
+    fillcolor="#9370DB20";
+    color="#9370DB";
+
+    promtail [label="promtail", fillcolor="#9370DB", tooltip="promtail"];
+    ai_sandbox [label="ai-sandbox", fillcolor="#9370DB", tooltip="ai-sandbox"];
+    ai_worker [label="ai-worker", fillcolor="#9370DB", tooltip="ai-worker"];
+  }
+
+  subgraph cluster_service {
+    label="SERVICE";
+    style=filled;
+    fillcolor="#77889920";
+    color="#778899";
+
+    zookeeper [label="zookeeper", fillcolor="#778899", tooltip="zookeeper"];
+    strategic_foresight [label="strategic-foresight", fillcolor="#778899", tooltip="strategic-foresight"];
+  }
+
+  subgraph cluster_messaging {
+    label="MESSAGING";
+    style=filled;
+    fillcolor="#FF6B6B20";
+    color="#FF6B6B";
+
+    kafka [label="kafka", fillcolor="#FF6B6B", tooltip="kafka"];
+  }
+
+  subgraph cluster_app {
+    label="APP";
+    style=filled;
+    fillcolor="#98FB9820";
+    color="#98FB98";
+
+    _summit_a11y_lab [label="a11y-lab", fillcolor="#98FB98", tooltip="Accessibility lab with Playwright + axe-core gates, keyboard trap detection, contrast budgeting, and SR tooling."];
+    _intelgraph_analytics_engine [label="analytics-engine", fillcolor="#98FB98", tooltip="Custom Analytics Dashboard Engine for IntelGraph"];
+    _companyos_compliance_console [label="@companyos/compliance-console", fillcolor="#98FB98", tooltip="@companyos/compliance-console"];
+    _intelgraph_desktop [label="desktop", fillcolor="#98FB98", tooltip="IntelGraph Desktop Application (Windows, Mac, Linux)"];
+    _intelgraph_graph_analytics_service [label="graph-analytics-service", fillcolor="#98FB98", tooltip="Advanced Graph Analytics Engine for IntelGraph"];
+    _intelgraph_labeling_ui [label="labeling-ui", fillcolor="#98FB98", tooltip="Labeling UI for data factory annotation workflows"];
+    _intelgraph_ml_engine [label="ml-engine", fillcolor="#98FB98", tooltip="Machine Learning Engine for IntelGraph Entity Resolution"];
+    _intelgraph_mobile [label="mobile", fillcolor="#98FB98", tooltip="React Native OSINT mobile app for Summit IntelGraph with offline-first architecture and real-time GraphQL subscriptions"];
+    _intelgraph_mobile_interface [label="mobile-interface", fillcolor="#98FB98", tooltip="Mobile-responsive Investigation Interface for IntelGraph"];
+    _intelgraph_mobile_native [label="mobile-native", fillcolor="#98FB98", tooltip="Native iOS and Android mobile apps for IntelGraph using React Native"];
+    _intelgraph_search_engine [label="search-engine", fillcolor="#98FB98", tooltip="Advanced Search and Query Engine for IntelGraph"];
+    _intelgraph_workflow_engine [label="workflow-engine", fillcolor="#98FB98", tooltip="Workflow Automation Engine for IntelGraph"];
+  }
+
+  subgraph cluster_library {
+    label="LIBRARY";
+    style=filled;
+    fillcolor="#A9A9A920";
+    color="#A9A9A9";
+
+    _intelgraph_3d_visualization [label="3d-visualization", fillcolor="#A9A9A9", tooltip="3D and immersive visualization library for IntelGraph"];
+    _intelgraph_acs_learner [label="acs-learner", fillcolor="#A9A9A9", tooltip="@intelgraph/acs-learner"];
+    _intelgraph_acs_simulator [label="acs-simulator", fillcolor="#A9A9A9", tooltip="@intelgraph/acs-simulator"];
+    _intelgraph_agent_identification [label="agent-identification", fillcolor="#A9A9A9", tooltip="@intelgraph/agent-identification"];
+    _intelgraph_anomaly_detection [label="anomaly-detection", fillcolor="#A9A9A9", tooltip="Advanced anomaly detection with behavioral analytics (UBA/EBA)"];
+    _intelgraph_api_framework [label="api-framework", fillcolor="#A9A9A9", tooltip="Unified API framework combining REST, GraphQL, and streaming APIs"];
+    _intelgraph_attack_surface [label="attack-surface", fillcolor="#A9A9A9", tooltip="@intelgraph/attack-surface"];
+    _intelgraph_attribution_engine [label="attribution-engine", fillcolor="#A9A9A9", tooltip="Digital identity attribution and footprint analysis engine"];
+    _intelgraph_audio_analytics [label="audio-analytics", fillcolor="#A9A9A9", tooltip="Audio feature extraction and analysis"];
+    _intelgraph_audio_enhancement [label="audio-enhancement", fillcolor="#A9A9A9", tooltip="Audio enhancement and quality improvement"];
+    _intelgraph_audio_forensics [label="audio-forensics", fillcolor="#A9A9A9", tooltip="Audio forensics and authenticity verification"];
+    _intelgraph_audio_intelligence [label="audio-intelligence", fillcolor="#A9A9A9", tooltip="Audio event detection and acoustic intelligence"];
+    _intelgraph_audio_synthesis [label="audio-synthesis", fillcolor="#A9A9A9", tooltip="Audio synthesis with TTS, voice cloning, and effects"];
+    _intelgraph_authz_core [label="authz-core", fillcolor="#A9A9A9", tooltip="Comprehensive multi-tenant authorization library with warrant and license enforcement"];
+    _intelgraph_battle_fusion [label="battle-fusion", fillcolor="#A9A9A9", tooltip="Multidomain data fusion engine for battle management"];
+    _intelgraph_behavioral_analysis [label="behavioral-analysis", fillcolor="#A9A9A9", tooltip="@intelgraph/behavioral-analysis"];
+    _intelgraph_bilateral_relations [label="bilateral-relations", fillcolor="#A9A9A9", tooltip="@intelgraph/bilateral-relations"];
+    _intelgraph_biometrics [label="biometrics", fillcolor="#A9A9A9", tooltip="@intelgraph/biometrics"];
+    _intelgraph_business_glossary [label="business-glossary", fillcolor="#A9A9A9", tooltip="Business glossary and data dictionary with term management and approval workflows"];
+    _intelgraph_catalog_analytics [label="catalog-analytics", fillcolor="#A9A9A9", tooltip="Analytics and reporting for data catalog usage, adoption, and ROI"];
+    _intelgraph_cep_engine [label="cep-engine", fillcolor="#A9A9A9", tooltip="Complex Event Processing engine for pattern detection and temporal analysis"];
+    _intelgraph_chain_of_custody [label="chain-of-custody", fillcolor="#A9A9A9", tooltip="Chain of custody tracking for evidence and legal compliance"];
+    _intelgraph_charting [label="charting", fillcolor="#A9A9A9", tooltip="Advanced charting library for IntelGraph"];
+    _summit_cloud_governance [label="cloud-governance", fillcolor="#A9A9A9", tooltip="Cloud governance, security, and compliance for data lakehouse"];
+    _intelgraph_cnn_framework [label="cnn-framework", fillcolor="#A9A9A9", tooltip="Convolutional Neural Network framework for Summit"];
+    _intelgraph_collaboration [label="collaboration", fillcolor="#A9A9A9", tooltip="Comprehensive collaboration platform for intelligence analysis"];
+    _summit_comint_analyzer [label="comint-analyzer", fillcolor="#A9A9A9", tooltip="Communications Intelligence Analysis - Training Framework"];
+    _intelgraph_compliance_monitor [label="compliance-monitor", fillcolor="#A9A9A9", tooltip="@intelgraph/compliance-monitor"];
+    _intelgraph_content_verification [label="content-verification", fillcolor="#A9A9A9", tooltip="@intelgraph/content-verification"];
+    _intelgraph_counterintel_ops [label="counterintel-ops", fillcolor="#A9A9A9", tooltip="@intelgraph/counterintel-ops"];
+    _intelgraph_covert_operations [label="covert-operations", fillcolor="#A9A9A9", tooltip="@intelgraph/covert-operations"];
+    _intelgraph_cqrs [label="cqrs", fillcolor="#A9A9A9", tooltip="CQRS (Command Query Responsibility Segregation) implementation with projections"];
+    _intelgraph_crisis_diplomacy [label="crisis-diplomacy", fillcolor="#A9A9A9", tooltip="@intelgraph/crisis-diplomacy"];
+  }
+
+  subgraph cluster_ui {
+    label="UI";
+    style=filled;
+    fillcolor="#FFB6C120";
+    color="#FFB6C1";
+
+    _intelgraph_component_tracker [label="component-tracker", fillcolor="#FFB6C1", tooltip="@intelgraph/component-tracker"];
+  }
+
+  subgraph cluster_ci {
+    label="CI";
+    style=filled;
+    fillcolor="#F0E68C20";
+    color="#F0E68C";
+
+    workflow__reusable_build [label="_reusable-build", fillcolor="#F0E68C", tooltip="🏗️ Reusable - Build"];
+    workflow__reusable_ci_fast [label="_reusable-ci-fast", fillcolor="#F0E68C", tooltip="_reusable-ci-fast"];
+    workflow__reusable_ci_perf [label="_reusable-ci-perf", fillcolor="#F0E68C", tooltip="CI Performance SLO"];
+    workflow__reusable_ci_security [label="_reusable-ci-security", fillcolor="#F0E68C", tooltip="CI Security"];
+    workflow__reusable_node_pnpm_setup [label="_reusable-node-pnpm-setup", fillcolor="#F0E68C", tooltip="Reusable Node.js & pnpm Setup"];
+    workflow__reusable_release [label="_reusable-release", fillcolor="#F0E68C", tooltip="Release"];
+    workflow__reusable_setup [label="_reusable-setup", fillcolor="#F0E68C", tooltip="🔧 Reusable - Environment Setup"];
+    workflow__reusable_slsa_build [label="_reusable-slsa-build", fillcolor="#F0E68C", tooltip="Reusable SLSA L3 Build"];
+    workflow__reusable_test [label="_reusable-test", fillcolor="#F0E68C", tooltip="🧪 Reusable - Test Runner"];
+    workflow__reusable_toolchain_setup [label="_reusable-toolchain-setup", fillcolor="#F0E68C", tooltip="🛠️ Reusable Toolchain Setup (Node + PNPM)"];
+    workflow_abac_policy [label="abac-policy", fillcolor="#F0E68C", tooltip="🔐 ABAC Policy Gate"];
+    workflow_add_to_project [label="add-to-project", fillcolor="#F0E68C", tooltip="Add Issues and PRs to Project"];
+    workflow_adr_check [label="adr-check", fillcolor="#F0E68C", tooltip="ADR Update Check"];
+    workflow_agentic_task_orchestrator [label="agentic-task-orchestrator", fillcolor="#F0E68C", tooltip="🤖 Agentic Task Orchestrator"];
+    workflow_agsm_probes [label="agsm-probes", fillcolor="#F0E68C", tooltip="AGSM Synthetic Probes"];
+    workflow_airgap_deployment [label="airgap-deployment", fillcolor="#F0E68C", tooltip="Air-Gapped Deployment CI"];
+    workflow_api_docs_validation [label="api-docs-validation", fillcolor="#F0E68C", tooltip="API Documentation Validation"];
+    workflow_api_docs [label="api-docs", fillcolor="#F0E68C", tooltip="API Documentation"];
+    workflow_attest_provenance [label="attest-provenance", fillcolor="#F0E68C", tooltip="attest-provenance"];
+    workflow_attest_sbom [label="attest-sbom", fillcolor="#F0E68C", tooltip="SBOM & Attest"];
+    workflow_audit_strict_nightly [label="audit.strict.nightly", fillcolor="#F0E68C", tooltip="Audit (strict, nightly)"];
+    workflow_auto_assign [label="auto-assign", fillcolor="#F0E68C", tooltip="Auto Assign Reviewers"];
+    workflow_auto_draft_release [label="auto-draft-release", fillcolor="#F0E68C", tooltip="Auto Draft Release"];
+    workflow_auto_fix_vulnerabilities [label="auto-fix-vulnerabilities", fillcolor="#F0E68C", tooltip="Auto-Fix Vulnerabilities"];
+    workflow_auto_green [label="auto-green", fillcolor="#F0E68C", tooltip="Auto-Green PR"];
+    workflow_auto_merge_ready [label="auto-merge-ready", fillcolor="#F0E68C", tooltip="Auto Merge Ready PRs"];
+    workflow_auto_resolve_conflicts [label="auto-resolve-conflicts", fillcolor="#F0E68C", tooltip="Auto-resolve conflicts"];
+    workflow_auto_rollback [label="auto-rollback", fillcolor="#F0E68C", tooltip="🔄 Auto-Rollback Safety Net"];
+    workflow_auto_update_prs [label="auto-update-prs", fillcolor="#F0E68C", tooltip="Auto Update PRs (safe)"];
+    workflow_automerge [label="automerge", fillcolor="#F0E68C", tooltip="Auto-merge"];
+    workflow_autotriage_ci [label="autotriage-ci", fillcolor="#F0E68C", tooltip="Autotriage CI"];
+    workflow_backup_restore_validation [label="backup-restore-validation", fillcolor="#F0E68C", tooltip="Backup & Restore Validation"];
+    workflow_batch_merge [label="batch-merge", fillcolor="#F0E68C", tooltip="Batch Merge PRs"];
+    workflow_blue_green_canary [label="blue-green-canary", fillcolor="#F0E68C", tooltip="Blue-Green with Progressive Canary"];
+    workflow_branch_cleanup [label="branch-cleanup", fillcolor="#F0E68C", tooltip="Branch Cleanup"];
+    workflow_branch_protection [label="branch-protection", fillcolor="#F0E68C", tooltip="Configure Branch Protection"];
+    workflow_build_and_push [label="build-and-push", fillcolor="#F0E68C", tooltip="build-and-push"];
+    workflow_build_images [label="build-images", fillcolor="#F0E68C", tooltip="build-images"];
+    workflow_canary_deployment [label="canary-deployment", fillcolor="#F0E68C", tooltip="Canary Deployment"];
+    workflow_canary_progress [label="canary-progress", fillcolor="#F0E68C", tooltip="Canary Weight Progression"];
+    workflow_cd_deploy [label="cd-deploy", fillcolor="#F0E68C", tooltip="CD Deploy"];
+    workflow_cd_preview [label="cd-preview", fillcolor="#F0E68C", tooltip="CD Preview Environments"];
+    workflow_cd_release [label="cd-release", fillcolor="#F0E68C", tooltip="CD Release"];
+    workflow_cd_rollback [label="cd-rollback", fillcolor="#F0E68C", tooltip="CD Rollback"];
+    workflow_cdis [label="cdis", fillcolor="#F0E68C", tooltip="cdis"];
+    workflow_chatops [label="chatops", fillcolor="#F0E68C", tooltip="🤖 ChatOps Commands"];
+    workflow_ci_backbone [label="ci-backbone", fillcolor="#F0E68C", tooltip="CI Backbone"];
+    workflow_ci_cd [label="ci-cd", fillcolor="#F0E68C", tooltip="IntelGraph CI/CD Pipeline"];
+    workflow_ci_golden_path [label="ci-golden-path", fillcolor="#F0E68C", tooltip="CI Golden Path"];
+    workflow_ci_image [label="ci-image", fillcolor="#F0E68C", tooltip="CI Image"];
+    workflow_ci_main [label="ci-main", fillcolor="#F0E68C", tooltip="CI Main - Green Lock Strategy"];
+    workflow_ci_modernized [label="ci-modernized", fillcolor="#F0E68C", tooltip="🚀 CI - Modernized Pipeline"];
+    workflow_ci_performance_k6 [label="ci-performance-k6", fillcolor="#F0E68C", tooltip="CI Performance (k6)"];
+    workflow_ci_security [label="ci-security", fillcolor="#F0E68C", tooltip="Security and Compliance Suite"];
+    workflow_ci_validate [label="ci-validate", fillcolor="#F0E68C", tooltip="CI Validate"];
+    workflow_ci_zap [label="ci-zap", fillcolor="#F0E68C", tooltip="CI Security (OWASP ZAP)"];
+    workflow_ci_green [label="ci.green", fillcolor="#F0E68C", tooltip="CI (green)"];
+    workflow_ci_main [label="ci.main", fillcolor="#F0E68C", tooltip="CI (main)"];
+    workflow_ci [label="ci", fillcolor="#F0E68C", tooltip="CI"];
+    workflow_cli [label="cli", fillcolor="#F0E68C", tooltip="CLI Build & Test"];
+    workflow_client_ci [label="client-ci", fillcolor="#F0E68C", tooltip="Client CI"];
+    workflow_close_when_done [label="close-when-done", fillcolor="#F0E68C", tooltip="close-when-done"];
+    workflow_closed_pr_excavator [label="closed-pr-excavator", fillcolor="#F0E68C", tooltip="🏗️ Closed PR Excavator - Advanced Recovery"];
+    workflow_code_quality_gates [label="code-quality-gates", fillcolor="#F0E68C", tooltip="🎯 Code Quality Gates"];
+    workflow_codeql_analysis [label="codeql-analysis", fillcolor="#F0E68C", tooltip="🔍 CodeQL Analysis"];
+    workflow_codeql_dev [label="codeql-dev", fillcolor="#F0E68C", tooltip="CodeQL"];
+    workflow_codeql [label="codeql", fillcolor="#F0E68C", tooltip="CodeQL"];
+    workflow_cognitive_targeting_engine_ci [label="cognitive-targeting-engine-ci", fillcolor="#F0E68C", tooltip="Cognitive Targeting Engine CI"];
+    workflow_compose_k6_smoke [label="compose-k6-smoke", fillcolor="#F0E68C", tooltip="Compose k6 Smoke"];
+    workflow_compose_ui_screens [label="compose-ui-screens", fillcolor="#F0E68C", tooltip="Compose UI Screens"];
+    workflow_config_attest [label="config-attest", fillcolor="#F0E68C", tooltip="config-attestation"];
+    workflow_configure_oidc [label="configure-oidc", fillcolor="#F0E68C", tooltip="Configure GitHub OIDC for Cloud Providers"];
+    workflow_conftest [label="conftest", fillcolor="#F0E68C", tooltip="Policy Gate"];
+    workflow_container_security [label="container-security", fillcolor="#F0E68C", tooltip="Container Security Scan"];
+    workflow_contract_tests [label="contract-tests", fillcolor="#F0E68C", tooltip="contract-tests"];
+    workflow_contract_verify [label="contract-verify", fillcolor="#F0E68C", tooltip="contract-verify"];
+    workflow_copilot_adoption_report [label="copilot-adoption-report", fillcolor="#F0E68C", tooltip="Weekly Copilot Adoption Report"];
+    workflow_copilot_guardrail [label="copilot-guardrail", fillcolor="#F0E68C", tooltip="Copilot Guardrail"];
+    workflow_copilot_refresh [label="copilot-refresh", fillcolor="#F0E68C", tooltip="Copilot Context Refresh"];
+    workflow_copilot_wins_rollup [label="copilot-wins-rollup", fillcolor="#F0E68C", tooltip="Copilot Wins Rollup"];
+    workflow_coverage_gate [label="coverage-gate", fillcolor="#F0E68C", tooltip="Test Coverage Gate"];
+    workflow_create_roadmap_issues [label="create-roadmap-issues", fillcolor="#F0E68C", tooltip="Create Roadmap Issues"];
+    workflow_danger [label="danger", fillcolor="#F0E68C", tooltip="danger"];
+    workflow_data_spine_governance [label="data-spine-governance", fillcolor="#F0E68C", tooltip="Data Spine Governance Checks"];
+    workflow_deception_sim [label="deception-sim", fillcolor="#F0E68C", tooltip="deception-simulation"];
+    workflow_delivery_train [label="delivery-train", fillcolor="#F0E68C", tooltip="Golden Path Delivery"];
+    workflow_demo_validate [label="demo-validate", fillcolor="#F0E68C", tooltip="Demo Validate (Seed + Screens + k6)"];
+    workflow_dependabot_auto_merge [label="dependabot-auto-merge", fillcolor="#F0E68C", tooltip="Dependabot Auto Merge"];
+    workflow_dependency_review [label="dependency-review", fillcolor="#F0E68C", tooltip="Dependency Review"];
+    workflow_dependency_update [label="dependency-update", fillcolor="#F0E68C", tooltip="Dependency Update"];
+    workflow_deploy_compose [label="deploy-compose", fillcolor="#F0E68C", tooltip="Deploy via Docker Compose (Remote)"];
+    workflow_deploy_dev [label="deploy-dev", fillcolor="#F0E68C", tooltip="Deploy Dev (AWS)"];
+    workflow_deploy_pipeline [label="deploy-pipeline", fillcolor="#F0E68C", tooltip="Deploy Pipeline"];
+    workflow_deploy_preview_canary [label="deploy-preview-canary", fillcolor="#F0E68C", tooltip="Preview Environment"];
+    workflow_deploy_preview [label="deploy-preview", fillcolor="#F0E68C", tooltip="Deploy Preview"];
+    workflow_deploy_prod_canary [label="deploy-prod-canary", fillcolor="#F0E68C", tooltip="Deploy to Prod (Canary + Auto-rollback)"];
+    workflow_deploy_production [label="deploy-production", fillcolor="#F0E68C", tooltip="Deploy to Production"];
+    workflow_deploy_stage_canary [label="deploy-stage-canary", fillcolor="#F0E68C", tooltip="Deploy to Stage (Canary)"];
+    workflow_deploy_staging [label="deploy-staging", fillcolor="#F0E68C", tooltip="Deploy to Staging"];
+    workflow_deploy [label="deploy", fillcolor="#F0E68C", tooltip="Manual Deploy"];
+    workflow_deps_cycles_changed [label="deps.cycles.changed", fillcolor="#F0E68C", tooltip="Dependency Cycles (changed workspaces)"];
+    workflow_detect_deception [label="detect-deception", fillcolor="#F0E68C", tooltip="detect-deception"];
+    workflow_dev_ci [label="dev-ci", fillcolor="#F0E68C", tooltip="CI"];
+    workflow_docker_build_modernized [label="docker-build-modernized", fillcolor="#F0E68C", tooltip="🐳 Docker - Multi-arch Build & Push"];
+    workflow_docker_build_multiarch [label="docker-build-multiarch", fillcolor="#F0E68C", tooltip="Build Multi-Architecture Docker Images"];
+    workflow_docker_release [label="docker-release", fillcolor="#F0E68C", tooltip="Build, Test, and Release Summit Docker Image"];
+    workflow_docs_deploy [label="docs-deploy", fillcolor="#F0E68C", tooltip="Deploy Documentation"];
+    workflow_docs_screenshots [label="docs-screenshots", fillcolor="#F0E68C", tooltip="Docs Screenshots"];
+    workflow_docs [label="docs", fillcolor="#F0E68C", tooltip="docs"];
+    workflow_dr_verify [label="dr-verify", fillcolor="#F0E68C", tooltip="DR Verify Workflow"];
+    workflow_e2e_observability [label="e2e-observability", fillcolor="#F0E68C", tooltip="E2E Observability Pipeline"];
+    workflow_e2e [label="e2e", fillcolor="#F0E68C", tooltip="E2E (Playwright)"];
+    workflow_enhanced_testing [label="enhanced-testing", fillcolor="#F0E68C", tooltip="Enhanced Testing Suite"];
+    workflow_entity_resolution_train [label="entity-resolution-train", fillcolor="#F0E68C", tooltip="entity-resolution-train"];
+    workflow_environment_specific_tests [label="environment-specific-tests", fillcolor="#F0E68C", tooltip="Environment Specific Tests"];
+    workflow_er_precision_gate [label="er-precision-gate", fillcolor="#F0E68C", tooltip="Entity Resolution Precision Gate"];
+    workflow_error_budget_monitoring [label="error-budget-monitoring", fillcolor="#F0E68C", tooltip="Error Budget Monitoring"];
+    workflow_evals [label="evals", fillcolor="#F0E68C", tooltip="Evals"];
+    workflow_evidence_bundle_release [label="evidence-bundle-release", fillcolor="#F0E68C", tooltip="Evidence Bundle Generation and Release"];
+    workflow_feature_flag_branches [label="feature-flag-branches", fillcolor="#F0E68C", tooltip="Feature Flag Branch Gates"];
+    workflow_finops_monitoring [label="finops-monitoring", fillcolor="#F0E68C", tooltip="FinOps Cost Monitoring"];
+    workflow_gitleaks [label="gitleaks", fillcolor="#F0E68C", tooltip="gitleaks"];
+    workflow_golden_build [label="golden-build", fillcolor="#F0E68C", tooltip="Golden Path Build (Image & Sign)"];
+    workflow_golden_ci [label="golden-ci", fillcolor="#F0E68C", tooltip="Golden Path CI (Build & Scan)"];
+    workflow_golden_deploy [label="golden-deploy", fillcolor="#F0E68C", tooltip="Golden Path Deploy (Stage -> Prod)"];
+    workflow_golden_path_ci [label="golden-path-ci", fillcolor="#F0E68C", tooltip="Golden Path CI/CD"];
+    workflow_golden_pr_tests [label="golden-pr-tests", fillcolor="#F0E68C", tooltip="🏆 Golden PR Tests"];
+    workflow_golden_preview [label="golden-preview", fillcolor="#F0E68C", tooltip="Golden Path Preview (Ephemeral)"];
+    workflow_golden_sample [label="golden-sample", fillcolor="#F0E68C", tooltip="Service: Golden Sample"];
+    workflow_golden_service_pipeline [label="golden-service-pipeline", fillcolor="#F0E68C", tooltip="Golden Service Pipeline"];
+    workflow_governance [label="governance", fillcolor="#F0E68C", tooltip="governance"];
+    workflow_grafana_import [label="grafana-import", fillcolor="#F0E68C", tooltip="grafana-import-dashboards"];
+    workflow_graph_benchmark [label="graph-benchmark", fillcolor="#F0E68C", tooltip="Graph Performance Benchmarks"];
+    workflow_graphql_validation [label="graphql-validation", fillcolor="#F0E68C", tooltip="GraphQL Schema Validation"];
+    workflow_helm_ci [label="helm-ci", fillcolor="#F0E68C", tooltip="helm-ci"];
+    workflow_helm_validation [label="helm-validation", fillcolor="#F0E68C", tooltip="Helm - Chart Validation"];
+    workflow_iac_scan [label="iac-scan", fillcolor="#F0E68C", tooltip="Infrastructure as Code (IaC) Scan"];
+    workflow_image_ci [label="image-ci", fillcolor="#F0E68C", tooltip="Docker Image CI"];
+    workflow_infra_deploy [label="infra-deploy", fillcolor="#F0E68C", tooltip="Infra Deploy"];
+    workflow_k6_gates [label="k6-gates", fillcolor="#F0E68C", tooltip="k6 SLO Gates"];
+    workflow_k6_load [label="k6-load", fillcolor="#F0E68C", tooltip="k6-load"];
+    workflow_k6_smoke_stage [label="k6.smoke.stage", fillcolor="#F0E68C", tooltip="k6 Smoke (staging, hard)"];
+    workflow_k6_smoke [label="k6.smoke", fillcolor="#F0E68C", tooltip="k6 Smoke"];
+    workflow_lane_fast [label="lane-fast", fillcolor="#F0E68C", tooltip="Fast Lane"];
+    workflow_lane_integration [label="lane-integration", fillcolor="#F0E68C", tooltip="Integration Lane"];
+    workflow_lane_security [label="lane-security", fillcolor="#F0E68C", tooltip="Security Lane"];
+    workflow_license_compliance [label="license-compliance", fillcolor="#F0E68C", tooltip="License Compliance"];
+    workflow_lint_actions [label="lint-actions", fillcolor="#F0E68C", tooltip="Lint Workflows & Terraform"];
+    workflow_lint_docs [label="lint-docs", fillcolor="#F0E68C", tooltip="Docs Lint"];
+    workflow_lint_changed [label="lint.changed", fillcolor="#F0E68C", tooltip="Lint (changed workspaces)"];
+    workflow_load_test [label="load-test", fillcolor="#F0E68C", tooltip="k6 Load Tests"];
+    workflow_lockfile_verify [label="lockfile-verify", fillcolor="#F0E68C", tooltip="Lockfile Verify"];
+    workflow_log_mirror [label="log-mirror", fillcolor="#F0E68C", tooltip="Mirror CI Logs (self-archiving)"];
+    workflow_maintainability_check [label="maintainability-check", fillcolor="#F0E68C", tooltip="Maintainability Metrics Check"];
+    workflow_marketplace_ga_ci [label="marketplace-ga-ci", fillcolor="#F0E68C", tooltip="marketplace-ga-ci"];
+    workflow_master_orchestrator [label="master-orchestrator", fillcolor="#F0E68C", tooltip="🎯 Master Orchestrator - Supreme Control"];
+    workflow_mc_platform_v041_sovereign_safeguards [label="mc-platform-v041-sovereign-safeguards", fillcolor="#F0E68C", tooltip="MC Platform v0.4.1 Sovereign Safeguards CI/CD"];
+    workflow_mega_merge_orchestrator [label="mega-merge-orchestrator", fillcolor="#F0E68C", tooltip="🏭 Mega Merge Orchestrator - Industrial Scale"];
+    workflow_mega_pr_excavator [label="mega-pr-excavator", fillcolor="#F0E68C", tooltip="🏗️ Mega PR Excavator - Mass Recovery"];
+    workflow_merge_queue_config [label="merge-queue-config", fillcolor="#F0E68C", tooltip="Merge Queue Configuration"];
+    workflow_merge_queue [label="merge-queue", fillcolor="#F0E68C", tooltip="Merge Queue"];
+    workflow_merge_train_health [label="merge-train-health", fillcolor="#F0E68C", tooltip="Merge Train Health Check"];
+    workflow_merge_train_intelligence [label="merge-train-intelligence", fillcolor="#F0E68C", tooltip="🧠 Merge Train Intelligence & Self-Healing"];
+    workflow_merge_queue_kicker [label="merge.queue.kicker", fillcolor="#F0E68C", tooltip="Merge Queue Kicker"];
+    workflow_metrics_export [label="metrics-export", fillcolor="#F0E68C", tooltip="📊 Metrics Export"];
+    workflow_migration_audit [label="migration-audit", fillcolor="#F0E68C", tooltip="Migration Audit"];
+    workflow_migration_dryrun [label="migration-dryrun", fillcolor="#F0E68C", tooltip="migration-dryrun"];
+    workflow_migration_gate [label="migration-gate", fillcolor="#F0E68C", tooltip="DB Migration Gate"];
+    workflow_ml_ci [label="ml-ci", fillcolor="#F0E68C", tooltip="ML CI"];
+    workflow_ml_pipeline [label="ml-pipeline", fillcolor="#F0E68C", tooltip="ML Infrastructure Pipeline"];
+    workflow_mobile [label="mobile", fillcolor="#F0E68C", tooltip="Mobile CI"];
+    workflow_model_catalog_staleness [label="model-catalog-staleness", fillcolor="#F0E68C", tooltip="Model Catalog Staleness Check"];
+    workflow_nightly_cve_scan [label="nightly-cve-scan", fillcolor="#F0E68C", tooltip="nightly-cve-scan"];
+    workflow_nightly_ops_delta [label="nightly-ops-delta", fillcolor="#F0E68C", tooltip="nightly-ops-delta"];
+    workflow_nightly_testing [label="nightly-testing", fillcolor="#F0E68C", tooltip="Nightly Testing"];
+    workflow_nightly_ops_perf [label="nightly.ops.perf", fillcolor="#F0E68C", tooltip="Nightly Ops & Perf (strict)"];
+    workflow_oct25_bulk_import [label="oct25-bulk-import", fillcolor="#F0E68C", tooltip="Oct25 Bulk Import"];
+    workflow_operational_verification [label="operational-verification", fillcolor="#F0E68C", tooltip="Operational Verification Checklist"];
+    workflow_ops_reminders [label="ops-reminders", fillcolor="#F0E68C", tooltip="ops-reminders"];
+    workflow_ops_validate_stage [label="ops.validate.stage", fillcolor="#F0E68C", tooltip="Ops Validate (staging, hard)"];
+    workflow_owasp_zap_scan [label="owasp-zap-scan", fillcolor="#F0E68C", tooltip="OWASP ZAP Security Scan"];
+    workflow_owasp_zap [label="owasp-zap", fillcolor="#F0E68C", tooltip="Security - OWASP ZAP"];
+    workflow_pact [label="pact", fillcolor="#F0E68C", tooltip="pact-contracts"];
+    workflow_performance_benchmark [label="performance-benchmark", fillcolor="#F0E68C", tooltip="📈 Performance Benchmarking"];
+    workflow_performance_regression [label="performance-regression", fillcolor="#F0E68C", tooltip="⚡ Performance Regression Testing"];
+    workflow_platform_sre_pipeline [label="platform-sre-pipeline", fillcolor="#F0E68C", tooltip="platform-sre-pipeline"];
+    workflow_playwright_smoke [label="playwright.smoke", fillcolor="#F0E68C", tooltip="Playwright Smoke"];
+    workflow_policy_ci [label="policy-ci", fillcolor="#F0E68C", tooltip="Policy Tests"];
+    workflow_policy_fuzzer [label="policy-fuzzer", fillcolor="#F0E68C", tooltip="Policy Fuzzer"];
+    workflow_policy_gate [label="policy-gate", fillcolor="#F0E68C", tooltip="Policy Gate"];
+    workflow_policy_pack [label="policy-pack", fillcolor="#F0E68C", tooltip="policy-pack-v0"];
+    workflow_populate_october_project [label="populate-october-project", fillcolor="#F0E68C", tooltip="Populate October Project"];
+    workflow_post_deploy_verification [label="post-deploy-verification", fillcolor="#F0E68C", tooltip="post-deploy-verification"];
+    workflow_post_ga_patch [label="post-ga-patch", fillcolor="#F0E68C", tooltip="post-ga-patch"];
+    workflow_pq_dual_sig_gate [label="pq-dual-sig-gate", fillcolor="#F0E68C", tooltip="Post-Quantum Dual Signature Gate"];
+    workflow_pr_auto_assign_reviewers [label="pr-auto-assign-reviewers", fillcolor="#F0E68C", tooltip="PR Auto-Assign Reviewers"];
+    workflow_pr_auto_update [label="pr-auto-update", fillcolor="#F0E68C", tooltip="PR Auto-Update and Merge Train"];
+    workflow_pr_green_up [label="pr-green-up", fillcolor="#F0E68C", tooltip="PR Green-Up Protocol"];
+    workflow_pr_labeler [label="pr-labeler", fillcolor="#F0E68C", tooltip="PR Auto-Labeler"];
+    workflow_pr_policy_gates [label="pr-policy-gates", fillcolor="#F0E68C", tooltip="PR Policy Gates"];
+    workflow_pr_quality_gate [label="pr-quality-gate", fillcolor="#F0E68C", tooltip="PR Quality Gate"];
+    workflow_pr_size_check [label="pr-size-check", fillcolor="#F0E68C", tooltip="📏 PR Size Check"];
+    workflow_pr_size_checker [label="pr-size-checker", fillcolor="#F0E68C", tooltip="PR Size Checker"];
+    workflow_pr_stale_close [label="pr-stale-close", fillcolor="#F0E68C", tooltip="Mark and close stale PRs"];
+    workflow_pr_test_coverage_check [label="pr-test-coverage-check", fillcolor="#F0E68C", tooltip="PR Test Coverage Check"];
+    workflow_pr_triage [label="pr-triage", fillcolor="#F0E68C", tooltip="PR Triage & Quality Gate"];
+    workflow_pr_tripwire [label="pr-tripwire", fillcolor="#F0E68C", tooltip="pr-tripwire"];
+    workflow_pr_validation [label="pr-validation", fillcolor="#F0E68C", tooltip="🔍 PR Validation"];
+    workflow_preview_env [label="preview-env", fillcolor="#F0E68C", tooltip="Preview Environment"];
+    workflow_preview_teardown [label="preview-teardown", fillcolor="#F0E68C", tooltip="Preview Teardown"];
+    workflow_preview_ttl_reaper [label="preview-ttl-reaper", fillcolor="#F0E68C", tooltip="Preview TTL Reaper"];
+    workflow_preview [label="preview", fillcolor="#F0E68C", tooltip="Preview Env"];
+    workflow_promise_tracker [label="promise-tracker", fillcolor="#F0E68C", tooltip="Promise Tracker"];
+    workflow_promote_on_build [label="promote-on-build", fillcolor="#F0E68C", tooltip="promote-on-build"];
+    workflow_publish_model_catalog_doc [label="publish-model-catalog-doc", fillcolor="#F0E68C", tooltip="Publish Model Catalog Doc"];
+    workflow_publish_dryrun [label="publish.dryrun", fillcolor="#F0E68C", tooltip="Publish Dry-Run (changed workspaces)"];
+    workflow_pve [label="pve", fillcolor="#F0E68C", tooltip="PVE Policy Validation"];
+    workflow_python_ci [label="python-ci", fillcolor="#F0E68C", tooltip="IntelGraph Python CI"];
+    workflow_queue_monitoring [label="queue-monitoring", fillcolor="#F0E68C", tooltip="Queue Performance Monitoring"];
+    workflow_rbac_drift [label="rbac-drift", fillcolor="#F0E68C", tooltip="RBAC Drift Monitor"];
+    workflow_release_captain_demo [label="release-captain-demo", fillcolor="#F0E68C", tooltip="🎬 Release Captain Demo"];
+    workflow_release_captain [label="release-captain", fillcolor="#F0E68C", tooltip="Release Captain (one-shot)"];
+    workflow_release_comprehensive [label="release-comprehensive", fillcolor="#F0E68C", tooltip="Release - Multi-arch Docker & Helm"];
+    workflow_release_ga [label="release-ga", fillcolor="#F0E68C", tooltip="release-ga"];
+    workflow_release_hardened [label="release-hardened", fillcolor="#F0E68C", tooltip="Hardened Release"];
+    workflow_release_notes [label="release-notes", fillcolor="#F0E68C", tooltip="📝 Automated Release Notes"];
+    workflow_release_on_main [label="release-on-main", fillcolor="#F0E68C", tooltip="Release on main"];
+    workflow_release_train_discipline [label="release-train-discipline", fillcolor="#F0E68C", tooltip="Release Train Discipline"];
+    workflow_release_verify [label="release-verify", fillcolor="#F0E68C", tooltip="Release Verify"];
+    workflow_release [label="release", fillcolor="#F0E68C", tooltip="Release"];
+    workflow_review_sla [label="review-sla", fillcolor="#F0E68C", tooltip="Review SLA"];
+    workflow_reviewdog [label="reviewdog", fillcolor="#F0E68C", tooltip="reviewdog"];
+    workflow_revive_closed_prs [label="revive-closed-prs", fillcolor="#F0E68C", tooltip="Revive Closed PR Work"];
+    workflow_run_pr_merge [label="run_pr_merge", fillcolor="#F0E68C", tooltip="Run PR Merge"];
+    workflow_sbom_vuln_scan [label="sbom-vuln-scan", fillcolor="#F0E68C", tooltip="SBOM & Vulnerability Scan"];
+    workflow_sbom [label="sbom", fillcolor="#F0E68C", tooltip="SBOM"];
+    workflow_scenario_evaluation [label="scenario-evaluation", fillcolor="#F0E68C", tooltip="Scenario Evaluation Tests"];
+    workflow_schema_validation [label="schema-validation", fillcolor="#F0E68C", tooltip="Schema Validation & Drift Detection"];
+    workflow_scpe [label="scpe", fillcolor="#F0E68C", tooltip="SCPE Supply Chain Gate"];
+    workflow_security_audit [label="security-audit", fillcolor="#F0E68C", tooltip="Security audit"];
+    workflow_security_autopilot [label="security-autopilot", fillcolor="#F0E68C", tooltip="Security Autopilot"];
+    workflow_security_comprehensive [label="security-comprehensive", fillcolor="#F0E68C", tooltip="Security - Comprehensive Scanning"];
+    workflow_security_gates [label="security-gates", fillcolor="#F0E68C", tooltip="Security Gates"];
+    workflow_security_scan [label="security-scan", fillcolor="#F0E68C", tooltip="Security Scan"];
+    workflow_security_scans [label="security-scans", fillcolor="#F0E68C", tooltip="Security Scans"];
+    workflow_security [label="security", fillcolor="#F0E68C", tooltip="Security"];
+    workflow_semantic_release [label="semantic-release", fillcolor="#F0E68C", tooltip="Semantic Release"];
+    workflow_server_ci [label="server-ci", fillcolor="#F0E68C", tooltip="Server CI"];
+    workflow_ses [label="ses", fillcolor="#F0E68C", tooltip="SES Gate"];
+    workflow_setup_smoke_test [label="setup-smoke-test", fillcolor="#F0E68C", tooltip="Setup Smoke Test"];
+    workflow_slsa_attestation [label="slsa-attestation", fillcolor="#F0E68C", tooltip="SLSA Level 3 Attestation"];
+    workflow_slsa_l3_airgap_build [label="slsa-l3-airgap-build", fillcolor="#F0E68C", tooltip="SLSA L3 Air-Gapped Build Pipeline"];
+    workflow_slsa_l3_provenance [label="slsa-l3-provenance", fillcolor="#F0E68C", tooltip="SLSA L3 Provenance & Supply Chain Security"];
+    workflow_smoke_compose [label="smoke-compose", fillcolor="#F0E68C", tooltip="Full Deployment Smoke (Compose)"];
+    workflow_soc2_evidence [label="soc2-evidence", fillcolor="#F0E68C", tooltip="SOC2 Evidence Bundle"];
+    workflow_sonar_scan [label="sonar-scan", fillcolor="#F0E68C", tooltip="SonarCloud Scan"];
+    workflow_stabilization [label="stabilization", fillcolor="#F0E68C", tooltip="Stabilization: Build & Unit Tests"];
+    workflow_staging_deployment [label="staging-deployment", fillcolor="#F0E68C", tooltip="Staging Deployment Pipeline"];
+    workflow_stale [label="stale", fillcolor="#F0E68C", tooltip="Close Stale Issues"];
+    workflow_supply_chain [label="supply-chain", fillcolor="#F0E68C", tooltip="Supply Chain Gates"];
+    workflow_synthetic_monitoring [label="synthetic-monitoring", fillcolor="#F0E68C", tooltip="Synthetic Monitoring"];
+    workflow_system_map_drift [label="system-map-drift", fillcolor="#F0E68C", tooltip="System Map Drift Detection"];
+    workflow_terraform_drift [label="terraform-drift", fillcolor="#F0E68C", tooltip="Terraform Drift Detection"];
+    workflow_test_coverage [label="test-coverage", fillcolor="#F0E68C", tooltip="Test Coverage"];
+    workflow_test_policy [label="test-policy", fillcolor="#F0E68C", tooltip="Test Policy Enforcement"];
+    workflow_tests_changed [label="tests.changed", fillcolor="#F0E68C", tooltip="Tests (changed workspaces)"];
+    workflow_tip [label="tip", fillcolor="#F0E68C", tooltip="Tenant Isolation Prover"];
+    workflow_trivy [label="trivy", fillcolor="#F0E68C", tooltip="Trivy Scan"];
+    workflow_turbo_ci_optimizer [label="turbo-ci-optimizer", fillcolor="#F0E68C", tooltip="⚡ Turbo CI Optimizer - Advanced Performance"];
+    workflow_typecheck_changed [label="typecheck.changed", fillcolor="#F0E68C", tooltip="Typecheck (changed workspaces)"];
+    workflow_ultra_merge_orchestrator [label="ultra-merge-orchestrator", fillcolor="#F0E68C", tooltip="🚀 Ultra Merge Orchestrator"];
+    workflow_validate_canary_config [label="validate-canary-config", fillcolor="#F0E68C", tooltip="Validate Canary Configuration"];
+    workflow_validate_canary_params [label="validate-canary-params", fillcolor="#F0E68C", tooltip="validate-canary-params"];
+    workflow_validate_grafana_json [label="validate-grafana-json", fillcolor="#F0E68C", tooltip="validate-grafana-json"];
+    workflow_validate_model_catalog [label="validate-model-catalog", fillcolor="#F0E68C", tooltip="Validate Model Catalog"];
+    workflow_validate_v035_config [label="validate-v035-config", fillcolor="#F0E68C", tooltip="Validate v0.3.5 Configuration"];
+    workflow_wargame_ci [label="wargame-ci", fillcolor="#F0E68C", tooltip="WarGame Dashboard CI/CD"];
+    workflow_webapp_e2e [label="webapp-e2e", fillcolor="#F0E68C", tooltip="Webapp E2E and Visual Regression"];
+    workflow_week2_deployment [label="week2-deployment", fillcolor="#F0E68C", tooltip="Week 2 Deployment Pipeline"];
+    workflow_weekly_hygiene [label="weekly-hygiene", fillcolor="#F0E68C", tooltip="Weekly Hygiene"];
+    workflow_zap_dast [label="zap-dast", fillcolor="#F0E68C", tooltip="ZAP DAST Scan"];
+  }
+
+  // Dependencies
+  api -> postgres [style=solid];
+  api -> redis [style=solid];
+  api -> neo4j [style=solid];
+  api -> elasticsearch [style=solid];
+  gateway -> api [style=solid];
+  web -> api [style=solid];
+  websocket_server -> redis [style=solid];
+  grafana -> prometheus [style=solid];
+  grafana -> loki [style=solid];
+  grafana -> jaeger [style=solid];
+  ai_sandbox -> redis [style=solid];
+  kafka -> zookeeper [style=solid];
+  ai_worker -> api [style=solid];
+  ai_worker -> kafka [style=solid];
+  _intelgraph_behavioral_analysis -> _intelgraph_biometrics [style=dashed];
+}

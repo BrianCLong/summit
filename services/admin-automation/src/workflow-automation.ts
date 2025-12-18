@@ -37,7 +37,7 @@ export class WorkflowAutomation {
     let autoResolved = 0;
     for (const need of autoResolvable) {
       const result = await this.proactiveResolver.autoResolve(need.id, citizenId);
-      if (result.resolved) autoResolved++;
+      if (result.resolved) {autoResolved++;}
     }
 
     return {
@@ -98,7 +98,7 @@ export class WorkflowAutomation {
       for (const need of needs) {
         if (need.autoResolvable) {
           const result = await this.proactiveResolver.autoResolve(need.id, citizenId);
-          if (result.resolved) autoResolved++;
+          if (result.resolved) {autoResolved++;}
         } else if (need.confidence >= 0.8) {
           await this.proactiveResolver.notifyCitizen(citizenId, need.id);
           notificationsSent++;
