@@ -52,7 +52,7 @@ export class DIDManager {
   async resolveDID(did: string): Promise<DIDDocument | undefined> {
     // Check local cache
     const cached = this.documents.get(did);
-    if (cached) return cached;
+    if (cached) {return cached;}
 
     // In production, resolve via DID resolver network
     return undefined;
@@ -63,7 +63,7 @@ export class DIDManager {
     updates: Partial<Omit<DIDDocument, 'id'>>,
   ): Promise<DIDDocument | undefined> {
     const document = this.documents.get(did);
-    if (!document) return undefined;
+    if (!document) {return undefined;}
 
     const updated: DIDDocument = {
       ...document,
@@ -80,7 +80,7 @@ export class DIDManager {
     method: VerificationMethod,
   ): Promise<DIDDocument | undefined> {
     const document = this.documents.get(did);
-    if (!document) return undefined;
+    if (!document) {return undefined;}
 
     document.verificationMethod.push(method);
     return document;
@@ -91,7 +91,7 @@ export class DIDManager {
     service: ServiceEndpoint,
   ): Promise<DIDDocument | undefined> {
     const document = this.documents.get(did);
-    if (!document) return undefined;
+    if (!document) {return undefined;}
 
     document.service = document.service || [];
     document.service.push(service);

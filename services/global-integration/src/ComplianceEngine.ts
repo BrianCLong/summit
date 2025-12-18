@@ -85,7 +85,7 @@ export class ComplianceEngine {
       framework: 'GDPR',
       requirement: 'Data Processing Agreement (DPA)',
       check: async (partner) => {
-        const hasDPA = !!partner.metadata.dataProcessingAgreement;
+        const hasDPA = Boolean(partner.metadata.dataProcessingAgreement);
         return {
           passed: hasDPA,
           requirement: 'Data Processing Agreement',
@@ -178,7 +178,7 @@ export class ComplianceEngine {
       framework: 'eIDAS',
       requirement: 'Electronic seal',
       check: async (partner) => {
-        const hasSeal = partner.authMethod === 'x-road' || !!partner.metadata.electronicSeal;
+        const hasSeal = partner.authMethod === 'x-road' || Boolean(partner.metadata.electronicSeal);
         return {
           passed: hasSeal,
           requirement: 'Electronic seal',

@@ -1,0 +1,114 @@
+# Tenant Graph Slice v0 - CSV Mapping Configuration Example
+# This file defines how CSV columns map to graph entities and relationships
+
+version: "1.0"
+
+source:
+  type: csv
+  delimiter: ","
+  hasHeader: true
+  encoding: utf-8
+
+# Entity mappings
+entities:
+  # Person entities
+  - kind: person
+    idField: person_id
+    labels:
+      - Person
+      - Analyst
+    fields:
+      name:
+        csvColumn: full_name
+        transform: trim
+      email:
+        csvColumn: email_address
+        transform: lowercase
+      phone:
+        csvColumn: phone_number
+      dateOfBirth:
+        csvColumn: dob
+        transform: date
+      nationality:
+        csvColumn: country
+        transform: uppercase
+      aliases:
+        csvColumn: known_aliases
+        transform: json
+        default: []
+
+  # Organization entities
+  - kind: organization
+    filter:
+      entity_type: "organization"
+    idField: org_id
+    labels:
+      csvColumn: org_labels
+    fields:
+      name:
+        csvColumn: org_name
+        transform: trim
+      industry:
+        csvColumn: industry_sector
+      jurisdiction:
+        csvColumn: jurisdiction
+        transform: uppercase
+      registrationNumber:
+        csvColumn: registration_no
+      website:
+        csvColumn: website_url
+        transform: lowercase
+
+  # Asset entities
+  - kind: asset
+    filter:
+      entity_type: "asset"
+    idField: asset_id
+    labels:
+      - Asset
+      - Financial
+    fields:
+      assetType:
+        csvColumn: asset_type
+      description:
+        csvColumn: asset_description
+      value:
+        csvColumn: asset_value
+        transform: float
+      currency:
+        csvColumn: currency_code
+        transform: uppercase
+        default: "USD"
+      serialNumber:
+        csvColumn: serial_number
+
+# Relationship mappings
+relationships:
+  # Person works for Organization
+  - type: MEMBER_OF
+    fromField: person_id
+    toField: org_id
+    confidence:
+      csvColumn: relationship_confidence
+    properties:
+      role:
+        csvColumn: job_title
+      startDate:
+        csvColumn: employment_start
+        transform: date
+      endDate:
+        csvColumn: employment_end
+        transform: date
+
+  # Organization owns Asset
+  - type: OWNS
+    fromField: org_id
+    toField: asset_id
+    confidence: 0.95
+    properties:
+      acquisitionDate:
+        csvColumn: acquisition_date
+        transform: date
+      ownershipPercentage:
+        csvColumn: ownership_pct
+        transform: float
