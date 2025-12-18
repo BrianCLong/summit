@@ -1,0 +1,22 @@
+{
+  "id": "002-xss-profile-update",
+  "description": "Attempt Stored XSS in support ticket creation",
+  "steps": [
+    {
+      "method": "POST",
+      "path": "/api/support/tickets",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "body": {
+        "title": "Problem <script>alert(1)</script>",
+        "description": "Please help <img src=x onerror=alert(1)>",
+        "priority": "high"
+      },
+      "expect": {
+        "status": 403,
+        "bodyContains": "Forbidden"
+      }
+    }
+  ]
+}
