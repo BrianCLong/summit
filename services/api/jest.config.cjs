@@ -1,6 +1,7 @@
 /** Jest config for services/api */
 module.exports = {
-  roots: ['<rootDir>/src/graphql/__tests__'],
+  roots: ['<rootDir>/src/graphql/__tests__', '<rootDir>/src/middleware/__tests__'],
+  testMatch: ['**/__tests__/**/*.test.ts'],
   transform: { '^.+\\.(ts|tsx)$': 'ts-jest' },
   testEnvironment: 'node',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

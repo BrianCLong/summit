@@ -1,0 +1,44 @@
+name: Pipeline - Nightly Security
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 2 AM UTC daily
+  workflow_dispatch:
+
+jobs:
+  deep-scan:
+    name: 🕵️ Deep Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Trivy (Full Filesystem Scan)
+      - name: Trivy FS Scan
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+
+      - name: Upload Trivy Results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          category: trivy
+
+      # Check for License Compliance
+      - name: License Compliance Check
+        run: npm run compliance:licenses
+        continue-on-error: true # Report but don't fail yet if strict compliance isn't set up
+
+      # Container Scan (Pull latest image and scan)
+      - name: Scan Staging Image
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: 'ghcr.io/${{ github.repository }}-server:latest' # Assuming latest matches staging
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+        continue-on-error: true
