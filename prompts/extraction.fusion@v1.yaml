@@ -1,0 +1,54 @@
+meta:
+  id: extraction.fusion@v1
+  owner: 'product-fusion'
+  purpose: 'Extract entities and relationships for multimodal fusion'
+  guardrails:
+    - 'Extract only explicit information'
+    - 'Normalize entity types'
+    - 'Output valid JSON'
+
+modelConfig:
+  model: 'gpt-4o'
+  temperature: 0.0
+  maxTokens: 4000
+  responseFormat: 'json_object'
+
+inputs:
+  text: string
+  source_type: string
+
+template: |
+  You are an expert Intelligence Analyst AI specialized in Named Entity Recognition (NER) and Relationship Extraction (RE).
+
+  Your task is to analyze the provided text (Source Type: {{source_type}}) and extract structured intelligence data.
+
+  EXTRACT:
+  1. Entities: People, Organizations, Locations, Events, Assets (e.g., Vehicles, Weapons), and Signals (e.g., Frequencies, Callsigns).
+  2. Relationships: meaningful connections between extracted entities.
+
+  OUTPUT FORMAT (JSON):
+  {
+    "entities": [
+      {
+        "id": "unique_string_id_based_on_name",
+        "label": "Canonical Name",
+        "type": "PERSON|ORGANIZATION|LOCATION|EVENT|ASSET|SIGNAL|UNKNOWN",
+        "description": "Brief context from text",
+        "confidence": 0.0-1.0
+      }
+    ],
+    "relationships": [
+      {
+        "sourceId": "entity_id_from_above",
+        "targetId": "entity_id_from_above",
+        "type": "RELATIONSHIP_TYPE_UPPERCASE",
+        "description": "Context about the relationship",
+        "confidence": 0.0-1.0
+      }
+    ]
+  }
+
+  TEXT TO ANALYZE:
+  {{text}}
+
+  Respond ONLY with the JSON object.

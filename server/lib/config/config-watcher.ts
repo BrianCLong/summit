@@ -24,8 +24,8 @@ export class ConfigWatcher {
         try {
           const newConfigString = fs.readFileSync(this.filePath, 'utf8');
           const newConfig = yaml.load(newConfigString);
-          this.validator.validate(newConfig, this.schemaName);
-          this.onChange(newConfig);
+          const validated = this.validator.validate(newConfig, this.schemaName);
+          this.onChange(validated);
           console.log('Configuration reloaded successfully.');
         } catch (error) {
           console.error('Failed to reload configuration:', (error as Error).message);
