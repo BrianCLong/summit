@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/text-generation",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Text data generation with GPT-based synthesis, NER, and multi-lingual support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

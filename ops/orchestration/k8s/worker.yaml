@@ -1,0 +1,133 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: summit-worker
+  namespace: summit-platform
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summit-worker
+  namespace: summit-platform
+  labels:
+    app: summit-worker
+    tier: backend
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: summit-worker
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: summit-worker
+        tier: backend
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      serviceAccountName: summit-worker
+      containers:
+        - name: worker
+          image: ghcr.io/summit-platform/worker:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: CONDUCTOR_ROLE
+              value: worker
+            - name: WORKER_PORT
+              value: "4100"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: summit-app-secrets
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: summit-app-secrets
+                  key: redis-url
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.summit-observability:4317
+          ports:
+            - name: metrics
+              containerPort: 4100
+          readinessProbe:
+            tcpSocket:
+              port: 4100
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            tcpSocket:
+              port: 4100
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 300m
+              memory: 384Mi
+            limits:
+              cpu: 800m
+              memory: 1Gi
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: summit-worker
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-worker
+  namespace: summit-platform
+spec:
+  selector:
+    app: summit-worker
+  ports:
+    - name: metrics
+      port: 4100
+      targetPort: 4100
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: summit-worker
+  namespace: summit-platform
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: summit-worker
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: summit-worker
+  namespace: summit-platform
+spec:
+  minReplicas: 2
+  maxReplicas: 8
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: summit-worker
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65

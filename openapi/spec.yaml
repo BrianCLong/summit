@@ -69,6 +69,8 @@ tags:
     description: Administrative operations (users, tenants, audit)
   - name: Health
     description: Health check and monitoring endpoints
+  - name: Versioning
+    description: API versioning, compatibility, and migration information
 
 security:
   - BearerAuth: []
@@ -1632,3 +1634,446 @@ paths:
           description: Forbidden - requires user:read permission
         '500':
           description: Internal server error
+
+  # Versioning API
+  /api/versioning/versions:
+    get:
+      summary: List all API versions
+      description: Returns all available API versions (current, latest, active, deprecated)
+      operationId: listApiVersions
+      tags:
+        - Versioning
+      security: []
+      responses:
+        '200':
+          description: List of API versions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  current:
+                    type: string
+                    description: Current default version
+                    example: "1.0.0"
+                  latest:
+                    type: string
+                    description: Latest available version
+                    example: "2.0.0"
+                  active:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        version:
+                          type: string
+                        status:
+                          type: string
+                          enum: [active, stable, deprecated, sunset]
+                        releaseDate:
+                          type: string
+                          format: date
+                        description:
+                          type: string
+                        breaking:
+                          type: boolean
+                  deprecated:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        version:
+                          type: string
+                        deprecationDate:
+                          type: string
+                          format: date
+                        sunsetDate:
+                          type: string
+                          format: date
+                        description:
+                          type: string
+
+  /api/versioning/versions/{version}:
+    get:
+      summary: Get version details
+      description: Returns detailed information about a specific API version
+      operationId: getVersionDetails
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier (e.g., "1.0.0" or "2.0.0")
+          example: "1.0.0"
+      responses:
+        '200':
+          description: Version details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  status:
+                    type: string
+                  releaseDate:
+                    type: string
+                    format: date
+                  deprecationDate:
+                    type: string
+                    format: date
+                  sunsetDate:
+                    type: string
+                    format: date
+                  description:
+                    type: string
+                  breaking:
+                    type: boolean
+                  changelog:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Version not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/versioning/compatibility:
+    get:
+      summary: Get compatibility matrix
+      description: Returns version compatibility matrix across all API versions
+      operationId: getCompatibilityMatrix
+      tags:
+        - Versioning
+      security: []
+      responses:
+        '200':
+          description: Compatibility matrix
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: object
+                  additionalProperties:
+                    type: object
+                    properties:
+                      compatible:
+                        type: boolean
+                      autoMigrate:
+                        type: boolean
+                      warnings:
+                        type: array
+                        items:
+                          type: string
+
+  /api/versioning/compatibility/{from}/{to}:
+    get:
+      summary: Get compatibility between versions
+      description: Returns compatibility information between two specific versions
+      operationId: getVersionCompatibility
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: from
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Source version
+          example: "1.0.0"
+        - name: to
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Target version
+          example: "2.0.0"
+      responses:
+        '200':
+          description: Compatibility information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  from:
+                    type: string
+                  to:
+                    type: string
+                  compatible:
+                    type: boolean
+                  autoMigrate:
+                    type: boolean
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '404':
+          description: One or both versions not found
+
+  /api/versioning/changelog:
+    get:
+      summary: Get full changelog
+      description: Returns complete changelog across all API versions
+      operationId: getFullChangelog
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [markdown, json]
+            default: markdown
+          description: Response format
+      responses:
+        '200':
+          description: Full changelog
+          content:
+            text/markdown:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    version:
+                      type: string
+                    changelog:
+                      type: array
+                      items:
+                        type: object
+
+  /api/versioning/changelog/{version}:
+    get:
+      summary: Get version changelog
+      description: Returns changelog for a specific version
+      operationId: getVersionChangelog
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+          example: "2.0.0"
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, markdown, html]
+            default: json
+          description: Response format
+      responses:
+        '200':
+          description: Version changelog
+          content:
+            application/json:
+              schema:
+                type: object
+            text/markdown:
+              schema:
+                type: string
+            text/html:
+              schema:
+                type: string
+        '404':
+          description: Version not found
+
+  /api/versioning/docs/{version}:
+    get:
+      summary: Get version documentation
+      description: Returns API documentation for a specific version
+      operationId: getVersionDocumentation
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, markdown]
+            default: json
+          description: Response format
+      responses:
+        '200':
+          description: Version documentation
+          content:
+            application/json:
+              schema:
+                type: object
+            text/markdown:
+              schema:
+                type: string
+        '404':
+          description: Documentation not found
+
+  /api/versioning/openapi/{version}:
+    get:
+      summary: Get version OpenAPI spec
+      description: Returns OpenAPI specification for a specific API version
+      operationId: getVersionOpenAPI
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+          example: "1.0.0"
+      responses:
+        '200':
+          description: OpenAPI specification
+          content:
+            application/json:
+              schema:
+                type: object
+                description: OpenAPI 3.0 specification object
+        '404':
+          description: Version not found
+
+  /api/versioning/migration/{from}/{to}:
+    get:
+      summary: Get migration guide
+      description: Returns migration guide between two API versions
+      operationId: getMigrationGuide
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: from
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Source version
+        - name: to
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Target version
+      responses:
+        '200':
+          description: Migration guide
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fromVersion:
+                    type: string
+                  toVersion:
+                    type: string
+                  steps:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        breaking:
+                          type: boolean
+                  examples:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Migration guide not found
+
+  /api/versioning/breaking-changes/{version}:
+    get:
+      summary: Get breaking changes
+      description: Returns list of breaking changes for a specific version
+      operationId: getBreakingChanges
+      tags:
+        - Versioning
+      security: []
+      parameters:
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Version identifier
+      responses:
+        '200':
+          description: Breaking changes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  version:
+                    type: string
+                  breakingChanges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        description:
+                          type: string
+                        impact:
+                          type: string
+                        migration:
+                          type: string
+        '404':
+          description: Version not found
+
+  /api/versioning/status:
+    get:
+      summary: Get versioning status
+      description: Returns overall API versioning status and statistics
+      operationId: getVersioningStatus
+      tags:
+        - Versioning
+      security: []
+      responses:
+        '200':
+          description: Versioning status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalVersions:
+                    type: integer
+                  activeVersions:
+                    type: integer
+                  deprecatedVersions:
+                    type: integer
+                  currentDefault:
+                    type: string
+                  latestVersion:
+                    type: string
+                  supportedVersions:
+                    type: array
+                    items:
+                      type: string
