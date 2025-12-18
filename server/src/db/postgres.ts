@@ -1,7 +1,6 @@
 // @ts-nocheck
 import crypto from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-// @ts-ignore - pg type imports
 import { Pool, QueryConfig, QueryResult, PoolClient } from 'pg';
 import { dbConfig } from './config.js';
 import baseLogger from '../config/logger.js';
