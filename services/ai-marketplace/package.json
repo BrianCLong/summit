@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/ai-marketplace",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Hyper-Personalized AI Experience Marketplace",
   "type": "module",
   "main": "dist/index.js",
@@ -13,9 +13,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@intelgraph/extensions": "workspace:*",
+<<<<<<< HEAD
+=======
+    "@summit/extensions": "workspace:*",
+<<<<<<< HEAD
+    "@summit/i18n": "workspace:*",
+    "@summit/graph-ai-core": "workspace:*",
+=======
     "@intelgraph/i18n": "workspace:*",
     "@intelgraph/graph-ai-core": "workspace:*",
+>>>>>>> main
+>>>>>>> main
     "zod": "^3.22.4",
     "uuid": "^9.0.0"
   },

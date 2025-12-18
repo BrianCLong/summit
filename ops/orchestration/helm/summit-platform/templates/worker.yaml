@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-worker
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-worker
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "summit-platform.labels" . | nindent 4 }}
+    component: worker
+spec:
+  replicas: {{ .Values.worker.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: {{ include "summit-platform.fullname" . }}-worker
+      component: worker
+  template:
+    metadata:
+      labels:
+        app: {{ include "summit-platform.fullname" . }}-worker
+        component: worker
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "{{ ternary "true" "false" .Values.serviceMesh.enabled }}"
+    spec:
+      serviceAccountName: {{ include "summit-platform.fullname" . }}-worker
+      containers:
+        - name: worker
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: CONDUCTOR_ROLE
+              value: worker
+            - name: WORKER_PORT
+              value: "{{ .Values.worker.port }}"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.worker.env.databaseUrlSecret }}
+                  key: database-url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.worker.env.redisUrlSecret }}
+                  key: redis-url
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.summit-observability:4317
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.worker.port }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.worker.port }}
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.worker.port }}
+            periodSeconds: 15
+            timeoutSeconds: 3
+            failureThreshold: 5
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: {{ include "summit-platform.fullname" . }}-worker
+                topologyKey: kubernetes.io/hostname
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-worker
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "summit-platform.labels" . | nindent 4 }}
+    component: worker
+spec:
+  selector:
+    app: {{ include "summit-platform.fullname" . }}-worker
+  ports:
+    - name: metrics
+      port: {{ .Values.worker.port }}
+      targetPort: {{ .Values.worker.port }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-worker
+  namespace: {{ .Values.namespace }}
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ include "summit-platform.fullname" . }}-worker
+{{- if .Values.worker.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "summit-platform.fullname" . }}-worker
+  namespace: {{ .Values.namespace }}
+spec:
+  minReplicas: {{ .Values.worker.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.worker.autoscaling.maxReplicas }}
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "summit-platform.fullname" . }}-worker
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.worker.autoscaling.cpu.targetPercentage }}
+{{- end }}
