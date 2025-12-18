@@ -32,9 +32,9 @@ function signHash(hash: string, privPem: string): string {
 }
 
 const PRIV = process.env.LEDGER_PRIVATE_PEM || '';
-const PUB = process.env.LEDGER_PUBLIC_PEM || '';
+const _PUB = process.env.LEDGER_PUBLIC_PEM || ''; // Reserved for signature verification
 
-export const app = express(); // Export app for testing
+export const app: express.Application = express(); // Export app for testing
 app.use(bodyParser.json());
 
 app.post('/ledger/append', (req, res) => {
@@ -72,4 +72,6 @@ app.get('/ledger/last', (req, res) => {
 });
 
 const port = Number(process.env.PORT || 7401);
-app.listen(port, () => console.log('Ledger server on', port));
+app.listen(port, () => {
+  // Ledger server listening on port
+});

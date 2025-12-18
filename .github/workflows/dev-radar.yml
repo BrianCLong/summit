@@ -1,0 +1,56 @@
+name: Developer Radar
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Nightly at midnight UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Needed for git log analysis
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Attempt to download test results from previous 'ci' run
+      # This relies on the 'ci' workflow uploading 'junit-report' artifact
+      # If not found, the script will gracefully handle it.
+      - name: Download Test Results (Optional)
+        uses: dawidd6/action-download-artifact@v3
+        continue-on-error: true
+        with:
+          workflow: ci.yml
+          name: junit-report
+          path: .
+          if_no_artifact_found: warn
+
+      - name: Run Developer Radar
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx tsx scripts/dev/radar.ts
+
+      - name: Commit Dashboard Update
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update developer radar dashboard"
+          file_pattern: "docs/dev/radar-dashboard.md"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: radar-report
+          path: |
+            radar.json
+            radar.md

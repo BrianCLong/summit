@@ -1,0 +1,29 @@
+meta:
+  id: jade.scenario-set@v1
+  owner: jules
+  purpose: Scenario Set Artifact Template
+  tags: [jade, artifact, scenarios]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.5
+  maxTokens: 2000
+inputs:
+  analysis: The preceding analysis or context
+template: |
+  Using the analysis below, output a SCENARIO_SET artifact.
+
+  ANALYSIS: {{analysis}}
+
+  ARTIFACT: SCENARIO_SET
+
+  1) AXES & RATIONALE
+  2) SCENARIO TABLE
+  - Name | Type (P50/P10+/P10-) | Summary | Key Drivers | Risks | Opportunities
+
+  3) OPTIONS BY SCENARIO
+  - No-regret moves
+  - Bets
+  - Hedges
+
+  4) SIGNPOST TABLE
+  - Signpost | What it suggests | Where to monitor | Cadence

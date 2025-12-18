@@ -109,7 +109,7 @@ export default function ServingAlertsConfig() {
   }, [])
 
   const handleSave = async () => {
-    if (!config) return
+    if (!config) {return}
 
     try {
       setSaving(true)
@@ -135,7 +135,7 @@ export default function ServingAlertsConfig() {
   }
 
   const updateConfig = (updates: Partial<ServingAlertConfig>) => {
-    if (!config) return
+    if (!config) {return}
     setConfig({ ...config, ...updates })
   }
 
