@@ -2,9 +2,21 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - 'services/*'
-  - 'contracts/*'
-  - 'server'
-  - 'client'
   - 'tools/*'
+<<<<<<< HEAD
 exclude:
   - 'archive/**'
+<<<<<<< HEAD
+  - 'apps/mobile-native'
+  - 'apps/desktop-electron'
+=======
+  - 'tools/summitctl'
+=======
+  - 'client'
+  - 'server'
+  - 'intelgraph-mvp/ui'
+  - '!**/test/**'
+  - '!**/tests/**'
+  - '!**/node_modules/**'
+>>>>>>> main
+>>>>>>> main

@@ -1,26 +1,26 @@
 package companyos.authz.customer
 
-default allow := false
+default decision := {
+  "allow": false,
+  "reason": "default_deny",
+}
 
-# Input shape:
+# Input:
 # {
 #   "subject": {...},
-#   "resource": { "type": "customer", "tenant_id": "...", "region": "us" },
-#   "action": "read"
+#   "resource": {"type": "customer", "tenant_id": "...", "region": "us"},
+#   "action": "customer:read"
 # }
 
-allow {
-  input.action == "read"
+decision := { "allow": true, "reason": "tenant_role_ok" } {
+  input.action == "customer:read"
   input.resource.type == "customer"
 
-  same_tenant
+  input.subject.tenant_id == input.resource.tenant_id
+
   not restricted_region_mismatch
 
   has_role("compliance_lead") or has_role("account_owner")
-}
-
-same_tenant {
-  input.subject.tenant_id == input.resource.tenant_id
 }
 
 restricted_region_mismatch {

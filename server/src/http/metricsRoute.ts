@@ -1,19 +1,11 @@
-/**
- * Prometheus metrics endpoint
- * Exposes application and system metrics in Prometheus format
- */
-import type { Request, Response } from 'express';
-import { registry } from '../observability/metrics';
+import { registry, metrics } from './metrics.js';
 
-export async function metricsRoute(_req: Request, res: Response): Promise<void> {
+export const metricsRoute = async (_req: any, res: any) => {
   try {
-    res.setHeader('Content-Type', registry.contentType);
-    const metrics = await registry.metrics();
-    res.end(metrics);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to collect metrics',
-      message: error instanceof Error ? error.message : 'Unknown error',
-    });
+    const metricsData = await registry.metrics();
+    res.set('Content-Type', registry.contentType);
+    res.send(metricsData);
+  } catch (err) {
+    res.status(500).send('Error collecting metrics');
   }
-}
+};

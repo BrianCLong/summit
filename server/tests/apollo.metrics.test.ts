@@ -2,6 +2,7 @@ import { ApolloServer } from '@apollo/server';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { register } from 'prom-client';
 import { apolloPromPlugin } from '../src/metrics/apolloPromPlugin.js';
+import { test, expect, beforeEach } from '@jest/globals';
 
 beforeEach(() => register.resetMetrics());
 
