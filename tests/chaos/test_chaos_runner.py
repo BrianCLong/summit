@@ -59,6 +59,68 @@ def _write_suite(tmp_path: Path) -> Path:
     return path
 
 
+def _write_suite_with_recovery_targets(tmp_path: Path) -> Path:
+    payload = {
+        "spec": {"baseline": {"slo_compliance": 0.6}},
+        "experiments": [
+            {
+                "name": "broker-kill",
+                "description": "kill broker replica",
+                "type": "service_failure",
+                "target": {"broker": "broker-0"},
+                "fault_injection": {
+                    "type": "broker_kill",
+                    "observed_rpo_seconds": 12,
+                },
+                "success_criteria": [
+                    {"rto_seconds": "<=120"},
+                    {"rpo_seconds": "<=60"},
+                ],
+            },
+            {
+                "name": "cross-region",
+                "description": "validate replica promotion",
+                "type": "resiliency",
+                "target": {
+                    "primary_region": "us-east-1",
+                    "secondary_region": "us-west-2",
+                    "replication_lag_seconds": 14,
+                },
+                "fault_injection": {
+                    "type": "cross_region_failover",
+                    "observed_rpo_seconds": 75,
+                    "expected_failover_seconds": 240,
+                },
+                "success_criteria": [
+                    {"rto_seconds": "<=180"},
+                    {"rpo_seconds": "<=30"},
+                ],
+            },
+            {
+                "name": "pitr-drill",
+                "description": "simulate PITR restore",
+                "type": "backup",
+                "target": {"backup_id": "backup-123"},
+                "fault_injection": {
+                    "type": "pitr_recovery",
+                    "backup_id": "backup-123",
+                    "target_timestamp": "2025-01-01T00:00:00Z",
+                    "observed_rpo_seconds": 10,
+                },
+                "success_criteria": [
+                    {"rto_seconds": "<=300"},
+                    {"rpo_seconds": "<=120"},
+                ],
+            },
+        ],
+        "validation": {"pre_experiment": ["health"]},
+    }
+
+    path = tmp_path / "suite-rto-rpo.yaml"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    return path
+
+
 @pytest.fixture(autouse=True)
 def patch_hooks(monkeypatch: pytest.MonkeyPatch) -> None:
     def _pod(*args, **kwargs):
@@ -91,6 +153,8 @@ def test_run_suite_executes_and_summarises(tmp_path: Path) -> None:
     assert report["summary"]["total_experiments"] == 4
     assert report["summary"]["successful_experiments"] == 4
     assert report["summary"]["meets_slo_floor"] is True
+    assert report["summary"]["rto_compliance"] is True
+    assert report["summary"]["rpo_compliance"] is True
 
 
 def test_run_suite_filters_by_name(tmp_path: Path) -> None:
@@ -113,3 +177,17 @@ def test_legacy_pod_kill_helper_aggregates(monkeypatch: pytest.MonkeyPatch) -> N
 
     assert summary["status"] == "completed"
     assert calls == ["api-0", "api-1"]
+
+
+def test_runner_tracks_rto_rpo_metrics(tmp_path: Path) -> None:
+    suite_path = _write_suite_with_recovery_targets(tmp_path)
+    runner = ChaosRunner(suite_path, dry_run=True, namespace="chaos")
+
+    report = runner.run_suite()
+    experiments = {item["name"]: item["metrics"] for item in report["experiments"]}
+
+    assert experiments["broker-kill"]["rto_met"] is True
+    assert experiments["cross-region"]["rpo_met"] is False
+    assert experiments["pitr-drill"]["objectives_met"] is True
+    assert report["summary"]["rto_compliance"] is False
+    assert report["summary"]["rpo_compliance"] is False

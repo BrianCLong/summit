@@ -398,11 +398,11 @@ export class WorkflowService extends EventEmitter {
     changes?: { field: string; oldValue: unknown; newValue: unknown }[]
   ): boolean {
     if (trigger.type === 'field_changed' && trigger.field) {
-      if (!changes) return false;
+      if (!changes) {return false;}
       const change = changes.find((c) => c.field === trigger.field);
-      if (!change) return false;
-      if (trigger.fromValue !== undefined && change.oldValue !== trigger.fromValue) return false;
-      if (trigger.toValue !== undefined && change.newValue !== trigger.toValue) return false;
+      if (!change) {return false;}
+      if (trigger.fromValue !== undefined && change.oldValue !== trigger.fromValue) {return false;}
+      if (trigger.toValue !== undefined && change.newValue !== trigger.toValue) {return false;}
     }
     return true;
   }
