@@ -9,6 +9,8 @@ import {
   startObservability,
   metricsHandler,
   requestMetricsMiddleware,
+  tracingContextMiddleware,
+  injectTraceContext,
 } from './observability';
 import { AttributeService } from './attribute-service';
 import { StepUpManager } from './stepup';
@@ -29,6 +31,7 @@ export async function createApp(): Promise<express.Application> {
     .filter(Boolean);
 
   const app: express.Application = express();
+  app.use(tracingContextMiddleware);
   app.use(pinoHttp());
   app.use(express.json());
   app.use(requestMetricsMiddleware);
@@ -235,6 +238,9 @@ export async function createApp(): Promise<express.Application> {
       target: upstream,
       changeOrigin: true,
       pathRewrite: { '^/protected': '' },
+      onProxyReq: (proxyReq) => {
+        injectTraceContext(proxyReq);
+      },
     }),
   );
 
