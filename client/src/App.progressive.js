@@ -138,8 +138,11 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Progressive IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
   }, []);
 

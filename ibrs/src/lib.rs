@@ -1,7 +1,7 @@
-mod parser;
-mod runtime;
+pub mod parser;
+pub mod runtime;
+pub mod config;
+pub mod metrics;
 
-pub use parser::{ParseError, Program};
-pub use runtime::{
-    AppliedRule, Engine, EngineError, EvaluationResult, FactProof, Proof, ProofExpr, ProofExprKind,
-};
+pub use config::{AppConfig, ConfigManager};
+pub use metrics::MetricsRegistry;
