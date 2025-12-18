@@ -4,6 +4,7 @@
 
 import { PartnerRegistry } from '../partner-registry.js';
 import type { PartnerNation, DataClassification } from '../types.js';
+import { describe, it, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 describe('PartnerRegistry', () => {
   let registry: PartnerRegistry;
