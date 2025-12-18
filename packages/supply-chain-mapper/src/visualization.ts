@@ -138,7 +138,7 @@ export class VisualizationService {
     }>();
 
     for (const node of nodes) {
-      if (!node.location?.country) continue;
+      if (!node.location?.country) {continue;}
 
       const country = node.location.country;
       if (!countryMap.has(country)) {
@@ -372,9 +372,9 @@ export class VisualizationService {
   }
 
   private getEdgeColor(strength: number): string {
-    if (strength >= 0.8) return '#2196F3';
-    if (strength >= 0.6) return '#03A9F4';
-    if (strength >= 0.4) return '#81D4FA';
+    if (strength >= 0.8) {return '#2196F3';}
+    if (strength >= 0.6) {return '#03A9F4';}
+    if (strength >= 0.4) {return '#81D4FA';}
     return '#B3E5FC';
   }
 
