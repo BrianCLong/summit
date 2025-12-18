@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import config from '../config'
 
 export interface WebSocketMessage {
   type: string
@@ -21,15 +22,15 @@ export interface WebSocketState {
   lastMessage: WebSocketMessage | null
 }
 
-export function useWebSocketUpdates(config: WebSocketConfig = {}) {
+export function useWebSocketUpdates(wsConfig: WebSocketConfig = {}) {
   const {
-    url = process.env.NODE_ENV === 'development'
+    url = config.env === 'development'
       ? 'ws://localhost:3001/ws/maestro'
       : `wss://${window.location.host}/ws/maestro`,
     reconnectInterval = 3000,
     maxReconnectAttempts = 10,
     heartbeatInterval = 30000,
-  } = config
+  } = wsConfig
 
   const wsRef = useRef<WebSocket | null>(null)
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null)

@@ -1,32 +1,24 @@
-# CompanyOS – Summit Subsystem
+# CompanyOS
 
-CompanyOS is the policy-governed “company operating system” that runs **inside** the Summit platform.
+This directory contains the operational blueprint, agent definitions, and governance artifacts for the CompanyOS.
 
-It follows the same golden path as Summit:
+## Structure
 
-- Top-level: `make bootstrap && make up && make smoke`
-- CompanyOS: `make companyos-bootstrap && make companyos-up && make companyos-smoke`
+*   **`blueprint/`**: The organizational design and high-level architecture.
+*   **`agents/`**: Definitions and system prompts for the Agent Mesh.
+*   **`workflows/`**: Maestro Task Graph templates for standard flows.
+*   **`governance/`**: Integration of the Governance Layer into the mesh.
+*   **`backlog/`**: Initial backlog and sprint plans (Sprint 0-3).
+*   **`toolchain/`**: Specifications for tool interoperability.
 
-## Layout
+## Quick Start (Sprint 0)
 
-- `adr/` – architecture decision records for CompanyOS
-- `services/` – runtime services (API, workers, cron)
-- `scripts/` – smoke tests and operational utilities
+1.  **Review the Blueprint**: Start with `blueprint/overview.md` to understand the org structure.
+2.  **Spin up Agents**: Use the prompts in `agents/definitions.md` to instantiate the agent mesh.
+3.  **Deploy Governance**: Apply the principles in `governance/integration.md`.
+4.  **Execute Sprint 0**: Follow the stories in `backlog/sprint-plan.md`.
 
-## Golden Path (CompanyOS)
+## Mission Lock
 
-From repo root:
-
-```bash
-make companyos-bootstrap
-make companyos-up
-make companyos-smoke
-```
-
-These commands:
-
-* Install deps for `companyos-api`
-* Start CompanyOS services in Docker (db + API)
-* Run a minimal health-based smoke test
-
-```
+**WARNING**: This system is mission-locked. All modifications must adhere to the governance charter.
+No actions may be taken that weaken civil society, support authoritarianism, or violate the ethical guardrails defined in `governance/`.
