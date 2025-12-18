@@ -1,0 +1,24 @@
+{
+  "event_id": "f7708107-29f1-4d6b-8f4e-70e1d0c5e8ec",
+  "event_type": "policy.bundle_updated.v1",
+  "event_version": "v1",
+  "occurred_at": "2025-01-10T18:20:01Z",
+  "recorded_at": "2025-01-10T18:20:02Z",
+  "tenant_id": "tenant-acme",
+  "subject_id": "policy-admin-5",
+  "source_service": "policy-service",
+  "trace_id": "trace-xyz-001",
+  "correlation_id": "change-1188",
+  "region": "us-east-1",
+  "data": {
+    "bundle_id": "policy-bundle-2025-01",
+    "version": "2025.01.10.1",
+    "checksum": "sha256:aa02b4f31cbb8ba4c3f5c1f0bb4ad55f",
+    "change_type": "publish",
+    "previous_version": "2024.12.22.4",
+    "changed_by": "policy-admin-5",
+    "notes": "Added document retention policy updates",
+    "artifact_uri": "s3://companyos-policy/bundles/2025-01-10-1.tar.gz",
+    "review_state": "approved"
+  }
+}

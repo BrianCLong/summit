@@ -113,7 +113,7 @@ export const useConductorMetrics = (options: UseConductorMetricsOptions) => {
 
   // Real-time updates using SSE
   useEffect(() => {
-    if (!refreshInterval) return
+    if (!refreshInterval) {return}
 
     const eventSource = new EventSource(
       `/api/conductor/v1/metrics/stream?timeRange=${timeRange}`
