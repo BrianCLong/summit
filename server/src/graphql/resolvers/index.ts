@@ -2,6 +2,7 @@ import entityResolvers from './entity';
 import relationshipResolvers from './relationship';
 import userResolvers from './user';
 import investigationResolvers from './investigation';
+import authResolvers from './auth.js';
 import { WargameResolver } from '../../resolvers/WargameResolver.js'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import evidenceResolvers from './evidence.js';
 import evidenceOkResolvers from './evidenceOk.js';
@@ -30,6 +31,7 @@ const resolvers = {
     ...userResolvers.Query,
     ...healthResolvers.Query,
     ...investigationResolvers.Query,
+    ...(authResolvers.Query || {}),
     ...(evidenceOkResolvers.Query || {}),
     ...(trustRiskResolvers.Query || {}),
     ...(provenanceResolvers.Query || {}),
@@ -61,6 +63,7 @@ const resolvers = {
     ...relationshipResolvers.Mutation,
     ...userResolvers.Mutation,
     ...investigationResolvers.Mutation,
+    ...(authResolvers.Mutation || {}),
     ...(evidenceResolvers.Mutation || {}),
     ...(trustRiskResolvers.Mutation || {}),
     ...(provenanceResolvers.Mutation || {}),
