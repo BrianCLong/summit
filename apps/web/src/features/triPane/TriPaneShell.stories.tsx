@@ -116,7 +116,10 @@ export const Default: Story = {
  */
 export const WithProvenance: Story = {
   args: {
-    ...Default.args,
+    entities: mockEntities,
+    relationships: mockRelationships,
+    timelineEvents: mockTimelineEvents,
+    geospatialEvents: mockGeospatialEvents,
     showProvenanceOverlay: true,
   },
   render: args => (
@@ -139,7 +142,10 @@ export const WithProvenance: Story = {
  */
 export const WithTimeFilter: Story = {
   args: {
-    ...Default.args,
+    entities: mockEntities,
+    relationships: mockRelationships,
+    timelineEvents: mockTimelineEvents,
+    geospatialEvents: mockGeospatialEvents,
     initialSyncState: {
       globalTimeWindow: {
         start: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
@@ -170,7 +176,10 @@ export const WithTimeFilter: Story = {
  */
 export const WithSelectedEntity: Story = {
   args: {
-    ...Default.args,
+    entities: mockEntities,
+    relationships: mockRelationships,
+    timelineEvents: mockTimelineEvents,
+    geospatialEvents: mockGeospatialEvents,
     initialSyncState: {
       graph: {
         layout: { type: 'force', settings: {} },
@@ -278,7 +287,10 @@ export const LargeDataset: Story = {
  */
 export const RadialLayout: Story = {
   args: {
-    ...Default.args,
+    entities: mockEntities,
+    relationships: mockRelationships,
+    timelineEvents: mockTimelineEvents,
+    geospatialEvents: mockGeospatialEvents,
     initialSyncState: {
       graph: {
         layout: { type: 'radial', settings: {} },
@@ -306,7 +318,10 @@ export const RadialLayout: Story = {
  */
 export const HierarchicLayout: Story = {
   args: {
-    ...Default.args,
+    entities: mockEntities,
+    relationships: mockRelationships,
+    timelineEvents: mockTimelineEvents,
+    geospatialEvents: mockGeospatialEvents,
     initialSyncState: {
       graph: {
         layout: { type: 'hierarchic', settings: {} },
