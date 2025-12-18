@@ -71,14 +71,14 @@ export class MultiModalFusionEngine {
     const assigned = new Set<string>();
 
     for (const threat of threats) {
-      if (assigned.has(threat.id)) continue;
+      if (assigned.has(threat.id)) {continue;}
 
       const group = [threat];
       assigned.add(threat.id);
 
       // Find correlated threats
       for (const other of threats) {
-        if (assigned.has(other.id)) continue;
+        if (assigned.has(other.id)) {continue;}
         if (this.areCorrelated(threat, other)) {
           group.push(other);
           assigned.add(other.id);
@@ -97,17 +97,17 @@ export class MultiModalFusionEngine {
       a.temporalContext.timeWindow.start.getTime() -
         b.temporalContext.timeWindow.start.getTime()
     );
-    if (temporalDiff > this.config.temporalWindow) return false;
+    if (temporalDiff > this.config.temporalWindow) {return false;}
 
     // Spatial correlation
     const spatialOverlap = this.calculateSpatialOverlap(
       a.geospatialContext.jurisdictions,
       b.geospatialContext.jurisdictions
     );
-    if (spatialOverlap === 0) return false;
+    if (spatialOverlap === 0) {return false;}
 
     // Type correlation
-    if (a.type === b.type) return true;
+    if (a.type === b.type) {return true;}
 
     // Related types
     const relatedTypes: Record<string, string[]> = {
@@ -223,7 +223,7 @@ export class MultiModalFusionEngine {
     // Deduplicate by action
     const seen = new Set<string>();
     return all.filter((m) => {
-      if (seen.has(m.action)) return false;
+      if (seen.has(m.action)) {return false;}
       seen.add(m.action);
       return true;
     });

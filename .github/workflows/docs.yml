@@ -52,7 +52,6 @@ jobs:
         if: ${{ vars.DOCS_DISABLE != '1' }}
         uses: pnpm/action-setup@v3
         with:
-          version: 9
 
       - name: Install dependencies
         if: ${{ vars.DOCS_DISABLE != '1' }}

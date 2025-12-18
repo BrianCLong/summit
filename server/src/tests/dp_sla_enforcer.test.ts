@@ -1,4 +1,5 @@
 import { SlaEnforcer } from '../privacy/dp/SlaEnforcer';
+import { describe, it, expect } from '@jest/globals';
 
 describe('SlaEnforcer', () => {
   it('credits and pauses on breach', async () => {
