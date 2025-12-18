@@ -9,6 +9,7 @@ import {
   validateWorkflow,
 } from '../src/index.ts';
 import type { WorkflowDefinition, WorkflowValidationIssue } from 'common-types';
+import { ZeroTrustSecretsManager } from 'secrets';
 
 type TestFn = () => void;
 
@@ -150,6 +151,57 @@ runTest('topological sort surfaces cycles without infinite loop', () => {
       (cycle) => cycle.includes('n2') && cycle.includes('n3'),
     ),
   );
+});
+
+runTest('secret rotation compliance surfaces stale references', () => {
+  const workflow = createWorkflow();
+  workflow.nodes[0].params = {
+    repo: 'vault://repo',
+    credential: {
+      provider: 'kms',
+      keyId: 'alias/db',
+      ciphertext: Buffer.from('envelope').toString('base64'),
+      key: 'db/password',
+    },
+  };
+
+  const manager = new ZeroTrustSecretsManager([
+    {
+      name: 'kms-stub',
+      supports: (ref) => (ref as { provider?: string }).provider === 'kms',
+      getSecret: async () => ({ provider: 'kms-stub', value: 'placeholder' }),
+      describeRotation: () => ({
+        needsRotation: true,
+        reason: 'rotation interval exceeded',
+      }),
+    },
+  ]);
+
+  const result = validateWorkflow(workflow, { secretsManager: manager });
+  const rotationIssue = result.analysis.issues.find(
+    (issue: WorkflowValidationIssue) => issue.code === 'policy.secret-rotation',
+  );
+  assert.ok(rotationIssue);
+});
+
+runTest('unsupported secret provider is blocked', () => {
+  const workflow = createWorkflow();
+  workflow.nodes[0].params = {
+    repo: 'vault://repo',
+    credential: {
+      provider: 'kms',
+      keyId: 'alias/db',
+      ciphertext: Buffer.from('envelope').toString('base64'),
+      key: 'db/password',
+    },
+  };
+
+  const manager = new ZeroTrustSecretsManager([]);
+  const result = validateWorkflow(workflow, { secretsManager: manager });
+  const providerIssue = result.analysis.issues.find(
+    (issue: WorkflowValidationIssue) => issue.code === 'policy.secret-provider',
+  );
+  assert.ok(providerIssue);
 });
 
 if (process?.env?.NODE_TEST) {
