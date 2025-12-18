@@ -1,13 +1,14 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "jsx": "react-jsx",
+    "outDir": "./dist",
+    "rootDir": "./",
     "module": "ESNext",
+    "target": "ES2022",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "moduleResolution": "Bundler",
-    "skipLibCheck": true,
-    "types": ["vite/client", "node"]
+    "types": ["node", "@playwright/test"]
   },
-  "include": ["src", "scripts", "tests", ".storybook"],
-  "exclude": ["dist", "build"]
+  "include": ["src/**/*", "tests/**/*", "scripts/**/*", "playwright.config.ts"]
 }

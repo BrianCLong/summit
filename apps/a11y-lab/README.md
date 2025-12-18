@@ -1,37 +1,45 @@
-# A11y Lab
+# Accessibility Lab
 
-A self-contained accessibility lab that ships automated axe-core gates, keyboard trap detection, focus order export, contrast budgeting, and screen reader helpers. The lab disables analytics by default and applies data privacy (DP) guards to every telemetry touchpoint.
+A self-contained accessibility lab that wires Playwright and axe-core together to guard against critical violations, generates focus order maps, stress-tests UI with text scaling and RTL, and ships a runtime "A11y heatmap" overlay. It is designed to be framework-agnostic and to provide both automated and manual coverage.
 
-## Features
+## What ships here
+- **Automated gates**: Playwright + axe-core runs with a **zero critical violation budget** and a **contrast budget** report. Keyboard trap detection is baked into the focus order walk.
+- **Exploratory overlays**: Toggle a runtime A11y heatmap overlay script that paints issue density without collecting analytics or content.
+- **Storybook a11y panel**: Shared `storybook/preview.ts` ready to drop into Storybook to enable the `@storybook/addon-a11y` panel by default.
+- **Manual checklists**: Repeatable reviewer templates for screen reader sanity checks and DP-safe telemetry reviews.
 
-- **axe-core gate**: CLI (`pnpm --filter @summit/a11y-lab run check:axe`) or in-app trigger that fails on critical violations.
-- **Keyboard trap detector**: watches Tab sequences and emits live alerts before a user becomes trapped.
-- **Contrast budgeter**: calculates WCAG ratios and flags violations of AA/AAA budgets.
-- **Screen-reader scripts**: skip links, live region announcer, and focus-order narrator for manual reviews.
-- **Focus order map**: deterministic export of tab order; also available via `pnpm --filter @summit/a11y-lab run check:focus-map`.
-- **Storybook a11y panel**: built with `@storybook/addon-a11y` to keep components auditable.
-- **Playwright + axe integration**: see `tests/a11y.spec.ts` for focus-map, RTL, and text-scale stress tests.
-- **A11y heatmap overlay**: runtime toggle to highlight interactive targets and tab order.
-- **Privacy guardrails**: telemetry guard blocks analytics and strips user content; `scripts/telemetry-guard.sh` is enforced in CI.
+## Quick start
+1. Install dependencies from the repo root (workspace-aware):
+   ```bash
+   pnpm install
+   ```
+2. Set the target URL (defaults to `http://localhost:3000`):
+   ```bash
+   export A11Y_LAB_TARGET_URL="http://localhost:3000"
+   ```
+3. Run the suite:
+   ```bash
+   cd apps/a11y-lab
+   pnpm test
+   ```
+4. Enforce the CI gate locally (fails on any critical axe violation):
+   ```bash
+   pnpm run ci:gate
+   ```
 
-## Getting started
+## Tests included
+- **axe-core sweep** (`tests/a11y.spec.ts`): captures violations, writes JSON artifacts, and fails on critical findings. Contrast violations are summarized as a budget to make regressions visible.
+- **Focus order map** (`src/focus-order.ts`): tab-walks the page, tracks loops to detect keyboard traps, and saves the navigation trail.
+- **Stress tests** (`tests/stress.spec.ts`): runs text scaling and RTL flips to shake out layout issues while reusing the axe assertions.
+- **Heatmap overlay** (`src/heatmap-overlay.ts`): injects a toggle that colorizes elements by issue density; emits a standalone snippet via `heatmap:build`.
 
-```bash
-pnpm install
-pnpm --filter @summit/a11y-lab dev
-```
+## Data protection
+- No analytics or content collection are performed. Only axe metadata is persisted to `./artifacts` for CI triage.
+- Telemetry guards: the CI gate script strips node identifiers and retains only rule IDs + selectors. See `scripts/ci-gate.mjs` for sanitization.
 
-### Quality gates
+## Manual reviewer workflow
+- Start from `checklists/manual-a11y-checklist.md` for SR and keyboard coverage.
+- Use `checklists/dp-telemetry-guard.md` when wiring any observability around a11y signals to ensure we never capture user content.
 
-- Run automated axe: `pnpm --filter @summit/a11y-lab run check:axe`
-- Export focus order: `pnpm --filter @summit/a11y-lab run check:focus-map`
-- Playwright a11y suite: `pnpm --filter @summit/a11y-lab test:e2e`
-- Storybook with a11y panel: `pnpm --filter @summit/a11y-lab storybook`
-
-### Privacy and telemetry
-
-Analytics is disabled unless `A11Y_LAB_ALLOW_ANALYTICS=true` is explicitly set. The telemetry guard removes content-bearing fields before any payload is emitted and the shell guard blocks CI if analytics is enabled.
-
-### Manual checklist
-
-Use the GitHub issue template `a11y-lab-manual-checklist.md` to record manual sweeps (SR output, logical focus order, content review). Pair manual reviews with Playwright reports for full coverage.
+## Storybook usage
+Copy `storybook/preview.ts` into your Storybook config to turn on the a11y panel and to expose the heatmap toggle as a Storybook global.

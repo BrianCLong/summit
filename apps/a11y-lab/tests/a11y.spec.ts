@@ -1,39 +1,63 @@
 import { test, expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
-import { samplePage } from './helpers/samplePage';
+import AxeBuilder, { AxeViolation } from '@axe-core/playwright';
+import fs from 'node:fs';
+import path from 'node:path';
+import { walkFocusOrder } from '../src/focus-order';
+import { getHeatmapSnippet } from '../src/heatmap-overlay';
 
-const focusScript = `
-  window.buildFocusOrder = () => {
-    const selectors = 'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])';
-    const nodes = Array.from(document.querySelectorAll(selectors)).filter((node) => !node.hasAttribute('disabled'));
-    return nodes.map((node, index) => ({
-      index: index + 1,
-      nodeName: node.nodeName.toLowerCase(),
-      label: node.getAttribute('aria-label') || node.textContent || node.id || 'unlabeled',
-    }));
-  };
-`;
+const ARTIFACT_DIR = path.join(process.cwd(), 'artifacts');
+const REPORT_PATH = path.join(ARTIFACT_DIR, 'axe-report.json');
 
-test('axe has zero critical violations', async ({ page }) => {
-  await page.setContent(samplePage);
-  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
-  const critical = results.violations.filter((violation) => violation.impact === 'critical');
-  expect(critical.length).toBe(0);
+function ensureArtifacts() {
+  if (!fs.existsSync(ARTIFACT_DIR)) {
+    fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
+  }
+}
+
+test.describe('Accessibility gates', () => {
+  test.beforeEach(async ({ page, baseURL }) => {
+    await page.goto(baseURL ?? 'http://localhost:3000');
+  });
+
+  test('axe-core finds no critical violations and captures artifacts', async ({ page }) => {
+    const builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']);
+    const results = await builder.analyze();
+
+    ensureArtifacts();
+    fs.writeFileSync(REPORT_PATH, JSON.stringify({ ...results, violations: sanitize(results.violations) }, null, 2));
+
+    const critical = results.violations.filter((v) => v.impact === 'critical');
+    expect(critical, 'Critical accessibility regressions detected').toHaveLength(0);
+
+    const contrastViolations = results.violations.filter((v) => v.id === 'color-contrast');
+    const contrastBudget = contrastViolations.length;
+    // contrast budget: flag loudly if it exceeds 2
+    expect(contrastBudget, 'Contrast budget exceeded').toBeLessThanOrEqual(2);
+
+    // store an analytics-free heatmap snippet for optional embedding
+    const snippet = getHeatmapSnippet({ ...results, violations: sanitize(results.violations) } as any);
+    fs.writeFileSync(path.join(ARTIFACT_DIR, 'heatmap-snippet.js'), snippet);
+  });
+
+  test('focus order walk does not get trapped', async ({ page }) => {
+    const focusMap = await walkFocusOrder(page);
+    ensureArtifacts();
+    fs.writeFileSync(path.join(ARTIFACT_DIR, 'focus-order.json'), JSON.stringify(focusMap, null, 2));
+    expect(focusMap.trapped, 'Keyboard trap detected while tabbing through the page').toBeFalsy();
+  });
 });
 
-test('focus order map is generated', async ({ page }) => {
-  await page.setContent(samplePage);
-  await page.addScriptTag({ content: focusScript });
-  const focusOrder = await page.evaluate(() => (window as unknown as { buildFocusOrder: () => unknown }).buildFocusOrder());
-  expect(Array.isArray(focusOrder)).toBe(true);
-  expect((focusOrder as { label: string }[])[0]?.label).toContain('Skip');
-});
-
-test('supports text scaling and RTL stress', async ({ page }) => {
-  await page.setContent(samplePage);
-  await page.addStyleTag({ content: 'body { font-size: 120%; direction: rtl; }' });
-  const dir = await page.$eval('body', (node) => node.getAttribute('dir'));
-  const fontSize = await page.$eval('body', (node) => getComputedStyle(node as HTMLElement).fontSize);
-  expect(dir === 'rtl' || dir === null).toBeTruthy();
-  expect(parseFloat(fontSize)).toBeGreaterThanOrEqual(19);
-});
+function sanitize(violations: AxeViolation[]) {
+  return violations.map(({ id, impact, description, nodes, helpUrl }) => ({
+    id,
+    impact,
+    description,
+    helpUrl,
+    nodes: nodes.map((node) => ({
+      impact: node.impact,
+      html: undefined,
+      target: node.target,
+      failureSummary: node.failureSummary,
+    })),
+  }));
+}
