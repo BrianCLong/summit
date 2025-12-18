@@ -1,0 +1,6 @@
+image:
+  repository: ghcr.io/owner/app
+  tag: stage
+ingress:
+  hosts:
+    - host: app-stage.example.com
