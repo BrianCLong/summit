@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 import { cacheService } from './cacheService';
 
+// Interfaces (IOC, ThreatHunt, etc.) retained
 export interface IOC {
   id: string;
   type: IOCType;
@@ -355,17 +356,32 @@ export type EvidenceType =
   | 'DNS_QUERY'
   | 'HTTP_REQUEST';
 
+export interface DiamondModel {
+  adversary: any;
+  capability: string[];
+  infrastructure: string[];
+  victim: string[];
+  social_political: string;
+  technology: string;
+}
+
 export class ThreatHuntingService extends EventEmitter {
   private iocs: Map<string, IOC> = new Map();
   private detections: Map<string, Detection> = new Map();
   private hunts: Map<string, ThreatHunt> = new Map();
   private feedSources: Map<string, ThreatIntelFeed> = new Map();
 
+  // CTI Entities
+  private threatActors: Map<string, any> = new Map();
+  private malware: Map<string, any> = new Map();
+  private campaigns: Map<string, any> = new Map();
+
   constructor() {
     super();
     console.log('[THREAT_HUNTING] Advanced threat hunting service initialized');
     this.initializeThreatFeeds();
     this.initializeSampleIOCs();
+    this.initializeSampleCTIData();
 
     // Periodic tasks
     setInterval(() => {
@@ -420,6 +436,37 @@ export class ThreatHuntingService extends EventEmitter {
     console.log(
       `[THREAT_HUNTING] Initialized ${feeds.length} threat intelligence feeds`,
     );
+  }
+
+  private async initializeSampleCTIData(): Promise<void> {
+      // Mock Data for Threat Actors
+      const actorId = 'actor-1';
+      this.threatActors.set(actorId, {
+          id: actorId,
+          name: 'APT29',
+          description: 'A threat group that has been attributed to Russia\'s Foreign Intelligence Service (SVR).',
+          aliases: ['Cozy Bear', 'The Dukes'],
+          threat_actor_types: ['nation-state', 'espionage'],
+          sophistication: 'expert',
+          first_seen: '2008-01-01T00:00:00Z',
+          last_seen: new Date().toISOString(),
+          // Links
+          malware_ids: ['malware-1'],
+          campaign_ids: []
+      });
+
+      // Mock Data for Malware
+      const malwareId = 'malware-1';
+      this.malware.set(malwareId, {
+          id: malwareId,
+          name: 'MiniDuke',
+          description: 'A backdoor used by APT29.',
+          malware_types: ['backdoor'],
+          is_family: true,
+          platform: ['Windows']
+      });
+
+      console.log('[THREAT_HUNTING] Initialized sample CTI data');
   }
 
   private async initializeSampleIOCs(): Promise<void> {
@@ -893,6 +940,108 @@ export class ThreatHuntingService extends EventEmitter {
         new Date(a.detectionTime).getTime(),
     );
   }
+
+  // ==========================================
+  // CTI Methods
+  // ==========================================
+
+  getThreatActor(id: string) {
+    return this.threatActors.get(id);
+  }
+
+  getThreatActors() {
+    return Array.from(this.threatActors.values());
+  }
+
+  getMalware(id: string) {
+    return this.malware.get(id);
+  }
+
+  getMalwareList() {
+    return Array.from(this.malware.values());
+  }
+
+  /**
+   * Diamond Model Analysis
+   * Maps Adversary, Capability, Infrastructure, and Victim
+   */
+  analyzeDiamondModel(actorId: string): DiamondModel {
+    const actor = this.threatActors.get(actorId);
+    if (!actor) throw new Error('Actor not found');
+
+    // Dynamic generation based on linked IDs
+    const malwareIds = actor.malware_ids || [];
+    const capability = malwareIds.map((mid: string) => {
+        const m = this.malware.get(mid);
+        return m ? m.name : 'Unknown Tool';
+    });
+
+    // Add some default capabilities if list is empty, based on sophistication
+    if (capability.length === 0 && actor.sophistication === 'expert') {
+        capability.push('Custom Exploits', 'Zero-days');
+    }
+
+    return {
+      adversary: actor,
+      capability: capability,
+      infrastructure: ['185.220.101.42', 'C2 Server Network'], // Still mocked as we don't have Infrastructure entities yet
+      victim: ['Government Agencies', 'Think Tanks'], // Mocked
+      social_political: actor.description || 'Unknown motivation',
+      technology: 'Windows, Microsoft Office'
+    };
+  }
+
+  /**
+   * Attack Chain Mapping
+   * Maps observed techniques to Kill Chain phases
+   */
+  analyzeAttackChain(incidentId: string): any[] {
+     // Dynamic mapping based on incident ID (mock logic for demo)
+     if (incidentId === 'incident-1') {
+         return [
+             {
+                 id: 'T1566',
+                 name: 'Phishing',
+                 kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'initial-access' }]
+             }
+         ];
+     }
+
+     return [
+         {
+             id: 'T1566',
+             name: 'Phishing',
+             kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'initial-access' }]
+         },
+         {
+             id: 'T1059',
+             name: 'Command and Scripting Interpreter',
+             kill_chain_phases: [{ kill_chain_name: 'mitre-attack', phase_name: 'execution' }]
+         }
+     ];
+  }
+
+  /**
+   * Threat Scoring and Prioritization
+   * Calculates a risk score (0-100) based on severity, confidence, and context
+   */
+  getThreatScore(entityId: string): number {
+      const actor = this.threatActors.get(entityId);
+      if (actor) {
+          let score = 50;
+          if (actor.sophistication === 'expert') score += 30;
+          if (actor.threat_actor_types.includes('nation-state')) score += 15;
+          return score;
+      }
+
+      const malware = this.malware.get(entityId);
+      if (malware) {
+          return 75; // Base score for malware
+      }
+
+      return 0;
+  }
+
 
   /**
    * Get threat hunting statistics
