@@ -68,3 +68,20 @@ occur outside recorded history instead of throwing.
 
 Run `npm test` from the package root to execute the Vitest suite and ensure the
 backtesting features remain production-ready.
+
+## Authority Schema
+
+The `config/authority-schema.yaml` file documents a canonical policy schema for
+authority definitions that combine inheritance, reusable role templates, and
+attribute-based access control (ABAC) conditions. The schema includes:
+
+- A principal, resource, and context attribute catalog to keep ABAC inputs
+  explicit.
+- Reusable role templates (`viewer`, `editor`, `maintainer`) with parameters,
+  obligations, and CEL expressions for consistent guardrails.
+- Authority definitions (e.g., `org-default`, `engineering`) that show how
+  inheritance, template bindings, and ABAC controls compose to deliver
+  environment-aware access decisions.
+
+Use this schema as a reference when authoring new authorities or validating
+existing policy documents.
