@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "graph_id": { "type": "string" },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "properties": { "type": "object" }
+        },
+        "required": ["id", "type"]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string" },
+          "target": { "type": "string" },
+          "type": { "type": "string" },
+          "properties": { "type": "object" }
+        },
+        "required": ["source", "target", "type"]
+      }
+    }
+  },
+  "required": ["nodes", "edges"]
+}

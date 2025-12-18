@@ -9,9 +9,9 @@ allow {
 }
 
 allowed_actions := {
-  "viewer": {"read"},
-  "analyst": {"read", "query", "export"},
-  "admin": {"read", "query", "export", "write"}
+  "viewer": {"read", "entityById", "searchEntities", "neighbors"},
+  "analyst": {"read", "query", "export", "entityById", "searchEntities", "neighbors"},
+  "admin": {"read", "query", "export", "write", "entityById", "searchEntities", "neighbors"}
 }
 
 violation_reason := reason if not allow
