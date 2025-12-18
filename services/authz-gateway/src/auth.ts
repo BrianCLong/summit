@@ -1,7 +1,6 @@
-import crypto from 'crypto';
-import { SignJWT, jwtVerify } from 'jose';
-import { getPrivateKey, getPublicKey } from './keys';
 import { log } from './audit';
+import { assertMfa, verifyOidcToken } from './oidc';
+import { sessionManager } from './session';
 
 interface User {
   username: string;
@@ -28,20 +27,14 @@ export async function login(username: string, password: string) {
   if (!user || user.password !== password) {
     throw new Error('invalid_credentials');
   }
-  const sessionId = crypto.randomUUID();
-  const token = await new SignJWT({
+  const token = await sessionManager.createSession({
     sub: user.sub,
     tenantId: user.tenantId,
     roles: user.roles,
     clearance: user.clearance,
     acr: 'loa1',
-    sid: sessionId,
-    sessionEstablishedAt: new Date().toISOString(),
-  })
-    .setProtectedHeader({ alg: 'RS256', kid: 'authz-gateway-1' })
-    .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(getPrivateKey());
+    amr: ['pwd'],
+  });
   await log({
     subject: user.sub,
     action: 'login',
@@ -54,6 +47,29 @@ export async function login(username: string, password: string) {
 }
 
 export async function introspect(token: string) {
-  const { payload } = await jwtVerify(token, getPublicKey());
+  const { payload } = await sessionManager.validate(token);
   return payload;
+}
+
+export async function oidcLogin(idToken: string) {
+  const payload = await verifyOidcToken(idToken);
+  if (!payload.sub) {
+    throw new Error('missing_subject');
+  }
+  assertMfa(payload);
+  const sessionToken = await sessionManager.createSession({
+    ...payload,
+    sub: String(payload.sub),
+    acr: payload.acr || (payload.amr?.includes('hwk') ? 'loa2' : 'loa1'),
+    amr: payload.amr || ['pwd'],
+  });
+  await log({
+    subject: String(payload.sub),
+    action: 'oidc_login',
+    resource: 'self',
+    tenantId: (payload as { tenantId?: string }).tenantId || 'unknown',
+    allowed: true,
+    reason: 'oidc_login',
+  });
+  return sessionToken;
 }

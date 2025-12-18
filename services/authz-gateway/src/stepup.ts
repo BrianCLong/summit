@@ -25,6 +25,8 @@ export interface StepUpChallenge {
     type: string;
     transports: string[];
     displayName: string;
+    authenticatorAttachment: 'cross-platform' | 'platform';
+    deviceType: 'yubikey' | 'fido2-key';
   }[];
   expiresAt: string;
   context: Pick<
@@ -122,8 +124,12 @@ export class StepUpManager {
       allowCredentials: registered.map((entry) => ({
         id: entry.credentialId,
         type: 'public-key',
-        transports: ['usb', 'nfc', 'ble'],
+        transports: ['usb', 'nfc', 'ble', 'hybrid'],
         displayName: entry.deviceName,
+        authenticatorAttachment: 'cross-platform',
+        deviceType: entry.deviceName.toLowerCase().includes('yubi')
+          ? 'yubikey'
+          : 'fido2-key',
       })),
       expiresAt: new Date(this.now() + this.ttlMs).toISOString(),
       context: {

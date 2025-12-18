@@ -1,16 +1,15 @@
-import { jwtVerify, type JWTPayload } from 'jose';
 import type { Request, Response, NextFunction } from 'express';
+import type { JWTPayload } from 'jose';
 import pino from 'pino';
-import { getPublicKey } from './keys';
 import { authorize } from './policy';
 import { log } from './audit';
+import { sessionManager } from './session';
 import type { AttributeService } from './attribute-service';
 import type {
   AuthorizationInput,
   DecisionObligation,
   ResourceAttributes,
   SubjectAttributes,
-  ElevationGrant,
 } from './types';
 
 interface Options {
@@ -64,53 +63,6 @@ async function buildResource(
 
 const logger = pino({ name: 'authz-require-auth' });
 
-function validateElevation(
-  payload: JWTPayload,
-  resource: ResourceAttributes,
-  action: string,
-  enforceContext: boolean,
-): string | null {
-  const elevation = (payload as { elevation?: ElevationGrant }).elevation;
-  const sessionId = String((payload as { sid?: string }).sid || '');
-  if (payload.acr !== 'loa2') {
-    return enforceContext ? 'acr_insufficient' : null;
-  }
-  if (!elevation || !sessionId) {
-    return 'elevation_provenance_missing';
-  }
-  if (elevation.sessionId !== sessionId) {
-    return 'elevation_session_mismatch';
-  }
-  const expiresAt = Date.parse(elevation.expiresAt);
-  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
-    return 'elevation_expired';
-  }
-  if (enforceContext) {
-    if (
-      elevation.requestedAction &&
-      elevation.requestedAction !== action
-    ) {
-      return 'elevation_action_mismatch';
-    }
-    if (elevation.resourceId && elevation.resourceId !== resource.id) {
-      return 'elevation_resource_mismatch';
-    }
-    if (
-      elevation.tenantId &&
-      elevation.tenantId !== resource.tenantId
-    ) {
-      return 'elevation_tenant_mismatch';
-    }
-    if (
-      elevation.classification &&
-      elevation.classification !== resource.classification
-    ) {
-      return 'elevation_classification_mismatch';
-    }
-  }
-  return null;
-}
-
 export function requireAuth(
   attributeService: AttributeService,
   options: Options,
@@ -126,7 +78,13 @@ export function requireAuth(
     }
     try {
       const token = auth.replace('Bearer ', '');
-      const { payload } = await jwtVerify(token, getPublicKey());
+      const { payload } = await sessionManager.validate(token);
+      if (options.requiredAcr && payload.acr !== options.requiredAcr) {
+        return res
+          .status(401)
+          .set('WWW-Authenticate', `acr=${options.requiredAcr}`)
+          .json({ error: 'step_up_required' });
+      }
       const subject = await attributeService.getSubjectAttributes(
         String(payload.sub || ''),
       );
@@ -136,32 +94,6 @@ export function requireAuth(
         subject,
         options.resourceIdHeader,
       );
-
-      const protectedActions = attributeService.listProtectedActions();
-      const enforceContextualElevation =
-        options.requiredAcr === 'loa2' ||
-        protectedActions.includes(options.action);
-      const elevationStatus = validateElevation(
-        payload,
-        resource,
-        options.action,
-        enforceContextualElevation,
-      );
-      if (
-        elevationStatus &&
-        (payload.acr === 'loa2' || enforceContextualElevation)
-      ) {
-        return res
-          .status(401)
-          .set('WWW-Authenticate', 'acr=loa2 step-up=webauthn')
-          .json({ error: 'step_up_required', reason: elevationStatus });
-      }
-      if (options.requiredAcr && payload.acr !== options.requiredAcr) {
-        return res
-          .status(401)
-          .set('WWW-Authenticate', `acr=${options.requiredAcr}`)
-          .json({ error: 'step_up_required' });
-      }
 
       if (!options.skipAuthorization) {
         const input: AuthorizationInput = {
@@ -205,6 +137,13 @@ export function requireAuth(
       req.resourceAttributes = resource;
       return next();
     } catch (error) {
+      const message = (error as Error).message;
+      if (message === 'session_expired') {
+        return res.status(401).json({ error: 'session_expired' });
+      }
+      if (message === 'session_not_found') {
+        return res.status(401).json({ error: 'invalid_session' });
+      }
       if (process.env.NODE_ENV !== 'test') {
         logger.error({ err: error }, 'Authorization error');
       }
