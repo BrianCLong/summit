@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "test": "npm run -ws --if-present test",
-    "smoke": "npm run -ws --if-present test:smoke",
-    "load": "npm run -ws --if-present test:load"
+    "test:smoke": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-World\"",
+    "test:load": "npm run test --workspace meta-orchestrator -- --threads false --filter=\"Hello-Case\""
   }
 }

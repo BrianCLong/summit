@@ -1,28 +1,22 @@
-# Reference "Hello" Workflows
+# Hello Workflows: End-to-End References
 
-These scenarios exercise the full IntelGraph orchestrator path — planning, execution, self-healing, and graph updates — with repeatable fixtures developers can run locally or in CI.
+These reference flows exercise the IntelGraph knowledge graph, meta orchestrator, and generative action translation so teams can validate the entire control path after each deploy.
 
-## Hello-World (golden path)
+## Hello-World (Smoke)
+- **Path:** Staging build for `svc-hello` using the IntelGraph context (service, environment, pipeline, policy lookup) and the meta orchestrator planner/executor derived from the IntelGraph pipeline definition.
+- **Signals:** Pricing feed selects the lowest-cost compliant provider; audit sink captures plan+execution entries; telemetry is derived from the reward signals.
+- **Expected outcome:** Both stages execute successfully without approvals. The audit log contains plan records and telemetry shows near-100% audit completeness.
 
-- **Entry point:** `runHelloWorldWorkflow` in `packages/meta-orchestrator/src/index.ts`.
-- **What it covers:** hybrid planner scoring, pricing-aware selection, audit logging, and knowledge-graph ingestion for the `svc-hello-world` service.
-- **Topology:** single build/deploy stage targeting Azure (primary) with AWS as a guarded fallback; runs in the `env-dev` environment with PCI policies attached.
-- **Expected signals:** plan narrative, full audit trace, graph nodes for service/pipeline/environment, and a low-cost, low-risk risk profile.
+## Hello-Case (Load)
+- **Path:** Production deploy for `svc-case` with an open critical incident and `high-risk` policy tag.
+- **Signals:** GenerativeActionTranslator requires approval and enqueues the plan; Azure is selected as the cheapest path, intentionally fails, and the orchestrator self-heals by failing over to AWS using the IntelGraph-derived fallback strategies.
+- **Expected outcome:** Fallback traces are marked as recovered, reward updates are recorded, and aggregated telemetry across multiple runs shows a non-zero self-healing rate under sustained load.
 
-## Hello-Case (resilient path)
+## How to run locally
+- Smoke: `npm run test:smoke`
+- Load/soak: `npm run test:load`
+- Full suite: `npm run test --workspace meta-orchestrator`
 
-- **Entry point:** `runHelloCaseWorkflow` in `packages/meta-orchestrator/src/index.ts`.
-- **What it covers:** failure handling, fallback execution, reward shaping, and IntelGraph risk surfacing driven by incidents, cost pressure, and policy bindings for `svc-hello-case`.
-- **Topology:** ML-capable stage planned on Azure that intentionally fails, triggering AWS fallback with self-healing enabled; attaches FedRAMP policies and production zero-trust environment context.
-- **Expected signals:** recovered execution trace, self-healing telemetry, elevated service risk (incident + cost), and audit events spanning plan, fallback, and execution.
-
-## Running the workflows
-
-- **Package tests:**
-  - `cd packages/meta-orchestrator && npm test` — full vitest suite including both reference workflows.
-  - `npm run smoke` — workspace smoke pass (Hello-World reference flow only).
-  - `npm run load` — workspace load pass (Hello-Case repeated orchestration with fallback).
-
-## Post-deploy validation
-
-- The `.github/workflows/post-deploy-tests.yml` workflow triggers on successful deployments, re-runs the smoke and load commands, and posts their status as PR comments for any commit tied to the deployment.
+## Post-deploy automation
+- `.github/workflows/post-deploy-verification.yml` runs the smoke and load workflows on every successful deployment.
+- The workflow posts a PR comment (when a PR is associated with the deployment ref) summarizing smoke/load results and the workflow URL so reviewers can gate merges on the latest deploy health.
