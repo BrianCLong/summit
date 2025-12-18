@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/websocket-server",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "High-availability WebSocket infrastructure for Summit platform",
   "main": "dist/index.js",
   "type": "module",

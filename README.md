@@ -13,6 +13,20 @@
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](https://www.typescriptlang.org/)
 
+## 🎉 **NEW in v2.0.0** (December 2025)
+
+**Summit v2.0.0 is a major release** consolidating 12,000+ PRs into an enterprise-grade intelligence platform:
+
+- ✅ **Enterprise Infrastructure**: Load balancing, multi-tier caching, telemetry
+- ✅ **Advanced AI/ML**: Multimodal extraction with 8 Black Projects modules
+- ✅ **Security Hardening**: Rate limiting, GraphQL complexity limits, IDOR fixes
+- ✅ **Real-Time Systems**: Narrative simulation engine with REST API
+- ✅ **Production Ready**: Helm charts, automated deployments, comprehensive monitoring
+
+**[View Release Notes](CHANGELOG-v2.0.0.md)** | **[Migration Guide](docs/MIGRATION-v0.1-to-v2.0.md)**
+
+---
+
 # Summit Platform
 
 > Deployable-first IntelGraph (Summit) stack with GraphQL, React, Neo4j, PostgreSQL, Redis, and observability/AI services.
