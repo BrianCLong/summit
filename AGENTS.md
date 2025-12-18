@@ -19,12 +19,12 @@ This document defines the technical standards mandated by the **Law of Consisten
 
 ## Build, Test, and Development Commands
 
-- Install: `npm install && (cd server && npm install) && (cd client && npm install)`.
-- Dev: `npm run dev` (runs server and client concurrently).
-- Test: `npm test` (server+client), server only: `cd server && npm test`.
-- Lint/Format: `npm run lint && npm run format`.
-- DB: `npm run db:migrate` and `npm run db:seed` (from repo root or `server/`).
-- Docker: `npm run docker:dev` or `npm run docker:prod`.
+- Install: `pnpm install`.
+- Dev: `pnpm run dev` (runs server and client concurrently).
+- Test: `pnpm test` (server+client), server only: `pnpm --filter intelgraph-server test`.
+- Lint/Format: `pnpm run lint && pnpm run format`.
+- DB: `pnpm run db:migrate` and `pnpm run db:seed` (from repo root).
+- Docker: `pnpm run docker:dev` or `pnpm run docker:prod`.
 
 ## Coding Style & Naming Conventions
 
@@ -34,9 +34,10 @@ This document defines the technical standards mandated by the **Law of Consisten
 
 ## Testing Guidelines
 
-- Backend: Jest (`server/tests`), run with coverage: `cd server && npm run test:coverage`.
-- Frontend: see client tests; e2e via Playwright: `npm run test:e2e`.
+- Backend: Jest (`server/tests`), run with coverage: `pnpm --filter intelgraph-server test:coverage`.
+- Frontend: see client tests; e2e via Playwright: `pnpm run test:e2e`.
 - Naming: `*.spec.ts`/`*.test.js` (client), `*.test.js` (server). Target ≥80% coverage for changed code.
+- **Official CI Standard**: The `pr-quality-gate.yml` workflow is the single source of truth for PR validation. See `docs/CI_STANDARDS.md` for details.
 
 ## Commit & Pull Request Guidelines
 
@@ -102,3 +103,12 @@ done
 - Use `.env` (copy from `.env.example`); never commit secrets.
 - Helmet + CORS defaults are enabled; restrict `CORS_ORIGIN` in prod.
 - Run `scripts/bootstrap_github.sh` to set up labels/milestones and import issues.
+
+## Architectural North Star
+
+All agents should reference `docs/FIRST_PRINCIPLES_REDESIGN.md` when proposing major changes.
+The long-term goal is to migrate the monolithic architecture towards the "Cognitive Lattice" blueprint (Event Sourcing + Agentic Runtime).
+
+- **Strangler Pattern**: Prefer creating new logic in standalone `packages/` rather than adding to the existing `server/src/services/` monolith.
+- **Event-First**: Prioritize emitting immutable events (Provenance Ledger) over direct database mutations.
+- **Agent Independence**: Design agents as autonomous actors that react to the event stream, rather than synchronous HTTP services.
