@@ -1,6 +1,6 @@
 {
   "name": "@summit/canonical-entities",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Canonical entity types for Summit Platform with bitemporal support",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
