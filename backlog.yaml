@@ -58,3 +58,30 @@ backlog:
       - story: UI clutter dimming for focus (cognitive load guardrails)
         priority: P2 - Fearsome Delight
         sprint: Sprint 3
+
+  - epic: Platform Governance (K)
+    stories:
+      - story: Paved-Road Service Template v0.1
+        priority: P0 - Must
+        sprint: Paved Road + Governance
+      - story: Local Dev Stack for Paved-Road Services
+        priority: P1 - Should
+        sprint: Paved Road + Governance
+      - story: Observability Baseline for Reference Service
+        priority: P0 - Must
+        sprint: Paved Road + Governance
+      - story: Post-Deploy Validation & Runbook v0.1
+        priority: P2 - Stretch
+        sprint: Paved Road + Governance
+      - story: SBOM Generation in CI
+        priority: P0 - Must
+        sprint: Paved Road + Governance
+      - story: Container Signing & Verification
+        priority: P1 - Should
+        sprint: Paved Road + Governance
+      - story: OPA Policy Gate on PR & Release
+        priority: P0 - Must
+        sprint: Paved Road + Governance
+      - story: Evidence Pack v0.1
+        priority: P2 - Stretch
+        sprint: Paved Road + Governance
