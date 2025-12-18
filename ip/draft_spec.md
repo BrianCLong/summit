@@ -1,25 +1,27 @@
-# Provisional Patent Application: Draft Specification
+# TECHNICAL DISCLOSURE: Summit Reasoning Evaluator (SRE)
 
-**Title:** Curriculum-Guided Experiment Graph Orchestration for Large Language Model Scientists
+## 1. Field of the Invention
+The present disclosure relates to the field of Artificial Intelligence (AI) and Machine Learning (ML), specifically to systems and methods for evaluating the reasoning capabilities, tool usage efficiency, and multi-agent coordination of Large Language Models (LLMs) and autonomous agents.
 
-**Abstract:**
+## 2. Background
+Current evaluation methodologies for LLMs primarily focus on "final answer" accuracy (Exact Match, F1 score) or reference-free quality assessment using another LLM as a judge. These methods treat the reasoning process as a "black box" or a linear sequence of text tokens. They lack the structural fidelity to evaluate *how* an agent arrived at a conclusion, particularly in complex scenarios involving backtracking, self-correction, parallel tool execution, and multi-agent debate. Furthermore, evaluation datasets are typically static, failing to adapt to the specific failure modes of the model under test.
 
-A method and system for autonomously conducting scientific experimentation using a Large Language Model (LLM). The system represents the experimental process as a typed, directed acyclic graph (the "experiment-graph"). An LLM-based planner proposes new experiments (nodes and edges) guided by a declarative, multi-stage curriculum. The curriculum imposes goals and constraints at each stage of the scientific process, from baseline reproduction to ablation studies and generalization checks. The system executes proposed experiments, records telemetry to the graph, and uses the updated graph to inform the next cycle of planning. This structured approach improves the efficiency and reproducibility of LLM-driven research compared to unstructured prompting or traditional automated machine learning (AutoML) techniques.
+## 3. Summary of the Invention
+The Summit Reasoning Evaluator (SRE) introduces a novel evaluation framework based on two core innovations:
 
-**Background:**
+### 3.1. Graph-Structured Reasoning Episodes
+Unlike linear logs, SRE represents a reasoning episode as a Directed Acyclic Graph (DAG) $G = (V, E)$, where nodes $V$ represent discrete cognitive or operational states (e.g., *Thought*, *ToolCall*, *Observation*, *Communication*) and edges $E$ represent causal dependencies (e.g., *Follows*, *DependsOn*, *Corrects*).
 
-[To be filled in with a detailed description of the prior art and its limitations, drawing from `prior_art.csv`.]
+This representation enables:
+*   **Topological Metrics**: Measuring "Reasoning Efficiency" by comparing the number of nodes in the executed graph versus an optimal path subgraph.
+*   **Backtracking Analysis**: Explicitly identifying *Correction* edges to quantify an agent's self-healing capability.
+*   **Parallelism Scoring**: Evaluating the agent's ability to schedule non-dependent tool calls concurrently.
 
-**Summary of the Invention:**
+### 3.2. Curriculum-Guided Evaluation Policy
+SRE implements an "Active Evaluation" protocol. Instead of iterating through a static list of test cases, a *Curriculum Policy* (a meta-agent) dynamically selects the next task based on the history of the current evaluation run.
 
-[To be filled in with a high-level overview of the claims.]
+*   **Frontier Discovery**: The policy seeks to identify the "frontier of capability"—the specific complexity level where the agent begins to fail—optimizing the information gain per compute unit.
+*   **Adversarial Injection**: The policy can inject "Probabilistic Faults" (e.g., simulated tool timeouts, misleading observations) into the graph execution to test resilience.
 
-**Detailed Description:**
-
-[To be filled in with a detailed walkthrough of the architecture, including the Experiment Graph schema, the Curriculum Engine, the LLM Planner, the Runner, and the Telemetry/Governance modules. Reference will be made to diagrams and figures.]
-
-**Figures:**
-
-[Figure 1: High-level architecture diagram showing the main components and data flow.]
-[Figure 2: Example of a populated Experiment Graph for a text classification task.]
-[Figure 3: Flowchart of the Planner's decision-making process.]
+## 4. Detailed Description of Embodiments
+[See /spec/sre_spec.md for data models and interfaces]

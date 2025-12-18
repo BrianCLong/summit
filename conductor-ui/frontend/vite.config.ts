@@ -8,6 +8,16 @@ export default defineConfig({
     hmr: {
       overlay: false, // Disable HMR overlay to potentially bypass CSP issues
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+      },
+      '/maestro': {
+        target: 'http://localhost:4000', // Redirect maestro assets if served by backend, but usually it's API only
+        changeOrigin: true,
+      }
+    }
   },
   build: {
     rollupOptions: {
