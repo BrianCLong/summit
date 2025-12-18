@@ -270,9 +270,9 @@ export class VoterSuppressionDetector extends ThreatDetector {
   }
 
   private calculateSeverity(impact: number): SeverityLevel {
-    if (impact >= 0.7) return 'CRITICAL';
-    if (impact >= 0.5) return 'HIGH';
-    if (impact >= 0.3) return 'MEDIUM';
+    if (impact >= 0.7) {return 'CRITICAL';}
+    if (impact >= 0.5) {return 'HIGH';}
+    if (impact >= 0.3) {return 'MEDIUM';}
     return 'LOW';
   }
 }
