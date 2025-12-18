@@ -1,5 +1,27 @@
 # ✅ Comet Merge Train — 2025-10-08
 
+## Immediate review clearance (blocking Jules)
+
+The following “Ready for review” items are unblocked and just need final validation before publishing. Run the steps in order to avoid browser session churn and keep the merge lane flowing.
+
+- **CI/CD workflow optimization PR**
+  - [ ] Open the diff in a stable session; spot-check workflow matrix changes (cache keys, concurrency, artifact guards).
+  - [ ] Confirm GitHub Actions logs are green (retry flaky jobs once if needed); ensure no secrets surfaced in logs.
+  - [ ] Re-run `scripts/pr_sanitize.sh` if the branch touched workflow files; push with `--force-with-lease` only if required.
+  - [ ] Approve and merge with squash; note CI runtime delta in the PR comment for telemetry follow-up.
+
+- **Frontend auth mocking for Gap 9 (Narrative Intelligence)**
+  - [ ] Verify mock auth provider toggles are gated by env/feature flag and default to off in production builds.
+  - [ ] Run the scoped UI smoke (`npm test -- workspace=web` or equivalent) and ensure Storybook/Playwright artifacts still build.
+  - [ ] Validate mock responses cover Gap 9 scenarios (Narrative Intelligence flows) without leaking real tokens.
+  - [ ] Approve and merge; record follow-up to remove mocks once live auth is wired.
+
+- **GraphAnalyticsService updates (unit tests already passing)**
+  - [ ] Re-open the cached unit test results to confirm cache hits/TTL logic remained unchanged.
+  - [ ] Scan for perf-impacting changes (graph traversal heuristics, batching) and ensure logging stays at debug level by default.
+  - [ ] Run `npm test -- GraphAnalyticsService` if feasible; otherwise, attach existing green run to the PR review.
+  - [ ] Approve and merge; capture any observed dataset regressions in the analytics changelog.
+
 ## Inventory Overview
 
 - Total open PRs analyzed: **100**
