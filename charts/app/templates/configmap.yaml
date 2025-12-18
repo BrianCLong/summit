@@ -3,5 +3,4 @@ kind: ConfigMap
 metadata:
   name: {{ include "app.fullname" . }}-config
 data:
-  app.yaml: |
-    {{- toYaml .Values.config | nindent 4 }}
+  APP_NAME: {{ include "app.fullname" . }}

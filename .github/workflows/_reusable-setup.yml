@@ -1,0 +1,144 @@
+name: 🔧 Reusable - Environment Setup
+# Universal setup workflow for Node.js, pnpm, Python, and caching
+# Optimized for monorepo with Turbo and pnpm workspaces
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version (e.g., "20.x", "18.x", "20")'
+        required: false
+        type: string
+        default: '20.x'
+      pnpm-version:
+        description: 'pnpm version'
+        required: false
+        type: string
+        default: '9.12.0'
+      python-version:
+        description: 'Python version (optional)'
+        required: false
+        type: string
+        default: ''
+      install-deps:
+        description: 'Install dependencies'
+        required: false
+        type: boolean
+        default: true
+      cache-dependency-path:
+        description: 'Path to lockfile for cache key'
+        required: false
+        type: string
+        default: 'pnpm-lock.yaml'
+      working-directory:
+        description: 'Working directory for installation'
+        required: false
+        type: string
+        default: '.'
+    outputs:
+      node-version:
+        description: 'Resolved Node.js version'
+        value: ${{ jobs.setup.outputs.node }}
+      pnpm-version:
+        description: 'Resolved pnpm version'
+        value: ${{ jobs.setup.outputs.pnpm }}
+      cache-hit:
+        description: 'Whether cache was hit'
+        value: ${{ jobs.setup.outputs.cache-hit }}
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    name: Setup Environment
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    outputs:
+      node: ${{ steps.versions.outputs.node }}
+      pnpm: ${{ steps.versions.outputs.pnpm }}
+      cache-hit: ${{ steps.cache-pnpm.outputs.cache-hit }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve versions
+        id: versions
+        run: |
+          echo "node=${{ inputs.node-version }}" >> "$GITHUB_OUTPUT"
+          echo "pnpm=${{ inputs.pnpm-version }}" >> "$GITHUB_OUTPUT"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ inputs.pnpm-version }}
+          run_install: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
+          cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: |
+          echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        id: cache-pnpm
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Install dependencies
+        if: inputs.install-deps
+        working-directory: ${{ inputs.working-directory }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Python (optional)
+        if: inputs.python-version != ''
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          cache: 'pip'
+
+      - name: Install Python dependencies (optional)
+        if: inputs.python-version != '' && hashFiles('requirements.txt') != ''
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Log environment
+        run: |
+          echo "### 🔧 Environment Setup Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Tool | Version |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Node.js | $(node --version) |" >> $GITHUB_STEP_SUMMARY
+          echo "| pnpm | $(pnpm --version) |" >> $GITHUB_STEP_SUMMARY
+          echo "| npm | $(npm --version) |" >> $GITHUB_STEP_SUMMARY
+          if command -v python3 &> /dev/null; then
+            echo "| Python | $(python3 --version) |" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Cache Status:** ${{ steps.cache-pnpm.outputs.cache-hit == 'true' && '✅ Hit' || '❌ Miss' }}" >> $GITHUB_STEP_SUMMARY
