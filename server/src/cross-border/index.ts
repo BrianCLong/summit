@@ -79,3 +79,12 @@ export {
   updateActiveSessions,
   updateActivePartners,
 } from './metrics.js';
+
+// Integration helpers
+export {
+  initializeCrossBorder,
+  registerCrossBorderRoutes,
+  getCrossBorderGraphQL,
+  shutdownCrossBorder,
+  getCrossBorderHealth,
+} from './integration.js';

@@ -2,17 +2,25 @@ import { Router } from 'express';
 import { SOC2ComplianceService } from '../services/SOC2ComplianceService';
 import { ComplianceMonitoringService } from '../services/ComplianceMonitoringService';
 import { EventSourcingService } from '../services/EventSourcingService';
+import { UserRepository } from '../data/UserRepository';
 import { getPostgresPool } from '../config/database';
-// Assuming an auth middleware exists that attaches user to req
-// import { ensureAuthenticated, ensureRole } from '../middleware/auth';
+import { generatePdfFromPacket } from '../utils/pdfGenerator';
+import { SigningService } from '../services/SigningService';
+import { ensureAuthenticated, ensureRole } from '../middleware/auth';
 
 const router = Router();
 const pgPool = getPostgresPool();
 
 // Instantiate the services
+const userRepository = new UserRepository();
 const eventSourcingService = new EventSourcingService(pgPool);
 const complianceMonitoringService = new ComplianceMonitoringService(pgPool);
-const soc2ComplianceService = new SOC2ComplianceService(complianceMonitoringService, eventSourcingService);
+const soc2ComplianceService = new SOC2ComplianceService(
+  complianceMonitoringService,
+  eventSourcingService,
+  userRepository
+);
+const signingService = new SigningService();
 
 /**
  * GET /api/compliance/soc2-packet
@@ -26,11 +34,14 @@ const soc2ComplianceService = new SOC2ComplianceService(complianceMonitoringServ
  * @return {object} 400 - Bad request if date parameters are invalid.
  * @return {object} 403 - Forbidden if user does not have the required role.
  */
-// Placeholder for auth middleware: router.get('/soc2-packet', ensureAuthenticated, ensureRole('compliance-officer'), async (req, res) => {
-router.get('/soc2-packet', async (req, res) => {
-  const { startDate, endDate } = req.query;
+router.get(
+  '/soc2-packet',
+  ensureAuthenticated,
+  ensureRole(['ADMIN', 'compliance-officer']),
+  async (req, res) => {
+    const { startDate, endDate, format } = req.query;
 
-  if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
+    if (!startDate || !endDate || typeof startDate !== 'string' || typeof endDate !== 'string') {
     return res.status(400).json({ error: 'startDate and endDate query parameters are required.' });
   }
 
@@ -43,11 +54,35 @@ router.get('/soc2-packet', async (req, res) => {
 
   try {
     const packet = await soc2ComplianceService.generateSOC2Packet(start, end);
-    res.status(200).json(packet);
+
+    if (format === 'pdf') {
+      const pdfBuffer = await generatePdfFromPacket(packet);
+      const signature = signingService.sign(pdfBuffer);
+      res.setHeader('X-Evidence-Signature', signature);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="SOC2_Evidence_Packet_${start.toISOString()}_-_${end.toISOString()}.pdf"`);
+      res.send(pdfBuffer);
+    } else {
+      const jsonPacket = JSON.stringify(packet);
+      const signature = signingService.sign(jsonPacket);
+      res.setHeader('X-Evidence-Signature', signature);
+      res.setHeader('Content-Type', 'application/json');
+      res.send(jsonPacket);
+    }
   } catch (error) {
     console.error('Failed to generate SOC2 packet:', error);
     res.status(500).json({ error: 'An internal server error occurred.' });
   }
+});
+
+/**
+ * GET /api/compliance/public-key
+ * @summary Retrieves the public key for verifying evidence packet signatures.
+ * @tags Compliance
+ */
+router.get('/public-key', (req, res) => {
+  res.setHeader('Content-Type', 'application/pem-certificate-chain');
+  res.send(signingService.getPublicKey());
 });
 
 export default router;

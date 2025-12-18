@@ -1,0 +1,48 @@
+{
+  "name": "approvals-happy-path",
+  "description": "Synthetic approval create + decision path with provenance write",
+  "steps": [
+    {
+      "name": "create approval",
+      "request": {
+        "method": "POST",
+        "url": "${APPROVALS_URL}/approvals",
+        "headers": { "X-Tenant-ID": "synthetic-tenant" },
+        "body": {
+          "operation": "grant_elevated_access",
+          "requestedBy": "synthetic-user",
+          "reason": "synthetic probe",
+          "resource": { "id": "example-resource" }
+        }
+      },
+      "assertions": [
+        { "type": "status", "value": 201 },
+        { "type": "jsonBody", "path": "$.status", "value": "PENDING" }
+      ],
+      "extractions": [
+        { "name": "approvalId", "path": "$.id" }
+      ]
+    },
+    {
+      "name": "decision",
+      "request": {
+        "method": "POST",
+        "url": "${APPROVALS_URL}/approvals/${approvalId}/decision",
+        "headers": { "X-Tenant-ID": "synthetic-tenant" },
+        "body": {
+          "outcome": "APPROVED",
+          "decidedBy": "synthetic-approver",
+          "comment": "synthetic happy path"
+        }
+      },
+      "assertions": [
+        { "type": "status", "value": 200 },
+        { "type": "jsonBody", "path": "$.outcome", "value": "APPROVED" }
+      ]
+    }
+  ],
+  "metrics": {
+    "success": "synthetic_approvals_success_total{scenario=\"happy_path\"}",
+    "failure": "synthetic_approvals_failure_total{scenario=\"happy_path\"}"
+  }
+}

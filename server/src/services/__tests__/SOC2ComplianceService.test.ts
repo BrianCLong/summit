@@ -1,15 +1,18 @@
 import { SOC2ComplianceService } from '../SOC2ComplianceService';
 import { ComplianceMonitoringService } from '../ComplianceMonitoringService';
 import { EventSourcingService } from '../EventSourcingService';
+import { UserRepository } from '../../data/UserRepository';
 
 // Mock dependencies
 jest.mock('../ComplianceMonitoringService');
 jest.mock('../EventSourcingService');
+jest.mock('../../data/UserRepository');
 
 describe('SOC2ComplianceService', () => {
   let soc2Service: SOC2ComplianceService;
   let mockComplianceMonitoringService: jest.Mocked<ComplianceMonitoringService>;
   let mockEventSourcingService: jest.Mocked<EventSourcingService>;
+  let mockUserRepository: jest.Mocked<UserRepository>;
 
   beforeEach(() => {
     // Clear all mocks before each test
@@ -26,9 +29,18 @@ describe('SOC2ComplianceService', () => {
 
     mockComplianceMonitoringService = new ComplianceMonitoringService(null) as jest.Mocked<ComplianceMonitoringService>;
 
+    mockUserRepository = new UserRepository() as jest.Mocked<UserRepository>;
+    mockUserRepository.getActiveUserCount.mockResolvedValue(152);
+    mockUserRepository.getMfaUserCount.mockResolvedValue(152);
+    mockUserRepository.getAccessReviewSummary.mockResolvedValue([
+        { role: 'tenant_admin', user_count: 25, last_review_date: '2025-12-15', status: 'APPROVED' },
+    ]);
+    mockUserRepository.getDeprovisioningStats.mockResolvedValue({ total: 14, within24h: 14 });
+
     soc2Service = new SOC2ComplianceService(
       mockComplianceMonitoringService,
-      mockEventSourcingService
+      mockEventSourcingService,
+      mockUserRepository
     );
   });
 
