@@ -679,6 +679,51 @@ The API **refuses to boot in production** if:
 
 ## Working with AI Assistants (Claude, Copilot, etc.)
 
+### Claude Code Prompt Library
+
+**NEW**: IntelGraph provides a comprehensive library of production-ready prompts for Claude Code:
+
+📚 **Location**: [`docs/claude-code-prompts/`](docs/claude-code-prompts/)
+
+**11 Stand-Alone Prompts** covering:
+- 🏗️ **Infrastructure**: Monorepo, GraphQL gateway, Neo4j data model
+- 📥 **Data**: Ingest connectors, provenance ledger
+- 🔒 **Security**: OPA policies, threat modeling
+- 📊 **Operations**: Observability, CI/CD, testing
+- 💰 **Cost**: Usage metering, budget alerts
+
+**Quick Start**:
+```bash
+# Use slash commands
+/bootstrap-monorepo    # Scaffold full dev environment
+/graphql-gateway       # Implement Apollo Server + ABAC
+/neo4j-schema          # Design graph data model
+/observability         # Add OTel + Prometheus + Grafana
+/testing-strategy      # Comprehensive test suite
+
+# Or reference directly
+cat docs/claude-code-prompts/README.md
+```
+
+**Key Resources**:
+- [**Prompt Catalog**](docs/claude-code-prompts/README.md) - Full library with selection guide
+- [**Quick Reference**](docs/claude-code-prompts/QUICK_REFERENCE.md) - One-liners and workflows
+- [**Usage Examples**](docs/claude-code-prompts/USAGE_EXAMPLES.md) - Real-world scenarios
+
+**When to Use**:
+- Starting a new service or feature
+- Performance optimization (SLO compliance)
+- Security hardening (threat model, ABAC)
+- Production readiness (observability, testing)
+- Cost optimization (metering, budgets)
+
+Each prompt includes:
+- ✅ Complete context and task description
+- ✅ SLO targets and guardrails
+- ✅ Deliverables checklist
+- ✅ Acceptance criteria with tests
+- ✅ Code examples and configurations
+
 ### Best Practices for AI Assistance
 
 1. **Always run tests after changes**:
