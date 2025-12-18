@@ -1,0 +1,36 @@
+{
+  "name": "@intelgraph/bitemporal",
+  "version": "1.0.0",
+  "description": "Bitemporal storage layer with time-travel queries, temporal diff, and signed audits",
+  "main": "dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "pg": "^8.16.3",
+    "zod": "^3.22.4",
+    "pino": "^10.1.0",
+    "crypto": "^1.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/pg": "^8.15.6",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0",
+    "@types/jest": "^30.0.0",
+    "ts-jest": "^29.1.0",
+    "fast-check": "^3.15.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}
