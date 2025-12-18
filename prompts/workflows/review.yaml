@@ -1,0 +1,25 @@
+meta:
+  id: workflow.review@v1
+  owner: engineering
+  purpose: Comprehensive code review (Security + Quality).
+  tags: [workflow, review]
+
+modelConfig:
+  model: gpt-4-turbo
+  temperature: 0.1
+
+inputs:
+  diff: string
+  context: string
+
+template: |
+  # CODE REVIEW
+
+  ## PART 1: SECURITY
+  {{> agent.security code_diff="{{diff}}" context="{{context}}"}}
+
+  ## PART 2: QUALITY & ARCHITECTURE
+  {{> agent.architect context="{{context}}" problem_statement="Review this implementation for architectural alignment."}}
+
+  ## CONSOLIDATED FEEDBACK
+  Summarize all findings into a single checklist of required changes.

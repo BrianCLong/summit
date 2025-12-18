@@ -1,0 +1,349 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 1,
+    "links": [],
+    "panels": [
+        {
+            "type": "stat",
+            "title": "SLO Compliance (7d)",
+            "id": 1,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "100 * (1 - avg_over_time(service:http_requests_error_ratio:5m{service=\"approvals\"}[7d]))",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percent",
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "yellow",
+                                "value": 99
+                            },
+                            {
+                                "color": "red",
+                                "value": 99.5
+                            }
+                        ]
+                    }
+                },
+                "overrides": []
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "orientation": "horizontal"
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 6,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "Requests per minute",
+            "id": 2,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "sum by (route) (rate(http_requests_total{service=\"approvals\"}[5m]))",
+                    "legendFormat": "{{route}}",
+                    "refId": "A"
+                }
+            ],
+            "gridPos": {
+                "h": 4,
+                "w": 9,
+                "x": 6,
+                "y": 0
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "Error rate %",
+            "id": 3,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "service:http_requests_error_ratio:5m{service=\"approvals\"} * 100",
+                    "legendFormat": "{{route}}",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "percent"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 9,
+                "x": 15,
+                "y": 0
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "p95 Latency per route",
+            "id": 4,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "service:http_request_duration_seconds:p95{service=\"approvals\"}",
+                    "legendFormat": "{{route}}",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 0,
+                "y": 4
+            }
+        },
+        {
+            "type": "bargauge",
+            "title": "Latency histogram: /approvals",
+            "id": 5,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "rate(http_request_duration_seconds_bucket{service=\"approvals\",route=\"/approvals\"}[5m])",
+                    "legendFormat": "<= {{le}}s",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "req/s"
+                },
+                "overrides": []
+            },
+            "options": {
+                "displayMode": "gradient",
+                "orientation": "horizontal"
+            },
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 12,
+                "y": 4
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "Provenance writes (success vs error)",
+            "id": 6,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "rate(companyos_provenance_writes_total{status=\"success\"}[5m])",
+                    "legendFormat": "success",
+                    "refId": "A"
+                },
+                {
+                    "expr": "rate(companyos_provenance_writes_total{status=\"error\"}[5m])",
+                    "legendFormat": "error",
+                    "refId": "B"
+                }
+            ],
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 0,
+                "y": 10
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "Policy decisions allow/deny",
+            "id": 7,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "rate(companyos_policy_decisions_total{operation=\"grant_elevated_access\",outcome=\"allow\"}[5m])",
+                    "legendFormat": "allow",
+                    "refId": "A"
+                },
+                {
+                    "expr": "rate(companyos_policy_decisions_total{operation=\"grant_elevated_access\",outcome=\"deny\"}[5m])",
+                    "legendFormat": "deny",
+                    "refId": "B"
+                }
+            ],
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 12,
+                "y": 10
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "Approvals by tenant (top N)",
+            "id": 8,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "topk(5, sum by (tenant_id) (rate(companyos_approvals_created_total[1h])))",
+                    "legendFormat": "{{tenant_id}}",
+                    "refId": "A"
+                }
+            ],
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 0,
+                "y": 16
+            }
+        },
+        {
+            "type": "timeseries",
+            "title": "Decisions by outcome & tenant",
+            "id": 9,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "sum by (tenant_id, outcome) (rate(companyos_approvals_decisions_total[1h]))",
+                    "legendFormat": "{{tenant_id}} - {{outcome}}",
+                    "refId": "A"
+                }
+            ],
+            "gridPos": {
+                "h": 6,
+                "w": 12,
+                "x": 12,
+                "y": 16
+            }
+        },
+        {
+            "type": "text",
+            "title": "Tracing shortcuts",
+            "id": 10,
+            "options": {
+                "content": "Link to traces: [Open tracing view](https://tempo.example.com/search?service=approvals&approval_id=$approvalId)",
+                "mode": "markdown"
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 8,
+                "x": 0,
+                "y": 22
+            }
+        },
+        {
+            "type": "table",
+            "title": "Recent slow requests",
+            "id": 11,
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "targets": [
+                {
+                    "expr": "service:http_request_duration_seconds:p95{service=\"approvals\"}",
+                    "format": "table",
+                    "legendFormat": "{{route}}",
+                    "refId": "A"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "unit": "s"
+                },
+                "overrides": []
+            },
+            "options": {
+                "showHeader": true
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 16,
+                "x": 8,
+                "y": 22
+            }
+        }
+    ],
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [
+        "approvals",
+        "provenance",
+        "slo"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "CompanyOS \u2013 Approvals & Provenance",
+    "uid": "companyos-approvals-provenance",
+    "version": 1
+}
