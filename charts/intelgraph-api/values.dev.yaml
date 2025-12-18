@@ -1,0 +1,39 @@
+# DEV Environment Values
+# Guardrails: Minimal resources, no high availability requirements.
+
+image:
+  tag: latest # Overridden by CI
+
+service:
+  type: ClusterIP
+  port: 4000
+
+env:
+  # In dev, we might point to a shared dev DB or local containers
+  NEO4J_URI: bolt://neo4j-dev.default.svc.cluster.local:7687
+  PG_CONNECTION: postgres://postgres:postgres@postgres-dev.default.svc.cluster.local:5432/companyos_dev
+
+ingress:
+  enabled: true
+  hosts:
+    - host: api.dev.topicality.co
+      paths: [{ path: /, pathType: Prefix }]
+  tls: [] # Optional in dev or use self-signed
+
+resources:
+  requests:
+    cpu: 50m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  minReplicas: 1
+  maxReplicas: 2
+  targetCPUUtilizationPercentage: 80
+
+rollout:
+  strategy:
+    # Simple rolling update for dev speed
+    canary: null
