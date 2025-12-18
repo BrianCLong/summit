@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@intelgraph/graph-ai-core": "workspace:*",
+    "@summit/graph-ai-core": "workspace:*",
     "zod": "^4.1.12",
     "neo4j-driver": "6.0.1",
     "uuid": "^11.0.3"

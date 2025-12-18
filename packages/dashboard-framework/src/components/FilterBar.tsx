@@ -19,7 +19,7 @@ export function FilterBar({ filters, pageId, className = '' }: FilterBarProps) {
     removeFilter(pageId, filterId);
   };
 
-  if (filters.length === 0) return null;
+  if (filters.length === 0) {return null;}
 
   return (
     <div className={`filter-bar ${className}`} style={containerStyle}>

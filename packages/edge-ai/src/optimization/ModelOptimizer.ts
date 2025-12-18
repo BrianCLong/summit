@@ -1,5 +1,6 @@
 import { pino, type Logger } from 'pino';
-import type { ModelMetadata, Precision } from '../inference/InferenceEngine';
+import type { ModelMetadata } from '../inference/InferenceEngine';
+import { Precision } from '../inference/InferenceEngine';
 
 export enum OptimizationTechnique {
   QUANTIZATION = 'quantization',

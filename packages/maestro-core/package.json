@@ -69,6 +69,34 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine.d.ts",
+      "import": "./dist/engine.js"
+    },
+    "./stores/postgres-state-store": {
+      "types": "./dist/stores/postgres-state-store.d.ts",
+      "import": "./dist/stores/postgres-state-store.js"
+    },
+    "./stores/s3-artifact-store": {
+      "types": "./dist/stores/s3-artifact-store.d.ts",
+      "import": "./dist/stores/s3-artifact-store.js"
+    },
+    "./policy/opa-policy-engine": {
+      "types": "./dist/policy/opa-policy-engine.d.ts",
+      "import": "./dist/policy/opa-policy-engine.js"
+    },
+    "./plugins/litellm-plugin": {
+      "types": "./dist/plugins/litellm-plugin.d.ts",
+      "import": "./dist/plugins/litellm-plugin.js"
+    },
+    "./plugins/ollama-plugin": {
+      "types": "./dist/plugins/ollama-plugin.d.ts",
+      "import": "./dist/plugins/ollama-plugin.js"
+    },
+    "./plugins/web-scraper-plugin": {
+      "types": "./dist/plugins/web-scraper-plugin.d.ts",
+      "import": "./dist/plugins/web-scraper-plugin.js"
     }
   }
 }

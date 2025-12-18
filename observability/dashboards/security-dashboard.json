@@ -1,0 +1,48 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Security & Auth Anomalies",
+    "panels": [
+      {
+        "title": "Secret Scan Findings (Last 24h)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum(increase(gitleaks_findings_total[24h]))",
+            "legendFormat": "Findings"
+          }
+        ]
+      },
+      {
+        "title": "Auth Failures per Service",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(auth_failures_total[5m])",
+            "legendFormat": "{{service}}"
+          }
+        ]
+      },
+      {
+        "title": "CI Build Provenance Failures",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "sum(rate(ci_provenance_verification_failed[1h]))",
+            "legendFormat": "Failures"
+          }
+        ]
+      },
+      {
+        "title": "Admin Access Events",
+        "type": "logs",
+        "targets": [
+          {
+            "expr": "{job=\"audit-logs\", event_type=\"admin_access\"}"
+          }
+        ]
+      }
+    ],
+    "refresh": "1m"
+  }
+}
