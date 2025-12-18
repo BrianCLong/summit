@@ -1,0 +1,69 @@
+{
+  "name": "@intelgraph/dlp-core",
+  "version": "0.1.0",
+  "description": "Core Data Loss Prevention library for IntelGraph - content inspection, information barriers, and redaction",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    },
+    "./detection": {
+      "import": "./dist/DetectionEngine.js",
+      "types": "./dist/DetectionEngine.d.ts"
+    },
+    "./redaction": {
+      "import": "./dist/RedactionEngine.js",
+      "types": "./dist/RedactionEngine.d.ts"
+    },
+    "./barriers": {
+      "import": "./dist/BarrierEnforcer.js",
+      "types": "./dist/BarrierEnforcer.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "clean": "rm -rf dist",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit.git",
+    "directory": "packages/dlp-core"
+  },
+  "keywords": [
+    "dlp",
+    "data-loss-prevention",
+    "information-barriers",
+    "pii",
+    "redaction",
+    "content-inspection",
+    "security",
+    "compliance"
+  ],
+  "author": "IntelGraph Team",
+  "license": "UNLICENSED"
+}

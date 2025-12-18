@@ -253,8 +253,8 @@ export class WebSocketServer {
     // Close HTTP server
     await new Promise<void>((resolve, reject) => {
       this.httpServer.close((err) => {
-        if (err) reject(err);
-        else resolve();
+        if (err) {reject(err);}
+        else {resolve();}
       });
     });
 

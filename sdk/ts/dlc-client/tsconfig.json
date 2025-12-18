@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "declaration": true,
+    "declarationMap": true,
+    "module": "commonjs",
+    "target": "es2019",
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"]
+}
