@@ -1,0 +1,26 @@
+{
+  "policies_loaded": 3,
+  "tests": [
+    {
+      "name": "Safe Request",
+      "expected": "ALLOW",
+      "actual": "ALLOW"
+    },
+    {
+      "name": "Toxic Request",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "name": "Bad Tool",
+      "expected": "DENY",
+      "actual": "DENY"
+    },
+    {
+      "name": "PII Data",
+      "expected": "ESCALATE",
+      "actual": "ESCALATE"
+    }
+  ],
+  "graph_nodes": 3
+}

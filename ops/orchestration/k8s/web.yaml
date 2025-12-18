@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: summit-web
+  namespace: summit-platform
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: summit-web
+  namespace: summit-platform
+  labels:
+    app: summit-web
+    tier: frontend
+    version: v1
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: summit-web
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: summit-web
+        tier: frontend
+        version: v1
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      serviceAccountName: summit-web
+      containers:
+        - name: web
+          image: ghcr.io/summit-platform/web:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: VITE_API_URL
+              value: https://api.summit.example.com
+          ports:
+            - name: http
+              containerPort: 4173
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 600m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: summit-web
+  namespace: summit-platform
+  labels:
+    app: summit-web
+spec:
+  selector:
+    app: summit-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: 4173
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: summit-web
+  namespace: summit-platform
+spec:
+  minReplicas: 2
+  maxReplicas: 6
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: summit-web
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: summit-web
+  namespace: summit-platform
+spec:
+  host: summit-web.summit-platform.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+  subsets:
+    - name: v1
+      labels:
+        version: v1

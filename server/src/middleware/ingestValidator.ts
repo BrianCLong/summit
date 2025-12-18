@@ -12,6 +12,7 @@ import DOMPurify from 'isomorphic-dompurify';
 import { PrometheusMetrics } from '../utils/metrics';
 import logger from '../utils/logger';
 import { tracer, Span } from '../utils/tracing';
+import { quotaEnforcer } from '../lib/resources/QuotaEnforcer.js';
 
 // Validation configuration
 interface IngestValidatorConfig {
@@ -291,6 +292,20 @@ export class IngestValidator {
           try {
             const tenantId = this.extractTenantId(req);
             const payloadSize = this.calculatePayloadSize(req);
+
+            // Ingest Quota Check (Step 1)
+            const count = Array.isArray(req.body) ? req.body.length : 1;
+            const quotaResult = await quotaEnforcer.checkIngestQuota(tenantId, count);
+
+            if (!quotaResult.allowed) {
+                logger.warn('Ingest quota exceeded', { tenantId, count, limit: quotaResult.limit });
+                this.metrics.incrementCounter('blocked_requests', { tenant_id: tenantId, reason: 'quota_exceeded' });
+                res.status(429).json({
+                    error: 'Ingest Quota Exceeded',
+                    message: `You have exceeded your ingest rate limit. Reset in ${Math.ceil((quotaResult.reset - Date.now())/1000)}s`
+                });
+                return;
+            }
 
             span.setAttributes({
               'ingest_validator.tenant_id': tenantId,
