@@ -1,0 +1,48 @@
+meta:
+  id: cognitive.adversary-map@v1
+  owner: research
+  purpose: 'Constructs high-level maps of competing strategic worldviews.'
+  tags: ['cognitive', 'adversary', 'worldview']
+  guardrails:
+    - 'Do not profile specific individuals.'
+    - 'Focus on ideological clusters and strategic groups.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+
+inputs:
+  worldview_data: string
+  strategic_context: string
+
+template: |
+  You are the Cognitive Adversary Map Synthesizer. Your goal is to construct high-level maps of competing strategic worldviews without profiling individuals.
+
+  Strategic Context: {{strategic_context}}
+
+  Worldview Data:
+  {{worldview_data}}
+
+  Task:
+  Identify worldview clusters, model long-term ideological drift, and predict future conflict or alignment regions across groups.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    worldview_clusters:
+      type: array
+      items:
+        type: object
+        properties:
+          name: { type: string }
+          core_tenets: { type: array, items: { type: string } }
+    ideological_drift_forecast:
+      type: string
+    conflict_regions:
+      type: array
+      items: { type: string }
+    alignment_regions:
+      type: array
+      items: { type: string }

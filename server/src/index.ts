@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 import http from 'http';
 import express from 'express';
+import { GraphQLError } from 'graphql';
 import { useServer } from 'graphql-ws/use/ws';
 import { WebSocketServer } from 'ws';
+import { randomUUID } from 'node:crypto';
 import pino from 'pino';
 import { getContext } from './lib/auth.js';
 import path from 'path';
@@ -11,32 +14,42 @@ import { createApp } from './app.js';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { typeDefs } from './graphql/schema.js';
 import resolvers from './graphql/resolvers/index.js';
+import { subscriptionEngine } from './graphql/subscriptionEngine.js';
 import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
-import BatchJobService from './services/BatchJobService.js';
-import soc2EvidenceJob, { JOB_NAME as SOC2_JOB_NAME } from './jobs/processors/soc2EvidenceJob.js';
+<<<<<<< HEAD
+import { startOSINTWorkers } from './services/OSINTQueueService.js';
+=======
+import { BackupManager } from './backup/BackupManager.js';
+import { checkNeo4jIndexes } from './db/indexManager.js';
+>>>>>>> main
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
+=======
+import { bootstrapSecrets } from './bootstrap-secrets.js';
+import { logger } from './config/logger.js';
+import { logConfigSummary } from './config/index.js';
+>>>>>>> main
 
-const startServer = async () => {
-  // Optional Kafka consumer import - only when AI services enabled
-  let startKafkaConsumer: any = null;
-  let stopKafkaConsumer: any = null;
-  if (
-    process.env.AI_ENABLED === 'true' ||
-    process.env.KAFKA_ENABLED === 'true'
-  ) {
-    try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
-      startKafkaConsumer = kafkaModule.startKafkaConsumer;
-      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
-      logger.warn('Kafka not available - running in minimal mode');
-    }
+(async () => {
+  try {
+    // 1. Load Secrets (Environment or Vault)
+    await bootstrapSecrets();
+
+    // Log Config
+    logConfigSummary();
+
+    // 2. Start Server
+    logger.info('Secrets loaded. Starting server...');
+    await import('./server_entry.js');
+  } catch (err) {
+    logger.error(`Fatal error during startup: ${err}`);
+    process.exit(1);
   }
+<<<<<<< HEAD
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
@@ -56,7 +69,60 @@ const startServer = async () => {
   useServer(
     {
       schema,
-      context: getContext,
+      context: async (ctx) => {
+        const request = (ctx.extra as any).request ?? (ctx as any).extra;
+        const baseContext = await getContext({ req: request });
+
+        return {
+          ...baseContext,
+          connectionId: (ctx.extra as any).connectionId,
+          pubsub: subscriptionEngine.getPubSub(),
+          subscriptionEngine,
+        };
+      },
+      onConnect: (ctx) => {
+        const connectionId = randomUUID();
+        (ctx.extra as any).connectionId = connectionId;
+        subscriptionEngine.registerConnection(
+          connectionId,
+          (ctx.extra as any).socket,
+        );
+      },
+      onSubscribe: (ctx, msg) => {
+        const socket = (ctx.extra as any).socket;
+        if (!subscriptionEngine.enforceBackpressure(socket)) {
+          return [new GraphQLError('Backpressure threshold exceeded')];
+        }
+        const connectionId = (ctx.extra as any).connectionId;
+        if (connectionId) {
+          subscriptionEngine.trackSubscription(connectionId, msg.id);
+        }
+        (ctx.extra as any).lastFanoutStart = process.hrtime.bigint();
+      },
+      onNext: (ctx) => {
+        const startedAt =
+          (ctx.extra as any).lastFanoutStart ?? process.hrtime.bigint();
+        subscriptionEngine.recordFanout(startedAt);
+        (ctx.extra as any).lastFanoutStart = process.hrtime.bigint();
+      },
+      onComplete: (ctx, msg) => {
+        const connectionId = (ctx.extra as any).connectionId;
+        if (connectionId) {
+          subscriptionEngine.completeSubscription(connectionId, msg?.id);
+        }
+      },
+      onError: (ctx, msg, errors) => {
+        logger.error(
+          { errors, operationId: msg?.id, connectionId: (ctx.extra as any).connectionId },
+          'GraphQL WS subscription error',
+        );
+      },
+      onClose: (ctx) => {
+        const connectionId = (ctx.extra as any).connectionId;
+        if (connectionId) {
+          subscriptionEngine.unregisterConnection(connectionId);
+        }
+      },
       // ...wsMiddleware,
     },
     wss,
@@ -76,15 +142,45 @@ const startServer = async () => {
   httpServer.listen(port, async () => {
     logger.info(`Server listening on port ${port}`);
 
-    // Initialize and start Batch Job Service
-    await BatchJobService.start();
-    BatchJobService.boss.work(SOC2_JOB_NAME, soc2EvidenceJob);
-
     // Initialize and start Data Retention Service
     const neo4jDriver = getNeo4jDriver();
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
+<<<<<<< HEAD
+    // Start OSINT Workers
+    startOSINTWorkers();
+
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    // Initialize Backup Manager
+    const backupManager = new BackupManager();
+    backupManager.startScheduler();
+
+    // Check Neo4j Indexes
+    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
 
@@ -115,7 +211,6 @@ const startServer = async () => {
     io.close(); // Close Socket.IO server
     streamingRateLimiter.destroy();
     if (stopKafkaConsumer) await stopKafkaConsumer(); // WAR-GAMED SIMULATION - Stop Kafka Consumer
-    await BatchJobService.stop();
     await Promise.allSettled([
       closeNeo4jDriver(),
       closePostgresPool(),
@@ -136,3 +231,6 @@ const startServer = async () => {
 };
 
 startServer();
+=======
+})();
+>>>>>>> main

@@ -1,15 +1,63 @@
-# Operations & Release Management Labels
-- name: ops
-  color: '1f883d'
-  description: 'Operational tasks and procedures'
+<<<<<<< HEAD
+- name: needs-canary-plan
+  color: CC9900
+  description: Canary plan required before merge
+- name: migration-gate
+  color: 5319e7
+  description: DB/contract migration present — gate applies
+- name: ops/preview
+  color: 0e8a16
+  description: Preview environment work
+- name: ops/release-train
+  color: 1f77b4
+  description: Release train tasks
+- name: risk/high
+  color: d73a4a
+  description: Elevated risk change
+- name: type/runbook
+  color: c2e0c6
+  description: Documentation/runbook
+=======
+# Standard set of labels for Summit repo
+# Use with actions/labeler or a label sync tool
 
-- name: release-train
-  color: '0e8a16'
-  description: 'Weekly release train activities'
+- name: 'type: bug'
+  color: 'd73a4a'
+  description: 'Something isn''t working'
+- name: 'type: feature'
+  color: 'a2eeef'
+  description: 'New feature or request'
+- name: 'type: docs'
+  color: '0075ca'
+  description: 'Improvements or additions to documentation'
+- name: 'type: chores'
+  color: 'a4f6a9'
+  description: 'Maintenance, dependencies, tooling'
+- name: 'type: security'
+  color: 'e99695'
+  description: 'Security vulnerability or hardening'
 
-- name: hygiene
+- name: 'priority: critical'
   color: 'b60205'
+<<<<<<< HEAD
+  description: 'Must handle immediately'
+- name: 'priority: high'
+  color: 'ff0000'
+  description: 'Important for next release'
+- name: 'priority: medium'
+  color: 'fbca04'
+  description: 'Normal priority'
+- name: 'priority: low'
+=======
   description: 'Monthly operational hygiene tasks'
+
+- name: needs-canary-plan
+  color: '0b7285'
+  description: 'Requires a documented canary and rollback plan before merge'
+
+- name: migration-gate
+  color: 'e11d48'
+  description: 'Schema-impacting change that must clear the migration gate'
 
 - name: 'cadence:weekly'
   color: '5319e7'
@@ -24,18 +72,63 @@
   description: 'High priority items'
 
 - name: 'priority:normal'
+>>>>>>> main
   color: 'c2e0c6'
-  description: 'Normal priority items'
+  description: 'Nice to have'
 
-# Additional operational labels
-- name: evidence
-  color: 'ffc107'
-  description: 'Evidence collection and audit trails'
+- name: 'status: blocked'
+  color: '000000'
+  description: 'Waiting on something else'
+- name: 'status: in-review'
+  color: 'feceea'
+  description: 'Currently being reviewed'
+- name: 'status: needs-triage'
+  color: 'ffffff'
+  description: 'Needs initial review/categorization'
 
-- name: chaos
-  color: 'dc3545'
-  description: 'Chaos engineering and DR testing'
+- name: 'area: frontend'
+  color: '1d76db'
+  description: 'Frontend/UI code'
+- name: 'area: backend'
+  color: '5319e7'
+  description: 'Backend/API code'
+- name: 'area: devops'
+  color: '0052cc'
+  description: 'CI/CD, Infrastructure, Docker'
+- name: 'area: data'
+  color: 'bfdadc'
+  description: 'Database, migration, data integrity'
 
+<<<<<<< HEAD
+- name: 'needs-canary-plan'
+  color: 'bfd4f2'
+  description: 'Requires a canary deployment plan before merge'
+- name: 'migration-gate'
+  color: 'd93f0b'
+  description: 'Contains database migrations, requires verification'
+=======
 - name: security
   color: '6610f2'
   description: 'Security-related tasks'
+
+# Ops hardening week 1 labels
+- name: needs-canary-plan
+  color: 'CC9900'
+  description: Canary plan required before merge
+- name: migration-gate
+  color: '5319e7'
+  description: DB/contract migration present — gate applies
+- name: ops/preview
+  color: '0e8a16'
+  description: Preview environment work
+- name: ops/release-train
+  color: '1f77b4'
+  description: Release train tasks
+- name: risk/high
+  color: 'd73a4a'
+  description: Elevated risk change
+- name: type/runbook
+  color: 'c2e0c6'
+  description: Documentation/runbook
+>>>>>>> main
+>>>>>>> main
