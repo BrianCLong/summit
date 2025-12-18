@@ -1,12 +1,29 @@
 /**
- * Core geospatial types for IntelGraph GEOINT platform
+ * Core geospatial and GeoJSON-adjacent types for the IntelGraph GEOINT platform.
+ * These definitions deliberately avoid external type packages so that the
+ * library can type-check in offline or restricted environments.
  */
 
-import { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
+export type Position = [number, number, number?];
 
-/**
- * Coordinate reference system
- */
+export type PointGeometry = { type: 'Point'; coordinates: Position };
+export type LineStringGeometry = { type: 'LineString'; coordinates: Position[] };
+export type PolygonGeometry = { type: 'Polygon'; coordinates: Position[][] };
+export type MultiPointGeometry = { type: 'MultiPoint'; coordinates: Position[] };
+export type MultiLineStringGeometry = { type: 'MultiLineString'; coordinates: Position[][] };
+export type MultiPolygonGeometry = { type: 'MultiPolygon'; coordinates: Position[][][] };
+export type GeometryCollection = { type: 'GeometryCollection'; geometries: Geometry[] };
+
+export type Geometry =
+  | PointGeometry
+  | LineStringGeometry
+  | PolygonGeometry
+  | MultiPointGeometry
+  | MultiLineStringGeometry
+  | MultiPolygonGeometry
+  | GeometryCollection
+  | null;
+
 export interface CoordinateReferenceSystem {
   type: string;
   properties: {
@@ -14,9 +31,6 @@ export interface CoordinateReferenceSystem {
   };
 }
 
-/**
- * Bounding box for spatial extent
- */
 export interface BoundingBox {
   minLon: number;
   minLat: number;
@@ -25,9 +39,20 @@ export interface BoundingBox {
   crs?: string;
 }
 
-/**
- * Geographic point with optional elevation and timestamp
- */
+export interface Feature<P = Record<string, unknown>> {
+  type: 'Feature';
+  geometry: Geometry;
+  properties: P;
+  id?: string;
+  bbox?: BoundingBox;
+}
+
+export interface FeatureCollection<F extends Feature = Feature> {
+  type: 'FeatureCollection';
+  features: F[];
+  bbox?: BoundingBox;
+}
+
 export interface GeoPoint {
   latitude: number;
   longitude: number;
@@ -37,26 +62,19 @@ export interface GeoPoint {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Geographic feature with intelligence metadata
- */
-export interface IntelFeature extends Feature {
-  properties: GeoJsonProperties & {
-    entityId?: string;
-    entityType?: string;
-    classification?: string;
-    timestamp?: string;
-    source?: string;
-    confidence?: number;
-    tags?: string[];
-  };
+export interface IntelProperties extends Record<string, unknown> {
+  entityId?: string;
+  entityType?: string;
+  classification?: string;
+  timestamp?: string;
+  source?: string;
+  confidence?: number;
+  tags?: string[];
 }
 
-/**
- * Feature collection with intelligence context
- */
-export interface IntelFeatureCollection extends FeatureCollection {
-  features: IntelFeature[];
+export interface IntelFeature extends Feature<IntelProperties> {}
+
+export interface IntelFeatureCollection extends FeatureCollection<IntelFeature> {
   metadata?: {
     source?: string;
     collectionDate?: string;
@@ -66,24 +84,18 @@ export interface IntelFeatureCollection extends FeatureCollection {
   };
 }
 
-/**
- * Geofence definition
- */
 export interface Geofence {
   id: string;
   name: string;
-  geometry: Geometry;
+  geometry: Exclude<Geometry, GeometryCollection | null>;
   type: 'entry' | 'exit' | 'dwell' | 'proximity';
-  radius?: number; // meters for proximity geofences
-  dwellTime?: number; // milliseconds for dwell geofences
+  radius?: number;
+  dwellTime?: number;
   enabled: boolean;
   tags?: string[];
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Geofence event
- */
 export interface GeofenceEvent {
   id: string;
   geofenceId: string;
@@ -94,101 +106,77 @@ export interface GeofenceEvent {
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Movement track
- */
 export interface MovementTrack {
   id: string;
   entityId: string;
   points: GeoPoint[];
   startTime: Date;
   endTime: Date;
-  totalDistance?: number; // meters
-  averageSpeed?: number; // m/s
+  totalDistance?: number;
+  averageSpeed?: number;
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Spatial cluster result
- */
 export interface SpatialCluster {
   id: number;
   points: GeoPoint[];
   centroid: GeoPoint;
-  radius: number; // meters
+  radius: number;
   density: number;
   label?: string;
   noise?: boolean;
 }
 
-/**
- * Hotspot analysis result
- */
 export interface Hotspot {
   location: GeoPoint;
   zScore: number;
   pValue: number;
   significance: 'high' | 'medium' | 'low' | 'none';
   count: number;
-  radius: number; // meters
+  radius: number;
 }
 
-/**
- * Route segment
- */
 export interface RouteSegment {
   id: string;
   start: GeoPoint;
   end: GeoPoint;
-  distance: number; // meters
-  duration: number; // seconds
+  distance: number;
+  duration: number;
   geometry: Position[];
   instructions?: string;
   roadType?: string;
 }
 
-/**
- * Complete route
- */
 export interface Route {
   id: string;
   segments: RouteSegment[];
-  totalDistance: number; // meters
-  totalDuration: number; // seconds
+  totalDistance: number;
+  totalDuration: number;
   waypoints: GeoPoint[];
   geometry: Position[];
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Isochrone (time-based accessibility zone)
- */
 export interface Isochrone {
   center: GeoPoint;
-  time: number; // seconds
+  time: number;
   mode: 'walking' | 'driving' | 'cycling' | 'transit';
-  geometry: Geometry;
-  area?: number; // square meters
+  geometry: Exclude<Geometry, GeometryCollection | null>;
+  area?: number;
 }
 
-/**
- * Origin-destination flow
- */
 export interface ODFlow {
   origin: GeoPoint;
   destination: GeoPoint;
   count: number;
   entityIds?: string[];
-  averageDuration?: number; // seconds
+  averageDuration?: number;
   geometry?: Position[];
 }
 
-/**
- * Spatial query options
- */
 export interface SpatialQueryOptions {
   bbox?: BoundingBox;
-  maxDistance?: number; // meters
+  maxDistance?: number;
   limit?: number;
   offset?: number;
   timeRange?: {
@@ -198,9 +186,6 @@ export interface SpatialQueryOptions {
   filters?: Record<string, unknown>;
 }
 
-/**
- * Geocoding result
- */
 export interface GeocodingResult {
   location: GeoPoint;
   formattedAddress: string;
@@ -217,42 +202,30 @@ export interface GeocodingResult {
   bbox?: BoundingBox;
 }
 
-/**
- * Reverse geocoding result
- */
 export interface ReverseGeocodingResult extends GeocodingResult {
-  distance: number; // meters from query point
+  distance: number;
 }
 
-/**
- * Terrain data point
- */
 export interface TerrainPoint extends GeoPoint {
   elevation: number;
-  slope?: number; // degrees
-  aspect?: number; // degrees (0-360)
-  terrain?: string; // terrain type
+  slope?: number;
+  aspect?: number;
+  terrain?: string;
 }
 
-/**
- * Satellite imagery metadata
- */
 export interface SatelliteImagery {
   id: string;
   source: string;
   captureDate: Date;
   bbox: BoundingBox;
-  resolution: number; // meters per pixel
-  cloudCover?: number; // percentage
+  resolution: number;
+  cloudCover?: number;
   bands?: string[];
   url?: string;
   tileUrl?: string;
   metadata?: Record<string, unknown>;
 }
 
-/**
- * Map layer configuration
- */
 export interface MapLayer {
   id: string;
   name: string;
@@ -266,9 +239,6 @@ export interface MapLayer {
   maxZoom?: number;
 }
 
-/**
- * Spatial index configuration
- */
 export interface SpatialIndexConfig {
   type: 'rtree' | 'quadtree' | 'geohash' | 'h3';
   precision?: number;
