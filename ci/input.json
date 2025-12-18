@@ -1,0 +1,15 @@
+{
+  "env": "prod",
+  "pr": {
+    "approvals": 2,
+    "labels": ["security-reviewed"]
+  },
+  "artifact": {
+    "sbom": {
+      "signed": true
+    }
+  },
+  "security": {
+    "failures": []
+  }
+}

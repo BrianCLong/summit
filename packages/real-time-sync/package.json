@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/real-time-sync",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Real-time synchronization with operational transformation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
