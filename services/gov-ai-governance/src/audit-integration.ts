@@ -53,13 +53,13 @@ export class HttpAuditClient implements AuditServiceClient {
 
   async query(filters: AuditQueryFilters): Promise<AuditEvent[]> {
     const params = new URLSearchParams();
-    if (filters.eventType) params.set('eventType', filters.eventType);
-    if (filters.actorId) params.set('actorId', filters.actorId);
-    if (filters.resourceType) params.set('resourceType', filters.resourceType);
-    if (filters.resourceId) params.set('resourceId', filters.resourceId);
-    if (filters.startTime) params.set('startTime', filters.startTime.toISOString());
-    if (filters.endTime) params.set('endTime', filters.endTime.toISOString());
-    if (filters.limit) params.set('limit', String(filters.limit));
+    if (filters.eventType) {params.set('eventType', filters.eventType);}
+    if (filters.actorId) {params.set('actorId', filters.actorId);}
+    if (filters.resourceType) {params.set('resourceType', filters.resourceType);}
+    if (filters.resourceId) {params.set('resourceId', filters.resourceId);}
+    if (filters.startTime) {params.set('startTime', filters.startTime.toISOString());}
+    if (filters.endTime) {params.set('endTime', filters.endTime.toISOString());}
+    if (filters.limit) {params.set('limit', String(filters.limit));}
 
     const response = await fetch(`${this.baseUrl}/audit/query?${params}`, {
       headers: this.apiKey ? { Authorization: `Bearer ${this.apiKey}` } : {},

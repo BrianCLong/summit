@@ -148,7 +148,7 @@ export class LineageTracker {
     const visited = new Set<string>();
 
     const traverse = (currentId: string) => {
-      if (visited.has(currentId)) return;
+      if (visited.has(currentId)) {return;}
       visited.add(currentId);
 
       const incomingEdges = this.lineageGraph.edges.filter(edge => edge.to === currentId);
@@ -174,7 +174,7 @@ export class LineageTracker {
     const visited = new Set<string>();
 
     const traverse = (currentId: string) => {
-      if (visited.has(currentId)) return;
+      if (visited.has(currentId)) {return;}
       visited.add(currentId);
 
       const outgoingEdges = this.lineageGraph.edges.filter(edge => edge.from === currentId);

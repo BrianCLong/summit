@@ -1,6 +1,6 @@
 {
   "name": "risk-assessment-service",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "@intelgraph/supplier-risk": "workspace:*",
     "@intelgraph/third-party-risk": "workspace:*",
     "@intelgraph/compliance-monitor": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "pino": "^10.1.0",
     "pino-http": "^10.3.0",
     "zod": "^3.22.4",

@@ -1,6 +1,6 @@
 {
   "name": "switchboard-web",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -13,7 +13,7 @@
   "dependencies": {
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.452.0",
-    "next": "14.2.32",
+    "next": "14.2.35",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "zod": "^4.1.12"
