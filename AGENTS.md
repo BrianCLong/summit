@@ -1,5 +1,15 @@
 # Repository Guidelines
 
+**⚠️ GOVERNANCE NOTICE:**
+All agents and contributors must adhere to the [Constitution of the Ecosystem](docs/governance/CONSTITUTION.md).
+This document defines the technical standards mandated by the **Law of Consistency**.
+
+## Governance & Compliance
+
+- **Authority:** This repository is governed by the [Meta-Governance Framework](docs/governance/META_GOVERNANCE.md).
+- **Mandates:** See [Agent Mandates](docs/governance/AGENT_MANDATES.md) for role-specific powers and limits.
+- **Rulebook:** The [Living Rulebook](docs/governance/RULEBOOK.md) contains the full index of laws and standards.
+
 ## Project Structure & Module Organization
 
 - Apps: `server/` (Node/Express/GraphQL), `client/` (React/Vite).

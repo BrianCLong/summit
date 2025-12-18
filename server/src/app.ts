@@ -53,6 +53,15 @@ import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
 <<<<<<< HEAD
+import { SummitInvestigate } from './services/SummitInvestigate.js';
+=======
+<<<<<<< HEAD
+import osintRouter from './routes/osint.js';
+=======
+<<<<<<< HEAD
+import edgeOpsRouter from './routes/edge-ops.js';
+=======
+<<<<<<< HEAD
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
 =======
@@ -86,6 +95,9 @@ import queryReplayRouter from './routes/query-replay.js';
 =======
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
@@ -310,6 +322,12 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
 <<<<<<< HEAD
+  app.use('/api/osint', osintRouter);
+=======
+<<<<<<< HEAD
+  app.use('/api/edge', edgeOpsRouter);
+=======
+<<<<<<< HEAD
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
 =======
 <<<<<<< HEAD
@@ -349,8 +367,14 @@ export const createApp = async () => {
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main
+>>>>>>> main
   app.get('/metrics', metricsRoute);
 
+<<<<<<< HEAD
+  // Initialize SummitInvestigate Platform Routes
+  SummitInvestigate.initialize(app);
+=======
   // Maestro
   const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
   const { Maestro } = await import('./maestro/core.js');
@@ -374,6 +398,7 @@ export const createApp = async () => {
   const maestroQueries = new MaestroQueries(igClient);
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
+>>>>>>> main
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;
