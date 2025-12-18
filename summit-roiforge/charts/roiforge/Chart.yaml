@@ -1,0 +1,6 @@
+apiVersion: v2
+name: roiforge
+description: A Helm chart for SummitROIForge
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
