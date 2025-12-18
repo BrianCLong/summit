@@ -26,6 +26,7 @@ module.exports = {
     '^evidenceRepo$': '<rootDir>/tests/integration/__mocks__/evidenceRepo.ts',
     '^argon2$': '<rootDir>/__mocks__/argon2.ts',
     '^archiver$': '<rootDir>/tests/integration/__mocks__/archiver.ts',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   moduleDirectories: [
     'node_modules',
