@@ -1,4 +1,5 @@
 import { statsResolvers } from '../src/graphql/resolvers/stats';
+import { jest, describe, test, expect } from '@jest/globals';
 
 jest.mock('../src/config/database.js', () => {
   const query = jest.fn(async (sql: string, _params: any[]) => {

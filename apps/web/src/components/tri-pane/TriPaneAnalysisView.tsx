@@ -123,6 +123,16 @@ export function TriPaneAnalysisView({
     setProvenanceData(mockProvenance)
   }, [entities])
 
+  // Calculate full time range of all events
+  const fullTimeRange = useMemo(() => {
+    if (timelineEvents.length === 0) return null
+    const timestamps = timelineEvents.map(e => new Date(e.timestamp).getTime())
+    return {
+      start: new Date(Math.min(...timestamps)),
+      end: new Date(Math.max(...timestamps)),
+    }
+  }, [timelineEvents])
+
   // Filter data based on time range
   const filteredData = useMemo(() => {
     if (!timeFilter) {
@@ -192,6 +202,26 @@ export function TriPaneAnalysisView({
     [onTimeRangeChange]
   )
 
+  const handleCurrentTimeChange = useCallback(
+    (time: Date) => {
+      if (!fullTimeRange) return
+
+      const newRange = {
+        start: fullTimeRange.start,
+        end: time,
+      }
+
+      setTimeFilter(newRange)
+      setViewportSync(prev => ({
+        ...prev,
+        timeline: { ...prev.timeline, timeRange: newRange },
+      }))
+
+      onTimeRangeChange?.(newRange)
+    },
+    [fullTimeRange, onTimeRangeChange]
+  )
+
   // Handle entity selection - synchronize across all panes
   const handleEntitySelect = useCallback(
     (entity: Entity) => {
@@ -255,7 +285,7 @@ export function TriPaneAnalysisView({
   const getProvenanceTooltip = useCallback(
     (entityId: string) => {
       const provenance = provenanceData.get(entityId)
-      if (!provenance) return null
+      if (!provenance) {return null}
 
       return (
         <div className="space-y-2 text-xs">
@@ -386,11 +416,14 @@ export function TriPaneAnalysisView({
           </CardHeader>
           <CardContent className="p-0 h-[calc(100%-4rem)]">
             <TimelineRail
-              data={filteredData.timelineEvents}
+              data={timelineEvents}
               onTimeRangeChange={handleTimeRangeChange}
               onEventSelect={handleTimelineEventSelect}
               selectedEventId={viewportSync.timeline.selectedEventId}
               className="border-0"
+              totalTimeRange={fullTimeRange || undefined}
+              currentTime={timeFilter?.end || fullTimeRange?.end}
+              onCurrentTimeChange={handleCurrentTimeChange}
             />
           </CardContent>
         </Card>
@@ -429,7 +462,7 @@ export function TriPaneAnalysisView({
               {showProvenance &&
                 filteredData.entities.map(entity => {
                   const provenance = provenanceData.get(entity.id)
-                  if (!provenance) return null
+                  if (!provenance) {return null}
 
                   return (
                     <Tooltip

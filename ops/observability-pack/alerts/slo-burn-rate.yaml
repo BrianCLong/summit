@@ -1,0 +1,159 @@
+# SLO Burn Rate Alerts
+# Based on Google SRE book multi-window burn rate alerting
+
+groups:
+  - name: slo-burn-rate
+    rules:
+      # Fast burn - 2% budget consumed in 1 hour
+      - alert: SLOBurnRateFast
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[1h]))
+            / sum(rate(http_requests_total[1h]))
+          ) > (14.4 * 0.001)
+          and
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m]))
+            / sum(rate(http_requests_total[5m]))
+          ) > (14.4 * 0.001)
+        for: 2m
+        labels:
+          severity: critical
+          slo: availability
+        annotations:
+          summary: "High error rate burning through SLO budget quickly"
+          description: "Service {{ $labels.service }} is consuming error budget at 14.4x normal rate"
+          runbook_url: "https://runbooks.intelgraph.com/slo-burn-rate"
+
+      # Slow burn - 5% budget consumed in 6 hours
+      - alert: SLOBurnRateSlow
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[6h]))
+            / sum(rate(http_requests_total[6h]))
+          ) > (6 * 0.001)
+          and
+          (
+            sum(rate(http_requests_total{status=~"5.."}[30m]))
+            / sum(rate(http_requests_total[30m]))
+          ) > (6 * 0.001)
+        for: 15m
+        labels:
+          severity: warning
+          slo: availability
+        annotations:
+          summary: "Elevated error rate consuming SLO budget"
+          description: "Service {{ $labels.service }} has elevated error rate"
+          runbook_url: "https://runbooks.intelgraph.com/slo-burn-rate"
+
+      # Latency SLO burn rate
+      - alert: LatencySLOBurnRate
+        expr: |
+          (
+            histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[1h])) by (le, service))
+            > 0.5
+          )
+          and
+          (
+            histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service))
+            > 0.5
+          )
+        for: 5m
+        labels:
+          severity: warning
+          slo: latency
+        annotations:
+          summary: "P99 latency exceeding SLO target"
+          description: "Service {{ $labels.service }} P99 latency is above 500ms"
+          runbook_url: "https://runbooks.intelgraph.com/latency-slo"
+
+  - name: error-budget
+    rules:
+      # Error budget nearly exhausted
+      - alert: ErrorBudgetLow
+        expr: |
+          (
+            1 - (
+              sum(increase(http_requests_total{status=~"5.."}[30d]))
+              / sum(increase(http_requests_total[30d]))
+            ) / 0.001
+          ) < 0.2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Error budget below 20%"
+          description: "Only {{ $value | humanizePercentage }} of monthly error budget remaining"
+          runbook_url: "https://runbooks.intelgraph.com/error-budget"
+
+      # Error budget exhausted
+      - alert: ErrorBudgetExhausted
+        expr: |
+          (
+            1 - (
+              sum(increase(http_requests_total{status=~"5.."}[30d]))
+              / sum(increase(http_requests_total[30d]))
+            ) / 0.001
+          ) < 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error budget exhausted"
+          description: "Monthly error budget has been exceeded"
+          runbook_url: "https://runbooks.intelgraph.com/error-budget-exhausted"
+
+  - name: service-specific
+    rules:
+      # Prov-Ledger specific SLO
+      - alert: ProvLedgerReadLatency
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(prov_ledger_claim_lookup_duration_seconds_bucket[5m])) by (le)
+          ) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          service: prov-ledger
+        annotations:
+          summary: "Prov-Ledger p95 read latency exceeding SLO (1.5s)"
+          description: "Claim lookup p95 latency is {{ $value | humanizeDuration }}"
+
+      # Entity Resolution specific
+      - alert: ERMergeQueueBacklog
+        expr: er_adjudication_queue_size > 1000
+        for: 15m
+        labels:
+          severity: warning
+          service: entity-resolution
+        annotations:
+          summary: "Entity Resolution adjudication queue backlog"
+          description: "{{ $value }} items in H2L adjudication queue"
+
+      # ZK-TX proof generation
+      - alert: ZKTXProofGenerationSlow
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(zk_tx_proof_generation_seconds_bucket[5m])) by (le)
+          ) > 3
+        for: 5m
+        labels:
+          severity: warning
+          service: zk-tx
+        annotations:
+          summary: "ZK-TX proof generation exceeding 3s p99"
+          description: "ZK proof generation is taking {{ $value | humanizeDuration }}"
+
+      # Policy Engine
+      - alert: PolicyEngineEvaluationSlow
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(policy_engine_evaluation_seconds_bucket[5m])) by (le)
+          ) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          service: policy-engine
+        annotations:
+          summary: "Policy evaluation exceeding 200ms p99"
+          description: "Policy evaluation latency is {{ $value | humanizeDuration }}"
