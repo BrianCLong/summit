@@ -37,7 +37,9 @@ import type {
   WorkflowSuggestion,
   WorkflowValidationIssue,
   WorkflowValidationResult,
+  SecretRef,
 } from 'common-types';
+import type { ZeroTrustSecretsManager } from 'secrets';
 
 // ============================================================================
 // RUNTIME POLICY ENGINE - From HEAD
@@ -215,6 +217,17 @@ export {
   type GuardedEvaluationContext,
   type GuardedAuditEntry,
 } from './guarded-gateway.js';
+export {
+  AuthorityLicenseCompiler,
+  type AuthorityCompilerOptions,
+  type AuthorityPolicyRule,
+  type AuthorityPolicySelector,
+  type CompiledGuardBundle,
+  type GuardAuditRecord,
+  type LicenseVerdict,
+  type OpaGuard,
+  type PolicyBundleDocument,
+} from './authority-compiler.js';
 
 export function buildDefaultPolicyEngine(): PolicyEngine {
   const engine = new PolicyEngine([
@@ -497,11 +510,52 @@ export interface ValidateOptions {
   allowLoops?: boolean;
   requireEvidence?: boolean;
   defaults?: Partial<ValidationDefaults>;
+  secretsManager?: ZeroTrustSecretsManager;
+  now?: Date;
 }
 
 export interface TopologyResult {
   order: string[];
   cycles: string[][];
+}
+
+function collectSecretRefs(
+  params: Record<string, unknown> | undefined,
+  prefix = '',
+): Array<{ path: string; ref: SecretRef }> {
+  if (!params || typeof params !== 'object') {
+    return [];
+  }
+
+  const collected: Array<{ path: string; ref: SecretRef }> = [];
+
+  for (const [key, value] of Object.entries(params)) {
+    const path = prefix ? `${prefix}.${key}` : key;
+
+    if (ensureSecret(value)) {
+      collected.push({ path, ref: value });
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      value.forEach((entry, index) => {
+        if (entry && typeof entry === 'object') {
+          collected.push(
+            ...collectSecretRefs(
+              entry as Record<string, unknown>,
+              `${path}[${index}]`,
+            ),
+          );
+        }
+      });
+    } else if (value && typeof value === 'object') {
+      collected.push(
+        ...collectSecretRefs(value as Record<string, unknown>, path),
+      );
+    }
+  }
+
+  return collected;
 }
 
 export function validateWorkflow(
@@ -540,6 +594,36 @@ export function validateWorkflow(
         suggestion:
           'Replace literal values with {"vault":"vault://path","key":"secret"}.',
       });
+    }
+
+    if (options.secretsManager) {
+      const secretRefs = collectSecretRefs(
+        node.params as Record<string, unknown> | undefined,
+      );
+      for (const secret of secretRefs) {
+        if (!options.secretsManager.supports(secret.ref)) {
+          issues.push({
+            severity: 'error',
+            code: 'policy.secret-provider',
+            message: `Node ${node.id} references unsupported secret provider at ${secret.path}.`,
+            nodes: [node.id],
+          });
+          continue;
+        }
+
+        const rotationStatus = options.secretsManager.describeRotation(
+          secret.ref,
+          options.now ?? new Date(),
+        );
+        if (rotationStatus.needsRotation) {
+          issues.push({
+            severity: 'warning',
+            code: 'policy.secret-rotation',
+            message: `Secret at ${secret.path} in node ${node.id} requires rotation${rotationStatus.reason ? ` (${rotationStatus.reason})` : ''}.`,
+            nodes: [node.id],
+          });
+        }
+      }
     }
 
     if (node.policy?.handlesPii && !normalized.policy.pii) {
