@@ -1,4 +1,5 @@
 import { copilotResolvers } from '../src/graphql/resolvers.copilot.js';
+import { jest, describe, it, expect } from '@jest/globals';
 
 describe('copilotQuery resolver', () => {
   const makeContext = (policyAllow = true) => {

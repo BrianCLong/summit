@@ -29,6 +29,47 @@ groups:
           description: 'The Conductor system is running in degraded mode for {{ $labels.instance }}'
           runbook_url: 'https://docs.intelgraph.com/runbooks/conductor-degraded'
 
+  # Golden Path Health Alert
+  - name: golden_path.health
+    rules:
+      - alert: GoldenPathHealthLow
+        expr: sum(rate(http_request_duration_seconds_count{path="/health/ready", status="200"}[7d])) / sum(rate(http_request_duration_seconds_count{path="/health/ready"}[7d])) < 0.995
+        for: 5m
+        labels:
+          severity: critical
+          service: api-server
+          component: health
+        annotations:
+          summary: 'Golden Path Health Availability Drop'
+          description: 'The availability of the /health/ready endpoint has dropped below 99.5% over the last 7 days.'
+          runbook_url: 'https://docs.intelgraph.com/runbooks/golden-path-health-low'
+
+  # API latency regression and p99 visibility
+  - name: api.latency
+    rules:
+      - record: api_http_request_duration_seconds_p99
+        expr: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service="api-server"}[5m])))
+
+      - record: api_http_request_duration_seconds_p99_baseline
+        expr: histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service="api-server"}[1h])))
+
+      - alert: ApiP99LatencyRegression
+        expr: |
+          api_http_request_duration_seconds_p99 > 0.5
+          and api_http_request_duration_seconds_p99
+              > (api_http_request_duration_seconds_p99_baseline * 1.4)
+        for: 10m
+        labels:
+          severity: warning
+          service: api-server
+          component: http
+        annotations:
+          summary: 'API p99 latency regression'
+          description: >-
+            p99 latency is {{ $value }}s and more than 40% above the 1h baseline.
+            Inspect upstream dependencies, database health, and recent deploys.
+          runbook_url: 'https://docs.intelgraph.com/runbooks/api-latency-regression'
+
   # Routing performance and reliability
   - name: conductor.routing
     rules:
