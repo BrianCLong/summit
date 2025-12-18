@@ -1,6 +1,7 @@
 use std::collections::{HashMap, BTreeMap};
 use serde_json::Value;
 use thiserror::Error;
+use jsonschema::JSONSchema;
 
 #[derive(Debug, Error)]
 pub enum ConfigValidationError {
@@ -13,25 +14,53 @@ pub enum ConfigValidationError {
     Custom(String),
 }
 
-pub trait ConfigValidator {
+pub trait ConfigValidator: Send + Sync {
     fn validate(&self, config: &Value) -> Result<(), ConfigValidationError>;
 }
 
-pub struct Schema {}
-impl Schema {
-    pub fn validate(&self, _value: &Value) -> Result<(), String> {
-        Ok(())
+pub struct SchemaWrapper {
+    inner: JSONSchema,
+}
+
+impl SchemaWrapper {
+    pub fn new(schema_json: &Value) -> Result<Self, String> {
+        JSONSchema::compile(schema_json)
+            .map(|s| Self { inner: s })
+            .map_err(|e| e.to_string())
+    }
+
+    pub fn validate(&self, value: &Value) -> Result<(), String> {
+        if let Err(errors) = self.inner.validate(value) {
+            let msg = errors.map(|e| e.to_string()).collect::<Vec<_>>().join(", ");
+            Err(msg)
+        } else {
+            Ok(())
+        }
     }
 }
 
 // 1. Strong configuration validation with JSON Schema
 pub struct JsonSchemaValidator {
-    pub schemas: HashMap<String, Schema>,
-    pub custom_validators: Vec<Box<dyn ConfigValidator + Send + Sync>>,
+    pub schemas: HashMap<String, SchemaWrapper>,
+    pub custom_validators: Vec<Box<dyn ConfigValidator>>,
 }
 
 impl JsonSchemaValidator {
+    pub fn new() -> Self {
+        Self {
+            schemas: HashMap::new(),
+            custom_validators: Vec::new(),
+        }
+    }
+
+    pub fn add_schema(&mut self, key: String, schema_json: Value) -> Result<(), String> {
+        let schema = SchemaWrapper::new(&schema_json)?;
+        self.schemas.insert(key, schema);
+        Ok(())
+    }
+
     pub fn validate_config(&self, config: &serde_json::Value) -> Result<(), ConfigValidationError> {
+        // Validate each known section
         for (key, schema) in &self.schemas {
             if let Some(value) = config.get(key) {
                 schema.validate(value)
@@ -55,8 +84,8 @@ pub type Version = u32;
 
 #[derive(Debug, Error)]
 pub enum MigrationError {
-    #[error("Migration failed")]
-    Failed,
+    #[error("Migration failed: {0}")]
+    Failed(String),
 }
 
 #[async_trait::async_trait]
@@ -64,15 +93,20 @@ pub trait ConfigMigration: Send + Sync {
     async fn migrate(&self, config: Value) -> Result<Value, MigrationError>;
 }
 
-pub struct ConfigVersionTracker {}
-
 // 2. Configuration schema evolution with automatic migration
 pub struct ConfigMigrationEngine {
     pub migrations: BTreeMap<Version, Box<dyn ConfigMigration>>,
-    pub version_tracker: ConfigVersionTracker,
 }
 
 impl ConfigMigrationEngine {
+    pub fn new() -> Self {
+        Self { migrations: BTreeMap::new() }
+    }
+
+    pub fn add_migration(&mut self, target_version: Version, migration: Box<dyn ConfigMigration>) {
+        self.migrations.insert(target_version, migration);
+    }
+
     pub async fn migrate_config(
         &self,
         config: serde_json::Value,
@@ -80,25 +114,19 @@ impl ConfigMigrationEngine {
         to_version: Version
     ) -> Result<serde_json::Value, MigrationError> {
         let mut current_config = config;
-        let mut current_version = from_version;
+        let mut _current_version = from_version; // Prefix with _ to silence warning or use it logic
 
-        for (target_version, migration) in self.migrations.range(from_version..=to_version) {
-            if current_version < *target_version {
-                current_config = migration.migrate(current_config).await?;
-                current_version = *target_version;
-            }
+        for (target_version, migration) in self.migrations.range((from_version + 1)..=to_version) {
+            // Apply migration to reach target_version
+            current_config = migration.migrate(current_config).await?;
+            _current_version = *target_version;
         }
 
         Ok(current_config)
     }
 }
 
-pub struct RuntimeConfigValidator {}
-pub struct ConfigDependencyResolver {}
-
 pub struct AdvancedConfigSystem {
     pub schema_validator: JsonSchemaValidator,
     pub version_migration: ConfigMigrationEngine,
-    pub runtime_validator: RuntimeConfigValidator,
-    pub dependency_resolver: ConfigDependencyResolver,
 }

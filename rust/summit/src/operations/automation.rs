@@ -1,146 +1,164 @@
 use std::time::Duration;
 use thiserror::Error;
 use uuid::Uuid;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
-pub struct DeploymentSpec {}
-pub enum DeploymentResult { Success }
+pub type NodeId = Uuid;
+
+#[derive(Debug, Clone)]
+pub struct DeploymentSpec {
+    pub image: String,
+    pub replicas: usize,
+    pub version: String,
+}
+
+#[derive(Debug)]
+pub enum DeploymentResult { Success, RolledBack }
 
 #[derive(Debug, Error)]
 pub enum DeploymentError {
-    #[error("Canary failure")]
-    CanaryFailure(CanaryAnalysis),
-    #[error("Deployment failed")]
-    Failed,
+    #[error("Canary failure: {0}")]
+    CanaryFailure(String),
+    #[error("Deployment failed: {0}")]
+    Failed(String),
 }
 
 pub struct CanaryAnalysis {
-    healthy: bool,
-}
-impl CanaryAnalysis {
-    pub fn is_healthy(&self) -> bool { self.healthy }
+    pub healthy: bool,
+    pub error_rate: f64,
+    pub latency_p95: f64,
 }
 
 pub struct CanaryAnalysisEngine {}
+
 impl CanaryAnalysisEngine {
-    pub async fn analyze_canary_performance(&self) -> CanaryAnalysis { CanaryAnalysis { healthy: true } }
+    pub async fn analyze_canary_performance(&self) -> CanaryAnalysis {
+        // Mock analysis
+        CanaryAnalysis { healthy: true, error_rate: 0.0, latency_p95: 50.0 }
+    }
 }
 
 pub struct TrafficManagement {}
 impl TrafficManagement {
-    pub async fn shift_traffic(&self, _percentage: u32) {}
+    pub async fn shift_traffic(&self, percentage: u32) {
+        println!("Shifting traffic to {}%", percentage);
+    }
 }
-
-pub struct HealthValidationEngine {}
 
 pub struct RollbackEngine {}
 impl RollbackEngine {
-    pub async fn rollback_canary(&self) -> Result<(), DeploymentError> { Ok(()) }
+    pub async fn rollback_canary(&self) -> Result<(), DeploymentError> {
+        println!("Rolling back canary...");
+        Ok(())
+    }
 }
-
-pub type NodeId = Uuid;
 
 // 1. Automated deployment with canary analysis
 pub struct DeploymentOrchestrator {
     pub canary_analyzer: CanaryAnalysisEngine,
     pub traffic_manager: TrafficManagement,
-    pub health_validator: HealthValidationEngine,
     pub rollback_engine: RollbackEngine,
 }
 
 impl DeploymentOrchestrator {
+    pub fn new() -> Self {
+        Self {
+            canary_analyzer: CanaryAnalysisEngine {},
+            traffic_manager: TrafficManagement {},
+            rollback_engine: RollbackEngine {},
+        }
+    }
+
     pub async fn execute_canary_deployment(
         &self,
         deployment: DeploymentSpec
     ) -> Result<DeploymentResult, DeploymentError> {
         // Phase 1: Deploy to canary nodes
-        let canary_nodes = self.select_canary_nodes(&deployment).await;
-        self.deploy_to_nodes(&deployment, &canary_nodes).await?;
+        println!("Deploying canary version {}", deployment.version);
 
         // Phase 2: Gradual traffic shift with analysis
         for percentage in &[1, 5, 10, 25, 50, 100] {
             self.traffic_manager.shift_traffic(*percentage).await;
 
-            let analysis = self.canary_analyzer.analyze_canary_performance().await;
-            if !analysis.is_healthy() {
-                self.rollback_engine.rollback_canary().await?;
-                return Err(DeploymentError::CanaryFailure(analysis));
-            }
+            // Wait for metrics to stabilize
+            tokio::time::sleep(Duration::from_millis(100)).await; // Fast for demo, use secs in prod
 
-            tokio::time::sleep(Duration::from_secs(300)).await; // Wait 5 minutes
+            let analysis = self.canary_analyzer.analyze_canary_performance().await;
+            if !analysis.healthy {
+                self.rollback_engine.rollback_canary().await?;
+                return Err(DeploymentError::CanaryFailure("Metrics degraded".into()));
+            }
         }
 
-        // Phase 3: Full deployment
-        self.deploy_to_all_nodes(&deployment).await?;
         Ok(DeploymentResult::Success)
     }
-
-    async fn select_canary_nodes(&self, _deployment: &DeploymentSpec) -> Vec<NodeId> { vec![] }
-    async fn deploy_to_nodes(&self, _deployment: &DeploymentSpec, _nodes: &[NodeId]) -> Result<(), DeploymentError> { Ok(()) }
-    async fn deploy_to_all_nodes(&self, _deployment: &DeploymentSpec) -> Result<(), DeploymentError> { Ok(()) }
 }
 
-pub struct SystemSymptom {}
-pub struct Diagnosis {}
-pub struct RootCause {}
-pub struct Remediation {}
-pub struct HealingResult {}
-
-#[derive(Debug, Error)]
-pub enum HealingError {
-    #[error("Healing failed")]
-    Failed,
+// Self Healing
+#[derive(Debug, Clone, PartialEq)]
+pub enum SystemSymptom {
+    HighLatency,
+    HighErrorRate,
+    NodeUnresponsive,
 }
 
-pub struct SymptomDetector {}
-impl SymptomDetector {
-    pub async fn analyze_symptom(&self, _symptom: SystemSymptom) -> Result<Diagnosis, HealingError> { Ok(Diagnosis{}) }
+#[derive(Debug, Clone)]
+pub enum RootCause {
+    CpuSaturation,
+    MemoryLeak,
+    NetworkPartition,
+    Unknown,
 }
 
-pub struct RootCauseAnalyzer {}
-impl RootCauseAnalyzer {
-    pub async fn find_root_cause(&self, _diagnosis: Diagnosis) -> Result<RootCause, HealingError> { Ok(RootCause{}) }
+#[derive(Debug, Clone)]
+pub enum Remediation {
+    ScaleOut,
+    RestartService,
+    IsolateNode,
+    AlertHuman,
 }
 
-pub struct RemediationSelector {}
-impl RemediationSelector {
-    pub async fn select_remediation(&self, _cause: RootCause) -> Result<Remediation, HealingError> { Ok(Remediation{}) }
-}
-
-pub struct ActionExecutor {}
-impl ActionExecutor {
-    pub async fn execute_remediation(&self, _remediation: Remediation) -> Result<HealingResult, HealingError> { Ok(HealingResult{}) }
-}
-
-// 2. Advanced self-healing capabilities
 pub struct SelfHealingOrchestrator {
-    pub symptom_detector: SymptomDetector,
-    pub root_cause_analyzer: RootCauseAnalyzer,
-    pub remediation_selector: RemediationSelector,
-    pub action_executor: ActionExecutor,
+    // History of incidents
+    pub incident_log: Arc<RwLock<Vec<(SystemSymptom, RootCause, Remediation)>>>,
 }
 
 impl SelfHealingOrchestrator {
-    pub async fn diagnose_and_heal(&self, symptom: SystemSymptom) -> Result<HealingResult, HealingError> {
-        let diagnosis = self.symptom_detector.analyze_symptom(symptom).await?;
-        let root_cause = self.root_cause_analyzer.find_root_cause(diagnosis).await?;
-        let remediation = self.remediation_selector.select_remediation(root_cause).await?;
-
-        let result = self.action_executor.execute_remediation(remediation).await?;
-
-        // Learn from the outcome
-        self.learn_from_incident(diagnosis, root_cause, remediation, &result).await;
-
-        Ok(result)
+    pub fn new() -> Self {
+        Self {
+            incident_log: Arc::new(RwLock::new(Vec::new())),
+        }
     }
 
-    async fn learn_from_incident(&self, _diagnosis: Diagnosis, _cause: RootCause, _remediation: Remediation, _result: &HealingResult) {}
+    pub async fn diagnose_and_heal(&self, symptom: SystemSymptom) -> Result<Remediation, String> {
+        // 1. Diagnose
+        let cause = match symptom {
+            SystemSymptom::HighLatency => RootCause::CpuSaturation,
+            SystemSymptom::HighErrorRate => RootCause::NetworkPartition,
+            SystemSymptom::NodeUnresponsive => RootCause::MemoryLeak,
+        };
+
+        // 2. Select Remediation
+        let remediation = match cause {
+            RootCause::CpuSaturation => Remediation::ScaleOut,
+            RootCause::MemoryLeak => Remediation::RestartService,
+            RootCause::NetworkPartition => Remediation::IsolateNode,
+            RootCause::Unknown => Remediation::AlertHuman,
+        };
+
+        // 3. Execute (Simulated)
+        println!("Executing remediation: {:?}", remediation);
+
+        // 4. Record
+        let mut log = self.incident_log.write().await;
+        log.push((symptom, cause, remediation.clone()));
+
+        Ok(remediation)
+    }
 }
 
-pub struct OperationalInsights {}
-
 pub struct OperationsAutomation {
-    pub deployment_orchestrator: DeploymentOrchestrator,
-    pub rollback_engine: RollbackEngine,
+    pub deployment: DeploymentOrchestrator,
     pub self_healing: SelfHealingOrchestrator,
-    pub operational_insights: OperationalInsights,
 }

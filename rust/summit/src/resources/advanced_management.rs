@@ -1,106 +1,127 @@
 use std::collections::HashMap;
 use uuid::Uuid;
 use thiserror::Error;
+use std::sync::Arc;
+use tokio::sync::RwLock;
 
 pub type TenantId = Uuid;
 pub type ServiceId = Uuid;
 pub type UserId = Uuid;
 
+#[derive(Debug, Clone)]
 pub struct ResourceRequest {
     pub tenant_id: TenantId,
     pub service_id: ServiceId,
     pub user_id: UserId,
+    pub cpu_units: f64,
+    pub memory_mb: f64,
 }
 
-pub struct QuotaToken {}
+pub struct QuotaToken {
+    pub granted: bool,
+}
 
 #[derive(Debug, Error)]
 pub enum QuotaError {
-    #[error("User not found")]
+    #[error("User quota not found")]
     UserNotFound,
-    #[error("Service not found")]
+    #[error("Service quota not found")]
     ServiceNotFound,
-    #[error("Tenant not found")]
+    #[error("Tenant quota not found")]
     TenantNotFound,
-    #[error("Quota exceeded")]
-    Exceeded,
+    #[error("Quota exceeded: {0}")]
+    Exceeded(String),
 }
 
-pub trait Quota {
-    fn check_request(&self, request: &ResourceRequest) -> Result<QuotaToken, QuotaError>;
-    fn min(&self, other: &Self) -> Self;
+#[derive(Clone, Debug)]
+pub struct ResourceLimit {
+    pub cpu_limit: f64,
+    pub memory_limit: f64,
 }
 
-pub struct TenantQuota {}
-impl Quota for TenantQuota {
-    fn check_request(&self, _request: &ResourceRequest) -> Result<QuotaToken, QuotaError> { Ok(QuotaToken {}) }
-    fn min(&self, _other: &Self) -> Self { Self {} }
-}
+impl ResourceLimit {
+    pub fn check(&self, req: &ResourceRequest) -> bool {
+        req.cpu_units <= self.cpu_limit && req.memory_mb <= self.memory_limit
+    }
 
-pub struct ServiceQuota {}
-impl Quota for ServiceQuota {
-    fn check_request(&self, _request: &ResourceRequest) -> Result<QuotaToken, QuotaError> { Ok(QuotaToken {}) }
-    fn min(&self, _other: &Self) -> Self { Self {} }
-}
-
-pub struct UserQuota {}
-impl Quota for UserQuota {
-    fn check_request(&self, _request: &ResourceRequest) -> Result<QuotaToken, QuotaError> { Ok(QuotaToken {}) }
-    fn min(&self, _other: &Self) -> Self { Self {} }
-}
-
-// 1. Hierarchical quota system
-pub struct HierarchicalQuotaSystem {
-    pub tenant_quotas: HashMap<TenantId, TenantQuota>,
-    pub service_quotas: HashMap<ServiceId, ServiceQuota>,
-    pub user_quotas: HashMap<UserId, UserQuota>,
-}
-
-impl HierarchicalQuotaSystem {
-    pub fn check_quota(&self, request: &ResourceRequest) -> Result<QuotaToken, QuotaError> {
-        // Check at each level: user -> service -> tenant
-        let user_quota = self.user_quotas.get(&request.user_id)
-            .ok_or(QuotaError::UserNotFound)?;
-
-        let service_quota = self.service_quotas.get(&request.service_id)
-            .ok_or(QuotaError::ServiceNotFound)?;
-
-        let tenant_quota = self.tenant_quotas.get(&request.tenant_id)
-            .ok_or(QuotaError::TenantNotFound)?;
-
-        // Enforce most restrictive quota
-        // Note: Real implementation would need a common trait that can be minimized.
-        // For compilation we just assume check_request works on all.
-        // And min returns a common type or we just check all sequentially.
-
-        // Simplified logic for this snippet:
-        user_quota.check_request(request)?;
-        service_quota.check_request(request)?;
-        tenant_quota.check_request(request)
+    pub fn min(&self, other: &Self) -> Self {
+        Self {
+            cpu_limit: self.cpu_limit.min(other.cpu_limit),
+            memory_limit: self.memory_limit.min(other.memory_limit),
+        }
     }
 }
 
-pub struct CostCalculator {}
-impl CostCalculator {
-    pub async fn calculate_cost(&self, _request: &ResourceRequest) -> f64 { 0.0 }
+pub struct HierarchicalQuotaSystem {
+    pub tenant_quotas: Arc<RwLock<HashMap<TenantId, ResourceLimit>>>,
+    pub service_quotas: Arc<RwLock<HashMap<ServiceId, ResourceLimit>>>,
+    pub user_quotas: Arc<RwLock<HashMap<UserId, ResourceLimit>>>,
 }
 
+impl HierarchicalQuotaSystem {
+    pub fn new() -> Self {
+        Self {
+            tenant_quotas: Arc::new(RwLock::new(HashMap::new())),
+            service_quotas: Arc::new(RwLock::new(HashMap::new())),
+            user_quotas: Arc::new(RwLock::new(HashMap::new())),
+        }
+    }
+
+    pub async fn check_quota(&self, request: &ResourceRequest) -> Result<QuotaToken, QuotaError> {
+        let user_q = self.user_quotas.read().await;
+        let service_q = self.service_quotas.read().await;
+        let tenant_q = self.tenant_quotas.read().await;
+
+        let u_limit = user_q.get(&request.user_id).ok_or(QuotaError::UserNotFound)?;
+        let s_limit = service_q.get(&request.service_id).ok_or(QuotaError::ServiceNotFound)?;
+        let t_limit = tenant_q.get(&request.tenant_id).ok_or(QuotaError::TenantNotFound)?;
+
+        // Effective limit is the intersection (minimum) of all limits
+        let effective = u_limit.min(s_limit).min(t_limit);
+
+        if effective.check(request) {
+            Ok(QuotaToken { granted: true })
+        } else {
+            Err(QuotaError::Exceeded(format!("Request {:?} exceeds effective limit {:?}", request, effective)))
+        }
+    }
+}
+
+pub struct CostCalculator {
+    pub cpu_rate: f64,
+    pub memory_rate: f64,
+}
+
+impl CostCalculator {
+    pub fn calculate_cost(&self, request: &ResourceRequest) -> f64 {
+        (request.cpu_units * self.cpu_rate) + (request.memory_mb * self.memory_rate)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Budget {
     pub remaining: f64,
 }
 
-pub struct BudgetTracker {}
+pub struct BudgetTracker {
+    budgets: Arc<RwLock<HashMap<TenantId, Budget>>>,
+}
+
 impl BudgetTracker {
-    pub async fn get_budget(&self, _tenant_id: TenantId) -> Result<Budget, AllocationError> { Ok(Budget{ remaining: 100.0 }) }
-    pub async fn record_allocation(&self, _tenant_id: TenantId, _cost: f64) {}
-}
+    pub fn new() -> Self {
+        Self { budgets: Arc::new(RwLock::new(HashMap::new())) }
+    }
 
-pub struct OptimizationEngine {}
-impl OptimizationEngine {
-    pub async fn find_optimal_allocation(&self, _request: ResourceRequest, _cost: f64) -> Result<ResourceAllocation, AllocationError> { Ok(ResourceAllocation {}) }
-}
+    pub async fn get_budget(&self, tenant_id: TenantId) -> Result<Budget, AllocationError> {
+        self.budgets.read().await.get(&tenant_id).cloned().ok_or(AllocationError::Failed)
+    }
 
-pub struct ResourceAllocation {}
+    pub async fn record_allocation(&self, tenant_id: TenantId, cost: f64) {
+        if let Some(budget) = self.budgets.write().await.get_mut(&tenant_id) {
+            budget.remaining -= cost;
+        }
+    }
+}
 
 #[derive(Debug, Error)]
 pub enum AllocationError {
@@ -113,19 +134,31 @@ pub enum AllocationError {
     Failed,
 }
 
+pub struct ResourceAllocation {
+    pub granted_cpu: f64,
+    pub granted_memory: f64,
+    pub cost: f64,
+}
+
 // 2. Cost-aware resource allocation
 pub struct CostAwareAllocator {
     pub cost_calculator: CostCalculator,
     pub budget_tracker: BudgetTracker,
-    pub optimization_engine: OptimizationEngine,
 }
 
 impl CostAwareAllocator {
+    pub fn new(cpu_rate: f64, memory_rate: f64) -> Self {
+        Self {
+            cost_calculator: CostCalculator { cpu_rate, memory_rate },
+            budget_tracker: BudgetTracker::new(),
+        }
+    }
+
     pub async fn allocate_resources(
         &self,
         request: ResourceRequest
     ) -> Result<ResourceAllocation, AllocationError> {
-        let cost = self.cost_calculator.calculate_cost(&request).await;
+        let cost = self.cost_calculator.calculate_cost(&request);
         let budget = self.budget_tracker.get_budget(request.tenant_id).await?;
 
         if cost > budget.remaining {
@@ -135,24 +168,18 @@ impl CostAwareAllocator {
             });
         }
 
-        // Find cost-optimal allocation strategy
-        let allocation = self.optimization_engine.find_optimal_allocation(request, cost).await?;
-
         // Track allocation against budget
         self.budget_tracker.record_allocation(request.tenant_id, cost).await;
 
-        Ok(allocation)
+        Ok(ResourceAllocation {
+            granted_cpu: request.cpu_units,
+            granted_memory: request.memory_mb,
+            cost,
+        })
     }
 }
 
-pub struct QuotaEnforcementEngine {}
-pub struct ResourceTracker {}
-pub struct CostAllocationEngine {}
-pub struct EfficiencyOptimizer {}
-
 pub struct AdvancedResourceManager {
-    pub quota_enforcer: QuotaEnforcementEngine,
-    pub resource_tracker: ResourceTracker,
-    pub cost_allocator: CostAllocationEngine,
-    pub efficiency_optimizer: EfficiencyOptimizer,
+    pub quota_system: HierarchicalQuotaSystem,
+    pub cost_allocator: CostAwareAllocator,
 }
