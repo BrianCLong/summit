@@ -1,16 +1,21 @@
-name: DB Migration Gate
+name: Migration Gate
+
 on:
   pull_request:
     paths:
-      - '**/migrations/**'
-      - 'ops/db/**'
+      - 'server/db/migrations/**'
+
 jobs:
-  plan_and_verify:
+  check-migration:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout @v4/**
-      - name: Plan & shadow verify
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Approval
+        env:
+          MIGRATION_APPROVED: ${{ vars.MIGRATION_APPROVED }}
         run: |
-          chmod +x ops/db/migrate ops/db/verify
-          ./ops/db/migrate --plan --no-apply
-          ./ops/db/verify --shadow
+          chmod +x ops/migration_gate.sh
+          ./ops/migration_gate.sh
