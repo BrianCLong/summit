@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import http from 'http';
 import express from 'express';
 import { useServer } from 'graphql-ws/use/ws';
@@ -15,33 +16,42 @@ import { DataRetentionService } from './services/DataRetentionService.js';
 import { getNeo4jDriver, initializeNeo4jDriver } from './db/neo4j.js';
 import { cfg } from './config.js';
 import { streamingRateLimiter } from './routes/streaming.js';
-import { ensurePerformanceIndexes } from './db/optimization/performanceIndexes.js';
+<<<<<<< HEAD
+import { startOSINTWorkers } from './services/OSINTQueueService.js';
+=======
+import { BackupManager } from './backup/BackupManager.js';
+import { checkNeo4jIndexes } from './db/indexManager.js';
+>>>>>>> main
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const logger: pino.Logger = pino();
+=======
+import { bootstrapSecrets } from './bootstrap-secrets.js';
+import { logger } from './config/logger.js';
+import { logConfigSummary } from './config/index.js';
+>>>>>>> main
 
-const startServer = async () => {
-  // Optional Kafka consumer import - only when AI services enabled
-  let startKafkaConsumer: any = null;
-  let stopKafkaConsumer: any = null;
-  if (
-    process.env.AI_ENABLED === 'true' ||
-    process.env.KAFKA_ENABLED === 'true'
-  ) {
-    try {
-      const kafkaModule = await import('./realtime/kafkaConsumer.js');
-      startKafkaConsumer = kafkaModule.startKafkaConsumer;
-      stopKafkaConsumer = kafkaModule.stopKafkaConsumer;
-    } catch (error) {
-      logger.warn('Kafka not available - running in minimal mode');
-    }
+(async () => {
+  try {
+    // 1. Load Secrets (Environment or Vault)
+    await bootstrapSecrets();
+
+    // Log Config
+    logConfigSummary();
+
+    // 2. Start Server
+    logger.info('Secrets loaded. Starting server...');
+    await import('./server_entry.js');
+  } catch (err) {
+    logger.error(`Fatal error during startup: ${err}`);
+    process.exit(1);
   }
+<<<<<<< HEAD
   const app = await createApp();
   const schema = makeExecutableSchema({ typeDefs, resolvers });
   const httpServer = http.createServer(app);
 
   await initializeNeo4jDriver();
-  await ensurePerformanceIndexes();
 
   // Subscriptions with Persisted Query validation
 
@@ -81,6 +91,40 @@ const startServer = async () => {
     const dataRetentionService = new DataRetentionService(neo4jDriver);
     dataRetentionService.startCleanupJob(); // Start the cleanup job
 
+<<<<<<< HEAD
+    // Start OSINT Workers
+    startOSINTWorkers();
+
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+    // Initialize Backup Manager
+    const backupManager = new BackupManager();
+    backupManager.startScheduler();
+
+    // Check Neo4j Indexes
+    checkNeo4jIndexes().catch(err => logger.error('Failed to run initial index check', err));
+
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     // WAR-GAMED SIMULATION - Start Kafka Consumer
     await startKafkaConsumer();
 
@@ -131,3 +175,6 @@ const startServer = async () => {
 };
 
 startServer();
+=======
+})();
+>>>>>>> main
