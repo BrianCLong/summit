@@ -1,8 +1,4 @@
-pub mod streaming;
-pub mod caching;
-pub mod telemetry;
-pub mod config;
-pub mod resources;
-pub mod state;
-pub mod load_balancing;
-pub mod operations;
+pub mod cluster;
+pub mod failure_detector;
+
+pub use cluster::membership::ClusterMembership;
