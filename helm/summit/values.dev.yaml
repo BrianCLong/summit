@@ -1,0 +1,13 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/BrianCLong/summit
+  tag: dev
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 250m
+    memory: 256Mi
+featureFlags:
+  someRiskyPath: false
