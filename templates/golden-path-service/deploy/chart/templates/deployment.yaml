@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: golden-path
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: golden-path
+  template:
+    metadata:
+      labels:
+        app: golden-path
+    spec:
+      containers:
+        - name: api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: PORT
+              value: "{{ .Values.service.port }}"
+            - name: LOG_LEVEL
+              value: info
+            - name: POLICY_ENDPOINT
+              value: http://opa:8181/v1/data/companyos/authz/allow
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: {{ .Values.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: golden-path-pdb
+spec:
+  {{- if .Values.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: golden-path

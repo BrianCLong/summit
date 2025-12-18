@@ -1,0 +1,45 @@
+meta:
+  id: jury.policy@v1
+  owner: jules
+  purpose: Policy, Legal & Standards Compliance Playbook
+  tags: [jury, policy, legal, compliance]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.7
+  maxTokens: 4000
+inputs:
+  mission: The mission description
+  jurisdictions: Relevant legal or policy jurisdictions
+template: |
+  PLAYBOOK: JURY_POLICY_COALITION
+
+  Given the mission and jurisdictions below:
+
+  MISSION: {{mission}}
+  JURISDICTIONS: {{jurisdictions}}
+
+  1) REGIME MAP
+  - Identify key laws, standards, and regulators affected.
+  - Map to mission surface (where we are exposed).
+
+  2) OBLIGATIONS & OPPORTUNITIES
+  - Minimal compliance obligations (must-do).
+  - Strategic opportunities (shape or exceed standards for moat).
+
+  3) POLICY STRATEGY
+  - 3–5 strategic positions (stances) we can take.
+  - Risks/benefits of each stance.
+
+  4) COALITION MAP
+  - Stakeholder categories (regulators, industry, NGOs, etc.).
+  - Potential allies, opponents, and swing actors.
+  - Incentives and levers for each.
+
+  5) COMMENT / BRIEF OUTLINE
+  - Skeleton for a policy comment or briefing memo:
+    - Executive summary
+    - Position
+    - Evidence & arguments
+    - Requests / proposed language
+
+  Include PCS: sources, assumptions, confidence, falsifiers.

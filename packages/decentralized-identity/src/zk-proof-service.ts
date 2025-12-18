@@ -46,7 +46,7 @@ export class ZKProofService {
     // Separate revealed and hidden attributes
     for (const credential of credentials) {
       for (const [key, value] of Object.entries(credential.credentialSubject)) {
-        if (key === 'id') continue;
+        if (key === 'id') {continue;}
         if (revealedAttributeNames.includes(key)) {
           revealedAttributes[key] = String(value);
         } else {
@@ -79,7 +79,7 @@ export class ZKProofService {
     expectedAttributes?: Record<string, string>,
   ): Promise<boolean> {
     const proof = this.generatedProofs.get(proofId);
-    if (!proof) return false;
+    if (!proof) {return false;}
 
     // Verify revealed attributes match expectations
     if (expectedAttributes) {
