@@ -8,7 +8,7 @@
  * - Continuous validation
  */
 
-import { createHash, randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type { ZeroTrustContext, AccessEvent, AuditEntry } from '../types.js';
 import { ComplianceLogger } from '../compliance/compliance-logger.js';
 
@@ -296,8 +296,8 @@ export class ZeroTrustValidator {
     // Check specific permission
     const requiredPerm = `${resource}:${action}`;
     const hasPermission = permissions.some((p) => {
-      if (p === requiredPerm) return true;
-      if (p.endsWith(':*') && requiredPerm.startsWith(p.slice(0, -1))) return true;
+      if (p === requiredPerm) {return true;}
+      if (p.endsWith(':*') && requiredPerm.startsWith(p.slice(0, -1))) {return true;}
       return false;
     });
 
@@ -371,7 +371,7 @@ export class ZeroTrustValidator {
     const validCount = attestations.filter((a) => a.status === 'valid').length;
     const totalCount = attestations.length;
 
-    if (totalCount === 0) return 'untrusted';
+    if (totalCount === 0) {return 'untrusted';}
 
     const ratio = validCount / totalCount;
 
