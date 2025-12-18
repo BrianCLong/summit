@@ -1,0 +1,41 @@
+{
+  "name": "@intelgraph/sim-harness",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scenario simulation and evaluation harness for IntelGraph platform",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:integration": "jest --config jest.integration.config.js",
+    "sim:run": "node dist/cli.js",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "simulation",
+    "evaluation",
+    "testing",
+    "scenarios",
+    "intelgraph"
+  ],
+  "dependencies": {
+    "axios": "^1.6.0",
+    "uuid": "^9.0.0",
+    "winston": "^3.11.0",
+    "js-yaml": "^4.1.0",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^9.0.0",
+    "@types/js-yaml": "^4.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}
