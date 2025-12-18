@@ -664,7 +664,7 @@ export class WorkflowService extends EventEmitter {
       case 'success':
         return !stepResult?.error;
       case 'failure':
-        return !!stepResult?.error;
+        return Boolean(stepResult?.error);
       case 'custom':
         return connection.customCondition
           ? this.evaluateCondition(connection.customCondition, {
@@ -981,7 +981,7 @@ export class WorkflowService extends EventEmitter {
     workflow: WorkflowDefinition,
   ): Promise<void> {
     for (const trigger of workflow.triggers) {
-      if (!trigger.isEnabled) continue;
+      if (!trigger.isEnabled) {continue;}
 
       switch (trigger.type) {
         case 'schedule':

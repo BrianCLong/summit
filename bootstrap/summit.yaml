@@ -1,0 +1,45 @@
+version: 1.0
+
+agents:
+  jules:
+    path: agents/jules/
+    enabled: true
+  codex:
+    path: agents/codex/
+    enabled: true
+  reviewer:
+    path: agents/reviewer/
+    enabled: true
+  predictive:
+    path: agents/predictive/
+    enabled: true
+  psyops:
+    path: agents/psyops/
+    enabled: true
+  executor:
+    path: agents/executor/
+    enabled: true
+
+flows:
+  - flows/session_to_pr.yaml
+  - flows/pr_lifecycle.yaml
+  - flows/recapture_closed_prs.yaml
+  - flows/auto_improve_daily.yaml
+
+governance:
+  prime_brain: SUMMIT_PRIME_BRAIN.md
+  agent_governance: governance/AGENT_GOVERNANCE.md
+  pr_policy: governance/PR_POLICY.md
+  safety_rules: governance/SAFETY_RULES.md
+
+analytics:
+  architecture: analytics/ARCHITECTURE.md
+  signals: analytics/SIGNALS.md
+  models: analytics/MODELS.yaml
+  routing: analytics/ROUTING.md
+
+runtime:
+  enable_observability: true
+  enable_event_triggers: true
+  logs_dir: .summit/logs/
+  state_dir: .summit/state/

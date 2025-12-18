@@ -1,0 +1,335 @@
+meta:
+  id: plan.policy-engine@v1
+  owner: 'platform-engineering'
+  purpose: 'Enforce policies across CI, docs, and code with a centralized engine'
+  tags:
+    - governance
+    - policy
+    - opa
+    - enforcement
+    - compliance
+  guardrails:
+    - 'Policies must be version controlled'
+    - 'Enforcement must be consistent'
+    - 'Exceptions must be audited'
+    - 'Policies must not block emergencies'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  policy_domains: string
+  current_enforcement: string
+  compliance_requirements: string
+  exception_process: string
+  stakeholders: string
+
+template: |
+  You are a Platform Engineer implementing a policy engine for Summit/IntelGraph.
+
+  **Objective:** Enforce policies across CI, docs, and code.
+
+  **Policy Domains:**
+  {{policy_domains}}
+
+  **Current Enforcement:**
+  {{current_enforcement}}
+
+  **Compliance Requirements:**
+  {{compliance_requirements}}
+
+  **Exception Process:**
+  {{exception_process}}
+
+  **Stakeholders:**
+  {{stakeholders}}
+
+  ## Deliverables
+
+  ### 1. Policy Engine Architecture
+  ```yaml
+  architecture:
+    engine: Open Policy Agent (OPA) | custom
+    deployment:
+      - Sidecar for runtime decisions
+      - CLI for CI/CD checks
+      - API for programmatic queries
+
+    components:
+      policy_store:
+        storage: Git repository
+        format: Rego (OPA) / YAML
+        versioning: Semantic versioning
+
+      decision_log:
+        storage: Elasticsearch / PostgreSQL
+        retention: 1 year
+        queryable: true
+
+      admin_ui:
+        features:
+          - Policy browser
+          - Decision log viewer
+          - Exception management
+          - Audit reports
+
+    integration_points:
+      - CI/CD pipelines
+      - API gateway
+      - Git hooks
+      - Documentation builds
+  ```
+
+  ### 2. Policy Definitions
+  ```yaml
+  policies:
+    security:
+      - id: SEC-001
+        name: no_secrets_in_code
+        description: Prevent secrets from being committed
+        enforcement: CI blocking
+        rule: |
+          package security
+
+          deny[msg] {
+            input.file_type == "code"
+            contains(input.content, pattern)
+            pattern := ["password =", "api_key =", "secret ="]
+            msg := sprintf("Potential secret found in %s", [input.filename])
+          }
+
+      - id: SEC-002
+        name: approved_dependencies
+        description: Only allow approved dependencies
+        enforcement: CI blocking
+        rule: |
+          package dependencies
+
+          deny[msg] {
+            dep := input.dependencies[_]
+            not approved_dependencies[dep.name]
+            msg := sprintf("Unapproved dependency: %s", [dep.name])
+          }
+
+    code_quality:
+      - id: CQ-001
+        name: test_coverage
+        description: Minimum test coverage required
+        enforcement: CI warning → blocking
+        rule: |
+          package quality
+
+          deny[msg] {
+            input.coverage < 80
+            msg := sprintf("Coverage %v%% is below 80%% threshold", [input.coverage])
+          }
+
+      - id: CQ-002
+        name: file_size_limit
+        description: Prevent excessively large files
+        enforcement: CI warning
+        rule: |
+          package quality
+
+          warn[msg] {
+            input.file_size_kb > 500
+            msg := sprintf("File %s is %vKB, consider splitting", [input.filename, input.file_size_kb])
+          }
+
+    documentation:
+      - id: DOC-001
+        name: readme_required
+        description: All packages must have README
+        enforcement: CI blocking
+        rule: |
+          package docs
+
+          deny[msg] {
+            not file_exists("README.md")
+            msg := "README.md is required"
+          }
+
+    operations:
+      - id: OPS-001
+        name: resource_limits
+        description: K8s manifests must have resource limits
+        enforcement: CI blocking
+        rule: |
+          package kubernetes
+
+          deny[msg] {
+            container := input.spec.containers[_]
+            not container.resources.limits
+            msg := sprintf("Container %s missing resource limits", [container.name])
+          }
+  ```
+
+  ### 3. Enforcement Hooks
+  ```yaml
+  enforcement:
+    ci_pipeline:
+      github_actions: |
+        - name: Policy Check
+          uses: open-policy-agent/setup-opa@v2
+          with:
+            version: latest
+
+        - name: Evaluate Policies
+          run: |
+            opa eval --data policies/ --input input.json \
+              "data.summit.deny" --fail-defined
+
+      stages:
+        - pre_commit: Secrets, formatting
+        - pr_check: Full policy suite
+        - pre_deploy: Operational policies
+
+    git_hooks:
+      pre_commit:
+        - Secret detection
+        - File size check
+        - Formatting
+
+      pre_push:
+        - Branch naming
+        - Commit message format
+
+    runtime:
+      api_gateway:
+        - Authentication policies
+        - Rate limiting policies
+        - Data access policies
+
+      admission_controller:
+        - Pod security policies
+        - Network policies
+        - Resource quotas
+
+    documentation:
+      mkdocs_hook:
+        - Link validation
+        - Accessibility checks
+        - Required sections
+  ```
+
+  ### 4. Exception Management
+  ```yaml
+  exceptions:
+    workflow:
+      1. Developer requests exception
+      2. Policy owner reviews
+      3. Approval/rejection with reason
+      4. Time-limited exception if approved
+      5. Automatic expiry and notification
+
+    exception_request:
+      required_fields:
+        - policy_id
+        - scope: file, directory, package
+        - duration: temporary, permanent
+        - justification
+        - risk_assessment
+        - approver
+
+    storage:
+      format: |
+        exceptions:
+          - id: EXC-001
+            policy: SEC-001
+            scope: "legacy/old-module/*"
+            reason: "Legacy code, being deprecated"
+            expires: "2024-06-01"
+            approved_by: "security-lead"
+            approved_at: "2024-01-15"
+
+    automation:
+      - Expiry notifications (30d, 7d, 1d before)
+      - Automatic removal after expiry
+      - Audit log of all exceptions
+      - Quarterly exception review
+
+    emergency:
+      bypass:
+        - Requires two approvers
+        - Valid for 24 hours
+        - Incident ticket required
+        - Automatic escalation
+  ```
+
+  ### 5. Audit and Reporting
+  ```yaml
+  audit:
+    decision_logging:
+      captured:
+        - timestamp
+        - policy_id
+        - input_hash
+        - decision: allow/deny
+        - user/service
+        - context
+
+      storage: Append-only log
+      retention: 1 year
+      queryable: true
+
+    reports:
+      compliance_dashboard:
+        - Policy pass rate
+        - Exception count
+        - Violation trends
+        - Top violating policies
+
+      weekly_report:
+        - New violations
+        - Resolved violations
+        - Exception requests
+        - Policy changes
+
+      audit_export:
+        - Full decision log
+        - Exception history
+        - Policy version history
+        - Compliance attestation
+
+    alerting:
+      - Critical policy violations
+      - High exception volume
+      - Policy drift detection
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Policy engine deployed
+  - [ ] Key policies defined
+  - [ ] CI integration working
+  - [ ] Exception process functional
+  - [ ] Audit logging active
+
+  ## Rollback Plan
+  - Policies can be set to warn-only
+  - Emergency bypass available
+  - Individual policies can be disabled
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'policy-engine'
+    inputs:
+      policy_domains: 'Security, Code Quality, Documentation, Operations'
+      current_enforcement: 'Ad-hoc linting, manual code review'
+      compliance_requirements: 'SOC2, internal security standards'
+      exception_process: 'Informal, through Slack'
+      stakeholders: 'Security, Platform, All developers'
+    expected_contains:
+      - 'Policy Engine'
+      - 'Policy Definitions'
+      - 'Enforcement'
+      - 'Exception Management'
