@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-query",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Graph query language support (Cypher, Gremlin, SPARQL)",
   "type": "module",
   "main": "dist/index.js",
@@ -11,7 +11,8 @@
     "lint": "eslint src/**/*.ts"
   },
   "dependencies": {
-    "@intelgraph/graph-database": "workspace:*"
+    "@intelgraph/graph-database": "workspace:*",
+    "@intelgraph/errors": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
