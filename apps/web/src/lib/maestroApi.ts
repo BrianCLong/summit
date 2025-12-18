@@ -301,7 +301,7 @@ export class MaestroApi {
       }
     }
     src.addEventListener('message', listener)
-    if (onError) src.addEventListener('error', onError)
+    if (onError) {src.addEventListener('error', onError)}
     return () => {
       src.removeEventListener('message', listener)
       src.close()
