@@ -117,6 +117,51 @@ export const ActivityAPI = {
   },
 };
 
+export const WebhookAPI = {
+  list: () => apiFetch('/api/webhooks'),
+  create: (payload) =>
+    apiFetch('/api/webhooks', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  update: (id, payload) =>
+    apiFetch(`/api/webhooks/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+  remove: (id) =>
+    apiFetch(`/api/webhooks/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+  deliveries: (id, { limit = 20, offset = 0 } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('limit', String(limit));
+    qs.set('offset', String(offset));
+    return apiFetch(`/api/webhooks/${encodeURIComponent(id)}/deliveries?${qs.toString()}`);
+  },
+  attempts: (id, { deliveryId, limit = 50 } = {}) => {
+    const qs = new URLSearchParams();
+    qs.set('limit', String(limit));
+    const basePath = deliveryId
+      ? `/api/webhooks/${encodeURIComponent(id)}/deliveries/${encodeURIComponent(
+          deliveryId,
+        )}/attempts`
+      : `/api/webhooks/${encodeURIComponent(id)}/attempts`;
+    const suffix = qs.toString();
+    return apiFetch(`${basePath}${suffix ? `?${suffix}` : ''}`);
+  },
+  triggerTest: (payload) =>
+    apiFetch('/api/webhooks/trigger-test', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+  testSingle: (id, payload = {}) =>
+    apiFetch(`/api/webhooks/${encodeURIComponent(id)}/test`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+};
+
 export const TemplatesAPI = {
   list: ({ scope } = {}) => {
     const qs = new URLSearchParams();

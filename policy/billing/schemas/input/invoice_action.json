@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Invoice action request",
+  "type": "object",
+  "required": ["subject", "invoice", "action", "context"],
+  "properties": {
+    "subject": {
+      "type": "object",
+      "required": ["id", "role"],
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "level": { "type": "string" }
+      }
+    },
+    "invoice": {
+      "type": "object",
+      "required": ["id", "amount", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "tenant_id": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string" },
+        "due_date": { "type": "string", "format": "date" },
+        "currency": { "type": "string" }
+      }
+    },
+    "action": {
+      "type": "string",
+      "enum": ["generate", "mark_sent", "mark_paid", "cancel", "write_off", "adjust"]
+    },
+    "adjustment": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": "number" },
+        "reason": { "type": "string" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["reason", "requested_at"],
+      "properties": {
+        "reason": { "type": "string" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "source": { "type": "string" },
+        "evidence": { "type": "string" }
+      }
+    }
+  }
+}
