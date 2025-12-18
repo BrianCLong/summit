@@ -6,7 +6,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { randomUUID } from 'crypto';
 import { getTracer } from '../observability/tracer.js';
-import { getLogContext, withLogContext } from '../config/logger.js';
+import { correlationStorage } from '../config/logger.js';
 
 // Extend Express Request type to include correlation IDs
 declare global {
@@ -21,12 +21,14 @@ declare global {
 
 export const CORRELATION_ID_HEADER = 'x-correlation-id';
 export const REQUEST_ID_HEADER = 'x-request-id';
+export const TENANT_ID_HEADER = 'x-tenant-id';
 
 /**
  * Correlation ID middleware
  * - Generates or extracts correlation ID from request headers
  * - Adds OpenTelemetry trace/span IDs to request
  * - Injects IDs into response headers for client-side correlation
+ * - Uses AsyncLocalStorage to propagate context to logger
  */
 export function correlationIdMiddleware(
   req: Request,
@@ -47,33 +49,40 @@ export function correlationIdMiddleware(
   req.traceId = tracer.getTraceId() || '';
   req.spanId = tracer.getSpanId() || '';
 
-  return withLogContext(
-    {
-      correlationId,
-      traceId: req.traceId || undefined,
-      spanId: req.spanId || undefined,
-      userId: (req as any).user?.sub || (req as any).user?.id,
-      tenantId: (req as any).user?.tenant_id || (req as any).tenant_id,
-    },
-    () => {
-      // Add to current span if available
-      if (req.traceId) {
-        tracer.setAttribute('correlation.id', correlationId);
-        tracer.setAttribute('correlation.request_id', correlationId);
-      }
+  const tenantId = (req.headers[TENANT_ID_HEADER] as string) || (req as any).user?.tenant_id || 'unknown';
 
-      // Inject correlation ID into response headers
-      res.setHeader(CORRELATION_ID_HEADER, correlationId);
-      res.setHeader(REQUEST_ID_HEADER, correlationId);
+  // Add to current span if available
+  if (req.traceId) {
+    tracer.setAttribute('correlation.id', correlationId);
+    tracer.setAttribute('correlation.request_id', correlationId);
+    if (tenantId !== 'unknown') {
+        tracer.setAttribute('tenant.id', tenantId);
+    }
+  }
 
-      // Add trace ID to response if available (for debugging)
-      if (req.traceId) {
-        res.setHeader('x-trace-id', req.traceId);
-      }
+  // Inject correlation ID into response headers
+  res.setHeader(CORRELATION_ID_HEADER, correlationId);
+  res.setHeader(REQUEST_ID_HEADER, correlationId);
 
+  // Add trace ID to response if available (for debugging)
+  if (req.traceId) {
+    res.setHeader('x-trace-id', req.traceId);
+  }
+
+  // Setup AsyncLocalStorage context
+  const store = new Map<string, string>();
+  store.set('correlationId', correlationId);
+  store.set('requestId', correlationId);
+  store.set('traceId', req.traceId);
+  store.set('tenantId', tenantId);
+
+  if ((req as any).user) {
+      store.set('principalId', (req as any).user.sub || (req as any).user.id);
+  }
+
+  correlationStorage.run(store, () => {
       next();
-    },
-  );
+  });
 }
 
 /**
@@ -87,17 +96,12 @@ export function getCorrelationContext(req: Request): {
   userId?: string;
   tenantId?: string;
 } {
-  const context = getLogContext();
-
   return {
-    correlationId: req.correlationId || context.correlationId || '',
-    traceId: req.traceId || context.traceId || '',
-    spanId: req.spanId || context.spanId || '',
-    userId:
-      (req as any).user?.sub ||
-      (req as any).user?.id ||
-      context.userId,
-    tenantId: (req as any).user?.tenant_id || (req as any).tenant_id || context.tenantId,
+    correlationId: req.correlationId,
+    traceId: req.traceId,
+    spanId: req.spanId,
+    userId: (req as any).user?.sub || (req as any).user?.id,
+    tenantId: (req as any).user?.tenant_id || (req as any).tenant_id,
   };
 }
 

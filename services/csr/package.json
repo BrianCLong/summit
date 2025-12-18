@@ -1,6 +1,6 @@
 {
   "name": "@summit/csr",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Consent State Reconciler service",
   "main": "dist/index.js",

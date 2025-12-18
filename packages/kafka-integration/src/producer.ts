@@ -37,7 +37,7 @@ export class KafkaProducer {
       retry: config.retry,
     });
 
-    this.isTransactional = !!producerConfig?.transactionalId;
+    this.isTransactional = Boolean(producerConfig?.transactionalId);
 
     if (schemaRegistryUrl) {
       this.schemaRegistry = new SchemaRegistryClient({ host: schemaRegistryUrl });
@@ -311,7 +311,7 @@ export class KafkaProducer {
   private getCompressionType(
     compression?: 'gzip' | 'snappy' | 'lz4' | 'zstd'
   ): CompressionTypes | undefined {
-    if (!compression) return undefined;
+    if (!compression) {return undefined;}
 
     const compressionMap = {
       gzip: CompressionTypes.GZIP,

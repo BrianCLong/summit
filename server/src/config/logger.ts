@@ -1,71 +1,111 @@
-import { AsyncLocalStorage } from 'node:async_hooks';
-import { trace } from '@opentelemetry/api';
-import pino, { LoggerOptions } from 'pino';
+// @ts-nocheck
+import pino from 'pino';
+<<<<<<< HEAD
+import { correlationEngine } from '../lib/telemetry/correlation-engine';
 
-export type LogContext = {
-  correlationId?: string;
-  traceId?: string;
-  spanId?: string;
-  userId?: string;
-  tenantId?: string;
+// Custom stream that intercepts logs for the Correlation Engine and passes them to stdout
+const stream = {
+  write: (msg: string) => {
+    // Optimization: avoid parsing JSON on every log line unless it looks like JSON
+    // and we are actually running the correlation engine.
+    if (msg.trim().startsWith('{')) {
+        try {
+          const logEntry = JSON.parse(msg);
+          correlationEngine.ingestLog(logEntry);
+        } catch (e) {
+          // If parsing fails, ignore for correlation but still print
+        }
+    }
+    process.stdout.write(msg);
+  },
 };
+=======
+import { cfg } from '../config.js';
+import { AsyncLocalStorage } from 'async_hooks';
+>>>>>>> main
 
-const logContext = new AsyncLocalStorage<LogContext>();
+// AsyncLocalStorage for correlation ID propagation
+export const correlationStorage = new AsyncLocalStorage<Map<string, string>>();
 
-const redactionPaths = [
+// Configuration for redaction of sensitive data
+const REDACT_PATHS = [
   'req.headers.authorization',
   'req.headers.cookie',
-  'headers.authorization',
+  'req.headers["x-auth-token"]',
+  'req.headers["x-api-key"]',
+  'body.password',
+  'body.token',
+  'body.refreshToken',
+  'body.secret',
   'password',
   'token',
-  'refreshToken',
-  'clientSecret',
   'secret',
-  'ssn',
-  'card.number',
-  'creditCard',
-  'email',
+  'user.email',
+  'user.phone',
 ];
 
-const loggerOptions: LoggerOptions = {
+// Standard logging context
+export interface SummitLogContext {
+  correlationId?: string;
+  tenantId?: string;
+  principalId?: string;
+  principalKind?: "user" | "api_key" | "service_account" | "system";
+  service: string;
+  subsystem?: string;
+  requestId?: string;
+  runId?: string;
+  severity?: "debug" | "info" | "warn" | "error";
+  message?: string;
+  [key: string]: any;
+}
+
+export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
+  base: {
+    service: 'intelgraph-server',
+    env: cfg.NODE_ENV,
+    version: process.env.npm_package_version || 'unknown',
+  },
   timestamp: pino.stdTimeFunctions.isoTime,
-  formatters: {
-    level: (label) => ({ level: label.toUpperCase() }),
-  },
   redact: {
-    paths: redactionPaths,
-    remove: true,
+    paths: REDACT_PATHS,
+    censor: '[REDACTED]',
   },
-  mixin() {
-    const span = trace.getActiveSpan();
-    const spanContext = span?.spanContext();
-    const context = logContext.getStore() || {};
-
-    return {
-      correlationId: context.correlationId,
-      traceId: spanContext?.traceId || context.traceId,
-      spanId: spanContext?.spanId || context.spanId,
-      userId: context.userId,
-      tenantId: context.tenantId,
-    };
+  mixin(_context, level) {
+    const store = correlationStorage.getStore();
+    if (store) {
+        return {
+            correlationId: store.get('correlationId'),
+            tenantId: store.get('tenantId'),
+            principalId: store.get('principalId'),
+            requestId: store.get('requestId'),
+            traceId: store.get('traceId'),
+        }
+    }
+    return {};
   },
-};
-
-export const logger = pino(loggerOptions);
-
-export function withLogContext<T>(context: LogContext, fn: () => T): T {
-  const merged = { ...logContext.getStore(), ...context };
-  return logContext.run(merged, fn);
-}
-
-export function setLogContext(context: LogContext): void {
-  const merged = { ...logContext.getStore(), ...context };
-  logContext.enterWith(merged);
-}
-
-export function getLogContext(): LogContext {
-  return logContext.getStore() || {};
-}
+  formatters: {
+    level: (label) => {
+      return { level: label.toUpperCase() };
+    },
+    bindings: (bindings) => {
+      return {
+        pid: bindings.pid,
+        host: bindings.hostname,
+      };
+    },
+  },
+  serializers: {
+    err: pino.stdSerializers.err,
+    req: pino.stdSerializers.req,
+    res: pino.stdSerializers.res,
+  },
+<<<<<<< HEAD
+  // Remove pino-pretty transport for production readiness
+  // In production, logs should be structured JSON for log aggregation
+}, stream);
+=======
+});
+>>>>>>> main
 
 export default logger;
