@@ -1,3 +1,5 @@
-module platform/cce
+module github.com/summit/cce
 
-go 1.21
+go 1.22
+
+replace github.com/summit/cce => .
