@@ -1,0 +1,10 @@
+{
+  "alert": "AuthenticationFailureSpike",
+  "description": "Authentication failures at {{ $value }} per second over the last 5 minutes",
+  "expr": "sum(rate(auth_failures_total[5m])) > 10\n",
+  "runbook_url": "https://runbooks.intelgraph.io/security/auth-failures",
+  "service": "security",
+  "severity": "critical",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Authentication failure spike detected"
+}
