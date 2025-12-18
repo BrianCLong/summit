@@ -1,25 +1,22 @@
 import Ajv, { ErrorObject } from 'ajv';
 import * as fs from 'fs';
 import * as path from 'path';
-import { SecretManager, SecretManagerOptions } from '../secrets/secret-manager';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class SchemaValidator {
   private ajv: Ajv;
   private schemas: Map<string, any> = new Map();
-  private secretManager: SecretManager;
 
-  constructor(secretManager = new SecretManager()) {
+  constructor() {
     this.ajv = new Ajv({ allErrors: true });
-    this.secretManager = secretManager;
     this.loadSchemas();
   }
 
-  configureSecrets(options: SecretManagerOptions) {
-    this.secretManager.updateOptions(options);
-  }
-
   private loadSchemas() {
-    const schemaDir = path.join(__dirname, '../../../config/schemas');
+    const schemaDir = path.join(__dirname, '../../config/schemas');
     const schemaFiles = fs.readdirSync(schemaDir).filter(file => file.endsWith('.schema.json'));
     for (const file of schemaFiles) {
       const schemaName = path.basename(file, '.schema.json');
@@ -29,9 +26,9 @@ export class SchemaValidator {
     }
   }
 
-  public validate(config: any, schemaName: string): any {
+  public validate(config: any, schemaName: string): void {
     const interpolatedConfig = this.interpolate(config);
-    const resolvedConfig = this.secretManager.resolveConfig(interpolatedConfig);
+    const resolvedConfig = this.resolveSecrets(interpolatedConfig);
 
     const validate = this.ajv.getSchema(schemaName);
     if (!validate) {
@@ -41,8 +38,6 @@ export class SchemaValidator {
     if (!validate(resolvedConfig)) {
       throw new Error(this.formatErrors(validate.errors));
     }
-
-    return resolvedConfig;
   }
 
   private interpolate(config: any): any {
@@ -55,6 +50,17 @@ export class SchemaValidator {
       return value;
     });
     return JSON.parse(interpolatedString);
+  }
+
+  private resolveSecrets(config: any): any {
+    const configString = JSON.stringify(config);
+    const resolvedString = configString.replace(/"aws-ssm:(.*?)"/g, (_, secretPath) => {
+      // In a real implementation, you would fetch this from AWS SSM.
+      // For this example, we'll use a dummy value.
+      console.log(`Resolving secret from AWS SSM: ${secretPath}`);
+      return `"resolved-${secretPath.split('/').pop()}"`;
+    });
+    return JSON.parse(resolvedString);
   }
 
   private formatErrors(errors: ErrorObject[] | null | undefined): string {

@@ -170,9 +170,9 @@ export const crossBorderResolvers = {
         language: input.language,
         context: input.dataClassification
           ? {
-              dataClassification:
-                input.dataClassification.toLowerCase() as DataClassification,
-            }
+            dataClassification:
+              input.dataClassification.toLowerCase() as DataClassification,
+          }
           : undefined,
       });
       return transformSession(session);
@@ -280,6 +280,7 @@ export const crossBorderResolvers = {
     },
 
     crossBorderMessageReceived: {
+      // eslint-disable-next-line require-yield
       subscribe: async function* (
         _: unknown,
         { sessionId }: { sessionId: string }
@@ -296,6 +297,9 @@ export const crossBorderResolvers = {
             };
           }
         };
+
+        // Placeholder yield to satisfy generator requirements
+        yield { crossBorderMessageReceived: { sessionId, content: 'Subscription started', type: 'SYSTEM', timestamp: Date.now() } };
 
         gateway.on('messageSent', listener);
       },

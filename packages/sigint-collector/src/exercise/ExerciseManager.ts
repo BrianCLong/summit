@@ -281,8 +281,8 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   async startExercise(exerciseId: string): Promise<void> {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) throw new Error(`Exercise ${exerciseId} not found`);
-    if (this.activeExercise) throw new Error('Another exercise is already running');
+    if (!exercise) {throw new Error(`Exercise ${exerciseId} not found`);}
+    if (this.activeExercise) {throw new Error('Another exercise is already running');}
 
     exercise.status = 'RUNNING';
     exercise.startTime = new Date();
@@ -305,7 +305,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   pauseExercise(exerciseId: string): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise || exercise.status !== 'RUNNING') return;
+    if (!exercise || exercise.status !== 'RUNNING') {return;}
 
     exercise.status = 'PAUSED';
     this.clearInjectTimers();
@@ -320,7 +320,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   resumeExercise(exerciseId: string): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise || exercise.status !== 'PAUSED') return;
+    if (!exercise || exercise.status !== 'PAUSED') {return;}
 
     exercise.status = 'RUNNING';
     this.scheduleInjects(exercise, true);
@@ -334,7 +334,7 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   endExercise(exerciseId: string): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) return;
+    if (!exercise) {return;}
 
     exercise.status = 'COMPLETED';
     exercise.endTime = new Date();
@@ -355,10 +355,10 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    */
   completeObjective(exerciseId: string, objectiveId: string, score: number): void {
     const exercise = this.exercises.get(exerciseId);
-    if (!exercise) return;
+    if (!exercise) {return;}
 
     const objective = exercise.objectives.find(o => o.id === objectiveId);
-    if (!objective) return;
+    if (!objective) {return;}
 
     objective.completed = true;
     objective.score = score;
@@ -517,9 +517,9 @@ export class ExerciseManager extends EventEmitter<ExerciseManagerEvents> {
    * Generate feedback based on score
    */
   private generateFeedback(scoreRatio: number): string {
-    if (scoreRatio >= 0.9) return 'Excellent performance. All objectives met with high proficiency.';
-    if (scoreRatio >= 0.7) return 'Good performance. Most objectives completed successfully.';
-    if (scoreRatio >= 0.5) return 'Satisfactory performance. Key objectives met but room for improvement.';
+    if (scoreRatio >= 0.9) {return 'Excellent performance. All objectives met with high proficiency.';}
+    if (scoreRatio >= 0.7) {return 'Good performance. Most objectives completed successfully.';}
+    if (scoreRatio >= 0.5) {return 'Satisfactory performance. Key objectives met but room for improvement.';}
     return 'Additional training recommended. Review procedures and try again.';
   }
 
