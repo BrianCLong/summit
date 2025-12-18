@@ -1,0 +1,9 @@
+replicaCount: 2
+features:
+  dynamic_config: true
+  distributed_tracing: true
+  multi_serialization: true
+  pluggable_storage: true
+  advanced_health: true
+  intelligent_lb: true
+  performance_suite: true

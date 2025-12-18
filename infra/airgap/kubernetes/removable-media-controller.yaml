@@ -1,0 +1,279 @@
+# Removable Media Controller
+# Enforces strict controls on USB/removable media in air-gapped environment
+# Part of Air-Gapped Deployment for Summit IntelGraph
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: media-controller-config
+  namespace: intelgraph-scanning
+  labels:
+    app.kubernetes.io/name: media-controller
+    app.kubernetes.io/component: removable-media
+data:
+  policy.yaml: |
+    # Removable Media Policy Configuration
+    # Implements defense-in-depth for data transfer
+
+    mediaPolicy:
+      version: "1.0"
+      enforcementMode: strict
+
+      # Device whitelist - only approved devices allowed
+      deviceWhitelist:
+        usbStorage:
+          enabled: true
+          requireEncryption: true
+          allowedVendors:
+            - vendorId: "0951"
+              name: "Kingston"
+              models: ["DataTraveler", "IronKey"]
+            - vendorId: "0781"
+              name: "SanDisk"
+              models: ["Extreme", "Ultra"]
+            - vendorId: "8564"
+              name: "Transcend"
+              models: ["JetFlash"]
+          maxCapacityGB: 256
+          requiredFeatures:
+            - hardware-encryption
+            - tamper-evident
+
+        opticalMedia:
+          enabled: true
+          types:
+            - CD-R
+            - DVD-R
+          writeProtected: true
+
+        sdCard:
+          enabled: false
+          reason: "SD cards not permitted in air-gapped environment"
+
+      # Scanning requirements
+      scanningRequirements:
+        mandatoryBeforeAccess: true
+        scanEngines:
+          minimum: 2
+          required:
+            - clamav
+            - yara
+        quarantineOnDetection: true
+        blockOnFailure: true
+        scanTimeout: 600s
+
+      # Chain of custody
+      chainOfCustody:
+        enabled: true
+        requireSignature: true
+        logRetention: 2years
+        hashAlgorithms:
+          - SHA-256
+          - SHA-512
+        metadata:
+          - deviceSerialNumber
+          - insertionTime
+          - operatorId
+          - scanResults
+          - approvalChain
+
+      # Transfer restrictions
+      transferRestrictions:
+        inbound:
+          allowedFileTypes:
+            - ".tar.gz"
+            - ".tar.xz"
+            - ".zip"
+            - ".sig"
+            - ".sbom"
+            - ".json"
+            - ".yaml"
+            - ".yml"
+          blockedPatterns:
+            - "*.exe"
+            - "*.dll"
+            - "*.ps1"
+            - "*.bat"
+            - "*.sh"  # Scripts require manual review
+          maxFileSizeMB: 4096
+          requireDigitalSignature: true
+          requireManifest: true
+
+        outbound:
+          enabled: false  # No data exfiltration from air-gapped zone
+          exceptions:
+            - type: audit-logs
+              requireApproval: true
+              approvers: 2
+            - type: backup-verification
+              requireApproval: true
+              approvers: 3
+
+      # Audit logging
+      auditLog:
+        destination: siem
+        format: json
+        includeFields:
+          - timestamp
+          - eventType
+          - deviceInfo
+          - operatorId
+          - scanResults
+          - fileList
+          - hashValues
+          - approvalStatus
+        realTimeStreaming: true
+
+  udev-rules.conf: |
+    # udev rules for removable media control
+    # Block all USB storage by default
+    ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[b-z]*", \
+      RUN+="/usr/local/bin/media-controller quarantine %k"
+
+    # Log all USB device connections
+    ACTION=="add", SUBSYSTEM=="usb", \
+      RUN+="/usr/local/bin/media-controller log-device %k"
+
+    # Block unauthorized devices
+    ACTION=="add", SUBSYSTEM=="usb", ATTR{authorized}="0", \
+      ENV{ID_USB_DRIVER}=="usb-storage", \
+      RUN+="/usr/local/bin/media-controller block-device %k"
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: media-controller
+  namespace: intelgraph-scanning
+  labels:
+    app.kubernetes.io/name: media-controller
+    app.kubernetes.io/component: removable-media
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: media-controller
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: media-controller
+        app.kubernetes.io/component: media-handler
+    spec:
+      serviceAccountName: media-controller
+      hostPID: true
+      hostNetwork: false
+
+      nodeSelector:
+        workload-type: malware-scanning
+
+      tolerations:
+        - key: scanning-only
+          operator: Equal
+          value: "true"
+          effect: NoSchedule
+
+      containers:
+        - name: controller
+          image: ${ECR_REGISTRY}/media-controller:v1.0.0
+          imagePullPolicy: Always
+          securityContext:
+            privileged: false
+            capabilities:
+              add:
+                - SYS_ADMIN  # Required for mount operations
+              drop:
+                - ALL
+          env:
+            - name: POLICY_PATH
+              value: /config/policy.yaml
+            - name: SCANNER_ENDPOINT
+              value: http://malware-scanner:8080
+            - name: SIEM_ENDPOINT
+              value: http://siem-collector.intelgraph-siem:5044
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: udev-rules
+              mountPath: /etc/udev/rules.d
+              readOnly: true
+            - name: dev
+              mountPath: /dev
+            - name: sys
+              mountPath: /sys
+              readOnly: true
+            - name: media-staging
+              mountPath: /mnt/staging
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            exec:
+              command:
+                - /usr/local/bin/media-controller
+                - health
+            initialDelaySeconds: 10
+            periodSeconds: 30
+
+      volumes:
+        - name: config
+          configMap:
+            name: media-controller-config
+            items:
+              - key: policy.yaml
+                path: policy.yaml
+        - name: udev-rules
+          configMap:
+            name: media-controller-config
+            items:
+              - key: udev-rules.conf
+                path: 99-intelgraph-media.rules
+        - name: dev
+          hostPath:
+            path: /dev
+            type: Directory
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
+        - name: media-staging
+          emptyDir:
+            medium: Memory
+            sizeLimit: 8Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: media-controller
+  namespace: intelgraph-scanning
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: media-controller
+rules:
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create", "patch"]
+  - apiGroups: [""]
+    resources: ["nodes"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: media-controller
+subjects:
+  - kind: ServiceAccount
+    name: media-controller
+    namespace: intelgraph-scanning
+roleRef:
+  kind: ClusterRole
+  name: media-controller
+  apiGroup: rbac.authorization.k8s.io
