@@ -10,7 +10,7 @@ import { NodeSDK } from '@opentelemetry/sdk-node';
 // @ts-ignore - OpenTelemetry types not fully resolved
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 // @ts-ignore - OpenTelemetry types not fully resolved
-import { Resource } from '@opentelemetry/resources';
+import * as resources from '@opentelemetry/resources';
 // @ts-ignore - OpenTelemetry types not fully resolved
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
@@ -58,8 +58,8 @@ class OpenTelemetryService {
   initialize(): void {
     try {
       // Configure resource
-      const resource = Resource.default().merge(
-        new Resource({
+      const resource = resources.Resource.default().merge(
+        new resources.Resource({
           [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
           [SemanticResourceAttributes.SERVICE_VERSION]:
             this.config.serviceVersion,

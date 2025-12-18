@@ -1,4 +1,5 @@
 import CopilotOrchestrationService from '../../src/services/CopilotOrchestrationService.js'; // Note the .js extension
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
 describe('CopilotOrchestrationService', () => {
   let service;

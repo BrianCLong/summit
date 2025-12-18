@@ -1,120 +1,77 @@
-# 🛠 Summit Developer Onboarding Guide
+# Developer Onboarding Guide
 
-Welcome to **Summit** — an AI-augmented intelligence analysis platform. This guide provides a single, canonical path for setting up your development environment.
+Welcome to the **Summit / IntelGraph / Maestro** platform. This guide will get you set up quickly.
 
-**Core Philosophy:** Our primary directive is **Deployable First**. The `main` branch must always be in a state that can be deployed. This means the automated "golden path" workflow must pass before any code is merged.
+## 🚀 Quickstart
 
----
+The fastest way to get started is using the `make` commands defined in the root `Makefile`.
 
-## 🚀 Quickstart (Go from clone to running app in minutes)
+### Prerequisites
 
-This is the **one true way** to set up your local development environment.
+- **Node.js**: v20+
+- **pnpm**: v9+
+- **Docker**: Desktop or Engine (Compose v2)
+- **Python**: 3.11+ (for AI/ML components)
 
-**1. Prerequisites:**
+### 1. Bootstrap the Environment
 
-*   **Docker Desktop ≥ 4.x**: Must be running with at least 8GB of memory allocated.
-*   **Node.js ≥ 18**: We use `pnpm` for package management.
-*   **pnpm ≥ 9**: Enabled via `corepack enable`.
-*   **Python ≥ 3.11**: For scripts and tooling.
-
-**2. Canonical Setup Commands:**
-
-These commands are your source of truth for managing the local development lifecycle.
+Run a single bootstrap to install and scaffold everything:
 
 ```bash
-# First time setup: installs all dependencies, sets up .env file
 make dev-setup
+```
 
-# Start all services (API, UI, databases, etc.)
+What it does (no extra steps needed): installs Node dependencies, sets up Python venvs, and copies `.env` templates.
+
+### 2. Start Services
+
+Spin up the local development stack:
+
+```bash
 make dev-run
+```
 
-# Run the core test suite (unit, integration, etc.)
+You will get the server on port 4000, client on 5173, and data services via Docker Compose.
+
+### 3. Verify Setup
+
+Run the smoke tests to ensure everything is working:
+
+```bash
 make dev-test
-
-# Run lint and format checks
-make dev-lint
-
-# Stop all running services
-make down
 ```
 
-**3. Your First Run:**
-
-Follow these steps exactly to get started.
+If you are trialing the AI refactor tooling, you can also dry-run prompts without writing changes:
 
 ```bash
-# Clone the repository
-git clone https://github.com/BrianCLong/summit.git
-cd summit
-
-# Install dependencies and configure the environment
-make dev-setup
-
-# Start all services in the background
-make dev-run
-
-# Run the smoke tests to verify the golden path is working
-make smoke
+pnpm ts-node scripts/ai/run-refactor.ts --dry-run
 ```
 
-*   ✅ If `make smoke` passes, you are ready to start developing.
-*   ❌ If any step fails, stop and debug. See the "Troubleshooting" section below.
+## 🤖 Agent Roles
 
----
+We utilize a multi-agent development workflow. Each agent has a specific role and scope.
 
-## 🧭 The Golden Path
+See [Agent Roles Registry](./agent-roles.yaml) for a detailed list of roles and responsibilities.
 
-The "Golden Path" is the critical end-to-end workflow that **must always work**. It is:
+### Common Roles:
 
-**Investigation → Entities → Relationships → Copilot → Results**
+- **Model Trainer**: AI/ML stack and training.
+- **Graph/Backend Engineer**: Schema and core backend services.
+- **Maestro Orchestrator Engineer**: Pipeline orchestration.
+- **CI Guardian**: CI/CD health and policies.
+- **UI/UX Engineer**: Frontend development.
+- **Docs & Prompt Architect**: Documentation and agent coordination.
 
-The `make smoke` command automates the validation of this path using the seeded dataset located in `data/golden-path/demo-investigation.json`. Every developer must be able to manually step through this workflow and verify its success.
+## 📂 Project Structure
 
-**Service Endpoints:**
-*   **Frontend**: http://localhost:3000
-*   **GraphQL API**: http://localhost:4000/graphql
-*   **Neo4j Browser**: http://localhost:7474
-*   **Adminer (DB Admin)**: http://localhost:8080
-*   **Grafana Dashboards**: http://localhost:3001
+- `server/`: Backend application (Express, GraphQL, Neo4j)
+- `client/`: Frontend application (React, Vite)
+- `apps/`: Other applications (e.g., `web`, `slo-exporter`)
+- `docs/`: Project documentation
+- `scripts/`: Utility scripts
 
----
+## 📚 Resources
 
-## 🧑‍💻 Daily Development Workflow
-
-1.  **Create a feature branch:** `git checkout -b feature/my-new-thing`
-2.  **Write code:** Make your changes.
-3.  **Run tests and linters:**
-    ```bash
-    make dev-test
-    make dev-lint
-    ```
-4.  **Verify the golden path:** `make smoke`
-5.  **Commit your changes:** Use [Conventional Commits](https://www.conventionalcommits.org/) format (e.g., `feat: add new widget`).
-6.  **Push and open a Pull Request.**
-
----
-
-## 🆘 Troubleshooting
-
-*   **`make dev-run` fails:**
-    *   Ensure Docker Desktop is running and has sufficient memory.
-    *   Check for port conflicts using `docker ps`.
-    *   View logs for a specific service: `docker-compose logs api`.
-    *   As a last resort, restart everything: `make down && make dev-run`.
-*   **`make smoke` fails:**
-    *   This indicates the core workflow is broken. **Fix this before writing new code.**
-    *   Check the detailed health status: `curl http://localhost:4000/health/detailed | jq`.
-    *   Review service logs (`docker-compose logs api`) for errors during the test run.
-*   **Database migration issues:**
-    *   Ensure services are running with `make dev-run`.
-    *   Run migrations manually: `make migrate`.
-    *   Check the postgres logs: `docker-compose logs postgres`.
-
----
-
-## 📚 Helpful Commands
-
-*   `make help`: Show a list of all available `make` commands.
-*   `make down`: Stop all running Docker containers.
-*   `make up-ai`: Start the stack with optional AI/ML services (requires more resources).
-*   `make migrate`: Manually run database migrations.
+- [AGENTS.md](../../AGENTS.md): Comprehensive agent guidelines.
+- [Makefile](../../Makefile): Development commands.
+- [SPRINT_INDEX.md](../../SPRINT_INDEX.md): Sprint planning and status.
