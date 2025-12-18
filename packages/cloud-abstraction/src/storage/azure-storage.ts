@@ -141,7 +141,7 @@ export class AzureStorageProvider implements IStorageProvider {
       return {
         objects,
         continuationToken,
-        isTruncated: !!continuationToken
+        isTruncated: Boolean(continuationToken)
       };
     } catch (error) {
       throw new StorageError(
@@ -224,7 +224,7 @@ export class AzureStorageProvider implements IStorageProvider {
 
       // Note: Azure SAS tokens require different permissions
       // This is a simplified implementation
-      return blobClient.url + `?se=${expiresOn.toISOString()}`;
+      return `${blobClient.url  }?se=${expiresOn.toISOString()}`;
     } catch (error) {
       throw new StorageError(
         `Failed to generate signed URL for Azure blob: ${key}`,

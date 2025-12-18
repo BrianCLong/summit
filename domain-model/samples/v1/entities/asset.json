@@ -1,0 +1,16 @@
+{
+  "id": "asset-9001",
+  "schemaVersion": "v1",
+  "entityType": "Asset",
+  "name": "Edge Gateway Cluster",
+  "assetType": "infrastructure",
+  "ownerId": "org-42",
+  "locationId": "loc-1",
+  "value": 1500000,
+  "currency": "USD",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "cmdb",
+    "ingestedAt": "2025-01-12T09:00:00Z"
+  }
+}

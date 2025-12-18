@@ -213,9 +213,9 @@ export function analyzeTemporalEvolution(
   const densitySlope = calculateSlope(densities);
 
   let densityTrend: 'increasing' | 'decreasing' | 'stable';
-  if (densitySlope > 0.01) densityTrend = 'increasing';
-  else if (densitySlope < -0.01) densityTrend = 'decreasing';
-  else densityTrend = 'stable';
+  if (densitySlope > 0.01) {densityTrend = 'increasing';}
+  else if (densitySlope < -0.01) {densityTrend = 'decreasing';}
+  else {densityTrend = 'stable';}
 
   const volatility = calculateVolatility([...nodeCounts, ...edgeCounts]);
 
@@ -383,7 +383,7 @@ export function analyzeTemporalCentrality(
   }> = [];
 
   for (const [node, scores] of nodeCentrality) {
-    if (scores.length < 2) continue;
+    if (scores.length < 2) {continue;}
 
     const values = scores.map((s) => s.score);
     const variance = calculateVariance(values);
@@ -513,14 +513,14 @@ export function analyzeEventSequences(
 // Helper functions
 
 function calculateGrowthRate(values: number[]): number {
-  if (values.length < 2) return 0;
+  if (values.length < 2) {return 0;}
   const first = values[0] || 1;
   const last = values[values.length - 1];
   return (last - first) / first;
 }
 
 function calculateSlope(values: number[]): number {
-  if (values.length < 2) return 0;
+  if (values.length < 2) {return 0;}
 
   const n = values.length;
   let sumX = 0;
@@ -540,7 +540,7 @@ function calculateSlope(values: number[]): number {
 }
 
 function calculateVolatility(values: number[]): number {
-  if (values.length < 2) return 0;
+  if (values.length < 2) {return 0;}
 
   const changes = [];
   for (let i = 1; i < values.length; i++) {
@@ -553,7 +553,7 @@ function calculateVolatility(values: number[]): number {
 }
 
 function calculateVariance(values: number[]): number {
-  if (values.length === 0) return 0;
+  if (values.length === 0) {return 0;}
   const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
   const variance =
     values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
@@ -565,11 +565,11 @@ function calculateStdDev(values: number[]): number {
 }
 
 function detectTrend(values: number[]): 'rising' | 'falling' | 'fluctuating' {
-  if (values.length < 3) return 'fluctuating';
+  if (values.length < 3) {return 'fluctuating';}
 
   const slope = calculateSlope(values);
 
-  if (slope > 0.01) return 'rising';
-  if (slope < -0.01) return 'falling';
+  if (slope > 0.01) {return 'rising';}
+  if (slope < -0.01) {return 'falling';}
   return 'fluctuating';
 }

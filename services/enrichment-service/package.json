@@ -1,0 +1,20 @@
+{
+  "name": "@intelgraph/enrichment-service",
+  "version": "1.0.0",
+  "description": "Data enrichment service for OSINT",
+  "type": "module",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@intelgraph/social-media-intel": "workspace:*",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

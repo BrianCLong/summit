@@ -1,0 +1,148 @@
+name: Helm lint and validate
+
+on:
+  pull_request:
+    paths:
+      - 'helm/**'
+      - 'charts/**'
+      - 'infra/helm/**'
+      - 'deploy/helm/**'
+      - 'k8s/**'
+      - 'ops/**'
+      - 'services/**/helm/**'
+      - 'deepagent-mvp/helm/**'
+      - 'graph-xai/infra/helm/**'
+      - 'graph_xai/infra/helm/**'
+      - 'ga-graphai/infra/helm/**'
+      - 'prov-ledger/infra/helm/**'
+      - 'prov_ledger/infra/helm/**'
+      - 'templates/golden-path-platform/helm/**'
+      - 'v24_modules/**'
+      - 'sprint-kits/**'
+      - 'summit-company_extended/infra/helm/**'
+      - '.github/workflows/helm-lint-validate.yml'
+      - 'helm/ci-values.yaml'
+      - 'docs/helm-ci.md'
+  workflow_dispatch:
+    inputs:
+      run_kind_smoke:
+        description: 'Create a Kind cluster and install the redis chart as a smoke test'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  HELM_VERSION: v3.14.4
+  KUBECONFORM_VERSION: '0.6.7'
+  SAMPLE_VALUES_FILE: helm/ci-values.yaml
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Cache Helm data
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/helm
+            ~/.local/share/helm
+          key: ${{ runner.os }}-helm-${{ env.HELM_VERSION }}-${{ hashFiles('**/Chart.yaml', '**/Chart.lock', 'helm/ci-values.yaml') }}
+
+      - name: Seed Helm repositories
+        run: |
+          set -euo pipefail
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add jaegertracing https://jaegertracing.github.io/helm-charts
+          helm repo add neo4j https://neo4j.github.io/helm-charts
+          helm repo add neo4j-official https://helm.neo4j.com
+          helm repo add jetstack https://charts.jetstack.io
+          helm repo add external-secrets https://charts.external-secrets.io
+          helm repo add opentelemetry https://open-telemetry.github.io/opentelemetry-helm-charts
+          helm repo add gatekeeper https://open-policy-agent.github.io/gatekeeper/charts
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+
+      - name: Install kubeconform
+        run: |
+          set -euo pipefail
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/v${KUBECONFORM_VERSION}/kubeconform-linux-amd64.tar.gz" -o kubeconform.tar.gz
+          tar -xzf kubeconform.tar.gz kubeconform
+          sudo mv kubeconform /usr/local/bin/kubeconform
+          kubeconform -v
+
+      - name: Discover charts
+        id: chart-list
+        run: |
+          set -euo pipefail
+          mapfile -t charts < <(find helm deploy/helm infra/helm charts k8s ops services deepagent-mvp graph-xai graph_xai ga-graphai prov-ledger prov_ledger templates/golden-path-platform v24_modules sprint-kits summit-company_extended -name Chart.yaml -print | sort)
+          printf 'count=%s\n' "${#charts[@]}" >> "$GITHUB_OUTPUT"
+          printf 'paths<<EOF\n%s\nEOF\n' "$(printf '%s\n' "${charts[@]}")" >> "$GITHUB_OUTPUT"
+          printf 'Discovered %s chart(s)\n' "${#charts[@]}"
+
+      - name: Helm lint
+        if: steps.chart-list.outputs.count != '0'
+        run: |
+          set -euo pipefail
+          echo "${{ steps.chart-list.outputs.paths }}" | while read -r chart; do
+            [ -z "$chart" ] && continue
+            chart_dir=$(dirname "$chart")
+            echo "::group::Lint ${chart_dir}"
+            helm dependency build "$chart_dir" --skip-refresh || true
+            helm lint "$chart_dir" --values "${SAMPLE_VALUES_FILE}"
+            echo "::endgroup::"
+          done
+
+      - name: Template & validate manifests
+        if: steps.chart-list.outputs.count != '0'
+        run: |
+          set -euo pipefail
+          echo "${{ steps.chart-list.outputs.paths }}" | while read -r chart; do
+            [ -z "$chart" ] && continue
+            chart_dir=$(dirname "$chart")
+            chart_name=$(basename "$chart_dir")
+            echo "::group::Validate ${chart_name}"
+            helm template "$chart_name" "$chart_dir" --values "${SAMPLE_VALUES_FILE}" --include-crds --namespace default \
+              | kubeconform -strict -ignore-missing-schemas -summary
+            echo "::endgroup::"
+          done
+
+  kind-smoke:
+    runs-on: ubuntu-latest
+    needs: lint-and-validate
+    if: github.event_name == 'workflow_dispatch' && inputs.run_kind_smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1.10.0
+
+      - name: Install redis chart smoke test
+        run: |
+          set -euo pipefail
+          helm upgrade --install redis-smoke helm/redis \
+            --namespace helm-smoke \
+            --create-namespace \
+            --values "${SAMPLE_VALUES_FILE}" \
+            --set persistence.enabled=false \
+            --wait --timeout 5m
+          kubectl get pods -n helm-smoke

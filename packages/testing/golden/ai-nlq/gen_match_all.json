@@ -1,0 +1,1 @@
+{"cypher":"MATCH (n) RETURN n","reasoning":"match all","cost_est":1,"preview_sample":[]}
