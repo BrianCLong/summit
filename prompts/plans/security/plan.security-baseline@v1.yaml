@@ -1,0 +1,216 @@
+meta:
+  id: plan.security-baseline@v1
+  owner: 'security-engineering'
+  purpose: 'Establish minimal secure defaults and runtime hardening across subsystems'
+  tags:
+    - security
+    - hardening
+    - baseline
+    - containers
+    - runtime
+  guardrails:
+    - 'Security defaults must not break functionality'
+    - 'All changes must be tested in staging first'
+    - 'Hardening must not significantly impact performance'
+    - 'Emergency bypass procedures must be documented'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  subsystems: string
+  current_security_posture: string
+  compliance_requirements: string
+  threat_environment: string
+  risk_tolerance: string
+
+template: |
+  You are a Security Engineer establishing security baselines for Summit/IntelGraph.
+
+  **Objective:** Establish minimal secure defaults across subsystems.
+
+  **Subsystems:**
+  {{subsystems}}
+
+  **Current Security Posture:**
+  {{current_security_posture}}
+
+  **Compliance Requirements:**
+  {{compliance_requirements}}
+
+  **Threat Environment:**
+  {{threat_environment}}
+
+  **Risk Tolerance:**
+  {{risk_tolerance}}
+
+  ## Deliverables
+
+  ### 1. Security Baseline Checklist
+  ```yaml
+  baseline:
+    authentication:
+      - [ ] Enforce strong password policy
+      - [ ] Enable MFA for all admin accounts
+      - [ ] JWT token expiry < 1 hour
+      - [ ] Refresh token rotation enabled
+      - [ ] Session invalidation on logout
+
+    authorization:
+      - [ ] RBAC enforced at API layer
+      - [ ] Principle of least privilege
+      - [ ] Resource-level access control
+      - [ ] Audit logging for privilege changes
+
+    network:
+      - [ ] TLS 1.2+ required
+      - [ ] mTLS for service-to-service
+      - [ ] Network policies in Kubernetes
+      - [ ] Ingress rate limiting
+      - [ ] Egress filtering
+
+    data:
+      - [ ] Encryption at rest (AES-256)
+      - [ ] Encryption in transit (TLS)
+      - [ ] PII masking in logs
+      - [ ] Data retention policies enforced
+
+    containers:
+      - [ ] Non-root user in containers
+      - [ ] Read-only root filesystem
+      - [ ] No privileged containers
+      - [ ] Seccomp/AppArmor profiles
+      - [ ] Resource limits set
+  ```
+
+  ### 2. Runtime Hardening Hints
+  ```yaml
+  hardening:
+    node_js:
+      - helmet middleware enabled
+      - CORS properly configured
+      - CSP headers set
+      - Rate limiting per IP/user
+      - Input validation (zod/joi)
+      - SQL/NoSQL injection prevention
+
+    containers:
+      dockerfile:
+        - FROM non-root base image
+        - USER nobody:nogroup
+        - No sensitive files in image
+        - Multi-stage builds
+        - Minimal attack surface
+
+      runtime:
+        - readOnlyRootFilesystem: true
+        - allowPrivilegeEscalation: false
+        - runAsNonRoot: true
+        - capabilities:
+            drop: ["ALL"]
+            add: []  # Only if necessary
+
+    kubernetes:
+      pod_security:
+        - PodSecurityPolicy/PodSecurityStandards: restricted
+        - NetworkPolicy: deny-all default
+        - ServiceAccount: minimal permissions
+        - Secrets: external-secrets or sealed-secrets
+  ```
+
+  ### 3. Container Security Best Practices
+  ```yaml
+  container_security:
+    base_images:
+      - Use distroless or alpine
+      - Pin to digest, not tag
+      - Regular updates (weekly)
+      - Scan with Trivy/Grype
+
+    build_process:
+      - No secrets in Dockerfile
+      - No .env files in image
+      - Minimal packages installed
+      - SBOM generated
+
+    runtime_protection:
+      - Memory limits
+      - CPU limits
+      - PID limits
+      - Network policies
+      - Filesystem restrictions
+
+    secrets_management:
+      - Never in environment variables
+      - Use Kubernetes secrets
+      - External secrets operator
+      - Rotation policy
+  ```
+
+  ### 4. CI Security Checks
+  ```yaml
+  ci_checks:
+    - name: SAST
+      tool: Semgrep/CodeQL
+      blocking: true
+      severity_threshold: high
+
+    - name: Dependency Scan
+      tool: Snyk/Dependabot
+      blocking: true
+      severity_threshold: critical
+
+    - name: Container Scan
+      tool: Trivy
+      blocking: true
+      severity_threshold: critical
+
+    - name: Secrets Detection
+      tool: Gitleaks
+      blocking: true
+
+    - name: License Compliance
+      tool: FOSSA/license-checker
+      blocking: false
+
+    - name: IaC Security
+      tool: Checkov/tfsec
+      blocking: true
+  ```
+
+  ### 5. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] All baseline checks pass in CI
+  - [ ] Hardening applied to staging
+  - [ ] No critical vulnerabilities open
+  - [ ] Security documentation updated
+  - [ ] Runbooks for security incidents
+
+  ## Rollback Plan
+  - Revert hardening if blocking functionality
+  - Document emergency bypass procedures
+  - Security team approval for exceptions
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'summit-security-baseline'
+    inputs:
+      subsystems: 'API Server, Graph Engine, Web Client, Workers, Databases'
+      current_security_posture: 'Basic auth, TLS enabled, no mTLS, container scanning in CI'
+      compliance_requirements: 'SOC2, GDPR, internal security policy'
+      threat_environment: 'Enterprise SaaS, sensitive data, targeted attacks possible'
+      risk_tolerance: 'Low - security is priority'
+    expected_contains:
+      - 'baseline'
+      - 'hardening'
+      - 'Container Security'
+      - 'CI Security Checks'
