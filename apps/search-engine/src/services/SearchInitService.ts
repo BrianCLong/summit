@@ -1,12 +1,13 @@
-import { Pool } from 'pg';
 import { Driver as Neo4jDriver } from 'neo4j-driver';
+import { Pool } from 'pg';
 import { createClient, RedisClientType } from 'redis';
 import { createLogger, format, transports, Logger } from 'winston';
+
+import { ALL_INDEX_MAPPINGS } from '../config/indexMappings';
 
 import { ElasticsearchService } from './ElasticsearchService';
 import { IndexingService } from './IndexingService';
 import { SearchAnalyticsService } from './SearchAnalyticsService';
-import { ALL_INDEX_MAPPINGS } from '../config/indexMappings';
 
 export class SearchInitService {
   private logger: Logger;

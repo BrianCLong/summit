@@ -1,0 +1,10 @@
+{
+  "alert": "TestCoverageDropped",
+  "description": "Test coverage for {{ $labels.suite }} is {{ $value }}% (threshold: 75%)",
+  "expr": "test_coverage_percent < 75\n",
+  "runbook_url": "https://runbooks.intelgraph.io/ci/test-coverage",
+  "service": "ci_cd",
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Test coverage dropped below threshold"
+}

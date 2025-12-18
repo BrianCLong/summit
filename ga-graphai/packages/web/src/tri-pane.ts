@@ -14,7 +14,6 @@ export interface TriPaneState {
   evidence: EvidenceNode[];
   policyBindings: string[];
   confidenceOpacity: number;
-  activePanel: Panel;
   savedViews: Record<string, TriPaneState>;
 }
 
@@ -23,10 +22,6 @@ export interface ExplainView {
   evidence: EvidenceNode[];
   policyBindings: string[];
   confidenceOpacity: number;
-  activePanel: Panel;
-  summary: string;
-  policyHighlights: string[];
-  navigationTips: string[];
 }
 
 export interface PathMetric {
@@ -34,34 +29,35 @@ export interface PathMetric {
   durationMs: number;
 }
 
-export interface TriPaneCommand {
-  id: string;
-  label: string;
-  shortcut?: string;
-  run: () => void;
-}
-
-export interface PaneLayout {
-  id: Panel;
-  title: string;
-  selection?: string;
-  linkedTo: Panel[];
-  description: string;
-}
-
-export interface CommandPaletteState {
-  query: string;
-  commands: Array<{ id: string; label: string; shortcut?: string }>;
-}
-
-export interface TriPaneLayout {
-  activePanel: Panel;
-  panes: PaneLayout[];
-  commandPalette: CommandPaletteState;
-  explainPanel: ExplainView;
-}
-
 type Listener = (state: TriPaneState) => void;
+
+function cloneEvidence(evidence: EvidenceNode[]): EvidenceNode[] {
+  return evidence.map((item) => ({
+    ...item,
+    policies: [...item.policies],
+  }));
+}
+
+function snapshotState(
+  state: TriPaneState,
+  includeSavedViews = true,
+): TriPaneState {
+  const savedViews = includeSavedViews
+    ? Object.fromEntries(
+        Object.entries(state.savedViews).map(([name, view]) => [
+          name,
+          snapshotState(view, false),
+        ]),
+      )
+    : {};
+
+  return {
+    ...state,
+    evidence: cloneEvidence(state.evidence),
+    policyBindings: [...state.policyBindings],
+    savedViews,
+  };
+}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -71,51 +67,18 @@ export class TriPaneController {
   private state: TriPaneState;
   private readonly listeners: Map<Panel, Set<Listener>> = new Map();
   private readonly metrics: PathMetric[] = [];
-  private readonly commands: Map<string, TriPaneCommand> = new Map();
-  private readonly shortcuts: Map<string, string> = new Map();
 
   constructor(initialEvidence: EvidenceNode[] = []) {
     this.state = {
-      evidence: [...initialEvidence],
+      evidence: cloneEvidence(initialEvidence),
       policyBindings: [],
       confidenceOpacity: 1,
-      activePanel: 'graph',
       savedViews: {},
     };
-    this.registerCommand({
-      id: 'focus.graph',
-      label: 'Focus Graph pane',
-      shortcut: 'ctrl+1',
-      run: () => this.setActivePanel('graph'),
-    });
-    this.registerCommand({
-      id: 'focus.timeline',
-      label: 'Focus Timeline pane',
-      shortcut: 'ctrl+2',
-      run: () => this.setActivePanel('timeline'),
-    });
-    this.registerCommand({
-      id: 'focus.map',
-      label: 'Focus Map pane',
-      shortcut: 'ctrl+3',
-      run: () => this.setActivePanel('map'),
-    });
-    this.registerCommand({
-      id: 'explain.view',
-      label: 'Explain this view',
-      shortcut: 'ctrl+/',
-      run: () => {
-        this.state.savedViews['explain:last'] = this.current;
-      },
-    });
   }
 
   get current(): TriPaneState {
-    return {
-      ...this.state,
-      evidence: [...this.state.evidence],
-      policyBindings: [...this.state.policyBindings],
-    };
+    return snapshotState(this.state);
   }
 
   on(panel: Panel, listener: Listener): () => void {
@@ -126,20 +89,20 @@ export class TriPaneController {
   }
 
   selectFromGraph(nodeId: string, evidence: EvidenceNode[]): void {
+    const nextEvidence = cloneEvidence(evidence);
     this.state.graphSelection = nodeId;
-    this.state.mapSelection = evidence[0]?.id;
-    this.state.timelineSelection = evidence.at(-1)?.id;
-    this.state.evidence = evidence;
+    this.state.mapSelection = nextEvidence[0]?.id;
+    this.state.timelineSelection = nextEvidence.at(-1)?.id;
+    this.state.evidence = nextEvidence;
     this.state.policyBindings = Array.from(
-      new Set(evidence.flatMap((item) => item.policies)),
+      new Set(nextEvidence.flatMap((item) => item.policies)),
     );
     this.state.confidenceOpacity = clamp(
-      evidence.reduce((acc, item) => acc + item.confidence, 0) /
-        Math.max(evidence.length, 1),
+      nextEvidence.reduce((acc, item) => acc + item.confidence, 0) /
+        Math.max(nextEvidence.length, 1),
       0,
       1,
     );
-    this.state.activePanel = 'graph';
     this.emit('graph');
     this.emit('map');
     this.emit('timeline');
@@ -150,13 +113,11 @@ export class TriPaneController {
     if (!this.state.graphSelection) {
       this.state.graphSelection = locationId;
     }
-    this.state.activePanel = 'map';
     this.emit('map');
   }
 
   selectFromTimeline(eventId: string): void {
     this.state.timelineSelection = eventId;
-    this.state.activePanel = 'timeline';
     this.emit('timeline');
   }
 
@@ -176,132 +137,33 @@ export class TriPaneController {
   }
 
   saveView(name: string): void {
-    this.state.savedViews[name] = this.current;
+    const savedView = snapshotState(this.state, false);
+    this.state.savedViews = { ...this.state.savedViews, [name]: savedView };
   }
 
   restoreView(name: string): TriPaneState | undefined {
     const view = this.state.savedViews[name];
-    if (view) {
-      this.state = {
-        ...view,
-        evidence: [...view.evidence],
-        policyBindings: [...view.policyBindings],
-        savedViews: { ...this.state.savedViews },
-      };
-      this.emit('graph');
-      this.emit('map');
-      this.emit('timeline');
-      return this.current;
+    if (!view) {
+      return undefined;
     }
-    return undefined;
+
+    this.state = {
+      ...snapshotState(view, false),
+      savedViews: { ...this.state.savedViews },
+    };
+    this.emit('graph');
+    this.emit('map');
+    this.emit('timeline');
+    return this.current;
   }
 
   explainCurrentView(): ExplainView {
-    const focus = this.state.graphSelection;
-    const summaryParts = [
-      `Active pane: ${this.state.activePanel}`,
-      focus ? `focused on ${focus}` : 'no primary focus selected',
-      `linked evidence: ${this.state.evidence.length}`,
-    ];
-    const navigationTips = [
-      'Ctrl+1 Graph · Ctrl+2 Timeline · Ctrl+3 Map',
-      'Ctrl+/ Explain view',
-      'Use command palette to jump to saved views',
-    ];
     return {
-      focus,
-      evidence: [...this.state.evidence],
+      focus: this.state.graphSelection,
+      evidence: cloneEvidence(this.state.evidence),
       policyBindings: [...this.state.policyBindings],
       confidenceOpacity: this.state.confidenceOpacity,
-      activePanel: this.state.activePanel,
-      summary: summaryParts.join(' | '),
-      policyHighlights:
-        this.state.policyBindings.length > 0
-          ? this.state.policyBindings
-          : ['No policy bindings detected'],
-      navigationTips,
     };
-  }
-
-  buildUnifiedLayout(query = ''): TriPaneLayout {
-    const panes: PaneLayout[] = [
-      {
-        id: 'graph',
-        title: 'Graph',
-        selection: this.state.graphSelection,
-        linkedTo: ['timeline', 'map'],
-        description: 'Entity graph with policy overlays',
-      },
-      {
-        id: 'timeline',
-        title: 'Timeline',
-        selection: this.state.timelineSelection,
-        linkedTo: ['graph', 'map'],
-        description: 'Events and audit chronology',
-      },
-      {
-        id: 'map',
-        title: 'Map',
-        selection: this.state.mapSelection,
-        linkedTo: ['graph', 'timeline'],
-        description: 'Geo context and path routing',
-      },
-    ];
-    return {
-      activePanel: this.state.activePanel,
-      panes,
-      commandPalette: this.commandPalette(query),
-      explainPanel: this.explainCurrentView(),
-    };
-  }
-
-  registerCommand(command: TriPaneCommand): void {
-    this.commands.set(command.id, command);
-    if (command.shortcut) {
-      this.shortcuts.set(this.normalizeShortcut(command.shortcut), command.id);
-    }
-  }
-
-  commandPalette(query = ''): CommandPaletteState {
-    const normalized = query.trim().toLowerCase();
-    const commands = Array.from(this.commands.values())
-      .filter((command) =>
-        normalized.length === 0
-          ? true
-          : command.label.toLowerCase().includes(normalized) ||
-            command.id.toLowerCase().includes(normalized),
-      )
-      .map((command) => ({
-        id: command.id,
-        label: command.label,
-        shortcut: command.shortcut,
-      }));
-    return { query, commands };
-  }
-
-  triggerCommand(commandId: string): boolean {
-    const command = this.commands.get(commandId);
-    if (!command) {
-      return false;
-    }
-    command.run();
-    return true;
-  }
-
-  handleShortcut(shortcut: string): boolean {
-    const commandId = this.shortcuts.get(this.normalizeShortcut(shortcut));
-    if (!commandId) {
-      return false;
-    }
-    return this.triggerCommand(commandId);
-  }
-
-  private setActivePanel(panel: Panel): void {
-    this.state.activePanel = panel;
-  }
-
-  private normalizeShortcut(shortcut: string): string {
-    return shortcut.trim().toLowerCase();
   }
 
   private emit(panel: Panel): void {
