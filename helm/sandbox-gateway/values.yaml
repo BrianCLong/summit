@@ -1,0 +1,178 @@
+# Default values for sandbox-gateway
+# This is a YAML-formatted file.
+
+replicaCount: 3
+
+image:
+  repository: ghcr.io/brianclong/summit/sandbox-gateway
+  pullPolicy: IfNotPresent
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+# Environment
+environment: production
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "4100"
+  prometheus.io/path: "/metrics"
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 4100
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: "10m"
+    nginx.ingress.kubernetes.io/rate-limit: "100"
+    nginx.ingress.kubernetes.io/rate-limit-window: "1m"
+  host: sandbox-api.intelgraph.io
+  tls:
+    enabled: true
+    secretName: sandbox-gateway-tls
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity:
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: sandbox-gateway
+          topologyKey: kubernetes.io/hostname
+
+# Application configuration
+config:
+  logLevel: info
+  port: 4100
+  rateLimiting:
+    windowMs: 60000
+    max: 1000
+  cors:
+    origins:
+      - https://app.intelgraph.io
+  sandbox:
+    defaultExpirationDays: 30
+    maxConcurrentSandboxes: 10
+    enabledPresets:
+      - dataLab
+      - research
+      - demo
+      - training
+      - airgapped
+  promotion:
+    requiredApprovals: 2
+    autoPromoteThreshold: 3
+
+# Secrets (should be overridden via external secrets)
+secrets:
+  neo4jUri: ""
+  postgresConnectionString: ""
+  redisUrl: ""
+  jwtSecret: ""
+
+# External secrets (recommended for production)
+externalSecrets:
+  enabled: false
+  secretStore:
+    name: vault-backend
+    kind: ClusterSecretStore
+  refreshInterval: 1h
+
+# Network policies
+networkPolicy:
+  enabled: true
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
+    - from:
+        - podSelector:
+            matchLabels:
+              component: sandbox
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
+
+# Observability
+observability:
+  tracing:
+    enabled: true
+    endpoint: http://otel-collector.observability:4317
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+
+# Health checks
+healthCheck:
+  liveness:
+    path: /health/live
+    initialDelaySeconds: 10
+    periodSeconds: 15
+  readiness:
+    path: /health/ready
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+# Volumes
+volumes:
+  - name: tmp
+    emptyDir: {}
+  - name: config
+    configMap:
+      name: sandbox-gateway-config
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: config
+    mountPath: /app/config
+    readOnly: true
