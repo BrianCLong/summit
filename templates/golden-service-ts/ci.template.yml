@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    paths:
+      - 'services/SERVICE_NAME/**'
+  pull_request:
+    paths:
+      - 'services/SERVICE_NAME/**'
+
+jobs:
+  golden-pipeline:
+    uses: ./.github/workflows/golden-service-pipeline.yml
+    with:
+      service-name: SERVICE_NAME
+      working-directory: services/SERVICE_NAME
