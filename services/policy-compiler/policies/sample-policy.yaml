@@ -1,0 +1,30 @@
+name: investigation-policy
+version: "1.0"
+licenses:
+  - "data-license-001"
+  - "warrant-2024-456"
+warrants:
+  - "search-warrant-NY-2024-123"
+dataPurpose:
+  - "criminal-investigation"
+  - "intelligence-analysis"
+retention: "7-years"
+clearance: "SECRET"
+rules:
+  - resource: "/api/entities"
+    action: "read"
+    allow: true
+  - resource: "/api/entities"
+    action: "write"
+    allow: true
+    conditions:
+      role: "analyst"
+  - resource: "/api/entities"
+    action: "export"
+    allow: false
+  - resource: "/api/relationships"
+    action: "read"
+    allow: true
+  - resource: "/api/investigations"
+    action: "delete"
+    allow: false
