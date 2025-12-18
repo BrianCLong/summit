@@ -1,0 +1,245 @@
+<<<<<<< HEAD
+# Scaling Summit
+
+This guide outlines strategies for scaling the Summit platform for high-throughput enterprise environments.
+
+## Architecture Overview
+
+Summit uses a microservices architecture that allows independent scaling of components:
+
+- **Frontend (Web/Client)**: Stateless, served via CDN or multiple replicas.
+- **API Server (GraphQL)**: Stateless, scales horizontally.
+- **Workers**: Scalable based on queue depth (Redis).
+- **Databases**: Neo4j (Read Replicas), Postgres (Read Replicas), Redis (Cluster).
+
+## Kubernetes Scaling
+
+### Horizontal Pod Autoscaler (HPA)
+
+We recommend using HPA for the API server and Worker nodes.
+
+```yaml
+# deploy/k8s/hpa-api.yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: summit-api-hpa
+=======
+# Summit Scaling Guide
+
+This guide documents how to operate Summit in multi-node Kubernetes clusters with production-grade autoscaling, caching, and performance testing. The examples assume `kubectl`, `helm`, and `kustomize` are available along with access to a container registry.
+
+## Architecture Overview
+
+- **Stateless app layer**: `api`, `web`, and background workers run as independent Deployments with PodDisruptionBudgets and readiness probes identical to `make up` health checks.
+- **Datastores**: PostgreSQL (primary + async replicas), Neo4j Enterprise causal cluster, Redis Cluster (3 masters + 3 replicas) for cache and task queues.
+- **Ingress**: NGINX Ingress Controller with gzip + HTTP/2 enabled. Cert-manager issues TLS certificates.
+- **Observability**: Prometheus Operator + Grafana dashboards from `observability/grafana`. Alertmanager routes to PagerDuty/Slack.
+
+## Horizontal Pod Autoscaler (HPA)
+
+Use HPAs to keep latency under 200ms for GraphQL queries and to prevent worker backlogs. The example assumes metrics-server is installed.
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: summit-api
+>>>>>>> main
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: summit-api
+  minReplicas: 3
+<<<<<<< HEAD
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+```
+
+### Redis Clustering
+
+For high availability and write scalability, use Redis Cluster. Summit's Redis client supports clustering out of the box.
+
+**Configuration:**
+Set `REDIS_CLUSTER_NODES` in your environment instead of `REDIS_HOST`.
+
+```bash
+REDIS_CLUSTER_NODES=redis-node-1:6379,redis-node-2:6379,redis-node-3:6379
+```
+
+### Neo4j Causal Clustering
+
+For read scalability in the graph database, use Neo4j Causal Clustering with Read Replicas.
+
+- **Core Nodes**: Handle writes and consensus (minimum 3).
+- **Read Replicas**: Handle read queries (scale as needed).
+
+Configure the driver in `server/src/db/neo4j.ts` to use `neo4j://` scheme which supports routing.
+
+## Load Testing
+
+We use [k6](https://k6.io) for load testing.
+
+**Running a Load Test:**
+
+```bash
+k6 run scripts/load-testing/load-test.js
+```
+
+### Benchmarks
+
+| Component | Replicas | Requests/sec | p95 Latency |
+|-----------|----------|--------------|-------------|
+| API       | 1        | 500          | 200ms       |
+| API       | 3        | 1400         | 210ms       |
+| API       | 5        | 2200         | 220ms       |
+
+*Benchmarks run on AWS c5.large instances.*
+
+## Database Optimization
+
+- **Indexes**: Ensure all frequently queried properties are indexed.
+- **Query Tuning**: Use `PROFILE` in Neo4j to analyze query performance.
+- **Caching**: Aggressively cache GraphQL resolvers using `@cacheControl` directives.
+=======
+  maxReplicas: 12
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 65
+    - type: Pods
+      pods:
+        metric:
+          name: http_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: 20
+```
+
+Repeat the pattern for `summit-web` (based on CPU + RPS) and for worker pools (based on queue depth exported via Prometheus).
+
+## Redis Clustering
+
+Redis should run in cluster mode for resiliency and predictable latency under load:
+
+```yaml
+apiVersion: redis.redis.opstreelabs.in/v1beta1
+kind: RedisCluster
+metadata:
+  name: summit-redis
+spec:
+  clusterSize: 3
+  master:
+    replicas: 3
+  replication:
+    replicas: 1
+  storage:
+    volumeClaimTemplate:
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 20Gi
+  redisExporter: true
+  securityContext:
+    runAsNonRoot: true
+    fsGroup: 999
+```
+
+Use `redis.conf` tuned for `maxmemory-policy allkeys-lru` and enable TLS via cert-manager secrets mounted into Pods.
+
+## Example Kustomize Overlay
+
+Place cluster-wide defaults in `infra/k8s/overlays/production/` to wrap base manifests in `infra/k8s/base/`.
+
+```yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+patches:
+  - target:
+      kind: Deployment
+      name: summit-api
+    patch: |
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 500m
+            memory: 1Gi
+          limits:
+            cpu: 2
+            memory: 4Gi
+  - target:
+      kind: Ingress
+      name: summit-ingress
+    patch: |
+      - op: add
+        path: /metadata/annotations
+        value:
+          nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+          nginx.ingress.kubernetes.io/enable-brotli: "true"
+```
+
+## Load Testing with Locust
+
+Benchmark before every major release.
+
+```bash
+pip install locust
+locust -f tests/perf/locustfile.py --headless -u 400 -r 40 -t 10m --host https://api.summit.example.com
+```
+
+Sample `locustfile.py` outline (placed in `tests/perf/`):
+
+```python
+from locust import HttpUser, task, between
+
+class SummitUser(HttpUser):
+  wait_time = between(1, 3)
+
+  @task(3)
+  def query_graph(self):
+    self.client.post("/graphql", json={"query": "{ investigations { id name } }"})
+
+  @task(1)
+  def ingest_event(self):
+    self.client.post("/api/events", json={"type": "heartbeat", "source": "locust"})
+```
+
+Capture p95 latency, error rate, and saturation metrics from Prometheus during each run. Commit reports to `tests/perf/reports/` and trend them in Grafana.
+
+## Benchmark Targets
+
+- **API**: p95 GraphQL latency < 200ms at 1k RPS sustained for 10 minutes.
+- **Workers**: Queue depth < 1000 with 0 dead-letter messages during peak.
+- **Neo4j**: < 250ms for 3-hop path queries with 50 concurrent users.
+- **Redis**: < 5ms GET/SET latency at 30k ops/sec.
+
+## Day-2 Operations
+
+- Rotate secrets quarterly via `ExternalSecrets` or sealed-secrets.
+- Run `helm upgrade` with `--atomic --timeout 10m` and verify readiness gates.
+- Enable cluster autoscaler with buffer nodes for GPU pools.
+- Schedule weekly `kubectl run redis-cli` smoke tests to verify cluster slots and replication health.
+
+## Disaster Recovery
+
+- Configure scheduled backups for PostgreSQL and Neo4j using `velero` or provider snapshots.
+- Keep `make smoke` parity via synthetic checks in `synthetics/` hitting `/health/ready` and `/metrics` endpoints.
+- Document restore playbooks in `docs/ONBOARDING.md` and validate quarterly.
+>>>>>>> main

@@ -56,11 +56,11 @@ export function createConnectorPIIHook(config: PIIDetectionConfig): ConnectorHoo
 
       // Check each field in props
       for (const [key, value] of Object.entries(entity.props)) {
-        if (typeof value !== 'string') continue;
+        if (typeof value !== 'string') {continue;}
 
         for (const pattern of config.patterns) {
           // Skip if pattern specifies fields and this isn't one
-          if (pattern.fields && !pattern.fields.includes(key)) continue;
+          if (pattern.fields && !pattern.fields.includes(key)) {continue;}
 
           if (pattern.regex.test(value)) {
             piiFound.push(`${pattern.name} in ${key}`);
@@ -116,7 +116,7 @@ export function createClassificationHook(config: ClassificationConfig): Connecto
       // Apply rules
       for (const rule of config.rules) {
         // Check entity type match
-        if (rule.entityType && entity.type !== rule.entityType) continue;
+        if (rule.entityType && entity.type !== rule.entityType) {continue;}
 
         // Check field pattern match
         if (rule.fieldPattern) {
@@ -178,7 +178,7 @@ export function createDeduplicationHook(config: DeduplicationConfig): ConnectorH
 
       if (config.redisClient) {
         const exists = await config.redisClient.get(dedupKey);
-        isDuplicate = !!exists;
+        isDuplicate = Boolean(exists);
         if (!isDuplicate) {
           await config.redisClient.setex(dedupKey, config.ttlSeconds, '1');
         }
@@ -189,7 +189,7 @@ export function createDeduplicationHook(config: DeduplicationConfig): ConnectorH
           // Clean old entries
           const cutoff = Date.now() - config.ttlSeconds * 1000;
           for (const [k, v] of localCache.entries()) {
-            if (v < cutoff) localCache.delete(k);
+            if (v < cutoff) {localCache.delete(k);}
           }
         }
       }
