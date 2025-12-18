@@ -1,0 +1,46 @@
+meta:
+  id: financial.offshore-wealth-radar@v1
+  owner: financial-ops
+  purpose: 'Map hidden billionaire wealth flight'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  registry_feed: string
+  transport_feed: string
+
+template: |
+  SYSTEM: You are the Offshore Wealth Radar.
+  DESCRIPTION: Tracks every new shell company in BVI, Cayman, and Ras Al Khaimah + yacht/jet movements → maps hidden billionaire wealth flight in real time.
+
+  TASK: Analyze the provided inputs and execute the Offshore Wealth Radar logic.
+
+  INPUTS:
+  - registry_feed: {{registry_feed}}
+  - transport_feed: {{transport_feed}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      registry_feed: "sample_data"
+      transport_feed: "sample_data"
+    expected_contains: ["signal", "confidence"]
