@@ -228,7 +228,7 @@ export function exportToJSON(graph: GraphData): string {
 export function exportToCSV(graph: GraphData): { nodes: string; edges: string } {
   // Nodes CSV
   const nodeHeaders = ['id', 'label', ...getAllPropertyKeys(graph.nodes)];
-  let nodesCsv = nodeHeaders.join(',') + '\n';
+  let nodesCsv = `${nodeHeaders.join(',')  }\n`;
 
   graph.nodes.forEach((node) => {
     const row = [
@@ -238,12 +238,12 @@ export function exportToCSV(graph: GraphData): { nodes: string; edges: string } 
         .slice(2)
         .map((h) => escapeCsv(String(node.properties?.[h] || ''))),
     ];
-    nodesCsv += row.join(',') + '\n';
+    nodesCsv += `${row.join(',')  }\n`;
   });
 
   // Edges CSV
   const edgeHeaders = ['source', 'target', 'weight', 'label', ...getAllPropertyKeys(graph.edges)];
-  let edgesCsv = edgeHeaders.join(',') + '\n';
+  let edgesCsv = `${edgeHeaders.join(',')  }\n`;
 
   graph.edges.forEach((edge) => {
     const row = [
@@ -255,7 +255,7 @@ export function exportToCSV(graph: GraphData): { nodes: string; edges: string } 
         .slice(4)
         .map((h) => escapeCsv(String(edge.properties?.[h] || ''))),
     ];
-    edgesCsv += row.join(',') + '\n';
+    edgesCsv += `${row.join(',')  }\n`;
   });
 
   return { nodes: nodesCsv, edges: edgesCsv };
