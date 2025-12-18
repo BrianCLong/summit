@@ -11,9 +11,12 @@
     "types": ["node", "jest"],
 <<<<<<< HEAD
     "resolveJsonModule": true
+<<<<<<< HEAD
+=======
 =======
     "resolveJsonModule": true,
     "downlevelIteration": true
+>>>>>>> main
 >>>>>>> main
   },
   "include": ["src", "examples", "scripts", "__tests__"],
