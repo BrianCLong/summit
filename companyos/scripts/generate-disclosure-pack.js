@@ -1,36 +1,95 @@
 #!/usr/bin/env node
-import fs from "fs";
+/* eslint-disable no-console */
 
-const buildId = process.env.BUILD_ID || `build-${Date.now()}`;
-const tenantId = process.env.TENANT_ID || "demo-tenant";
-const product = process.env.PRODUCT || "demo-product";
-const environment = process.env.ENVIRONMENT || "dev";
-const sbomUri = process.env.SBOM_URI || "https://example.com/sbom.json";
-const outputPath = process.env.OUTPUT_PATH || "disclosure-pack.json";
-const residencyRegion = process.env.RESIDENCY_REGION || "us";
+const fs = require("fs");
+const path = require("path");
 
-const critical = Number(process.env.VULN_CRITICAL ?? 0);
-const high = Number(process.env.VULN_HIGH ?? 0);
-const medium = Number(process.env.VULN_MEDIUM ?? 0);
-const low = Number(process.env.VULN_LOW ?? 0);
+function parseArgs(argv) {
+  const args = {};
+  for (let i = 2; i < argv.length; i += 2) {
+    const key = argv[i];
+    const val = argv[i + 1];
+    if (!key || !val) break;
+    if (!key.startsWith("--")) continue;
+    args[key.slice(2)] = val;
+  }
+  return args;
+}
 
-const sloSummary = {
-  period: process.env.SLO_PERIOD ?? null,
-  availability_target: process.env.SLO_AVAILABILITY_TARGET
-    ? Number(process.env.SLO_AVAILABILITY_TARGET)
-    : null,
-  availability_actual: process.env.SLO_AVAILABILITY_ACTUAL
-    ? Number(process.env.SLO_AVAILABILITY_ACTUAL)
-    : null,
-  latency_target_ms_p95: process.env.SLO_LATENCY_TARGET_MS_P95
-    ? Number(process.env.SLO_LATENCY_TARGET_MS_P95)
-    : null,
-  latency_actual_ms_p95: process.env.SLO_LATENCY_ACTUAL_MS_P95
-    ? Number(process.env.SLO_LATENCY_ACTUAL_MS_P95)
-    : null
-};
+function requireFile(filePath, friendlyName) {
+  if (!fs.existsSync(filePath)) {
+    console.error(`Missing required ${friendlyName} at ${filePath}`);
+    process.exit(2);
+  }
+}
+
+const args = parseArgs(process.argv);
+
+if (!args.sbom || !args.trivy || !args.out) {
+  console.error(
+    "Usage: generate-disclosure-pack.js --sbom <path> --trivy <path> --out <path> --product <name> --environment <env> --tenant <id> --build-id <sha>"
+  );
+  process.exit(2);
+}
 
 const now = new Date().toISOString();
+const sbomPath = args.sbom;
+const trivyPath = args.trivy;
+
+requireFile(sbomPath, "SBOM");
+requireFile(trivyPath, "Trivy report");
+
+const product = args.product || "companyos-api";
+const environment = args.environment || "dev";
+const tenantId = args.tenant || "global";
+const buildId = args["build-id"] || process.env.GITHUB_SHA || "unknown";
+
+const sbomUri = `file://${path.resolve(sbomPath)}`;
+
+let trivy;
+try {
+  const trivyRaw = fs.readFileSync(trivyPath, "utf8");
+  trivy = JSON.parse(trivyRaw);
+} catch (error) {
+  console.error(`Failed to read or parse Trivy report: ${error.message}`);
+  process.exit(2);
+}
+
+let critical = 0;
+let high = 0;
+let medium = 0;
+let low = 0;
+
+const results = trivy.Results ?? [];
+for (const result of results) {
+  const vulns = result.Vulnerabilities ?? [];
+  for (const vuln of vulns) {
+    switch (vuln.Severity) {
+      case "CRITICAL":
+        critical++;
+        break;
+      case "HIGH":
+        high++;
+        break;
+      case "MEDIUM":
+        medium++;
+        break;
+      case "LOW":
+        low++;
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+const sloSummary = {
+  period: "rolling_30d",
+  availability_target: 0.99,
+  availability_actual: null,
+  latency_target_ms_p95: null,
+  latency_actual_ms_p95: null
+};
 
 const disclosurePack = {
   id: `disclosure-${buildId}`,
@@ -39,17 +98,21 @@ const disclosurePack = {
   tenant_id: tenantId,
   product,
   environment,
-  residency_region: residencyRegion,
   builds: [
     {
       build_id: buildId,
       sbom_uri: sbomUri,
       signed: true,
-      vuln_summary: { critical, high, medium, low }
+      vuln_summary: {
+        critical,
+        high,
+        medium,
+        low
+      }
     }
   ],
   slo_summary: sloSummary
 };
 
-fs.writeFileSync(outputPath, JSON.stringify(disclosurePack, null, 2));
-console.log(`disclosure pack written to ${outputPath}`);
+fs.writeFileSync(args.out, JSON.stringify(disclosurePack, null, 2), "utf8");
+console.log(`✅ Wrote disclosure pack to ${args.out}`);

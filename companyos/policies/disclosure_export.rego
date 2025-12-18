@@ -5,17 +5,7 @@ default decision := {
   "reason": "default_deny"
 }
 
-# Input:
-# {
-#   "subject": {...},
-#   "resource": {
-#     "type": "disclosure_pack",
-#     "tenant_id": "...",
-#     "residency_region": "eu" | "us"
-#   },
-#   "action": "disclosure:export"
-# }
-
+# Fully allowed
 decision := {
   "allow": true,
   "reason": "tenant_region_role_and_mfa_ok"
@@ -23,16 +13,53 @@ decision := {
   input.action == "disclosure:export"
   input.resource.type == "disclosure_pack"
 
-  # same tenant
+  same_tenant
+  residency_match
+  mfa_ok
+  role_ok
+}
+
+# Same tenant/region/role, but MFA missing → explicit reason
+decision := {
+  "allow": false,
+  "reason": "mfa_required"
+} {
+  input.action == "disclosure:export"
+  input.resource.type == "disclosure_pack"
+
+  same_tenant
+  residency_match
+  not mfa_ok
+  role_ok
+}
+
+# Same tenant + MFA + role, but region mismatch → explicit reason
+decision := {
+  "allow": false,
+  "reason": "residency_mismatch"
+} {
+  input.action == "disclosure:export"
+  input.resource.type == "disclosure_pack"
+
+  same_tenant
+  not residency_match
+  mfa_ok
+  role_ok
+}
+
+same_tenant {
   input.subject.tenant_id == input.resource.tenant_id
+}
 
-  # residency match: no cross-region export
+residency_match {
   input.subject.attributes.region == input.resource.residency_region
+}
 
-  # step-up auth: MFA verified
+mfa_ok {
   input.subject.attributes.mfa_verified == true
+}
 
-  # require appropriate role
+role_ok {
   has_role("compliance_lead") or has_role("security_lead")
 }
 

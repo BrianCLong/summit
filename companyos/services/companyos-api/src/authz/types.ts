@@ -1,22 +1,27 @@
+// src/authz/types.ts
+
+export type SubjectType = "human" | "service";
+
+export interface Subject {
+  id: string;
+  type: SubjectType;
+  tenant_id: string;
+  roles: string[];
+  groups: string[];
+  attributes: {
+    clearance?: "internal" | "external";
+    region?: string;
+    mfa_verified?: boolean;
+    [k: string]: unknown;
+  };
+}
+
 export interface Resource {
   type: string;
   id?: string;
   tenant_id?: string;
-  residency_region?: string | null;
-  [key: string]: unknown;
-}
-
-export interface SubjectAttributes {
-  [key: string]: any;
   region?: string;
-  mfa_verified?: boolean;
-}
-
-export interface Subject {
-  tenant_id?: string;
-  roles?: string[];
-  attributes: SubjectAttributes;
-  [key: string]: any;
+  [k: string]: unknown;
 }
 
 export interface AuthzInput {
