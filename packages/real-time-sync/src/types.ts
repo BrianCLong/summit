@@ -17,7 +17,10 @@ export const OperationSchema = z.object({
   attributes: z.record(z.any()).optional(),
   userId: z.string(),
   timestamp: z.number(),
-  version: z.number()
+  version: z.number(),
+  // Client-known version the operation was authored against. Used to transform
+  // against remote history while preserving intent when rebasing.
+  baseVersion: z.number().optional()
 });
 
 export const DocumentStateSchema = z.object({
