@@ -5,7 +5,7 @@ export function robustZ(x: number, mu: number, mad: number) {
   return mad ? Math.abs(x - mu) / (1.4826 * mad) : 0;
 }
 
-function median(a: number[]) {
+export function median(a: number[]) {
   const s = [...a].sort((x, y) => x - y);
   const m = Math.floor(s.length / 2);
   return s.length ? (s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2) : 0;
