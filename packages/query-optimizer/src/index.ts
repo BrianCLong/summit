@@ -1,18 +1,11 @@
-/**
- * Summit Query Optimizer
- * 
- * Advanced query optimization with:
- * - Cost-based optimization
- * - Execution plan analysis
- * - Index recommendations
- * - Materialized view management
- * - Statistics collection
- * - Query rewriting
- */
-
-export * from './planner/cost-optimizer';
-export * from './executor/plan-executor';
-export * from './rewriter/query-rewriter';
-export * from './statistics/stats-collector';
+<<<<<<< HEAD
+export const version = '1.0.0';
+=======
+export * from './types';
+export * from './optimizer/cost-model';
+export * from './optimizer/planner';
+export * from './materialized/ims-manager';
+// Export legacy manager if needed, but we are focusing on the new graph stuff
 export * from './materialized/mv-manager';
 export * from './optimizer-manager';
+>>>>>>> main

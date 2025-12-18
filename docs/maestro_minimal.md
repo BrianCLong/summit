@@ -1,461 +1,386 @@
-# Maestro Minimal - Run Tracking & Disclosure Packs
+# Maestro Minimal - Run, Artifact, and Disclosure Pack Tracking
+
+**Version:** 0.1.0
+**Status:** MVP / 2-week value slice
+**Last Updated:** 2025-11-22
 
 ## Overview
 
-The Maestro subsystem provides run tracking, artifact management, and disclosure pack generation for governance and compliance. It's designed to integrate with IntelGraph entities and decisions while providing release gate validation based on SBOM, SLSA provenance, and risk assessments.
+Maestro Conductor is a lightweight subsystem for tracking computational runs, their artifacts, and disclosure packs. It provides the foundation for SBOM/SLSA integration and release governance within the IntelGraph platform.
+
+### Key Capabilities
+
+- **Run Tracking**: Track computational workflows with cost estimates, status, and metadata
+- **Artifact Management**: Attach artifacts (SBOM, SLSA provenance, risk assessments, etc.) to runs
+- **Disclosure Packs**: Generate comprehensive summaries of runs with artifact manifests
+- **Release Gates**: Validate runs meet compliance requirements before release
+- **IntelGraph Integration**: Link runs to entities and decisions in the knowledge graph
 
 ## Architecture
 
 ### Domain Model
 
-The Maestro system consists of three core entities:
+```
+┌─────────────────────┐
+│       Run           │
+│ ─────────────────── │
+│ id, name, owner     │
+│ status, costs       │
+│ entity_ids          │◄──────┐
+│ decision_ids        │       │
+└─────────────────────┘       │
+          │                   │
+          │ 1:N               │
+          ▼                   │
+┌─────────────────────┐       │
+│     Artifact        │       │
+│ ─────────────────── │       │
+│ id, run_id, kind    │       │
+│ path_or_uri         │       │
+│ content_hash        │       │
+│ metadata_json       │       │
+└─────────────────────┘       │
+          │                   │
+          │ N:1               │
+          ▼                   │
+┌─────────────────────┐       │
+│   DisclosurePack    │       │
+│ ─────────────────── │       │
+│ id, run_id          │       │
+│ summary             │       │
+│ artifact_ids        │───────┘
+└─────────────────────┘
+```
 
-#### 1. Run
-A **Run** represents a tracked execution (build, deployment, analysis, etc.) that produces artifacts.
+### Components
+
+| Component | Purpose | Location |
+|-----------|---------|----------|
+| **Models** | Pydantic domain models | `maestro/models.py` |
+| **Storage** | In-memory data store | `maestro/storage.py` |
+| **API Router** | FastAPI endpoints | `api/maestro.py` |
+| **Checks** | Release gate validation | `maestro/checks.py` |
+| **App** | Standalone FastAPI app | `maestro/app.py` |
+| **Tests** | Pytest test suite | `tests/maestro/` |
+
+## Data Models
+
+### Run
+
+Tracks a computational workflow or analysis task.
 
 **Fields:**
-- `id`: Unique identifier
+- `id`: UUID (auto-generated)
 - `name`: Human-readable name
-- `owner`: User or system that owns the run
-- `started_at`: When the run started
-- `finished_at`: When the run completed (optional)
-- `status`: Current status (pending, running, completed, failed, cancelled)
-- `cost_estimate`: Estimated cost
-- `cost_actual`: Actual cost incurred
-- `related_entity_ids`: References to IntelGraph entities
-- `related_decision_ids`: References to IntelGraph decisions
-- `created_at`: Timestamp
+- `owner`: User/service identifier
+- `started_at`: Timestamp (auto-set)
+- `finished_at`: Timestamp (nullable)
+- `status`: `pending`, `running`, `succeeded`, `failed`, `cancelled`
+- `cost_estimate`: Estimated cost in dollars (nullable)
+- `cost_actual`: Actual cost in dollars (nullable)
+- `related_entity_ids`: List of IntelGraph entity UUIDs
+- `related_decision_ids`: List of IntelGraph decision UUIDs
+- `metadata`: Additional key-value metadata
 
-**Integration with IntelGraph:**
-- `related_entity_ids` can reference IntelGraph entities (Person, Org, Location, Event, Document)
-- `related_decision_ids` can reference governance decisions
-- Future: Add foreign key constraints to validate references
+**Example:**
+```json
+{
+  "id": "abc-123",
+  "name": "Entity network analysis - Q4 2025",
+  "owner": "analyst@example.com",
+  "status": "succeeded",
+  "cost_estimate": 15.00,
+  "cost_actual": 12.45,
+  "related_entity_ids": ["entity-456", "entity-789"],
+  "related_decision_ids": ["decision-101"],
+  "metadata": {"project": "counter-intel", "priority": "high"}
+}
+```
 
-#### 2. Artifact
-An **Artifact** is a traceable output from a run (SBOM, provenance, logs, reports, etc.).
+### Artifact
+
+An artifact produced or consumed by a run.
 
 **Fields:**
-- `id`: Unique identifier
-- `run_id`: Parent run
-- `kind`: Type of artifact (sbom, slsa_provenance, risk_assessment, log, report, data, other)
-- `path_or_uri`: Location of the artifact (S3, file path, URL)
-- `content_hash`: SHA256 or similar hash for integrity
-- `created_at`: Timestamp
-- `metadata_json`: Governance metadata
+- `id`: UUID (auto-generated)
+- `run_id`: Foreign key to Run
+- `kind`: `sbom`, `slsa_provenance`, `risk_assessment`, `build_log`, `test_report`, `other`
+- `path_or_uri`: S3 URI, file path, or other location
+- `content_hash`: SHA256 or other hash (nullable)
+- `created_at`: Timestamp (auto-set)
+- `metadata_json`: Governance metadata (see below)
 
-**Metadata Structure:**
+**Metadata JSON Schema:**
+- `sbom_present`: Boolean - SBOM data included
+- `slsa_provenance_present`: Boolean - SLSA provenance included
+- `risk_assessment_present`: Boolean - Risk assessment included
+- `additional_metadata`: Dict - Other metadata
+
+**Example:**
 ```json
 {
-  "sbom_present": true,
-  "slsa_provenance_present": true,
-  "risk_assessment_present": true,
-  "additional_data": {
-    "tool": "syft",
-    "version": "0.68.1"
-  }
-}
-```
-
-#### 3. DisclosurePack
-A **DisclosurePack** summarizes a run and bundles its artifacts for governance review.
-
-**Fields:**
-- `id`: Unique identifier
-- `run_id`: Parent run
-- `summary`: Human-readable summary
-- `artifact_ids`: List of artifact IDs included in the pack
-- `created_at`: Timestamp
-
-### Release Gate Requirements
-
-A run passes the release gate when it has at least one artifact with each of the following:
-- `sbom_present: true`
-- `slsa_provenance_present: true`
-- `risk_assessment_present: true`
-
-These can be in separate artifacts or combined in a single artifact.
-
-## API Endpoints
-
-All endpoints are prefixed with `/maestro`.
-
-### Runs
-
-#### Create Run
-```http
-POST /maestro/runs
-```
-
-**Request:**
-```json
-{
-  "name": "Production Release v1.0",
-  "owner": "release-team",
-  "cost_estimate": 500.0,
-  "related_entity_ids": ["entity-123", "entity-456"],
-  "related_decision_ids": ["decision-789"]
-}
-```
-
-**Response:**
-```json
-{
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "name": "Production Release v1.0",
-  "owner": "release-team",
-  "started_at": "2025-11-22T10:30:00Z",
-  "finished_at": null,
-  "status": "pending",
-  "cost_estimate": 500.0,
-  "cost_actual": null,
-  "related_entity_ids": ["entity-123", "entity-456"],
-  "related_decision_ids": ["decision-789"],
-  "created_at": "2025-11-22T10:30:00Z"
-}
-```
-
-#### List Runs
-```http
-GET /maestro/runs?owner=release-team&status=completed&limit=100
-```
-
-#### Get Run
-```http
-GET /maestro/runs/{run_id}
-```
-
-#### Update Run
-```http
-PATCH /maestro/runs/{run_id}
-```
-
-**Request:**
-```json
-{
-  "status": "completed",
-  "finished_at": "2025-11-22T11:00:00Z",
-  "cost_actual": 475.0
-}
-```
-
-### Artifacts
-
-#### Create Artifact
-```http
-POST /maestro/artifacts
-```
-
-**Request:**
-```json
-{
-  "run_id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": "art-456",
+  "run_id": "abc-123",
   "kind": "sbom",
-  "path_or_uri": "s3://releases/v1.0/sbom.json",
-  "content_hash": "sha256:abc123def456",
+  "path_or_uri": "s3://artifacts/2025-11-22/sbom-abc123.json",
+  "content_hash": "sha256:a1b2c3d4...",
   "metadata_json": {
     "sbom_present": true,
     "slsa_provenance_present": false,
     "risk_assessment_present": false,
-    "additional_data": {
-      "tool": "syft",
-      "version": "0.68.1"
-    }
+    "additional_metadata": {"scanner": "syft", "format": "cyclonedx"}
   }
 }
 ```
 
-#### List Artifacts for Run
-```http
-GET /maestro/runs/{run_id}/artifacts
+### DisclosurePack
+
+A comprehensive summary of a run with artifact manifest.
+
+**Fields:**
+- `id`: UUID (auto-generated)
+- `run_id`: Foreign key to Run
+- `summary`: Human-readable description
+- `artifact_ids`: List of artifact UUIDs
+- `created_at`: Timestamp (auto-set)
+- `metadata`: Additional metadata
+
+**Example:**
+```json
+{
+  "id": "pack-789",
+  "run_id": "abc-123",
+  "summary": "Entity network analysis with complete SBOM, SLSA provenance, and risk assessment. 3 high-confidence entity links identified.",
+  "artifact_ids": ["art-456", "art-457", "art-458"],
+  "created_at": "2025-11-22T10:30:00Z"
+}
 ```
+
+## API Endpoints
+
+Base path: `/maestro`
+
+### Runs
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/maestro/runs` | Create a new run |
+| `GET` | `/maestro/runs` | List runs (filterable by owner, status) |
+| `GET` | `/maestro/runs/{run_id}` | Get run by ID |
+| `PATCH` | `/maestro/runs/{run_id}` | Update run (status, cost, metadata) |
+| `GET` | `/maestro/runs/{run_id}/manifest` | Get complete run manifest |
+| `GET` | `/maestro/runs/{run_id}/release-gate` | Check release gate compliance |
+
+### Artifacts
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/maestro/artifacts` | Create artifact |
+| `GET` | `/maestro/artifacts` | List artifacts (filterable by run_id) |
+| `GET` | `/maestro/artifacts/{artifact_id}` | Get artifact by ID |
 
 ### Disclosure Packs
 
-#### Create Disclosure Pack
-```http
-POST /maestro/disclosure-packs
-```
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/maestro/disclosure-packs` | Create disclosure pack |
+| `GET` | `/maestro/disclosure-packs` | List all disclosure packs |
+| `GET` | `/maestro/disclosure-packs/{pack_id}` | Get pack by ID |
 
-**Request:**
-```json
-{
-  "run_id": "550e8400-e29b-41d4-a716-446655440000",
-  "summary": "Complete release package with SBOM, SLSA provenance, and risk assessment",
-  "artifact_ids": [
-    "artifact-1",
-    "artifact-2",
-    "artifact-3"
-  ]
-}
-```
+## Release Gate Requirements
 
-#### Get Disclosure Pack for Run
-```http
-GET /maestro/runs/{run_id}/disclosure-pack
-```
+The release gate ensures runs meet governance requirements before release/deployment.
 
-### Run Manifest (Primary Endpoint)
+**Requirements:**
+1. Run status must be `succeeded`
+2. At least one artifact must have **all three** compliance flags set to `true`:
+   - `sbom_present`
+   - `slsa_provenance_present`
+   - `risk_assessment_present`
 
-#### Get Complete Run Manifest
-```http
-GET /maestro/runs/{run_id}/manifest
+**Checking the Release Gate:**
+
+```bash
+curl http://localhost:8001/maestro/runs/{run_id}/release-gate
 ```
 
 **Response:**
 ```json
 {
-  "run": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "name": "Production Release v1.0",
-    "owner": "release-team",
-    "status": "completed",
-    ...
-  },
-  "artifacts": [
-    {
-      "id": "artifact-1",
-      "kind": "sbom",
-      "path_or_uri": "s3://releases/v1.0/sbom.json",
-      "metadata_json": {
-        "sbom_present": true,
-        ...
-      },
-      ...
-    },
-    ...
-  ],
-  "disclosure_pack": {
-    "id": "pack-1",
-    "run_id": "550e8400-e29b-41d4-a716-446655440000",
-    "summary": "Complete release package...",
-    ...
-  },
-  "release_gate_passed": true
-}
-```
-
-### Run Summary
-
-#### Get Run Summary
-```http
-GET /maestro/runs/{run_id}/summary
-```
-
-**Response:**
-```json
-{
-  "run_id": "550e8400-e29b-41d4-a716-446655440000",
-  "run_name": "Production Release v1.0",
-  "run_status": "completed",
-  "owner": "release-team",
-  "started_at": "2025-11-22T10:30:00Z",
-  "finished_at": "2025-11-22T11:00:00Z",
-  "release_gate": {
-    "sbom_present": true,
-    "slsa_provenance_present": true,
-    "risk_assessment_present": true,
-    "missing_requirements": [],
-    "artifacts_count": 3,
-    "message": "Release gate passed"
-  },
-  "artifacts": {
+  "run_id": "abc-123",
+  "passed": true,
+  "message": "Release gate passed: 2 compliant artifact(s) found",
+  "details": {
     "total_artifacts": 3,
-    "by_kind": {
-      "sbom": 1,
-      "slsa_provenance": 1,
-      "risk_assessment": 1
-    },
-    "governance": {
-      "sbom_count": 1,
-      "slsa_provenance_count": 1,
-      "risk_assessment_count": 1
-    }
+    "compliant_artifacts": 2,
+    "compliant_artifact_ids": ["art-456", "art-457"]
   }
 }
-```
-
-### Health
-
-#### Health Check
-```http
-GET /maestro/health
-```
-
-## Usage Examples
-
-### Complete Workflow
-
-```bash
-# 1. Create a run
-RUN_ID=$(curl -X POST http://localhost:8000/maestro/runs \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Production Release v1.0",
-    "owner": "release-team",
-    "cost_estimate": 500.0,
-    "related_entity_ids": ["app-service", "db-service"],
-    "related_decision_ids": ["decision-release-001"]
-  }' | jq -r '.id')
-
-# 2. Attach SBOM artifact
-SBOM_ID=$(curl -X POST http://localhost:8000/maestro/artifacts \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"run_id\": \"$RUN_ID\",
-    \"kind\": \"sbom\",
-    \"path_or_uri\": \"s3://releases/v1.0/sbom.json\",
-    \"content_hash\": \"sha256:abc123\",
-    \"metadata_json\": {
-      \"sbom_present\": true,
-      \"slsa_provenance_present\": false,
-      \"risk_assessment_present\": false
-    }
-  }" | jq -r '.id')
-
-# 3. Attach SLSA provenance artifact
-SLSA_ID=$(curl -X POST http://localhost:8000/maestro/artifacts \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"run_id\": \"$RUN_ID\",
-    \"kind\": \"slsa_provenance\",
-    \"path_or_uri\": \"s3://releases/v1.0/slsa.json\",
-    \"content_hash\": \"sha256:def456\",
-    \"metadata_json\": {
-      \"sbom_present\": false,
-      \"slsa_provenance_present\": true,
-      \"risk_assessment_present\": false
-    }
-  }" | jq -r '.id')
-
-# 4. Attach risk assessment artifact
-RISK_ID=$(curl -X POST http://localhost:8000/maestro/artifacts \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"run_id\": \"$RUN_ID\",
-    \"kind\": \"risk_assessment\",
-    \"path_or_uri\": \"s3://releases/v1.0/risk.pdf\",
-    \"content_hash\": \"sha256:ghi789\",
-    \"metadata_json\": {
-      \"sbom_present\": false,
-      \"slsa_provenance_present\": false,
-      \"risk_assessment_present\": true
-    }
-  }" | jq -r '.id')
-
-# 5. Create disclosure pack
-PACK_ID=$(curl -X POST http://localhost:8000/maestro/disclosure-packs \
-  -H "Content-Type: application/json" \
-  -d "{
-    \"run_id\": \"$RUN_ID\",
-    \"summary\": \"Production release v1.0 with complete SBOM, SLSA provenance, and risk assessment\",
-    \"artifact_ids\": [\"$SBOM_ID\", \"$SLSA_ID\", \"$RISK_ID\"]
-  }" | jq -r '.id')
-
-# 6. Get complete manifest and check release gate
-curl http://localhost:8000/maestro/runs/$RUN_ID/manifest | jq '.'
-
-# 7. Update run to completed
-curl -X PATCH http://localhost:8000/maestro/runs/$RUN_ID \
-  -H "Content-Type: application/json" \
-  -d '{
-    "status": "completed",
-    "cost_actual": 475.0
-  }'
-```
-
-### HTTPie Examples
-
-```bash
-# Create run
-http POST :8000/maestro/runs \
-  name="Test Run" \
-  owner="alice"
-
-# List runs
-http :8000/maestro/runs owner==alice
-
-# Get manifest
-http :8000/maestro/runs/$RUN_ID/manifest
 ```
 
 ## Integration with IntelGraph
 
-### Linking to Entities
+Maestro runs can reference IntelGraph entities and decisions via UUID lists:
 
-When creating a run, you can link it to IntelGraph entities:
+- **`related_entity_ids`**: Links to entities (Person, Org, Location, etc.) in the knowledge graph
+- **`related_decision_ids`**: Links to analytical decisions or hypotheses
 
-```json
-{
-  "name": "Threat Analysis Run",
-  "owner": "analyst-team",
-  "related_entity_ids": [
-    "person-123",    // Person entity
-    "org-456",       // Organization entity
-    "event-789"      // Event entity
-  ]
-}
+**Example Use Cases:**
+1. **Entity Resolution Run**: Links to entities being merged/de-duplicated
+2. **Risk Assessment Run**: Links to entities under investigation and related decisions
+3. **Graph Analysis Run**: Links to subgraph entities and analytical conclusions
+
+**Validation:**
+- Currently, IDs are stored as strings with no foreign-key enforcement
+- Future enhancement: Add validation against IntelGraph entity/decision stores
+
+## Usage Examples
+
+### Example 1: Create a Run and Attach Artifacts
+
+```bash
+# 1. Create a run
+curl -X POST http://localhost:8001/maestro/runs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Entity network analysis",
+    "owner": "analyst@example.com",
+    "cost_estimate": 10.0,
+    "related_entity_ids": ["entity-123", "entity-456"]
+  }'
+
+# Response: {"id": "run-abc123", ...}
+
+# 2. Attach SBOM artifact
+curl -X POST http://localhost:8001/maestro/artifacts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "run_id": "run-abc123",
+    "kind": "sbom",
+    "path_or_uri": "s3://artifacts/sbom.json",
+    "content_hash": "sha256:abc...",
+    "metadata_json": {
+      "sbom_present": true,
+      "slsa_provenance_present": false,
+      "risk_assessment_present": false
+    }
+  }'
+
+# 3. Attach SLSA provenance
+curl -X POST http://localhost:8001/maestro/artifacts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "run_id": "run-abc123",
+    "kind": "slsa_provenance",
+    "path_or_uri": "s3://artifacts/slsa.json",
+    "metadata_json": {
+      "sbom_present": false,
+      "slsa_provenance_present": true,
+      "risk_assessment_present": false
+    }
+  }'
+
+# 4. Attach risk assessment
+curl -X POST http://localhost:8001/maestro/artifacts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "run_id": "run-abc123",
+    "kind": "risk_assessment",
+    "path_or_uri": "s3://artifacts/risk.json",
+    "metadata_json": {
+      "sbom_present": false,
+      "slsa_provenance_present": false,
+      "risk_assessment_present": true
+    }
+  }'
+
+# 5. Update run to succeeded
+curl -X PATCH http://localhost:8001/maestro/runs/run-abc123 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "succeeded",
+    "cost_actual": 8.50,
+    "finished_at": "2025-11-22T10:30:00Z"
+  }'
 ```
 
-### Linking to Decisions
+### Example 2: Create Disclosure Pack and Check Release Gate
 
-Link runs to governance decisions:
+```bash
+# 1. Create disclosure pack
+curl -X POST http://localhost:8001/maestro/disclosure-packs \
+  -H "Content-Type: application/json" \
+  -d '{
+    "run_id": "run-abc123",
+    "summary": "Entity network analysis completed with full compliance artifacts",
+    "artifact_ids": ["art-1", "art-2", "art-3"]
+  }'
 
-```json
-{
-  "name": "Production Deployment",
-  "owner": "devops-team",
-  "related_decision_ids": [
-    "decision-approve-release-v1.0"
-  ]
-}
+# Response: {"id": "pack-xyz789", ...}
+
+# 2. Fetch run manifest
+curl http://localhost:8001/maestro/runs/run-abc123/manifest
+
+# Response includes:
+# - Run details
+# - All artifacts
+# - Disclosure pack
+# - Compliance report
+
+# 3. Check release gate
+curl http://localhost:8001/maestro/runs/run-abc123/release-gate
+
+# Response: {"passed": false, "message": "No artifacts meet compliance..."}
+# (Fails because no single artifact has all three flags)
 ```
 
-### Future: Foreign Key Validation
+### Example 3: Complete Compliant Run
 
-In the future, we'll add validation to ensure:
-- `related_entity_ids` reference valid IntelGraph entities
-- `related_decision_ids` reference valid decisions
-- Proper tenant/case scoping
+```bash
+# Create run
+RUN_ID=$(curl -s -X POST http://localhost:8001/maestro/runs \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Compliant run", "owner": "user@example.com"}' \
+  | jq -r '.id')
 
-## Governance Checks
+# Create fully compliant artifact
+curl -X POST http://localhost:8001/maestro/artifacts \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"run_id\": \"$RUN_ID\",
+    \"kind\": \"other\",
+    \"path_or_uri\": \"s3://artifacts/bundle.tgz\",
+    \"metadata_json\": {
+      \"sbom_present\": true,
+      \"slsa_provenance_present\": true,
+      \"risk_assessment_present\": true
+    }
+  }"
 
-The `maestro_checks` module provides helpers for governance validation:
+# Update run to succeeded
+curl -X PATCH http://localhost:8001/maestro/runs/$RUN_ID \
+  -H "Content-Type: application/json" \
+  -d '{"status": "succeeded"}'
 
-### Release Gate Check
-
-```python
-from app.services.maestro_checks import check_release_gate
-
-passed, details = check_release_gate(run, artifacts)
-
-if passed:
-    print("Release gate passed!")
-else:
-    print(f"Missing: {details['missing_requirements']}")
+# Check release gate (should pass!)
+curl http://localhost:8001/maestro/runs/$RUN_ID/release-gate
+# Response: {"passed": true, "message": "Release gate passed: 1 compliant artifact(s) found"}
 ```
 
-### Artifact Metadata Validation
+## Running the Service
 
-```python
-from app.services.maestro_checks import validate_artifact_metadata
+### Local Development
 
-valid, errors = validate_artifact_metadata(artifact)
+```bash
+# Install dependencies
+pip install -r requirements.txt
 
-if not valid:
-    print(f"Validation errors: {errors}")
+# Run API server
+make maestro-api
+
+# Or manually:
+python -m uvicorn maestro.app:app --host 0.0.0.0 --port 8001 --reload
 ```
-
-### Artifact Summary
-
-```python
-from app.services.maestro_checks import summarize_run_artifacts
-
-summary = summarize_run_artifacts(artifacts)
-print(f"Total artifacts: {summary['total_artifacts']}")
-print(f"SBOM count: {summary['governance']['sbom_count']}")
-```
-
-## Testing
 
 ### Running Tests
 
@@ -463,97 +388,101 @@ print(f"SBOM count: {summary['governance']['sbom_count']}")
 # Run all Maestro tests
 make maestro-test
 
-# Or using pytest directly
-cd intelgraph-mvp/api
-pytest tests/test_maestro.py -v
+# Or manually:
+pytest tests/maestro/ -v
 
 # Run specific test
-pytest tests/test_maestro.py::test_complete_workflow -v
-```
-
-### Test Coverage
-
-The test suite covers:
-- ✅ Creating, listing, and updating runs
-- ✅ Creating and listing artifacts
-- ✅ Creating disclosure packs
-- ✅ Getting run manifests
-- ✅ Release gate validation (pass and fail cases)
-- ✅ Run summary endpoint
-- ✅ Complete end-to-end workflow
-
-## Development
-
-### Starting the API
-
-```bash
-# Using Make
-make maestro-api
-
-# Or using uvicorn directly
-cd intelgraph-mvp/api
-uvicorn app.main:app --reload --port 8000
-```
-
-### File Structure
-
-```
-intelgraph-mvp/api/
-├── app/
-│   ├── models/
-│   │   └── maestro.py          # Domain models
-│   ├── routers/
-│   │   └── maestro.py          # API endpoints
-│   ├── services/
-│   │   └── maestro_checks.py   # Governance checks
-│   └── main.py                 # FastAPI app (includes maestro router)
-└── tests/
-    └── test_maestro.py         # Test suite
+pytest tests/maestro/test_maestro.py::TestReleaseGate::test_release_gate_passes -v
 ```
 
 ## Future Enhancements
 
-### Phase 2: Database Integration
-- Replace in-memory storage with PostgreSQL/Neo4j
-- Add proper foreign key constraints to IntelGraph
-- Implement tenant/case scoping
+### Near-term (Next 2-week slice)
+1. **Persistent Storage**: Replace in-memory store with PostgreSQL or Neo4j
+2. **Foreign Key Validation**: Validate entity/decision IDs against IntelGraph
+3. **SBOM/SLSA Parsers**: Auto-extract metadata from SBOM and SLSA files
+4. **Webhook Notifications**: Trigger events on run completion or gate failures
 
-### Phase 3: SBOM/SLSA Integration
-- Integrate with Syft for SBOM generation
-- Add SLSA provenance verification
-- Automated artifact generation
+### Medium-term
+1. **Cost Tracking**: Integrate with cloud billing APIs for actual cost tracking
+2. **Artifact Storage**: Direct S3/GCS integration for artifact upload
+3. **Audit Trail**: Full provenance chain for artifact transformations
+4. **Policy Engine**: Configurable release gate requirements
 
-### Phase 4: Advanced Governance
-- Custom release gate policies
-- Policy-as-code integration (OPA)
-- Audit trail for governance decisions
+### Long-term
+1. **Multi-tenant**: Tenant isolation and RBAC
+2. **Workflow Orchestration**: DAG-based run dependencies
+3. **Automated Gates**: Trigger downstream actions on gate passage
+4. **Analytics Dashboard**: Visualize run costs, compliance trends
 
-### Phase 5: UI Integration
-- Maestro dashboard in IntelGraph UI
-- Visual run timelines
-- Artifact explorer
+## Testing
+
+### Test Coverage
+
+The test suite covers:
+- ✅ Run creation, retrieval, listing, updating
+- ✅ Artifact creation and listing
+- ✅ Disclosure pack creation
+- ✅ Run manifest generation
+- ✅ Release gate validation (pass/fail scenarios)
+- ✅ Compliance report generation
+- ✅ API endpoint integration tests
+
+### Test Data
+
+See `tests/maestro/conftest.py` for reusable fixtures:
+- `maestro_store`: Fresh storage instance
+- `client`: FastAPI test client
+- `sample_run_data`: Example run creation payload
+- `sample_artifact_metadata`: Example artifact metadata
 
 ## Troubleshooting
 
-### Run not found
-- Ensure the run was created successfully
-- Check that you're using the correct run ID
+### Common Issues
 
-### Release gate failing
-- Use `/maestro/runs/{run_id}/summary` to see which requirements are missing
-- Ensure artifacts have proper `metadata_json` with governance flags set to `true`
+**Problem**: Release gate fails with "No artifacts meet compliance requirements"
 
-### Artifacts not showing up
-- Verify the run ID is correct
-- Check that artifacts were created successfully with `/maestro/runs/{run_id}/artifacts`
+**Solution**: Ensure at least one artifact has all three flags set:
+```python
+metadata_json = {
+  "sbom_present": true,
+  "slsa_provenance_present": true,
+  "risk_assessment_present": true
+}
+```
 
-## Support
+**Problem**: Cannot create artifact - "Run not found"
 
-For questions or issues:
-- Check the test suite for usage examples
-- Review the API endpoint documentation above
-- Contact the Maestro team
+**Solution**: Verify the run exists and the `run_id` is correct:
+```bash
+curl http://localhost:8001/maestro/runs/{run_id}
+```
 
-## License
+**Problem**: Run manifest returns empty disclosure pack
 
-Copyright © 2025 Topicality. All rights reserved.
+**Solution**: Disclosure packs are optional. Create one explicitly:
+```bash
+curl -X POST http://localhost:8001/maestro/disclosure-packs \
+  -d '{"run_id": "...", "summary": "...", "artifact_ids": [...]}'
+```
+
+## Contributing
+
+When extending Maestro:
+
+1. **Add tests first**: Follow TDD - write tests before implementation
+2. **Update documentation**: Keep this doc in sync with code changes
+3. **Maintain simplicity**: This is a 2-week MVP, avoid over-engineering
+4. **Follow patterns**: Match IntelGraph MVP conventions (Pydantic, FastAPI, pytest)
+
+## References
+
+- **IntelGraph Models**: `intelgraph-mvp/api/app/models/__init__.py`
+- **SBOM Spec**: https://cyclonedx.org/
+- **SLSA Provenance**: https://slsa.dev/spec/v1.0/provenance
+- **FastAPI Docs**: https://fastapi.tiangolo.com/
+
+---
+
+**Maintainer**: Engineering Team
+**Feedback**: Submit issues to the project tracker
