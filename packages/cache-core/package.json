@@ -1,0 +1,48 @@
+{
+  "name": "@intelgraph/cache-core",
+  "version": "1.0.0",
+  "description": "Unified caching abstraction with L1/L2 tiers, metrics, and invalidation",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "ioredis": "^5.4.1",
+    "prom-client": "^15.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "peerDependencies": {
+    "ioredis": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "keywords": [
+    "cache",
+    "redis",
+    "lru",
+    "multi-tier"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BrianCLong/summit.git",
+    "directory": "packages/cache-core"
+  }
+}

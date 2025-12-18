@@ -1,0 +1,250 @@
+name: Reusable SLSA L3 Build
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        description: 'Container image name'
+        required: true
+        type: string
+      dockerfile:
+        description: 'Path to Dockerfile'
+        required: false
+        type: string
+        default: './Dockerfile'
+      context:
+        description: 'Build context path'
+        required: false
+        type: string
+        default: '.'
+      platforms:
+        description: 'Target platforms (comma-separated)'
+        required: false
+        type: string
+        default: 'linux/amd64'
+      push:
+        description: 'Push to registry'
+        required: false
+        type: boolean
+        default: true
+      sign:
+        description: 'Sign with cosign'
+        required: false
+        type: boolean
+        default: true
+      sbom:
+        description: 'Generate SBOM'
+        required: false
+        type: boolean
+        default: true
+      slsa_provenance:
+        description: 'Generate SLSA provenance'
+        required: false
+        type: boolean
+        default: true
+      reproducible:
+        description: 'Enable reproducible build settings'
+        required: false
+        type: boolean
+        default: true
+    outputs:
+      image_digest:
+        description: 'Image digest'
+        value: ${{ jobs.build.outputs.digest }}
+      image_uri:
+        description: 'Full image URI with digest'
+        value: ${{ jobs.build.outputs.image-uri }}
+      sbom_digest:
+        description: 'SBOM digest'
+        value: ${{ jobs.build.outputs.sbom-digest }}
+      slsa_level:
+        description: 'Achieved SLSA level'
+        value: ${{ jobs.build.outputs.slsa-level }}
+    secrets:
+      registry_password:
+        description: 'Container registry password/token'
+        required: false
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+  attestations: write
+
+env:
+  REGISTRY: ghcr.io
+  COSIGN_EXPERIMENTAL: '1'
+
+jobs:
+  build:
+    name: Build & Attest
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.build.outputs.digest }}
+      image-uri: ${{ steps.image-uri.outputs.uri }}
+      sbom-digest: ${{ steps.sbom.outputs.digest }}
+      slsa-level: ${{ steps.slsa-check.outputs.level }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            network=none
+            image=moby/buildkit:v0.12.4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.registry_password || secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ inputs.image_name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=sha,prefix=sha-
+
+      - name: Set reproducible build environment
+        if: inputs.reproducible
+        run: |
+          # Set deterministic timestamps for reproducible builds
+          echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+
+      - name: Build and push
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ inputs.context }}
+          file: ${{ inputs.dockerfile }}
+          push: ${{ inputs.push }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            io.slsa.level=3
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: ${{ inputs.platforms }}
+          sbom: ${{ inputs.sbom }}
+          provenance: mode=max
+          build-args: |
+            SOURCE_DATE_EPOCH=${{ env.SOURCE_DATE_EPOCH }}
+            GIT_COMMIT=${{ github.sha }}
+
+      - name: Set image URI
+        id: image-uri
+        run: |
+          URI="${{ env.REGISTRY }}/${{ inputs.image_name }}@${{ steps.build.outputs.digest }}"
+          echo "uri=$URI" >> "$GITHUB_OUTPUT"
+
+      - name: Install Cosign
+        if: inputs.sign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: v2.2.4
+
+      - name: Sign image (OIDC keyless)
+        if: inputs.sign && inputs.push
+        run: |
+          set -euo pipefail
+
+          IMAGE="${{ steps.image-uri.outputs.uri }}"
+
+          cosign sign --yes \
+            -a "repo=${{ github.repository }}" \
+            -a "ref=${{ github.ref }}" \
+            -a "sha=${{ github.sha }}" \
+            -a "workflow=${{ github.workflow }}" \
+            -a "slsa_level=3" \
+            "$IMAGE"
+
+      - name: Generate SBOM
+        if: inputs.sbom
+        id: sbom
+        run: |
+          set -euo pipefail
+
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.4.1
+
+          if [ "${{ inputs.push }}" = "true" ]; then
+            IMAGE="${{ steps.image-uri.outputs.uri }}"
+            syft "$IMAGE" -o cyclonedx-json=sbom.cdx.json
+            syft "$IMAGE" -o spdx-json=sbom.spdx.json
+          else
+            syft . -o cyclonedx-json=sbom.cdx.json
+            syft . -o spdx-json=sbom.spdx.json
+          fi
+
+          SBOM_DIGEST=$(sha256sum sbom.cdx.json | cut -d' ' -f1)
+          echo "digest=$SBOM_DIGEST" >> "$GITHUB_OUTPUT"
+
+      - name: Attest SBOM
+        if: inputs.sbom && inputs.sign && inputs.push
+        run: |
+          set -euo pipefail
+
+          IMAGE="${{ steps.image-uri.outputs.uri }}"
+
+          cosign attest --yes \
+            --predicate sbom.cdx.json \
+            --type cyclonedx \
+            "$IMAGE"
+
+          cosign attest --yes \
+            --predicate sbom.spdx.json \
+            --type spdx \
+            "$IMAGE"
+
+      - name: Determine SLSA level
+        id: slsa-check
+        run: |
+          LEVEL="SLSA_0"
+
+          # Check for SLSA requirements
+          if [ "${{ inputs.push }}" = "true" ] && [ "${{ inputs.sign }}" = "true" ]; then
+            if [ "${{ inputs.sbom }}" = "true" ] && [ "${{ inputs.slsa_provenance }}" = "true" ]; then
+              LEVEL="SLSA_3"
+            else
+              LEVEL="SLSA_2"
+            fi
+          fi
+
+          echo "level=$LEVEL" >> "$GITHUB_OUTPUT"
+          echo "Achieved SLSA Level: $LEVEL"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-${{ github.run_id }}
+          path: |
+            sbom.cdx.json
+            sbom.spdx.json
+          retention-days: 90
+
+  # SLSA provenance generation using official generator
+  provenance:
+    name: Generate SLSA Provenance
+    needs: build
+    if: inputs.slsa_provenance && inputs.push
+    permissions:
+      actions: read
+      id-token: write
+      contents: write
+      packages: write
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_container_slsa3.yml@v2.0.0
+    with:
+      image: ${{ needs.build.outputs.image-uri }}
+      digest: ${{ needs.build.outputs.digest }}
+    secrets:
+      registry-password: ${{ secrets.GITHUB_TOKEN }}
