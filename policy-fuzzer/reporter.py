@@ -45,21 +45,21 @@ def generate_html_report(failing_cases, coverage_data):
     <head>
         <title>Policy Fuzzer Report</title>
         <style>
-            body { font-family: sans-serif; }
-            table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; }
-            .heatmap-cell { width: 50px; height: 20px; text-align: center; vertical-align: middle; }
-            .color-0 { background-color: #ffebee; } /* Lightest red */
-            .color-1 { background-color: #ffcdd2; }
-            .color-2 { background-color: #ef9a9a; }
-            .color-3 { background-color: #e57373; }
-            .color-4 { background-color: #ef5350; }
-            .color-5 { background-color: #f44336; }
-            .color-6 { background-color: #e53935; }
-            .color-7 { background-color: #d32f2f; }
-            .color-8 { background-color: #c62828; }
-            .color-9 { background-color: #b71c1c; } /* Darkest red */
+            body {{ font-family: sans-serif; }}
+            table {{ border-collapse: collapse; width: 100%; margin-bottom: 20px; }}
+            th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+            th {{ background-color: #f2f2f2; }}
+            .heatmap-cell {{ width: 50px; height: 20px; text-align: center; vertical-align: middle; }}
+            .color-0 {{ background-color: #ffebee; }} /* Lightest red */
+            .color-1 {{ background-color: #ffcdd2; }}
+            .color-2 {{ background-color: #ef9a9a; }}
+            .color-3 {{ background-color: #e57373; }}
+            .color-4 {{ background-color: #ef5350; }}
+            .color-5 {{ background-color: #f44336; }}
+            .color-6 {{ background-color: #e53935; }}
+            .color-7 {{ background-color: #d32f2f; }}
+            .color-8 {{ background-color: #c62828; }}
+            .color-9 {{ background-color: #b71c1c; }} /* Darkest red */
         </style>
     </head>
     <body>
@@ -156,9 +156,9 @@ def generate_reports(failing_cases, coverage_data):
                 f.write(
                     "is_compliant = all([consent_result, licenses_result, geo_result, retention_result, time_window_result])\n"
                 )
-                f.write(f'print(f"Policy: {policy}")\n')
-                f.write(f'print(f"Query: {query}")\n')
-                f.write(f'print(f"Is Compliant: {is_compliant}")\n')
+                f.write('print(f"Policy: {policy}")\n')
+                f.write('print(f"Query: {query}")\n')
+                f.write('print(f"Is Compliant: {is_compliant}")\n')
                 f.write(
                     f"# Expected: {'Non-compliant' if 'Metamorphic' in case['reason'] else 'Compliant'}\n"
                 )

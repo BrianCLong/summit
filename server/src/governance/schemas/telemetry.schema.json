@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string" },
+    "runId": { "type": "string" },
+    "modelId": { "type": "string" },
+    "tenantId": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "details": { "type": "object" },
+    "previousEventId": { "type": "string" }
+  },
+  "required": ["id", "kind", "runId", "timestamp", "details"]
+}

@@ -25,6 +25,7 @@ export { EmptyState } from './EmptyState'
 export { Input } from './input'
 export { Label } from './label'
 export { Pagination } from './Pagination'
+export { Popover, PopoverContent, PopoverTrigger } from './Popover'
 export { Progress } from './progress'
 export { SearchBar } from './SearchBar'
 export { Separator } from './separator'
@@ -50,19 +51,7 @@ export {
   TooltipTrigger,
 } from './Tooltip'
 
-// Re-export recharts components for convenience
-export {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip as ChartTooltip,
-  Legend,
-} from 'recharts'
+// NOTE: Recharts components were previously re-exported here for convenience,
+// but this caused the entire recharts library (~120KB) to be included when
+// importing any UI component. Import recharts directly where needed instead:
+// import { BarChart, Bar, ... } from 'recharts'
