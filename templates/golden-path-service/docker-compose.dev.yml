@@ -1,0 +1,42 @@
+version: '3.9'
+services:
+  api:
+    build: .
+    command: npm run dev
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - LOG_LEVEL=debug
+      - DB_URL=postgres://postgres:postgres@db:5432/golden_path
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+  db:
+    image: postgres:16-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=golden_path
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-U', 'postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  redpanda:
+    image: docker.redpanda.com/vectorized/redpanda:v24.2.3
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=512M
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+    ports:
+      - '9092:9092'

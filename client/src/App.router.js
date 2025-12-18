@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, Suspense } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -31,17 +31,21 @@ import {
   IconButton,
   LinearProgress,
   Divider,
+  CircularProgress,
 } from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  Search,
-  Timeline,
-  Psychology,
-  Menu as MenuIcon,
-  Map,
-  Assessment,
-  Settings,
-} from '@mui/icons-material';
+
+// Direct icon imports for tree-shaking (reduces bundle size by ~200-400KB)
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import Search from '@mui/icons-material/Search';
+import Timeline from '@mui/icons-material/Timeline';
+import Psychology from '@mui/icons-material/Psychology';
+import MenuIcon from '@mui/icons-material/Menu';
+import Map from '@mui/icons-material/Map';
+import Assessment from '@mui/icons-material/Assessment';
+import Settings from '@mui/icons-material/Settings';
+import MilitaryTech from '@mui/icons-material/MilitaryTech';
+import Security from '@mui/icons-material/Security';
+
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
 import { apolloClient } from './services/apollo';
@@ -49,16 +53,55 @@ import { useSelector } from 'react-redux';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
-import InteractiveGraphExplorer from './components/graph/InteractiveGraphExplorer';
-import IntelligentCopilot from './components/ai/IntelligentCopilot';
-import LiveCollaborationPanel from './components/collaboration/LiveCollaborationPanel';
-import InvestigationTimeline from './components/timeline/InvestigationTimeline';
-import ThreatAssessmentEngine from './components/threat/ThreatAssessmentEngine';
-import OsintFeedConfig from './components/admin/OSINTFeedConfig';
-import ExecutiveDashboard from './features/wargame/ExecutiveDashboard'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
-import AccessIntelPage from './features/rbac/AccessIntelPage.jsx';
-import { Security } from '@mui/icons-material';
+
+// Lazy-loaded page components for better initial load performance
+// These heavy components are only loaded when their routes are accessed
+const InteractiveGraphExplorer = React.lazy(() =>
+  import('./components/graph/InteractiveGraphExplorer')
+);
+const IntelligentCopilot = React.lazy(() =>
+  import('./components/ai/IntelligentCopilot')
+);
+const LiveCollaborationPanel = React.lazy(() =>
+  import('./components/collaboration/LiveCollaborationPanel')
+);
+const InvestigationTimeline = React.lazy(() =>
+  import('./components/timeline/InvestigationTimeline')
+);
+const ThreatAssessmentEngine = React.lazy(() =>
+  import('./components/threat/ThreatAssessmentEngine')
+);
+const OsintFeedConfig = React.lazy(() =>
+  import('./components/admin/OSINTFeedConfig')
+);
+// WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
+const ExecutiveDashboard = React.lazy(() =>
+  import('./features/wargame/ExecutiveDashboard')
+);
+const AccessIntelPage = React.lazy(() =>
+  import('./features/rbac/AccessIntelPage.jsx')
+);
+
+// Loading fallback component for lazy-loaded routes
+function PageLoadingFallback() {
+  return (
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '50vh',
+        flexDirection: 'column',
+        gap: 2,
+      }}
+    >
+      <CircularProgress size={40} />
+      <Typography variant="body2" color="text.secondary">
+        Loading...
+      </Typography>
+    </Box>
+  );
+}
 
 // Navigation items
 const navigationItems = [
@@ -100,6 +143,7 @@ function ConnectionStatus() {
           body: JSON.stringify({ query: '{ __typename }' }),
         });
         setBackendStatus(response.ok ? 'connected' : 'error');
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         setBackendStatus('error');
       }
@@ -473,7 +517,9 @@ function DashboardPage() {
 
         {/* Live Collaboration Panel */}
         <Grid item xs={12} md={4}>
-          <LiveCollaborationPanel />
+          <Suspense fallback={<PageLoadingFallback />}>
+            <LiveCollaborationPanel />
+          </Suspense>
         </Grid>
 
         {/* Platform Status */}
@@ -538,7 +584,9 @@ function DashboardPage() {
 function InvestigationsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InvestigationTimeline />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <InvestigationTimeline />
+      </Suspense>
     </Container>
   );
 }
@@ -546,7 +594,9 @@ function InvestigationsPage() {
 function GraphExplorerPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <InteractiveGraphExplorer />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <InteractiveGraphExplorer />
+      </Suspense>
     </Container>
   );
 }
@@ -554,7 +604,9 @@ function GraphExplorerPage() {
 function CopilotPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <IntelligentCopilot />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <IntelligentCopilot />
+      </Suspense>
     </Container>
   );
 }
@@ -562,7 +614,9 @@ function CopilotPage() {
 function ThreatsPage() {
   return (
     <Container maxWidth="xl" sx={{ height: '100vh', py: 2 }}>
-      <ThreatAssessmentEngine />
+      <Suspense fallback={<PageLoadingFallback />}>
+        <ThreatAssessmentEngine />
+      </Suspense>
     </Container>
   );
 }
@@ -611,15 +665,15 @@ function MainLayout() {
             <Route path="/graph" element={<GraphExplorerPage />} />
             <Route path="/copilot" element={<CopilotPage />} />
             <Route path="/threats" element={<ThreatsPage />} />
-            <Route path="/access-intel" element={<AccessIntelPage />} />
+            <Route path="/access-intel" element={<Suspense fallback={<PageLoadingFallback />}><AccessIntelPage /></Suspense>} />
             <Route path="/geoint" element={<InvestigationsPage />} />
             <Route path="/reports" element={<InvestigationsPage />} />
             <Route element={<ProtectedRoute roles={['ADMIN']} />}>
               <Route path="/system" element={<InvestigationsPage />} />
-              <Route path="/admin/osint-feeds" element={<OsintFeedConfig />} />
+              <Route path="/admin/osint-feeds" element={<Suspense fallback={<PageLoadingFallback />}><OsintFeedConfig /></Suspense>} />
               <Route
                 path="/wargame-dashboard"
-                element={<ExecutiveDashboard />}
+                element={<Suspense fallback={<PageLoadingFallback />}><ExecutiveDashboard /></Suspense>}
               />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
@@ -666,10 +720,15 @@ function ThemedAppShell({ children }) {
 
 function App() {
   useEffect(() => {
+    // eslint-disable-next-line no-console
     console.log('🚀 Router IntelGraph App mounting...');
+    // eslint-disable-next-line no-console
     console.log('✅ Redux store connected');
+    // eslint-disable-next-line no-console
     console.log('✅ Material-UI theme loaded');
+    // eslint-disable-next-line no-console
     console.log('✅ Apollo GraphQL client initialized');
+    // eslint-disable-next-line no-console
     console.log('✅ React Router navigation enabled');
   }, []);
 
