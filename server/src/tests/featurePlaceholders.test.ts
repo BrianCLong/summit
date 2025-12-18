@@ -4,6 +4,7 @@ import { correlateBehavioralDna } from '../ai/behavioralDnaNetwork';
 import { runOtRedTeam } from '../ai/otDigitalTwinRedTeam';
 import { orchestrateContinuity } from '../ai/serviceContinuityOrchestrator';
 import { analyzeContent } from '../ai/deepfakeSentinel';
+import { describe, it, expect } from '@jest/globals';
 
 describe('feature placeholders', () => {
   it('returns placeholder outputs', () => {
