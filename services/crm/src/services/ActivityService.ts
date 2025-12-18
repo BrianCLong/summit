@@ -371,17 +371,17 @@ export class ActivityService extends EventEmitter {
     let engagementScore = 0;
     if (activities.length > 0) {
       engagementScore += Math.min(activities.length * 5, 30); // Activity count
-      if (byType['call']) engagementScore += Math.min(byType['call'] * 5, 20);
-      if (byType['meeting']) engagementScore += Math.min(byType['meeting'] * 10, 30);
-      if (byType['email']) engagementScore += Math.min(byType['email'] * 2, 20);
+      if (byType['call']) {engagementScore += Math.min(byType['call'] * 5, 20);}
+      if (byType['meeting']) {engagementScore += Math.min(byType['meeting'] * 10, 30);}
+      if (byType['email']) {engagementScore += Math.min(byType['email'] * 2, 20);}
 
       // Recency bonus
       if (sortedActivities[0]) {
         const daysSinceActivity = Math.floor(
           (Date.now() - sortedActivities[0].createdAt.getTime()) / (1000 * 60 * 60 * 24)
         );
-        if (daysSinceActivity <= 7) engagementScore += 20;
-        else if (daysSinceActivity <= 30) engagementScore += 10;
+        if (daysSinceActivity <= 7) {engagementScore += 20;}
+        else if (daysSinceActivity <= 30) {engagementScore += 10;}
       }
     }
 

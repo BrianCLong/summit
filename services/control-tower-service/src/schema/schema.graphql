@@ -1,0 +1,1617 @@
+# Control Tower Service - GraphQL Schema
+# Version: 1.0.0
+
+"""
+Scalar types for the Control Tower service
+"""
+scalar DateTime
+scalar JSON
+scalar UUID
+
+"""
+Severity levels for events and situations
+"""
+enum Severity {
+  CRITICAL
+  WARNING
+  NORMAL
+  INFO
+  SUCCESS
+}
+
+"""
+Status of an operational event
+"""
+enum EventStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+"""
+Status of a situation (grouped events)
+"""
+enum SituationStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+"""
+Priority levels for situations
+"""
+enum Priority {
+  P1
+  P2
+  P3
+  P4
+}
+
+"""
+Types of actions that can be taken
+"""
+enum ActionType {
+  ACKNOWLEDGE
+  ESCALATE
+  RESOLVE
+  REASSIGN
+  SNOOZE
+  COMMENT
+  RUN_PLAYBOOK
+  NOTIFY
+  LINK_EVENT
+  UNLINK_EVENT
+}
+
+"""
+Status of an action
+"""
+enum ActionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+"""
+Categories for operational events
+"""
+enum EventCategory {
+  PAYMENT
+  SUPPORT
+  SALES
+  PRODUCT
+  INFRASTRUCTURE
+  SECURITY
+  CUSTOMER_HEALTH
+  HR
+  COMPLIANCE
+  GENERAL
+}
+
+"""
+Health score trend direction
+"""
+enum TrendDirection {
+  UP
+  DOWN
+  STABLE
+}
+
+"""
+Alert rule trigger types
+"""
+enum AlertTriggerType {
+  EVENT_MATCH
+  THRESHOLD
+  ANOMALY
+  SCHEDULE
+}
+
+"""
+Notification channels
+"""
+enum NotificationChannel {
+  EMAIL
+  SLACK
+  PAGERDUTY
+  WEBHOOK
+  IN_APP
+}
+
+# ============================================================================
+# Core Types
+# ============================================================================
+
+"""
+Operational event from any integrated source system
+"""
+type OperationalEvent {
+  id: UUID!
+
+  """Event title/summary"""
+  title: String!
+
+  """Detailed description"""
+  description: String
+
+  """Severity level"""
+  severity: Severity!
+
+  """Current status"""
+  status: EventStatus!
+
+  """Event category"""
+  category: EventCategory!
+
+  """Source system (e.g., 'stripe', 'zendesk')"""
+  source: String!
+
+  """External ID in source system"""
+  sourceId: String
+
+  """Direct link to source system"""
+  sourceUrl: String
+
+  """When the event occurred"""
+  occurredAt: DateTime!
+
+  """When we received the event"""
+  receivedAt: DateTime!
+
+  """When the event was created in our system"""
+  createdAt: DateTime!
+
+  """When last updated"""
+  updatedAt: DateTime!
+
+  """User who acknowledged the event"""
+  acknowledgedBy: User
+
+  """When acknowledged"""
+  acknowledgedAt: DateTime
+
+  """Currently assigned user"""
+  assignedTo: User
+
+  """Raw event payload"""
+  payload: JSON
+
+  """Structured metadata"""
+  metadata: EventMetadata
+
+  """Related entities from the graph"""
+  relatedEntities: [RelatedEntity!]!
+
+  """Events correlated with this one"""
+  correlatedEvents: [OperationalEvent!]!
+
+  """Situation this event belongs to"""
+  situation: Situation
+
+  """Actions taken on this event"""
+  actions: [EventAction!]!
+
+  """AI-generated suggestions"""
+  suggestions: [AISuggestion!]!
+
+  """Governance and provenance info"""
+  governance: GovernanceInfo!
+}
+
+"""
+Metadata for an operational event
+"""
+type EventMetadata {
+  """Estimated impact (monetary, users, etc.)"""
+  impactEstimate: ImpactEstimate
+
+  """Tags for filtering"""
+  tags: [String!]!
+
+  """Custom key-value properties"""
+  properties: JSON
+
+  """Error details if applicable"""
+  errorDetails: ErrorDetails
+}
+
+"""
+Impact estimation for an event
+"""
+type ImpactEstimate {
+  """Revenue at risk"""
+  revenueAtRisk: Float
+
+  """Number of affected customers"""
+  customersAffected: Int
+
+  """Number of affected users"""
+  usersAffected: Int
+
+  """Estimated severity score (0-100)"""
+  severityScore: Int
+
+  """Confidence in the estimate (0-1)"""
+  confidence: Float
+}
+
+"""
+Error details for technical events
+"""
+type ErrorDetails {
+  """Error code"""
+  code: String
+
+  """Error message"""
+  message: String
+
+  """Stack trace"""
+  stackTrace: String
+
+  """Affected endpoint or service"""
+  affectedService: String
+
+  """Error count"""
+  count: Int
+
+  """Error rate percentage"""
+  errorRate: Float
+}
+
+"""
+Related entity from the graph database
+"""
+type RelatedEntity {
+  """Entity ID"""
+  id: UUID!
+
+  """Entity type (Customer, System, Person, etc.)"""
+  type: String!
+
+  """Entity name/label"""
+  name: String!
+
+  """Relationship type to the event"""
+  relationshipType: String!
+
+  """Additional entity properties"""
+  properties: JSON
+
+  """Link to full entity view"""
+  entityUrl: String
+}
+
+"""
+Situation - a group of related events representing an operational issue
+"""
+type Situation {
+  id: UUID!
+
+  """Situation title"""
+  title: String!
+
+  """Detailed description"""
+  description: String
+
+  """Current status"""
+  status: SituationStatus!
+
+  """Priority level"""
+  priority: Priority!
+
+  """Highest severity event"""
+  severity: Severity!
+
+  """When the situation started"""
+  startedAt: DateTime!
+
+  """When the situation was resolved"""
+  resolvedAt: DateTime
+
+  """Duration in seconds"""
+  duration: Int
+
+  """Primary owner"""
+  owner: User
+
+  """All related events"""
+  events(
+    first: Int = 20
+    after: String
+    severity: [Severity!]
+    status: [EventStatus!]
+  ): EventConnection!
+
+  """Number of related events"""
+  eventCount: Int!
+
+  """Affected entities"""
+  affectedEntities: [RelatedEntity!]!
+
+  """Impact summary"""
+  impact: SituationImpact!
+
+  """Timeline of situation updates"""
+  timeline: [SituationTimelineEntry!]!
+
+  """Recommended actions"""
+  recommendedActions: [RecommendedAction!]!
+
+  """All actions taken"""
+  actions: [EventAction!]!
+
+  """Team members involved"""
+  team: [User!]!
+
+  """Created timestamp"""
+  createdAt: DateTime!
+
+  """Last update timestamp"""
+  updatedAt: DateTime!
+}
+
+"""
+Impact summary for a situation
+"""
+type SituationImpact {
+  """Total revenue at risk"""
+  revenueAtRisk: Float
+
+  """Number of affected customers"""
+  customersAffected: Int
+
+  """Number of support tickets"""
+  supportTickets: Int
+
+  """Reputational risk level"""
+  reputationalRisk: String
+
+  """List of affected customer details"""
+  affectedCustomers: [AffectedCustomer!]!
+}
+
+"""
+Customer affected by a situation
+"""
+type AffectedCustomer {
+  """Customer ID"""
+  id: UUID!
+
+  """Customer name"""
+  name: String!
+
+  """Annual Recurring Revenue"""
+  arr: Float
+
+  """Customer tier"""
+  tier: String
+
+  """Health score"""
+  healthScore: Int
+
+  """Account manager"""
+  accountManager: User
+}
+
+"""
+Entry in the situation timeline
+"""
+type SituationTimelineEntry {
+  """Entry ID"""
+  id: UUID!
+
+  """Timestamp"""
+  timestamp: DateTime!
+
+  """Type of entry (event, action, comment, status_change)"""
+  entryType: String!
+
+  """Description"""
+  description: String!
+
+  """User who created the entry"""
+  user: User
+
+  """Related event if applicable"""
+  event: OperationalEvent
+
+  """Related action if applicable"""
+  action: EventAction
+}
+
+"""
+Recommended action from AI or rules
+"""
+type RecommendedAction {
+  """Action ID"""
+  id: UUID!
+
+  """Action type"""
+  actionType: ActionType!
+
+  """Action title"""
+  title: String!
+
+  """Detailed description"""
+  description: String!
+
+  """Confidence score (0-1)"""
+  confidence: Float!
+
+  """Estimated time to complete"""
+  estimatedTimeMinutes: Int
+
+  """Historical success rate"""
+  successRate: Float
+
+  """Playbook to run if applicable"""
+  playbook: Playbook
+
+  """Template to use if applicable"""
+  template: NotificationTemplate
+
+  """Reason for recommendation"""
+  reasoning: String
+
+  """Similar past incidents"""
+  similarIncidents: [HistoricalIncident!]
+}
+
+"""
+AI-generated suggestion for an event
+"""
+type AISuggestion {
+  """Suggestion ID"""
+  id: UUID!
+
+  """Suggestion type"""
+  type: String!
+
+  """Suggestion content"""
+  content: String!
+
+  """Confidence score"""
+  confidence: Float!
+
+  """Reasoning behind the suggestion"""
+  reasoning: String
+
+  """Actionable link"""
+  actionUrl: String
+
+  """Similar past incidents"""
+  similarIncidents: [HistoricalIncident!]
+}
+
+"""
+Historical incident for context
+"""
+type HistoricalIncident {
+  """Incident ID"""
+  id: UUID!
+
+  """Incident title"""
+  title: String!
+
+  """When it occurred"""
+  occurredAt: DateTime!
+
+  """How it was resolved"""
+  resolution: String
+
+  """Time to resolution"""
+  resolutionTimeMinutes: Int
+
+  """Similarity score"""
+  similarityScore: Float!
+}
+
+"""
+Action taken on an event or situation
+"""
+type EventAction {
+  """Action ID"""
+  id: UUID!
+
+  """Action type"""
+  type: ActionType!
+
+  """Current status"""
+  status: ActionStatus!
+
+  """User who performed the action"""
+  performedBy: User!
+
+  """When the action was initiated"""
+  initiatedAt: DateTime!
+
+  """When the action completed"""
+  completedAt: DateTime
+
+  """Duration in milliseconds"""
+  durationMs: Int
+
+  """Action details/notes"""
+  details: String
+
+  """Result of the action"""
+  result: ActionResult
+
+  """Target event"""
+  targetEvent: OperationalEvent
+
+  """Target situation"""
+  targetSituation: Situation
+}
+
+"""
+Result of an action
+"""
+type ActionResult {
+  """Whether the action succeeded"""
+  success: Boolean!
+
+  """Result message"""
+  message: String
+
+  """Error details if failed"""
+  error: String
+
+  """Additional result data"""
+  data: JSON
+}
+
+"""
+Governance and provenance information
+"""
+type GovernanceInfo {
+  """Data origin/source"""
+  origin: String!
+
+  """Sensitivity level"""
+  sensitivity: String!
+
+  """Required clearance level"""
+  clearance: String!
+
+  """Legal basis for processing"""
+  legalBasis: String
+
+  """Retention policy"""
+  retentionClass: String
+
+  """Policy labels"""
+  policyLabels: [String!]!
+
+  """Full provenance chain"""
+  provenanceChain: [ProvenanceEntry!]!
+}
+
+"""
+Entry in provenance chain
+"""
+type ProvenanceEntry {
+  """Step ID"""
+  id: UUID!
+
+  """Timestamp"""
+  timestamp: DateTime!
+
+  """Transform type"""
+  transformType: String!
+
+  """Actor who performed the transform"""
+  actorId: String
+
+  """Configuration used"""
+  config: JSON
+}
+
+"""
+User in the system
+"""
+type User {
+  """User ID"""
+  id: UUID!
+
+  """Display name"""
+  name: String!
+
+  """Email address"""
+  email: String!
+
+  """Avatar URL"""
+  avatarUrl: String
+
+  """Current status"""
+  status: UserStatus
+
+  """Current activity"""
+  currentActivity: String
+
+  """Role"""
+  role: String
+}
+
+"""
+User status information
+"""
+type UserStatus {
+  """Online status"""
+  online: Boolean!
+
+  """Status message"""
+  statusMessage: String
+
+  """Last seen timestamp"""
+  lastSeen: DateTime
+
+  """Available for assignment"""
+  availableForAssignment: Boolean!
+}
+
+"""
+Playbook for automated response
+"""
+type Playbook {
+  """Playbook ID"""
+  id: UUID!
+
+  """Playbook name"""
+  name: String!
+
+  """Description"""
+  description: String
+
+  """Steps in the playbook"""
+  steps: [PlaybookStep!]!
+
+  """Estimated execution time"""
+  estimatedTimeMinutes: Int
+
+  """Historical success rate"""
+  successRate: Float
+
+  """Number of times executed"""
+  executionCount: Int
+}
+
+"""
+Step in a playbook
+"""
+type PlaybookStep {
+  """Step number"""
+  order: Int!
+
+  """Step name"""
+  name: String!
+
+  """Step type"""
+  type: String!
+
+  """Step configuration"""
+  config: JSON
+}
+
+"""
+Notification template
+"""
+type NotificationTemplate {
+  """Template ID"""
+  id: UUID!
+
+  """Template name"""
+  name: String!
+
+  """Template type"""
+  type: String!
+
+  """Subject line"""
+  subject: String
+
+  """Template body"""
+  body: String!
+
+  """Supported channels"""
+  channels: [NotificationChannel!]!
+}
+
+# ============================================================================
+# Health Score Types
+# ============================================================================
+
+"""
+Overall operational health score
+"""
+type HealthScore {
+  """Overall score (0-100)"""
+  score: Int!
+
+  """Trend direction"""
+  trend: TrendDirection!
+
+  """Change from previous period"""
+  change: Int!
+
+  """Period comparison (e.g., 'yesterday')"""
+  comparisonPeriod: String!
+
+  """Component scores"""
+  components: [HealthScoreComponent!]!
+
+  """When calculated"""
+  calculatedAt: DateTime!
+
+  """Historical scores"""
+  history(
+    period: String = "7d"
+    resolution: String = "1h"
+  ): [HealthScoreDataPoint!]!
+}
+
+"""
+Component of the health score
+"""
+type HealthScoreComponent {
+  """Component name"""
+  name: String!
+
+  """Component score (0-100)"""
+  score: Int!
+
+  """Component status"""
+  status: ComponentStatus!
+
+  """Contributing factors"""
+  factors: [HealthFactor!]!
+
+  """Weight in overall score"""
+  weight: Float!
+}
+
+"""
+Status for a health score component
+"""
+enum ComponentStatus {
+  HEALTHY
+  WARNING
+  CRITICAL
+  UNKNOWN
+}
+
+"""
+Factor contributing to a health score
+"""
+type HealthFactor {
+  """Factor name"""
+  name: String!
+
+  """Current value"""
+  value: Float!
+
+  """Threshold for warning"""
+  warningThreshold: Float
+
+  """Threshold for critical"""
+  criticalThreshold: Float
+
+  """Impact on score"""
+  impact: Float!
+}
+
+"""
+Historical health score data point
+"""
+type HealthScoreDataPoint {
+  """Timestamp"""
+  timestamp: DateTime!
+
+  """Score at this time"""
+  score: Int!
+}
+
+# ============================================================================
+# Alert Types
+# ============================================================================
+
+"""
+Alert triggered by an alert rule
+"""
+type Alert {
+  """Alert ID"""
+  id: UUID!
+
+  """Alert rule that triggered this"""
+  rule: AlertRule!
+
+  """Severity"""
+  severity: Severity!
+
+  """Current status"""
+  status: AlertStatus!
+
+  """Alert title"""
+  title: String!
+
+  """Alert message"""
+  message: String!
+
+  """Triggering event"""
+  triggeringEvent: OperationalEvent
+
+  """When triggered"""
+  triggeredAt: DateTime!
+
+  """When acknowledged"""
+  acknowledgedAt: DateTime
+
+  """Acknowledged by"""
+  acknowledgedBy: User
+
+  """Snooze until"""
+  snoozedUntil: DateTime
+
+  """Notifications sent"""
+  notifications: [AlertNotification!]!
+}
+
+"""
+Alert status
+"""
+enum AlertStatus {
+  ACTIVE
+  ACKNOWLEDGED
+  SNOOZED
+  RESOLVED
+  DISMISSED
+}
+
+"""
+Alert rule configuration
+"""
+type AlertRule {
+  """Rule ID"""
+  id: UUID!
+
+  """Rule name"""
+  name: String!
+
+  """Rule description"""
+  description: String
+
+  """Whether enabled"""
+  enabled: Boolean!
+
+  """Trigger type"""
+  triggerType: AlertTriggerType!
+
+  """Trigger conditions"""
+  conditions: JSON!
+
+  """Severity to assign"""
+  severity: Severity!
+
+  """Notification channels"""
+  channels: [NotificationChannel!]!
+
+  """Notification recipients"""
+  recipients: [String!]!
+
+  """Cooldown period in seconds"""
+  cooldownSeconds: Int
+
+  """Times triggered"""
+  triggerCount: Int!
+
+  """Last triggered"""
+  lastTriggeredAt: DateTime
+
+  """Created by"""
+  createdBy: User!
+
+  """Created at"""
+  createdAt: DateTime!
+
+  """Updated at"""
+  updatedAt: DateTime!
+}
+
+"""
+Notification sent for an alert
+"""
+type AlertNotification {
+  """Notification ID"""
+  id: UUID!
+
+  """Channel used"""
+  channel: NotificationChannel!
+
+  """Recipient"""
+  recipient: String!
+
+  """When sent"""
+  sentAt: DateTime!
+
+  """Whether delivered"""
+  delivered: Boolean!
+
+  """Delivery error if any"""
+  error: String
+}
+
+# ============================================================================
+# Metrics Types
+# ============================================================================
+
+"""
+Key metric for display
+"""
+type KeyMetric {
+  """Metric ID"""
+  id: String!
+
+  """Metric name"""
+  name: String!
+
+  """Current value"""
+  value: Float!
+
+  """Display unit"""
+  unit: String
+
+  """Formatted value for display"""
+  formattedValue: String!
+
+  """Trend direction"""
+  trend: TrendDirection!
+
+  """Change from previous period"""
+  change: Float!
+
+  """Change percentage"""
+  changePercent: Float
+
+  """Status"""
+  status: ComponentStatus!
+
+  """Sparkline data"""
+  sparkline: [Float!]
+
+  """Link to detailed view"""
+  detailUrl: String
+}
+
+"""
+Team member pulse status
+"""
+type TeamPulse {
+  """User"""
+  user: User!
+
+  """Current status"""
+  status: UserStatus!
+
+  """Current assignment"""
+  currentAssignment: String
+
+  """Active situations count"""
+  activeSituationsCount: Int!
+
+  """Events assigned today"""
+  eventsAssignedToday: Int!
+}
+
+# ============================================================================
+# Connections (Pagination)
+# ============================================================================
+
+"""
+Connection type for paginated events
+"""
+type EventConnection {
+  """List of edges"""
+  edges: [EventEdge!]!
+
+  """Page info"""
+  pageInfo: PageInfo!
+
+  """Total count"""
+  totalCount: Int!
+}
+
+"""
+Edge type for event connection
+"""
+type EventEdge {
+  """The event"""
+  node: OperationalEvent!
+
+  """Cursor for pagination"""
+  cursor: String!
+}
+
+"""
+Connection type for paginated situations
+"""
+type SituationConnection {
+  """List of edges"""
+  edges: [SituationEdge!]!
+
+  """Page info"""
+  pageInfo: PageInfo!
+
+  """Total count"""
+  totalCount: Int!
+}
+
+"""
+Edge type for situation connection
+"""
+type SituationEdge {
+  """The situation"""
+  node: Situation!
+
+  """Cursor for pagination"""
+  cursor: String!
+}
+
+"""
+Connection type for paginated alerts
+"""
+type AlertConnection {
+  """List of edges"""
+  edges: [AlertEdge!]!
+
+  """Page info"""
+  pageInfo: PageInfo!
+
+  """Total count"""
+  totalCount: Int!
+}
+
+"""
+Edge type for alert connection
+"""
+type AlertEdge {
+  """The alert"""
+  node: Alert!
+
+  """Cursor for pagination"""
+  cursor: String!
+}
+
+"""
+Pagination info
+"""
+type PageInfo {
+  """Has next page"""
+  hasNextPage: Boolean!
+
+  """Has previous page"""
+  hasPreviousPage: Boolean!
+
+  """Start cursor"""
+  startCursor: String
+
+  """End cursor"""
+  endCursor: String
+}
+
+# ============================================================================
+# Input Types
+# ============================================================================
+
+"""
+Filter input for events
+"""
+input EventFilterInput {
+  """Filter by severity"""
+  severity: [Severity!]
+
+  """Filter by status"""
+  status: [EventStatus!]
+
+  """Filter by category"""
+  category: [EventCategory!]
+
+  """Filter by source"""
+  source: [String!]
+
+  """Filter by time range start"""
+  startTime: DateTime
+
+  """Filter by time range end"""
+  endTime: DateTime
+
+  """Text search query"""
+  searchQuery: String
+
+  """Filter by assigned user"""
+  assignedTo: UUID
+
+  """Filter by situation"""
+  situationId: UUID
+
+  """Filter unassigned only"""
+  unassignedOnly: Boolean
+}
+
+"""
+Input for creating a situation
+"""
+input CreateSituationInput {
+  """Situation title"""
+  title: String!
+
+  """Description"""
+  description: String
+
+  """Priority"""
+  priority: Priority!
+
+  """Initial event IDs to include"""
+  eventIds: [UUID!]!
+
+  """Owner user ID"""
+  ownerId: UUID
+}
+
+"""
+Input for updating a situation
+"""
+input UpdateSituationInput {
+  """New title"""
+  title: String
+
+  """New description"""
+  description: String
+
+  """New status"""
+  status: SituationStatus
+
+  """New priority"""
+  priority: Priority
+
+  """New owner"""
+  ownerId: UUID
+}
+
+"""
+Input for performing an action
+"""
+input PerformActionInput {
+  """Action type"""
+  type: ActionType!
+
+  """Target event ID"""
+  eventId: UUID
+
+  """Target situation ID"""
+  situationId: UUID
+
+  """Action details/notes"""
+  details: String
+
+  """Assignee ID for reassign actions"""
+  assigneeId: UUID
+
+  """Playbook ID for playbook actions"""
+  playbookId: UUID
+
+  """Template ID for notification actions"""
+  templateId: UUID
+
+  """Snooze duration in minutes"""
+  snoozeDurationMinutes: Int
+
+  """Additional parameters"""
+  parameters: JSON
+}
+
+"""
+Input for creating an alert rule
+"""
+input CreateAlertRuleInput {
+  """Rule name"""
+  name: String!
+
+  """Description"""
+  description: String
+
+  """Trigger type"""
+  triggerType: AlertTriggerType!
+
+  """Trigger conditions"""
+  conditions: JSON!
+
+  """Severity"""
+  severity: Severity!
+
+  """Notification channels"""
+  channels: [NotificationChannel!]!
+
+  """Recipients"""
+  recipients: [String!]!
+
+  """Cooldown in seconds"""
+  cooldownSeconds: Int
+
+  """Whether enabled"""
+  enabled: Boolean = true
+}
+
+"""
+Input for updating an alert rule
+"""
+input UpdateAlertRuleInput {
+  """Rule name"""
+  name: String
+
+  """Description"""
+  description: String
+
+  """Trigger conditions"""
+  conditions: JSON
+
+  """Severity"""
+  severity: Severity
+
+  """Notification channels"""
+  channels: [NotificationChannel!]
+
+  """Recipients"""
+  recipients: [String!]
+
+  """Cooldown in seconds"""
+  cooldownSeconds: Int
+
+  """Whether enabled"""
+  enabled: Boolean
+}
+
+"""
+Input for global search
+"""
+input SearchInput {
+  """Search query"""
+  query: String!
+
+  """Entity types to search"""
+  types: [String!]
+
+  """Maximum results"""
+  limit: Int = 20
+
+  """Include resolved/closed items"""
+  includeResolved: Boolean = false
+}
+
+"""
+Search result
+"""
+type SearchResult {
+  """Result type (event, situation, customer, etc.)"""
+  type: String!
+
+  """Result ID"""
+  id: UUID!
+
+  """Display title"""
+  title: String!
+
+  """Description/excerpt"""
+  description: String
+
+  """Relevance score"""
+  score: Float!
+
+  """Highlight matches"""
+  highlights: [String!]
+
+  """Additional metadata"""
+  metadata: JSON
+}
+
+# ============================================================================
+# Queries
+# ============================================================================
+
+type Query {
+  """Get operational health score"""
+  healthScore: HealthScore!
+
+  """Get key metrics for dashboard"""
+  keyMetrics(metricIds: [String!]): [KeyMetric!]!
+
+  """Get team pulse (status)"""
+  teamPulse: [TeamPulse!]!
+
+  """Get active situations"""
+  activeSituations(
+    first: Int = 10
+    after: String
+    priority: [Priority!]
+    status: [SituationStatus!]
+  ): SituationConnection!
+
+  """Get a specific situation"""
+  situation(id: UUID!): Situation
+
+  """Get event timeline"""
+  eventTimeline(
+    first: Int = 50
+    after: String
+    filter: EventFilterInput
+  ): EventConnection!
+
+  """Get a specific event"""
+  event(id: UUID!): OperationalEvent
+
+  """Get correlated events for an event"""
+  correlatedEvents(eventId: UUID!, depth: Int = 1): [OperationalEvent!]!
+
+  """Get context graph for an event"""
+  eventContextGraph(
+    eventId: UUID!
+    depth: Int = 2
+    entityTypes: [String!]
+  ): ContextGraph!
+
+  """Get alerts"""
+  alerts(
+    first: Int = 20
+    after: String
+    status: [AlertStatus!]
+    severity: [Severity!]
+  ): AlertConnection!
+
+  """Get a specific alert"""
+  alert(id: UUID!): Alert
+
+  """Get alert rules"""
+  alertRules(enabled: Boolean): [AlertRule!]!
+
+  """Get a specific alert rule"""
+  alertRule(id: UUID!): AlertRule
+
+  """Get available playbooks"""
+  playbooks(category: String): [Playbook!]!
+
+  """Get a specific playbook"""
+  playbook(id: UUID!): Playbook
+
+  """Global search"""
+  search(input: SearchInput!): [SearchResult!]!
+
+  """Get event sources"""
+  eventSources: [EventSource!]!
+
+  """Get event categories with counts"""
+  eventCategories(timeRange: String): [CategoryCount!]!
+
+  """Get current user"""
+  me: User!
+}
+
+"""
+Context graph for visualization
+"""
+type ContextGraph {
+  """Nodes in the graph"""
+  nodes: [GraphNode!]!
+
+  """Edges in the graph"""
+  edges: [GraphEdge!]!
+}
+
+"""
+Node in context graph
+"""
+type GraphNode {
+  """Node ID"""
+  id: UUID!
+
+  """Node type"""
+  type: String!
+
+  """Node label"""
+  label: String!
+
+  """Node properties"""
+  properties: JSON
+}
+
+"""
+Edge in context graph
+"""
+type GraphEdge {
+  """Edge ID"""
+  id: UUID!
+
+  """Source node ID"""
+  source: UUID!
+
+  """Target node ID"""
+  target: UUID!
+
+  """Relationship type"""
+  type: String!
+
+  """Edge properties"""
+  properties: JSON
+}
+
+"""
+Event source configuration
+"""
+type EventSource {
+  """Source ID"""
+  id: String!
+
+  """Source name"""
+  name: String!
+
+  """Source type"""
+  type: String!
+
+  """Whether enabled"""
+  enabled: Boolean!
+
+  """Last sync time"""
+  lastSyncAt: DateTime
+
+  """Event count"""
+  eventCount: Int!
+}
+
+"""
+Category with event count
+"""
+type CategoryCount {
+  """Category"""
+  category: EventCategory!
+
+  """Event count"""
+  count: Int!
+
+  """Critical count"""
+  criticalCount: Int!
+}
+
+# ============================================================================
+# Mutations
+# ============================================================================
+
+type Mutation {
+  """Acknowledge an event"""
+  acknowledgeEvent(eventId: UUID!, notes: String): OperationalEvent!
+
+  """Update event status"""
+  updateEventStatus(eventId: UUID!, status: EventStatus!, notes: String): OperationalEvent!
+
+  """Assign event to user"""
+  assignEvent(eventId: UUID!, userId: UUID!): OperationalEvent!
+
+  """Create a new situation"""
+  createSituation(input: CreateSituationInput!): Situation!
+
+  """Update a situation"""
+  updateSituation(id: UUID!, input: UpdateSituationInput!): Situation!
+
+  """Link event to situation"""
+  linkEventToSituation(eventId: UUID!, situationId: UUID!): Situation!
+
+  """Unlink event from situation"""
+  unlinkEventFromSituation(eventId: UUID!, situationId: UUID!): Situation!
+
+  """Resolve a situation"""
+  resolveSituation(id: UUID!, resolution: String!): Situation!
+
+  """Perform an action"""
+  performAction(input: PerformActionInput!): EventAction!
+
+  """Execute a playbook"""
+  executePlaybook(playbookId: UUID!, targetId: UUID!, targetType: String!): PlaybookExecution!
+
+  """Acknowledge an alert"""
+  acknowledgeAlert(alertId: UUID!): Alert!
+
+  """Snooze an alert"""
+  snoozeAlert(alertId: UUID!, durationMinutes: Int!): Alert!
+
+  """Dismiss an alert"""
+  dismissAlert(alertId: UUID!, reason: String): Alert!
+
+  """Create alert rule"""
+  createAlertRule(input: CreateAlertRuleInput!): AlertRule!
+
+  """Update alert rule"""
+  updateAlertRule(id: UUID!, input: UpdateAlertRuleInput!): AlertRule!
+
+  """Delete alert rule"""
+  deleteAlertRule(id: UUID!): Boolean!
+
+  """Update user status"""
+  updateMyStatus(status: String, currentActivity: String, availableForAssignment: Boolean): User!
+
+  """Add comment to event or situation"""
+  addComment(targetId: UUID!, targetType: String!, content: String!): Comment!
+}
+
+"""
+Playbook execution result
+"""
+type PlaybookExecution {
+  """Execution ID"""
+  id: UUID!
+
+  """Playbook executed"""
+  playbook: Playbook!
+
+  """Current status"""
+  status: ActionStatus!
+
+  """Steps completed"""
+  stepsCompleted: Int!
+
+  """Total steps"""
+  totalSteps: Int!
+
+  """Started at"""
+  startedAt: DateTime!
+
+  """Completed at"""
+  completedAt: DateTime
+
+  """Results"""
+  results: JSON
+}
+
+"""
+Comment on an event or situation
+"""
+type Comment {
+  """Comment ID"""
+  id: UUID!
+
+  """Comment content"""
+  content: String!
+
+  """Author"""
+  author: User!
+
+  """Created at"""
+  createdAt: DateTime!
+}
+
+# ============================================================================
+# Subscriptions
+# ============================================================================
+
+type Subscription {
+  """Subscribe to new events"""
+  eventCreated(filter: EventFilterInput): OperationalEvent!
+
+  """Subscribe to event updates"""
+  eventUpdated(eventId: UUID): OperationalEvent!
+
+  """Subscribe to situation updates"""
+  situationUpdated(situationId: UUID): Situation!
+
+  """Subscribe to new alerts"""
+  alertTriggered(severity: [Severity!]): Alert!
+
+  """Subscribe to health score updates"""
+  healthScoreUpdated: HealthScore!
+
+  """Subscribe to team pulse updates"""
+  teamPulseUpdated: TeamPulse!
+
+  """Subscribe to real-time metrics"""
+  metricsUpdated(metricIds: [String!]): [KeyMetric!]!
+}

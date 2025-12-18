@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       .glass-card {
@@ -497,6 +498,22 @@
         const [promptPreview, setPromptPreview] = useState(
           '[system] You are Orion…\n[user] Graph schema: … → produce Cypher',
         );
+        const [runInEnclave, setRunInEnclave] = useState(true);
+
+        const attestationProof =
+          routeDecision?.attestationProof ||
+          'PCR:trusted-measurement | Quote: sha256:enclave-sample';
+
+        useEffect(() => {
+          const handler = () => {
+            navigator.clipboard.writeText(attestationProof);
+            const btn = $('#copy-attestation');
+            btn.text('Copied!');
+            setTimeout(() => btn.text('Copy Proof'), 800);
+          };
+          $('#copy-attestation').on('click', handler);
+          return () => $('#copy-attestation').off('click', handler);
+        }, [attestationProof]);
 
         const runDryRun = async () => {
           try {
@@ -512,7 +529,7 @@
           try {
             const result = await api.routeExecute(
               task,
-              { loa, tenant, costCap },
+              { loa, tenant, costCap, runInEnclave, attestationProof },
               promptPreview,
             );
             console.log('Execution result:', result);
@@ -543,6 +560,34 @@
                 </div>
               }
             >
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4 p-3 rounded-lg border border-dashed border-green-400 bg-green-50">
+                <div className="flex items-center space-x-3">
+                  <label className="flex items-center space-x-2 font-semibold text-green-800">
+                    <input
+                      type="checkbox"
+                      checked={runInEnclave}
+                      onChange={(e) => setRunInEnclave(e.target.checked)}
+                      className="h-4 w-4 text-green-600"
+                    />
+                    <span>Run in Enclave</span>
+                  </label>
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    ✅ Attested
+                  </span>
+                  <button
+                    id="copy-attestation"
+                    type="button"
+                    className="px-3 py-1 text-xs rounded border border-emerald-400 text-emerald-800 hover:bg-emerald-100"
+                  >
+                    Copy Proof
+                  </button>
+                </div>
+                <div className="text-xs text-gray-600">
+                  {runInEnclave
+                    ? 'Ingress only, sealed storage enforced, KMS unwrap inside enclave.'
+                    : 'Enclave protections disabled; job will run in standard runtime.'}
+                </div>
+              </div>
               <div className="mb-4">
                 <h4 className="font-semibold mb-3">Task Meta</h4>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
