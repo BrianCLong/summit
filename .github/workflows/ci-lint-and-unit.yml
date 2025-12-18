@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 name: CI (Lint & Unit)
 
 on:
@@ -9,6 +10,26 @@ on:
 jobs:
   lint-and-unit:
     runs-on: ubuntu-latest
+=======
+name: CI - Lint and Unit
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint-type-test:
+    name: lint, typecheck, and unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+>>>>>>> main
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,13 +37,22 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
+<<<<<<< HEAD
           version: 9.12.3
+=======
+          version: 9.12.0
+>>>>>>> main
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
+<<<<<<< HEAD
           node-version: 20.14.0
           cache: 'pnpm'
+=======
+          node-version: 20
+          cache: pnpm
+>>>>>>> main
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -33,5 +63,13 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+<<<<<<< HEAD
       - name: Test
         run: pnpm test
+=======
+      - name: Unit tests
+        env:
+          CI: true
+        run: |
+          pnpm run test:quick
+>>>>>>> main

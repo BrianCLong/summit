@@ -10,7 +10,6 @@
     "declarationMap": true,
     "sourceMap": true,
     "removeComments": true,
-    "allowImportingTsExtensions": false
     "types": []
   },
   "include": [
