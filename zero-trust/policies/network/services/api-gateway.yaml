@@ -1,0 +1,203 @@
+# Network Policy for API Gateway
+# Defines all allowed ingress and egress for the API Gateway service
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-gateway-ingress
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: api-gateway
+    policy.intelgraph.io/type: service-policy
+  annotations:
+    policy.intelgraph.io/description: "API Gateway ingress rules - accepts traffic from ingress controller and internal services"
+    policy.intelgraph.io/owner: "platform-team"
+spec:
+  podSelector:
+    matchLabels:
+      app: ga-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    # Allow from nginx ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 4000
+        - protocol: TCP
+          port: 4001
+
+    # Allow from Istio ingress gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: istio-system
+          podSelector:
+            matchLabels:
+              istio: ingressgateway
+      ports:
+        - protocol: TCP
+          port: 4000
+        - protocol: TCP
+          port: 4001
+
+    # Allow from client pods (internal)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: intelgraph-client
+      ports:
+        - protocol: TCP
+          port: 4000
+        - protocol: TCP
+          port: 4001
+
+    # Allow health checks from monitoring
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+          podSelector:
+            matchLabels:
+              app: prometheus
+      ports:
+        - protocol: TCP
+          port: 9090
+
+    # Allow from Istio sidecar (mesh traffic)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              istio-injection: enabled
+      ports:
+        - protocol: TCP
+          port: 15090
+        - protocol: TCP
+          port: 15021
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: api-gateway-egress
+  namespace: intelgraph-ga
+  labels:
+    app.kubernetes.io/name: zero-trust
+    app.kubernetes.io/component: network-policy
+    policy.intelgraph.io/service: api-gateway
+    policy.intelgraph.io/type: service-policy
+  annotations:
+    policy.intelgraph.io/description: "API Gateway egress rules - allowed downstream services"
+    policy.intelgraph.io/owner: "platform-team"
+spec:
+  podSelector:
+    matchLabels:
+      app: ga-gateway
+  policyTypes:
+    - Egress
+  egress:
+    # Allow to API server
+    - to:
+        - podSelector:
+            matchLabels:
+              app: intelgraph-api
+      ports:
+        - protocol: TCP
+          port: 4001
+
+    # Allow to AdminSec (authentication)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: ga-adminsec
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3001
+
+    # Allow to GraphAI
+    - to:
+        - podSelector:
+            matchLabels:
+              app: ga-graphai
+      ports:
+        - protocol: TCP
+          port: 8000
+
+    # Allow to Forensics service
+    - to:
+        - podSelector:
+            matchLabels:
+              app: ga-forensics
+      ports:
+        - protocol: TCP
+          port: 9000
+
+    # Allow to Intelligence Verticals
+    - to:
+        - podSelector:
+            matchLabels:
+              component: intelligence-vertical
+      ports:
+        - protocol: TCP
+          port: 8080
+
+    # Allow to Authorization Gateway
+    - to:
+        - podSelector:
+            matchLabels:
+              app: authz-gateway
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 9091
+
+    # Allow to Audit service
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-system
+          podSelector:
+            matchLabels:
+              app: audit-svc
+      ports:
+        - protocol: TCP
+          port: 8080
+        - protocol: TCP
+          port: 50051
+
+    # Allow to OpenTelemetry collector
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app: otel-collector
+      ports:
+        - protocol: TCP
+          port: 4317
+        - protocol: TCP
+          port: 4318
+
+    # Allow to Redis (session cache)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: intelgraph-data
+          podSelector:
+            matchLabels:
+              app: redis
+      ports:
+        - protocol: TCP
+          port: 6379

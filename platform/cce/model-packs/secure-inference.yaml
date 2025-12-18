@@ -1,0 +1,29 @@
+name: secure-default-pack
+runtime: enclave
+models:
+  - id: distilbert-safe
+    framework: transformers
+    checksum: "6b147f8793bfb7821c9509e4a0f7f12a7cf14d0b9d0ed7f0481e93a44823d8e2"
+    inputs:
+      - type: text
+        limit: 1024
+    output:
+      type: embedding
+      dimensions: 768
+    enclaveSafe: true
+    notes:
+      - No network calls; uses deterministic tokenization.
+      - Pre-loaded weights pinned to checksum; disallows dynamic loading.
+  - id: mistral-guarded
+    framework: gguf
+    checksum: "f99305f4a566d303c30f3bc23dc4a7b51b6a5536a75654ed3511b19c594f1461"
+    inputs:
+      - type: text
+        limit: 512
+    output:
+      type: text
+      limit: 128
+    enclaveSafe: true
+    notes:
+      - Low temperature deterministic decoding to avoid sensitive data leaks.
+      - Token logs sealed and never written to stdout.

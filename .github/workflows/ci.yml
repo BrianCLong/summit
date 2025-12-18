@@ -140,6 +140,15 @@ jobs:
           ignore-unfixed: true
           exit-code: '0'
           vuln-type: 'os,library'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Run Custom Security Script (Dependency Audit)
+        run: ./scripts/security-scan.sh || true
 
   # Integration lane: Golden path smoke tests
   golden-path:
@@ -213,6 +222,9 @@ jobs:
         run: make up
       - name: Golden path smoke tests
         run: make smoke
+      - name: Load Test (k6)
+        run: |
+          docker run --network host -i grafana/k6 run - < scripts/load-testing/graph-query-load.js || true
       - name: Compose logs on failure
         if: failure()
         run: ./scripts/run-compose.sh -f docker-compose.dev.yml logs --tail=200
