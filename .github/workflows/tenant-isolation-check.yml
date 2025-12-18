@@ -1,0 +1,74 @@
+name: Tenant Isolation Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'server/src/**/*.ts'
+      - 'server/src/**/*.js'
+      - 'scripts/security/**/*.ts'
+      - '.github/workflows/tenant-isolation-check.yml'
+
+jobs:
+  static-analysis:
+    name: Static Tenant Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (root)
+        run: npm install -g pnpm && pnpm install
+
+      - name: Run Static Scanner
+        run: npx tsx scripts/security/scan-tenant-isolation.ts
+
+      - name: Upload Scan Report
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: tenant-scan-report
+          path: reports/tenant-scan-static.json
+
+  dynamic-verification:
+    name: Dynamic Isolation Verify
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: maestro
+          POSTGRES_PASSWORD: maestro-dev-secret
+          POSTGRES_DB: maestro
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (root)
+        run: npm install -g pnpm && pnpm install
+
+      - name: Run Dynamic Verifier
+        env:
+          DATABASE_URL: postgres://maestro:maestro-dev-secret@localhost:5432/maestro
+        run: |
+          # Ensure script is executable and compiled/runnable
+          # We need to make sure 'pg' is available to the script.
+          # It should be installed in server/ or root workspace.
+          # We will run it using npx tsx
+          npx tsx scripts/security/verify-tenant-isolation.ts
