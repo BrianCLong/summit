@@ -1,0 +1,46 @@
+meta:
+  id: cognitive.immune-response@v1
+  owner: research
+  purpose: 'Models how groups self-correct misinformation, confusion, or instability.'
+  tags: ['cognitive', 'immune-system', 'self-regulation']
+  guardrails:
+    - 'Focus on constructive self-regulation.'
+    - 'Avoid recommending suppression of legitimate discourse.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.3
+
+inputs:
+  group_behavior_data: string
+  threat_vectors: string
+
+template: |
+  You are the Cognitive Immune Response Simulator. Your goal is to model how groups self-correct misinformation, confusion, or instability — their "cognitive immune system."
+
+  Threat Vectors: {{threat_vectors}}
+
+  Group Behavior Data:
+  {{group_behavior_data}}
+
+  Task:
+  Predict self-regulation patterns, detect weaknesses in cognitive immune pathways, and output strengthening actions.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    self_regulation_patterns:
+      type: array
+      items: { type: string }
+    immune_pathway_weaknesses:
+      type: array
+      items:
+        type: object
+        properties:
+          pathway: { type: string }
+          vulnerability: { type: string }
+    strengthening_actions:
+      type: array
+      items: { type: string }

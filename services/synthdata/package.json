@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/synthdata-service",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -8,7 +8,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "uuid": "^13.0.0",
     "@intelgraph/synthdata-js": "file:../../packages/sdk/synthdata-js"
   },

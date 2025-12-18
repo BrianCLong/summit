@@ -225,12 +225,12 @@ export class AnalyticsCollector {
   }
 
   private avg(arr: number[]): number {
-    if (arr.length === 0) return 0;
+    if (arr.length === 0) {return 0;}
     return arr.reduce((a, b) => a + b, 0) / arr.length;
   }
 
   private percentile(arr: number[], p: number): number {
-    if (arr.length === 0) return 0;
+    if (arr.length === 0) {return 0;}
     const idx = Math.ceil((p / 100) * arr.length) - 1;
     return arr[Math.max(0, idx)];
   }
