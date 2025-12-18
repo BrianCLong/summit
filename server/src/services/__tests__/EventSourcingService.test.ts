@@ -4,6 +4,7 @@
 
 import { Pool } from 'pg';
 import { EventSourcingService, DomainEvent, StoredEvent } from '../EventSourcingService';
+import { jest, describe, it, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock pg Pool
 jest.mock('pg');

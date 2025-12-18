@@ -54,7 +54,7 @@ export class AIMarketplaceService {
    */
   async installExperience(userId: string, experienceId: string): Promise<boolean> {
     const experience = this.personalizationEngine.getExperience(experienceId);
-    if (!experience) return false;
+    if (!experience) {return false;}
 
     let installations = this.userInstallations.get(userId);
     if (!installations) {
@@ -75,7 +75,7 @@ export class AIMarketplaceService {
    */
   async uninstallExperience(userId: string, experienceId: string): Promise<boolean> {
     const installations = this.userInstallations.get(userId);
-    if (!installations?.has(experienceId)) return false;
+    if (!installations?.has(experienceId)) {return false;}
 
     installations.delete(experienceId);
 
@@ -90,12 +90,12 @@ export class AIMarketplaceService {
    */
   async getInstalledExperiences(userId: string): Promise<AIExperience[]> {
     const installations = this.userInstallations.get(userId);
-    if (!installations) return [];
+    if (!installations) {return [];}
 
     const experiences: AIExperience[] = [];
     for (const id of installations) {
       const exp = this.personalizationEngine.getExperience(id);
-      if (exp) experiences.push(exp);
+      if (exp) {experiences.push(exp);}
     }
     return experiences;
   }
@@ -122,7 +122,7 @@ export class AIMarketplaceService {
     rating: number
   ): Promise<boolean> {
     const experience = this.personalizationEngine.getExperience(experienceId);
-    if (!experience || rating < 1 || rating > 5) return false;
+    if (!experience || rating < 1 || rating > 5) {return false;}
 
     // Update experience rating (simplified - production would use proper aggregation)
     const currentRating = experience.rating || 0;

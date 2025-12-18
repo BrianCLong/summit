@@ -1,546 +1,372 @@
 /**
  * Schema Registry Service
- * Manages schema registration, versioning, and compatibility checking
+ * Manages schema versions, compatibility checks, and schema evolution
  */
 
-import { createHash } from 'crypto';
 import {
-  SchemaDefinition,
-  SchemaRegistrationRequest,
-  SchemaEvolutionRequest,
-  SchemaSearchRequest,
-  SchemaSearchResponse,
-  SchemaStatus,
-  CompatibilityCheckResult,
-  SchemaChange,
-  SchemaChangeType,
-  CompatibilityMode,
-  VersionType,
   SchemaVersion,
-  SchemaUsageStatistics,
-  SchemaDeprecationPlan,
-} from '../types/schemaRegistry.js';
+  SchemaFormat,
+  SchemaVersionStatus,
+} from '../types/metadata.js';
+import { IMetadataStore } from '../stores/PostgresMetadataStore.js';
+
+export interface SchemaCompatibilityResult {
+  compatible: boolean;
+  breakingChanges: string[];
+  warnings: string[];
+}
 
 export class SchemaRegistryService {
-  private schemas: Map<string, SchemaDefinition>;
-  private schemasByName: Map<string, Map<string, SchemaDefinition>>; // namespace -> name -> schema
-  private schemaVersions: Map<string, SchemaVersion[]>;
-
-  constructor() {
-    this.schemas = new Map();
-    this.schemasByName = new Map();
-    this.schemaVersions = new Map();
-  }
+  constructor(private store: IMetadataStore) {}
 
   /**
-   * Register a new schema
+   * Register a new schema version
    */
-  async registerSchema(
-    request: SchemaRegistrationRequest,
-  ): Promise<SchemaDefinition> {
-    // Generate schema hash for deduplication
-    const schemaHash = this.generateSchemaHash(request.schema);
-
-    // Check if schema already exists
-    const existing = await this.findSchemaByHash(schemaHash);
-    if (existing) {
-      throw new Error(
-        `Schema already exists with id: ${existing.id} version: ${existing.version}`,
-      );
-    }
-
-    // Create new schema definition
-    const fullyQualifiedName = `${request.namespace}.${request.name}`;
-    const schema: SchemaDefinition = {
-      id: this.generateId(),
-      name: request.name,
-      namespace: request.namespace,
-      fullyQualifiedName,
-      description: request.description,
-      type: request.type,
-      format: request.format,
-      schema: request.schema,
-      schemaHash,
-      version: '1.0.0',
-      versionNumber: 1,
-      majorVersion: 1,
-      minorVersion: 0,
-      patchVersion: 0,
-      compatibilityMode: request.compatibilityMode,
-      previousVersionId: null,
-      isBreakingChange: false,
-      status: SchemaStatus.ACTIVE,
-      deprecatedAt: null,
-      deprecationReason: null,
-      replacedByVersionId: null,
-      owner: request.owner,
-      createdBy: request.owner,
-      approvedBy: null,
-      tags: request.tags,
-      domain: request.domain,
-      datasetIds: [],
-      mappingIds: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      publishedAt: new Date(),
-      properties: request.properties,
-    };
-
-    // Store schema
-    this.schemas.set(schema.id, schema);
-
-    // Index by namespace and name
-    if (!this.schemasByName.has(request.namespace)) {
-      this.schemasByName.set(request.namespace, new Map());
-    }
-    this.schemasByName.get(request.namespace)!.set(request.name, schema);
-
-    // Create initial version
-    const version: SchemaVersion = {
-      id: this.generateId(),
-      schemaId: schema.id,
-      version: schema.version,
-      versionNumber: schema.versionNumber,
-      status: schema.status,
-      isBreakingChange: false,
-      changes: [],
-      createdAt: schema.createdAt,
-      createdBy: schema.createdBy,
-    };
-    this.schemaVersions.set(schema.id, [version]);
-
-    return schema;
-  }
-
-  /**
-   * Evolve an existing schema (create new version)
-   */
-  async evolveSchema(
-    request: SchemaEvolutionRequest,
-  ): Promise<SchemaDefinition> {
-    // Get current schema
-    const currentSchema = this.schemas.get(request.schemaId);
-    if (!currentSchema) {
-      throw new Error(`Schema not found: ${request.schemaId}`);
-    }
-
-    // Check compatibility if required
-    if (!request.skipCompatibilityCheck) {
-      const compatibilityCheck = await this.checkCompatibility(
-        currentSchema,
-        request.newSchema,
-      );
-      if (!compatibilityCheck.compatible) {
-        throw new Error(
-          `Schema is not compatible: ${compatibilityCheck.errors.map((e) => e.message).join(', ')}`,
-        );
-      }
-    }
-
-    // Detect changes
-    const changes = this.detectSchemaChanges(
-      currentSchema.schema,
-      request.newSchema,
-    );
-    const isBreakingChange = changes.some((c) => c.isBreaking);
-
-    // Calculate new version
-    const newVersion = this.calculateNewVersion(
-      currentSchema,
-      request.versionType,
-      isBreakingChange,
-    );
-
-    // Generate schema hash
-    const schemaHash = this.generateSchemaHash(request.newSchema);
-
-    // Create new schema version
-    const newSchema: SchemaDefinition = {
-      ...currentSchema,
-      id: this.generateId(),
-      schema: request.newSchema,
-      schemaHash,
-      version: newVersion.version,
-      versionNumber: newVersion.versionNumber,
-      majorVersion: newVersion.majorVersion,
-      minorVersion: newVersion.minorVersion,
-      patchVersion: newVersion.patchVersion,
-      previousVersionId: currentSchema.id,
-      isBreakingChange,
-      updatedAt: new Date(),
-      publishedAt: new Date(),
-    };
-
-    // Store new version
-    this.schemas.set(newSchema.id, newSchema);
-
-    // Update index
-    this.schemasByName
-      .get(newSchema.namespace)!
-      .set(newSchema.name, newSchema);
-
-    // Add version history
-    const version: SchemaVersion = {
-      id: this.generateId(),
-      schemaId: newSchema.id,
-      version: newSchema.version,
-      versionNumber: newSchema.versionNumber,
-      status: newSchema.status,
-      isBreakingChange,
-      changes,
-      createdAt: newSchema.updatedAt,
-      createdBy: currentSchema.createdBy,
-    };
-
-    const versions = this.schemaVersions.get(request.schemaId) || [];
-    versions.push(version);
-    this.schemaVersions.set(newSchema.id, versions);
-
-    return newSchema;
-  }
-
-  /**
-   * Get schema by ID
-   */
-  async getSchema(id: string): Promise<SchemaDefinition | null> {
-    return this.schemas.get(id) || null;
-  }
-
-  /**
-   * Get schema by name and namespace
-   */
-  async getSchemaByName(
-    namespace: string,
-    name: string,
-    version?: string,
-  ): Promise<SchemaDefinition | null> {
-    const nameMap = this.schemasByName.get(namespace);
-    if (!nameMap) {
-      return null;
-    }
-
-    const schema = nameMap.get(name);
-    if (!schema) {
-      return null;
-    }
-
-    if (version && schema.version !== version) {
-      // Find specific version in history
-      return this.findSchemaVersion(schema.id, version);
-    }
-
-    return schema;
-  }
-
-  /**
-   * Search schemas
-   */
-  async searchSchemas(
-    request: SchemaSearchRequest,
-  ): Promise<SchemaSearchResponse> {
-    let results = Array.from(this.schemas.values());
-
-    // Filter by namespace
-    if (request.namespace) {
-      results = results.filter((s) => s.namespace === request.namespace);
-    }
-
-    // Filter by type
-    if (request.type) {
-      results = results.filter((s) => s.type === request.type);
-    }
-
-    // Filter by status
-    if (request.status) {
-      results = results.filter((s) => s.status === request.status);
-    }
-
-    // Filter by tags
-    if (request.tags.length > 0) {
-      results = results.filter((s) =>
-        request.tags.some((tag) => s.tags.includes(tag)),
-      );
-    }
-
-    // Filter by domain
-    if (request.domain) {
-      results = results.filter((s) => s.domain === request.domain);
-    }
-
-    // Text search on name and description
-    if (request.query) {
-      const query = request.query.toLowerCase();
-      results = results.filter(
-        (s) =>
-          s.name.toLowerCase().includes(query) ||
-          s.fullyQualifiedName.toLowerCase().includes(query) ||
-          (s.description && s.description.toLowerCase().includes(query)),
-      );
-    }
-
-    const total = results.length;
-
-    // Pagination
-    const paginatedResults = results.slice(
-      request.offset,
-      request.offset + request.limit,
-    );
-
-    return {
-      schemas: paginatedResults,
-      total,
-      offset: request.offset,
-      limit: request.limit,
-    };
-  }
-
-  /**
-   * Deprecate a schema
-   */
-  async deprecateSchema(
+  async registerSchemaVersion(
     schemaId: string,
-    reason: string,
-    replacementSchemaId?: string,
-  ): Promise<SchemaDefinition> {
-    const schema = this.schemas.get(schemaId);
-    if (!schema) {
-      throw new Error(`Schema not found: ${schemaId}`);
+    schema: Record<string, any>,
+    format: SchemaFormat,
+    createdBy: string,
+    options: {
+      description?: string;
+      changelog?: string;
+      checkCompatibility?: boolean;
+    } = {}
+  ): Promise<SchemaVersion> {
+    // Get latest version
+    const latestVersion = await this.store.getLatestSchemaVersion(schemaId);
+    const newVersion = latestVersion ? latestVersion.version + 1 : 1;
+
+    // Check compatibility if requested and there's a previous version
+    let backwardCompatible = true;
+    let forwardCompatible = false;
+    let breakingChanges: string[] = [];
+
+    if (options.checkCompatibility && latestVersion) {
+      const compatibility = this.checkCompatibility(
+        latestVersion.schema,
+        schema,
+        format
+      );
+      backwardCompatible = compatibility.compatible;
+      breakingChanges = compatibility.breakingChanges;
     }
 
-    schema.status = SchemaStatus.DEPRECATED;
-    schema.deprecatedAt = new Date();
-    schema.deprecationReason = reason;
-    schema.replacedByVersionId = replacementSchemaId || null;
-    schema.updatedAt = new Date();
-
-    return schema;
-  }
-
-  /**
-   * Archive a schema
-   */
-  async archiveSchema(schemaId: string): Promise<SchemaDefinition> {
-    const schema = this.schemas.get(schemaId);
-    if (!schema) {
-      throw new Error(`Schema not found: ${schemaId}`);
-    }
-
-    schema.status = SchemaStatus.ARCHIVED;
-    schema.updatedAt = new Date();
-
-    return schema;
-  }
-
-  /**
-   * Get schema versions
-   */
-  async getSchemaVersions(schemaId: string): Promise<SchemaVersion[]> {
-    return this.schemaVersions.get(schemaId) || [];
-  }
-
-  /**
-   * Get schema usage statistics
-   */
-  async getSchemaUsage(schemaId: string): Promise<SchemaUsageStatistics> {
-    const schema = this.schemas.get(schemaId);
-    if (!schema) {
-      throw new Error(`Schema not found: ${schemaId}`);
-    }
-
-    // This would be calculated from actual usage data
-    return {
-      schemaId: schema.id,
-      version: schema.version,
-      datasetCount: schema.datasetIds.length,
-      mappingCount: schema.mappingIds.length,
-      activeReferences: schema.datasetIds.length + schema.mappingIds.length,
-      lastUsedAt: new Date(),
-      usageByDataset: {},
-      usageByService: {},
+    const schemaVersion: SchemaVersion = {
+      id: this.generateSchemaVersionId(schemaId, newVersion),
+      schemaId,
+      version: newVersion,
+      schema,
+      schemaFormat: format,
+      backwardCompatible,
+      forwardCompatible,
+      breakingChanges,
+      status: SchemaVersionStatus.ACTIVE,
+      deprecatedAt: null,
+      description: options.description || null,
+      changelog: options.changelog || null,
+      createdAt: new Date(),
+      createdBy,
     };
+
+    return this.store.registerSchema(schemaVersion);
   }
 
   /**
-   * Check compatibility between schemas
+   * Get latest schema version
    */
-  private async checkCompatibility(
-    currentSchema: SchemaDefinition,
-    newSchema: Record<string, any> | string,
-  ): Promise<CompatibilityCheckResult> {
-    const changes = this.detectSchemaChanges(currentSchema.schema, newSchema);
+  async getLatest(schemaId: string): Promise<SchemaVersion | null> {
+    return this.store.getLatestSchemaVersion(schemaId);
+  }
 
-    const errors = changes
-      .filter((c) => c.isBreaking)
-      .map((c) => ({
-        code: c.type,
-        message: c.description,
-        path: c.path,
-        severity: 'ERROR' as const,
-      }));
+  /**
+   * Get specific schema version
+   */
+  async getVersion(schemaId: string, version: number): Promise<SchemaVersion | null> {
+    return this.store.getSchemaVersion(schemaId, version);
+  }
 
-    const warnings = changes
-      .filter((c) => !c.isBreaking)
-      .map((c) => ({
-        code: c.type,
-        message: c.description,
-        path: c.path,
-        recommendation: 'Review change impact',
-      }));
+  /**
+   * List all versions of a schema
+   */
+  async listVersions(schemaId: string): Promise<SchemaVersion[]> {
+    return this.store.listSchemaVersions(schemaId);
+  }
 
-    const compatible =
-      errors.length === 0 ||
-      currentSchema.compatibilityMode === CompatibilityMode.NONE;
+  /**
+   * Check schema compatibility
+   */
+  checkCompatibility(
+    oldSchema: Record<string, any>,
+    newSchema: Record<string, any>,
+    format: SchemaFormat
+  ): SchemaCompatibilityResult {
+    switch (format) {
+      case SchemaFormat.JSON_SCHEMA:
+        return this.checkJsonSchemaCompatibility(oldSchema, newSchema);
+
+      case SchemaFormat.SQL_DDL:
+        return this.checkSqlDdlCompatibility(oldSchema, newSchema);
+
+      default:
+        // Default to simple field-level comparison
+        return this.checkGenericCompatibility(oldSchema, newSchema);
+    }
+  }
+
+  /**
+   * Deprecate a schema version
+   */
+  async deprecateVersion(
+    schemaId: string,
+    version: number,
+    reason: string
+  ): Promise<SchemaVersion> {
+    const schemaVersion = await this.store.getSchemaVersion(schemaId, version);
+    if (!schemaVersion) {
+      throw new Error(`Schema version ${schemaId}:${version} not found`);
+    }
+
+    // Update to deprecated status
+    schemaVersion.status = SchemaVersionStatus.DEPRECATED;
+    schemaVersion.deprecatedAt = new Date();
+    schemaVersion.changelog = schemaVersion.changelog
+      ? `${schemaVersion.changelog}\n\nDeprecated: ${reason}`
+      : `Deprecated: ${reason}`;
+
+    // For now, we'll need to implement an update method in the store
+    // This is a simplified version
+    return schemaVersion;
+  }
+
+  /**
+   * Validate schema against format rules
+   */
+  validateSchema(
+    schema: Record<string, any>,
+    format: SchemaFormat
+  ): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    switch (format) {
+      case SchemaFormat.JSON_SCHEMA:
+        if (!schema.$schema) {
+          errors.push('Missing $schema property');
+        }
+        if (!schema.type && !schema.properties) {
+          errors.push('Schema must have type or properties');
+        }
+        break;
+
+      case SchemaFormat.AVRO:
+        if (!schema.type) {
+          errors.push('Avro schema must have type');
+        }
+        if (!schema.name) {
+          errors.push('Avro schema must have name');
+        }
+        break;
+
+      case SchemaFormat.SQL_DDL:
+        if (!schema.columns || !Array.isArray(schema.columns)) {
+          errors.push('SQL DDL schema must have columns array');
+        }
+        break;
+
+      default:
+        // No specific validation for other formats
+        break;
+    }
 
     return {
-      compatible,
-      mode: currentSchema.compatibilityMode,
+      valid: errors.length === 0,
       errors,
-      warnings,
-      changes,
     };
   }
 
+  // ====== Private Helper Methods ======
+
   /**
-   * Detect changes between schemas
+   * Check JSON Schema compatibility
    */
-  private detectSchemaChanges(
-    oldSchema: Record<string, any> | string,
-    newSchema: Record<string, any> | string,
-  ): SchemaChange[] {
-    const changes: SchemaChange[] = [];
+  private checkJsonSchemaCompatibility(
+    oldSchema: any,
+    newSchema: any
+  ): SchemaCompatibilityResult {
+    const breakingChanges: string[] = [];
+    const warnings: string[] = [];
 
-    // Simple implementation - in production, use json-diff or similar
-    const oldSchemaObj =
-      typeof oldSchema === 'string' ? JSON.parse(oldSchema) : oldSchema;
-    const newSchemaObj =
-      typeof newSchema === 'string' ? JSON.parse(newSchema) : newSchema;
+    // Check if required fields were added
+    const oldRequired = new Set(oldSchema.required || []);
+    const newRequired = new Set(newSchema.required || []);
 
-    // Check for field removals (breaking)
-    for (const key in oldSchemaObj) {
-      if (!(key in newSchemaObj)) {
-        changes.push({
-          type: SchemaChangeType.FIELD_REMOVED,
-          path: key,
-          oldValue: oldSchemaObj[key],
-          newValue: null,
-          isBreaking: true,
-          description: `Field '${key}' was removed`,
-        });
+    for (const field of newRequired) {
+      if (!oldRequired.has(field)) {
+        breakingChanges.push(`Added required field: ${field}`);
       }
     }
 
-    // Check for field additions (non-breaking if optional)
-    for (const key in newSchemaObj) {
-      if (!(key in oldSchemaObj)) {
-        changes.push({
-          type: SchemaChangeType.FIELD_ADDED,
-          path: key,
-          oldValue: null,
-          newValue: newSchemaObj[key],
-          isBreaking: false,
-          description: `Field '${key}' was added`,
-        });
+    // Check if fields were removed
+    const oldProperties = Object.keys(oldSchema.properties || {});
+    const newProperties = Object.keys(newSchema.properties || {});
+
+    for (const field of oldProperties) {
+      if (!newProperties.includes(field)) {
+        breakingChanges.push(`Removed field: ${field}`);
       }
     }
 
-    // Check for type changes (breaking)
-    for (const key in oldSchemaObj) {
-      if (key in newSchemaObj) {
-        const oldType = typeof oldSchemaObj[key];
-        const newType = typeof newSchemaObj[key];
+    // Check if field types changed
+    for (const field of oldProperties) {
+      if (newProperties.includes(field)) {
+        const oldType = oldSchema.properties[field].type;
+        const newType = newSchema.properties[field].type;
+
         if (oldType !== newType) {
-          changes.push({
-            type: SchemaChangeType.TYPE_CHANGED,
-            path: key,
-            oldValue: oldType,
-            newValue: newType,
-            isBreaking: true,
-            description: `Field '${key}' type changed from ${oldType} to ${newType}`,
-          });
+          breakingChanges.push(`Changed type of ${field} from ${oldType} to ${newType}`);
         }
       }
     }
 
-    return changes;
-  }
-
-  /**
-   * Calculate new version number
-   */
-  private calculateNewVersion(
-    currentSchema: SchemaDefinition,
-    versionType: VersionType,
-    isBreakingChange: boolean,
-  ): {
-    version: string;
-    versionNumber: number;
-    majorVersion: number;
-    minorVersion: number;
-    patchVersion: number;
-  } {
-    let major = currentSchema.majorVersion;
-    let minor = currentSchema.minorVersion;
-    let patch = currentSchema.patchVersion;
-
-    if (isBreakingChange || versionType === VersionType.MAJOR) {
-      major += 1;
-      minor = 0;
-      patch = 0;
-    } else if (versionType === VersionType.MINOR) {
-      minor += 1;
-      patch = 0;
-    } else {
-      patch += 1;
+    // Check for added optional fields (warnings)
+    for (const field of newProperties) {
+      if (!oldProperties.includes(field) && !newRequired.has(field)) {
+        warnings.push(`Added optional field: ${field}`);
+      }
     }
 
     return {
-      version: `${major}.${minor}.${patch}`,
-      versionNumber: currentSchema.versionNumber + 1,
-      majorVersion: major,
-      minorVersion: minor,
-      patchVersion: patch,
+      compatible: breakingChanges.length === 0,
+      breakingChanges,
+      warnings,
     };
   }
 
   /**
-   * Generate schema hash
+   * Check SQL DDL compatibility
    */
-  private generateSchemaHash(schema: Record<string, any> | string): string {
-    const schemaStr =
-      typeof schema === 'string' ? schema : JSON.stringify(schema);
-    return createHash('sha256').update(schemaStr).digest('hex');
-  }
+  private checkSqlDdlCompatibility(
+    oldSchema: any,
+    newSchema: any
+  ): SchemaCompatibilityResult {
+    const breakingChanges: string[] = [];
+    const warnings: string[] = [];
 
-  /**
-   * Find schema by hash
-   */
-  private async findSchemaByHash(
-    hash: string,
-  ): Promise<SchemaDefinition | null> {
-    for (const schema of this.schemas.values()) {
-      if (schema.schemaHash === hash) {
-        return schema;
+    const oldColumns = oldSchema.columns || [];
+    const newColumns = newSchema.columns || [];
+
+    const oldColumnMap = new Map(oldColumns.map((c: any) => [c.name, c]));
+    const newColumnMap = new Map(newColumns.map((c: any) => [c.name, c]));
+
+    // Check for removed columns
+    for (const [name, oldCol] of oldColumnMap) {
+      if (!newColumnMap.has(name)) {
+        breakingChanges.push(`Removed column: ${name}`);
       }
     }
-    return null;
+
+    // Check for type changes and nullability changes
+    for (const [name, newCol] of newColumnMap) {
+      const oldCol = oldColumnMap.get(name);
+      if (oldCol) {
+        if (oldCol.type !== newCol.type) {
+          breakingChanges.push(`Changed type of ${name} from ${oldCol.type} to ${newCol.type}`);
+        }
+        if (oldCol.nullable && !newCol.nullable) {
+          breakingChanges.push(`Made ${name} non-nullable`);
+        }
+      } else {
+        // New column added
+        if (!newCol.nullable && !newCol.default) {
+          breakingChanges.push(`Added non-nullable column without default: ${name}`);
+        } else {
+          warnings.push(`Added column: ${name}`);
+        }
+      }
+    }
+
+    return {
+      compatible: breakingChanges.length === 0,
+      breakingChanges,
+      warnings,
+    };
   }
 
   /**
-   * Find specific schema version
+   * Generic field-level compatibility check
    */
-  private async findSchemaVersion(
-    schemaId: string,
-    version: string,
-  ): Promise<SchemaDefinition | null> {
-    // This would traverse the version history
-    // For now, just return the current schema
-    return this.schemas.get(schemaId) || null;
+  private checkGenericCompatibility(
+    oldSchema: any,
+    newSchema: any
+  ): SchemaCompatibilityResult {
+    const breakingChanges: string[] = [];
+    const warnings: string[] = [];
+
+    const oldFields = Object.keys(oldSchema);
+    const newFields = Object.keys(newSchema);
+
+    // Check for removed fields
+    for (const field of oldFields) {
+      if (!newFields.includes(field)) {
+        breakingChanges.push(`Removed field: ${field}`);
+      }
+    }
+
+    // Check for added fields
+    for (const field of newFields) {
+      if (!oldFields.includes(field)) {
+        warnings.push(`Added field: ${field}`);
+      }
+    }
+
+    return {
+      compatible: breakingChanges.length === 0,
+      breakingChanges,
+      warnings,
+    };
   }
 
   /**
-   * Generate unique ID (placeholder)
+   * Generate schema version ID
    */
-  private generateId(): string {
-    return `schema-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  private generateSchemaVersionId(schemaId: string, version: number): string {
+    return `${schemaId}-v${version}`;
+  }
+
+  /**
+   * Compare schemas and generate diff
+   */
+  getSchemaDiff(
+    oldSchema: Record<string, any>,
+    newSchema: Record<string, any>,
+    format: SchemaFormat
+  ): {
+    added: string[];
+    removed: string[];
+    modified: string[];
+  } {
+    const compatibility = this.checkCompatibility(oldSchema, newSchema, format);
+
+    const added: string[] = [];
+    const removed: string[] = [];
+    const modified: string[] = [];
+
+    for (const change of compatibility.breakingChanges) {
+      if (change.startsWith('Added')) {
+        added.push(change);
+      } else if (change.startsWith('Removed')) {
+        removed.push(change);
+      } else if (change.startsWith('Changed')) {
+        modified.push(change);
+      }
+    }
+
+    for (const warning of compatibility.warnings) {
+      if (warning.startsWith('Added')) {
+        added.push(warning);
+      }
+    }
+
+    return { added, removed, modified };
   }
 }
