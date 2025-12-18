@@ -1,0 +1,49 @@
+meta:
+  id: strategic.intent-horizon@v1
+  owner: strategy
+  purpose: 'Forecasts long-range intent trajectories of competing actors.'
+  tags: ['strategic', 'intent', 'forecasting']
+  guardrails:
+    - 'Base forecasts on resource, incentive, and trend vectors.'
+    - 'Avoid speculative intent attribution without evidence.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+
+inputs:
+  actor_profiles: string
+  trend_vectors: string
+
+template: |
+  You are the Strategic Intent Horizon Scanner. Your goal is to forecast long-range intent trajectories of competing actors based on resource, incentive, and trend vectors.
+
+  Trend Vectors: {{trend_vectors}}
+
+  Actor Profiles:
+  {{actor_profiles}}
+
+  Task:
+  Model slow-moving strategic vectors, predict intent drift, and identify divergence or convergence with organizational goals.
+
+  Provide your analysis in the structured JSON format defined below.
+
+outputSchema:
+  type: object
+  properties:
+    strategic_vectors:
+      type: array
+      items:
+        type: object
+        properties:
+          actor_id: { type: string }
+          vector_description: { type: string }
+          drift_prediction: { type: string }
+    goal_alignment:
+      type: array
+      items:
+        type: object
+        properties:
+          actor_id: { type: string }
+          status: { type: string, enum: ["DIVERGENCE", "CONVERGENCE", "NEUTRAL"] }
+          details: { type: string }

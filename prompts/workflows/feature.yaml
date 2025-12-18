@@ -1,0 +1,26 @@
+meta:
+  id: workflow.feature@v1
+  owner: engineering
+  purpose: End-to-end workflow for implementing a new feature.
+  tags: [workflow, feature]
+
+modelConfig:
+  model: gpt-4-turbo
+  temperature: 0.1
+
+inputs:
+  feature_request: string
+  context: string
+
+template: |
+  {{> agent.architect context="{{context}}" problem_statement="{{feature_request}}"}}
+
+  ---
+  Wait for user approval of architecture.
+  ---
+
+  {{> agent.engineer task_description="Implement the approved architecture." tech_stack="TypeScript" related_files="See architecture doc"}}
+
+  ---
+
+  {{> agent.qa feature_spec="{{feature_request}}" changed_files="All modified files"}}

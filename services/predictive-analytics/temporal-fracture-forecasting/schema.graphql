@@ -1,0 +1,360 @@
+scalar DateTime
+scalar JSON
+
+# Core Types
+
+type FractureMap {
+  systemId: ID!
+  currentPhase: SystemPhase!
+  stabilityScore: Float!
+  predictedFractures: [FracturePoint!]!
+  recommendations: [RecoveryPlan!]!
+  lastUpdated: DateTime!
+}
+
+type FracturePoint {
+  id: ID!
+  systemId: ID!
+  predictedTime: DateTime!
+  detectedAt: DateTime!
+  confidence: Float!
+  severity: FractureSeverity!
+  triggeringFactors: [TriggeringFactor!]!
+  leadTimeHours: Float!
+  estimatedImpact: ImpactEstimate!
+  actualOccurrence: DateTime
+  wasPrevented: Boolean
+  urgency: Float!
+  isUrgent: Boolean!
+}
+
+enum FractureSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type TriggeringFactor {
+  name: String!
+  contribution: Float!
+  currentValue: Float!
+  thresholdValue: Float!
+  trend: TriggeringTrend!
+}
+
+enum TriggeringTrend {
+  increasing
+  decreasing
+  stable
+  oscillating
+}
+
+type ImpactEstimate {
+  affectedSystems: [String!]!
+  estimatedDowntimeMinutes: Int!
+  estimatedCostUSD: Float!
+  userImpact: UserImpactLevel!
+  dataLossRisk: Float!
+}
+
+enum UserImpactLevel {
+  low
+  medium
+  high
+  critical
+}
+
+type SystemPhase {
+  systemId: ID!
+  current: PhaseState!
+  duration: Int!
+  stability: StabilityMetric!
+  trends: [Trend!]!
+  lastTransition: PhaseTransition
+  isHealthy: Boolean!
+  requiresAttention: Boolean!
+  severity: Float!
+}
+
+enum PhaseState {
+  STABLE
+  PRE_FRACTURE
+  UNSTABLE
+  CRITICAL
+  RECOVERING
+}
+
+type PhaseTransition {
+  id: ID!
+  systemId: ID!
+  transitionTime: DateTime!
+  fromPhase: PhaseState!
+  toPhase: PhaseState!
+  confidence: Float!
+  metrics: JSON!
+}
+
+type StabilityMetric {
+  timestamp: DateTime!
+  systemId: ID!
+  lyapunovExponent: Float!
+  stabilityScore: Float!
+  hurstExponent: Float
+  entropy: Float
+  isStable: Boolean!
+  timeToInstability: Int
+}
+
+type Trend {
+  metric: String!
+  direction: TrendDirection!
+  magnitude: Float!
+  confidence: Float!
+}
+
+enum TrendDirection {
+  up
+  down
+  stable
+}
+
+type RecoveryPlan {
+  id: ID!
+  fracturePointId: ID!
+  systemId: ID!
+  createdAt: DateTime!
+  urgency: Urgency!
+  timeWindowHours: Float!
+  recommendedActions: [Action!]!
+  fallbackActions: [Action!]
+  estimatedRecoveryTimeMinutes: Int!
+  successProbability: Float!
+  wasExecuted: Boolean
+  executionResult: ExecutionResult
+  totalEstimatedImpact: Float!
+  totalCost: Float!
+  isExpired: Boolean!
+  automatableActionsCount: Int!
+}
+
+enum Urgency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+type Action {
+  id: ID!
+  type: ActionType!
+  description: String!
+  parameters: JSON!
+  estimatedImpact: Float!
+  timeToEffectMinutes: Int!
+  riskLevel: RiskLevel!
+  costUSD: Float
+  automatable: Boolean!
+  dependencies: [String!]
+}
+
+enum ActionType {
+  SCALE_RESOURCES
+  RATE_LIMIT
+  CIRCUIT_BREAK
+  CACHE_WARM
+  TRAFFIC_SHIFT
+  CONFIG_TUNE
+  RESTART_SERVICE
+  DEPLOY_ROLLBACK
+}
+
+enum RiskLevel {
+  low
+  medium
+  high
+}
+
+type ExecutionResult {
+  executedAt: DateTime!
+  actionsExecuted: [String!]!
+  success: Boolean!
+  actualRecoveryTimeMinutes: Int!
+  stabilityImprovement: Float!
+  notes: String!
+}
+
+# Monitoring Session
+
+type MonitoringSession {
+  id: ID!
+  systemId: ID!
+  startedAt: DateTime!
+  status: MonitoringStatus!
+  metricsConfig: MetricsConfig!
+  thresholds: Thresholds!
+}
+
+enum MonitoringStatus {
+  ACTIVE
+  PAUSED
+  STOPPED
+}
+
+type MetricsConfig {
+  metricNames: [String!]!
+  windowSizeMinutes: Int!
+  samplingIntervalSeconds: Int!
+}
+
+type Thresholds {
+  lyapunovThreshold: Float
+  stabilityScoreThreshold: Float
+}
+
+# Real-time Alerts
+
+type FractureAlert {
+  fracturePoint: FracturePoint!
+  recoveryPlan: RecoveryPlan!
+  timestamp: DateTime!
+}
+
+type PhaseTransitionAlert {
+  transition: PhaseTransition!
+  timestamp: DateTime!
+}
+
+type StabilityUpdate {
+  systemId: ID!
+  stability: StabilityMetric!
+  timestamp: DateTime!
+}
+
+# Inputs
+
+input MetricsConfigInput {
+  metricNames: [String!]!
+  windowSizeMinutes: Int = 60
+  samplingIntervalSeconds: Int = 60
+}
+
+input ThresholdInput {
+  lyapunovThreshold: Float
+  stabilityScoreThreshold: Float
+}
+
+input TimeSeriesDataInput {
+  timestamp: DateTime!
+  value: Float!
+  tags: JSON
+}
+
+# Queries
+
+type Query {
+  """
+  Get complete fracture map for a system
+  """
+  getFractureMap(systemId: ID!): FractureMap!
+
+  """
+  Predict future fracture points
+  """
+  predictFractures(
+    systemId: ID!
+    horizonHours: Int = 72
+    confidenceThreshold: Float = 0.7
+  ): [FracturePoint!]!
+
+  """
+  Get current system stability analysis
+  """
+  getSystemStability(
+    systemId: ID!
+    metricsData: [TimeSeriesDataInput!]
+  ): StabilityMetric!
+
+  """
+  Get recovery plan for a fracture point
+  """
+  getRecoveryPlan(fracturePointId: ID!): RecoveryPlan
+
+  """
+  Get all monitoring sessions
+  """
+  getMonitoringSessions(systemId: ID): [MonitoringSession!]!
+
+  """
+  Analyze metrics data
+  """
+  analyzeMetrics(
+    systemId: ID!
+    metricsData: [TimeSeriesDataInput!]!
+  ): FractureMap!
+}
+
+# Mutations
+
+type Mutation {
+  """
+  Start monitoring a system
+  """
+  monitorSystem(
+    systemId: ID!
+    metricsConfig: MetricsConfigInput!
+    thresholds: ThresholdInput
+  ): MonitoringSession!
+
+  """
+  Stop monitoring a system
+  """
+  stopMonitoring(sessionId: ID!): Boolean!
+
+  """
+  Update stability thresholds
+  """
+  setStabilityThresholds(
+    systemId: ID!
+    lyapunovThreshold: Float
+    stabilityScoreThreshold: Float
+  ): Boolean!
+
+  """
+  Mark fracture as prevented
+  """
+  markFracturePrevented(
+    fracturePointId: ID!
+    recoveryPlanId: ID!
+  ): FracturePoint!
+
+  """
+  Record recovery plan execution
+  """
+  recordRecoveryExecution(
+    recoveryPlanId: ID!
+    actionsExecuted: [String!]!
+    success: Boolean!
+    actualRecoveryTimeMinutes: Int!
+    notes: String
+  ): RecoveryPlan!
+}
+
+# Subscriptions
+
+type Subscription {
+  """
+  Subscribe to fracture detection alerts
+  """
+  onFractureDetected(systemId: ID!): FractureAlert!
+
+  """
+  Subscribe to phase transition events
+  """
+  onPhaseTransition(systemId: ID!): PhaseTransitionAlert!
+
+  """
+  Subscribe to stability metric updates
+  """
+  onStabilityChange(systemId: ID!): StabilityUpdate!
+}
