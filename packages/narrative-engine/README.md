@@ -81,3 +81,52 @@ The Express router registers the following endpoints:
 - `GET /api/narrative/state` – retrieve the full narrative state snapshot
 
 Each endpoint returns structured JSON to support orchestration dashboards.
+
+## Narrative Simulation Studio
+
+The `NarrativeSimulationStudio` orchestrates influence campaigns, counter-narrative
+responses, and information operation effectiveness models on top of the core
+engine. It turns higher-level plans into queued events while surfacing
+mitigation and effectiveness scores that can be visualized in dashboards.
+
+```ts
+import { NarrativeSimulationStudio, SimulationEngine } from './src/index.js';
+
+const engine = new SimulationEngine();
+engine.initialize(config);
+
+const studio = new NarrativeSimulationStudio(engine);
+studio.configureCampaigns([
+  {
+    id: 'campaign-alpha',
+    sponsor: 'Frontier Group',
+    objective: 'Shift public sentiment on water policy',
+    narratives: ['river-restoration-is-a-failure'],
+    channels: ['social', 'radio'],
+    targetAudiences: ['civic-leaders', 'youth'],
+    intensity: 0.8,
+  },
+]);
+studio.configureCounterNarratives([
+  {
+    id: 'cn-alpha',
+    campaignId: 'campaign-alpha',
+    approach: 'prebunk',
+    confidence: 0.6,
+    channelAlignment: 0.8,
+  },
+]);
+studio.configureInformationOperations([
+  {
+    id: 'io-alpha',
+    campaignId: 'campaign-alpha',
+    tactic: 'bot-swarm',
+    amplification: 0.7,
+    deception: 0.5,
+    reach: 0.6,
+  },
+]);
+
+const tick = studio.modelInfluenceTick(['mayor', 'chief']);
+console.log(tick.operationEffectiveness['io-alpha']);
+```

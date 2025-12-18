@@ -1,0 +1,21 @@
+{
+  "name": "dev_console",
+  "nodes": [
+    {"id": "classify", "type": "classifier"},
+    {"id": "retrieve", "type": "rag", "inputs": ["question"], "outputs": ["context"]},
+    {"id": "model", "type": "model", "inputs": ["question", "context"], "outputs": ["answer"]},
+    {"id": "alignment", "type": "policy", "inputs": ["answer"], "outputs": ["allow"]},
+    {"id": "patch", "type": "tool", "inputs": ["answer"], "outputs": ["patch"]}
+  ],
+  "edges": [
+    {"from": "classify", "to": "retrieve"},
+    {"from": "retrieve", "to": "model"},
+    {"from": "model", "to": "alignment"},
+    {"from": "alignment", "to": "patch", "when": "allow"}
+  ],
+  "policy_defaults": {
+    "tenant": "engineering",
+    "region": "global",
+    "purpose": "dev_assistant"
+  }
+}
