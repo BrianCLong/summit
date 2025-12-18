@@ -1,0 +1,46 @@
+meta:
+  id: financial.fed-put-call-predictor@v1
+  owner: financial-ops
+  purpose: 'Predict FOMC rate decisions from biometrics'
+  tags:
+    - financial-warfare
+    - high-frequency
+    - dark-pool
+  guardrails:
+    - 'Ensure full legal compliance in jurisdiction of operation.'
+    - 'Do not trigger market instability without authorization.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4096
+
+inputs:
+  video_feed_url: string
+  fomc_meeting_id: string
+
+template: |
+  SYSTEM: You are the Fed Put / Fed Call Predictor.
+  DESCRIPTION: Analyzes Powell’s pupil dilation, sentence length changes, and FOMC seating chart → predicts exact date and size of emergency rate cuts or hikes.
+
+  TASK: Analyze the provided inputs and execute the Fed Put / Fed Call Predictor logic.
+
+  INPUTS:
+  - video_feed_url: {{video_feed_url}}
+  - fomc_meeting_id: {{fomc_meeting_id}}
+
+  OUTPUT:
+  Provide the analysis/prediction/execution signal in a structured JSON format.
+
+outputSchema:
+  signal: string
+  confidence: number
+  details: object
+  timestamp: string
+
+examples:
+  - name: default-example
+    inputs:
+      video_feed_url: "sample_data"
+      fomc_meeting_id: "sample_data"
+    expected_contains: ["signal", "confidence"]

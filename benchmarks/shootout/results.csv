@@ -1,0 +1,10 @@
+Lang,Benchmark,AvgTime(ms)
+TS,Fibonacci(30),18.6875
+TS,JSON Parse,102.5325
+TS,String Concat,11.0789
+Python, Fibonacci(30), 198.2634
+Python, JSON Parse, 237.9154
+Python, String Concat, 13.1866
+Go,Fibonacci(30),5.6000
+Go,JSON Parse,287.2000
+Go,String Concat,2.6000
