@@ -1,11 +1,12 @@
 {
   "name": "@intelgraph/prov-ledger-lib",
-  "version": "0.2.0",
+  "version": "2.0.0",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "prov-verify": "dist/cli/verify.js"
+    "prov-verify": "dist/cli/verify.js",
+    "prov-verify-detailed": "dist/cli/verify-detailed.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

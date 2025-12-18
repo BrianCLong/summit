@@ -1,0 +1,18 @@
+{
+  "id": "license-12",
+  "schemaVersion": "v1",
+  "entityType": "License",
+  "name": "Darknet Monitoring Warrant",
+  "holderId": "org-42",
+  "scope": "credential-leak-monitoring",
+  "issuedBy": "agency-1",
+  "validFor": {
+    "start": "2025-01-01T00:00:00Z",
+    "end": "2025-12-31T23:59:59Z"
+  },
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "governance",
+    "ingestedAt": "2025-01-02T00:00:00Z"
+  }
+}

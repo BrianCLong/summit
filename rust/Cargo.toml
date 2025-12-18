@@ -1,8 +1,6 @@
 [workspace]
-resolver = "2"
 members = [
     "psc-runner",
     "summit",
-    "operator",
-    "summit-macros",
 ]
+resolver = "2"

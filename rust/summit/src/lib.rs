@@ -1,7 +1,4 @@
-pub mod config;
-pub mod tracing;
-pub mod serialization;
-pub mod storage;
-pub mod health;
-pub mod load_balancing;
-pub mod performance;
+pub mod cluster;
+pub mod failure_detector;
+
+pub use cluster::membership::ClusterMembership;
