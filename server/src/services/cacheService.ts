@@ -1,4 +1,5 @@
-import { createClient, RedisClientType } from 'redis';
+import { getRedisClient } from '../config/database.js';
+import { cfg } from '../config.js';
 import {
   recHit,
   recMiss,
@@ -13,218 +14,165 @@ export interface CacheEntry<T> {
 }
 
 export class CacheService {
-  private memoryCache: Map<string, CacheEntry<any>> = new Map();
-  private redisClient: RedisClientType | null = null;
-  private namespace = process.env.CACHE_NAMESPACE || 'maestro';
-  private defaultTTL = 300; // 5 minutes default TTL
+  private memoryCache: Map<string, CacheEntry<unknown>> = new Map();
+  private namespace = 'cache';
+  private defaultTtl = cfg?.CACHE_TTL_DEFAULT ?? 300;
+  private enabled = cfg?.CACHE_ENABLED ?? true;
 
-  constructor() {
-    // Initialize Redis client if available
-    try {
-      const url =
-        process.env.REDIS_URL ||
-        (process.env.REDIS_HOST
-          ? `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT || '6379'}`
-          : undefined);
-      if (url) {
-        this.redisClient = createClient({ url });
-        this.redisClient.on('error', (err) =>
-          console.warn('[CACHE] Redis client error:', err),
-        );
-        this.redisClient
-          .connect()
-          .then(() => console.log('[CACHE] Redis cache connected'))
-          .catch((e) => console.warn('[CACHE] Redis connect failed', e));
-      } else {
-        console.log('[CACHE] Using in-memory cache only');
-      }
-    } catch (error) {
-      console.warn('[CACHE] Redis unavailable, using in-memory cache:', error);
-    }
+  private getKey(key: string): string {
+    return `${this.namespace}:${key}`;
   }
 
-  /**
-   * Get cached data by key
-   */
+  private isExpired(entry: CacheEntry<unknown>): boolean {
+    return Date.now() - entry.timestamp >= entry.ttl * 1000;
+  }
+
+  private redis() {
+    return this.enabled ? getRedisClient() : null;
+  }
+
+  private isCacheEntry<T>(val: any): val is CacheEntry<T> {
+    return (
+      val &&
+      typeof val === 'object' &&
+      'data' in val &&
+      'timestamp' in val &&
+      'ttl' in val
+    );
+  }
+
   async get<T>(key: string): Promise<T | null> {
-    const op = 'get';
-    // Check memory cache first
+    if (!this.enabled) return null;
+
     const entry = this.memoryCache.get(key);
+    if (entry && !this.isExpired(entry)) {
+      recHit('memory', 'get');
+      return entry.data as T;
+    }
     if (entry) {
-      const now = Date.now();
-      if (now - entry.timestamp < entry.ttl * 1000) {
-        console.log(`[CACHE] Memory cache hit for key: ${key}`);
-        recHit('memory', op);
-        return entry.data as T;
-      } else {
-        // Expired, remove from cache
-        this.memoryCache.delete(key);
-        console.log(`[CACHE] Memory cache expired for key: ${key}`);
-      }
+      this.memoryCache.delete(key);
     }
 
-    // Try Redis if available
-    if (this.redisClient) {
-      try {
-        const rkey = `${this.namespace}:${key}`;
-        const raw = await this.redisClient.get(rkey);
-        if (raw) {
-          const parsed = JSON.parse(raw as string) as CacheEntry<T>;
-          const now = Date.now();
-          if (now - parsed.timestamp < parsed.ttl * 1000) {
-            recHit('redis', op);
-            return parsed.data as T;
-          } else {
-            await this.redisClient.del(rkey);
-          }
-        }
-      } catch (e) {
-        console.warn('[CACHE] Redis get error:', e);
-      }
+    const redis = this.redis();
+    if (!redis) {
+      recMiss('memory', 'get');
+      return null;
     }
 
-    console.log(`[CACHE] Cache miss for key: ${key}`);
-    recMiss(this.redisClient ? 'redis' : 'memory', op);
-    return null;
-  }
-
-  /**
-   * Set cached data with optional TTL
-   */
-  async set<T>(key: string, data: T, ttl?: number): Promise<void> {
-    const op = 'set';
-    const cacheTTL = ttl || this.defaultTTL;
-
-    // Store in memory cache
-    this.memoryCache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl: cacheTTL,
-    });
-
-    console.log(`[CACHE] Cached data for key: ${key} (TTL: ${cacheTTL}s)`);
-    recSet('memory', op);
-
-    if (this.redisClient) {
-      try {
-        const rkey = `${this.namespace}:${key}`;
-        const payload: CacheEntry<T> = {
-          data,
-          timestamp: Date.now(),
-          ttl: cacheTTL,
-        };
-        await this.redisClient.set(rkey, JSON.stringify(payload), {
-          EX: cacheTTL,
-        });
-        recSet('redis', op);
-      } catch (e) {
-        console.warn('[CACHE] Redis set error:', e);
+    try {
+      const raw = await redis.get(this.getKey(key));
+      if (!raw) {
+        recMiss('redis', 'get');
+        return null;
       }
-    }
-  }
 
-  /**
-   * Delete cached data
-   */
-  async delete(key: string): Promise<void> {
-    const op = 'delete';
-    this.memoryCache.delete(key);
-    console.log(`[CACHE] Deleted cache for key: ${key}`);
-    if (this.redisClient) {
-      try {
-        await this.redisClient.del(`${this.namespace}:${key}`);
-      } catch (e) {
-        console.warn('[CACHE] Redis del error:', e);
-      }
-    }
-  }
+      const parsed = JSON.parse(raw);
+      const data = this.isCacheEntry<T>(parsed) ? parsed.data : (parsed as T);
 
-  /**
-   * Clear all cached data
-   */
-  async clear(): Promise<void> {
-    this.memoryCache.clear();
-    console.log('[CACHE] Cleared all memory cache');
-    if (this.redisClient) {
-      try {
-        const pattern = `${this.namespace}:*`;
-        // Iterate keys (SCAN pattern) to avoid FLUSHALL
-        for await (const key of this.scanKeys(pattern)) {
-          await this.redisClient.del(key);
-        }
-      } catch (e) {
-        console.warn('[CACHE] Redis clear error:', e);
-      }
-    }
-  }
-
-  private async *scanKeys(pattern: string): AsyncGenerator<string> {
-    if (!this.redisClient) return;
-    let cursor = 0;
-    do {
-      const res: any = await (this.redisClient as any).scan(cursor, {
-        MATCH: pattern,
-        COUNT: 1000,
+      this.memoryCache.set(key, {
+        data,
+        timestamp: Date.now(),
+        ttl: this.defaultTtl,
       });
-      cursor = res.cursor;
-      const keys: string[] = res.keys || res[1] || [];
-      for (const k of keys) yield k;
-    } while (cursor !== 0);
+      this.updateGauge();
+      recHit('redis', 'get');
+      return data as T;
+    } catch {
+      recMiss('redis', 'get');
+      return null;
+    }
   }
 
-  /**
-   * Get cache statistics
-   */
+  async set<T>(key: string, value: T, ttl?: number): Promise<void> {
+    if (!this.enabled) return;
+
+    const effectiveTtl = ttl ?? this.defaultTtl;
+    this.memoryCache.set(key, {
+      data: value,
+      timestamp: Date.now(),
+      ttl: effectiveTtl,
+    });
+    this.updateGauge();
+    recSet('memory', 'set');
+
+    const redis = this.redis();
+    if (!redis) return;
+
+    try {
+      await redis.setex(this.getKey(key), effectiveTtl, JSON.stringify(value));
+      recSet('redis', 'set');
+    } catch {
+      // Redis write failures should not break the request path
+    }
+  }
+
+  async delete(key: string): Promise<void> {
+    this.memoryCache.delete(key);
+    this.updateGauge();
+    const redis = this.redis();
+    if (!redis) return;
+
+    try {
+      await redis.del(this.getKey(key));
+    } catch {
+      // Non-fatal
+    }
+  }
+
+  async getOrSet<T>(
+    key: string,
+    factory: () => Promise<T>,
+    ttl?: number,
+  ): Promise<T> {
+    const cached = await this.get<T>(key);
+    if (cached !== null && cached !== undefined) {
+      return cached;
+    }
+
+    const fresh = await factory();
+    if (fresh !== undefined && fresh !== null) {
+      await this.set(key, fresh, ttl);
+    }
+    return fresh;
+  }
+
   getStats() {
     const now = Date.now();
     let validEntries = 0;
     let expiredEntries = 0;
 
-    for (const [key, entry] of this.memoryCache.entries()) {
-      if (now - entry.timestamp < entry.ttl * 1000) {
-        validEntries++;
-      } else {
+    for (const entry of this.memoryCache.values()) {
+      if (this.isExpired(entry)) {
         expiredEntries++;
+      } else {
+        validEntries++;
       }
     }
 
-    const stats = {
+    return {
       totalEntries: this.memoryCache.size,
       validEntries,
       expiredEntries,
-      cacheType: 'memory',
+      cacheType: 'memory+redis',
     };
-    cacheLocalSize.labels(this.namespace).set(this.memoryCache.size);
-    return stats;
   }
 
-  /**
-   * Clean up expired entries
-   */
   cleanup(): void {
-    const now = Date.now();
     let cleaned = 0;
-
     for (const [key, entry] of this.memoryCache.entries()) {
-      if (now - entry.timestamp >= entry.ttl * 1000) {
+      if (this.isExpired(entry)) {
         this.memoryCache.delete(key);
         cleaned++;
       }
     }
+    this.updateGauge();
+  }
 
-    if (cleaned > 0) {
-      console.log(`[CACHE] Cleaned up ${cleaned} expired entries`);
-    }
+  private updateGauge() {
+    cacheLocalSize.labels(this.namespace).set(this.memoryCache.size);
   }
 }
 
-// Global cache instance
 export const cacheService = new CacheService();
 
-// Periodic cleanup every 5 minutes
-setInterval(
-  () => {
-    cacheService.cleanup();
-  },
-  5 * 60 * 1000,
-);
+setInterval(() => cacheService.cleanup(), 5 * 60 * 1000);
