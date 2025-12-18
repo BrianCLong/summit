@@ -1,0 +1,10 @@
+{
+  "alert": "PersistentQueryViolations",
+  "description": "{{ $value }} PQ violations per second - check client implementations",
+  "expr": "rate(pq_violations_total[5m]) > 10",
+  "runbook_url": "https://docs.intelgraph.dev/runbooks/persisted-query-violations",
+  "service": "intelgraph-api",
+  "severity": "warning",
+  "source": "ops/slos-and-alerts.yaml",
+  "summary": "High rate of persisted query violations"
+}

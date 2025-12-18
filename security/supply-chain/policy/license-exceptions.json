@@ -1,0 +1,15 @@
+{
+  "exceptions": [
+    {
+      "id": "lic-ex-001",
+      "package": "legacy-telemetry-adapter",
+      "license": "GPL-3.0",
+      "reason": "Existing dependency slated for replacement; no transitive redistribution",
+      "expiresAt": "2026-12-31",
+      "approvals": [
+        {"name": "Taylor Reed", "role": "legal"},
+        {"name": "Samir Patel", "role": "security"}
+      ]
+    }
+  ]
+}

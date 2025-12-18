@@ -1,39 +1,60 @@
-# Complex Event Processing (CEP) Service
+# Complex Event Processing (CEP) Service Blueprint
 
-This service provides a DSL-driven rules engine with tumbling and sliding windows, watermarking, and adapters for Redis/Kafka delivery. The runtime intentionally stores only metadata to avoid PII retention and uses idempotent emitters to guarantee at-least-once delivery semantics.
+This document captures the scoped blueprint for a CEP subsystem requested for the platform. It consolidates the runtime model, adapter expectations, API contracts, UI flows, and validation surfaces so implementation can proceed in small, reviewable increments without ambiguity.
 
-## DSL
+## Goals
+- Expressive DSL with sequence operators (`AFTER`, `WITHIN`, `EVERY`), tumbling and sliding windows, and watermark-aware timing semantics.
+- Pluggable ingestion/egress adapters for Redis streams and Kafka topics while enforcing at-least-once delivery and idempotent emits.
+- API surface for rule authoring, dry runs, and execution trace lookup: `POST /rules`, `GET /runs/:id`, `POST /dryrun`.
+- UI rule composer with live match preview; chip-style selectors for window and sequence constraints (jQuery compatible).
+- Fixtures that cover event sequences, joins, and watermark correctness; soak testing via k6 and end-to-end author→preview→deploy via Playwright.
+- Safety requirements: propagate LAC (latest acceptable clock) labels and avoid storing PII payloads at rest.
 
-Rules are declared with a human-friendly DSL that supports sequencing (`AFTER`), temporal fences (`WITHIN`), periodic evaluation (`EVERY`), and window definitions:
-
+## Service Layout
 ```
-EVERY 5s AFTER login WITHIN 30s purchase WINDOW TUMBLING 1m WATERMARK 5s
+services/cep/
+  go/           # Go runtime skeleton (streams + watermarking core)
+  node/         # Node/TypeScript API + UI composition helpers
+  docs/         # Architecture notes, threat model, runbooks
+  fixtures/     # Event streams, joins, watermark edge cases
+  tests/        # Go + Node unit/integration suites, k6 + Playwright specs
 ```
 
-Parsed fields:
-- **sequence**: ordered events paired via `AFTER`.
-- **within**: deadline for completing the sequence.
-- **every**: cadence for periodic scanning.
-- **window**: `TUMBLING` or `SLIDING` with durations.
-- **watermark**: late-arrival grace.
-
-## API
-
-- `POST /rules` – register a rule and receive a `ruleId` and `runId` for the initial evaluation run.
-- `GET /runs/:id` – fetch latest run status, matches, and emitted results.
-- `POST /dryrun` – evaluate a rule with provided events without persisting it.
+## DSL Semantics
+- **Sequencing**: `A AFTER B` enforces ordered occurrence; `WITHIN <duration>` limits lateness. `EVERY` repeats evaluation for each matching occurrence rather than first-match semantics.
+- **Windows**:
+  - Tumbling: fixed-size, non-overlapping buckets keyed by event time.
+  - Sliding: overlapping window advancing on each event; evaluation occurs per step.
+- **Watermarking**: All time-based operations use event-time with watermark advancement; triggers only fire when watermark crosses window end. Rules carry LAC labels to bound acceptable skew.
 
 ## Adapters
+- **Kafka**: consumer groups with manual commit, replayable offsets, and deterministic partition keying to preserve ordering for correlated sequences.
+- **Redis Streams**: consumer groups with explicit ACK after idempotent emit is confirmed; uses XCLAIM for stuck deliveries.
+- Emission path must de-duplicate via rule-run IDs or deterministic hashes before acknowledging upstream.
 
-- **Kafka**: produces/consumes events with LAC labels encoded in headers and idempotent producer keys.
-- **Redis**: persists dedupe keys and delivers queued emits with acknowledgement tracking.
+## APIs
+- `POST /rules`: registers a DSL rule, validates window/sequence composition, and returns a rule identifier plus LAC label.
+- `GET /runs/:id`: fetches run metadata and non-PII diagnostics (window boundaries, watermark progression, adapter offsets).
+- `POST /dryrun`: accepts a rule and fixture payload to simulate matches without persisting payload bodies.
+- Responses redact payload data; only schema fingerprints and timing metadata are returned.
 
-## Delivery Semantics
+## UI Composition
+- Rule composer should render sequence and window terms as chips; selecting chips updates a live preview by invoking `/dryrun` against fixture streams.
+- Live preview highlights matched windows and shows watermark position and LAC per evaluation step.
 
-- At-least-once is enforced by awaiting broker acknowledgements and retrying with deterministic identifiers.
-- Idempotent emits rely on Redis-set keys keyed by `ruleId`+`eventId`.
-- Payloads are filtered so only metadata (id, type, timestamp, labels) are stored.
+## Testing Surfaces
+- **Fixtures**: deterministic event streams for sequences, joins, and late-arriving data to verify watermark handling.
+- **Watermark tests**: ensure late events before watermark are included; late events after watermark are dropped but logged.
+- **Soak**: k6 script driving sustained publish/consume to verify at-least-once and idempotent emit behavior.
+- **E2E**: Playwright flow covering authoring a rule, previewing via dry run, and deploying to active evaluation.
 
-## Testing
+## Delivery Considerations
+- Avoid persisting payload bodies; store hashes and schema fingerprints only.
+- Tag downstream emits with LAC labels for lineage and auditability.
+- Implement replay protection using rule-run IDs across adapters.
+- Prefer schema-first validation for DSL to prevent ambiguous parsing.
 
-Watermark correctness, DSL parsing, and delivery idempotency are covered via Node's built-in test runner under `services/cep/tests`.
+## Next Steps
+- Establish Go module for watermark core and Node package for API/UI composition.
+- Wire adapter interfaces with contract tests using the fixtures catalog.
+- Bootstrap CI pipelines for unit, integration, soak, and e2e suites tied to the new service path.

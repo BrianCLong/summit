@@ -176,7 +176,7 @@ export class RadicalizationMonitor {
 
   private async assessRisk(individualId: string): Promise<void> {
     const profile = this.profiles.get(individualId);
-    if (!profile) return;
+    if (!profile) {return;}
 
     let risk = 0;
 
