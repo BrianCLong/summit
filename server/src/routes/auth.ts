@@ -1,104 +1,113 @@
-import { Router, Request } from 'express';
+import { Router, Request, Response, RequestHandler } from 'express';
 import express from 'express';
-import cookieParser from 'cookie-parser';
-import { AuthService } from '../services/AuthService.js';
 import { replayGuard, webhookRatelimit } from '../middleware/webhook-guard.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
-import { User } from '../services/AuthService.js';
-
-interface AuthenticatedRequest extends Request {
-  user?: User;
-}
+import AuthService from '../services/AuthService.js';
+import { rateLimitMiddleware } from '../middleware/rateLimit.js';
 
 const router = Router();
 const authService = new AuthService();
 
-router.use(cookieParser());
-router.use(express.json());
+// Type-safe wrapper for async handlers
+const asyncHandler = (fn: (req: Request, res: Response) => Promise<any>): RequestHandler =>
+  (req, res, next) => {
+    Promise.resolve(fn(req, res)).catch(next);
+  };
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+/**
+ * @route POST /auth/signup
+ * @desc Register a new user
+ * @access Public
+ */
+router.post('/signup', rateLimitMiddleware, asyncHandler(async (req, res) => {
+  const { email, password, firstName, lastName, username } = req.body;
+
   if (!email || !password) {
-    return res.status(400).send('Email and password are required');
+    return res.status(400).json({ error: 'Email and password are required' });
   }
 
-  try {
-    const { user, accessToken, refreshToken } = await authService.login(
-      email,
-      password,
-    );
+  const result = await authService.register({
+    email,
+    password,
+    firstName,
+    lastName,
+    username
+  });
 
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/auth/refresh_token',
-    });
+  return res.status(201).json(result);
+}));
 
-    res.json({ user, accessToken });
-  } catch (error) {
-    res.status(401).send('Invalid credentials');
+/**
+ * @route POST /auth/login
+ * @desc Authenticate user and get tokens
+ * @access Public
+ */
+router.post('/login', rateLimitMiddleware, asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
   }
-});
 
-router.post('/refresh_token', async (req, res) => {
-  const token = req.cookies.refresh_token;
+  const result = await authService.login(email, password, req.ip, req.get('User-Agent'));
+
+  return res.json(result);
+}));
+
+/**
+ * @route POST /auth/verify-email
+ * @desc Verify user email with token
+ * @access Public
+ */
+router.post('/verify-email', rateLimitMiddleware, asyncHandler(async (req, res) => {
+  const { token } = req.body;
 
   if (!token) {
-    return res.status(401).send('Refresh token not found');
+    return res.status(400).json({ error: 'Verification token is required' });
   }
 
-  try {
-    const tokenPair = await authService.refreshAccessToken(token);
-    if (!tokenPair) {
-      return res.status(401).send('Invalid refresh token');
-    }
+  const result = await authService.verifyEmail(token);
 
-    res.cookie('refresh_token', tokenPair.refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/auth/refresh_token',
-    });
+  return res.json({
+    success: true,
+    message: 'Email verified successfully',
+    ...result
+  });
+}));
 
-    return res.json({ accessToken: tokenPair.accessToken });
-  } catch (err) {
-    return res.status(401).send('Invalid refresh token');
+/**
+ * @route POST /auth/resend-verification
+ * @desc Resend verification email
+ * @access Public
+ */
+router.post('/resend-verification', rateLimitMiddleware, asyncHandler(async (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
   }
-});
 
-router.post(
-  '/revoke_all_tokens',
-  ensureAuthenticated,
-  async (req: AuthenticatedRequest, res) => {
-    const { userId } = req.body;
-    if (!userId) {
-      return res.status(400).send('userId is required');
-    }
+  await authService.resendVerification(email);
 
-    // A user can only revoke their own tokens, unless they are an admin
-    if (req.user.id !== userId && req.user.role !== 'ADMIN') {
-      return res.status(403).send('Forbidden');
-    }
+  return res.json({
+    success: true,
+    message: 'If an account exists with this email, a verification link has been sent.'
+  });
+}));
 
-    try {
-      await authService.logout(userId);
-      return res.send(`Tokens revoked for user ${userId}`);
-    } catch (err) {
-      return res.status(500).send('Error revoking tokens');
-    }
-  },
-);
-
+/**
+ * @route POST /auth/events
+ * @desc Webhook handler for auth events
+ * @access Protected (Webhook)
+ */
 router.post(
   '/events',
   webhookRatelimit,
   replayGuard(),
   express.raw({ type: '*/*', limit: '1mb' }),
-  async (_req, res) => {
+  asyncHandler(async (_req, res) => {
     // Generic auth provider webhook stub (Clerk/Auth0/etc.)
     return res.sendStatus(200);
-  },
+  }),
 );
 
 export default router;

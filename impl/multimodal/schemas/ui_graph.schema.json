@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UIScreenGraph",
+  "description": "Schema for UI screen graphs combining layout, semantics, and actionable affordances.",
+  "type": "object",
+  "required": ["screen_id", "uri", "elements"],
+  "properties": {
+    "screen_id": {"type": "string"},
+    "tenant_id": {"type": "string"},
+    "uri": {"type": "string", "description": "Screenshot or UI state reference"},
+    "timestamp": {"type": "string", "format": "date-time"},
+    "elements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "role", "bbox"],
+        "properties": {
+          "id": {"type": "string"},
+          "role": {"type": "string", "description": "button|input|table|card|image|text"},
+          "name": {"type": "string", "description": "Accessible name or label"},
+          "text": {"type": "string", "description": "Visible text content"},
+          "bbox": {"$ref": "#/definitions/bbox"},
+          "state": {
+            "type": "object",
+            "properties": {
+              "enabled": {"type": "boolean", "default": true},
+              "focused": {"type": "boolean"},
+              "selected": {"type": "boolean"},
+              "checked": {"type": "boolean"}
+            }
+          },
+          "actions": {
+            "type": "array",
+            "description": "Allowed actions for tool-native execution",
+            "items": {
+              "type": "object",
+              "required": ["type"],
+              "properties": {
+                "type": {"type": "string", "description": "click|type|scroll|select"},
+                "value": {"type": "string", "description": "Optional text to type or selection value"},
+                "tool": {"type": "string", "description": "Tool name to execute the action"}
+              }
+            }
+          },
+          "relations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["target_id", "type"],
+              "properties": {
+                "target_id": {"type": "string"},
+                "type": {"type": "string", "description": "parent|child|next|label-for|controls"},
+                "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          }
+        }
+      }
+    },
+    "graph_edges": {
+      "type": "array",
+      "description": "Edges between elements for IntelGraph ingestion",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "type"],
+        "properties": {
+          "source": {"type": "string"},
+          "target": {"type": "string"},
+          "type": {"type": "string"},
+          "weight": {"type": "number"}
+        }
+      }
+    },
+    "metadata": {"type": "object", "additionalProperties": true},
+    "security_tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Redaction/classification tags at the screen level"
+    }
+  },
+  "definitions": {
+    "bbox": {
+      "type": "object",
+      "required": ["x", "y", "w", "h"],
+      "properties": {
+        "x": {"type": "number"},
+        "y": {"type": "number"},
+        "w": {"type": "number", "exclusiveMinimum": 0},
+        "h": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  },
+  "additionalProperties": false
+}
