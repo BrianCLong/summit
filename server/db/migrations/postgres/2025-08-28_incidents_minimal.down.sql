@@ -1,0 +1,1 @@
+-- Undo for 2025-08-28_incidents_minimal.sql
