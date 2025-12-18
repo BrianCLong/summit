@@ -55,14 +55,14 @@ export const providerService = {
   async findById(id: string): Promise<DataProvider | null> {
     // Check cache first
     const cached = await cache.get<DataProvider>(`provider:${id}`);
-    if (cached) return cached;
+    if (cached) {return cached;}
 
     const result = await db.query(
       'SELECT * FROM data_providers WHERE id = $1',
       [id]
     );
 
-    if (!result.rows[0]) return null;
+    if (!result.rows[0]) {return null;}
 
     const provider = mapRowToProvider(result.rows[0]);
     await cache.set(`provider:${id}`, provider, CACHE_TTL);
