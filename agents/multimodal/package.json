@@ -39,7 +39,7 @@
     "transformer"
   ],
   "author": "IntelGraph Team",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "neo4j-driver": "^5.x",
     "pg": "^8.x",
