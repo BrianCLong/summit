@@ -42,16 +42,26 @@
     "framer-motion": "^12.23.24",
     "graphql": "^16.12.0",
     "graphql-ws": "^6.0.6",
+<<<<<<< HEAD
+    "immer": "^10.2.0",
+    "leaflet": "^1.9.4",
+=======
     "jquery": "^3.7.1",
+>>>>>>> main
     "lodash": "^4.17.21",
     "lucide-react": "^0.554.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-hook-form": "^7.47.0",
     "react-hotkeys-hook": "^5.2.1",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.4",
+<<<<<<< HEAD
+    "recharts": "^3.5.1",
+=======
     "recharts": "^3.3.0",
     "rxjs": "^7.8.2",
+>>>>>>> main
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
@@ -69,6 +79,9 @@
     "@storybook/react-vite": "^10.0.6",
     "@storybook/test": "^8.6.14",
     "@storybook/testing-library": "^0.2.2",
+<<<<<<< HEAD
+    "@types/leaflet": "^1.9.8",
+=======
 <<<<<<< HEAD
     "@types/jest": "^30.0.0",
     "@types/node": "^24.10.1",
@@ -98,6 +111,7 @@
     "@testing-library/user-event": "^14.6.1",
 =======
 <<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main

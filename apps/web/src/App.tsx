@@ -38,7 +38,11 @@ const SignupPage = React.lazy(() => import('@/pages/SignupPage'))
 const VerifyEmailPage = React.lazy(() => import('@/pages/VerifyEmailPage'))
 const AccessDeniedPage = React.lazy(() => import('@/pages/AccessDeniedPage'))
 const TriPanePage = React.lazy(() => import('@/pages/TriPanePage'))
+<<<<<<< HEAD
+const GeoIntPane = React.lazy(() => import('@/panes/GeoIntPane').then(module => ({ default: module.GeoIntPane })))
+=======
 const NarrativeIntelligencePage = React.lazy(() => import('@/pages/NarrativeIntelligencePage'))
+>>>>>>> main
 
 // Global search context
 import { SearchProvider } from '@/contexts/SearchContext'
@@ -113,6 +117,10 @@ function App() {
                       <Route
                         path="analysis/tri-pane"
                         element={<TriPanePage />}
+                      />
+                      <Route
+                        path="geoint"
+                        element={<GeoIntPane />}
                       />
 
                       {/* Narrative Intelligence */}
