@@ -1,15 +1,21 @@
 #!/bin/bash
-# Developer bootstrap script
-# Installs dependencies and initializes the runtime
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-BOOTSTRAP_ROOT="$(dirname "$DIR")"
+# Summit Dev Environment Setup
 
-echo "Setting up Summit Dev Environment..."
-cd "$BOOTSTRAP_ROOT"
-npm install
+echo "Setting up Summit Development Environment..."
 
-echo "Initializing Runtime..."
-"$DIR/summit.sh" init
+# 1. Check dependencies
+echo "Checking dependencies..."
+command -v node >/dev/null 2>&1 || { echo >&2 "Node.js is required but not installed. Aborting."; exit 1; }
 
-echo "Dev environment ready."
+# 2. Install dependencies
+echo "Installing dependencies..."
+if [ -f "package.json" ]; then
+    npm install
+fi
+
+# 3. Initialize Summit
+echo "Initializing Summit..."
+./bootstrap/cli/summit.sh init
+
+echo "Dev environment ready. Run './bootstrap/cli/summit.sh' to interact."
