@@ -1,4 +1,5 @@
 import { engagementCascade } from '../../src/insights/engagementCascade';
+import { describe, it, expect } from '@jest/globals';
 
 describe('engagementCascade', () => {
   it('reduces latency compared to the baseline plan', () => {

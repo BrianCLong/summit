@@ -1,10 +1,10 @@
 {
-  "alert_id": "DiskSpaceLow",
-  "alert_name": "Disk space running low",
+  "alert": "DiskSpaceLow",
+  "description": "Disk space is {{ $value }}% free on {{ $labels.instance }}:{{ $labels.mount }}",
+  "expr": "(\n  disk_free_bytes / disk_total_bytes * 100\n) < 20\n",
+  "runbook_url": null,
+  "service": "infrastructure",
   "severity": "critical",
-  "service": "unknown",
-  "tenant_id": null,
-  "metrics": {},
-  "timestamp": "2025-11-27T03:39:31+00:00",
-  "description": "Disk space is {{ $value }}% free on {{ $labels.instance }}:{{ $labels.mount }}"
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Disk space running low"
 }

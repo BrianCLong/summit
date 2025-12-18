@@ -1,10 +1,10 @@
 {
-  "alert_id": "IngestLatencySLOBurn",
-  "alert_name": "Data ingest latency SLO breach",
-  "severity": "warning",
+  "alert": "IngestLatencySLOBurn",
+  "description": "95th percentile ingest latency is {{ $value }}s (threshold: 1.5s)",
+  "expr": "histogram_quantile(0.95,\n  sum(rate(ingest_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le)\n) > 1.5\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/ingest-latency",
   "service": "api",
-  "tenant_id": null,
-  "metrics": {},
-  "timestamp": "2025-11-27T03:39:31+00:00",
-  "description": "95th percentile ingest latency is {{ $value }}s (threshold: 1.5s)"
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Data ingest latency SLO breach"
 }

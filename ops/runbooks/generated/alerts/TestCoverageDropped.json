@@ -1,10 +1,10 @@
 {
-  "alert_id": "TestCoverageDropped",
-  "alert_name": "Test coverage dropped below threshold",
+  "alert": "TestCoverageDropped",
+  "description": "Test coverage for {{ $labels.suite }} is {{ $value }}% (threshold: 75%)",
+  "expr": "test_coverage_percent < 75\n",
+  "runbook_url": "https://runbooks.intelgraph.io/ci/test-coverage",
+  "service": "ci_cd",
   "severity": "warning",
-  "service": "unknown",
-  "tenant_id": null,
-  "metrics": {},
-  "timestamp": "2025-11-27T03:39:31+00:00",
-  "description": "Test coverage for {{ $labels.suite }} is {{ $value }}% (threshold: 75%)"
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Test coverage dropped below threshold"
 }

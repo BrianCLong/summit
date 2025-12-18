@@ -1,10 +1,10 @@
 {
-  "alert_id": "AuthenticationFailureSpike",
-  "alert_name": "Authentication failure spike detected",
+  "alert": "AuthenticationFailureSpike",
+  "description": "Authentication failures at {{ $value }} per second over the last 5 minutes",
+  "expr": "sum(rate(auth_failures_total[5m])) > 10\n",
+  "runbook_url": "https://runbooks.intelgraph.io/security/auth-failures",
+  "service": "security",
   "severity": "critical",
-  "service": "unknown",
-  "tenant_id": null,
-  "metrics": {},
-  "timestamp": "2025-11-27T03:39:31+00:00",
-  "description": "Authentication failures at {{ $value }} per second over the last 5 minutes"
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Authentication failure spike detected"
 }

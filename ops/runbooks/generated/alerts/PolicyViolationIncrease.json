@@ -1,10 +1,10 @@
 {
-  "alert_id": "PolicyViolationIncrease",
-  "alert_name": "Policy violation rate increased",
+  "alert": "PolicyViolationIncrease",
+  "description": "Policy violations at {{ $value }} per second for policy {{ $labels.policy }}",
+  "expr": "sum(rate(policy_violations_total{action=\"deny\"}[5m])) > 5\n",
+  "runbook_url": "https://runbooks.intelgraph.io/security/policy-violations",
+  "service": "security",
   "severity": "warning",
-  "service": "unknown",
-  "tenant_id": null,
-  "metrics": {},
-  "timestamp": "2025-11-27T03:39:31+00:00",
-  "description": "Policy violations at {{ $value }} per second for policy {{ $labels.policy }}"
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Policy violation rate increased"
 }

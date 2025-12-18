@@ -4,7 +4,6 @@ set -euo pipefail
 docker compose -f "$(dirname "$0")/../docker-compose.yml" config >/dev/null
 echo "docker-compose configuration OK"
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
-python "$SCRIPT_DIR/alert_runbook_generator.py"
-python "$SCRIPT_DIR/check_oncall_paths.py"
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+python3 "$REPO_ROOT/ops/runbooks/generate_alert_runbooks.py" --check
+python3 "$REPO_ROOT/ops/observability-ci/scripts/check_oncall_pagerduty.py"

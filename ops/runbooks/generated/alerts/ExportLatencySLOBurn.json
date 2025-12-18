@@ -1,10 +1,10 @@
 {
-  "alert_id": "ExportLatencySLOBurn",
-  "alert_name": "Data export latency SLO breach",
-  "severity": "warning",
+  "alert": "ExportLatencySLOBurn",
+  "description": "95th percentile export latency is {{ $value }}s (threshold: 1.2s)",
+  "expr": "histogram_quantile(0.95,\n  sum(rate(export_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le)\n) > 1.2\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/export-latency",
   "service": "api",
-  "tenant_id": null,
-  "metrics": {},
-  "timestamp": "2025-11-27T03:39:31+00:00",
-  "description": "95th percentile export latency is {{ $value }}s (threshold: 1.2s)"
+  "severity": "warning",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "Data export latency SLO breach"
 }

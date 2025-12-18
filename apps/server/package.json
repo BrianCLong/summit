@@ -1,7 +1,7 @@
 {
   "name": "apps-server",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "IntelGraph GraphQL Server",
   "main": "src/index.ts",
   "scripts": {
@@ -12,7 +12,7 @@
   "dependencies": {
     "apollo-server": "^3.13.0",
     "graphql": "^16.12.0",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "body-parser": "^2.2.0",
     "axios": "^1.7.2",
     "uuid": "^13.0.0"

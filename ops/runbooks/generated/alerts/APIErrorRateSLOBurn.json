@@ -1,10 +1,10 @@
 {
-  "alert_id": "APIErrorRateSLOBurn",
-  "alert_name": "API error rate SLO breach",
-  "severity": "critical",
+  "alert": "APIErrorRateSLOBurn",
+  "description": "API error rate is {{ $value | humanizePercentage }} (threshold: 1%) over the last 5 minutes",
+  "expr": "(\n  sum(rate(http_requests_total{job=\"intelgraph-api\",status=~\"5..\"}[5m])) /\n  sum(rate(http_requests_total{job=\"intelgraph-api\"}[5m]))\n) > 0.01\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/api-error-rate",
   "service": "api",
-  "tenant_id": null,
-  "metrics": {},
-  "timestamp": "2025-11-27T03:39:31+00:00",
-  "description": "API error rate is {{ $value | humanizePercentage }} (threshold: 1%) over the last 5 minutes"
+  "severity": "critical",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "API error rate SLO breach"
 }
