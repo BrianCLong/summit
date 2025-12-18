@@ -1,5 +1,6 @@
 import { withLegacyGraphServer } from './__helpers__/legacyGraphTestkit';
 import * as neo from '../src/graph/neo4j';
+import { jest, it, expect } from '@jest/globals';
 
 jest.spyOn(neo, 'runCypher').mockImplementation(async (c, p) => {
   // naive in-memory stub; assert queries are called
