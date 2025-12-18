@@ -1,0 +1,86 @@
+meta:
+  id: security.threat-model@v1
+  owner: security-team
+  purpose: Auto-generate STRIDE threat models for microservices
+  tags: [security, threat-modeling, stride, automation]
+  guardrails: [input-sanitization, output-validation]
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+  maxTokens: 2000
+
+inputs:
+  serviceName: The name of the microservice
+  description: A detailed description of what the service does
+  architecture: A description of the service's architecture, dependencies, and data stores
+  dataFlow: A description of how data flows in and out of the service
+
+template: |
+  You are an expert Security Architect specializing in Threat Modeling using the STRIDE methodology.
+  Your task is to analyze the provided microservice details and generate a comprehensive STRIDE threat model.
+
+  Microservice Name: {{serviceName}}
+  Description: {{description}}
+  Architecture: {{architecture}}
+  Data Flow: {{dataFlow}}
+
+  Perform the following analysis:
+  1.  Decompose the system to understand trust boundaries.
+  2.  Identify threats for each STRIDE category:
+      *   **S**poofing: Authenticity
+      *   **T**ampering: Integrity
+      *   **R**epudiation: Non-repudiability
+      *   **I**nformation Disclosure: Confidentiality
+      *   **D**enial of Service: Availability
+      *   **E**levation of Privilege: Authorization
+  3.  For each identified threat, provide:
+      *   **Description**: What is the threat?
+      *   **Impact**: What happens if the threat is realized?
+      *   **Severity**: High, Medium, or Low.
+      *   **Mitigation**: How can this threat be mitigated?
+
+  Return the output as a valid JSON object matching the following schema. Do not include markdown formatting or code blocks.
+
+outputSchema:
+  type: object
+  properties:
+    serviceName:
+      type: string
+    analysisDate:
+      type: string
+    trustBoundaries:
+      type: array
+      items:
+        type: string
+    threats:
+      type: array
+      items:
+        type: object
+        properties:
+          category:
+            type: string
+            enum: [Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege]
+          description:
+            type: string
+          impact:
+            type: string
+          severity:
+            type: string
+            enum: [High, Medium, Low]
+          mitigation:
+            type: string
+    recommendations:
+      type: array
+      items:
+        type: string
+
+examples:
+  - name: Auth Service Analysis
+    inputs:
+      serviceName: AuthService
+      description: Handles user authentication and token issuance.
+      architecture: Node.js service using PostgreSQL for users and Redis for sessions. Exposes REST API.
+      dataFlow: Users submit credentials via POST /login. Service validates against DB. Issues JWT.
+    expected_contains: ["Spoofing", "Tampering", "JWT"]
+    expected_output: '{"serviceName": "AuthService", "analysisDate": "2023-10-27", "trustBoundaries": ["Internet / API Gateway", "Service / Database"], "threats": [{"category": "Spoofing", "description": "Attacker impersonates a valid user using stolen credentials", "impact": "Unauthorized access to user account", "severity": "High", "mitigation": "Implement MFA and strong password policies"}], "recommendations": ["Rotate secrets regularly"]}'
