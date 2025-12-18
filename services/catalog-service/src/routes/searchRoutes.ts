@@ -56,3 +56,27 @@ searchRouter.post('/click', async (req, res, next) => {
     next(error);
   }
 });
+
+/**
+ * POST /api/v1/search/fields
+ * Search fields with advanced filters
+ */
+searchRouter.post('/fields', async (req, res, next) => {
+  try {
+    await controller.searchFields(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/v1/search/impact
+ * Perform impact analysis
+ */
+searchRouter.post('/impact', async (req, res, next) => {
+  try {
+    await controller.performImpactAnalysis(req, res);
+  } catch (error) {
+    next(error);
+  }
+});

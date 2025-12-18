@@ -1,4 +1,5 @@
 import { planFederatedQuery } from '../services/federation/index.js';
+import { describe, it, expect } from '@jest/globals';
 
 describe('planFederatedQuery', () => {
   it('creates subqueries for each enclave', () => {

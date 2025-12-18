@@ -139,6 +139,19 @@ export const subscriptionFanoutLatency = new client.Histogram({
   registers: [registry]
 });
 
+export const subscriptionBackpressureTotal = new client.Counter({
+  name: 'subscription_backpressure_total',
+  help: 'Count of WebSocket disconnects or drops caused by backpressure',
+  registers: [registry]
+});
+
+export const subscriptionBatchesEmitted = new client.Histogram({
+  name: 'subscription_batch_size',
+  help: 'Distribution of batched subscription payload sizes',
+  buckets: [1, 5, 10, 25, 50, 75, 100],
+  registers: [registry]
+});
+
 // ==================== Ingest Metrics (existing) ====================
 export const ingestDedupeRate = new client.Gauge({
   name: 'ingest_dedupe_rate',
