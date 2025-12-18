@@ -1,10 +1,47 @@
 module.exports = {
+<<<<<<< HEAD
+  preset: 'ts-jest',
+  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  transform: {
+    '^.+\\.(ts|tsx)$': ['@swc/jest', {
+      jsc: {
+        parser: {
+          syntax: 'typescript',
+          tsx: true,
+        },
+        target: 'es2022',
+        transform: {
+          react: {
+            runtime: 'automatic',
+          },
+        },
+      },
+    }],
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
   preset: 'ts-jest/presets/default-esm',
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
     'ts-jest': {
       useESM: true,
+      tsconfig: 'tsconfig.test.json',
     },
+>>>>>>> main
   },
   testEnvironment: 'jsdom',
   roots: ['server', 'client', 'packages', 'services', 'tests'],
@@ -39,6 +76,28 @@ module.exports = {
     '!**/salvage/**',
     '!**/pull/**',
   ],
+  // Coverage thresholds - PR quality gate enforcement
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+    // Critical paths require 85% coverage
+    './server/src/middleware/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+    './server/src/services/**/*.ts': {
+      branches: 85,
+      functions: 85,
+      lines: 85,
+      statements: 85,
+    },
+  },
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
     '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
@@ -52,30 +111,46 @@ module.exports = {
     '^@server/(.*)$': '<rootDir>/server/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
   },
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
-  coverageThreshold: {
-    global: {
-      branches: 70,
-      functions: 70,
-      lines: 70,
-      statements: 70,
-    },
-    './server/src/security/**/*.ts': {
-      branches: 75,
-      functions: 75,
-      lines: 75,
-      statements: 75,
-    },
-    './server/src/services/AuthService.ts': {
-      branches: 75,
-      functions: 75,
-      lines: 75,
-      statements: 75,
-    },
-  },
-  coverageReporters: ['text', 'text-summary', 'json-summary', 'lcov'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(.*\\.mjs$))',
+    '<rootDir>/.disabled/',
+    '<rootDir>/apps/.mobile-native-disabled/',
+    '<rootDir>/apps/.desktop-electron-disabled/',
+  ],
   // Test timeout
   testTimeout: 30000,
   // Setup files
   setupFilesAfterEnv: ['<rootDir>/tests/utils/jest-setup.ts'],
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+=======
+  testEnvironment: 'node',
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
+  },
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  extensionsToTreatAsEsm: ['.ts'],
+  testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
 };
