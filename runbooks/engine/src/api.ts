@@ -368,23 +368,10 @@ export function createRunbookAPI(engine: RunbookEngine): Router {
   /**
    * POST /executions/:id/pause
    * Pause a running execution
-   *
-   * Body:
-   * {
-   *   userId: string
-   * }
    */
   router.post('/executions/:id/pause', async (req: Request, res: Response) => {
     try {
-      const { userId } = req.body;
-      if (!userId) {
-        res.status(400).json({
-          error: 'Missing required field: userId',
-        });
-        return;
-      }
-
-      await engine.pauseExecution(req.params.id, userId);
+      await engine.pauseExecution(req.params.id);
 
       res.json({
         version: API_VERSION,
@@ -402,23 +389,10 @@ export function createRunbookAPI(engine: RunbookEngine): Router {
   /**
    * POST /executions/:id/resume
    * Resume a paused execution
-   *
-   * Body:
-   * {
-   *   userId: string
-   * }
    */
   router.post('/executions/:id/resume', async (req: Request, res: Response) => {
     try {
-      const { userId } = req.body;
-      if (!userId) {
-        res.status(400).json({
-          error: 'Missing required field: userId',
-        });
-        return;
-      }
-
-      await engine.resumeExecution(req.params.id, userId);
+      await engine.resumeExecution(req.params.id);
 
       res.json({
         version: API_VERSION,
@@ -435,25 +409,17 @@ export function createRunbookAPI(engine: RunbookEngine): Router {
 
   /**
    * POST /executions/:id/cancel
-   * Cancel a running or paused execution
+   * Cancel a running execution
    *
-   * Body:
+   * Body (optional):
    * {
-   *   userId: string,
    *   reason?: string
    * }
    */
   router.post('/executions/:id/cancel', async (req: Request, res: Response) => {
     try {
-      const { userId, reason } = req.body;
-      if (!userId) {
-        res.status(400).json({
-          error: 'Missing required field: userId',
-        });
-        return;
-      }
-
-      await engine.cancelExecution(req.params.id, userId, reason);
+      const { reason } = req.body;
+      await engine.cancelExecution(req.params.id, reason);
 
       res.json({
         version: API_VERSION,
@@ -469,42 +435,25 @@ export function createRunbookAPI(engine: RunbookEngine): Router {
   });
 
   /**
-   * POST /executions/:id/steps/:stepId/retry
-   * Retry a failed step
-   *
-   * Body:
-   * {
-   *   userId: string
-   * }
+   * GET /executions/:id/stats
+   * Get execution statistics and progress
    */
-  router.post(
-    '/executions/:id/steps/:stepId/retry',
-    async (req: Request, res: Response) => {
-      try {
-        const { userId } = req.body;
-        if (!userId) {
-          res.status(400).json({
-            error: 'Missing required field: userId',
-          });
-          return;
-        }
+  router.get('/executions/:id/stats', async (req: Request, res: Response) => {
+    try {
+      const stats = await engine.getExecutionStats(req.params.id);
 
-        await engine.retryFailedStep(req.params.id, req.params.stepId, userId);
-
-        res.json({
-          version: API_VERSION,
-          executionId: req.params.id,
-          stepId: req.params.stepId,
-          status: 'retried',
-        });
-      } catch (error) {
-        res.status(500).json({
-          error: 'Failed to retry step',
-          message: (error as Error).message,
-        });
-      }
+      res.json({
+        version: API_VERSION,
+        executionId: req.params.id,
+        stats,
+      });
+    } catch (error) {
+      res.status(500).json({
+        error: 'Failed to get execution stats',
+        message: (error as Error).message,
+      });
     }
-  );
+  });
 
   /**
    * GET /health

@@ -1,0 +1,295 @@
+# ISO 27001:2022 Regulatory Pack
+# CompanyOS Trust Center
+
+id: iso-27001-2024
+name: ISO 27001:2022 Compliance Pack
+description: |
+  ISO/IEC 27001:2022 Information Security Management System (ISMS) compliance pack.
+  Covers Annex A controls with evidence sources and automated testing.
+version: "2024.1"
+framework: ISO_27001
+status: active
+
+metadata:
+  audit_period: "2024-01-01/2024-12-31"
+  auditor: "ISO Certification Body"
+  certification_date: "2024-11-01"
+  expiration_date: "2027-11-01"
+
+controls:
+  # A.5 - Organizational Controls
+  - id: A.5.1
+    title: "Policies for Information Security"
+    description: |
+      Information security policy and topic-specific policies shall be defined,
+      approved by management, published, communicated to and acknowledged by
+      relevant personnel and relevant interested parties.
+    category: Organizational Controls
+    evidence_sources:
+      - type: configuration
+        name: Security Policies
+        systems:
+          - name: Information Security Policy
+            config: /SECURITY/policies/information-security-policy.md
+          - name: Acceptable Use Policy
+            config: /docs/policies/acceptable-use.md
+      - type: audit_log
+        name: Policy Acknowledgments
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_type = 'policy.acknowledged'
+          AND timestamp BETWEEN $1 AND $2
+    tests:
+      - id: A.5.1-T01
+        name: Policy Review
+        type: manual
+        frequency: annual
+        procedure: Review and update all security policies
+        expected: Policies reviewed and updated within 12 months
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC1.1
+      - framework: NIST_800_53
+        control: PL-1
+
+  - id: A.5.15
+    title: "Access Control"
+    description: |
+      Rules to control physical and logical access to information and other
+      associated assets shall be established and implemented based on business
+      and information security requirements.
+    category: Organizational Controls
+    evidence_sources:
+      - type: policy
+        name: Access Control Policy
+        policy_path: /SECURITY/policy/opa/abac.rego
+      - type: configuration
+        name: RBAC Configuration
+        systems:
+          - name: Role Definitions
+            config: /server/src/config/roles.ts
+    tests:
+      - id: A.5.15-T01
+        name: Access Control Enforcement
+        type: automated
+        frequency: continuous
+        automation:
+          script: tests/compliance/access-control.test.ts
+        expected: Access controls enforced per policy
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.1
+      - framework: NIST_800_53
+        control: AC-1
+
+  # A.8 - Technological Controls
+  - id: A.8.2
+    title: "Privileged Access Rights"
+    description: |
+      The allocation and use of privileged access rights shall be restricted
+      and managed.
+    category: Technological Controls
+    evidence_sources:
+      - type: audit_log
+        name: Privileged Access Events
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_type LIKE 'admin.%'
+          AND timestamp BETWEEN $1 AND $2
+      - type: configuration
+        name: Privileged Role Configuration
+        systems:
+          - name: Admin Roles
+            config: /server/src/config/admin-roles.ts
+    tests:
+      - id: A.8.2-T01
+        name: Privileged Access Review
+        type: manual
+        frequency: quarterly
+        procedure: Review all privileged access assignments
+        expected: Privileged access appropriate and documented
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.1
+      - framework: NIST_800_53
+        control: AC-6
+
+  - id: A.8.9
+    title: "Configuration Management"
+    description: |
+      Configurations, including security configurations, of hardware, software,
+      services and networks shall be established, documented, implemented,
+      monitored and reviewed.
+    category: Technological Controls
+    evidence_sources:
+      - type: configuration
+        name: Infrastructure Configuration
+        systems:
+          - name: Terraform IaC
+            config: /infra/terraform/
+          - name: Kubernetes Manifests
+            config: /k8s/
+      - type: audit_log
+        name: Configuration Changes
+        table: audit_events
+        query: |
+          SELECT * FROM audit_events
+          WHERE event_category = 'configuration'
+          AND timestamp BETWEEN $1 AND $2
+    tests:
+      - id: A.8.9-T01
+        name: Configuration Drift Detection
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/config-drift.test.ts
+        expected: No unauthorized configuration changes
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC8.1
+      - framework: NIST_800_53
+        control: CM-2
+
+  - id: A.8.12
+    title: "Data Leakage Prevention"
+    description: |
+      Data leakage prevention measures shall be applied to systems, networks
+      and any other devices that process, store or transmit sensitive information.
+    category: Technological Controls
+    evidence_sources:
+      - type: configuration
+        name: DLP Configuration
+        systems:
+          - name: Network Policies
+            config: /k8s/network-policies/
+          - name: Egress Rules
+            config: /infra/terraform/modules/networking/egress.tf
+      - type: metric
+        name: DLP Alerts
+        prometheus_query: |
+          sum(increase(dlp_alerts_total[24h]))
+    tests:
+      - id: A.8.12-T01
+        name: Data Exfiltration Prevention
+        type: automated
+        frequency: weekly
+        automation:
+          script: tests/compliance/dlp.test.ts
+        expected: Unauthorized data transfers blocked
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.7
+      - framework: NIST_800_53
+        control: SC-7
+
+  - id: A.8.15
+    title: "Logging"
+    description: |
+      Logs that record activities, exceptions, faults and other relevant events
+      shall be produced, stored, protected and analysed.
+    category: Technological Controls
+    evidence_sources:
+      - type: audit_log
+        name: System Logs
+        table: audit_events
+        query: |
+          SELECT COUNT(*) as event_count, event_category
+          FROM audit_events
+          WHERE timestamp BETWEEN $1 AND $2
+          GROUP BY event_category
+      - type: configuration
+        name: Logging Configuration
+        systems:
+          - name: Audit System
+            config: /server/src/audit/
+          - name: Log Retention
+            config: /server/src/config/retention.ts
+    tests:
+      - id: A.8.15-T01
+        name: Log Completeness
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/logging-completeness.test.ts
+        expected: All required events logged
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC7.1
+      - framework: NIST_800_53
+        control: AU-2
+
+  - id: A.8.24
+    title: "Use of Cryptography"
+    description: |
+      Rules for the effective use of cryptography, including cryptographic key
+      management, shall be defined and implemented.
+    category: Technological Controls
+    evidence_sources:
+      - type: configuration
+        name: Encryption Configuration
+        systems:
+          - name: TLS Configuration
+            config: /infra/terraform/modules/networking/tls.tf
+          - name: Encryption at Rest
+            config: /infra/terraform/modules/storage/encryption.tf
+      - type: metric
+        name: TLS Version Distribution
+        prometheus_query: |
+          sum by (version) (tls_connections_total)
+    tests:
+      - id: A.8.24-T01
+        name: Encryption Standards
+        type: automated
+        frequency: daily
+        automation:
+          script: tests/compliance/encryption-standards.test.ts
+        expected: TLS 1.3 enforced, AES-256 for data at rest
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC6.7
+      - framework: NIST_800_53
+        control: SC-13
+
+  # A.8.31 - Separation of Development, Test and Production Environments
+  - id: A.8.31
+    title: "Separation of Environments"
+    description: |
+      Development, testing and production environments shall be separated
+      and secured.
+    category: Technological Controls
+    evidence_sources:
+      - type: configuration
+        name: Environment Separation
+        systems:
+          - name: Kubernetes Namespaces
+            config: /k8s/namespaces/
+          - name: Network Segmentation
+            config: /infra/terraform/modules/networking/segmentation.tf
+    tests:
+      - id: A.8.31-T01
+        name: Environment Isolation
+        type: automated
+        frequency: weekly
+        automation:
+          script: tests/compliance/env-isolation.test.ts
+        expected: Production isolated from dev/test
+    mappings:
+      - framework: SOC2_TYPE_II
+        control: CC8.1
+      - framework: NIST_800_53
+        control: CM-4
+
+artifacts:
+  - type: certificate
+    name: ISO 27001 Certificate
+    description: ISO 27001:2022 certification
+    access: customer
+    path: /artifacts/iso-27001-certificate-2024.pdf
+
+  - type: report
+    name: Statement of Applicability
+    description: ISO 27001 Statement of Applicability (SoA)
+    access: customer_nda
+    path: /artifacts/iso-27001-soa-2024.pdf

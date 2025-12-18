@@ -1,627 +1,609 @@
 /**
- * Unit tests for Standard Step Executors
- *
- * Tests:
- * - CallServiceExecutor: HTTP calls, idempotency, error handling
- * - WaitForEventExecutor: Event matching, timeout handling
- * - HumanApprovalExecutor: Multi-approver logic, timeout actions
- * - ConditionalExecutor: Condition evaluation, branch selection
- * - LoopExecutor: Iteration limits, safety checks
+ * Tests for built-in executors
  */
 
 import {
-  CallServiceExecutor,
-  WaitForEventExecutor,
-  HumanApprovalExecutor,
   ConditionalExecutor,
   LoopExecutor,
-  evaluateCondition,
+  ApprovalExecutor,
+  EventWaitExecutor,
+  ServiceCallExecutor,
+  ConditionEvaluator,
 } from '../src/executors';
 import {
   StepDefinition,
+  ExtendedStepDefinition,
   ExecutionContext,
   ExecutionStatus,
-  RetryPolicy,
-  Condition,
 } from '../src/types';
 
-// Mock execution context
-const createMockContext = (): ExecutionContext => ({
-  legalBasis: {
-    authority: 'TEST',
-    classification: 'UNCLASSIFIED',
-    authorizedUsers: ['user1', 'user2', 'user3'],
-  },
-  tenantId: 'test-tenant',
-  initiatedBy: 'user1',
-  assumptions: [],
-});
+describe('ConditionEvaluator', () => {
+  const testData = {
+    status: 'active',
+    count: 42,
+    items: ['a', 'b', 'c'],
+    nested: {
+      value: 100,
+    },
+  };
 
-const defaultRetryPolicy: RetryPolicy = {
-  maxAttempts: 3,
-  initialDelayMs: 10,
-  maxDelayMs: 100,
-  backoffMultiplier: 2,
-};
+  it('should evaluate eq operator', () => {
+    expect(
+      ConditionEvaluator.evaluate(
+        { left: '$status', operator: 'eq', right: 'active' },
+        testData
+      )
+    ).toBe(true);
 
-describe('evaluateCondition', () => {
-  it('should evaluate equality condition', () => {
-    const condition: Condition = {
-      field: 'status',
-      operator: 'eq',
-      value: 'active',
-    };
-
-    expect(evaluateCondition(condition, { status: 'active' })).toBe(true);
-    expect(evaluateCondition(condition, { status: 'inactive' })).toBe(false);
+    expect(
+      ConditionEvaluator.evaluate(
+        { left: '$status', operator: 'eq', right: 'inactive' },
+        testData
+      )
+    ).toBe(false);
   });
 
-  it('should evaluate numeric comparison', () => {
-    const data = { count: 10 };
+  it('should evaluate ne operator', () => {
+    expect(
+      ConditionEvaluator.evaluate(
+        { left: '$status', operator: 'ne', right: 'inactive' },
+        testData
+      )
+    ).toBe(true);
+  });
+
+  it('should evaluate gt operator', () => {
+    expect(
+      ConditionEvaluator.evaluate(
+        { left: '$count', operator: 'gt', right: 40 },
+        testData
+      )
+    ).toBe(true);
 
     expect(
-      evaluateCondition({ field: 'count', operator: 'gt', value: 5 }, data)
-    ).toBe(true);
+      ConditionEvaluator.evaluate(
+        { left: '$count', operator: 'gt', right: 50 },
+        testData
+      )
+    ).toBe(false);
+  });
+
+  it('should evaluate gte operator', () => {
     expect(
-      evaluateCondition({ field: 'count', operator: 'lt', value: 15 }, data)
-    ).toBe(true);
-    expect(
-      evaluateCondition({ field: 'count', operator: 'gte', value: 10 }, data)
-    ).toBe(true);
-    expect(
-      evaluateCondition({ field: 'count', operator: 'lte', value: 10 }, data)
+      ConditionEvaluator.evaluate(
+        { left: '$count', operator: 'gte', right: 42 },
+        testData
+      )
     ).toBe(true);
   });
 
   it('should evaluate in operator', () => {
-    const condition: Condition = {
-      field: 'status',
-      operator: 'in',
-      value: ['active', 'pending'],
-    };
-
-    expect(evaluateCondition(condition, { status: 'active' })).toBe(true);
-    expect(evaluateCondition(condition, { status: 'inactive' })).toBe(false);
-  });
-
-  it('should evaluate contains operator', () => {
-    const condition: Condition = {
-      field: 'message',
-      operator: 'contains',
-      value: 'error',
-    };
+    expect(
+      ConditionEvaluator.evaluate(
+        { left: '$status', operator: 'in', right: ['active', 'pending'] },
+        testData
+      )
+    ).toBe(true);
 
     expect(
-      evaluateCondition(condition, { message: 'An error occurred' })
-    ).toBe(true);
-    expect(evaluateCondition(condition, { message: 'Success' })).toBe(false);
+      ConditionEvaluator.evaluate(
+        { left: '$status', operator: 'in', right: ['inactive', 'pending'] },
+        testData
+      )
+    ).toBe(false);
   });
 
   it('should evaluate exists operator', () => {
-    const condition: Condition = {
-      field: 'optionalField',
-      operator: 'exists',
-    };
+    expect(
+      ConditionEvaluator.evaluate({ left: '$status', operator: 'exists' }, testData)
+    ).toBe(true);
 
     expect(
-      evaluateCondition(condition, { optionalField: 'value' })
+      ConditionEvaluator.evaluate(
+        { left: '$nonexistent', operator: 'exists' },
+        testData
+      )
+    ).toBe(false);
+  });
+
+  it('should support nested paths', () => {
+    expect(
+      ConditionEvaluator.evaluate(
+        { left: '$nested.value', operator: 'eq', right: 100 },
+        testData
+      )
     ).toBe(true);
-    expect(evaluateCondition(condition, {})).toBe(false);
-  });
-
-  it('should handle nested field paths', () => {
-    const condition: Condition = {
-      field: 'user.status',
-      operator: 'eq',
-      value: 'active',
-    };
-
-    const data = { user: { status: 'active' } };
-    expect(evaluateCondition(condition, data)).toBe(true);
-  });
-});
-
-describe('CallServiceExecutor', () => {
-  let executor: CallServiceExecutor;
-
-  beforeEach(() => {
-    executor = new CallServiceExecutor();
-  });
-
-  it('should validate step configuration', () => {
-    const validStep: StepDefinition = {
-      id: 'test-call',
-      name: 'Test Call',
-      type: 'call-service',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {
-        url: 'https://api.example.com/endpoint',
-        method: 'POST',
-      },
-      retryPolicy: defaultRetryPolicy,
-    };
-
-    expect(executor.validate(validStep)).toBe(true);
-  });
-
-  it('should reject invalid configuration', () => {
-    const invalidStep: StepDefinition = {
-      id: 'test-call',
-      name: 'Test Call',
-      type: 'call-service',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {}, // Missing url and method
-      retryPolicy: defaultRetryPolicy,
-    };
-
-    expect(() => executor.validate(invalidStep)).toThrow(/missing required config/);
-  });
-
-  // Note: Actual HTTP tests would require mocking fetch or using a test server
-});
-
-describe('WaitForEventExecutor', () => {
-  let executor: WaitForEventExecutor;
-
-  beforeEach(() => {
-    executor = new WaitForEventExecutor();
-  });
-
-  it('should validate step configuration', () => {
-    const validStep: StepDefinition = {
-      id: 'wait-step',
-      name: 'Wait for Event',
-      type: 'wait-for-event',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {
-        eventType: 'approval.completed',
-      },
-      retryPolicy: defaultRetryPolicy,
-    };
-
-    expect(executor.validate(validStep)).toBe(true);
-  });
-
-  it('should receive registered events', async () => {
-    const step: StepDefinition = {
-      id: 'wait-step',
-      name: 'Wait for Event',
-      type: 'wait-for-event',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {
-        eventType: 'test.event',
-        correlationId: 'test-123',
-        timeoutMs: 5000,
-        pollIntervalMs: 100,
-      },
-      retryPolicy: defaultRetryPolicy,
-    };
-
-    // Register event before execution
-    executor.registerEvent('test.event', 'test-123', { result: 'success' });
-
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: {} },
-      createMockContext()
-    );
-
-    expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.output?.data).toEqual({ result: 'success' });
-  });
-
-  it('should timeout if event not received', async () => {
-    const step: StepDefinition = {
-      id: 'wait-step',
-      name: 'Wait for Event',
-      type: 'wait-for-event',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {
-        eventType: 'test.event',
-        correlationId: 'test-456',
-        timeoutMs: 100, // Short timeout
-        pollIntervalMs: 50,
-      },
-      retryPolicy: defaultRetryPolicy,
-    };
-
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: {} },
-      createMockContext()
-    );
-
-    expect(result.status).toBe(ExecutionStatus.FAILED);
-    expect(result.error?.message).toContain('Timeout waiting for event');
-  });
-});
-
-describe('HumanApprovalExecutor', () => {
-  let executor: HumanApprovalExecutor;
-
-  beforeEach(() => {
-    executor = new HumanApprovalExecutor();
-  });
-
-  it('should validate approval configuration', () => {
-    const validStep: StepDefinition = {
-      id: 'approval-step',
-      name: 'Approval Step',
-      type: 'human-approval',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {},
-      retryPolicy: defaultRetryPolicy,
-      approvalConfig: {
-        approvers: ['user1', 'user2'],
-        minApprovals: 1,
-        timeoutMs: 60000,
-        timeoutAction: 'fail',
-      },
-    };
-
-    expect(executor.validate(validStep)).toBe(true);
-  });
-
-  it('should reject invalid approval configuration', () => {
-    const invalidStep: StepDefinition = {
-      id: 'approval-step',
-      name: 'Approval Step',
-      type: 'human-approval',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {},
-      retryPolicy: defaultRetryPolicy,
-      approvalConfig: {
-        approvers: ['user1'],
-        minApprovals: 2, // More than approvers
-        timeoutMs: 60000,
-        timeoutAction: 'fail',
-      },
-    };
-
-    expect(() => executor.validate(invalidStep)).toThrow(/minApprovals/);
-  });
-
-  it('should approve when minimum approvals reached', async () => {
-    const step: StepDefinition = {
-      id: 'approval-step',
-      name: 'Approval Step',
-      type: 'human-approval',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {},
-      retryPolicy: defaultRetryPolicy,
-      approvalConfig: {
-        approvers: ['user1', 'user2'],
-        minApprovals: 2,
-        timeoutMs: 5000,
-        timeoutAction: 'fail',
-      },
-    };
-
-    // Submit approvals before execution completes
-    setTimeout(() => {
-      executor.submitApproval(step.id, 'user1', 'approved', 'LGTM');
-    }, 100);
-
-    setTimeout(() => {
-      executor.submitApproval(step.id, 'user2', 'approved', 'Approved');
-    }, 200);
-
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: {} },
-      createMockContext()
-    );
-
-    expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.output?.data.approved).toBe(true);
-    expect(result.approvals).toHaveLength(2);
-  });
-
-  it('should reject when too many rejections', async () => {
-    const step: StepDefinition = {
-      id: 'approval-step',
-      name: 'Approval Step',
-      type: 'human-approval',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {},
-      retryPolicy: defaultRetryPolicy,
-      approvalConfig: {
-        approvers: ['user1', 'user2', 'user3'],
-        minApprovals: 2,
-        timeoutMs: 5000,
-        timeoutAction: 'fail',
-      },
-    };
-
-    // Submit rejections
-    setTimeout(() => {
-      executor.submitApproval(step.id, 'user1', 'rejected', 'No');
-      executor.submitApproval(step.id, 'user2', 'rejected', 'No');
-    }, 100);
-
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: {} },
-      createMockContext()
-    );
-
-    expect(result.status).toBe(ExecutionStatus.FAILED);
-    expect(result.error?.message).toContain('rejected');
-  });
-
-  it('should handle timeout with auto-approve', async () => {
-    const step: StepDefinition = {
-      id: 'approval-step',
-      name: 'Approval Step',
-      type: 'human-approval',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {},
-      retryPolicy: defaultRetryPolicy,
-      approvalConfig: {
-        approvers: ['user1', 'user2'],
-        minApprovals: 2,
-        timeoutMs: 100, // Short timeout
-        timeoutAction: 'approve',
-      },
-    };
-
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: {} },
-      createMockContext()
-    );
-
-    expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.output?.data.autoApproved).toBe(true);
   });
 });
 
 describe('ConditionalExecutor', () => {
-  let executor: ConditionalExecutor;
+  const executor = new ConditionalExecutor();
+  const context: ExecutionContext = {
+    legalBasis: {
+      authority: 'TEST',
+      classification: 'UNCLASSIFIED',
+      authorizedUsers: ['test-user'],
+    },
+    tenantId: 'test-tenant',
+    initiatedBy: 'test-user',
+    assumptions: [],
+  };
 
-  beforeEach(() => {
-    executor = new ConditionalExecutor();
-  });
-
-  it('should validate conditional configuration', () => {
-    const validStep: StepDefinition = {
-      id: 'conditional-step',
-      name: 'Conditional Step',
-      type: 'conditional',
+  it('should validate step with branches', () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-conditional',
+      name: 'Test Conditional',
+      type: 'core:conditional',
       inputSchema: {},
       outputSchema: {},
       dependsOn: [],
-      config: {
-        condition: {
-          field: 'status',
-          operator: 'eq',
-          value: 'active',
-        },
-        trueBranch: 'step-a',
-        falseBranch: 'step-b',
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
       },
-      retryPolicy: defaultRetryPolicy,
+      branches: [
+        {
+          condition: { left: '$status', operator: 'eq', right: 'active' },
+          steps: [],
+        },
+      ],
     };
 
-    expect(executor.validate(validStep)).toBe(true);
+    expect(executor.validate(step)).toBe(true);
   });
 
-  it('should execute true branch', async () => {
+  it('should throw error for step without branches', () => {
     const step: StepDefinition = {
-      id: 'conditional-step',
-      name: 'Conditional Step',
-      type: 'conditional',
+      id: 'test-conditional',
+      name: 'Test Conditional',
+      type: 'core:conditional',
       inputSchema: {},
       outputSchema: {},
       dependsOn: [],
-      config: {
-        condition: {
-          field: 'status',
-          operator: 'eq',
-          value: 'active',
-        },
-        trueBranch: 'step-a',
-        falseBranch: 'step-b',
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
       },
-      retryPolicy: defaultRetryPolicy,
     };
 
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: { status: 'active' } },
-      createMockContext()
-    );
+    expect(() => executor.validate(step)).toThrow();
+  });
+
+  it('should execute and match first true condition', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-conditional',
+      name: 'Test Conditional',
+      type: 'core:conditional',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      branches: [
+        {
+          condition: { left: '$status', operator: 'eq', right: 'inactive' },
+          steps: [],
+        },
+        {
+          condition: { left: '$status', operator: 'eq', right: 'active' },
+          steps: [
+            {
+              id: 'step1',
+              name: 'Step 1',
+              type: 'test',
+              inputSchema: {},
+              outputSchema: {},
+              dependsOn: [],
+              config: {},
+              retryPolicy: {
+                maxAttempts: 1,
+                initialDelayMs: 1000,
+                maxDelayMs: 1000,
+                backoffMultiplier: 1,
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const input = {
+      schema: {},
+      data: { status: 'active' },
+    };
+
+    const result = await executor.execute(step, input, context);
 
     expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.output?.data.condition).toBe(true);
-    expect(result.output?.data.nextStepId).toBe('step-a');
+    expect(result.output?.data.matchedBranch).toBe(1);
+    expect(result.output?.data.stepsToExecute).toEqual(['step1']);
   });
 
-  it('should execute false branch', async () => {
-    const step: StepDefinition = {
-      id: 'conditional-step',
-      name: 'Conditional Step',
-      type: 'conditional',
+  it('should skip if no condition matches', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-conditional',
+      name: 'Test Conditional',
+      type: 'core:conditional',
       inputSchema: {},
       outputSchema: {},
       dependsOn: [],
-      config: {
-        condition: {
-          field: 'status',
-          operator: 'eq',
-          value: 'active',
-        },
-        trueBranch: 'step-a',
-        falseBranch: 'step-b',
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
       },
-      retryPolicy: defaultRetryPolicy,
+      branches: [
+        {
+          condition: { left: '$status', operator: 'eq', right: 'inactive' },
+          steps: [],
+        },
+      ],
     };
 
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: { status: 'inactive' } },
-      createMockContext()
-    );
-
-    expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.output?.data.condition).toBe(false);
-    expect(result.output?.data.nextStepId).toBe('step-b');
-  });
-
-  it('should skip when no branch configured', async () => {
-    const step: StepDefinition = {
-      id: 'conditional-step',
-      name: 'Conditional Step',
-      type: 'conditional',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {
-        condition: {
-          field: 'status',
-          operator: 'eq',
-          value: 'active',
-        },
-        trueBranch: 'step-a',
-        // No false branch
-      },
-      retryPolicy: defaultRetryPolicy,
+    const input = {
+      schema: {},
+      data: { status: 'active' },
     };
 
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: { status: 'inactive' } },
-      createMockContext()
-    );
+    const result = await executor.execute(step, input, context);
 
-    expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.skipped).toBe(true);
+    expect(result.status).toBe(ExecutionStatus.SKIPPED);
   });
 });
 
 describe('LoopExecutor', () => {
-  let executor: LoopExecutor;
+  const executor = new LoopExecutor();
+  const context: ExecutionContext = {
+    legalBasis: {
+      authority: 'TEST',
+      classification: 'UNCLASSIFIED',
+      authorizedUsers: ['test-user'],
+    },
+    tenantId: 'test-tenant',
+    initiatedBy: 'test-user',
+    assumptions: [],
+  };
 
-  beforeEach(() => {
-    executor = new LoopExecutor();
-  });
-
-  it('should validate loop configuration', () => {
-    const validStep: StepDefinition = {
-      id: 'loop-step',
-      name: 'Loop Step',
-      type: 'loop',
+  it('should validate for_each loop', () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-loop',
+      name: 'Test Loop',
+      type: 'core:loop',
       inputSchema: {},
       outputSchema: {},
       dependsOn: [],
-      config: {
-        bodyStepId: 'process-item',
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
       },
-      retryPolicy: defaultRetryPolicy,
-      loopConfig: {
-        maxIterations: 10,
-      },
-    };
-
-    expect(executor.validate(validStep)).toBe(true);
-  });
-
-  it('should reject excessive max iterations', () => {
-    const invalidStep: StepDefinition = {
-      id: 'loop-step',
-      name: 'Loop Step',
-      type: 'loop',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {
-        bodyStepId: 'process-item',
-      },
-      retryPolicy: defaultRetryPolicy,
-      loopConfig: {
-        maxIterations: 2000, // Too high
-      },
-    };
-
-    expect(() => executor.validate(invalidStep)).toThrow(/too high/);
-  });
-
-  it('should iterate over array', async () => {
-    const step: StepDefinition = {
-      id: 'loop-step',
-      name: 'Loop Step',
-      type: 'loop',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: [],
-      config: {
-        bodyStepId: 'process-item',
-      },
-      retryPolicy: defaultRetryPolicy,
-      loopConfig: {
+      loop: {
+        type: 'for_each',
+        collection: '$items',
         maxIterations: 100,
-        iterateOver: 'items',
+        steps: [],
       },
     };
 
-    const items = ['a', 'b', 'c', 'd', 'e'];
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: { items } },
-      createMockContext()
-    );
-
-    expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.output?.data.iterations).toBe(5);
-    expect(result.output?.data.items).toEqual(items);
+    expect(executor.validate(step)).toBe(true);
   });
 
-  it('should respect max iterations', async () => {
-    const step: StepDefinition = {
-      id: 'loop-step',
-      name: 'Loop Step',
-      type: 'loop',
+  it('should throw error for invalid maxIterations', () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-loop',
+      name: 'Test Loop',
+      type: 'core:loop',
       inputSchema: {},
       outputSchema: {},
       dependsOn: [],
-      config: {
-        bodyStepId: 'process-item',
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
       },
-      retryPolicy: defaultRetryPolicy,
-      loopConfig: {
-        maxIterations: 3,
-        iterateOver: 'items',
+      loop: {
+        type: 'for_each',
+        collection: '$items',
+        maxIterations: 20000, // Too high
+        steps: [],
       },
     };
 
-    const items = ['a', 'b', 'c', 'd', 'e'];
-    const result = await executor.execute(
-      step,
-      { schema: {}, data: { items } },
-      createMockContext()
-    );
+    expect(() => executor.validate(step)).toThrow();
+  });
+
+  it('should execute for_each loop', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-loop',
+      name: 'Test Loop',
+      type: 'core:loop',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      loop: {
+        type: 'for_each',
+        collection: '$items',
+        maxIterations: 100,
+        steps: [],
+      },
+    };
+
+    const input = {
+      schema: {},
+      data: { items: ['a', 'b', 'c'] },
+    };
+
+    const result = await executor.execute(step, input, context);
 
     expect(result.status).toBe(ExecutionStatus.COMPLETED);
-    expect(result.output?.data.iterations).toBe(3); // Capped at maxIterations
+    expect(result.output?.data.iterationCount).toBe(3);
+    expect(result.output?.data.iterations).toHaveLength(3);
+  });
+
+  it('should enforce maxIterations limit', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-loop',
+      name: 'Test Loop',
+      type: 'core:loop',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      loop: {
+        type: 'for_each',
+        collection: '$items',
+        maxIterations: 2, // Limit to 2
+        steps: [],
+      },
+    };
+
+    const input = {
+      schema: {},
+      data: { items: ['a', 'b', 'c', 'd', 'e'] },
+    };
+
+    const result = await executor.execute(step, input, context);
+
+    expect(result.status).toBe(ExecutionStatus.COMPLETED);
+    expect(result.output?.data.iterationCount).toBe(2); // Only 2 iterations
+  });
+
+  it('should execute count loop', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-loop',
+      name: 'Test Loop',
+      type: 'core:loop',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      loop: {
+        type: 'count',
+        count: 5,
+        maxIterations: 10,
+        steps: [],
+      },
+    };
+
+    const input = {
+      schema: {},
+      data: {},
+    };
+
+    const result = await executor.execute(step, input, context);
+
+    expect(result.status).toBe(ExecutionStatus.COMPLETED);
+    expect(result.output?.data.iterationCount).toBe(5);
+  });
+});
+
+describe('ApprovalExecutor', () => {
+  const executor = new ApprovalExecutor();
+  const context: ExecutionContext = {
+    legalBasis: {
+      authority: 'TEST',
+      classification: 'UNCLASSIFIED',
+      authorizedUsers: ['test-user'],
+    },
+    tenantId: 'test-tenant',
+    initiatedBy: 'test-user',
+    assumptions: [],
+  };
+
+  it('should validate approval step', () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-approval',
+      name: 'Test Approval',
+      type: 'core:approval',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      approval: {
+        message: 'Approve this action',
+        requiredApprovers: ['approver1', 'approver2'],
+        minApprovals: 1,
+      },
+    };
+
+    expect(executor.validate(step)).toBe(true);
+  });
+
+  it('should execute and return WAITING_APPROVAL', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-approval',
+      name: 'Test Approval',
+      type: 'core:approval',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      approval: {
+        message: 'Approve this action',
+        requiredApprovers: ['approver1'],
+        minApprovals: 1,
+      },
+    };
+
+    const input = { schema: {}, data: {} };
+    const result = await executor.execute(step, input, context);
+
+    expect(result.status).toBe(ExecutionStatus.WAITING_APPROVAL);
+    expect(result.output?.data.approvalId).toBeDefined();
+  });
+
+  it('should handle approval submission', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-approval',
+      name: 'Test Approval',
+      type: 'core:approval',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      approval: {
+        message: 'Approve this action',
+        requiredApprovers: ['approver1'],
+        minApprovals: 1,
+      },
+    };
+
+    const input = { schema: {}, data: {} };
+    const result = await executor.execute(step, input, context);
+    const approvalId = result.output?.data.approvalId;
+
+    // Submit approval
+    const approvalRequest = await executor.submitApproval(
+      approvalId,
+      'approver1',
+      'approve'
+    );
+
+    expect(approvalRequest.status).toBe('approved');
+    expect(approvalRequest.approvals).toHaveLength(1);
+  });
+});
+
+describe('ServiceCallExecutor', () => {
+  const executor = new ServiceCallExecutor();
+  const context: ExecutionContext = {
+    legalBasis: {
+      authority: 'TEST',
+      classification: 'UNCLASSIFIED',
+      authorizedUsers: ['test-user'],
+    },
+    tenantId: 'test-tenant',
+    initiatedBy: 'test-user',
+    assumptions: [],
+  };
+
+  it('should validate service call step', () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-service-call',
+      name: 'Test Service Call',
+      type: 'core:service-call',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      serviceCall: {
+        service: 'http://example.com/api',
+        method: 'POST',
+        timeoutMs: 5000,
+      },
+    };
+
+    expect(executor.validate(step)).toBe(true);
+  });
+
+  it('should execute service call', async () => {
+    const step: ExtendedStepDefinition = {
+      id: 'test-service-call',
+      name: 'Test Service Call',
+      type: 'core:service-call',
+      inputSchema: {},
+      outputSchema: {},
+      dependsOn: [],
+      config: {},
+      retryPolicy: {
+        maxAttempts: 1,
+        initialDelayMs: 1000,
+        maxDelayMs: 1000,
+        backoffMultiplier: 1,
+      },
+      serviceCall: {
+        service: 'http://example.com/api',
+        method: 'POST',
+        payload: { data: 'test' },
+        timeoutMs: 5000,
+        idempotencyKey: 'test-key-123',
+      },
+    };
+
+    const input = { schema: {}, data: {} };
+    const result = await executor.execute(step, input, context);
+
+    expect(result.status).toBe(ExecutionStatus.COMPLETED);
+    expect(result.output?.data.idempotencyKey).toBe('test-key-123');
   });
 });

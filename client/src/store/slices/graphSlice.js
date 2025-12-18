@@ -23,6 +23,67 @@ export const fetchGraphData = createAsyncThunk(
   },
 );
 
+// Async thunk for compressing graph data
+export const compressGraph = createAsyncThunk(
+  'graph/compressGraph',
+  async (graphData, { dispatch }) => {
+    dispatch(graphSlice.actions.setLoading(true));
+    try {
+      // Map Cytoscape format to Backend format
+      // Cytoscape node: { data: { id, label, type, ... }, position: { x, y } }
+      // Backend node: { id, label, type, ..., x, y }
+      const nodes = graphData.nodes.map(n => ({
+          ...n.data,
+          id: n.data.id,
+          x: n.position ? n.position.x : undefined,
+          y: n.position ? n.position.y : undefined
+      }));
+
+      // Cytoscape edge: { data: { id, source, target, ... } }
+      // Backend link: { source, target, ... }
+      const links = graphData.edges.map(e => ({
+          ...e.data,
+          source: e.data.source,
+          target: e.data.target
+      }));
+
+      // Use relative URL which will be proxied or use base URL config if available
+      // For now, assuming standard relative path as per other API calls
+      const response = await fetch('/api/graph/compress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nodes, links }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || 'Compression failed');
+      }
+
+      const compressed = await response.json();
+
+      // Map back to Cytoscape format
+      const newNodes = compressed.nodes.map(n => ({
+        data: n,
+        position: (n.x !== undefined && n.y !== undefined) ? { x: n.x, y: n.y } : undefined
+      }));
+      const newEdges = compressed.links.map(l => ({
+        data: {
+          ...l,
+          id: l.id || `${l.source}-${l.target}-${l.type || 'rel'}`,
+        }
+      }));
+
+      dispatch(graphSlice.actions.setGraphData({ nodes: newNodes, edges: newEdges }));
+    } catch (error) {
+      dispatch(graphSlice.actions.setErrorMessage(error.message));
+      throw error;
+    } finally {
+      dispatch(graphSlice.actions.setLoading(false));
+    }
+  }
+);
+
 const graphSlice = createSlice({
   name: 'graph',
   initialState: {

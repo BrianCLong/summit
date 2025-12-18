@@ -4,20 +4,20 @@ import { register } from '../monitoring/metrics.js';
 export const neo4jQueryTotal = new Counter({
   name: 'neo4j_query_total',
   help: 'Total number of Neo4j queries executed',
-  labelNames: ['operation', 'label'],
+  labelNames: ['operation', 'label', 'tenant_id'],
 });
 
 export const neo4jQueryErrorsTotal = new Counter({
   name: 'neo4j_query_errors_total',
   help: 'Total number of Neo4j query errors',
-  labelNames: ['operation', 'label'],
+  labelNames: ['operation', 'label', 'tenant_id'],
 });
 
 export const neo4jQueryLatencyMs = new Histogram({
   name: 'neo4j_query_latency_ms',
   help: 'Latency of Neo4j queries in milliseconds',
-  labelNames: ['operation', 'label'],
-  buckets: [10, 20, 50, 100, 250, 500, 1000, 5000],
+  labelNames: ['operation', 'label', 'tenant_id'],
+  buckets: [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000],
 });
 
 export const neo4jConnectivityUp = new Gauge({
@@ -25,7 +25,19 @@ export const neo4jConnectivityUp = new Gauge({
   help: 'Neo4j connectivity status (1=up, 0=down)',
 });
 
+export const neo4jActiveConnections = new Gauge({
+  name: 'neo4j_active_connections',
+  help: 'Number of active connections in the Neo4j pool',
+});
+
+export const neo4jIdleConnections = new Gauge({
+  name: 'neo4j_idle_connections',
+  help: 'Number of idle connections in the Neo4j pool',
+});
+
 register.registerMetric(neo4jQueryTotal);
 register.registerMetric(neo4jQueryErrorsTotal);
 register.registerMetric(neo4jQueryLatencyMs);
 register.registerMetric(neo4jConnectivityUp);
+register.registerMetric(neo4jActiveConnections);
+register.registerMetric(neo4jIdleConnections);

@@ -2,6 +2,7 @@
  * Message Event Handlers
  */
 
+import crypto from 'crypto';
 import { AuthenticatedSocket } from '../types/index.js';
 import { HandlerDependencies } from './index.js';
 import { wrapHandlerWithRateLimit } from '../middleware/rateLimit.js';
@@ -59,11 +60,13 @@ export function registerMessageHandlers(
           };
 
           // Persist if requested
-          let messageId: string | undefined;
+          let messageId: string;
           if (persistent) {
             const persisted = await messagePersistence.storeMessage(message);
             messageId = persisted.id;
             metrics.messagePersisted.inc({ tenant: socket.tenantId, room });
+          } else {
+            messageId = crypto.randomUUID();
           }
 
           // Broadcast to room (excluding sender)

@@ -1,31 +1,57 @@
-# Runbook Orchestration Engine
+# Runbook Engine
 
-Production-ready DAG-based workflow orchestration engine for IntelGraph. Executes runbooks as directed acyclic graphs with typed inputs/outputs, human-in-the-loop approvals, conditional branching, and comprehensive audit logging.
+DAG-based workflow orchestration engine for IntelGraph. Executes runbooks as directed acyclic graphs with typed inputs/outputs, retry policies, and comprehensive logging.
 
 ## Features
 
-### Core Capabilities
+### Core Execution
 - **DAG Execution**: Execute workflows as directed acyclic graphs with automatic dependency resolution
 - **Retry Logic**: Configurable retry policies with exponential backoff
 - **State Management**: Persistent state tracking with support for memory and database backends
 - **Idempotency**: Automatic duplicate detection to prevent redundant executions
 - **Replay**: Re-run completed executions for debugging and verification
 
-### Advanced Features
-- **Human Approvals**: Multi-approver workflows with timeout handling
+### Control Flow
 - **Conditional Branching**: If/else logic based on runtime data
-- **Loops**: Safe iterative execution with hard limits (max 1000 iterations)
-- **Service Integration**: HTTP/gRPC calls with idempotency keys
-- **Event-Driven**: Wait for external events with correlation
-- **Execution Control**: Pause, resume, cancel running workflows
-- **Step Retry**: Re-run individual failed steps
+- **Loops**: For-each, while, and count loops with safety limits
+- **Parallel Execution**: Automatic parallelization of independent steps
 
-### Enterprise Grade
+### Human-in-the-Loop
+- **Approval Steps**: Require human approval for sensitive operations
+- **Timeout Handling**: Configurable timeouts for approval requests
+- **Multi-Approver**: Support for multiple approvers with quorum requirements
+
+### Event-Driven
+- **Wait for Events**: Pause execution until external events occur
+- **Event Correlation**: Match events by correlation ID and filters
+- **Timeout Support**: Configurable event wait timeouts
+
+### Service Integration
+- **Generic Service Calls**: Call external services via HTTP/gRPC
+- **Idempotency Keys**: Safe retries with idempotency guarantees
+- **Timeout and Error Handling**: Comprehensive error handling
+
+### Safety & Security
+- **Rate Limiting**: Per-tenant rate limits to prevent abuse
+- **Depth Limits**: Maximum nesting depth for control flow
+- **Resource Limits**: Limits on steps, iterations, and execution time
+- **Authorization**: Integration with OPA/authz service for step-level permissions
+- **Tenant Isolation**: Strict tenant resource isolation
+
+### Observability
 - **Structured Logging**: Comprehensive logging with assumptions, data scope, and legal basis tracking
 - **Evidence Collection**: Automatic evidence collection and linking for audit trails
-- **Authorization**: Integration with authz services for step-level permissions
-- **Safety Limits**: Max depth, max iterations, timeouts, circuit breakers
-- **REST API**: Full REST API for managing templates and executions
+- **Execution Statistics**: Real-time progress tracking and metrics
+
+### Control Operations
+- **Pause/Resume**: Pause and resume long-running executions
+- **Cancel**: Cancel executions with reason tracking
+- **Progress Tracking**: Real-time execution statistics
+
+### API
+- **REST API**: Full REST API for managing executions
+- **Admin Operations**: Pause, resume, cancel, and monitor executions
+- **Approval Management**: Submit and track approvals
 
 ## Architecture
 
@@ -63,7 +89,7 @@ npm run build
 ### Basic Example
 
 ```typescript
-import { RunbookEngine, RunbookDefinition } from '@intelgraph/runbook-engine';
+import { RunbookEngine, RunbookDefinition, StepExecutor } from '@intelgraph/runbook-engine';
 
 // 1. Create engine
 const engine = new RunbookEngine({
@@ -78,49 +104,28 @@ const engine = new RunbookEngine({
   detailedLogging: true,
 });
 
-// 2. Register standard executors (included)
-// CallServiceExecutor, HumanApprovalExecutor, etc. are registered automatically
+// 2. Register step executors
+engine.registerExecutor(new MyCustomExecutor());
 
 // 3. Register runbook
 const runbook: RunbookDefinition = {
   id: 'my-runbook',
   name: 'My Runbook',
   version: '1.0.0',
-  description: 'Example runbook with approval',
+  description: 'Example runbook',
   steps: [
     {
-      id: 'call-api',
-      name: 'Call External API',
-      type: 'call-service',
+      id: 'step1',
+      name: 'First Step',
+      type: 'custom:my-step',
       inputSchema: {},
       outputSchema: {},
       dependsOn: [],
-      config: {
-        url: 'https://api.example.com/process',
-        method: 'POST',
-        idempotencyKey: 'unique-key',
-      },
-      retryPolicy: { maxAttempts: 3, initialDelayMs: 1000, maxDelayMs: 5000, backoffMultiplier: 2 },
-    },
-    {
-      id: 'require-approval',
-      name: 'Require Manager Approval',
-      type: 'human-approval',
-      inputSchema: {},
-      outputSchema: {},
-      dependsOn: ['call-api'],
       config: {},
-      retryPolicy: { maxAttempts: 1, initialDelayMs: 0, maxDelayMs: 0, backoffMultiplier: 1 },
-      approvalConfig: {
-        approvers: ['manager1', 'manager2'],
-        minApprovals: 1,
-        timeoutMs: 3600000, // 1 hour
-        timeoutAction: 'fail',
-        prompt: 'Approve this action?',
-      },
+      retryPolicy: engine.config.defaultRetryPolicy,
     },
   ],
-  defaultRetryPolicy: { maxAttempts: 3, initialDelayMs: 1000, maxDelayMs: 10000, backoffMultiplier: 2 },
+  defaultRetryPolicy: engine.config.defaultRetryPolicy,
 };
 
 engine.registerRunbook(runbook);
@@ -132,7 +137,7 @@ const executionId = await engine.startRunbook(
     legalBasis: {
       authority: 'INVESTIGATION',
       classification: 'SENSITIVE',
-      authorizedUsers: ['analyst-1', 'manager1', 'manager2'],
+      authorizedUsers: ['analyst-1'],
     },
     tenantId: 'my-tenant',
     initiatedBy: 'analyst-1',
@@ -145,107 +150,23 @@ const executionId = await engine.startRunbook(
 const execution = await engine.getStatus(executionId);
 console.log(execution.status);
 
-// 6. Pause/resume if needed
-await engine.pauseExecution(executionId, 'analyst-1');
-await engine.resumeExecution(executionId, 'analyst-1');
-
-// 7. Get logs and evidence
+// 6. Get logs
 const logs = await engine.getLogs({ executionId });
+
+// 7. Get evidence
 const evidence = await engine.getEvidence(executionId);
 ```
 
-### Standard Step Executors
-
-The engine includes built-in executors for common patterns:
-
-#### Call Service (HTTP/gRPC)
-```typescript
-{
-  id: 'call-api',
-  type: 'call-service',
-  config: {
-    url: 'https://api.example.com/process',
-    method: 'POST',
-    headers: { 'X-API-Key': 'secret' },
-    idempotencyKey: 'unique-key-123',
-  }
-}
-```
-
-#### Human Approval
-```typescript
-{
-  id: 'require-approval',
-  type: 'human-approval',
-  approvalConfig: {
-    approvers: ['manager1', 'manager2'],
-    minApprovals: 2,
-    timeoutMs: 3600000, // 1 hour
-    timeoutAction: 'fail',
-    prompt: 'Approve deployment to production?',
-  }
-}
-```
-
-#### Conditional Branching
-```typescript
-{
-  id: 'check-status',
-  type: 'conditional',
-  config: {
-    condition: {
-      field: 'result.status',
-      operator: 'eq',
-      value: 'success',
-    },
-    trueBranch: 'deploy-step',
-    falseBranch: 'rollback-step',
-  }
-}
-```
-
-#### Loop Iteration
-```typescript
-{
-  id: 'process-items',
-  type: 'loop',
-  config: {
-    bodyStepId: 'process-single-item',
-  },
-  loopConfig: {
-    maxIterations: 100,
-    iterateOver: 'items', // Array field
-  }
-}
-```
-
-#### Wait for Event
-```typescript
-{
-  id: 'wait-webhook',
-  type: 'wait-for-event',
-  config: {
-    eventType: 'webhook.received',
-    correlationId: 'order-123',
-    timeoutMs: 300000, // 5 minutes
-  }
-}
-```
-
-### Implementing a Custom Executor
+### Implementing a Step Executor
 
 ```typescript
 import { StepExecutor, StepDefinition, StepIO, ExecutionContext, StepResult, ExecutionStatus } from '@intelgraph/runbook-engine';
-import { v4 as uuidv4 } from 'uuid';
 
 export class MyCustomExecutor implements StepExecutor {
   readonly type = 'custom:my-step';
 
   validate(step: StepDefinition): boolean {
-    const { requiredParam } = step.config;
-    if (!requiredParam) {
-      throw new Error(`Missing required config: requiredParam`);
-    }
+    // Validate step configuration
     return true;
   }
 
@@ -255,66 +176,29 @@ export class MyCustomExecutor implements StepExecutor {
     context: ExecutionContext
   ): Promise<StepResult> {
     const startTime = new Date();
-    const logs = [];
 
-    try {
-      // Your logic here
-      const output = { result: 'success' };
+    // Your logic here
+    const output = { result: 'success' };
 
-      logs.push({
-        id: uuidv4(),
-        timestamp: new Date(),
-        level: 'info' as const,
-        stepId: step.id,
-        executionId: context.tenantId,
-        message: 'Step completed successfully',
-      });
-
-      return {
-        stepId: step.id,
-        status: ExecutionStatus.COMPLETED,
-        output: { schema: {}, data: output },
-        startTime,
-        endTime: new Date(),
-        durationMs: Date.now() - startTime.getTime(),
-        attemptNumber: 1,
-        evidence: [],
-        logs,
-      };
-    } catch (error) {
-      return {
-        stepId: step.id,
-        status: ExecutionStatus.FAILED,
-        error: error as Error,
-        startTime,
-        endTime: new Date(),
-        durationMs: Date.now() - startTime.getTime(),
-        attemptNumber: 1,
-        evidence: [],
-        logs,
-      };
-    }
+    return {
+      stepId: step.id,
+      status: ExecutionStatus.COMPLETED,
+      output: { schema: {}, data: output },
+      startTime,
+      endTime: new Date(),
+      durationMs: Date.now() - startTime.getTime(),
+      attemptNumber: 1,
+      evidence: [],
+      logs: [],
+    };
   }
 }
 ```
 
 ## REST API
 
-### Runbook Templates
+### Start Runbook Execution
 
-#### List all runbooks
-```http
-GET /api/v1/runbooks
-```
-
-#### Get specific runbook
-```http
-GET /api/v1/runbooks/{runbookId}
-```
-
-### Executions
-
-#### Start execution
 ```http
 POST /api/v1/executions
 Content-Type: application/json
@@ -337,96 +221,28 @@ Content-Type: application/json
 }
 ```
 
-#### Get execution status
+### Get Execution Status
+
 ```http
 GET /api/v1/executions/{executionId}
 ```
 
-#### List executions for runbook
-```http
-GET /api/v1/executions?runbookId=my-runbook
-```
+### Get Logs
 
-### Execution Control
-
-#### Pause execution
-```http
-POST /api/v1/executions/{executionId}/pause
-Content-Type: application/json
-
-{
-  "userId": "analyst-1"
-}
-```
-
-#### Resume execution
-```http
-POST /api/v1/executions/{executionId}/resume
-Content-Type: application/json
-
-{
-  "userId": "analyst-1"
-}
-```
-
-#### Cancel execution
-```http
-POST /api/v1/executions/{executionId}/cancel
-Content-Type: application/json
-
-{
-  "userId": "analyst-1",
-  "reason": "No longer needed"
-}
-```
-
-#### Retry failed step
-```http
-POST /api/v1/executions/{executionId}/steps/{stepId}/retry
-Content-Type: application/json
-
-{
-  "userId": "analyst-1"
-}
-```
-
-#### Replay execution
-```http
-POST /api/v1/executions/{executionId}/replay
-```
-
-### Logs and Evidence
-
-#### Get logs
 ```http
 GET /api/v1/executions/{executionId}/logs?stepId=step1&level=info&limit=100
 ```
 
-#### Get evidence
+### Get Evidence
+
 ```http
 GET /api/v1/executions/{executionId}/evidence
 ```
 
-### Health and Metrics
+### Replay Execution
 
-#### Health check
 ```http
-GET /api/v1/health
-```
-
-#### Readiness
-```http
-GET /health/ready
-```
-
-#### Liveness
-```http
-GET /health/live
-```
-
-#### Metrics
-```http
-GET /metrics
+POST /api/v1/executions/{executionId}/replay
 ```
 
 ## Testing
@@ -441,93 +257,6 @@ npm run test:coverage
 # Watch mode
 npm run test:watch
 ```
-
-## Deployment
-
-### Standalone Service
-
-```bash
-# Build
-npm run build
-
-# Set environment variables
-export PORT=3000
-export MAX_CONCURRENT_STEPS=10
-export STORAGE_BACKEND=memory
-export DETAILED_LOGGING=true
-
-# Start service
-node dist/service.js
-```
-
-### Docker
-
-```dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist/ ./dist/
-EXPOSE 3000
-CMD ["node", "dist/service.js"]
-```
-
-### Kubernetes
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: runbook-engine
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: runbook-engine
-  template:
-    metadata:
-      labels:
-        app: runbook-engine
-    spec:
-      containers:
-      - name: engine
-        image: intelgraph/runbook-engine:1.0.0
-        ports:
-        - containerPort: 3000
-        env:
-        - name: MAX_CONCURRENT_STEPS
-          value: "10"
-        - name: STORAGE_BACKEND
-          value: "memory"
-        livenessProbe:
-          httpGet:
-            path: /health/live
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /health/ready
-            port: 3000
-          initialDelaySeconds: 5
-          periodSeconds: 10
-```
-
-## Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | HTTP port | `3000` |
-| `MAX_CONCURRENT_STEPS` | Max parallel step execution | `5` |
-| `DEFAULT_MAX_RETRIES` | Default retry attempts | `3` |
-| `DEFAULT_INITIAL_DELAY_MS` | Initial retry delay | `1000` |
-| `DEFAULT_MAX_DELAY_MS` | Max retry delay | `10000` |
-| `DEFAULT_BACKOFF_MULTIPLIER` | Exponential backoff multiplier | `2` |
-| `STORAGE_BACKEND` | Storage backend: `memory`, `postgres`, `redis` | `memory` |
-| `DATABASE_URL` | Database connection string | - |
-| `DETAILED_LOGGING` | Enable detailed logging | `false` |
-| `ENABLE_CORS` | Enable CORS | `true` |
-| `CORS_ORIGINS` | Comma-separated allowed origins | `*` |
 
 ## Type Safety
 
@@ -549,28 +278,13 @@ The engine automatically detects duplicate executions with the same runbook ID a
 
 ## State Persistence
 
-Supports multiple storage backends:
-- **Memory**: In-memory storage (for testing and development)
-- **PostgreSQL**: Production-ready persistence (coming soon)
-- **Redis**: High-performance caching layer (coming soon)
-
-## Safety and Limits
-
-The engine enforces strict safety limits to prevent runaway executions:
-
-- **Max Loop Iterations**: Hard cap at 1000 iterations
-- **Max Execution Depth**: Prevent infinite recursion in nested runbooks
-- **Timeouts**: Global and per-step timeouts
-- **Concurrent Step Limit**: Configurable max parallel execution
-- **Authorization Checks**: Step-level permission validation
-- **Idempotency**: Prevent duplicate executions
+Currently supports:
+- **Memory**: In-memory storage (for testing)
+- **PostgreSQL**: Coming soon
+- **Redis**: Coming soon
 
 ## API Version
 
 Current API version: `v1`
 
 All API endpoints are versioned and backward compatible.
-
-## License
-
-Proprietary - IntelGraph Platform
