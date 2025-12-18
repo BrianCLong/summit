@@ -1,0 +1,75 @@
+name: parquet-connector
+version: 1.0.0
+description: Import entities and relationships from Apache Parquet files
+author: IntelGraph Platform Team
+ingestion_type: batch
+supported_formats:
+  - parquet
+
+configuration:
+  batch_size: 1000
+  columns: null  # null means all columns, or specify list: ['col1', 'col2']
+  filters: null  # Row filters (optional)
+  sample_data_file: sample.parquet
+
+# Rate limiting (optional for file-based)
+rate_limit:
+  requests_per_hour: 10000
+  burst_limit: 100
+
+# PII flags - fields that may contain PII
+pii_flags:
+  - field_name: email
+    description: Email addresses may be PII
+    severity: medium
+    redaction_policy: allow
+    pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+
+  - field_name: phone
+    description: Phone numbers may be PII
+    severity: medium
+    redaction_policy: allow
+    pattern: "^\\+?[1-9]\\d{1,14}$"
+
+  - field_name: ssn
+    description: Social Security Numbers are high-risk PII
+    severity: critical
+    redaction_policy: block
+    legal_basis: "GDPR Article 9"
+    pattern: "^\\d{3}-\\d{2}-\\d{4}$"
+
+# License configuration
+license:
+  type: User-Provided
+  classification: unknown
+  attribution_required: false
+  allowed_use_cases:
+    - internal-analysis
+    - investigation
+    - reporting
+  blocked_use_cases:
+    - commercial-redistribution
+  blocked_fields: []
+
+# Lineage tracking
+lineage:
+  enabled: true
+  source_system: local-filesystem
+  data_classification: internal
+
+# Entity mapping examples
+entity_mappings:
+  Person:
+    - name
+    - email
+    - phone
+  Organization:
+    - org_name
+    - company
+  Location:
+    - city
+    - state
+    - country
+  Event:
+    - event_date
+    - timestamp
