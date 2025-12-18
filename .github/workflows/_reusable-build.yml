@@ -1,0 +1,162 @@
+name: 🏗️ Reusable - Build
+# Universal build workflow with caching and artifact management
+
+on:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version'
+        required: false
+        type: string
+        default: '20.x'
+      build-command:
+        description: 'Build command to run'
+        required: false
+        type: string
+        default: 'pnpm run build'
+      upload-artifacts:
+        description: 'Upload build artifacts'
+        required: false
+        type: boolean
+        default: true
+      artifact-name:
+        description: 'Name for build artifacts'
+        required: false
+        type: string
+        default: 'build-artifacts'
+      artifact-path:
+        description: 'Path to build artifacts'
+        required: false
+        type: string
+        default: |
+          dist/
+          build/
+          .next/
+          out/
+          server/dist/
+          client/dist/
+          apps/*/dist/
+          packages/*/dist/
+    outputs:
+      build-success:
+        description: 'Whether build succeeded'
+        value: ${{ jobs.build.outputs.success }}
+      artifact-name:
+        description: 'Name of uploaded artifact'
+        value: ${{ jobs.build.outputs.artifact }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build Application
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    outputs:
+      success: ${{ steps.build-step.outcome == 'success' }}
+      artifact: ${{ inputs.artifact-name }}-${{ github.run_number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+          cache: 'pnpm'
+
+      - name: Get pnpm store path
+        id: pnpm-store
+        shell: bash
+        run: echo "path=$(pnpm store path)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-store.outputs.path }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-build-
+            ${{ runner.os }}-turbo-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build application
+        id: build-step
+        run: ${{ inputs.build-command }}
+        env:
+          NODE_ENV: production
+          CI: true
+
+      - name: Check build outputs
+        id: check-outputs
+        run: |
+          echo "### 📦 Build Outputs" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -d "dist" ]; then
+            size=$(du -sh dist | cut -f1)
+            echo "- \`dist/\`: $size" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "build" ]; then
+            size=$(du -sh build | cut -f1)
+            echo "- \`build/\`: $size" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d ".next" ]; then
+            size=$(du -sh .next | cut -f1)
+            echo "- \`\.next/\`: $size" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "server/dist" ]; then
+            size=$(du -sh server/dist | cut -f1)
+            echo "- \`server/dist/\`: $size" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ -d "client/dist" ]; then
+            size=$(du -sh client/dist | cut -f1)
+            echo "- \`client/dist/\`: $size" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload build artifacts
+        if: inputs.upload-artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}-${{ github.run_number }}
+          path: ${{ inputs.artifact-path }}
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "## 🏗️ Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Status | ${{ steps.build-step.outcome == 'success' && '✅ Success' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| OS | ${{ matrix.os }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node.js | $(node --version) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Command | \`${{ inputs.build-command }}\` |" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.upload-artifacts }}" = "true" ]; then
+            echo "| Artifacts | ${{ inputs.artifact-name }}-${{ github.run_number }} |" >> $GITHUB_STEP_SUMMARY
+          fi

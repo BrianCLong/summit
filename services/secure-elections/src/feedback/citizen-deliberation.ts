@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 /**
  * Citizen Feedback and Deliberation Module
@@ -297,7 +297,7 @@ export class CitizenDeliberationPlatform {
     const comments = this.comments.get(proposalId) || [];
     const preferences = this.preferences.get(proposalId) || [];
 
-    if (!proposal) return null;
+    if (!proposal) {return null;}
 
     const sentimentBreakdown: Record<string, number> = {
       support: 0,

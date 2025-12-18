@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CEP Rule Composer</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body { font-family: Inter, sans-serif; padding: 16px; }
+      .chip { display: inline-flex; align-items: center; padding: 4px 8px; margin: 4px; border-radius: 16px; background: #e0f7fa; }
+      .chip button { margin-left: 4px; border: none; background: transparent; cursor: pointer; }
+      #preview { margin-top: 16px; padding: 12px; border: 1px solid #ddd; background: #fafafa; }
+    </style>
+  </head>
+  <body>
+    <h1>CEP Rule Composer</h1>
+    <label>Sequence token</label>
+    <input id="sequence" placeholder="login" />
+    <button id="add-seq">Add AFTER</button>
+    <label>Window</label>
+    <select id="window-kind">
+      <option value="TUMBLING">Tumbling</option>
+      <option value="SLIDING">Sliding</option>
+    </select>
+    <input id="window-duration" placeholder="1m" />
+    <button id="add-window">Set Window</button>
+
+    <div id="chips"></div>
+    <div id="preview"></div>
+
+    <script>
+      const chips = [];
+
+      function render() {
+        $('#chips').empty();
+        chips.forEach((chip, idx) => {
+          const node = $('<span class="chip"></span>').text(chip.label);
+          $('<button aria-label="remove">×</button>').on('click', () => { chips.splice(idx, 1); render(); }).appendTo(node);
+          $('#chips').append(node);
+        });
+        const dsl = chips.map((c) => c.dsl).join(' ');
+        $('#preview').text(dsl.length ? `Preview: ${dsl}` : 'Preview: waiting for tokens');
+      }
+
+      $('#add-seq').on('click', () => {
+        const name = $('#sequence').val();
+        if (!name) return;
+        chips.push({ label: `AFTER ${name}`, dsl: `AFTER ${name}` });
+        $('#sequence').val('');
+        render();
+      });
+
+      $('#add-window').on('click', () => {
+        const kind = $('#window-kind').val();
+        const dur = $('#window-duration').val();
+        if (!dur) return;
+        chips.push({ label: `${kind} ${dur}`, dsl: `WINDOW ${kind} ${dur}` });
+        render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

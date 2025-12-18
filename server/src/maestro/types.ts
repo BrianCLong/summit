@@ -1,95 +1,73 @@
-export interface HealthSnapshot {
-  overallScore: number; // 0-100
-  workstreams: {
-    name: string;
-    status: 'healthy' | 'degraded' | 'incident';
-    score: number;
-  }[];
-  activeAlerts: Alert[];
-}
+export type TaskStatus = 'queued' | 'running' | 'succeeded' | 'failed';
 
-export interface Alert {
+export interface UserRef {
   id: string;
-  title: string;
-  severity: 'critical' | 'warning' | 'info';
-  timestamp: string;
 }
 
-export interface SLOSnapshot {
-  name: string;
-  target: number;
-  current: number; // e.g., 99.95
-  errorBudget: number; // Remaining budget
-  status: 'healthy' | 'risk' | 'breached';
-}
-
-export interface AutonomicLoop {
+export interface AgentRef {
   id: string;
   name: string;
-  type: 'reliability' | 'cost' | 'performance' | 'safety';
-  status: 'active' | 'paused';
-  lastDecision: string;
-  lastRun: string;
-  config: Record<string, any>;
+  kind: 'llm' | 'tool' | 'workflow' | 'graph-engine';
+  modelId?: string;        // e.g. "openai:gpt-4.1"
+  toolName?: string;       // e.g. "bash-shell"
 }
 
-export interface AgentProfile {
+export interface Run {
   id: string;
-  name: string;
-  role: string;
-  model: string;
-  status: 'healthy' | 'degraded';
-  metrics: {
-    successRate: number;
-    latencyP95: number;
-    costPerTask: number;
-  };
-  routingWeight: number;
+  user: UserRef;
+  createdAt: string;
+  requestText: string;
 }
 
-export interface MergeTrain {
+export interface Task {
   id: string;
-  status: 'active' | 'paused' | 'locked';
-  queueLength: number;
-  throughput: number; // PRs per day
-  activePRs: PullRequest[];
-}
-
-export interface PullRequest {
-  number: number;
-  title: string;
-  author: string;
-  status: 'queued' | 'running' | 'passed' | 'failed' | 'manual_check';
-  url: string;
-}
-
-export interface Experiment {
-  id: string;
-  name: string;
-  hypothesis: string;
-  status: 'running' | 'completed' | 'draft';
-  variants: string[];
-  metrics: Record<string, any>;
-  startDate: string;
-  endDate?: string;
-}
-
-export interface Playbook {
-  id: string;
-  name: string;
+  runId: string;
+  parentTaskId?: string;
+  status: TaskStatus;
+  agent: AgentRef;
+  kind: 'plan' | 'action' | 'subworkflow' | 'graph.analysis';
   description: string;
-  triggers: string[];
-  actions: string[];
-  isEnabled: boolean;
+  input: Record<string, unknown>;
+  output?: Record<string, unknown>;
+  errorMessage?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-export interface AuditEvent {
+export interface Artifact {
   id: string;
-  timestamp: string;
-  actor: string;
-  action: string;
-  resource: string;
-  details: string;
-  status: 'allowed' | 'denied';
-  policyId?: string;
+  runId: string;
+  taskId: string;
+  kind: 'text' | 'json' | 'file' | 'graph';
+  label: string;
+  data: unknown; // or a typed union if you want stricter types
+  createdAt: string;
+}
+
+export interface CostSample {
+  id: string;
+  runId: string;
+  taskId: string;
+  model: string;
+  vendor: 'openai' | 'anthropic' | 'google' | 'local';
+  inputTokens: number;
+  outputTokens: number;
+  currency: 'USD';
+  cost: number;
+  createdAt: string;
+  feature?: string;
+  tenantId?: string;
+  environment?: string;
+}
+
+export interface RunCostSummary {
+  runId: string;
+  totalCostUSD: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  byModel: Record<string, {
+    costUSD: number;
+    inputTokens: number;
+    outputTokens: number;
+  }>;
 }
