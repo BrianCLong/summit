@@ -1,0 +1,58 @@
+name: Maestro Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  maestro-delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Toolchain
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: |
+          npm install -g pnpm
+          pnpm install
+          # Install 'just' if not present
+          if ! command -v just &> /dev/null; then
+              curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+          fi
+
+      - name: Build All
+        run: just build-all
+
+      - name: SBOM & Scan
+        run: |
+          just sbom
+          just trivy
+
+      - name: SLO Burn Check
+        run: just slo-check
+
+      - name: Migration Gate
+        if: github.event_name == 'pull_request'
+        run: just migration-gate
+
+      - name: Canary Deploy
+        if: github.ref == 'refs/heads/main'
+        run: just deploy strategy="canary" weight="10"
+
+      - name: Canary Analyze
+        if: github.ref == 'refs/heads/main'
+        run: just canary-analyze
+
+      - name: Promote
+        if: github.ref == 'refs/heads/main'
+        run: just promote
+
+      # Rollback logic usually triggered on failure, here we simulate the happy path.
+      # In a real workflow, we might use steps.canary-analyze.outcome == 'failure'

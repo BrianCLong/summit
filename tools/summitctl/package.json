@@ -1,0 +1,30 @@
+{
+  "name": "summitctl",
+  "version": "0.1.0",
+  "description": "Control plane CLI for Summit",
+  "main": "dist/index.js",
+  "bin": {
+    "summitctl": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.js"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "luxon": "^3.4.4",
+    "simple-git": "^3.22.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^20.11.5",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
