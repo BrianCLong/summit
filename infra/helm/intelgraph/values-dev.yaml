@@ -45,6 +45,7 @@ redis:
 neo4j:
   enabled: true
   neo4j:
+    name: intelgraph-dev
     password: devpassword
   volumes:
     data:

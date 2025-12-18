@@ -73,7 +73,7 @@ export class ContributionTracker {
     merkleRoot: string,
   ): Promise<boolean> {
     const contribution = this.contributions.get(contributionId);
-    if (!contribution) return false;
+    if (!contribution) {return false;}
 
     // Verify Merkle proof against root
     return this.verifyMerkleProof(
@@ -88,7 +88,7 @@ export class ContributionTracker {
     const contributions = await this.getContributions(poolId);
 
     for (const contrib of contributions) {
-      if (!contrib.rewardEligible) continue;
+      if (!contrib.rewardEligible) {continue;}
 
       const current = rewards.get(contrib.contributorId) || 0;
       // Simple reward calculation based on contribution
@@ -100,7 +100,7 @@ export class ContributionTracker {
 
   private async verifyContribution(contribution: Contribution): Promise<boolean> {
     // Verify signature
-    if (!contribution.signature) return false;
+    if (!contribution.signature) {return false;}
 
     // Verify content hash matches
     const computedHash = crypto
