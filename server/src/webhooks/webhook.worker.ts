@@ -5,9 +5,13 @@ import axios from 'axios';
 import { pg } from '../db/pg.js';
 import { webhookService } from './webhook.service.js';
 <<<<<<< HEAD
+import { logger } from '../utils/logger.js';
+=======
+<<<<<<< HEAD
 import { logger } from '../../logger.js';
 =======
 import { logger } from '../utils/logger.js';
+>>>>>>> main
 >>>>>>> main
 
 const connection = new IORedis(process.env.REDIS_URL || 'redis://localhost:6379', {
