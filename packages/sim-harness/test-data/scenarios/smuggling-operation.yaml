@@ -1,0 +1,123 @@
+name: smuggling-operation
+type: cross-border-crime
+description: Cross-border smuggling network with logistics and border crossings
+params:
+  nodeCount: 60
+  edgeDensity: 0.32
+  noiseLevel: 0.08
+  seed: 789
+
+entities:
+  - type: PERSON
+    distribution:
+      count: 25
+      attributes:
+        role:
+          - organizer
+          - courier
+          - driver
+          - customs_official
+          - distributor
+        threat_level:
+          distribution: normal
+          mean: 65
+          stddev: 18
+
+  - type: ORGANIZATION
+    distribution:
+      count: 15
+      attributes:
+        org_type:
+          - logistics_company
+          - front_business
+          - cartel
+          - distribution_network
+        risk_score:
+          distribution: normal
+          mean: 72
+          stddev: 16
+
+  - type: LOCATION
+    distribution:
+      count: 20
+      attributes:
+        location_type:
+          - border_crossing
+          - warehouse
+          - transit_hub
+          - safe_house
+          - port
+        country:
+          - USA
+          - Mexico
+          - Colombia
+          - Netherlands
+          - China
+
+relationships:
+  - type: TRANSPORTS_FOR
+    from: PERSON
+    to: ORGANIZATION
+    probability: 0.35
+    attributes:
+      frequency:
+        distribution: uniform
+        min: 1
+        max: 20
+      last_shipment:
+        distribution: daterange
+        start: "2024-01-01"
+        end: "2024-12-31"
+
+  - type: CROSSES_BORDER
+    from: PERSON
+    to: LOCATION
+    probability: 0.4
+    attributes:
+      frequency:
+        distribution: uniform
+        min: 1
+        max: 15
+      last_crossing:
+        distribution: daterange
+        start: "2024-01-01"
+        end: "2024-12-31"
+
+  - type: OPERATES_AT
+    from: ORGANIZATION
+    to: LOCATION
+    probability: 0.5
+
+  - type: SUPPLIES
+    from: ORGANIZATION
+    to: ORGANIZATION
+    probability: 0.3
+    attributes:
+      volume:
+        distribution: lognormal
+        mean: 10.0
+        stddev: 1.8
+
+  - type: BRIBES
+    from: ORGANIZATION
+    to: PERSON
+    probability: 0.15
+    attributes:
+      amount:
+        distribution: lognormal
+        mean: 10.5
+        stddev: 1.2
+
+signals:
+  - type: anomaly
+    entities:
+      - repeated-border-crossings
+      - suspicious-cargo-patterns
+      - coordinated-logistics
+    count: 6
+
+  - type: missing_data
+    probability: 0.08
+
+  - type: conflicting_evidence
+    count: 2
