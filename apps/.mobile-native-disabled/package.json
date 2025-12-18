@@ -50,9 +50,15 @@
     "react-native-geolocation-service": "^5.3.1",
     "react-native-background-geolocation": "^4.19.0",
     "@notifee/react-native": "^9.1.8",
+<<<<<<< HEAD:apps/.mobile-native-disabled/package.json
+    "@react-native-firebase/app": "^20.5.0",
+    "@react-native-firebase/messaging": "^20.5.0",
+    "@react-native-firebase/analytics": "^20.5.0",
+=======
     "@react-native-firebase/app": "^23.5.0",
     "@react-native-firebase/messaging": "^23.5.0",
     "@react-native-firebase/analytics": "^23.5.0",
+>>>>>>> main:apps/mobile-native/package.json
     "react-native-push-notification": "^8.1.1",
     "react-native-image-picker": "^7.1.2",
     "react-native-document-picker": "^9.3.1",

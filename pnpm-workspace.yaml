@@ -6,6 +6,10 @@ packages:
 <<<<<<< HEAD
 exclude:
   - 'archive/**'
+<<<<<<< HEAD
+  - 'apps/mobile-native'
+  - 'apps/desktop-electron'
+=======
   - 'tools/summitctl'
 =======
   - 'client'
@@ -14,4 +18,5 @@ exclude:
   - '!**/test/**'
   - '!**/tests/**'
   - '!**/node_modules/**'
+>>>>>>> main
 >>>>>>> main

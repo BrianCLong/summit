@@ -22,9 +22,13 @@
     "@socket.io/redis-streams-adapter": "^0.2.3",
 =======
 <<<<<<< HEAD
+    "@socket.io/redis-streams-adapter": "^0.2.3",
+=======
+<<<<<<< HEAD
     "@socket.io/redis-streams-adapter": "^0.2.2",
 =======
     "@socket.io/redis-streams-adapter": "^0.2.3",
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main
     "ioredis": "^5.8.2",
