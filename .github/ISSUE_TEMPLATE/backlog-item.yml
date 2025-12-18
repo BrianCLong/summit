@@ -1,0 +1,109 @@
+name: Backlog Item
+description: Canonical backlog intake with Definition of Done guardrails
+labels: [backlog]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for every new work item so we keep one canonical backlog. Fill in the fields below; do not skip acceptance criteria or evidence.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component / Initiative
+      description: Core area that owns this work
+      options:
+        - Summit
+        - CompanyOS
+        - Maestro
+        - Switchboard
+        - IntelGraph
+        - CI/CD
+        - Security/Compliance
+        - Data/Spine
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: epic
+    attributes:
+      label: Epic
+      description: Link to parent epic or name the umbrella theme
+      placeholder: e.g., CompanyOS: Decision Spine
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - feature
+        - tech_debt
+        - spike
+        - doc
+        - ops
+    validations:
+      required: true
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      options:
+        - Idea
+        - Ready
+        - In Progress
+        - In Review
+        - In Prod
+        - Validated
+    validations:
+      required: true
+  - type: input
+    id: spec_link
+    attributes:
+      label: Spec link
+      description: URL to doc/RFC with flows, APIs, data model, risks
+      placeholder: https://...
+  - type: textarea
+    id: description
+    attributes:
+      label: Summary
+      description: What problem are we solving and what does success look like?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria (testable)
+      description: 3–7 bullets that can be verified via tests, telemetry, or demos.
+      placeholder: |
+        - Can execute a 5-node job graph with conditional edges
+        - Failures captured with type/message/timestamp
+        - Metrics emitted for jobs_started/succeeded/failed per graph
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies and sequencing
+      description: Services, schemas, flags, or decisions required before starting
+  - type: textarea
+    id: validation_plan
+    attributes:
+      label: Validation and rollout plan
+      description: How we will prove it works (tests, environments, sample scenario, telemetry checks)
+  - type: checkboxes
+    id: definition_of_done
+    attributes:
+      label: Definition of Done (must be true before marking In Prod/Validated)
+      options:
+        - label: Code merged to main
+        - label: Tests exist and pass (unit + ≥1 integration/E2E where applicable)
+        - label: Feature exposed via intended surface (UI/API/CLI)
+        - label: Docs updated (user-facing + runbook)
+        - label: Telemetry/feature flag wiring in place
+        - label: Deployed to staging + prod
+        - label: Validated with real or simulated usage; feedback captured
+    validations:
+      required: true
+  - type: input
+    id: evidence
+    attributes:
+      label: Evidence links
+      description: PRs, CI runs, logs/metrics dashboards, screenshots/recordings

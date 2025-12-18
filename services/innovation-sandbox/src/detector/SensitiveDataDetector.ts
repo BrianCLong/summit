@@ -116,7 +116,7 @@ export class SensitiveDataDetector {
    * Scan output data for sensitive information
    */
   async scanOutput(output: unknown): Promise<SensitiveDataFlag[]> {
-    if (output === null || output === undefined) return [];
+    if (output === null || output === undefined) {return [];}
     return this.scanObject({ output }, { source: 'output', path: '' });
   }
 
@@ -130,7 +130,7 @@ export class SensitiveDataDetector {
   ): SensitiveDataFlag[] {
     const flags: SensitiveDataFlag[] = [];
 
-    if (obj === null || obj === undefined) return flags;
+    if (obj === null || obj === undefined) {return flags;}
 
     if (typeof obj === 'string') {
       return this.scanString(obj, { ...context, path });
@@ -227,16 +227,17 @@ export class SensitiveDataDetector {
    * Redact sensitive data for logging
    */
   private redact(value: string, type: string): string {
-    if (value.length <= 4) return '****';
+    if (value.length <= 4) {return '****';}
 
     switch (type) {
       case 'SSN':
         return `***-**-${value.slice(-4)}`;
       case 'CREDIT_CARD':
         return `****-****-****-${value.slice(-4)}`;
-      case 'EMAIL':
+      case 'EMAIL': {
         const [local, domain] = value.split('@');
         return `${local[0]}***@${domain}`;
+      }
       case 'PHONE':
         return `***-***-${value.slice(-4)}`;
       default:
