@@ -360,7 +360,7 @@ export class WorkflowBuilder {
   }
 
   private validateConnections(): void {
-    if (!this.workflow.steps) return;
+    if (!this.workflow.steps) {return;}
 
     const stepIds = new Set(this.workflow.steps.map((step) => step.id));
 

@@ -1,84 +1,97 @@
-import { Router } from 'express';
-import { authenticate, requireRole } from '../middleware/auth.js';
-import { PolicyEngine } from '../services/PolicyEngine.js';
-import { AdvancedAuditSystem } from '../audit/advanced-audit-system.js';
 
-const router = Router();
+import express from 'express';
+import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryService';
+import { WorkflowService } from '../governance/ontology/WorkflowService';
+import { ensureAuthenticated } from '../middleware/auth';
 
-// Helper to get instances safely
-const getPolicyEngine = () => PolicyEngine.getInstance();
-// For AuditSystem, we use getInstance which might be uninitialized in dev context,
-// but we handle that inside the class via a fallback or it throws if dependencies missing.
-// In a real app, `app.ts` initializes it first.
-const getAuditSystem = () => {
+const router = express.Router();
+const registry = SchemaRegistryService.getInstance();
+const workflow = WorkflowService.getInstance();
+
+// Schema Routes
+router.get('/schemas', ensureAuthenticated, (req, res) => {
+  res.json(registry.listSchemas());
+});
+
+router.get('/schemas/latest', ensureAuthenticated, (req, res) => {
+  const schema = registry.getLatestSchema();
+  if (!schema) return res.status(404).json({ error: 'No active schema' });
+  res.json(schema);
+});
+
+router.get('/schemas/:id', ensureAuthenticated, (req, res) => {
+  const schema = registry.getSchemaById(req.params.id);
+  if (!schema) return res.status(404).json({ error: 'Schema not found' });
+  res.json(schema);
+});
+
+// Vocabulary Routes
+router.get('/vocabularies', ensureAuthenticated, (req, res) => {
+  res.json(registry.listVocabularies());
+});
+
+router.post('/vocabularies', ensureAuthenticated, (req, res) => {
+    // TODO: Add permission check (schema.admin)
     try {
-        return AdvancedAuditSystem.getInstance();
-    } catch (e) {
-        console.warn('AuditSystem access failed in router', e);
-        return null;
+        const { name, description, concepts } = req.body;
+        const vocab = registry.createVocabulary(name, description, concepts);
+        res.status(201).json(vocab);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
     }
-};
-
-// Status Endpoint
-router.get('/status', authenticate, requireRole(['admin', 'auditor']), async (req, res, next) => {
-  try {
-    const engine = getPolicyEngine();
-    res.json({
-      status: 'active',
-      environment: process.env.NODE_ENV || 'dev',
-      engine: 'PolicyEngine v1.0',
-      checks: {
-        opa_connection: 'simulated',
-        audit_log: getAuditSystem() ? 'active' : 'inactive'
-      }
-    });
-  } catch (error) {
-    next(error);
-  }
 });
 
-// Violations / Incidents
-router.get('/violations', authenticate, requireRole(['admin', 'auditor']), async (req, res, next) => {
-  try {
-    const auditSystem = getAuditSystem();
-    const trails = auditSystem ? await auditSystem.getTrail('all') : [];
-
-    // Filter for violations/blocks if possible, or just return recent trails for MVP
-    const violations = trails.filter(t => t.outcome === 'failure' || t.message.includes('BLOCKED'));
-
-    res.json({
-      summary: {
-        total_violations: violations.length,
-        high_severity: violations.filter(v => v.level === 'error' || v.level === 'critical').length,
-        open_incidents: 0 // Mocked
-      },
-      events: violations.map(v => ({
-          id: v.id,
-          timestamp: v.timestamp,
-          policy: v.eventType,
-          status: 'BLOCKED',
-          details: v.message,
-          actor: v.userId
-      }))
-    });
-  } catch (error) {
-    next(error);
-  }
+// Change Request Routes
+router.get('/changes', ensureAuthenticated, (req, res) => {
+    res.json(workflow.listChangeRequests());
 });
 
-// Test Evaluation Endpoint
-router.post('/evaluate', authenticate, requireRole(['admin']), async (req, res, next) => {
-  try {
-    const context = req.body;
-    const engine = getPolicyEngine();
-    const decision = await engine.evaluate({
-      ...context,
-      user: { ...req.user, ...context.user }
-    });
-    res.json(decision);
-  } catch (error) {
-    next(error);
-  }
+router.post('/changes', ensureAuthenticated, (req, res) => {
+    try {
+        const { title, description, proposedChanges } = req.body;
+        // @ts-ignore - req.user is added by ensureAuthenticated
+        const author = req.user?.id || 'unknown';
+        const cr = workflow.createChangeRequest(title, description, author, proposedChanges);
+        res.status(201).json(cr);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
 });
+
+router.get('/changes/:id', ensureAuthenticated, (req, res) => {
+    const cr = workflow.getChangeRequest(req.params.id);
+    if (!cr) return res.status(404).json({ error: 'Change Request not found' });
+    res.json(cr);
+});
+
+router.get('/changes/:id/impact', ensureAuthenticated, (req, res) => {
+    // Determine impact
+    const impact = workflow.calculateImpact(req.params.id);
+    res.json(impact);
+});
+
+router.post('/changes/:id/review', ensureAuthenticated, (req, res) => {
+    try {
+        const { decision, comment } = req.body;
+        // @ts-ignore
+        const reviewer = req.user?.id || 'unknown';
+        const cr = workflow.reviewChangeRequest(req.params.id, reviewer, decision, comment);
+        res.json(cr);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
+});
+
+router.post('/changes/:id/merge', ensureAuthenticated, (req, res) => {
+    try {
+        // @ts-ignore
+        const merger = req.user?.id || 'unknown';
+        const newSchema = workflow.mergeChangeRequest(req.params.id, merger);
+        res.json(newSchema);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
+});
+
 
 export default router;
