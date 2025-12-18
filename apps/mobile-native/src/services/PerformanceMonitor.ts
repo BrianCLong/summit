@@ -29,7 +29,7 @@ class PerformanceMonitor {
    * Setup native performance observer for automatic tracking
    */
   private setupNativePerformanceObserver() {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {return;}
 
     // Track app startup metrics
     this.trackAppStartup();
@@ -129,7 +129,7 @@ class PerformanceMonitor {
    * Mark the start of a performance measurement
    */
   mark(name: string): void {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {return;}
 
     this.marks.set(name, {
       name,
@@ -143,7 +143,7 @@ class PerformanceMonitor {
    * Measure the time between a mark and now
    */
   measure(name: string, category: PerformanceMetric['category'] = 'custom', metadata?: Record<string, any>): number {
-    if (!this.isEnabled) return 0;
+    if (!this.isEnabled) {return 0;}
 
     const mark = this.marks.get(name);
     if (!mark) {
@@ -172,7 +172,7 @@ class PerformanceMonitor {
    * Record a custom metric
    */
   recordMetric(metric: PerformanceMetric): void {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {return;}
 
     this.metrics.push({
       ...metric,
@@ -299,7 +299,7 @@ class PerformanceMonitor {
    */
   getAverageMetric(name: string): number {
     const metrics = this.metrics.filter(m => m.name === name);
-    if (metrics.length === 0) return 0;
+    if (metrics.length === 0) {return 0;}
 
     const sum = metrics.reduce((acc, m) => acc + m.value, 0);
     return sum / metrics.length;
