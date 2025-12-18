@@ -1,267 +1,211 @@
-import { getDriver } from '../graph/neo4j';
-import { provenanceLedger } from '../provenance/ledger';
-import { dlpService } from './DLPService';
-import crypto from 'crypto';
-import { Session, Transaction } from 'neo4j-driver';
-
-export interface DecisionData {
-  tenantId: string;
-  outcome: string;
-  rationale: string;
-  confidenceScore: number;
-  actorId: string;
-  classification?: string; // e.g., 'CONFIDENTIAL', 'INTERNAL'
-}
-
-export interface ClaimData {
-  tenantId: string;
-  text: string;
-  type: string;
-  source?: string;
-  classification?: string;
-}
-
-export interface IntelGraphReceipt {
-  decisionId: string;
-  ledgerEntryId: string;
-  ledgerEntryHash: string;
-  timestamp: Date;
-}
+import { runCypher } from '../graph/neo4j.js';
+import {
+  SCHEMA_CONSTRAINTS,
+  Entity,
+  NodeLabel,
+  EdgeType,
+  NodeLabels,
+  EdgeTypes,
+  NATURAL_KEYS
+} from '../graph/schema.js';
+import { randomUUID } from 'crypto';
 
 export class IntelGraphService {
+  private static instance: IntelGraphService;
+
+  private constructor() {}
+
+  public static getInstance(): IntelGraphService {
+    if (!IntelGraphService.instance) {
+      IntelGraphService.instance = new IntelGraphService();
+    }
+    return IntelGraphService.instance;
+  }
+
+  public async initializeSchema(): Promise<void> {
+    console.log('Initializing IntelGraph schema constraints...');
+    for (const cypher of SCHEMA_CONSTRAINTS) {
+      try {
+        await runCypher(cypher);
+      } catch (error) {
+        console.error(`Failed to apply constraint: ${cypher}`, error);
+      }
+    }
+    console.log('IntelGraph schema initialization complete.');
+  }
+
   /**
-   * Creates a Decision node, links it to Claims, and logs to Provenance Ledger.
-   * Applies policy labels based on classification.
-   * Returns a receipt containing the ledger hash.
+   * Ensures a node exists in the graph (Idempotent / Upsert).
+   * Uses MERGE based on natural keys if available, or CREATE if not.
+   * If the node exists, it updates `updatedAt` and any provided properties.
    */
-  async createDecision(
-    decision: DecisionData,
-    claimIds: string[],
-    evidenceIds: string[] = []
-  ): Promise<IntelGraphReceipt> {
-    const driver = getDriver();
-    const session = driver.session();
-    const decisionId = crypto.randomUUID();
-    const timestamp = new Date();
+  public async ensureNode<T extends Entity>(
+    tenantId: string,
+    label: NodeLabel,
+    properties: Omit<T, 'id' | 'tenantId' | 'createdAt' | 'updatedAt' | 'label'>
+  ): Promise<T> {
+    this.validateNodeLabel(label);
 
-    // 0. DLP Scan & Redaction on Rationale
-    let rationale = decision.rationale;
-    const dlpResult = await dlpService.scanContent(rationale, {
-        tenantId: decision.tenantId,
-        userId: decision.actorId,
-        userRole: 'user',
-        operationType: 'write',
-        contentType: 'text/plain'
-    });
+    const naturalKeys = NATURAL_KEYS[label];
+    const hasNaturalKey = naturalKeys && naturalKeys.length > 0 && naturalKeys.every(k => (properties as any)[k] !== undefined);
 
-    // If blocked, throw error
-    if (dlpResult.some(r => r.recommendedActions.some(a => a.type === 'block'))) {
-        throw new Error('DLP Violation: Content blocked');
-    }
+    const id = randomUUID();
+    const now = new Date().toISOString();
 
-    // Apply redaction if needed
-    if (dlpResult.some(r => r.recommendedActions.some(a => a.type === 'redact'))) {
-        const processed = await dlpService.applyActions(rationale, dlpResult, {
-            tenantId: decision.tenantId,
-            userId: decision.actorId,
-            userRole: 'user',
-            operationType: 'write',
-            contentType: 'text/plain'
-        });
-        if (typeof processed.processedContent === 'string') {
-            rationale = processed.processedContent;
-        }
-    }
+    let cypher: string;
+    let params: any = {
+      props: properties,
+      id,
+      tenantId,
+      now,
+    };
 
-    // 1. Log to Provenance Ledger first to get the hash
-    const ledgerEntry = await provenanceLedger.appendEntry({
-      tenantId: decision.tenantId,
-      actionType: 'CREATE_DECISION',
-      resourceType: 'decision',
-      resourceId: decisionId,
-      actorId: decision.actorId,
-      actorType: 'user', // Default to user, could be system/agent
-      payload: {
-        outcome: decision.outcome,
-        rationale: rationale, // Use redacted rationale
-        confidenceScore: decision.confidenceScore,
-        claimIds,
-        evidenceIds
-      },
-      metadata: {
-        classification: decision.classification ? [decision.classification] : ['INTERNAL']
-      }
-    });
+    if (hasNaturalKey) {
+        // Construct MERGE clause
+        // MERGE (n:Label { tenantId: $tenantId, key1: $val1, ... })
+        const mergeProps = naturalKeys.map(k => `${k}: $${k}`).join(', ');
+        // Extract natural key values into params
+        naturalKeys.forEach(k => params[k] = (properties as any)[k]);
 
-    try {
-      await session.executeWrite(async (tx: Transaction) => {
-        // 2. Create Decision Node with Policy Labels
-        const labels = ['Decision'];
-        if (decision.classification) {
-            // Sanitize label: allow only alphanumeric and underscore
-            if (/^[A-Za-z0-9_]+$/.test(decision.classification)) {
-                labels.push(decision.classification);
-            } else {
-                console.warn(`Invalid classification label: ${decision.classification}`);
-            }
-        }
+        // Remove natural keys from $props to avoid duplication in SET if we wanted,
+        // but replacing $props is fine as long as we handle it.
+        // Actually, we want to update other props.
 
-        // Base query for Decision node
-        const createQuery = `
-          CREATE (d:Decision {
-            id: $id,
-            tenantId: $tenantId,
-            outcome: $outcome,
-            rationale: $rationale,
-            confidenceScore: $confidenceScore,
-            ledgerEntryId: $ledgerEntryId,
-            ledgerEntryHash: $ledgerEntryHash,
-            createdAt: $timestamp
-          })
-          SET d:${labels.join(':')}
-          RETURN d
+        cypher = `
+            MERGE (n:${label} { tenantId: $tenantId, ${mergeProps} })
+            ON CREATE SET
+                n = $props,
+                n.id = $id,
+                n.tenantId = $tenantId,
+                n.createdAt = $now,
+                n.updatedAt = $now
+            ON MATCH SET
+                n += $props,
+                n.updatedAt = $now
+            RETURN n
         `;
+    } else {
+        // Fallback to CREATE if no natural key definition (shouldn't happen for canonical entities)
+        // or just treat as a new distinct entity
+        cypher = `
+            CREATE (n:${label})
+            SET n = $props,
+                n.id = $id,
+                n.tenantId = $tenantId,
+                n.createdAt = $now,
+                n.updatedAt = $now
+            RETURN n
+        `;
+    }
 
-        await tx.run(createQuery, {
-          id: decisionId,
-          tenantId: decision.tenantId,
-          outcome: decision.outcome,
-          rationale: decision.rationale,
-          confidenceScore: decision.confidenceScore,
-          ledgerEntryId: ledgerEntry.id,
-          ledgerEntryHash: ledgerEntry.currentHash,
-          timestamp: timestamp.toISOString()
-        });
+    const result = await runCypher(cypher, params);
+    if (!result || result.length === 0) {
+      throw new Error(`Failed to ensure node of type ${label}`);
+    }
 
-        // 3. Link to Claims
-        if (claimIds.length > 0) {
-          const linkClaimsQuery = `
-            MATCH (d:Decision {id: $decisionId})
-            MATCH (c:Claim {tenantId: $tenantId})
-            WHERE c.id IN $claimIds
-            MERGE (d)-[:DECIDES]->(c)
-          `;
-          await tx.run(linkClaimsQuery, {
-            decisionId,
-            tenantId: decision.tenantId,
-            claimIds
-          });
-        }
+    return result[0]['n'] as T;
+  }
 
-        // 4. Link to Evidence
-        if (evidenceIds.length > 0) {
-          // Assuming Evidence nodes might be generic Entity nodes or specific Evidence nodes
-          // Using specific Evidence label for now, falling back to Entity if needed in future
-          const linkEvidenceQuery = `
-            MATCH (d:Decision {id: $decisionId})
-            MATCH (e) WHERE e.id IN $evidenceIds AND e.tenantId = $tenantId
-            MERGE (d)-[:BASED_ON]->(e)
-          `;
-          await tx.run(linkEvidenceQuery, {
-            decisionId,
-            tenantId: decision.tenantId,
-            evidenceIds
-          });
-        }
-      });
+  // Deprecated: use ensureNode for canonical correctness
+  public async createNode<T extends Entity>(
+    tenantId: string,
+    label: NodeLabel,
+    properties: Omit<T, 'id' | 'tenantId' | 'createdAt' | 'updatedAt' | 'label'>
+  ): Promise<T> {
+      return this.ensureNode(tenantId, label, properties);
+  }
 
-      return {
-        decisionId,
-        ledgerEntryId: ledgerEntry.id,
-        ledgerEntryHash: ledgerEntry.currentHash,
-        timestamp
-      };
+  public async createEdge(
+    tenantId: string,
+    fromId: string,
+    toId: string,
+    edgeType: EdgeType,
+    properties: Record<string, any> = {}
+  ): Promise<void> {
+    this.validateEdgeType(edgeType);
 
-    } finally {
-      await session.close();
+    const cypher = `
+      MATCH (a), (b)
+      WHERE a.id = $fromId AND a.tenantId = $tenantId
+        AND b.id = $toId AND b.tenantId = $tenantId
+      MERGE (a)-[r:${edgeType}]->(b)
+      ON CREATE SET r = $props, r.createdAt = $now
+      ON MATCH SET r += $props
+      RETURN r
+    `;
+
+    const params = {
+      fromId,
+      toId,
+      tenantId,
+      props: properties,
+      now: new Date().toISOString(),
+    };
+
+    const result = await runCypher(cypher, params);
+    if (!result || result.length === 0) {
+      throw new Error(
+        `Failed to create edge ${edgeType} between ${fromId} and ${toId}. Check IDs and tenant ownership.`
+      );
     }
   }
 
-  async createClaim(claim: ClaimData): Promise<string> {
-    const driver = getDriver();
-    const session = driver.session();
-    const claimId = crypto.randomUUID();
+  public async getNodeById<T extends Entity>(
+    tenantId: string,
+    id: string
+  ): Promise<T | null> {
+    const cypher = `
+      MATCH (n)
+      WHERE n.id = $id AND n.tenantId = $tenantId
+      RETURN n
+    `;
 
-    // Log to Ledger
-    await provenanceLedger.appendEntry({
-      tenantId: claim.tenantId,
-      actionType: 'CREATE_CLAIM',
-      resourceType: 'claim',
-      resourceId: claimId,
-      actorId: 'system', // Claims often ingested by system
-      actorType: 'system',
-      payload: claim,
-      metadata: {
-        classification: claim.classification ? [claim.classification] : ['INTERNAL']
-      }
-    });
-
-    try {
-      await session.executeWrite(async (tx: Transaction) => {
-        const labels = ['Claim'];
-        if (claim.classification) {
-          labels.push(claim.classification);
-        }
-
-        const query = `
-          CREATE (c:Claim {
-            id: $id,
-            tenantId: $tenantId,
-            text: $text,
-            type: $type,
-            source: $source,
-            createdAt: $timestamp
-          })
-          SET c:${labels.join(':')}
-        `;
-
-        await tx.run(query, {
-          id: claimId,
-          tenantId: claim.tenantId,
-          text: claim.text,
-          type: claim.type,
-          source: claim.source || null,
-          timestamp: new Date().toISOString()
-        });
-      });
-      return claimId;
-    } finally {
-      await session.close();
+    const result = await runCypher(cypher, { id, tenantId });
+    if (!result || result.length === 0) {
+      return null;
     }
+    return result[0]['n'] as T;
   }
 
-  async getDecisionWithReceipt(decisionId: string): Promise<any> {
-    const driver = getDriver();
-    const session = driver.session();
-    try {
-      const result = await session.run(`
-        MATCH (d:Decision {id: $id})
-        OPTIONAL MATCH (d)-[:DECIDES]->(c:Claim)
-        OPTIONAL MATCH (d)-[:BASED_ON]->(e)
-        RETURN d, collect(c) as claims, collect(e) as evidence
-      `, { id: decisionId });
+  public async searchNodes<T extends Entity>(
+    tenantId: string,
+    label: NodeLabel,
+    criteria: Record<string, any> = {},
+    limit: number = 100
+  ): Promise<T[]> {
+    this.validateNodeLabel(label);
 
-      if (result.records.length === 0) return null;
+    let whereClause = 'n.tenantId = $tenantId';
+    const params: any = { tenantId };
 
-      const record = result.records[0];
-      const decision = record.get('d').properties;
-      const claims = record.get('claims').map((n: any) => n.properties);
-      const evidence = record.get('evidence').map((n: any) => n.properties);
+    Object.keys(criteria).forEach((key) => {
+      if (!/^[a-zA-Z0-9_]+$/.test(key)) {
+         throw new Error(`Invalid property key: ${key}`);
+      }
+      whereClause += ` AND n.${key} = $${key}`;
+      params[key] = criteria[key];
+    });
 
-      return {
-        ...decision,
-        claims,
-        evidence,
-        // The receipt is effectively the decision node itself which has the ledger hash
-        receipt: {
-          ledgerEntryId: decision.ledgerEntryId,
-          ledgerEntryHash: decision.ledgerEntryHash
-        }
-      };
-    } finally {
-      await session.close();
-    }
+    const cypher = `
+      MATCH (n:${label})
+      WHERE ${whereClause}
+      RETURN n
+      LIMIT ${limit}
+    `;
+
+    const result = await runCypher(cypher, params);
+    return result.map((r) => r['n'] as T);
+  }
+
+  private validateNodeLabel(label: string): void {
+     if (!Object.values(NodeLabels).includes(label as NodeLabel)) {
+         throw new Error(`Invalid node label: ${label}`);
+     }
+  }
+
+  private validateEdgeType(type: string): void {
+     if (!Object.values(EdgeTypes).includes(type as EdgeType)) {
+         throw new Error(`Invalid edge type: ${type}`);
+     }
   }
 }
-
-export const intelGraphService = new IntelGraphService();

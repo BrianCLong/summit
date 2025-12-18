@@ -314,9 +314,9 @@ function mapGitHubStatus(
   conclusion: string,
   status: string,
 ): BuildEvent['status'] {
-  if (conclusion === 'success') return 'success';
-  if (conclusion === 'failure' || conclusion === 'cancelled') return 'failed';
-  if (status === 'in_progress' || status === 'queued') return 'running';
+  if (conclusion === 'success') {return 'success';}
+  if (conclusion === 'failure' || conclusion === 'cancelled') {return 'failed';}
+  if (status === 'in_progress' || status === 'queued') {return 'running';}
   return 'pending';
 }
 

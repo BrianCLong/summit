@@ -10,4 +10,6 @@ export interface Backend {
   connections: number;
   latency: number;
   status: 'UP' | 'DOWN';
+  role: 'PRIMARY' | 'REPLICA';
+  region: string;
 }

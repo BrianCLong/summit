@@ -144,7 +144,7 @@ export abstract class BaseConnector extends EventEmitter {
    */
   protected async rateLimit(): Promise<void> {
     const rateLimitConfig = this.config.extractionConfig.rateLimitConfig;
-    if (!rateLimitConfig) return;
+    if (!rateLimitConfig) {return;}
 
     // Simple rate limiting implementation
     // In production, use a more sophisticated rate limiter like bottleneck
