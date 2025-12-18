@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18-alpine@sha256:a8f88948f856683d32d459c8370b02a43e116302d142e3418c0054475009008b
 
 # Install system dependencies for native modules like canvas
 RUN apk add --no-cache \
@@ -27,4 +27,3 @@ ENV PORT=4000
 EXPOSE 4000
 # Run directly from source for demonstration
 CMD ["npx", "tsx", "src/index.ts"]
-
