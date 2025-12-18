@@ -1,0 +1,263 @@
+name: Scenario Evaluation Tests
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/sim-harness/**'
+      - 'server/**'
+      - 'graphql/**'
+      - '.github/workflows/scenario-evaluation.yml'
+  workflow_dispatch:
+    inputs:
+      scenario:
+        description: 'Scenario to run'
+        required: false
+        default: 'fraud-ring'
+      sessions:
+        description: 'Number of sessions'
+        required: false
+        default: '3'
+
+jobs:
+  scenario-tests:
+    name: Run Scenario Evaluations
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "pnpm_cache_dir=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build sim-harness
+        run: |
+          cd packages/sim-harness
+          pnpm build
+
+      - name: Run unit tests
+        run: |
+          cd packages/sim-harness
+          pnpm test --coverage
+
+      - name: Start IntelGraph stack
+        run: |
+          make bootstrap
+          make up
+
+      - name: Wait for services
+        run: |
+          timeout 120 bash -c 'until curl -sf http://localhost:4000/health > /dev/null; do sleep 2; done'
+          echo "✓ API is ready"
+          timeout 60 bash -c 'until curl -sf http://localhost:3000 > /dev/null; do sleep 2; done'
+          echo "✓ Frontend is ready"
+          timeout 60 bash -c 'until curl -sf http://localhost:7474 > /dev/null; do sleep 2; done'
+          echo "✓ Neo4j is ready"
+
+      - name: Run golden path smoke test
+        run: make smoke
+
+      - name: Run fraud-ring scenario
+        env:
+          API_URL: http://localhost:4000/graphql
+          TENANT_ID: test-ci-fraud-ring
+        run: |
+          cd packages/sim-harness
+          pnpm run-scenario run \
+            --scenario fraud-ring \
+            --seed 42 \
+            --size small \
+            --sessions ${{ github.event.inputs.sessions || '3' }} \
+            --format all \
+            --output ./reports/fraud-ring
+
+      - name: Run terror-cell scenario
+        env:
+          API_URL: http://localhost:4000/graphql
+          TENANT_ID: test-ci-terror-cell
+        run: |
+          cd packages/sim-harness
+          pnpm run-scenario run \
+            --scenario terror-cell \
+            --seed 123 \
+            --size small \
+            --sessions 2 \
+            --format all \
+            --output ./reports/terror-cell
+
+      - name: Run corruption-network scenario
+        env:
+          API_URL: http://localhost:4000/graphql
+          TENANT_ID: test-ci-corruption
+        run: |
+          cd packages/sim-harness
+          pnpm run-scenario run \
+            --scenario corruption-network \
+            --seed 456 \
+            --size small \
+            --sessions 2 \
+            --format all \
+            --output ./reports/corruption
+
+      - name: Validate success criteria
+        run: |
+          cd packages/sim-harness
+          node -e "
+            const fs = require('fs');
+            const glob = require('glob');
+
+            const reportFiles = glob.sync('reports/**/\*-report.json');
+            console.log('Found', reportFiles.length, 'report files');
+
+            let allPassed = true;
+            for (const file of reportFiles) {
+              const report = JSON.parse(fs.readFileSync(file, 'utf-8'));
+              const metrics = report.aggregateMetrics;
+
+              console.log('\n' + file + ':');
+              console.log('  Success Rate:', (metrics.reliability.successRate * 100).toFixed(1) + '%');
+              console.log('  Entities Found:', (metrics.correctness.entitiesFoundRate * 100).toFixed(1) + '%');
+              console.log('  Avg Duration:', (metrics.performance.avgDuration / 1000).toFixed(2) + 's');
+
+              // Check thresholds
+              if (metrics.reliability.successRate < 0.8) {
+                console.error('  ❌ Success rate below 80%');
+                allPassed = false;
+              }
+              if (metrics.correctness.entitiesFoundRate < 0.7) {
+                console.error('  ❌ Entity discovery rate below 70%');
+                allPassed = false;
+              }
+            }
+
+            if (!allPassed) {
+              console.error('\n❌ Some scenarios failed quality thresholds');
+              process.exit(1);
+            }
+
+            console.log('\n✅ All scenarios passed quality thresholds');
+          "
+
+      - name: Upload scenario reports
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: scenario-evaluation-reports
+          path: packages/sim-harness/reports/
+          retention-days: 30
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: coverage
+          path: packages/sim-harness/coverage/
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const glob = require('glob');
+
+            const reportFiles = glob.sync('packages/sim-harness/reports/**/\*-report.json');
+
+            let comment = '## 📊 Scenario Evaluation Results\n\n';
+            comment += '| Scenario | Success Rate | Entities Found | Avg Duration | Status |\n';
+            comment += '|----------|-------------|----------------|--------------|--------|\n';
+
+            for (const file of reportFiles) {
+              const report = JSON.parse(fs.readFileSync(file, 'utf-8'));
+              const m = report.aggregateMetrics;
+              const scenarioName = report.scenarioName;
+              const successRate = (m.reliability.successRate * 100).toFixed(1);
+              const entitiesRate = (m.correctness.entitiesFoundRate * 100).toFixed(1);
+              const duration = (m.performance.avgDuration / 1000).toFixed(2);
+              const status = m.reliability.successRate >= 0.8 ? '✅' : '❌';
+
+              comment += `| ${scenarioName} | ${successRate}% | ${entitiesRate}% | ${duration}s | ${status} |\n`;
+            }
+
+            comment += '\n📁 [View detailed reports in artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Cleanup
+        if: always()
+        run: |
+          make down
+          docker system prune -f
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build sim-harness
+        run: |
+          cd packages/sim-harness
+          pnpm build
+
+      - name: Start IntelGraph stack
+        run: |
+          make bootstrap
+          make up
+
+      - name: Wait for services
+        run: |
+          timeout 120 bash -c 'until curl -sf http://localhost:4000/health > /dev/null; do sleep 2; done'
+
+      - name: Run integration tests
+        env:
+          API_URL: http://localhost:4000/graphql
+          TENANT_ID: test-integration
+        run: |
+          cd packages/sim-harness
+          pnpm test:integration
+
+      - name: Cleanup
+        if: always()
+        run: make down

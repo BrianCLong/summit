@@ -67,6 +67,57 @@ describe('TriPaneController', () => {
     const explain = controller.explainCurrentView();
     expect(explain.focus).toBe('person-1');
     expect(explain.evidence.length).toBe(3);
+    expect(explain.activePanel).toBe('graph');
+    expect(explain.policyHighlights).toContain('policy:export');
+    expect(explain.navigationTips).toContain(
+      'Ctrl+1 Graph · Ctrl+2 Timeline · Ctrl+3 Map',
+    );
+  });
+
+  it('restores saved views without later mutations leaking through', () => {
+    const localEvidence = evidence.map((item) => ({
+      ...item,
+      policies: [...item.policies],
+    }));
+    const controller = new TriPaneController(localEvidence);
+    controller.selectFromGraph('person-1', localEvidence);
+    controller.saveView('orion');
+
+    localEvidence[0].label = 'mutated-label';
+    controller.selectFromGraph('person-2', localEvidence);
+
+    const restored = controller.restoreView('orion');
+    expect(restored?.graphSelection).toBe('person-1');
+    expect(restored?.evidence[0]?.label).toBe('email:alice@example.com');
+  });
+
+  it('guards state against external evidence mutation after selection', () => {
+    const mutableEvidence = evidence.map((item) => ({
+      ...item,
+      policies: [...item.policies],
+    }));
+    const controller = new TriPaneController();
+
+    controller.selectFromGraph('person-1', mutableEvidence);
+    mutableEvidence[0].label = 'mutated';
+    mutableEvidence[0].policies.push('policy:tamper');
+
+    const current = controller.current;
+    expect(current.evidence[0]?.label).toBe('email:alice@example.com');
+    expect(current.evidence[0]?.policies).toEqual(['policy:export']);
+  });
+
+  it('returns explain view clones so consumers cannot mutate controller state', () => {
+    const controller = new TriPaneController();
+    controller.selectFromGraph('person-1', evidence);
+
+    const explain = controller.explainCurrentView();
+    explain.evidence[0]!.label = 'mutated';
+    explain.evidence[0]!.policies.push('policy:tamper');
+
+    const current = controller.current;
+    expect(current.evidence[0]?.label).toBe('email:alice@example.com');
+    expect(current.evidence[0]?.policies).toEqual(['policy:export']);
   });
 
   it('tracks time-to-path metric', () => {
@@ -74,5 +125,40 @@ describe('TriPaneController', () => {
     controller.recordPathDiscovery(1200);
     controller.recordPathDiscovery(800);
     expect(controller.averageTimeToPath()).toBe(1000);
+  });
+
+  it('builds unified layout with explain panel and command palette', () => {
+    const controller = new TriPaneController(evidence);
+    controller.selectFromGraph('person-1', evidence);
+    const layout = controller.buildUnifiedLayout('graph');
+    expect(layout.activePanel).toBe('graph');
+    expect(layout.panes.find((pane) => pane.id === 'graph')?.linkedTo).toEqual([
+      'timeline',
+      'map',
+    ]);
+    expect(layout.commandPalette.commands.some((cmd) => cmd.id === 'focus.graph'))
+      .toBe(true);
+    expect(layout.explainPanel.summary).toContain('Active pane: graph');
+    expect(layout.explainPanel.policyHighlights).toContain('policy:export');
+  });
+
+  it('supports command palette commands and keyboard shortcuts', () => {
+    const controller = new TriPaneController(evidence);
+    controller.registerCommand({
+      id: 'save.snapshot',
+      label: 'Save snapshot',
+      shortcut: 'cmd+s',
+      run: () => controller.saveView('snapshot'),
+    });
+    expect(controller.handleShortcut('ctrl+2')).toBe(true);
+    expect(controller.current.activePanel).toBe('timeline');
+    expect(
+      controller.commandPalette('snapshot').commands.find(
+        (command) => command.id === 'save.snapshot',
+      ),
+    ).toBeDefined();
+    controller.selectFromMap('ev-2');
+    expect(controller.handleShortcut('cmd+s')).toBe(true);
+    expect(controller.restoreView('snapshot')).toBeDefined();
   });
 });
