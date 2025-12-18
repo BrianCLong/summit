@@ -1,6 +1,6 @@
 {
   "name": "@summit/govbrief",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Pipeline for ingesting .gov research and generating proof-carrying strategy briefs",
   "type": "module",
   "main": "dist/index.js",

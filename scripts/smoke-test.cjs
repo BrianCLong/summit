@@ -12,10 +12,11 @@
  * 5. See live results
  */
 
-const axios = require('axios');
-const { WebSocket } = require('ws');
 const fs = require('fs');
 const path = require('path');
+
+let axios;
+let WebSocket;
 
 // Configuration
 const defaultApiBase = process.env.API_BASE_URL || 'http://localhost:4000';
@@ -23,8 +24,8 @@ const repoRoot = path.resolve(__dirname, '..');
 const defaultDataset = path.join(
   repoRoot,
   'data',
-  'golden-path',
-  'demo-investigation.json',
+  'quickstart',
+  'quickstart-investigation.json',
 );
 const config = {
   apiBaseUrl: defaultApiBase,
@@ -34,7 +35,7 @@ const config = {
   neo4jUrl: process.env.NEO4J_URL || 'http://localhost:7474',
   metricsUrl: process.env.METRICS_URL || `${defaultApiBase}/metrics`,
   timeout: 30000,
-  maxRetries: 3,
+  maxRetries: process.env.SMOKE_MAX_RETRIES ? parseInt(process.env.SMOKE_MAX_RETRIES) : 3,
   retryDelay: 2000,
   datasetPath: path.resolve(
     process.env.GOLDEN_PATH_DATASET || defaultDataset,
@@ -144,21 +145,25 @@ class SmokeTest {
 
   async test(name, testFn) {
     this.results.total++;
+    const startTime = Date.now();
 
     try {
       await this.log(`🧪 Running: ${name}`);
       await testFn();
+      const duration = Date.now() - startTime;
       this.results.passed++;
-      this.results.details.push({ name, status: 'PASSED' });
-      await this.log(`✅ PASSED: ${name}`, 'success');
+      this.results.details.push({ name, status: 'PASSED', duration });
+      await this.log(`✅ PASSED: ${name} (${duration}ms)`, 'success');
     } catch (error) {
+      const duration = Date.now() - startTime;
       this.results.failed++;
       this.results.details.push({
         name,
         status: 'FAILED',
         error: error.message,
+        duration,
       });
-      await this.log(`❌ FAILED: ${name} - ${error.message}`, 'error');
+      await this.log(`❌ FAILED: ${name} (${duration}ms) - ${error.message}`, 'error');
     }
   }
 
@@ -528,6 +533,26 @@ class SmokeTest {
       await this.log(`API response time: ${responseTime}ms`, 'info');
     });
 
+    // Phase 7.5: Enterprise Feature Verification
+    await this.test('Verify Narrative Simulation Active', async () => {
+      try {
+        const response = await axios.get(`${config.apiBaseUrl}/simulations`, {
+          timeout: 5000,
+          validateStatus: null, // Allow handling 403 manually
+        });
+
+        if (response.status === 200) {
+          await this.log('Narrative Simulation endpoint is active (200 OK)', 'info');
+        } else if (response.status === 403) {
+           throw new Error('Narrative Simulation feature is disabled (Received 403 Forbidden)');
+        } else {
+           throw new Error(`Unexpected status from /simulations: ${response.status}`);
+        }
+      } catch (error) {
+        throw new Error(`Failed to check Narrative Simulation: ${error.message}`);
+      }
+    });
+
     // Phase 8: Clean Up (optional)
     await this.test('Environment Cleanup', async () => {
       // In a real scenario, you might want to clean up test data
@@ -584,12 +609,16 @@ class SmokeTest {
 // Install axios if not available
 async function ensureDependencies() {
   try {
-    require('axios');
-    require('ws');
+    axios = require('axios');
+    const wsModule = require('ws');
+    WebSocket = wsModule.WebSocket;
   } catch (error) {
     console.log('Installing required dependencies...');
     const { execSync } = require('child_process');
     execSync('npm install axios ws', { stdio: 'inherit' });
+    axios = require('axios');
+    const wsModule = require('ws');
+    WebSocket = wsModule.WebSocket;
   }
 }
 

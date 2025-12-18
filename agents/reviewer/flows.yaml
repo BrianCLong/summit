@@ -1,0 +1,31 @@
+version: 1
+
+agent: reviewer
+
+flows:
+  - name: pr_review
+    description: >
+      Review PR packages for correctness, safety, and governance alignment.
+    trigger:
+      - manual
+      - api: /flows/pr_review
+    steps:
+      - ingest_pr_package
+      - validate_scope_against_prime_brain
+      - review_code_tests_docs
+      - assess_risk_and_rollout
+      - issue_decision
+      - communicate_requirements
+
+  - name: security_spot_check
+    description: >
+      Perform focused review on high-risk or security-sensitive changes.
+    trigger:
+      - scheduled
+      - manual
+    steps:
+      - receive_target_signal
+      - deep_dive_review
+      - require_mitigations
+      - document_findings
+      - route_followups

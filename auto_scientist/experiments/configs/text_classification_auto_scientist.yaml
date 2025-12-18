@@ -1,0 +1,29 @@
+task: "text_classification"
+dataset: "ag_news"
+target_metric: "accuracy"
+target_value: 0.90
+
+curriculum:
+  - stage: "baseline"
+    goals:
+      - "reproduce reference model"
+    constraints:
+      max_runs: 5
+      required_metrics:
+        accuracy: 0.85
+
+  - stage: "ablation"
+    goals:
+      - "identify key hyperparameters"
+    constraints:
+      max_runs: 10
+      required_metrics:
+        accuracy: 0.88
+
+  - stage: "generalization"
+    goals:
+      - "check robustness to distribution shift"
+    constraints:
+      max_runs: 10
+      required_metrics:
+        accuracy: 0.90
