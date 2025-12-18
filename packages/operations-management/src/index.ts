@@ -498,7 +498,7 @@ export class OperationsManager {
     }
 
     const totalMilestones = mission.timeline.milestones.length;
-    if (totalMilestones === 0) return 0;
+    if (totalMilestones === 0) {return 0;}
 
     const completedMilestones = mission.timeline.milestones.filter(m => m.completed).length;
     return (completedMilestones / totalMilestones) * 100;

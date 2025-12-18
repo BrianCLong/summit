@@ -237,7 +237,7 @@ export class DataLoader {
   private prepareInsert(record: any): { columns: string; values: any[]; placeholders: string } {
     const columns: string[] = [];
     const values: any[] = [];
-    let paramIndex = 1;
+    const paramIndex = 1;
 
     for (const [key, value] of Object.entries(record)) {
       columns.push(key);
