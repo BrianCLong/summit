@@ -1,0 +1,169 @@
+"""
+Citizen Service GraphQL Schema
+Real-time citizen-centric service automation
+"""
+
+type CitizenProfile {
+  id: ID!
+  nationalId: String!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  dateOfBirth: String
+  gender: Gender
+  nationality: String
+  contact: ContactInfo
+  verified: Boolean!
+  verificationDate: String
+  source: String!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ContactInfo {
+  email: String
+  phone: String
+  address: Address
+}
+
+type Address {
+  street: String
+  city: String
+  state: String
+  postalCode: String
+  country: String
+}
+
+enum Gender {
+  male
+  female
+  other
+  undisclosed
+}
+
+enum ServiceDomain {
+  education
+  healthcare
+  administration
+  taxation
+  social_services
+  transportation
+  housing
+  employment
+}
+
+enum ServiceStatus {
+  pending
+  in_progress
+  completed
+  rejected
+}
+
+type ServiceRecord {
+  id: ID!
+  citizenId: ID!
+  domain: ServiceDomain!
+  serviceType: String!
+  status: ServiceStatus!
+  requestDate: String!
+  completionDate: String
+  linkedRecords: [ID!]
+}
+
+type DataConsent {
+  citizenId: ID!
+  domain: ServiceDomain!
+  consentGiven: Boolean!
+  consentDate: String!
+  expiryDate: String
+  scope: [String!]!
+}
+
+type Eligibility {
+  citizenId: ID!
+  domain: ServiceDomain!
+  serviceType: String!
+  eligible: Boolean!
+  reason: String
+  computedAt: String!
+  validUntil: String!
+}
+
+type UnifiedCitizenView {
+  profile: CitizenProfile
+  serviceHistory: [ServiceRecord!]!
+  eligibleServices: [Eligibility!]!
+  consents: [DataConsent!]!
+}
+
+type Query {
+  """Get unified citizen view - all data consolidated in one call"""
+  citizen(id: ID!): UnifiedCitizenView
+
+  """Find citizen by national ID"""
+  citizenByNationalId(nationalId: String!): CitizenProfile
+
+  """Get proactive service recommendations"""
+  citizenRecommendations(citizenId: ID!): [Eligibility!]!
+
+  """Get service history for a citizen"""
+  serviceHistory(citizenId: ID!, domain: ServiceDomain): [ServiceRecord!]!
+}
+
+input CitizenInput {
+  nationalId: String!
+  firstName: String!
+  lastName: String!
+  middleName: String
+  dateOfBirth: String
+  gender: Gender
+  nationality: String
+  contact: ContactInfoInput
+  source: String!
+}
+
+input ContactInfoInput {
+  email: String
+  phone: String
+  address: AddressInput
+}
+
+input AddressInput {
+  street: String
+  city: String
+  state: String
+  postalCode: String
+  country: String
+}
+
+input ServiceRequestInput {
+  domain: ServiceDomain!
+  serviceType: String!
+  metadata: JSON
+}
+
+input ConsentInput {
+  domain: ServiceDomain!
+  scope: [String!]!
+  expiryDays: Int
+}
+
+scalar JSON
+
+type Mutation {
+  """Register or update citizen - ingest data once"""
+  registerCitizen(input: CitizenInput!): CitizenProfile!
+
+  """Grant consent for data sharing"""
+  grantConsent(citizenId: ID!, input: ConsentInput!): DataConsent!
+
+  """Request a government service"""
+  requestService(citizenId: ID!, input: ServiceRequestInput!): ServiceRecord!
+
+  """Compute eligibility for a service"""
+  computeEligibility(
+    citizenId: ID!
+    domain: ServiceDomain!
+    serviceType: String!
+  ): Eligibility!
+}
