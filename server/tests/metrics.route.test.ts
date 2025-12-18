@@ -4,6 +4,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { apolloPromPlugin } from '../src/metrics/apolloPromPlugin.js';
 import { cacheHits } from '../src/metrics/cacheMetrics.js';
 import { metricsText, metricsContentType } from '../src/metrics/expose.js';
+import { test, expect } from '@jest/globals';
 
 test('/metrics exposes apollo_* and cache_*', async () => {
   // Generate metrics by executing a couple of GraphQL operations

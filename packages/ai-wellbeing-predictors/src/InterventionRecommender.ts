@@ -246,7 +246,7 @@ export class InterventionRecommender {
     prediction: WellbeingPrediction
   ): InterventionRecommendation | null {
     const lowestDomain = this.identifyLowScoreDomains(prediction)[0];
-    if (!lowestDomain) return null;
+    if (!lowestDomain) {return null;}
 
     const now = new Date();
     return {
@@ -298,9 +298,9 @@ export class InterventionRecommender {
   }
 
   private determineDomainPriority(avgScore: number): string {
-    if (avgScore < 30) return 'critical';
-    if (avgScore < 50) return 'high';
-    if (avgScore < 70) return 'moderate';
+    if (avgScore < 30) {return 'critical';}
+    if (avgScore < 50) {return 'high';}
+    if (avgScore < 70) {return 'moderate';}
     return 'low';
   }
 
@@ -314,7 +314,7 @@ export class InterventionRecommender {
       .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
       .filter((rec) => {
         const key = `${rec.interventionType}-${rec.targetDomains.sort().join(',')}`;
-        if (seen.has(key)) return false;
+        if (seen.has(key)) {return false;}
         seen.add(key);
         return true;
       });
