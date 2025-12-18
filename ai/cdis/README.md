@@ -1,28 +1,41 @@
 # Causal Discovery & Intervention Service (CDIS)
 
-CDIS provides a Python 3.12 FastAPI microservice for causal discovery, do-calculus simulation, and counterfactual explanation. Endpoints are guarded by the `CAUSAL_LAB_ENABLED` feature flag so the service can be deployed in read-only environments.
+This service provides causal structure learning, do-calculus simulation, and counterfactual
+analysis for the "Causal Lab" UI. It is implemented with **Python 3.12** and **FastAPI** and
+ships with three structure learners (NOTEARS-style regression, PC conditional-independence, and
+Granger time-series) plus a lightweight do-calculus simulator that can surface top-k path
+contributions and counterfactual deltas.
 
-## Endpoints
-- `POST /discover` — run structure learning (NOTEARS, PC, or Granger) against tabular or time-series payloads.
-- `POST /intervene` — apply `do()` interventions on learned graphs, return effect deltas, confidence, and top-k path contributions.
-- `GET /explain/{simId}` — fetch previously-computed simulation payloads (graph, effects, path-level decomposition).
+## Features
+- POST `/discover` — run causal discovery over tabular or time-series JSON data
+- POST `/intervene` — apply `do()` interventions and compute counterfactual deltas
+- GET `/explain/:simId` — retrieve learned graph, effect estimates, confidence, and top paths
+- Feature-flagged via `CDIS_FEATURE_ENABLED=true`
+- Synthetic DAG fixtures with tolerance-checked tests
+- Playwright end-to-end flow that mirrors **discover → intervene → share**
 
 ## Getting started
+
 ```bash
 python3.12 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-export CAUSAL_LAB_ENABLED=true
-uvicorn app:app --reload --port 8080
+pip install -r requirements-dev.txt
+python -m playwright install --with-deps  # required for e2e browser automation
+uvicorn cdis.api:app --reload --port 8090
 ```
 
-Visit `ui/index.html` for the “Causal Lab” dashboard (uses jQuery sliders for intervention strength and effect bars to visualize deltas). The UI expects the API to be available on `http://localhost:8080`.
+Visit `http://localhost:8090/lab` for the Causal Lab UI. The API is read-only and uses in-memory
+simulation state; no data is persisted, and no biometric inputs are accepted.
 
-## Tests
-- Python unit tests: `pytest tests`
-- Playwright E2E (from `e2e/`): `npm ci && npx playwright test`
+## Tests & lint
 
-## Security & compliance
-- No biometric or PII processing; synthetic fixtures only.
-- Dependencies are snapshot pinned via `requirements.txt` and pinned npm devDependencies for deterministic builds.
-- The service is read-only; simulations are kept in-memory and never persisted to disk.
+```bash
+ruff check cdis
+pytest -m "not e2e"
+pytest -m e2e  # requires Playwright browsers and a running dev server on :8090
+```
+
+## CI
+The `.github/workflows/cdis.yml` workflow installs Python 3.12, pins dependencies from
+`requirements-dev.txt`, runs Ruff, unit tests, and the FastAPI contract tests. The Playwright e2e
+suite is marked `e2e` and can be enabled with `RUN_E2E=true`.
