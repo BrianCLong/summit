@@ -1,4 +1,5 @@
 import { deepfakeTriage } from '../ai/deepfakeTriage';
+import { describe, it, test, expect } from '@jest/globals';
 
 describe('deepfake triage', () => {
   it('returns score, facets, and latency', () => {

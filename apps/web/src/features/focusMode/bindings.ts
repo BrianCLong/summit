@@ -40,9 +40,9 @@ function currentRegionFromHover(): 'graph' | 'map' | 'timeline' | 'codex' {
     window.innerWidth / 2,
     window.innerHeight / 2
   ) as HTMLElement
-  if (!el) return 'graph'
-  if (el.closest('#pane-codex')) return 'codex'
-  if (el.closest('#pane-map')) return 'map'
-  if (el.closest('#pane-timeline')) return 'timeline'
+  if (!el) {return 'graph'}
+  if (el.closest('#pane-codex')) {return 'codex'}
+  if (el.closest('#pane-map')) {return 'map'}
+  if (el.closest('#pane-timeline')) {return 'timeline'}
   return 'graph'
 }
