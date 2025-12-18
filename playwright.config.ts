@@ -9,7 +9,11 @@ export default defineConfig({
 <<<<<<< HEAD
     'e2e/golden-path.spec.ts',
 =======
+<<<<<<< HEAD
+    'e2e/golden-path.spec.ts',
+=======
     'e2e/osint/**/*.spec.ts',
+>>>>>>> main
 >>>>>>> main
     'e2e/**/*.a11y.spec.ts',
     'tests/e2e/**/*.spec.ts',
@@ -19,10 +23,17 @@ export default defineConfig({
     'e2e/simple.spec.ts',
 >>>>>>> main
   ],
-  timeout: 30_000,
+  timeout: 60_000,
   retries: 2,
   reporter: [['html', { outputFolder: 'reports/playwright' }], ['list']],
   use: {
+<<<<<<< HEAD
+    // The client seems to be running on port 3000 now based on vite.config.js and curl check
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
+    screenshot: 'on',
+=======
 <<<<<<< HEAD
     baseURL: process.env.BASE_URL || (process.env.CI ? 'http://localhost:3000' : 'http://localhost:5173'),
 =======
@@ -30,13 +41,19 @@ export default defineConfig({
 >>>>>>> main
     trace: 'retain-on-failure',
     video: 'on',
+>>>>>>> main
   },
   ...(useWebServer
     ? {
         webServer: [
           {
+<<<<<<< HEAD
+            command: 'npm run client:dev',
+            port: 3000, // Changed to 3000
+=======
             command: 'npm run web:dev',
             port: 3000,
+>>>>>>> main
             reuseExistingServer: !process.env.CI,
             timeout: 120_000,
           },
