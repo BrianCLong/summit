@@ -27,6 +27,7 @@ jobs:
 
       - name: Create Kubeconfig
         run: |
+          set -euo pipefail
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG_PROD_B64 }}" | base64 -d > ~/.kube/config
           chmod 600 ~/.kube/config
@@ -36,6 +37,7 @@ jobs:
           NAMESPACE: prod
           HOST: api.intelgraph.io
         run: |
+          set -euo pipefail
           # The chart has Argo Rollouts enabled, so 'helm upgrade' applies the Rollout object.
           # Argo Rollouts controller handles the steps (10% -> 50% -> 100%).
           helm upgrade --install server ./charts/server \
@@ -44,4 +46,21 @@ jobs:
             --set image.tag=${{ inputs.image_tag }} \
             --set ingress.hosts[0].host=$HOST \
             --set ingress.tls[0].hosts[0]=$HOST \
+            --atomic \
+            --timeout 10m \
             --wait
+
+      - name: Verify rollout health
+        env:
+          NAMESPACE: prod
+        run: |
+          set -euo pipefail
+          release=server
+          if kubectl -n "$NAMESPACE" get deployment "$release" >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status deployment "$release" --timeout=5m
+          elif kubectl -n "$NAMESPACE" get statefulset "$release" >/dev/null 2>&1; then
+            kubectl -n "$NAMESPACE" rollout status statefulset "$release" --timeout=5m
+          else
+            echo "::warning::No deployment or statefulset named $release; checking pods by label"
+            kubectl -n "$NAMESPACE" wait --for=condition=Ready pod -l app.kubernetes.io/name=$release --timeout=5m
+          fi
