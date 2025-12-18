@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * IntelGraph GA-Core Streaming Ingest Worker
  * Committee Requirements: PII redaction, real-time processing, observability

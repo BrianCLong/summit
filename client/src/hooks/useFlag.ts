@@ -29,6 +29,27 @@ const DEFAULT_FLAGS: FlagConfig = {
       env: ['development', 'staging', 'production'],
     },
   },
+  'graph-lod': {
+    enabled: true,
+    rollout: 100,
+    conditions: {
+      env: ['development', 'staging', 'production'],
+    },
+  },
+  'graph-lod-aggregation': {
+    enabled: true,
+    rollout: 100,
+    conditions: {
+      env: ['development', 'staging', 'production'],
+    },
+  },
+  'graph-lod-benchmark': {
+    enabled: import.meta.env.DEV ?? true,
+    rollout: 100,
+    conditions: {
+      env: ['development', 'staging', 'production'],
+    },
+  },
   'k-shortest-paths': {
     enabled: true,
     rollout: 100,
