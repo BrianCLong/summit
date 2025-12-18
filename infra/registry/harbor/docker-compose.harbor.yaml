@@ -1,0 +1,292 @@
+# Harbor Registry - Development/Testing Deployment
+# For production, use Helm chart with harbor-values.yaml
+#
+# Usage:
+#   docker-compose -f docker-compose.harbor.yaml up -d
+#
+# Prerequisites:
+#   - Docker Compose v2.x
+#   - 8GB+ RAM allocated to Docker
+#   - SSL certificates in ./certs/
+
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  harbor-db:
+    image: goharbor/harbor-db:v2.10.0
+    container_name: harbor-db
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    volumes:
+      - harbor-database:/var/lib/postgresql/data
+    networks:
+      - harbor-internal
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${HARBOR_DB_PASSWORD:-root123}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  harbor-redis:
+    image: goharbor/redis-photon:v2.10.0
+    container_name: harbor-redis
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    volumes:
+      - harbor-redis:/var/lib/redis
+    networks:
+      - harbor-internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Harbor Core
+  harbor-core:
+    image: goharbor/harbor-core:v2.10.0
+    container_name: harbor-core
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+    volumes:
+      - harbor-core-ca:/etc/core/ca
+      - harbor-core-token:/etc/core/token
+      - harbor-psc:/etc/core/key
+      - ./config/core/app.conf:/etc/core/app.conf:ro
+      - ./config/core/private_key.pem:/etc/core/private_key.pem:ro
+    networks:
+      - harbor-internal
+    depends_on:
+      harbor-db:
+        condition: service_healthy
+      harbor-redis:
+        condition: service_healthy
+    environment:
+      CORE_SECRET: ${HARBOR_CORE_SECRET}
+      _REDIS_URL_CORE: redis://harbor-redis:6379/0
+      SYNC_QUOTA: "true"
+      CONFIG_PATH: /etc/core/app.conf
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/api/v2.0/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # Harbor Portal (Web UI)
+  harbor-portal:
+    image: goharbor/harbor-portal:v2.10.0
+    container_name: harbor-portal
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    volumes:
+      - ./config/portal/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - harbor-internal
+    depends_on:
+      - harbor-core
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Harbor Registry
+  harbor-registry:
+    image: goharbor/registry-photon:v2.10.0
+    container_name: harbor-registry
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    volumes:
+      - harbor-registry-data:/storage
+      - ./config/registry/config.yml:/etc/registry/config.yml:ro
+      - ./config/registry/passwd:/etc/registry/passwd:ro
+      - harbor-registry-root-certs:/etc/registry/root.crt:ro
+    networks:
+      - harbor-internal
+    depends_on:
+      harbor-db:
+        condition: service_healthy
+    environment:
+      REGISTRY_HTTP_SECRET: ${HARBOR_REGISTRY_HTTP_SECRET}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:5000/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Harbor Job Service
+  harbor-jobservice:
+    image: goharbor/harbor-jobservice:v2.10.0
+    container_name: harbor-jobservice
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+    volumes:
+      - harbor-jobservice-logs:/var/log/jobs
+      - ./config/jobservice/config.yml:/etc/jobservice/config.yml:ro
+    networks:
+      - harbor-internal
+    depends_on:
+      harbor-core:
+        condition: service_healthy
+      harbor-redis:
+        condition: service_healthy
+    environment:
+      CORE_SECRET: ${HARBOR_CORE_SECRET}
+      JOBSERVICE_SECRET: ${HARBOR_JOBSERVICE_SECRET}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/api/v1/stats"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Trivy Security Scanner
+  harbor-trivy:
+    image: goharbor/trivy-adapter-photon:v2.10.0
+    container_name: harbor-trivy
+    restart: always
+    cap_drop:
+      - ALL
+    volumes:
+      - harbor-trivy-cache:/home/scanner/.cache
+      - ./trivy-db:/home/scanner/trivy-db:ro  # Offline DB
+    networks:
+      - harbor-internal
+    environment:
+      SCANNER_LOG_LEVEL: info
+      SCANNER_TRIVY_CACHE_DIR: /home/scanner/.cache/trivy
+      SCANNER_TRIVY_REPORTS_DIR: /home/scanner/.cache/reports
+      SCANNER_TRIVY_DEBUG_MODE: "false"
+      SCANNER_TRIVY_VULN_TYPE: "os,library"
+      SCANNER_TRIVY_SEVERITY: "UNKNOWN,LOW,MEDIUM,HIGH,CRITICAL"
+      SCANNER_TRIVY_IGNORE_UNFIXED: "false"
+      SCANNER_TRIVY_SKIP_UPDATE: "true"  # Air-gapped mode
+      SCANNER_TRIVY_OFFLINE_SCAN: "true"  # Air-gapped mode
+      SCANNER_TRIVY_GITHUB_TOKEN: ""
+      SCANNER_TRIVY_TIMEOUT: 10m
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/probe/healthy"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Nginx Proxy
+  harbor-nginx:
+    image: goharbor/nginx-photon:v2.10.0
+    container_name: harbor-nginx
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - DAC_OVERRIDE
+      - SETGID
+      - SETUID
+      - NET_BIND_SERVICE
+    volumes:
+      - ./config/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs/server.crt:/etc/harbor/tls/server.crt:ro
+      - ./certs/server.key:/etc/harbor/tls/server.key:ro
+    networks:
+      - harbor-internal
+      - harbor-external
+    ports:
+      - "443:8443"
+      - "80:8080"
+    depends_on:
+      harbor-core:
+        condition: service_healthy
+      harbor-portal:
+        condition: service_healthy
+      harbor-registry:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/api/v2.0/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Harbor Exporter (Metrics)
+  harbor-exporter:
+    image: goharbor/harbor-exporter:v2.10.0
+    container_name: harbor-exporter
+    restart: always
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+    networks:
+      - harbor-internal
+    depends_on:
+      harbor-core:
+        condition: service_healthy
+    environment:
+      HARBOR_EXPORTER_PORT: 8001
+      HARBOR_EXPORTER_METRICS_PATH: /metrics
+      HARBOR_EXPORTER_METRICS_ENABLED: "true"
+      HARBOR_EXPORTER_CACHE_TIME: 23
+      HARBOR_EXPORTER_CACHE_CLEAN_INTERVAL: 14400
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8001/metrics"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  harbor-internal:
+    internal: true
+    driver: bridge
+  harbor-external:
+    driver: bridge
+
+volumes:
+  harbor-database:
+  harbor-redis:
+  harbor-core-ca:
+  harbor-core-token:
+  harbor-psc:
+  harbor-registry-data:
+  harbor-registry-root-certs:
+  harbor-jobservice-logs:
+  harbor-trivy-cache:

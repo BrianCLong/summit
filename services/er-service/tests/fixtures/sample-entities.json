@@ -1,0 +1,153 @@
+{
+  "persons": [
+    {
+      "recordId": "person-001",
+      "attributes": {
+        "props": {
+          "name": "John Michael Smith",
+          "firstName": "John",
+          "lastName": "Smith",
+          "dateOfBirth": "1985-03-15",
+          "gender": "male",
+          "nationalities": ["US"],
+          "identifications": [
+            {
+              "type": "passport",
+              "value": "AB1234567",
+              "issuingCountry": "US"
+            }
+          ],
+          "contacts": [
+            { "type": "email", "value": "john.smith@example.com" },
+            { "type": "phone", "value": "+1-555-123-4567" }
+          ]
+        }
+      }
+    },
+    {
+      "recordId": "person-002",
+      "attributes": {
+        "props": {
+          "name": "John M Smith",
+          "firstName": "John",
+          "lastName": "Smith",
+          "dateOfBirth": "1985-03-15",
+          "gender": "male",
+          "nationalities": ["US"],
+          "identifications": [
+            {
+              "type": "passport",
+              "value": "AB1234567",
+              "issuingCountry": "US"
+            }
+          ],
+          "contacts": [
+            { "type": "email", "value": "jsmith@workplace.com" }
+          ]
+        }
+      },
+      "expectedMatch": "person-001",
+      "expectedDecision": "AUTO_MERGE",
+      "reason": "Same passport number"
+    },
+    {
+      "recordId": "person-003",
+      "attributes": {
+        "props": {
+          "name": "Jane Elizabeth Doe",
+          "firstName": "Jane",
+          "lastName": "Doe",
+          "dateOfBirth": "1990-07-22",
+          "gender": "female",
+          "nationalities": ["UK"],
+          "contacts": [
+            { "type": "email", "value": "jane.doe@example.com" }
+          ]
+        }
+      }
+    },
+    {
+      "recordId": "person-004",
+      "attributes": {
+        "props": {
+          "name": "Jon Smith",
+          "firstName": "Jon",
+          "lastName": "Smith",
+          "dateOfBirth": "1985-03-15",
+          "gender": "male",
+          "nationalities": ["US"]
+        }
+      },
+      "expectedMatch": "person-001",
+      "expectedDecision": "CANDIDATE",
+      "reason": "Similar name and same DOB but no deterministic match"
+    },
+    {
+      "recordId": "person-005",
+      "attributes": {
+        "nationalId": "123-45-6789",
+        "props": {
+          "name": "Robert Johnson",
+          "firstName": "Robert",
+          "lastName": "Johnson",
+          "dateOfBirth": "1978-11-30"
+        }
+      }
+    },
+    {
+      "recordId": "person-006",
+      "attributes": {
+        "nationalId": "123-45-6789",
+        "props": {
+          "name": "Bob Johnson",
+          "firstName": "Bob",
+          "lastName": "Johnson"
+        }
+      },
+      "expectedMatch": "person-005",
+      "expectedDecision": "AUTO_MERGE",
+      "reason": "Same SSN"
+    }
+  ],
+  "organizations": [
+    {
+      "recordId": "org-001",
+      "attributes": {
+        "props": {
+          "name": "Acme Corporation Inc.",
+          "taxId": "12-3456789",
+          "industry": "Technology",
+          "incorporationCountry": "US"
+        }
+      }
+    },
+    {
+      "recordId": "org-002",
+      "attributes": {
+        "props": {
+          "name": "Acme Corp",
+          "taxId": "12-3456789",
+          "industry": "Technology"
+        }
+      },
+      "expectedMatch": "org-001",
+      "expectedDecision": "AUTO_MERGE",
+      "reason": "Same Tax ID"
+    },
+    {
+      "recordId": "org-003",
+      "attributes": {
+        "props": {
+          "name": "Global Tech Solutions LLC",
+          "lei": "529900T8BM49AURSDO55",
+          "industry": "Consulting"
+        }
+      }
+    }
+  ],
+  "evaluationMetrics": {
+    "expectedPrecision": 0.95,
+    "expectedRecall": 0.90,
+    "expectedF1": 0.92
+  }
+}
