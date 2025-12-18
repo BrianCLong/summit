@@ -19,6 +19,7 @@ import { WarrantService } from '../src/services/WarrantService';
 import { AdvancedAuditSystem } from '../src/audit/advanced-audit-system';
 import { pool } from '../src/db/postgres';
 import { neo4jDriver } from '../src/db/neo4j';
+import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
 // Test fixtures
 const TENANT_A_ID = 'tenant-a';

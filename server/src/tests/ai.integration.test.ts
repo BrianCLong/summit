@@ -1,5 +1,6 @@
 import { AIResolvers } from '../resolvers/ai';
 import { randomUUID as uuid } from 'node:crypto';
+import { jest, describe, it, test, expect, beforeEach, afterEach } from '@jest/globals';
 
 // Mock dependencies
 jest.mock('axios');
