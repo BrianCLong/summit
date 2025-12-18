@@ -10,22 +10,32 @@
 
 import { test, expect, Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import fs from 'fs';
+import path from 'path';
+
+const AUTH_STATE_PATH = path.join(__dirname, '../auth-state.json');
+
+test.use({ storageState: AUTH_STATE_PATH });
 
 test.describe('Maestro Dashboard', () => {
   let page: Page;
 
+  test.beforeAll(() => {
+    if (!fs.existsSync(AUTH_STATE_PATH)) {
+      throw new Error(
+        'Missing auth storage state. Run the auth-setup spec to generate auth-state.json (e.g., `npx playwright test tests/e2e/tests/auth-setup.spec.ts --project=chromium-desktop`).',
+      );
+    }
+  });
+
   test.beforeEach(async ({ page: testPage }) => {
     page = testPage;
 
-    // Set up authentication if required
-    if (process.env.TEST_AUTH_TOKEN) {
-      await page.addInitScript((token) => {
-        localStorage.setItem('auth_token', token);
-      }, process.env.TEST_AUTH_TOKEN);
-    }
-
     // Navigate to Maestro dashboard
     await page.goto('/maestro/dashboard');
+
+    // Guard against auth redirects to login
+    await expect(page).not.toHaveURL(/login/, { timeout: 15000 });
   });
 
   test.describe('Authentication & Navigation', () => {
