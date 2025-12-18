@@ -1,0 +1,28 @@
+SPDXVersion: SPDX-2.3
+DataLicense: CC0-1.0
+SPDXID: SPDXRef-DOCUMENT
+DocumentName: Summit Reasoning Evaluator (SRE) v0.1 SBOM
+DocumentNamespace: http://summit.ai/spdx/sre-v0.1
+Creator: Organization: Summit AI
+Created: 2025-05-15T12:00:00Z
+
+##### Package: SRE
+PackageName: sre
+SPDXID: SPDXRef-Package-sre
+PackageVersion: 0.1.0
+PackageDownloadLocation: NOASSERTION
+PackageLicenseConcluded: MIT
+PackageLicenseDeclared: MIT
+PackageCopyrightText: Copyright (c) 2025 Summit AI
+
+##### Relationship: SRE depends on Pydantic
+Relationship: SPDXRef-Package-sre DEPENDS_ON SPDXRef-Package-pydantic
+
+##### Package: Pydantic
+PackageName: pydantic
+SPDXID: SPDXRef-Package-pydantic
+PackageVersion: 2.0+
+PackageDownloadLocation: NOASSERTION
+PackageLicenseConcluded: MIT
+
+# Note: This is a template. A full SBOM should be generated automatically during CI/CD.
