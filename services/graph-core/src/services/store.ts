@@ -1,4 +1,4 @@
-import { Entity, Relationship } from '../schema';
+import { Entity, Relationship } from '../schema.js';
 import { v4 as uuid } from 'uuid';
 
 /**

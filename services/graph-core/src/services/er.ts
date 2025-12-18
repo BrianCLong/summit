@@ -1,4 +1,4 @@
-import { Entity } from '../schema';
+import { Entity } from '../schema.js';
 
 /**
  * Represents the score and metadata for an entity resolution candidate match.
