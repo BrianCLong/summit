@@ -1,0 +1,106 @@
+groups:
+  - name: workflow-slos
+    interval: 30s
+    rules:
+      - record: workflow_latency_p95_seconds:rate5m
+        labels: { workflow: "ingest" }
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="ingest"}[5m])) by (le))
+      - record: workflow_latency_p95_seconds:rate5m
+        labels: { workflow: "query" }
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="query"}[5m])) by (le))
+      - record: workflow_latency_p95_seconds:rate5m
+        labels: { workflow: "copilot" }
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="copilot"}[5m])) by (le))
+      - record: workflow_latency_p95_seconds:rate5m
+        labels: { workflow: "vertical-intel" }
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="vertical-intel"}[5m])) by (le))
+
+      - record: workflow_error_rate:ratio5m
+        labels: { workflow: "ingest" }
+        expr: sum(rate(http_requests_total{service="ingest",status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{service="ingest"}[5m])), 0.0001)
+      - record: workflow_error_rate:ratio5m
+        labels: { workflow: "query" }
+        expr: sum(rate(http_requests_total{service="query",status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{service="query"}[5m])), 0.0001)
+      - record: workflow_error_rate:ratio5m
+        labels: { workflow: "copilot" }
+        expr: sum(rate(http_requests_total{service="copilot",status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{service="copilot"}[5m])), 0.0001)
+      - record: workflow_error_rate:ratio5m
+        labels: { workflow: "vertical-intel" }
+        expr: sum(rate(http_requests_total{service="vertical-intel",status=~"5.."}[5m])) / clamp_min(sum(rate(http_requests_total{service="vertical-intel"}[5m])), 0.0001)
+
+      - record: workflow_error_rate:ratio30m
+        labels: { workflow: "ingest" }
+        expr: sum(rate(http_requests_total{service="ingest",status=~"5.."}[30m])) / clamp_min(sum(rate(http_requests_total{service="ingest"}[30m])), 0.0001)
+      - record: workflow_error_rate:ratio30m
+        labels: { workflow: "query" }
+        expr: sum(rate(http_requests_total{service="query",status=~"5.."}[30m])) / clamp_min(sum(rate(http_requests_total{service="query"}[30m])), 0.0001)
+      - record: workflow_error_rate:ratio30m
+        labels: { workflow: "copilot" }
+        expr: sum(rate(http_requests_total{service="copilot",status=~"5.."}[30m])) / clamp_min(sum(rate(http_requests_total{service="copilot"}[30m])), 0.0001)
+      - record: workflow_error_rate:ratio30m
+        labels: { workflow: "vertical-intel" }
+        expr: sum(rate(http_requests_total{service="vertical-intel",status=~"5.."}[30m])) / clamp_min(sum(rate(http_requests_total{service="vertical-intel"}[30m])), 0.0001)
+
+      - alert: WorkflowLatencySLOBreach
+        expr: workflow_latency_p95_seconds:rate5m{workflow="ingest"} > 1.2
+        for: 10m
+        labels: { severity: page, slo: latency, workflow: "ingest" }
+        annotations:
+          summary: "Ingest latency SLO breaching"
+          description: "p95 ingest latency above 1.2s for 10m; inspect queue depth, retries, and backpressure." 
+
+      - alert: WorkflowLatencySLOBreach
+        expr: workflow_latency_p95_seconds:rate5m{workflow="query"} > 1.0
+        for: 10m
+        labels: { severity: page, slo: latency, workflow: "query" }
+        annotations:
+          summary: "Query latency SLO breaching"
+          description: "p95 query latency above 1.0s for 10m; check cache hit rates and downstream graph traversal." 
+
+      - alert: WorkflowLatencySLOBreach
+        expr: workflow_latency_p95_seconds:rate5m{workflow="copilot"} > 0.8
+        for: 10m
+        labels: { severity: page, slo: latency, workflow: "copilot" }
+        annotations:
+          summary: "Copilot latency SLO breaching"
+          description: "p95 copilot response latency above 800ms for 10m; verify embeddings, model inference, and retrieval hops." 
+
+      - alert: WorkflowLatencySLOBreach
+        expr: workflow_latency_p95_seconds:rate5m{workflow="vertical-intel"} > 1.5
+        for: 10m
+        labels: { severity: page, slo: latency, workflow: "vertical-intel" }
+        annotations:
+          summary: "Vertical intelligence latency SLO breaching"
+          description: "p95 vertical intelligence workflow latency above 1.5s for 10m; validate enrichment adapters and feature stores." 
+
+      - alert: WorkflowErrorBudgetBurn
+        expr: (workflow_error_rate:ratio5m{workflow="ingest"} > 0.02) and (workflow_error_rate:ratio30m{workflow="ingest"} > 0.01)
+        for: 5m
+        labels: { severity: page, slo: availability, workflow: "ingest" }
+        annotations:
+          summary: "Ingest error budget burning fast"
+          description: "Ingest errors exceed 2% over 5m and 1% over 30m; error budget is burning faster than target." 
+
+      - alert: WorkflowErrorBudgetBurn
+        expr: (workflow_error_rate:ratio5m{workflow="query"} > 0.015) and (workflow_error_rate:ratio30m{workflow="query"} > 0.008)
+        for: 5m
+        labels: { severity: page, slo: availability, workflow: "query" }
+        annotations:
+          summary: "Query error budget burning fast"
+          description: "Query errors exceed 1.5% over 5m and 0.8% over 30m; error budget is burning faster than target." 
+
+      - alert: WorkflowErrorBudgetBurn
+        expr: (workflow_error_rate:ratio5m{workflow="copilot"} > 0.01) and (workflow_error_rate:ratio30m{workflow="copilot"} > 0.005)
+        for: 5m
+        labels: { severity: page, slo: availability, workflow: "copilot" }
+        annotations:
+          summary: "Copilot error budget burning fast"
+          description: "Copilot errors exceed 1% over 5m and 0.5% over 30m; error budget is burning faster than target." 
+
+      - alert: WorkflowErrorBudgetBurn
+        expr: (workflow_error_rate:ratio5m{workflow="vertical-intel"} > 0.015) and (workflow_error_rate:ratio30m{workflow="vertical-intel"} > 0.008)
+        for: 5m
+        labels: { severity: page, slo: availability, workflow: "vertical-intel" }
+        annotations:
+          summary: "Vertical intelligence error budget burning fast"
+          description: "Vertical intelligence errors exceed 1.5% over 5m and 0.8% over 30m; error budget is burning faster than target." 

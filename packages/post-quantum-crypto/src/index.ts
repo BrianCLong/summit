@@ -14,6 +14,7 @@ export * from './algorithms/sphincsplus';
 
 // Hybrid schemes
 export * from './key-exchange/hybrid-kem';
+export * from './signatures/hybrid-signature';
 
 // Utilities
 export * from './utils/benchmark';
