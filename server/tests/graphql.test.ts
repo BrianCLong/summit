@@ -1,5 +1,6 @@
 import request from 'supertest';
 import { createApp } from '../src/app';
+import { describe, it, test, expect, beforeAll, afterAll } from '@jest/globals';
 
 describe('GraphQL Integration Tests', () => {
   let app;

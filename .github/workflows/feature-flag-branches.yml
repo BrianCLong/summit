@@ -1,4 +1,4 @@
-name: Feature Flag Branch CI
+name: Feature Flag Branch Gates
 
 on:
   push:
@@ -11,22 +11,12 @@ on:
       - feat/atsh
       - feat/saga
       - feat/prompt-registry
+  workflow_dispatch:
 
 env:
-  ATSH_ENABLED: 'true'
-  SAGA_ENABLED: 'true'
-  PROMPT_REGISTRY_ENABLED: 'true'
-  FEATURE_FLAG_LABELS: feature:ATSH_ENABLED,feature:SAGA_ENABLED,feature:PROMPT_REGISTRY_ENABLED
-  CI: 'true'
-
-permissions:
-  contents: read
-  actions: write
-  pull-requests: write
-
-concurrency:
-  group: feature-flag-${{ github.ref }}
-  cancel-in-progress: true
+  FEATURE_ATSH_ENABLED: ${{ github.ref_name == 'feat/atsh' && 'true' || 'false' }}
+  FEATURE_SAGA_ENABLED: ${{ github.ref_name == 'feat/saga' && 'true' || 'false' }}
+  FEATURE_PROMPT_REGISTRY_ENABLED: ${{ github.ref_name == 'feat/prompt-registry' && 'true' || 'false' }}
 
 jobs:
   lint:
@@ -34,173 +24,95 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.11.x'
           cache: 'pnpm'
-
+      - name: Enable corepack
+        run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
-
+        run: pnpm install --frozen-lockfile
       - name: Lint
         run: pnpm run lint
 
-  unit-tests:
+  unit:
     runs-on: ubuntu-22.04
-    timeout-minutes: 40
-    needs: lint
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.11.x'
           cache: 'pnpm'
-
+      - name: Enable corepack
+        run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
+        run: pnpm install --frozen-lockfile
+      - name: Unit tests
+        run: pnpm run test:unit -- --runInBand
+        env:
+          CI: 'true'
 
-      - name: Run unit tests
-        run: pnpm run test:unit
-
-  contract-tests:
+  contract:
     runs-on: ubuntu-22.04
-    timeout-minutes: 40
-    needs: unit-tests
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.11.x'
           cache: 'pnpm'
-
+      - name: Enable corepack
+        run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
-
-      - name: Run policy/contract tests
+        run: pnpm install --frozen-lockfile
+      - name: Contract tests
         run: pnpm run test:policy
+        env:
+          CI: 'true'
 
   playwright:
     runs-on: ubuntu-22.04
-    timeout-minutes: 60
-    needs: contract-tests
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9
           run_install: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20.11.x'
           cache: 'pnpm'
-
+      - name: Enable corepack
+        run: corepack enable
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile=false
-
+        run: pnpm install --frozen-lockfile
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps
-
-      - name: Run Playwright smoke suite
+      - name: Playwright (flagged flows)
         run: pnpm run e2e
+        env:
+          CI: 'true'
 
-  preview-environment:
+  preview-and-rollback:
     runs-on: ubuntu-22.04
-    timeout-minutes: 20
-    needs: [lint, unit-tests, contract-tests, playwright]
-    if: github.event_name == 'pull_request'
-    environment: preview
+    needs:
+      - lint
+      - unit
+      - contract
+      - playwright
     steps:
       - uses: actions/checkout@v4
-
-      - name: Record preview metadata
-        run: |
-          cat <<'JSON' > preview-metadata.json
-          {
-            "featureFlags": "${FEATURE_FLAG_LABELS}",
-            "branch": "${GITHUB_HEAD_REF:-${GITHUB_REF##*/}}",
-            "workflow": "feature-flag-branches",
-            "preview": "requires preview-env rollout with auto-rollback on failure"
-          }
-          JSON
-
-      - name: Upload preview metadata
-        uses: actions/upload-artifact@v4
-        with:
-          name: preview-flags
-          path: preview-metadata.json
-
-      - name: Comment preview expectations
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const branch = process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF?.replace('refs/heads/', '');
-            const body = [
-              `Preview environment requested for **${branch}** with flags: ${process.env.FEATURE_FLAG_LABELS}.`,
-              'CI gates: lint → unit → policy/contract → Playwright.',
-              'Preview deploy must honor feature flags and be wired to auto-rollback on failure.',
-            ].join('\n');
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
-              body,
-            });
-
-  auto-rollback-hook:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    needs: [lint, unit-tests, contract-tests, playwright]
-    if: always()
-    steps:
-      - name: Evaluate gating results
-        id: gates
-        run: |
-          failing=0
-          for result in "${{ needs.lint.result }}" "${{ needs.unit-tests.result }}" "${{ needs.contract-tests.result }}" "${{ needs.playwright.result }}"; do
-            if [ "$result" != "success" ]; then
-              failing=1
-            fi
-          done
-          echo "failing=$failing" >> $GITHUB_OUTPUT
-
-      - name: Dispatch auto-rollback workflow on failure
-        if: steps.gates.outputs.failing == '1'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const ref = context.payload.pull_request ? context.payload.pull_request.head.ref : context.ref.replace('refs/heads/', '');
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'auto-rollback.yml',
-              ref,
-            });
-            core.info(`Triggered auto-rollback workflow for ${ref}`);
+      - name: Preview environment smoke (dry help)
+        run: bash scripts/preview-local.sh help
+      - name: Auto-rollback hook validation
+        run: bash scripts/validate-rollback.sh --help

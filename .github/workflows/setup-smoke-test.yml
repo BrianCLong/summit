@@ -1,0 +1,60 @@
+# .github/workflows/setup-smoke-test.yml
+
+name: 'Setup Smoke Test'
+
+on:
+  pull_request:
+    paths:
+      - 'docs/ONBOARDING.md'
+      - 'scripts/validate-env.sh'
+      - 'scripts/start.sh'
+      - 'data/quickstart/**'
+      - 'docker-compose.dev.yml'
+      - 'Makefile'
+      - '.github/workflows/setup-smoke-test.yml'
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: setup-smoke-test-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  validate-setup-experience:
+    name: 'Validate Developer Setup'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v4
+
+      - name: 'Set up Node.js and pnpm'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      - name: 'Enable corepack'
+        run: corepack enable
+      - name: 'Setup pnpm'
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: 'Run Environment Validator'
+        run: |
+          chmod +x scripts/validate-env.sh
+          ./scripts/validate-env.sh
+
+      - name: 'Run Full Setup and Smoke Test'
+        run: ./start.sh
+        env:
+          # Prevent interactive prompts in CI
+          CI: 'true'
+
+      - name: 'Tear Down Environment on Failure'
+        if: failure()
+        run: |
+          echo "Setup failed. Tearing down environment..."
+          docker-compose -f docker-compose.dev.yml logs --tail=200
+          docker-compose -f docker-compose.dev.yml down -v

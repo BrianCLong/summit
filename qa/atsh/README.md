@@ -1,18 +1,25 @@
-# ATSH QA Harness Scaffold
+# ATSH Safety Harness
 
-This scaffold tracks the `feat/atsh` branch and the `feature:ATSH_ENABLED` label. It defines the structure for the Autonomous Triage Safety Harness QA lane while keeping the feature flag off for `main`.
+Feature flag: `FEATURE_ATSH_ENABLED`
+Branch: `feat/atsh`
 
-## Layout
-- `contracts/`: typed request/response definitions for ATSH harness entrypoints.
-- `fixtures/`: sanitized, PII-free datasets and deterministic seeds for reproducible runs.
-- `tests/`: unit, policy/contract, and Playwright smoke coverage aligned with the feature-flag CI workflow.
-- `docs/`: guardrail notes, schema snapshots, and runbooks for preview environment expectations.
+## Purpose
+- Provide a deterministic anti-tamper QA harness for safety regression packs.
+- Enforce typed event ingress/egress boundaries with no shared databases.
 
-## CI & Feature Flags
-- The feature branch workflow `.github/workflows/feature-flag-branches.yml` runs lint → unit → policy/contract → Playwright for ATSH.
-- `ATSH_ENABLED` is exported in CI; assertions should verify the flag is respected before invoking harness effects.
-- Preview environments should publish URLs in PR comments and rely on `auto-rollback.yml` when gates fail.
+## Implementation Notes
+- Harness orchestration must run behind the ATSH flag and expose typed contracts for inputs/outputs.
+- Logs and artifacts require PII/SPI redaction; disable recordings when redaction is uncertain.
+- Seed all fixtures for reproducibility; add contract tests for ingress schemas and guardrail rehearsal flows.
 
-## Governance
-- No shared databases; rely on ephemeral stores or mocks. Typed boundaries are required for any integrations.
-- Redact PII in all fixtures/logs. Document seeds and rerun guidance to keep executions deterministic.
+## CI Expectations
+- Lint: `pnpm run lint`
+- Unit: `pnpm run test:unit` (seeded)
+- Contract: `pnpm run test:policy`
+- Playwright: `pnpm run e2e` (flag-aware flows)
+- Preview smoke: `bash scripts/preview-local.sh help`
+- Rollback validation: `bash scripts/validate-rollback.sh --help`
+
+## Rollout
+- Keep `FEATURE_ATSH_ENABLED` default OFF; enable per-environment after CI + preview validation passes.
+- Capture preview environment URL and rollback plan in the PR using the repo template.

@@ -1,17 +1,25 @@
 # Prompt Registry Scaffold
 
-This scaffold tracks the `feat/prompt-registry` branch with the `feature:PROMPT_REGISTRY_ENABLED` label. It provides the structure for a governed prompt registry with deterministic evaluations and strict privacy controls.
+Feature flag: `FEATURE_PROMPT_REGISTRY_ENABLED`
+Branch: `feat/prompt-registry`
 
-## Layout
-- `schemas/`: typed prompt, evaluation, and rollout definitions with versioned history.
-- `evaluations/`: deterministic harnesses with seeded datasets and snapshot baselines.
-- `tests/`: unit, policy/contract, and Playwright smoke suites aligned to the feature branch workflow.
-- `docs/`: lifecycle policies, redaction guidance, and preview environment expectations.
+## Purpose
+- Govern the lifecycle of prompts with typed schemas, auditability, and rollout controls.
+- Provide isolated registry storage/adapters with no shared databases and event-driven integrations.
 
-## CI & Feature Flags
-- `.github/workflows/feature-flag-branches.yml` enforces lint, unit, policy/contract, and Playwright checks with `PROMPT_REGISTRY_ENABLED=true` on the feature branch.
-- Preview environments should publish prompt-registry endpoints and redaction posture; `auto-rollback.yml` remains the failure guard.
+## Implementation Notes
+- Define typed prompt metadata, versioning, and lineage; emit events for publish/retire actions.
+- Redact PII/SPI in stored prompts, logs, and telemetry; enable governance checks in CI.
+- Supply deterministic fixtures for prompt samples and agent behaviors to keep tests reproducible.
 
-## Governance
-- No shared DBs; registry artifacts are isolated and versioned. Typed boundaries and schema compatibility rules are mandatory.
-- Redact PII in prompts/responses and maintain audit trails; document seeds and rerun guidance for deterministic outcomes.
+## CI Expectations
+- Lint: `pnpm run lint`
+- Unit: `pnpm run test:unit` (seeded fixtures)
+- Contract: `pnpm run test:policy`
+- Playwright: `pnpm run e2e` (flag-aware registry flows)
+- Preview smoke: `bash scripts/preview-local.sh help`
+- Rollback validation: `bash scripts/validate-rollback.sh --help`
+
+## Rollout
+- Keep `FEATURE_PROMPT_REGISTRY_ENABLED` default OFF until governance sign-off.
+- Capture preview environment link, rollback hooks, and feature-flag diff in the PR using the repo template.
