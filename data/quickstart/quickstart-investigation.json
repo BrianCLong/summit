@@ -1,0 +1,84 @@
+{
+  "investigation": {
+    "name": "Quickstart Investigation: Project Cybershield",
+    "description": "A pre-seeded dataset to demonstrate the core features of the Summit Platform, focusing on a fictional cybersecurity threat group.",
+    "type": "CYBER_SECURITY"
+  },
+  "entities": [
+    {
+      "type": "PERSON",
+      "name": "Alex 'Viper' Chen",
+      "properties": {"role": "Lead Developer", "status": "Active", "skills": ["Malware Development", "Reverse Engineering"]}
+    },
+    {
+      "type": "THREAT_ACTOR",
+      "name": "Nocturne Group",
+      "properties": {"origin": "Unknown", "primary_motivation": "Financial Gain", "sophistication": "High"}
+    },
+    {
+      "type": "MALWARE",
+      "name": "ShadowNet Botnet",
+      "properties": {"family": "Zeus", "capabilities": ["DDoS", "Data Exfiltration", "Spam"], "version": "2.1"}
+    },
+    {
+      "type": "ORGANIZATION",
+      "name": "CyberSolutions Inc.",
+      "properties": {"sector": "Technology", "status": "Compromised"}
+    },
+    {
+      "type": "LOCATION",
+      "name": "Berlin",
+      "properties": {"country": "Germany", "lat": 52.5200, "lng": 13.4050}
+    },
+    {
+      "type": "VULNERABILITY",
+      "name": "CVE-2023-4567",
+      "properties": {"cvss_score": 9.8, "product": "FirewallX", "status": "Unpatched"}
+    }
+  ],
+  "relationships": [
+    {
+      "type": "IS_MEMBER_OF",
+      "from": 0,
+      "to": 1,
+      "properties": {"start_date": "2022-01-15", "is_active": true}
+    },
+    {
+      "type": "DEVELOPED",
+      "from": 0,
+      "to": 2,
+      "properties": {"contribution": "Core C2 Module"}
+    },
+    {
+      "type": "OPERATES",
+      "from": 1,
+      "to": 2,
+      "properties": {"infrastructure": "Distributed, uses TOR"}
+    },
+    {
+      "type": "TARGETED",
+      "from": 1,
+      "to": 3,
+      "properties": {"date_of_attack": "2023-11-01", "outcome": "Successful Breach"}
+    },
+    {
+      "type": "BASED_IN",
+      "from": 1,
+      "to": 4,
+      "properties": {"certainty": "Moderate", "source": "Signal Intelligence"}
+    },
+    {
+      "type": "EXPLOITED",
+      "from": 2,
+      "to": 5,
+      "properties": {"payload_delivered": "True"}
+    },
+    {
+      "type": "AFFECTS",
+      "from": 5,
+      "to": 3,
+      "properties": {"impact": "Data exfiltration and lateral movement"}
+    }
+  ],
+  "copilotGoal": "Analyze the command and control infrastructure of the ShadowNet Botnet and identify potential attribution points for the Nocturne Group."
+}
