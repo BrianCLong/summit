@@ -11,7 +11,13 @@ Please follow the **[Onboarding & Quickstart Guide](planning/enablement-pack/onb
 
 See **[Daily Developer Workflows](planning/enablement-pack/daily-dev-workflows.md)**.
 
+<<<<<<< HEAD
+> **Note:** Check out the [Examples Directory](examples/) for plugins and custom pipelines.
+
+## Branch & Pull Request Workflow
+=======
 ## Mergefix / Express 5 Changes (Fast Path)
+>>>>>>> main
 
 This section defines **coding rules, commit conventions, and the minimal gate** for any PR that touches the Express 5 migration or related merge conflict work. Use it for PRs labeled `mergefix`.
 
