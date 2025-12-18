@@ -445,12 +445,12 @@ app.post(
 
       // Apply additional configuration if provided
       if (config) {
-        if (config.description) builder.setDescription(config.description);
+        if (config.description) {builder.setDescription(config.description);}
         if (config.errorHandling)
-          builder.setErrorHandling(config.errorHandling);
-        if (config.logging) builder.setLogging(config.logging);
-        if (config.concurrency) builder.setConcurrency(config.concurrency);
-        if (config.timeout) builder.setTimeout(config.timeout);
+          {builder.setErrorHandling(config.errorHandling);}
+        if (config.logging) {builder.setLogging(config.logging);}
+        if (config.concurrency) {builder.setConcurrency(config.concurrency);}
+        if (config.timeout) {builder.setTimeout(config.timeout);}
         if (config.variables) {
           Object.entries(config.variables).forEach(([key, value]) => {
             builder.setGlobalVariable(key, value);
@@ -567,8 +567,8 @@ async function getWorkflows(options: any) {
   `;
 
   const params = [];
-  if (options.search) params.push(`%${options.search}%`);
-  if (options.isActive !== undefined) params.push(options.isActive);
+  if (options.search) {params.push(`%${options.search}%`);}
+  if (options.isActive !== undefined) {params.push(options.isActive);}
   params.push(options.limit, options.offset);
 
   const result = await pgPool.query(query, params);
@@ -587,8 +587,8 @@ async function getExecutions(options: any) {
   `;
 
   const params = [];
-  if (options.workflowId) params.push(options.workflowId);
-  if (options.status) params.push(options.status);
+  if (options.workflowId) {params.push(options.workflowId);}
+  if (options.status) {params.push(options.status);}
   params.push(options.limit, options.offset);
 
   const result = await pgPool.query(query, params);
@@ -607,8 +607,8 @@ async function getHumanTasks(options: any) {
   `;
 
   const params = [];
-  if (options.status) params.push(options.status);
-  if (options.assignee) params.push(`["${options.assignee}"]`);
+  if (options.status) {params.push(options.status);}
+  if (options.assignee) {params.push(`["${options.assignee}"]`);}
   params.push(options.limit, options.offset);
 
   const result = await pgPool.query(query, params);
