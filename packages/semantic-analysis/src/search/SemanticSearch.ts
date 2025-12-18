@@ -56,7 +56,7 @@ export class SemanticSearch {
         params.namespace = query.filters.namespace;
       }
 
-      const whereClause = filters.length > 0 ? 'WHERE ' + filters.join(' AND ') : '';
+      const whereClause = filters.length > 0 ? `WHERE ${  filters.join(' AND ')}` : '';
 
       // Simple text search (in production, use full-text indexes or vector search)
       const result = await session.run(
