@@ -1,0 +1,22 @@
+{
+  "name": "@summit/object-storage",
+  "version": "1.0.0",
+  "description": "Multi-cloud object storage management for data lakehouse",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@summit/cloud-platform": "workspace:*",
+    "zod": "^4.1.12",
+    "pino": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  }
+}

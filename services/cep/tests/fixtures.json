@@ -1,0 +1,10 @@
+{
+  "sequence": [
+    { "name": "login", "timestamp": 1000 },
+    { "name": "purchase", "timestamp": 25000 }
+  ],
+  "join": [
+    { "name": "inventory", "timestamp": 5000, "labels": { "sku": "abc" } },
+    { "name": "order", "timestamp": 8000, "labels": { "sku": "abc" } }
+  ]
+}

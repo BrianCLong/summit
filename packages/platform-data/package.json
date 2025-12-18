@@ -1,0 +1,60 @@
+{
+  "name": "@summit/platform-data",
+  "version": "1.0.0",
+  "description": "Data lineage, mock data factory, and privacy utilities (P36-40)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./lineage": {
+      "import": "./dist/lineage/index.js",
+      "types": "./dist/lineage/index.d.ts"
+    },
+    "./mock": {
+      "import": "./dist/mock/index.js",
+      "types": "./dist/mock/index.d.ts"
+    },
+    "./privacy": {
+      "import": "./dist/privacy/index.js",
+      "types": "./dist/privacy/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@faker-js/faker": "^8.3.1",
+    "zod": "^3.22.4",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/uuid": "^9.0.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0",
+    "eslint": "^8.56.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "data-lineage",
+    "mock-data",
+    "privacy",
+    "pii",
+    "summit"
+  ],
+  "license": "MIT"
+}
