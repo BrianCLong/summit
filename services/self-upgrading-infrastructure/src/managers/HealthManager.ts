@@ -37,7 +37,7 @@ export class HealthManager extends EventEmitter {
   }
 
   start(): void {
-    if (this.checkInterval) return;
+    if (this.checkInterval) {return;}
 
     logger.info('Starting health monitoring');
     this.checkInterval = setInterval(
@@ -71,7 +71,7 @@ export class HealthManager extends EventEmitter {
 
   private async checkComponent(name: string): Promise<void> {
     const health = this.componentHealth.get(name);
-    if (!health) return;
+    if (!health) {return;}
 
     const start = Date.now();
     try {
