@@ -27,6 +27,25 @@ spec:
             - --web.enable-lifecycle
           ports:
             - containerPort: 9090
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9090
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 250m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 2Gi
           volumeMounts:
             - name: config
               mountPath: /etc/prometheus
@@ -82,20 +101,30 @@ spec:
                   key: admin-password
           ports:
             - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
           volumeMounts:
             - name: dashboards
-              mountPath: /var/lib/grafana/dashboards/monitoring-platform.json
-              subPath: monitoring-platform.json
+              mountPath: /var/lib/grafana/dashboards
             - name: provisioning
-              mountPath: /etc/grafana/provisioning/dashboards/dashboards.yaml
-              subPath: dashboards.yaml
+              mountPath: /etc/grafana/provisioning/dashboards
       volumes:
         - name: dashboards
           configMap:
             name: grafana-dashboards
         - name: provisioning
           configMap:
-            name: grafana-dashboards
+            name: grafana-provisioning
 ---
 apiVersion: v1
 kind: Service
@@ -135,6 +164,18 @@ spec:
             - --config.file=/etc/alertmanager/alertmanager.yml
           ports:
             - containerPort: 9093
+          livenessProbe:
+            httpGet:
+              path: /-/healthy
+              port: 9093
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /-/ready
+              port: 9093
+            initialDelaySeconds: 5
+            periodSeconds: 10
           volumeMounts:
             - name: config
               mountPath: /etc/alertmanager
@@ -180,6 +221,19 @@ spec:
           ports:
             - containerPort: 16686
             - containerPort: 14268
+            - containerPort: 4317
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 16686
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 16686
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -198,6 +252,9 @@ spec:
     - name: collector
       port: 14268
       targetPort: 14268
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -231,6 +288,18 @@ spec:
             limits:
               cpu: 1
               memory: 2Gi
+          livenessProbe:
+            httpGet:
+              path: /_cluster/health?wait_for_status=yellow&timeout=50s
+              port: 9200
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health?wait_for_status=yellow&timeout=50s
+              port: 9200
+            initialDelaySeconds: 20
+            periodSeconds: 20
 ---
 apiVersion: v1
 kind: Service
@@ -271,6 +340,18 @@ spec:
               value: http://elasticsearch-apm:9200
           ports:
             - containerPort: 5601
+          livenessProbe:
+            httpGet:
+              path: /api/status
+              port: 5601
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/status
+              port: 5601
+            initialDelaySeconds: 10
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -310,6 +391,18 @@ spec:
             - -config.expand-env=true
           ports:
             - containerPort: 3100
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 3100
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3100
+            initialDelaySeconds: 10
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -377,3 +470,195 @@ data:
     output.elasticsearch:
       hosts: ["elasticsearch-apm:9200"]
     setup.ilm.enabled: false
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  labels:
+    app: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: otel-collector
+  template:
+    metadata:
+      labels:
+        app: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.115.0
+          args:
+            - "--config=/etc/otelcol/otel-collector-config.yaml"
+          ports:
+            - containerPort: 4317
+            - containerPort: 4318
+            - containerPort: 9464
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 13133
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 13133
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /etc/otelcol
+      volumes:
+        - name: config
+          configMap:
+            name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  labels:
+    app: otel-collector
+spec:
+  type: ClusterIP
+  selector:
+    app: otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+    - name: prom-metrics
+      port: 9464
+      targetPort: 9464
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pyroscope
+  labels:
+    app: pyroscope
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pyroscope
+  template:
+    metadata:
+      labels:
+        app: pyroscope
+    spec:
+      containers:
+        - name: pyroscope
+          image: grafana/pyroscope:1.9.0
+          env:
+            - name: PYROSCOPE_LOG_LEVEL
+              value: info
+          ports:
+            - containerPort: 4040
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 4040
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 4040
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pyroscope
+  labels:
+    app: pyroscope
+spec:
+  type: ClusterIP
+  selector:
+    app: pyroscope
+  ports:
+    - name: http
+      port: 4040
+      targetPort: 4040
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blackbox-exporter
+  labels:
+    app: blackbox-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blackbox-exporter
+  template:
+    metadata:
+      labels:
+        app: blackbox-exporter
+    spec:
+      containers:
+        - name: blackbox-exporter
+          image: prom/blackbox-exporter:v0.25.0
+          args:
+            - --config.file=/etc/blackbox-exporter/config.yml
+          ports:
+            - containerPort: 9115
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9115
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9115
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          volumeMounts:
+            - name: config
+              mountPath: /etc/blackbox-exporter
+      volumes:
+        - name: config
+          configMap:
+            name: blackbox-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blackbox-exporter
+  labels:
+    app: blackbox-exporter
+spec:
+  type: ClusterIP
+  selector:
+    app: blackbox-exporter
+  ports:
+    - name: http
+      port: 9115
+      targetPort: 9115
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: blackbox-config
+  labels:
+    app: blackbox-exporter
+data:
+  config.yml: |
+    modules:
+      http_2xx:
+        prober: http
+        timeout: 5s
+        http:
+          method: GET
+          preferred_ip_protocol: ip4
