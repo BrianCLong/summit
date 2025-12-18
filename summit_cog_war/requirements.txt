@@ -1,0 +1,19 @@
+# Core Application
+streamlit
+
+# Testing
+pytest
+playwright
+
+# AI/ML
+tensorflow
+torch
+transformers
+# For NeuroGraph/LLM hybrids
+dgl
+networkx
+spacy
+# For EvoForge
+numpy
+pandas
+scikit-learn

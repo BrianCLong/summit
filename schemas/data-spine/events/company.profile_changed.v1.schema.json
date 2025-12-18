@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://companyos.example.com/schemas/data-spine/company.profile_changed.v1.schema.json",
+  "title": "Company Profile Changed Event v1",
+  "description": "CDC-style event for CompanyOS company profile mutations with redacted sensitive fields.",
+  "allOf": [
+    { "$ref": "./base-envelope.schema.json" },
+    {
+      "type": "object",
+      "properties": {
+        "event_type": { "const": "company.profile_changed.v1" },
+        "event_version": { "const": "v1" },
+        "data": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "entity_id": { "type": "string" },
+            "change_type": { "type": "string", "enum": ["insert", "update", "delete"] },
+            "previous_state": {
+              "description": "Previous state with sensitive fields redacted or hashed.",
+              "type": ["object", "null"]
+            },
+            "new_state": {
+              "description": "New state with sensitive fields redacted or hashed.",
+              "type": ["object", "null"]
+            },
+            "changed_by": { "type": ["string", "null"] },
+            "cdc_lsn": {
+              "description": "Log sequence number or offset for CDC replay.",
+              "type": ["string", "null"]
+            },
+            "source_table": {
+              "description": "Fully qualified table name where change originated.",
+              "type": "string"
+            },
+            "classification": {
+              "description": "Field-level sensitivity map used for DLP enforcement.",
+              "type": "object",
+              "additionalProperties": {
+                "type": "string",
+                "enum": ["PUBLIC", "INTERNAL", "CONFIDENTIAL", "SENSITIVE_PII"]
+              }
+            }
+          },
+          "required": [
+            "entity_id",
+            "change_type",
+            "source_table",
+            "new_state"
+          ]
+        }
+      }
+    }
+  ]
+}
