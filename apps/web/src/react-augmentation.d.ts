@@ -25,11 +25,11 @@ declare module 'react' {
   }
 
   // Ensure component types are compatible
-  interface FunctionComponent<P = {}> {
+  interface FunctionComponent<P = object> {
     (props: P, deprecatedLegacyContext?: any): ReactNode;
   }
 
-  interface ComponentClass<P = {}, S = any> {
+  interface ComponentClass<P = object, S = any> {
     new (props: P, deprecatedLegacyContext?: any): Component<P, S>;
   }
 }
@@ -137,7 +137,7 @@ declare module 'lucide-react' {
 
 // Augment recharts types
 declare module 'recharts' {
-  import type { ComponentType, CSSProperties } from 'react';
+  import type { ComponentType } from 'react';
 
   export interface ResponsiveContainerProps {
     aspect?: number;
@@ -487,20 +487,6 @@ declare namespace React {
     | Promise<ReactNode>;
 }
 
-// Lodash types
-declare module 'lodash/debounce' {
-  function debounce<T extends (...args: any[]) => any>(
-    func: T,
-    wait?: number,
-    options?: {
-      leading?: boolean;
-      maxWait?: number;
-      trailing?: boolean;
-    }
-  ): T & { cancel(): void; flush(): void };
-  export = debounce;
-}
-
 // MSW types (Mock Service Worker)
 declare module 'msw' {
   export const http: any;
@@ -523,8 +509,8 @@ declare module 'react-redux' {
 
 // JQuery types for legacy code
 declare namespace JQuery {
-  interface AjaxSettings {}
-  interface Promise<T> {}
+  interface AjaxSettings { [key: string]: any }
+  interface Promise<T> { [key: string]: any }
 }
 
 declare type JQuery<TElement = HTMLElement> = any;
