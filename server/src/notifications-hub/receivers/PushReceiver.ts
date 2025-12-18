@@ -1,79 +1,67 @@
-import { BaseReceiver, DeliveryResult, ReceiverConfig } from './ReceiverInterface.js';
+
+import { BaseReceiver, DeliveryResult } from './ReceiverInterface.js';
 import { CanonicalEvent } from '../events/EventSchema.js';
-import { RenderedTemplate } from '../templates/TemplateRenderer.js';
 
-export interface PushReceiverConfig extends ReceiverConfig {
-  provider: 'fcm' | 'apns' | 'mock';
-  credentials?: Record<string, unknown>;
-  defaultTtlSeconds?: number;
-}
-
+/**
+ * Mobile Push Receiver implementation for sending push notifications (FCM/APNS).
+ * Uses a provider (e.g. Firebase Admin SDK) via config.
+ * For this MVP, we will simulate the sending logic.
+ */
 export class PushReceiver extends BaseReceiver {
-  private pushConfig: PushReceiverConfig;
-
   constructor() {
-    super('push', 'Push Notifications');
+    super('push', 'Mobile Push Receiver');
   }
 
   protected async onInitialize(): Promise<void> {
-    this.pushConfig = this.config as PushReceiverConfig;
+    // Initialize Push provider (e.g. Firebase)
+    // const { serviceAccount } = this.config.metadata;
+    console.log('Push Receiver initialized');
   }
 
   protected async deliverToRecipient(
     event: CanonicalEvent,
-    recipient: string,
-    options?: Record<string, unknown>,
+    recipient: string, // Device Token or User ID mapped to token
+    options?: Record<string, unknown>
   ): Promise<DeliveryResult> {
-    const template = options?.template as RenderedTemplate | undefined;
-    const payload = this.buildPayload(event, template);
 
-    const messageId = await this.retryWithBackoff(async () => {
-      return this.sendPush(recipient, payload);
-    }, 'push:send');
+    // Simulate Push Notification
+    // In a real implementation: await admin.messaging().send(...)
 
-    return {
-      success: true,
-      recipientId: recipient,
-      channel: this.id,
-      messageId,
-      deliveredAt: new Date(),
-      metadata: { provider: this.pushConfig.provider },
-    };
+    // Simulate latency
+    await this.sleep(50);
+
+    const success = true;
+
+    if (success) {
+      console.log(`[Push] Sent to ${recipient}: ${event.title}`);
+      return {
+        success: true,
+        recipientId: recipient,
+        channel: this.id,
+        messageId: `push_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+        deliveredAt: new Date(),
+      };
+    } else {
+        return {
+            success: false,
+            recipientId: recipient,
+            channel: this.id,
+            error: new Error('Failed to send push notification'),
+        }
+    }
   }
 
   async validateRecipient(recipient: string): Promise<boolean> {
-    return typeof recipient === 'string' && recipient.length > 10;
+    // Basic validation of device token format or user existence
+    return recipient.length > 5;
   }
 
   protected async performHealthCheck(): Promise<boolean> {
+    // Check connection to Push provider
     return true;
   }
 
   protected async onShutdown(): Promise<void> {
-    return;
-  }
-
-  private async sendPush(
-    recipient: string,
-    payload: Record<string, unknown>,
-  ): Promise<string> {
-    await this.sleep(5);
-    return `${this.pushConfig.provider || 'mock'}_${Date.now()}_${recipient}`;
-  }
-
-  private buildPayload(
-    event: CanonicalEvent,
-    template?: RenderedTemplate,
-  ): Record<string, unknown> {
-    return {
-      title: template?.subject || event.title,
-      body: template?.shortMessage || event.message,
-      severity: event.severity,
-      type: event.type,
-      eventId: event.id,
-      timestamp: event.timestamp,
-      ttlSeconds: this.pushConfig.defaultTtlSeconds || 3600,
-      action: template?.callToAction || event.subject.url,
-    };
+    // Close connections
   }
 }

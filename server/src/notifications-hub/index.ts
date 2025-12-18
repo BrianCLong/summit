@@ -11,8 +11,8 @@
  * @module notifications-hub
  */
 
-import { RealtimeSessionManager } from './receivers/RealtimeReceiver.js';
-import { TemplateRegistry } from './templates/TemplateRegistry.js';
+import { NotificationHub } from './NotificationHub.js';
+import { AdapterRegistry } from './adapters/EventAdapters.js';
 
 // Core exports
 export { NotificationHub, type NotificationHubConfig } from './NotificationHub.js';
@@ -44,14 +44,6 @@ export {
   WebhookValidator,
   WebhookTransforms,
 } from './receivers/WebhookReceiver.js';
-export { SmsReceiver } from './receivers/SmsReceiver.js';
-export { PushReceiver } from './receivers/PushReceiver.js';
-export {
-  RealtimeReceiver,
-  RealtimeSessionManager,
-  type RealtimeClient,
-  type RealtimeSessionOptions,
-} from './receivers/RealtimeReceiver.js';
 
 // Adapters
 export {
@@ -65,14 +57,7 @@ export {
 } from './adapters/EventAdapters.js';
 
 // Templates
-export {
-  TemplateRegistry,
-  type MessageTemplate,
-} from './templates/TemplateRegistry.js';
-export {
-  TemplateRenderer,
-  type RenderedTemplate,
-} from './templates/TemplateRenderer.js';
+export { TemplateRegistry, type MessageTemplate } from './templates/TemplateRegistry.js';
 
 // Preferences
 export {
@@ -81,6 +66,10 @@ export {
   type PreferencesStorage,
   type RolePreferences,
 } from './preferences/PreferencesManager.js';
+
+// Import for use in factory functions
+import { NotificationHub } from './NotificationHub.js';
+import { AdapterRegistry } from './adapters/EventAdapters.js';
 
 /**
  * Factory function to create a fully configured notification hub
@@ -105,26 +94,9 @@ export async function createNotificationHub(config: {
     enabled: boolean;
     signatureSecret?: string;
   };
-  sms?: {
-    enabled: boolean;
-    senderId: string;
-    provider?: 'twilio' | 'sns' | 'mock';
-  };
-  push?: {
-    enabled: boolean;
-    provider?: 'fcm' | 'apns' | 'mock';
-    defaultTtlSeconds?: number;
-  };
-  realtime?: {
-    enabled: boolean;
-    manager?: RealtimeSessionManager;
-    poolOptions?: RealtimeSessionOptions;
-  };
   routing?: {
     defaultChannels?: string[];
   };
-  templates?: TemplateRegistry;
-  rateLimiting?: { maxPerMinute?: number };
 }): Promise<NotificationHub> {
   const hubConfig = {
     receivers: {
@@ -154,33 +126,6 @@ export async function createNotificationHub(config: {
             },
           }
         : undefined,
-      sms: config.sms
-        ? {
-            enabled: config.sms.enabled,
-            config: {
-              senderId: config.sms.senderId,
-              provider: config.sms.provider,
-            },
-          }
-        : undefined,
-      push: config.push
-        ? {
-            enabled: config.push.enabled,
-            config: {
-              provider: config.push.provider,
-              defaultTtlSeconds: config.push.defaultTtlSeconds,
-            },
-          }
-        : undefined,
-      realtime: config.realtime
-        ? {
-            enabled: config.realtime.enabled,
-            config: {
-              manager: config.realtime.manager,
-              poolOptions: config.realtime.poolOptions,
-            },
-          }
-        : undefined,
     },
     routing: {
       rules: [],
@@ -192,11 +137,7 @@ export async function createNotificationHub(config: {
     },
   };
 
-  const hub = new NotificationHub({
-    ...hubConfig,
-    templates: config.templates,
-    rateLimiting: config.rateLimiting,
-  });
+  const hub = new NotificationHub(hubConfig);
   await hub.initialize();
 
   return hub;

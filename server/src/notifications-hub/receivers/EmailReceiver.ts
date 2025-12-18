@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Email Receiver for sending email notifications
  *

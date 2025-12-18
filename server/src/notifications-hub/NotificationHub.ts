@@ -10,7 +10,6 @@
  */
 
 import EventEmitter from 'events';
-import { Counter, Gauge, Histogram, Registry, collectDefaultMetrics } from 'prom-client';
 import {
   CanonicalEvent,
   EventType,
@@ -21,14 +20,8 @@ import { IReceiver } from './receivers/ReceiverInterface.js';
 import { EmailReceiver } from './receivers/EmailReceiver.js';
 import { ChatReceiver } from './receivers/ChatReceiver.js';
 import { WebhookReceiver } from './receivers/WebhookReceiver.js';
-import { SmsReceiver } from './receivers/SmsReceiver.js';
+import { SMSReceiver } from './receivers/SMSReceiver.js';
 import { PushReceiver } from './receivers/PushReceiver.js';
-import {
-  RealtimeReceiver,
-  RealtimeSessionManager,
-} from './receivers/RealtimeReceiver.js';
-import { TemplateRenderer, RenderedTemplate } from './templates/TemplateRenderer.js';
-import { TemplateRegistry } from './templates/TemplateRegistry.js';
 
 export interface NotificationHubConfig {
   receivers: {
@@ -52,19 +45,11 @@ export interface NotificationHubConfig {
       enabled: boolean;
       config: Record<string, unknown>;
     };
-    realtime?: {
-      enabled: boolean;
-      config: Record<string, unknown>;
-    };
   };
   routing?: RoutingConfig;
   storage?: {
     enabled: boolean;
     retentionDays: number;
-  };
-  templates?: TemplateRegistry;
-  rateLimiting?: {
-    maxPerMinute?: number;
   };
 }
 
@@ -96,16 +81,7 @@ export interface RuleAction {
 }
 
 export interface RecipientSpec {
-  type:
-    | 'user'
-    | 'role'
-    | 'team'
-    | 'email'
-    | 'channel'
-    | 'webhook'
-    | 'sms'
-    | 'push'
-    | 'realtime';
+  type: 'user' | 'role' | 'team' | 'email' | 'channel' | 'webhook';
   id: string;
   metadata?: Record<string, unknown>;
 }
@@ -116,9 +92,6 @@ export interface NotificationPreferences {
     email?: ChannelPreference;
     chat?: ChannelPreference;
     webhook?: ChannelPreference;
-    sms?: ChannelPreference;
-    push?: ChannelPreference;
-    realtime?: ChannelPreference;
   };
   quietHours?: {
     enabled: boolean;
@@ -154,20 +127,9 @@ export interface NotificationJob {
   error?: string;
 }
 
-export interface DeadLetterEntry {
-  id: string;
-  event: CanonicalEvent;
-  recipientId: string;
-  recipientAddress: string;
-  channel: string;
-  error: string;
-  attempts: number;
-  lastAttemptAt: Date;
-}
-
 export interface ResolvedRecipient {
   id: string;
-  type: 'user' | 'email' | 'channel' | 'webhook' | 'sms' | 'push' | 'realtime';
+  type: 'user' | 'email' | 'channel' | 'webhook';
   channels: string[];
   address: string;
   preferences?: NotificationPreferences;
@@ -180,8 +142,6 @@ export interface NotificationResult {
   messageId?: string;
   error?: string;
   deliveredAt?: Date;
-  recipientAddress?: string;
-  metadata?: Record<string, unknown>;
 }
 
 export interface NotificationMetrics {
@@ -203,27 +163,6 @@ export class NotificationHub extends EventEmitter {
   private metrics: NotificationMetrics;
   private routingRules: RoutingRule[];
   private initialized: boolean = false;
-  private templateRenderer: TemplateRenderer;
-  private batchQueues: Map<
-    string,
-    {
-      events: CanonicalEvent[];
-      recipient: ResolvedRecipient;
-      channel: string;
-      timer: NodeJS.Timeout;
-    }
-  >;
-  private deliveryLog: NotificationResult[];
-  private deadLetterQueue: DeadLetterEntry[];
-  private rateLimiter: Map<string, { windowStart: number; count: number }>;
-  private promRegistry: Registry;
-  private promCounters: {
-    eventsTotal: Counter<string>;
-    notificationsTotal: Counter<string>;
-    failuresTotal: Counter<string>;
-  };
-  private promLatency: Histogram<string>;
-  private promDeadLetters: Gauge<string>;
 
   constructor(config: NotificationHubConfig) {
     super();
@@ -232,11 +171,6 @@ export class NotificationHub extends EventEmitter {
     this.preferences = new Map();
     this.jobs = new Map();
     this.routingRules = config.routing?.rules || [];
-    this.templateRenderer = new TemplateRenderer(config.templates);
-    this.batchQueues = new Map();
-    this.deliveryLog = [];
-    this.deadLetterQueue = [];
-    this.rateLimiter = new Map();
 
     this.metrics = {
       totalEvents: 0,
@@ -248,57 +182,6 @@ export class NotificationHub extends EventEmitter {
       byEventType: {},
       averageLatencyMs: 0,
     };
-
-    this.promRegistry = new Registry();
-    collectDefaultMetrics({ register: this.promRegistry });
-    this.promCounters = {
-      eventsTotal:
-        (this.promRegistry.getSingleMetric(
-          'notification_events_total',
-        ) as Counter<string>) ||
-        new Counter({
-          name: 'notification_events_total',
-          help: 'Total notification events ingested',
-          registers: [this.promRegistry],
-        }),
-      notificationsTotal:
-        (this.promRegistry.getSingleMetric(
-          'notification_notifications_total',
-        ) as Counter<string>) ||
-        new Counter({
-          name: 'notification_notifications_total',
-          help: 'Total notifications attempted',
-          labelNames: ['channel', 'status'],
-          registers: [this.promRegistry],
-        }),
-      failuresTotal:
-        (this.promRegistry.getSingleMetric(
-          'notification_failures_total',
-        ) as Counter<string>) ||
-        new Counter({
-          name: 'notification_failures_total',
-          help: 'Total notification failures',
-          labelNames: ['channel', 'reason'],
-          registers: [this.promRegistry],
-        }),
-    } as any;
-    this.promLatency =
-      (this.promRegistry.getSingleMetric('notification_delivery_latency_ms') as Histogram<string>) ||
-      new Histogram({
-        name: 'notification_delivery_latency_ms',
-        help: 'Latency histogram for notifications',
-        labelNames: ['channel'],
-        buckets: [10, 50, 100, 250, 500, 1000, 5000],
-        registers: [this.promRegistry],
-      });
-    this.promDeadLetters =
-      (this.promRegistry.getSingleMetric('notification_dead_letter_gauge') as Gauge<string>) ||
-      new Gauge({
-        name: 'notification_dead_letter_gauge',
-        help: 'Current dead letter queue size',
-        registers: [this.promRegistry],
-      });
-    this.promDeadLetters.set(0);
   }
 
   /**
@@ -341,7 +224,7 @@ export class NotificationHub extends EventEmitter {
     }
 
     if (this.config.receivers.sms?.enabled) {
-      const smsReceiver = new SmsReceiver();
+      const smsReceiver = new SMSReceiver();
       await smsReceiver.initialize({
         enabled: true,
         name: 'SMS',
@@ -358,16 +241,6 @@ export class NotificationHub extends EventEmitter {
         ...this.config.receivers.push.config,
       } as any);
       this.receivers.set('push', pushReceiver);
-    }
-
-    if (this.config.receivers.realtime?.enabled) {
-      const realtimeReceiver = new RealtimeReceiver();
-      await realtimeReceiver.initialize({
-        enabled: true,
-        name: 'Realtime',
-        ...this.config.receivers.realtime.config,
-      } as any);
-      this.receivers.set('realtime', realtimeReceiver);
     }
 
     // Sort routing rules by priority
@@ -388,7 +261,6 @@ export class NotificationHub extends EventEmitter {
     this.metrics.totalEvents++;
     this.incrementMetric('byEventType', event.type);
     this.incrementMetric('bySeverity', event.severity);
-    this.promCounters.eventsTotal.inc();
 
     // Create notification job
     const job: NotificationJob = {
@@ -404,7 +276,21 @@ export class NotificationHub extends EventEmitter {
     try {
       // Update event status
       event.status = EventStatus.PROCESSING;
-      const renderedTemplate = this.templateRenderer.render(event);
+
+      // Deduplication check
+      if (await this.shouldDeduplicate(event)) {
+        job.status = 'completed';
+        job.processedAt = new Date();
+        job.results = [{
+          recipientId: 'system',
+          channel: 'system',
+          success: true,
+          messageId: 'deduplicated',
+          error: 'Deduplicated event'
+        }];
+        this.emit('notification:deduplicated', job);
+        return job;
+      }
 
       // Determine recipients based on routing rules
       const recipients = await this.resolveRecipients(event);
@@ -425,36 +311,26 @@ export class NotificationHub extends EventEmitter {
       job.status = 'processing';
       const startTime = Date.now();
 
-      const results = await this.dispatchToReceivers(
-        event,
-        filteredRecipients,
-        renderedTemplate,
-      );
+      const results = await this.dispatchToReceivers(event, filteredRecipients);
       job.results = results;
 
       // Update metrics
       const latency = Date.now() - startTime;
-      const immediateResults = results.filter((r) => !r.metadata?.queued);
-      const successCount = immediateResults.filter((r) => r.success).length;
-      this.recordDeliveryResults(immediateResults);
+      this.updateAverageLatency(latency);
 
-      this.updateAverageLatency(latency, immediateResults.length || 1);
+      const successCount = results.filter((r) => r.success).length;
+      const failureCount = results.filter((r) => !r.success).length;
+
+      this.metrics.totalNotifications += results.length;
+      this.metrics.totalDelivered += successCount;
+      this.metrics.totalFailed += failureCount;
 
       // Update job status
-      job.status =
-        successCount > 0 || results.some((r) => r.metadata?.queued)
-          ? 'completed'
-          : 'failed';
+      job.status = successCount > 0 ? 'completed' : 'failed';
       job.processedAt = new Date();
 
       // Update event status
-      if (successCount > 0) {
-        event.status = EventStatus.DELIVERED;
-      } else if (results.some((r) => r.metadata?.queued)) {
-        event.status = EventStatus.PROCESSING;
-      } else {
-        event.status = EventStatus.FAILED;
-      }
+      event.status = successCount > 0 ? EventStatus.DELIVERED : EventStatus.FAILED;
 
       this.emit('notification:completed', job);
       return job;
@@ -467,6 +343,17 @@ export class NotificationHub extends EventEmitter {
       this.emit('notification:failed', job, error);
       throw error;
     }
+  }
+
+  /**
+   * Check if event should be deduplicated
+   * Logic: Check if identical event (fingerprint) received recently
+   */
+  private async shouldDeduplicate(event: CanonicalEvent): Promise<boolean> {
+     // TODO: Implement Redis-based deduplication
+     // Key: `notification:dedup:${event.context.tenantId}:${fingerprint(event)}`
+     // if exists -> return true
+     return false;
   }
 
   /**
@@ -598,6 +485,10 @@ export class NotificationHub extends EventEmitter {
           });
           break;
 
+        // Note: 'sms' and 'push' support in routing rules would be added here
+        // as new spec types if explicit routing is needed, otherwise they are
+        // resolved via 'user' preferences/lookups.
+
         case 'channel':
           recipients.push({
             id: spec.id,
@@ -612,30 +503,6 @@ export class NotificationHub extends EventEmitter {
             id: spec.id,
             type: 'webhook',
             channels: ['webhook'],
-            address: spec.id,
-          });
-          break;
-        case 'sms':
-          recipients.push({
-            id: spec.id,
-            type: 'sms',
-            channels: ['sms'],
-            address: spec.id,
-          });
-          break;
-        case 'push':
-          recipients.push({
-            id: spec.id,
-            type: 'push',
-            channels: ['push'],
-            address: spec.id,
-          });
-          break;
-        case 'realtime':
-          recipients.push({
-            id: spec.id,
-            type: 'realtime',
-            channels: ['realtime'],
             address: spec.id,
           });
           break;
@@ -724,7 +591,6 @@ export class NotificationHub extends EventEmitter {
   private async dispatchToReceivers(
     event: CanonicalEvent,
     recipients: ResolvedRecipient[],
-    template: RenderedTemplate,
   ): Promise<NotificationResult[]> {
     const results: NotificationResult[] = [];
 
@@ -747,68 +613,18 @@ export class NotificationHub extends EventEmitter {
         continue;
       }
 
-      const immediateRecipients: ResolvedRecipient[] = [];
-      for (const recipient of channelRecipients) {
-        const channelPref =
-          recipient.preferences?.channels[
-            channelName as keyof NotificationPreferences['channels']
-          ];
-
-        if (channelPref?.batchingEnabled) {
-          const windowMinutes = channelPref.batchingWindowMinutes || 15;
-          this.queueBatch(event, recipient, channelName, windowMinutes);
-          results.push({
-            recipientId: recipient.id,
-            channel: channelName,
-            success: true,
-            metadata: { queued: true, windowMinutes },
-          });
-          continue;
-        }
-
-        if (this.isRateLimited(recipient.id)) {
-          const error = 'Rate limit exceeded for recipient';
-          const result: NotificationResult = {
-            recipientId: recipient.id,
-            recipientAddress: recipient.address,
-            channel: channelName,
-            success: false,
-            error,
-            metadata: { rateLimited: true },
-          };
-          results.push(result);
-          this.pushDeadLetter(event, recipient, channelName, error);
-          this.incrementChannelMetric(channelName, 'failed');
-          continue;
-        }
-
-        immediateRecipients.push(recipient);
-      }
-
-      if (immediateRecipients.length === 0) {
-        continue;
-      }
-
-      const addresses = immediateRecipients.map((r) => r.address);
+      const addresses = channelRecipients.map((r) => r.address);
       try {
-        const channelStart = Date.now();
-        const deliveryResults = await receiver.send(event, addresses, {
-          template,
-          digest: false,
-        });
+        const deliveryResults = await receiver.send(event, addresses);
 
-        deliveryResults.forEach((result, index) => {
-          const latencyMs = Date.now() - channelStart;
-          const sourceRecipient = immediateRecipients[index];
+        for (const result of deliveryResults) {
           results.push({
-            recipientId: sourceRecipient?.id || result.recipientId,
-            recipientAddress: sourceRecipient?.address,
+            recipientId: result.recipientId,
             channel: channelName,
             success: result.success,
             messageId: result.messageId,
             error: result.error?.message,
             deliveredAt: result.deliveredAt,
-            metadata: { ...result.metadata, latencyMs },
           });
 
           this.incrementChannelMetric(channelName, 'sent');
@@ -816,19 +632,11 @@ export class NotificationHub extends EventEmitter {
             this.incrementChannelMetric(channelName, 'delivered');
           } else {
             this.incrementChannelMetric(channelName, 'failed');
-            if (sourceRecipient) {
-              this.pushDeadLetter(
-                event,
-                sourceRecipient,
-                channelName,
-                result.error?.message || 'Unknown delivery failure',
-              );
-            }
           }
-        });
+        }
       } catch (error) {
         console.error(`Error sending to channel ${channelName}:`, error);
-        for (const recipient of immediateRecipients) {
+        for (const recipient of channelRecipients) {
           results.push({
             recipientId: recipient.id,
             channel: channelName,
@@ -836,111 +644,11 @@ export class NotificationHub extends EventEmitter {
             error: (error as Error).message,
           });
           this.incrementChannelMetric(channelName, 'failed');
-          this.pushDeadLetter(
-            event,
-            recipient,
-            channelName,
-            (error as Error).message,
-          );
         }
       }
     }
 
     return results;
-  }
-
-  private queueBatch(
-    event: CanonicalEvent,
-    recipient: ResolvedRecipient,
-    channel: string,
-    windowMinutes: number,
-  ): void {
-    const key = `${recipient.id}:${channel}`;
-    const existing = this.batchQueues.get(key);
-
-    if (existing) {
-      existing.events.push(event);
-      return;
-    }
-
-    const timer = setTimeout(() => this.flushBatch(key), windowMinutes * 60 * 1000);
-    this.batchQueues.set(key, {
-      events: [event],
-      recipient,
-      channel,
-      timer,
-    });
-  }
-
-  private async flushBatch(key: string): Promise<void> {
-    const batch = this.batchQueues.get(key);
-    if (!batch) return;
-
-    clearTimeout(batch.timer);
-    this.batchQueues.delete(key);
-
-    const digest = this.templateRenderer.renderDigest(
-      batch.events,
-      batch.recipient.id,
-      batch.channel,
-    );
-
-    await this.dispatchBatch(batch.recipient, batch.channel, digest.event, digest.template);
-  }
-
-  private async dispatchBatch(
-    recipient: ResolvedRecipient,
-    channel: string,
-    event: CanonicalEvent,
-    template: RenderedTemplate,
-  ): Promise<void> {
-    const receiver = this.receivers.get(channel);
-    if (!receiver) {
-      console.warn(`No receiver configured for channel: ${channel}`);
-      return;
-    }
-
-    try {
-      const channelStart = Date.now();
-      const deliveryResults = await receiver.send(event, [recipient.address], {
-        template,
-        digest: true,
-      });
-
-      const results = deliveryResults.map((result) => ({
-        recipientId: recipient.id,
-        recipientAddress: recipient.address,
-        channel,
-        success: result.success,
-        messageId: result.messageId,
-        error: result.error?.message,
-        deliveredAt: result.deliveredAt,
-        metadata: { ...result.metadata, latencyMs: Date.now() - channelStart },
-      }));
-
-      for (const result of results) {
-        if (!result.success) {
-          this.pushDeadLetter(
-            event,
-            recipient,
-            channel,
-            result.error || 'Unknown batch delivery failure',
-          );
-        }
-      }
-
-      this.recordDeliveryResults(results);
-    } catch (error) {
-      const failure: NotificationResult = {
-        recipientId: recipient.id,
-        recipientAddress: recipient.address,
-        channel,
-        success: false,
-        error: (error as Error).message,
-      };
-      this.pushDeadLetter(event, recipient, channel, failure.error || 'Unknown error');
-      this.recordDeliveryResults([failure]);
-    }
   }
 
   /**
@@ -951,14 +659,12 @@ export class NotificationHub extends EventEmitter {
     channels: string[],
   ): Promise<ResolvedRecipient | null> {
     // Mock implementation - would query user service
-    const address = channels.includes('realtime')
-      ? userId
-      : `user_${userId}@example.com`;
+    // In production: await userService.getUser(userId)
     return {
       id: userId,
       type: 'user',
       channels,
-      address,
+      address: `user_${userId}@example.com`,
     };
   }
 
@@ -967,6 +673,16 @@ export class NotificationHub extends EventEmitter {
     channels: string[],
   ): Promise<ResolvedRecipient[]> {
     // Mock implementation - would query user service for users with this role
+    // In production: await rbacService.getUsersByRole(roleId)
+    // For now, return a dummy user if role is 'admin' to simulate behavior
+    if (roleId === 'admin') {
+         return [{
+            id: 'admin_user_1',
+            type: 'user',
+            channels,
+            address: 'admin@example.com'
+         }];
+    }
     return [];
   }
 
@@ -975,6 +691,15 @@ export class NotificationHub extends EventEmitter {
     channels: string[],
   ): Promise<ResolvedRecipient[]> {
     // Mock implementation - would query user service for team members
+    // In production: await teamService.getTeamMembers(teamId)
+     if (teamId === 'devops') {
+         return [{
+            id: 'devops_lead',
+            type: 'user',
+            channels,
+            address: 'devops@example.com'
+         }];
+    }
     return [];
   }
 
@@ -1014,27 +739,6 @@ export class NotificationHub extends EventEmitter {
     return actualIndex >= thresholdIndex;
   }
 
-  private isRateLimited(recipientId: string): boolean {
-    const maxPerMinute = this.config.rateLimiting?.maxPerMinute;
-    if (!maxPerMinute) return false;
-
-    const windowMs = 60 * 1000;
-    const now = Date.now();
-    const entry = this.rateLimiter.get(recipientId);
-
-    if (!entry || now - entry.windowStart >= windowMs) {
-      this.rateLimiter.set(recipientId, { windowStart: now, count: 1 });
-      return false;
-    }
-
-    if (entry.count >= maxPerMinute) {
-      return true;
-    }
-
-    entry.count++;
-    return false;
-  }
-
   private incrementMetric(category: string, key: string): void {
     const metrics = (this.metrics as any)[category];
     if (metrics) {
@@ -1049,64 +753,10 @@ export class NotificationHub extends EventEmitter {
     this.metrics.byChannel[channel][metric]++;
   }
 
-  private pushDeadLetter(
-    event: CanonicalEvent,
-    recipient: ResolvedRecipient,
-    channel: string,
-    error: string,
-  ): void {
-    const entry: DeadLetterEntry = {
-      id: `dlq_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      event: { ...event },
-      recipientId: recipient.id,
-      recipientAddress: recipient.address,
-      channel,
-      error,
-      attempts: 1,
-      lastAttemptAt: new Date(),
-    };
-
-    this.deadLetterQueue.push(entry);
-    this.promDeadLetters.set(this.deadLetterQueue.length);
-  }
-
-  private updateAverageLatency(latency: number, notificationsCount: number = 1): void {
+  private updateAverageLatency(latency: number): void {
     const total = this.metrics.averageLatencyMs * this.metrics.totalNotifications;
     this.metrics.averageLatencyMs =
-      (total + latency * notificationsCount) /
-      (this.metrics.totalNotifications + Math.max(1, notificationsCount));
-  }
-
-  private recordDeliveryResults(results: NotificationResult[]): void {
-    for (const result of results) {
-      this.deliveryLog.push(result);
-
-      if (result.metadata?.queued) {
-        continue;
-      }
-
-      this.metrics.totalNotifications++;
-      this.promCounters.notificationsTotal.inc({
-        channel: result.channel,
-        status: result.success ? 'delivered' : 'failed',
-      });
-      if (!result.success) {
-        this.promCounters.failuresTotal.inc({
-          channel: result.channel,
-          reason: result.error || 'unknown',
-        });
-      }
-      if (result.success) {
-        this.metrics.totalDelivered++;
-      } else {
-        this.metrics.totalFailed++;
-      }
-
-      const latency = Number(result.metadata?.latencyMs);
-      if (!Number.isNaN(latency) && latency > 0) {
-        this.promLatency.observe({ channel: result.channel }, latency);
-      }
-    }
+      (total + latency) / (this.metrics.totalNotifications + 1);
   }
 
   /**
@@ -1116,84 +766,8 @@ export class NotificationHub extends EventEmitter {
     return { ...this.metrics };
   }
 
-  getPrometheusMetrics(): Promise<string> {
-    return this.promRegistry.metrics();
-  }
-
-  getDeadLetterQueue(): DeadLetterEntry[] {
-    return [...this.deadLetterQueue];
-  }
-
-  async retryDeadLetter(entryId: string): Promise<NotificationResult | null> {
-    const entryIndex = this.deadLetterQueue.findIndex((entry) => entry.id === entryId);
-    if (entryIndex === -1) return null;
-
-    const entry = this.deadLetterQueue[entryIndex];
-    const receiver = this.receivers.get(entry.channel);
-    if (!receiver) {
-      throw new Error(`No receiver available for channel ${entry.channel}`);
-    }
-
-    const template = this.templateRenderer.render(entry.event);
-    const channelStart = Date.now();
-    const [result] = await receiver.send(entry.event, [entry.recipientAddress], {
-      template,
-      digest: false,
-    });
-
-    const mappedResult: NotificationResult = {
-      recipientId: entry.recipientId,
-      recipientAddress: entry.recipientAddress,
-      channel: entry.channel,
-      success: result.success,
-      messageId: result.messageId,
-      error: result.error?.message,
-      deliveredAt: result.deliveredAt,
-      metadata: { ...result.metadata, latencyMs: Date.now() - channelStart, retry: true },
-    };
-
-    if (mappedResult.success) {
-      this.deadLetterQueue.splice(entryIndex, 1);
-    } else {
-      this.deadLetterQueue[entryIndex] = {
-        ...entry,
-        attempts: entry.attempts + 1,
-        lastAttemptAt: new Date(),
-        error: mappedResult.error || entry.error,
-      };
-    }
-
-    this.promDeadLetters.set(this.deadLetterQueue.length);
-    this.recordDeliveryResults([mappedResult]);
-    return mappedResult;
-  }
-
   getJob(jobId: string): NotificationJob | undefined {
     return this.jobs.get(jobId);
-  }
-
-  getDeliveryHistory(filter?: {
-    recipientId?: string;
-    channel?: string;
-  }): NotificationResult[] {
-    return this.deliveryLog.filter((entry) => {
-      if (filter?.recipientId && entry.recipientId !== filter.recipientId) {
-        return false;
-      }
-
-      if (filter?.channel && entry.channel !== filter.channel) {
-        return false;
-      }
-
-      return true;
-    });
-  }
-
-  getRealtimeManager(): RealtimeSessionManager | undefined {
-    const receiver = this.receivers.get('realtime') as
-      | RealtimeReceiver
-      | undefined;
-    return receiver?.getSessionManager();
   }
 
   async healthCheck(): Promise<Record<string, boolean>> {
@@ -1207,17 +781,11 @@ export class NotificationHub extends EventEmitter {
   }
 
   async shutdown(): Promise<void> {
-    for (const batch of this.batchQueues.values()) {
-      clearTimeout(batch.timer);
-    }
-    this.batchQueues.clear();
-
     for (const receiver of this.receivers.values()) {
       await receiver.shutdown();
     }
 
     this.receivers.clear();
-    this.promRegistry.resetMetrics();
     this.initialized = false;
     this.emit('shutdown');
   }
