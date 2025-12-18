@@ -1,6 +1,6 @@
 {
   "name": "@summit/ses",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Schema Evolution Simulator (SES) for what-if planning and migrations",
   "type": "module",
   "main": "dist/index.js",

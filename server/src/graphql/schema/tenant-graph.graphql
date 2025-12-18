@@ -1,0 +1,306 @@
+# Tenant Graph Slice v0 - Multi-tenant Graph Query API
+# Extends canonical entity schema with tenant-scoped search and traversal
+
+"""
+Entity interface for graph nodes with tenant isolation
+"""
+interface Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Person entity type
+"""
+type Person implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Person-specific fields
+  name: String!
+  email: String @pii
+  phone: String @pii
+  dateOfBirth: DateTime @pii
+  nationality: String
+  aliases: [String!]
+}
+
+"""
+Organization entity type
+"""
+type Organization implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Organization-specific fields
+  name: String!
+  industry: String
+  jurisdiction: String
+  registrationNumber: String
+  website: String
+  aliases: [String!]
+}
+
+"""
+Asset entity type
+"""
+type Asset implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Asset-specific fields
+  assetType: String!
+  description: String
+  value: Float
+  currency: String
+  serialNumber: String
+  location: Location
+}
+
+"""
+Event entity type
+"""
+type Event implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Event-specific fields
+  eventType: String!
+  description: String!
+  timestamp: DateTime!
+  location: Location
+  participants: [ID!]
+}
+
+"""
+Indicator entity type (IoC, TTP, etc.)
+"""
+type Indicator implements Entity {
+  id: ID!
+  tenantId: ID!
+  labels: [String!]!
+  score: Float
+  metadata: JSON
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  # Indicator-specific fields
+  indicatorType: String!
+  value: String!
+  pattern: String
+  confidence: Float!
+  firstSeen: DateTime
+  lastSeen: DateTime
+  tlpLevel: TLPLevel
+}
+
+"""
+Geolocation type
+"""
+type Location {
+  latitude: Float!
+  longitude: Float!
+  address: String
+  city: String
+  country: String
+  accuracy: Float
+}
+
+"""
+Traffic Light Protocol levels for information sharing
+"""
+enum TLPLevel {
+  WHITE
+  GREEN
+  AMBER
+  RED
+}
+
+"""
+Edge/Relationship between entities
+"""
+type Relationship {
+  id: ID!
+  tenantId: ID!
+  fromEntityId: ID!
+  toEntityId: ID!
+  relationshipType: String!
+  properties: JSON
+  confidence: Float!
+  source: String
+  firstSeen: DateTime!
+  lastSeen: DateTime
+  createdAt: DateTime!
+}
+
+"""
+Neighbor filter for graph traversal
+"""
+input NeighborFilter {
+  labelIn: [String!]
+  edgeIn: [String!]
+  maxDegree: Int
+  minConfidence: Float
+}
+
+"""
+Search result with provenance
+"""
+type SearchResult {
+  entities: [Entity!]!
+  total: Int!
+  hasMore: Boolean!
+  took: Int!
+  provenanceId: String
+}
+
+"""
+Neighbors result
+"""
+type NeighborsResult {
+  entities: [Entity!]!
+  relationships: [Relationship!]!
+  total: Int!
+  took: Int!
+}
+
+"""
+Ingest result
+"""
+type IngestResult {
+  success: Boolean!
+  entitiesCreated: Int!
+  entitiesUpdated: Int!
+  relationshipsCreated: Int!
+  relationshipsUpdated: Int!
+  errors: [String!]
+  provenanceId: String!
+  took: Int!
+}
+
+"""
+Provenance metadata for data lineage
+"""
+type ProvenanceMetadata {
+  id: ID!
+  sourceType: String!
+  sourceId: String!
+  transformChain: [ProvenanceStep!]!
+  hashManifest: String!
+  createdAt: DateTime!
+}
+
+"""
+Individual provenance step
+"""
+type ProvenanceStep {
+  action: String!
+  timestamp: DateTime!
+  actor: String!
+  method: String
+  parameters: JSON
+}
+
+# Directive for PII fields
+directive @pii on FIELD_DEFINITION
+
+extend type Query {
+  """
+  Get entity by ID with tenant scope
+  """
+  entityById(
+    id: ID!
+    tenantId: ID!
+  ): Entity
+
+  """
+  Search entities by query string
+  """
+  searchEntities(
+    q: String!
+    tenantId: ID!
+    limit: Int = 25
+    offset: Int = 0
+    labelFilter: [String!]
+  ): SearchResult!
+
+  """
+  Get neighbors with optional filtering
+  """
+  neighbors(
+    id: ID!
+    tenantId: ID!
+    hops: Int = 2
+    limit: Int = 50
+    filter: NeighborFilter
+  ): NeighborsResult!
+
+  """
+  Get provenance for entity or relationship
+  """
+  provenance(
+    entityId: ID!
+    tenantId: ID!
+  ): ProvenanceMetadata
+}
+
+extend type Mutation {
+  """
+  Ingest entities and relationships from external source
+  Note: Requires 'ingest:write' permission via OPA
+  """
+  ingestData(
+    tenantId: ID!
+    sourceType: String!
+    sourceId: String!
+    entities: [EntityInput!]!
+    relationships: [RelationshipInput!]!
+  ): IngestResult!
+}
+
+"""
+Input for creating/updating entities
+"""
+input EntityInput {
+  externalId: String
+  kind: String!
+  labels: [String!]!
+  properties: JSON!
+}
+
+"""
+Input for creating/updating relationships
+"""
+input RelationshipInput {
+  fromExternalId: String!
+  toExternalId: String!
+  relationshipType: String!
+  properties: JSON
+  confidence: Float!
+  source: String
+}
