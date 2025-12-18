@@ -17,7 +17,7 @@ export class PolicyClient {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(ctx),
     });
-    if (!res.ok) throw new Error(`PDP error ${res.status}`);
+    if (!res.ok) {throw new Error(`PDP error ${res.status}`);}
     return res.json() as Promise<PolicyDecision>;
   }
 }

@@ -1,0 +1,32 @@
+meta:
+  id: template.standard@v1
+  owner: jules
+  purpose: 'Template for creating new prompts using the Unified Architecture'
+  guardrails:
+    - 'Must use role and safety partials.'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.1
+
+inputs:
+  input_variable: string
+
+template: |
+  {{> atoms/role.architect }}
+
+  {{> components/safety.standard }}
+
+  Describe the task here.
+  Input: {{input_variable}}
+
+  {{> components/workflow.verify }}
+
+outputSchema:
+  result: string
+
+examples:
+  - name: example-1
+    inputs:
+      input_variable: "test"
+    expected_contains: ["result"]
