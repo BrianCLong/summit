@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ScalingMetrics",
+  "type": "object",
+  "required": ["primary_task", "training", "evaluation"],
+  "properties": {
+    "primary_task": {
+      "type": "string",
+      "description": "Task or benchmark family these metrics represent (e.g., reasoning, tool-use, summarization)."
+    },
+    "training": {
+      "type": "object",
+      "required": ["loss"],
+      "properties": {
+        "loss": {
+          "type": "number",
+          "description": "Final or checkpoint training loss."
+        },
+        "loss_curve_uri": {
+          "type": "string",
+          "description": "URI to time-series loss curve data."
+        },
+        "tokens_seen": {
+          "type": "number",
+          "description": "Total tokens processed during training."
+        },
+        "flops": {
+          "type": "number",
+          "description": "Total floating point operations consumed."
+        },
+        "gpu_hours": {
+          "type": "number",
+          "description": "Total GPU-hours consumed."
+        },
+        "wall_clock_hours": {
+          "type": "number",
+          "description": "Elapsed wall-clock time for training."
+        }
+      },
+      "additionalProperties": false
+    },
+    "evaluation": {
+      "type": "object",
+      "required": ["reasoning_score", "tool_success_rate"],
+      "properties": {
+        "reasoning_score": {
+          "type": "number",
+          "description": "Scalar reasoning or SRE score (higher is better)."
+        },
+        "tool_success_rate": {
+          "type": "number",
+          "description": "Proportion of tool calls that succeed end-to-end."
+        },
+        "hallucination_rate": {
+          "type": "number",
+          "description": "Fraction of evaluated responses flagged as hallucinations."
+        },
+        "safety_score": {
+          "type": "number",
+          "description": "Aggregated safety/oversight score (higher is safer)."
+        },
+        "latency_p95_ms": {
+          "type": "number",
+          "description": "95th percentile end-to-end latency in milliseconds."
+        },
+        "throughput_tps": {
+          "type": "number",
+          "description": "Tokens per second generated during evaluation."
+        },
+        "eval_suite_version": {
+          "type": "string",
+          "description": "Identifier for the evaluation suite or commit hash."
+        }
+      },
+      "additionalProperties": false
+    },
+    "uncertainty": {
+      "type": "object",
+      "description": "Optional confidence intervals for key metrics.",
+      "properties": {
+        "reasoning_score_ci95": {
+          "$ref": "#/definitions/confidenceInterval"
+        },
+        "tool_success_ci95": {
+          "$ref": "#/definitions/confidenceInterval"
+        },
+        "latency_p95_ci95": {
+          "$ref": "#/definitions/confidenceInterval"
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "description": "Runtime observability snapshots.",
+      "properties": {
+        "gpu_memory_peak_gb": {
+          "type": "number",
+          "description": "Peak GPU memory usage in gigabytes."
+        },
+        "cpu_utilization_avg": {
+          "type": "number",
+          "description": "Average CPU utilization percentage."
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of notable runtime errors or warnings."
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "definitions": {
+    "confidenceInterval": {
+      "type": "object",
+      "required": ["low", "high"],
+      "properties": {
+        "low": {
+          "type": "number"
+        },
+        "high": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

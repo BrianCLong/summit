@@ -1,0 +1,106 @@
+namespace: summit-platform
+
+resourceQuota:
+  enabled: true
+  requestsCpu: "6"
+  requestsMemory: 12Gi
+  limitsCpu: "12"
+  limitsMemory: 24Gi
+  pods: "50"
+  loadBalancers: "4"
+
+limitRange:
+  enabled: true
+  defaultCpu: 1000m
+  defaultMemory: 1Gi
+  defaultRequestCpu: 250m
+  defaultRequestMemory: 512Mi
+
+ingress:
+  hosts:
+    api: api.summit.example.com
+    web: summit.example.com
+  tls:
+    enabled: true
+    credentialName: summit-gateway-tls
+
+serviceMesh:
+  enabled: true
+  mtlsMode: ISTIO_MUTUAL
+
+autoscalingDefaults:
+  cpu: 70
+  memory: 75
+
+api:
+  image:
+    repository: ghcr.io/summit-platform/api
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 3
+  port: 4000
+  env:
+    databaseUrlSecret: summit-app-secrets
+    redisUrlSecret: summit-app-secrets
+  resources:
+    requests:
+      cpu: 400m
+      memory: 512Mi
+    limits:
+      cpu: 1000m
+      memory: 1.5Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 10
+    cpu:
+      targetPercentage: 70
+    memory:
+      targetPercentage: 75
+
+worker:
+  image:
+    repository: ghcr.io/summit-platform/worker
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  port: 4100
+  env:
+    databaseUrlSecret: summit-app-secrets
+    redisUrlSecret: summit-app-secrets
+  resources:
+    requests:
+      cpu: 300m
+      memory: 384Mi
+    limits:
+      cpu: 800m
+      memory: 1Gi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 8
+    cpu:
+      targetPercentage: 65
+
+web:
+  image:
+    repository: ghcr.io/summit-platform/web
+    tag: latest
+    pullPolicy: IfNotPresent
+  replicaCount: 2
+  port: 4173
+  env:
+    apiUrl: https://api.summit.example.com
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 600m
+      memory: 512Mi
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    cpu:
+      targetPercentage: 65
