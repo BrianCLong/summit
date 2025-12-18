@@ -1,0 +1,18 @@
+[
+  {
+    "file": "audit_logs_sample.json",
+    "hash": "eb3762d027d99f6b85736437dbbbea451457cdd5cb1c0bf5f845f91cde5f1937"
+  },
+  {
+    "file": "quorum_results.json",
+    "hash": "37f51e303f3a56ec7cd53a5a5d17d0b9838501b2423ae6fe1a3145be1838d7dd"
+  },
+  {
+    "file": "sbom.json",
+    "hash": "ac46fd24bd501fa7297f0a2945bcc7f5d655b9bcf8bfbf16718a9d25c0c2c018"
+  },
+  {
+    "file": "slo_report.json",
+    "hash": "35dda57fa52708e34965bd3f503d5939645ccaf29ab2fc42f56850d0a1fb995d"
+  }
+]
