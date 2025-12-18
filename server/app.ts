@@ -1,13 +1,15 @@
 import express, { Request, Response, NextFunction } from 'express';
 import { requireStepUp } from './middleware/stepup';
 import { loadTenant } from './middleware/tenant';
-import { rateLimit } from './middleware/ratelimit';
+import { authenticatedRateLimit, publicRateLimit } from './middleware/rateLimiter';
+import publicRoutes from './routes/public';
 
 const app = express();
 
 app.use(express.json());
 
-app.use(loadTenant, rateLimit({ starter: 60, pro: 600, enterprise: 6000 }));
+app.use('/', publicRateLimit, publicRoutes);
+app.use(loadTenant, authenticatedRateLimit);
 
 /**
  * Admin delete user handler - requires step-up authentication

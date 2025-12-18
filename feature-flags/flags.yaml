@@ -21,3 +21,13 @@ features:
     expires: 2025-12-31
   search_synonyms: { default: false, owners: [search] }
   search_fuzzy: { default: false, owners: [search] }
+  # New flags
+  new_search_algorithm:
+    default: false
+    owners: [search]
+    rollout:
+      stage: 50
+      prod: 0
+  dark_mode_ui:
+    default: true
+    owners: [frontend]

@@ -1,0 +1,203 @@
+# P33: Fluent Bit Log Collection Configuration
+# Structured log aggregation with parsing and filtering
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+  namespace: summit-observability
+  labels:
+    app.kubernetes.io/part-of: summit
+    app.kubernetes.io/component: logging
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Daemon          Off
+        Flush           1
+        Log_Level       info
+        Parsers_File    parsers.conf
+        HTTP_Server     On
+        HTTP_Listen     0.0.0.0
+        HTTP_Port       2020
+        Health_Check    On
+
+    # Kubernetes container logs
+    [INPUT]
+        Name              tail
+        Tag               kube.*
+        Path              /var/log/containers/*.log
+        Parser            docker
+        DB                /var/log/fluentbit.db
+        Mem_Buf_Limit     50MB
+        Skip_Long_Lines   On
+        Refresh_Interval  10
+
+    # Summit application logs
+    [INPUT]
+        Name              tail
+        Tag               summit.*
+        Path              /var/log/summit/*.log
+        Parser            json
+        DB                /var/log/fluentbit-summit.db
+        Mem_Buf_Limit     100MB
+
+    # Kubernetes metadata enrichment
+    [FILTER]
+        Name                kubernetes
+        Match               kube.*
+        Kube_URL            https://kubernetes.default.svc:443
+        Kube_CA_File        /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        Kube_Token_File     /var/run/secrets/kubernetes.io/serviceaccount/token
+        Kube_Tag_Prefix     kube.var.log.containers.
+        Merge_Log           On
+        Keep_Log            Off
+        K8S-Logging.Parser  On
+        K8S-Logging.Exclude On
+        Labels              On
+        Annotations         On
+
+    # Parse JSON logs from Summit services
+    [FILTER]
+        Name          parser
+        Match         summit.*
+        Key_Name      log
+        Parser        summit-json
+        Reserve_Data  On
+
+    # Add trace context if available
+    [FILTER]
+        Name          modify
+        Match         *
+        Add           cluster ${CLUSTER_NAME}
+        Add           environment ${ENVIRONMENT}
+
+    # Normalize log levels
+    [FILTER]
+        Name          lua
+        Match         *
+        Script        normalize_level.lua
+        Call          normalize_level
+
+    # Redact sensitive data
+    [FILTER]
+        Name          lua
+        Match         *
+        Script        redact.lua
+        Call          redact_sensitive
+
+    # Filter out noisy logs
+    [FILTER]
+        Name          grep
+        Match         kube.*
+        Exclude       log healthcheck
+        Exclude       log /health
+        Exclude       log /ready
+        Exclude       log /live
+
+    # Output to Elasticsearch
+    [OUTPUT]
+        Name            es
+        Match           *
+        Host            ${ELASTICSEARCH_HOST}
+        Port            ${ELASTICSEARCH_PORT}
+        Index           summit-logs
+        Type            _doc
+        Logstash_Format On
+        Logstash_Prefix summit
+        Time_Key        @timestamp
+        Include_Tag_Key On
+        Tag_Key         tag
+        Buffer_Size     10MB
+        Retry_Limit     3
+
+    # Output to Loki for Grafana
+    [OUTPUT]
+        Name          loki
+        Match         *
+        Host          ${LOKI_HOST}
+        Port          ${LOKI_PORT}
+        Labels        job=summit, environment=${ENVIRONMENT}
+        Label_Keys    $kubernetes['namespace_name'], $kubernetes['pod_name'], $level
+        Remove_Keys   kubernetes
+        Line_Format   json
+
+    # Output metrics about logging
+    [OUTPUT]
+        Name          prometheus_exporter
+        Match         internal_metrics
+        Host          0.0.0.0
+        Port          2021
+
+  parsers.conf: |
+    [PARSER]
+        Name        docker
+        Format      json
+        Time_Key    time
+        Time_Format %Y-%m-%dT%H:%M:%S.%L
+        Time_Keep   On
+
+    [PARSER]
+        Name        summit-json
+        Format      json
+        Time_Key    timestamp
+        Time_Format %Y-%m-%dT%H:%M:%S.%LZ
+        Time_Keep   On
+
+    [PARSER]
+        Name        syslog
+        Format      regex
+        Regex       ^\<(?<pri>[0-9]+)\>(?<time>[^ ]* {1,2}[^ ]* [^ ]*) (?<host>[^ ]*) (?<ident>[a-zA-Z0-9_\/\.\-]*)(?:\[(?<pid>[0-9]+)\])?(?:[^\:]*\:)? *(?<message>.*)$
+        Time_Key    time
+        Time_Format %b %d %H:%M:%S
+
+  normalize_level.lua: |
+    function normalize_level(tag, timestamp, record)
+        local level = record["level"] or record["severity"] or record["loglevel"]
+        if level then
+            level = string.lower(level)
+            if level == "warn" then
+                level = "warning"
+            elseif level == "err" then
+                level = "error"
+            elseif level == "crit" or level == "critical" or level == "fatal" then
+                level = "critical"
+            elseif level == "dbg" then
+                level = "debug"
+            elseif level == "inf" then
+                level = "info"
+            end
+            record["level"] = level
+        else
+            record["level"] = "info"
+        end
+        return 1, timestamp, record
+    end
+
+  redact.lua: |
+    -- Patterns for sensitive data
+    local patterns = {
+        -- API keys and tokens
+        {"(api[_-]?key[\"']?\\s*[:=]\\s*[\"']?)([a-zA-Z0-9_\\-]{20,})", "%1[REDACTED]"},
+        {"(token[\"']?\\s*[:=]\\s*[\"']?)([a-zA-Z0-9_\\-\\.]{20,})", "%1[REDACTED]"},
+        {"(bearer\\s+)([a-zA-Z0-9_\\-\\.]+)", "%1[REDACTED]"},
+        -- Passwords
+        {"(password[\"']?\\s*[:=]\\s*[\"']?)([^\"'\\s]+)", "%1[REDACTED]"},
+        {"(secret[\"']?\\s*[:=]\\s*[\"']?)([^\"'\\s]+)", "%1[REDACTED]"},
+        -- Credit cards (basic pattern)
+        {"\\b(\\d{4})[\\s\\-]?(\\d{4})[\\s\\-]?(\\d{4})[\\s\\-]?(\\d{4})\\b", "[REDACTED-CC]"},
+        -- SSN
+        {"\\b\\d{3}[\\-\\s]?\\d{2}[\\-\\s]?\\d{4}\\b", "[REDACTED-SSN]"},
+        -- Email addresses
+        {"([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})", "[REDACTED-EMAIL]"},
+    }
+
+    function redact_sensitive(tag, timestamp, record)
+        for key, value in pairs(record) do
+            if type(value) == "string" then
+                for _, pattern in ipairs(patterns) do
+                    value = string.gsub(value, pattern[1], pattern[2])
+                end
+                record[key] = value
+            end
+        end
+        return 1, timestamp, record
+    end

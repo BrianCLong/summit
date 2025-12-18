@@ -5,12 +5,18 @@
  * for Apollo GraphQL, Neo4j, and BullMQ operations.
  */
 
+// @ts-ignore - OpenTelemetry types not fully resolved
 import { NodeSDK } from '@opentelemetry/sdk-node';
+// @ts-ignore - OpenTelemetry types not fully resolved
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
-import { Resource } from '@opentelemetry/resources';
+// @ts-ignore - OpenTelemetry types not fully resolved
+import * as resources from '@opentelemetry/resources';
+// @ts-ignore - OpenTelemetry types not fully resolved
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { JaegerExporter } from '@opentelemetry/exporter-jaeger';
+// @ts-ignore - OpenTelemetry types not fully resolved
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+// @ts-ignore - OpenTelemetry types not fully resolved
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 import { trace, context, SpanStatusCode, SpanKind } from '@opentelemetry/api';
 import pino from 'pino';
@@ -52,8 +58,8 @@ class OpenTelemetryService {
   initialize(): void {
     try {
       // Configure resource
-      const resource = Resource.default().merge(
-        new Resource({
+      const resource = resources.Resource.default().merge(
+        new resources.Resource({
           [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
           [SemanticResourceAttributes.SERVICE_VERSION]:
             this.config.serviceVersion,

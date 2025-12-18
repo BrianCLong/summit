@@ -1,0 +1,358 @@
+meta:
+  id: plan.ux-guidelines@v1
+  owner: 'design-engineering'
+  purpose: 'Align UI components with UX standards through component library vetting'
+  tags:
+    - ux
+    - design-system
+    - components
+    - style-guide
+    - consistency
+  guardrails:
+    - 'Guidelines must be actionable for developers'
+    - 'Component changes require design review'
+    - 'Accessibility must be built in'
+    - 'Performance must not be compromised'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  current_components: string
+  design_system: string
+  ux_pain_points: string
+  target_platforms: string
+  accessibility_requirements: string
+
+template: |
+  You are a Design Engineer creating UX guidelines for Summit/IntelGraph.
+
+  **Objective:** Align UI components with UX standards.
+
+  **Current Components:**
+  {{current_components}}
+
+  **Design System:**
+  {{design_system}}
+
+  **UX Pain Points:**
+  {{ux_pain_points}}
+
+  **Target Platforms:**
+  {{target_platforms}}
+
+  **Accessibility Requirements:**
+  {{accessibility_requirements}}
+
+  ## Deliverables
+
+  ### 1. Component Library Audit
+  ```yaml
+  audit:
+    coverage:
+      total_components: [count]
+      documented: [count]
+      tested: [count]
+      accessible: [count]
+
+    categories:
+      - name: Form Controls
+        components: [Button, Input, Select, Checkbox, Radio]
+        status: [good, needs_work, missing]
+        issues: [list]
+
+      - name: Data Display
+        components: [Table, Card, List, Badge, Avatar]
+        status: [good, needs_work, missing]
+        issues: [list]
+
+      - name: Navigation
+        components: [Menu, Tabs, Breadcrumb, Pagination]
+        status: [good, needs_work, missing]
+        issues: [list]
+
+      - name: Feedback
+        components: [Alert, Toast, Modal, Tooltip]
+        status: [good, needs_work, missing]
+        issues: [list]
+
+      - name: Layout
+        components: [Grid, Stack, Divider, Container]
+        status: [good, needs_work, missing]
+        issues: [list]
+
+    findings:
+      - component: Button
+        issues:
+          - Inconsistent sizing across variants
+          - Missing loading state
+          - Focus ring not visible
+        priority: high
+
+      - component: Table
+        issues:
+          - No sticky header option
+          - Accessibility issues with sorting
+          - Inconsistent pagination
+        priority: high
+  ```
+
+  ### 2. Style Guide
+  ```yaml
+  style_guide:
+    typography:
+      font_family: "Inter, system-ui, sans-serif"
+      scale:
+        - name: heading-1
+          size: 2.5rem
+          weight: 700
+          line_height: 1.2
+          usage: Page titles
+
+        - name: heading-2
+          size: 2rem
+          weight: 600
+          line_height: 1.3
+          usage: Section titles
+
+        - name: body
+          size: 1rem
+          weight: 400
+          line_height: 1.5
+          usage: Body text
+
+        - name: caption
+          size: 0.875rem
+          weight: 400
+          line_height: 1.4
+          usage: Labels, metadata
+
+    colors:
+      semantic:
+        - name: primary
+          light: "#2563eb"
+          dark: "#3b82f6"
+          usage: Primary actions, links
+
+        - name: success
+          light: "#16a34a"
+          dark: "#22c55e"
+          usage: Success states
+
+        - name: warning
+          light: "#d97706"
+          dark: "#f59e0b"
+          usage: Warning states
+
+        - name: error
+          light: "#dc2626"
+          dark: "#ef4444"
+          usage: Error states
+
+      contrast:
+        text_on_primary: "#ffffff"
+        minimum_ratio: 4.5:1
+
+    spacing:
+      base: 4px
+      scale: [4, 8, 12, 16, 24, 32, 48, 64, 96]
+      usage:
+        - 4px: Tight inline elements
+        - 8px: Related elements
+        - 16px: Section padding
+        - 24px: Card padding
+        - 32px+: Section separation
+
+    motion:
+      duration:
+        fast: 150ms
+        normal: 250ms
+        slow: 400ms
+      easing: "cubic-bezier(0.4, 0, 0.2, 1)"
+      reduce_motion: Respect prefers-reduced-motion
+  ```
+
+  ### 3. Component Checklist
+  ```yaml
+  component_checklist:
+    requirements:
+      documentation:
+        - [ ] Props documented with types
+        - [ ] Usage examples provided
+        - [ ] Do's and don'ts included
+        - [ ] Accessibility notes documented
+
+      accessibility:
+        - [ ] Keyboard navigable
+        - [ ] Screen reader tested
+        - [ ] Color contrast meets WCAG AA
+        - [ ] Focus states visible
+        - [ ] ARIA labels where needed
+
+      functionality:
+        - [ ] All variants implemented
+        - [ ] All sizes implemented
+        - [ ] Loading/disabled states
+        - [ ] Error states handled
+        - [ ] Responsive behavior defined
+
+      testing:
+        - [ ] Unit tests for logic
+        - [ ] Visual regression tests
+        - [ ] Interaction tests
+        - [ ] A11y automated tests
+
+      performance:
+        - [ ] Bundle size checked
+        - [ ] Lazy loading if large
+        - [ ] No memory leaks
+        - [ ] Render optimization
+
+    template: |
+      ## Component: [Name]
+
+      ### Status: [Draft/Review/Stable]
+      ### Owner: [Team/Person]
+
+      ### Props
+      | Prop | Type | Default | Description |
+      |------|------|---------|-------------|
+
+      ### Variants
+      - Primary
+      - Secondary
+      - Outline
+
+      ### Sizes
+      - sm / md / lg
+
+      ### States
+      - Default, Hover, Focus, Active, Disabled, Loading
+
+      ### Accessibility
+      - Role: button
+      - Keyboard: Enter, Space
+      - Screen reader: [behavior]
+
+      ### Examples
+      \`\`\`tsx
+      <Button variant="primary">Click me</Button>
+      \`\`\`
+  ```
+
+  ### 4. Migration Plan
+  ```yaml
+  migration:
+    phases:
+      - phase: 1
+        name: Audit and Document
+        duration: 2 weeks
+        tasks:
+          - Complete component audit
+          - Document current state
+          - Identify priority fixes
+
+      - phase: 2
+        name: Critical Fixes
+        duration: 4 weeks
+        tasks:
+          - Accessibility fixes
+          - Consistency improvements
+          - Documentation updates
+
+      - phase: 3
+        name: Enhancement
+        duration: Ongoing
+        tasks:
+          - New component variants
+          - Performance optimization
+          - Advanced features
+
+    breaking_changes:
+      policy: Semver with deprecation period
+      deprecation:
+        - Add @deprecated JSDoc
+        - Console warning in dev
+        - Migration guide provided
+        - 3 month removal window
+
+    tracking:
+      - GitHub project board
+      - Weekly design review
+      - Monthly metrics review
+  ```
+
+  ### 5. Governance
+  ```yaml
+  governance:
+    component_lifecycle:
+      proposal:
+        - Design spec required
+        - Use case documentation
+        - Accessibility plan
+        - Review by design lead
+
+      development:
+        - Follow component checklist
+        - Design review at 50%
+        - QA review at 100%
+
+      release:
+        - Documentation complete
+        - Tests passing
+        - Changelog updated
+        - Storybook published
+
+    review_process:
+      design_review:
+        required_for: New components, major changes
+        reviewers: Design team
+        criteria: UX guidelines compliance
+
+      code_review:
+        required_for: All changes
+        reviewers: Frontend team
+        criteria: Technical quality, a11y
+
+    exceptions:
+      process: Request in #design-system
+      approval: Design lead
+      documentation: Exception logged with reason
+  ```
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Component audit complete
+  - [ ] Style guide documented
+  - [ ] Checklist being used
+  - [ ] Migration plan approved
+  - [ ] Governance in place
+
+  ## Rollback Plan
+  - Guidelines are additive
+  - Components remain backwards compatible
+  - Deprecation before removal
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'component-library-ux'
+    inputs:
+      current_components: '50+ React components, MUI-based'
+      design_system: 'Partially documented, inconsistent usage'
+      ux_pain_points: 'Inconsistent spacing, missing states, a11y gaps'
+      target_platforms: 'Desktop web, some tablet'
+      accessibility_requirements: 'WCAG 2.1 AA'
+    expected_contains:
+      - 'Component Audit'
+      - 'Style Guide'
+      - 'Component Checklist'
+      - 'Migration Plan'
