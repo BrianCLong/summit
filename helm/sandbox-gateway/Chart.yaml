@@ -1,0 +1,25 @@
+apiVersion: v2
+name: sandbox-gateway
+description: GraphQL Gateway for Sandbox Tenant and Data Lab Services
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - sandbox
+  - datalab
+  - graphql
+  - gateway
+  - intelgraph
+maintainers:
+  - name: IntelGraph Team
+    email: engineering@intelgraph.io
+sources:
+  - https://github.com/BrianCLong/summit/tree/main/services/sandbox-gateway
+dependencies:
+  - name: common
+    version: "1.x.x"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: common.enabled
+annotations:
+  category: API Gateway
+  licenses: MIT

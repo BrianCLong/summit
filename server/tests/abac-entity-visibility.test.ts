@@ -1,5 +1,6 @@
 import { withAuthAndPolicy } from '../src/middleware/withAuthAndPolicy';
 import { ForbiddenError } from 'apollo-server-express';
+import { describe, it, test, expect } from '@jest/globals';
 
 describe('mission tag and temporal ABAC', () => {
   const baseUser = {
@@ -26,7 +27,7 @@ describe('mission tag and temporal ABAC', () => {
     const result = await resolver(
       {},
       {},
-      { user: baseUser },
+      { user: baseUser, req: {} as any },
       { fieldName: 'test', path: 'testPath' },
     );
     expect(result).toBe('ok');
@@ -45,7 +46,7 @@ describe('mission tag and temporal ABAC', () => {
       resolver(
         {},
         {},
-        { user: baseUser },
+        { user: baseUser, req: {} as any },
         { fieldName: 'test', path: 'testPath' },
       ),
     ).rejects.toThrow(ForbiddenError);
@@ -65,7 +66,7 @@ describe('mission tag and temporal ABAC', () => {
       resolver(
         {},
         {},
-        { user: baseUser },
+        { user: baseUser, req: {} as any },
         { fieldName: 'test', path: 'testPath' },
       ),
     ).rejects.toThrow(ForbiddenError);
