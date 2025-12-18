@@ -119,6 +119,26 @@ export const aiJobsTotal = new client.Counter({
   labelNames: ['job_type', 'status'],
 });
 
+// LLM Metrics
+const llmRequestDuration = new client.Histogram({
+  name: 'llm_request_duration_seconds',
+  help: 'Duration of LLM requests in seconds',
+  labelNames: ['provider', 'model', 'status'],
+  buckets: [0.5, 1, 2, 5, 10, 20, 60],
+});
+
+const llmTokensTotal = new client.Counter({
+  name: 'llm_tokens_total',
+  help: 'Total number of tokens processed',
+  labelNames: ['provider', 'model', 'type'], // type: prompt, completion
+});
+
+const llmRequestsTotal = new client.Counter({
+  name: 'llm_requests_total',
+  help: 'Total number of LLM requests',
+  labelNames: ['provider', 'model', 'status'],
+});
+
 // Graph operations metrics
 export const graphNodesTotal = new client.Gauge({
   name: 'graph_nodes_total',
@@ -235,6 +255,9 @@ register.registerMetric(aiJobsQueued);
 register.registerMetric(aiJobsProcessing);
 register.registerMetric(aiJobDuration);
 register.registerMetric(aiJobsTotal);
+register.registerMetric(llmRequestDuration);
+register.registerMetric(llmTokensTotal);
+register.registerMetric(llmRequestsTotal);
 register.registerMetric(graphNodesTotal);
 register.registerMetric(graphEdgesTotal);
 register.registerMetric(graphOperationDuration);
@@ -472,6 +495,9 @@ export const metrics = {
   aiJobsProcessing,
   aiJobDuration,
   aiJobsTotal,
+  llmRequestDuration,
+  llmTokensTotal,
+  llmRequestsTotal,
   graphNodesTotal,
   graphEdgesTotal,
   graphOperationDuration,

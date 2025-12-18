@@ -4,7 +4,12 @@
  */
 
 import logger from '../utils/logger.js';
-import { applicationErrors } from '../monitoring/metrics.js';
+import {
+  applicationErrors,
+  llmRequestDuration,
+  llmTokensTotal,
+  llmRequestsTotal,
+} from '../monitoring/metrics.js';
 import { otelService } from '../monitoring/opentelemetry.js';
 
 // Global history buffer for the "Prompt Activity Monitor"
@@ -127,7 +132,8 @@ class LLMService {
         }
 
         const latency = Date.now() - startTime;
-        this.updateMetrics(latency, response.usage);
+        this.updateMetrics(latency, response.usage, model);
+        llmRequestsTotal.labels(this.config.provider, model, 'success').inc();
 
         logger.debug('LLM completion successful', {
           provider: this.config.provider,
@@ -162,6 +168,7 @@ class LLMService {
           applicationErrors
             .labels('llm_service', 'CompletionError', 'error')
             .inc();
+          llmRequestsTotal.labels(this.config.provider, model, 'error').inc();
 
           logger.error('LLM completion failed after retries', {
             provider: this.config.provider,
@@ -233,7 +240,8 @@ class LLMService {
       }
 
       const latency = Date.now() - startTime;
-      this.updateMetrics(latency, response.usage);
+      this.updateMetrics(latency, response.usage, model);
+      llmRequestsTotal.labels(this.config.provider, model, 'success').inc();
 
       // Record to global history
       addToHistory({
@@ -253,6 +261,7 @@ class LLMService {
     } catch (error) {
       this.metrics.errorCount++;
       applicationErrors.labels('llm_service', 'ChatError', 'error').inc();
+      llmRequestsTotal.labels(this.config.provider, model, 'error').inc();
 
       logger.error('LLM chat failed', {
         provider: this.config.provider,
@@ -507,8 +516,36 @@ Answer:`;
   /**
    * Update metrics
    */
-  updateMetrics(latency, usage = {}) {
+  updateMetrics(latency, usage = {}, model = this.config.model) {
     this.metrics.totalCompletions++;
+
+    // Record to Prometheus
+    llmRequestDuration
+      .labels(this.config.provider, model, 'success')
+      .observe(latency / 1000);
+
+    if (usage) {
+      if (usage.prompt_tokens) {
+        llmTokensTotal
+          .labels(this.config.provider, model, 'prompt')
+          .inc(usage.prompt_tokens);
+      }
+      if (usage.completion_tokens) {
+        llmTokensTotal
+          .labels(this.config.provider, model, 'completion')
+          .inc(usage.completion_tokens);
+      }
+      if (usage.total_tokens) {
+        // We don't have a 'total' type counter usually if we have prompt/completion,
+        // but let's strictly follow standard: prompt + completion = total.
+        // If we only have total, we log it.
+        if (!usage.prompt_tokens && !usage.completion_tokens) {
+          llmTokensTotal
+            .labels(this.config.provider, model, 'total')
+            .inc(usage.total_tokens);
+        }
+      }
+    }
 
     const currentLatency = this.metrics.averageLatency;
     this.metrics.averageLatency = currentLatency
