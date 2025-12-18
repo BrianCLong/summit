@@ -1,5 +1,5 @@
-import { useQuery, useMutation } from '@apollo/client'
-import { gql } from '@apollo/client'
+import { gql } from '@apollo/client/core'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { useMemo, useCallback } from 'react'
 import type { Entity, Relationship } from '@/types'
 

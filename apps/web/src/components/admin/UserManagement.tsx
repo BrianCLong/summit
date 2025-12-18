@@ -41,7 +41,8 @@ import {
   PersonAdd as ImpersonateIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { useQuery, useMutation, gql } from '@apollo/client';
+import { gql } from '@apollo/client/core';
+import { useQuery, useMutation } from '@apollo/client/react';
 import { format } from 'date-fns';
 
 // ============================================================================

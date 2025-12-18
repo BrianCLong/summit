@@ -22,7 +22,7 @@ const optionalBoundedString = (max: number) =>
 const parseOrThrow = <T>(schema: z.ZodType<T>, payload: unknown, context: string) => {
   const parsed = schema.safeParse(payload);
   if (!parsed.success) {
-    const message = parsed.error.errors
+    const message = parsed.error.issues
       .map((err) => `${context}${err.path.length ? `.${err.path.join('.')}` : ''} ${err.message}`)
       .join('; ');
     throw new Error(`Validation failed: ${message}`);

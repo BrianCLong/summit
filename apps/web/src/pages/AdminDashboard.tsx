@@ -23,8 +23,8 @@ import {
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
 } from '@mui/icons-material';
-import { useQuery } from '@apollo/client';
-import { gql } from '@apollo/client';
+import { gql } from '@apollo/client/core';
+import { useQuery } from '@apollo/client/react';
 
 import DashboardOverview from '../components/admin/DashboardOverview';
 import UserManagement from '../components/admin/UserManagement';
