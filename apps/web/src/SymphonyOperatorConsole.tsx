@@ -225,10 +225,11 @@ function KPIBar() {
 }
 
 // ---------- Prompt Activity Monitor ----------
-function PromptActivityMonitor() {
+export function PromptActivityMonitor({ active }: { active: boolean }) {
   const [prompts, setPrompts] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
+  const pollerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const fetchPrompts = async () => {
     setLoading(true)
@@ -245,11 +246,24 @@ function PromptActivityMonitor() {
   }
 
   useEffect(() => {
+    if (!active) {
+      if (pollerRef.current) {
+        clearInterval(pollerRef.current)
+      }
+      pollerRef.current = null
+      return
+    }
+
     fetchPrompts()
-    // Poll every 5 seconds
-    const interval = setInterval(fetchPrompts, 5000)
-    return () => clearInterval(interval)
-  }, [])
+    pollerRef.current = setInterval(fetchPrompts, 5000)
+
+    return () => {
+      if (pollerRef.current) {
+        clearInterval(pollerRef.current)
+      }
+      pollerRef.current = null
+    }
+  }, [active])
 
   return (
     <Card className="col-span-12">
@@ -1065,7 +1079,7 @@ export default function SymphonyOperatorConsole() {
 
         {/* Prompts */}
         <TabsContent value="prompts" className="space-y-4">
-            <PromptActivityMonitor />
+            <PromptActivityMonitor active={activeTab === 'prompts'} />
         </TabsContent>
 
         {/* Route */}
