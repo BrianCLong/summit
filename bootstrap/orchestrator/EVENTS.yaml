@@ -1,0 +1,21 @@
+events:
+  repo_change:
+    triggers:
+      - agent: executor
+        flow: session_to_pr
+
+  daily_cycle:
+    cron: "0 3 * * *"
+    triggers:
+      - agent: executor
+        flow: auto_improve_daily
+
+  closed_pr_detected:
+    triggers:
+      - agent: codex
+        flow: recapture_closed_prs
+
+  risk_hotspot_detected:
+    triggers:
+      - agent: predictive
+        flow: risk_analysis

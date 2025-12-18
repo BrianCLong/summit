@@ -10,6 +10,7 @@ import mysql from 'mysql2/promise';
 type MySQLPool = any;
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { EventEmitter } from 'events';
+import { Readable } from 'stream';
 
 const tracer = {
   startActiveSpan: async (
@@ -312,6 +313,90 @@ export class JDBCConnector extends EventEmitter {
         throw error;
       } finally {
         span.end?.();
+      }
+    });
+  }
+
+  /**
+   * Stream query results.
+   * Returns a standard Node.js Readable stream.
+   *
+   * For PostgreSQL: Wraps pg-cursor in a Readable stream.
+   * For MySQL: Returns the native stream.
+   */
+  async queryStream(
+    sql: string,
+    params: any[] = [],
+    options: QueryOptions = {},
+  ): Promise<Readable> {
+    return tracer.startActiveSpan('jdbc.query_stream', async (span: any) => {
+      span.setAttributes?.({
+        tenant_id: this.tenantId,
+        database_type: this.config.type,
+        sql_length: sql.length,
+        stream: true,
+      });
+
+      if (!this.connected || !this.pool) {
+        throw new Error('Database not connected');
+      }
+
+      try {
+        if (this.config.type === 'postgresql') {
+          const client = await (this.pool as Pool).connect();
+          const Cursor = await import('pg-cursor').then((m) => m.default || m);
+          const cursor = client.query(new Cursor(sql, params));
+          const fetchSize = options.fetchSize || 100;
+
+          // Wrap Cursor in Readable
+          const stream = new Readable({
+            objectMode: true,
+            read() {
+              cursor.read(
+                fetchSize,
+                (err: Error | null, rows: any[]) => {
+                  if (err) {
+                    this.destroy(err);
+                    return;
+                  }
+                  if (!rows || rows.length === 0) {
+                    this.push(null);
+                  } else {
+                    rows.forEach((row: any) => this.push(row));
+                  }
+                },
+              );
+            },
+            destroy(err, callback) {
+              cursor.close(() => {
+                client.release();
+                callback(err);
+              });
+            },
+          });
+
+          return stream;
+        } else if (this.config.type === 'mysql') {
+          const connection = await (this.pool as MySQLPool).getConnection();
+          const stream = connection.connection
+            .query(sql, params)
+            .stream({ highWaterMark: options.fetchSize || 100 });
+
+          stream.on('end', () => {
+            connection.release();
+          });
+
+          stream.on('error', () => {
+            connection.release();
+          });
+
+          return stream;
+        } else {
+          throw new Error('Unsupported database type for streaming');
+        }
+      } catch (error) {
+        span.recordException?.(error as Error);
+        throw error;
       }
     });
   }
