@@ -1,49 +1,51 @@
-# Supply Chain Security Suite
+# Supply Chain Assurance (SCA)
 
-This package scaffolds SBOM generation, vulnerability scanning, license governance, and Sigstore attestations for Summit services. It includes both Go and Node runners, dual-control exception workflows, and CI gates that export signed manifests to the Compliance Center.
+This package bootstraps supply-chain security controls for Summit, covering SBOM generation (SPDX + CycloneDX), vulnerability and license governance, Sigstore attestations, and compliance exports. The toolkit ships language-agnostic policy plus minimal Go and Node orchestrators so the same controls can gate containers, services, and libraries across the fleet.
 
-## Components
+## Capabilities
+- **SBOM generation**: deterministic SPDX and CycloneDX documents for each image or package, stored in `manifests/` with digest-based filenames.
+- **Vulnerability scanning**: score CVEs against baseline CVSS thresholds and compute burn-down deltas for dashboards.
+- **License compliance**: blocked-license enforcement with dual-control exceptions and expiring waivers.
+- **Sigstore attestations**: keyless signing for SBOMs and scan manifests; attestations are emitted alongside artifacts for Compliance Center ingestion.
+- **Dashboards**: burn-down and license exception lenses for Grafana/Loki; JSON definitions live under `dashboards/`.
+- **GitHub App automation**: hooks for automated remediation PRs sourced from vulnerability advisories.
 
-- **Go toolkit (`security/supply-chain/go`)** – deterministic SBOM emitters (SPDX & CycloneDX), policy-aware license/vulnerability evaluation, and Sigstore-friendly attestations.
-- **Node orchestrator (`security/supply-chain/node`)** – lightweight wrappers for CI/CD, JSON exports, and integration with external scanners.
-- **Policies (`security/supply-chain/policy.yaml`)** – baseline CVSS thresholds, blocked license lists, dual-control approvers, and reproducible-build attestations.
-- **Dashboards (`security/supply-chain/dashboards`)** – burn-down and exception-tracking specs ready for Grafana/Looker.
-- **Pipelines (`.github/workflows/supply-chain.yml`)** – CI gates for SBOM per image, license/exception enforcement, reproducible-build proof, and export of signed manifests to the Compliance Center.
+## Quickstart
+1. Populate `policy/images.json` with the container images to gate.
+2. Update `policy/policy.json` with CVSS and license thresholds.
+3. Run the Node CLI for local checks:
+   ```bash
+   node security/supply-chain/node/index.js license-check \
+     --policy security/supply-chain/policy/policy.json \
+     --licenses security/supply-chain/policy/sample-licenses.json \
+     --exceptions security/supply-chain/policy/license-exceptions.json
+   ```
+4. Validate vulnerability policy:
+   ```bash
+   node security/supply-chain/node/index.js vuln-policy \
+     --policy security/supply-chain/policy/policy.json \
+     --vulns security/supply-chain/policy/sample-vulns.json
+   ```
+5. Build the Go orchestrator:
+   ```bash
+   (cd security/supply-chain/go && go test ./... && go run ./cmd/sca --help)
+   ```
 
-## Usage
+## CI/CD integration
+- `.github/workflows/supply-chain.yml` runs SBOM + vulnerability + license gates per-image using the supplied policy.
+- Cosign attestations are produced for SBOMs; signed artifacts are uploaded for Compliance Center.
+- Violations (CVSS over baseline or disallowed licenses without dual approvals) fail the workflow.
 
-### Node CLI (local development)
+## Directory layout
+- `go/`: Lightweight CLI for deterministic SBOM manifests and attestations.
+- `node/`: Policy enforcement and dashboard reducers.
+- `policy/`: CVSS baselines, blocked licenses, license exceptions, image inventory, and sample datasets.
+- `dashboards/`: Grafana-ready JSON for vulnerability burn-down and license exception overviews.
+- `github-app/`: GitHub App blueprint for automated PRs with suggested fixes.
+- `manifests/`: Output folder for generated SBOMs, scan reports, and attestations.
 
-```bash
-cd security/supply-chain/node
-npm install
-node index.js sbom --image ghcr.io/summit/service:latest
-node index.js scan --report reports/vulns.json
-node index.js licenses --sbom reports/sbom.spdx.json
-node index.js attest --manifest manifests/app.json --signature-path artifacts/cosign.sig
-```
+## Dual control
+License exceptions require at least two approvers with distinct identities; the policy engine enforces expiration dates and purpose notes. Update `policy/license-exceptions.json` with approvals before running the gates.
 
-### Go CLI (deterministic pipelines)
-
-```bash
-cd security/supply-chain/go
-go run ./cmd/supplychain --policy ../policy.yaml --image ghcr.io/summit/service:latest --format spdx
-```
-
-The Go binary emits SPDX or CycloneDX documents and enforces baseline CVSS thresholds and blocked-license policy. Dual-control exception requests must include at least two distinct approvers from `policy.yaml`.
-
-### Sigstore attestations
-
-Use `scripts/export_manifests.sh` to sign SBOMs and vulnerability manifests with Cosign and forward them to the Compliance Center API. The GitHub Actions workflow wires this script into CI so every container image publishes: SBOM (SPDX+CycloneDX), vulnerability report, license exceptions, and provenance attestations.
-
-## Dual-control & exception flow
-
-1. All license exceptions require two approvers from the `dual_control.approvers` list (minimum enforced by both Go/Node runners).
-2. Exceptions expire after the configured window; the dashboard highlights pending expirations.
-3. Compliance Center receives signed exception manifests so downstream auditors can verify provenance.
-
-## Roadmap-aligned artifacts
-
-- Baseline CVSS policy and blocked-license filters are centrally defined in `policy.yaml`.
-- Burn-down and exception dashboards ship as shareable JSON specs under `dashboards/`.
-- GitHub App automation opens remediation PRs whenever a scanner surfaces a fix version.
+## Compliance Center export
+All SBOMs, scan manifests, and cosign attestations are written under `manifests/` with digest-aware names. CI uploads these artifacts so Compliance Center can ingest them without additional transformation.

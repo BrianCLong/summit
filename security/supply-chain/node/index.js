@@ -1,148 +1,168 @@
+#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
-const yaml = require('js-yaml');
 
-function loadPolicy(policyPath = path.join(__dirname, '..', 'policy.yaml')) {
-  const content = fs.readFileSync(policyPath, 'utf-8');
-  return yaml.load(content);
+function loadJson(filePath) {
+  const fullPath = path.resolve(filePath);
+  return JSON.parse(fs.readFileSync(fullPath, 'utf8'));
 }
 
-function generateSpdx(image, policy) {
-  const now = new Date().toISOString();
-  return {
-    spdxVersion: 'SPDX-2.3',
-    dataLicense: 'CC0-1.0',
-    creationInfo: {
-      created: now,
-      creators: ['Tool: summit-supply-chain-node'],
-      licenseListVersion: '3.23'
-    },
-    documentNamespace: `urn:spdx:sbom:${encodeURIComponent(image)}`,
-    name: `SBOM for ${image}`,
-    packages: [],
-    policy
-  };
+function requireArg(args, name) {
+  const value = args[name];
+  if (!value) {
+    throw new Error(`Missing required argument --${name}`);
+  }
+  return value;
 }
 
-function generateCycloneDx(image, policy) {
-  return {
-    bomFormat: 'CycloneDX',
-    specVersion: '1.6',
-    serialNumber: `urn:uuid:${cryptoSafeId()}`,
-    version: 1,
-    metadata: {
-      timestamp: new Date().toISOString(),
-      tools: [{ name: 'summit-supply-chain-node', vendor: 'summit' }],
-      component: { name: image }
-    },
-    components: [],
-    policy
-  };
-}
-
-function cryptoSafeId() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = Math.random() * 16 | 0;
-    const v = c === 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
+function parseArgs(argv) {
+  const args = {};
+  argv.forEach((item, index) => {
+    if (item.startsWith('--')) {
+      const key = item.replace(/^--/, '');
+      const next = argv[index + 1];
+      if (next && !next.startsWith('--')) {
+        args[key] = next;
+      } else {
+        args[key] = true;
+      }
+    }
   });
+  return args;
 }
 
-function evaluateVulnerabilities(reportPath, policy) {
-  const raw = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
-  const failing = raw.vulnerabilities.filter((vuln) => vuln.cvss >= policy.baseline_cvss);
-  return { failing, passed: failing.length === 0 };
+function validateExceptions(policy, exceptions) {
+  const required = policy.licenses.dualControl.requiredApprovals;
+  const roles = policy.licenses.dualControl.approverRoles || [];
+  const errors = [];
+
+  exceptions.exceptions.forEach((entry) => {
+    const approvers = entry.approvals || [];
+    const unique = new Set(approvers.map((a) => a.name));
+    if (unique.size < required) {
+      errors.push(`Exception ${entry.id} does not meet dual-control requirement (${unique.size}/${required}).`);
+    }
+    roles.forEach((role) => {
+      if (!approvers.find((a) => a.role === role)) {
+        errors.push(`Exception ${entry.id} missing approver with role ${role}.`);
+      }
+    });
+    const expiry = new Date(entry.expiresAt);
+    if (Number.isNaN(expiry.getTime())) {
+      errors.push(`Exception ${entry.id} has invalid expiry ${entry.expiresAt}.`);
+    } else if (expiry < new Date()) {
+      errors.push(`Exception ${entry.id} expired on ${entry.expiresAt}.`);
+    }
+  });
+
+  return errors;
 }
 
-function evaluateLicenses(sbomPath, policy) {
-  const data = JSON.parse(fs.readFileSync(sbomPath, 'utf-8'));
-  const licenses = data.packages?.map((pkg) => pkg.license).filter(Boolean) || [];
-  const blocked = licenses.filter((license) => policy.blocked_licenses.includes(license));
-  return { blocked, passed: blocked.length === 0 };
+function checkLicenses(policy, licenses, exceptions) {
+  const blocked = new Set(policy.licenses.blocked);
+  const exceptionMap = new Map();
+  exceptions.exceptions.forEach((entry) => {
+    exceptionMap.set(`${entry.package}:${entry.license}`, entry);
+  });
+
+  const violations = [];
+  licenses.dependencies.forEach((dep) => {
+    const key = `${dep.name}:${dep.license}`;
+    if (blocked.has(dep.license)) {
+      if (!exceptionMap.has(key)) {
+        violations.push(`Dependency ${dep.name}@${dep.version} uses blocked license ${dep.license}.`);
+      }
+    }
+  });
+  return violations;
 }
 
-function dualControlSatisfied(exception) {
-  const uniqueApprovers = new Set(exception.approvers || []);
-  return uniqueApprovers.size >= (exception.minimum_approvers || 2);
+function checkVulns(policy, vulns) {
+  const blockedSeverities = new Set(policy.cvss.blockedSeverities.map((s) => s.toLowerCase()));
+  const maxScore = policy.cvss.maxBaseScore;
+  const violations = [];
+  vulns.vulnerabilities.forEach((v) => {
+    if (blockedSeverities.has(v.severity.toLowerCase())) {
+      violations.push(`${v.id} severity ${v.severity} is blocked.`);
+    }
+    if (v.cvss > maxScore) {
+      violations.push(`${v.id} CVSS ${v.cvss} exceeds baseline ${maxScore}.`);
+    }
+  });
+  return violations;
 }
 
-function createSigstoreAttestation(manifestPath, signaturePath, policy) {
-  return {
-    manifestPath,
-    signaturePath,
-    provenance: policy.reproducible_builds?.provenance_format || 'in-toto',
-    attestationRequired: Boolean(policy.reproducible_builds?.attestation_required),
-    createdAt: new Date().toISOString()
+function renderBurnDown(vulns) {
+  const buckets = {};
+  vulns.vulnerabilities.forEach((v) => {
+    const sev = v.severity.toLowerCase();
+    buckets[sev] = (buckets[sev] || 0) + 1;
+  });
+  const output = {
+    generatedAt: new Date().toISOString(),
+    totals: buckets
   };
+  fs.mkdirSync(path.resolve(__dirname, '..', 'manifests'), { recursive: true });
+  const outfile = path.resolve(__dirname, '..', 'manifests', 'vuln-burn-down.json');
+  fs.writeFileSync(outfile, JSON.stringify(output, null, 2));
+  console.log(`Wrote burn-down snapshot to ${outfile}`);
 }
 
-function writeJson(filePath, payload) {
-  fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+function help() {
+  console.log(`Usage:
+  license-check --policy <path> --licenses <path> --exceptions <path>
+  vuln-policy --policy <path> --vulns <path>
+  burn-down --vulns <path>
+`);
 }
 
 function main() {
   const [command, ...rest] = process.argv.slice(2);
-  const args = Object.fromEntries(rest.map((arg) => arg.split('=')));
-  const policy = loadPolicy(args['--policy']);
-
-  switch (command) {
-    case 'sbom': {
-      const image = args['--image'];
-      const format = args['--format'] || 'spdx';
-      const output = args['--output'] || `artifacts/sbom.${format}.json`;
-      const payload = format === 'cyclonedx' ? generateCycloneDx(image, policy) : generateSpdx(image, policy);
-      writeJson(output, payload);
-      console.log(`SBOM (${format}) written to ${output}`);
-      break;
-    }
-    case 'scan': {
-      const report = args['--report'];
-      const { failing, passed } = evaluateVulnerabilities(report, policy);
-      writeJson(args['--output'] || 'artifacts/vuln-gate.json', { failing, passed });
-      if (!passed) {
-        console.error('Vulnerability gate failed');
-        process.exitCode = 1;
+  const args = parseArgs(rest);
+  try {
+    switch (command) {
+      case 'license-check': {
+        const policy = loadJson(requireArg(args, 'policy'));
+        const licenses = loadJson(requireArg(args, 'licenses'));
+        const exceptions = loadJson(requireArg(args, 'exceptions'));
+        const dualControlErrors = validateExceptions(policy, exceptions);
+        const licenseViolations = checkLicenses(policy, licenses, exceptions);
+        const errors = [...dualControlErrors, ...licenseViolations];
+        if (errors.length) {
+          errors.forEach((e) => console.error(e));
+          process.exitCode = 1;
+        } else {
+          console.log('License policy satisfied.');
+        }
+        break;
       }
-      break;
-    }
-    case 'licenses': {
-      const sbomPath = args['--sbom'];
-      const exception = {
-        approvers: (args['--approvers'] || '').split(',').filter(Boolean),
-        minimum_approvers: policy.dual_control?.minimum_approvers || 2
-      };
-      const { blocked, passed } = evaluateLicenses(sbomPath, policy);
-      const dualControl = dualControlSatisfied(exception);
-      writeJson(args['--output'] || 'artifacts/license-gate.json', { blocked, passed, dualControl });
-      if (!passed || !dualControl) {
-        console.error('License gate failed');
-        process.exitCode = 1;
+      case 'vuln-policy': {
+        const policy = loadJson(requireArg(args, 'policy'));
+        const vulns = loadJson(requireArg(args, 'vulns'));
+        const violations = checkVulns(policy, vulns);
+        if (violations.length) {
+          violations.forEach((e) => console.error(e));
+          process.exitCode = 1;
+        } else {
+          console.log('Vulnerability policy satisfied.');
+        }
+        break;
       }
-      break;
+      case 'burn-down': {
+        const vulns = loadJson(requireArg(args, 'vulns'));
+        renderBurnDown(vulns);
+        break;
+      }
+      case '--help':
+      case '-h':
+      default:
+        help();
+        break;
     }
-    case 'attest': {
-      const payload = createSigstoreAttestation(args['--manifest'], args['--signature-path'], policy);
-      writeJson(args['--output'] || 'artifacts/attestation.json', payload);
-      console.log('Attestation manifest generated');
-      break;
-    }
-    default:
-      console.error('Supported commands: sbom, scan, licenses, attest');
-      process.exit(1);
+  } catch (err) {
+    console.error(err.message);
+    process.exitCode = 1;
   }
 }
 
-if (require.main === module) {
-  main();
-}
-
-module.exports = {
-  loadPolicy,
-  generateSpdx,
-  generateCycloneDx,
-  evaluateVulnerabilities,
-  evaluateLicenses,
-  createSigstoreAttestation,
-  dualControlSatisfied
-};
+main();
