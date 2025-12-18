@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/graph-ai-core",
+  "name": "@summit/graph-ai-core",
   "version": "1.0.0",
   "description": "Shared XAI types and utilities for Graph AI",
   "main": "dist/index.js",
