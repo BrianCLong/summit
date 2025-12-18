@@ -1,0 +1,10 @@
+{
+  "alert": "NLQLatencySLOBurn",
+  "description": "95th percentile NL\u2192Cypher latency is {{ $value }}s (threshold: 2.0s) over the last 5 minutes",
+  "expr": "(\n  histogram_quantile(0.95,\n    sum(rate(nlq_duration_seconds_bucket{job=\"intelgraph-gateway\"}[5m])) by (le)\n  ) > 2.0\n) and (\n  sum(rate(nlq_duration_seconds_count{job=\"intelgraph-gateway\"}[5m])) > 0.1\n)\n",
+  "runbook_url": "https://runbooks.intelgraph.io/slo/nlq-latency",
+  "service": "gateway",
+  "severity": "critical",
+  "source": "ops/alerts/slo-burn-rules.yml",
+  "summary": "NL\u2192Cypher latency SLO burning fast"
+}

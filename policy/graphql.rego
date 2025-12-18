@@ -1,35 +1,49 @@
-package graphql
+package intelgraph.graphql
 
 default allow = false
 
+# Allow if tenant matches and user has read permission
 allow {
-  input.user.tenant == input.args.tenantId
-  input.user.scope[_] == "coherence:read"
+  input.user.tenantId == input.context.tenantId
+  has_permission("read")
 }
 
+# Allow write if tenant matches and user has write permission
 allow {
-  input.user.tenant == input.args.tenantId
-  input.user.scope[_] == "coherence:read:self"
+  is_mutation
+  input.user.tenantId == input.context.tenantId
+  has_permission("write")
 }
 
+# Admin override
 allow {
-  input.user.tenant == input.args.tenantId
-  input.user.scope[_] == "coherence:read"
-  input.user.residency == input.args.residency // S3.2: Enforce data access by residency tag
+  has_role("admin")
 }
 
-allow_write {
-  input.user.tenant == input.args.tenantId
-  input.user.scope[_] == "coherence:write"
+# Helpers
+has_permission(perm) {
+  # Check permissions if present
+  input.user.permissions[_] == perm
 }
 
-allow_write {
-  input.user.tenant == input.args.tenantId
-  input.user.scope[_] == "coherence:write:self"
+has_permission(perm) {
+  # Fallback to scope-based mapping for legacy support
+  # scope format: "coherence:read", "coherence:write"
+  # Mapping: "read" -> "coherence:read", "write" -> "coherence:write"
+  input.user.scope[_] == sprintf("coherence:%s", [perm])
 }
 
-allow_write {
-  input.user.tenant == input.args.tenantId
-  input.user.scope[_] == "coherence:write"
-  input.user.residency == input.args.residency // S3.2: Enforce data access by residency tag
+has_role(role) {
+  input.user.role == role
+}
+
+is_mutation {
+  startswith(input.action, "mutation.")
+}
+
+# Field-level security (example)
+deny {
+  input.resource.field == "socialSecurityNumber"
+  not has_role("admin")
+  not has_role("compliance_officer")
 }
