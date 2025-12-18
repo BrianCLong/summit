@@ -1,68 +1,39 @@
-name: CodeQL (auto language matrix)
+name: CodeQL
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
   pull_request:
-    branches: [main]
+    branches: [ "main" ]
   schedule:
-    - cron: '17 19 * * 6'
-
-permissions:
-  contents: read
+    - cron: "0 2 * * 0"
 
 jobs:
-  create-matrix:
-    runs-on: ubuntu-latest
-    permissions:
-      # required for code scanning + language discovery
-      security-events: write
-      contents: read
-      packages: read
-      actions: read
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - name: Get languages from repo
-        id: set-matrix
-        uses: advanced-security/set-codeql-language-matrix@v1
-        with:
-          access-token: ${{ secrets.GITHUB_TOKEN }}
-          endpoint: ${{ github.event.repository.languages_url }}
-          # Optional: exclude languages you don't want to analyze
-          # exclude: 'java, csharp, actions'
-          # Optional: force manual build mode for some langs
-          # build-mode-manual-override: 'java, csharp'
-          # See README for details.
-
   analyze:
-    needs: create-matrix
-    if: ${{ needs.create-matrix.outputs.matrix != '[]' }}
     name: Analyze
-    # Swift needs macOS; others can stay on Ubuntu
-    runs-on: ${{ matrix.language == 'swift' && 'macos-latest' || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
+
     permissions:
       actions: read
       contents: read
       security-events: write
+
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(needs.create-matrix.outputs.matrix) }}
+      matrix:
+        language: [ 'javascript', 'typescript', 'python', 'go' ]
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.build-mode }}
 
-      # If build-mode is 'manual' for any language, add your build here.
-      - if: matrix.build-mode == 'manual'
-        run: |
-          echo "Add your manual build steps here (e.g., make build)"; exit 1
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-        with:
-          category: /language:${{ matrix.language }}

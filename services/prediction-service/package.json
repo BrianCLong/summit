@@ -1,6 +1,6 @@
 {
   "name": "prediction-service",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",
@@ -9,7 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "zod": "^4.1.12",
     "body-parser": "^1.20.2",
     "@summit/forecasting": "workspace:*",
