@@ -17,6 +17,9 @@
     "@intelgraph/entity-extraction": "workspace:*",
     "@intelgraph/text-analytics": "workspace:*",
     "@intelgraph/language-models": "workspace:*",
+<<<<<<< HEAD:services/nlp-service/package.json
+    "express": "^5.1.0",
+=======
 <<<<<<< HEAD
     "express": "^4.21.2",
 =======
@@ -30,6 +33,7 @@
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main:services/nlp-service/package.json.disabled
     "cors": "^2.8.5",
     "helmet": "^8.0.0",
     "express-rate-limit": "8.1.0",

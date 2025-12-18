@@ -7,6 +7,9 @@ packages:
 exclude:
   - 'archive/**'
 <<<<<<< HEAD
+  - 'apps/desktop-electron'
+=======
+<<<<<<< HEAD
   - 'apps/mobile-native'
   - 'apps/desktop-electron'
 =======
@@ -18,5 +21,6 @@ exclude:
   - '!**/test/**'
   - '!**/tests/**'
   - '!**/node_modules/**'
+>>>>>>> main
 >>>>>>> main
 >>>>>>> main

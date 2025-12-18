@@ -21,6 +21,9 @@
 <<<<<<< HEAD:services/websocket-server/package.json
     "@socket.io/redis-streams-adapter": "^0.2.2",
 =======
+<<<<<<< HEAD:services/websocket-server/package.json
+    "@socket.io/redis-streams-adapter": "^0.2.2",
+=======
 <<<<<<< HEAD
     "@socket.io/redis-streams-adapter": "^0.2.3",
 =======
@@ -34,6 +37,7 @@
 >>>>>>> main
 >>>>>>> main
 >>>>>>> main
+>>>>>>> main:services/websocket-server/package.json.disabled
 >>>>>>> main:services/websocket-server/package.json.disabled
     "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",

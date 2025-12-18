@@ -13,6 +13,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+<<<<<<< HEAD:services/ai-marketplace/package.json
+=======
 <<<<<<< HEAD
 =======
     "@summit/extensions": "workspace:*",
@@ -20,6 +22,7 @@
     "@summit/i18n": "workspace:*",
     "@summit/graph-ai-core": "workspace:*",
 =======
+>>>>>>> main:services/ai-marketplace/package.json.disabled
     "@intelgraph/i18n": "workspace:*",
     "@intelgraph/graph-ai-core": "workspace:*",
 >>>>>>> main
