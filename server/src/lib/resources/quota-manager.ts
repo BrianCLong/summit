@@ -1,83 +1,47 @@
-
-import { getRedisClient } from '../config/database.js';
-import { cfg } from '../config.js';
-import { PrometheusMetrics } from '../utils/metrics.js';
-import pino from 'pino';
-
-const logger = pino({ name: 'QuotaManager' });
-
-export interface TenantQuota {
-    limit: number;
-    windowMs: number;
+export interface Quota {
+    tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+    requestsPerMinute: number;
+    maxTokensPerRequest: number;
 }
 
 export class QuotaManager {
-    private metrics: PrometheusMetrics;
+    private static instance: QuotaManager;
+    private tenantTiers: Map<string, 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE'> = new Map();
 
-    constructor() {
-        this.metrics = new PrometheusMetrics('quota_manager');
-        this.metrics.createCounter('quota_breach_total', 'Total quota breaches', ['tenantId', 'resource']);
+    private constructor() {
+        // Seed with some dummy data or defaults
+        // In production, this would load from DB or Redis
     }
 
-    async getTenantQuota(tenantId: string, resource: string): Promise<TenantQuota> {
-        // In a real implementation, this would fetch from a database or cache
-        // based on the tenant's tier.
-
-        // Mock tiers
-        const tier = 'starter'; // fetch from tenant service
-
-        let limit = 100; // Default
-        let windowMs = 60000;
-
-        if (resource === 'graphql') {
-            if (tier === 'starter') limit = 1000;
-            if (tier === 'pro') limit = 10000;
-        } else if (resource === 'ingest') {
-             if (tier === 'starter') limit = 500;
+    public static getInstance(): QuotaManager {
+        if (!QuotaManager.instance) {
+            QuotaManager.instance = new QuotaManager();
         }
-
-        return { limit, windowMs };
+        return QuotaManager.instance;
     }
 
-    async checkQuota(tenantId: string, resource: string): Promise<{ allowed: boolean, remaining: number, reset: number }> {
-        const quota = await this.getTenantQuota(tenantId, resource);
-        const redisKey = `quota:${tenantId}:${resource}`;
-        const redisClient = getRedisClient();
+    public getQuotaForTenant(tenantId: string): Quota {
+        const tier = this.tenantTiers.get(tenantId) || 'FREE';
+        return this.getQuotaForTier(tier);
+    }
 
-        if (!redisClient) {
-             return { allowed: true, remaining: quota.limit, reset: Date.now() + quota.windowMs };
+    public getQuotaForTier(tier: string): Quota {
+        switch (tier) {
+            case 'ENTERPRISE':
+                return { tier: 'ENTERPRISE', requestsPerMinute: 10000, maxTokensPerRequest: 32000 };
+            case 'PRO':
+                return { tier: 'PRO', requestsPerMinute: 1000, maxTokensPerRequest: 16000 };
+            case 'STARTER':
+                return { tier: 'STARTER', requestsPerMinute: 100, maxTokensPerRequest: 4000 };
+            case 'FREE':
+            default:
+                return { tier: 'FREE', requestsPerMinute: 20, maxTokensPerRequest: 1000 };
         }
+    }
 
-        try {
-            const script = `
-                local current = redis.call("INCR", KEYS[1])
-                local ttl = redis.call("PTTL", KEYS[1])
-                if tonumber(current) == 1 then
-                    redis.call("PEXPIRE", KEYS[1], ARGV[1])
-                    ttl = ARGV[1]
-                end
-                return {current, ttl}
-            `;
-            const result = await redisClient.eval(script, 1, redisKey, quota.windowMs) as [number, number];
-            const current = result[0];
-            const ttl = result[1];
-
-            const allowed = current <= quota.limit;
-
-            if (!allowed) {
-                this.metrics.incrementCounter('quota_breach_total', { tenantId, resource });
-            }
-
-            return {
-                allowed,
-                remaining: Math.max(0, quota.limit - current),
-                reset: Date.now() + (ttl > 0 ? ttl : quota.windowMs)
-            };
-        } catch (e) {
-            logger.error({ err: e }, 'Quota check failed');
-             return { allowed: true, remaining: quota.limit, reset: Date.now() + quota.windowMs };
-        }
+    public setTenantTier(tenantId: string, tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE') {
+        this.tenantTiers.set(tenantId, tier);
     }
 }
 
-export const quotaManager = new QuotaManager();
+export default QuotaManager.getInstance();
