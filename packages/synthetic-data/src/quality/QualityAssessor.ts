@@ -357,7 +357,7 @@ export class QualityAssessor {
     const overlapMin = Math.max(origMin, synthMin);
     const overlapMax = Math.min(origMax, synthMax);
 
-    if (overlapMax < overlapMin) return 0;
+    if (overlapMax < overlapMin) {return 0;}
 
     const overlapSize = overlapMax - overlapMin;
     const origSize = origMax - origMin;

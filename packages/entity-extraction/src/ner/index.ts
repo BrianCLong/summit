@@ -304,7 +304,7 @@ export class NERExtractor {
    * Remove overlapping entities
    */
   private removeOverlapping(entities: Entity[]): Entity[] {
-    if (entities.length === 0) return [];
+    if (entities.length === 0) {return [];}
 
     const result: Entity[] = [entities[0]];
 
