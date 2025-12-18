@@ -137,7 +137,7 @@ export class IncrementalLoader {
    * Extract data that has changed since last watermark
    */
   private async extractIncrementalData(watermark: any): Promise<any[]> {
-    if (!this.sourcePool) throw new Error('Source pool not initialized');
+    if (!this.sourcePool) {throw new Error('Source pool not initialized');}
 
     const client = await this.sourcePool.connect();
 
@@ -178,7 +178,7 @@ export class IncrementalLoader {
    * Load a batch of data to target
    */
   private async loadBatch(batch: any[]): Promise<void> {
-    if (!this.targetPool) throw new Error('Target pool not initialized');
+    if (!this.targetPool) {throw new Error('Target pool not initialized');}
 
     const client = await this.targetPool.connect();
 
@@ -224,7 +224,7 @@ export class IncrementalLoader {
    * Get current watermark value
    */
   private async getWatermark(): Promise<any> {
-    if (!this.targetPool) throw new Error('Target pool not initialized');
+    if (!this.targetPool) {throw new Error('Target pool not initialized');}
 
     const client = await this.targetPool.connect();
 
@@ -254,7 +254,7 @@ export class IncrementalLoader {
    * Update watermark after successful load
    */
   private async updateWatermark(newValue: any, loadState: LoadState): Promise<void> {
-    if (!this.targetPool) throw new Error('Target pool not initialized');
+    if (!this.targetPool) {throw new Error('Target pool not initialized');}
 
     const client = await this.targetPool.connect();
 
@@ -286,7 +286,7 @@ export class IncrementalLoader {
    * Ensure watermark tracking table exists
    */
   private async ensureWatermarkTable(): Promise<void> {
-    if (!this.targetPool) return;
+    if (!this.targetPool) {return;}
 
     const client = await this.targetPool.connect();
 
@@ -365,7 +365,7 @@ export class IncrementalLoader {
    * Get load history
    */
   async getLoadHistory(limit: number = 10): Promise<LoadState[]> {
-    if (!this.targetPool) throw new Error('Target pool not initialized');
+    if (!this.targetPool) {throw new Error('Target pool not initialized');}
 
     const client = await this.targetPool.connect();
 
@@ -398,7 +398,7 @@ export class IncrementalLoader {
    * Reset watermark (useful for full reloads)
    */
   async resetWatermark(): Promise<void> {
-    if (!this.targetPool) throw new Error('Target pool not initialized');
+    if (!this.targetPool) {throw new Error('Target pool not initialized');}
 
     const client = await this.targetPool.connect();
 

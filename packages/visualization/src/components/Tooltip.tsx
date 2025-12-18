@@ -17,7 +17,7 @@ export function Tooltip({
   offset = { x: 10, y: 10 },
   style = {},
 }: TooltipProps) {
-  if (!visible) return null;
+  if (!visible) {return null;}
 
   return (
     <div

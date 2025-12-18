@@ -2,7 +2,7 @@
 members = [
     "ibrs",
     "bindings/ibrs-node",
-    "rust/psc-runner"
+    "rust/summit_enterprise"
 ]
 resolver = "2"
 

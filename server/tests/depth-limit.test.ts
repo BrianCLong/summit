@@ -1,5 +1,6 @@
 import { depthLimit } from '../src/graphql/validation/depthLimit';
 import { validate, buildSchema, parse } from 'graphql';
+import { describe, test, expect } from '@jest/globals';
 
 describe('GraphQL Depth Limit Validation', () => {
   const schema = buildSchema(`
