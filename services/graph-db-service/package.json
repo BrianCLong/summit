@@ -15,7 +15,7 @@
     "@intelgraph/graph-algorithms": "workspace:*",
     "@intelgraph/relationship-mining": "workspace:*",
     "@intelgraph/link-prediction": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "cors": "^2.8.5"
   },
   "devDependencies": {
