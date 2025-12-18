@@ -1,0 +1,14 @@
+{
+  "subject": {
+    "id": "user_123",
+    "type": "human",
+    "tenant_id": "tenant_abc",
+    "roles": ["compliance_lead"],
+    "groups": ["team-compliance"],
+    "attributes": {
+      "clearance": "internal",
+      "region": "us",
+      "mfa_verified": true
+    }
+  }
+}
