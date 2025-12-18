@@ -1,0 +1,5 @@
+imageGateway: ghcr.io/example/ig:gateway
+imageUI: ghcr.io/example/ig:ui
+replicas: 1
+ingress:
+  host: "ig-preview.local"
