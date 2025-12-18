@@ -5,6 +5,7 @@ import {
   StochasticActorAwareness,
 } from '../../src/services/StochasticActorAwareness';
 import { MLAnalysisService } from '../../src/services/mlAnalysisService';
+import { describe, it, expect } from '@jest/globals';
 
 class StubAwareness extends StochasticActorAwareness {
   public receivedSignals: ActorSignal[] = [];

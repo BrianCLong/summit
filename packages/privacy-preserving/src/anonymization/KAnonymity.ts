@@ -51,7 +51,7 @@ export class KAnonymity {
     const warnings: string[] = [];
 
     // Create equivalence classes
-    let equivalenceClasses = this.createEquivalenceClasses(data);
+    const equivalenceClasses = this.createEquivalenceClasses(data);
 
     // Identify and handle small equivalence classes
     const smallClasses = equivalenceClasses.filter(ec => ec.size < this.config.k);
@@ -229,7 +229,7 @@ export class KAnonymity {
     } else if (typeof value === 'string') {
       // Generalize strings by truncation or wildcarding
       if (value.length > 3) {
-        return value.substring(0, 3) + '*';
+        return `${value.substring(0, 3)  }*`;
       }
       return value;
     }

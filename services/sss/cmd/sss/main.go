@@ -23,21 +23,46 @@ import (
 
 const version = "0.1.0"
 
+// Config holds global configuration options
+type Config struct {
+	Mode string
+	Scan ScanConfig
+	Serve ServeConfig
+}
+
+type ScanConfig struct {
+	Root             string
+	Paths            string
+	QuarantineDir    string
+	QuarantineEnabled bool
+	AutoRotate       bool
+	SarifPath        string
+	Annotate         bool
+}
+
+type ServeConfig struct {
+	Addr          string
+	QuarantineDir string
+}
+
 func main() {
 	log.SetFlags(0)
+
 	if len(os.Args) < 2 {
 		usage()
 		os.Exit(1)
 	}
 
-	subcommand := os.Args[1]
-	switch subcommand {
+	cmd := os.Args[1]
+	args := os.Args[2:]
+
+	switch cmd {
 	case "scan":
-		if err := runScan(os.Args[2:]); err != nil {
+		if err := runScan(args); err != nil {
 			log.Fatal(err)
 		}
 	case "serve":
-		if err := runServe(os.Args[2:]); err != nil {
+		if err := runServe(args); err != nil {
 			log.Fatal(err)
 		}
 	case "version":
@@ -54,14 +79,16 @@ func usage() {
 }
 
 func runScan(args []string) error {
+	var cfg ScanConfig
 	fs := flag.NewFlagSet("scan", flag.ContinueOnError)
-	root := fs.String("path", ".", "Root path to scan")
-	paths := fs.String("paths", "", "Comma separated additional paths")
-	quarantineDir := fs.String("quarantine-dir", ".sss_quarantine", "Directory where quarantine files are moved")
-	quarantineEnabled := fs.Bool("quarantine", false, "Quarantine files that trigger findings")
-	autoRotate := fs.Bool("auto-rotate", false, "Invoke auto-rotation hooks for supported providers")
-	sarifPath := fs.String("sarif", "", "Path to write SARIF report")
-	annotate := fs.Bool("annotate", false, "Emit GitHub Actions annotations")
+	fs.StringVar(&cfg.Root, "path", ".", "Root path to scan")
+	fs.StringVar(&cfg.Paths, "paths", "", "Comma separated additional paths")
+	fs.StringVar(&cfg.QuarantineDir, "quarantine-dir", ".sss_quarantine", "Directory where quarantine files are moved")
+	fs.BoolVar(&cfg.QuarantineEnabled, "quarantine", false, "Quarantine files that trigger findings")
+	fs.BoolVar(&cfg.AutoRotate, "auto-rotate", false, "Invoke auto-rotation hooks for supported providers")
+	fs.StringVar(&cfg.SarifPath, "sarif", "", "Path to write SARIF report")
+	fs.BoolVar(&cfg.Annotate, "annotate", false, "Emit GitHub Actions annotations")
+
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -72,11 +99,11 @@ func runScan(args []string) error {
 	}
 	s := scanner.New(e)
 
-	if *annotate {
+	if cfg.Annotate {
 		s.Annotator = pr.New(os.Stdout)
 	}
-	if *quarantineEnabled {
-		qm, err := quarantine.New(*quarantineDir, os.Stdout)
+	if cfg.QuarantineEnabled {
+		qm, err := quarantine.New(cfg.QuarantineDir, os.Stdout)
 		if err != nil {
 			return err
 		}
@@ -84,13 +111,14 @@ func runScan(args []string) error {
 	}
 	s.Rotator = rotator.NewManager(os.Stdout)
 
-	targets := collectTargets(*root, *paths)
+	targets := collectTargets(cfg.Root, cfg.Paths)
 	var aggregate []models.Finding
 	for _, target := range targets {
 		opts := scanner.Options{
 			Root:             filepath.Clean(target),
-			EnableQuarantine: *quarantineEnabled,
-			EnableAutoRotate: *autoRotate,
+			EnableQuarantine: cfg.QuarantineEnabled,
+			EnableAutoRotate: cfg.AutoRotate,
+			// MaxFileSize defaults to 10MB in scanner (0 value)
 		}
 		findings, err := s.Scan(opts)
 		if err != nil {
@@ -105,21 +133,23 @@ func runScan(args []string) error {
 	}
 	fmt.Printf("Total findings: %d\n", len(aggregate))
 
-	if *sarifPath != "" {
+	if cfg.SarifPath != "" {
 		report := sarif.FromFindings(version, aggregate)
-		if err := report.Write(*sarifPath); err != nil {
+		if err := report.Write(cfg.SarifPath); err != nil {
 			return err
 		}
-		fmt.Printf("SARIF report written to %s\n", *sarifPath)
+		fmt.Printf("SARIF report written to %s\n", cfg.SarifPath)
 	}
 
 	return nil
 }
 
 func runServe(args []string) error {
+	var cfg ServeConfig
 	fs := flag.NewFlagSet("serve", flag.ContinueOnError)
-	addr := fs.String("addr", ":8080", "Address to bind the HTTP server")
-	quarantineDir := fs.String("quarantine-dir", ".sss_quarantine", "Directory for quarantine operations")
+	fs.StringVar(&cfg.Addr, "addr", ":8080", "Address to bind the HTTP server")
+	fs.StringVar(&cfg.QuarantineDir, "quarantine-dir", ".sss_quarantine", "Directory for quarantine operations")
+
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -131,7 +161,7 @@ func runServe(args []string) error {
 
 	factory := func() *scanner.Scanner {
 		s := scanner.New(e)
-		if qm, qerr := quarantine.New(*quarantineDir, os.Stdout); qerr == nil {
+		if qm, qerr := quarantine.New(cfg.QuarantineDir, os.Stdout); qerr == nil {
 			s.Quarantine = qm
 		}
 		s.Rotator = rotator.NewManager(os.Stdout)
@@ -140,12 +170,12 @@ func runServe(args []string) error {
 
 	srv := server.New(factory)
 	httpServer := &http.Server{
-		Addr:              *addr,
+		Addr:              cfg.Addr,
 		Handler:           srv.Routes(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	log.Printf("sss service listening on %s", *addr)
+	log.Printf("sss service listening on %s", cfg.Addr)
 	return httpServer.ListenAndServe()
 }
 
