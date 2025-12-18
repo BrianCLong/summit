@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/audio-analytics",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Audio feature extraction and analysis",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

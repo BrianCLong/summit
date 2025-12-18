@@ -249,7 +249,7 @@ export class FormAutoCompleteEngine {
 
     for (const section of template.sections) {
       for (const field of section.fields) {
-        if (field.required) totalRequired++;
+        if (field.required) {totalRequired++;}
 
         const result = this.autoFillField(field);
         fields.push(result);
@@ -363,14 +363,14 @@ export class FormAutoCompleteEngine {
    * Calculate confidence in auto-filled value
    */
   private calculateConfidence(field: FormField, value: unknown): number {
-    if (!value) return 0;
+    if (!value) {return 0;}
 
     // Higher confidence for exact source matches
-    if (field.autoFillSource?.startsWith('organization.')) return 0.95;
-    if (field.autoFillSource?.startsWith('system.')) return 0.9;
+    if (field.autoFillSource?.startsWith('organization.')) {return 0.95;}
+    if (field.autoFillSource?.startsWith('system.')) {return 0.9;}
 
     // Lower confidence for derived/transformed values
-    if (Array.isArray(value)) return 0.8;
+    if (Array.isArray(value)) {return 0.8;}
 
     return 0.85;
   }
