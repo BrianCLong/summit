@@ -238,10 +238,10 @@ export class RequirementsParser {
   ): 'public' | 'cui' | 'secret' | 'top_secret' {
     const lowerText = text.toLowerCase();
 
-    if (/top\s*secret|ts\/sci/i.test(text)) return 'top_secret';
-    if (/\bsecret\b/i.test(text)) return 'secret';
-    if (/\bcui\b|controlled\s*unclassified/i.test(text)) return 'cui';
-    if (/\bpublic\b|unclassified/i.test(text)) return 'public';
+    if (/top\s*secret|ts\/sci/i.test(text)) {return 'top_secret';}
+    if (/\bsecret\b/i.test(text)) {return 'secret';}
+    if (/\bcui\b|controlled\s*unclassified/i.test(text)) {return 'cui';}
+    if (/\bpublic\b|unclassified/i.test(text)) {return 'public';}
 
     return 'cui'; // Default to CUI
   }
@@ -342,8 +342,8 @@ export class RequirementsParser {
     baseDays += Math.floor(controlCount / 10);
 
     // Multiply for risk level
-    if (riskLevel === 'high') baseDays *= 1.5;
-    if (riskLevel === 'moderate') baseDays *= 1.2;
+    if (riskLevel === 'high') {baseDays *= 1.5;}
+    if (riskLevel === 'moderate') {baseDays *= 1.2;}
 
     // Add for multiple frameworks
     if (frameworks.length > 1) {
@@ -363,9 +363,9 @@ export class RequirementsParser {
     const criticalFamilies = ['AC', 'IA', 'SC', 'AU', 'SI'];
     const highFamilies = ['CM', 'IR', 'CA', 'RA'];
 
-    if (criticalFamilies.includes(family)) return 'P0';
-    if (highFamilies.includes(family)) return 'P1';
-    if (riskLevel === 'high') return 'P2';
+    if (criticalFamilies.includes(family)) {return 'P0';}
+    if (highFamilies.includes(family)) {return 'P1';}
+    if (riskLevel === 'high') {return 'P2';}
     return 'P3';
   }
 

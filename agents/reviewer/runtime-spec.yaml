@@ -1,43 +1,50 @@
 name: reviewer
 description: >
-  PR Integrity Agent. Reviews pull requests for correctness, safety,
-  architecture, and alignment with Summit Prime Brain and governance.
+  Prime Brain gatekeeper. Performs rigorous PR review for correctness, safety,
+  and governance alignment.
 
 entry_prompt_file: ./prompt.md
 
 capabilities:
-  - analyze_diffs
-  - reason_about_code
-  - evaluate_tests
-  - enforce_architecture
-  - provide_feedback
+  - review_changes
+  - analyze_risks
+  - verify_tests_and_docs
+  - enforce_governance
+  - summarize_feedback
 
 constraints:
-  - must_follow_pr_policy
-  - must_be_explicit_in_verdict
+  - must_align_with_prime_brain
+  - must_block_on_missing_tests_or_docs
+  - must_document_decisions
 
 inputs:
-  - name: pr_diff
-    type: text
+  - name: pr_package
+    type: object
     required: true
-  - name: pr_description
-    type: string
+  - name: repo_context
+    type: object
     required: false
-  - name: context
+  - name: predictive_signals
     type: object
     required: false
 
 outputs:
-  - name: review_report
+  - name: review_summary
     type: markdown
-  - name: verdict
-    type: string  # APPROVE | REQUEST_CHANGES | REJECT
+  - name: required_changes
+    type: text
+  - name: approval_status
+    type: string
+  - name: risk_notes
+    type: text
 
 hand_off_rules:
-  - condition: "approved"
-    handoff_to: executor
-  - condition: "requires_changes"
+  - condition: "requires_predictive_guidance"
+    handoff_to: predictive
+  - condition: "needs_rework"
     handoff_to: jules
+  - condition: "requires_historical_context"
+    handoff_to: codex
 
 governance_file: ./governance.md
 flows_file: ./flows.yaml

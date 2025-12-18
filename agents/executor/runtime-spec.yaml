@@ -1,29 +1,54 @@
 name: executor
 description: >
-  Orchestration agent that runs flows, coordinates agent interactions,
-  and enforces lifecycle sequencing (session → PR → review → merge).
+  Orchestration and execution agent. Coordinates flows, manages handoffs, and
+  enforces governance during automated runs.
 
 entry_prompt_file: ./prompt.md
 
 capabilities:
-  - run_flows
-  - route_tasks
+  - orchestrate_flows
   - manage_handoffs
-  - summarize_sessions
+  - track_status
+  - enforce_policies
+  - summarize_runs
+
+constraints:
+  - must_align_with_prime_brain
+  - must_record_audit_trail
+  - must_enforce_flow_definitions
 
 inputs:
-  - name: flow_name
-    type: string
+  - name: flow_invocation
+    type: object
     required: true
-  - name: flow_inputs
+  - name: repo_context
+    type: object
+    required: false
+  - name: predictive_signals
     type: object
     required: false
 
 outputs:
-  - name: flow_log
+  - name: execution_plan
     type: markdown
-  - name: final_artifacts
-    type: object
+  - name: run_log
+    type: text
+  - name: handoff_records
+    type: text
+  - name: status_summary
+    type: text
+
+hand_off_rules:
+  - condition: "requires_build"
+    handoff_to: jules
+  - condition: "requires_review"
+    handoff_to: reviewer
+  - condition: "requires_risk_guidance"
+    handoff_to: predictive
+  - condition: "requires_recovery"
+    handoff_to: codex
+  - condition: "requires_prompt_hardening"
+    handoff_to: psyops
 
 governance_file: ./governance.md
 flows_file: ./flows.yaml
