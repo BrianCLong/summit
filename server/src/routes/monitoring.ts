@@ -274,7 +274,8 @@ router.post('/web-vitals', (req: Request, res: Response) => {
  */
 router.post('/telemetry/events', (req: Request, res: Response) => {
   const { event, labels } = req.body;
-  const tenantId = (req.headers['x-tenant-id'] as string) || 'unknown';
+  const tenantId =
+    (req.headers['x-tenant-id'] as string) || labels?.tenantId || 'unknown';
 
   if (!event) {
     return res.status(400).json({ error: 'Event name is required' });

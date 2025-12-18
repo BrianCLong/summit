@@ -10,6 +10,7 @@ import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
 import { snapshotter } from './lib/telemetry/diagnostic-snapshotter.js';
 import { anomalyDetector } from './lib/telemetry/anomaly-detector.js';
+import { buildCorsOptions } from './config/cors-options.js';
 import { auditLogger } from './middleware/audit-logger.js';
 import { auditFirstMiddleware } from './middleware/audit-first.js';
 import { correlationIdMiddleware } from './middleware/correlation-id.js';
@@ -64,23 +65,9 @@ export const createApp = async () => {
   app.use(correlationIdMiddleware);
 
   app.use(helmet());
-  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        if (!origin || cfg.NODE_ENV !== 'production') {
-          return callback(null, true);
-        }
-        if (allowedOrigins.includes(origin)) {
-          return callback(null, true);
-        }
-        return callback(new Error(`Origin ${origin} not allowed by Summit CORS policy`));
-      },
-      credentials: true,
-    }),
-  );
+  const corsOptions = buildCorsOptions(cfg);
+  app.use(cors(corsOptions));
+  app.options('*', cors(corsOptions));
 
   // Enhanced Pino HTTP logger with correlation and trace context
   app.use(
