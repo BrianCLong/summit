@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import {
-  AlertTriangle,
-  Shield,
-  Target,
-  Clock,
-  Filter,
-  Download,
-  RefreshCw,
-} from 'lucide-react'
+import { Download, RefreshCw } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
@@ -75,13 +67,13 @@ export default function AlertsPage() {
 
   // Filter alerts
   const filteredAlerts = alerts.filter(alert => {
-    if (selectedSeverity && alert.severity !== selectedSeverity) return false
-    if (selectedStatus && alert.status !== selectedStatus) return false
+    if (selectedSeverity && alert.severity !== selectedSeverity) {return false}
+    if (selectedStatus && alert.status !== selectedStatus) {return false}
     if (
       searchQuery &&
       !alert.title.toLowerCase().includes(searchQuery.toLowerCase())
     )
-      return false
+      {return false}
     return true
   })
 
@@ -124,7 +116,10 @@ export default function AlertsPage() {
     },
   ]
 
-  const handleStatusChange = async (alertId: string, newStatus: AlertStatus) => {
+  const handleStatusChange = async (
+    alertId: string,
+    newStatus: AlertStatus
+  ) => {
     try {
       if (alertsData) {
         await updateAlertStatus({
