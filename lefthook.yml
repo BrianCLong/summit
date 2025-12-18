@@ -12,7 +12,7 @@ pre-push:
     hook-signature:
       run: scripts/hooks/verify-hook-signature.sh
     smoke:
-      run: node smoke-test.js --ci
+      run: node smoke-test.cjs --ci
     parity:
       run: node scripts/devkit/check-parity.js
     actionlint:

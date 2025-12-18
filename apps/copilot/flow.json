@@ -1,0 +1,19 @@
+{
+  "name": "doc_graph_copilot",
+  "nodes": [
+    {"id": "classify", "type": "classifier", "outputs": ["intent"]},
+    {"id": "retrieve", "type": "rag", "inputs": ["question"], "outputs": ["context"]},
+    {"id": "model", "type": "model", "inputs": ["question", "context", "policy"], "outputs": ["answer"]},
+    {"id": "policy", "type": "policy", "inputs": ["answer"], "outputs": ["decision"]}
+  ],
+  "edges": [
+    {"from": "classify", "to": "retrieve"},
+    {"from": "retrieve", "to": "model"},
+    {"from": "model", "to": "policy"}
+  ],
+  "policy_defaults": {
+    "tenant": "enterprise",
+    "region": "us-west",
+    "sensitivity": "internal"
+  }
+}
