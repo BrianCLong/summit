@@ -188,7 +188,7 @@ export class ObjectTracker {
    */
   private updateTrack(trackId: number, detection: Detection): void {
     const track = this.tracks.get(trackId);
-    if (!track) return;
+    if (!track) {return;}
 
     // Calculate velocity
     const oldCenter = getBboxCenter(track.detection.bbox);
