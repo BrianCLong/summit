@@ -5,6 +5,7 @@ const useWebServer = process.env.PLAYWRIGHT_USE_WEBSERVER === 'true';
 export default defineConfig({
   testDir: '.',
   testMatch: [
+    'e2e/golden-path.spec.ts',
     'e2e/maestro.spec.ts',
 <<<<<<< HEAD
     'e2e/golden-path.spec.ts',

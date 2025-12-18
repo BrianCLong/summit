@@ -25,7 +25,7 @@
     "compliance:licenses": "node scripts/compliance/check_licenses.cjs",
     "compliance:sbom": "bash scripts/compliance/generate_sbom.sh",
     "test:jest": "jest --config jest.projects.cjs --maxWorkers=50% --detectOpenHandles",
-    "test:e2e": "pnpm smoke",
+    "test:e2e": "playwright test",
     "test:ci": "pnpm run test:jest && pnpm run test:e2e",
     "test": "turbo run test --cache-dir=.turbo --continue",
     "test:server": "cd server && npm test",
