@@ -1,18 +1,27 @@
-"""Autonomous investigator package exports."""
+"""Autonomous investigator service package."""
 
-from .analysis import (
-    EvidenceAnalysisPipeline,
-    EvidenceAnalysisReport,
-    EvidenceArtifact,
-    Relationship,
+from importlib import import_module
+from typing import Any
+
+from .fusion_pipeline import (
+    CorrelationResult,
+    FusionEntity,
+    FusionOutcome,
+    FusionPattern,
+    IntelligenceFusionPipeline,
 )
-from .engine import InvestigatorEngine, InnovationCoefficients
 
 __all__ = [
-    "EvidenceAnalysisPipeline",
-    "EvidenceAnalysisReport",
-    "EvidenceArtifact",
-    "InnovationCoefficients",
-    "InvestigatorEngine",
-    "Relationship",
+    "app",
+    "CorrelationResult",
+    "FusionEntity",
+    "FusionOutcome",
+    "FusionPattern",
+    "IntelligenceFusionPipeline",
 ]
+
+
+def __getattr__(name: str) -> Any:  # pragma: no cover
+    if name == "app":
+        return import_module("autonomous_investigator.main").app
+    raise AttributeError(name)

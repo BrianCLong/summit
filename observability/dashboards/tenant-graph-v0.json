@@ -1,0 +1,169 @@
+{
+  "dashboard": {
+    "title": "Tenant Graph Slice v0 - SLOs & Performance",
+    "tags": ["tenant-graph", "slo", "graphql"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Search Query Latency (p50, p95, p99)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(graphql_search_latency_ms_bucket[5m]))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_search_latency_ms_bucket[5m]))",
+            "legendFormat": "p95 (SLO: 350ms)"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(graphql_search_latency_ms_bucket[5m]))",
+            "legendFormat": "p99"
+          }
+        ],
+        "yaxes": [
+          { "format": "ms", "label": "Latency" }
+        ],
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+      },
+      {
+        "id": 2,
+        "title": "Neighbors Query Latency (1-hop vs 2-hop)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_neighbors_1hop_latency_ms_bucket[5m]))",
+            "legendFormat": "1-hop p95 (SLO: 300ms)"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(graphql_neighbors_2hop_latency_ms_bucket[5m]))",
+            "legendFormat": "2-hop p95 (SLO: 1200ms)"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+      },
+      {
+        "id": 3,
+        "title": "Ingest Throughput (entities/sec)",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(ingest_entities_created_total[5m])",
+            "legendFormat": "Created"
+          },
+          {
+            "expr": "rate(ingest_entities_updated_total[5m])",
+            "legendFormat": "Updated"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Error Rate & SLO Burn",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(graphql_errors_total[5m])",
+            "legendFormat": "Error Rate"
+          },
+          {
+            "expr": "rate(graphql_slo_violations_total[5m])",
+            "legendFormat": "SLO Violations"
+          }
+        ],
+        "yaxes": [
+          { "format": "percentunit", "max": 0.01 }
+        ],
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+      },
+      {
+        "id": 5,
+        "title": "Availability (99.9% SLO)",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "(1 - (rate(graphql_errors_total[30d]) / rate(graphql_requests_total[30d]))) * 100"
+          }
+        ],
+        "format": "percent",
+        "thresholds": "99.9,99.95",
+        "gridPos": { "x": 0, "y": 16, "w": 6, "h": 4 }
+      },
+      {
+        "id": 6,
+        "title": "Active Tenants",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "count(count by (tenant_id) (graphql_requests_total))"
+          }
+        ],
+        "gridPos": { "x": 6, "y": 16, "w": 6, "h": 4 }
+      },
+      {
+        "id": 7,
+        "title": "Total Entities",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "sum(pg_stat_user_tables_n_tup_ins{relname=\"entities\"})"
+          }
+        ],
+        "format": "short",
+        "gridPos": { "x": 12, "y": 16, "w": 6, "h": 4 }
+      },
+      {
+        "id": 8,
+        "title": "Ingest Jobs (Last 24h)",
+        "type": "singlestat",
+        "targets": [
+          {
+            "expr": "count(increase(ingest_jobs_total[24h]))"
+          }
+        ],
+        "gridPos": { "x": 18, "y": 16, "w": 6, "h": 4 }
+      },
+      {
+        "id": 9,
+        "title": "Neo4j Query Performance",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(neo4j_transaction_committed_total[5m])",
+            "legendFormat": "Commits/sec"
+          },
+          {
+            "expr": "rate(neo4j_transaction_rollbacks_total[5m])",
+            "legendFormat": "Rollbacks/sec"
+          }
+        ],
+        "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 }
+      },
+      {
+        "id": 10,
+        "title": "PostgreSQL Connection Pool",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "pg_pool_total_connections",
+            "legendFormat": "Total"
+          },
+          {
+            "expr": "pg_pool_idle_connections",
+            "legendFormat": "Idle"
+          },
+          {
+            "expr": "pg_pool_waiting_connections",
+            "legendFormat": "Waiting"
+          }
+        ],
+        "gridPos": { "x": 12, "y": 20, "w": 12, "h": 8 }
+      }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 27,
+    "version": 1
+  }
+}

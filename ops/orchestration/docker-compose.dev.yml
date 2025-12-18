@@ -1,0 +1,144 @@
+version: '3.9'
+
+x-common-env: &common-env
+  NODE_ENV: development
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: summit-postgres
+    environment:
+      POSTGRES_DB: summit
+      POSTGRES_USER: summit
+      POSTGRES_PASSWORD: summit
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-summit} -d ${POSTGRES_DB:-summit}']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: summit-redis
+    ports:
+      - '6379:6379'
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.103.0
+    container_name: summit-otel-collector
+    command: ['--config=/etc/otel-collector-config.yaml']
+    volumes:
+      - ../otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - '4317:4317'
+      - '9464:9464'
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.58
+    container_name: summit-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: 'true'
+    ports:
+      - '16686:16686'
+
+  api:
+    build:
+      context: ../../server
+      dockerfile: Dockerfile.dev
+    container_name: summit-api
+    environment:
+      <<: *common-env
+      PORT: '4000'
+      DATABASE_URL: postgres://summit:summit@postgres:5432/summit
+      REDIS_URL: redis://redis:6379
+    command: ['npm', 'run', 'dev']
+    working_dir: /app
+    volumes:
+      - ../../server:/app:delegated
+      - /app/node_modules
+    ports:
+      - '4000:4000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -f http://localhost:4000/healthz || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    build:
+      context: ../../server
+      dockerfile: Dockerfile.dev
+    container_name: summit-worker
+    environment:
+      <<: *common-env
+      CONDUCTOR_ROLE: worker
+      WORKER_PORT: '4100'
+      PORT: '4001'
+      DATABASE_URL: postgres://summit:summit@postgres:5432/summit
+      REDIS_URL: redis://redis:6379
+    command: ['npm', 'run', 'dev:worker']
+    working_dir: /app
+    volumes:
+      - ../../server:/app:delegated
+      - /app/node_modules
+    ports:
+      - '4100:4100'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          node -e "require('net').connect({port:4100, host:'localhost'}).on('connect',
+          () => process.exit(0)).on('error', () => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  client:
+    build:
+      context: ../../client
+      dockerfile: Dockerfile.dev
+    container_name: summit-client
+    environment:
+      <<: *common-env
+      VITE_API_URL: http://localhost:4000
+    command: ['npm', 'run', 'dev', '--', '--host', '0.0.0.0', '--port', '5173']
+    working_dir: /app
+    volumes:
+      - ../../client:/app:delegated
+      - /app/node_modules
+    ports:
+      - '5173:5173'
+    depends_on:
+      api:
+        condition: service_started
+
+volumes:
+  postgres-data: {}
+
+networks:
+  default:
+    name: summit-dev
