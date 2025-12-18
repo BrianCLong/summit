@@ -93,15 +93,15 @@ export class ContractDeployer {
     constructorArgs: unknown[],
   ): Promise<DeploymentResult> {
     // Simulate deployment
-    const address = '0x' + crypto.randomBytes(20).toString('hex');
-    const txHash = '0x' + crypto.randomBytes(32).toString('hex');
+    const address = `0x${  crypto.randomBytes(20).toString('hex')}`;
+    const txHash = `0x${  crypto.randomBytes(32).toString('hex')}`;
 
     const result: DeploymentResult = {
       address,
       txReceipt: {
         txHash,
         blockNumber: Math.floor(Date.now() / 1000),
-        blockHash: '0x' + crypto.randomBytes(32).toString('hex'),
+        blockHash: `0x${  crypto.randomBytes(32).toString('hex')}`,
         gasUsed: 500000 + Math.floor(Math.random() * 500000),
         status: 'success',
         logs: [

@@ -311,7 +311,7 @@ export class ComplianceTracker {
     const milestones = this.getMilestones(requestId);
     const request = this.requests.get(requestId);
 
-    if (!request) return [];
+    if (!request) {return [];}
 
     const startDate = request.createdAt;
     let currentDate = new Date(startDate);

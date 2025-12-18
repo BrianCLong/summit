@@ -92,6 +92,85 @@ function getPoolForQuery(
   }
 }
 
+async function _executeQuery(
+  spanName: string,
+  query: string,
+  params: any[],
+  options: {
+    region?: string;
+    routerHint?: string;
+    tenantId?: string;
+    forceWrite?: boolean;
+    poolType?: 'read' | 'write';
+  },
+  returnMany: boolean,
+) {
+  return tracer.startActiveSpan(spanName, async (span: Span) => {
+    const operation = query.split(' ')[0].toLowerCase();
+    const { pool: selectedPool, poolType } = options.poolType
+      ? {
+          pool: options.poolType === 'read' ? readPool : writePool,
+          poolType: options.poolType,
+        }
+      : getPoolForQuery(query, options?.forceWrite);
+    const currentRegion = process.env.CURRENT_REGION || 'unknown';
+
+    span.setAttributes({
+      'db.system': 'postgresql',
+      'db.statement': query,
+      'db.operation': operation,
+      'db.pool_type': poolType,
+      'db.region': currentRegion,
+      tenant_id: options?.tenantId || 'unknown',
+    });
+
+    const scopedQuery = validateAndScopeQuery(
+      query,
+      params,
+      options?.tenantId,
+    );
+    const startTime = Date.now();
+
+    try {
+      dbConnectionsActive.inc({
+        region: currentRegion,
+        pool_type: poolType,
+        tenant_id: options?.tenantId || 'unknown',
+      });
+
+      const result = await selectedPool.query(
+        scopedQuery.query,
+        scopedQuery.params,
+      );
+
+      const duration = (Date.now() - startTime) / 1000;
+      dbQueryDuration.observe(
+        {
+          region: currentRegion,
+          pool_type: poolType,
+          operation,
+          tenant_id: options?.tenantId || 'unknown',
+        },
+        duration,
+      );
+
+      span.setAttributes({
+        'db.rows_affected': result.rowCount || 0,
+        'db.tenant_scoped': scopedQuery.wasScoped,
+        'db.query_duration': duration,
+      });
+
+      return returnMany ? result.rows : result.rows[0] || null;
+    } catch (error) {
+      span.recordException(error as Error);
+      span.setStatus({ code: 2, message: (error as Error).message });
+      throw error;
+    } finally {
+      span.end();
+    }
+  });
+}
+
 export const pg = {
   // Legacy method with automatic pool selection
   oneOrNone: async (
@@ -104,69 +183,7 @@ export const pg = {
       forceWrite?: boolean;
     },
   ) => {
-    return tracer.startActiveSpan('postgres.query', async (span: Span) => {
-      const operation = query.split(' ')[0].toLowerCase();
-      const { pool: selectedPool, poolType } = getPoolForQuery(
-        query,
-        options?.forceWrite,
-      );
-      const currentRegion = process.env.CURRENT_REGION || 'unknown';
-
-      span.setAttributes({
-        'db.system': 'postgresql',
-        'db.statement': query,
-        'db.operation': operation,
-        'db.pool_type': poolType,
-        'db.region': currentRegion,
-        tenant_id: options?.tenantId || 'unknown',
-      });
-
-      // Enhanced tenant scoping validation
-      const scopedQuery = validateAndScopeQuery(
-        query,
-        params,
-        options?.tenantId,
-      );
-      const startTime = Date.now();
-
-      try {
-        dbConnectionsActive.inc({
-          region: currentRegion,
-          pool_type: poolType,
-          tenant_id: options?.tenantId || 'unknown',
-        });
-
-        const result = await selectedPool.query(
-          scopedQuery.query,
-          scopedQuery.params,
-        );
-
-        const duration = (Date.now() - startTime) / 1000;
-        dbQueryDuration.observe(
-          {
-            region: currentRegion,
-            pool_type: poolType,
-            operation,
-            tenant_id: options?.tenantId || 'unknown',
-          },
-          duration,
-        );
-
-        span.setAttributes({
-          'db.rows_affected': result.rowCount || 0,
-          'db.tenant_scoped': scopedQuery.wasScoped,
-          'db.query_duration': duration,
-        });
-
-        return result.rows[0] || null;
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+    return _executeQuery('postgres.query', query, params, options || {}, false);
   },
 
   // Explicit read-only method
@@ -175,71 +192,13 @@ export const pg = {
     params: any[] = [],
     options?: { region?: string; tenantId?: string },
   ) => {
-    return tracer.startActiveSpan('postgres.read', async (span: Span) => {
-      const operation = query.split(' ')[0].toLowerCase();
-      const currentRegion = process.env.CURRENT_REGION || 'unknown';
-
-      // Ensure this is a read operation
-      if (!['select', 'with'].includes(operation)) {
-        throw new Error(
-          `Read method called with write operation: ${operation}`,
-        );
-      }
-
-      span.setAttributes({
-        'db.system': 'postgresql',
-        'db.statement': query,
-        'db.operation': operation,
-        'db.pool_type': 'read',
-        'db.region': currentRegion,
-        tenant_id: options?.tenantId || 'unknown',
-      });
-
-      const scopedQuery = validateAndScopeQuery(
-        query,
-        params,
-        options?.tenantId,
-      );
-      const startTime = Date.now();
-
-      try {
-        dbConnectionsActive.inc({
-          region: currentRegion,
-          pool_type: 'read',
-          tenant_id: options?.tenantId || 'unknown',
-        });
-
-        const result = await readPool.query(
-          scopedQuery.query,
-          scopedQuery.params,
-        );
-
-        const duration = (Date.now() - startTime) / 1000;
-        dbQueryDuration.observe(
-          {
-            region: currentRegion,
-            pool_type: 'read',
-            operation,
-            tenant_id: options?.tenantId || 'unknown',
-          },
-          duration,
-        );
-
-        span.setAttributes({
-          'db.rows_affected': result.rowCount || 0,
-          'db.tenant_scoped': scopedQuery.wasScoped,
-          'db.query_duration': duration,
-        });
-
-        return result.rows[0] || null;
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+    return _executeQuery(
+      'postgres.read',
+      query,
+      params,
+      { ...options, poolType: 'read' },
+      false,
+    );
   },
 
   // Explicit write method
@@ -248,74 +207,13 @@ export const pg = {
     params: any[] = [],
     options?: { region?: string; tenantId?: string },
   ) => {
-    return tracer.startActiveSpan('postgres.write', async (span: Span) => {
-      const operation = query.split(' ')[0].toLowerCase();
-      const currentRegion = process.env.CURRENT_REGION || 'unknown';
-
-      // Block writes in read-only regions unless this is a failover scenario
-      if (
-        process.env.READ_ONLY_REGION === 'true' &&
-        !process.env.FAILOVER_MODE
-      ) {
-        throw new Error(
-          `Write operations not allowed in read-only region: ${currentRegion}`,
-        );
-      }
-
-      span.setAttributes({
-        'db.system': 'postgresql',
-        'db.statement': query,
-        'db.operation': operation,
-        'db.pool_type': 'write',
-        'db.region': currentRegion,
-        tenant_id: options?.tenantId || 'unknown',
-      });
-
-      const scopedQuery = validateAndScopeQuery(
-        query,
-        params,
-        options?.tenantId,
-      );
-      const startTime = Date.now();
-
-      try {
-        dbConnectionsActive.inc({
-          region: currentRegion,
-          pool_type: 'write',
-          tenant_id: options?.tenantId || 'unknown',
-        });
-
-        const result = await writePool.query(
-          scopedQuery.query,
-          scopedQuery.params,
-        );
-
-        const duration = (Date.now() - startTime) / 1000;
-        dbQueryDuration.observe(
-          {
-            region: currentRegion,
-            pool_type: 'write',
-            operation,
-            tenant_id: options?.tenantId || 'unknown',
-          },
-          duration,
-        );
-
-        span.setAttributes({
-          'db.rows_affected': result.rowCount || 0,
-          'db.tenant_scoped': scopedQuery.wasScoped,
-          'db.query_duration': duration,
-        });
-
-        return result.rows[0] || null;
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+    return _executeQuery(
+      'postgres.write',
+      query,
+      params,
+      { ...options, poolType: 'write' },
+      false,
+    );
   },
 
   // Read many records
@@ -324,64 +222,13 @@ export const pg = {
     params: any[] = [],
     options?: { region?: string; tenantId?: string },
   ) => {
-    return tracer.startActiveSpan('postgres.read_many', async (span: Span) => {
-      const operation = query.split(' ')[0].toLowerCase();
-      const currentRegion = process.env.CURRENT_REGION || 'unknown';
-
-      if (!['select', 'with'].includes(operation)) {
-        throw new Error(
-          `ReadMany method called with write operation: ${operation}`,
-        );
-      }
-
-      span.setAttributes({
-        'db.system': 'postgresql',
-        'db.statement': query,
-        'db.operation': operation,
-        'db.pool_type': 'read',
-        'db.region': currentRegion,
-        tenant_id: options?.tenantId || 'unknown',
-      });
-
-      const scopedQuery = validateAndScopeQuery(
-        query,
-        params,
-        options?.tenantId,
-      );
-      const startTime = Date.now();
-
-      try {
-        const result = await readPool.query(
-          scopedQuery.query,
-          scopedQuery.params,
-        );
-
-        const duration = (Date.now() - startTime) / 1000;
-        dbQueryDuration.observe(
-          {
-            region: currentRegion,
-            pool_type: 'read',
-            operation,
-            tenant_id: options?.tenantId || 'unknown',
-          },
-          duration,
-        );
-
-        span.setAttributes({
-          'db.rows_affected': result.rowCount || 0,
-          'db.tenant_scoped': scopedQuery.wasScoped,
-          'db.query_duration': duration,
-        });
-
-        return result.rows;
-      } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        throw error;
-      } finally {
-        span.end();
-      }
-    });
+    return _executeQuery(
+      'postgres.read_many',
+      query,
+      params,
+      { ...options, poolType: 'read' },
+      true,
+    );
   },
 
   many: async (
