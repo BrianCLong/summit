@@ -1,0 +1,39 @@
+{
+  "name": "@intelgraph/training-orchestration",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "Advanced training orchestration with hyperparameter optimization and AutoML",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "test": "jest",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "@intelgraph/mlops-platform": "workspace:*",
+    "@intelgraph/common-types": "workspace:*",
+    "uuid": "^13.0.0",
+    "winston": "^3.18.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/uuid": "^11.0.0",
+    "typescript": "^5.9.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "training",
+    "hyperparameter-optimization",
+    "automl",
+    "distributed-training"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT"
+}
