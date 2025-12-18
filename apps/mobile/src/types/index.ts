@@ -1,290 +1,245 @@
-/**
- * Mobile Field Ops Type Definitions
- */
+import { z } from 'zod';
 
-// User and Auth types
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  permissions: string[];
-  avatarUrl?: string;
-}
+// Classification levels
+export const ClassificationLevel = z.enum([
+  'UNCLASSIFIED',
+  'CONFIDENTIAL',
+  'SECRET',
+  'TOP_SECRET',
+]);
+export type ClassificationLevel = z.infer<typeof ClassificationLevel>;
 
-export type UserRole = 'field_agent' | 'analyst' | 'supervisor' | 'admin';
-
-export interface DeviceInfo {
-  deviceId: string;
-  platform: 'ios' | 'android' | 'web';
-  model?: string;
-  osVersion?: string;
-  appVersion: string;
-  registeredAt: string;
-  lastActiveAt: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  deviceInfo: DeviceInfo | null;
-  accessToken: string | null;
-  refreshToken: string | null;
-  isAuthenticated: boolean;
-  isPinVerified: boolean;
-  sessionExpiresAt: number | null;
-}
-
-// Case and Alert types
-export interface Case {
-  id: string;
-  title: string;
-  status: CaseStatus;
-  priority: Priority;
-  assignedTo: string[];
-  summary?: string;
-  lastUpdated: string;
-  createdAt: string;
-  entityCount: number;
-  alertCount: number;
-  keyEntities?: EntitySummary[];
-  mapSnapshot?: MapSnapshot;
-  lastBrief?: Brief;
-}
-
-export type CaseStatus = 'open' | 'in_progress' | 'pending_review' | 'closed';
-export type Priority = 'low' | 'medium' | 'high' | 'critical';
-
-export interface Alert {
-  id: string;
-  type: AlertType;
-  title: string;
-  message: string;
-  severity: Severity;
-  caseId?: string;
-  entityId?: string;
-  createdAt: string;
-  acknowledgedAt?: string;
-  acknowledgedBy?: string;
-  isRead: boolean;
-  metadata?: Record<string, unknown>;
-}
-
-export type AlertType =
-  | 'new_intelligence'
-  | 'entity_update'
-  | 'relationship_change'
-  | 'assignment'
-  | 'deadline'
-  | 'system';
-
-export type Severity = 'info' | 'warning' | 'error' | 'critical';
-
-export interface Task {
-  id: string;
-  title: string;
-  description?: string;
-  caseId: string;
-  assignedTo: string;
-  status: TaskStatus;
-  priority: Priority;
-  dueDate?: string;
-  completedAt?: string;
-  createdAt: string;
-}
-
-export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked';
+// Priority levels
+export const Priority = z.enum(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW', 'INFO']);
+export type Priority = z.infer<typeof Priority>;
 
 // Entity types
-export interface Entity {
-  id: string;
-  type: EntityType;
-  name: string;
-  attributes: Record<string, unknown>;
-  photos?: EntityPhoto[];
-  provenance?: ProvenanceSummary;
-  lastUpdated: string;
-  createdAt: string;
-  confidence?: number;
+export const EntityType = z.enum([
+  'PERSON',
+  'ORGANIZATION',
+  'LOCATION',
+  'EVENT',
+  'DOCUMENT',
+  'THREAT',
+  'VEHICLE',
+  'DEVICE',
+  'FINANCIAL',
+  'COMMUNICATION',
+]);
+export type EntityType = z.infer<typeof EntityType>;
+
+// Relationship types
+export const RelationshipType = z.enum([
+  'ASSOCIATED_WITH',
+  'WORKS_FOR',
+  'LOCATED_AT',
+  'OWNS',
+  'COMMUNICATES_WITH',
+  'RELATED_TO',
+  'PART_OF',
+  'FUNDED_BY',
+  'TRANSACTED_WITH',
+  'MENTIONED_IN',
+]);
+export type RelationshipType = z.infer<typeof RelationshipType>;
+
+// Base entity schema
+export const EntitySchema = z.object({
+  id: z.string().uuid(),
+  type: EntityType,
+  name: z.string(),
+  description: z.string().optional(),
+  classification: ClassificationLevel,
+  priority: Priority.optional(),
+  confidence: z.number().min(0).max(100),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  metadata: z.record(z.unknown()).optional(),
+  location: z
+    .object({
+      latitude: z.number(),
+      longitude: z.number(),
+      accuracy: z.number().optional(),
+    })
+    .optional(),
+  tags: z.array(z.string()).optional(),
+  sources: z.array(z.string()).optional(),
+});
+export type Entity = z.infer<typeof EntitySchema>;
+
+// Relationship schema
+export const RelationshipSchema = z.object({
+  id: z.string().uuid(),
+  type: RelationshipType,
+  sourceId: z.string().uuid(),
+  targetId: z.string().uuid(),
+  classification: ClassificationLevel,
+  confidence: z.number().min(0).max(100),
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  createdAt: z.string().datetime(),
+  metadata: z.record(z.unknown()).optional(),
+});
+export type Relationship = z.infer<typeof RelationshipSchema>;
+
+// Investigation schema
+export const InvestigationSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string().optional(),
+  classification: ClassificationLevel,
+  priority: Priority,
+  status: z.enum(['DRAFT', 'ACTIVE', 'ON_HOLD', 'CLOSED', 'ARCHIVED']),
+  leadAnalyst: z.string(),
+  team: z.array(z.string()),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  dueDate: z.string().datetime().optional(),
+  tags: z.array(z.string()).optional(),
+  entityCount: z.number().default(0),
+  relationshipCount: z.number().default(0),
+});
+export type Investigation = z.infer<typeof InvestigationSchema>;
+
+// OSINT Alert schema
+export const OSINTAlertSchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string(),
+  priority: Priority,
+  source: z.string(),
+  sourceUrl: z.string().url().optional(),
+  entities: z.array(z.string().uuid()),
+  location: z
+    .object({
+      latitude: z.number(),
+      longitude: z.number(),
+      name: z.string().optional(),
+    })
+    .optional(),
+  timestamp: z.string().datetime(),
+  isRead: z.boolean().default(false),
+  isAcknowledged: z.boolean().default(false),
+  acknowledgedAt: z.string().datetime().optional(),
+  acknowledgedBy: z.string().optional(),
+});
+export type OSINTAlert = z.infer<typeof OSINTAlertSchema>;
+
+// GEOINT Feature schema
+export const GEOINTFeatureSchema = z.object({
+  id: z.string().uuid(),
+  type: z.literal('Feature'),
+  geometry: z.object({
+    type: z.enum(['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon']),
+    coordinates: z.union([
+      z.tuple([z.number(), z.number()]),
+      z.array(z.tuple([z.number(), z.number()])),
+      z.array(z.array(z.tuple([z.number(), z.number()]))),
+    ]),
+  }),
+  properties: z.object({
+    name: z.string().optional(),
+    entityId: z.string().uuid().optional(),
+    entityType: EntityType.optional(),
+    classification: ClassificationLevel.optional(),
+    priority: Priority.optional(),
+    description: z.string().optional(),
+    timestamp: z.string().datetime().optional(),
+    source: z.string().optional(),
+    confidence: z.number().min(0).max(100).optional(),
+    metadata: z.record(z.unknown()).optional(),
+  }),
+});
+export type GEOINTFeature = z.infer<typeof GEOINTFeatureSchema>;
+
+// GEOINT Layer schema
+export const GEOINTLayerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.enum(['entities', 'alerts', 'heatmap', 'routes', 'areas', 'custom']),
+  visible: z.boolean(),
+  opacity: z.number().min(0).max(1),
+  features: z.array(GEOINTFeatureSchema),
+  style: z.record(z.unknown()).optional(),
+});
+export type GEOINTLayer = z.infer<typeof GEOINTLayerSchema>;
+
+// Sync status types
+export interface SyncStatus {
+  lastSyncAt: string | null;
+  pendingChanges: number;
+  isSyncing: boolean;
+  error: string | null;
+  offlineMode: boolean;
 }
 
-export interface EntitySummary {
-  id: string;
-  type: EntityType;
-  name: string;
-  thumbnailUrl?: string;
+// User preferences
+export interface UserPreferences {
+  theme: 'light' | 'dark' | 'system';
+  mapStyle: 'satellite' | 'streets' | 'dark' | 'light';
+  notifications: {
+    alerts: boolean;
+    updates: boolean;
+    mentions: boolean;
+    sound: boolean;
+    vibration: boolean;
+  };
+  offlineSettings: {
+    autoSync: boolean;
+    syncOnWifiOnly: boolean;
+    maxOfflineData: number; // MB
+  };
+  displaySettings: {
+    showConfidence: boolean;
+    showClassification: boolean;
+    compactMode: boolean;
+  };
 }
 
-export type EntityType =
-  | 'person'
-  | 'organization'
-  | 'location'
-  | 'event'
-  | 'document'
-  | 'vehicle'
-  | 'device'
-  | 'account'
-  | 'other';
+// Navigation types
+export type RootStackParamList = {
+  Splash: undefined;
+  Auth: undefined;
+  Main: undefined;
+  EntityDetails: { entityId: string };
+  InvestigationDetails: { investigationId: string };
+  AlertDetails: { alertId: string };
+  MapFullScreen: { layerIds?: string[]; centerOn?: { lat: number; lng: number } };
+  Settings: undefined;
+  Profile: undefined;
+  Search: { query?: string };
+  Notifications: undefined;
+};
 
-export interface EntityPhoto {
-  id: string;
-  url: string;
-  thumbnailUrl: string;
-  caption?: string;
-  uploadedAt: string;
-  uploadedBy: string;
+export type AuthStackParamList = {
+  Login: undefined;
+  MFA: { userId: string };
+  Biometric: undefined;
+  PINSetup: undefined;
+  ForgotPassword: undefined;
+};
+
+export type MainTabParamList = {
+  Dashboard: undefined;
+  Investigations: undefined;
+  Map: undefined;
+  Alerts: undefined;
+  More: undefined;
+};
+
+// API response types
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
-export interface ProvenanceSummary {
-  sources: string[];
-  confidence: number;
-  lastVerified?: string;
-  chain: ProvenanceLink[];
-}
-
-export interface ProvenanceLink {
-  source: string;
-  timestamp: string;
-  method: string;
-}
-
-// Map types
-export interface MapSnapshot {
-  centerLat: number;
-  centerLng: number;
-  zoom: number;
-  markers: MapMarker[];
-  thumbnailUrl?: string;
-}
-
-export interface MapMarker {
-  id: string;
-  lat: number;
-  lng: number;
-  type: 'entity' | 'event' | 'poi';
-  label?: string;
-}
-
-// Brief types
-export interface Brief {
-  id: string;
-  caseId: string;
-  title: string;
-  content: string;
-  summary: string;
-  createdAt: string;
-  createdBy: string;
-}
-
-// Note and Observation types
-export interface Note {
-  id: string;
-  localId: string; // For offline sync
-  entityId?: string;
-  caseId?: string;
-  alertId?: string;
-  content: string;
-  createdAt: string;
-  createdBy: string;
-  syncStatus: SyncStatus;
-  version: number;
-}
-
-export interface Observation {
-  id: string;
-  localId: string;
-  caseId: string;
-  type: ObservationType;
-  data: Record<string, unknown>;
-  location?: GeoLocation;
-  timestamp: string;
-  createdBy: string;
-  syncStatus: SyncStatus;
-  version: number;
-}
-
-export type ObservationType =
-  | 'sighting'
-  | 'contact'
-  | 'activity'
-  | 'incident'
-  | 'other';
-
-export interface GeoLocation {
-  lat: number;
-  lng: number;
-  accuracy?: number;
-  altitude?: number;
-}
-
-// Attachment types
-export interface Attachment {
-  id: string;
-  localId: string;
-  type: AttachmentType;
-  filename: string;
-  mimeType: string;
-  size: number;
-  localUri?: string; // Local file path for offline
-  remoteUrl?: string;
-  caseId?: string;
-  entityId?: string;
-  uploadedAt?: string;
-  uploadedBy: string;
-  syncStatus: SyncStatus;
-}
-
-export type AttachmentType = 'photo' | 'audio' | 'document';
-
-// Sync types
-export type SyncStatus = 'pending' | 'syncing' | 'synced' | 'conflict' | 'error';
-
-export interface SyncQueueItem {
-  id: string;
-  operation: 'create' | 'update' | 'delete';
-  entityType: 'note' | 'observation' | 'attachment' | 'acknowledgement';
-  data: unknown;
-  createdAt: string;
-  attempts: number;
-  lastAttempt?: string;
-  error?: string;
-}
-
-export interface ConflictResolution {
-  id: string;
-  localData: unknown;
-  serverData: unknown;
-  resolvedData: unknown;
-  resolvedAt: string;
-  resolution: 'local' | 'server' | 'merge';
-}
-
-// Network and offline types
-export type NetworkStatus = 'online' | 'offline' | 'slow';
-
-export interface CacheMetadata {
-  key: string;
-  type: string;
-  cachedAt: string;
-  expiresAt: string;
-  size: number;
-  checksum: string;
-}
-
-// Security types
-export interface SecurityConfig {
-  requirePin: boolean;
-  requireBiometric: boolean;
-  sessionTimeoutMinutes: number;
-  maxFailedAttempts: number;
-  enableScreenshotPrevention: boolean;
-  enableCopyPrevention: boolean;
-}
-
-export interface DeviceToken {
-  token: string;
-  deviceId: string;
-  isActive: boolean;
-  createdAt: string;
-  lastUsedAt: string;
-  revokedAt?: string;
+export interface ApiError {
+  code: string;
+  message: string;
+  details?: Record<string, unknown>;
 }

@@ -1,7 +1,8 @@
+// @ts-nocheck
 import 'dotenv/config';
 import { z } from 'zod';
 
-const Env = z
+export const EnvSchema = z
   .object({
     NODE_ENV: z.string().default('development'),
     PORT: z.coerce.number().default(4000),
@@ -20,8 +21,11 @@ const Env = z
     RATE_LIMIT_MAX_AUTHENTICATED: z.coerce.number().default(1000),
     CACHE_ENABLED: z.coerce.boolean().default(true),
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
-  })
-  .passthrough(); // Allow extra env vars
+    L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
+    L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
+  });
+
+const Env = EnvSchema.passthrough(); // Allow extra env vars
 
 // Environment variable documentation for helpful error messages
 const ENV_VAR_HELP: Record<string, string> = {

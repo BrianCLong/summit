@@ -1,19 +1,33 @@
 import pino from 'pino';
 import { recordUserSignup } from '../../monitoring/businessMetrics.js';
+import { cache } from '../../lib/cache/index.js';
+import { cfg } from '../../config.js';
 
 const logger = pino();
 
 const userResolvers = {
   Query: {
     user: async (_: any, { id }: { id: string }) => {
-      logger.info(`Fetching user with ID: ${id} (placeholder)`);
+      const cacheKey = `user:${id}`;
+      const cachedUser = await cache.get(cacheKey);
+
+      if (cachedUser) {
+        logger.info(`[CACHE HIT] Found user with ID: ${id} in cache.`);
+        return cachedUser;
+      }
+
+      logger.info(`[CACHE MISS] Fetching user with ID: ${id} from source.`);
       // Placeholder: In a real implementation, fetch user from PostgreSQL
-      return {
+      const user = {
         id: id,
         email: `user-${id}@example.com`,
         username: `user${id}`,
         createdAt: new Date().toISOString(),
       };
+
+      await cache.set(cacheKey, user, cfg.CACHE_TTL_DEFAULT);
+
+      return user;
     },
     users: async (
       _: any,
@@ -69,6 +83,8 @@ const userResolvers = {
         `Updating user ${id}: ${JSON.stringify(input)} (placeholder)`,
       );
       // Placeholder: In a real implementation, update user in PostgreSQL
+      const cacheKey = `user:${id}`;
+      await cache.invalidate(cacheKey);
       return {
         id: id,
         email: input.email || `user-${id}@example.com`,
@@ -79,6 +95,8 @@ const userResolvers = {
     deleteUser: async (_: any, { id }: { id: string }) => {
       logger.info(`Deleting user: ${id} (placeholder)`);
       // Placeholder: In a real implementation, soft delete user in PostgreSQL
+      const cacheKey = `user:${id}`;
+      await cache.invalidate(cacheKey);
       return true;
     },
     updateUserPreferences: async (

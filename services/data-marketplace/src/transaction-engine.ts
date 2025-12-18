@@ -86,7 +86,7 @@ export class TransactionEngine {
     role?: 'buyer' | 'seller',
   ): Promise<Transaction[]> {
     const userTxs = this.userTransactions.get(userId);
-    if (!userTxs) return [];
+    if (!userTxs) {return [];}
 
     const txIds = role === 'buyer' ? userTxs.buys :
                   role === 'seller' ? userTxs.sells :
@@ -132,7 +132,7 @@ export class TransactionEngine {
 
   async processRefund(transactionId: string): Promise<boolean> {
     const tx = this.transactions.get(transactionId);
-    if (!tx || tx.status !== 'completed') return false;
+    if (!tx || tx.status !== 'completed') {return false;}
 
     tx.status = 'refunded';
     const license = this.licenses.get(transactionId);

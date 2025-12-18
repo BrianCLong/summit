@@ -164,7 +164,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
    * Start the orchestrator
    */
   async start(): Promise<void> {
-    if (this.running) return;
+    if (this.running) {return;}
 
     logger.info('Starting Workflow Orchestrator', { nodeId: this.config.nodeId });
 
@@ -214,7 +214,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
     );
 
     this.worker.on('failed', (job, error) => {
-      if (job) this.handleTaskFailure(job.data.taskId, error.message);
+      if (job) {this.handleTaskFailure(job.data.taskId, error.message);}
     });
 
     this.running = true;
@@ -225,7 +225,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
    * Stop the orchestrator
    */
   async stop(): Promise<void> {
-    if (!this.running) return;
+    if (!this.running) {return;}
 
     logger.info('Stopping Workflow Orchestrator');
 
@@ -319,7 +319,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
    */
   async pauseWorkflow(workflowId: string): Promise<void> {
     const workflow = this.workflows.get(workflowId);
-    if (!workflow) return;
+    if (!workflow) {return;}
 
     workflow.state = 'paused';
     workflow.updatedAt = new Date();
@@ -336,7 +336,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
    */
   async resumeWorkflow(workflowId: string): Promise<void> {
     const workflow = this.workflows.get(workflowId);
-    if (!workflow) return;
+    if (!workflow) {return;}
 
     workflow.state = 'running';
     workflow.updatedAt = new Date();
@@ -350,7 +350,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
    */
   async cancelWorkflow(workflowId: string): Promise<void> {
     const workflow = this.workflows.get(workflowId);
-    if (!workflow) return;
+    if (!workflow) {return;}
 
     workflow.state = 'cancelled';
     workflow.updatedAt = new Date();
@@ -400,7 +400,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
 
   private async queueReadyTasks(workflow: Workflow): Promise<void> {
     const readyTasks = workflow.tasks.filter(task => {
-      if (task.state !== 'pending') return false;
+      if (task.state !== 'pending') {return false;}
 
       // Check dependencies
       const depsCompleted = task.dependencies.every(depId => {
@@ -428,10 +428,10 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
     const { workflowId, taskId } = job.data;
 
     const workflow = this.workflows.get(workflowId);
-    if (!workflow) throw new Error(`Workflow ${workflowId} not found`);
+    if (!workflow) {throw new Error(`Workflow ${workflowId} not found`);}
 
     const task = workflow.tasks.find(t => t.id === taskId);
-    if (!task) throw new Error(`Task ${taskId} not found`);
+    if (!task) {throw new Error(`Task ${taskId} not found`);}
 
     task.state = 'running';
     task.startedAt = new Date();
@@ -497,7 +497,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
   }
 
   private async checkNetworkCondition(task: Task): Promise<boolean> {
-    if (!task.assignedNode) return true;
+    if (!task.assignedNode) {return true;}
 
     const { healthySummary } = this.topologyManager.getTopologySnapshot();
     return healthySummary.healthy > 0 || healthySummary.degraded > 0;
@@ -508,7 +508,7 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
       t => t.state === 'completed' || t.state === 'skipped' || t.state === 'failed'
     );
 
-    if (!allDone) return;
+    if (!allDone) {return;}
 
     const anyFailed = workflow.tasks.some(t => t.state === 'failed');
 
@@ -621,9 +621,9 @@ export class WorkflowOrchestrator extends EventEmitter<OrchestratorEvents> {
   }
 
   private categorizeError(message: string): string {
-    if (message.includes('network') || message.includes('timeout')) return 'NETWORK_ERROR';
-    if (message.includes('unavailable')) return 'NODE_UNAVAILABLE';
-    if (message.includes('connectivity')) return 'NO_CONNECTIVITY';
+    if (message.includes('network') || message.includes('timeout')) {return 'NETWORK_ERROR';}
+    if (message.includes('unavailable')) {return 'NODE_UNAVAILABLE';}
+    if (message.includes('connectivity')) {return 'NO_CONNECTIVITY';}
     return 'UNKNOWN';
   }
 
