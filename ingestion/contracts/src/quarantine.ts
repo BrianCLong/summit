@@ -1,40 +1,31 @@
 import { QuarantineRecord } from './types.js';
-import { AppendOnlyAuditLog } from './audit.js';
 
-export class QuarantineService {
-  private readonly quarantined: QuarantineRecord[] = [];
+export class QuarantineRegistry {
+  private readonly records: QuarantineRecord[] = [];
 
-  constructor(private readonly audit: AppendOnlyAuditLog) {}
-
-  place(
-    contractId: string,
-    reason: string,
-    payloadSample: Record<string, unknown>,
-  ): QuarantineRecord {
+  quarantine(contractId: string, version: string, reason: string): QuarantineRecord {
     const record: QuarantineRecord = {
-      id: `quarantine-${crypto.randomUUID()}`,
       contractId,
-      observedAt: new Date().toISOString(),
+      version,
       reason,
-      payloadSample,
+      at: new Date().toISOString()
     };
-    this.quarantined.push(record);
-    this.audit.record({ actor: 'quarantine', action: 'placed', details: { contractId, reason } });
+    this.records.push(record);
     return record;
   }
 
-  resolve(id: string, notes: string): QuarantineRecord | undefined {
-    const record = this.quarantined.find((entry) => entry.id === id);
-    if (!record) return undefined;
-    if (!record.resolvedAt) {
-      record.resolvedAt = new Date().toISOString();
-      record.resolutionNotes = notes;
-      this.audit.record({ actor: 'quarantine', action: 'resolved', details: { id, notes } });
+  resolve(contractId: string, version: string, resolutionNote: string): QuarantineRecord | undefined {
+    const entry = this.records.find(
+      (record) => record.contractId === contractId && record.version === version && !record.releasedAt
+    );
+    if (entry) {
+      entry.releasedAt = new Date().toISOString();
+      entry.resolutionNote = resolutionNote;
     }
-    return record;
+    return entry;
   }
 
-  list(): QuarantineRecord[] {
-    return [...this.quarantined];
+  active(): QuarantineRecord[] {
+    return this.records.filter((record) => !record.releasedAt);
   }
 }

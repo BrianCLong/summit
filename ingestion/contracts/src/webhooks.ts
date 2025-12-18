@@ -1,29 +1,22 @@
-import { WebhookEndpoint } from './types.js';
+import { request } from 'https';
 
-export interface WebhookDelivery {
-  endpoint: WebhookEndpoint;
-  payload: Record<string, unknown>;
+export interface WebhookPayload {
+  event: string;
+  contractId: string;
+  version: string;
+  details?: Record<string, unknown>;
 }
 
-export class WebhookRegistry {
-  private readonly endpoints: WebhookEndpoint[] = [];
-
-  register(endpoint: WebhookEndpoint): void {
-    const existing = this.endpoints.find((entry) => entry.producerId === endpoint.producerId);
-    if (existing) {
-      existing.url = endpoint.url;
-      existing.secret = endpoint.secret;
-      existing.enabled = endpoint.enabled;
-      return;
-    }
-    this.endpoints.push(endpoint);
-  }
-
-  activeForProducer(producerId: string): WebhookEndpoint[] {
-    return this.endpoints.filter((endpoint) => endpoint.producerId === producerId && endpoint.enabled);
-  }
-
-  buildNotifications(producerId: string, payload: Record<string, unknown>): WebhookDelivery[] {
-    return this.activeForProducer(producerId).map((endpoint) => ({ endpoint, payload }));
+export class WebhookDispatcher {
+  async send(url: string, payload: WebhookPayload): Promise<number> {
+    const body = JSON.stringify(payload);
+    return new Promise((resolve, reject) => {
+      const req = request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' } }, (res) => {
+        resolve(res.statusCode ?? 0);
+      });
+      req.on('error', reject);
+      req.write(body);
+      req.end();
+    });
   }
 }

@@ -1,48 +1,92 @@
-import { ContractSpec, Certification, CertificationResult } from './types.js';
-import { normalizeSpec } from './spec-utils.js';
+import { createHash, createSign, generateKeyPairSync, verify } from 'crypto';
+import { ContractSpec, CertificatePayload, ValidationFinding } from './types.js';
+import { ContractSpecification } from './specification.js';
 
-const encoder = new TextEncoder();
+export class CertificateAuthority {
+  private readonly privateKey: string;
+  private readonly publicKey: string;
+  constructor(private readonly signer = 'dpic-ca') {
+    const { privateKey, publicKey } = generateKeyPairSync('rsa', {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: 'spki', format: 'pem' },
+      privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+    });
+    this.privateKey = privateKey;
+    this.publicKey = publicKey;
+  }
 
-async function sha256Hex(input: string): Promise<string> {
-  const data = encoder.encode(input);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash))
-    .map((byte) => byte.toString(16).padStart(2, '0'))
-    .join('');
+  signContract(spec: ContractSpec): CertificatePayload {
+    const payload = {
+      contractId: spec.id,
+      dataset: spec.dataset,
+      version: spec.version,
+      issuedAt: new Date().toISOString(),
+      signedBy: this.signer
+    } as CertificatePayload;
+
+    const signer = createSign('RSA-SHA256');
+    signer.update(JSON.stringify({ contract: spec, issuedAt: payload.issuedAt }));
+    payload.signature = signer.sign(this.privateKey, 'base64');
+    return payload;
+  }
+
+  verify(payload: CertificatePayload, spec: ContractSpec): boolean {
+    const verifier = verify(
+      'RSA-SHA256',
+      Buffer.from(JSON.stringify({ contract: spec, issuedAt: payload.issuedAt })),
+      this.publicKey,
+      Buffer.from(payload.signature, 'base64')
+    );
+    return verifier;
+  }
+
+  get publicKeyPem(): string {
+    return this.publicKey;
+  }
 }
 
 export class CertificationWorkflow {
-  constructor(private readonly issuer: string) {}
+  constructor(private readonly ca: CertificateAuthority) {}
 
-  async issueCertificate(
-    spec: ContractSpec,
-    secret: string,
-    validUntil?: string,
-  ): Promise<Certification> {
-    const payload = normalizeSpec(spec);
-    const signature = await sha256Hex(`${secret}:${payload}`);
-    return {
-      id: `cert-${crypto.randomUUID()}`,
+  certify(spec: ContractSpec): { cert: CertificatePayload; findings: ValidationFinding[] } {
+    const specification = new ContractSpecification(spec);
+    const findings = specification.validate();
+    const blockingIssues = findings.filter((finding) => finding.severity === 'error');
+
+    if (blockingIssues.length) {
+      throw new Error(`contract ${spec.id} failed validation: ${blockingIssues[0].issue}`);
+    }
+
+    const signature = this.ca.signContract(spec);
+    const hashedTerms = specification.hashTerms();
+
+    const cert: CertificatePayload = {
+      ...signature,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 180).toISOString(),
       contractId: spec.id,
-      contractVersion: spec.version,
-      issuer: this.issuer,
-      issuedAt: new Date().toISOString(),
-      validUntil,
-      signature,
+      dataset: spec.dataset,
+      version: spec.version,
+      signedBy: signature.signedBy,
+      signature: signature.signature,
+      issuedAt: signature.issuedAt
     };
+
+    spec.termsHash = hashedTerms;
+    spec.certified = true;
+    spec.certifiedAt = cert.issuedAt;
+    spec.signature = cert.signature;
+
+    return { cert, findings };
   }
 
-  async verifyCertificate(
-    spec: ContractSpec,
-    certificate: Certification,
-    secret: string,
-  ): Promise<CertificationResult> {
-    const payload = normalizeSpec(spec);
-    const expected = await sha256Hex(`${secret}:${payload}`);
-    const verified =
-      certificate.contractId === spec.id &&
-      certificate.contractVersion === spec.version &&
-      certificate.signature === expected;
-    return { certificate, verified };
+  enforceProductionGate(spec: ContractSpec): void {
+    if (!spec.certified || !spec.signature) {
+      throw new Error('production ingest blocked: contract is not certified');
+    }
+
+    const tamperHash = createHash('sha256').update(JSON.stringify(spec.fields)).digest('hex');
+    if (tamperHash !== spec.termsHash) {
+      throw new Error('production ingest blocked: contract hash mismatch');
+    }
   }
 }

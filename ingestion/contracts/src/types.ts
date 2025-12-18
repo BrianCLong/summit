@@ -1,79 +1,71 @@
-export type FieldPrimitive = 'string' | 'number' | 'boolean' | 'object' | 'array';
+export type DataClassification = 'public' | 'dp' | 'pii';
 
 export interface ContractField {
   name: string;
-  type: FieldPrimitive;
+  type: 'string' | 'number' | 'boolean' | 'date' | 'object' | 'array';
   nullable: boolean;
-  unit: string;
-  pii: boolean;
-  dp: boolean;
+  unit?: string;
+  description?: string;
+  classification?: DataClassification;
+}
+
+export interface ContractLicense {
+  name: string;
+  url?: string;
+  attributionRequired?: boolean;
+  expiresAt?: string;
 }
 
 export interface ContractSpec {
   id: string;
+  dataset: string;
   version: string;
-  license: string;
+  owner: string;
   fields: ContractField[];
-  createdAt?: string;
-  status?: 'draft' | 'certified' | 'quarantined' | 'deprecated';
+  license: ContractLicense;
+  termsHash: string;
+  certified?: boolean;
+  certifiedAt?: string;
+  signature?: string;
 }
 
-export interface Certification {
-  id: string;
-  contractId: string;
-  contractVersion: string;
-  issuer: string;
-  issuedAt: string;
-  validUntil?: string;
-  signature: string;
+export interface ValidationFinding {
+  field: string;
+  issue: string;
+  severity: 'info' | 'warning' | 'error';
 }
 
-export interface CertificationResult {
-  certificate: Certification;
-  verified: boolean;
-}
-
-export interface ConformanceResult {
-  conforms: boolean;
-  missingFields: string[];
-  nullabilityViolations: string[];
-  typeViolations: string[];
-  score: number;
-  piiFlagsValid: boolean;
-  dpFlagsValid: boolean;
-}
-
-export interface QuarantineRecord {
-  id: string;
-  contractId: string;
-  observedAt: string;
-  reason: string;
-  payloadSample: Record<string, unknown>;
-  resolvedAt?: string;
-  resolutionNotes?: string;
-}
-
-export interface AuditEvent {
-  id: string;
-  actor: string;
-  action: string;
-  timestamp: string;
-  details?: Record<string, unknown>;
-}
-
-export interface WebhookEndpoint {
-  producerId: string;
-  url: string;
-  secret: string;
-  enabled: boolean;
+export interface DriftDiffEntry {
+  field: string;
+  change: 'added' | 'removed' | 'changed';
+  details: string;
 }
 
 export interface Scorecard {
   contractId: string;
   version: string;
-  totalChecks: number;
-  passedChecks: number;
-  quarantinedEvents: number;
-  lastUpdated: string;
-  grade: 'A' | 'B' | 'C' | 'D' | 'F';
+  completeness: number;
+  safety: number;
+  governance: number;
+  webhooksDelivered: number;
+  findings: ValidationFinding[];
+}
+
+export interface QuarantineRecord {
+  contractId: string;
+  version: string;
+  reason: string;
+  at: string;
+  releasedAt?: string;
+  resolutionNote?: string;
+}
+
+export interface CertificatePayload {
+  contractId: string;
+  dataset: string;
+  version: string;
+  issuedAt: string;
+  expiresAt?: string;
+  signedBy: string;
+  signature: string;
 }

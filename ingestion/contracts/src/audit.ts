@@ -1,21 +1,16 @@
-import { AuditEvent } from './types.js';
+import { appendFileSync, mkdirSync } from 'fs';
+import { join } from 'path';
 
 export class AppendOnlyAuditLog {
-  private readonly events: AuditEvent[] = [];
+  private readonly file: string;
 
-  record(event: Omit<AuditEvent, 'id' | 'timestamp'> & { id?: string; timestamp?: string }): AuditEvent {
-    const complete: AuditEvent = {
-      id: event.id ?? `audit-${crypto.randomUUID()}`,
-      actor: event.actor,
-      action: event.action,
-      timestamp: event.timestamp ?? new Date().toISOString(),
-      details: event.details,
-    };
-    this.events.push(Object.freeze(complete));
-    return complete;
+  constructor(filename = 'audit.log') {
+    this.file = join(process.cwd(), filename);
+    mkdirSync(process.cwd(), { recursive: true });
   }
 
-  list(): AuditEvent[] {
-    return [...this.events];
+  write(event: Record<string, unknown>): void {
+    const entry = { ...event, at: new Date().toISOString() };
+    appendFileSync(this.file, `${JSON.stringify(entry)}\n`);
   }
 }
