@@ -1,0 +1,55 @@
+# Filebeat Configuration
+# Issue: #11813 - Structured Logging with ELK/OpenTelemetry
+
+filebeat.inputs:
+  # Application log files
+  - type: log
+    enabled: true
+    paths:
+      - /logs/*.log
+    json.keys_under_root: true
+    json.add_error_key: true
+    fields:
+      log_type: application
+      service: intelgraph
+
+  # Docker container logs
+  - type: container
+    enabled: true
+    paths:
+      - '/var/lib/docker/containers/*/*.log'
+    processors:
+      - add_docker_metadata:
+          host: "unix:///var/run/docker.sock"
+
+# Output to Logstash
+output.logstash:
+  hosts: ["logstash:5044"]
+  compression_level: 3
+
+# Output directly to Elasticsearch (alternative)
+# output.elasticsearch:
+#   hosts: ["elasticsearch:9200"]
+#   indices:
+#     - index: "intelgraph-logs-%{+yyyy.MM.dd}"
+#       when.not.contains:
+#         tags: "audit"
+#     - index: "intelgraph-audit-%{+yyyy.MM.dd}"
+#       when.contains:
+#         tags: "audit"
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+# Processors
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~

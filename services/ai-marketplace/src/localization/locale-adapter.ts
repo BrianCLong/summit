@@ -117,7 +117,7 @@ export class LocaleAdapter {
     for (const pref of preferredLocales) {
       const lang = pref.split('-')[0];
       const match = availableLocales.find(l => l.startsWith(lang));
-      if (match) return match;
+      if (match) {return match;}
     }
 
     return null;
