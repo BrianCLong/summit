@@ -44,7 +44,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({children}) => {
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        isAuthenticated: Boolean(user),
         isLoading,
         login,
         logout,
