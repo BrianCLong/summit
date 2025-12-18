@@ -10,7 +10,7 @@ riskRoutes.post('/assess', async (req: AuthenticatedRequest, res, next) => {
   try {
     // Create a temporary product-like object for assessment
     const tempProduct = {
-      id: 'temp-' + Date.now(),
+      id: `temp-${  Date.now()}`,
       providerId: req.user!.providerId || req.user!.id,
       ...req.body,
       status: 'draft',
