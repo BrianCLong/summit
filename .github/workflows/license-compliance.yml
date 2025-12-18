@@ -1,0 +1,57 @@
+name: License Compliance
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 5 * * 1' # Weekly on Mondays
+
+jobs:
+  license-scan:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install license-checker
+        run: npm install -g license-checker
+
+      - name: Run License Scan
+        run: |
+          echo "Scanning production dependencies..."
+          # Fail if unauthorized licenses are found
+          license-checker --production --summary --excludePrivatePackages --onlyAllow "MIT;BSD;Apache-2.0;ISC;Unlicense" > license-report.txt
+
+          echo "## License Compliance Report" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat license-report.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+          # Explicitly block on GPL or other non-allowed licenses if license-checker didn't already fail
+          if grep -q "GPL" license-report.txt; then
+            echo "::error::GPL license found! Please review."
+            exit 1
+          fi
+
+      - name: Upload Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-report
+          path: license-report.txt

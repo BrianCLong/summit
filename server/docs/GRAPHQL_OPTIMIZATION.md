@@ -337,6 +337,14 @@ APQ reduces network bandwidth by allowing clients to send query hashes instead o
 - **Improved CDN caching** (GET requests instead of POST)
 - **Reduced parsing overhead** on server
 
+### Production allowlisting
+
+- The server now loads a persisted operation manifest (by default `client/src/generated/graphql.json` or `persisted-operations.json`) and enforces it on `/graphql` in production.
+- Operation IDs **and** APQ SHA-256 hashes are accepted; matching entries inject the canonical query text before execution.
+- Multiple manifest files are merged so blue/green or overlay manifests can co-exist during deployments.
+- Non-allowlisted queries return `403 PERSISTED_QUERY_REQUIRED` unless `ALLOW_NON_PERSISTED_QUERIES=true` is explicitly set for development.
+- GET requests that send persisted identifiers via query string are normalized the same way as POST bodies so CDNs can cache them safely.
+
 ### Client Configuration
 
 #### Apollo Client

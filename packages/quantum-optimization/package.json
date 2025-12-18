@@ -1,6 +1,6 @@
 {
   "name": "@summit/quantum-optimization",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Quantum-inspired optimization algorithms for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
