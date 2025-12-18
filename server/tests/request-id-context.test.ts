@@ -1,4 +1,5 @@
 import { getContext } from '../src/lib/auth.js';
+import { describe, it, expect } from '@jest/globals';
 
 describe('trace context', () => {
   it('attaches unique requestId to context', async () => {

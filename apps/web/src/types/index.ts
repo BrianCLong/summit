@@ -252,6 +252,8 @@ export interface GeospatialEvent {
   id: string
   timestamp: string
   location: GeoLocation
+  latitude: number
+  longitude: number
   type: string
   severity?: AlertSeverity
   description?: string
