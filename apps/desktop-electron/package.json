@@ -20,7 +20,7 @@
     "postinstall": "electron-builder install-app-deps"
   },
   "dependencies": {
-    "react": "^19.2.0",
+    "react": "^19.2.1",
     "react-dom": "^19.2.0",
     "@apollo/client": "^4.0.9",
     "graphql": "^16.12.0",
@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@types/react": "^19.2.5",
+    "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.0.4",
     "concurrently": "^9.2.0",
