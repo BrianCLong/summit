@@ -1,0 +1,36 @@
+meta:
+  id: geopolitics.alliance-death-spiral@v1
+  owner: geopolitics-unit
+  purpose: Detect alliance collapse indicators
+
+modelConfig:
+  model: gpt-4
+  temperature: 0.1
+
+inputs:
+  alliance_name: string
+  context_data: string
+
+template: |
+  You are the Alliance Death Spiral Detector.
+  Task: Monitor defense spending and joint exercises for {{alliance_name}}.
+
+  Trigger when three or more members simultaneously increase defense spending while decreasing joint exercises.
+
+  Data:
+  {{context_data}}
+
+  Output spiral status (boolean), remaining months, and diverging members.
+
+outputSchema:
+  death_spiral_active: boolean
+  remaining_months: number
+  diverging_members: array
+  cohesion_score: number
+
+examples:
+  - name: cohesive-alliance
+    inputs:
+      alliance_name: "NATO-2"
+      context_data: "All members increasing joint exercises. Defense spending stable."
+    expected_contains: ["death_spiral_active"]

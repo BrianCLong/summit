@@ -1,0 +1,103 @@
+name: CompanyOS Service Template
+
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      helm_chart:
+        required: true
+        type: string
+      job_label:
+        required: true
+        type: string
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+
+      - name: Build image
+        id: meta
+        run: |
+          IMAGE="ghcr.io/${GITHUB_REPOSITORY}/${{ inputs.service }}:${GITHUB_SHA}"
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+          docker build \
+            -f docker/Dockerfile.${{ inputs.service }} \
+            -t $IMAGE \
+            .
+
+  deploy-canary:
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy canary
+        run: |
+          helm upgrade ${{ inputs.service }} ${{ inputs.helm_chart }} \
+            -f ${{ inputs.helm_chart }}/values.yaml \
+            -f ${{ inputs.helm_chart }}/values-canary.yaml \
+            --set image.tag=${GITHUB_SHA}
+
+      - name: Wait for canary
+        run: sleep 300
+
+  canary-slo-gate:
+    runs-on: ubuntu-latest
+    needs: [deploy-canary]
+    env:
+      PROM_URL: https://prometheus.yourdomain.example/api/v1/query
+      SERVICE: ${{ inputs.job_label }}
+      CANARY_WINDOW: 10m
+      BASELINE_WINDOW: 60m
+      CANARY_ERROR_FACTOR: 2
+      CANARY_LATENCY_FACTOR: 2
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Run canary SLO gate
+        run: node companyos/scripts/check-canary-slo.mjs
+
+  promote-or-rollback:
+    runs-on: ubuntu-latest
+    needs: [canary-slo-gate]
+    if: ${{ needs.canary-slo-gate.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Promote to full
+        run: |
+          helm upgrade ${{ inputs.service }} ${{ inputs.helm_chart }} \
+            -f ${{ inputs.helm_chart }}/values.yaml \
+            --set image.tag=${GITHUB_SHA}
+
+  rollback:
+    runs-on: ubuntu-latest
+    needs: [canary-slo-gate]
+    if: ${{ needs.canary-slo-gate.result == 'failure' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Roll back
+        run: |
+          helm rollback ${{ inputs.service }}
