@@ -1,0 +1,743 @@
+# Product Increment GraphQL Schema
+# Tracks sprint/iteration progress, goals, milestones, and deliverables
+
+# =============================================================================
+# ENUMS
+# =============================================================================
+
+"""Status of a product increment through its lifecycle"""
+enum IncrementStatus {
+  """Increment is being planned"""
+  PLANNING
+  """Currently in progress"""
+  ACTIVE
+  """In review/QA phase"""
+  REVIEW
+  """Successfully completed"""
+  COMPLETED
+  """Released to production"""
+  RELEASED
+  """Cancelled/abandoned"""
+  CANCELLED
+}
+
+"""Category of an increment goal"""
+enum GoalCategory {
+  """New feature development"""
+  FEATURE
+  """Improvement to existing feature"""
+  ENHANCEMENT
+  """Bug fix"""
+  BUGFIX
+  """Technical debt / refactoring"""
+  TECHNICAL
+  """Security improvement"""
+  SECURITY
+  """Performance optimization"""
+  PERFORMANCE
+  """Regulatory/compliance requirement"""
+  COMPLIANCE
+  """Research/exploration"""
+  RESEARCH
+}
+
+"""Status of an increment goal"""
+enum GoalStatus {
+  """Not yet started"""
+  PENDING
+  """Currently being worked on"""
+  IN_PROGRESS
+  """Blocked by dependency/issue"""
+  BLOCKED
+  """Successfully completed"""
+  COMPLETED
+  """Moved to future increment"""
+  DEFERRED
+  """Cancelled"""
+  CANCELLED
+}
+
+"""Type of deliverable/work item"""
+enum DeliverableType {
+  """Large body of work"""
+  EPIC
+  """User story"""
+  STORY
+  """Individual task"""
+  TASK
+  """Bug fix"""
+  BUG
+  """Research/investigation"""
+  SPIKE
+  """Sub-item of another deliverable"""
+  SUBTASK
+}
+
+"""Status of a deliverable"""
+enum DeliverableStatus {
+  """In backlog"""
+  BACKLOG
+  """Ready for development"""
+  READY
+  """In progress"""
+  IN_PROGRESS
+  """In code review"""
+  IN_REVIEW
+  """In QA/testing"""
+  TESTING
+  """Completed"""
+  DONE
+  """Blocked"""
+  BLOCKED
+  """Cancelled"""
+  CANCELLED
+}
+
+"""Role of a team member in an increment"""
+enum TeamRole {
+  """Increment owner/lead"""
+  OWNER
+  """Team contributor"""
+  CONTRIBUTOR
+  """Code/work reviewer"""
+  REVIEWER
+  """Interested party"""
+  STAKEHOLDER
+  """Read-only access"""
+  OBSERVER
+}
+
+# =============================================================================
+# TYPES
+# =============================================================================
+
+"""
+Product Increment represents a sprint or iteration in the development cycle.
+It tracks goals, deliverables, team assignments, and progress metrics.
+"""
+type ProductIncrement {
+  id: ID!
+  tenantId: String!
+
+  """Name of the increment (e.g., 'Sprint 42', 'Q4 Release')"""
+  name: String!
+
+  """Detailed description of the increment scope"""
+  description: String
+
+  """Version identifier (e.g., '1.2.0', 'Sprint-42')"""
+  version: String!
+
+  """Current status of the increment"""
+  status: IncrementStatus!
+
+  """Planned start date"""
+  plannedStartDate: DateTime
+
+  """Planned end date"""
+  plannedEndDate: DateTime
+
+  """Actual start date (set when status becomes ACTIVE)"""
+  actualStartDate: DateTime
+
+  """Actual end date (set when status becomes COMPLETED)"""
+  actualEndDate: DateTime
+
+  """Total planned capacity in story points"""
+  plannedCapacityPoints: Int!
+
+  """Total committed story points"""
+  committedPoints: Int!
+
+  """Total completed story points"""
+  completedPoints: Int!
+
+  """Calculated velocity (points per week)"""
+  velocity: Float
+
+  """Release notes for completed increments"""
+  releaseNotes: String
+
+  """Git tag or release identifier"""
+  releaseTag: String
+
+  """Link to release artifacts"""
+  releaseUrl: String
+
+  """Additional custom properties"""
+  props: JSON
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+  updatedBy: String
+
+  # Relationships
+  """Goals associated with this increment"""
+  goals: [IncrementGoal!]!
+
+  """Deliverables within this increment"""
+  deliverables: [Deliverable!]!
+
+  """Team members assigned to this increment"""
+  teamMembers: [TeamAssignment!]!
+}
+
+"""Summary view of a product increment with computed metrics"""
+type IncrementSummary {
+  id: ID!
+  tenantId: String!
+  name: String!
+  version: String!
+  status: IncrementStatus!
+  plannedStartDate: DateTime
+  plannedEndDate: DateTime
+  actualStartDate: DateTime
+  actualEndDate: DateTime
+  plannedCapacityPoints: Int!
+  committedPoints: Int!
+  completedPoints: Int!
+  velocity: Float
+
+  """Total number of goals"""
+  totalGoals: Int!
+
+  """Number of completed goals"""
+  completedGoals: Int!
+
+  """Total number of deliverables"""
+  totalDeliverables: Int!
+
+  """Number of completed deliverables"""
+  completedDeliverables: Int!
+
+  """Number of deliverables in progress"""
+  inProgressDeliverables: Int!
+
+  """Number of blocked deliverables"""
+  blockedDeliverables: Int!
+
+  """Number of team members"""
+  teamSize: Int!
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Statistics and analytics for a product increment"""
+type IncrementStatistics {
+  id: ID!
+  name: String!
+  version: String!
+  status: IncrementStatus!
+
+  """Progress percentage (0-100)"""
+  progressPercent: Int!
+
+  """Days remaining until planned end date"""
+  daysRemaining: Int
+
+  """Days elapsed since start"""
+  daysElapsed: Int
+
+  """Current velocity (points per week)"""
+  velocity: Float
+
+  """Projected completion date based on velocity"""
+  projectedCompletion: DateTime
+
+  """Whether the increment is on track to meet deadline"""
+  isOnTrack: Boolean!
+
+  """Full summary data"""
+  summary: IncrementSummary!
+}
+
+"""Goal or objective for a product increment"""
+type IncrementGoal {
+  id: ID!
+  incrementId: ID!
+  tenantId: String!
+
+  """Goal title"""
+  title: String!
+
+  """Detailed description"""
+  description: String
+
+  """Category of the goal"""
+  category: GoalCategory!
+
+  """Priority level"""
+  priority: Priority!
+
+  """Estimated story points"""
+  storyPoints: Int
+
+  """Current status"""
+  status: GoalStatus!
+
+  """List of acceptance criteria"""
+  acceptanceCriteria: JSON
+
+  """Key metrics and targets"""
+  successMetrics: JSON
+
+  """When the goal was completed"""
+  completedAt: DateTime
+
+  """Notes about completion"""
+  completionNotes: String
+
+  """Additional custom properties"""
+  props: JSON
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+
+  # Relationships
+  """Deliverables associated with this goal"""
+  deliverables: [Deliverable!]!
+
+  """Parent increment"""
+  increment: ProductIncrement!
+}
+
+"""Work item or deliverable within an increment"""
+type Deliverable {
+  id: ID!
+  incrementId: ID!
+  goalId: ID
+  tenantId: String!
+
+  """Deliverable title"""
+  title: String!
+
+  """Detailed description"""
+  description: String
+
+  """Type of deliverable"""
+  deliverableType: DeliverableType!
+
+  """Parent deliverable ID (for subtasks)"""
+  parentId: ID
+
+  """Priority level"""
+  priority: Priority!
+
+  """Estimated story points"""
+  storyPoints: Int
+
+  """Current status"""
+  status: DeliverableStatus!
+
+  """Assigned user ID"""
+  assigneeId: String
+
+  """Assigned user name"""
+  assigneeName: String
+
+  """External tracking ID (Jira, GitHub, etc.)"""
+  externalId: String
+
+  """Link to external tracker"""
+  externalUrl: String
+
+  """Progress percentage (0-100)"""
+  progressPercent: Int!
+
+  """When work started"""
+  startedAt: DateTime
+
+  """When work completed"""
+  completedAt: DateTime
+
+  """Linked investigation ID"""
+  investigationId: ID
+
+  """Additional custom properties"""
+  props: JSON
+
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: String!
+
+  # Relationships
+  """Parent increment"""
+  increment: ProductIncrement!
+
+  """Associated goal (if any)"""
+  goal: IncrementGoal
+
+  """Child deliverables (for epics/stories)"""
+  children: [Deliverable!]!
+
+  """Parent deliverable (for subtasks)"""
+  parent: Deliverable
+
+  """Linked investigation"""
+  investigation: Investigation
+}
+
+"""Team member assignment to an increment"""
+type TeamAssignment {
+  id: ID!
+  incrementId: ID!
+  tenantId: String!
+
+  """User ID"""
+  userId: String!
+
+  """User's display name"""
+  userName: String
+
+  """User's email"""
+  userEmail: String
+
+  """Role in this increment"""
+  role: TeamRole!
+
+  """Percentage of time allocated (0-100)"""
+  allocationPercent: Int!
+
+  """Additional custom properties"""
+  props: JSON
+
+  createdAt: DateTime!
+
+  # Relationships
+  """Parent increment"""
+  increment: ProductIncrement!
+}
+
+"""Snapshot of increment metrics at a point in time"""
+type MetricsSnapshot {
+  id: ID!
+  incrementId: ID!
+  tenantId: String!
+
+  """Date of the snapshot"""
+  snapshotDate: DateTime!
+
+  """Total committed points"""
+  totalPoints: Int!
+
+  """Completed points"""
+  completedPoints: Int!
+
+  """Remaining points"""
+  remainingPoints: Int!
+
+  """Total work items"""
+  totalItems: Int!
+
+  """Completed items"""
+  completedItems: Int!
+
+  """Items in progress"""
+  inProgressItems: Int!
+
+  """Blocked items"""
+  blockedItems: Int!
+
+  """Total goals"""
+  goalsTotal: Int!
+
+  """Completed goals"""
+  goalsCompleted: Int!
+
+  """Additional metrics data"""
+  metrics: JSON
+
+  createdAt: DateTime!
+}
+
+"""Burndown chart data point"""
+type BurndownDataPoint {
+  """Date of the data point"""
+  date: DateTime!
+
+  """Ideal remaining points (linear burndown)"""
+  idealRemaining: Float!
+
+  """Actual remaining points"""
+  actualRemaining: Float!
+
+  """Completed points to date"""
+  completedPoints: Float!
+}
+
+"""Velocity data for historical increments"""
+type VelocityData {
+  """The increment"""
+  increment: ProductIncrement!
+
+  """Calculated velocity"""
+  velocity: Float!
+}
+
+# =============================================================================
+# INPUT TYPES
+# =============================================================================
+
+input ProductIncrementInput {
+  tenantId: String!
+  name: String!
+  description: String
+  version: String!
+  status: IncrementStatus = PLANNING
+  plannedStartDate: DateTime
+  plannedEndDate: DateTime
+  plannedCapacityPoints: Int = 0
+  releaseNotes: String
+  releaseTag: String
+  releaseUrl: String
+  props: JSON
+}
+
+input ProductIncrementUpdateInput {
+  name: String
+  description: String
+  version: String
+  status: IncrementStatus
+  plannedStartDate: DateTime
+  plannedEndDate: DateTime
+  actualStartDate: DateTime
+  actualEndDate: DateTime
+  plannedCapacityPoints: Int
+  releaseNotes: String
+  releaseTag: String
+  releaseUrl: String
+  props: JSON
+}
+
+input IncrementGoalInput {
+  incrementId: ID!
+  tenantId: String!
+  title: String!
+  description: String
+  category: GoalCategory = FEATURE
+  priority: Priority = MEDIUM
+  storyPoints: Int
+  acceptanceCriteria: JSON
+  successMetrics: JSON
+  props: JSON
+}
+
+input IncrementGoalUpdateInput {
+  title: String
+  description: String
+  category: GoalCategory
+  priority: Priority
+  storyPoints: Int
+  status: GoalStatus
+  acceptanceCriteria: JSON
+  successMetrics: JSON
+  completedAt: DateTime
+  completionNotes: String
+  props: JSON
+}
+
+input DeliverableInput {
+  incrementId: ID!
+  goalId: ID
+  tenantId: String!
+  title: String!
+  description: String
+  deliverableType: DeliverableType = TASK
+  parentId: ID
+  priority: Priority = MEDIUM
+  storyPoints: Int
+  assigneeId: String
+  assigneeName: String
+  externalId: String
+  externalUrl: String
+  investigationId: ID
+  props: JSON
+}
+
+input DeliverableUpdateInput {
+  title: String
+  description: String
+  goalId: ID
+  deliverableType: DeliverableType
+  parentId: ID
+  priority: Priority
+  storyPoints: Int
+  status: DeliverableStatus
+  assigneeId: String
+  assigneeName: String
+  externalId: String
+  externalUrl: String
+  progressPercent: Int
+  startedAt: DateTime
+  completedAt: DateTime
+  investigationId: ID
+  props: JSON
+}
+
+input TeamAssignmentInput {
+  incrementId: ID!
+  tenantId: String!
+  userId: String!
+  userName: String
+  userEmail: String
+  role: TeamRole = CONTRIBUTOR
+  allocationPercent: Int = 100
+  props: JSON
+}
+
+input IncrementFilter {
+  status: [IncrementStatus!]
+  search: String
+  startDateFrom: DateTime
+  startDateTo: DateTime
+  endDateFrom: DateTime
+  endDateTo: DateTime
+}
+
+input DeliverableFilter {
+  status: [DeliverableStatus!]
+  assigneeId: String
+  goalId: ID
+}
+
+# =============================================================================
+# QUERIES
+# =============================================================================
+
+extend type Query {
+  """Get a product increment by ID"""
+  productIncrement(id: ID!): ProductIncrement
+
+  """Get increment with full summary metrics"""
+  productIncrementSummary(id: ID!): IncrementSummary
+
+  """Get computed statistics for an increment"""
+  productIncrementStatistics(id: ID!): IncrementStatistics
+
+  """List product increments for a tenant"""
+  productIncrements(
+    tenantId: String!
+    filter: IncrementFilter
+    limit: Int = 50
+    offset: Int = 0
+  ): [ProductIncrement!]!
+
+  """Get the current active increment for a tenant"""
+  currentProductIncrement(tenantId: String!): ProductIncrement
+
+  """Get a goal by ID"""
+  incrementGoal(id: ID!): IncrementGoal
+
+  """List goals for an increment"""
+  incrementGoals(incrementId: ID!): [IncrementGoal!]!
+
+  """Get a deliverable by ID"""
+  deliverable(id: ID!): Deliverable
+
+  """List deliverables for an increment"""
+  deliverables(
+    incrementId: ID!
+    filter: DeliverableFilter
+  ): [Deliverable!]!
+
+  """Get team members for an increment"""
+  incrementTeamMembers(incrementId: ID!): [TeamAssignment!]!
+
+  """Get burndown chart data for an increment"""
+  incrementBurndown(incrementId: ID!): [BurndownDataPoint!]!
+
+  """Get velocity history for a tenant"""
+  velocityHistory(tenantId: String!, limit: Int = 10): [VelocityData!]!
+
+  """Get metrics history for an increment"""
+  incrementMetricsHistory(
+    incrementId: ID!
+    startDate: DateTime
+    endDate: DateTime
+  ): [MetricsSnapshot!]!
+}
+
+# =============================================================================
+# MUTATIONS
+# =============================================================================
+
+extend type Mutation {
+  # Increment mutations
+  """Create a new product increment"""
+  createProductIncrement(input: ProductIncrementInput!): ProductIncrement!
+
+  """Update a product increment"""
+  updateProductIncrement(id: ID!, input: ProductIncrementUpdateInput!): ProductIncrement!
+
+  """Delete a product increment"""
+  deleteProductIncrement(id: ID!): Boolean!
+
+  """Start an increment (transition to ACTIVE)"""
+  startProductIncrement(id: ID!): ProductIncrement!
+
+  """Complete an increment (transition to COMPLETED)"""
+  completeProductIncrement(id: ID!): ProductIncrement!
+
+  """Release an increment (transition to RELEASED)"""
+  releaseProductIncrement(
+    id: ID!
+    releaseNotes: String!
+    releaseTag: String!
+    releaseUrl: String
+  ): ProductIncrement!
+
+  # Goal mutations
+  """Create a goal for an increment"""
+  createIncrementGoal(input: IncrementGoalInput!): IncrementGoal!
+
+  """Update an increment goal"""
+  updateIncrementGoal(id: ID!, input: IncrementGoalUpdateInput!): IncrementGoal!
+
+  """Delete an increment goal"""
+  deleteIncrementGoal(id: ID!): Boolean!
+
+  # Deliverable mutations
+  """Create a deliverable"""
+  createDeliverable(input: DeliverableInput!): Deliverable!
+
+  """Update a deliverable"""
+  updateDeliverable(id: ID!, input: DeliverableUpdateInput!): Deliverable!
+
+  """Delete a deliverable"""
+  deleteDeliverable(id: ID!): Boolean!
+
+  """Assign a deliverable to a user"""
+  assignDeliverable(id: ID!, assigneeId: String!, assigneeName: String): Deliverable!
+
+  """Update deliverable status"""
+  updateDeliverableStatus(id: ID!, status: DeliverableStatus!): Deliverable!
+
+  # Team mutations
+  """Assign a team member to an increment"""
+  assignTeamMember(input: TeamAssignmentInput!): TeamAssignment!
+
+  """Remove a team member from an increment"""
+  removeTeamMember(incrementId: ID!, userId: String!): Boolean!
+
+  # Metrics mutations
+  """Record a metrics snapshot for an increment"""
+  recordIncrementMetrics(incrementId: ID!): MetricsSnapshot
+}
+
+# =============================================================================
+# SUBSCRIPTIONS
+# =============================================================================
+
+extend type Subscription {
+  """Subscribe to increment updates"""
+  productIncrementUpdated(tenantId: String!): ProductIncrement!
+
+  """Subscribe to deliverable updates within an increment"""
+  deliverableUpdated(incrementId: ID!): Deliverable!
+
+  """Subscribe to goal updates within an increment"""
+  goalUpdated(incrementId: ID!): IncrementGoal!
+}
