@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/kafka-integration",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Enterprise Kafka integration layer with EOS, schema registry, and high-throughput streaming",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

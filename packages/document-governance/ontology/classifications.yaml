@@ -1,0 +1,146 @@
+version: '1.0.0'
+description: Document classification level definitions
+
+classification_levels:
+  - id: Public
+    level: 0
+    name: Public
+    description: May be exposed externally without NDA.
+    color: '#22c55e'
+    handling_requirements:
+      - No special handling required
+      - Can be shared externally without restrictions
+    examples:
+      - Marketing materials
+      - Public website content
+      - Open source documentation
+
+  - id: Internal
+    level: 1
+    name: Internal
+    description: Internal use only, not for external distribution.
+    color: '#3b82f6'
+    handling_requirements:
+      - Store on company-managed systems
+      - Do not share externally without approval
+      - May be shared with contractors under NDA
+    examples:
+      - Internal communications
+      - Meeting notes
+      - Internal presentations
+
+  - id: Confidential
+    level: 2
+    name: Confidential
+    description: Limited internal access; may be shared externally with NDA.
+    color: '#f59e0b'
+    handling_requirements:
+      - Access control required
+      - NDA required for external sharing
+      - Should not be left unattended
+      - Encrypt when transmitted externally
+    examples:
+      - Business plans
+      - Financial projections
+      - Customer contracts
+
+  - id: Restricted
+    level: 3
+    name: Restricted
+    description: Strictly limited to specific teams or roles.
+    color: '#ef4444'
+    handling_requirements:
+      - Need-to-know basis only
+      - Access logging required
+      - No external sharing without executive approval
+      - Encryption at rest and in transit
+    examples:
+      - M&A documents
+      - Executive compensation details
+      - Strategic plans
+
+  - id: HighlyRestricted
+    level: 4
+    name: Highly Restricted
+    description: Need-to-know only; strong monitoring and access control.
+    color: '#dc2626'
+    handling_requirements:
+      - Encryption at rest required
+      - Strict access controls
+      - Comprehensive audit logging
+      - Two-person rule for access where applicable
+      - Secure disposal required
+    examples:
+      - Source code (proprietary)
+      - Security vulnerabilities
+      - Cryptographic keys
+      - PII databases
+
+  - id: Classified_Internal
+    level: 5
+    name: Classified (Internal)
+    description: Internal security-sensitive documents requiring special handling.
+    color: '#7c3aed'
+    handling_requirements:
+      - Security clearance required
+      - Air-gapped or isolated storage
+      - Comprehensive access tracking
+      - Secure communication channels only
+      - Physical security measures
+    examples:
+      - Security architecture details
+      - Penetration test results
+      - Incident response details
+
+  - id: Classified_Regulated
+    level: 6
+    name: Classified (Regulated)
+    description: Governed by external regulations (HIPAA, CJIS, ITAR, etc).
+    color: '#be185d'
+    handling_requirements:
+      - Must comply with applicable regulatory requirements
+      - Regulatory-specific access controls
+      - Audit trail per regulation
+      - Data residency requirements may apply
+      - Breach notification requirements
+    examples:
+      - PHI (HIPAA)
+      - Criminal justice data (CJIS)
+      - Export-controlled data (ITAR/EAR)
+      - Payment card data (PCI DSS)
+
+# Access matrix mapping classification to roles
+access_matrix:
+  Public:
+    all_employees: read
+    contractors: read
+    public: read
+  Internal:
+    all_employees: read
+    contractors: read_with_nda
+    public: none
+  Confidential:
+    all_employees: none
+    team_members: read
+    managers: read_write
+    executives: read_write
+  Restricted:
+    all_employees: none
+    designated_roles: read
+    document_owner: read_write
+    executives: read
+  HighlyRestricted:
+    all_employees: none
+    designated_roles: read_with_approval
+    document_owner: read_write
+    ciso: read
+    ceo: read
+  Classified_Internal:
+    all_employees: none
+    security_cleared: read_with_approval
+    ciso: read_write
+  Classified_Regulated:
+    all_employees: none
+    compliance_team: read
+    designated_handlers: read_write
+    dpo: read
