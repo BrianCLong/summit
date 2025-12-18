@@ -1,0 +1,96 @@
+{
+  "$schema": "https://claude.ai/schemas/claude-code-settings.json",
+  "project": {
+    "name": "Summit/IntelGraph Platform",
+    "description": "Next-generation intelligence analysis platform with AI-augmented graph analytics",
+    "type": "monorepo",
+    "packageManager": "pnpm",
+    "languages": ["typescript", "javascript", "python", "graphql"],
+    "frameworks": ["react", "apollo", "express", "neo4j"]
+  },
+  "conventions": {
+    "commitStyle": "conventional",
+    "branchPrefix": {
+      "feature": "feature/",
+      "bugfix": "fix/",
+      "claude": "claude/"
+    },
+    "testPattern": "**/*.{test,spec}.{ts,tsx,js,jsx}",
+    "importOrder": ["external", "internal", "relative"]
+  },
+  "goldenPath": {
+    "bootstrap": "make bootstrap",
+    "start": "make up",
+    "validate": "make smoke",
+    "stop": "make down"
+  },
+  "codeQuality": {
+    "lint": "pnpm lint",
+    "lintFix": "pnpm lint:fix",
+    "format": "pnpm format",
+    "typecheck": "pnpm typecheck",
+    "test": "pnpm test",
+    "testUnit": "pnpm test:jest",
+    "testE2e": "pnpm e2e",
+    "testSmoke": "pnpm smoke"
+  },
+  "database": {
+    "primary": "neo4j",
+    "secondary": "postgresql",
+    "cache": "redis",
+    "migrations": {
+      "postgres": "pnpm db:pg:migrate",
+      "neo4j": "pnpm db:neo4j:migrate"
+    }
+  },
+  "security": {
+    "secretScanning": true,
+    "auditOnCommit": true,
+    "prodGuard": "pnpm ci:prod-guard",
+    "securityScan": "pnpm security:scan"
+  },
+  "ci": {
+    "requiredChecks": ["lint", "typecheck", "test:jest", "smoke"],
+    "optionalChecks": ["e2e", "security:scan"]
+  },
+  "endpoints": {
+    "api": "http://localhost:4000/graphql",
+    "health": "http://localhost:4000/health",
+    "metrics": "http://localhost:4000/metrics",
+    "client": "http://localhost:3000",
+    "neo4j": "http://localhost:7474",
+    "grafana": "http://localhost:3001"
+  },
+  "permissions": {
+    "allowList": [
+      "Bash(pnpm *)",
+      "Bash(npm *)",
+      "Bash(make *)",
+      "Bash(git *)",
+      "Bash(docker *)",
+      "Bash(docker-compose *)",
+      "Bash(curl *)",
+      "Bash(turbo *)",
+      "Bash(tsc *)",
+      "Bash(jest *)",
+      "Bash(playwright *)",
+      "Bash(eslint *)",
+      "Bash(prettier *)"
+    ],
+    "denyList": [
+      "Bash(rm -rf /)",
+      "Bash(sudo *)",
+      "Bash(chmod 777 *)",
+      "Bash(curl * | bash)",
+      "Bash(* > /etc/*)"
+    ]
+  },
+  "aiGuidelines": {
+    "preferExistingPatterns": true,
+    "requireTests": true,
+    "requireDocumentation": false,
+    "maxFileSize": 500,
+    "preferSmallPRs": true,
+    "runSmokeBeforeCommit": true
+  }
+}
