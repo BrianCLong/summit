@@ -37,20 +37,7 @@ import {
 } from 'common-types';
 
 export * from './mul-ledger';
-export {
-  ProvenanceBundleValidator,
-  hashBundle,
-} from './externalValidator';
-export type {
-  ChainOfCustodyEvent,
-  ComplianceAttestation,
-  ExternalValidationPayload,
-  ExternalValidationReport,
-  ExternalVerificationReceipt,
-  ThirdPartyValidator,
-  ValidationStatus,
-  ValidatorOptions,
-} from './externalValidator';
+export * from './quantum-safe-ledger';
 
 // ============================================================================
 // SIMPLE PROVENANCE LEDGER - From HEAD

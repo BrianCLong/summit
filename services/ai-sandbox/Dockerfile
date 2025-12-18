@@ -2,11 +2,19 @@
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+# Copy base config
+COPY tsconfig.base.json ./
 
-COPY tsconfig.json ./
-COPY src ./src
+# Set up service directory structure
+WORKDIR /app/services/ai-sandbox
+
+# Copy service files
+COPY services/ai-sandbox/package*.json ./
+COPY services/ai-sandbox/tsconfig.json ./
+COPY services/ai-sandbox/src ./src
+
+# Install and build
+RUN npm install
 RUN npm run build
 
 # Runtime stage
@@ -19,9 +27,9 @@ ENV NODE_ENV=production
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
+COPY --from=builder /app/services/ai-sandbox/dist ./dist
+COPY --from=builder /app/services/ai-sandbox/node_modules ./node_modules
+COPY --from=builder /app/services/ai-sandbox/package.json ./
 
 USER nodejs
 

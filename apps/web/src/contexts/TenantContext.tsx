@@ -100,7 +100,7 @@ export function TenantProvider({ children }: TenantProviderProps) {
   }
 
   const hasPermission = (permission: string) => {
-    if (!currentTenant) return false
+    if (!currentTenant) {return false}
     return (
       currentTenant.permissions.includes(permission) ||
       currentTenant.permissions.includes('admin.all')

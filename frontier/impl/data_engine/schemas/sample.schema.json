@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "content": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "domain": { "type": "string" },
+        "task_type": { "type": "string" },
+        "difficulty": { "type": "number" },
+        "safety_tags": { "type": "array", "items": { "type": "string" } },
+        "source_license": { "type": "string" }
+      }
+    }
+  },
+  "required": ["id", "content", "metadata"]
+}

@@ -1,4 +1,5 @@
 import { capitalize, reverse } from './stringUtils';
+import { describe, it, expect } from '@jest/globals';
 
 describe('String Utils', () => {
   it('should capitalize the first letter of a string', () => {
