@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/aer-ledger",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "license": "MIT",
   "type": "module",
   "main": "dist/index.js",
@@ -13,7 +13,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "body-parser": "^2.2.0"
   },
   "devDependencies": {

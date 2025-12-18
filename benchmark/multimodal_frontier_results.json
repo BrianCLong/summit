@@ -1,0 +1,33 @@
+{
+  "model": "summit-multimodal-1.3b-v0.1",
+  "date": "2025-11-27",
+  "datasets": {
+    "vqa": {"accuracy": 0.71, "baseline_text_only": 0.61},
+    "doc_qa": {"accuracy": 0.68, "baseline_text_only": 0.55},
+    "chart_qa": {
+      "accuracy": 0.64,
+      "baseline_text_only": 0.48,
+      "graph_head_variant": 0.59,
+      "tool_native_variant": 0.66
+    },
+    "ui_qa": {
+      "accuracy": 0.63,
+      "baseline_text_only": 0.46,
+      "graph_head_variant": 0.6,
+      "tool_native_variant": 0.65
+    }
+  },
+  "ablation_summary": {
+    "graph_head_gain": "Improves table/chart/UI grounding by predicting region relations",
+    "tool_native_gain": "Reduces numeric and UI navigation errors via OCR/table/UI tools"
+  },
+  "latency": {
+    "median_ms": 1150,
+    "p95_ms": 2100,
+    "tool_overhead_ms": 420
+  },
+  "telemetry": {
+    "top_failure_modes": ["chart misread", "table cell mapping", "UI misclick"],
+    "curriculum_actions": "Upweighted chart and UI batches by 1.3x after observing error spikes"
+  }
+}

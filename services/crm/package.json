@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/crm",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Comprehensive CRM system for Summit - contact management, sales pipeline, email tracking, and automation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -32,13 +32,16 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@intelgraph/types": "workspace:*",
     "@types/node": "^20.0.0",
     "@types/uuid": "^9.0.0",
     "typescript": "^5.3.3"
   },
+<<<<<<< HEAD
+=======
   "peerDependencies": {
-    "@intelgraph/types": "*"
   },
+>>>>>>> main
   "files": [
     "dist",
     "README.md"

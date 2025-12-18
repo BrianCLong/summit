@@ -1,7 +1,12 @@
 {
   "name": "@summit/data-warehouse",
+<<<<<<< HEAD
   "version": "1.0.0",
   "description": "Data warehouse integration for Summit platform",
+=======
+  "version": "2.0.0",
+  "description": "Enterprise data warehouse with MPP, columnar storage, and advanced analytics",
+>>>>>>> main
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",

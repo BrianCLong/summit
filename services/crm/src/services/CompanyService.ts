@@ -269,8 +269,8 @@ export class CompanyService extends EventEmitter {
     results.sort((a, b) => {
       const aVal = (a as Record<string, unknown>)[sortBy];
       const bVal = (b as Record<string, unknown>)[sortBy];
-      if (aVal < bVal) return sortOrder === 'asc' ? -1 : 1;
-      if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
+      if (aVal < bVal) {return sortOrder === 'asc' ? -1 : 1;}
+      if (aVal > bVal) {return sortOrder === 'asc' ? 1 : -1;}
       return 0;
     });
 
@@ -354,7 +354,7 @@ export class CompanyService extends EventEmitter {
     let score = 50; // Base score
 
     // Deal activity
-    if (company.openDeals > 0) score += 15;
+    if (company.openDeals > 0) {score += 15;}
     if (company.totalDeals > 0) {
       const winRate = company.totalRevenue / (company.totalDeals * 10000); // Simplified
       score += Math.min(winRate * 10, 15);
@@ -365,15 +365,15 @@ export class CompanyService extends EventEmitter {
       const daysSinceActivity = Math.floor(
         (Date.now() - company.lastActivityAt.getTime()) / (1000 * 60 * 60 * 24)
       );
-      if (daysSinceActivity <= 7) score += 15;
-      else if (daysSinceActivity <= 30) score += 10;
-      else if (daysSinceActivity <= 90) score += 5;
-      else score -= 10;
+      if (daysSinceActivity <= 7) {score += 15;}
+      else if (daysSinceActivity <= 30) {score += 10;}
+      else if (daysSinceActivity <= 90) {score += 5;}
+      else {score -= 10;}
     }
 
     // Company type
-    if (company.type === 'customer') score += 10;
-    if (company.status === 'churned') score -= 30;
+    if (company.type === 'customer') {score += 10;}
+    if (company.status === 'churned') {score -= 30;}
 
     // Clamp score
     score = Math.max(0, Math.min(100, score));
@@ -400,9 +400,9 @@ export class CompanyService extends EventEmitter {
       throw new Error(`Company ${id} not found`);
     }
 
-    if (metrics.totalRevenue !== undefined) company.totalRevenue = metrics.totalRevenue;
-    if (metrics.totalDeals !== undefined) company.totalDeals = metrics.totalDeals;
-    if (metrics.openDeals !== undefined) company.openDeals = metrics.openDeals;
+    if (metrics.totalRevenue !== undefined) {company.totalRevenue = metrics.totalRevenue;}
+    if (metrics.totalDeals !== undefined) {company.totalDeals = metrics.totalDeals;}
+    if (metrics.openDeals !== undefined) {company.openDeals = metrics.openDeals;}
     company.updatedAt = new Date();
 
     this.companies.set(id, company);
@@ -454,7 +454,7 @@ export class CompanyService extends EventEmitter {
 
       // Merge tags
       company.tags.forEach((tag) => {
-        if (!primary.tags.includes(tag)) primary.tags.push(tag);
+        if (!primary.tags.includes(tag)) {primary.tags.push(tag);}
       });
 
       // Delete merged company

@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/dashboard-service",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Backend service for dashboard management",
   "main": "dist/index.js",
   "scripts": {
@@ -10,7 +10,18 @@
     "test": "jest"
   },
   "dependencies": {
+<<<<<<< HEAD
     "express": "^4.21.2",
+=======
+<<<<<<< HEAD
+    "express": "^5.1.0",
+<<<<<<< HEAD
+=======
+=======
+    "express": "^5.2.0",
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "apollo-server-express": "^3.13.0",
     "graphql": "^16.8.1",
     "pg": "^8.16.3",
@@ -26,8 +37,21 @@
   "devDependencies": {
     "typescript": "^5.9.3",
     "@types/node": "^24.10.1",
+<<<<<<< HEAD
     "@types/express": "^4.17.21",
     "@types/cors": "^2.8.19",
+=======
+    "@types/express": "^5.0.0",
+<<<<<<< HEAD
+    "@types/cors": "^2.8.17",
+=======
+<<<<<<< HEAD
+    "@types/cors": "^2.8.19",
+=======
+    "@types/cors": "^2.8.17",
+>>>>>>> main
+>>>>>>> main
+>>>>>>> main
     "@types/compression": "^1.7.5",
     "ts-node-dev": "^2.0.0"
   }
