@@ -1,0 +1,70 @@
+{
+  "name": "@summit/platform-telemetry",
+  "version": "1.0.0",
+  "description": "Unified telemetry SDK for metrics, tracing, and logging (P31-32)",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./metrics": {
+      "import": "./dist/metrics/index.js",
+      "types": "./dist/metrics/index.d.ts"
+    },
+    "./tracing": {
+      "import": "./dist/tracing/index.js",
+      "types": "./dist/tracing/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/sdk-metrics": "^1.19.0",
+    "@opentelemetry/sdk-trace-base": "^1.19.0",
+    "@opentelemetry/sdk-trace-node": "^1.19.0",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.46.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.46.0",
+    "@opentelemetry/exporter-prometheus": "^0.46.0",
+    "@opentelemetry/semantic-conventions": "^1.19.0",
+    "@opentelemetry/resources": "^1.19.0",
+    "@opentelemetry/instrumentation": "^0.46.0",
+    "@opentelemetry/instrumentation-http": "^0.46.0",
+    "@opentelemetry/instrumentation-express": "^0.34.0",
+    "@opentelemetry/instrumentation-graphql": "^0.35.0",
+    "@opentelemetry/instrumentation-pg": "^0.37.0",
+    "@opentelemetry/instrumentation-redis-4": "^0.35.0",
+    "prom-client": "^15.1.0",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0",
+    "eslint": "^8.56.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "telemetry",
+    "metrics",
+    "tracing",
+    "opentelemetry",
+    "observability",
+    "summit"
+  ],
+  "license": "MIT"
+}

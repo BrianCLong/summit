@@ -1,152 +1,47 @@
-// server/src/lib/resources/quota-manager.ts
-
-/**
- * @file Manages hierarchical resource quotas for tenants.
- * @author Jules
- * @version 1.0.0
- *
- * @warning This implementation uses a non-persistent in-memory store.
- * All quota and usage data will be lost on application restart.
- * This is a prototype and is NOT suitable for production use without
- * being refactored to use a persistent data store (e.g., Redis).
- */
-
-// A simple in-memory key-value store to simulate a persistent data store.
-const store: { [key: string]: any } = {};
-
-export type ResourceType = 'api_calls' | 'storage' | 'compute' | 'bandwidth';
-
 export interface Quota {
-  hardLimit: number;
-  softLimit: number;
-  usage: number;
-}
-
-export type QuotaMap = { [key in ResourceType]?: Quota };
-
-export interface HierarchicalQuota {
-  org: QuotaMap;
-  team?: { [key: string]: QuotaMap };
-  user?: { [key: string]: QuotaMap };
+    tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE';
+    requestsPerMinute: number;
+    maxTokensPerRequest: number;
 }
 
 export class QuotaManager {
-  public getTenantQuotas(tenantId: string): HierarchicalQuota | undefined {
-    return store[tenantId];
-  }
+    private static instance: QuotaManager;
+    private tenantTiers: Map<string, 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE'> = new Map();
 
-  public updateTenantQuotas(tenantId: string, newQuotas: HierarchicalQuota): void {
-    store[tenantId] = newQuotas;
-  }
-
-  public checkQuota(
-    tenantId: string,
-    resource: ResourceType,
-    amount: number,
-    identifiers: { teamId?: string; userId?: string }
-  ): { allowed: boolean; softLimitExceeded: boolean } {
-    const tenantQuotas = this.getTenantQuotas(tenantId);
-    if (!tenantQuotas) {
-      return { allowed: true, softLimitExceeded: false };
+    private constructor() {
+        // Seed with some dummy data or defaults
+        // In production, this would load from DB or Redis
     }
 
-    const { teamId, userId } = identifiers;
-
-    // Check org quota
-    const orgQuota = tenantQuotas.org[resource];
-    if (orgQuota && orgQuota.usage + amount > orgQuota.hardLimit) {
-      return { allowed: false, softLimitExceeded: orgQuota.usage > orgQuota.softLimit };
+    public static getInstance(): QuotaManager {
+        if (!QuotaManager.instance) {
+            QuotaManager.instance = new QuotaManager();
+        }
+        return QuotaManager.instance;
     }
 
-    // Check team quota
-    if (teamId && tenantQuotas.team?.[teamId]?.[resource]) {
-      const teamQuota = tenantQuotas.team[teamId][resource]!;
-      if (teamQuota.usage + amount > teamQuota.hardLimit) {
-        return { allowed: false, softLimitExceeded: teamQuota.usage > teamQuota.softLimit };
-      }
+    public getQuotaForTenant(tenantId: string): Quota {
+        const tier = this.tenantTiers.get(tenantId) || 'FREE';
+        return this.getQuotaForTier(tier);
     }
 
-    // Check user quota
-    if (userId && tenantQuotas.user?.[userId]?.[resource]) {
-      const userQuota = tenantQuotas.user[userId][resource]!;
-      if (userQuota.usage + amount > userQuota.hardLimit) {
-        return { allowed: false, softLimitExceeded: userQuota.usage > userQuota.softLimit };
-      }
+    public getQuotaForTier(tier: string): Quota {
+        switch (tier) {
+            case 'ENTERPRISE':
+                return { tier: 'ENTERPRISE', requestsPerMinute: 10000, maxTokensPerRequest: 32000 };
+            case 'PRO':
+                return { tier: 'PRO', requestsPerMinute: 1000, maxTokensPerRequest: 16000 };
+            case 'STARTER':
+                return { tier: 'STARTER', requestsPerMinute: 100, maxTokensPerRequest: 4000 };
+            case 'FREE':
+            default:
+                return { tier: 'FREE', requestsPerMinute: 20, maxTokensPerRequest: 1000 };
+        }
     }
 
-    let softLimitExceeded = false;
-    if (orgQuota && orgQuota.usage + amount > orgQuota.softLimit) {
-      softLimitExceeded = true;
+    public setTenantTier(tenantId: string, tier: 'FREE' | 'STARTER' | 'PRO' | 'ENTERPRISE') {
+        this.tenantTiers.set(tenantId, tier);
     }
-    if (teamId && tenantQuotas.team?.[teamId]?.[resource]) {
-      const teamQuota = tenantQuotas.team[teamId][resource]!;
-      if (teamQuota.usage + amount > teamQuota.softLimit) {
-        softLimitExceeded = true;
-      }
-    }
-    if (userId && tenantQuotas.user?.[userId]?.[resource]) {
-      const userQuota = tenantQuotas.user[userId][resource]!;
-      if (userQuota.usage + amount > userQuota.softLimit) {
-        softLimitExceeded = true;
-      }
-    }
-
-    return {
-      allowed: true,
-      softLimitExceeded
-    };
-  }
-
-  public consumeQuota(
-    tenantId: string,
-    resource: ResourceType,
-    amount: number,
-    identifiers: { teamId?: string; userId?: string }
-  ): boolean {
-    const { allowed } = this.checkQuota(tenantId, resource, amount, identifiers);
-    if (!allowed) {
-      return false;
-    }
-
-    const tenantQuotas = this.getTenantQuotas(tenantId);
-    if (!tenantQuotas) return false;
-
-    const { teamId, userId } = identifiers;
-
-    if (tenantQuotas.org[resource]) {
-        tenantQuotas.org[resource]!.usage += amount;
-    }
-    if (teamId && tenantQuotas.team?.[teamId]?.[resource]) {
-        tenantQuotas.team[teamId][resource]!.usage += amount;
-    }
-    if (userId && tenantQuotas.user?.[userId]?.[resource]) {
-        tenantQuotas.user[userId][resource]!.usage += amount;
-    }
-
-    return true;
-  }
-
-  public releaseQuota(
-    tenantId: string,
-    resource: ResourceType,
-    amount: number,
-    identifiers: { teamId?: string; userId?: string }
-  ): void {
-    const tenantQuotas = this.getTenantQuotas(tenantId);
-    if (!tenantQuotas) return;
-
-    const { teamId, userId } = identifiers;
-
-    if (tenantQuotas.org[resource]) {
-        tenantQuotas.org[resource]!.usage = Math.max(0, tenantQuotas.org[resource]!.usage - amount);
-    }
-    if (teamId && tenantQuotas.team?.[teamId]?.[resource]) {
-        tenantQuotas.team[teamId][resource]!.usage = Math.max(0, tenantQuotas.team[teamId][resource]!.usage - amount);
-    }
-    if (userId && tenantQuotas.user?.[userId]?.[resource]) {
-        tenantQuotas.user[userId][resource]!.usage = Math.max(0, tenantQuotas.user[userId][resource]!.usage - amount);
-    }
-  }
 }
 
-export const quotaManager = new QuotaManager();
+export default QuotaManager.getInstance();
