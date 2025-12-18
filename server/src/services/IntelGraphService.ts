@@ -1,23 +1,19 @@
-// server/src/services/IntelGraphService.ts
-import neo4j, { Driver } from 'neo4j-driver';
+import { runCypher } from '../graph/neo4j.js';
+import {
+  SCHEMA_CONSTRAINTS,
+  Entity,
+  NodeLabel,
+  EdgeType,
+  NodeLabels,
+  EdgeTypes,
+  NATURAL_KEYS
+} from '../graph/schema.js';
 import { randomUUID } from 'crypto';
-import { getNeo4jDriver } from '../config/database';
-import { Entity, Claim, Evidence, PolicyLabel, Decision } from '../graph/schema';
-import { AppError } from '../lib/errors';
-import { provenanceLedger, ProvenanceLedgerV2 } from '../provenance/ledger';
 
 export class IntelGraphService {
   private static instance: IntelGraphService;
-  private driver: Driver;
-  private ledger: ProvenanceLedgerV2;
 
-  private constructor() {
-    this.driver = getNeo4jDriver();
-    if (!this.driver) {
-      throw new AppError('Neo4j driver not initialized', 500);
-    }
-    this.ledger = provenanceLedger;
-  }
+  private constructor() {}
 
   public static getInstance(): IntelGraphService {
     if (!IntelGraphService.instance) {
@@ -26,435 +22,190 @@ export class IntelGraphService {
     return IntelGraphService.instance;
   }
 
-  /**
-   * Creates a new Entity node in the graph.
-   * @param entityData - The data for the new entity.
-   * @param owner - The ID of the user or service creating the entity.
-   * @param tenantId - The ID of the tenant.
-   * @returns The newly created Entity.
-   */
-  async createEntity(
-    entityData: Omit<Entity, keyof import('../graph/schema').BaseNode>,
-    owner: string,
-    tenantId: string
-  ): Promise<Entity> {
-    const session = this.driver.session();
-    try {
-      const now = new Date().toISOString();
-      const newEntity: Entity = {
-        id: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-        owner,
-        ...entityData,
-      };
-
-      const result = await session.run(
-        `
-        CREATE (e:Entity {
-          id: $id,
-          name: $name,
-          description: $description,
-          createdAt: $createdAt,
-          updatedAt: $updatedAt,
-          owner: $owner,
-          tenantId: $tenantId
-        })
-        RETURN e
-      `,
-        { ...newEntity, tenantId }
-      );
-
-      const createdEntity = result.records[0].get('e').properties as Entity;
-
-      // Audit Log
-      await this.ledger.appendEntry({
-        tenantId,
-        timestamp: new Date(now),
-        actionType: 'CREATE',
-        resourceType: 'Entity',
-        resourceId: createdEntity.id,
-        actorId: owner,
-        actorType: 'user', // Assuming user for now
-        payload: { name: createdEntity.name, description: createdEntity.description },
-        metadata: {},
-      });
-
-      return createdEntity;
-    } finally {
-      await session.close();
-    }
-  }
-
-  /**
-   * Creates a new Claim node and links it to an existing Entity.
-   * @param claimData - The data for the new claim.
-   * @param owner - The ID of the user or service creating the claim.
-   * @param tenantId - The ID of the tenant.
-   * @returns The newly created Claim.
-   */
-  async createClaim(
-    claimData: Omit<Claim, keyof import('../graph/schema').BaseNode>,
-    owner: string,
-    tenantId: string
-  ): Promise<Claim> {
-    const session = this.driver.session();
-    try {
-      const now = new Date().toISOString();
-      const newClaim: Claim = {
-        id: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-        owner,
-        ...claimData,
-      };
-
-      const result = await session.run(
-        `
-        MATCH (e:Entity {id: $entityId, tenantId: $tenantId})
-        CREATE (c:Claim {
-          id: $id,
-          statement: $statement,
-          confidence: $confidence,
-          createdAt: $createdAt,
-          updatedAt: $updatedAt,
-          owner: $owner,
-          tenantId: $tenantId
-        })
-        CREATE (c)-[:RELATES_TO]->(e)
-        RETURN c
-      `,
-        { ...newClaim, entityId: claimData.entityId, tenantId }
-      );
-
-      if (result.records.length === 0) {
-        throw new AppError(`Entity with ID ${claimData.entityId} not found for this tenant.`, 404);
+  public async initializeSchema(): Promise<void> {
+    console.log('Initializing IntelGraph schema constraints...');
+    for (const cypher of SCHEMA_CONSTRAINTS) {
+      try {
+        await runCypher(cypher);
+      } catch (error) {
+        console.error(`Failed to apply constraint: ${cypher}`, error);
       }
-
-      const createdClaim = result.records[0].get('c').properties as Claim;
-
-      // Audit Log
-      await this.ledger.appendEntry({
-        tenantId,
-        timestamp: new Date(now),
-        actionType: 'CREATE',
-        resourceType: 'Claim',
-        resourceId: createdClaim.id,
-        actorId: owner,
-        actorType: 'user',
-        payload: {
-          statement: createdClaim.statement,
-          confidence: createdClaim.confidence,
-          entityId: claimData.entityId,
-        },
-        metadata: {},
-      });
-
-      return createdClaim;
-    } finally {
-      await session.close();
     }
+    console.log('IntelGraph schema initialization complete.');
   }
 
   /**
-   * Attaches a new Evidence node to an existing Claim.
-   * @param evidenceData - The data for the new evidence.
-   * @param owner - The ID of the user or service.
-   * @param tenantId - The ID of the tenant.
-   * @returns The newly created Evidence.
+   * Ensures a node exists in the graph (Idempotent / Upsert).
+   * Uses MERGE based on natural keys if available, or CREATE if not.
+   * If the node exists, it updates `updatedAt` and any provided properties.
    */
-  async attachEvidence(
-    evidenceData: Omit<Evidence, keyof import('../graph/schema').BaseNode>,
-    owner: string,
-    tenantId: string
-  ): Promise<Evidence> {
-    const session = this.driver.session();
-    try {
-      const now = new Date().toISOString();
-      const newEvidence: Evidence = {
-        id: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-        owner,
-        ...evidenceData,
-      };
+  public async ensureNode<T extends Entity>(
+    tenantId: string,
+    label: NodeLabel,
+    properties: Omit<T, 'id' | 'tenantId' | 'createdAt' | 'updatedAt' | 'label'>
+  ): Promise<T> {
+    this.validateNodeLabel(label);
 
-      const result = await session.run(
-        `
-        MATCH (c:Claim {id: $claimId, tenantId: $tenantId})
-        CREATE (ev:Evidence {
-          id: $id,
-          sourceURI: $sourceURI,
-          hash: $hash,
-          content: $content,
-          createdAt: $createdAt,
-          updatedAt: $updatedAt,
-          owner: $owner,
-          tenantId: $tenantId
-        })
-        CREATE (ev)-[:SUPPORTS]->(c)
-        RETURN ev
-      `,
-        { ...newEvidence, claimId: evidenceData.claimId, tenantId }
+    const naturalKeys = NATURAL_KEYS[label];
+    const hasNaturalKey = naturalKeys && naturalKeys.length > 0 && naturalKeys.every(k => (properties as any)[k] !== undefined);
+
+    const id = randomUUID();
+    const now = new Date().toISOString();
+
+    let cypher: string;
+    let params: any = {
+      props: properties,
+      id,
+      tenantId,
+      now,
+    };
+
+    if (hasNaturalKey) {
+        // Construct MERGE clause
+        // MERGE (n:Label { tenantId: $tenantId, key1: $val1, ... })
+        const mergeProps = naturalKeys.map(k => `${k}: $${k}`).join(', ');
+        // Extract natural key values into params
+        naturalKeys.forEach(k => params[k] = (properties as any)[k]);
+
+        // Remove natural keys from $props to avoid duplication in SET if we wanted,
+        // but replacing $props is fine as long as we handle it.
+        // Actually, we want to update other props.
+
+        cypher = `
+            MERGE (n:${label} { tenantId: $tenantId, ${mergeProps} })
+            ON CREATE SET
+                n = $props,
+                n.id = $id,
+                n.tenantId = $tenantId,
+                n.createdAt = $now,
+                n.updatedAt = $now
+            ON MATCH SET
+                n += $props,
+                n.updatedAt = $now
+            RETURN n
+        `;
+    } else {
+        // Fallback to CREATE if no natural key definition (shouldn't happen for canonical entities)
+        // or just treat as a new distinct entity
+        cypher = `
+            CREATE (n:${label})
+            SET n = $props,
+                n.id = $id,
+                n.tenantId = $tenantId,
+                n.createdAt = $now,
+                n.updatedAt = $now
+            RETURN n
+        `;
+    }
+
+    const result = await runCypher(cypher, params);
+    if (!result || result.length === 0) {
+      throw new Error(`Failed to ensure node of type ${label}`);
+    }
+
+    return result[0]['n'] as T;
+  }
+
+  // Deprecated: use ensureNode for canonical correctness
+  public async createNode<T extends Entity>(
+    tenantId: string,
+    label: NodeLabel,
+    properties: Omit<T, 'id' | 'tenantId' | 'createdAt' | 'updatedAt' | 'label'>
+  ): Promise<T> {
+      return this.ensureNode(tenantId, label, properties);
+  }
+
+  public async createEdge(
+    tenantId: string,
+    fromId: string,
+    toId: string,
+    edgeType: EdgeType,
+    properties: Record<string, any> = {}
+  ): Promise<void> {
+    this.validateEdgeType(edgeType);
+
+    const cypher = `
+      MATCH (a), (b)
+      WHERE a.id = $fromId AND a.tenantId = $tenantId
+        AND b.id = $toId AND b.tenantId = $tenantId
+      MERGE (a)-[r:${edgeType}]->(b)
+      ON CREATE SET r = $props, r.createdAt = $now
+      ON MATCH SET r += $props
+      RETURN r
+    `;
+
+    const params = {
+      fromId,
+      toId,
+      tenantId,
+      props: properties,
+      now: new Date().toISOString(),
+    };
+
+    const result = await runCypher(cypher, params);
+    if (!result || result.length === 0) {
+      throw new Error(
+        `Failed to create edge ${edgeType} between ${fromId} and ${toId}. Check IDs and tenant ownership.`
       );
-
-      if (result.records.length === 0) {
-        throw new AppError(`Claim with ID ${evidenceData.claimId} not found for this tenant.`, 404);
-      }
-
-      const attachedEvidence = result.records[0].get('ev').properties as Evidence;
-
-      // Audit Log
-      await this.ledger.appendEntry({
-        tenantId,
-        timestamp: new Date(now),
-        actionType: 'ATTACH',
-        resourceType: 'Evidence',
-        resourceId: attachedEvidence.id,
-        actorId: owner,
-        actorType: 'user',
-        payload: {
-          claimId: evidenceData.claimId,
-          sourceURI: attachedEvidence.sourceURI,
-          hash: attachedEvidence.hash,
-        },
-        metadata: {},
-      });
-
-      return attachedEvidence;
-    } finally {
-      await session.close();
     }
   }
 
-    /**
-   * Attaches a new PolicyLabel node to any other node in the graph.
-   * @param policyData - The data for the new policy label.
-   * @param targetNodeId - The ID of the node to attach the policy to.
-   * @param owner - The ID of the user or service.
-   * @param tenantId - The ID of the tenant.
-   * @returns The newly created PolicyLabel.
-   */
-  async tagPolicy(
-    policyData: Omit<PolicyLabel, keyof import('../graph/schema').BaseNode>,
-    targetNodeId: string,
-    owner: string,
-    tenantId: string
-  ): Promise<PolicyLabel> {
-    const session = this.driver.session();
-    try {
-      const now = new Date().toISOString();
-      const newPolicy: PolicyLabel = {
-        id: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-        owner,
-        ...policyData,
-      };
+  public async getNodeById<T extends Entity>(
+    tenantId: string,
+    id: string
+  ): Promise<T | null> {
+    const cypher = `
+      MATCH (n)
+      WHERE n.id = $id AND n.tenantId = $tenantId
+      RETURN n
+    `;
 
-      const result = await session.run(
-        `
-        MATCH (n {id: $targetNodeId, tenantId: $tenantId})
-        CREATE (p:PolicyLabel {
-          id: $id,
-          label: $label,
-          sensitivity: $sensitivity,
-          createdAt: $createdAt,
-          updatedAt: $updatedAt,
-          owner: $owner,
-          tenantId: $tenantId
-        })
-        CREATE (n)-[:HAS_POLICY]->(p)
-        RETURN p
-      `,
-        { ...newPolicy, targetNodeId, tenantId }
-      );
-
-      if (result.records.length === 0) {
-        throw new AppError(`Node with ID ${targetNodeId} not found for this tenant.`, 404);
-      }
-
-      const taggedPolicy = result.records[0].get('p').properties as PolicyLabel;
-
-      // Audit Log
-      await this.ledger.appendEntry({
-        tenantId,
-        timestamp: new Date(now),
-        actionType: 'TAG',
-        resourceType: 'PolicyLabel',
-        resourceId: taggedPolicy.id,
-        actorId: owner,
-        actorType: 'user',
-        payload: {
-          targetNodeId,
-          label: taggedPolicy.label,
-          sensitivity: taggedPolicy.sensitivity,
-        },
-        metadata: {},
-      });
-
-      return taggedPolicy;
-    } finally {
-      await session.close();
+    const result = await runCypher(cypher, { id, tenantId });
+    if (!result || result.length === 0) {
+      return null;
     }
+    return result[0]['n'] as T;
   }
 
-  /**
-   * For testing purposes only.
-   * Resets the singleton instance.
-   */
-  public static _resetForTesting() {
-    IntelGraphService.instance = null;
+  public async searchNodes<T extends Entity>(
+    tenantId: string,
+    label: NodeLabel,
+    criteria: Record<string, any> = {},
+    limit: number = 100
+  ): Promise<T[]> {
+    this.validateNodeLabel(label);
+
+    let whereClause = 'n.tenantId = $tenantId';
+    const params: any = { tenantId };
+
+    Object.keys(criteria).forEach((key) => {
+      if (!/^[a-zA-Z0-9_]+$/.test(key)) {
+         throw new Error(`Invalid property key: ${key}`);
+      }
+      whereClause += ` AND n.${key} = $${key}`;
+      params[key] = criteria[key];
+    });
+
+    const cypher = `
+      MATCH (n:${label})
+      WHERE ${whereClause}
+      RETURN n
+      LIMIT ${limit}
+    `;
+
+    const result = await runCypher(cypher, params);
+    return result.map((r) => r['n'] as T);
   }
 
-  /**
-   * Retrieves the full provenance for a given Decision.
-   * This includes the claims that informed the decision and the evidence supporting those claims.
-   * @param decisionId - The ID of the Decision.
-   * @param tenantId - The ID of the tenant.
-   * @returns An object containing the decision and its provenance trail.
-   */
-  async getDecisionProvenance(decisionId: string, tenantId: string): Promise<any> {
-    const session = this.driver.session();
-    try {
-      const result = await session.run(
-        `
-        MATCH (d:Decision {id: $decisionId, tenantId: $tenantId})
-        // Use OPTIONAL MATCH in case a decision has no claims yet
-        OPTIONAL MATCH (d)-[:INFORMED_BY]->(c:Claim)
-        // Use OPTIONAL MATCH in case a claim has no evidence yet
-        OPTIONAL MATCH (c)<-[:SUPPORTS]-(ev:Evidence)
-        WITH d, c, COLLECT(ev.properties) AS evidences
-        WITH d, COLLECT({claim: c.properties, evidences: evidences}) AS claims
-        RETURN {decision: d.properties, claims: claims} AS provenance
-      `,
-        { decisionId, tenantId }
-      );
-
-      if (result.records.length === 0 || !result.records[0].get('provenance').decision) {
-        throw new AppError(`Decision with ID ${decisionId} not found for this tenant.`, 404);
-      }
-
-      return result.records[0].get('provenance');
-    } finally {
-      await session.close();
-    }
+  private validateNodeLabel(label: string): void {
+     if (!Object.values(NodeLabels).includes(label as NodeLabel)) {
+         throw new Error(`Invalid node label: ${label}`);
+     }
   }
 
-  /**
-   * Retrieves all claims and their associated policy labels for a given Entity.
-   * @param entityId - The ID of the Entity.
-   * @param tenantId - The ID of the tenant.
-   * @returns An object containing the entity and a list of its claims with policies.
-   */
-  async getEntityClaims(entityId: string, tenantId: string): Promise<any> {
-    const session = this.driver.session();
-    try {
-      const result = await session.run(
-        `
-        MATCH (e:Entity {id: $entityId, tenantId: $tenantId})
-        // Use OPTIONAL MATCH in case an entity has no claims
-        OPTIONAL MATCH (e)<-[:RELATES_TO]-(c:Claim)
-        // Use OPTIONAL MATCH in case a claim has no policy labels
-        OPTIONAL MATCH (c)-[:HAS_POLICY]->(p:PolicyLabel)
-        WITH e, c, COLLECT(p.properties) AS policies
-        WITH e, COLLECT({claim: c.properties, policies: policies}) AS claims
-        RETURN {entity: e.properties, claims: claims} AS entityClaims
-      `,
-        { entityId, tenantId }
-      );
-
-      if (result.records.length === 0 || !result.records[0].get('entityClaims').entity) {
-        throw new AppError(`Entity with ID ${entityId} not found for this tenant.`, 404);
-      }
-
-      return result.records[0].get('entityClaims');
-    } finally {
-      await session.close();
-    }
-  }
-
-  /**
-   * Creates a new Decision node and links it to the claims that informed it.
-   * @param decisionData - The data for the new decision.
-   * @param informedByClaimIds - An array of Claim IDs that informed this decision.
-   * @param owner - The ID of the user or service.
-   * @param tenantId - The ID of the tenant.
-   * @returns The newly created Decision.
-   */
-  async createDecision(
-    decisionData: Omit<Decision, keyof import('../../graph/schema').BaseNode>,
-    informedByClaimIds: string[],
-    owner: string,
-    tenantId: string
-  ): Promise<Decision> {
-    const session = this.driver.session();
-    try {
-      const now = new Date().toISOString();
-      const newDecision = {
-        id: randomUUID(),
-        createdAt: now,
-        updatedAt: now,
-        owner,
-        ...decisionData,
-      };
-
-      const result = await session.run(
-        `
-        CREATE (d:Decision {
-          id: $id,
-          question: $question,
-          recommendation: $recommendation,
-          rationale: $rationale,
-          createdAt: $createdAt,
-          updatedAt: $updatedAt,
-          owner: $owner,
-          tenantId: $tenantId
-        })
-        WITH d
-        UNWIND $informedByClaimIds AS claimId
-        MATCH (c:Claim {id: claimId, tenantId: $tenantId})
-        CREATE (d)-[:INFORMED_BY]->(c)
-        RETURN d
-      `,
-        { ...newDecision, informedByClaimIds, tenantId }
-      );
-
-      if (result.records.length === 0) {
-        // This could happen if no claims are found, but the decision is still created.
-        // A more robust query might handle this better, but for now we'll re-fetch the decision.
-        const decisionResult = await session.run(
-          'MATCH (d:Decision {id: $id}) RETURN d',
-          { id: newDecision.id }
-        );
-        if (decisionResult.records.length === 0) {
-            throw new AppError(`Failed to create or find decision with ID ${newDecision.id}`, 500);
-        }
-        return decisionResult.records[0].get('d').properties;
-      }
-
-      const createdDecision = result.records[0].get('d').properties;
-
-      // Audit Log
-      await this.ledger.appendEntry({
-        tenantId,
-        timestamp: new Date(now),
-        actionType: 'CREATE',
-        resourceType: 'Decision',
-        resourceId: createdDecision.id,
-        actorId: owner,
-        actorType: 'user',
-        payload: {
-          question: createdDecision.question,
-          recommendation: createdDecision.recommendation,
-          informedByClaimIds,
-        },
-        metadata: {},
-      });
-
-      return createdDecision;
-    } finally {
-      await session.close();
-    }
+  private validateEdgeType(type: string): void {
+     if (!Object.values(EdgeTypes).includes(type as EdgeType)) {
+         throw new Error(`Invalid edge type: ${type}`);
+     }
   }
 }

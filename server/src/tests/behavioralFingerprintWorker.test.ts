@@ -1,4 +1,5 @@
 import { runBehavioralFingerprintJob } from '../workers/behavioralFingerprintWorker';
+import { describe, it, expect } from '@jest/globals';
 
 describe('behavioral fingerprint job', () => {
   it('scores and clusters identities across projects', async () => {

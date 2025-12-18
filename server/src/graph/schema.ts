@@ -1,99 +1,97 @@
-// server/src/graph/schema.ts
+export const NodeLabels = {
+  Person: 'Person',
+  Org: 'Org',
+  Asset: 'Asset',
+  Event: 'Event',
+  Indicator: 'Indicator',
+} as const;
 
-/**
- * Defines the sensitivity levels for data within the IntelGraph.
- */
-export type Sensitivity = 'public' | 'internal' | 'confidential' | 'secret' | 'top-secret';
+export const EdgeTypes = {
+  MEMBER_OF: 'MEMBER_OF',
+  OWNS: 'OWNS',
+  MENTIONED_IN: 'MENTIONED_IN',
+  RELATED_TO: 'RELATED_TO',
+} as const;
 
-/**
- * Base interface for all nodes in the IntelGraph.
- */
-export interface BaseNode {
-  id: string; // UUID
-  createdAt: string; // ISO 8601 timestamp
-  updatedAt: string; // ISO 8601 timestamp
-  owner: string; // User or Service ID
+export type NodeLabel = keyof typeof NodeLabels;
+export type EdgeType = keyof typeof EdgeTypes;
+
+export interface BaseEntity {
+  id: string;
+  tenantId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
-/**
- * Represents a person, organization, product, or any other noun.
- * An Entity is a central node to which claims are attached.
- */
-export interface Entity extends BaseNode {
+export interface PersonEntity extends BaseEntity {
+  label: 'Person';
+  fullName: string;
+  role?: string;
+  email?: string;
+}
+
+export interface OrgEntity extends BaseEntity {
+  label: 'Org';
   name: string;
-  description: string;
+  industry?: string;
+  region?: string;
 }
 
-/**
- * A statement or assertion about an Entity.
- * Claims are the core informational unit.
- */
-export interface Claim extends BaseNode {
-  statement: string;
-  confidence: number; // 0.0 to 1.0
-  entityId: string;
+export interface AssetEntity extends BaseEntity {
+  label: 'Asset';
+  name: string;
+  type: string;
+  criticality?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 }
 
-/**
- * Represents a piece of data that supports or refutes a Claim.
- * Evidence provides the grounding for claims.
- */
-export interface Evidence extends BaseNode {
-  sourceURI: string; // URL or other resource identifier
-  hash: string; // SHA-256 hash of the content, if applicable
-  content: string; // The actual content or a snippet
-  claimId: string;
+export interface EventEntity extends BaseEntity {
+  label: 'Event';
+  title: string;
+  timestamp: string;
+  description?: string;
+  severity?: string;
 }
 
-/**
- * Represents a specific, auditable decision made based on IntelGraph data.
- * Decisions link to the claims and evidence that informed them.
- */
-export interface Decision extends BaseNode {
-  question: string;
-  recommendation: string;
-  rationale: string;
+export interface IndicatorEntity extends BaseEntity {
+  label: 'Indicator';
+  value: string;
+  type: string;
+  confidence?: number;
 }
 
-/**
- * A label for applying governance rules (e.g., access control, redaction).
- * Policies are attached to other nodes to enforce rules.
- */
-export interface PolicyLabel extends BaseNode {
-  label: string;
-  sensitivity: Sensitivity;
-}
+export type Entity =
+  | PersonEntity
+  | OrgEntity
+  | AssetEntity
+  | EventEntity
+  | IndicatorEntity;
 
-// --- Edge Types ---
+export const NATURAL_KEYS: Record<NodeLabel, string[]> = {
+  Person: ['email'],
+  Org: ['name'],
+  Asset: ['name', 'type'],
+  Event: ['title', 'timestamp'], // Weak natural key, careful
+  Indicator: ['value', 'type'],
+};
 
-/**
- * Connects a Claim to an Entity.
- * Relationship: (Claim)-[RELATES_TO]->(Entity)
- */
-export interface RelatesToEdge {
-  type: 'RELATES_TO';
-}
+export const SCHEMA_CONSTRAINTS = [
+  // Unique IDs
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Person) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Org) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Asset) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Event) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Indicator) REQUIRE n.id IS UNIQUE',
 
-/**
- * Connects Evidence to a Claim.
- * Relationship: (Evidence)-[SUPPORTS]->(Claim)
- */
-export interface SupportsEdge {
-  type: 'SUPPORTS';
-}
+  // Tenant Isolation Indexes
+  'CREATE INDEX IF NOT EXISTS FOR (n:Person) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Org) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Asset) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Event) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Indicator) ON (n.tenantId)',
 
-/**
- * Connects a Decision to the Claims that informed it.
- * Relationship: (Decision)-[INFORMED_BY]->(Claim)
- */
-export interface InformedByEdge {
-  type: 'INFORMED_BY';
-}
-
-/**
- * Connects a PolicyLabel to any other node.
- * Relationship: (AnyNode)-[HAS_POLICY]->(PolicyLabel)
- */
-export interface HasPolicyEdge {
-  type: 'HAS_POLICY';
-}
+  // Natural Key Indexes (Composite with tenantId is ideal but Neo4j constraint limited, so use Index)
+  // We will enforce uniqueness in application logic via MERGE
+  'CREATE INDEX IF NOT EXISTS FOR (n:Person) ON (n.email)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Org) ON (n.name)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Indicator) ON (n.value)',
+];

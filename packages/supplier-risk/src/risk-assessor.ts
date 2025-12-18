@@ -508,7 +508,7 @@ export class SupplierRiskAssessor {
   // Private helper methods
 
   private calculateOverallRisk(categoryRisks: RiskAssessment[]): number {
-    if (categoryRisks.length === 0) return 50;
+    if (categoryRisks.length === 0) {return 50;}
 
     // Weighted average of category risks
     const weights: Record<RiskCategory, number> = {
@@ -537,9 +537,9 @@ export class SupplierRiskAssessor {
   }
 
   private scoreToLevel(score: number): RiskLevel {
-    if (score >= 80) return 'low';
-    if (score >= 60) return 'medium';
-    if (score >= 40) return 'high';
+    if (score >= 80) {return 'low';}
+    if (score >= 60) {return 'medium';}
+    if (score >= 40) {return 'high';}
     return 'critical';
   }
 
