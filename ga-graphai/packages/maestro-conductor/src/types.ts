@@ -243,6 +243,8 @@ export interface IncidentReport {
   snapshot: HealthSnapshot;
   plans: SelfHealingPlan[];
   timestamp: Date;
+  sandboxed?: boolean;
+  warnings?: string[];
 }
 
 export interface OrchestrationTask {
