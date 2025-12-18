@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
+URL=${1:?usage: $0 <base-url>}
 
-# IntelGraph GA-Core Smoke Test
-# Committee Requirements: Golden path validation with hard gates
-# Validates all 8 phases of integration train
+curl -fsS "$URL/health" >/dev/null
 
+<<<<<<< HEAD
 echo "🧪 IntelGraph GA-Core Smoke Test - Committee Validation"
 echo "Testing all integration train phases..."
 echo ""
@@ -32,8 +32,9 @@ run_test() {
 
 echo "=== PHASE 1: CI/REPO HYGIENE ==="
 run_test "Gitleaks configuration" "test -f .gitleaks.toml"
-run_test "CI workflow" "test -f .github/workflows/ci.yml"
-run_test "Security gates" "grep -q 'gitleaks detect' .github/workflows/ci.yml"
+run_test "Lint & unit CI workflow" "test -f .github/workflows/ci-lint-and-unit.yml"
+run_test "Golden path CI workflow" "test -f .github/workflows/ci-golden-path.yml"
+run_test "Security gates" "grep -q 'gitleaks detect' .github/workflows/security.yml"
 
 echo ""
 echo "=== PHASE 2: DATA & DB FOUNDATION ==="
@@ -121,3 +122,6 @@ else
     echo "❌ Review failed tests before deployment"
     exit 1
 fi
+=======
+echo "smoke ok"
+>>>>>>> main
