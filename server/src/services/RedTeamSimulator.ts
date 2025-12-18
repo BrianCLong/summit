@@ -1,104 +1,192 @@
-/**
- * Red Team Simulator
- *
- * Orchestrates simulated adversarial attacks and influence operations
- * for testing defense and resilience.
- *
- * @module RedTeamSimulator
- */
-
 import { EventEmitter } from 'events';
-import { createRequire } from 'module';
-import { SimulationService, SimulationConfig, SimulationResult } from './SimulationService.js';
+import { SimulationEngineService, SimulationConfig } from './SimulationEngineService';
+import eventBus from '../workers/eventBus';
+import logger from '../utils/logger';
 
-// Robustly import CommonJS module in ESM environment
-const require = createRequire(import.meta.url);
-const eventBus = require('../workers/eventBus.js') as EventEmitter;
-
-export interface RedTeamScenario {
-  type: string;
-  [key: string]: any;
+export interface CampaignOptions {
+  name?: string;
+  description?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
+  parameters?: Record<string, any>;
+  userId?: string;
+  investigationId?: string;
 }
 
-export class RedTeamSimulator {
-  private bus: EventEmitter;
-  private simulationService: SimulationService;
-  private scenarios: Map<string, () => RedTeamScenario>;
+export type CampaignType = 'PHISHING_CAMPAIGN' | 'NETWORK_BREACH' | 'INSIDER_THREAT' | 'RANSOMWARE_OUTBREAK';
 
-  constructor(options?: { scenarios?: Record<string, () => RedTeamScenario> }) {
-    this.bus = eventBus;
-    this.simulationService = new SimulationService();
-    this.scenarios = new Map(Object.entries(options?.scenarios || {}));
+export class RedTeamSimulator extends EventEmitter {
+  private simulationEngine: SimulationEngineService;
+  private activeCampaigns: Map<string, string> = new Map(); // campaignId -> simulationId
 
-    this.registerDefaultScenarios();
+  constructor(simulationEngine: SimulationEngineService) {
+    super();
+    this.simulationEngine = simulationEngine;
+    this.initializeListeners();
   }
 
-  private registerDefaultScenarios() {
-    if (!this.scenarios.has('phishing-campaign')) {
-      this.scenarios.set('phishing-campaign', () => ({
-        type: 'phishing',
-        entity: 'CorpX',
-        severity: 'medium',
-        location: { lat: 0, lon: 0 },
-        timestamp: new Date(),
-      }));
-    }
+  private initializeListeners() {
+    this.simulationEngine.on('simulationCompleted', (simulation: any) => {
+      this.handleSimulationUpdate(simulation, 'COMPLETED');
+    });
 
-    if (!this.scenarios.has('influence-operation')) {
-      this.scenarios.set('influence-operation', () => ({
-        type: 'influence',
-        narrative: 'Synthetic disinformation campaign',
-        virality: 0.8,
-        targetAudience: 'General',
-        timestamp: new Date(),
-      }));
+    this.simulationEngine.on('simulationFailed', (simulation: any) => {
+      this.handleSimulationUpdate(simulation, 'FAILED');
+    });
+  }
+
+  private handleSimulationUpdate(simulation: any, status: string) {
+    // Standard event
+    const eventPayload = {
+      simulationId: simulation.id,
+      status,
+      results: simulation.results,
+      timestamp: new Date()
+    };
+
+    eventBus.emit('red-team:campaign-update', eventPayload);
+
+    // Legacy event for backward compatibility
+    eventBus.emit('raw-event', {
+        source: 'red-team',
+        data: {
+            type: 'campaign-update',
+            ...eventPayload
+        }
+    });
+
+    logger.info(`Red Team Campaign update: ${simulation.id} is ${status}`);
+  }
+
+  /**
+   * Run a specific Red Team campaign
+   */
+  async runCampaign(type: CampaignType, targetId: string, options: CampaignOptions = {}): Promise<{ campaignId: string, simulationId: string }> {
+    logger.info(`Starting Red Team campaign: ${type} targeting ${targetId}`);
+
+    const config = this.buildSimulationConfig(type, targetId, options);
+
+    try {
+      const result = await this.simulationEngine.runSimulation(config);
+      const campaignId = `campaign-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
+      this.activeCampaigns.set(campaignId, result.id);
+
+      // Standard event
+      eventBus.emit('red-team:campaign-started', {
+        campaignId,
+        simulationId: result.id,
+        type,
+        targetId,
+        timestamp: new Date()
+      });
+
+      // Legacy event for backward compatibility
+      // The original RedTeamSimulator emitted 'raw-event' with source 'red-team'
+      eventBus.emit('raw-event', {
+          source: 'red-team',
+          data: {
+              type,
+              entity: targetId,
+              campaignId,
+              simulationId: result.id
+          }
+      });
+
+      return { campaignId, simulationId: result.id };
+    } catch (error: any) {
+      logger.error(`Failed to start Red Team campaign: ${error.message}`);
+      throw error;
     }
   }
 
   /**
-   * Injects a scenario into the system.
-   * Can trigger simple event generation or complex simulations.
+   * @deprecated Use runCampaign instead
    */
-  public inject(name: string, params?: any): any {
-    // Handle complex simulation
-    if (name === 'influence-simulation') {
-      return this.runInfluenceSimulation(params as SimulationConfig);
-    }
-
-    // Handle standard scenarios
-    const generator = this.scenarios.get(name);
-    if (!generator) {
-      throw new Error(`Unknown scenario: ${name}`);
-    }
-
-    const payload = { ...generator(), ...params };
-
-    // Emit to the event bus so detection services (like DefensivePsyOps) can see it
-    this.bus.emit('raw-event', {
-      source: 'red-team',
-      type: payload.type,
-      data: payload,
-      timestamp: new Date()
-    });
-
-    return payload;
+  inject(name: string): any {
+     logger.warn('RedTeamSimulator.inject is deprecated. Use runCampaign instead.');
+     if (name === 'phishing-campaign') {
+         // Best effort mapping for backward compatibility
+         this.runCampaign('PHISHING_CAMPAIGN', 'legacy-target').catch(err => logger.error('Legacy inject failed', err));
+         return { type: 'phishing', legacy: true };
+     }
+     throw new Error(`Unknown scenario: ${name}`);
   }
 
   /**
-   * Runs a graph-based influence simulation.
+   * Maps high-level campaign types to low-level simulation engine configurations
    */
-  private runInfluenceSimulation(config: SimulationConfig): SimulationResult {
-    // Run the simulation
-    const result = this.simulationService.simulateSpread(config);
+  private buildSimulationConfig(type: CampaignType, targetId: string, options: CampaignOptions): SimulationConfig {
+    const baseConfig: SimulationConfig = {
+      name: options.name || `${type} against ${targetId}`,
+      description: options.description || `Red Team simulation of ${type}`,
+      investigationId: options.investigationId || targetId, // Assuming targetId can map to investigationId context
+      userId: options.userId || 'system-red-team',
+      parameters: { ...options.parameters, targetId }
+    };
 
-    // Emit the full result
-    this.bus.emit('raw-event', {
-      source: 'red-team',
-      type: 'simulation_result',
-      data: result,
-      timestamp: new Date()
-    });
+    switch (type) {
+      case 'PHISHING_CAMPAIGN':
+        return {
+          ...baseConfig,
+          scenario: 'SOCIO_COGNITIVE',
+          engines: ['NETWORK_PROPAGATION', 'BEHAVIORAL_PREDICTION'],
+          parameters: {
+            ...baseConfig.parameters,
+            propagationRate: 0.4, // Phishing spreads fast
+            resistanceFactor: 0.3, // User awareness
+            threshold: 0.1
+          }
+        };
 
-    return result;
+      case 'NETWORK_BREACH':
+        return {
+          ...baseConfig,
+          scenario: 'CYBER_PHYSICAL',
+          engines: ['NETWORK_PROPAGATION', 'RISK_ASSESSMENT', 'EVENT_CASCADE'],
+          parameters: {
+            ...baseConfig.parameters,
+            propagationRate: 0.6,
+            decayFactor: 0.2,
+            cascadeDepth: 4
+          }
+        };
+
+      case 'INSIDER_THREAT':
+        return {
+          ...baseConfig,
+          scenario: 'THREAT_PROPAGATION',
+          engines: ['RISK_ASSESSMENT', 'BEHAVIORAL_PREDICTION'],
+          parameters: {
+            ...baseConfig.parameters,
+            impactRadius: 2, // Localized impact initially
+            confidenceThreshold: 0.8
+          }
+        };
+
+      case 'RANSOMWARE_OUTBREAK':
+        return {
+          ...baseConfig,
+          scenario: 'CRISIS_RESPONSE',
+          engines: ['NETWORK_PROPAGATION', 'EVENT_CASCADE', 'RESOURCE_ALLOCATION'],
+          parameters: {
+            ...baseConfig.parameters,
+            propagationRate: 0.8, // Very fast
+            impactDecay: 0.05, // High impact persistence
+            timeDelay: 1 // Fast cascade (1 hour)
+          }
+        };
+
+      default:
+        throw new Error(`Unknown campaign type: ${type}`);
+    }
+  }
+
+  getCampaignStatus(campaignId: string) {
+    const simId = this.activeCampaigns.get(campaignId);
+    if (!simId) return null;
+    return this.simulationEngine.getSimulationStatus(simId);
   }
 }
+
+// Default export for ESM
+export default RedTeamSimulator;

@@ -9,9 +9,11 @@ configMapGenerator:
       - prometheus.yml=../../prometheus/prometheus.yml
       - prometheus-rule-slo.yaml=../../prometheus/prometheus-rule-slo.yaml
       - rules-business.yaml=../../prometheus/rules-business.yaml
+      - workflow-slo-rules.yaml=../../prometheus/workflow-slo-rules.yaml
   - name: grafana-dashboards
     files:
       - monitoring-platform.json=../../grafana/dashboards/monitoring-platform.json
+      - monorepo-otel-workflows.json=../../grafana/dashboards/monorepo-otel-workflows.json
       - dashboards.yaml=../../grafana/provisioning/dashboards/dashboards.yml
   - name: alertmanager-config
     files:

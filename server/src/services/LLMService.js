@@ -4,8 +4,25 @@
  */
 
 import logger from '../utils/logger.js';
-import { applicationErrors } from '../monitoring/metrics.js';
+import {
+  applicationErrors,
+  llmRequestDuration,
+  llmTokensTotal,
+  llmRequestsTotal,
+} from '../monitoring/metrics.js';
 import { otelService } from '../monitoring/opentelemetry.js';
+
+// Global history buffer for the "Prompt Activity Monitor"
+// Stores the last 50 interactions across all LLMService instances.
+const globalHistory = [];
+const MAX_HISTORY = 50;
+
+function addToHistory(entry) {
+  globalHistory.unshift(entry);
+  if (globalHistory.length > MAX_HISTORY) {
+    globalHistory.pop();
+  }
+}
 
 class LLMService {
   constructor(config = {}) {
@@ -28,12 +45,46 @@ class LLMService {
       totalTokensGenerated: 0,
       averageTokensPerCompletion: 0,
     };
+    this.hasAlerted80 = false;
+  }
+
+  /**
+   * Check LLM budget
+   * Note: This uses in-memory metrics which reset on server restart.
+   * For production, metrics should be persisted to Redis/DB.
+   */
+  checkBudget() {
+    const costPerToken = parseFloat(process.env.LLM_COST_PER_TOKEN) || 0.000002;
+    const monthlyBudget = parseFloat(process.env.LLM_MONTHLY_BUDGET) || 100.0;
+    const currentSpend = this.metrics.totalTokensGenerated * costPerToken;
+
+    // Use a latch to prevent log spam, but for now simple range check is used as MVP.
+    // Ideally use Redis key `llm:alert:80` with TTL.
+    if (!this.hasAlerted80 && currentSpend >= monthlyBudget * 0.8) {
+       this.hasAlerted80 = true;
+       logger.warn({ currentSpend, monthlyBudget }, 'LLM Spend Alert: 80% of budget consumed');
+       // In a real system, send this to alerting service
+    }
+
+    if (currentSpend >= monthlyBudget) {
+       logger.error({ currentSpend, monthlyBudget }, 'LLM Spend Cap Exceeded');
+       throw new Error('LLM Spend Cap Exceeded. Please contact admin.');
+    }
+  }
+
+  /**
+   * Access global prompt history
+   */
+  static getGlobalHistory() {
+    return globalHistory;
   }
 
   /**
    * Generate text completion
    */
   async complete(params) {
+    this.checkBudget();
+
     const {
       prompt,
       model = this.config.model,
@@ -71,6 +122,9 @@ class LLMService {
           case 'local':
             response = await this.localCompletion(params);
             break;
+          case 'mock':
+            response = await this.mockCompletion(params);
+            break;
           default:
             throw new Error(
               `Unsupported LLM provider: ${this.config.provider}`,
@@ -78,7 +132,8 @@ class LLMService {
         }
 
         const latency = Date.now() - startTime;
-        this.updateMetrics(latency, response.usage);
+        this.updateMetrics(latency, response.usage, model);
+        llmRequestsTotal.labels(this.config.provider, model, 'success').inc();
 
         logger.debug('LLM completion successful', {
           provider: this.config.provider,
@@ -87,6 +142,21 @@ class LLMService {
           responseLength: response.content.length,
           latency,
           tokensUsed: response.usage,
+        });
+
+        // Record to global history
+        addToHistory({
+          id: Date.now().toString() + Math.random().toString().slice(2, 5),
+          timestamp: new Date().toISOString(),
+          type: 'complete',
+          provider: this.config.provider,
+          model,
+          prompt,
+          systemMessage,
+          response: response.content,
+          latency,
+          tokens: response.usage,
+          status: 'success',
         });
 
         return response.content;
@@ -98,12 +168,25 @@ class LLMService {
           applicationErrors
             .labels('llm_service', 'CompletionError', 'error')
             .inc();
+          llmRequestsTotal.labels(this.config.provider, model, 'error').inc();
 
           logger.error('LLM completion failed after retries', {
             provider: this.config.provider,
             model,
             attempt,
             error: error.message,
+          });
+
+          // Record failure
+          addToHistory({
+            id: Date.now().toString() + Math.random().toString().slice(2, 5),
+            timestamp: new Date().toISOString(),
+            type: 'complete',
+            provider: this.config.provider,
+            model,
+            prompt,
+            error: error.message,
+            status: 'error',
           });
 
           throw error;
@@ -157,17 +240,45 @@ class LLMService {
       }
 
       const latency = Date.now() - startTime;
-      this.updateMetrics(latency, response.usage);
+      this.updateMetrics(latency, response.usage, model);
+      llmRequestsTotal.labels(this.config.provider, model, 'success').inc();
+
+      // Record to global history
+      addToHistory({
+        id: Date.now().toString() + Math.random().toString().slice(2, 5),
+        timestamp: new Date().toISOString(),
+        type: 'chat',
+        provider: this.config.provider,
+        model,
+        messages,
+        response: response.content,
+        latency,
+        tokens: response.usage,
+        status: 'success',
+      });
 
       return response.content;
     } catch (error) {
       this.metrics.errorCount++;
       applicationErrors.labels('llm_service', 'ChatError', 'error').inc();
+      llmRequestsTotal.labels(this.config.provider, model, 'error').inc();
 
       logger.error('LLM chat failed', {
         provider: this.config.provider,
         messageCount: messages.length,
         error: error.message,
+      });
+
+      // Record failure
+      addToHistory({
+        id: Date.now().toString() + Math.random().toString().slice(2, 5),
+        timestamp: new Date().toISOString(),
+        type: 'chat',
+        provider: this.config.provider,
+        model,
+        messages,
+        error: error.message,
+        status: 'error',
       });
 
       throw error;
@@ -282,6 +393,49 @@ class LLMService {
   }
 
   /**
+   * Mock completion for testing
+   */
+  async mockCompletion(params) {
+    const { prompt } = params;
+    this.logger.info('Generating mock LLM response');
+
+    // Simulate latency
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    return {
+      content: JSON.stringify({
+        title: "Summit OS Growth Playbook",
+        summary: "A customized growth strategy based on your company health assessment.",
+        score: 85,
+        strengths: ["Strong engineering culture", "High retention"],
+        weaknesses: ["Marketing funnel undefined", "Sales cycle too long"],
+        strategic_initiatives: [
+          {
+            title: "Implement EOS L10 Meetings",
+            description: "Standardize weekly execution meetings to improve accountability.",
+            timeline: "Immediate"
+          },
+          {
+            title: "Revamp Sales Compensation",
+            description: "Align incentives with 3-year growth targets.",
+            timeline: "Q2"
+          }
+        ],
+        tactical_actions: [
+          "Set up weekly scorecard",
+          "Define 1-year goals",
+          "Hire VP of Sales"
+        ]
+      }, null, 2),
+      usage: {
+        prompt_tokens: 50,
+        completion_tokens: 200,
+        total_tokens: 250
+      }
+    };
+  }
+
+  /**
    * Summarize text
    */
   async summarize(text, options = {}) {
@@ -362,8 +516,36 @@ Answer:`;
   /**
    * Update metrics
    */
-  updateMetrics(latency, usage = {}) {
+  updateMetrics(latency, usage = {}, model = this.config.model) {
     this.metrics.totalCompletions++;
+
+    // Record to Prometheus
+    llmRequestDuration
+      .labels(this.config.provider, model, 'success')
+      .observe(latency / 1000);
+
+    if (usage) {
+      if (usage.prompt_tokens) {
+        llmTokensTotal
+          .labels(this.config.provider, model, 'prompt')
+          .inc(usage.prompt_tokens);
+      }
+      if (usage.completion_tokens) {
+        llmTokensTotal
+          .labels(this.config.provider, model, 'completion')
+          .inc(usage.completion_tokens);
+      }
+      if (usage.total_tokens) {
+        // We don't have a 'total' type counter usually if we have prompt/completion,
+        // but let's strictly follow standard: prompt + completion = total.
+        // If we only have total, we log it.
+        if (!usage.prompt_tokens && !usage.completion_tokens) {
+          llmTokensTotal
+            .labels(this.config.provider, model, 'total')
+            .inc(usage.total_tokens);
+        }
+      }
+    }
 
     const currentLatency = this.metrics.averageLatency;
     this.metrics.averageLatency = currentLatency

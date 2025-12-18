@@ -1,0 +1,18 @@
+[project]
+name = "summit-sdk"
+version = "0.1.0"
+description = "Summit developer SDK (Python)"
+authors = [{name = "Summit"}]
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "pydantic>=2.8",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
