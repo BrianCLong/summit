@@ -1,0 +1,499 @@
+# Proxy-Chained Sensor Management
+# Implements multi-hop proxy for secure sensor communication in air-gapped environment
+# Part of Air-Gapped Deployment for Summit IntelGraph
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxy-chain-config
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: proxy-chain
+    app.kubernetes.io/component: sensor-management
+data:
+  proxy-chain.yaml: |
+    # Proxy Chain Configuration for Air-Gapped Sensor Management
+    # Implements defense-in-depth with multiple proxy hops
+
+    proxyChain:
+      version: "1.0"
+      mode: strict
+
+      # Proxy hop definitions
+      hops:
+        - name: edge-proxy
+          tier: 1
+          listen:
+            address: 0.0.0.0
+            port: 8080
+          upstream:
+            address: zone-proxy.intelgraph-monitoring
+            port: 8081
+          security:
+            mtls: true
+            clientCertRequired: true
+            allowedCNs:
+              - "ot-sensor-*.intelgraph.local"
+              - "edge-collector.intelgraph.local"
+          rateLimit:
+            requestsPerSecond: 100
+            burstSize: 200
+
+        - name: zone-proxy
+          tier: 2
+          listen:
+            address: 0.0.0.0
+            port: 8081
+          upstream:
+            address: core-proxy.intelgraph-monitoring
+            port: 8082
+          security:
+            mtls: true
+            clientCertRequired: true
+            allowedCNs:
+              - "edge-proxy.intelgraph.local"
+          rateLimit:
+            requestsPerSecond: 500
+            burstSize: 1000
+
+        - name: core-proxy
+          tier: 3
+          listen:
+            address: 0.0.0.0
+            port: 8082
+          upstream:
+            address: siem-collector.intelgraph-siem
+            port: 5044
+          security:
+            mtls: true
+            clientCertRequired: true
+            allowedCNs:
+              - "zone-proxy.intelgraph.local"
+          rateLimit:
+            requestsPerSecond: 1000
+            burstSize: 2000
+
+      # Content inspection at each hop
+      inspection:
+        enabled: true
+        allowedContentTypes:
+          - application/json
+          - application/x-ndjson
+          - text/plain
+        maxPayloadSizeKB: 1024
+        blockOnMalformed: true
+        logAllPayloads: true
+        sanitizeFields:
+          - password
+          - token
+          - key
+          - secret
+
+      # Audit logging
+      audit:
+        enabled: true
+        destination: siem
+        format: json
+        fields:
+          - timestamp
+          - sourceIP
+          - destinationIP
+          - hopName
+          - method
+          - path
+          - responseCode
+          - latencyMs
+          - payloadHash
+
+  envoy-edge.yaml: |
+    # Envoy configuration for edge proxy
+    static_resources:
+      listeners:
+        - name: edge_listener
+          address:
+            socket_address:
+              address: 0.0.0.0
+              port_value: 8080
+          filter_chains:
+            - transport_socket:
+                name: envoy.transport_sockets.tls
+                typed_config:
+                  "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.DownstreamTlsContext
+                  require_client_certificate: true
+                  common_tls_context:
+                    tls_certificates:
+                      - certificate_chain:
+                          filename: /certs/tls.crt
+                        private_key:
+                          filename: /certs/tls.key
+                    validation_context:
+                      trusted_ca:
+                        filename: /certs/ca.crt
+              filters:
+                - name: envoy.filters.network.http_connection_manager
+                  typed_config:
+                    "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                    stat_prefix: edge_ingress
+                    access_log:
+                      - name: envoy.access_loggers.file
+                        typed_config:
+                          "@type": type.googleapis.com/envoy.extensions.access_loggers.file.v3.FileAccessLog
+                          path: /dev/stdout
+                          log_format:
+                            json_format:
+                              timestamp: "%START_TIME%"
+                              hop: "edge"
+                              source: "%DOWNSTREAM_REMOTE_ADDRESS%"
+                              destination: "%UPSTREAM_HOST%"
+                              method: "%REQ(:METHOD)%"
+                              path: "%REQ(:PATH)%"
+                              response_code: "%RESPONSE_CODE%"
+                              latency: "%DURATION%"
+                    route_config:
+                      name: edge_route
+                      virtual_hosts:
+                        - name: sensor_ingress
+                          domains: ["*"]
+                          routes:
+                            - match:
+                                prefix: "/"
+                              route:
+                                cluster: zone_proxy
+                    http_filters:
+                      - name: envoy.filters.http.local_ratelimit
+                        typed_config:
+                          "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+                          stat_prefix: http_local_rate_limiter
+                          token_bucket:
+                            max_tokens: 200
+                            tokens_per_fill: 100
+                            fill_interval: 1s
+                      - name: envoy.filters.http.router
+                        typed_config:
+                          "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+
+      clusters:
+        - name: zone_proxy
+          connect_timeout: 5s
+          type: STRICT_DNS
+          lb_policy: ROUND_ROBIN
+          transport_socket:
+            name: envoy.transport_sockets.tls
+            typed_config:
+              "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+              common_tls_context:
+                tls_certificates:
+                  - certificate_chain:
+                      filename: /certs/tls.crt
+                    private_key:
+                      filename: /certs/tls.key
+                validation_context:
+                  trusted_ca:
+                    filename: /certs/ca.crt
+          load_assignment:
+            cluster_name: zone_proxy
+            endpoints:
+              - lb_endpoints:
+                  - endpoint:
+                      address:
+                        socket_address:
+                          address: zone-proxy.intelgraph-monitoring
+                          port_value: 8081
+---
+# Edge Proxy Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-proxy
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: edge-proxy
+    app.kubernetes.io/component: proxy-chain
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: edge-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: edge-proxy
+        app.kubernetes.io/component: proxy-chain
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9901"
+    spec:
+      serviceAccountName: proxy-chain
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:v1.28.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - -c
+            - /config/envoy-edge.yaml
+            - --service-cluster
+            - edge-proxy
+            - --service-node
+            - edge-proxy-$(POD_NAME)
+          ports:
+            - name: proxy
+              containerPort: 8080
+              protocol: TCP
+            - name: admin
+              containerPort: 9901
+              protocol: TCP
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: admin
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: admin
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+      volumes:
+        - name: config
+          configMap:
+            name: proxy-chain-config
+        - name: certs
+          secret:
+            secretName: proxy-chain-certs
+        - name: tmp
+          emptyDir: {}
+---
+# Zone Proxy Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zone-proxy
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: zone-proxy
+    app.kubernetes.io/component: proxy-chain
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zone-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: zone-proxy
+        app.kubernetes.io/component: proxy-chain
+    spec:
+      serviceAccountName: proxy-chain
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:v1.28.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - -c
+            - /config/envoy-zone.yaml
+            - --service-cluster
+            - zone-proxy
+          ports:
+            - name: proxy
+              containerPort: 8081
+              protocol: TCP
+            - name: admin
+              containerPort: 9901
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+      volumes:
+        - name: config
+          configMap:
+            name: proxy-chain-config
+        - name: certs
+          secret:
+            secretName: proxy-chain-certs
+        - name: tmp
+          emptyDir: {}
+---
+# Core Proxy Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-proxy
+  namespace: intelgraph-monitoring
+  labels:
+    app.kubernetes.io/name: core-proxy
+    app.kubernetes.io/component: proxy-chain
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: core-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: core-proxy
+        app.kubernetes.io/component: proxy-chain
+    spec:
+      serviceAccountName: proxy-chain
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:v1.28.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          args:
+            - -c
+            - /config/envoy-core.yaml
+            - --service-cluster
+            - core-proxy
+          ports:
+            - name: proxy
+              containerPort: 8082
+              protocol: TCP
+            - name: admin
+              containerPort: 9901
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /config
+              readOnly: true
+            - name: certs
+              mountPath: /certs
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+
+      volumes:
+        - name: config
+          configMap:
+            name: proxy-chain-config
+        - name: certs
+          secret:
+            secretName: proxy-chain-certs
+        - name: tmp
+          emptyDir: {}
+---
+# Services for proxy chain
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-proxy
+  namespace: intelgraph-monitoring
+spec:
+  selector:
+    app.kubernetes.io/name: edge-proxy
+  ports:
+    - name: proxy
+      port: 8080
+      targetPort: proxy
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zone-proxy
+  namespace: intelgraph-monitoring
+spec:
+  selector:
+    app.kubernetes.io/name: zone-proxy
+  ports:
+    - name: proxy
+      port: 8081
+      targetPort: proxy
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: core-proxy
+  namespace: intelgraph-monitoring
+spec:
+  selector:
+    app.kubernetes.io/name: core-proxy
+  ports:
+    - name: proxy
+      port: 8082
+      targetPort: proxy
+  type: ClusterIP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: proxy-chain
+  namespace: intelgraph-monitoring

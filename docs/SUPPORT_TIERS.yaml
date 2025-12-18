@@ -1,0 +1,13 @@
+tiers:
+  critical_security:
+    response_sla: "15m"
+    resolution_sla: "24h"
+    coverage: "24/7"
+  high_priority:
+    response_sla: "1h"
+    resolution_sla: "72h"
+    coverage: "24/7"
+  feature_enhancement:
+    cadence: "Quarterly"
+  major_version:
+    cadence: "Annual"
