@@ -1,13 +1,16 @@
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package.json ./
-# No lockfile yet in this context, but in monorepo it might be tricky.
-# We will just install dependencies for this app.
-RUN npm install
+RUN npm install -g pnpm
 
-COPY . .
-RUN npm run build
+COPY package.json ./
+COPY tsconfig.json ./
+
+RUN pnpm install
+
+COPY src ./src
+
+EXPOSE 9092
 
 CMD ["npm", "start"]

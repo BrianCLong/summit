@@ -1,0 +1,30 @@
+version: 1
+
+agent: predictive
+
+flows:
+  - name: risk_forecast
+    description: >
+      Provide risk and priority forecasts for incoming tasks or PR packages.
+    trigger:
+      - manual
+      - api: /flows/risk_forecast
+    steps:
+      - ingest_context
+      - analyze_signals
+      - rank_risks
+      - recommend_actions
+      - suggest_instrumentation
+      - publish_guidance
+
+  - name: improvement_prioritization
+    description: >
+      Produce prioritized backlogs for autonomous improvement cycles.
+    trigger:
+      - scheduled
+    steps:
+      - collect_repo_signals
+      - score_opportunities
+      - propose_backlog
+      - advise_rollout
+      - feed_to_executor

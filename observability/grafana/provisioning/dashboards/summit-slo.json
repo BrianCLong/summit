@@ -8,27 +8,84 @@
         "hide": true,
         "iconColor": "rgba(0, 211, 255, 1)",
         "name": "Annotations & Alerts",
-        "target": {
-          "limit": 100,
-          "matchAny": false,
-          "tags": [],
-          "type": "dashboard"
-        },
         "type": "dashboard"
       }
     ]
   },
   "editable": true,
-  "fiscalYearStartMonth": 0,
+  "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
+  "id": 100,
   "links": [],
-  "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1500
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "graphql_p95_ms",
+          "refId": "A"
+        }
+      ],
+      "title": "GraphQL P95 Latency",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
       },
       "fieldConfig": {
         "defaults": {
@@ -49,71 +106,7 @@
               }
             ]
           },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
-      "id": 1,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
-      },
-      "pluginVersion": "10.4.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "editorMode": "code",
-          "expr": "summit_graphql_p95_latency_seconds",
-          "legendFormat": "__auto",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "GraphQL p95 Latency (SLO < 1.5s)",
-      "type": "gauge"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 0.01
-              }
-            ]
-          },
-          "unit": "percentunit"
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -125,6 +118,9 @@
       },
       "id": 2,
       "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
@@ -133,44 +129,104 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.4.1",
+      "pluginVersion": "10.4.7",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P1809F7CD0C75ACF3"
           },
-          "editorMode": "code",
-          "expr": "summit_graphql_error_rate",
-          "legendFormat": "__auto",
-          "range": true,
+          "expr": "graphql_error_rate",
           "refId": "A"
         }
       ],
-      "title": "GraphQL Error Rate (SLO < 1%)",
-      "type": "gauge"
+      "title": "GraphQL Error Rate",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "P1809F7CD0C75ACF3"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 99
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "P1809F7CD0C75ACF3"
+          },
+          "expr": "smoke_uptime_pct",
+          "refId": "A"
+        }
+      ],
+      "title": "Smoke Uptime %",
+      "type": "stat"
     }
   ],
-  "refresh": "5s",
   "schemaVersion": 39,
   "tags": [
     "slo",
-    "summit"
+    "golden-path"
   ],
   "templating": {
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Summit SLOs",
-  "uid": "summit-slos",
+  "uid": "summit-slo",
   "version": 1,
   "weekStart": ""
 }

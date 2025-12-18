@@ -226,13 +226,13 @@ export class RateLimitMetricsCollector {
   }
 
   private calculateAverage(values: number[]): number {
-    if (values.length === 0) return 0;
+    if (values.length === 0) {return 0;}
     const sum = values.reduce((a, b) => a + b, 0);
     return sum / values.length;
   }
 
   private calculatePercentile(values: number[], percentile: number): number {
-    if (values.length === 0) return 0;
+    if (values.length === 0) {return 0;}
     const sorted = [...values].sort((a, b) => a - b);
     const index = Math.ceil(sorted.length * percentile) - 1;
     return sorted[index] || 0;
@@ -282,7 +282,7 @@ export class RateLimitAlerter {
    * Check if should alert based on utilization
    */
   shouldAlert(consumed: number, limit: number): boolean {
-    if (limit === 0) return false;
+    if (limit === 0) {return false;}
     const utilization = consumed / limit;
     return utilization >= this.alertThreshold;
   }
