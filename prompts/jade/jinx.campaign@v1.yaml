@@ -1,0 +1,48 @@
+meta:
+  id: jinx.campaign@v1
+  owner: jules
+  purpose: Adversary Emulation Campaign Playbook
+  tags: [jinx, adversary, security, red-team]
+modelConfig:
+  model: gpt-4o
+  temperature: 0.7
+  maxTokens: 4000
+inputs:
+  mission: The mission description
+  adversary_model: Description of the adversary (capabilities, intent)
+template: |
+  PLAYBOOK: JINX_CAMPAIGN_TREE
+
+  Using the mission and adversary model below, generate:
+
+  MISSION: {{mission}}
+  ADVERSARY MODEL: {{adversary_model}}
+
+  1) ADVERSARY OBJECTIVES & CONSTRAINTS
+  - Their primary goals.
+  - Their constraints (legal, technical, political, resource).
+
+  2) TTP CHAINS / CAMPAIGN PHASES
+  - 3–5 plausible campaigns.
+  - For each campaign:
+    - Phase 0: Recon & shaping.
+    - Phase 1: Initial access / influence / positioning.
+    - Phase 2: Exploitation / escalation.
+    - Phase 3: Consolidation / cover.
+
+  3) CAMPAIGN TREE
+  - Show branching:
+    - If defender does X, adversary likely does Y/Z.
+    - Include “cheap switches”: low-cost pivots for the adversary.
+
+  4) DEFENSIVE MAPPING
+  - For each phase:
+    - Existing controls / capabilities.
+    - Gaps and likely failure points.
+    - High-leverage defensive investments (systemic, not one-off).
+
+  5) METRICS & TRIPWIRES
+  - Detectable signals that a campaign path is being executed.
+  - Leading indicators vs. lagging indicators.
+
+  Ensure explicit assumptions, confidence, and falsifiers.
