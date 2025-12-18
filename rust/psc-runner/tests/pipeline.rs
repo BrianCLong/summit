@@ -52,3 +52,18 @@ fn auditor_validates_from_sealed_output() {
         psc_runner::auditor::AuditorError::SealedOutputMismatch
     ));
 }
+
+#[test]
+fn auditor_can_unseal_after_verification() {
+    let policy = compile_policy();
+    let mut inputs = HashMap::new();
+    inputs.insert("a".to_string(), 10.0);
+    inputs.insert("b".to_string(), 5.0);
+
+    let ciphertext = FunctionalEncryptionEngine::bind_inputs(&policy, &inputs);
+    let receipt = EnclaveShim::execute(&policy, &ciphertext).expect("enclave executes");
+
+    let clear = Auditor::verify_and_unseal(&policy, &receipt.sealed_output, &receipt.proof)
+        .expect("auditor verifies and decrypts");
+    assert_eq!(clear, receipt.clear_result);
+}

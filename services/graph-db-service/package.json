@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/graph-db-service",
-  "version": "0.1.0",
+  "version": "2.0.0",
   "description": "Graph database service with REST API",
   "type": "module",
   "main": "dist/server.js",
@@ -15,7 +15,7 @@
     "@intelgraph/graph-algorithms": "workspace:*",
     "@intelgraph/relationship-mining": "workspace:*",
     "@intelgraph/link-prediction": "workspace:*",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "cors": "^2.8.5"
   },
   "devDependencies": {

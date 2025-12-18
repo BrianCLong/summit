@@ -1,0 +1,45 @@
+name: CD - Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to rollback'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - prod
+
+env:
+  REGION: us-west-2
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.REGION }}
+
+      - name: Update Kubeconfig
+        run: |
+          # Ideally, fetch cluster name from Terraform output or convention
+          CLUSTER_NAME="intelgraph-${{ github.event.inputs.environment }}"
+          aws eks update-kubeconfig --name $CLUSTER_NAME --region ${{ env.REGION }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Rollback
+        run: |
+          helm rollback summit --namespace summit-${{ github.event.inputs.environment }}
