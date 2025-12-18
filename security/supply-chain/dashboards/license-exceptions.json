@@ -1,0 +1,16 @@
+{
+  "title": "License Exceptions",
+  "panels": [
+    {
+      "type": "table",
+      "title": "Dual-Control Exceptions",
+      "columns": ["package", "license", "approvals", "expiresAt"],
+      "query": "sca_license_exception_info"
+    },
+    {
+      "type": "stat",
+      "title": "Exceptions Expiring <30d",
+      "query": "sum(sca_license_exception_expiring_days{days<'30'})"
+    }
+  ]
+}

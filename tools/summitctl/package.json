@@ -1,18 +1,30 @@
 {
-  "name": "@summit/ctl",
+  "name": "summitctl",
   "version": "0.1.0",
-  "description": "Agentic Control Plane CLI",
-  "main": "src/index.ts",
+  "description": "Control plane CLI for Summit",
+  "main": "dist/index.js",
   "bin": {
-    "summitctl": "src/index.ts"
+    "summitctl": "dist/index.js"
   },
   "scripts": {
-    "start": "tsx src/index.ts"
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.js"
   },
-  "dependencies": {},
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "luxon": "^3.4.4",
+    "simple-git": "^3.22.0",
+    "yaml": "^2.3.4"
+  },
   "devDependencies": {
-    "tsx": "^4.0.0",
-    "typescript": "^5.0.0"
-  },
-  "type": "module"
+    "@types/jest": "^30.0.0",
+    "@types/luxon": "^3.4.2",
+    "@types/node": "^20.11.5",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
 }
