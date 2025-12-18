@@ -1,30 +1,25 @@
-# Prompt Registry
+# Prompt Registry Scaffold
 
-## Mission
-Centralize governed prompts, safety rails, and evaluation packs for AI-facing services.
+Feature flag: `FEATURE_PROMPT_REGISTRY_ENABLED`
+Branch: `feat/prompt-registry`
 
-## Deliverables
-- Typed prompt manifests with metadata (owner, version, guardrails, evaluators).
-- Deterministic evaluation harness with auto-generated coverage for prompt changes.
-- Contract-first APIs/events for prompt fetch, diff, and rollout notifications.
-- Preview environment smoke scripts with rollback-on-regression automation.
+## Purpose
+- Govern the lifecycle of prompts with typed schemas, auditability, and rollout controls.
+- Provide isolated registry storage/adapters with no shared databases and event-driven integrations.
 
-## Operating Constraints
-- Feature flag: `feature:PROMPT_REGISTRY_ENABLED`; branch: `feat/prompt-registry`.
-- No shared databases with application workloads; registry uses isolated storage and signed artifacts.
-- Deterministic seeds for prompt evals; store run manifests alongside artifacts.
+## Implementation Notes
+- Define typed prompt metadata, versioning, and lineage; emit events for publish/retire actions.
+- Redact PII/SPI in stored prompts, logs, and telemetry; enable governance checks in CI.
+- Supply deterministic fixtures for prompt samples and agent behaviors to keep tests reproducible.
 
-## CI Gates
-- Lint + typecheck for registry schemas and clients.
-- Unit + contract tests for prompt APIs and events.
-- Playwright coverage for UI flows where applicable.
-- Feature-flag assertion via `scripts/ci/feature-flag-gate.js PROMPT_REGISTRY_ENABLED`.
+## CI Expectations
+- Lint: `pnpm run lint`
+- Unit: `pnpm run test:unit` (seeded fixtures)
+- Contract: `pnpm run test:policy`
+- Playwright: `pnpm run e2e` (flag-aware registry flows)
+- Preview smoke: `bash scripts/preview-local.sh help`
+- Rollback validation: `bash scripts/validate-rollback.sh --help`
 
-## Preview + Rollback Expectations
-- Preview env publishes signed prompt bundles; consumers read from preview endpoints only.
-- Rollback hook disables the feature flag and reverts to prior bundle on regression signals.
-
-## Acceptance Readiness
-- ≥90% coverage for prompt compilers/evaluators; deterministic snapshots recorded.
-- PII/secret scrubbing validated on prompt payloads and logs.
-- Typed API/event boundaries documented with no shared database coupling.
+## Rollout
+- Keep `FEATURE_PROMPT_REGISTRY_ENABLED` default OFF until governance sign-off.
+- Capture preview environment link, rollback hooks, and feature-flag diff in the PR using the repo template.

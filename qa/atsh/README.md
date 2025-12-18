@@ -1,30 +1,25 @@
-# ATSH Quality Harness
+# ATSH Safety Harness
 
-## Mission
-Deliver an autonomous test safety harness (ATSH) that stress-tests resilience paths, red-team regressions, and enforces deterministic outcomes for QA-critical services.
+Feature flag: `FEATURE_ATSH_ENABLED`
+Branch: `feat/atsh`
 
-## Deliverables
-- Scenario packs for adversarial, chaos, and compliance runs with seeded fixtures.
-- Typed contract probes for GraphQL/REST endpoints and event topics.
-- Golden trace baselines with log/metric/trace scrubbing for PII and secrets.
-- Preview-environment smoke flows with auto-rollback hooks triggered on regression signals.
+## Purpose
+- Provide a deterministic anti-tamper QA harness for safety regression packs.
+- Enforce typed event ingress/egress boundaries with no shared databases.
 
-## Operating Constraints
-- Feature flag: `feature:ATSH_ENABLED` default **off** in shared environments; branch: `feat/atsh`.
-- No shared databases across test actors; rely on ephemeral datasets per run.
-- Deterministic seeds are mandatory for replay; capture in run metadata.
+## Implementation Notes
+- Harness orchestration must run behind the ATSH flag and expose typed contracts for inputs/outputs.
+- Logs and artifacts require PII/SPI redaction; disable recordings when redaction is uncertain.
+- Seed all fixtures for reproducibility; add contract tests for ingress schemas and guardrail rehearsal flows.
 
-## CI Gates
-- Lint + typecheck (`pnpm lint`, `pnpm typecheck`).
-- Unit + contract tests (`pnpm test:unit`, `pnpm run test:policy` where applicable).
-- Playwright e2e smoke on the preview environment with roll-forward/rollback decisioning.
-- Feature-flag assertion via `scripts/ci/feature-flag-gate.js ATSH_ENABLED`.
+## CI Expectations
+- Lint: `pnpm run lint`
+- Unit: `pnpm run test:unit` (seeded)
+- Contract: `pnpm run test:policy`
+- Playwright: `pnpm run e2e` (flag-aware flows)
+- Preview smoke: `bash scripts/preview-local.sh help`
+- Rollback validation: `bash scripts/validate-rollback.sh --help`
 
-## Preview + Rollback Expectations
-- Preview namespaces created per PR with downstream data fixtures.
-- Health and regression signals gate promotion; rollback hook wired to `scripts/preview-local.sh cleanup`.
-
-## Acceptance Readiness
-- ≥90% coverage for harness-generated modules with mutation or property tests.
-- Logs and traces show no raw PII; redact-at-source enforced.
-- Replay reports emitted to `artifacts/qa/atsh` with deterministic seeds and dependency manifest.
+## Rollout
+- Keep `FEATURE_ATSH_ENABLED` default OFF; enable per-environment after CI + preview validation passes.
+- Capture preview environment URL and rollback plan in the PR using the repo template.

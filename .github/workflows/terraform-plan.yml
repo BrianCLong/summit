@@ -1,0 +1,17 @@
+name: Terraform Plan
+on:
+  pull_request:
+    paths: [ 'terraform/**' ]
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform -chdir=terraform init -input=false
+      - run: terraform -chdir=terraform fmt -check
+      - run: terraform -chdir=terraform validate
+      - run: terraform -chdir=terraform plan -no-color

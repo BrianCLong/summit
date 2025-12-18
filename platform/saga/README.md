@@ -1,30 +1,25 @@
-# Saga Orchestration Platform
+# Saga Orchestration Scaffold
 
-## Mission
-Deliver a platform-grade saga orchestrator for cross-service workflows with typed events, compensating actions, and bounded retries.
+Feature flag: `FEATURE_SAGA_ENABLED`
+Branch: `feat/saga`
 
-## Deliverables
-- Typed workflow definitions with contract-first events and compensations.
-- Idempotent command handlers with circuit breakers and backoff policies.
-- Observability overlays (traces, metrics, structured logs) per saga step with correlation IDs.
-- Preview environment promotion plan with automated rollback on invariant breaks.
+## Purpose
+- Implement saga-based orchestration with explicit compensating actions and typed event/command schemas.
+- Maintain isolation across services with no shared databases; rely on message contracts and idempotent handlers.
 
-## Operating Constraints
-- Feature flag: `feature:SAGA_ENABLED`; branch: `feat/saga`.
-- No shared databases across services; sagas coordinate through events and idempotent stores.
-- Deterministic replay seeds for chaos drills and auditability.
+## Implementation Notes
+- Document forward/compensation steps and state transitions with deterministic replay fixtures.
+- Capture metrics/traces with redaction for sensitive fields before emission.
+- Provide contract tests for saga boundaries and enforce feature flag gating across UX and API layers.
 
-## CI Gates
-- Lint + typecheck for orchestrator packages.
-- Unit + contract test matrix for sagas and compensations.
-- Playwright/API end-to-end checks on the preview environment.
-- Feature-flag guardrail: `scripts/ci/feature-flag-gate.js SAGA_ENABLED`.
+## CI Expectations
+- Lint: `pnpm run lint`
+- Unit: `pnpm run test:unit`
+- Contract: `pnpm run test:policy`
+- Playwright: `pnpm run e2e` (flag-aware flows)
+- Preview smoke: `bash scripts/preview-local.sh help`
+- Rollback validation: `bash scripts/validate-rollback.sh --help`
 
-## Preview + Rollback Expectations
-- Preview namespaces per PR with seeded queues/topics.
-- Rollback hook triggers compensations and tears down preview resources on failure signals.
-
-## Acceptance Readiness
-- Deterministic saga runs with sealed state transitions and explicit DLQ handling.
-- ≥90% coverage for workflow libraries; contract diffs published per PR.
-- PII redaction verified in saga payload logging.
+## Rollout
+- Keep `FEATURE_SAGA_ENABLED` default OFF; enable per-environment after preview validation.
+- Document rollout/rollback steps in the PR and link to preview environment details.
