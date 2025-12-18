@@ -6,5 +6,7 @@ api:
   enabled: true
 neo4j:
   enabled: true
+  neo4j:
+    name: intelgraph-mvp1plus
 redis:
   enabled: true

@@ -124,7 +124,7 @@ spec:
         {{- include "intelgraph.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: otel-collector
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/otel-config.yaml") . | sha256sum }}
+        checksum/config: {{ .Values.otel | toYaml | sha256sum }}
         prometheus.io/scrape: "true"
         prometheus.io/port: "8889"
         prometheus.io/path: "/metrics"
@@ -134,8 +134,8 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: otel-collector
-          image: "{{ .Values.otel.image.repository | default "otel/opentelemetry-collector-contrib" }}:{{ .Values.otel.image.tag | default "0.88.0" }}"
-          imagePullPolicy: {{ .Values.otel.image.pullPolicy | default "IfNotPresent" }}
+          image: "{{ default "otel/opentelemetry-collector-contrib" (dig "image" "repository" "" .Values.otel) }}:{{ default "0.88.0" (dig "image" "tag" "" .Values.otel) }}"
+          imagePullPolicy: {{ default "IfNotPresent" (dig "image" "pullPolicy" "" .Values.otel) }}
           args:
             - --config=/etc/otel/otel-config.yaml
           ports:
