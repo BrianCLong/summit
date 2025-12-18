@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/api-gateway",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "GraphQL API Gateway with policy middleware",
   "main": "dist/index.js",
   "scripts": {
@@ -14,13 +14,14 @@
   "dependencies": {
     "@as-integrations/express4": "^1.1.2",
     "@apollo/server": "^5.1.0",
-    "express": "^5.1.0",
+    "express": "^5.2.0",
     "graphql": "^16.12.0",
     "graphql-tag": "^2.12.0",
     "cors": "^2.8.5",
     "helmet": "^8.1.0",
     "compression": "^1.7.4",
-    "winston": "^3.18.3"
+    "winston": "^3.18.3",
+    "jose": "^6.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.3",

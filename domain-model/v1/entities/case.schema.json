@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./case.schema.json",
+  "title": "Case (Canonical v1)",
+  "type": "object",
+  "properties": {
+    "id": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "schemaVersion": { "const": "v1" },
+    "entityType": { "const": "Case" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "status": { "type": "string", "enum": ["open", "in-review", "closed"] },
+    "ownerId": { "$ref": "../base.schema.json#/$defs/Identifier" },
+    "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "createdAt": { "$ref": "../base.schema.json#/$defs/Timestamp" },
+    "updatedAt": { "$ref": "../base.schema.json#/$defs/Timestamp" },
+    "metadata": { "$ref": "../base.schema.json#/$defs/EntityMetadata" }
+  },
+  "required": ["id", "schemaVersion", "entityType", "title", "status", "createdAt"],
+  "additionalProperties": false
+}
