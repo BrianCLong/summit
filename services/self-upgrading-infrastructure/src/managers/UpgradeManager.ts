@@ -49,10 +49,10 @@ export class UpgradeManager extends EventEmitter {
 
   async createUpgradeFromTrend(trend: MarketTrend): Promise<UpgradeRequest | null> {
     const component = this.mapTrendToComponent(trend.category);
-    if (!component) return null;
+    if (!component) {return null;}
 
     const componentVersion = this.componentVersions.get(component);
-    if (!componentVersion) return null;
+    if (!componentVersion) {return null;}
 
     const targetVersion = semver.inc(componentVersion.currentVersion, 'minor') || '1.1.0';
 
@@ -75,10 +75,10 @@ export class UpgradeManager extends EventEmitter {
 
   async createUpgradeFromThreat(threat: CompetitiveThreat): Promise<UpgradeRequest | null> {
     const component = this.mapThreatToComponent(threat.threatType);
-    if (!component) return null;
+    if (!component) {return null;}
 
     const componentVersion = this.componentVersions.get(component);
-    if (!componentVersion) return null;
+    if (!componentVersion) {return null;}
 
     const targetVersion = semver.inc(componentVersion.currentVersion, 'minor') || '1.1.0';
 
@@ -105,10 +105,10 @@ export class UpgradeManager extends EventEmitter {
 
     for (const affectedComponent of change.affectedComponents) {
       const component = this.normalizeComponent(affectedComponent);
-      if (!component) continue;
+      if (!component) {continue;}
 
       const componentVersion = this.componentVersions.get(component);
-      if (!componentVersion) continue;
+      if (!componentVersion) {continue;}
 
       const targetVersion = semver.inc(componentVersion.currentVersion, 'patch') || '1.0.1';
 
@@ -128,7 +128,7 @@ export class UpgradeManager extends EventEmitter {
       };
 
       const queued = await this.queueUpgrade(upgrade);
-      if (queued) upgrades.push(queued);
+      if (queued) {upgrades.push(queued);}
     }
 
     return upgrades;

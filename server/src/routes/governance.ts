@@ -1,70 +1,97 @@
 
-import { Router } from 'express';
-import { GovernancePolicyService } from '../services/governance/GovernancePolicyService.js';
-import { GovernanceRiskService } from '../services/governance/GovernanceRiskService.js';
-import { FiduciaryService } from '../services/governance/FiduciaryService.js';
-import { PhilanthropyService } from '../services/governance/PhilanthropyService.js';
-import { MissionGuardrailService } from '../services/governance/MissionGuardrailService.js';
-import { StewardshipService } from '../services/governance/StewardshipService.js';
-import { ensureAuthenticated } from '../middleware/auth.js';
+import express from 'express';
+import { SchemaRegistryService } from '../governance/ontology/SchemaRegistryService';
+import { WorkflowService } from '../governance/ontology/WorkflowService';
+import { ensureAuthenticated } from '../middleware/auth';
 
-const router = Router();
+const router = express.Router();
+const registry = SchemaRegistryService.getInstance();
+const workflow = WorkflowService.getInstance();
 
-// Policies
-router.get('/policies', ensureAuthenticated, (req, res) => {
-  const policies = GovernancePolicyService.getInstance().getAllPolicies();
-  res.json(policies);
+// Schema Routes
+router.get('/schemas', ensureAuthenticated, (req, res) => {
+  res.json(registry.listSchemas());
 });
 
-router.post('/policies', ensureAuthenticated, (req, res) => {
-  // Add RBAC check here for Ethics Council / Board
-  const policy = GovernancePolicyService.getInstance().registerPolicy(req.body);
-  res.json(policy);
+router.get('/schemas/latest', ensureAuthenticated, (req, res) => {
+  const schema = registry.getLatestSchema();
+  if (!schema) return res.status(404).json({ error: 'No active schema' });
+  res.json(schema);
 });
 
-// Risk Scoring
-router.post('/risk/score', ensureAuthenticated, (req, res) => {
-  const result = GovernanceRiskService.getInstance().calculateRisk(req.body);
-  res.json(result);
+router.get('/schemas/:id', ensureAuthenticated, (req, res) => {
+  const schema = registry.getSchemaById(req.params.id);
+  if (!schema) return res.status(404).json({ error: 'Schema not found' });
+  res.json(schema);
 });
 
-// Fiduciary / Cap Table (Simulated)
-router.get('/fiduciary/captable', ensureAuthenticated, (req, res) => {
-  const capTable = FiduciaryService.getInstance().getCapTable();
-  res.json(capTable);
+// Vocabulary Routes
+router.get('/vocabularies', ensureAuthenticated, (req, res) => {
+  res.json(registry.listVocabularies());
 });
 
-router.post('/fiduciary/simulate', ensureAuthenticated, (req, res) => {
-  const result = FiduciaryService.getInstance().simulateTransaction(req.body);
-  res.json(result);
+router.post('/vocabularies', ensureAuthenticated, (req, res) => {
+    // TODO: Add permission check (schema.admin)
+    try {
+        const { name, description, concepts } = req.body;
+        const vocab = registry.createVocabulary(name, description, concepts);
+        res.status(201).json(vocab);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
 });
 
-// Philanthropy
-router.get('/philanthropy/programs', ensureAuthenticated, (req, res) => {
-  const programs = PhilanthropyService.getInstance().getPrograms();
-  res.json(programs);
+// Change Request Routes
+router.get('/changes', ensureAuthenticated, (req, res) => {
+    res.json(workflow.listChangeRequests());
 });
 
-router.get('/philanthropy/ledger', ensureAuthenticated, (req, res) => {
-  const ledger = PhilanthropyService.getInstance().getLedger();
-  res.json(ledger);
+router.post('/changes', ensureAuthenticated, (req, res) => {
+    try {
+        const { title, description, proposedChanges } = req.body;
+        // @ts-ignore - req.user is added by ensureAuthenticated
+        const author = req.user?.id || 'unknown';
+        const cr = workflow.createChangeRequest(title, description, author, proposedChanges);
+        res.status(201).json(cr);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
 });
 
-router.post('/philanthropy/calculate', ensureAuthenticated, (req, res) => {
-  const obligation = PhilanthropyService.getInstance().calculateObligation(req.body);
-  res.json(obligation);
+router.get('/changes/:id', ensureAuthenticated, (req, res) => {
+    const cr = workflow.getChangeRequest(req.params.id);
+    if (!cr) return res.status(404).json({ error: 'Change Request not found' });
+    res.json(cr);
 });
 
-// Mission Guardrails
-router.post('/guardrails/check', ensureAuthenticated, (req, res) => {
-  const result = MissionGuardrailService.getInstance().checkGuardrails(req.body);
-  res.json(result);
+router.get('/changes/:id/impact', ensureAuthenticated, (req, res) => {
+    // Determine impact
+    const impact = workflow.calculateImpact(req.params.id);
+    res.json(impact);
 });
 
-// Stewardship / Drift
-router.get('/stewardship/drift', ensureAuthenticated, (req, res) => {
-  const history = StewardshipService.getInstance().getDriftHistory();
-  res.json(history);
+router.post('/changes/:id/review', ensureAuthenticated, (req, res) => {
+    try {
+        const { decision, comment } = req.body;
+        // @ts-ignore
+        const reviewer = req.user?.id || 'unknown';
+        const cr = workflow.reviewChangeRequest(req.params.id, reviewer, decision, comment);
+        res.json(cr);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
 });
+
+router.post('/changes/:id/merge', ensureAuthenticated, (req, res) => {
+    try {
+        // @ts-ignore
+        const merger = req.user?.id || 'unknown';
+        const newSchema = workflow.mergeChangeRequest(req.params.id, merger);
+        res.json(newSchema);
+    } catch (e: any) {
+        res.status(400).json({ error: e.message });
+    }
+});
+
 
 export default router;

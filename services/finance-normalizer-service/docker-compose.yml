@@ -1,0 +1,80 @@
+version: '3.9'
+
+services:
+  finance-normalizer-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: finance-normalizer-service
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=4200
+      - LOG_LEVEL=info
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=intelgraph
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_POOL_MAX=20
+      - RATE_LIMIT_WINDOW_MS=60000
+      - RATE_LIMIT_MAX_REQUESTS=100
+    ports:
+      - '4200:4200'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:4200/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - finance-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: finance-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: intelgraph
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finance-network
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: finance-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@intelgraph.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - '5050:80'
+    depends_on:
+      - postgres
+    networks:
+      - finance-network
+    profiles:
+      - tools
+
+networks:
+  finance-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
