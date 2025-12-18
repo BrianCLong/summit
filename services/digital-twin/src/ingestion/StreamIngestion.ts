@@ -69,7 +69,7 @@ export class StreamIngestion {
   }
 
   private async handleMessage({ topic, message }: EachMessagePayload): Promise<void> {
-    if (!message.value) return;
+    if (!message.value) {return;}
 
     try {
       const data = JSON.parse(message.value.toString()) as IngestMessage;

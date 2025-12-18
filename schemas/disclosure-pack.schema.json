@@ -1,0 +1,55 @@
+{
+  "$id": "https://companyos/schemas/disclosure-pack.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DisclosurePack",
+  "type": "object",
+  "properties": {
+    "id": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "generated_by": { "type": "string" },
+    "tenant_id": { "type": "string" },
+    "product": { "type": "string" },
+    "environment": { "type": "string", "enum": ["dev", "stage", "prod"] },
+    "builds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "build_id": { "type": "string" },
+          "sbom_uri": { "type": "string", "format": "uri" },
+          "signed": { "type": "boolean" },
+          "vuln_summary": {
+            "type": "object",
+            "properties": {
+              "critical": { "type": "integer" },
+              "high": { "type": "integer" },
+              "medium": { "type": "integer" },
+              "low": { "type": "integer" }
+            },
+            "required": ["critical", "high", "medium", "low"]
+          }
+        },
+        "required": ["build_id", "sbom_uri", "signed"]
+      }
+    },
+    "slo_summary": {
+      "type": "object",
+      "properties": {
+        "period": { "type": "string" },
+        "availability_target": { "type": "number" },
+        "availability_actual": { "type": "number" },
+        "latency_target_ms_p95": { "type": "number" },
+        "latency_actual_ms_p95": { "type": "number" }
+      }
+    }
+  },
+  "required": [
+    "id",
+    "generated_at",
+    "generated_by",
+    "tenant_id",
+    "product",
+    "environment",
+    "builds"
+  ]
+}
