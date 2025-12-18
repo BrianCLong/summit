@@ -20,4 +20,17 @@ template: |
   Analyze the following data:
   {{context_data}}
 
-  Output the current Fracture Index and projected regime lifespan.
+  Output the current Fracture Index (0.0 to 1.0) and projected regime lifespan in months.
+
+outputSchema:
+  fracture_index: number
+  regime_lifespan_months: number
+  risk_level: string
+  analysis: string
+
+examples:
+  - name: stable-regime
+    inputs:
+      country: "Exampleland"
+      context_data: "Private jet co-travel among elites remains high. No significant changes in family boarding schools. Phone metadata shows cohesive communication patterns."
+    expected_contains: ["fracture_index", "regime_lifespan_months"]

@@ -20,3 +20,23 @@ template: |
   Objective: {{objective}}
   Data:
   {{context_data}}
+
+  Output three scenarios, plausibility score, and evidence requirements.
+
+outputSchema:
+  scenarios:
+    type: array
+    items:
+      scenario_name: string
+      execution_steps: array
+      plausibility_score: number
+      deniability_days: number
+      required_evidence: array
+
+examples:
+  - name: cyber-attack-simulation
+    inputs:
+      target: "Grid X"
+      objective: "Justify retaliation"
+      context_data: "Known vulnerabilities in SCADA systems. APT group footprints available."
+    expected_contains: ["scenarios"]

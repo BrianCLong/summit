@@ -19,3 +19,18 @@ template: |
 
   Analyze current indicators:
   {{context_data}}
+
+  Output the current stage (0-21), status, and next probable event.
+
+outputSchema:
+  current_stage: number
+  kill_chain_status: string
+  next_event_prediction: string
+  threat_case_spawned: boolean
+
+examples:
+  - name: stage-5-activity
+    inputs:
+      country: "Republic of Unrest"
+      context_data: "NGO funding has spiked by 300%. Student leaders attending workshops in neighboring country."
+    expected_contains: ["current_stage"]

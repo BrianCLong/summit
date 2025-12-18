@@ -19,3 +19,18 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output conflict probability, days until trigger, and alert status.
+
+outputSchema:
+  conflict_probability: number
+  days_until_trigger: number
+  alert_active: boolean
+  hotspot_coordinates: string
+
+examples:
+  - name: disputed-river
+    inputs:
+      river_basin: "Nile 2.0"
+      context_data: "Upstream dam filling accelerated. Artillery moving to border."
+    expected_contains: ["conflict_probability"]

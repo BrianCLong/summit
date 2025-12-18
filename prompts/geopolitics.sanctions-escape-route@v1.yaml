@@ -18,3 +18,18 @@ template: |
 
   Constraints:
   {{context_data}}
+
+  Output proposed route steps, invisibility score, and estimated volume.
+
+outputSchema:
+  route_steps: array
+  invisibility_score: number
+  estimated_volume_usd: number
+  jurisdictions_involved: array
+
+examples:
+  - name: crypto-route
+    inputs:
+      sanctioned_entity: "Corp X"
+      context_data: "Needs to move $10M. Access to crypto exchanges."
+    expected_contains: ["route_steps"]

@@ -19,3 +19,19 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output feasibility score (0-100) and duration capacity in days.
+
+outputSchema:
+  feasibility_score: number
+  duration_capacity_days: number
+  key_bottleneck: string
+  success_probability: number
+
+examples:
+  - name: strong-navy
+    inputs:
+      country_a: "Oceania"
+      country_b: "Islandia"
+      context_data: "Oceania has 5 carrier groups. Islandia has no navy."
+    expected_contains: ["feasibility_score"]

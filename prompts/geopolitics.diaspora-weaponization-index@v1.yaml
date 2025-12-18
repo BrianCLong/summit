@@ -18,3 +18,18 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output weaponization score (0-100), threat status, and active indicators.
+
+outputSchema:
+  weaponization_score: number
+  threat_status: string
+  active_indicators: array
+  flipped_to_threat: boolean
+
+examples:
+  - name: peaceful-diaspora
+    inputs:
+      diaspora_group: "Group A"
+      context_data: "Remittances high. Low protest activity."
+    expected_contains: ["weaponization_score"]

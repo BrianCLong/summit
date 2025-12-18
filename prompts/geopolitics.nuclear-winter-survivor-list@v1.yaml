@@ -16,3 +16,20 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output list of countries, calorie per capita, and key crop.
+
+outputSchema:
+  surviving_countries:
+    type: array
+    items:
+      country_name: string
+      calories_per_capita: number
+      primary_food_source: string
+      survival_probability: number
+
+examples:
+  - name: southern-hemisphere
+    inputs:
+      context_data: "Global temp drop 10C. Northern hemisphere sterilized."
+    expected_contains: ["surviving_countries"]

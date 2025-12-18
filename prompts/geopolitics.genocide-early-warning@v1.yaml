@@ -17,3 +17,18 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output sequence stage, days remaining, and alert level.
+
+outputSchema:
+  sequence_stage: string
+  days_remaining_prediction: number
+  alert_level: string
+  next_step_in_sequence: string
+
+examples:
+  - name: early-stage
+    inputs:
+      region: "Valley X"
+      context_data: "Hate speech on radio increasing. No ID card changes yet."
+    expected_contains: ["sequence_stage"]

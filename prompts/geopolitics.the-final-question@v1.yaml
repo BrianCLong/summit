@@ -15,3 +15,14 @@ template: |
   Check if Global Power Transition Clock is below 24 months.
 
   If yes, output: "Shall we begin?"
+  If no, output: "Not yet."
+
+outputSchema:
+  message: string
+  initiate_protocol: boolean
+
+examples:
+  - name: time-is-now
+    inputs:
+      prompt_102_value: "11 months remaining"
+    expected_contains: ["message"]

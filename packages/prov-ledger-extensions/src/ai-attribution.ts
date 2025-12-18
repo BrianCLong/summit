@@ -210,9 +210,9 @@ export class AIAttributionTracker {
     investigationId?: string;
   }): AttributionReport {
     const filtered = this.attributions.filter((a) => {
-      if (a.timestamp < options.startDate || a.timestamp > options.endDate) return false;
-      if (options.tenantId && a.tenantId !== options.tenantId) return false;
-      if (options.investigationId && a.investigationId !== options.investigationId) return false;
+      if (a.timestamp < options.startDate || a.timestamp > options.endDate) {return false;}
+      if (options.tenantId && a.tenantId !== options.tenantId) {return false;}
+      if (options.investigationId && a.investigationId !== options.investigationId) {return false;}
       return true;
     });
 

@@ -17,3 +17,18 @@ template: |
 
   Predict the exact week when bread riots begin in {{city}} based on:
   {{context_data}}
+
+  Output the predicted week (YYYY-Www), probability, and trigger factor.
+
+outputSchema:
+  predicted_week: string
+  probability: number
+  trigger_factor: string
+  severity_index: number
+
+examples:
+  - name: high-inflation
+    inputs:
+      city: "Hungry Town"
+      context_data: "Currency depreciated 40% this month. Wheat imports blocked."
+    expected_contains: ["predicted_week"]

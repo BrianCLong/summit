@@ -17,3 +17,21 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output three locations, percentage of supply affected, and notice time.
+
+outputSchema:
+  choke_points:
+    type: array
+    items:
+      location_name: string
+      supply_percentage: number
+      cut_notice_hours: number
+      coordinates: string
+
+examples:
+  - name: lithium-choke
+    inputs:
+      mineral: "Lithium"
+      context_data: "Major refinery in Port A. Mine in Region B."
+    expected_contains: ["choke_points"]

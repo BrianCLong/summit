@@ -1,0 +1,134 @@
+meta:
+  id: plan.load-testing@v1
+  owner: 'platform-engineering'
+  purpose: 'Design and execute load testing strategy to validate scalability under peak load'
+  tags:
+    - performance
+    - load-testing
+    - scalability
+    - stress-testing
+    - capacity
+  guardrails:
+    - 'Load tests must not affect production systems'
+    - 'Test data must not contain PII'
+    - 'Graceful degradation must be verified'
+    - 'Results must inform capacity planning'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  target_endpoints: string
+  expected_peak_load: string
+  current_capacity: string
+  infrastructure_limits: string
+  sli_targets: string
+
+template: |
+  You are a Site Reliability Engineer designing load tests for Summit/IntelGraph.
+
+  **Objective:** Validate scalability under peak load conditions.
+
+  **Target Endpoints:**
+  {{target_endpoints}}
+
+  **Expected Peak Load:**
+  {{expected_peak_load}}
+
+  **Current Capacity:**
+  {{current_capacity}}
+
+  **Infrastructure Limits:**
+  {{infrastructure_limits}}
+
+  **SLI Targets:**
+  {{sli_targets}}
+
+  ## Deliverables
+
+  ### 1. Load Test Scenarios
+  ```yaml
+  scenarios:
+    - name: [scenario_name]
+      type: [smoke|load|stress|spike|soak]
+      description: [what it validates]
+      target_rps: [requests per second]
+      duration: [minutes]
+      ramp_up: [seconds]
+      success_criteria:
+        - [metric]: [threshold]
+  ```
+
+  ### 2. Test Matrix
+  | Scenario | VUs | Duration | Ramp | Target RPS | Error Rate | p99 Latency |
+  |----------|-----|----------|------|------------|------------|-------------|
+  | Smoke | 10 | 5m | 30s | 50 | < 0.1% | < 200ms |
+  | Load | 100 | 30m | 2m | 500 | < 1% | < 500ms |
+  | Stress | 500 | 15m | 5m | 2000 | < 5% | < 2s |
+  | Spike | 10→500 | 10m | 30s | burst | < 5% | < 3s |
+  | Soak | 100 | 4h | 5m | 500 | < 1% | stable |
+
+  ### 3. Run Plans
+  - Environment setup (isolated staging)
+  - Data seeding requirements
+  - Monitoring during tests
+  - Result collection and storage
+
+  ### 4. Expected SLIs
+  ```yaml
+  slis:
+    - name: availability
+      target: 99.9%
+      measurement: successful_requests / total_requests
+    - name: latency_p99
+      target: < 500ms
+      measurement: percentile(response_time, 99)
+    - name: error_rate
+      target: < 1%
+      measurement: error_requests / total_requests
+    - name: throughput
+      target: > 1000 rps
+      measurement: requests_per_second
+  ```
+
+  ### 5. CI Integration
+  - Nightly load test runs
+  - PR-triggered smoke tests
+  - Result comparison with baseline
+  - Regression alerting
+
+  ### 6. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] All scenario types defined and documented
+  - [ ] Load tests run successfully in CI
+  - [ ] Results visible in dashboard
+  - [ ] Thresholds prevent regression merges
+  - [ ] Capacity limits documented
+
+  ## Rollback Plan
+  - Load tests are non-destructive
+  - Disable CI integration via workflow toggle
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'graphql-load-testing'
+    inputs:
+      target_endpoints: 'POST /graphql (queries, mutations), GET /health'
+      expected_peak_load: '2000 concurrent users, 5000 req/min'
+      current_capacity: '500 concurrent, 1000 req/min'
+      infrastructure_limits: '8 pods max, 4 CPU / 8GB each'
+      sli_targets: 'p99 < 500ms, error rate < 1%, availability > 99.9%'
+    expected_contains:
+      - 'scenarios'
+      - 'Test Matrix'
+      - 'SLIs'
+      - 'CI Integration'

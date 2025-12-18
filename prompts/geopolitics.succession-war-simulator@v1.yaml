@@ -17,3 +17,21 @@ template: |
 
   Continuously simulate the next three succession scenarios and their exact probability-adjusted timelines based on:
   {{context_data}}
+
+  Output three scenarios with probabilities (must sum to 1.0) and timelines.
+
+outputSchema:
+  scenarios:
+    type: array
+    items:
+      name: string
+      probability: number
+      timeline_days: number
+      key_actors: array
+
+examples:
+  - name: general-coup
+    inputs:
+      capital: "Autocracia City"
+      context_data: "Colonel X has been meeting with Oligarch Y. The President's mistress has left the country."
+    expected_contains: ["scenarios"]

@@ -17,3 +17,18 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output retaliation time (seconds), surviving warheads, and target list.
+
+outputSchema:
+  retaliation_time_seconds: number
+  surviving_warheads: number
+  target_cities: array
+  decision_confidence: number
+
+examples:
+  - name: second-strike
+    inputs:
+      country: "Nuclear State A"
+      context_data: "Launch detected. silos hardened. Submarines on patrol."
+    expected_contains: ["retaliation_time_seconds"]

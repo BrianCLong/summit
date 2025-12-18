@@ -19,3 +19,18 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output spiral status (boolean), remaining months, and diverging members.
+
+outputSchema:
+  death_spiral_active: boolean
+  remaining_months: number
+  diverging_members: array
+  cohesion_score: number
+
+examples:
+  - name: cohesive-alliance
+    inputs:
+      alliance_name: "NATO-2"
+      context_data: "All members increasing joint exercises. Defense spending stable."
+    expected_contains: ["death_spiral_active"]

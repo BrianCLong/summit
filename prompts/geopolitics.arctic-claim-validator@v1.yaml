@@ -17,3 +17,17 @@ template: |
 
   Data:
   {{context_data}}
+
+  Output predicted country, control probability, and key asset used.
+
+outputSchema:
+  predicted_country: string
+  control_probability: number
+  key_asset_used: string
+  territory_size_km2: number
+
+examples:
+  - name: arctic-rush
+    inputs:
+      context_data: "Country A moving 3 nuclear icebreakers to Sector Z. Submitted new EEZ claim."
+    expected_contains: ["predicted_country"]

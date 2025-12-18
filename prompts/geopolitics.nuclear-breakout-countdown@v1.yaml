@@ -17,3 +17,18 @@ template: |
 
   Determine the exact calendar date when {{country}} achieves deliverable nuclear capability based on:
   {{context_data}}
+
+  Output the breakout date (YYYY-MM-DD) and confidence level.
+
+outputSchema:
+  breakout_date: string
+  confidence_level: number
+  evidence_summary: string
+  critical_components: array
+
+examples:
+  - name: rapid-enrichment
+    inputs:
+      country: "Enrichistan"
+      context_data: "Centrifuges spinning at 90% capacity. 2000kg of UF6 procured."
+    expected_contains: ["breakout_date"]
