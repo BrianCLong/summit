@@ -1,46 +1,97 @@
-import { getDriver } from './neo4j.js';
+export const NodeLabels = {
+  Person: 'Person',
+  Org: 'Org',
+  Asset: 'Asset',
+  Event: 'Event',
+  Indicator: 'Indicator',
+} as const;
 
-/**
- * Ensures all indexes and constraints exist for the IntelGraph schema.
- */
-export async function ensureGraphSchema() {
-  const driver = getDriver();
-  const session = driver.session();
+export const EdgeTypes = {
+  MEMBER_OF: 'MEMBER_OF',
+  OWNS: 'OWNS',
+  MENTIONED_IN: 'MENTIONED_IN',
+  RELATED_TO: 'RELATED_TO',
+} as const;
 
-  try {
-    const commands = [
-      // Indexes for Core Nodes
-      'CREATE CONSTRAINT IF NOT EXISTS FOR (n:GraphNode) REQUIRE n.globalId IS UNIQUE',
-      'CREATE INDEX IF NOT EXISTS FOR (n:GraphNode) ON (n.tenantId)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:GraphNode) ON (n.entityType)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:GraphNode) ON (n.globalId)',
+export type NodeLabel = keyof typeof NodeLabels;
+export type EdgeType = keyof typeof EdgeTypes;
 
-      // Type-specific indexes
-      'CREATE INDEX IF NOT EXISTS FOR (n:Actor) ON (n.globalId)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:Organization) ON (n.globalId)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:Asset) ON (n.globalId)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:Document) ON (n.globalId)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:Run) ON (n.globalId)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:Task) ON (n.globalId)',
-
-      // Time-travel indexes
-      'CREATE INDEX IF NOT EXISTS FOR (n:GraphNode) ON (n.validFrom)',
-      'CREATE INDEX IF NOT EXISTS FOR (n:GraphNode) ON (n.validTo)',
-
-      // Vector Index (if we were using GDS/Vector features, placeholder)
-      // 'CREATE VECTOR INDEX ...'
-    ];
-
-    console.log('Applying Graph Schema Constraints...');
-    for (const cmd of commands) {
-      await session.run(cmd);
-    }
-    console.log('Graph Schema Applied.');
-
-  } catch (error) {
-    console.error('Failed to apply graph schema:', error);
-    throw error;
-  } finally {
-    await session.close();
-  }
+export interface BaseEntity {
+  id: string;
+  tenantId: string;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export interface PersonEntity extends BaseEntity {
+  label: 'Person';
+  fullName: string;
+  role?: string;
+  email?: string;
+}
+
+export interface OrgEntity extends BaseEntity {
+  label: 'Org';
+  name: string;
+  industry?: string;
+  region?: string;
+}
+
+export interface AssetEntity extends BaseEntity {
+  label: 'Asset';
+  name: string;
+  type: string;
+  criticality?: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+}
+
+export interface EventEntity extends BaseEntity {
+  label: 'Event';
+  title: string;
+  timestamp: string;
+  description?: string;
+  severity?: string;
+}
+
+export interface IndicatorEntity extends BaseEntity {
+  label: 'Indicator';
+  value: string;
+  type: string;
+  confidence?: number;
+}
+
+export type Entity =
+  | PersonEntity
+  | OrgEntity
+  | AssetEntity
+  | EventEntity
+  | IndicatorEntity;
+
+export const NATURAL_KEYS: Record<NodeLabel, string[]> = {
+  Person: ['email'],
+  Org: ['name'],
+  Asset: ['name', 'type'],
+  Event: ['title', 'timestamp'], // Weak natural key, careful
+  Indicator: ['value', 'type'],
+};
+
+export const SCHEMA_CONSTRAINTS = [
+  // Unique IDs
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Person) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Org) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Asset) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Event) REQUIRE n.id IS UNIQUE',
+  'CREATE CONSTRAINT IF NOT EXISTS FOR (n:Indicator) REQUIRE n.id IS UNIQUE',
+
+  // Tenant Isolation Indexes
+  'CREATE INDEX IF NOT EXISTS FOR (n:Person) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Org) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Asset) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Event) ON (n.tenantId)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Indicator) ON (n.tenantId)',
+
+  // Natural Key Indexes (Composite with tenantId is ideal but Neo4j constraint limited, so use Index)
+  // We will enforce uniqueness in application logic via MERGE
+  'CREATE INDEX IF NOT EXISTS FOR (n:Person) ON (n.email)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Org) ON (n.name)',
+  'CREATE INDEX IF NOT EXISTS FOR (n:Indicator) ON (n.value)',
+];

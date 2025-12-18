@@ -1,153 +1,140 @@
+export type TenantId = string;
+export type EntityId = string;
+export type EdgeId = string;
+export type EntityType = string;
+export type EdgeType = string;
+export type EventId = string;
 
-/**
- * Canonical Graph Data Model Types
- */
-
-export type EntityType =
-  | 'Actor'
-  | 'Organization'
-  | 'Asset'
-  | 'Document'
-  | 'Run'
-  | 'Task'
-  | 'Experiment'
-  | 'Policy'
-  | 'Incident'
-  | 'Event'
-  | 'IntegrationInstance'
-  | 'ModelProfile'
-  | 'Signal'
-  | 'Tag';
-
-export type EdgeType =
-  | 'USES'
-  | 'OWNS'
-  | 'MEMBER_OF'
-  | 'RUN_OF'
-  | 'RUN_CONTAINS_TASK'
-  | 'TASK_DEPENDS_ON'
-  | 'DERIVED_FROM'
-  | 'REFERENCES'
-  | 'RAISED_INCIDENT'
-  | 'GOVERNED_BY'
-  | 'RELATES_TO'
-  | 'SIMILAR_TO'
-  | 'PART_OF';
-
-export type EpistemicStatus =
-  | 'observed_fact'
-  | 'reported_claim'
-  | 'inferred_hypothesis'
-  | 'derived_metric'
-  | 'disputed'
-  | 'deprecated';
-
-export type RiskClassification = 'benign' | 'sensitive' | 'highly_sensitive';
-
-export interface EpistemicMetadata {
-  status: EpistemicStatus;
-  confidence: number; // 0.0 - 1.0
-  sourceTrust: number; // 0.0 - 1.0
-  recencyScore: number; // 0.0 - 1.0
-  riskClassification: RiskClassification;
-}
-
-export interface SourceReference {
-  provider: string; // e.g. 'github', 'pagerduty', 'maestro'
-  externalId: string;
-  url?: string;
-  ingestedAt: string; // ISO8601
-}
-
-export interface GraphEntity {
-  globalId: string;
-  tenantId: string;
-  entityType: EntityType;
-  createdAt: string; // ISO8601
-  updatedAt: string; // ISO8601
-  validFrom: string; // ISO8601
-  validTo?: string; // ISO8601, null/undefined means currently valid
-  sourceRefs: SourceReference[];
-  epistemic: EpistemicMetadata;
-  attributes: Record<string, any>; // Flexible typed attributes
-}
-
-export interface GraphEdge {
-  id: string; // Unique edge ID
-  sourceId: string;
-  targetId: string;
-  edgeType: EdgeType;
-  tenantId: string;
+export interface Entity {
+  id: EntityId;
+  tenantId: TenantId;
+  type: EntityType; // "person", "org", "account", "asset", "location", etc.
+  label: string; // human-readable primary label
   createdAt: string;
-  validFrom: string;
-  validTo?: string;
-  attributes: Record<string, any>; // weight, etc.
-  sourceRefs: SourceReference[];
-  epistemic?: EpistemicMetadata;
+  updatedAt: string;
+  attributes: Record<string, unknown>;
+  sensitivity?: 'public' | 'internal' | 'confidential' | 'restricted';
+  metadata: Record<string, unknown>;
 }
 
-// Specific Node Interfaces (extending GraphEntity implies they have the base fields)
-// We use a discriminated union pattern or just interface extensions.
-// For Neo4j, these map to Labels and Properties.
-
-export interface ActorNode extends GraphEntity {
-  entityType: 'Actor';
-  attributes: {
-    name: string;
-    email?: string;
-    role?: string;
-    [key: string]: any;
-  };
+export interface Edge {
+  id: EdgeId;
+  tenantId: TenantId;
+  type: EdgeType; // "owns", "controls", "transfers", "communicates_with", etc.
+  fromEntityId: EntityId;
+  toEntityId: EntityId;
+  directed: boolean;
+  weight?: number; // strength, frequency, or value
+  createdAt: string;
+  updatedAt: string;
+  attributes: Record<string, unknown>;
+  sensitivity?: 'public' | 'internal' | 'confidential' | 'restricted';
+  metadata: Record<string, unknown>;
 }
 
-export interface OrganizationNode extends GraphEntity {
-  entityType: 'Organization';
-  attributes: {
-    name: string;
-    domain?: string;
-    [key: string]: any;
-  };
+export interface Event {
+  id: EventId;
+  tenantId: TenantId;
+  type: string; // "transaction", "communication", "login", "shipment", etc.
+  occurredAt: string;
+  entitiesInvolved: EntityId[];
+  edgesInvolved?: EdgeId[];
+  attributes: Record<string, unknown>;
+  metadata: Record<string, unknown>;
 }
 
-export interface AssetNode extends GraphEntity {
-  entityType: 'Asset';
-  attributes: {
-    name: string;
-    assetType: 'repo' | 'service' | 'environment' | 'endpoint' | 'dataset' | 'model';
-    uri?: string;
-    [key: string]: any;
-  };
+export interface EntityQuery {
+  ids?: EntityId[];
+  types?: EntityType[];
+  labelContains?: string;
+  attributes?: Record<string, unknown>;
+  limit?: number;
+  offset?: number;
 }
 
-export interface DocumentNode extends GraphEntity {
-  entityType: 'Document';
-  attributes: {
-    title: string;
-    docType: 'spec' | 'ticket' | 'pr' | 'design_doc' | 'runbook' | 'wiki' | 'notebook';
-    uri?: string;
-    contentSummary?: string;
-    [key: string]: any;
-  };
+export interface EdgeQuery {
+  ids?: EdgeId[];
+  types?: EdgeType[];
+  fromEntityId?: EntityId;
+  toEntityId?: EntityId;
+  directed?: boolean;
+  attributes?: Record<string, unknown>;
+  limit?: number;
+  offset?: number;
 }
 
-export interface RunNode extends GraphEntity {
-  entityType: 'Run';
-  attributes: {
-    runId: string; // Maestro run ID
-    status: string;
-    goal?: string;
-    [key: string]: any;
-  };
+export interface GraphService {
+  getEntity(tenantId: TenantId, id: EntityId): Promise<Entity | null>;
+  findEntities(tenantId: TenantId, query: EntityQuery): Promise<Entity[]>;
+  getEdges(tenantId: TenantId, query: EdgeQuery): Promise<Edge[]>;
+  upsertEntity(tenantId: TenantId, entity: Partial<Entity>): Promise<Entity>;
+  upsertEdge(tenantId: TenantId, edge: Partial<Edge>): Promise<Edge>;
+  deleteEntity(tenantId: TenantId, id: EntityId): Promise<boolean>;
+  deleteEdge(tenantId: TenantId, id: EdgeId): Promise<boolean>;
 }
 
-export interface TaskNode extends GraphEntity {
-  entityType: 'Task';
-  attributes: {
-    taskId: string;
-    name: string;
-    status: string;
-    [key: string]: any;
-  };
+// Analytics Types
+
+export interface GraphScope {
+  investigationId?: string;
+  collectionId?: string;
+  // Could include advanced filters later
 }
 
-// ... other types mapped similarly
+export interface PathResult {
+  nodes: Entity[];
+  edges: Edge[];
+  cost?: number;
+}
+
+export interface Subgraph {
+  nodes: Entity[];
+  edges: Edge[];
+}
+
+export interface CentralityResult {
+  entityId: EntityId;
+  score: number;
+  rank?: number;
+}
+
+export interface CommunityResult {
+  communityId: string;
+  entityIds: EntityId[];
+  size: number;
+}
+
+export interface AnomalyResult {
+  entityId: EntityId;
+  score: number;
+  kind: 'degree' | 'motif' | 'isolation' | 'other';
+  reason: string;
+}
+
+export interface GraphAnalyticsService {
+  shortestPath(params: {
+    tenantId: TenantId;
+    from: EntityId;
+    to: EntityId;
+    maxDepth?: number;
+  }): Promise<PathResult | null>;
+  kHopNeighborhood(params: {
+    tenantId: TenantId;
+    seedIds: EntityId[];
+    depth: number;
+  }): Promise<Subgraph>;
+  centrality(params: {
+    tenantId: TenantId;
+    scope: GraphScope;
+    algorithm: 'degree' | 'betweenness' | 'eigenvector';
+  }): Promise<CentralityResult[]>;
+  communities(params: {
+    tenantId: TenantId;
+    scope: GraphScope;
+  }): Promise<CommunityResult[]>;
+  detectAnomalies(params: {
+    tenantId: TenantId;
+    scope: GraphScope;
+    kind?: 'degree' | 'motif';
+  }): Promise<AnomalyResult[]>;
+}

@@ -1,95 +1,76 @@
 import express from 'express';
-import { GraphStore } from '../store.js';
-import { FusionEngine } from '../fusion/FusionEngine.js';
-import { CKPEngine } from '../ckp/CKPEngine.js';
-import { parseDSL, buildCypherFromDSL } from '../dsl/execution.js';
-import { ensureAuthenticated } from '../../middleware/auth.js';
-import { GraphEntity } from '../types.js';
+import { intelGraphService } from '../services/IntelGraphService.js';
+import { ensurePolicy } from '../middleware/abac.js';
+import { requireStepUp } from '../auth/webauthn/middleware.js';
+import { z } from 'zod';
 
 const router = express.Router();
-const store = new GraphStore();
-const fusion = new FusionEngine();
-const ckp = new CKPEngine();
 
-// Middleware to ensure tenant context
-router.use(ensureAuthenticated);
+const decisionSchema = z.object({
+  tenantId: z.string(),
+  outcome: z.string(),
+  rationale: z.string(),
+  confidenceScore: z.number().min(0).max(1),
+  actorId: z.string(),
+  classification: z.string().optional(),
+  claimIds: z.array(z.string()).default([]),
+  evidenceIds: z.array(z.string()).default([])
+});
 
-/**
- * @api {post} /api/intelgraph/ingest Ingest Data (Fusion)
- */
-router.post('/ingest', async (req, res) => {
+const claimSchema = z.object({
+  tenantId: z.string(),
+  text: z.string(),
+  type: z.string(),
+  source: z.string().optional(),
+  classification: z.string().optional()
+});
+
+router.post('/decisions', ensurePolicy('create', 'decision'), requireStepUp, async (req, res) => {
   try {
-    const payload = req.body;
-    // Security: Validate payload schema (FusionPayload)
-    // In production: Zod validation here.
+    const body = decisionSchema.parse(req.body);
+    const { claimIds, evidenceIds, ...decisionData } = body;
 
-    // Enforce tenantId from auth context
-    if (payload.tenantId !== req.user?.tenantId) {
-       return res.status(403).json({ error: 'Tenant mismatch' });
+    const receipt = await intelGraphService.createDecision(
+      decisionData,
+      claimIds,
+      evidenceIds
+    );
+
+    res.status(201).json({ receipt });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
     }
-
-    await fusion.ingest(payload);
-    res.status(200).json({ status: 'ok' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+    console.error('Error creating decision:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-/**
- * @api {post} /api/intelgraph/query Execute DSL Query
- */
-router.post('/query', async (req, res) => {
+router.post('/claims', ensurePolicy('create', 'claim'), async (req, res) => {
   try {
-    const dsl = req.body.dsl; // JSON string or object
-    const queryObj = typeof dsl === 'string' ? parseDSL(dsl) : dsl;
-    const { cypher, params } = buildCypherFromDSL(queryObj, req.user!.tenantId);
-
-    const results = await store.runCypher(cypher, params);
-    res.json(results);
-  } catch (err) {
-    res.status(400).json({ error: err.message });
-  }
-});
-
-/**
- * @api {post} /api/intelgraph/ckp/:planId Execute Knowledge Plan
- */
-router.post('/ckp/:planId', async (req, res) => {
-  try {
-    const { planId } = req.params;
-    const inputs = req.body;
-
-    // 1. Fetch Plan definition (Built-ins for now)
-    let plan = CKPEngine.DEPENDENCY_BLAST_RADIUS; // Hardcoded lookup for demo
-    if (planId !== 'ckp_blast_radius') {
-        // In real impl, look up plan from GraphStore or Registry
-        return res.status(404).json({ error: 'Plan not found' });
+    const body = claimSchema.parse(req.body);
+    const claimId = await intelGraphService.createClaim(body);
+    res.status(201).json({ claimId });
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
     }
-
-    const result = await ckp.executePlan(plan, inputs, req.user!.tenantId);
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error creating claim:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-/**
- * @api {get} /api/intelgraph/analytics/centrality Simple Centrality
- */
-router.get('/analytics/centrality', async (req, res) => {
+router.get('/decisions/:id', async (req, res) => {
     try {
-        // Simple degree centrality via Cypher
-        const cypher = `
-            MATCH (n:GraphNode { tenantId: $tenantId })-[r]-()
-            RETURN n.globalId as id, n.attributes.name as name, count(r) as degree
-            ORDER BY degree DESC LIMIT 20
-        `;
-        const results = await store.runCypher(cypher, { tenantId: req.user!.tenantId });
-        res.json(results);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+        const result = await intelGraphService.getDecisionWithReceipt(req.params.id);
+        if (!result) {
+            return res.status(404).json({ error: 'Decision not found' });
+        }
+        res.json(result);
+    } catch (error) {
+        console.error('Error getting decision:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-export default router;
+export const intelGraphRouter = router;
