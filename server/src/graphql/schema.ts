@@ -394,6 +394,79 @@ type CacheOperationResult {
   message: String!
 }
 
+# Geospatial Types
+
+type GeoPoint {
+  lat: Float!
+  lon: Float!
+}
+
+type GeoObject {
+  type: String
+  confidence: Float
+  location: GeoPoint
+}
+
+type SatelliteAnalysisResult {
+  classification: String
+  objectsDetected: [GeoObject]
+  cloudCover: Float
+  timestamp: String
+}
+
+type ChangeDetectionArea {
+  type: String
+  confidence: Float
+  bounds: GeoPoint
+}
+
+type ChangeDetectionResult {
+  changeDetected: Boolean
+  percentageChange: Float
+  areas: [ChangeDetectionArea]
+}
+
+type MovementAnalysisSegment {
+  fromIndex: Int
+  toIndex: Int
+  distanceMeters: Float
+  speedMps: Float
+  bearingDegrees: Float
+}
+
+type MovementAnalysisResult {
+  totalDistanceMeters: Float
+  maxSpeedMps: Float
+  avgSpeedMps: Float
+  pattern: String
+  segments: [MovementAnalysisSegment]
+}
+
+type ElevationPoint {
+  distance: Float
+  elevation: Float
+  lat: Float
+  lon: Float
+}
+
+type CoordinateTransformResult {
+  lat: Float
+  lon: Float
+  x: Float
+  y: Float
+}
+
+input TrackPointInput {
+  lat: Float!
+  lon: Float!
+  timestamp: String
+}
+
+input GeoPointInput {
+  lat: Float!
+  lon: Float!
+}
+
 # Support Ticket Types
 enum SupportTicketStatus {
   open
@@ -434,7 +507,7 @@ type SupportTicket {
   updated_at: DateTime!
   resolved_at: DateTime
   closed_at: DateTime
-  comments: [SupportTicketComment!]!
+  comments(limit: Int = 100, offset: Int = 0): [SupportTicketComment!]!
 }
 
 type SupportTicketComment {
@@ -551,6 +624,14 @@ input SemanticSearchFilter {
       graphId: ID
     ): DataQualityReport!
 
+    # Geospatial Queries
+    analyzeSatelliteImage(imageUrl: String!): SatelliteAnalysisResult
+    detectChange(beforeImageUrl: String!, afterImageUrl: String!): ChangeDetectionResult
+    checkGeofence(pointLat: Float!, pointLon: Float!, polygonCoords: [[Float!]!]!): Boolean
+    analyzeMovement(trackPoints: [TrackPointInput!]!): MovementAnalysisResult
+    getElevationProfile(path: [GeoPointInput!]!): [ElevationPoint]
+    transformCoordinates(lat: Float!, lon: Float!, fromSys: String!, toSys: String!): CoordinateTransformResult
+
     """
     Query the knowledge graph using explainable GraphRAG.
     Returns structured response with answer, confidence, citations, and why_paths.
@@ -575,6 +656,11 @@ input SemanticSearchFilter {
     # Support Ticket Queries
     supportTicket(id: ID!): SupportTicket
     supportTickets(filter: SupportTicketFilter, limit: Int = 50, offset: Int = 0): SupportTicketList!
+
+    """
+    Generate a causal influence graph for the investigation
+    """
+    causalGraph(investigationId: ID!): CausalGraph!
   }
   
   input EntityInput { type: String!, props: JSON }
@@ -659,5 +745,27 @@ input SemanticSearchFilter {
     entityUpdated: Entity!
     entityDeleted: ID!
     aiRecommendationUpdated: AIRecommendation!
+  }
+
+  # Causal Graph Types
+  type CausalNode {
+    id: ID!
+    label: String!
+    type: String!
+    confidence: Float
+    metadata: JSON
+  }
+
+  type CausalEdge {
+    source: ID!
+    target: ID!
+    type: String!
+    weight: Float!
+    evidence: String
+  }
+
+  type CausalGraph {
+    nodes: [CausalNode!]!
+    edges: [CausalEdge!]!
   }
 `;
