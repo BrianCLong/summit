@@ -22,15 +22,23 @@ export class RateLimiter {
   }
 
   /**
-   * Check if a key has exceeded the rate limit.
+   * Check if a key has exceeded the rate limit (consumes 1 point).
+   */
+  async checkLimit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
+    return this.consume(key, 1, limit, windowMs);
+  }
+
+  /**
+   * Consume points from the rate limit bucket.
    * Uses a sliding window counter (fixed window with Redis expiration).
    *
-   * @param key Unique key for the limit (e.g., user ID or IP)
-   * @param limit Max requests allowed
+   * @param key Unique key for the limit
+   * @param points Number of points to consume
+   * @param limit Max points allowed in window
    * @param windowMs Window size in milliseconds
    * @returns RateLimitResult
    */
-  async checkLimit(key: string, limit: number, windowMs: number): Promise<RateLimitResult> {
+  async consume(key: string, points: number, limit: number, windowMs: number): Promise<RateLimitResult> {
     const redisKey = `${this.namespace}:${key}`;
     const now = Date.now();
     const redisClient = getRedisClient();
@@ -47,19 +55,19 @@ export class RateLimiter {
     }
 
     try {
-      // Lua script to increment and set expiry atomically
+      // Lua script to increment by points and set expiry atomically
       // Returns [current_count, ttl_ms]
       const script = `
-        local current = redis.call("INCR", KEYS[1])
+        local current = redis.call("INCRBY", KEYS[1], ARGV[1])
         local ttl = redis.call("PTTL", KEYS[1])
-        if tonumber(current) == 1 then
-          redis.call("PEXPIRE", KEYS[1], ARGV[1])
-          ttl = ARGV[1]
+        if tonumber(current) == tonumber(ARGV[1]) then
+          redis.call("PEXPIRE", KEYS[1], ARGV[2])
+          ttl = ARGV[2]
         end
         return {current, ttl}
       `;
 
-      const result = await redisClient.eval(script, 1, redisKey, windowMs) as [number, number];
+      const result = await redisClient.eval(script, 1, redisKey, points, windowMs) as [number, number];
       const current = result[0];
       const ttl = result[1]; // TTL in ms
 

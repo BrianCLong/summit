@@ -1,28 +1,15 @@
-# Freedom to Operate (FTO) Memo: SRE v0.1
+# Freedom-to-Operate Notes: Summit SDK
 
-**Date:** 2025-05-15
-**Subject:** IP Risks & Design-Arounds for Summit Reasoning Evaluator
+## Domain
+Graph-native, policy-aware SDK for LLM applications including RAG, tools, governance, and telemetry.
 
-## 1. Executive Summary
-A preliminary review of the landscape suggests a "Yellow" risk level. While general "LLM Evaluation" is a crowded field, our specific approach (Graph-Structured Episodes + Curriculum Policy) appears distinct from the dominant "Span-based" (OpenTelemetry) and "Unit-Test" (DeepEval) paradigms.
+## Observations
+- Most open-source agent frameworks (LangChain, LlamaIndex) focus on chains, not governance-first graphs; our policy-first graphs provide differentiation.
+- Governance/telemetry coupling with per-tenant overlays appears under-served; monitor for patents around policy-enforced agent execution.
+- Tool schema derivation from type hints is common; ensure unique graph+policy integration is emphasized in filings.
 
-## 2. Potential Conflicts
+## Mitigations
+- Maintain modular transport layer to avoid infringement on provider-specific SDKs.
+- Use explicit capability flags to remain compatible with multiple model providers.
+- Document governance ledger integration and graph compilation as distinguishing features.
 
-### A. Trace Visualization (LangSmith / Arize)
-*   **Risk**: Patents related to "Visualizing hierarchical execution traces of language models".
-*   **Mitigation**: SRE focuses on the *computational graph* (DAG) aspect—specifically "Correction" and "Merge" edges—rather than the temporal "Call Stack" visualization. Our UI should emphasize the *topology* (loops, branches) rather than the *timeline*.
-
-### B. Feedback Functions (TruLens)
-*   **Risk**: Methods for "programmatically evaluating output quality using feedback functions".
-*   **Mitigation**: Avoid the term "Feedback Function". Use "Topological Metric" or "Structural Predicate". Our core claims focus on graph structure analysis, not just output scoring.
-
-### C. Active Learning / Curriculum
-*   **Risk**: General patents on "Automated Curriculum Learning".
-*   **Mitigation**: Narrow our claims to "Curriculum for *Evaluation*" (finding the failure boundary), distinct from "Curriculum for *Training*".
-
-## 3. Design-Around Strategy
-1.  **Enforce Graph Strictness**: Ensure our schema *requires* explicit edge definitions, differentiating it from loose "log streams".
-2.  **Coupling**: Tighten the link between the "Curriculum Policy" and the "Evaluation Report", making them an inseparable feedback loop system (System Claim) rather than just a method.
-
-## 4. Conclusion
-Proceed with filing. The "Graph-Native" angle provides sufficient novelty distance from existing "Log-Native" solutions.

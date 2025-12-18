@@ -3,35 +3,19 @@
  * Comprehensive testing of all IntelGraph platform capabilities
  */
 
-import { describe, it, before, after, beforeEach, afterEach } from 'mocha';
+import { describe, it, before, after, beforeEach } from 'mocha';
 import { expect } from 'chai';
-import request from 'supertest';
-import { Client } from 'pg';
-import Redis from 'ioredis';
-import { driver as neo4jDriver } from 'neo4j-driver';
+import request, { SuperTest, Test } from 'supertest';
 import { randomUUID } from 'crypto';
+import {
+  createIntegrationTestServer,
+  type IntegrationTestState,
+} from './helpers/integrationTestServer';
 
 // Test configuration
 const TEST_CONFIG = {
   api: {
-    baseUrl: process.env.TEST_API_BASE_URL || 'http://localhost:3000',
     timeout: 30000,
-  },
-  databases: {
-    postgres: {
-      connectionString:
-        process.env.TEST_POSTGRES_URL ||
-        'postgresql://test:test@localhost:5432/intelgraph_test',
-    },
-    neo4j: {
-      uri: process.env.TEST_NEO4J_URI || 'bolt://localhost:7687',
-      user: process.env.TEST_NEO4J_USER || 'neo4j',
-      password: process.env.TEST_NEO4J_PASSWORD || 'test',
-    },
-    redis: {
-      host: process.env.TEST_REDIS_HOST || 'localhost',
-      port: parseInt(process.env.TEST_REDIS_PORT || '6379'),
-    },
   },
   auth: {
     testUser: {
@@ -44,9 +28,9 @@ const TEST_CONFIG = {
 
 describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
   let authToken: string;
-  let pgClient: Client;
-  let redisClient: Redis;
-  let neo4jDriver: any;
+  let api!: SuperTest<Test>;
+  let state!: IntegrationTestState;
+  let resetState?: () => void;
   let testCorrelationId: string;
 
   before(async function () {
@@ -54,34 +38,13 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
 
     console.log('🔧 Setting up test environment...');
 
-    // Initialize database connections
-    pgClient = new Client({
-      connectionString: TEST_CONFIG.databases.postgres.connectionString,
-    });
-    await pgClient.connect();
-
-    redisClient = new Redis(TEST_CONFIG.databases.redis);
-
-    neo4jDriver = neo4jDriver(
-      TEST_CONFIG.databases.neo4j.uri,
-      neo4jDriver.auth.basic(
-        TEST_CONFIG.databases.neo4j.user,
-        TEST_CONFIG.databases.neo4j.password,
-      ),
-    );
-
-    // Verify database connectivity
-    await pgClient.query('SELECT 1');
-    await redisClient.ping();
-
-    const session = neo4jDriver.session();
-    await session.run('RETURN 1');
-    await session.close();
-
-    console.log('✅ Database connections established');
+    const server = createIntegrationTestServer();
+    api = request(server.app);
+    state = server.state;
+    resetState = server.reset;
 
     // Authenticate test user
-    const authResponse = await request(TEST_CONFIG.api.baseUrl)
+    const authResponse = await api
       .post('/api/auth/login')
       .send({
         email: TEST_CONFIG.auth.testUser.email,
@@ -101,10 +64,11 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
 
     console.log('🧹 Cleaning up test environment...');
 
-    // Close database connections
-    if (pgClient) await pgClient.end();
-    if (redisClient) redisClient.disconnect();
-    if (neo4jDriver) await neo4jDriver.close();
+    if (resetState) {
+      resetState();
+      expect(state.graphs.size).to.equal(0);
+      expect(state.auditEvents.length).to.equal(0);
+    }
 
     console.log('✅ Test environment cleanup complete');
   });
@@ -115,7 +79,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
 
   describe('🏗️ Core Platform Health', () => {
     it('should verify all system components are healthy', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/health')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -130,7 +94,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should verify autonomous orchestrator is running', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/maestro/v1/health')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -145,7 +109,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
 
   describe('🔐 Authentication & Authorization', () => {
     it('should authenticate user and return valid JWT', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/auth/login')
         .send({
           email: TEST_CONFIG.auth.testUser.email,
@@ -164,7 +128,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should reject invalid credentials', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/auth/login')
         .send({
           email: TEST_CONFIG.auth.testUser.email,
@@ -177,7 +141,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should protect endpoints with authentication', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/graphs')
         .set('X-Correlation-ID', testCorrelationId)
         .timeout(TEST_CONFIG.api.timeout);
@@ -199,7 +163,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         },
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/graphs')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -223,7 +187,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         },
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post(`/api/graphs/${testGraphId}/entities`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -237,7 +201,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should query entities with filtering', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get(`/api/graphs/${testGraphId}/entities`)
         .query({ type: 'Person', limit: 10 })
         .set('Authorization', `Bearer ${authToken}`)
@@ -260,7 +224,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         },
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post(`/api/graphs/${testGraphId}/analyze`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -289,7 +253,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         reasonForAccess: 'End-to-end integration testing',
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/maestro/v1/runs')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -304,7 +268,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should retrieve run status and progress', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get(`/api/maestro/v1/runs/${testRunId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -319,7 +283,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
 
     it('should handle run approval workflow', async () => {
       // First, check if approval is required
-      const statusResponse = await request(TEST_CONFIG.api.baseUrl)
+      const statusResponse = await api
         .get(`/api/maestro/v1/runs/${testRunId}/approvals`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -331,7 +295,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       ) {
         const approvalId = statusResponse.body.pending[0].id;
 
-        const approvalResponse = await request(TEST_CONFIG.api.baseUrl)
+        const approvalResponse = await api
           .post(`/api/maestro/v1/approvals/${approvalId}/approve`)
           .set('Authorization', `Bearer ${authToken}`)
           .set('X-Correlation-ID', testCorrelationId)
@@ -360,7 +324,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         },
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/maestro/v1/routing/optimize')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -375,7 +339,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should track Thompson sampling performance', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/maestro/v1/routing/analytics')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -401,7 +365,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         },
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/maestro/v1/policy/evaluate')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -421,7 +385,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         endDate: new Date().toISOString(),
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/maestro/v1/compliance/reports')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -451,7 +415,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         complianceFrameworks: ['SOC2'],
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/maestro/v1/audit/events')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -470,7 +434,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         limit: 100,
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/maestro/v1/audit/events')
         .query(query)
         .set('Authorization', `Bearer ${authToken}`)
@@ -483,7 +447,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should verify audit trail integrity', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/maestro/v1/audit/verify')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -521,7 +485,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
         },
       };
 
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .post('/api/sig/v1/evidence/register')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -535,7 +499,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should validate provenance chain', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/sig/v1/provenance/validate')
         .query({ correlationId: testCorrelationId })
         .set('Authorization', `Bearer ${authToken}`)
@@ -551,7 +515,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
 
   describe('📈 Performance & Monitoring', () => {
     it('should retrieve system metrics', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/maestro/v1/metrics')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -568,7 +532,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       this.timeout(60000); // 1 minute for concurrent test
 
       const concurrentRequests = Array.from({ length: 10 }, (_, i) =>
-        request(TEST_CONFIG.api.baseUrl)
+        api
           .get('/api/health')
           .set('Authorization', `Bearer ${authToken}`)
           .set('X-Correlation-ID', `${testCorrelationId}-${i}`)
@@ -585,7 +549,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
   describe('🚨 Error Handling & Resilience', () => {
     it('should handle graceful degradation', async () => {
       // Simulate high load condition
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/health')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -603,7 +567,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
     });
 
     it('should implement circuit breaker pattern', async () => {
-      const response = await request(TEST_CONFIG.api.baseUrl)
+      const response = await api
         .get('/api/maestro/v1/circuit-breaker/status')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -622,7 +586,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       console.log('🚀 Starting complete workflow test...');
 
       // Step 1: Create investigation workspace
-      const workspaceResponse = await request(TEST_CONFIG.api.baseUrl)
+      const workspaceResponse = await api
         .post('/api/investigations')
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -636,7 +600,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       const workspaceId = workspaceResponse.body.id;
 
       // Step 2: Initiate autonomous analysis
-      const analysisResponse = await request(TEST_CONFIG.api.baseUrl)
+      const analysisResponse = await api
         .post(`/api/investigations/${workspaceId}/analyze`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
@@ -662,7 +626,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       while (!analysisComplete && attempts < maxAttempts) {
         await new Promise((resolve) => setTimeout(resolve, 6000)); // 6 second intervals
 
-        const statusResponse = await request(TEST_CONFIG.api.baseUrl)
+        const statusResponse = await api
           .get(`/api/investigations/${workspaceId}/analyses/${analysisId}`)
           .set('Authorization', `Bearer ${authToken}`)
           .set('X-Correlation-ID', testCorrelationId)
@@ -686,7 +650,7 @@ describe('🚀 IntelGraph Platform - End-to-End Integration Tests', () => {
       expect(analysisComplete).to.be.true;
 
       // Step 4: Verify results and artifacts
-      const resultsResponse = await request(TEST_CONFIG.api.baseUrl)
+      const resultsResponse = await api
         .get(`/api/investigations/${workspaceId}/results`)
         .set('Authorization', `Bearer ${authToken}`)
         .set('X-Correlation-ID', testCorrelationId)
