@@ -69,7 +69,7 @@ const POLICY_WEIGHTS: Record<NonNullable<BuildEvent['policy']>, number> = {
 };
 
 function scoreTest(status?: BuildStatus | TestStatus): number {
-  if (!status) return 0.6; // neutral if unknown
+  if (!status) {return 0.6;} // neutral if unknown
   switch (status) {
     case 'pass':
       return 1;
@@ -276,7 +276,7 @@ export class BuildDistillationEngine extends EventEmitter {
 
   private computeCoverageScore(event: BuildEvent): number {
     const tests = event.tests;
-    if (!tests) return 0.65;
+    if (!tests) {return 0.65;}
 
     const scores = [tests.unit, tests.e2e, tests.security].map((status) =>
       scoreTest(status),
@@ -300,15 +300,15 @@ export class BuildDistillationEngine extends EventEmitter {
   }
 
   private computeVelocityScore(prWindow: PRWindowState): number {
-    if (!prWindow.syntheticLag) return 0.72; // no previous data yet
+    if (!prWindow.syntheticLag) {return 0.72;} // no previous data yet
 
     // Normalise synthetic lag (ms) into [0,1] where faster loops score higher
     const minutes = prWindow.syntheticLag / 60000;
     const fastThreshold = 5;
     const slowThreshold = 45;
 
-    if (minutes <= fastThreshold) return 1;
-    if (minutes >= slowThreshold) return 0.2;
+    if (minutes <= fastThreshold) {return 1;}
+    if (minutes >= slowThreshold) {return 0.2;}
 
     return clamp(
       1 - (minutes - fastThreshold) / (slowThreshold - fastThreshold),
@@ -483,7 +483,7 @@ export class BuildDistillationEngine extends EventEmitter {
 
   private applyTemperature(score: number, temperature: number): number {
     const safeTemp = temperature <= 0 ? 1 : temperature;
-    if (safeTemp === 1) return clamp(score);
+    if (safeTemp === 1) {return clamp(score);}
 
     return clamp(Math.pow(score, safeTemp));
   }

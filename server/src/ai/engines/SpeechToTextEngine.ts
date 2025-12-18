@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { createReadStream, createWriteStream } from 'fs';
 import path from 'path';
 import pino from 'pino';
-import { ExtractionEngineConfig } from '../ExtractionEngine.js';
+import { ExtractionEngineConfig } from '../types.js';
 
 const logger = pino({ name: 'SpeechToTextEngine' });
 

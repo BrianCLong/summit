@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { test, expect } from '@jest/globals';
 
 test('similarEntities by text (integration)', async () => {
   const apiUrl = process.env.API_URL || 'http://localhost:4000';
