@@ -1,0 +1,86 @@
+name: Webapp E2E and Visual Regression
+
+on:
+  pull_request:
+    paths:
+      - 'apps/webapp/**'
+      - '.github/workflows/webapp-e2e.yml'
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: 'pnpm'
+      - name: Install dependencies and browsers
+        run: |
+          corepack enable || true
+          pnpm install --frozen-lockfile=false
+          pnpm exec playwright install --with-deps
+      - name: Run Playwright suite (smoke, integration, visual)
+        env:
+          WEBAPP_PORT: 4173
+          WEBAPP_BASE_URL: http://127.0.0.1:4173
+        run: |
+          cd apps/webapp
+          pnpm exec playwright test --config=playwright.config.ts --reporter=line
+      - name: Upload Playwright traces (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-playwright-results
+          path: |
+            apps/webapp/playwright-report
+            apps/webapp/test-results
+          retention-days: 5
+
+  cypress:
+    needs: playwright
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.14.x'
+          cache: 'pnpm'
+      - name: Install dependencies
+        run: |
+          corepack enable || true
+          pnpm install --frozen-lockfile=false
+      - name: Start webapp dev server
+        env:
+          WEBAPP_PORT: 4173
+        run: |
+          cd apps/webapp
+          pnpm run dev -- --host --port 4173 >/tmp/webapp-dev.log 2>&1 &
+          for i in {1..40}; do
+            if curl -sSf http://127.0.0.1:4173 >/dev/null 2>&1; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "webapp dev server did not start" >&2
+          exit 1
+      - name: Run Cypress smoke
+        env:
+          WEBAPP_PORT: 4173
+          WEBAPP_BASE_URL: http://127.0.0.1:4173
+          CYPRESS_baseUrl: http://127.0.0.1:4173
+        run: |
+          cd apps/webapp
+          pnpm run test:cypress
+      - name: Upload Cypress artifacts (on failure)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapp-cypress-artifacts
+          path: |
+            /tmp/webapp-dev.log
+            apps/webapp/cypress/screenshots
+            apps/webapp/cypress/videos
+          retention-days: 5
