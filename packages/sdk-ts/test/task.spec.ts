@@ -3,7 +3,7 @@ import { defineTask, createRunContext } from '../src/index.js';
 test('task validates and executes', async () => {
   const t = defineTask<{ n: number }, { doubled: number }>({
     validate: ({ payload }) => {
-      if (payload.n == null) throw new Error('n required');
+      if (payload.n == null) {throw new Error('n required');}
     },
     execute: async (_ctx, { payload }) => ({
       payload: { doubled: payload.n * 2 },

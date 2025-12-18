@@ -1,0 +1,10 @@
+fastapi==0.115.0
+uvicorn==0.30.6
+pydantic==2.9.0
+pandas==2.2.2
+numpy==2.1.2
+scipy==1.13.1
+networkx==3.3
+statsmodels==0.14.2
+scikit-learn==1.5.2
+python-dotenv==1.0.1

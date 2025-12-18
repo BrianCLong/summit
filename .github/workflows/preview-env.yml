@@ -17,6 +17,7 @@ on:
 env:
   REGISTRY: ghcr.io
   NAMESPACE_PREFIX: intelgraph-pr
+  PREVIEW_TTL_HOURS: 72
 
 concurrency:
   group: preview-${{ github.event.number }}
@@ -98,7 +99,61 @@ jobs:
       - name: Create namespace
         run: |
           NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          PR_NUMBER=${{ github.event.number }}
+          EXPIRY=$(date -u -d "+${PREVIEW_TTL_HOURS} hours" +"%Y-%m-%dT%H:%M:%SZ")
+          REFRESHED_AT=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
           kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+          kubectl label namespace ${NAMESPACE} pr=${{ github.event.number }} ttl-hours=${{ env.PREVIEW_TTL_HOURS }} owner=${{ github.actor }} managed-by=github-actions --overwrite
+          kubectl annotate namespace ${NAMESPACE} teardown=auto reason=preview-env --overwrite
+
+          kubectl label namespace ${NAMESPACE} \
+            preview.summit.ai/enabled=true \
+            preview.summit.ai/pull-request=${PR_NUMBER} \
+            --overwrite
+
+          kubectl annotate namespace ${NAMESPACE} \
+            preview.summit.ai/expiry="${EXPIRY}" \
+            preview.summit.ai/ttl-hours="${PREVIEW_TTL_HOURS}" \
+            preview.summit.ai/last-refresh="${REFRESHED_AT}" \
+            --overwrite
+
+      - name: Enforce resource guardrails
+        run: |
+          NAMESPACE="${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          cat <<'EOF' | kubectl apply -n ${NAMESPACE} -f -
+          apiVersion: v1
+          kind: ResourceQuota
+          metadata:
+            name: preview-quota
+          spec:
+            hard:
+              requests.cpu: "2"
+              requests.memory: 4Gi
+              limits.cpu: "4"
+              limits.memory: 8Gi
+              pods: "10"
+          ---
+          apiVersion: v1
+          kind: LimitRange
+          metadata:
+            name: preview-defaults
+          spec:
+            limits:
+              - type: Container
+                default:
+                  cpu: 500m
+                  memory: 512Mi
+                defaultRequest:
+                  cpu: 200m
+                  memory: 256Mi
+                max:
+                  cpu: "1"
+                  memory: 1Gi
+                min:
+                  cpu: 100m
+                  memory: 128Mi
+          EOF
 
       - name: Deploy preview environment
         run: |
@@ -211,6 +266,7 @@ jobs:
           - **Images**:
             - Server: \`pr-${{ github.event.number }}\`
             - Client: \`pr-${{ github.event.number }}\`
+          - **Auto-expiry**: ${PREVIEW_TTL_HOURS}h after last refresh
           - **Auto-teardown**: When PR is closed
 
           > This preview environment is automatically updated with each push to this PR.
@@ -250,6 +306,14 @@ jobs:
           # Delete namespace
           kubectl delete namespace ${NAMESPACE} --ignore-not-found --timeout=300s
 
+      - name: Check for leftover resources
+        id: leftovers
+        run: |
+          touch leftovers.txt
+          kubectl get all --all-namespaces -l pr=${{ github.event.number }} -o name > leftovers.txt 2>/dev/null || true
+          COUNT=$(wc -l < leftovers.txt | tr -d ' ')
+          echo "count=${COUNT}" >> $GITHUB_OUTPUT
+
       - name: Cleanup container images
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -267,4 +331,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr comment ${{ github.event.number }} --body "🧹 Preview environment has been cleaned up and resources have been freed."
+          MESSAGE="🧹 Preview environment teardown completed."
+          MESSAGE+=$"\n- Namespace: `${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}`"
+          MESSAGE+=$"\n- TTL: ${{ env.PREVIEW_TTL_HOURS }}h labels applied to resources (managed-by=github-actions)"
+          if [ "${{ steps.leftovers.outputs.count }}" != "0" ]; then
+            MESSAGE+=$"\n\n⚠️ Detected leftover resources with `pr=${{ github.event.number }}` after teardown. Please inspect and clean manually:"
+            MESSAGE+=$"\n```"
+            cat leftovers.txt >> message_block.txt
+            MESSAGE+=$(cat message_block.txt)
+            MESSAGE+=$"\n```"
+          fi
+          MESSAGE+=$"\n\nCost note: resources are tagged for TTL enforcement; preview images were deleted for this PR."
+          gh pr comment ${{ github.event.number }} --body "$MESSAGE"
