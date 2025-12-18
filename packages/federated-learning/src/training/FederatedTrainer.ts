@@ -351,7 +351,7 @@ export class FederatedTrainer extends EventEmitter {
    * Calculate convergence metric
    */
   private calculateConvergence(currentLoss: number): number {
-    if (this.rounds.length === 0) return 0;
+    if (this.rounds.length === 0) {return 0;}
 
     const previousLoss = this.rounds[this.rounds.length - 1].metrics.avgLoss || currentLoss;
     const improvement = (previousLoss - currentLoss) / previousLoss;

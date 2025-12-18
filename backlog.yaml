@@ -59,62 +59,29 @@ backlog:
         priority: P2 - Fearsome Delight
         sprint: Sprint 3
 
-  - epic: Black-Cell & Resync (v1.1)
+  - epic: Platform Governance (K)
     stories:
-      - story: Packager (ig-pack) & Verifier
+      - story: Paved-Road Service Template v0.1
         priority: P0 - Must
-        sprint: v1.1
-      - story: Resync Protocol (Manifest + Hash Trees)
-        priority: P0 - Must
-        sprint: v1.1
-      - story: Ledger Continuity Proofs
-        priority: P0 - Must
-        sprint: v1.1
-      - story: File-Drop Ingest
+        sprint: Paved Road + Governance
+      - story: Local Dev Stack for Paved-Road Services
         priority: P1 - Should
-        sprint: v1.1
-
-  - epic: SDK & App Ecosystem (v1.1)
-    stories:
-      - story: TypeScript SDK & Python SDK
+        sprint: Paved Road + Governance
+      - story: Observability Baseline for Reference Service
         priority: P0 - Must
-        sprint: v1.1
-      - story: App Manifest Schema & Validator
+        sprint: Paved Road + Governance
+      - story: Post-Deploy Validation & Runbook v0.1
+        priority: P2 - Stretch
+        sprint: Paved Road + Governance
+      - story: SBOM Generation in CI
         priority: P0 - Must
-        sprint: v1.1
-      - story: Plugin APIs (Connectors, Policy)
+        sprint: Paved Road + Governance
+      - story: Container Signing & Verification
         priority: P1 - Should
-        sprint: v1.1
-
-  - epic: Scale-Out Performance (v1.1)
-    stories:
-      - story: Query Acceleration (Cache/Materialization)
+        sprint: Paved Road + Governance
+      - story: OPA Policy Gate on PR & Release
         priority: P0 - Must
-        sprint: v1.1
-      - story: Ingest Fairness & Backpressure
-        priority: P0 - Must
-        sprint: v1.1
-      - story: Autoscaling & Cost Policies
-        priority: P1 - Should
-        sprint: v1.1
-
-  - epic: Evidence-Aware AI (v1.1)
-    stories:
-      - story: Provenance-Aware Retriever
-        priority: P0 - Must
-        sprint: v1.1
-      - story: Redaction-Aware Generation
-        priority: P0 - Must
-        sprint: v1.1
-      - story: AI Evaluation Harness
-        priority: P0 - Must
-        sprint: v1.1
-
-  - epic: Data Product Exchange (v1.1)
-    stories:
-      - story: Product Catalog & Contract Registry
-        priority: P1 - Should
-        sprint: v1.1
-      - story: Signed Export/Import
-        priority: P0 - Must
-        sprint: v1.1
+        sprint: Paved Road + Governance
+      - story: Evidence Pack v0.1
+        priority: P2 - Stretch
+        sprint: Paved Road + Governance

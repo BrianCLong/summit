@@ -1,4 +1,5 @@
 import MultimodalFusionLayer from '../../src/services/MultimodalFusionLayer.js';
+import { describe, test, expect } from '@jest/globals';
 
 describe('MultimodalFusionLayer', () => {
   const fusionLayer = new MultimodalFusionLayer({ embeddingSize: 16, similarityThreshold: 0.6 });
