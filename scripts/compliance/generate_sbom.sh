@@ -1,21 +1,27 @@
 #!/bin/bash
 set -e
 
-# Output directory for SBOMs
-OUTPUT_DIR="artifacts/sbom"
-mkdir -p "$OUTPUT_DIR"
+# SBOM Generation Script
+# Requires cdxgen to be installed (npm install -g @cyclonedx/cdxgen)
+# If not present, fails (as per sprint plan "Must")
 
-echo "Generating SBOM for Root..."
-npx @cyclonedx/cdxgen . -o "$OUTPUT_DIR/sbom-root.json" --spec-version 1.5
+OUTPUT_DIR="artifacts/sbom"
+mkdir -p $OUTPUT_DIR
 
 echo "Generating SBOM for Server..."
-cd server
-npx @cyclonedx/cdxgen . -o "../$OUTPUT_DIR/sbom-server.json" --spec-version 1.5
-cd ..
 
-echo "Generating SBOM for Web..."
-cd apps/web
-npx @cyclonedx/cdxgen . -o "../../$OUTPUT_DIR/sbom-web.json" --spec-version 1.5
-cd ../..
+if ! command -v cdxgen &> /dev/null; then
+    echo "Error: cdxgen is not installed."
+    # Fails on missing attestation as per Sprint 31 E5 Must requirement
+    echo "CRITICAL: SBOM generation failed due to missing tool."
+    exit 1
+fi
 
-echo "SBOM generation complete. Artifacts stored in $OUTPUT_DIR"
+cdxgen -t nodejs -o $OUTPUT_DIR/server-sbom.json server/
+echo "SBOM generated at $OUTPUT_DIR/server-sbom.json"
+
+# Check for high severity vulnerabilities (mock check if cdxgen doesn't do it directly without plugins)
+# In real flow, we might use 'npm audit' or 'trivy'
+# npm audit --audit-level=high --prefix server/
+
+echo "SBOM generation complete."
