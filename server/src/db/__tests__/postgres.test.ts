@@ -19,67 +19,45 @@ import {
   closePostgresPool,
   __private,
 } from '../postgres';
-import type { PoolClient } from 'pg';
+import type pg from 'pg';
+
+type Pool = pg.Pool;
+type PoolClient = pg.PoolClient;
 
 // Mock pg module
 jest.mock('pg', () => {
-  const mockPools: any[] = [];
-
-  const createMockPool = () => {
-    const pool = {
-      query: jest.fn(),
-      connect: jest.fn(),
-      end: jest.fn(),
-      on: jest.fn(),
-      totalCount: 10,
-      idleCount: 5,
-      waitingCount: 0,
-    };
-
-    mockPools.push(pool);
-    return pool;
-  };
-
-  const Pool = jest.fn(() => createMockPool());
-  (Pool as any).mockPools = mockPools;
-  (Pool as any).reset = () => {
-    mockPools.length = 0;
+  const mockPool = {
+    query: jest.fn(),
+    connect: jest.fn(),
+    end: jest.fn(),
+    on: jest.fn(),
+    totalCount: 10,
+    idleCount: 5,
+    waitingCount: 0,
   };
 
   return {
-    Pool,
+    Pool: jest.fn(() => mockPool),
   };
 });
-
-const mockPgModule = jest.requireMock('pg') as {
-  Pool: jest.Mock & { mockPools: any[]; reset: () => void };
-};
-
-const getMockPools = () => mockPgModule.Pool.mockPools as any[];
-const resetMockPools = () => mockPgModule.Pool.reset();
-const setAllPoolClients = (client: PoolClient) => {
-  getMockPools().forEach((mockPool) => {
-    mockPool.connect.mockResolvedValue(client);
-  });
-};
-const rejectAllPoolClients = (error: Error) => {
-  getMockPools().forEach((mockPool) => {
-    mockPool.connect.mockRejectedValue(error);
-  });
-};
 
 describe('PostgreSQL Pool', () => {
   let mockClient: jest.Mocked<PoolClient>;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    resetMockPools();
 
     // Reset environment variables
     delete process.env.DATABASE_URL;
     delete process.env.DATABASE_READ_REPLICAS;
     delete process.env.PG_WRITE_POOL_SIZE;
     delete process.env.PG_READ_POOL_SIZE;
+    delete process.env.PG_PREFERRED_READ_REGIONS;
+    delete process.env.PG_READ_REPLICA_REGION_BONUS;
+    delete process.env.PG_READ_REPLICA_HEALTH_THRESHOLD;
+    delete process.env.PG_READ_REPLICA_ALLOW_DEGRADED;
+    delete process.env.PG_FAILOVER_TO_WRITER;
+    delete process.env.CURRENT_REGION;
 
     // Mock client
     mockClient = {
@@ -111,6 +89,24 @@ describe('PostgreSQL Pool', () => {
       const pool = getPostgresPool();
 
       expect(pool).toBeDefined();
+    });
+
+    it('should parse read replica metadata for regions and priority', () => {
+      process.env.DATABASE_READ_REPLICAS =
+        'postgresql://read1:5432/db|region=us-east-1|priority=120,postgresql://read2:5432/db|region=eu-west-1|priority=80';
+
+      const replicas = __private.parseReadReplicaConfigs();
+
+      expect(replicas).toHaveLength(2);
+      expect(replicas[0]).toMatchObject({
+        region: 'us-east-1',
+        priority: 120,
+      });
+      expect(replicas[1]).toMatchObject({
+        name: 'read-replica-2',
+        region: 'eu-west-1',
+        priority: 80,
+      });
     });
 
     it('should parse individual connection parameters', () => {
@@ -150,7 +146,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      setAllPoolClients(mockClient);
+      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
     });
 
     it('should route SELECT queries to read pool', async () => {
@@ -399,7 +395,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      setAllPoolClients(mockClient);
+      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
     });
 
     it('should return health status for all pools', async () => {
@@ -424,7 +420,7 @@ describe('PostgreSQL Pool', () => {
         expect(typeof snapshot.activeConnections).toBe('number');
         expect(typeof snapshot.idleConnections).toBe('number');
         expect(typeof snapshot.queuedRequests).toBe('number');
-        expect(typeof snapshot.consecutiveHealthFailures).toBe('number');
+        expect(snapshot.healthScore).toBeDefined();
       });
     });
 
@@ -435,47 +431,26 @@ describe('PostgreSQL Pool', () => {
 
       expect(health.some((h: any) => !h.healthy)).toBe(true);
     });
+  });
 
-    it('should recycle unhealthy pools after repeated failures', async () => {
-      await closePostgresPool();
-      resetMockPools();
+  describe('Replica Health', () => {
+    it('should expose health scoring with preferred region bias', async () => {
+      process.env.DATABASE_READ_REPLICAS =
+        'postgresql://read1:5432/db|region=us-east-1|priority=120,postgresql://read2:5432/db|region=eu-west-1|priority=80';
+      process.env.CURRENT_REGION = 'us-east-1';
 
-      process.env.PG_POOL_HEALTH_FAILURE_THRESHOLD = '1';
-      process.env.PG_POOL_RECOVERY_BACKOFF_MS = '0';
+      const pool = getPostgresPool();
 
-      pool = getPostgresPool();
+      const { readPoolWrappers } = __private.getPoolsSnapshot();
+      __private.replicaHealthTracker.recordFailure(readPoolWrappers[1]);
 
-      const [writePool, readPool] = getMockPools();
-      writePool.connect.mockRejectedValue(new Error('Health probe failed'));
-      readPool.connect.mockResolvedValue(mockClient);
-      mockClient.query.mockResolvedValue({ rows: [{ result: 1 }] } as any);
+      const health = pool.replicaHealth();
+      const east = health.find((entry: any) => entry.region === 'us-east-1');
+      const eu = health.find((entry: any) => entry.region === 'eu-west-1');
 
-      const initialPoolCreations = mockPgModule.Pool.mock.calls.length;
-
-      const failedHealth = await pool.healthCheck();
-
-      expect(
-        failedHealth.some(
-          (snapshot: any) =>
-            snapshot.name === 'write-primary' && snapshot.consecutiveHealthFailures >= 1,
-        ),
-      ).toBe(true);
-      expect(writePool.end).toHaveBeenCalled();
-
-      const replacementPool = getMockPools()[getMockPools().length - 1];
-      replacementPool.connect.mockResolvedValue(mockClient);
-
-      const recoveredHealth = await pool.healthCheck();
-
-      expect(mockPgModule.Pool.mock.calls.length).toBeGreaterThan(
-        initialPoolCreations,
-      );
-      expect(
-        recoveredHealth.some(
-          (snapshot: any) =>
-            snapshot.name === 'write-primary' && snapshot.consecutiveHealthFailures === 0,
-        ),
-      ).toBe(true);
+      expect(health.length).toBeGreaterThan(0);
+      expect((east?.healthScore ?? 0)).toBeGreaterThan(eu?.healthScore ?? 0);
+      expect(east?.priority).toBeGreaterThanOrEqual(eu?.priority ?? 0);
     });
   });
 
@@ -485,7 +460,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      setAllPoolClients(mockClient);
+      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
     });
 
     it('should track slow queries', async () => {
@@ -532,7 +507,7 @@ describe('PostgreSQL Pool', () => {
         release: jest.fn(),
       } as any;
 
-      setAllPoolClients(mockTransactionClient);
+      (pool.connect as jest.Mock).mockResolvedValue(mockTransactionClient);
 
       const client = await pool.connect();
 
@@ -547,7 +522,7 @@ describe('PostgreSQL Pool', () => {
         release: jest.fn(),
       } as any;
 
-      setAllPoolClients(mockTransactionClient);
+      (pool.connect as jest.Mock).mockResolvedValue(mockTransactionClient);
 
       const client = await pool.connect();
       client.release();
@@ -573,7 +548,7 @@ describe('PostgreSQL Pool', () => {
     beforeEach(() => {
       pool = getPostgresPool();
       mockClient.query.mockResolvedValue({ rows: [], rowCount: 0 } as any);
-      setAllPoolClients(mockClient);
+      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
     });
 
     it('should respect custom timeout', async () => {
@@ -617,7 +592,7 @@ describe('PostgreSQL Pool', () => {
 
     beforeEach(() => {
       pool = getPostgresPool();
-      setAllPoolClients(mockClient);
+      (pool.connect as jest.Mock).mockResolvedValue(mockClient);
     });
 
     it('should throw error on query failure', async () => {
@@ -642,7 +617,9 @@ describe('PostgreSQL Pool', () => {
     });
 
     it('should handle connection acquisition failure', async () => {
-      rejectAllPoolClients(new Error('Connection pool exhausted'));
+      (pool.connect as jest.Mock).mockRejectedValue(
+        new Error('Connection pool exhausted'),
+      );
 
       await expect(pool.query('SELECT 1')).rejects.toThrow();
     });

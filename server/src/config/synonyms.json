@@ -1,0 +1,9 @@
+{
+  "malware": ["virus", "trojan", "ransomware", "spyware", "worm", "backdoor"],
+  "phishing": ["social engineering", "scam", "fraud", "spear phishing", "whaling"],
+  "apt": ["advanced persistent threat", "nation-state", "cyber espionage", "state-sponsored"],
+  "dos": ["denial of service", "ddos", "flood"],
+  "vulnerability": ["exploit", "bug", "flaw", "weakness", "zero-day", "cve"],
+  "ioc": ["indicator of compromise", "artifact", "signature", "trace"],
+  "credentials": ["password", "login", "auth", "secrets", "keys", "tokens"]
+}
