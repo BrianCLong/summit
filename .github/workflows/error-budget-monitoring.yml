@@ -1,193 +1,218 @@
 name: Error Budget Monitoring
 
 on:
-  # Disabled scheduled trigger until production environment is configured
-  # schedule:
-  #   # Every 15 minutes during business hours
-  #   - cron: '*/15 8-18 * * 1-5'
+  schedule:
+    - cron: '*/10 * * * *'
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   issues: write
+  deployments: write
+  actions: write
 
 env:
+  PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
+  PROMETHEUS_TOKEN: ${{ secrets.PROMETHEUS_TOKEN }}
   GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
-  RESPONSIBLE_ENGINEER: ${{ secrets.SLO_ONCALL }}
-  PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
-  PROMETHEUS_BEARER_TOKEN: ${{ secrets.PROMETHEUS_BEARER_TOKEN }}
-  GRAPHQL_P95_THRESHOLD_MS: 1500
-  GRAPHQL_ERROR_RATE_THRESHOLD: 0.5
-  INGEST_TIME_THRESHOLD_SEC: 300
-  INGEST_DLQ_THRESHOLD_PERCENT: 0.1
-  WORKER_FAILURE_THRESHOLD_PERCENT: 1
-  CI_PASS_THRESHOLD_PERCENT: 95
-  CI_MEAN_TIME_THRESHOLD_MINUTES: 25
+  SLO_ENVIRONMENT: production
+  ROLLBACK_EVENT: slo-breach
 
 jobs:
   error-budget-check:
-    outputs:
-      alert-needed: ${{ steps.slo-checks.outputs.alert-needed }}
-    if: ${{ !cancelled() }}
+    name: 📉 Detect SLO Breaches
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      alert-needed: ${{ steps.report.outputs.alert-needed }}
+      failing-slos: ${{ steps.evaluate.outputs.failing_slos }}
+      rollback-target: ${{ steps.deployment.outputs.rollback_target }}
+      deployment-sha: ${{ steps.deployment.outputs.current_sha }}
+      responsible-engineer: ${{ steps.deployment.outputs.responsible_engineer }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.x'
+      - name: Install monitoring dependencies
+        run: |
+          python3 -m pip install --quiet --upgrade pip pyyaml
 
-      - name: Evaluate SLOs from Prometheus
-        id: slo-checks
+      - name: Evaluate SLOs from catalog
+        id: evaluate
+        env:
+          PROMETHEUS_URL: ${{ env.PROMETHEUS_URL }}
+          PROMETHEUS_TOKEN: ${{ env.PROMETHEUS_TOKEN }}
         run: |
           set -euo pipefail
 
-          if [[ -z "${PROMETHEUS_URL}" ]]; then
-            echo "PROMETHEUS_URL secret is required for SLO checks" | tee -a "$GITHUB_STEP_SUMMARY"
-            exit 1
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.parse
+          import urllib.request
+
+          import yaml
+
+          prom_url = os.environ.get("PROMETHEUS_URL", "").rstrip("/")
+          prom_token = os.environ.get("PROMETHEUS_TOKEN")
+
+          with open("slo-config.yaml", "r", encoding="utf-8") as handle:
+            slo_config = yaml.safe_load(handle)
+
+          headers = {"Accept": "application/json"}
+          if prom_token:
+            headers["Authorization"] = f"Bearer {prom_token}"
+
+          results = []
+          failing = []
+          for objective in slo_config.get("spec", {}).get("objectives", []):
+            name = objective.get("name", "unnamed")
+            target = float(objective.get("target", 0))
+            query = objective.get("sli", {}).get("query", "")
+            measured = None
+            status = "unknown"
+            source = prom_url or "manual-input"
+
+            if prom_url and query:
+              try:
+                params = urllib.parse.urlencode({"query": query})
+                request = urllib.request.Request(
+                  f"{prom_url}/api/v1/query?{params}", headers=headers
+                )
+                with urllib.request.urlopen(request, timeout=20) as response:
+                  payload = json.load(response)
+                vector = payload.get("data", {}).get("result", [])
+                if vector:
+                  raw_value = float(vector[0]["value"][1])
+                  measured = raw_value * 100 if raw_value <= 1 else raw_value
+                  status = "breach" if measured < target else "ok"
+                else:
+                  status = "unavailable"
+              except Exception as exc:  # noqa: BLE001
+                status = f"unavailable ({exc.__class__.__name__})"
+            else:
+              status = "unavailable"
+
+            display_value = measured if measured is not None else "n/a"
+            results.append(
+              {
+                "name": name,
+                "target": target,
+                "value": display_value,
+                "status": status,
+                "query": query,
+                "source": source,
+              }
+            )
+
+            if status == "breach":
+              failing.append(name)
+
+          with open("slo-report.json", "w", encoding="utf-8") as handle:
+            json.dump(results, handle, indent=2)
+
+          breached = bool(failing)
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+            output.write(f"breach={str(breached).lower()}\n")
+            output.write(f"failing_slos={'|'.join(failing)}\n")
+          PY
+
+      - name: Resolve deployment context
+        id: deployment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SLO_ENVIRONMENT: ${{ env.SLO_ENVIRONMENT }}
+        run: |
+          set -euo pipefail
+
+          ENVIRONMENT="${SLO_ENVIRONMENT:-production}"
+          DEPLOYMENTS=$(gh api \
+            --method GET \
+            "/repos/$GITHUB_REPOSITORY/deployments?environment=${ENVIRONMENT}&per_page=5" 2>/dev/null || true)
+
+          CURRENT_SHA=$(echo "$DEPLOYMENTS" | jq -r '.[0].sha // ""')
+          RESPONSIBLE=$(echo "$DEPLOYMENTS" | jq -r '.[0].creator.login // ""')
+
+          ROLLBACK_TARGET=""
+          if [[ -n "$DEPLOYMENTS" && "$DEPLOYMENTS" != "[]" ]]; then
+            while read -r sha id; do
+              STATUS=$(gh api \
+                "/repos/$GITHUB_REPOSITORY/deployments/$id/statuses?per_page=1" \
+                --jq '.[0].state' 2>/dev/null || echo "unknown")
+
+              if [[ "$STATUS" == "success" ]]; then
+                if [[ "$sha" == "$CURRENT_SHA" ]]; then
+                  continue
+                fi
+                ROLLBACK_TARGET="$sha"
+                break
+              fi
+            done < <(echo "$DEPLOYMENTS" | jq -r '.[] | "\(.sha) \(.id)"')
           fi
 
-          prom_query() {
-            local query="$1"
-            local timeout="${2:-15}"
-            local auth_args=()
-
-            if [[ -n "${PROMETHEUS_BEARER_TOKEN:-}" ]]; then
-              auth_args=("-H" "Authorization: Bearer ${PROMETHEUS_BEARER_TOKEN}")
-            fi
-
-            curl -s \
-              --fail \
-              --max-time "$timeout" \
-              --get \
-              "${auth_args[@]}" \
-              --data-urlencode "query=$query" \
-              "$PROMETHEUS_URL/api/v1/query" |
-              jq -r '.data.result[0].value[1] // "null"'
-          }
-
-          GRAPHQL_LATENCY=$(prom_query 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="graphql"}[5m])) by (le))') || GRAPHQL_LATENCY="null"
-          GRAPHQL_LATENCY_MS="unknown"
-          GRAPHQL_P95_BREACH="false"
-          if [[ "$GRAPHQL_LATENCY" != "null" ]]; then
-            GRAPHQL_LATENCY_MS=$(printf '%.0f' "$(echo "$GRAPHQL_LATENCY * 1000" | bc -l)")
-            if (( $(echo "$GRAPHQL_LATENCY_MS > ${GRAPHQL_P95_THRESHOLD_MS}" | bc -l) )); then
-              GRAPHQL_P95_BREACH="true"
-            fi
-          fi
-
-          GRAPHQL_ERROR_RATE=$(prom_query 'sum(rate(http_requests_total{job="graphql",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="graphql"}[5m])) * 100') || GRAPHQL_ERROR_RATE="null"
-          GRAPHQL_ERROR_BREACH="false"
-          if [[ "$GRAPHQL_ERROR_RATE" != "null" ]]; then
-            if (( $(echo "$GRAPHQL_ERROR_RATE > ${GRAPHQL_ERROR_RATE_THRESHOLD}" | bc -l) )); then
-              GRAPHQL_ERROR_BREACH="true"
-            fi
-          fi
-
-          INGEST_TIME=$(prom_query 'histogram_quantile(0.5, sum(rate(ingest_end_to_end_seconds_bucket[10m])) by (le))') || INGEST_TIME="null"
-          INGEST_DLQ=$(prom_query 'sum(rate(ingest_dlq_total[5m])) / sum(rate(ingest_processed_total[5m])) * 100') || INGEST_DLQ="null"
-          INGEST_TIME_BREACH="false"
-          if [[ "$INGEST_TIME" != "null" ]]; then
-            if (( $(echo "$INGEST_TIME > ${INGEST_TIME_THRESHOLD_SEC}" | bc -l) )); then
-              INGEST_TIME_BREACH="true"
-            fi
-          fi
-          if [[ "$INGEST_DLQ" != "null" ]]; then
-            if (( $(echo "$INGEST_DLQ > ${INGEST_DLQ_THRESHOLD_PERCENT}" | bc -l) )); then
-              INGEST_TIME_BREACH="true"
-            fi
-          fi
-
-          WORKER_FAIL_RATE=$(prom_query 'sum(rate(worker_failures_total[5m])) / sum(rate(worker_requests_total[5m])) * 100') || WORKER_FAIL_RATE="null"
-          WORKER_BREACH="false"
-          if [[ "$WORKER_FAIL_RATE" != "null" ]]; then
-            if (( $(echo "$WORKER_FAIL_RATE > ${WORKER_FAILURE_THRESHOLD_PERCENT}" | bc -l) )); then
-              WORKER_BREACH="true"
-            fi
-          fi
-
-          CI_PASS_RATE="${{ env.CI_PASS_THRESHOLD_PERCENT }}"
-          CI_MEAN_TIME="${{ env.CI_MEAN_TIME_THRESHOLD_MINUTES }}"
-          CI_PASS_BREACH="false"
-          CI_TIME_BREACH="false"
-
-          ALERT_NEEDED="false"
-          if [[ "$GRAPHQL_P95_BREACH" == "true" ]] || [[ "$GRAPHQL_ERROR_BREACH" == "true" ]] || [[ "$INGEST_TIME_BREACH" == "true" ]] || [[ "$WORKER_BREACH" == "true" ]]; then
-            ALERT_NEEDED="true"
-          fi
-
-          {
-            echo "graphql-p95-ms=${GRAPHQL_LATENCY_MS}"
-            echo "graphql-error-rate=${GRAPHQL_ERROR_RATE}"
-            echo "graphql-latency-breach=${GRAPHQL_P95_BREACH}"
-            echo "graphql-error-breach=${GRAPHQL_ERROR_BREACH}"
-            echo "ingest-time=${INGEST_TIME}"
-            echo "ingest-dlq=${INGEST_DLQ}"
-            echo "ingest-breach=${INGEST_TIME_BREACH}"
-            echo "worker-fail-rate=${WORKER_FAIL_RATE}"
-            echo "worker-breach=${WORKER_BREACH}"
-            echo "ci-pass-rate=${CI_PASS_RATE}"
-            echo "ci-mean-time=${CI_MEAN_TIME}"
-            echo "ci-pass-breach=${CI_PASS_BREACH}"
-            echo "ci-time-breach=${CI_TIME_BREACH}"
-            echo "alert-needed=${ALERT_NEEDED}"
-          } >> "$GITHUB_OUTPUT"
-
-          printf "## Prometheus SLO snapshot\n" >> "$GITHUB_STEP_SUMMARY"
-          printf "- GraphQL p95 latency: %s ms (budget %s ms)\n" "$GRAPHQL_LATENCY_MS" "$GRAPHQL_P95_THRESHOLD_MS" >> "$GITHUB_STEP_SUMMARY"
-          printf "- GraphQL error rate: %s%% (budget %s%%)\n" "${GRAPHQL_ERROR_RATE:-unknown}" "$GRAPHQL_ERROR_RATE_THRESHOLD" >> "$GITHUB_STEP_SUMMARY"
-          printf "- Ingest p50: %s s (budget %s s)\n" "${INGEST_TIME:-unknown}" "$INGEST_TIME_THRESHOLD_SEC" >> "$GITHUB_STEP_SUMMARY"
-          printf "- Ingest DLQ: %s%% (budget %s%%)\n" "${INGEST_DLQ:-unknown}" "$INGEST_DLQ_THRESHOLD_PERCENT" >> "$GITHUB_STEP_SUMMARY"
-          printf "- Worker failure rate: %s%% (budget %s%%)\n" "${WORKER_FAIL_RATE:-unknown}" "$WORKER_FAILURE_THRESHOLD_PERCENT" >> "$GITHUB_STEP_SUMMARY"
+          echo "current_sha=$CURRENT_SHA" >> "$GITHUB_OUTPUT"
+          echo "responsible_engineer=$RESPONSIBLE" >> "$GITHUB_OUTPUT"
+          echo "rollback_target=$ROLLBACK_TARGET" >> "$GITHUB_OUTPUT"
 
       - name: Generate Error Budget Report
         id: report
         run: |
-          cat > error-budget-report.md << EOF
-          # 📊 Error Budget Status Report
+          set -euo pipefail
 
-          **Timestamp:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          python3 - <<'PY'
+          import json
+          from datetime import datetime, timezone
 
-          ## Service Level Objectives (SLOs)
+          with open("slo-report.json", "r", encoding="utf-8") as handle:
+            slo_results = json.load(handle)
 
-          | Metric | Current | Budget | Status |
-          |--------|---------|---------|---------|
-          | GraphQL P95 | ${{ steps.slo-checks.outputs.graphql-p95-ms }}ms | ≤ ${{ env.GRAPHQL_P95_THRESHOLD_MS }}ms | ${{ steps.slo-checks.outputs.graphql-latency-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | GraphQL Error Rate | ${{ steps.slo-checks.outputs.graphql-error-rate }}% | < ${{ env.GRAPHQL_ERROR_RATE_THRESHOLD }}% | ${{ steps.slo-checks.outputs.graphql-error-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | Ingest E2E (p50) | ${{ steps.slo-checks.outputs.ingest-time }}s | < ${{ env.INGEST_TIME_THRESHOLD_SEC }}s | ${{ steps.slo-checks.outputs.ingest-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | DLQ Rate | ${{ steps.slo-checks.outputs.ingest-dlq }}% | < ${{ env.INGEST_DLQ_THRESHOLD_PERCENT }}% | ${{ steps.slo-checks.outputs.ingest-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | Worker Fail Rate | ${{ steps.slo-checks.outputs.worker-fail-rate }}% | < ${{ env.WORKER_FAILURE_THRESHOLD_PERCENT }}% | ${{ steps.slo-checks.outputs.worker-breach == 'true' && '❌ EXCEEDED' || '✅ OK' }} |
-          | CI Pass Rate | ${{ steps.slo-checks.outputs.ci-pass-rate }}% | > ${{ env.CI_PASS_THRESHOLD_PERCENT }}% | ✅ OK |
-          | CI Mean Time | ${{ steps.slo-checks.outputs.ci-mean-time }}m | < ${{ env.CI_MEAN_TIME_THRESHOLD_MINUTES }}m | ✅ OK |
+          breached = any(item.get("status") == "breach" for item in slo_results)
 
-          ## Budget Burn Rate
-          - **GraphQL**: $( [[ "${{ steps.slo-checks.outputs.graphql-latency-breach }}" == 'true' ]] && echo 'Elevated burn' || echo 'Normal burn' )
-          - **Ingest**: $( [[ "${{ steps.slo-checks.outputs.ingest-breach }}" == 'true' ]] && echo 'Elevated burn' || echo 'Normal burn' )
-          - **Workers**: $( [[ "${{ steps.slo-checks.outputs.worker-breach }}" == 'true' ]] && echo 'Elevated burn' || echo 'Minimal burn' )
+          lines = [
+            "# 📊 Error Budget Status Report",
+            f"**Timestamp:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}",
+            "",
+            "## Service Level Objectives",
+            "| Metric | Current | Target | Status | Source |",
+            "|--------|---------|--------|--------|--------|",
+          ]
 
-          ## Actions Required
-          ${{ steps.slo-checks.outputs.graphql-latency-breach == 'true' && '🚨 **IMMEDIATE**: GraphQL latency exceeding budget - investigate slow resolvers' || '' }}
-          ${{ steps.slo-checks.outputs.graphql-error-breach == 'true' && '🚨 **IMMEDIATE**: GraphQL error rate above budget - check upstream dependencies' || '' }}
-          ${{ steps.slo-checks.outputs.ingest-breach == 'true' && '🚨 **IMMEDIATE**: Ingest pipeline degraded - check worker scaling' || '' }}
-          ${{ steps.slo-checks.outputs.worker-breach == 'true' && '🚨 **IMMEDIATE**: Worker failure rate high - check DLQ and error logs' || '' }}
+          for item in slo_results:
+            status = item.get("status")
+            status_icon = "❌ BREACH" if status == "breach" else "✅ OK" if status == "ok" else "⚠️ unavailable"
+            value = item.get("value", "n/a")
+            lines.append(
+              f"| {item.get('name')} | {value} | ≥ {item.get('target')} | {status_icon} | {item.get('source')} |"
+            )
 
-          EOF
+          if breached:
+            lines.append("")
+            lines.append("## Actions Required")
+            lines.append("- 🚨 One or more SLOs breached. Automatic rollback will be triggered.")
 
-          echo "alert-needed=${{ steps.slo-checks.outputs.alert-needed }}" >> $GITHUB_OUTPUT
+          with open("error-budget-report.md", "w", encoding="utf-8") as handle:
+            handle.write("\n".join(lines))
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+            output.write(f"alert-needed={str(breached).lower()}\n")
+          PY
 
       - name: Create or Update Issue
         if: steps.report.outputs.alert-needed == 'true'
         uses: actions/github-script@v7
+        env:
+          RESPONSIBLE: ${{ steps.deployment.outputs.responsible_engineer }}
+          DEPLOYMENT_SHA: ${{ steps.deployment.outputs.current_sha }}
+          FAILING_SLOS: ${{ steps.evaluate.outputs.failing_slos }}
         with:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('error-budget-report.md', 'utf8');
-            const oncall = process.env.RESPONSIBLE_ENGINEER;
+            const failingSlos = (process.env.FAILING_SLOS || '').split('|').filter(Boolean);
+            const assignees = process.env.RESPONSIBLE ? [process.env.RESPONSIBLE] : [];
 
-            // Look for existing error budget issue
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -195,134 +220,92 @@ jobs:
               state: 'open'
             });
 
+            const latestDeployment = process.env.DEPLOYMENT_SHA || 'unavailable';
+            const body = `${report}\n\n**Failing SLOs:** ${failingSlos.join(', ') || 'unknown'}\n**Latest deployment:** ${latestDeployment}`;
+
             if (issues.data.length > 0) {
-              // Update existing issue
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issues.data[0].number,
-                body: `## Updated Error Budget Report\n\n${report}`
+                body
               });
             } else {
-              // Create new issue
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: '🚨 Error Budget Violation Detected',
-                body: report,
+                body,
                 labels: ['error-budget', 'slo-violation', 'P0'],
-                assignees: oncall ? [oncall] : undefined
+                assignees
               });
             }
 
       - name: Notify Slack
         if: steps.report.outputs.alert-needed == 'true'
+        env:
+          RESPONSIBLE: ${{ steps.deployment.outputs.responsible_engineer }}
+          DEPLOYMENT_SHA: ${{ steps.deployment.outputs.current_sha }}
+          ROLLBACK_TARGET: ${{ steps.deployment.outputs.rollback_target }}
+          FAILING_SLOS: ${{ steps.evaluate.outputs.failing_slos }}
         run: |
-          curl -X POST "${{ env.SLACK_WEBHOOK }}" \
+          set -euo pipefail
+
+          if [[ -z "${SLACK_WEBHOOK:-}" ]]; then
+            echo "Slack webhook not configured; skipping notification"
+            exit 0
+          fi
+
+          FAILING_SLOS="${FAILING_SLOS:-}"
+          RESPONSIBLE_HANDLE=${RESPONSIBLE:-on-call}
+
+          curl -X POST "${SLACK_WEBHOOK}" \
             -H 'Content-type: application/json' \
-            --data '{
-              "text": "🚨 IntelGraph Error Budget Violation",
-              "attachments": [
-                {
-                  "color": "danger",
-                  "title": "SLO Violation Detected",
-                  "fields": [
-                    {
-                      "title": "GraphQL P95",
-                      "value": "${{ steps.slo-checks.outputs.graphql-p95-ms }}ms",
-                      "short": true
-                    },
-                    {
-                      "title": "Worker Failures",
-                      "value": "${{ steps.slo-checks.outputs.worker-fail-rate }}%",
-                      "short": true
-                    },
-                    {
-                      "title": "Action Required",
-                      "value": "Check error budget dashboard and recent deployments",
-                      "short": false
-                    },
-                    {
-                      "title": "Oncall",
-                      "value": "${{ env.RESPONSIBLE_ENGINEER || 'unassigned' }}",
-                      "short": true
-                    }
-                  ]
-                }
-              ]
-            }'
+            --data "{\
+              \"text\": \"🚨 SLO violation detected in ${SLO_ENVIRONMENT}. Rollback will be triggered.\",\
+              \"attachments\": [\
+                {\
+                  \"color\": \"danger\",\
+                  \"title\": \"SLO Breach\",\
+                  \"fields\": [\
+                    {\"title\": \"Failing SLOs\", \"value\": \"${FAILING_SLOS:-unknown}\", \"short\": false},\
+                    {\"title\": \"Latest Deployment\", \"value\": \"${DEPLOYMENT_SHA:-unknown}\", \"short\": true},\
+                    {\"title\": \"Rollback Target\", \"value\": \"${ROLLBACK_TARGET:-pending}\", \"short\": true},\
+                    {\"title\": \"Responsible Engineer\", \"value\": \"${RESPONSIBLE_HANDLE}\", \"short\": true}\
+                  ]\
+                }\
+              ]\
+            }"
 
       - name: Upload Report Artifact
         uses: actions/upload-artifact@v4
         with:
           name: error-budget-report-${{ github.run_number }}
-          path: error-budget-report.md
+          path: |
+            error-budget-report.md
+            slo-report.json
           retention-days: 30
 
-  slo-auto-rollback:
-    name: SLO Auto Rollback
-    needs: error-budget-check
-    if: needs.error-budget-check.outputs.alert-needed == 'true'
-    runs-on: ubuntu-latest
-    env:
-      SLO_ROLLBACK_ENABLED: ${{ secrets.SLO_ROLLBACK_ENABLED }}
-      SLO_ROLLBACK_DRY_RUN: ${{ secrets.SLO_ROLLBACK_DRY_RUN }}
-      PROMETHEUS_URL: ${{ secrets.PROMETHEUS_URL }}
-      PROMETHEUS_BEARER_TOKEN: ${{ secrets.PROMETHEUS_BEARER_TOKEN }}
-      KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      RESPONSIBLE_ENGINEER: ${{ secrets.SLO_ONCALL }}
-      SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
-      NAMESPACE: ${{ secrets.K8S_NAMESPACE }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: 'v1.30.0'
-
-      - name: Configure kubeconfig
-        id: kubeconfig
-        run: |
-          if [ -z "${KUBE_CONFIG_DATA}" ]; then
-            echo "KUBE_CONFIG secret is missing; skipping rollback for safety." | tee -a "$GITHUB_STEP_SUMMARY"
-            echo "configured=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          mkdir -p "$HOME/.kube"
-          echo "${KUBE_CONFIG_DATA}" | base64 -d > "$HOME/.kube/config"
-          chmod 600 "$HOME/.kube/config"
-
-          echo "configured=true" >> "$GITHUB_OUTPUT"
-
-      - name: Run SLO rollback monitor
-        if: env.SLO_ROLLBACK_ENABLED == 'true' && steps.kubeconfig.outputs.configured == 'true'
+      - name: Trigger rollback workflow
+        if: steps.report.outputs.alert-needed == 'true' && steps.deployment.outputs.rollback_target != ''
         env:
-          ALLOW_NON_CANARY: "true"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESPONSIBLE: ${{ steps.deployment.outputs.responsible_engineer }}
         run: |
-          if [ -z "${PROMETHEUS_URL}" ]; then
-            echo "PROMETHEUS_URL is not configured; skipping rollback." | tee -a "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
+          set -euo pipefail
 
-          export DRY_RUN=${SLO_ROLLBACK_DRY_RUN:-false}
-          export SERVICE_NAME=${SERVICE_NAME:-intelgraph-server}
-          export NAMESPACE=${NAMESPACE:-intelgraph}
+          PAYLOAD=$(jq -n \
+            --arg env "$SLO_ENVIRONMENT" \
+            --arg deployment_sha "${{ steps.deployment.outputs.current_sha }}" \
+            --arg rollback_target "${{ steps.deployment.outputs.rollback_target }}" \
+            --arg failing_slos "${{ steps.evaluate.outputs.failing_slos }}" \
+            --arg triggered_by "${{ github.workflow }}" \
+            --arg responsible "${RESPONSIBLE:-}" \
+            '{environment: $env, deployment_sha: $deployment_sha, rollback_target: $rollback_target, failing_slos: $failing_slos, triggered_by: $triggered_by, responsible: $responsible}'
+          )
 
-          bash scripts/auto-rollback.sh
-
-      - name: Summarize rollback action
-        run: |
-          printf "## SLO rollback automation\n" >> "$GITHUB_STEP_SUMMARY"
-          if [ "${SLO_ROLLBACK_ENABLED}" != "true" ]; then
-            printf "- Rollback disabled via secret flag; no action taken.\n" >> "$GITHUB_STEP_SUMMARY"
-          elif [ "${{ steps.kubeconfig.outputs.configured }}" != "true" ]; then
-            printf "- Rollback skipped because kubeconfig was unavailable.\n" >> "$GITHUB_STEP_SUMMARY"
-          else
-            printf "- Rollback monitor executed using prometheus endpoint %s.\n" "${PROMETHEUS_URL}" >> "$GITHUB_STEP_SUMMARY"
-            printf "- Oncall notified: %s\n" "${RESPONSIBLE_ENGINEER:-unassigned}" >> "$GITHUB_STEP_SUMMARY"
-          fi
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            "/repos/$GITHUB_REPOSITORY/dispatches" \
+            --input - <<<"{\"event_type\": \"${ROLLBACK_EVENT}\", \"client_payload\": $PAYLOAD}"
