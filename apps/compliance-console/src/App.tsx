@@ -1,29 +1,57 @@
 import { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 
-axios.defaults.withCredentials = true;
-
-interface DisclosurePack {
+type DisclosurePack = {
   id: string;
   name: string;
   residency_region: string;
   tenant_id: string;
-}
+};
 
-function App() {
+axios.defaults.withCredentials = true;
+
+export default function App() {
   const [packs, setPacks] = useState<DisclosurePack[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [showStepUp, setShowStepUp] = useState(false);
   const [stepUpCode, setStepUpCode] = useState('');
   const [stepUpError, setStepUpError] = useState<string | null>(null);
   const [pendingExportId, setPendingExportId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios
-      .get<{ data: DisclosurePack[] }>('/api/disclosure-packs')
-      .then((res) => setPacks(res.data.data))
-      .catch(() => setPacks([]));
+    const fetchPacks = async () => {
+      try {
+        const res = await axios.get('/api/disclosure-packs');
+        const list = (res.data?.data as DisclosurePack[]) || [];
+        setPacks(list);
+        setSelectedId(list[0]?.id ?? null);
+        setError(null);
+      } catch (e: any) {
+        setError(
+          e?.response?.data?.error ||
+            e?.message ||
+            'Failed to load disclosure packs',
+        );
+        // provide a small fallback list so the UI remains interactive in dev
+        const fallback: DisclosurePack[] = [
+          {
+            id: 'pack-1',
+            name: 'Demo disclosure pack',
+            residency_region: 'us',
+            tenant_id: 'tenant_demo',
+          },
+        ];
+        setPacks(fallback);
+        setSelectedId(fallback[0]?.id ?? null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPacks();
   }, []);
 
   const selectedPack = useMemo(
@@ -34,7 +62,7 @@ function App() {
   async function downloadSelected(idOverride?: string) {
     const id = idOverride ?? selectedId;
     if (!id) return;
-    setLoading(true);
+
     try {
       const res = await axios.get(`/api/disclosure-packs/${id}/export`, {
         responseType: 'blob',
@@ -56,7 +84,6 @@ function App() {
         setShowStepUp(true);
         setStepUpError(null);
         setStepUpCode('');
-        setLoading(false);
         return;
       }
 
@@ -65,106 +92,94 @@ function App() {
           data?.reason ?? data?.error ?? e?.message ?? 'unknown error'
         }`,
       );
-    } finally {
-      setLoading(false);
     }
   }
 
   return (
-    <div style={{ maxWidth: 960, margin: '0 auto', padding: '1.5rem' }}>
-      <header style={{ marginBottom: '1.5rem' }}>
+    <div style={{ fontFamily: 'Inter, sans-serif', padding: '1.5rem' }}>
+      <header style={{ marginBottom: '1rem' }}>
         <h1 style={{ margin: 0 }}>Compliance Console</h1>
-        <p style={{ color: '#555', marginTop: 4 }}>
-          Export disclosure packs with step-up verification when required.
+        <p style={{ color: '#555', marginTop: '0.25rem' }}>
+          Manage disclosure packs and perform exports with MFA step-up.
         </p>
       </header>
 
-      <section
-        style={{
-          background: '#fff',
-          borderRadius: 8,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-          padding: '1rem',
-        }}
-      >
-        <h2 style={{ marginTop: 0 }}>Disclosure packs</h2>
-        {packs.length === 0 ? (
-          <p style={{ color: '#777' }}>No packs available.</p>
-        ) : (
-          <table
-            style={{
-              width: '100%',
-              borderCollapse: 'collapse',
-              marginBottom: '1rem',
-            }}
-          >
-            <thead>
-              <tr style={{ textAlign: 'left', borderBottom: '1px solid #ddd' }}>
-                <th style={{ padding: '0.5rem' }}>Name</th>
-                <th style={{ padding: '0.5rem' }}>Region</th>
-                <th style={{ padding: '0.5rem' }}>Tenant</th>
-              </tr>
-            </thead>
-            <tbody>
+      {loading ? (
+        <p>Loading disclosure packs…</p>
+      ) : error ? (
+        <p style={{ color: 'red' }}>{error}</p>
+      ) : (
+        <>
+          <section style={{ marginBottom: '1rem' }}>
+            <h2 style={{ marginBottom: '0.5rem' }}>Disclosure packs</h2>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               {packs.map((pack) => (
-                <tr
+                <button
                   key={pack.id}
                   onClick={() => setSelectedId(pack.id)}
                   style={{
+                    padding: '0.75rem 1rem',
+                    borderRadius: 8,
+                    border:
+                      pack.id === selectedId
+                        ? '2px solid #2563eb'
+                        : '1px solid #ccc',
+                    background: pack.id === selectedId ? '#e0ecff' : '#f8f9fb',
                     cursor: 'pointer',
-                    background:
-                      selectedId === pack.id ? 'rgba(59,130,246,0.08)' : 'none',
+                    minWidth: 180,
+                    textAlign: 'left',
                   }}
                 >
-                  <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee' }}>
-                    {pack.name}
-                  </td>
-                  <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee' }}>
-                    {pack.residency_region.toUpperCase()}
-                  </td>
-                  <td style={{ padding: '0.5rem', borderBottom: '1px solid #eee' }}>
-                    {pack.tenant_id}
-                  </td>
-                </tr>
+                  <strong>{pack.name}</strong>
+                  <div style={{ fontSize: '0.85rem', color: '#555' }}>
+                    Region: {pack.residency_region}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', color: '#777' }}>
+                    Tenant: {pack.tenant_id}
+                  </div>
+                </button>
               ))}
-            </tbody>
-          </table>
-        )}
+            </div>
+          </section>
 
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
-          <button
-            onClick={() => downloadSelected(selectedId || undefined)}
-            disabled={!selectedPack || loading}
-            style={{
-              background: '#2563eb',
-              color: '#fff',
-              border: 'none',
-              padding: '0.6rem 1rem',
-              borderRadius: 6,
-              opacity: !selectedPack || loading ? 0.6 : 1,
-            }}
-          >
-            {loading ? 'Downloading…' : 'Download JSON'}
-          </button>
-        </div>
-      </section>
-
-      {selectedPack && (
-        <section
-          style={{
-            marginTop: '1rem',
-            background: '#fff',
-            borderRadius: 8,
-            padding: '1rem',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-          }}
-        >
-          <h3 style={{ marginTop: 0 }}>Selected pack</h3>
-          <p style={{ margin: 0 }}>
-            <strong>{selectedPack.name}</strong> · Region:{' '}
-            {selectedPack.residency_region.toUpperCase()}
-          </p>
-        </section>
+          {selectedPack && (
+            <section style={{ marginTop: '1rem' }}>
+              <h3 style={{ marginBottom: '0.5rem' }}>Selected pack</h3>
+              <div
+                style={{
+                  border: '1px solid #e5e7eb',
+                  padding: '1rem',
+                  borderRadius: 8,
+                  background: '#fff',
+                  maxWidth: 520,
+                }}
+              >
+                <p style={{ margin: '0 0 0.5rem 0' }}>
+                  <strong>{selectedPack.name}</strong>
+                </p>
+                <p style={{ margin: '0 0 0.5rem 0', color: '#555' }}>
+                  Residency: {selectedPack.residency_region}
+                </p>
+                <p style={{ margin: '0 0 1rem 0', color: '#555' }}>
+                  Tenant: {selectedPack.tenant_id}
+                </p>
+                <button
+                  onClick={() => downloadSelected(selectedPack.id)}
+                  style={{
+                    padding: '0.65rem 1.1rem',
+                    background: '#2563eb',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Download JSON
+                </button>
+              </div>
+            </section>
+          )}
+        </>
       )}
 
       {showStepUp && (
@@ -234,12 +249,14 @@ function App() {
                   } catch (e: any) {
                     const data = e?.response?.data;
                     setStepUpError(
-                      data?.error ?? e?.message ?? 'Step-up verification failed',
+                      data?.error ||
+                        e?.message ||
+                        'Step-up verification failed',
                     );
                   }
                 }}
               >
-                Verify & Export
+                Verify &amp; Export
               </button>
             </div>
           </div>
@@ -248,5 +265,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

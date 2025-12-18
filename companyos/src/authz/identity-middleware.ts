@@ -1,9 +1,10 @@
-import type { NextFunction, Request, Response } from 'express';
-import type { SubjectAttributes } from './types.js';
+import type { Request, Response, NextFunction } from 'express';
+import type { Subject } from './types.js';
 
 declare module 'express-serve-static-core' {
   interface Request {
-    subject?: SubjectAttributes;
+    cookies?: Record<string, string>;
+    subject?: Subject;
   }
 }
 
@@ -12,7 +13,7 @@ export function stubIdentity(req: Request, _res: Response, next: NextFunction) {
   const userId = req.header('x-user-id') ?? 'user_demo';
   const region = req.header('x-region') ?? 'us';
 
-  const cookieMfa = (req as any).cookies?.companyos_mfa === '1';
+  const cookieMfa = req.cookies?.companyos_mfa === '1';
   const headerMfa = req.header('x-mfa-verified') === 'true';
 
   const mfaVerified = cookieMfa || headerMfa;

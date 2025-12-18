@@ -1,4 +1,11 @@
-export async function run(name: string, batch = 1000) {
-  // Reads from migrations_progress (name, last_id, state)
-  // Processes rows > last_id, updates cursor; safe to resume.
+import { MigrationManager } from '../src/db/migrations/versioning.js';
+
+/**
+ * Postgres migration runner for managed SQL migrations.
+ * Uses the typed MigrationManager to coordinate apply/rollback operations
+ * while keeping compatibility with the legacy entrypoint signature.
+ */
+export async function run(_name = 'default', _batch = 1000) {
+  const manager = new MigrationManager();
+  await manager.migrate();
 }
