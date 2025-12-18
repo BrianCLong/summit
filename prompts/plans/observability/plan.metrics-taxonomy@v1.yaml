@@ -1,0 +1,283 @@
+meta:
+  id: plan.metrics-taxonomy@v1
+  owner: 'platform-engineering'
+  purpose: 'Standardize metrics naming across TS, Python, and Go subsystems'
+  tags:
+    - observability
+    - metrics
+    - prometheus
+    - standardization
+    - monitoring
+  guardrails:
+    - 'Naming must follow OpenMetrics conventions'
+    - 'Units must be clearly specified'
+    - 'Cardinality must be controlled'
+    - 'Breaking changes require migration path'
+
+modelConfig:
+  model: 'gpt-4'
+  temperature: 0.2
+  maxTokens: 4000
+
+inputs:
+  subsystems: string
+  current_metrics: string
+  metric_backends: string
+  dashboard_requirements: string
+  alerting_requirements: string
+
+template: |
+  You are an Observability Engineer standardizing metrics for Summit/IntelGraph.
+
+  **Objective:** Standardize metrics naming across TS/Python/Go.
+
+  **Subsystems:**
+  {{subsystems}}
+
+  **Current Metrics:**
+  {{current_metrics}}
+
+  **Metric Backends:**
+  {{metric_backends}}
+
+  **Dashboard Requirements:**
+  {{dashboard_requirements}}
+
+  **Alerting Requirements:**
+  {{alerting_requirements}}
+
+  ## Deliverables
+
+  ### 1. Metrics Catalog
+  ```yaml
+  metrics_catalog:
+    namespace: summit
+
+    # HTTP Request Metrics
+    http:
+      - name: summit_http_requests_total
+        type: counter
+        description: Total HTTP requests
+        unit: requests
+        labels:
+          - method: [GET, POST, PUT, DELETE, PATCH]
+          - path: normalized_path
+          - status_code: [2xx, 3xx, 4xx, 5xx]
+          - service: service_name
+        cardinality: ~500
+
+      - name: summit_http_request_duration_seconds
+        type: histogram
+        description: HTTP request duration
+        unit: seconds
+        buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10]
+        labels:
+          - method
+          - path
+          - status_code
+          - service
+
+    # Database Metrics
+    database:
+      - name: summit_db_query_duration_seconds
+        type: histogram
+        description: Database query duration
+        unit: seconds
+        labels:
+          - query_type: [read, write, transaction]
+          - database: [neo4j, postgres]
+          - table_or_label: entity_type
+
+      - name: summit_db_connections_active
+        type: gauge
+        description: Active database connections
+        labels:
+          - database
+          - pool: [read, write]
+
+    # Business Metrics
+    business:
+      - name: summit_investigations_created_total
+        type: counter
+        description: Total investigations created
+        labels:
+          - user_tier
+          - template_used
+
+      - name: summit_entities_indexed_total
+        type: counter
+        description: Total entities indexed
+        labels:
+          - entity_type
+          - source
+  ```
+
+  ### 2. Naming Conventions
+  ```yaml
+  naming_conventions:
+    format: "{namespace}_{subsystem}_{name}_{unit}"
+
+    rules:
+      - Use snake_case
+      - Prefix with namespace (summit_)
+      - Include subsystem when relevant
+      - Suffix with unit (_seconds, _bytes, _total)
+      - Use base units (seconds not milliseconds)
+
+    examples:
+      good:
+        - summit_http_requests_total
+        - summit_db_query_duration_seconds
+        - summit_cache_hit_ratio
+        - summit_queue_messages_pending
+
+      bad:
+        - requests_count  # Missing namespace
+        - http_request_latency_ms  # Use seconds
+        - Summit.Http.Requests  # Wrong format
+        - summit_http_request_time  # Unclear unit
+
+    label_conventions:
+      - Use lowercase
+      - Avoid high cardinality (user_id, etc.)
+      - Normalize paths (/users/:id not /users/123)
+      - Use enums where possible
+  ```
+
+  ### 3. Language Adapters
+  ```yaml
+  adapters:
+    typescript:
+      library: prom-client
+      example: |
+        import { Counter, Histogram, Registry } from 'prom-client';
+
+        const registry = new Registry();
+        registry.setDefaultLabels({ service: 'api' });
+
+        export const httpRequestsTotal = new Counter({
+          name: 'summit_http_requests_total',
+          help: 'Total HTTP requests',
+          labelNames: ['method', 'path', 'status_code'],
+          registers: [registry],
+        });
+
+        export const httpRequestDuration = new Histogram({
+          name: 'summit_http_request_duration_seconds',
+          help: 'HTTP request duration in seconds',
+          labelNames: ['method', 'path', 'status_code'],
+          buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+          registers: [registry],
+        });
+
+    python:
+      library: prometheus_client
+      example: |
+        from prometheus_client import Counter, Histogram, REGISTRY
+
+        http_requests_total = Counter(
+            'summit_http_requests_total',
+            'Total HTTP requests',
+            ['method', 'path', 'status_code', 'service'],
+            registry=REGISTRY,
+        )
+
+        http_request_duration = Histogram(
+            'summit_http_request_duration_seconds',
+            'HTTP request duration in seconds',
+            ['method', 'path', 'status_code', 'service'],
+            buckets=[0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10],
+        )
+
+    go:
+      library: prometheus/client_golang
+      example: |
+        import (
+          "github.com/prometheus/client_golang/prometheus"
+          "github.com/prometheus/client_golang/prometheus/promauto"
+        )
+
+        var httpRequestsTotal = promauto.NewCounterVec(
+          prometheus.CounterOpts{
+            Namespace: "summit",
+            Name:      "http_requests_total",
+            Help:      "Total HTTP requests",
+          },
+          []string{"method", "path", "status_code", "service"},
+        )
+
+        var httpRequestDuration = promauto.NewHistogramVec(
+          prometheus.HistogramOpts{
+            Namespace: "summit",
+            Name:      "http_request_duration_seconds",
+            Help:      "HTTP request duration in seconds",
+            Buckets:   prometheus.DefBuckets,
+          },
+          []string{"method", "path", "status_code", "service"},
+        )
+  ```
+
+  ### 4. Dashboard Mapping
+  ```yaml
+  dashboards:
+    overview:
+      metrics:
+        - summit_http_requests_total: Request rate
+        - summit_http_request_duration_seconds: Latency percentiles
+        - summit_db_connections_active: Connection saturation
+        - summit_cache_hit_ratio: Cache effectiveness
+
+    service_health:
+      per_service:
+        - Request rate: rate(summit_http_requests_total[5m])
+        - Error rate: rate(summit_http_requests_total{status_code=~"5.."}[5m])
+        - p50 latency: histogram_quantile(0.5, rate(...[5m]))
+        - p99 latency: histogram_quantile(0.99, rate(...[5m]))
+
+    slo_dashboard:
+      availability: |
+        1 - (
+          sum(rate(summit_http_requests_total{status_code=~"5.."}[5m]))
+          /
+          sum(rate(summit_http_requests_total[5m]))
+        )
+      latency_sli: |
+        histogram_quantile(0.99,
+          sum(rate(summit_http_request_duration_seconds_bucket[5m])) by (le)
+        )
+  ```
+
+  ### 5. Implementation Tasks
+  ```
+  [ ] Task 1: [description] (estimated: Xh, risk: low/med/high)
+  [ ] Task 2: [description] (estimated: Xh, risk: low/med/high)
+  ...
+  ```
+
+  ## Acceptance Criteria
+  - [ ] Metrics catalog documented
+  - [ ] Naming conventions enforced
+  - [ ] Adapters working in all languages
+  - [ ] Dashboards show consistent metrics
+  - [ ] No high-cardinality violations
+
+  ## Rollback Plan
+  - Old metric names can coexist temporarily
+  - Dashboards can query both old and new
+  - Migration period before deprecation
+
+  **Confidence Level:** [0-100]%
+
+examples:
+  - name: 'unified-metrics'
+    inputs:
+      subsystems: 'API (TS), Graph Engine (Go), ML Pipeline (Python), Workers (TS)'
+      current_metrics: 'Inconsistent naming, mix of camelCase and snake_case'
+      metric_backends: 'Prometheus, Grafana, Alertmanager'
+      dashboard_requirements: 'SLO tracking, service health, business metrics'
+      alerting_requirements: 'Latency, error rate, saturation alerts'
+    expected_contains:
+      - 'Metrics Catalog'
+      - 'Naming Conventions'
+      - 'Language Adapters'
+      - 'Dashboard Mapping'

@@ -157,9 +157,103 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
           SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
 
+  schema-safety:
+    name: Schema pre-flight & post-migration verification
+    needs: [validate, approval]
+    runs-on: ubuntu-latest
+    outputs:
+      report-path: ${{ steps.schema-report.outputs.path }}
+      preflight-status: ${{ steps.schema-report.outputs.preflight-status }}
+      verification-status: ${{ steps.schema-report.outputs.verification-status }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/v${{ inputs.version }}
+          fetch-depth: 0
+
+      - name: Run schema safety checks
+        id: schema-report
+        run: |
+          set -euo pipefail
+          REPORT_FILE="release-report.md"
+          VERSION_TAG="v${{ inputs.version }}"
+
+          echo "## Schema Migration Validation (${VERSION_TAG})" > "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          git fetch --tags --force
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 "${VERSION_TAG}^" 2>/dev/null || true)
+
+          PREFLIGHT_STATUS="skipped"
+          VERIFICATION_STATUS="skipped"
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            CHANGED_FILES=$(git diff --name-only "$PREVIOUS_TAG" "$VERSION_TAG" | grep -E '(migrations/|/schema|schema/)' || true)
+          else
+            CHANGED_FILES=$(git ls-files | grep -E '(migrations/|/schema|schema/)' || true)
+          fi
+
+          echo "- Previous tag: ${PREVIOUS_TAG:-none}" >> "$REPORT_FILE"
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "- Schema changes: none detected" >> "$REPORT_FILE"
+            echo "- Pre-flight check: not required" >> "$REPORT_FILE"
+            echo "- Post-migration verification: not required" >> "$REPORT_FILE"
+            echo "path=$REPORT_FILE" >> "$GITHUB_OUTPUT"
+            echo "preflight-status=$PREFLIGHT_STATUS" >> "$GITHUB_OUTPUT"
+            echo "verification-status=$VERIFICATION_STATUS" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "- Schema changes detected:" >> "$REPORT_FILE"
+          echo "$CHANGED_FILES" | while read -r file; do echo "  - $file" >> "$REPORT_FILE"; done
+
+          chmod +x ops/db/migrate ops/db/verify
+
+          if ./ops/db/migrate --plan --no-apply; then
+            PREFLIGHT_STATUS="passed"
+            echo "- Pre-flight check: ✅ passed" >> "$REPORT_FILE"
+          else
+            PREFLIGHT_STATUS="failed"
+            echo "- Pre-flight check: ❌ failed" >> "$REPORT_FILE"
+          fi
+
+          if ./ops/db/verify --shadow; then
+            VERIFICATION_STATUS="passed"
+            echo "- Post-migration verification: ✅ passed" >> "$REPORT_FILE"
+          else
+            VERIFICATION_STATUS="failed"
+            echo "- Post-migration verification: ❌ failed" >> "$REPORT_FILE"
+          fi
+
+          echo "path=$REPORT_FILE" >> "$GITHUB_OUTPUT"
+          echo "preflight-status=$PREFLIGHT_STATUS" >> "$GITHUB_OUTPUT"
+          echo "verification-status=$VERIFICATION_STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Append schema validation to summary
+        if: always()
+        run: cat ${{ steps.schema-report.outputs.path }} >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload release report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-report
+          path: ${{ steps.schema-report.outputs.path }}
+
+      - name: Fail if schema validation failed
+        if: always()
+        run: |
+          if [ "${{ steps.schema-report.outputs.preflight-status }}" = "failed" ] || [ "${{ steps.schema-report.outputs.verification-status }}" = "failed" ]; then
+            echo "Schema validation failed. See release report for details."
+            exit 1
+          fi
+
   pre-deployment-checks:
     name: Pre-deployment Checks
-    needs: [validate, approval]
+    needs: [validate, approval, schema-safety]
     runs-on: ubuntu-latest
 
     steps:
