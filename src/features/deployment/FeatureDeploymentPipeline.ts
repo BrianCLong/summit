@@ -470,6 +470,17 @@ export class FeatureDeploymentPipeline extends EventEmitter {
   }
 
   /**
+   * Retrieve a deployment request for observability or orchestration.
+   *
+   * This helper is read-only by design to avoid introducing new mutation
+   * pathways; it surfaces the cached request object so callers can render
+   * dashboards or correlate metrics without altering pipeline state.
+   */
+  getDeploymentRequest(requestId: string): DeploymentRequest | undefined {
+    return this.deploymentRequests.get(requestId);
+  }
+
+  /**
    * Reject deployment request
    */
   async rejectDeployment(
@@ -498,6 +509,22 @@ export class FeatureDeploymentPipeline extends EventEmitter {
     this.deploymentRequests.set(requestId, request);
 
     this.emit('deployment:rejected', { requestId, approver, reason });
+  }
+
+  /**
+   * Manually trigger rollback for a deployment.
+   *
+   * The public entrypoint delegates to the existing rollback execution logic,
+   * preserving the previously configured strategy while making the operation
+   * discoverable for operational runbooks.
+   */
+  async triggerRollback(requestId: string, reason: string): Promise<void> {
+    const request = this.deploymentRequests.get(requestId);
+    if (!request) {
+      throw new Error(`Deployment request not found: ${requestId}`);
+    }
+
+    await this.executeRollback(request, reason);
   }
 
   /**
