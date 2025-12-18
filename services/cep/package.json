@@ -1,0 +1,22 @@
+{
+  "name": "cep-service",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "CEP rule composer and runtime with DSL, windows, and adapters",
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "eslint .",
+    "test": "node --test services/cep/tests"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ioredis": "^5.4.2",
+    "kafkajs": "^2.2.4",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "k6": "^0.55.0"
+  }
+}
