@@ -1,0 +1,165 @@
+{
+  "generated_at": "2025-01-01T00:00:00+0000",
+  "clock_shift": {
+    "late_write_slip_days": 4,
+    "backfill_days": 20
+  },
+  "datasets": [
+    {
+      "name": "accounts_core",
+      "last_arrival": "2024-12-31T18:00:00+0000",
+      "purposes": [
+        {
+          "purpose": "customer_support",
+          "retention_days": 180,
+          "baseline_deletion_horizon": "2024-07-04",
+          "late_write_horizon": "2024-06-30",
+          "backfill_horizon": "2024-06-14",
+          "compliance_risk": [
+            {
+              "type": "late_writes",
+              "status": "breach",
+              "allowed_days": 2,
+              "projected_shift_days": 4,
+              "delta_days": 2,
+              "projected_horizon": "2024-06-30"
+            },
+            {
+              "type": "backfill",
+              "status": "breach",
+              "allowed_days": 14,
+              "projected_shift_days": 20,
+              "delta_days": 6,
+              "projected_horizon": "2024-06-14"
+            }
+          ]
+        },
+        {
+          "purpose": "fraud_detection",
+          "retention_days": 365,
+          "baseline_deletion_horizon": "2024-01-01",
+          "late_write_horizon": "2023-12-28",
+          "backfill_horizon": "2023-12-12",
+          "compliance_risk": [
+            {
+              "type": "late_writes",
+              "status": "breach",
+              "allowed_days": 3,
+              "projected_shift_days": 4,
+              "delta_days": 1,
+              "projected_horizon": "2023-12-28"
+            },
+            {
+              "type": "backfill",
+              "status": "ok",
+              "allowed_days": 30,
+              "projected_shift_days": 20,
+              "delta_days": -10,
+              "projected_horizon": "2023-12-12"
+            }
+          ]
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "customer_support_index",
+          "type": "index",
+          "purpose": "customer_support",
+          "retention_days": 150,
+          "latency_days": 1,
+          "deletion_horizon": "2024-08-04",
+          "alignment_delta_days": 31,
+          "impact": "extends deletion window by 31 days"
+        },
+        {
+          "name": "fraud_features_v4",
+          "type": "feature",
+          "purpose": "fraud_detection",
+          "retention_days": 400,
+          "latency_days": 2,
+          "deletion_horizon": "2023-11-29",
+          "alignment_delta_days": -33,
+          "impact": "eligible for deletion 33 days earlier"
+        }
+      ]
+    },
+    {
+      "name": "transactions_delta",
+      "last_arrival": "2024-12-30T06:00:00+0000",
+      "purposes": [
+        {
+          "purpose": "fraud_detection",
+          "retention_days": 540,
+          "baseline_deletion_horizon": "2023-07-09",
+          "late_write_horizon": "2023-07-05",
+          "backfill_horizon": "2023-06-19",
+          "compliance_risk": [
+            {
+              "type": "late_writes",
+              "status": "ok",
+              "allowed_days": 5,
+              "projected_shift_days": 4,
+              "delta_days": -1,
+              "projected_horizon": "2023-07-05"
+            },
+            {
+              "type": "backfill",
+              "status": "ok",
+              "allowed_days": 45,
+              "projected_shift_days": 20,
+              "delta_days": -25,
+              "projected_horizon": "2023-06-19"
+            }
+          ]
+        },
+        {
+          "purpose": "regulatory_reporting",
+          "retention_days": 730,
+          "baseline_deletion_horizon": "2022-12-31",
+          "late_write_horizon": "2022-12-27",
+          "backfill_horizon": "2022-12-11",
+          "compliance_risk": [
+            {
+              "type": "late_writes",
+              "status": "ok",
+              "allowed_days": 10,
+              "projected_shift_days": 4,
+              "delta_days": -6,
+              "projected_horizon": "2022-12-27"
+            },
+            {
+              "type": "backfill",
+              "status": "ok",
+              "allowed_days": 90,
+              "projected_shift_days": 20,
+              "delta_days": -70,
+              "projected_horizon": "2022-12-11"
+            }
+          ]
+        }
+      ],
+      "dependencies": [
+        {
+          "name": "fraud_scoring_index",
+          "type": "index",
+          "purpose": "fraud_detection",
+          "retention_days": 540,
+          "latency_days": 1,
+          "deletion_horizon": "2023-07-10",
+          "alignment_delta_days": 1,
+          "impact": "extends deletion window by 1 days"
+        },
+        {
+          "name": "reg_report_features",
+          "type": "feature",
+          "purpose": "regulatory_reporting",
+          "retention_days": 800,
+          "latency_days": 3,
+          "deletion_horizon": "2022-10-25",
+          "alignment_delta_days": -67,
+          "impact": "eligible for deletion 67 days earlier"
+        }
+      ]
+    }
+  ]
+}
