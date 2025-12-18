@@ -1,0 +1,83 @@
+groups:
+  - name: intelgraph.application
+    rules:
+      - alert: HighErrorRate
+        expr: rate(application_errors_total[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          service: intelgraph
+        annotations:
+          summary: "High application error rate"
+          description: "Application error rate is {{ $value }} errors/s"
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-error-rate"
+
+      - alert: HighGraphQLErrorRate
+        expr: sum(rate(graphql_errors_total[5m])) by (operation) / sum(rate(graphql_requests_total[5m])) by (operation) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph
+        annotations:
+          summary: "High GraphQL error rate for {{ $labels.operation }}"
+          description: "GraphQL operation {{ $labels.operation }} has >5% error rate"
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-graphql-errors"
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph
+        annotations:
+          summary: "High HTTP Latency"
+          description: "95th percentile HTTP latency is > 1s"
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-latency"
+
+      - alert: DatabaseSlow
+        expr: histogram_quantile(0.95, sum(rate(db_query_duration_seconds_bucket[5m])) by (le, database)) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          service: intelgraph
+        annotations:
+          summary: "Database query latency high"
+          description: "95th percentile DB latency for {{ $labels.database }} is > 500ms"
+          runbook_url: "https://docs.intelgraph.com/runbooks/db-latency"
+
+  - name: intelgraph.business
+    rules:
+      - alert: DropInSignups
+        expr: sum(rate(business_user_signups_total[1h])) == 0
+        for: 1h
+        labels:
+          severity: warning
+          service: intelgraph
+        annotations:
+          summary: "Zero signups in last hour"
+          description: "No user signups detected in the last hour"
+          runbook_url: "https://docs.intelgraph.com/runbooks/zero-signups"
+
+      - alert: DropInRevenue
+        expr: sum(rate(business_revenue_total[1h])) < 100
+        for: 1h
+        labels:
+          severity: warning
+          service: intelgraph
+        annotations:
+          summary: "Low revenue detected"
+          description: "Revenue rate dropped below threshold"
+          runbook_url: "https://docs.intelgraph.com/runbooks/low-revenue"
+
+  - name: intelgraph.infrastructure
+    rules:
+      - alert: HighMemoryUsage
+        expr: application_memory_usage_bytes{component="heap_used"} / application_memory_usage_bytes{component="heap_total"} > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          service: intelgraph
+        annotations:
+          summary: "High Memory Usage"
+          description: "Heap usage is over 90%"
+          runbook_url: "https://docs.intelgraph.com/runbooks/high-memory"
