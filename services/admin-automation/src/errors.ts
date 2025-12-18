@@ -71,7 +71,7 @@ export async function withErrorHandling<T>(
   try {
     return await fn();
   } catch (error) {
-    if (isAdminAutomationError(error)) throw error;
+    if (isAdminAutomationError(error)) {throw error;}
     throw new DatabaseError(operation, error instanceof Error ? error : undefined);
   }
 }
