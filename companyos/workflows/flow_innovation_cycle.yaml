@@ -1,0 +1,46 @@
+id: FLOW_INNOVATION_CYCLE
+owner: AUR-TEAM
+description: The loop for generating, validating, and protecting new IP.
+nodes:
+  - id: signal_mining
+    owner: IG-ARCH
+    input: Graph Data
+    action: Detect novel patterns/usage
+    output: Innovation Signal
+  - id: idea_generation
+    owner: AUR-TEAM
+    input: Innovation Signal
+    action: Formulate Invention Disclosure
+    output: Draft Disclosure
+  - id: prior_art_search
+    owner: AUR-TEAM
+    input: Draft Disclosure
+    action: Search external databases
+    output: Novelty Score
+  - id: internal_review
+    owner: MC-ARCH
+    input: Novelty Score
+    action: Technical viability & Ethics check
+    output: Go/No-Go Decision
+  - id: patent_drafting
+    owner: AUR-TEAM
+    input: Go/No-Go Decision
+    action: Draft Full Application
+    output: Patent Application
+  - id: foresight_integration
+    owner: AUR-TEAM
+    input: Patent Application
+    action: Update Strategic Scenario Models
+    output: Updated Strategy
+edges:
+  - source: signal_mining
+    target: idea_generation
+  - source: idea_generation
+    target: prior_art_search
+  - source: prior_art_search
+    target: internal_review
+  - source: internal_review
+    target: patent_drafting
+    condition: decision == GO
+  - source: patent_drafting
+    target: foresight_integration

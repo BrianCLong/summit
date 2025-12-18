@@ -128,9 +128,9 @@ export class CredentialIssuer {
   }
 
   private calculateTrustLevel(contributionCount: number): string {
-    if (contributionCount >= 100) return 'gold';
-    if (contributionCount >= 50) return 'silver';
-    if (contributionCount >= 10) return 'bronze';
+    if (contributionCount >= 100) {return 'gold';}
+    if (contributionCount >= 50) {return 'silver';}
+    if (contributionCount >= 10) {return 'bronze';}
     return 'standard';
   }
 }
