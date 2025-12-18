@@ -312,7 +312,7 @@ export class CognitiveAgentSimulator {
 
   private assessBeliefThreat(agent: CognitiveAgent, info: InformationStimulus): number {
     const belief = agent.beliefs.beliefs.get(info.topic);
-    if (!belief) return 0;
+    if (!belief) {return 0;}
     return belief.valence !== info.valence ? belief.confidence : 0;
   }
 

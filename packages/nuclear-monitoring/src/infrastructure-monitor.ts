@@ -4,7 +4,7 @@
  * Tracks overall nuclear infrastructure development and capabilities.
  */
 
-import type { NuclearInfrastructure, FuelCycleStage, TechnologyLevel } from './types.js';
+import { type NuclearInfrastructure, FuelCycleStage, TechnologyLevel } from './types.js';
 
 export class NuclearInfrastructureMonitor {
   private infrastructures: Map<string, NuclearInfrastructure>;

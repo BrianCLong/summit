@@ -180,7 +180,7 @@ export class ColumnarStorageEngine {
     columns: string[],
     data: any[][],
   ): Promise<void> {
-    if (data.length === 0) return;
+    if (data.length === 0) {return;}
 
     // Split into blocks
     const blocks = this.splitIntoBlocks(data, this.blockSize);
@@ -301,8 +301,8 @@ export class ColumnarStorageEngine {
     for (let i = 0; i < nonNull.length; i++) {
       const val = nonNull[i];
 
-      if (val < min) min = val;
-      if (val > max) max = val;
+      if (val < min) {min = val;}
+      if (val > max) {max = val;}
 
       if (i > 0 && nonNull[i] >= nonNull[i - 1]) {
         sortedCount++;
@@ -643,11 +643,11 @@ export class ColumnarStorageEngine {
   }
 
   private getValueSize(value: any): number {
-    if (value === null || value === undefined) return 0;
-    if (typeof value === 'string') return value.length * 2; // UTF-16
-    if (typeof value === 'number') return 8;
-    if (typeof value === 'boolean') return 1;
-    if (typeof value === 'object') return JSON.stringify(value).length * 2;
+    if (value === null || value === undefined) {return 0;}
+    if (typeof value === 'string') {return value.length * 2;} // UTF-16
+    if (typeof value === 'number') {return 8;}
+    if (typeof value === 'boolean') {return 1;}
+    if (typeof value === 'object') {return JSON.stringify(value).length * 2;}
     return 0;
   }
 
