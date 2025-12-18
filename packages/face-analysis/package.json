@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/face-analysis",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Comprehensive facial analysis including detection, recognition, emotion, age/gender estimation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
