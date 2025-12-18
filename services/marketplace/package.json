@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/marketplace",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Data Trading and Reuse Marketplace Service",
   "type": "module",
   "main": "dist/index.js",

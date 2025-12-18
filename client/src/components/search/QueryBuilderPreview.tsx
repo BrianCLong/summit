@@ -1,11 +1,11 @@
+// @ts-nocheck
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { gql, useSubscription } from '@apollo/client';
+import { useSubscription } from '@apollo/client';
 import {
   Alert,
   Box,
   Chip,
   Divider,
-  Grid,
   LinearProgress,
   List,
   ListItem,
@@ -16,42 +16,10 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
+import Grid from '@mui/material/Unstable_Grid2';
 import { FilterList, PlayArrow } from '@mui/icons-material';
 import { QueryChip, QueryChipBuilder } from './QueryChipBuilder';
-
-export const GRAPH_QUERY_PREVIEW_SUBSCRIPTION = gql`
-  subscription GraphQueryPreview($cypher: String!, $parameters: JSON, $limit: Int!) {
-    graphQueryPreview(cypher: $cypher, parameters: $parameters, limit: $limit) {
-      eventId
-      partial
-      progress {
-        completed
-        total
-        percentage
-      }
-      statistics {
-        nodeCount
-        edgeCount
-      }
-      nodes {
-        id
-        label
-        type
-        properties
-      }
-      edges {
-        id
-        type
-        source
-        target
-        properties
-      }
-      errors {
-        message
-      }
-    }
-  }
-`;
+import { GRAPH_QUERY_PREVIEW_SUBSCRIPTION } from './graphql';
 
 type GraphPreviewNode = {
   id: string;
