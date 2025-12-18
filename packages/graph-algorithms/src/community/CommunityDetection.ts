@@ -53,7 +53,7 @@ export class CommunityDetection {
 
         // Try moving to each neighbor community
         for (const targetCommunity of neighborCommunities) {
-          if (targetCommunity === currentCommunity) continue;
+          if (targetCommunity === currentCommunity) {continue;}
 
           const gain = this.modularityGain(
             node.id,
@@ -110,7 +110,7 @@ export class CommunityDetection {
           labelCounts.set(label, (labelCounts.get(label) || 0) + 1);
         }
 
-        if (labelCounts.size === 0) continue;
+        if (labelCounts.size === 0) {continue;}
 
         // Find most common label
         let maxCount = 0;
@@ -130,7 +130,7 @@ export class CommunityDetection {
         }
       }
 
-      if (!changed) break;
+      if (!changed) {break;}
     }
 
     return labels;
@@ -198,7 +198,7 @@ export class CommunityDetection {
       // Calculate edge betweenness
       const edgeBetweenness = this.edgeBetweenness();
 
-      if (edgeBetweenness.size === 0) break;
+      if (edgeBetweenness.size === 0) {break;}
 
       // Find edge with highest betweenness
       let maxBetweenness = -Infinity;
@@ -255,7 +255,7 @@ export class CommunityDetection {
     const edges = exported.edges;
     const m = edges.length;
 
-    if (m === 0) return 0;
+    if (m === 0) {return 0;}
 
     let modularity = 0;
 
@@ -296,7 +296,7 @@ export class CommunityDetection {
     const edges = exported.edges;
     const m = edges.length;
 
-    if (m === 0) return 0;
+    if (m === 0) {return 0;}
 
     let gain = 0;
 
@@ -376,7 +376,7 @@ export class CommunityDetection {
     // For each pair of nodes, find shortest paths
     for (const source of nodes) {
       for (const target of nodes) {
-        if (source.id === target.id) continue;
+        if (source.id === target.id) {continue;}
 
         // BFS to find shortest paths
         const paths = this.findAllShortestPaths(source.id, target.id);
