@@ -1,0 +1,9 @@
+{
+  "consumer": { "name": "gateway" },
+  "provider": { "name": "prov-ledger" },
+  "interactions": [{
+    "description": "register a claim",
+    "request": { "method": "POST", "path": "/claim", "body": { "evidenceId": "ev_123", "assertion": "string" } },
+    "response": { "status": 201, "body": { "id": "clm_123", "hash": "sha256:..." } }
+  }]
+}
