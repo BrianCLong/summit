@@ -1,0 +1,47 @@
+{
+  "name": "@intelgraph/authz-core",
+  "version": "1.0.0",
+  "description": "Comprehensive multi-tenant authorization library with warrant and license enforcement",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "authorization",
+    "authz",
+    "rbac",
+    "abac",
+    "warrant",
+    "license",
+    "multi-tenant",
+    "policy-enforcement"
+  ],
+  "author": "IntelGraph",
+  "license": "PROPRIETARY",
+  "dependencies": {
+    "pg": "^8.11.0",
+    "axios": "^1.6.0",
+    "pino": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.10.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0",
+    "eslint": "^8.55.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

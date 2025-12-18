@@ -8,6 +8,11 @@ import { Pool, PoolClient } from 'pg';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
 import { provenanceLedger } from '../provenance/ledger.js';
+import {
+  appendTenantFilter,
+  assertTenantMatch,
+  resolveTenantId,
+} from '../tenancy/tenantScope.js';
 
 const repoLogger = logger.child({ name: 'InvestigationRepo' });
 
@@ -33,6 +38,7 @@ export interface InvestigationInput {
 
 export interface InvestigationUpdateInput {
   id: string;
+  tenantId: string;
   name?: string;
   description?: string;
   status?: 'active' | 'archived' | 'completed';
@@ -61,6 +67,7 @@ export class InvestigationRepo {
     input: InvestigationInput,
     userId: string,
   ): Promise<Investigation> {
+    const tenantId = resolveTenantId(input.tenantId, 'investigation.create');
     const id = uuidv4();
 
     const { rows } = (await this.pg.query(
@@ -69,7 +76,7 @@ export class InvestigationRepo {
        RETURNING *`,
       [
         id,
-        input.tenantId,
+        tenantId,
         input.name,
         input.description || null,
         input.status || 'active',
@@ -81,17 +88,16 @@ export class InvestigationRepo {
     const investigation = this.mapRow(rows[0]);
 
     // Record activity
-    provenanceLedger
-      .appendEntry({
-        tenantId: input.tenantId,
-        actionType: 'INVESTIGATION_CREATED',
-        resourceType: 'investigation',
-        resourceId: investigation.id,
+        provenanceLedger
+          .appendEntry({
+            tenantId,
+            actionType: 'INVESTIGATION_CREATED',
+            resourceType: 'investigation',
+            resourceId: investigation.id,
         actorId: userId,
         actorType: 'user',
         payload: { name: input.name },
         metadata: {},
-        timestamp: new Date(),
       })
       .catch((err) =>
         repoLogger.error('Failed to record investigation creation', err),
@@ -103,13 +109,11 @@ export class InvestigationRepo {
   /**
    * Update investigation
    */
-  async update(
-    input: InvestigationUpdateInput,
-    tenantId: string,
-  ): Promise<Investigation | null> {
+  async update(input: InvestigationUpdateInput): Promise<Investigation | null> {
+    const tenantId = resolveTenantId(input.tenantId, 'investigation.update');
     const updateFields: string[] = [];
-    const params: any[] = [input.id, tenantId];
-    let paramIndex = 3;
+    const params: any[] = [input.id];
+    let paramIndex = 2;
 
     if (input.name !== undefined) {
       updateFields.push(`name = $${paramIndex}`);
@@ -141,14 +145,20 @@ export class InvestigationRepo {
 
     updateFields.push(`updated_at = now()`);
 
+    const tenantParamIndex = paramIndex;
+    params.push(tenantId);
+
     const { rows } = (await this.pg.query(
-      `UPDATE investigations SET ${updateFields.join(', ')}
-       WHERE id = $1 AND tenant_id = $2
-       RETURNING *`,
+      appendTenantFilter(
+        `UPDATE investigations SET ${updateFields.join(', ')}
+         WHERE id = $1`,
+        tenantParamIndex,
+      ),
       params,
     )) as { rows: InvestigationRow[] };
 
     if (rows[0]) {
+      assertTenantMatch(rows[0].tenant_id, tenantId, 'investigation');
       const investigation = this.mapRow(rows[0]);
       provenanceLedger
         .appendEntry({
@@ -160,7 +170,6 @@ export class InvestigationRepo {
           actorType: 'system',
           payload: { updates: input },
           metadata: {},
-          timestamp: new Date(),
         })
         .catch((err) =>
           repoLogger.error('Failed to record investigation update', err),
@@ -175,6 +184,7 @@ export class InvestigationRepo {
    * Delete investigation (cascade to related entities)
    */
   async delete(id: string, tenantId: string): Promise<boolean> {
+    const scopedTenantId = resolveTenantId(tenantId, 'investigation.delete');
     const client = await this.pg.connect();
 
     try {
@@ -184,15 +194,16 @@ export class InvestigationRepo {
       // or handle related entities/relationships more carefully
       const { rows } = await client.query(
         `DELETE FROM investigations WHERE id = $1 AND tenant_id = $2 RETURNING tenant_id`,
-        [id, tenantId],
+        [id, scopedTenantId],
       );
 
       await client.query('COMMIT');
 
       if (rows.length > 0) {
+        assertTenantMatch(rows[0].tenant_id, scopedTenantId, 'investigation');
         provenanceLedger
           .appendEntry({
-            tenantId: rows[0].tenant_id,
+            tenantId: scopedTenantId,
             actionType: 'INVESTIGATION_DELETED',
             resourceType: 'investigation',
             resourceId: id,
@@ -200,7 +211,6 @@ export class InvestigationRepo {
             actorType: 'system',
             payload: {},
             metadata: {},
-            timestamp: new Date(),
           })
           .catch((err) =>
             repoLogger.error('Failed to record investigation deletion', err),
@@ -220,17 +230,19 @@ export class InvestigationRepo {
   /**
    * Find investigation by ID
    */
-  async findById(id: string, tenantId?: string): Promise<Investigation | null> {
-    const params = [id];
-    let query = `SELECT * FROM investigations WHERE id = $1`;
+  async findById(id: string, tenantId: string): Promise<Investigation | null> {
+    const scopedTenantId = resolveTenantId(tenantId, 'investigation.findById');
+    const { rows } = (await this.pg.query(
+      appendTenantFilter(`SELECT * FROM investigations WHERE id = $1`, 2),
+      [id, scopedTenantId],
+    )) as { rows: InvestigationRow[] };
 
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
+    if (!rows[0]) {
+      return null;
     }
 
-    const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
-    return rows[0] ? this.mapRow(rows[0]) : null;
+    assertTenantMatch(rows[0].tenant_id, scopedTenantId, 'investigation');
+    return this.mapRow(rows[0]);
   }
 
   /**
@@ -247,7 +259,8 @@ export class InvestigationRepo {
     limit?: number;
     offset?: number;
   }): Promise<Investigation[]> {
-    const params: any[] = [tenantId];
+    const scopedTenantId = resolveTenantId(tenantId, 'investigation.list');
+    const params: any[] = [scopedTenantId];
     let query = `SELECT * FROM investigations WHERE tenant_id = $1`;
     let paramIndex = 2;
 
@@ -261,7 +274,10 @@ export class InvestigationRepo {
     params.push(Math.min(limit, 1000), offset);
 
     const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
-    return rows.map(this.mapRow);
+    return rows.map((row) => {
+      assertTenantMatch(row.tenant_id, scopedTenantId, 'investigation');
+      return this.mapRow(row);
+    });
   }
 
   /**
@@ -276,6 +292,7 @@ export class InvestigationRepo {
     entityCount: number;
     relationshipCount: number;
   }> {
+    const scopedTenantId = resolveTenantId(tenantId, 'investigation.stats');
     // OPTIMIZED: Single query with subqueries leverages expression indexes
     const { rows } = await this.pg.query(
       `SELECT
@@ -287,7 +304,7 @@ export class InvestigationRepo {
           FROM relationships
           WHERE tenant_id = $1
             AND props->>'investigationId' = $2) as relationship_count`,
-      [tenantId, investigationId],
+      [scopedTenantId, investigationId],
     );
 
     return {
@@ -301,21 +318,23 @@ export class InvestigationRepo {
    */
   async batchByIds(
     ids: readonly string[],
-    tenantId?: string,
+    tenantId: string,
   ): Promise<(Investigation | null)[]> {
     if (ids.length === 0) return [];
 
-    const params: any[] = [ids];
-    let query = `SELECT * FROM investigations WHERE id = ANY($1)`;
-
-    if (tenantId) {
-      query += ` AND tenant_id = $2`;
-      params.push(tenantId);
-    }
+    const scopedTenantId = resolveTenantId(tenantId, 'investigation.batchByIds');
+    const params: any[] = [ids, scopedTenantId];
+    const query = appendTenantFilter(
+      `SELECT * FROM investigations WHERE id = ANY($1)`,
+      2,
+    );
 
     const { rows } = (await this.pg.query(query, params)) as { rows: InvestigationRow[] };
     const investigationsMap = new Map(
-      rows.map((row) => [row.id, this.mapRow(row)]),
+      rows.map((row) => {
+        assertTenantMatch(row.tenant_id, scopedTenantId, 'investigation');
+        return [row.id, this.mapRow(row)];
+      }),
     );
 
     return ids.map((id) => investigationsMap.get(id) || null);

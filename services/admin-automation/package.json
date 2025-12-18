@@ -1,6 +1,6 @@
 {
   "name": "@intelgraph/admin-automation",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "AI-driven administrative task automation for 70% workload reduction",
   "type": "module",
   "main": "dist/index.js",
@@ -24,7 +24,11 @@
   "dependencies": {
     "@apollo/server": "^4.12.2",
     "cors": "^2.8.5",
+<<<<<<< HEAD
     "express": "^4.21.2",
+=======
+    "express": "^4.22.1",
+>>>>>>> main
     "graphql": "^16.12.0",
     "uuid": "^9.0.1",
     "zod": "^3.22.0"

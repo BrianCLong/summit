@@ -96,10 +96,10 @@ export class FormAutocomplete {
     partialValue: string,
   ): Promise<string[]> {
     const profile = await this.profileAggregator.getProfile(citizenId);
-    if (!profile) return [];
+    if (!profile) {return [];}
 
     const mapping = this.fieldMappings[fieldName];
-    if (!mapping) return [];
+    if (!mapping) {return [];}
 
     const storedValue = this.getNestedValue(profile, mapping);
     if (typeof storedValue === 'string' && storedValue.toLowerCase().startsWith(partialValue.toLowerCase())) {
