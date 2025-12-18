@@ -1,0 +1,247 @@
+# Security Chaos Drills Workflow
+#
+# Executes security chaos drills to validate detection and response capabilities.
+# Generates compliance-ready reports for leadership review.
+#
+# Triggers:
+#   - Manual (workflow_dispatch) with environment selection
+#   - Monthly schedule (first Monday at 03:00 UTC) in staging
+#
+# Safety:
+#   - NEVER runs against production
+#   - All drills are non-destructive and rate-limited
+
+name: Security Chaos Drills
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Target environment"
+        required: true
+        type: choice
+        options:
+          - local
+          - dev
+          - staging
+        default: "local"
+      drills:
+        description: 'Drills to run (comma-separated, or "all")'
+        required: false
+        type: string
+        default: "all"
+      dry_run:
+        description: "Dry run (no actual requests)"
+        required: false
+        type: boolean
+        default: false
+
+  # Monthly schedule - first Monday at 03:00 UTC
+  schedule:
+    - cron: "0 3 1-7 * 1"
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+  # For uploading artifacts
+  id-token: write
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.12.0"
+
+jobs:
+  # Safety gate - ensure we never hit production
+  safety-check:
+    name: Safety Check
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.validate.outputs.environment }}
+      drills: ${{ steps.validate.outputs.drills }}
+    steps:
+      - name: Validate environment
+        id: validate
+        run: |
+          # Determine environment (from input or default for scheduled runs)
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            ENV="staging"
+            DRILLS="all"
+          else
+            ENV="${{ inputs.environment }}"
+            DRILLS="${{ inputs.drills }}"
+          fi
+
+          # CRITICAL: Block production
+          if [ "$ENV" = "production" ] || [ "$ENV" = "prod" ]; then
+            echo "::error::BLOCKED: Security drills cannot run against production!"
+            exit 1
+          fi
+
+          # Validate environment
+          if [[ ! "$ENV" =~ ^(local|dev|staging)$ ]]; then
+            echo "::error::Invalid environment: $ENV. Must be local, dev, or staging."
+            exit 1
+          fi
+
+          echo "environment=$ENV" >> "$GITHUB_OUTPUT"
+          echo "drills=$DRILLS" >> "$GITHUB_OUTPUT"
+          echo "Running drills against $ENV environment"
+
+  run-drills:
+    name: Run Security Drills
+    needs: safety-check
+    runs-on: ubuntu-latest
+    environment: ${{ needs.safety-check.outputs.environment }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Start local stack (if local environment)
+        if: needs.safety-check.outputs.environment == 'local'
+        run: |
+          # Start docker compose in background
+          make up &
+
+          # Wait for services to be ready
+          echo "Waiting for services to start..."
+          timeout 120 bash -c 'until curl -sf http://localhost:4000/health > /dev/null 2>&1; do sleep 2; done'
+          echo "Services are ready!"
+
+      - name: Configure environment URLs
+        id: config
+        run: |
+          ENV="${{ needs.safety-check.outputs.environment }}"
+          case "$ENV" in
+            local)
+              echo "API_URL=http://localhost:4000" >> "$GITHUB_OUTPUT"
+              ;;
+            dev)
+              echo "API_URL=${{ secrets.DEV_API_URL || 'http://dev-api.intelgraph.internal:4000' }}" >> "$GITHUB_OUTPUT"
+              ;;
+            staging)
+              echo "API_URL=${{ secrets.STAGING_API_URL || 'http://staging-api.intelgraph.internal:4000' }}" >> "$GITHUB_OUTPUT"
+              ;;
+          esac
+
+      - name: Run security drills
+        id: drills
+        env:
+          LOCAL_API_URL: ${{ steps.config.outputs.API_URL }}
+          DEV_API_URL: ${{ steps.config.outputs.API_URL }}
+          STAGING_API_URL: ${{ steps.config.outputs.API_URL }}
+        run: |
+          DRILLS="${{ needs.safety-check.outputs.drills }}"
+          ENV="${{ needs.safety-check.outputs.environment }}"
+          DRY_RUN="${{ inputs.dry_run || 'false' }}"
+
+          # Build drill arguments
+          ARGS="--env $ENV --report --verbose"
+
+          if [ "$DRILLS" = "all" ]; then
+            ARGS="--all $ARGS"
+          else
+            ARGS="--drill $DRILLS $ARGS"
+          fi
+
+          if [ "$DRY_RUN" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          echo "Running: npx tsx scripts/security/run-drill.ts $ARGS"
+          npx tsx scripts/security/run-drill.ts $ARGS || echo "drill_exit_code=$?" >> "$GITHUB_OUTPUT"
+
+      - name: Find report file
+        id: report
+        run: |
+          REPORT=$(ls -t drills/security-report-*.md 2>/dev/null | head -1)
+          if [ -n "$REPORT" ]; then
+            echo "report_path=$REPORT" >> "$GITHUB_OUTPUT"
+            echo "report_name=$(basename $REPORT)" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload drill report
+        if: steps.report.outputs.report_path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-drill-report-${{ needs.safety-check.outputs.environment }}-${{ github.run_number }}
+          path: drills/security-report-*.md
+          retention-days: 90
+
+      - name: Comment report summary on PR
+        if: github.event_name == 'pull_request' && steps.report.outputs.report_path != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = fs.readFileSync('${{ steps.report.outputs.report_path }}', 'utf8');
+
+            // Extract summary section
+            const summaryMatch = report.match(/## Summary[\s\S]*?(?=## Detailed|$)/);
+            const summary = summaryMatch ? summaryMatch[0] : 'Report generated - see artifacts for details.';
+
+            github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## Security Chaos Drill Results\n\n${summary}\n\n[View full report in artifacts](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`
+            });
+
+      - name: Stop local stack
+        if: always() && needs.safety-check.outputs.environment == 'local'
+        run: |
+          make down || true
+
+      - name: Check drill results
+        run: |
+          # Read exit code from previous step
+          EXIT_CODE="${{ steps.drills.outputs.drill_exit_code }}"
+
+          if [ -n "$EXIT_CODE" ] && [ "$EXIT_CODE" != "0" ]; then
+            echo "::warning::Some security drills failed. Review the report for details."
+            # Don't fail the workflow for drill failures in scheduled runs
+            # This allows the report to be generated and uploaded
+            if [ "${{ github.event_name }}" != "schedule" ]; then
+              exit $EXIT_CODE
+            fi
+          fi
+
+  # Notify on failures (optional - uncomment to enable)
+  # notify-failure:
+  #   name: Notify on Failure
+  #   needs: run-drills
+  #   if: failure() && github.event_name == 'schedule'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Send Slack notification
+  #       uses: slackapi/slack-github-action@v1
+  #       with:
+  #         payload: |
+  #           {
+  #             "text": "Security Chaos Drills Failed",
+  #             "blocks": [
+  #               {
+  #                 "type": "section",
+  #                 "text": {
+  #                   "type": "mrkdwn",
+  #                   "text": "*Security Chaos Drills Failed* :warning:\n\nScheduled drill run encountered failures. Review required.\n\n<https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>"
+  #                 }
+  #               }
+  #             ]
+  #           }
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_SECURITY_WEBHOOK_URL }}
