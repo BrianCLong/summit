@@ -1,0 +1,285 @@
+# CompanyOS SLO Recording and Alerting Rules
+# Implements R1: CompanyOS SLOs Operationalized
+#
+# SLO Targets:
+# - Tenant API availability: 99.9% over 30 days
+# - Tenant read p95 latency: < 300ms
+# - CompanyOS API error rate: < 0.5% over 7 days
+
+groups:
+  # ============================================================================
+  # RECORDING RULES - SLO Metrics
+  # ============================================================================
+  - name: companyos_slo_recording
+    interval: 1m
+    rules:
+      # ----------------------------------------------------------------------------
+      # Availability SLO
+      # ----------------------------------------------------------------------------
+      # Total requests
+      - record: companyos:http_requests:rate5m
+        expr: sum(rate(companyos_http_requests_total[5m])) by (service)
+
+      # Error requests (5xx)
+      - record: companyos:http_errors:rate5m
+        expr: sum(rate(companyos_http_requests_total{status=~"5.."}[5m])) by (service)
+
+      # Error ratio
+      - record: companyos:http_error_ratio:rate5m
+        expr: |
+          companyos:http_errors:rate5m
+          /
+          companyos:http_requests:rate5m
+
+      # Success ratio (availability)
+      - record: companyos:http_availability:rate5m
+        expr: 1 - companyos:http_error_ratio:rate5m
+
+      # 7-day error budget consumption
+      - record: companyos:error_budget:7d
+        expr: |
+          1 - (
+            sum_over_time(companyos:http_errors:rate5m[7d])
+            /
+            sum_over_time(companyos:http_requests:rate5m[7d])
+          ) / 0.999
+
+      # 30-day availability
+      - record: companyos:http_availability:30d
+        expr: |
+          1 - (
+            sum(increase(companyos_http_requests_total{status=~"5.."}[30d]))
+            /
+            sum(increase(companyos_http_requests_total[30d]))
+          )
+
+      # ----------------------------------------------------------------------------
+      # Latency SLO
+      # ----------------------------------------------------------------------------
+      # P50 latency
+      - record: companyos:http_latency_p50:5m
+        expr: |
+          histogram_quantile(0.50,
+            sum(rate(companyos_http_request_duration_seconds_bucket[5m])) by (le, service)
+          )
+
+      # P95 latency
+      - record: companyos:http_latency_p95:5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(companyos_http_request_duration_seconds_bucket[5m])) by (le, service)
+          )
+
+      # P99 latency
+      - record: companyos:http_latency_p99:5m
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(companyos_http_request_duration_seconds_bucket[5m])) by (le, service)
+          )
+
+      # Latency SLO compliance (% of requests under 300ms)
+      - record: companyos:latency_slo_compliance:5m
+        expr: |
+          sum(rate(companyos_http_request_duration_seconds_bucket{le="0.3"}[5m])) by (service)
+          /
+          sum(rate(companyos_http_request_duration_seconds_count[5m])) by (service)
+
+      # ----------------------------------------------------------------------------
+      # Tenant-specific metrics
+      # ----------------------------------------------------------------------------
+      # Per-tenant request rate
+      - record: companyos:tenant_requests:rate5m
+        expr: sum(rate(companyos_http_requests_total[5m])) by (tenant_id)
+
+      # Per-tenant error rate
+      - record: companyos:tenant_errors:rate5m
+        expr: sum(rate(companyos_http_requests_total{status=~"5.."}[5m])) by (tenant_id)
+
+      # Per-tenant availability
+      - record: companyos:tenant_availability:rate5m
+        expr: |
+          1 - (
+            companyos:tenant_errors:rate5m
+            /
+            companyos:tenant_requests:rate5m
+          )
+
+      # ----------------------------------------------------------------------------
+      # OPA/Policy metrics
+      # ----------------------------------------------------------------------------
+      # OPA decision rate
+      - record: companyos:opa_decisions:rate5m
+        expr: sum(rate(companyos_opa_decisions_total[5m])) by (status)
+
+      # OPA decision latency
+      - record: companyos:opa_latency_p95:5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(companyos_opa_decision_duration_seconds_bucket[5m])) by (le)
+          )
+
+      # ----------------------------------------------------------------------------
+      # Rate limiting metrics
+      # ----------------------------------------------------------------------------
+      # Rate limit blocks
+      - record: companyos:rate_limit_blocks:rate5m
+        expr: sum(rate(companyos_rate_limit_blocks_total[5m])) by (tenant_id, endpoint)
+
+  # ============================================================================
+  # ALERTING RULES - SLO Breaches
+  # ============================================================================
+  - name: companyos_slo_alerts
+    rules:
+      # ----------------------------------------------------------------------------
+      # Availability Alerts
+      # ----------------------------------------------------------------------------
+      - alert: CompanyOSHighErrorRate
+        expr: companyos:http_error_ratio:rate5m > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          service: companyos
+          slo: availability
+        annotations:
+          summary: "CompanyOS error rate above 1%"
+          description: "Error rate is {{ $value | humanizePercentage }} (target: < 0.5%)"
+          runbook_url: "https://runbooks.example.com/companyos-high-error-rate"
+
+      - alert: CompanyOSCriticalErrorRate
+        expr: companyos:http_error_ratio:rate5m > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          service: companyos
+          slo: availability
+        annotations:
+          summary: "CompanyOS error rate critical"
+          description: "Error rate is {{ $value | humanizePercentage }} - immediate action required"
+          runbook_url: "https://runbooks.example.com/companyos-critical-error-rate"
+
+      - alert: CompanyOSErrorBudgetBurn
+        expr: companyos:error_budget:7d < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          service: companyos
+          slo: availability
+        annotations:
+          summary: "CompanyOS error budget burning fast"
+          description: "Only {{ $value | humanizePercentage }} of 7-day error budget remaining"
+
+      - alert: CompanyOSErrorBudgetExhausted
+        expr: companyos:error_budget:7d < 0.1
+        for: 5m
+        labels:
+          severity: critical
+          service: companyos
+          slo: availability
+        annotations:
+          summary: "CompanyOS error budget nearly exhausted"
+          description: "Only {{ $value | humanizePercentage }} of error budget remaining"
+
+      # ----------------------------------------------------------------------------
+      # Latency Alerts
+      # ----------------------------------------------------------------------------
+      - alert: CompanyOSHighLatency
+        expr: companyos:http_latency_p95:5m > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          service: companyos
+          slo: latency
+        annotations:
+          summary: "CompanyOS P95 latency above SLO"
+          description: "P95 latency is {{ $value | humanizeDuration }} (target: < 300ms)"
+          runbook_url: "https://runbooks.example.com/companyos-high-latency"
+
+      - alert: CompanyOSCriticalLatency
+        expr: companyos:http_latency_p95:5m > 1.0
+        for: 2m
+        labels:
+          severity: critical
+          service: companyos
+          slo: latency
+        annotations:
+          summary: "CompanyOS latency critical"
+          description: "P95 latency is {{ $value | humanizeDuration }} - immediate action required"
+
+      - alert: CompanyOSLatencySLOBreaching
+        expr: companyos:latency_slo_compliance:5m < 0.95
+        for: 10m
+        labels:
+          severity: warning
+          service: companyos
+          slo: latency
+        annotations:
+          summary: "CompanyOS latency SLO compliance dropping"
+          description: "Only {{ $value | humanizePercentage }} of requests under 300ms"
+
+      # ----------------------------------------------------------------------------
+      # OPA/Policy Alerts
+      # ----------------------------------------------------------------------------
+      - alert: CompanyOSOPAHighLatency
+        expr: companyos:opa_latency_p95:5m > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          service: companyos
+          component: opa
+        annotations:
+          summary: "OPA decision latency high"
+          description: "OPA P95 latency is {{ $value | humanizeDuration }} (target: < 50ms)"
+
+      - alert: CompanyOSOPAErrors
+        expr: |
+          sum(rate(companyos_opa_decisions_total{status="error"}[5m]))
+          /
+          sum(rate(companyos_opa_decisions_total[5m]))
+          > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          service: companyos
+          component: opa
+        annotations:
+          summary: "OPA decision errors elevated"
+          description: "{{ $value | humanizePercentage }} of OPA decisions are failing"
+
+      # ----------------------------------------------------------------------------
+      # Rate Limiting Alerts
+      # ----------------------------------------------------------------------------
+      - alert: CompanyOSTenantRateLimited
+        expr: sum(companyos:rate_limit_blocks:rate5m) by (tenant_id) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: companyos
+          component: rate-limiter
+        annotations:
+          summary: "Tenant hitting rate limits"
+          description: "Tenant {{ $labels.tenant_id }} is being rate limited"
+
+      # ----------------------------------------------------------------------------
+      # Service Health
+      # ----------------------------------------------------------------------------
+      - alert: CompanyOSDown
+        expr: up{job="companyos-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: companyos
+        annotations:
+          summary: "CompanyOS API is down"
+          description: "CompanyOS API has been unreachable for more than 1 minute"
+          runbook_url: "https://runbooks.example.com/companyos-down"
+
+      - alert: CompanyOSOPADown
+        expr: up{job="companyos-opa"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: companyos
+          component: opa
+        annotations:
+          summary: "CompanyOS OPA is down"
+          description: "OPA policy service is unreachable - authorization may fail"

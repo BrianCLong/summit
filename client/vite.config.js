@@ -5,8 +5,15 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   plugins: [
-    react(),
-    // Bundle analyzer - generates stats.html on build
+    react({
+      // Ensure JSX is handled even in .js files
+      include: "**/*.{jsx,tsx,js,ts}",
+      babel: {
+        parserOpts: {
+          plugins: ['decorators-legacy', 'classProperties']
+        }
+      }
+    }),
     visualizer({
       filename: './dist/stats.html',
       open: false,
@@ -14,6 +21,11 @@ export default defineConfig({
       brotliSize: true,
     }),
   ],
+  esbuild: {
+    loader: 'jsx',
+    include: /src\/.*\.js$/, // Apply to all .js files in src
+    exclude: [],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -40,15 +52,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     sourcemap: true,
-    // Performance: Split vendor code for better caching
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core React libraries
           'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          // Apollo GraphQL
           'apollo-vendor': ['@apollo/client', 'graphql', 'graphql-ws'],
-          // Material UI (heavy library)
           'mui-vendor': [
             '@mui/material',
             '@mui/icons-material',
@@ -57,9 +65,7 @@ export default defineConfig({
             '@emotion/react',
             '@emotion/styled',
           ],
-          // State management
           'state-vendor': ['@reduxjs/toolkit', 'react-redux'],
-          // Graph visualization (Cytoscape - very heavy)
           'graph-vendor': [
             'cytoscape',
             'cytoscape-cola',
@@ -74,29 +80,22 @@ export default defineConfig({
             'cytoscape-navigator',
             'cytoscape-panzoom',
           ],
-          // Data visualization (D3 - heavy)
           'd3-vendor': ['d3', 'd3-force', 'd3-selection'],
-          // Maps (Leaflet)
           'map-vendor': ['leaflet', 'react-leaflet'],
-          // Timeline visualization
           'timeline-vendor': ['vis-timeline'],
-          // Utilities
           'utils-vendor': ['lodash', 'date-fns', 'uuid', 'zod', 'fuse.js'],
         },
       },
     },
-    // Performance budgets - warn if chunks exceed these sizes
-    chunkSizeWarningLimit: 1000, // 1MB warning (default is 500KB)
-    // Enable minification and tree shaking
+    chunkSizeWarningLimit: 1000,
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.log in production
+        drop_console: true,
         drop_debugger: true,
       },
     },
   },
-  // Optimize dependency pre-bundling
   optimizeDeps: {
     include: [
       'react',
@@ -107,12 +106,16 @@ export default defineConfig({
       '@reduxjs/toolkit',
     ],
     exclude: [
-      // Exclude heavy deps from pre-bundling - they'll be lazy loaded
       'cytoscape',
       'd3',
       'leaflet',
       'vis-timeline',
     ],
+    esbuildOptions: {
+        loader: {
+            '.js': 'jsx',
+        },
+    },
   },
   test: {
     globals: true,
