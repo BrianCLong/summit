@@ -1,0 +1,22 @@
+controls:
+  - id: SOC2-CC6.1
+    name: Logical access and code ownership
+    category: access-control
+    description: Repository-level ownership, approval, and policy drift visibility.
+    evidence_scripts:
+      - scripts/security/baseline-check.sh
+      - .github/workflows/rbac-drift.yml
+  - id: SOC2-CC6.7
+    name: Secrets management and leakage prevention
+    category: secrets-management
+    description: Secret scanning guardrails and operational playbooks.
+    evidence_scripts:
+      - scripts/security/secrets-baseline.sh
+      - .github/workflows/gitleaks.yml
+  - id: NIST-SA-11
+    name: Secure build pipeline checks
+    category: secure-development
+    description: Dependency and CI supply-chain gates.
+    evidence_scripts:
+      - scripts/security/baseline-check.sh
+      - .github/workflows/security-scan.yml
