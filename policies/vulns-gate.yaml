@@ -1,0 +1,24 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: block-critical-vulns
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: require-no-critical
+      match:
+        any:
+          - resources:
+              kinds: [Pod, Deployment, StatefulSet, Job, CronJob]
+      preconditions:
+        all:
+          - key: "{{ images.containers[0].registry }}"
+            operator: AnyIn
+            value: ["ghcr.io"]
+      validate:
+        message: "Block deploy: image has CRITICAL vulns (per Trivy Operator report)"
+        cel:
+          expressions:
+            - expression: |
+                has(object.metadata.labels["trivy-criticals"]) && object.metadata.labels["trivy-criticals"] == "0"
