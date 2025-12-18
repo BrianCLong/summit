@@ -18,6 +18,7 @@ import { KPIStrip } from '@/components/panels/KPIStrip'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
+import { ActivationProgressTile } from '@/components/activation/ActivationProgressTile'
 import mockData from '@/mock/data.json'
 import type { KPIMetric, Investigation, Alert, Case } from '@/types'
 
@@ -140,6 +141,8 @@ export default function HomePage() {
         </div>
       </div>
 
+      <ActivationProgressTile />
+
       {/* KPI Metrics */}
       <div>
         <h2 className="text-lg font-semibold mb-4">Key Metrics</h2>
@@ -147,8 +150,8 @@ export default function HomePage() {
           data={kpiMetrics}
           loading={loading}
           onSelect={metric => {
-            if (metric.id === 'threats') navigate('/alerts')
-            else if (metric.id === 'investigations') navigate('/explore')
+            if (metric.id === 'threats') {navigate('/alerts')}
+            else if (metric.id === 'investigations') {navigate('/explore')}
           }}
         />
       </div>
