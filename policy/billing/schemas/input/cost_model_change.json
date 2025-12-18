@@ -1,0 +1,45 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Cost model change request",
+  "type": "object",
+  "required": ["subject", "model_before", "model_after", "context"],
+  "properties": {
+    "subject": {
+      "type": "object",
+      "required": ["id", "role"],
+      "properties": {
+        "id": { "type": "string" },
+        "role": { "type": "string" },
+        "level": { "type": "string" }
+      }
+    },
+    "model_before": {
+      "type": "object",
+      "description": "Current cost allocation rules",
+      "properties": {
+        "version": { "type": "string" },
+        "allocations": { "type": "object" },
+        "effective_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "model_after": {
+      "type": "object",
+      "description": "Proposed cost allocation rules",
+      "properties": {
+        "version": { "type": "string" },
+        "allocations": { "type": "object" },
+        "effective_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["reason", "requested_at", "impact_analysis"],
+      "properties": {
+        "reason": { "type": "string" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "impact_analysis": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    }
+  }
+}
