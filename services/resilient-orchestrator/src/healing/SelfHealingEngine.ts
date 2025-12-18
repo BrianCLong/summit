@@ -189,7 +189,7 @@ export class SelfHealingEngine extends EventEmitter<HealingEvents> {
    */
   async handleWorkflowFailure(workflowId: string, reason: string): Promise<void> {
     const workflow = this.activeWorkflows.get(workflowId);
-    if (!workflow) return;
+    if (!workflow) {return;}
 
     // Try to restore from checkpoint
     const checkpoint = this.checkpoints.get(workflowId);
@@ -264,7 +264,7 @@ export class SelfHealingEngine extends EventEmitter<HealingEvents> {
         // Only restore if task is in a recoverable state
         if (task.state === 'failed' || task.state === 'running') {
           task.state = saved.state as Task['state'];
-          if (saved.output) task.output = saved.output;
+          if (saved.output) {task.output = saved.output;}
         }
       }
     }

@@ -1,6 +1,6 @@
 {
   "name": "@summit/quantum-simulation",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Quantum algorithm simulation and circuit design for Summit",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
