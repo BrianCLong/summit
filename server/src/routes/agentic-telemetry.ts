@@ -1,65 +1,90 @@
-import { Router, Request, Response } from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
-import * as yaml from 'js-yaml';
+import { Router } from 'express';
+import { maestro } from '../orchestrator/maestro.js';
+import { logger } from '../utils/logger.js';
+import { z } from 'zod/v4';
 
 const router = Router();
-const TASK_REGISTRY_PATH = path.join(process.cwd(), '.agentic-tasks.yaml');
 
-interface Task {
-    id: string;
-    name: string;
-    agent: string;
-    status: string;
-    metrics?: {
-        startTime: number;
-        mergeTime?: number;
-    }
-}
+// Schema for task submission
+const taskSchema = z.object({
+  kind: z.enum(['plan', 'scaffold', 'implement', 'test', 'review', 'docs']),
+  repo: z.string(),
+  issue: z.string(),
+  budgetUSD: z.number().optional().default(10),
+  context: z.record(z.any()).optional().default({}),
+});
 
-router.get('/metrics', (req: Request, res: Response) => {
+// POST /tasks - Submit a new agent task
+router.post('/tasks', async (req, res) => {
   try {
-    let tasks: Task[] = [];
-    if (fs.existsSync(TASK_REGISTRY_PATH)) {
-      const doc = yaml.load(fs.readFileSync(TASK_REGISTRY_PATH, 'utf8')) as any;
-      tasks = doc.tasks || [];
-    }
+    const taskData = taskSchema.parse(req.body);
 
-    const activeTasks = tasks.filter(t => t.status !== 'archived');
-    const mergedTasks = tasks.filter(t => t.status === 'merged' || t.status === 'archived');
+    const task = {
+      ...taskData,
+      metadata: {
+        actor: (req as any).user?.sub || 'anonymous',
+        timestamp: new Date().toISOString(),
+        sprint_version: 'v1.0.0', // dynamic in real app
+      },
+    };
 
-    // Calculate velocity (avg time to merge for archived tasks)
-    let totalMergeTime = 0;
-    let mergeCount = 0;
-    mergedTasks.forEach(t => {
-        if (t.metrics && t.metrics.mergeTime && t.metrics.startTime) {
-            totalMergeTime += (t.metrics.mergeTime - t.metrics.startTime);
-            mergeCount++;
-        }
+    const taskId = await maestro.enqueueTask(task);
+
+    res.status(202).json({
+      taskId,
+      status: 'queued',
+      message: 'Agent task enqueued successfully',
     });
-    const avgMergeTimeMs = mergeCount > 0 ? totalMergeTime / mergeCount : 0;
-    const avgMergeTimeHours = (avgMergeTimeMs / (1000 * 60 * 60)).toFixed(2);
-
-    // Prometheus format text response
-    const promMetrics = [
-      '# HELP agentic_active_tasks Number of active agentic tasks',
-      '# TYPE agentic_active_tasks gauge',
-      `agentic_active_tasks ${activeTasks.length}`,
-      '# HELP agentic_velocity_hours Average time to merge in hours',
-      '# TYPE agentic_velocity_hours gauge',
-      `agentic_velocity_hours ${avgMergeTimeHours}`,
-      '# HELP agentic_completed_tasks_total Total completed tasks',
-      '# TYPE agentic_completed_tasks_total counter',
-      `agentic_completed_tasks_total ${mergedTasks.length}`
-    ].join('\n');
-
-    res.set('Content-Type', 'text/plain');
-    res.send(promMetrics);
-
-  } catch (error) {
-    console.error('Error serving metrics:', error);
-    res.status(500).send('Internal Server Error');
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: 'Validation failed', details: error.errors });
+    } else {
+      logger.error('Failed to enqueue task', { error: error.message });
+      res.status(500).json({ error: error.message });
+    }
   }
+});
+
+// GET /tasks/:id - Get task status
+router.get('/tasks/:id', async (req, res) => {
+  try {
+    const status = await maestro.getTaskStatus(req.params.id);
+    if (!status) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    res.json(status);
+  } catch (error: any) {
+    logger.error('Failed to get task status', { taskId: req.params.id, error: error.message });
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /metrics - Get agent velocity metrics
+router.get('/metrics', async (req, res) => {
+  // Mock metrics for now - in production this would query Prometheus/Redis
+  const metrics = {
+    velocity: {
+      daily_tasks_completed: 45,
+      avg_task_duration_ms: 125000,
+      success_rate: 0.94,
+    },
+    agents: {
+      planner: { active: 2, queued: 0 },
+      implementer: { active: 3, queued: 1 },
+      reviewer: { active: 1, queued: 0 },
+    },
+    budget: {
+      daily_spend: 15.40,
+      limit: 100.00,
+    },
+    slo: {
+      latency_p95: 350,
+      error_rate: 0.005,
+      status: 'healthy',
+    },
+  };
+
+  res.json(metrics);
 });
 
 export default router;

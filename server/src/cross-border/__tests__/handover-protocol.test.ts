@@ -5,6 +5,7 @@
 import { HandoverProtocol } from '../handover-protocol.js';
 import { PartnerRegistry } from '../partner-registry.js';
 import type { HandoverRequest, SessionContext } from '../types.js';
+import { jest, describe, it, test, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
 
 // Mock fetch for tests
 const originalFetch = global.fetch;

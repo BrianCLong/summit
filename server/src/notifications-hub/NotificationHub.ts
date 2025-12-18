@@ -20,6 +20,8 @@ import { IReceiver } from './receivers/ReceiverInterface.js';
 import { EmailReceiver } from './receivers/EmailReceiver.js';
 import { ChatReceiver } from './receivers/ChatReceiver.js';
 import { WebhookReceiver } from './receivers/WebhookReceiver.js';
+import { SMSReceiver } from './receivers/SMSReceiver.js';
+import { PushReceiver } from './receivers/PushReceiver.js';
 
 export interface NotificationHubConfig {
   receivers: {
@@ -32,6 +34,14 @@ export interface NotificationHubConfig {
       config: Record<string, unknown>;
     };
     webhook?: {
+      enabled: boolean;
+      config: Record<string, unknown>;
+    };
+    sms?: {
+      enabled: boolean;
+      config: Record<string, unknown>;
+    };
+    push?: {
       enabled: boolean;
       config: Record<string, unknown>;
     };
@@ -213,6 +223,26 @@ export class NotificationHub extends EventEmitter {
       this.receivers.set('webhook', webhookReceiver);
     }
 
+    if (this.config.receivers.sms?.enabled) {
+      const smsReceiver = new SMSReceiver();
+      await smsReceiver.initialize({
+        enabled: true,
+        name: 'SMS',
+        ...this.config.receivers.sms.config,
+      } as any);
+      this.receivers.set('sms', smsReceiver);
+    }
+
+    if (this.config.receivers.push?.enabled) {
+      const pushReceiver = new PushReceiver();
+      await pushReceiver.initialize({
+        enabled: true,
+        name: 'Push',
+        ...this.config.receivers.push.config,
+      } as any);
+      this.receivers.set('push', pushReceiver);
+    }
+
     // Sort routing rules by priority
     this.routingRules.sort((a, b) => b.priority - a.priority);
 
@@ -246,6 +276,21 @@ export class NotificationHub extends EventEmitter {
     try {
       // Update event status
       event.status = EventStatus.PROCESSING;
+
+      // Deduplication check
+      if (await this.shouldDeduplicate(event)) {
+        job.status = 'completed';
+        job.processedAt = new Date();
+        job.results = [{
+          recipientId: 'system',
+          channel: 'system',
+          success: true,
+          messageId: 'deduplicated',
+          error: 'Deduplicated event'
+        }];
+        this.emit('notification:deduplicated', job);
+        return job;
+      }
 
       // Determine recipients based on routing rules
       const recipients = await this.resolveRecipients(event);
@@ -298,6 +343,17 @@ export class NotificationHub extends EventEmitter {
       this.emit('notification:failed', job, error);
       throw error;
     }
+  }
+
+  /**
+   * Check if event should be deduplicated
+   * Logic: Check if identical event (fingerprint) received recently
+   */
+  private async shouldDeduplicate(event: CanonicalEvent): Promise<boolean> {
+     // TODO: Implement Redis-based deduplication
+     // Key: `notification:dedup:${event.context.tenantId}:${fingerprint(event)}`
+     // if exists -> return true
+     return false;
   }
 
   /**
@@ -428,6 +484,10 @@ export class NotificationHub extends EventEmitter {
             address: spec.id,
           });
           break;
+
+        // Note: 'sms' and 'push' support in routing rules would be added here
+        // as new spec types if explicit routing is needed, otherwise they are
+        // resolved via 'user' preferences/lookups.
 
         case 'channel':
           recipients.push({
@@ -599,6 +659,7 @@ export class NotificationHub extends EventEmitter {
     channels: string[],
   ): Promise<ResolvedRecipient | null> {
     // Mock implementation - would query user service
+    // In production: await userService.getUser(userId)
     return {
       id: userId,
       type: 'user',
@@ -612,6 +673,16 @@ export class NotificationHub extends EventEmitter {
     channels: string[],
   ): Promise<ResolvedRecipient[]> {
     // Mock implementation - would query user service for users with this role
+    // In production: await rbacService.getUsersByRole(roleId)
+    // For now, return a dummy user if role is 'admin' to simulate behavior
+    if (roleId === 'admin') {
+         return [{
+            id: 'admin_user_1',
+            type: 'user',
+            channels,
+            address: 'admin@example.com'
+         }];
+    }
     return [];
   }
 
@@ -620,6 +691,15 @@ export class NotificationHub extends EventEmitter {
     channels: string[],
   ): Promise<ResolvedRecipient[]> {
     // Mock implementation - would query user service for team members
+    // In production: await teamService.getTeamMembers(teamId)
+     if (teamId === 'devops') {
+         return [{
+            id: 'devops_lead',
+            type: 'user',
+            channels,
+            address: 'devops@example.com'
+         }];
+    }
     return [];
   }
 
