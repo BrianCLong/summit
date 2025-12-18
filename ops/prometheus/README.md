@@ -8,6 +8,7 @@ This folder ships the curated rules and base configuration for the IntelGraph ob
 - `prometheus-rule-slo.yaml` – legacy platform SLO alerts (graph latency and HTTP error burn rate).
 - `prometheus-rule-sla.yaml` – SLA/error budget/telemetry health rules (availability, error budget burn, p95 regressions, OTel exporter failures, Elasticsearch state, profiling ingestion, Filebeat delivery).
 - `rules-business.yaml` – business KPI recordings (signups, API calls, revenue) with anomaly detection, SLA/SLO alerts, and capacity planning projections.
+- `workflow-slo-rules.yaml` – workflow-specific SLO recordings and burn alerts for ingest, query, copilot, and vertical intelligence paths.
 
 ## Usage
 
