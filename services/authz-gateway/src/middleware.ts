@@ -1,11 +1,9 @@
-import { jwtVerify, type JWTPayload } from 'jose';
 import type { Request, Response, NextFunction } from 'express';
-import { context } from '@opentelemetry/api';
+import type { JWTPayload } from 'jose';
 import pino from 'pino';
-import { getPublicKey } from './keys';
 import { authorize } from './policy';
 import { log } from './audit';
-import { attachAuthorizationBaggage } from './observability';
+import { sessionManager } from './session';
 import type { AttributeService } from './attribute-service';
 import type {
   AuthorizationInput,
@@ -80,7 +78,7 @@ export function requireAuth(
     }
     try {
       const token = auth.replace('Bearer ', '');
-      const { payload } = await jwtVerify(token, getPublicKey());
+      const { payload } = await sessionManager.validate(token);
       if (options.requiredAcr && payload.acr !== options.requiredAcr) {
         return res
           .status(401)
@@ -137,16 +135,15 @@ export function requireAuth(
       req.user = payload;
       req.subjectAttributes = subject;
       req.resourceAttributes = resource;
-      const baggageContext = attachAuthorizationBaggage({
-        subjectId: subject.id,
-        tenantId: subject.tenantId,
-        resourceId: resource.id,
-        action: options.action,
-        classification: resource.classification,
-        residency: resource.residency,
-      });
-      return context.with(baggageContext, () => next());
+      return next();
     } catch (error) {
+      const message = (error as Error).message;
+      if (message === 'session_expired') {
+        return res.status(401).json({ error: 'session_expired' });
+      }
+      if (message === 'session_not_found') {
+        return res.status(401).json({ error: 'invalid_session' });
+      }
       if (process.env.NODE_ENV !== 'test') {
         logger.error({ err: error }, 'Authorization error');
       }
