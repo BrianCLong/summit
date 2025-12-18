@@ -96,8 +96,8 @@ export class DataPoolManager {
 
   async verifyAccessToken(poolId: string, token: string): Promise<boolean> {
     const tokenData = this.accessTokens.get(token);
-    if (!tokenData) return false;
-    if (tokenData.poolId !== poolId) return false;
+    if (!tokenData) {return false;}
+    if (tokenData.poolId !== poolId) {return false;}
     if (tokenData.expiresAt < new Date()) {
       this.accessTokens.delete(token);
       return false;
@@ -107,7 +107,7 @@ export class DataPoolManager {
 
   async queryData(poolId: string, query?: string): Promise<StoredContribution[]> {
     const contributions = this.contributions.get(poolId) || [];
-    if (!query) return contributions;
+    if (!query) {return contributions;}
 
     // Simple filtering (in production, use proper query engine)
     return contributions.filter((c) => JSON.stringify(c).includes(query));

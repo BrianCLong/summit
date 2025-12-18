@@ -40,8 +40,8 @@ export class ConfidenceScorer {
     const matches = context.match(pattern);
     const frequency = matches ? matches.length : 0;
 
-    if (frequency >= 3) return 1.2;
-    if (frequency === 2) return 1.1;
+    if (frequency >= 3) {return 1.2;}
+    if (frequency === 2) {return 1.1;}
     return 1.0;
   }
 
@@ -51,8 +51,8 @@ export class ConfidenceScorer {
   private lengthScore(entity: Entity): number {
     const words = entity.text.split(/\s+/).length;
 
-    if (words >= 3) return 1.1;
-    if (words === 1) return 0.9;
+    if (words >= 3) {return 1.1;}
+    if (words === 1) {return 0.9;}
     return 1.0;
   }
 }

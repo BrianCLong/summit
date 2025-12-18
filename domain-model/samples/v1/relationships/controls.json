@@ -1,0 +1,14 @@
+{
+  "id": "rel-1",
+  "schemaVersion": "v1",
+  "relationshipType": "controls",
+  "sourceId": "person-123",
+  "targetId": "asset-9001",
+  "sourceType": "Person",
+  "targetType": "Asset",
+  "metadata": {
+    "schemaVersion": "v1",
+    "sourceSystem": "cmdb",
+    "ingestedAt": "2025-02-01T14:15:00Z"
+  }
+}

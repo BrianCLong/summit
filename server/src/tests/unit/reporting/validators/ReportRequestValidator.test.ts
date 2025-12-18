@@ -5,6 +5,7 @@
 import { ReportRequestValidator, ValidationError } from '../../../../services/reporting/validators/ReportRequestValidator.js';
 import { mockInvestigationSummaryTemplate } from '../../../fixtures/reporting/mock-templates.js';
 import { createMockReportRequest } from '../../../fixtures/reporting/test-helpers.js';
+import { describe, it, test, expect } from '@jest/globals';
 
 describe('ReportRequestValidator', () => {
   describe('validate', () => {
