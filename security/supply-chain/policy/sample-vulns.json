@@ -1,0 +1,18 @@
+{
+  "vulnerabilities": [
+    {
+      "id": "CVE-2024-0001",
+      "package": "core-api",
+      "severity": "high",
+      "cvss": 6.8,
+      "fixedVersion": "1.4.1"
+    },
+    {
+      "id": "CVE-2024-0002",
+      "package": "ui-kit",
+      "severity": "medium",
+      "cvss": 5.2,
+      "fixedVersion": "2.1.2"
+    }
+  ]
+}
