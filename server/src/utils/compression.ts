@@ -1,5 +1,5 @@
 
-import zlib from 'zlib';
+import * as zlib from 'zlib';
 import { promisify } from 'util';
 
 const gzip = promisify(zlib.gzip);
@@ -43,7 +43,7 @@ export class CompressionUtils {
     const compressed = await gzip(buffer);
     const result = Buffer.alloc(compressed.length + 1);
     result.writeUInt8(1, 0); // 1 = GZIP
-    compressed.copy(result, 1);
+    (compressed as Buffer).copy(result, 1);
 
     return result;
   }

@@ -3,7 +3,7 @@
  * Provides cryptographic verification of bundle integrity
  */
 
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { MerkleNode, MerkleTree, MerkleProof } from '../types/provenance-beta.js';
 
 export class MerkleTreeBuilder {

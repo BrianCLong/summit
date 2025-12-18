@@ -217,14 +217,14 @@ export class QueryPreviewService {
     const costEstimate = this.estimateCypherCost(scopedQuery);
 
     // Assess risk
-    const riskAssessment = translationResult.policyRisk
+    const riskAssessment: RiskAssessment = translationResult.policyRisk
       ? {
-          level: translationResult.policyRisk.riskLevel as 'low' | 'medium' | 'high',
-          concerns: translationResult.policyRisk.concerns || [],
-          piiFields: translationResult.policyRisk.piiFields || [],
-          mutationDetected: translationResult.policyRisk.mutationDetected || false,
-          recommendedActions: translationResult.policyRisk.recommendedActions || [],
-        }
+        level: translationResult.policyRisk.riskLevel as 'low' | 'medium' | 'high',
+        concerns: translationResult.policyRisk.risks || [],
+        piiFields: [], // Not returned by service yet
+        mutationDetected: translationResult.policyRisk.sensitiveOperations.length > 0,
+        recommendedActions: [], // Not returned by service yet
+      }
       : this.assessCypherRisk(scopedQuery);
 
     // Determine execution policy
@@ -246,16 +246,16 @@ export class QueryPreviewService {
       },
       language: 'cypher',
       generatedQuery: scopedQuery,
-      queryExplanation: translationResult.explanation || this.explainCypher(scopedQuery),
+      queryExplanation: this.explainCypher(scopedQuery), // Service doesn't provide explanation yet
       costEstimate,
       riskAssessment,
-      syntacticallyValid: translationResult.isValid !== false,
-      validationErrors: translationResult.validationErrors || [],
+      syntacticallyValid: translationResult.validation.isValid !== false,
+      validationErrors: translationResult.validation.syntaxErrors || [],
       canExecute,
       requiresApproval,
       sandboxOnly,
       modelUsed: 'nl-to-cypher-v1',
-      confidence: translationResult.confidence || 0.85,
+      confidence: 0.85, // Service doesn't provide confidence yet
       generatedAt: new Date(),
       expiresAt: new Date(Date.now() + this.previewTTL * 1000),
       executed: false,

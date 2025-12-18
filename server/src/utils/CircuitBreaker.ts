@@ -1,5 +1,7 @@
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino();
 
 enum CircuitBreakerState {

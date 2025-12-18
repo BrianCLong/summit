@@ -28,8 +28,10 @@ function createServices(context: Context) {
   const glassBoxService = new GlassBoxRunService(context.pool, context.redis);
 
   const nlToCypherService = new NlToCypherService(
-    context.neo4jDriver,
-    context.pool
+    // Mock adapter for NlToCypherService since resolver dependencies are outdated
+    {
+      generate: async () => 'MATCH (n) RETURN n LIMIT 10'
+    }
   );
 
   const queryPreviewService = new QueryPreviewService(

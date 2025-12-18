@@ -20,9 +20,11 @@
 import { Driver } from 'neo4j-driver';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
-import pino from 'pino';
 import { createHash, randomUUID } from 'crypto';
-import * as z from 'zod';
+import { z } from 'zod/v4';
+import logger from '../../utils/logger.js';
+
+const serviceLogger = logger.child({ name: 'SemanticKGRAGService' });
 
 import {
   SemanticRAGRequest,
@@ -46,8 +48,6 @@ import {
 import { GraphTraversalAlgorithms, TraversalContext } from './GraphTraversalAlgorithms.js';
 import { STIXTAXIIFusionService } from './STIXTAXIIFusionService.js';
 import { HybridSemanticRetriever, EmbeddingService } from './HybridSemanticRetriever.js';
-
-const logger = pino({ name: 'SemanticKGRAGService' });
 
 // ============================================================================
 // LLM Service Interface
@@ -222,7 +222,7 @@ export class SemanticKGRAGService {
     const state = this.initializeOrchestratorState(requestId);
     this.orchestratorStates.set(requestId, state);
 
-    logger.info({
+    serviceLogger.info({
       requestId,
       investigationId: validated.investigationId,
       queryLength: validated.query.length,
@@ -372,7 +372,7 @@ Analyze this query and provide an execution plan.`;
       agentState.output = validated;
       agentState.endTime = Date.now();
 
-      return validated;
+      return validated as any;
     } catch (error) {
       agentState.status = 'failed';
       agentState.error = error instanceof Error ? error.message : 'Unknown error';
@@ -646,7 +646,7 @@ Verify each claim in the response is supported by the context.`;
    * Validate final response for quality and safety
    */
   private async validateResponse(
-    response: { answer: string; citations: string[]; confidence: number },
+    response: { answer: string; citations: string[]; confidence: number; whyPaths: any[] },
     context: { nodes: GraphNode[] },
     request: SemanticRAGRequest,
     state: OrchestratorState,

@@ -163,7 +163,7 @@ const AuditEventSchema = z.object({
   action: z.string(),
   outcome: z.enum(['success', 'failure', 'partial']),
   message: z.string(),
-  details: z.record(z.any()),
+  details: z.record(z.string(), z.any()),
   complianceRelevant: z.boolean(),
   complianceFrameworks: z.array(z.string()),
 });
@@ -237,7 +237,7 @@ export class AdvancedAuditSystem extends EventEmitter {
       const encryptionKey = process.env.AUDIT_ENCRYPTION_KEY || 'dev-encryption-key-do-not-use-in-prod';
 
       if (!redis) {
-          logger.warn("AdvancedAuditSystem initialized without Redis. Real-time alerting will be disabled.");
+        logger.warn("AdvancedAuditSystem initialized without Redis. Real-time alerting will be disabled.");
       }
 
       AdvancedAuditSystem.instance = new AdvancedAuditSystem(
@@ -643,10 +643,10 @@ export class AdvancedAuditSystem extends EventEmitter {
         // Store the expected previous hash for the NEXT iteration
         // The previousEventHash of the CURRENT event (N) points to the older event (N-1)
         if (expectedPreviousHash && event.hash !== expectedPreviousHash) {
-             invalidEvents.push({
-                eventId: event.id,
-                issue: 'Chain integrity violation: Hash mismatch with successor record',
-             });
+          invalidEvents.push({
+            eventId: event.id,
+            issue: 'Chain integrity violation: Hash mismatch with successor record',
+          });
         }
 
         // For the next iteration (which will process the OLDER event),
@@ -1056,7 +1056,7 @@ export class AdvancedAuditSystem extends EventEmitter {
     const timeSpan =
       events.length > 0
         ? events[events.length - 1].timestamp.getTime() -
-          events[0].timestamp.getTime()
+        events[0].timestamp.getTime()
         : 0;
 
     if (timeSpan > 0) {

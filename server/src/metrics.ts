@@ -1,4 +1,4 @@
-import client from 'prom-client';
+import * as client from 'prom-client';
 
 // Create a Registry to hold metrics
 export const registry = new client.Registry();

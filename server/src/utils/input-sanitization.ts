@@ -15,6 +15,7 @@
 
 import validator from 'validator';
 import { escape as htmlEscape } from 'html-escaper';
+// @ts-ignore
 import DOMPurify from 'isomorphic-dompurify';
 
 /**
@@ -111,7 +112,7 @@ export function sanitizeHTML(
   if (stripAll) {
     // Use DOMPurify with empty allowed tags for consistent stripping
     if (useDOMPurify) {
-      return DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+      return (DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [], RETURN_TRUSTED_TYPE: true }) as unknown as string)
         .replace(/\s+/g, ' ')
         .trim();
     }
@@ -126,7 +127,7 @@ export function sanitizeHTML(
   if (useDOMPurify) {
     // Build config from options or use preset
     const baseConfig = DOMPURIFY_CONFIGS[mode];
-    const config: DOMPurify.Config = {
+    const config: any = {
       ...baseConfig,
       ...(allowedTags && { ALLOWED_TAGS: allowedTags }),
       ...(allowedAttributes && { ALLOWED_ATTR: Object.values(allowedAttributes).flat() }),
@@ -161,7 +162,7 @@ export function sanitizeHTML(
     // Remove hooks after use to prevent accumulation
     DOMPurify.removeAllHooks();
 
-    return sanitized;
+    return sanitized as unknown as string;
   }
 
   // Fallback: regex-based sanitization (defense-in-depth)

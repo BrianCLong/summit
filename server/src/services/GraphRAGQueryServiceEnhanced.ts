@@ -28,7 +28,7 @@ export interface RedactionPolicy {
   enabled: boolean;
   rules: Array<'pii' | 'financial' | 'sensitive' | 'k_anon'>;
   allowedFields?: string[];
-  classificationLevel?: 'public' | 'internal' | 'confidential' | 'secret';
+  classificationLevel?: 'public' | 'internal' | 'confidential' | 'restricted';
 }
 
 export interface ProvenanceContext {
@@ -409,14 +409,14 @@ export class GraphRAGQueryServiceEnhanced {
 
         preview: preview
           ? {
-              id: preview.id,
-              generatedQuery: preview.generatedQuery,
-              queryExplanation: preview.queryExplanation,
-              costLevel: preview.costEstimate.level,
-              riskLevel: preview.riskAssessment.level,
-              canExecute: preview.canExecute,
-              requiresApproval: preview.requiresApproval,
-            }
+            id: preview.id,
+            generatedQuery: preview.generatedQuery,
+            queryExplanation: preview.queryExplanation,
+            costLevel: preview.costEstimate.level,
+            riskLevel: preview.riskAssessment.level,
+            canExecute: preview.canExecute,
+            requiresApproval: preview.requiresApproval,
+          }
           : undefined,
 
         runId: run.id,
@@ -595,14 +595,14 @@ export class GraphRAGQueryServiceEnhanced {
               const chain = chains[0];
               provenanceChain = {
                 chainId: chain.id,
-                rootHash: chain.rootHash,
-                transformChain: chain.transformChain || [],
-                verifiable: chain.verified,
+                rootHash: (chain.lineage as any).rootHash || '', // Cast to any as type def is incomplete
+                transformChain: chain.transforms,
+                verifiable: !!(chain.lineage as any).verified, // Cast to any
               };
 
               // Get associated claims
-              if (evidence.claimIds) {
-                claimIds = evidence.claimIds;
+              if ((evidence.metadata as any)?.claimIds) {
+                claimIds = (evidence.metadata as any).claimIds;
               }
             }
           } catch (error) {
@@ -626,7 +626,8 @@ export class GraphRAGQueryServiceEnhanced {
           sourceUrl: row.source_url,
 
           evidenceId: row.evidence_id,
-          claimIds,
+          // claimIds not on Evidence type in clients, assume in metadata if present
+          claimIds: row.props?.claimIds || [],
           provenanceChain,
 
           wasRedacted,
@@ -661,30 +662,37 @@ export class GraphRAGQueryServiceEnhanced {
   ): Promise<string> {
     try {
       const claim = await this.provLedgerClient.createClaim({
-        statement: answer,
-        claimType: 'graphrag_answer',
-        confidence: this.calculateOverallConfidence(citations),
-        sourceEntityIds: citations.map(c => c.entityId),
-        evidenceIds: citations
-          .map(c => c.evidenceId)
-          .filter((id): id is string => !!id),
+        content: {
+          statement: answer,
+          type: 'graphrag_answer',
+          confidence: this.calculateOverallConfidence(citations),
+        },
         metadata: {
           question,
           investigationId,
           citationCount: citations.length,
           timestamp: new Date().toISOString(),
+          evidenceIds: citations
+            .map(c => c.evidenceId)
+            .filter((id): id is string => !!id),
+          sourceEntityIds: citations.map(c => c.entityId),
         },
       });
 
       // Create provenance chain if we have evidence
-      if (claim.evidenceIds && claim.evidenceIds.length > 0) {
+      // Note: evidenceIds are stored in metadata, so we access them there
+      const evidenceIds = claim.metadata?.evidenceIds as string[] | undefined;
+
+      if (evidenceIds && evidenceIds.length > 0) {
         await this.provLedgerClient.createProvenanceChain({
           claimId: claim.id,
-          evidenceIds: claim.evidenceIds,
-          transformation: 'graphrag_synthesis',
-          transformParams: {
-            model: 'gpt-4',
-            confidence: claim.confidence,
+          sources: evidenceIds, // Mapping evidenceIds to sources as ProvChain expects sources
+          transforms: ['graphrag_synthesis'],
+          lineage: {
+            transformParams: {
+              model: 'gpt-4',
+              confidence: (claim.content as any).confidence,
+            },
           },
         });
       }
@@ -692,7 +700,7 @@ export class GraphRAGQueryServiceEnhanced {
       logger.info({
         claimId: claim.id,
         investigationId,
-        evidenceCount: claim.evidenceIds?.length || 0,
+        evidenceCount: (claim.metadata?.evidenceIds as any[])?.length || 0,
       }, 'Registered GraphRAG answer as claim');
 
       return claim.id;

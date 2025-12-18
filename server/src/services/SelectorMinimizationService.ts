@@ -13,7 +13,7 @@ import { CircuitBreaker } from '../utils/CircuitBreaker.js';
 import { getRedisClient } from '../db/redis.js';
 import { getPostgresPool } from '../db/postgres.js';
 import { advancedAuditSystem } from '../audit/advanced-audit-system.js';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 // ============================================================================
 // Types and Interfaces
@@ -158,10 +158,7 @@ export class SelectorMinimizationService {
   private readonly DEFAULT_ANOMALY_Z_SCORE = 4.0;
 
   constructor() {
-    this.circuitBreaker = new CircuitBreaker('SelectorMinimizationService', {
-      failureThreshold: 5,
-      resetTimeout: 60000,
-    });
+    this.circuitBreaker = new CircuitBreaker({});
 
     this.initializeConnections();
   }

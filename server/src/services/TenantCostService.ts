@@ -1033,7 +1033,7 @@ export class TenantCostService extends EventEmitter {
 
   private async generateAllForecasts(): Promise<void> {
     try {
-      for (const tenantId of this.budgets.keys()) {
+      for (const tenantId of Array.from(this.budgets.keys())) {
         try {
           await this.generateCostForecast(tenantId);
         } catch (error) {

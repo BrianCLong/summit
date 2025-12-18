@@ -1,15 +1,18 @@
 import { createWriteStream, createReadStream, promises as fs } from 'fs';
 import { pipeline } from 'stream/promises';
 import { createHash } from 'crypto';
-import path from 'path';
+import * as path from 'path';
 import { randomUUID as uuidv4 } from 'node:crypto';
-import sharp from 'sharp';
+// @ts-ignore
+import { default as sharp } from 'sharp';
 import ffprobe from 'ffprobe-static';
 import ffmpeg from 'fluent-ffmpeg';
 // @ts-ignore - Upload type not exported from graphql-upload-ts
 import { Upload } from 'graphql-upload-ts';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 
+// @ts-ignore
 const logger = pino({ name: 'MediaUploadService' });
 
 // Configure FFmpeg binary paths
@@ -78,7 +81,7 @@ export class MediaUploadService {
    * Upload and process a media file with comprehensive metadata extraction
    */
   async uploadMedia(upload: Upload, userId?: string): Promise<MediaMetadata> {
-    const { createReadStream, filename, mimetype } = await upload;
+    const { createReadStream, filename, mimetype } = (await upload) as any;
     const stream = createReadStream();
 
     // Sanitize the original filename first

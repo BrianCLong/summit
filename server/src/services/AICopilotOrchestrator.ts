@@ -171,12 +171,12 @@ export class AICopilotOrchestrator {
 
     const executionTimeMs = Date.now() - startTime;
 
-    metrics.copilotQueryTotal.inc({
+    metrics.copilotApiRequestTotal.inc({
       mode,
       status: 'success',
       autoMode: request.mode === 'auto' || !request.mode,
     });
-    metrics.copilotQueryDurationMs.observe({ mode }, executionTimeMs);
+    metrics.copilotApiRequestDurationMs.observe({ mode }, executionTimeMs);
 
     logger.info({
       investigationId: request.investigationId,
@@ -321,8 +321,8 @@ export class AICopilotOrchestrator {
         mode: this.inferModeFromRunType(run.type),
         question: run.prompt,
         timestamp: run.createdAt,
-        executionTimeMs: run.completedAt
-          ? new Date(run.completedAt).getTime() - new Date(run.createdAt).getTime()
+        executionTimeMs: (run as any).completedAt
+          ? new Date((run as any).completedAt).getTime() - new Date(run.createdAt).getTime()
           : 0,
         status: run.status,
       })),

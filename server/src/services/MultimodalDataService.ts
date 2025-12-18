@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { randomUUID as uuidv4 } from 'node:crypto';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
 import {
   MediaUploadService,
   MediaMetadata,
@@ -8,6 +9,7 @@ import {
 } from './MediaUploadService.js';
 import { ExtractionJobService } from './ExtractionJobService.js';
 
+// @ts-ignore
 const logger = pino({ name: 'MultimodalDataService' });
 
 export interface MediaSource {

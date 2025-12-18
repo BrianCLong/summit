@@ -10,9 +10,10 @@
  * - External verification for reproducibility
  */
 
-import crypto from 'node:crypto';
-import { z } from 'zod';
-import { RiskEngine, RiskResult, FeatureVector } from '../../risk/RiskEngine.js';
+import * as crypto from 'node:crypto';
+import { z } from 'zod/v4';
+import { RiskEngine, RiskResult } from '../../risk/RiskEngine.js';
+import { FeatureVector } from '../../risk/FeatureStore.js';
 import { dualNotary } from '../../federal/dual-notary.js';
 import { otelService } from '../../middleware/observability/otel-tracing.js';
 import logger from '../../utils/logger.js';
@@ -258,7 +259,7 @@ export class XAIOverlayService {
   // ============================================================================
 
   private generateInputSummary(features: FeatureVector): InputSummary {
-    const values = Object.values(features);
+    const values = Object.values(features) as number[];
     const featureNames = Object.keys(features);
 
     const nonZeroValues = values.filter(v => v !== 0);
@@ -281,8 +282,8 @@ export class XAIOverlayService {
       inputStatistics: {
         mean,
         std,
-        min: Math.min(...values),
-        max: Math.max(...values),
+        min: Math.min(...(values as number[])),
+        max: Math.max(...(values as number[])),
         nonZeroCount: nonZeroValues.length,
       },
       timestamp: new Date(),
@@ -375,7 +376,7 @@ export class XAIOverlayService {
     const directionText = direction === 'increases_risk' ? 'increases' : 'decreases';
 
     return `The ${label} (value: ${value.toFixed(3)}) ${directionText} risk by ${percent.toFixed(1)}% ` +
-           `(weight: ${weight.toFixed(3)})`;
+      `(weight: ${weight.toFixed(3)})`;
   }
 
   // ============================================================================
@@ -631,7 +632,7 @@ export class XAIOverlayService {
       case 'critical_tamper':
         // Critical tampering = multiple errors or specific field modifications
         return tamperResult.verificationErrors.length > 1 ||
-               (tamperResult.tamperedFields?.includes('modelOutput') ?? false);
+          (tamperResult.tamperedFields?.includes('modelOutput') ?? false);
 
       case 'manual_override':
         // Never auto-require dual control

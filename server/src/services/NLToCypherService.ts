@@ -11,13 +11,13 @@
  * Implements "Auditable by Design" from Wishbook requirements
  */
 
-import * as z from 'zod';
-import pino from 'pino';
+import { z } from 'zod/v4';
+import { logger as appLogger } from '../utils/logger.js';
 import { LLMGuardrailsService } from '../security/llm-guardrails.js';
 import LLMService from './LLMService.js';
 import { Driver, Session } from 'neo4j-driver';
 
-const logger = pino({ name: 'NLToCypherService' });
+const logger = appLogger.child({ module: 'NLToCypherService' });
 
 // Zod schemas for type safety
 const NLQuerySchema = z.object({
@@ -203,7 +203,7 @@ export class NLToCypherService {
       const records = result.records.map((record) => {
         const obj: Record<string, any> = {};
         record.keys.forEach((key) => {
-          obj[key] = record.get(key);
+          obj[key as string] = record.get(key);
         });
         return obj;
       });

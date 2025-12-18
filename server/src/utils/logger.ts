@@ -1,3 +1,4 @@
+// @ts-ignore
 import { default as pino } from 'pino';
 
 // @ts-ignore - pino types conflict with module resolution

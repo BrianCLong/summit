@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 
 export function hmacHex(
   algorithm: 'sha256' | 'sha1',

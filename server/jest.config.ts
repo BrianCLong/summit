@@ -78,7 +78,7 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$|uuid))'],
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

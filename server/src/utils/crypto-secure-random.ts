@@ -11,8 +11,8 @@
  * - Any operation where unpredictability is a security requirement
  */
 
-import crypto from 'crypto';
-import type { BufferEncoding } from 'node:buffer';
+import * as crypto from 'crypto';
+
 
 /**
  * Generate a cryptographically secure random string

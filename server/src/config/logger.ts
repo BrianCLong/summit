@@ -1,3 +1,4 @@
+// @ts-ignore
 import pino from 'pino';
 import { cfg } from '../config.js';
 
@@ -18,7 +19,7 @@ const REDACT_PATHS = [
   'user.phone',
 ];
 
-export const logger = pino({
+export const logger = (pino as any)({
   level: process.env.LOG_LEVEL || 'info',
   // Enforce structured JSON logging in all environments for consistency and to avoid missing dependency issues (pino-pretty).
   // This satisfies the requirement "All logs must be JSON structured".
@@ -27,16 +28,16 @@ export const logger = pino({
     env: cfg.NODE_ENV,
     version: process.env.npm_package_version || 'unknown',
   },
-  timestamp: pino.stdTimeFunctions.isoTime,
+  timestamp: () => `,"time":"${new Date().toISOString()}"`,
   redact: {
     paths: REDACT_PATHS,
     censor: '[REDACTED]',
   },
   formatters: {
-    level: (label) => {
+    level: (label: string) => {
       return { level: label.toUpperCase() };
     },
-    bindings: (bindings) => {
+    bindings: (bindings: any) => {
       return {
         pid: bindings.pid,
         host: bindings.hostname,
@@ -44,9 +45,12 @@ export const logger = pino({
     },
   },
   serializers: {
-    err: pino.stdSerializers.err,
-    req: pino.stdSerializers.req,
-    res: pino.stdSerializers.res,
+    // @ts-ignore
+    err: (pino as any).stdSerializers?.err,
+    // @ts-ignore
+    req: (pino as any).stdSerializers?.req,
+    // @ts-ignore
+    res: (pino as any).stdSerializers?.res,
   },
 });
 

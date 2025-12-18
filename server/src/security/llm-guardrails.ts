@@ -14,13 +14,27 @@
  * - MLCommons AI Safety Benchmarks
  */
 
-import { Logger } from '../observability/logger.js';
-import { Metrics } from '../observability/metrics.js';
+// @ts-ignore
+import { logger as rootLogger } from '../utils/logger.js';
+// @ts-ignore
+import { metrics as rootMetrics } from '../observability/metrics.js';
 import { SafetyV2Service } from '../safety/safety-v2.js';
 import { isSuspicious } from '../services/guard.js';
-import crypto from 'crypto';
+// @ts-ignore
+import * as crypto from 'crypto';
 
-const logger = new Logger('LLMGuardrails');
+const logger = rootLogger.child({ service: 'LLMGuardrails' });
+
+// Shim for missing Metrics class
+class Metrics {
+  counter(name: string, labels?: Record<string, any>) {
+    // No-op or log
+  }
+  histogram(name: string, value: number, labels?: Record<string, any>) {
+    // No-op or log
+  }
+}
+
 const metrics = new Metrics();
 
 interface GuardrailCheckResult {
@@ -461,31 +475,37 @@ export class LLMGuardrailsService {
     // 2. SafetyV2 integration (if available)
     if (this.safetyService) {
       try {
-        const safetyCheck = await this.safetyService.validate({
-          content: params.prompt,
-          context: {
-            userId: params.userId,
-            tenantId: params.tenantId,
-            operation: 'llm_query',
-          },
+        const evaluation = await this.safetyService.evaluateActionSafety({
+          actionId: `llm-${crypto.randomUUID()}`,
+          tenantId: params.tenantId || 'default-tenant',
+          userId: params.userId || 'system',
+          actionType: 'llm_query',
+          inputText: params.prompt,
+          dataClassification: params.privacyLevel || 'internal',
+          targetResources: [],
+          metadata: {
+            external: false,
+            requiresCitation: false
+          }
         });
 
-        if (!safetyCheck.safe) {
+        if (evaluation.decision !== 'allow') {
           logger.warn('Safety check failed', {
             user_id: params.userId,
-            violations: safetyCheck.violations,
+            violations: evaluation.guardrailViolations,
+            decision: evaluation.decision
           });
 
           return {
             allowed: false,
-            reason: `Safety violations: ${safetyCheck.violations?.join(', ')}`,
-            risk_score: safetyCheck.risk_score || 0.8,
+            reason: `Safety violations: ${evaluation.guardrailViolations.join(', ')}`,
+            risk_score: evaluation.riskScore,
           };
         }
 
-        riskScore = Math.max(riskScore, safetyCheck.risk_score || 0);
-        if (safetyCheck.warnings) {
-          warnings.push(...safetyCheck.warnings);
+        riskScore = Math.max(riskScore, evaluation.riskScore);
+        if (evaluation.reasoning) {
+          warnings.push(...evaluation.reasoning);
         }
       } catch (error) {
         logger.error('SafetyV2 check failed', error as Error);

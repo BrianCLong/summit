@@ -1,5 +1,6 @@
 import Redis from 'ioredis';
 import * as dotenv from 'dotenv';
+// @ts-ignore
 import { default as pino } from 'pino';
 
 dotenv.config();
@@ -52,10 +53,10 @@ export function getRedisClient(): Redis {
       };
 
       const originalDel = redisClient.del.bind(redisClient);
-      redisClient.del = async (key: string) => {
+      redisClient.del = (async (key: string) => {
         telemetry.subsystems.cache.dels.add(1);
         return await originalDel(key);
-      };
+      }) as any;
     } catch (error) {
       logger.warn(
         `Redis initialization failed - using development mode. Error: ${(error as Error).message}`,

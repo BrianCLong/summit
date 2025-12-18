@@ -1,4 +1,5 @@
 import { getNeo4jDriver } from '../db/neo4j.js';
+// @ts-ignore
 import { default as pino } from 'pino';
 
 // @ts-ignore
@@ -145,7 +146,7 @@ class GraphIndexAdvisorService {
       });
 
       // Analyze patterns
-      for (const [key, count] of this.accessPatterns.entries()) {
+      for (const [key, count] of Array.from(this.accessPatterns.entries())) {
         const [label, property] = key.split(':');
 
         // If index exists, skip

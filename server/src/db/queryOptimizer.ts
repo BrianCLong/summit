@@ -4,7 +4,7 @@
 import { trace, Span } from '@opentelemetry/api';
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { getRedisClient } from '../db/redis';
-import crypto from 'crypto';
+import * as crypto from 'crypto';
 import { neo } from './neo4j';
 import { CompressionUtils } from '../utils/compression';
 import neo4j from 'neo4j-driver'; // Import neo4j to handle Integer types
@@ -205,9 +205,9 @@ export class QueryOptimizer {
     executeQuery: (q: string, p: any) => Promise<any>
   ): Promise<any> {
     if (context.cacheEnabled === false) {
-        const rawResult = await executeQuery(query, params);
-        // Normalize even if cache disabled to ensure consistent data types across app
-        return this.transformNeo4jIntegers(rawResult);
+      const rawResult = await executeQuery(query, params);
+      // Normalize even if cache disabled to ensure consistent data types across app
+      return this.transformNeo4jIntegers(rawResult);
     }
 
     // 1. Optimize first to check cache strategy
@@ -215,21 +215,21 @@ export class QueryOptimizer {
 
     // If caching not enabled in plan or it's a write, just execute and normalize
     if (!plan.cacheStrategy?.enabled) {
-        const rawResult = await executeQuery(plan.optimizedQuery, params);
-        return this.transformNeo4jIntegers(rawResult);
+      const rawResult = await executeQuery(plan.optimizedQuery, params);
+      return this.transformNeo4jIntegers(rawResult);
     }
 
     const resultCacheKey = this.buildResultCacheKey(query, params, context);
 
     // 2. Try to get from result cache
     try {
-        const cachedResult = await this.getFromResultCache(resultCacheKey);
-        if (cachedResult) {
-            resultCacheHits.inc({ tenant_id: context.tenantId, query_type: context.queryType });
-            return cachedResult; // Already normalized/transformed when cached
-        }
+      const cachedResult = await this.getFromResultCache(resultCacheKey);
+      if (cachedResult) {
+        resultCacheHits.inc({ tenant_id: context.tenantId, query_type: context.queryType });
+        return cachedResult; // Already normalized/transformed when cached
+      }
     } catch (e) {
-        logger.warn('Failed to read from result cache', { error: e });
+      logger.warn('Failed to read from result cache', { error: e });
     }
 
     resultCacheMisses.inc({ tenant_id: context.tenantId, query_type: context.queryType });
@@ -242,9 +242,9 @@ export class QueryOptimizer {
 
     // 5. Cache result (using normalized data)
     try {
-        await this.cacheResult(resultCacheKey, normalizedResult, plan.cacheStrategy.ttl);
+      await this.cacheResult(resultCacheKey, normalizedResult, plan.cacheStrategy.ttl);
     } catch (e) {
-        logger.warn('Failed to write to result cache', { error: e });
+      logger.warn('Failed to write to result cache', { error: e });
     }
 
     return normalizedResult;
@@ -255,7 +255,7 @@ export class QueryOptimizer {
     params: any,
     context: OptimizationContext
   ): string {
-     const queryHash = crypto
+    const queryHash = crypto
       .createHash('sha256')
       .update(query + JSON.stringify(params))
       .digest('hex');
@@ -264,19 +264,19 @@ export class QueryOptimizer {
   }
 
   private async getFromResultCache(key: string): Promise<any | null> {
-      const redis = getRedisClient();
-      const cached = await redis.get(key);
-      if (cached) {
-          return CompressionUtils.decompressFromString(cached);
-      }
-      return null;
+    const redis = getRedisClient();
+    const cached = await redis.get(key);
+    if (cached) {
+      return CompressionUtils.decompressFromString(cached);
+    }
+    return null;
   }
 
   private async cacheResult(key: string, result: any, ttl: number): Promise<void> {
-      const redis = getRedisClient();
-      // result is already normalized
-      const compressed = await CompressionUtils.compressToString(result);
-      await redis.set(key, compressed, 'EX', ttl);
+    const redis = getRedisClient();
+    // result is already normalized
+    const compressed = await CompressionUtils.compressToString(result);
+    await redis.set(key, compressed, 'EX', ttl);
   }
 
   // Helper to convert Neo4j Integers to standard JS numbers/strings
@@ -306,46 +306,46 @@ export class QueryOptimizer {
 
   // Invalidation Method
   async invalidateForLabels(tenantId: string, labels: string[]): Promise<void> {
-      logger.info(`Invalidating cache for labels: ${labels.join(', ')} in tenant ${tenantId}`);
+    logger.info(`Invalidating cache for labels: ${labels.join(', ')} in tenant ${tenantId}`);
 
-      // Broad invalidation by tenant
-      // We clear both plan cache and result cache for the tenant
-      // Result cache prefix: query_result:tenantId:hash
-      // Plan cache prefix: query_optimizer:tenantId:queryType:hash
+    // Broad invalidation by tenant
+    // We clear both plan cache and result cache for the tenant
+    // Result cache prefix: query_result:tenantId:hash
+    // Plan cache prefix: query_optimizer:tenantId:queryType:hash
 
-      const redis = getRedisClient();
-      const resultPattern = `${this.resultCachePrefix}:${tenantId}:*`;
-      const planPattern = `${this.cachePrefix}:${tenantId}:*`;
+    const redis = getRedisClient();
+    const resultPattern = `${this.resultCachePrefix}:${tenantId}:*`;
+    const planPattern = `${this.cachePrefix}:${tenantId}:*`;
 
-      try {
-          const deletePattern = (pattern: string): Promise<void> => {
-              return new Promise((resolve, reject) => {
-                  const stream = redis.scanStream({ match: pattern, count: 100 });
+    try {
+      const deletePattern = (pattern: string): Promise<void> => {
+        return new Promise((resolve, reject) => {
+          const stream = redis.scanStream({ match: pattern, count: 100 });
 
-                  stream.on('data', (keys) => {
-                      if (keys.length) {
-                          stream.pause();
-                          redis.del(...keys)
-                              .then(() => stream.resume())
-                              .catch((e) => {
-                                  logger.error('Error deleting cache keys', e);
-                                  stream.resume();
-                              });
-                      }
-                  });
+          stream.on('data', (keys) => {
+            if (keys.length) {
+              stream.pause();
+              redis.del(...keys)
+                .then(() => stream.resume())
+                .catch((e) => {
+                  logger.error('Error deleting cache keys', e);
+                  stream.resume();
+                });
+            }
+          });
 
-                  stream.on('end', () => resolve());
-                  stream.on('error', (err) => reject(err));
-              });
-          };
+          stream.on('end', () => resolve());
+          stream.on('error', (err) => reject(err));
+        });
+      };
 
-          await Promise.all([
-              deletePattern(resultPattern),
-              deletePattern(planPattern)
-          ]);
-      } catch (error) {
-          logger.error(`Failed to invalidate cache for tenant ${tenantId}`, { error });
-      }
+      await Promise.all([
+        deletePattern(resultPattern),
+        deletePattern(planPattern)
+      ]);
+    } catch (error) {
+      logger.error(`Failed to invalidate cache for tenant ${tenantId}`, { error });
+    }
   }
 
 
@@ -502,7 +502,7 @@ export class QueryOptimizer {
 
     for (const { pattern, type: _type } of patterns) {
       const matches = query.matchAll(pattern);
-      for (const match of matches) {
+      for (const match of Array.from(matches)) {
         if (match[1] && match[2]) {
           const label = labels.find((l) =>
             lowerQuery.includes(l.toLowerCase()),
@@ -514,7 +514,7 @@ export class QueryOptimizer {
       }
     }
 
-    return [...new Set(indexes)]; // Remove duplicates
+    return Array.from(new Set(indexes)); // Remove duplicates
   }
 
   private analyzeSQLRequiredIndexes(query: string, tables: string[]): string[] {
@@ -554,7 +554,7 @@ export class QueryOptimizer {
       }
     }
 
-    return [...new Set(indexes)];
+    return Array.from(new Set(indexes));
   }
 
   private async generateOptimizationPlan(
@@ -569,30 +569,30 @@ export class QueryOptimizer {
 
     // Use Neo4j EXPLAIN if available for Cypher
     if (context.queryType === 'cypher') {
-        try {
-            const explainResult = await neo.run(`EXPLAIN ${query}`, params);
-            if (explainResult && explainResult.summary) {
-                // Incorporate real DB stats
-                const summary = explainResult.summary;
-                if (summary.plan) {
-                  // If we have a plan, check for "AllNodesScan" or "NodeByLabelScan" which might be bad
-                  // This is a simplified check.
-                  const planType = summary.plan.operatorType;
-                  if (planType.includes('AllNodesScan')) {
-                       optimizations.push({
-                          name: 'full_scan_warning',
-                          type: 'index_hint',
-                          description: 'Query performs a full node scan. Consider adding indexes.',
-                          impact: 'high',
-                          applied: false,
-                          reason: 'Detected via EXPLAIN'
-                      });
-                  }
-                }
+      try {
+        const explainResult = await neo.run(`EXPLAIN ${query}`, params);
+        if (explainResult && explainResult.summary) {
+          // Incorporate real DB stats
+          const summary = explainResult.summary;
+          if (summary.plan) {
+            // If we have a plan, check for "AllNodesScan" or "NodeByLabelScan" which might be bad
+            // This is a simplified check.
+            const planType = summary.plan.operatorType;
+            if (planType.includes('AllNodesScan')) {
+              optimizations.push({
+                name: 'full_scan_warning',
+                type: 'index_hint',
+                description: 'Query performs a full node scan. Consider adding indexes.',
+                impact: 'high',
+                applied: false,
+                reason: 'Detected via EXPLAIN'
+              });
             }
-        } catch (e) {
-            // Ignore explain errors, fallback to heuristics
+          }
         }
+      } catch (e) {
+        // Ignore explain errors, fallback to heuristics
+      }
     }
 
 
@@ -911,14 +911,14 @@ export class QueryOptimizer {
       const redis = getRedisClient();
       const cached = await redis.get(cacheKey);
       if (cached) {
-          try {
-              // Try Decompressing if it looks like base64
-              // For now, assume it's JSON if it parses, otherwise try decompress
-              return JSON.parse(cached);
-          } catch (e) {
-              // Might be compressed
-              return CompressionUtils.decompressFromString(cached);
-          }
+        try {
+          // Try Decompressing if it looks like base64
+          // For now, assume it's JSON if it parses, otherwise try decompress
+          return JSON.parse(cached);
+        } catch (e) {
+          // Might be compressed
+          return CompressionUtils.decompressFromString(cached);
+        }
       }
       return null;
     } catch (error) {

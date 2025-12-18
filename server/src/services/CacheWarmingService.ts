@@ -12,12 +12,16 @@
  * @module server/services/CacheWarmingService
  */
 
+// @ts-ignore
 import cron from 'node-cron';
-import pino from 'pino';
+// @ts-ignore
+import { default as pino } from 'pino';
+// @ts-ignore
 import { RedisCacheManager } from '../../config/redis.js';
 import { NeighborhoodCache } from './NeighborhoodCache.js';
 import { getNeo4jDriver } from '../config/database.js';
 
+// @ts-ignore
 const logger = pino();
 
 export interface Investigation {

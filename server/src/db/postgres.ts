@@ -343,7 +343,7 @@ function parseReadReplicaUrls(): string[] {
     ? [process.env.DATABASE_READ_URL]
     : [];
 
-  return [...new Set([...explicit, ...legacy])];
+  return Array.from(new Set([...explicit, ...legacy]));
 }
 
 function createPool(
@@ -705,7 +705,7 @@ async function withManagedClient<T>(
   }
 
   try {
-    const result = await fn(client);
+    const result = await fn(client as any);
     if (!options.skipRelease) {
       // release logic is handled in finally
     }

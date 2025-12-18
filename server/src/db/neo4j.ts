@@ -1,6 +1,7 @@
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import neo4j, { Driver, Session } from 'neo4j-driver';
 import * as dotenv from 'dotenv';
+// @ts-ignore
 import { default as pino } from 'pino';
 import {
   neo4jConnectivityUp,
@@ -13,10 +14,10 @@ import GraphIndexAdvisorService from '../services/GraphIndexAdvisorService.js';
 dotenv.config();
 
 // @ts-ignore
-const logger: ReturnType<typeof pino> = pino();
+const logger: any = pino();
 
-type Neo4jDriver = neo4j.Driver;
-type Neo4jSession = neo4j.Session;
+type Neo4jDriver = Driver;
+type Neo4jSession = Session;
 
 const NEO4J_URI = process.env.NEO4J_URI || 'bolt://neo4j:7687';
 const NEO4J_USER =

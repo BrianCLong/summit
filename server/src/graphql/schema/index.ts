@@ -10,8 +10,8 @@ import evidenceTypeDefs from '../schema.evidence.js';
 import evidenceOkTypeDefs from '../schema.evidenceOk.js';
 import trustRiskTypeDefs from '../schema.trust-risk.js';
 import provenanceTypeDefs from '../schema.provenance.js';
-import fs from 'fs';
-import path from 'path';
+import * as fs from 'fs';
+import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 const { copilotTypeDefs } = copilotModule as { copilotTypeDefs: any };
@@ -23,7 +23,7 @@ const { annotationsTypeDefs } = annotationsModule as {
 const graphragTypes =
   (graphragTypesModule as any).default || graphragTypesModule;
 
-const __filename = fileURLToPath(import.meta.url);
+const __filename = fileURLToPath((import.meta as any).url);
 const __dirname = path.dirname(__filename);
 
 // Load EW schema
