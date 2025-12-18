@@ -64,7 +64,7 @@ export class GraphClustering {
     const neighbors = this.storage.getNeighbors(nodeId, 'both');
     const k = neighbors.length;
 
-    if (k < 2) return 0;
+    if (k < 2) {return 0;}
 
     // Count edges between neighbors
     let edgeCount = 0;
@@ -120,7 +120,7 @@ export class GraphClustering {
     const coefficients = this.allClusteringCoefficients();
     const values = Array.from(coefficients.values());
 
-    if (values.length === 0) return 0;
+    if (values.length === 0) {return 0;}
 
     const sum = values.reduce((acc, val) => acc + val, 0);
     return sum / values.length;
@@ -221,7 +221,7 @@ export class GraphClustering {
    */
   kCore(k: number): Set<string> {
     const exported = this.storage.exportGraph();
-    let remaining = new Set(exported.nodes.map(n => n.id));
+    const remaining = new Set(exported.nodes.map(n => n.id));
 
     let changed = true;
     while (changed) {
@@ -273,7 +273,7 @@ export class GraphClustering {
         coreNumbers.set(nodeId, k);
       }
 
-      if (core.size === 0) break;
+      if (core.size === 0) {break;}
     }
 
     return coreNumbers;

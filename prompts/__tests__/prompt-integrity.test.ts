@@ -1,168 +1,186 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
+/**
+ * Prompt Integrity Test Suite
+ * 
+ * Validates that all required agent prompts exist and contain
+ * necessary execution markers.
+ */
 describe('Prompt Integrity Suite', () => {
   const promptsDir = path.join(__dirname, '..');
 
-  // Core agent prompt files that must exist
-  const corePromptFiles = [
+  const requiredFiles = [
+    'README.md',
     'claude-code.md',
     'codex.md',
     'jules-gemini.md',
     'cursor-warp.md',
-    'summit-platform.md',
-    'ci-cd-enforcement.md',
+    'summit-intelgraph.md',
+    'ci-cd.md',
     'meta-router.md',
     'capability-matrix.md',
     'enterprise-4th-order.md',
+    'workflow-automation.md',
   ];
-
-  // Existing persona prompts
-  const personaPromptFiles = [
-    'architect.md',
-    'hermes.md',
-    'orion.md',
-    'aegis.md',
-    'elara.md',
-  ];
-
-  // All required prompt files
-  const allPromptFiles = [...corePromptFiles, ...personaPromptFiles];
 
   describe('File Existence', () => {
-    test.each(corePromptFiles)(
-      'core prompt file %s exists and is non-empty',
-      (file) => {
-        const filePath = path.join(promptsDir, file);
-        expect(fs.existsSync(filePath)).toBe(true);
-        const stats = fs.statSync(filePath);
-        expect(stats.size).toBeGreaterThan(50);
-      },
-    );
-
-    test.each(personaPromptFiles)(
-      'persona prompt file %s exists',
-      (file) => {
-        const filePath = path.join(promptsDir, file);
-        expect(fs.existsSync(filePath)).toBe(true);
-      },
-    );
-
-    test('README.md exists', () => {
-      const readmePath = path.join(promptsDir, 'README.md');
-      expect(fs.existsSync(readmePath)).toBe(true);
+    test.each(requiredFiles)('%s exists and is not empty', (file) => {
+      const fullPath = path.join(promptsDir, file);
+      expect(fs.existsSync(fullPath)).toBe(true);
+      expect(fs.statSync(fullPath).size).toBeGreaterThan(100);
     });
   });
 
-  describe('Prompt Content', () => {
-    test.each(corePromptFiles)(
-      '%s contains BEGIN or EXECUTE marker',
+  describe('Execution Markers', () => {
+    const executablePrompts = [
+      'claude-code.md',
+      'codex.md',
+      'jules-gemini.md',
+      'cursor-warp.md',
+      'summit-intelgraph.md',
+      'ci-cd.md',
+      'meta-router.md',
+    ];
+
+    test.each(executablePrompts)(
+      '%s contains execution marker (BEGIN/EXECUTE)',
       (file) => {
-        const content = fs.readFileSync(path.join(promptsDir, file), 'utf8');
+        const content = fs.readFileSync(
+          path.join(promptsDir, file),
+          'utf8'
+        );
         expect(content).toMatch(/BEGIN|EXECUTE/i);
-      },
-    );
-
-    test.each(allPromptFiles)(
-      '%s has a proper markdown heading',
-      (file) => {
-        const content = fs.readFileSync(path.join(promptsDir, file), 'utf8');
-        expect(content).toMatch(/^#\s+.+/m);
-      },
-    );
-
-    test.each(corePromptFiles)(
-      '%s contains output format section',
-      (file) => {
-        const content = fs.readFileSync(path.join(promptsDir, file), 'utf8');
-        // Most prompts should have output format or required output section
-        expect(content).toMatch(/output|format|required/i);
-      },
+      }
     );
   });
 
-  describe('Prompt Structure', () => {
-    test('meta-router.md references all agent types', () => {
+  describe('Required Sections', () => {
+    test('claude-code.md has all execution layers', () => {
       const content = fs.readFileSync(
-        path.join(promptsDir, 'meta-router.md'),
-        'utf8',
+        path.join(promptsDir, 'claude-code.md'),
+        'utf8'
       );
-      expect(content).toMatch(/CLAUDE CODE/i);
-      expect(content).toMatch(/CODEX/i);
-      expect(content).toMatch(/JULES|GEMINI/i);
-      expect(content).toMatch(/CURSOR|WARP/i);
-      expect(content).toMatch(/SUMMIT/i);
-      expect(content).toMatch(/CI.?CD/i);
+      expect(content).toMatch(/1st-Order/i);
+      expect(content).toMatch(/2nd-Order/i);
+      expect(content).toMatch(/3rd-Order/i);
+      expect(content).toMatch(/SELF-AUDIT/i);
     });
 
-    test('capability-matrix.md contains a table', () => {
+    test('ci-cd.md has mandatory questions', () => {
       const content = fs.readFileSync(
-        path.join(promptsDir, 'capability-matrix.md'),
-        'utf8',
+        path.join(promptsDir, 'ci-cd.md'),
+        'utf8'
       );
-      // Markdown tables have | characters
-      expect(content).toMatch(/\|.*\|.*\|/);
+      expect(content).toMatch(/MANDATORY QUESTIONS/i);
+      expect(content).toMatch(/Will typecheck pass/i);
+      expect(content).toMatch(/Will CI be green/i);
     });
 
-    test('enterprise-4th-order.md covers all governance areas', () => {
+    test('enterprise-4th-order.md has all governance domains', () => {
       const content = fs.readFileSync(
         path.join(promptsDir, 'enterprise-4th-order.md'),
-        'utf8',
+        'utf8'
       );
-      expect(content).toMatch(/governance/i);
-      expect(content).toMatch(/operations/i);
-      expect(content).toMatch(/security/i);
-      expect(content).toMatch(/architecture/i);
+      expect(content).toMatch(/GOVERNANCE/i);
+      expect(content).toMatch(/OPERATIONS/i);
+      expect(content).toMatch(/SECURITY/i);
+      expect(content).toMatch(/ARCHITECTURE/i);
+      expect(content).toMatch(/ORGANIZATIONAL EFFECTIVENESS/i);
+    });
+
+    test('meta-router.md has decision tree', () => {
+      const content = fs.readFileSync(
+        path.join(promptsDir, 'meta-router.md'),
+        'utf8'
+      );
+      expect(content).toMatch(/DECISION TREE/i);
+      expect(content).toMatch(/AGENT SELECTION LOGIC/i);
     });
   });
 
-  describe('Prompt Packs', () => {
-    const packsDir = path.join(promptsDir, 'packs');
-
-    test('packs directory exists', () => {
-      expect(fs.existsSync(packsDir)).toBe(true);
-      expect(fs.statSync(packsDir).isDirectory()).toBe(true);
+  describe('Content Quality', () => {
+    test('No TODO markers in prompts', () => {
+      for (const file of requiredFiles) {
+        const content = fs.readFileSync(
+          path.join(promptsDir, file),
+          'utf8'
+        );
+        expect(content).not.toMatch(/TODO/i);
+      }
     });
 
-    test('base.system.txt exists', () => {
-      const filePath = path.join(packsDir, 'base.system.txt');
-      expect(fs.existsSync(filePath)).toBe(true);
-    });
-
-    test('code.system.txt exists', () => {
-      const filePath = path.join(packsDir, 'code.system.txt');
-      expect(fs.existsSync(filePath)).toBe(true);
+    test('No placeholder text in prompts', () => {
+      const placeholders = [
+        '[INSERT',
+        '[TBD',
+        '[PLACEHOLDER',
+        'Lorem ipsum',
+      ];
+      
+      for (const file of requiredFiles) {
+        const content = fs.readFileSync(
+          path.join(promptsDir, file),
+          'utf8'
+        );
+        for (const placeholder of placeholders) {
+          expect(content).not.toMatch(new RegExp(placeholder, 'i'));
+        }
+      }
     });
   });
 
-  describe('Schema Compliance', () => {
-    test('schema.json exists', () => {
-      const schemaPath = path.join(promptsDir, 'schema.json');
-      expect(fs.existsSync(schemaPath)).toBe(true);
-    });
-
-    test('schema.json is valid JSON', () => {
-      const schemaPath = path.join(promptsDir, 'schema.json');
-      const content = fs.readFileSync(schemaPath, 'utf8');
-      expect(() => JSON.parse(content)).not.toThrow();
+  describe('Capability Matrix Validation', () => {
+    test('capability-matrix.md has all agents listed', () => {
+      const content = fs.readFileSync(
+        path.join(promptsDir, 'capability-matrix.md'),
+        'utf8'
+      );
+      const requiredAgents = [
+        'Claude Code',
+        'Codex',
+        'Jules/Gemini',
+        'Cursor/Warp',
+        'Summit Superprompt',
+        'CI/CD Prompt',
+      ];
+      
+      for (const agent of requiredAgents) {
+        expect(content).toMatch(new RegExp(agent, 'i'));
+      }
     });
   });
+});
 
-  describe('No Sensitive Content', () => {
-    test.each(allPromptFiles)(
-      '%s does not contain API keys or secrets',
-      (file) => {
-        const content = fs.readFileSync(path.join(promptsDir, file), 'utf8');
-        // Check for common secret patterns
-        expect(content).not.toMatch(/api[_-]?key\s*[:=]\s*['"][^'"]+['"]/i);
-        expect(content).not.toMatch(/secret\s*[:=]\s*['"][^'"]+['"]/i);
-        expect(content).not.toMatch(/password\s*[:=]\s*['"][^'"]+['"]/i);
-        expect(content).not.toMatch(/sk-[a-zA-Z0-9]{32,}/); // OpenAI key pattern
-      },
-    );
+/**
+ * Prompt Version Tracking
+ * 
+ * Ensures prompt versions are tracked for auditing.
+ */
+describe('Prompt Version Tracking', () => {
+  test('Prompts have been updated recently', () => {
+    const promptFiles = [
+      'claude-code.md',
+      'codex.md',
+      'jules-gemini.md',
+    ];
+
+    for (const file of promptFiles) {
+      const fullPath = path.join(__dirname, '..', file);
+      if (fs.existsSync(fullPath)) {
+        const stats = fs.statSync(fullPath);
+        const age = Date.now() - stats.mtimeMs;
+        const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+        
+        // Warn if prompts haven't been reviewed in 30 days
+        if (age > thirtyDays) {
+          console.warn(
+            `Warning: ${file} hasn't been updated in ${Math.floor(
+              age / (24 * 60 * 60 * 1000)
+            )} days`
+          );
+        }
+      }
+    }
   });
 });

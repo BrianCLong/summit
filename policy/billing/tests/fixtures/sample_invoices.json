@@ -1,0 +1,18 @@
+[
+  {
+    "id": "inv-001",
+    "tenant_id": "tenant-123",
+    "amount": 8500,
+    "status": "open",
+    "due_date": "2025-02-15",
+    "currency": "USD"
+  },
+  {
+    "id": "inv-002",
+    "tenant_id": "tenant-enterprise",
+    "amount": 125000,
+    "status": "open",
+    "due_date": "2025-02-20",
+    "currency": "USD"
+  }
+]
