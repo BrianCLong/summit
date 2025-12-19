@@ -22,29 +22,91 @@ export interface SemanticSearchResult {
   created_at: Date;
 }
 
+export interface SemanticSearchOptions {
+  /**
+   * Optional pool to reuse. When provided, the service will not attempt to close it.
+   */
+  pool?: Pool;
+
+  /**
+   * Optional factory used to lazily create a pool when one is not provided.
+   * Defaults to creating a pool from DATABASE_URL.
+   */
+  poolFactory?: () => Pool;
+
+  /**
+   * Frequency for verifying connection health. Defaults to 30s to avoid per-call overhead.
+   */
+  healthCheckIntervalMs?: number;
+
+  /**
+   * Timeout for the health check query.
+   */
+  healthCheckTimeoutMs?: number;
+
+  /**
+   * Custom embedding service, useful for tests.
+   */
+  embeddingService?: EmbeddingService;
+}
+
 export default class SemanticSearchService {
   private embeddingService: EmbeddingService;
   private logger = pino({ name: 'SemanticSearchService' });
-  private pool: Pool | null = null;
+  private pool: Pool | null;
+  private readonly ownsPool: boolean;
+  private readonly poolFactory: () => Pool;
+  private readonly healthCheckIntervalMs: number;
+  private readonly healthCheckTimeoutMs: number;
+  private lastHealthCheckAt = 0;
 
-  constructor() {
-    this.embeddingService = new EmbeddingService();
+  constructor(options: SemanticSearchOptions = {}) {
+    this.pool = options.pool ?? null;
+    this.ownsPool = !options.pool;
+    this.poolFactory =
+      options.poolFactory ?? (() => {
+        if (!process.env.DATABASE_URL) {
+          throw new Error('DATABASE_URL must be set to initialize SemanticSearchService pool');
+        }
+        return new Pool({ connectionString: process.env.DATABASE_URL });
+      });
+    this.healthCheckIntervalMs = options.healthCheckIntervalMs ?? 30_000;
+    this.healthCheckTimeoutMs = options.healthCheckTimeoutMs ?? 3_000;
+    this.embeddingService = options.embeddingService ?? new EmbeddingService();
   }
 
   // Use a managed pool or create one if needed
-  private getPool(): Pool {
-    if (!this.pool) {
-      this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  private async getPool(): Promise<Pool> {
+    if (!this.pool || this.pool.ended) {
+      this.pool = this.poolFactory();
+      this.lastHealthCheckAt = 0; // force health check on new pool
     }
+
+    await this.runHealthCheckIfStale(this.pool);
     return this.pool;
+  }
+
+  private async runHealthCheckIfStale(pool: Pool) {
+    const now = Date.now();
+    if (now - this.lastHealthCheckAt < this.healthCheckIntervalMs) {
+      return;
+    }
+
+    const healthCheck = pool.query('SELECT 1');
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Semantic search health check timed out')), this.healthCheckTimeoutMs)
+    );
+
+    await Promise.race([healthCheck, timeout]);
+    this.lastHealthCheckAt = now;
   }
 
   // Ensure we close the pool if we created it
   async close() {
-    if (this.pool) {
+    if (this.pool && this.ownsPool) {
       await this.pool.end();
-      this.pool = null;
     }
+    this.pool = null;
   }
 
   // Deprecated indexDocument for backward compatibility
@@ -74,7 +136,8 @@ export default class SemanticSearchService {
     try {
       const vector = await this.embeddingService.generateEmbedding({ text });
       const vectorStr = `[${vector.join(',')}]`;
-      const client = await this.getPool().connect();
+      const pool = await this.getPool();
+      const client = await pool.connect();
       try {
         await client.query(
           `UPDATE cases SET embedding = $1::vector WHERE id = $2`,
@@ -108,7 +171,8 @@ export default class SemanticSearchService {
       // of what the user actually typed, avoiding the AND-logic pitfall with synonyms.
       // Vector search handles the semantic similarity (synonyms).
 
-      const client = await this.getPool().connect();
+      const pool = await this.getPool();
+      const client = await pool.connect();
       try {
         const whereClauses = [`embedding IS NOT NULL`];
         const params: any[] = [vectorStr];
