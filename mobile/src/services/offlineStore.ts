@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { encryptData, decryptData } from './encryption';
 
 export type OutboundRecord = {
   id: number;
@@ -23,26 +24,23 @@ export async function ensureOfflineStore(): Promise<void> {
 
 export async function enqueuePayload(payload: Record<string, unknown>): Promise<void> {
   const serialized = JSON.stringify(payload);
-  await runTx(tx => tx.executeSql('INSERT INTO outbound_queue (payload) VALUES (?)', [serialized]));
+  const encrypted = await encryptData(serialized);
+  await runTx(tx => tx.executeSql('INSERT INTO outbound_queue (payload) VALUES (?)', [encrypted]));
 }
 
 export async function readOldest(limit = 50): Promise<OutboundRecord[]> {
-  return new Promise((resolve, reject) => {
+  // 1. Fetch raw encrypted rows
+  const rawRows = await new Promise<any[]>((resolve, reject) => {
     db.readTransaction(tx => {
       tx.executeSql(
         'SELECT id, payload, created_at as createdAt FROM outbound_queue ORDER BY id ASC LIMIT ?',
         [limit],
         (_, rs) => {
-          const results: OutboundRecord[] = [];
-          for (let i = 0; i < rs.rows.length; i += 1) {
-            const row = rs.rows.item(i);
-            results.push({
-              id: row.id as number,
-              payload: JSON.parse(row.payload as string),
-              createdAt: row.createdAt as number
-            });
+          const rows: any[] = [];
+          for (let i = 0; i < rs.rows.length; i++) {
+            rows.push(rs.rows.item(i));
           }
-          resolve(results);
+          resolve(rows);
         },
         (_tx, error) => {
           reject(error);
@@ -51,6 +49,24 @@ export async function readOldest(limit = 50): Promise<OutboundRecord[]> {
       );
     }, reject);
   });
+
+  // 2. Decrypt asynchronously outside the transaction
+  const results: OutboundRecord[] = [];
+  for (const row of rawRows) {
+    try {
+      const decrypted = await decryptData(row.payload as string);
+      results.push({
+        id: row.id as number,
+        payload: JSON.parse(decrypted),
+        createdAt: row.createdAt as number
+      });
+    } catch (e) {
+      console.error('Failed to decrypt record', row.id, e);
+      // Skip corrupted records or handle error
+    }
+  }
+
+  return results;
 }
 
 export async function deleteRecords(ids: number[]): Promise<void> {
