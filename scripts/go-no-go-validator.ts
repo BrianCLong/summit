@@ -8,6 +8,10 @@ import fetch from 'node-fetch';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+import {
+  evaluateObservabilityGate,
+  REQUIRED_SERVICES,
+} from './observability/ga-observability-gate';
 
 interface ValidationResult {
   category: string;
@@ -95,6 +99,44 @@ class GoNoGoValidator {
     } finally {
       await this.redis.disconnect();
       await this.pool.end();
+    }
+  }
+
+  private async validateObservability(): Promise<void> {
+    console.log('🛰️ Validating Observability & SLO coverage...');
+
+    try {
+      const result = evaluateObservabilityGate(undefined, [...REQUIRED_SERVICES]);
+
+      if (!result.ok) {
+        for (const err of result.errors) {
+          this.addResult('observability', 'slo_gate', 'FAIL', err, {}, true);
+        }
+      }
+
+      if (result.warnings.length) {
+        for (const warning of result.warnings) {
+          this.addResult('observability', 'slo_gate', 'WARN', warning, {}, false);
+        }
+      }
+
+      if (result.ok && !result.warnings.length) {
+        this.addResult(
+          'observability',
+          'slo_gate',
+          'PASS',
+          'SLO config present for all production-critical services',
+        );
+      }
+    } catch (error) {
+      this.addResult(
+        'observability',
+        'slo_gate',
+        'FAIL',
+        `Observability validation failed: ${(error as Error).message}`,
+        { error },
+        true,
+      );
     }
   }
 
