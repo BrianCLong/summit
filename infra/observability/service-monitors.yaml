@@ -1,0 +1,77 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  namespaceSelector:
+    matchNames: [observability]
+  endpoints:
+    - port: metrics
+      interval: 15s
+      scheme: http
+      path: /metrics
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: intelgraph-api
+  labels:
+    release: prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: intelgraph-api
+  namespaceSelector:
+    matchNames: [default, intelgraph]
+  endpoints:
+    - port: http
+      interval: 15s
+      path: /metrics
+      relabelings:
+        - sourceLabels: [__meta_kubernetes_pod_label_app_kubernetes_io_instance]
+          targetLabel: instance
+        - sourceLabels: [__meta_kubernetes_namespace]
+          targetLabel: namespace
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: agent-runtime
+  labels:
+    release: prometheus-stack
+spec:
+  podMetricsEndpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics
+      metricRelabelings:
+        - action: replace
+          sourceLabels: [pod]
+          targetLabel: runtime
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: agent-runtime
+  namespaceSelector:
+    matchNames: [agents]
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: profiler
+  labels:
+    release: prometheus-stack
+spec:
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics
+      interval: 30s
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: pyroscope
+  namespaceSelector:
+    matchNames: [observability]
