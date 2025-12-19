@@ -1,4 +1,4 @@
-import { OPAClient } from '../opa-client'; // Mocked
+import { OPAClient } from '../../src/middleware/opa-abac'; // Mocked
 
 describe('GraphQL Policy Contract Tests', () => {
   const opaClient = new OPAClient();

@@ -236,6 +236,12 @@ export function opaAuthzMiddleware(opaClient: OPAClient) {
         policyInput,
       );
 
+      logAuditEvent(req, {
+        policy: 'intelgraph.abac.allow',
+        policy_version: process.env.OPA_POLICY_VERSION,
+        decision: allowed,
+      });
+
       if (!allowed) {
         span.setStatus({ code: 2, message: 'Access denied by policy' });
         span.end();
@@ -374,3 +380,17 @@ const defaultFieldResolver = (
 ) => {
   return source[info.fieldName];
 };
+
+async function logAuditEvent(req: Request, details: any) {
+  const user = (req as any).user as User;
+  const { log_audit_event } = require('../db/audit');
+  await log_audit_event(
+    user.id,
+    'opa.evaluation',
+    'opa',
+    null,
+    details,
+    req.ip,
+    'success'
+  );
+}

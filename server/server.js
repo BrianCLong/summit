@@ -218,9 +218,16 @@ async function startServer() {
       });
     });
 
+    const { OPAClient } = require('./src/middleware/opa-abac');
+    const { opaGatekeeperMiddleware } = require('./src/middleware/opa-gatekeeper');
+    const opaClient = new OPAClient(process.env.OPA_BASE_URL);
+
     // Enforce authentication across API and GraphQL routes
     app.use('/graphql', ensureAuthenticated);
     app.use('/api', ensureAuthenticated);
+
+    // Enforce OPA Gatekeeper for all mutating requests
+    app.use(opaGatekeeperMiddleware(opaClient, process.env.OPA_SIMULATE === 'true'));
 
     // API Routes
     app.use('/api/graphrag', require('./src/routes/graphragRoutes'));
@@ -232,6 +239,7 @@ async function startServer() {
     app.use('/api/admin', require('./src/routes/admin'));
     app.use('/api/import', require('./src/routes/import'));
     app.use('/api/templates', require('./src/routes/templateRoutes'));
+    app.use('/api/opa', require('./src/routes/opaRoutes'));
 
     // Webhook endpoint to ingest completed GNN suggestions (production-safe)
     app.post('/api/ai/gnn/suggestions', async (req, res) => {
