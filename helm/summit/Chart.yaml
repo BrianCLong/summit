@@ -36,7 +36,11 @@ dependencies:
     version: 0.1.0
     repository: file://../neo4j
     condition: neo4j.enabled
-  - name: istio-config
+  - name: monitoring
     version: 0.1.0
-    repository: file://../istio-config
-    condition: istio-config.enabled
+    repository: file://../monitoring
+    condition: monitoring.enabled
+  - name: kafka
+    version: 12.7.1
+    repository: https://charts.bitnami.com/bitnami
+    condition: kafka.enabled
