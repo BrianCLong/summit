@@ -30,12 +30,14 @@ export async function enqueuePayload(payload: Record<string, unknown>): Promise<
 
 export async function readOldest(limit = 50): Promise<OutboundRecord[]> {
   // 1. Fetch raw encrypted rows
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const rawRows = await new Promise<any[]>((resolve, reject) => {
     db.readTransaction(tx => {
       tx.executeSql(
         'SELECT id, payload, created_at as createdAt FROM outbound_queue ORDER BY id ASC LIMIT ?',
         [limit],
         (_, rs) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const rows: any[] = [];
           for (let i = 0; i < rs.rows.length; i++) {
             rows.push(rs.rows.item(i));

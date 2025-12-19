@@ -1,4 +1,7 @@
-import { renderHook, act } from '@testing-library/react-hooks'; // Hypothetical import, won't work in this env but shows intent
+// Hypothetical import, won't work in this env but shows intent
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { renderHook, act } from '@testing-library/react-hooks';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { SyncProvider, useSync } from '../services/SyncProvider';
 import * as offlineStore from '../services/offlineStore';
 

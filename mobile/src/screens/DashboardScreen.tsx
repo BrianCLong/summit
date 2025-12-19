@@ -17,6 +17,7 @@ export default function DashboardScreen(): JSX.Element {
   const navigation = useNavigation();
   const { lastSync, queueSize, status, lastError, syncNow, lowDataMode, setLowDataMode, enqueue } = useSync();
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleLongPress = async (e: any) => {
     const { coordinate } = e.nativeEvent;
     Alert.alert(

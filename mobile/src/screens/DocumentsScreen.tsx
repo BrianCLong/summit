@@ -4,10 +4,6 @@ import * as FileSystem from 'expo-file-system';
 import { Camera, CameraType } from 'expo-camera';
 import { useSync } from '../services/SyncProvider';
 
-// Documents are now stored in the encrypted offline store queue as 'document-scan' events,
-// and we maintain a local cache of metadata. In a real app, we'd query a dedicated SQLite table.
-// For this prototype, we'll just demonstrate the scanning flow.
-
 type SecureDocument = {
   id: string;
   title: string;
@@ -33,15 +29,18 @@ export default function DocumentsScreen(): JSX.Element {
     // Simulate OCR processing: In production, use 'react-native-mlkit-ocr'
     const text = "CONFIDENTIAL\nINTEL REPORT...";
 
-    const docId = `doc-${Date.now()}`;
+    // Use a variable to ensure consistency
+    // Note: Date.now() in event handlers is safe, unlike in render logic.
+    const now = Date.now();
+    const docId = `doc-${now}`;
     const filename = `${FileSystem.documentDirectory}${docId}.jpg`;
     await FileSystem.moveAsync({ from: snapshot.uri, to: filename });
 
     const newDoc: SecureDocument = {
       id: docId,
-      title: `Field Scan ${new Date().toLocaleTimeString()}`,
+      title: `Field Scan ${new Date(now).toLocaleTimeString()}`,
       path: filename,
-      scannedAt: Date.now()
+      scannedAt: now
     };
 
     // Optimistic local state update
@@ -64,7 +63,12 @@ export default function DocumentsScreen(): JSX.Element {
   };
 
   const handleOpen = async (doc: SecureDocument) => {
-    enqueue({ type: 'document-open', id: doc.id, openedAt: Date.now() });
+    // Capture time once before the async operation.
+    // We disable the lint rule here because this function is an event handler, NOT a render function.
+    // The lint rule sometimes gets confused by async arrow functions in props.
+    // eslint-disable-next-line react-hooks/purity
+    const openedTime = Date.now();
+    await enqueue({ type: 'document-open', id: doc.id, openedAt: openedTime });
     Alert.alert('Secure Viewer', `Accessing encrypted document: ${doc.title}`);
   };
 

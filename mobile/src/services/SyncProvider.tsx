@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as Network from 'expo-network';
@@ -31,6 +31,7 @@ const SyncContext = createContext<SyncContextValue>({
 
 async function sendPayload(payload: Record<string, unknown>): Promise<{ success: boolean; conflict?: boolean }> {
   // Mock API interaction - In production, use authenticated fetch
+  console.log('Sending payload:', payload);
   await new Promise(resolve => setTimeout(resolve, 50));
 
   // No random conflicts. Conflict logic should be driven by server response (409).
@@ -81,14 +82,13 @@ async function runSync(setters: {
   setLastError(undefined);
 
   try {
-    let processed = 0;
     let hasMore = true;
     while (hasMore) {
       const items = await readOldest(DEFAULT_BATCH_SIZE);
       if (!items.length) {
         hasMore = false;
       } else {
-        processed += await syncBatch(items);
+        await syncBatch(items);
       }
     }
     setLastSync(new Date());
@@ -140,10 +140,10 @@ export function SyncProvider({ children }: { children: React.ReactNode }): JSX.E
   const [lastError, setLastError] = useState<string>();
   const [lowDataMode, setLowDataMode] = useState(false);
 
-  const syncNow = async () => {
+  const syncNow = useCallback(async () => {
     await ensureOfflineStore();
     await runSync({ setLastSync, setStatus, setLastError, setQueueSize }, lowDataMode);
-  };
+  }, [lowDataMode]);
 
   useEffect(() => {
     ensureOfflineStore()
@@ -152,7 +152,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }): JSX.E
       .then(() => registerBackgroundTask(syncNow))
       .then(() => syncNow())
       .catch(error => setLastError((error as Error).message));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [syncNow]);
 
   const value = useMemo<SyncContextValue>(() => ({
     lastSync,
@@ -167,7 +167,7 @@ export function SyncProvider({ children }: { children: React.ReactNode }): JSX.E
       setQueueSize(prev => prev + 1);
     },
     syncNow
-  }), [lastError, lastSync, queueSize, status, lowDataMode]);
+  }), [lastError, lastSync, queueSize, status, lowDataMode, syncNow]);
 
   return <SyncContext.Provider value={value}>{children}</SyncContext.Provider>;
 }
