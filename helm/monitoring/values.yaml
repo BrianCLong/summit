@@ -1,5 +1,6 @@
 grafana:
   defaultDashboardsTimezone: utc
+  dashboardLabel: grafana_dashboard
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
@@ -21,19 +22,127 @@ grafana:
           "title": "IntelGraph API Overview",
           "version": 1
         }
+      signer.json: |
+        {
+          "schemaVersion": 38,
+          "title": "Signer Service",
+          "timezone": "utc",
+          "panels": [
+            {
+              "type": "stat",
+              "title": "Signatures per second",
+              "targets": [
+                { "expr": "rate(signer_signatures_total[5m])" }
+              ],
+              "id": 1
+            },
+            {
+              "type": "stat",
+              "title": "Failed validations",
+              "targets": [
+                { "expr": "rate(signer_validation_errors_total[5m])" }
+              ],
+              "id": 2
+            },
+            {
+              "type": "timeseries",
+              "title": "Validation latency p95",
+              "targets": [
+                { "expr": "histogram_quantile(0.95, rate(signer_validation_duration_seconds_bucket[5m]))" }
+              ],
+              "id": 3
+            }
+          ],
+          "version": 1
+        }
+      policy-supply-chain.json: |
+        {
+          "schemaVersion": 38,
+          "title": "Policy Supply Chain",
+          "timezone": "utc",
+          "panels": [
+            {
+              "type": "timeseries",
+              "title": "Bundle downloads",
+              "targets": [
+                { "expr": "rate(opa_bundle_downloads_total[10m])" }
+              ],
+              "id": 4
+            },
+            {
+              "type": "stat",
+              "title": "Bundle verification errors",
+              "targets": [
+                { "expr": "rate(opa_bundle_signatures_failed_total[10m])" }
+              ],
+              "id": 5
+            },
+            {
+              "type": "stat",
+              "title": "Active bundles",
+              "targets": [
+                { "expr": "opa_active_bundles" }
+              ],
+              "id": 6
+            }
+          ],
+          "version": 1
+        }
 alertmanager:
   config:
     route:
       receiver: 'default'
       group_by: ['alertname', 'service']
+      routes:
+        - receiver: 'security'
+          matchers:
+            - severity="critical"
     receivers:
       - name: 'default'
         slack_configs:
           - api_url: ${SLACK_WEBHOOK_URL}
             channel: '#intelgraph-alerts'
+      - name: 'security'
+        slack_configs:
+          - api_url: ${SLACK_WEBHOOK_URL}
+            channel: '#intelgraph-security'
 prometheus:
+  release: prometheus
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
     podMonitorSelectorNilUsesHelmValues: false
     ruleSelectorNilUsesHelmValues: false
     scrapeInterval: 30s
+  rules:
+    - name: signer-health
+      rules:
+        - alert: SignerDown
+          expr: up{job="signer"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: Signer service is not reporting metrics
+        - alert: SignerValidationErrors
+          expr: rate(signer_validation_errors_total[10m]) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Signer validation errors are increasing
+    - name: policy-supply-chain
+      rules:
+        - alert: PolicyBundleFailures
+          expr: rate(opa_bundle_signatures_failed_total[15m]) > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: OPA bundle signature failures detected
+        - alert: PolicyBundleStaleness
+          expr: time() - opa_bundle_last_success_timestamp_seconds > 1800
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: Policy bundles have not refreshed in the last 30 minutes

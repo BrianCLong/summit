@@ -1,0 +1,93 @@
+# This file contains example overrides you can pass to specific charts.
+# Apply the signer chart with:
+#   helm upgrade --install signer ./helm/signer -f helm/values.example.yaml
+# Apply the monitoring chart with:
+#   helm upgrade --install monitoring ./helm/monitoring -f helm/values.example.yaml
+
+# signer chart values
+image:
+  tag: v1.2.3
+
+replicaCount: 3
+
+env:
+  - name: SIGNING_KEY_ID
+    value: arn:aws:kms:us-east-1:111111111111:key/abcd-1234
+  - name: KMS_KEY_ARN
+    value: arn:aws:kms:us-east-1:111111111111:key/abcd-1234
+  - name: POLICY_BUNDLE_FILE
+    value: /etc/policy/bundles.yaml
+  - name: POLICY_REFRESH_SECONDS
+    value: '120'
+
+policyBundles:
+  enabled: true
+  fileName: bundles.yaml
+  sources:
+    - name: rbac-core
+      url: s3://intelgraph-bundles/prod/rbac/core.tar.gz
+      checksum: sha256:414141
+      signatureKey: bundle-signing-key
+    - name: dashboards
+      url: s3://intelgraph-bundles/prod/dashboards.tar.gz
+      checksum: sha256:151515
+      trigger: on-start
+  inlinePolicies:
+    admission.rego: |
+      package intelgraph.admission
+
+      default allow = false
+
+      allow {
+        input.request.kind.kind == "Pod"
+      }
+
+serviceMonitor:
+  enabled: true
+  interval: 15s
+  path: /metrics
+  release: prometheus
+
+# monitoring chart values
+grafana:
+  dashboardLabel: grafana_dashboard
+  dashboards:
+    intelgraph:
+      signer.json: |
+        {
+          "title": "Signer Golden Signals",
+          "schemaVersion": 38,
+          "panels": [
+            {
+              "type": "timeseries",
+              "title": "Signature Throughput",
+              "targets": [
+                { "expr": "rate(signer_signatures_total[5m])" }
+              ],
+              "id": 11
+            }
+          ],
+          "version": 1
+        }
+prometheus:
+  release: prometheus
+  rules:
+    - name: signer-golden-path
+      rules:
+        - alert: SignerLatencyHigh
+          expr: histogram_quantile(0.95, rate(signer_validation_duration_seconds_bucket[5m])) > 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: Signer validation p95 latency exceeded 1s
+alertmanager:
+  config:
+    route:
+      receiver: default
+      group_by: ['alertname', 'service']
+    receivers:
+      - name: default
+        slack_configs:
+          - api_url: ${SLACK_WEBHOOK_URL}
+            channel: '#intelgraph-alerts'
