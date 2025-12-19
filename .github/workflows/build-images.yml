@@ -141,6 +141,11 @@ jobs:
           provenance: true
           sbom: true
 
+      - name: Capture image reference
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        id: image-ref
+        run: echo "image_ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}" >> $GITHUB_OUTPUT
+
       - name: Generate SBOM with Syft
         if: steps.dockerfile-check.outputs.exists == 'true'
         run: |
@@ -165,9 +170,20 @@ jobs:
           category: trivy-${{ matrix.component.name }}
 
       - name: Cosign sign (keyless)
+        if: steps.dockerfile-check.outputs.exists == 'true'
         env:
           COSIGN_EXPERIMENTAL: '1'
-        run: cosign sign ghcr.io/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:${{ github.sha }}
+        run: cosign sign --yes ${{ steps.image-ref.outputs.image_ref }}
+
+      - name: Attach SBOM attestation
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          cosign attest --yes \
+            --predicate sbom-${{ matrix.component.name }}.spdx.json \
+            --type spdxjson \
+            ${{ steps.image-ref.outputs.image_ref }}
 
       - name: Verify image signature
         if: steps.dockerfile-check.outputs.exists == 'true'
@@ -177,7 +193,18 @@ jobs:
           cosign verify \
             --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/" \
             --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}@${{ steps.build.outputs.digest }}
+            ${{ steps.image-ref.outputs.image_ref }}
+
+      - name: Verify SBOM attestation
+        if: steps.dockerfile-check.outputs.exists == 'true'
+        env:
+          COSIGN_EXPERIMENTAL: 1
+        run: |
+          cosign verify-attestation \
+            --type spdxjson \
+            --certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            ${{ steps.image-ref.outputs.image_ref }}
 
       - name: Upload SBOM artifacts
         if: steps.dockerfile-check.outputs.exists == 'true'

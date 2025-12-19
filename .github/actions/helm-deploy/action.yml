@@ -3,9 +3,23 @@ inputs:
   chart: { required: true }
   namespace: { required: true }
   values: { required: false }
+  image: { required: true }
+  cosign-public-key: { required: false }
 runs:
   using: 'composite'
   steps:
+    - uses: sigstore/cosign-installer@v3
+      with:
+        cosign-release: 'v2.2.4'
+    - run: |
+        set -euo pipefail
+        verify_flags=(--certificate-identity-regexp "https://github.com/${{ github.repository }}/.github/workflows/" --certificate-oidc-issuer "https://token.actions.githubusercontent.com")
+        if [ -n "${{ inputs.cosign-public-key }}" ]; then
+          echo "${{ inputs.cosign-public-key }}" > cosign.pub
+          verify_flags=(--key cosign.pub)
+        fi
+        cosign verify-attestation --type spdxjson "${verify_flags[@]}" "${{ inputs.image }}"
+      shell: bash
     - uses: azure/setup-helm@v4
     - run: |
         helm upgrade --install $(basename ${{ inputs.chart }}) ${{ inputs.chart }} \

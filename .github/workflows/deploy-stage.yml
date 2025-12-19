@@ -7,11 +7,19 @@ on:
       - completed
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAMESPACE: brianclong/intelgraph
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     environment: staging
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
     steps:
       - uses: actions/checkout@v3
 
@@ -39,6 +47,24 @@ jobs:
           for sbom in sboms/*.spdx.json; do
             echo "Scanning $sbom..."
             trivy sbom "$sbom" --severity CRITICAL,HIGH --exit-code 1
+          done
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Sign and attest images from SBOMs
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          for sbom in sboms/*.spdx.json; do
+            component=$(basename "$sbom" | sed -e 's/^sbom-//' -e 's/.spdx.json$//')
+            image_ref="${REGISTRY}/${IMAGE_NAMESPACE}/${component}:latest"
+            echo "Signing ${image_ref}"
+            cosign sign --yes "${image_ref}"
+            cosign attest --yes --predicate "$sbom" --type spdxjson "${image_ref}"
+            cosign verify-attestation --type spdxjson "${image_ref}"
           done
 
       - name: Set up Helm

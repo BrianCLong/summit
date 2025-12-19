@@ -14,10 +14,19 @@ jobs:
     permissions:
       contents: read
       packages: write
+      id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@v0.17.1
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -27,20 +36,60 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: ./server
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
+      - name: Capture image reference
+        id: image-ref
+        run: echo "image_ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}" >> $GITHUB_OUTPUT
+
+      - name: Generate SBOM
+        run: syft ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} -o spdx-json=sbom.json
+
+      - name: Sign and attest build
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+        run: |
+          cosign sign --yes "${{ steps.image-ref.outputs.image_ref }}"
+          cosign attest --yes --predicate sbom.json --type spdxjson "${{ steps.image-ref.outputs.image_ref }}"
+
   deploy-stage:
     needs: build-and-push
     runs-on: ubuntu-latest
     environment: stage
+    permissions:
+      contents: read
+      id-token: write
+      packages: read
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
+      - name: Verify image signatures and attestations
+        env:
+          COSIGN_EXPERIMENTAL: '1'
+          COSIGN_PUBLIC_KEY: ${{ secrets.COSIGN_PUBLIC_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_REF=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          verify_flags=("--certificate-identity-regexp" "https://github.com/${{ github.repository }}/.github/workflows/" "--certificate-oidc-issuer" "https://token.actions.githubusercontent.com")
+          if [ -n "${COSIGN_PUBLIC_KEY:-}" ]; then
+            echo "${COSIGN_PUBLIC_KEY}" > cosign.pub
+            verify_flags=("--key" "cosign.pub")
+          fi
+          cosign verify "${verify_flags[@]}" "${IMAGE_REF}"
+          cosign verify-attestation --type spdxjson "${verify_flags[@]}" "${IMAGE_REF}"
 
       - name: Set up Helm
         uses: azure/setup-helm@v4
