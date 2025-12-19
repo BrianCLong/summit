@@ -15,6 +15,11 @@ import {
   authorize,
   AuthenticatedRequest,
 } from './middleware/auth';
+import {
+  MaterializedViewScheduler,
+  type MaterializedViewSource,
+} from './services/MaterializedViewScheduler';
+import type { ChartData } from './services/ChartService';
 
 const app: Express = express();
 const PORT = config.server.port || 4004;
@@ -57,12 +62,42 @@ let neo4jDriver: Driver;
 let redisClient: any;
 let dashboardService: DashboardService;
 let chartService: ChartService;
+let mvScheduler: MaterializedViewScheduler | null;
 
 const DASHBOARD_SORT_FIELDS = ['name', 'created_at', 'updated_at'] as const;
 type DashboardSortField = (typeof DASHBOARD_SORT_FIELDS)[number];
 type DashboardListOptions = Parameters<
   DashboardService['listDashboards']
 >[1];
+
+const applyReportingHeaders = (
+  res: express.Response,
+  metadata?: ChartData['metadata'],
+) => {
+  if (metadata?.source) {
+    res.setHeader('X-Reporting-Source', metadata.source);
+  }
+  if (metadata?.stalenessSeconds !== undefined) {
+    res.setHeader(
+      'X-Reporting-Staleness',
+      metadata.stalenessSeconds.toString(),
+    );
+  }
+};
+
+const applySnapshotHeaders = (
+  res: express.Response,
+  views?: MaterializedViewSource[],
+) => {
+  const stalenessSeconds = mvScheduler?.getStalenessSeconds(views);
+  if (stalenessSeconds !== undefined) {
+    res.setHeader('X-Reporting-Staleness', stalenessSeconds.toString());
+    res.setHeader(
+      'X-Reporting-Source',
+      config.reporting.useMaterializedViews ? 'materialized' : 'base',
+    );
+  }
+};
 
 const normalizeSortBy = (value: unknown): DashboardSortField => {
   if (
@@ -76,6 +111,7 @@ const normalizeSortBy = (value: unknown): DashboardSortField => {
 
 async function initializeServices() {
   try {
+    const reportingConfig = config.reporting;
     // PostgreSQL connection
     pgPool = new Pool({
       host: config.database.postgres.host,
@@ -123,7 +159,22 @@ async function initializeServices() {
 
     // Initialize services
     dashboardService = new DashboardService(pgPool, neo4jDriver, redisClient);
-    chartService = new ChartService(pgPool, neo4jDriver);
+    mvScheduler = new MaterializedViewScheduler(pgPool, {
+      enabled: reportingConfig.useMaterializedViews,
+      intervalMs: reportingConfig.refreshIntervalSeconds * 1000,
+      stalenessBudgetSeconds: reportingConfig.stalenessBudgetSeconds,
+      useConcurrentRefresh: reportingConfig.useConcurrentRefresh,
+    });
+
+    if (reportingConfig.useMaterializedViews) {
+      mvScheduler.start();
+    }
+
+    chartService = new ChartService(pgPool, neo4jDriver, {
+      useMaterializedViews: reportingConfig.useMaterializedViews,
+      fallbackToBase: reportingConfig.fallbackToBase,
+      getViewStaleness: (views) => mvScheduler?.getStalenessSeconds(views),
+    });
 
     logger.info('Analytics services initialized successfully');
   } catch (error) {
@@ -283,6 +334,7 @@ app.post(
   async (req, res) => {
     try {
       const chartData = await chartService.generateChartData(req.body);
+      applyReportingHeaders(res, chartData.metadata);
       res.json(chartData);
     } catch (error) {
       logger.error('Error generating chart:', error);
@@ -307,6 +359,7 @@ app.get(
       };
 
       const chartData = await chartService.getEntityGrowthChart(timeRange);
+      applyReportingHeaders(res, chartData.metadata);
       res.json(chartData);
     } catch (error) {
       logger.error('Error getting entity growth chart:', error);
@@ -321,6 +374,7 @@ app.get(
   async (req, res) => {
     try {
       const chartData = await chartService.getEntityTypeDistribution();
+      applyReportingHeaders(res, chartData.metadata);
       res.json(chartData);
     } catch (error) {
       logger.error('Error getting entity type distribution:', error);
@@ -337,6 +391,7 @@ app.get(
   async (req, res) => {
     try {
       const chartData = await chartService.getCaseStatusComparison();
+      applyReportingHeaders(res, chartData.metadata);
       res.json(chartData);
     } catch (error) {
       logger.error('Error getting case status comparison:', error);
@@ -417,6 +472,10 @@ app.get(
   async (req: AuthenticatedRequest, res) => {
     try {
       const insights = await generateOverviewInsights(req.user.id);
+      applySnapshotHeaders(res, [
+        'maestro.mv_reporting_entity_activity',
+        'maestro.mv_reporting_case_snapshot',
+      ]);
       res.json(insights);
     } catch (error) {
       logger.error('Error generating overview insights:', error);
@@ -432,6 +491,10 @@ app.get(
     try {
       const { period = '7d' } = req.query;
       const trends = await generateTrendInsights(req.user.id, period as string);
+      applySnapshotHeaders(res, [
+        'maestro.mv_reporting_entity_activity',
+        'maestro.mv_reporting_case_snapshot',
+      ]);
       res.json(trends);
     } catch (error) {
       logger.error('Error generating trend insights:', error);
@@ -473,9 +536,14 @@ app.post(
 
 // Helper functions for insights
 async function generateOverviewInsights(userId: string): Promise<any> {
+  const useMv = config.reporting.useMaterializedViews;
   const queries = [
-    'SELECT COUNT(*) as total_entities FROM entities',
-    'SELECT COUNT(*) as total_cases FROM cases',
+    useMv
+      ? 'SELECT COALESCE(SUM(entity_count), 0) as total_entities FROM maestro.mv_reporting_entity_activity'
+      : 'SELECT COUNT(*) as total_entities FROM entities',
+    useMv
+      ? 'SELECT COUNT(*) as total_cases FROM maestro.mv_reporting_case_snapshot'
+      : 'SELECT COUNT(*) as total_cases FROM cases',
     'SELECT COUNT(*) as total_relationships FROM relationships',
     'SELECT COUNT(*) as total_dashboards FROM dashboards WHERE created_by = $1',
   ];
@@ -502,7 +570,29 @@ async function generateTrendInsights(
 ): Promise<any> {
   const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
 
-  const query = `
+  const query = config.reporting.useMaterializedViews
+    ? `
+      SELECT 
+        bucket_day as date,
+        'entities' as type,
+        SUM(entity_count) as count
+      FROM maestro.mv_reporting_entity_activity
+      WHERE bucket_day >= NOW() - INTERVAL '${days} days'
+      GROUP BY bucket_day
+      
+      UNION ALL
+      
+      SELECT 
+        created_day as date,
+        'cases' as type,
+        COUNT(*) as count
+      FROM maestro.mv_reporting_case_snapshot
+      WHERE created_day >= NOW() - INTERVAL '${days} days'
+      GROUP BY created_day
+      
+      ORDER BY date DESC
+    `
+    : `
     SELECT 
       DATE_TRUNC('day', created_at) as date,
       'entities' as type,
@@ -571,6 +661,7 @@ async function startServer() {
     // Graceful shutdown
     process.on('SIGTERM', async () => {
       logger.info('SIGTERM received, shutting down gracefully');
+      mvScheduler?.stop();
       server.close(async () => {
         await pgPool.end();
         await neo4jDriver.close();
@@ -582,6 +673,7 @@ async function startServer() {
 
     process.on('SIGINT', async () => {
       logger.info('SIGINT received, shutting down gracefully');
+      mvScheduler?.stop();
       server.close(async () => {
         await pgPool.end();
         await neo4jDriver.close();

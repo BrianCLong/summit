@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import { Driver } from 'neo4j-driver';
 import { logger } from '../utils/logger';
+import { MaterializedViewSource } from './MaterializedViewScheduler';
 
 export interface ChartData {
   labels: string[];
@@ -10,6 +11,9 @@ export interface ChartData {
     aggregation?: string;
     timeRange?: { start: Date; end: Date };
     generatedAt: Date;
+    source?: 'materialized' | 'base' | 'live';
+    stalenessSeconds?: number;
+    viewRefreshedAt?: Date;
   };
 }
 
@@ -44,6 +48,19 @@ export interface ChartQuery {
   colorScheme?: string;
 }
 
+interface QueryMeta {
+  rawData?: any[];
+  source?: 'materialized' | 'base' | 'live';
+  stalenessSeconds?: number;
+  viewRefreshedAt?: Date;
+}
+
+interface ChartServiceOptions {
+  useMaterializedViews?: boolean;
+  fallbackToBase?: boolean;
+  getViewStaleness?: (views: MaterializedViewSource[]) => number | undefined;
+}
+
 export class ChartService {
   private colorSchemes = {
     default: [
@@ -73,25 +90,41 @@ export class ChartService {
       '#FF6384',
     ],
   };
+  private readonly useMaterializedViews: boolean;
+  private readonly fallbackToBase: boolean;
+  private readonly getViewStaleness?:
+    | ((views: MaterializedViewSource[]) => number | undefined)
+    | undefined;
 
   constructor(
     private pgPool: Pool,
     private neo4jDriver: Driver,
-  ) {}
+    options: ChartServiceOptions = {},
+  ) {
+    this.useMaterializedViews = Boolean(options.useMaterializedViews);
+    this.fallbackToBase = options.fallbackToBase !== false;
+    this.getViewStaleness = options.getViewStaleness;
+  }
 
-  async generateChartData(chartQuery: ChartQuery): Promise<ChartData> {
+  async generateChartData(
+    chartQuery: ChartQuery,
+    meta?: QueryMeta,
+  ): Promise<ChartData> {
     try {
-      let rawData: any[];
+      const rawData =
+        meta?.rawData ??
+        (chartQuery.dataSource === 'postgres'
+          ? await this.executePostgresQuery(chartQuery)
+          : chartQuery.dataSource === 'neo4j'
+            ? await this.executeNeo4jQuery(chartQuery)
+            : (() => {
+                throw new Error(
+                  `Unsupported data source: ${chartQuery.dataSource}`,
+                );
+              })());
 
-      if (chartQuery.dataSource === 'postgres') {
-        rawData = await this.executePostgresQuery(chartQuery);
-      } else if (chartQuery.dataSource === 'neo4j') {
-        rawData = await this.executeNeo4jQuery(chartQuery);
-      } else {
-        throw new Error(`Unsupported data source: ${chartQuery.dataSource}`);
-      }
-
-      return this.transformDataForChart(rawData, chartQuery);
+      const chartData = this.transformDataForChart(rawData, chartQuery);
+      return this.attachMetadata(chartData, meta);
     } catch (error) {
       logger.error('Error generating chart data:', error);
       throw error;
@@ -99,11 +132,10 @@ export class ChartService {
   }
 
   private async executePostgresQuery(chartQuery: ChartQuery): Promise<any[]> {
-    const result = await this.pgPool.query(
+    return this.runPostgres(
       chartQuery.query,
       chartQuery.parameters ? Object.values(chartQuery.parameters) : undefined,
     );
-    return result.rows;
   }
 
   private async executeNeo4jQuery(chartQuery: ChartQuery): Promise<any[]> {
@@ -115,6 +147,76 @@ export class ChartService {
     } finally {
       await session.close();
     }
+  }
+
+  private async runPostgres(
+    query: string,
+    parameters?: Record<string, any> | any[],
+  ): Promise<any[]> {
+    const params = Array.isArray(parameters)
+      ? parameters
+      : parameters
+        ? Object.values(parameters)
+        : undefined;
+    const result = await this.pgPool.query(query, params);
+    return result.rows;
+  }
+
+  private async runPostgresQueryWithMv(
+    mvSql: string,
+    fallbackSql: string,
+    parameters: Record<string, any> | undefined,
+    views: MaterializedViewSource[],
+  ): Promise<{
+    rows: any[];
+    source: 'materialized' | 'base';
+    stalenessSeconds?: number;
+  }> {
+    if (!this.useMaterializedViews) {
+      const rows = await this.runPostgres(fallbackSql, parameters);
+      return { rows, source: 'base' };
+    }
+
+    try {
+      const rows = await this.runPostgres(mvSql, parameters);
+      return {
+        rows,
+        source: 'materialized',
+        stalenessSeconds: this.getViewStaleness?.(views),
+      };
+    } catch (error) {
+      if (!this.fallbackToBase) {
+        throw error;
+      }
+      logger.warn(
+        { err: error as Error },
+        'Materialized view query failed; falling back to base tables',
+      );
+      const rows = await this.runPostgres(fallbackSql, parameters);
+      return { rows, source: 'base' };
+    }
+  }
+
+  private attachMetadata(chartData: ChartData, meta?: QueryMeta): ChartData {
+    const mergedMetadata = {
+      ...(chartData.metadata ?? {}),
+      generatedAt: chartData.metadata?.generatedAt ?? new Date(),
+    };
+
+    if (meta?.source) {
+      mergedMetadata.source = meta.source;
+    }
+    if (meta?.stalenessSeconds !== undefined) {
+      mergedMetadata.stalenessSeconds = meta.stalenessSeconds;
+    }
+    if (meta?.viewRefreshedAt) {
+      mergedMetadata.viewRefreshedAt = meta.viewRefreshedAt;
+    }
+
+    return {
+      ...chartData,
+      metadata: mergedMetadata,
+    };
   }
 
   private transformDataForChart(
@@ -498,6 +600,16 @@ export class ChartService {
     start: Date;
     end: Date;
   }): Promise<ChartData> {
+    const parameters = { start: timeRange.start, end: timeRange.end };
+    const mvSql = `
+      SELECT 
+        bucket_day as date,
+        SUM(entity_count) as count
+      FROM maestro.mv_reporting_entity_activity
+      WHERE bucket_day BETWEEN $1 AND $2
+      GROUP BY bucket_day
+      ORDER BY bucket_day
+    `;
     const query: ChartQuery = {
       type: 'time-series',
       dataSource: 'postgres',
@@ -510,7 +622,7 @@ export class ChartService {
         GROUP BY DATE_TRUNC('day', created_at)
         ORDER BY date
       `,
-      parameters: { start: timeRange.start, end: timeRange.end },
+      parameters,
       timeField: 'date',
       aggregateBy: 'count',
       aggregateFunction: 'sum',
@@ -518,10 +630,29 @@ export class ChartService {
       colorScheme: 'blues',
     };
 
-    return this.generateChartData(query);
+    const result = await this.runPostgresQueryWithMv(
+      mvSql,
+      query.query,
+      parameters,
+      ['maestro.mv_reporting_entity_activity'],
+    );
+
+    return this.generateChartData(query, {
+      rawData: result.rows,
+      source: result.source,
+      stalenessSeconds: result.stalenessSeconds,
+    });
   }
 
   async getEntityTypeDistribution(): Promise<ChartData> {
+    const mvSql = `
+      SELECT 
+        type,
+        SUM(entity_count) as count
+      FROM maestro.mv_reporting_entity_activity 
+      GROUP BY type
+      ORDER BY count DESC
+    `;
     const query: ChartQuery = {
       type: 'categorical',
       dataSource: 'postgres',
@@ -540,10 +671,30 @@ export class ChartService {
       colorScheme: 'categorical',
     };
 
-    return this.generateChartData(query);
+    const result = await this.runPostgresQueryWithMv(
+      mvSql,
+      query.query,
+      undefined,
+      ['maestro.mv_reporting_entity_activity'],
+    );
+
+    return this.generateChartData(query, {
+      rawData: result.rows,
+      source: result.source,
+      stalenessSeconds: result.stalenessSeconds,
+    });
   }
 
   async getCaseStatusComparison(): Promise<ChartData> {
+    const mvSql = `
+      SELECT 
+        status,
+        priority,
+        COUNT(*) as count
+      FROM maestro.mv_reporting_case_snapshot
+      GROUP BY status, priority
+      ORDER BY status, priority
+    `;
     const query: ChartQuery = {
       type: 'comparison',
       dataSource: 'postgres',
@@ -562,7 +713,18 @@ export class ChartService {
       colorScheme: 'default',
     };
 
-    return this.generateChartData(query);
+    const result = await this.runPostgresQueryWithMv(
+      mvSql,
+      query.query,
+      undefined,
+      ['maestro.mv_reporting_case_snapshot'],
+    );
+
+    return this.generateChartData(query, {
+      rawData: result.rows,
+      source: result.source,
+      stalenessSeconds: result.stalenessSeconds,
+    });
   }
 
   async getRelationshipStrengthDistribution(): Promise<ChartData> {
@@ -578,7 +740,7 @@ export class ChartService {
       colorScheme: 'greens',
     };
 
-    return this.generateChartData(query);
+    return this.generateChartData(query, { source: 'live' });
   }
 
   async getActivityHeatmapData(days: number = 30): Promise<any> {

@@ -43,6 +43,19 @@ export const config = {
     enableQueryLogging: process.env.ENABLE_QUERY_LOGGING === 'true',
   },
 
+  reporting: {
+    useMaterializedViews:
+      process.env.MV_REPORTING === '1' || process.env.MV_REPORTING === 'true',
+    refreshIntervalSeconds: parseInt(
+      process.env.MV_REFRESH_INTERVAL_SECONDS || '300',
+    ),
+    stalenessBudgetSeconds: parseInt(
+      process.env.MV_STALENESS_BUDGET_SECONDS || '900',
+    ),
+    fallbackToBase: process.env.MV_REPORTING_FALLBACK !== 'false',
+    useConcurrentRefresh: process.env.MV_REFRESH_CONCURRENT !== 'false',
+  },
+
   dashboard: {
     maxWidgetsPerDashboard: parseInt(
       process.env.MAX_WIDGETS_PER_DASHBOARD || '50',
