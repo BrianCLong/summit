@@ -16,10 +16,52 @@ env:
   PNPM_VERSION: '9.12.0'
 
 jobs:
+  changes:
+    name: Detect Changed Paths
+    runs-on: ubuntu-latest
+    outputs:
+      code: ${{ steps.filter.outputs.code }}
+      runtime: ${{ steps.filter.outputs.runtime }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Paths filter
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code:
+              - 'packages/**'
+              - 'apps/**'
+              - 'services/**'
+              - 'scripts/**'
+              - 'turbo.json'
+              - 'pnpm-lock.yaml'
+              - 'pnpm-workspace.yaml'
+              - 'package.json'
+              - 'tsconfig*.json'
+              - '.github/workflows/**'
+            runtime:
+              - 'server/**'
+              - 'client/**'
+              - 'docker-compose*'
+              - 'Dockerfile*'
+              - 'scripts/**'
+            docs:
+              - 'docs/**'
+              - '**/*.md'
+
   # Fast feedback lane: Static Analysis & Security
   static-checks:
     name: Static Checks & Security
     runs-on: ubuntu-latest
+    needs: changes
+    if: |
+      needs.changes.outputs.code == 'true' ||
+      needs.changes.outputs.docs == 'true'
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +75,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -73,9 +115,14 @@ jobs:
 
   # Unit Testing Lane
   unit-tests:
-    name: Unit Tests
+    name: Unit Tests (shard ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
-    needs: [static-checks] # Optional: remove dependency if you want parallelism at cost of compute
+    needs: [static-checks]
+    if: needs.changes.outputs.code == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -83,11 +130,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Enable Corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -109,13 +158,14 @@ jobs:
         run: pnpm install --no-frozen-lockfile
 
       - name: Run Unit Tests
-        run: pnpm run test:jest
+        run: pnpm run test:jest -- --ci --maxWorkers=50% --shard=${{ matrix.shard }}/2
 
   # Smoke Test Lane: The Golden Path
   smoke-tests:
     name: Smoke Tests (Golden Path)
     runs-on: ubuntu-latest
     needs: [static-checks]
+    if: needs.changes.outputs.runtime == 'true'
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -127,7 +177,7 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v4
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
@@ -151,11 +201,28 @@ jobs:
       - name: Bootstrap Environment
         run: make bootstrap
 
-      - name: Build Docker Images
-        # Building strictly what is needed for smoke tests
-        run: |
-           docker build -f server/Dockerfile.dev -t summit/api:ci ./server
-           docker build -f client/Dockerfile.dev -t summit/web:ci ./client
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build API image (layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          file: ./server/Dockerfile.dev
+          tags: summit/api:ci
+          push: false
+          cache-from: type=gha,scope=pr-quality-gate-smoke
+          cache-to: type=gha,mode=max,scope=pr-quality-gate-smoke
+
+      - name: Build client image (layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          file: ./client/Dockerfile.dev
+          tags: summit/web:ci
+          push: false
+          cache-from: type=gha,scope=pr-quality-gate-smoke
+          cache-to: type=gha,mode=max,scope=pr-quality-gate-smoke
 
       - name: Start Environment
         run: make up
@@ -173,3 +240,30 @@ jobs:
       - name: Teardown
         if: always()
         run: make down
+
+  metrics:
+    name: CI Metrics
+    runs-on: ubuntu-latest
+    needs: [static-checks, unit-tests, smoke-tests]
+    if: always()
+    permissions:
+      contents: read
+    steps:
+      - name: Summarize job timings
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const run_id = context.runId;
+            const jobsResponse = await github.rest.actions.listJobsForWorkflowRun({ owner, repo, run_id, per_page: 100 });
+            const lines = jobsResponse.data.jobs
+              .filter(job => job.completed_at)
+              .map(job => {
+                const durationMs = new Date(job.completed_at) - new Date(job.started_at);
+                const minutes = (durationMs / 60000).toFixed(2);
+                return `- ${job.name}: ${minutes} min (${job.conclusion})`;
+              });
+            await core.summary
+              .addHeading('CI Timing Metrics')
+              .addRaw(lines.join('\n') || 'No completed jobs yet')
+              .write();
