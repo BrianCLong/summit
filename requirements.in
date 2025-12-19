@@ -17,4 +17,3 @@ langchain_community
 pytest-cov
 requests
 urllib3>=2.6.0
-ruff

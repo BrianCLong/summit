@@ -10,7 +10,7 @@ For a fast and reliable development loop, we strictly enforce a "Golden Path" fo
 1.  **Setup**: Ensure you have run `pnpm install` and your environment is ready.
 2.  **Linting**: We use `husky` and `lint-staged` to automatically lint and format your code on commit.
     *   **JS/TS**: `eslint` and `prettier` run automatically.
-    *   **Python**: `ruff` runs automatically (ensure `ruff` is installed, e.g., via `pip install ruff` or `pip install -r requirements.txt`).
+    *   **Python**: `ruff` runs automatically (ensure `ruff` is installed, e.g., via `pip install ruff`).
 3.  **Secrets**: `gitleaks` checks for secrets. If you don't have it, the check is skipped locally, but CI will catch it.
 4.  **Commit**: Simply run `git commit`. The hooks are optimized to run only on staged files.
 
