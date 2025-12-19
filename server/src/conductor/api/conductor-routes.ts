@@ -21,6 +21,7 @@ import {
 import { workflowRoutes } from './workflow-routes.js';
 import { workflowExecutor } from '../workflows/workflow-executor.js';
 import logger from '../../config/logger.js';
+import { pricingRoutes } from './pricing-routes.js';
 
 const router = Router();
 
@@ -499,6 +500,9 @@ router.use('/policies', policyRoutes);
 
 // Mount evidence routes
 router.use('/evidence', evidenceRoutes);
+
+// Pricing refresh routes
+router.use('/pricing', pricingRoutes);
 
 // Mount workflow routes
 router.use('/', workflowRoutes);

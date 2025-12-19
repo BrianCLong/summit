@@ -75,6 +75,7 @@ class RBACManager {
             'cti:write',
             'cti:export',
             'cti:share',
+            'pricing:update',
           ],
         },
         analyst: {

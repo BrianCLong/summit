@@ -92,6 +92,17 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   labelNames: ['expert', 'timeout_type'],
 });
 
+export const pricingRefreshTotal = new client.Counter({
+  name: 'pricing_refresh_total',
+  help: 'Total number of pricing refresh attempts',
+  labelNames: ['status'],
+});
+
+export const pricingRefreshLastSuccessTimestamp = new client.Gauge({
+  name: 'pricing_refresh_last_success_timestamp',
+  help: 'Unix timestamp of the last successful pricing refresh',
+});
+
 // Register all conductor metrics with the main registry
 [
   conductorRouterDecisionsTotal,
@@ -108,6 +119,8 @@ export const conductorTaskTimeoutTotal = new client.Counter({
   conductorRoutingConfidenceHistogram,
   conductorConcurrencyLimitHitsTotal,
   conductorTaskTimeoutTotal,
+  pricingRefreshTotal,
+  pricingRefreshLastSuccessTimestamp,
 ].forEach((metric) => register.registerMetric(metric));
 
 // Helper functions to work with confidence buckets
