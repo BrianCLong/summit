@@ -70,8 +70,8 @@
   "author": "IntelGraph Team",
   "license": "MIT",
   "engines": {
-    "node": ">=18.18 <20",
-    "npm": ">=8.0.0"
+    "node": ">=20 <21",
+    "npm": ">=10"
   },
   "packageManager": "pnpm@10.24.0",
   "devDependencies": {
@@ -135,7 +135,7 @@
             "package-lock.json",
             "CHANGELOG.md"
           ],
-          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+          "message": "chore(release): ${nextRelease.version} [skip ci]\\n\\n${nextRelease.notes}"
         }
       ],
       "@semantic-release/github"

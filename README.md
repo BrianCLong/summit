@@ -123,6 +123,14 @@ pnpm typecheck        # tsconfig project references
 pnpm smoke            # same as make smoke (Node-based E2E)
 ```
 
+### 🧰 Tooling (golden clone)
+
+```bash
+corepack enable                     # ensures pnpm is available from the lockfile version
+pnpm install                        # installs all workspace dependencies
+pnpm -r test                        # runs workspace tests recursively
+```
+
 💡 **New to Summit?** Run `make help` for a quick command reference, or see [docs/COMMAND_REFERENCE.md](docs/COMMAND_REFERENCE.md) for the full guide.
 
 ## 🚥 CI & Merge Policy
