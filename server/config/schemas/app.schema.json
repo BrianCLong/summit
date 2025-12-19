@@ -12,6 +12,29 @@
     "services": { "$ref": "./services.schema.json" },
     "features": { "$ref": "./features.schema.json" },
     "security": { "$ref": "./security.schema.json" },
+    "dataPaths": {
+      "type": "object",
+      "description": "Logical data storage paths keyed by system name",
+      "patternProperties": {
+        "^[a-zA-Z][\\w-]*$": {
+          "type": "object",
+          "required": ["path", "tags"],
+          "properties": {
+            "path": { "type": "string" },
+            "classification": { "type": "string" },
+            "residency": { "type": "string" },
+            "description": { "type": "string" },
+            "tags": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 1
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "environments": {
       "type": "object",
       "description": "Environment-specific overrides keyed by environment name.",

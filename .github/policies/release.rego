@@ -366,6 +366,8 @@ breaking_api_changes if {
     not has_api_versioning
 }
 
+default removes_endpoints = false
+
 breaking_api_changes if {
     has_rest_api_changes
     removes_endpoints

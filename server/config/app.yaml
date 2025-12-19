@@ -56,3 +56,19 @@ environments:
         url: redis://staging-redis:6379
     features:
       enableExperimentalFeatures: true
+dataPaths:
+  maestro:
+    path: "./server/data/maestro"
+    classification: confidential
+    residency: us
+    tags: [maestro, workflows, run-artifacts]
+  intelgraph:
+    path: "./server/data/intelgraph"
+    classification: secret
+    residency: us
+    tags: [intelgraph, graph, knowledge-base]
+  companyos:
+    path: "./companyos/db"
+    classification: restricted
+    residency: us
+    tags: [companyos, operational, customers]
