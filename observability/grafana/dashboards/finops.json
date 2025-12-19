@@ -3,13 +3,75 @@
   "panels": [
     {
       "type": "timeseries",
-      "title": "Daily Cost",
-      "targets": [{ "expr": "sum(cost_total_daily)" }]
+      "title": "Daily Cost (total)",
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 800 },
+              { "color": "red", "value": 1000 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "showLegend": true }
+      },
+      "targets": [
+        { "expr": "sum(cost_total_daily)" }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Cost per Tenant",
-      "targets": [{ "expr": "sum by (tenant) (cost_total_daily)" }]
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 500 },
+              { "color": "red", "value": 900 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "showLegend": true }
+      },
+      "targets": [
+        { "expr": "sum by (tenant_id) (tenant_cost_total{period=\"day\"})", "legendFormat": "{{tenant_id}}" }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Bucketized Costs",
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "orange", "value": 250 },
+              { "color": "red", "value": 500 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "showLegend": true }
+      },
+      "targets": [
+        { "expr": "sum(tenant_cost_compute)", "legendFormat": "Compute" },
+        { "expr": "sum(tenant_cost_storage)", "legendFormat": "Storage" },
+        { "expr": "sum(tenant_cost_network)", "legendFormat": "Egress" },
+        { "expr": "sum(tenant_cost_api)", "legendFormat": "3rd Party/API" }
+      ]
     }
   ]
 }

@@ -70,6 +70,11 @@ export const SystemAPI = {
   ready: () => apiFetch('/api/readyz'),
 };
 
+export const FinOpsAPI = {
+  rollups: (days = 30) =>
+    apiFetch(`/api/finops/rollups?days=${encodeURIComponent(days)}`),
+};
+
 export const ExportAPI = {
   async graph(format = 'json', investigationId) {
     const token = localStorage.getItem('token');

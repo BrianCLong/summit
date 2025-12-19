@@ -89,6 +89,9 @@ const AdminDashboard = React.lazy(() =>
 const ApprovalsPage = React.lazy(() =>
   import('./features/approvals/ApprovalsPage')
 );
+const FinOpsDashboard = React.lazy(() =>
+  import('./pages/finops/FinOpsDashboard')
+);
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
 import { Security } from '@mui/icons-material';
@@ -112,6 +115,7 @@ const navigationItems = [
   { path: '/disclosures', label: 'Disclosures', icon: <Assessment /> },
   { path: '/access-intel', label: 'Access Intel', icon: <Security /> },
   { path: '/geoint', label: 'GeoInt Map', icon: <Map /> },
+  { path: '/finops', label: 'FinOps', icon: <Assessment /> },
   { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/system', label: 'System', icon: <Settings />, roles: [ADMIN] },
   {
@@ -689,6 +693,7 @@ function MainLayout() {
               <Route path="/disclosures" element={<DisclosurePackagerPage />} />
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
+              <Route path="/finops" element={<FinOpsDashboard />} />
               <Route path="/reports" element={<InvestigationsPage />} />
               <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
                 <Route path="/approvals" element={<ApprovalsPage />} />
