@@ -1,10 +1,9 @@
+use futures::Stream;
 use std::collections::HashMap;
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Duration;
-use futures::Stream;
 use tokio::sync::{mpsc, Semaphore};
-use futures::ready;
 
 // Mocked types for compilation
 type StreamId = u64;
@@ -34,12 +33,8 @@ impl<T> Stream for BackpressureStream<T> {
     type Item = T;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
-        let permit = ready!(self.capacity.poll_acquire(cx));
         match self.inner.poll_recv(cx) {
-            Poll::Ready(Some(item)) => {
-                permit.forget(); // Consume permit
-                Poll::Ready(Some(item))
-            }
+            Poll::Ready(Some(item)) => Poll::Ready(Some(item)),
             Poll::Ready(None) => Poll::Ready(None),
             Poll::Pending => Poll::Pending,
         }
@@ -58,7 +53,6 @@ impl RateAdjustmentAlgorithm {
         1.0
     }
 }
-
 
 pub struct AdaptiveRateLimiter {
     current_rate: f64,

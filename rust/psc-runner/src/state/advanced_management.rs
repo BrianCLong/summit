@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use std::any::TypeId;
+use std::collections::HashMap;
+use std::fmt;
 use thiserror::Error;
 
 // Mocked types for compilation
@@ -73,6 +74,15 @@ pub trait MergeStrategy {}
 pub struct ConflictResolver {
     crdt_registry: HashMap<TypeId, Box<dyn ConflictFreeReplicatedDataType>>,
     merge_strategies: HashMap<TypeId, Box<dyn MergeStrategy>>,
+}
+
+impl fmt::Debug for ConflictResolver {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ConflictResolver")
+            .field("crdt_registry_size", &self.crdt_registry.len())
+            .field("merge_strategies_size", &self.merge_strategies.len())
+            .finish()
+    }
 }
 
 impl ConflictResolver {

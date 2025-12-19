@@ -1,18 +1,18 @@
 pub mod attestation;
 pub mod auditor;
+pub mod caching;
+pub mod config;
 pub mod enclave;
 pub mod functional_encryption;
-pub mod policy;
-pub mod sealing;
-pub mod streaming;
-pub mod caching;
-pub mod telemetry;
-pub mod config;
-pub mod resources;
-pub mod state;
+pub mod improvements;
 pub mod load_balancing;
 pub mod operations;
-pub mod improvements;
+pub mod policy;
+pub mod resources;
+pub mod sealing;
+pub mod state;
+pub mod streaming;
+pub mod telemetry;
 
 pub use attestation::{AttestationProof, AttestationTranscript};
 pub use auditor::Auditor;

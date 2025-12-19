@@ -5,7 +5,9 @@ use thiserror::Error;
 #[derive(Debug)]
 struct RollbackEngine;
 impl RollbackEngine {
-    async fn rollback_canary(&self) -> Result<(), DeploymentError> { Ok(()) }
+    async fn rollback_canary(&self) -> Result<(), DeploymentError> {
+        Ok(())
+    }
 }
 
 #[derive(Debug)]
@@ -26,11 +28,15 @@ struct CanaryAnalysisEngine;
 #[derive(Debug, Default)]
 struct CanaryAnalysis;
 impl CanaryAnalysis {
-    fn is_healthy(&self) -> bool { true }
+    fn is_healthy(&self) -> bool {
+        true
+    }
 }
 
 impl CanaryAnalysisEngine {
-    async fn analyze_canary_performance(&self) -> CanaryAnalysis { CanaryAnalysis::default() }
+    async fn analyze_canary_performance(&self) -> CanaryAnalysis {
+        CanaryAnalysis::default()
+    }
 }
 
 #[derive(Debug)]
@@ -57,7 +63,7 @@ pub enum DeploymentError {
     Failed,
 }
 
-
+#[derive(Debug)]
 pub struct DeploymentOrchestrator {
     canary_analyzer: CanaryAnalysisEngine,
     traffic_manager: TrafficManagement,
@@ -92,9 +98,19 @@ impl DeploymentOrchestrator {
         Ok(DeploymentResult::Success)
     }
 
-    async fn select_canary_nodes(&self, _spec: &DeploymentSpec) -> Vec<String> { vec![] }
-    async fn deploy_to_nodes(&self, _spec: &DeploymentSpec, _nodes: &[String]) -> Result<(), DeploymentError> { Ok(()) }
-    async fn deploy_to_all_nodes(&self, _spec: &DeploymentSpec) -> Result<(), DeploymentError> { Ok(()) }
+    async fn select_canary_nodes(&self, _spec: &DeploymentSpec) -> Vec<String> {
+        vec![]
+    }
+    async fn deploy_to_nodes(
+        &self,
+        _spec: &DeploymentSpec,
+        _nodes: &[String],
+    ) -> Result<(), DeploymentError> {
+        Ok(())
+    }
+    async fn deploy_to_all_nodes(&self, _spec: &DeploymentSpec) -> Result<(), DeploymentError> {
+        Ok(())
+    }
 }
 
 // Mocked types for compilation
@@ -106,28 +122,41 @@ pub struct SystemSymptom;
 #[derive(Debug)]
 pub struct Diagnosis;
 impl SymptomDetector {
-    async fn analyze_symptom(&self, _symptom: SystemSymptom) -> Result<Diagnosis, HealingError> { Ok(Diagnosis) }
+    async fn analyze_symptom(&self, _symptom: SystemSymptom) -> Result<Diagnosis, HealingError> {
+        Ok(Diagnosis)
+    }
 }
 #[derive(Debug)]
 struct RootCauseAnalyzer;
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RootCause;
 impl RootCauseAnalyzer {
-    async fn find_root_cause(&self, _diagnosis: Diagnosis) -> Result<RootCause, HealingError> { Ok(RootCause) }
+    async fn find_root_cause(&self, _diagnosis: &Diagnosis) -> Result<RootCause, HealingError> {
+        Ok(RootCause)
+    }
 }
 #[derive(Debug)]
 struct RemediationSelector;
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Remediation;
 impl RemediationSelector {
-    async fn select_remediation(&self, _root_cause: RootCause) -> Result<Remediation, HealingError> { Ok(Remediation) }
+    async fn select_remediation(
+        &self,
+        _root_cause: &RootCause,
+    ) -> Result<Remediation, HealingError> {
+        Ok(Remediation)
+    }
 }
 #[derive(Debug)]
 struct ActionExecutor;
 impl ActionExecutor {
-    async fn execute_remediation(&self, _remediation: Remediation) -> Result<HealingResult, HealingError> { Ok(HealingResult) }
+    async fn execute_remediation(
+        &self,
+        _remediation: &Remediation,
+    ) -> Result<HealingResult, HealingError> {
+        Ok(HealingResult)
+    }
 }
-
 
 #[derive(Debug)]
 pub struct HealingResult;
@@ -138,6 +167,7 @@ pub enum HealingError {
     Failed,
 }
 
+#[derive(Debug)]
 pub struct SelfHealingOrchestrator {
     symptom_detector: SymptomDetector,
     root_cause_analyzer: RootCauseAnalyzer,
@@ -146,18 +176,35 @@ pub struct SelfHealingOrchestrator {
 }
 
 impl SelfHealingOrchestrator {
-    pub async fn diagnose_and_heal(&self, symptom: SystemSymptom) -> Result<HealingResult, HealingError> {
+    pub async fn diagnose_and_heal(
+        &self,
+        symptom: SystemSymptom,
+    ) -> Result<HealingResult, HealingError> {
         let diagnosis = self.symptom_detector.analyze_symptom(symptom).await?;
-        let root_cause = self.root_cause_analyzer.find_root_cause(diagnosis).await?;
-        let remediation = self.remediation_selector.select_remediation(root_cause).await?;
+        let root_cause = self.root_cause_analyzer.find_root_cause(&diagnosis).await?;
+        let remediation = self
+            .remediation_selector
+            .select_remediation(&root_cause)
+            .await?;
 
-        let result = self.action_executor.execute_remediation(remediation).await?;
+        let result = self
+            .action_executor
+            .execute_remediation(&remediation)
+            .await?;
 
         // Learn from the outcome
-        self.learn_from_incident(diagnosis, root_cause, remediation, &result).await;
+        self.learn_from_incident(&diagnosis, &root_cause, &remediation, &result)
+            .await;
 
         Ok(result)
     }
 
-    async fn learn_from_incident(&self, _diagnosis: Diagnosis, _root_cause: RootCause, _remediation: Remediation, _result: &HealingResult) {}
+    async fn learn_from_incident(
+        &self,
+        _diagnosis: &Diagnosis,
+        _root_cause: &RootCause,
+        _remediation: &Remediation,
+        _result: &HealingResult,
+    ) {
+    }
 }

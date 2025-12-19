@@ -30,7 +30,7 @@ pub struct TenantQuota;
 pub struct ServiceQuota;
 #[derive(Debug, Clone, Copy)]
 pub struct UserQuota;
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ResourceRequest {
     pub user_id: UserId,
     pub service_id: ServiceId,
@@ -79,13 +79,19 @@ pub struct HierarchicalQuotaSystem {
 impl HierarchicalQuotaSystem {
     pub fn check_quota(&self, request: &ResourceRequest) -> Result<QuotaToken, QuotaError> {
         // Check at each level: user -> service -> tenant
-        let user_quota = self.user_quotas.get(&request.user_id)
+        let user_quota = self
+            .user_quotas
+            .get(&request.user_id)
             .ok_or(QuotaError::UserNotFound)?;
 
-        let service_quota = self.service_quotas.get(&request.service_id)
+        let service_quota = self
+            .service_quotas
+            .get(&request.service_id)
             .ok_or(QuotaError::ServiceNotFound)?;
 
-        let tenant_quota = self.tenant_quotas.get(&request.tenant_id)
+        let tenant_quota = self
+            .tenant_quotas
+            .get(&request.tenant_id)
             .ok_or(QuotaError::TenantNotFound)?;
 
         // Enforce most restrictive quota
@@ -98,7 +104,9 @@ impl HierarchicalQuotaSystem {
 #[derive(Debug)]
 struct CostCalculator;
 impl CostCalculator {
-    async fn calculate_cost(&self, _request: &ResourceRequest) -> f64 { 0.0 }
+    async fn calculate_cost(&self, _request: &ResourceRequest) -> f64 {
+        0.0
+    }
 }
 #[derive(Debug)]
 struct BudgetTracker;
@@ -107,13 +115,19 @@ pub struct Budget {
     pub remaining: f64,
 }
 impl BudgetTracker {
-    async fn get_budget(&self, _tenant_id: TenantId) -> Result<Budget, AllocationError> { Ok(Budget { remaining: 100.0 }) }
+    async fn get_budget(&self, _tenant_id: TenantId) -> Result<Budget, AllocationError> {
+        Ok(Budget { remaining: 100.0 })
+    }
     async fn record_allocation(&self, _tenant_id: TenantId, _cost: f64) {}
 }
 #[derive(Debug)]
 struct OptimizationEngine;
 impl OptimizationEngine {
-    async fn find_optimal_allocation(&self, _request: ResourceRequest, _cost: f64) -> Result<ResourceAllocation, AllocationError> {
+    async fn find_optimal_allocation(
+        &self,
+        _request: &ResourceRequest,
+        _cost: f64,
+    ) -> Result<ResourceAllocation, AllocationError> {
         Ok(ResourceAllocation)
     }
 }
@@ -121,17 +135,13 @@ impl OptimizationEngine {
 #[derive(Debug, Error)]
 pub enum AllocationError {
     #[error("Budget exceeded: requested {requested}, remaining {remaining}")]
-    BudgetExceeded {
-        requested: f64,
-        remaining: f64,
-    },
+    BudgetExceeded { requested: f64, remaining: f64 },
     #[error("Allocation failed")]
     AllocationFailed,
 }
 
 #[derive(Debug)]
 pub struct ResourceAllocation;
-
 
 pub struct CostAwareAllocator {
     cost_calculator: CostCalculator,
@@ -142,7 +152,7 @@ pub struct CostAwareAllocator {
 impl CostAwareAllocator {
     pub async fn allocate_resources(
         &self,
-        request: ResourceRequest
+        request: &ResourceRequest,
     ) -> Result<ResourceAllocation, AllocationError> {
         let cost = self.cost_calculator.calculate_cost(&request).await;
         let budget = self.budget_tracker.get_budget(request.tenant_id).await?;
@@ -155,10 +165,15 @@ impl CostAwareAllocator {
         }
 
         // Find cost-optimal allocation strategy
-        let allocation = self.optimization_engine.find_optimal_allocation(request, cost).await?;
+        let allocation = self
+            .optimization_engine
+            .find_optimal_allocation(request, cost)
+            .await?;
 
         // Track allocation against budget
-        self.budget_tracker.record_allocation(request.tenant_id, cost).await;
+        self.budget_tracker
+            .record_allocation(request.tenant_id, cost)
+            .await;
 
         Ok(allocation)
     }
