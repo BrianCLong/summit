@@ -87,7 +87,7 @@ const AdminDashboard = React.lazy(() =>
   import('./components/admin/AdminDashboard')
 );
 const ApprovalsPage = React.lazy(() =>
-  import('./features/approvals/ApprovalsPage')
+  import('./switchboard/approvals/ApprovalsExperience')
 );
 
 import { MilitaryTech } from '@mui/icons-material'; // WAR-GAMED SIMULATION - FOR DECISION SUPPORT ONLY
