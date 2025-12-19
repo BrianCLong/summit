@@ -19,6 +19,8 @@
 ## Security/Compliance
 - [ ] Secrets via sealed-secrets
 - [ ] SBOM attached; SAST/SCA clean
+- [ ] Supply chain checks passed (signing, provenance, SBOM)
+- Exception ID/reference (if applicable):
 
 ## Verification
 - [ ] Smoke checks
@@ -45,6 +47,8 @@
 
 - [ ] Secrets via sealed-secrets
 - [ ] SBOM attached; SAST/SCA clean
+- [ ] Supply chain checks passed (signing, provenance, SBOM)
+- Exception ID/reference (if applicable):
 
 ## Verification
 
