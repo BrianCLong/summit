@@ -8,6 +8,7 @@ set -euo pipefail
 LABEL="automerge-safe"
 WAIT_INTERVAL=30
 MAX_RETRIES=60 # 30 minutes timeout per PR
+FREEZE_GUARD_SCRIPT="tools/merge-train/freeze_guard.ts"
 
 log() {
   echo "[$(date +'%H:%M:%S')] $*"
@@ -22,6 +23,15 @@ check_deps() {
     echo "Error: GitHub CLI is not authenticated."
     exit 1
   fi
+}
+
+enforce_freeze_window() {
+  if node "$FREEZE_GUARD_SCRIPT"; then
+    return
+  fi
+
+  log "Merge train halted by freeze window guard."
+  exit 1
 }
 
 get_candidate() {
@@ -98,7 +108,8 @@ process_pr() {
 
 main() {
   check_deps
-  
+  enforce_freeze_window
+
   while true; do
     candidate=$(get_candidate)
     
