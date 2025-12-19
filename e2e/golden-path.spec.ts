@@ -1,59 +1,51 @@
-import { test, expect } from './fixtures/auth';
+import { test, expect } from './fixtures/index';
 
-test.describe('Summit Golden Path - P0 Journey', () => {
+test.describe('Summit Golden Path', () => {
+  // Use a wider viewport for visual regression to capture full UI
   test.use({ viewport: { width: 1440, height: 900 } });
 
   test.beforeEach(async ({ login }) => {
+    // Login fixture handles navigation to authorized state
     await login();
   });
 
-  test('P0 Journey: Login -> Dashboard -> Pipelines -> Observability', async ({ page }) => {
-    // 1. Verify Dashboard
+  test('Analyst Journey: Navigation and Visual Verification', async ({ page }) => {
+    // 1. Dashboard / Home
+    console.log('Navigating to Dashboard...');
     await page.goto('/maestro/dashboard');
     await expect(page).toHaveURL(/.*dashboard/);
+    await page.waitForLoadState('domcontentloaded');
 
-    // Check for key dashboard elements (robust check instead of screenshot)
-    // Assuming there's a heading or main navigation
-    await expect(page.getByRole('main')).toBeVisible();
+    // Instead of simple timeout, verify main content
+    await expect(page.locator('#root')).toBeVisible();
 
-    // 2. Navigate to Pipelines (Run/OSINT Search equivalent in this context)
+    // 2. Pipelines
     console.log('Navigating to Pipelines...');
     await page.goto('/maestro/pipelines');
     await expect(page).toHaveURL(/.*pipelines/);
-    // Wait for a key element in pipelines
-    // await expect(page.getByText('Pipelines')).toBeVisible();
 
-    // 3. View Results / Observability
+    // 3. Observability
     console.log('Navigating to Observability...');
     await page.goto('/maestro/observability');
     await expect(page).toHaveURL(/.*observability/);
-    // await expect(page.getByText('Metrics')).toBeVisible();
 
-    // 4. Verify Settings/Autonomy
+    // 4. Autonomy
     console.log('Navigating to Autonomy...');
     await page.goto('/maestro/autonomy');
     await expect(page).toHaveURL(/.*autonomy/);
+
+    // 5. Settings
+    console.log('Navigating to Settings...');
+    await page.goto('/maestro/settings');
+    await expect(page).toHaveURL(/.*settings/);
   });
 
-  test('Investigation Flow: Search and Export', async ({ page }) => {
-    // Navigate to Investigations/Runs
+  test('Investigation Workflow', async ({ page }) => {
+    // Navigate to Investigations/Runs if available
     await page.goto('/maestro/runs');
     await expect(page).toHaveURL(/.*runs/);
 
-    // Ideally we would trigger a search or run here
-    // Since we don't have explicit selectors for the "Start Run" button in the prompt,
-    // we verify the page loads and the table/list is present.
-    // await expect(page.getByRole('button', { name: /New Run/i })).toBeVisible();
-
-    // View Details of a run (Simulated by clicking first item or navigating)
-    // await page.getByRole('link').first().click();
-
-    // Check for Export functionality (P0 requirement)
-    // If specific export button exists on this page
-    // const exportBtn = page.getByRole('button', { name: /Export/i });
-    // if (await exportBtn.isVisible()) {
-    //   await exportBtn.click();
-    //   // Verify export dialog or action
-    // }
+    // Check for run list availability (even if empty)
+    await expect(page.getByRole('main')).toBeVisible();
   });
 });

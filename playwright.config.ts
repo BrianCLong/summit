@@ -13,13 +13,18 @@ const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './e2e',
+  // Use root as testDir to pick up everything, or list specific dirs in testMatch
+  testDir: '.',
+  testMatch: [
+    'e2e/**/*.spec.ts',
+    'tests/e2e/**/*.spec.ts',
+    'tests/performance.spec.ts',
+  ],
   /* Maximum time one test can run for. */
   timeout: 60 * 1000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
-     * For example in `await expect(locator).toHaveText();`
      */
     timeout: 10 * 1000,
   },
