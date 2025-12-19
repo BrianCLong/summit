@@ -6,6 +6,7 @@ import {
   extractTenantContext,
   requireTenantContext,
 } from '../security/tenantContext.js';
+import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
 
 declare module 'express-serve-static-core' {
   interface Request {
@@ -31,7 +32,30 @@ export const tenant = (options: TenantMiddlewareOptions = {}) => {
         });
       }
 
+      tenantIsolationGuard.assertTenantContext(context);
+
+      const policyDecision = tenantIsolationGuard.evaluatePolicy(context, {
+        action: `${req.method}:${req.baseUrl || ''}${req.path}`,
+        resourceTenantId:
+          (req.params && (req.params as any).tenantId) ||
+          (req.body as any)?.tenantId ||
+          (req.query as any)?.tenantId,
+        environment: context.environment,
+      });
+
+      if (!policyDecision.allowed) {
+        return res.status(policyDecision.status || 403).json({
+          error: 'tenant_denied',
+          message:
+            policyDecision.reason ||
+            'Tenant policy evaluation failed for this request',
+        });
+      }
+
       req.tenant = context;
+      res.setHeader('X-Tenant-Id', context.tenantId);
+      res.setHeader('X-Tenant-Environment', context.environment);
+      res.setHeader('X-Tenant-Privilege-Tier', context.privilegeTier);
       return next();
     } catch (error) {
       const err = error as TenantContextError;

@@ -5,11 +5,11 @@
 
 import { GraphQLError } from 'graphql';
 import pino from 'pino';
+import { TenantContext as CanonicalTenantContext } from '../tenancy/types.js';
 
 const logger = pino({ name: 'tenantValidator' });
 
-export interface TenantContext {
-  tenantId: string;
+export interface TenantContext extends CanonicalTenantContext {
   userId: string;
   roles: string[];
   permissions: string[];
@@ -44,6 +44,22 @@ export class TenantValidator {
     const userTenantId = context.user?.tenantId;
     const userId = context.user?.id;
     const roles = context.user?.roles || [];
+    const environment =
+      (context.tenant as any)?.environment ||
+      (context.user as any)?.environment ||
+      (process.env.NODE_ENV?.startsWith('prod')
+        ? 'prod'
+        : process.env.NODE_ENV?.startsWith('stag')
+          ? 'staging'
+          : 'dev');
+    const privilegeTier =
+      (context.tenant as any)?.privilegeTier ||
+      (context.user as any)?.privilegeTier ||
+      (roles.includes('SUPER_ADMIN') || roles.includes('SYSTEM')
+        ? 'break-glass'
+        : roles.includes('ADMIN')
+          ? 'elevated'
+          : 'standard');
 
     // System-level access check
     if (
@@ -56,6 +72,8 @@ export class TenantValidator {
         userId,
         roles,
         permissions: ['*'],
+        environment,
+        privilegeTier,
       };
     }
 
@@ -101,6 +119,8 @@ export class TenantValidator {
       userId,
       roles,
       permissions: this.calculatePermissions(roles),
+      environment,
+      privilegeTier,
     };
   }
 

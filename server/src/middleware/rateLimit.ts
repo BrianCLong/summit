@@ -1,14 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { rateLimiter } from '../services/RateLimiter.js';
-import { quotaManager } from '../lib/resources/quota-manager.js';
 import { cfg } from '../config.js';
 import QuotaManager from '../lib/resources/quota-manager.js';
-
-interface RateLimitConfig {
-  windowMs: number;
-  max: number;
-  message: string;
-}
+import { tenantIsolationGuard } from '../tenancy/TenantIsolationGuard.js';
+import { TenantContext } from '../tenancy/types.js';
 
 /**
  * Rate limiting middleware.
@@ -21,34 +16,36 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
     return next();
   }
 
-  // 1. Tenant Quota Check
-  // @ts-ignore - req.user is populated by auth middleware
-  const user = req.user;
-  const tenantId = user?.tenantId;
+  // 1. Tenant Quota Check (hard isolation)
+  const tenantContext = (req as any).tenant as TenantContext | undefined;
+  if (tenantContext) {
+    const resource: 'api' | 'ingestion' | 'rag' = req.path.startsWith('/ingest')
+      ? 'ingestion'
+      : req.originalUrl.includes('/graphql') || req.baseUrl.endsWith('/graphql')
+        ? 'rag'
+        : 'api';
 
-  if (tenantId) {
-      let resource = 'api';
-      if (req.originalUrl.includes('/graphql') || req.baseUrl.endsWith('/graphql')) {
-          resource = 'graphql';
-      } else if (req.path.startsWith('/ingest')) {
-          resource = 'ingest';
-      }
+    const rateResult = await tenantIsolationGuard.enforceRateLimit(
+      tenantContext,
+      resource,
+    );
 
-      const quotaResult = await quotaManager.checkQuota(tenantId, resource);
+    res.set('X-Tenant-Quota-Limit', 'true');
+    res.set('X-Tenant-Quota-Remaining', String(rateResult.remaining));
+    res.set('X-Tenant-Quota-Reset', String(Math.ceil(rateResult.reset / 1000)));
 
-      res.set('X-Tenant-Quota-Limit', 'true'); // Indicating quota is active
-      res.set('X-Tenant-Quota-Remaining', String(quotaResult.remaining));
-
-      if (!quotaResult.allowed) {
-           res.status(429).json({
-              error: 'Tenant quota exceeded',
-              retryAfter: Math.ceil((quotaResult.reset - Date.now()) / 1000)
-           });
-           return;
-      }
+    if (!rateResult.allowed) {
+      res.status(429).json({
+        error: 'Tenant quota exceeded',
+        retryAfter: Math.ceil((rateResult.reset - Date.now()) / 1000),
+      });
+      return;
+    }
   }
 
   // 2. User/IP Rate Limiting (DoS Protection)
+  // @ts-ignore - req.user is populated by auth middleware
+  const user = req.user;
   let key: string;
   let limit: number;
   let windowMs = cfg.RATE_LIMIT_WINDOW_MS;
