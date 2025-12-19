@@ -18,7 +18,7 @@ import type { MapPaneProps } from './types'
 /**
  * MapPane component with synchronized selection and filtering
  */
-export function MapPane({
+export const MapPane = React.memo(function MapPane({
   locations,
   center = [0, 0],
   zoom = 2,
@@ -313,4 +313,4 @@ export function MapPane({
       )}
     </div>
   )
-}
+})

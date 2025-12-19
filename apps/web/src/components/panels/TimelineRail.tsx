@@ -18,6 +18,8 @@ import { Slider } from '@/components/ui/slider'
 import { Skeleton } from '@/components/ui/Skeleton'
 import { formatRelativeTime } from '@/lib/utils'
 import type { TimelineEvent, PanelProps } from '@/types'
+import { VariableSizeList as List } from 'react-window'
+import AutoSizer from 'react-virtualized-auto-sizer'
 
 interface TimelineRailProps extends PanelProps<TimelineEvent[]> {
   onTimeRangeChange?: (range: { start: string; end: string }) => void
@@ -28,6 +30,135 @@ interface TimelineRailProps extends PanelProps<TimelineEvent[]> {
   totalTimeRange?: { start: Date; end: Date }
   currentTime?: Date
   onCurrentTimeChange?: (time: Date) => void
+}
+
+type TimelineItem =
+  | { type: 'header'; date: string }
+  | { type: 'event'; event: TimelineEvent }
+
+const getEventIcon = (type: string) => {
+  switch (type) {
+    case 'entity_created':
+      return '➕'
+    case 'entity_updated':
+      return '✏️'
+    case 'relationship_created':
+      return '🔗'
+    case 'alert_triggered':
+      return '🚨'
+    case 'investigation_started':
+      return '🔍'
+    case 'threat_detected':
+      return '⚠️'
+    case 'analysis_completed':
+      return '📊'
+    default:
+      return '📍'
+  }
+}
+
+const getEventColor = (type: string) => {
+  switch (type) {
+    case 'entity_created':
+      return 'border-green-500'
+    case 'entity_updated':
+      return 'border-blue-500'
+    case 'relationship_created':
+      return 'border-purple-500'
+    case 'alert_triggered':
+      return 'border-red-500'
+    case 'investigation_started':
+      return 'border-yellow-500'
+    case 'threat_detected':
+      return 'border-orange-500'
+    case 'analysis_completed':
+      return 'border-cyan-500'
+    default:
+      return 'border-gray-500'
+  }
+}
+
+// Separate component for Row to avoid re-creation on every render
+const Row = ({ index, style, data }: { index: number; style: React.CSSProperties; data: any }) => {
+  const { flattenedItems, currentTime, selectedEventId, onEventSelect } = data
+  const item = flattenedItems[index]
+
+  if (item.type === 'header') {
+    return (
+      <div style={style} className="pr-4">
+         <div className="bg-background/90 backdrop-blur-sm py-1 sticky top-0 z-10">
+            <div className="text-sm font-medium text-muted-foreground">
+              {new Date(item.date).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </div>
+          </div>
+      </div>
+    )
+  }
+
+  const { event } = item
+  const isFuture = currentTime
+      ? new Date(event.timestamp) > currentTime
+      : false
+
+  return (
+    <div style={style} className="pr-4 pb-2">
+      <div className="relative h-full">
+      <div
+          className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors h-full ${
+          selectedEventId === event.id
+              ? 'bg-muted ring-2 ring-primary'
+              : ''
+          } ${isFuture ? 'opacity-40 grayscale' : ''}`}
+          onClick={() => onEventSelect?.(event)}
+      >
+          <div
+          className={`relative z-10 w-2 h-2 rounded-full border-2 bg-background mt-2 flex-shrink-0 ${getEventColor(event.type)}`}
+          >
+          {event.type === 'alert_triggered' && (
+              <Zap className="absolute -top-1 -left-1 h-4 w-4 text-red-500 animate-pulse" />
+          )}
+          </div>
+
+          <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+              <span className="text-sm">
+              {getEventIcon(event.type)}
+              </span>
+              <div className="font-medium text-sm truncate">
+              {event.title}
+              </div>
+              <div className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
+              {formatRelativeTime(event.timestamp)}
+              </div>
+          </div>
+
+          {event.description && (
+              <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+              {event.description}
+              </p>
+          )}
+
+          <div className="flex items-center gap-1">
+              <Badge variant="outline" className="text-xs">
+              {event.type.replace('_', ' ')}
+              </Badge>
+
+              {event.entityId && (
+              <Badge variant="secondary" className="text-xs">
+                  Entity: {event.entityId.slice(0, 8)}
+              </Badge>
+              )}
+          </div>
+          </div>
+      </div>
+      </div>
+    </div>
+  )
 }
 
 export function TimelineRail({
@@ -51,7 +182,7 @@ export function TimelineRail({
     end: '',
   })
   const [showFilters, setShowFilters] = React.useState(false)
-  const timelineRef = React.useRef<HTMLDivElement>(null)
+  const listRef = React.useRef<List>(null)
 
   // Playback state
   const [isPlaying, setIsPlaying] = React.useState(false)
@@ -95,43 +226,63 @@ export function TimelineRail({
     playbackSpeed,
   ])
 
-  // Auto-scroll to latest events or active event during playback
+  const sortedEvents = React.useMemo(() => {
+    return [...(events || [])].sort(
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    )
+  }, [events])
+
+  const flattenedItems = React.useMemo(() => {
+    const items: TimelineItem[] = []
+    let lastDate = ''
+
+    sortedEvents.forEach(event => {
+      const date = new Date(event.timestamp).toDateString()
+      if (date !== lastDate) {
+        items.push({ type: 'header', date })
+        lastDate = date
+      }
+      items.push({ type: 'event', event })
+    })
+
+    return items
+  }, [sortedEvents])
+
+  // Helper to determine item size
+  const getItemSize = (index: number) => {
+      const item = flattenedItems[index]
+      if (item.type === 'header') return 32 // Height for header
+      return 110 // Approximate height for event card
+  }
+
+  // Auto-scroll logic
   React.useEffect(() => {
-    if (!timelineRef.current || events.length === 0) return
+    if (!listRef.current || flattenedItems.length === 0) return
 
     if (isPlaying && currentTime) {
-      // Find the last event that is <= currentTime
-      const lastActiveEvent = events
-        .filter(e => new Date(e.timestamp) <= currentTime)
-        .sort(
-          (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        )[0]
+       // Find the index of the last event <= currentTime
+       let targetIndex = -1
+       for(let i=0; i < flattenedItems.length; i++) {
+         const item = flattenedItems[i]
+         if(item.type === 'event' && new Date(item.event.timestamp) <= currentTime) {
+            targetIndex = i
+         } else if (item.type === 'event' && new Date(item.event.timestamp) > currentTime) {
+            break // passed the point
+         }
+       }
 
-      if (lastActiveEvent) {
-        // Find the element in the DOM (we need to give them IDs or refs, but we can't easily ref map)
-        // Alternatively, calculate scroll position.
-        // Simple hack: We are not rendering IDs on the DOM elements directly accessible.
-        // But we have key={event.id}.
-        // Let's try to query selector.
-        // The container is timelineRef.current
-        // We can't easily select by React key.
-        // Let's assume the events are rendered in order.
-        // The sortedEvents logic is inside Render, but we need it here.
-        // This is getting complex for a useEffect.
-
-        // Simpler: Just scroll to bottom if autoScroll is true AND NOT playing.
-        // If playing, we might want to stay put or follow.
-        // Let's just disable auto-scroll to bottom during playback to prevent jumping.
-        // Users can scroll manually.
-        return
-      }
+       if(targetIndex !== -1) {
+          listRef.current.scrollToItem(targetIndex, 'center')
+          return
+       }
     }
 
     if (autoScroll && !isPlaying) {
-      timelineRef.current.scrollTop = timelineRef.current.scrollHeight
+      listRef.current.scrollToItem(flattenedItems.length - 1, 'end')
     }
-  }, [events, autoScroll, isPlaying, currentTime])
+  }, [flattenedItems, autoScroll, isPlaying, currentTime])
+
 
   // Toggle playback
   const togglePlayback = () => {
@@ -145,73 +296,18 @@ export function TimelineRail({
     setIsPlaying(!isPlaying)
   }
 
-  const sortedEvents = React.useMemo(() => {
-    return [...events].sort(
-      (a, b) =>
-        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    )
-  }, [events])
-
-  const groupedEvents = React.useMemo(() => {
-    const groups: Record<string, TimelineEvent[]> = {}
-
-    sortedEvents.forEach(event => {
-      const date = new Date(event.timestamp).toDateString()
-      if (!groups[date]) {
-        groups[date] = []
-      }
-      groups[date].push(event)
-    })
-
-    return groups
-  }, [sortedEvents])
-
-  const getEventIcon = (type: string) => {
-    switch (type) {
-      case 'entity_created':
-        return '➕'
-      case 'entity_updated':
-        return '✏️'
-      case 'relationship_created':
-        return '🔗'
-      case 'alert_triggered':
-        return '🚨'
-      case 'investigation_started':
-        return '🔍'
-      case 'threat_detected':
-        return '⚠️'
-      case 'analysis_completed':
-        return '📊'
-      default:
-        return '📍'
-    }
-  }
-
-  const getEventColor = (type: string) => {
-    switch (type) {
-      case 'entity_created':
-        return 'border-green-500'
-      case 'entity_updated':
-        return 'border-blue-500'
-      case 'relationship_created':
-        return 'border-purple-500'
-      case 'alert_triggered':
-        return 'border-red-500'
-      case 'investigation_started':
-        return 'border-yellow-500'
-      case 'threat_detected':
-        return 'border-orange-500'
-      case 'analysis_completed':
-        return 'border-cyan-500'
-      default:
-        return 'border-gray-500'
-    }
-  }
-
   const navigateTime = (direction: 'prev' | 'next') => {
     // Implement time navigation logic
     console.log('Navigate time:', direction)
   }
+
+  // Memoize item data to prevent unnecessary re-renders of rows
+  const itemData = React.useMemo(() => ({
+    flattenedItems,
+    currentTime,
+    selectedEventId,
+    onEventSelect
+  }), [flattenedItems, currentTime, selectedEventId, onEventSelect])
 
   if (loading) {
     return (
@@ -257,7 +353,7 @@ export function TimelineRail({
             <Clock className="h-4 w-4" />
             Timeline
             <Badge variant="secondary" className="text-xs">
-              {events.length} events
+              {events && events.length} events
             </Badge>
           </div>
           <div className="flex gap-1">
@@ -289,10 +385,10 @@ export function TimelineRail({
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 h-[500px] flex flex-col">
         {/* Playback Controls */}
         {totalTimeRange && currentTime && (
-          <div className="space-y-3 p-3 bg-muted/30 rounded-lg border">
+          <div className="space-y-3 p-3 bg-muted/30 rounded-lg border flex-shrink-0">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1">
                 <Button
@@ -361,7 +457,7 @@ export function TimelineRail({
         )}
 
         {showFilters && (
-          <div className="space-y-2 p-3 bg-muted/50 rounded-lg">
+          <div className="space-y-2 p-3 bg-muted/50 rounded-lg flex-shrink-0">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Calendar className="h-4 w-4" />
               Time Range Filter
@@ -391,87 +487,24 @@ export function TimelineRail({
           </div>
         )}
 
-        <div
-          ref={timelineRef}
-          className="relative max-h-96 overflow-y-auto scrollbar-thin space-y-6"
-        >
-          {/* Timeline line */}
-          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border"></div>
-
-          {Object.entries(groupedEvents).map(([date, dayEvents]) => (
-            <div key={date} className="space-y-3">
-              <div className="sticky top-0 bg-background/90 backdrop-blur-sm py-1">
-                <div className="text-sm font-medium text-muted-foreground">
-                  {new Date(date).toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </div>
-              </div>
-
-              {dayEvents.map(event => {
-                const isFuture = currentTime
-                  ? new Date(event.timestamp) > currentTime
-                  : false
-
-                return (
-                  <div
-                    key={event.id}
-                    className={`relative flex gap-3 cursor-pointer hover:bg-muted/50 p-2 rounded-lg transition-colors ${
-                      selectedEventId === event.id
-                        ? 'bg-muted ring-2 ring-primary'
-                        : ''
-                    } ${isFuture ? 'opacity-40 grayscale' : ''}`}
-                    onClick={() => onEventSelect?.(event)}
-                  >
-                  <div
-                    className={`relative z-10 w-2 h-2 rounded-full border-2 bg-background mt-2 ${getEventColor(event.type)}`}
-                  >
-                    {event.type === 'alert_triggered' && (
-                      <Zap className="absolute -top-1 -left-1 h-4 w-4 text-red-500 animate-pulse" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm">
-                        {getEventIcon(event.type)}
-                      </span>
-                      <div className="font-medium text-sm truncate">
-                        {event.title}
-                      </div>
-                      <div className="text-xs text-muted-foreground whitespace-nowrap">
-                        {formatRelativeTime(event.timestamp)}
-                      </div>
-                    </div>
-
-                    {event.description && (
-                      <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                        {event.description}
-                      </p>
-                    )}
-
-                    <div className="flex items-center gap-1">
-                      <Badge variant="outline" className="text-xs">
-                        {event.type.replace('_', ' ')}
-                      </Badge>
-
-                      {event.entityId && (
-                        <Badge variant="secondary" className="text-xs">
-                          Entity: {event.entityId.slice(0, 8)}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                )
-              })}
-            </div>
-          ))}
-
-          {events.length === 0 && (
+        <div className="flex-1 min-h-0 relative">
+          <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-border z-0"></div>
+          {flattenedItems.length > 0 ? (
+            <AutoSizer>
+              {({ height, width }) => (
+                <List
+                  ref={listRef}
+                  height={height}
+                  width={width}
+                  itemCount={flattenedItems.length}
+                  itemSize={getItemSize}
+                  itemData={itemData}
+                >
+                  {Row}
+                </List>
+              )}
+            </AutoSizer>
+          ) : (
             <div className="text-center py-8 text-muted-foreground">
               <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p className="text-sm">No timeline events found</p>
