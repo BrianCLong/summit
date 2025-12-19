@@ -1,114 +1,37 @@
-<<<<<<< HEAD
-# Scaling Summit
-
-This guide outlines strategies for scaling the Summit platform for high-throughput enterprise environments.
-
-## Architecture Overview
-
-Summit uses a microservices architecture that allows independent scaling of components:
-
-- **Frontend (Web/Client)**: Stateless, served via CDN or multiple replicas.
-- **API Server (GraphQL)**: Stateless, scales horizontally.
-- **Workers**: Scalable based on queue depth (Redis).
-- **Databases**: Neo4j (Read Replicas), Postgres (Read Replicas), Redis (Cluster).
-
-## Kubernetes Scaling
-
-### Horizontal Pod Autoscaler (HPA)
-
-We recommend using HPA for the API server and Worker nodes.
-
-```yaml
-# deploy/k8s/hpa-api.yaml
-apiVersion: autoscaling/v2
-kind: HorizontalPodAutoscaler
-metadata:
-  name: summit-api-hpa
-=======
 # Summit Scaling Guide
 
 This guide documents how to operate Summit in multi-node Kubernetes clusters with production-grade autoscaling, caching, and performance testing. The examples assume `kubectl`, `helm`, and `kustomize` are available along with access to a container registry.
 
 ## Architecture Overview
 
+Summit uses a microservices architecture that allows independent scaling of components:
+
 - **Stateless app layer**: `api`, `web`, and background workers run as independent Deployments with PodDisruptionBudgets and readiness probes identical to `make up` health checks.
+- **Frontend (Web/Client)**: Stateless, served via CDN or multiple replicas.
+- **API Server (GraphQL)**: Stateless, scales horizontally.
+- **Workers**: Scalable based on queue depth (Redis).
 - **Datastores**: PostgreSQL (primary + async replicas), Neo4j Enterprise causal cluster, Redis Cluster (3 masters + 3 replicas) for cache and task queues.
 - **Ingress**: NGINX Ingress Controller with gzip + HTTP/2 enabled. Cert-manager issues TLS certificates.
 - **Observability**: Prometheus Operator + Grafana dashboards from `observability/grafana`. Alertmanager routes to PagerDuty/Slack.
 
-## Horizontal Pod Autoscaler (HPA)
+## Kubernetes Scaling
 
-Use HPAs to keep latency under 200ms for GraphQL queries and to prevent worker backlogs. The example assumes metrics-server is installed.
+### Horizontal Pod Autoscaler (HPA)
+
+Use HPAs to keep latency under 200ms for GraphQL queries and to prevent worker backlogs. We recommend using HPA for the API server and Worker nodes. The example assumes metrics-server is installed.
 
 ```yaml
+# deploy/k8s/hpa-api.yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: summit-api
->>>>>>> main
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
     name: summit-api
   minReplicas: 3
-<<<<<<< HEAD
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
-      name: cpu
-      target:
-        type: Utilization
-        averageUtilization: 70
-```
-
-### Redis Clustering
-
-For high availability and write scalability, use Redis Cluster. Summit's Redis client supports clustering out of the box.
-
-**Configuration:**
-Set `REDIS_CLUSTER_NODES` in your environment instead of `REDIS_HOST`.
-
-```bash
-REDIS_CLUSTER_NODES=redis-node-1:6379,redis-node-2:6379,redis-node-3:6379
-```
-
-### Neo4j Causal Clustering
-
-For read scalability in the graph database, use Neo4j Causal Clustering with Read Replicas.
-
-- **Core Nodes**: Handle writes and consensus (minimum 3).
-- **Read Replicas**: Handle read queries (scale as needed).
-
-Configure the driver in `server/src/db/neo4j.ts` to use `neo4j://` scheme which supports routing.
-
-## Load Testing
-
-We use [k6](https://k6.io) for load testing.
-
-**Running a Load Test:**
-
-```bash
-k6 run scripts/load-testing/load-test.js
-```
-
-### Benchmarks
-
-| Component | Replicas | Requests/sec | p95 Latency |
-|-----------|----------|--------------|-------------|
-| API       | 1        | 500          | 200ms       |
-| API       | 3        | 1400         | 210ms       |
-| API       | 5        | 2200         | 220ms       |
-
-*Benchmarks run on AWS c5.large instances.*
-
-## Database Optimization
-
-- **Indexes**: Ensure all frequently queried properties are indexed.
-- **Query Tuning**: Use `PROFILE` in Neo4j to analyze query performance.
-- **Caching**: Aggressively cache GraphQL resolvers using `@cacheControl` directives.
-=======
   maxReplicas: 12
   behavior:
     scaleDown:
@@ -131,9 +54,27 @@ k6 run scripts/load-testing/load-test.js
 
 Repeat the pattern for `summit-web` (based on CPU + RPS) and for worker pools (based on queue depth exported via Prometheus).
 
+### Neo4j Causal Clustering
+
+For read scalability in the graph database, use Neo4j Causal Clustering with Read Replicas.
+
+- **Core Nodes**: Handle writes and consensus (minimum 3).
+- **Read Replicas**: Handle read queries (scale as needed).
+
+Configure the driver in `server/src/db/neo4j.ts` to use `neo4j://` scheme which supports routing.
+
 ## Redis Clustering
 
-Redis should run in cluster mode for resiliency and predictable latency under load:
+Redis should run in cluster mode for resiliency and predictable latency under load. Summit's Redis client supports clustering out of the box.
+
+**Configuration:**
+Set `REDIS_CLUSTER_NODES` in your environment instead of `REDIS_HOST`.
+
+```bash
+REDIS_CLUSTER_NODES=redis-node-1:6379,redis-node-2:6379,redis-node-3:6379
+```
+
+**Kubernetes Configuration:**
 
 ```yaml
 apiVersion: redis.redis.opstreelabs.in/v1beta1
@@ -195,9 +136,17 @@ patches:
           nginx.ingress.kubernetes.io/enable-brotli: "true"
 ```
 
-## Load Testing with Locust
+## Load Testing
 
-Benchmark before every major release.
+We use [k6](https://k6.io) and Locust for load testing. Benchmark before every major release.
+
+### k6 Load Testing
+
+```bash
+k6 run scripts/load-testing/load-test.js
+```
+
+### Locust Load Testing
 
 ```bash
 pip install locust
@@ -223,12 +172,28 @@ class SummitUser(HttpUser):
 
 Capture p95 latency, error rate, and saturation metrics from Prometheus during each run. Commit reports to `tests/perf/reports/` and trend them in Grafana.
 
+### Benchmarks
+
+| Component | Replicas | Requests/sec | p95 Latency |
+|-----------|----------|--------------|-------------|
+| API       | 1        | 500          | 200ms       |
+| API       | 3        | 1400         | 210ms       |
+| API       | 5        | 2200         | 220ms       |
+
+*Benchmarks run on AWS c5.large instances.*
+
 ## Benchmark Targets
 
 - **API**: p95 GraphQL latency < 200ms at 1k RPS sustained for 10 minutes.
 - **Workers**: Queue depth < 1000 with 0 dead-letter messages during peak.
 - **Neo4j**: < 250ms for 3-hop path queries with 50 concurrent users.
 - **Redis**: < 5ms GET/SET latency at 30k ops/sec.
+
+## Database Optimization
+
+- **Indexes**: Ensure all frequently queried properties are indexed.
+- **Query Tuning**: Use `PROFILE` in Neo4j to analyze query performance.
+- **Caching**: Aggressively cache GraphQL resolvers using `@cacheControl` directives.
 
 ## Day-2 Operations
 
@@ -242,4 +207,3 @@ Capture p95 latency, error rate, and saturation metrics from Prometheus during e
 - Configure scheduled backups for PostgreSQL and Neo4j using `velero` or provider snapshots.
 - Keep `make smoke` parity via synthetic checks in `synthetics/` hitting `/health/ready` and `/metrics` endpoints.
 - Document restore playbooks in `docs/ONBOARDING.md` and validate quarterly.
->>>>>>> main

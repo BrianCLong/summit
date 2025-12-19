@@ -1,12 +1,7 @@
 {
   "name": "@summit/olap-engine",
-<<<<<<< HEAD
-  "version": "1.0.0",
-  "description": "OLAP engine for analytical queries",
-=======
   "version": "2.0.0",
   "description": "OLAP cube engine with MDX support and multidimensional analytics",
->>>>>>> main
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",

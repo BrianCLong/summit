@@ -1,15 +1,9 @@
 {
-<<<<<<< HEAD
-  "name": "@intelgraph/extensions",
-  "version": "1.0.0",
-  "description": "Extension system for IntelGraph platform",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-=======
   "name": "@summit/extensions",
   "version": "2.0.0",
   "description": "Unified extension framework for Summit",
->>>>>>> main
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
     "build": "tsc",

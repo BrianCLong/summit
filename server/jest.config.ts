@@ -1,28 +1,12 @@
 import type { Config } from 'jest';
 
 const config: Config = {
-<<<<<<< HEAD
-  testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts'],
-  setupFilesAfterEnv: [
-<<<<<<< HEAD
-    '<rootDir>/tests/setup/jest.setup.cjs',
-=======
-<<<<<<< HEAD
-    '<rootDir>/tests/setup/jest.setup.cjs',
-=======
-    '<rootDir>/tests/setup/jest.setup.js',
-    // 'jest-extended/all' is loaded via require in jest.setup.js to handle resolution issues safely
-=======
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   setupFilesAfterEnv: [
     '<rootDir>/tests/setup/jest.setup.ts',
->>>>>>> main
->>>>>>> main
     'jest-extended/all',
->>>>>>> main
   ],
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
@@ -46,46 +30,7 @@ const config: Config = {
       'ts-jest',
       {
         useESM: true,
-<<<<<<< HEAD
-        tsconfig: 'tsconfig.json',
-=======
-<<<<<<< HEAD
-        tsconfig: 'tsconfig.json',
-=======
-<<<<<<< HEAD
-        tsconfig: 'tsconfig.json',
-=======
-<<<<<<< HEAD
-        tsconfig: 'tsconfig.json',
-=======
-<<<<<<< HEAD
-        tsconfig: 'tsconfig.json',
-=======
-<<<<<<< HEAD
-        tsconfig: {
-            target: 'ES2022',
-            module: 'ESNext',
-            moduleResolution: 'node',
-            esModuleInterop: true,
-            allowSyntheticDefaultImports: true,
-            resolveJsonModule: true,
-            allowJs: true,
-            sourceMap: true,
-            lib: ['ES2022'],
-            types: ['node', 'jest'],
-        },
-=======
-<<<<<<< HEAD
-        tsconfig: 'tsconfig.json',
-=======
         tsconfig: 'tsconfig.test.json',
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
       },
     ],
   },
@@ -119,13 +64,7 @@ const config: Config = {
   resetMocks: true,
   bail: false,
   errorOnDeprecated: true,
-<<<<<<< HEAD
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))',
-  ],
-=======
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$|node-fetch|data-uri-to-buffer|fetch-blob|formdata-polyfill)'],
->>>>>>> main
   maxWorkers: process.env.CI ? 2 : '50%',
 };
 

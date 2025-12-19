@@ -1,12 +1,7 @@
 {
   "name": "@summit/dimensional-modeling",
-<<<<<<< HEAD
-  "version": "1.0.0",
-  "description": "Dimensional modeling for data warehouse",
-=======
   "version": "2.0.0",
   "description": "Dimensional modeling with star/snowflake schemas and SCD support",
->>>>>>> main
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",

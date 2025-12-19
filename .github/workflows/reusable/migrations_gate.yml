@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-name: Reusable migrations_gate
-on:
-  workflow_call:
-
-jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Placeholder for migrations_gate
-        run: echo "Running migrations_gate workflow placeholder"
-=======
 name: migrations_gate
 
 on:
@@ -77,4 +65,3 @@ jobs:
           name: migration-gate-summary
           path: migration-gate-summary.txt
           retention-days: 7
->>>>>>> main

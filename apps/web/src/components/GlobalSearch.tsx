@@ -23,11 +23,7 @@ export function GlobalSearch() {
 
   // Mock search function
   const searchFunction = async (query: string): Promise<SearchResult[]> => {
-<<<<<<< HEAD
-    if (!query.trim()) {return []}
-=======
-    if (!query || !query.trim()) return []
->>>>>>> main
+    if (!query || !query.trim()) {return []}
 
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 200))

@@ -1,11 +1,7 @@
 # Sprint 2: Maestro Conductor — Multi-Tenant Hardening & Externalization
 
-<<<<<<< HEAD
 **Duration:** 2 weeks
-=======
-**Duration:** 2 weeks  
->>>>>>> main
-**Theme:** “Conductor as the shared automation fabric for many tenants (internal + white-label + SaaS)”
+**Theme:** "Conductor as the shared automation fabric for many tenants (internal + white-label + SaaS)"
 
 ## Objectives (end-of-sprint truths)
 1. **Multi-tenant Conductor is safe to share** – Isolation, noisy-neighbor protections, and per-tenant limits are enforced and observable.
@@ -14,12 +10,13 @@
 4. **SaaS readiness for SRE + billing** – Rate limiting, incident runbooks, DR drills, and usage signals exist for hosted Conductor.
 
 ## Workstreams & Stories
+
 ### Workstream 1 — Multi-Tenant Isolation & Limits
-<<<<<<< HEAD
+
 - **Story 1.1 – Tenant Isolation & Resource Quotas**
-  _Goal:_ One tenant can’t starve or break others; guardrails are visible and tunable.
+  _Goal:_ One tenant can't starve or break others; guardrails are visible and tunable.
   _Deliverables:_ Per-tenant max concurrent runs, max queued runs, max task concurrency, and execution classes (`standard`, `bulk`, `low-priority`) controlling scheduling.
-  _Acceptance:_ Quotas configurable via CompanyOS config/API; quota hits queue/defer with clear status/reason; quota-hit alerts/metrics; no cross-tenant impact in load tests; dashboards show utilization vs. quota; runbook: “What to do when a tenant hits Conductor quota.”
+  _Acceptance:_ Quotas configurable via CompanyOS config/API; quota hits queue/defer with clear status/reason; quota-hit alerts/metrics; no cross-tenant impact in load tests; dashboards show utilization vs. quota; runbook: "What to do when a tenant hits Conductor quota."
 
 - **Story 1.2 – Data Boundary & Secret Scoping**
   _Goal:_ No cross-tenant data leakage; secrets scoped to tenant/environment.
@@ -27,17 +24,19 @@
   _Acceptance:_ Cross-tenant API calls rejected and logged with structured security events; tests simulate mis-tagging and verify policy blocks; secrets access logged with tenant/environment/workflow context; threat model doc updated for multi-tenancy and secrets.
 
 ### Workstream 2 — Workflow Developer Experience & SDK
+
 - **Story 2.1 – Conductor Workflow SDK (TypeScript-first)**
   _Goal:_ Internal/partner devs author typed workflows.
   _Deliverables:_ TS SDK for defining workflows (steps, tasks, retries, timeouts), metadata (`risk_level`, `tenant_scope`, `category`, `tags`, `runbook_link`), and structured events/evidence hooks.
   _Acceptance:_ SDK published as internal NPM package with docs; ≥2 workflows migrated; policy harness consumes metadata (e.g., `risk_level`); tests ensure type safety and readable failures for broken definitions.
 
-- **Story 2.2 – “Golden” CompanyOS Workflows Library v1**
+- **Story 2.2 – "Golden" CompanyOS Workflows Library v1**
   _Goal:_ CompanyOS defaults to Maestro for canonical flows.
   _Deliverables:_ Three SDK-based workflows: Employee Onboarding, Tenant Provisioning/Bootstrap, and Incident Lifecycle. Each is risk-tagged, policy-gated, linked to runbooks/docs, and emits provenance receipts.
   _Acceptance:_ Triggerable from Switchboard palette or New Workflow UI; demo runs end-to-end in staging with real-ish data.
 
 ### Workstream 3 — White-Label & Partner Readiness
+
 - **Story 3.1 – Conductor Configuration Profiles (Internal / White-Label / Hosted SaaS)**
   _Goal:_ Same binary, three deployment personas.
   _Deliverables:_ Profile configs (`internal-edition`, `white-label-edition`, `hosted-saas`) toggling default policies, risk thresholds, limits/quotas, and logging/retention. Example files: `values.conductor.internal.yaml`, `values.conductor.white-label.yaml`, `values.conductor.saas.yaml`.
@@ -49,10 +48,11 @@
   _Acceptance:_ Walk-through validated by non-core engineer; commands/snippets tested in CI; guide referenced from white-label kit.
 
 ### Workstream 4 — Hosted SaaS: Rate Limits, Incidents, DR
+
 - **Story 4.1 – Tenant-Aware Rate Limiting & Abuse Protection**
   _Goal:_ Prevent abuse and protect global SLOs.
   _Deliverables:_ Tenant/IP-based API + workflow-trigger rate limits; abuse patterns & alarms (e.g., rapid create/cancel cycles).
-  _Acceptance:_ Limits configurable via profile or tenant override; structured errors and security/abuse events on limit hits; dashboards for top tenants by limit hits and global health; runbook: “Responding to rate-limit events or suspected abuse.”
+  _Acceptance:_ Limits configurable via profile or tenant override; structured errors and security/abuse events on limit hits; dashboards for top tenants by limit hits and global health; runbook: "Responding to rate-limit events or suspected abuse."
 
 - **Story 4.2 – DR Drill & Kill-Switch for Conductor**
   _Goal:_ Pause dangerous automation and recover from failure with evidence.
@@ -60,59 +60,11 @@
   _Acceptance:_ Kill-switch gated to specific roles, emits receipts; DR report with actions, recovery time, gaps; backups/restores observable with metrics/logs.
 
 ### Workstream 5 — FinOps & Usage-Based Pricing Inputs
+
 - **Story 5.1 – Enriched Metering for Pricing Experiments**
   _Goal:_ Finance/product can simulate pricing from real usage.
   _Deliverables:_ Metering events enriched with workflow complexity hints (steps, external calls), duration bands, and data volume/weight estimates; pricing model dashboard or spreadsheet exploring per-run/per-task/blended axes.
-=======
-- **Story 1.1 – Tenant Isolation & Resource Quotas**  
-  _Goal:_ One tenant can’t starve or break others; guardrails are visible and tunable.  
-  _Deliverables:_ Per-tenant max concurrent runs, max queued runs, max task concurrency, and execution classes (`standard`, `bulk`, `low-priority`) controlling scheduling.  
-  _Acceptance:_ Quotas configurable via CompanyOS config/API; quota hits queue/defer with clear status/reason; quota-hit alerts/metrics; no cross-tenant impact in load tests; dashboards show utilization vs. quota; runbook: “What to do when a tenant hits Conductor quota.”
-
-- **Story 1.2 – Data Boundary & Secret Scoping**  
-  _Goal:_ No cross-tenant data leakage; secrets scoped to tenant/environment.  
-  _Deliverables:_ Tenant + environment tags on workflow definitions, runs, log pointers, and secrets; secrets backend enforcing tenant namespaces and least-privilege for workers.  
-  _Acceptance:_ Cross-tenant API calls rejected and logged with structured security events; tests simulate mis-tagging and verify policy blocks; secrets access logged with tenant/environment/workflow context; threat model doc updated for multi-tenancy and secrets.
-
-### Workstream 2 — Workflow Developer Experience & SDK
-- **Story 2.1 – Conductor Workflow SDK (TypeScript-first)**  
-  _Goal:_ Internal/partner devs author typed workflows.  
-  _Deliverables:_ TS SDK for defining workflows (steps, tasks, retries, timeouts), metadata (`risk_level`, `tenant_scope`, `category`, `tags`, `runbook_link`), and structured events/evidence hooks.  
-  _Acceptance:_ SDK published as internal NPM package with docs; ≥2 workflows migrated; policy harness consumes metadata (e.g., `risk_level`); tests ensure type safety and readable failures for broken definitions.
-
-- **Story 2.2 – “Golden” CompanyOS Workflows Library v1**  
-  _Goal:_ CompanyOS defaults to Maestro for canonical flows.  
-  _Deliverables:_ Three SDK-based workflows: Employee Onboarding, Tenant Provisioning/Bootstrap, and Incident Lifecycle. Each is risk-tagged, policy-gated, linked to runbooks/docs, and emits provenance receipts.  
-  _Acceptance:_ Triggerable from Switchboard palette or New Workflow UI; demo runs end-to-end in staging with real-ish data.
-
-### Workstream 3 — White-Label & Partner Readiness
-- **Story 3.1 – Conductor Configuration Profiles (Internal / White-Label / Hosted SaaS)**  
-  _Goal:_ Same binary, three deployment personas.  
-  _Deliverables:_ Profile configs (`internal-edition`, `white-label-edition`, `hosted-saas`) toggling default policies, risk thresholds, limits/quotas, and logging/retention. Example files: `values.conductor.internal.yaml`, `values.conductor.white-label.yaml`, `values.conductor.saas.yaml`.  
-  _Acceptance:_ Single flag/env var selects profile; profiles live as versioned code with comments; docs describe selection and per-tenant overrides.
-
-- **Story 3.2 – Partner/Integrator Onboarding Guide**  
-  _Goal:_ Competent partner can run Conductor + Switchboard for a demo tenant.  
-  _Deliverables:_ Guide covering architecture, Helm/Terraform deploy via profile, first workflow with SDK, and identity/OPA wiring.  
-  _Acceptance:_ Walk-through validated by non-core engineer; commands/snippets tested in CI; guide referenced from white-label kit.
-
-### Workstream 4 — Hosted SaaS: Rate Limits, Incidents, DR
-- **Story 4.1 – Tenant-Aware Rate Limiting & Abuse Protection**  
-  _Goal:_ Prevent abuse and protect global SLOs.  
-  _Deliverables:_ Tenant/IP-based API + workflow-trigger rate limits; abuse patterns & alarms (e.g., rapid create/cancel cycles).  
-  _Acceptance:_ Limits configurable via profile or tenant override; structured errors and security/abuse events on limit hits; dashboards for top tenants by limit hits and global health; runbook: “Responding to rate-limit events or suspected abuse.”
-
-- **Story 4.2 – DR Drill & Kill-Switch for Conductor**  
-  _Goal:_ Pause dangerous automation and recover from failure with evidence.  
-  _Deliverables:_ Policy-gated global kill-switch with evidence receipts and Switchboard surface (banner/status); documented DR runbook with RPO/RTO and backup/restore steps; staging DR drill simulating partial data loss or region outage.  
-  _Acceptance:_ Kill-switch gated to specific roles, emits receipts; DR report with actions, recovery time, gaps; backups/restores observable with metrics/logs.
-
-### Workstream 5 — FinOps & Usage-Based Pricing Inputs
-- **Story 5.1 – Enriched Metering for Pricing Experiments**  
-  _Goal:_ Finance/product can simulate pricing from real usage.  
-  _Deliverables:_ Metering events enriched with workflow complexity hints (steps, external calls), duration bands, and data volume/weight estimates; pricing model dashboard or spreadsheet exploring per-run/per-task/blended axes.  
->>>>>>> main
-  _Acceptance:_ Enriched events live in metering store; ≥2 candidate pricing axes documented with pros/cons; per-tenant usage view includes runs, tasks, and complexity score; write-up: “Conductor Pricing Inputs v0.”
+  _Acceptance:_ Enriched events live in metering store; ≥2 candidate pricing axes documented with pros/cons; per-tenant usage view includes runs, tasks, and complexity score; write-up: "Conductor Pricing Inputs v0."
 
 ## Global Definition of Done (reaffirmed)
 1. **Spec / ADR** captured with rationale and alternatives.

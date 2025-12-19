@@ -1,12 +1,7 @@
 {
   "name": "@summit/query-optimizer",
-<<<<<<< HEAD
-  "version": "1.0.0",
-  "description": "Query optimizer for database operations",
-=======
   "version": "2.0.0",
   "description": "Advanced query optimizer with cost-based optimization and materialized views",
->>>>>>> main
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -14,12 +9,6 @@
     "build": "tsc",
     "test": "jest"
   },
-<<<<<<< HEAD
-  "devDependencies": {
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {}
-=======
   "keywords": [
     "query-optimizer",
     "cost-based",
@@ -36,5 +25,4 @@
     "@types/pg": "^8.15.6",
     "typescript": "^5.9.3"
   }
->>>>>>> main
 }

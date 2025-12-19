@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { describe, test, expect } from '@jest/globals';
-const { rankPaths } = require('../src/services/PathRankingService');
-=======
-import { rankPaths } from '../src/services/PathRankingService';
 import { describe, it, expect } from '@jest/globals';
->>>>>>> main
+import { rankPaths } from '../src/services/PathRankingService';
 
 describe('PathRankingService', () => {
   it('v2 ranking improves top1 path alignment', () => {

@@ -54,80 +54,23 @@ import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
 import { zeroDayRouter } from './routes/zero_day.js';
 import { abyssRouter } from './routes/abyss.js';
-<<<<<<< HEAD
 import authRouter from './routes/authRoutes.js';
-=======
-<<<<<<< HEAD
 import qafRouter from './routes/qaf.js';
-=======
-<<<<<<< HEAD
 import siemPlatformRouter from './routes/siem-platform.js';
-=======
-<<<<<<< HEAD
 import maestroRouter from './routes/maestro.js';
-=======
-<<<<<<< HEAD
 import { SummitInvestigate } from './services/SummitInvestigate.js';
-=======
-<<<<<<< HEAD
 import osintRouter from './routes/osint.js';
-=======
-<<<<<<< HEAD
 import edgeOpsRouter from './routes/edge-ops.js';
-=======
-<<<<<<< HEAD
 import swaggerUi from 'swagger-ui-express';
 import { swaggerSpec } from './config/swagger.js';
-=======
-<<<<<<< HEAD
 import metaOrchestratorRouter from './routes/meta-orchestrator.js';
-=======
-<<<<<<< HEAD
 import adminSmokeRouter from './routes/admin-smoke.js';
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
 import lineageRouter from './routes/lineage.js';
 import scenarioRouter from './routes/scenarios.js';
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 import resourceCostsRouter from './routes/resource-costs.js';
-=======
-<<<<<<< HEAD
 import queryReplayRouter from './routes/query-replay.js';
-=======
-<<<<<<< HEAD
-=======
-import streamRouter from './routes/stream.js'; // Added import
+import streamRouter from './routes/stream.js';
 import searchV1Router from './routes/search-v1.js';
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -138,45 +81,16 @@ export const createApp = async () => {
   // await tracer.initialize();
 
   const app = express();
-<<<<<<< HEAD
-  const logger = pino();
-<<<<<<< HEAD
-
-  // Add correlation ID middleware FIRST (before other middleware)
-  app.use(correlationIdMiddleware);
-
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        useDefaults: true,
-        directives: {
-          'script-src': [
-            "'self'",
-            "'unsafe-inline'",
-            'https://cdn.jsdelivr.net',
-          ],
-          'connect-src': ["'self'", 'https://api.intelgraph.example'],
-        },
-      },
-      crossOriginOpenerPolicy: { policy: 'same-origin' },
-      crossOriginEmbedderPolicy: { policy: 'require-corp' },
-      crossOriginResourcePolicy: { policy: 'same-origin' },
-      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-    })
-  );
-=======
-  const isProduction = cfg.NODE_ENV === 'production';
->>>>>>> main
-  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-=======
 
   const safetyState = await resolveSafetyState();
   if (safetyState.killSwitch || safetyState.safeMode) {
     appLogger.warn({ safetyState }, 'Safety gates enabled');
   }
->>>>>>> main
+
+  const isProduction = cfg.NODE_ENV === 'production';
+  const allowedOrigins = cfg.CORS_ORIGIN.split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
@@ -239,22 +153,7 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
   app.use(safetyModeMiddleware);
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
   // Standard audit logger for basic request tracking
   app.use(auditLogger);
   // Audit-First middleware for cryptographic stamping of sensitive operations
@@ -343,72 +242,23 @@ export const createApp = async () => {
   app.use('/api/necromancer', necromancerRouter);
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
-<<<<<<< HEAD
   app.use('/api/qaf', qafRouter);
-=======
-<<<<<<< HEAD
   app.use('/api/siem-platform', siemPlatformRouter);
-=======
-<<<<<<< HEAD
   app.use('/api/maestro', maestroRouter);
-=======
-<<<<<<< HEAD
   app.use('/api/osint', osintRouter);
-=======
-<<<<<<< HEAD
   app.use('/api/edge', edgeOpsRouter);
-=======
-<<<<<<< HEAD
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
-=======
-<<<<<<< HEAD
   app.use('/api', adminSmokeRouter);
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
   app.use('/api/scenarios', scenarioRouter);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
   app.use('/api/costs', resourceCostsRouter);
-=======
-<<<<<<< HEAD
   app.use('/api/query-replay', queryReplayRouter);
-=======
-<<<<<<< HEAD
-=======
-  app.use('/api/stream', streamRouter); // Register stream route
-  app.use('/api/v1/search', searchV1Router); // Register Unified Search API
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
+  app.use('/api/stream', streamRouter);
+  app.use('/api/v1/search', searchV1Router);
   app.get('/metrics', metricsRoute);
 
-<<<<<<< HEAD
   // Initialize SummitInvestigate Platform Routes
   SummitInvestigate.initialize(app);
-=======
+
   // Maestro
   const { buildMaestroRouter } = await import('./routes/maestro_routes.js');
   const { Maestro } = await import('./maestro/core.js');
@@ -432,7 +282,6 @@ export const createApp = async () => {
   const maestroQueries = new MaestroQueries(igClient);
 
   app.use('/api/maestro', buildMaestroRouter(maestro, maestroQueries));
->>>>>>> main
 
   app.get('/search/evidence', async (req, res) => {
     const { q, skip = 0, limit = 10 } = req.query;

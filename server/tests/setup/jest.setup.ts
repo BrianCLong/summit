@@ -3,12 +3,9 @@
  * Provides common test utilities and matchers
  */
 
-<<<<<<< HEAD:server/tests/setup/jest.setup.ts
-import 'jest-extended';
-import { jest, beforeAll, afterAll, afterEach } from '@jest/globals';
-=======
 // Extend Jest with additional matchers from jest-extended
 import 'jest-extended';
+import { jest, beforeAll, afterAll, afterEach } from '@jest/globals';
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
 jest.mock('ioredis', () => {
@@ -90,17 +87,13 @@ jest.mock('fluent-ffmpeg', () => {
   ffmpeg.ffprobe = jest.fn();
   return ffmpeg;
 });
->>>>>>> main:server/tests/setup/jest.setup.js
 
 // Global test timeout
-import { jest } from '@jest/globals';
 jest.setTimeout(30000);
 
 // Mock console methods to reduce noise in tests unless debugging
 const originalConsole = { ...console };
 const originalConsoleError = console.error;
-
-import { beforeAll, afterAll, afterEach } from '@jest/globals';
 
 beforeAll(() => {
   if (!process.env.DEBUG_TESTS) {
@@ -110,19 +103,15 @@ beforeAll(() => {
     console.debug = jest.fn();
   }
 
-<<<<<<< HEAD:server/tests/setup/jest.setup.ts
-  console.error = (...args: any[]) => {
-=======
   // Allow console.error for test debugging if needed, but fail test on it?
   // The original code threw an error, which is strict but good.
-  console.error = (...args) => {
+  console.error = (...args: any[]) => {
     // Check if it's the "Unhandled Rejection" we caught below, don't double throw
     if (args[0] && typeof args[0] === 'string' && args[0].startsWith('Unhandled Rejection')) {
       originalConsoleError(...args);
       return;
     }
 
->>>>>>> main:server/tests/setup/jest.setup.js
     originalConsoleError(...args);
     // throw new Error(
     //   '[console.error] used in server tests — replace with assertions or throw',

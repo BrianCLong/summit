@@ -137,13 +137,12 @@ export class CrossShardQueryExecutor {
         const aVal = a[sortBy];
         const bVal = b[sortBy];
 
-<<<<<<< HEAD
-        if (aVal < bVal) return order === 'asc' ? -1 : 1;
-        if (aVal > bVal) return order === 'asc' ? 1 : -1;
-=======
-        if (aVal < bVal) {return order === 'asc' ? -1 : 1;}
-        if (aVal > bVal) {return order === 'asc' ? 1 : -1;}
->>>>>>> main
+        if (aVal < bVal) {
+          return order === 'asc' ? -1 : 1;
+        }
+        if (aVal > bVal) {
+          return order === 'asc' ? 1 : -1;
+        }
         return 0;
       });
 

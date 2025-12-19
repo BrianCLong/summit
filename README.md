@@ -1,13 +1,9 @@
 [![Copilot Playbook](https://img.shields.io/badge/Copilot-Playbook-blue)](docs/Copilot-Playbook.md)
-<<<<<<< HEAD
+[![Developer Radar](https://img.shields.io/badge/Developer%20Radar-Active-blue)](docs/dev/radar-dashboard.md)
 [![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![CI (Lint & Unit)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-lint-and-unit.yml)
 [![CI (Golden Path)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci-golden-path.yml)
-=======
-[![Developer Radar](https://img.shields.io/badge/Developer%20Radar-Active-blue)](docs/dev/radar-dashboard.md)
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/BrianCLong/summit?utm_source=oss&utm_medium=github&utm_campaign=BrianCLong%2Fsummit&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 [![CI](https://github.com/BrianCLong/summit/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/ci.yml)
->>>>>>> main
 [![Security](https://github.com/BrianCLong/summit/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/security.yml)
 [![Release](https://github.com/BrianCLong/summit/actions/workflows/release.yml/badge.svg?branch=main)](https://github.com/BrianCLong/summit/actions/workflows/release.yml)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
@@ -125,25 +121,19 @@ pnpm smoke            # same as make smoke (Node-based E2E)
 
 ## 🚥 CI & Merge Policy
 
-<<<<<<< HEAD
-- **ci-lint-and-unit.yml** – cached `pnpm install`, lint, typecheck, and the workspace test suite to give quick feedback on code quality for every PR/main push.
-- **ci-golden-path.yml** – spins up the full stack via `make bootstrap && make up`, waits for health probes, runs `make smoke`, uploads the `summit-validation-20.x` artifacts, and always tears the stack down.
-- **security.yml** – CodeQL (JS/Python), dependency-review, and gitleaks with nightly/PR coverage.
-- **release.yml** – packages the deployable bundle from `main` pushes (and selected file changes) once the required checks pass.
-
-Recommended branch-protection statuses for `main` (and release branches): `CI (Lint & Unit)`, `CI Golden Path`, and `Security`.
-=======
 **Strict Branch Protection**: `main` is protected. Direct pushes are blocked.
 
 ### Required Checks
 
-The `ci.yml` workflow runs on every PR + main with the following checks:
-
-1. **CI (Lint & Unit)**: Fast lane. Runs lint, typecheck, and unit tests.
-2. **CI (Golden Path)**: Integration lane. Boots the full stack with `make bootstrap`, `make up` (headless), and `make smoke`.
-3. **Security**: CodeQL analysis, dependency review, gitleaks, SBOM + Trivy scans.
+- **ci-lint-and-unit.yml**: Cached `pnpm install`, lint, typecheck, and the workspace test suite to give quick feedback on code quality for every PR/main push.
+- **ci-golden-path.yml**: Spins up the full stack via `make bootstrap && make up`, waits for health probes, runs `make smoke`, uploads the `summit-validation-20.x` artifacts, and always tears the stack down.
+- **ci.yml**: Integration lane. Boots the full stack with `make bootstrap`, `make up` (headless), and `make smoke`.
+- **security.yml**: CodeQL (JS/Python), dependency-review, gitleaks, SBOM + Trivy scans with nightly/PR coverage.
+- **release.yml**: Packages the deployable bundle from `main` pushes (and selected file changes) once the required checks pass.
 
 All workflows use cached `pnpm install` and Docker layer caching. These are required checks for merge.
+
+Recommended branch-protection statuses for `main` (and release branches): `CI (Lint & Unit)`, `CI Golden Path`, `CI`, and `Security`.
 
 ### Merge Train
 
@@ -154,7 +144,6 @@ We use a "Safe Merge" label strategy to manage the PR backlog:
 * **Conflict/Failure**: If CI fails or conflicts arise, the label is removed and you are notified.
 
 **Note**: Do not use "Squash and merge" manually if the train is active. Let the bot handle it to ensure linear history and green builds.
->>>>>>> main
 
 ---
 
@@ -1125,17 +1114,14 @@ Check out our [Examples Directory](examples/) for plugins and custom pipelines.
 
 ### Tutorials & Videos
 
-<<<<<<< HEAD
-- [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
-- [Issue Tracker](https://github.com/BrianCLong/summit/issues)
-- [Release Notes](CHANGELOG.md)
-- [Code of Conduct](CODE_OF_CONDUCT.md)
-=======
 - [Neo4j GraphAcademy: Neo4j Fundamentals](https://graphacademy.neo4j.com/courses/neo4j-fundamentals/)
 - [Apollo Odyssey: Lift-off Series](https://odyssey.apollographql.com/)
 - [Grafana & Prometheus fundamentals (YouTube)](https://www.youtube.com/watch?v=Nfap7bEVQ-0)
 - [Kubernetes HPA Walkthrough](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/)
->>>>>>> main
+- [GitHub Discussions](https://github.com/BrianCLong/summit/discussions)
+- [Issue Tracker](https://github.com/BrianCLong/summit/issues)
+- [Release Notes](CHANGELOG.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ### Learning Resources
 

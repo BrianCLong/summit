@@ -73,11 +73,7 @@ export function registerPresenceHandlers(
           const rooms = roomManager.getSocketRooms(socket.data.connectionId);
 
           for (const room of rooms) {
-<<<<<<< HEAD
-            await presenceManager.updateStatus(room, socket.data.user.userId, status, metadata);
-=======
             await presenceManager.updateStatus(room, socket.user.userId, status, validMetadata);
->>>>>>> main
 
             // Broadcast to room
             const presence = await presenceManager.getRoomPresence(room);

@@ -187,7 +187,6 @@ const transientNodeErrors = new Set([
   'EPIPE',
 ]);
 
-<<<<<<< HEAD
 function parseConnectionConfig(): PoolConfig {
   if (process.env.DATABASE_URL) {
     return { connectionString: process.env.DATABASE_URL };
@@ -231,8 +230,6 @@ function parseReadReplicaUrls(): string[] {
   return [...new Set([...explicit, ...legacy])];
 }
 
-=======
->>>>>>> main
 function createPool(
   name: string,
   type: 'write' | 'read',

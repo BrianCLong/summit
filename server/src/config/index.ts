@@ -36,11 +36,7 @@ const rawConfig = {
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
   },
   bcrypt: {
-<<<<<<< HEAD
     rounds: parseInt(process.env.BCRYPT_ROUNDS || '14'),
-=======
-    rounds: process.env.BCRYPT_ROUNDS,
->>>>>>> main
   },
   rateLimit: {
     windowMs: process.env.RATE_LIMIT_WINDOW_MS,
@@ -55,8 +51,19 @@ const rawConfig = {
   },
 };
 
-<<<<<<< HEAD
-// Validation for production readiness
+let config: Config;
+
+try {
+  config = ConfigSchema.parse(rawConfig);
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    console.error('❌ Invalid Configuration:', error.format());
+    process.exit(1);
+  }
+  throw error;
+}
+
+// Production Readiness Checks
 if (config.requireRealDbs || config.env === 'production') {
   const requiredEnvVars = [
     'NEO4J_URI',
@@ -74,51 +81,26 @@ if (config.requireRealDbs || config.env === 'production') {
     console.error(
       `❌ Production/RealDBs mode missing env vars: ${missing.join(', ')}`,
     );
-=======
-let config: Config;
-
-try {
-  config = ConfigSchema.parse(rawConfig);
-} catch (error) {
-  if (error instanceof z.ZodError) {
-    console.error('❌ Invalid Configuration:', error.format());
->>>>>>> main
     process.exit(1);
   }
-  throw error;
-}
 
-<<<<<<< HEAD
   // Ensure not using default dev passwords in production
   const devPasswords = [
     'devpassword',
     'dev_jwt_secret_12345',
     'dev_refresh_secret_67890',
   ];
-  if (
-    devPasswords.includes(config.neo4j.password) ||
-    devPasswords.includes(config.postgres.password) ||
-    devPasswords.includes(config.jwt.secret) ||
-    devPasswords.includes(config.redis.password) ||
-    devPasswords.includes(config.jwt.refreshSecret)
-  ) {
-    console.error(
-      '❌ Production/RealDBs mode but using default dev passwords. Set proper secrets.',
-    );
-=======
-// Production Readiness Checks
-if (config.requireRealDbs) {
-  const devPasswords = ['devpassword', 'dev_jwt_secret_12345'];
   const violations: string[] = [];
 
   if (devPasswords.includes(config.neo4j.password)) violations.push('Default Neo4j password in use');
   if (devPasswords.includes(config.postgres.password)) violations.push('Default Postgres password in use');
   if (devPasswords.includes(config.jwt.secret)) violations.push('Default JWT secret in use');
+  if (devPasswords.includes(config.redis.password)) violations.push('Default Redis password in use');
+  if (devPasswords.includes(config.jwt.refreshSecret)) violations.push('Default JWT refresh secret in use');
 
   if (violations.length > 0) {
-    console.error('❌ REQUIRE_REAL_DBS=true but security violations found:');
+    console.error('❌ Production/RealDBs mode but security violations found:');
     violations.forEach(v => console.error(`   - ${v}`));
->>>>>>> main
     process.exit(1);
   }
 }

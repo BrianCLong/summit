@@ -60,45 +60,8 @@ const ledgerIntegrityStatus = new Gauge({
   labelNames: ['tenant_id'],
 });
 
-<<<<<<< HEAD
 // Export the V2 type as the primary ProvenanceEntry
 export type ProvenanceEntry = ProvenanceEntryV2;
-=======
-export interface ProvenanceEntry {
-  id: string;
-  tenantId: string;
-  sequenceNumber: bigint;
-  previousHash: string;
-  currentHash: string;
-  timestamp: Date;
-  actionType: string;
-  resourceType: string;
-  resourceId: string;
-  actorId: string;
-  actorType: 'user' | 'system' | 'api' | 'job';
-  payload: Record<string, any>;
-  metadata: {
-    ipAddress?: string;
-    userAgent?: string;
-    sessionId?: string;
-    requestId?: string;
-    purpose?: string;
-    classification?: string[];
-    privacy?: {
-      epsilon?: number;
-      delta?: number;
-      mechanism?: string;
-      noiseParams?: Record<string, any>;
-    };
-  };
-  signature?: string;
-  attestation?: {
-    policy: string;
-    evidence: Record<string, any>;
-    timestamp: Date;
-  };
-}
->>>>>>> main
 
 export interface LedgerRoot {
   id: string;

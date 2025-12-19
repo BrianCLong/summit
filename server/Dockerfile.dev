@@ -27,10 +27,7 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 # Copy package files and install as root
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
-<<<<<<< HEAD
 
-=======
->>>>>>> main
 # Copy source code and set permissions
 COPY . .
 RUN mkdir -p uploads logs && chown -R appuser:appgroup /app

@@ -281,11 +281,9 @@ export class Aggregators {
 
   static avg<T>(selector: (value: T) => number): AggregateFunction<T, number> {
     return (events) => {
-<<<<<<< HEAD
-      if (events.length === 0) return 0;
-=======
-      if (events.length === 0) {return 0;}
->>>>>>> main
+      if (events.length === 0) {
+        return 0;
+      }
       const sum = events.reduce((s, event) => s + selector(event.value), 0);
       return sum / events.length;
     };
@@ -293,22 +291,18 @@ export class Aggregators {
 
   static min<T>(selector: (value: T) => number): AggregateFunction<T, number> {
     return (events) => {
-<<<<<<< HEAD
-      if (events.length === 0) return 0;
-=======
-      if (events.length === 0) {return 0;}
->>>>>>> main
+      if (events.length === 0) {
+        return 0;
+      }
       return Math.min(...events.map(e => selector(e.value)));
     };
   }
 
   static max<T>(selector: (value: T) => number): AggregateFunction<T, number> {
     return (events) => {
-<<<<<<< HEAD
-      if (events.length === 0) return 0;
-=======
-      if (events.length === 0) {return 0;}
->>>>>>> main
+      if (events.length === 0) {
+        return 0;
+      }
       return Math.max(...events.map(e => selector(e.value)));
     };
   }

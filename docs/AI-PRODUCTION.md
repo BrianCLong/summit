@@ -1,9 +1,8 @@
-<<<<<<< HEAD
-# AI in Production
+# AI Production Guide
 
-This guide covers strategies for deploying Summit's AI/ML capabilities in a production environment.
+This playbook covers model serving, versioning, GPU scheduling, and monitoring patterns to keep Summit's AI features production-ready.
 
-## Model Serving
+## Model Serving Strategy
 
 Summit supports multiple strategies for serving AI models:
 
@@ -18,48 +17,17 @@ Models run directly within the Worker containers. Best for development and low-v
 
 Offload inference to a dedicated service (e.g., FastAPI with TorchServe or Triton).
 
+- **FastAPI inference gateway**: Wrap fine-tuned models behind FastAPI with pydantic validation and `/health` probes matching `make smoke` expectations.
+- **Deployment target**: Containerize with `Dockerfile.ai` using `uvicorn --workers 4 --proxy-headers`. Publish to GHCR and deploy via Helm alongside the core API.
+- **Batch vs. realtime**: Use RabbitMQ/Redis queues for batch extraction jobs; route realtime GraphQL requests to the FastAPI gateway via gRPC or HTTP/2.
+- **Schema contracts**: Define request/response contracts in `schema/ai/*.json` and generate clients with `openapi-generator`.
+
 **Configuration:**
 Update `AI_SERVICE_URL` in `.env` to point to your inference service.
 
 ```bash
 AI_SERVICE_URL=http://summit-inference:8000
 ```
-
-## GPU Orchestration
-
-For high-throughput, use NVIDIA GPUs with Docker/Kubernetes.
-
-### Docker Compose
-
-Ensure `nvidia-container-toolkit` is installed on the host.
-
-```yaml
-# docker-compose.gpu.yml
-services:
-  ai-worker:
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-```
-
-### Kubernetes
-
-Use the NVIDIA Device Plugin for Kubernetes to schedule pods on GPU nodes.
-=======
-# AI Production Guide
-
-This playbook covers model serving, versioning, GPU scheduling, and monitoring patterns to keep Summit's AI features production-ready.
-
-## Model Serving Strategy
-
-- **FastAPI inference gateway**: Wrap fine-tuned models behind FastAPI with pydantic validation and `/health` probes matching `make smoke` expectations.
-- **Deployment target**: Containerize with `Dockerfile.ai` using `uvicorn --workers 4 --proxy-headers`. Publish to GHCR and deploy via Helm alongside the core API.
-- **Batch vs. realtime**: Use RabbitMQ/Redis queues for batch extraction jobs; route realtime GraphQL requests to the FastAPI gateway via gRPC or HTTP/2.
-- **Schema contracts**: Define request/response contracts in `schema/ai/*.json` and generate clients with `openapi-generator`.
 
 ### Sample FastAPI server
 
@@ -88,24 +56,60 @@ Expose Prometheus metrics using `prometheus_fastapi_instrumentator` and secure w
 
 ## Versioning with MLflow
 
+Use MLflow or DVC to manage model versions.
+
 - Track experiments with `mlflow server --backend-store-uri postgresql://... --default-artifact-root s3://mlflow-artifacts`.
 - Log model metrics (precision/recall, latency) per dataset slice and promote artifacts to the `Production` stage.
 - Store the MLflow run ID in GraphQL metadata so investigations reference the model that produced insights.
+- Store model artifacts in S3.
+- Summit's `ModelRegistry` service can be configured to fetch specific versions at startup.
+
+```bash
+MODEL_VERSION=v2.1.0
+MODEL_BUCKET=s3://summit-models-prod
+```
 
 ## GPU Orchestration
 
+For high-throughput, use NVIDIA GPUs with Docker/Kubernetes.
+
 - Build GPU images with `Dockerfile.ai` and `--gpus all` using NVIDIA Container Toolkit.
-- Define `runtimeClassName: nvidia` in K8s deployments and request GPU resources:
->>>>>>> main
+- Define `runtimeClassName: nvidia` in K8s deployments and request GPU resources.
+
+### Docker Compose
+
+Ensure `nvidia-container-toolkit` is installed on the host.
+
+```yaml
+# docker-compose.gpu.yml
+services:
+  ai-worker:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+```
+
+### Kubernetes
+
+Use the NVIDIA Device Plugin for Kubernetes to schedule pods on GPU nodes.
 
 ```yaml
 resources:
   limits:
     nvidia.com/gpu: 1
-<<<<<<< HEAD
+    memory: 8Gi
+  requests:
+    cpu: 2000m
+    memory: 6Gi
 ```
 
-## Monitoring AI Workloads
+Node pools: separate GPU node groups (taints `accelerator=gpu:NoSchedule`) with tolerations on AI workloads.
+
+## Monitoring & Alerting
 
 ### Metrics
 
@@ -114,39 +118,22 @@ We export specific AI metrics via Prometheus:
 - `ai_inference_latency_seconds`: Histogram of inference time.
 - `ai_jobs_queued`: Gauge of jobs waiting for processing.
 - `ai_gpu_utilization`: GPU usage (requires `dcgm-exporter`).
+- Export inference latency histograms, queue depth, and GPU utilization via DCGM Exporter.
+
+### Tracing
+
+Propagate `traceparent` from GraphQL resolvers into FastAPI to visualize end-to-end spans in Jaeger/Tempo.
+
+### Logging
+
+Use structured JSON with request IDs and model version tags; ship to Loki/ELK.
 
 ### Alerting
 
 Set up alerts for:
-- High Inference Latency (> 2s p95)
+- High Inference Latency (> 2s p95 or > 400ms for 5 minutes)
 - Queue Saturation (> 100 jobs)
 - Model Error Rate (> 1%)
-
-## Versioning Models
-
-Use MLflow or DVC to manage model versions.
-
-- Store model artifacts in S3.
-- Summit's `ModelRegistry` service can be configured to fetch specific versions at startup.
-
-```bash
-MODEL_VERSION=v2.1.0
-MODEL_BUCKET=s3://summit-models-prod
-```
-=======
-    memory: 8Gi
-  requests:
-    cpu: 2000m
-    memory: 6Gi
-```
-
-- Node pools: separate GPU node groups (taints `accelerator=gpu:NoSchedule`) with tolerations on AI workloads.
-
-## Monitoring & Alerting
-
-- **Metrics**: Export inference latency histograms, queue depth, and GPU utilization via DCGM Exporter. Scrape with Prometheus and alert when p95 latency > 400ms for 5 minutes.
-- **Tracing**: Propagate `traceparent` from GraphQL resolvers into FastAPI to visualize end-to-end spans in Jaeger/Tempo.
-- **Logging**: Use structured JSON with request IDs and model version tags; ship to Loki/ELK.
 
 ## Production Deploy Checklist
 
@@ -162,4 +149,3 @@ MODEL_BUCKET=s3://summit-models-prod
 - Throttle GraphQL AI entrypoints using feature flags stored in Redis.
 - Drain GPU nodes with `kubectl cordon` and `kubectl drain --ignore-daemonsets` before driver upgrades.
 - Keep a fallback rules-based extractor deployed alongside ML models for graceful degradation.
->>>>>>> main

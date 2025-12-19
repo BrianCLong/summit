@@ -34,12 +34,6 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@v2
-        with:
-<<<<<<< HEAD
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-=======
->>>>>>> main
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -91,12 +85,6 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@v2
-        with:
-<<<<<<< HEAD
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-=======
->>>>>>> main
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -134,11 +122,6 @@ jobs:
         run: corepack enable
 
       - uses: pnpm/action-setup@v2
-        with:
-<<<<<<< HEAD
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-=======
 
       - name: Get pnpm store directory
         id: pnpm-cache
@@ -152,7 +135,6 @@ jobs:
           key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-store-
->>>>>>> main
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile

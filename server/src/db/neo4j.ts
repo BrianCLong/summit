@@ -1,27 +1,16 @@
 // @ts-nocheck
-import { telemetry } from '../lib/telemetry/comprehensive-telemetry';
-import neo4j, { Driver, Session } from 'neo4j-driver';
 import { telemetry } from '../lib/telemetry/comprehensive-telemetry.js';
 import { graphOptimizer } from '../graph/optimizer/GraphOptimizer.js';
-import neo4j from 'neo4j-driver';
+import neo4j, { Driver, Session } from 'neo4j-driver';
 import dotenv from 'dotenv';
 import pino from 'pino';
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 import { QueryReplayService } from '../services/query-replay/QueryReplayService';
-=======
 import { CircuitBreaker } from '../lib/circuitBreaker.js';
 import {
   dbPoolSize,
   dbPoolIdle,
   dbPoolWaiting
 } from '../metrics/dbMetrics.js';
->>>>>>> main
->>>>>>> main
->>>>>>> main
 import {
   neo4jConnectivityUp,
   neo4jQueryErrorsTotal,
@@ -54,35 +43,18 @@ const REQUIRE_REAL_DBS = process.env.REQUIRE_REAL_DBS === 'true';
 const CONNECTIVITY_CHECK_INTERVAL_MS = Number(
   process.env.NEO4J_HEALTH_INTERVAL_MS || 15000,
 );
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
 const SLOW_QUERY_THRESHOLD_MS = Number(process.env.NEO4J_SLOW_QUERY_THRESHOLD_MS || 1000);
-=======
-<<<<<<< HEAD
-=======
-const MAX_CONNECTION_POOL_SIZE = Number(process.env.NEO4J_MAX_POOL_SIZE || 100);
-const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
 
 // Connection Pool Settings
-const POOL_MAX_SIZE = Number(process.env.NEO4J_POOL_MAX_SIZE || 100);
-const POOL_CONNECTION_TIMEOUT = Number(process.env.NEO4J_POOL_CONNECTION_TIMEOUT || 30000);
-const POOL_ACQUISITION_TIMEOUT = Number(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT || 30000);
->>>>>>> main
-
 const MAX_CONNECTION_POOL_SIZE = parseInt(process.env.NEO4J_POOL_MAX_SIZE || '50', 10);
-const ACQUISITION_TIMEOUT_MS = parseInt(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT_MS || '5000', 10);
+const CONNECTION_TIMEOUT_MS = Number(process.env.NEO4J_CONNECTION_TIMEOUT_MS || 30000);
+const POOL_ACQUISITION_TIMEOUT = parseInt(process.env.NEO4J_POOL_ACQUISITION_TIMEOUT_MS || '5000', 10);
 
 const circuitBreaker = new CircuitBreaker({
   name: 'neo4j',
   failureThreshold: 5,
   cooldownMs: 30000,
 });
->>>>>>> main
->>>>>>> main
->>>>>>> main
 
 let realDriver: Neo4jDriver | null = null;
 let initializationPromise: Promise<void> | null = null;
@@ -523,41 +495,11 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
       };
   }
 
-  session.run = (
+  session.run = async (
     cypher: string,
     params?: any,
     labels: { operation?: string; label?: string } = {},
   ) => {
-<<<<<<< HEAD
-    telemetry.subsystems.database.queries.add(1);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
-    const startTime = Date.now();
-    try {
-      return await originalRun(cypher, params);
-    } catch (error) {
-      telemetry.subsystems.database.errors.add(1);
-      throw error;
-    } finally {
-      telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-    }
-=======
-=======
     if (useCircuitBreaker && !circuitBreaker.canExecute()) {
       const err = new Error('Neo4j circuit breaker is open');
       logger.warn('Neo4j circuit breaker blocked query execution');
@@ -565,36 +507,6 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
     }
 
     telemetry.subsystems.database.queries.add(1);
-<<<<<<< HEAD
->>>>>>> main
-    const startTime = Date.now();
-    try {
-      const result = await originalRun(cypher, params);
-      if (useCircuitBreaker) {
-        circuitBreaker.recordSuccess();
-      }
-      return result;
-    } catch (error) {
-      telemetry.subsystems.database.errors.add(1);
-      if (useCircuitBreaker) {
-        circuitBreaker.recordFailure(error as Error);
-      }
-      throw error;
-    } finally {
-      const durationMs = Date.now() - startTime;
-      telemetry.subsystems.database.latency.record(durationMs / 1000);
-      if (durationMs > SLOW_QUERY_THRESHOLD_MS) {
-        // Asynchronously record slow query
-        // labels is defined in the arguments of the wrapper function
-        const tenantId = params?.tenantId || params?.tenant_id || undefined;
-        QueryReplayService.getInstance().recordSlowQuery(cypher, params, durationMs, tenantId, labels).catch(err => {
-            logger.error(err, 'Failed to record slow Neo4j query');
-        });
-      }
->>>>>>> main
->>>>>>> main
-    }
-=======
 
     // Extract tenantId from params if available
     const tenantId = params?.tenantId || params?.tenant_id || 'global';
@@ -603,7 +515,23 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
     // Bypass optimization for EXPLAIN queries to prevent infinite recursion
     // Also bypass if specific flag set in params to avoid buffering in GraphStreamer
     if (lowerQuery.startsWith('explain') || params?._skipCache) {
-        return originalRun(cypher, params);
+        const startTime = Date.now();
+        try {
+          const result = await originalRun(cypher, params);
+          if (useCircuitBreaker) {
+            circuitBreaker.recordSuccess();
+          }
+          return result;
+        } catch (error) {
+          telemetry.subsystems.database.errors.add(1);
+          if (useCircuitBreaker) {
+            circuitBreaker.recordFailure(error as Error);
+          }
+          throw error;
+        } finally {
+          const durationMs = Date.now() - startTime;
+          telemetry.subsystems.database.latency.record(durationMs / 1000);
+        }
     }
 
     const isWrite = lowerQuery.includes('create') ||
@@ -617,7 +545,29 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
          // Fire-and-forget invalidation for raw queries
          // Note: For strict consistency, use executeWrite/beginTransaction
          graphOptimizer.invalidate(tenantId, ['*']).catch(err => logger.warn('Cache invalidation error', err));
-         return originalRun(cypher, params);
+
+         const startTime = Date.now();
+         try {
+           const result = await originalRun(cypher, params);
+           if (useCircuitBreaker) {
+             circuitBreaker.recordSuccess();
+           }
+           return result;
+         } catch (error) {
+           telemetry.subsystems.database.errors.add(1);
+           if (useCircuitBreaker) {
+             circuitBreaker.recordFailure(error as Error);
+           }
+           throw error;
+         } finally {
+           const durationMs = Date.now() - startTime;
+           telemetry.subsystems.database.latency.record(durationMs / 1000);
+           if (durationMs > SLOW_QUERY_THRESHOLD_MS) {
+             QueryReplayService.getInstance().recordSlowQuery(cypher, params, durationMs, tenantId, labels).catch(err => {
+                 logger.error(err, 'Failed to record slow Neo4j query');
+             });
+           }
+         }
     } else if (lowerQuery.includes('match') || lowerQuery.includes('return')) {
         // Return a Promise that mimics a Result (optimistic optimization)
         // We use an async IIFE to handle the logic but return the promise immediately
@@ -632,6 +582,10 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
                 };
 
                 const result = await graphOptimizer.executeCached(cypher, params, context, (q, p) => originalRun(q, p));
+
+                if (useCircuitBreaker) {
+                  circuitBreaker.recordSuccess();
+                }
 
                 // Shim the records to behave like Neo4j Records (implementing .get, .toObject)
                 // This ensures compatibility with existing driver code
@@ -654,9 +608,19 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
                 return result;
             } catch (error) {
                 logger.warn('Query optimization failed, falling back to direct execution', error);
+                telemetry.subsystems.database.errors.add(1);
+                if (useCircuitBreaker) {
+                  circuitBreaker.recordFailure(error as Error);
+                }
                 return await originalRun(cypher, params);
             } finally {
-                telemetry.subsystems.database.latency.record((Date.now() - startTime) / 1000);
+                const durationMs = Date.now() - startTime;
+                telemetry.subsystems.database.latency.record(durationMs / 1000);
+                if (durationMs > SLOW_QUERY_THRESHOLD_MS) {
+                  QueryReplayService.getInstance().recordSlowQuery(cypher, params, durationMs, tenantId, labels).catch(err => {
+                      logger.error(err, 'Failed to record slow Neo4j query');
+                  });
+                }
             }
         })();
 
@@ -687,14 +651,23 @@ function instrumentSession(session: any, useCircuitBreaker = false) {
     }
 
     // Default Fallback
+    const startTime = Date.now();
     try {
-      GraphIndexAdvisorService.getInstance().recordQuery(cypher);
-    } catch (err) {
-      logger.warn('Error in GraphIndexAdvisorService.recordQuery', err);
+      const result = await originalRun(cypher, params);
+      if (useCircuitBreaker) {
+        circuitBreaker.recordSuccess();
+      }
+      return result;
+    } catch (error) {
+      telemetry.subsystems.database.errors.add(1);
+      if (useCircuitBreaker) {
+        circuitBreaker.recordFailure(error as Error);
+      }
+      throw error;
+    } finally {
+      const durationMs = Date.now() - startTime;
+      telemetry.subsystems.database.latency.record(durationMs / 1000);
     }
-    return originalRun(cypher, params);
->>>>>>> main
->>>>>>> main
   };
   return session;
 }

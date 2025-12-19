@@ -197,11 +197,9 @@ export class CacheInvalidator {
   }
 
   private async loadDependencyGraph(): Promise<void> {
-<<<<<<< HEAD
-    if (!this.redis) return;
-=======
-    if (!this.redis) {return;}
->>>>>>> main
+    if (!this.redis) {
+      return;
+    }
 
     try {
       // Load dependency graph from Redis

@@ -1,5 +1,5 @@
 {
-  "name": "@intelgraph/entity-resolution",
+  "name": "@intelgraph/entity-resolution-service",
   "version": "1.0.0",
   "description": "Entity Resolution service with deterministic + probabilistic matching, explainable scorecards, and reversible merges",
   "main": "dist/index.js",

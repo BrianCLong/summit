@@ -42,12 +42,9 @@
     "framer-motion": "^12.23.24",
     "graphql": "^16.12.0",
     "graphql-ws": "^6.0.6",
-<<<<<<< HEAD
     "immer": "^10.2.0",
-    "leaflet": "^1.9.4",
-=======
     "jquery": "^3.7.1",
->>>>>>> main
+    "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
     "lucide-react": "^0.554.0",
     "react": "^19.2.1",
@@ -56,12 +53,8 @@
     "react-hotkeys-hook": "^5.2.1",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.4",
-<<<<<<< HEAD
     "recharts": "^3.5.1",
-=======
-    "recharts": "^3.3.0",
     "rxjs": "^7.8.2",
->>>>>>> main
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.4.0",
     "tailwindcss-animate": "^1.0.7",
@@ -79,66 +72,20 @@
     "@storybook/react-vite": "^10.0.6",
     "@storybook/test": "^8.6.14",
     "@storybook/testing-library": "^0.2.2",
-<<<<<<< HEAD
-    "@types/leaflet": "^1.9.8",
-=======
-<<<<<<< HEAD
-    "@types/jest": "^30.0.0",
-    "@types/node": "^24.10.1",
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
-=======
-<<<<<<< HEAD
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
-    "@types/react": "^19.2.5",
-=======
     "@tailwindcss/postcss": "^4.1.17",
     "@testing-library/dom": "^10.4.1",
-    "@testing-library/react": "^16.1.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
+    "@types/leaflet": "^1.9.8",
+    "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
->>>>>>> main
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.46.4",
     "@typescript-eslint/parser": "^8.46.4",
     "@vitejs/plugin-react": "^5.0.4",
-<<<<<<< HEAD
-    "@vitest/coverage-v8": "^4.0.10",
-=======
     "@vitest/coverage-v8": "^4.0.15",
->>>>>>> main
     "autoprefixer": "^10.4.16",
     "axe-core": "^4.11.0",
     "class-variance-authority": "^0.7.0",
@@ -151,77 +98,13 @@
     "msw-storybook-addon": "^2.0.6",
     "postcss": "^8.4.31",
     "prettier": "^3.6.2",
-<<<<<<< HEAD
     "rollup-plugin-visualizer": "^6.0.5",
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    "rollup-plugin-visualizer": "^6.0.5",
-=======
-<<<<<<< HEAD
-=======
-    "rollup-plugin-visualizer": "^6.0.5",
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
     "storybook": "^10.0.6",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.9.3",
-<<<<<<< HEAD
     "vite": "^7.2.6",
-=======
-    "vite": "^7.1.11",
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
->>>>>>> main
-    "vitest": "^4.0.3"
-=======
     "vitest": "^4.0.3",
     "vitest-axe": "^0.1.0"
->>>>>>> main
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

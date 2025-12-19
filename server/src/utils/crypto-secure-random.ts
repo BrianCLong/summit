@@ -21,12 +21,7 @@ import crypto from 'crypto';
  */
 export function randomString(
   length: number = 32,
-<<<<<<< HEAD
-  // eslint-disable-next-line no-undef
   encoding: BufferEncoding = 'hex'
-=======
-  encoding: NodeJS.BufferEncoding = 'hex'
->>>>>>> main
 ): string {
   const bytes = Math.ceil(length / 2);
   return crypto.randomBytes(bytes).toString(encoding).slice(0, length);

@@ -9,15 +9,8 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "types": ["node", "jest"],
-<<<<<<< HEAD
-    "resolveJsonModule": true
-<<<<<<< HEAD
-=======
-=======
     "resolveJsonModule": true,
     "downlevelIteration": true
->>>>>>> main
->>>>>>> main
   },
   "include": ["src", "examples", "scripts", "__tests__"],
   "exclude": ["dist", "deploy", "docs", "monitoring", "dashboards"]
