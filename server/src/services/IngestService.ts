@@ -9,6 +9,7 @@ import { Driver, Session } from 'neo4j-driver';
 import { createHash } from 'crypto';
 import { randomUUID as uuidv4 } from 'crypto';
 import logger from '../config/logger.js';
+import { meteringEmitter } from '../metering/emitter.js';
 
 const ingestLogger = logger.child({ name: 'IngestService' });
 
@@ -210,6 +211,27 @@ export class IngestService {
         took,
         throughput: `${throughput} entities/sec`,
       });
+
+      try {
+        await meteringEmitter.emitIngestUnits({
+          tenantId: input.tenantId,
+          units:
+            entitiesCreated +
+            entitiesUpdated +
+            relationshipsCreated +
+            relationshipsUpdated,
+          source: 'ingest-service',
+          correlationId: provenanceId,
+          idempotencyKey: provenanceId,
+          metadata: {
+            sourceType: input.sourceType,
+            sourceId: input.sourceId,
+            userId: input.userId,
+          },
+        });
+      } catch (err) {
+        ingestLogger.warn({ err, provenanceId }, 'Failed to emit ingest metering');
+      }
 
       return {
         success: errors.length === 0,
