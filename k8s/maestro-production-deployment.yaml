@@ -593,7 +593,7 @@ spec:
           annotations:
             summary: 'High error rate in Maestro orchestration'
             description: 'Maestro orchestration error rate is {{ $value }} errors per second'
-            runbook_url: 'https://runbooks.intelgraph.ai/maestro/high-error-rate'
+            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
         - alert: MaestroHighLatency
           expr: histogram_quantile(0.95, rate(maestro_orchestration_duration_seconds_bucket[5m])) > 30
           for: 5m
@@ -603,7 +603,7 @@ spec:
           annotations:
             summary: 'High latency in Maestro orchestration'
             description: '95th percentile latency is {{ $value }}s'
-            runbook_url: 'https://runbooks.intelgraph.ai/maestro/high-latency'
+            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
         - alert: MaestroPodDown
           expr: up{job="maestro-orchestrator"} == 0
           for: 1m
@@ -613,7 +613,7 @@ spec:
           annotations:
             summary: 'Maestro orchestrator pod is down'
             description: 'One or more Maestro orchestrator pods are not responding'
-            runbook_url: 'https://runbooks.intelgraph.ai/maestro/pod-down'
+            runbook_url: 'https://github.com/BrianCLong/summit/blob/main/RUNBOOKS/maestro-rollback.md'
         - alert: MaestroMemoryUsageHigh
           expr: (container_memory_usage_bytes{pod=~"maestro-orchestrator-.*"} / container_spec_memory_limit_bytes) > 0.85
           for: 5m
