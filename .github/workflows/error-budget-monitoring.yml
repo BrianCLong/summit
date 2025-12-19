@@ -17,7 +17,7 @@ env:
   GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
   SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
   SLO_ENVIRONMENT: production
-  ROLLBACK_EVENT: slo-breach
+  ROLLBACK_EVENT: error-budget-alert
 
 jobs:
   error-budget-check:

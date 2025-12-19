@@ -9,6 +9,15 @@ on:
       - Manual Deploy
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to verify (dev/staging/production)'
+        required: true
+        default: dev
+      drill_id:
+        description: 'Optional drill identifier for evidence storage'
+        required: false
 
 permissions:
   contents: read
@@ -16,7 +25,9 @@ permissions:
 
 jobs:
   smoke-and-load:
-    if: github.event.workflow_run.conclusion == 'success'
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -32,15 +43,26 @@ jobs:
 
       - name: Resolve deployment target
         id: target
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name || '' }}
+          WORKFLOW_INPUT_ENV: ${{ github.event.workflow_run.inputs.environment || '' }}
+          DISPATCH_ENV: ${{ inputs.environment || '' }}
         run: |
-          workflow="${{ github.event.workflow_run.name }}"
           target="dev"
-          if [ "$workflow" = "Deploy to Production" ]; then
-            target="prod"
-          elif [ "$workflow" = "Deploy to Staging" ]; then
-            target="staging"
-          elif [ "$workflow" = "Manual Deploy" ] && [ -n "${{ github.event.workflow_run.inputs.environment }}" ]; then
-            target="${{ github.event.workflow_run.inputs.environment }}"
+          if [ "$EVENT_NAME" = "workflow_run" ]; then
+            workflow="$WORKFLOW_NAME"
+            if [ "$workflow" = "Deploy to Production" ]; then
+              target="prod"
+            elif [ "$workflow" = "Deploy to Staging" ]; then
+              target="staging"
+            elif [ "$workflow" = "Manual Deploy" ] && [ -n "$WORKFLOW_INPUT_ENV" ]; then
+              target="$WORKFLOW_INPUT_ENV"
+            fi
+          else
+            if [ -n "$DISPATCH_ENV" ]; then
+              target="$DISPATCH_ENV"
+            fi
           fi
           echo "target=$target" >> $GITHUB_OUTPUT
 
@@ -96,6 +118,37 @@ jobs:
           echo "smoke=$smoke" >> $GITHUB_OUTPUT
           echo "load=$load" >> $GITHUB_OUTPUT
           echo "status=$status" >> $GITHUB_OUTPUT
+
+      - name: Persist verification evidence
+        if: always()
+        env:
+          DRILL_ID: ${{ inputs.drill_id || '' }}
+          TARGET_ENV: ${{ steps.target.outputs.target }}
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name || '' }}
+        run: |
+          run_url="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          cat > verification-summary.json <<EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "target": "${TARGET_ENV}",
+            "smoke": "${{ steps.summary.outputs.smoke }}",
+            "load": "${{ steps.summary.outputs.load }}",
+            "status": "${{ steps.summary.outputs.status }}",
+            "trigger": "${EVENT_NAME}",
+            "source_workflow": "${WORKFLOW_NAME}",
+            "drill_id": "${DRILL_ID}",
+            "run_url": "${run_url}"
+          }
+          EOF
+
+      - name: Upload verification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-deploy-verification-${{ github.run_id }}
+          path: verification-summary.json
+          retention-days: 60
 
       - name: Comment results on PR
         if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]

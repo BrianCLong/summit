@@ -114,7 +114,13 @@ Alerts are configured in Prometheus and routed via Alertmanager to Slack/Teams a
 ## 4. Deployment & Rollback
 
 - **Deployment**: Follow the steps in `README-DEPLOY.md`.
-- **Rollback**: Use `helm rollback maestro -n intelgraph-dev <REVISION_NUMBER>`.
+- **Rollback**:
+  - Automated: Error-budget alert webhooks from `.github/workflows/error-budget-monitoring.yml` automatically invoke `.github/workflows/auto-rollback.yml` for SLO breaches or alert webhooks.
+  - Manual: Use the **Pipeline - Rollback** workflow (`.github/workflows/pipeline-rollback.yml`) when you need to specify the exact target tag/SHA.
+    1. Navigate to GitHub Actions → Pipeline - Rollback.
+    2. Choose the environment (`staging` or `production`) and provide the rollback tag/SHA (use the `rollback_target` from the error-budget alert payload or the last green deploy).
+    3. Monitor the workflow run for deployment output and health verification.
+  - Evidence: After any manual rollback drill, trigger the **post-deploy-verification** workflow with `workflow_dispatch`, set the `environment`, and pass a `drill_id` to archive the results. The workflow uploads `verification-summary.json` as evidence under the `post-deploy-verification-<run_id>` artifact.
   - **Verification**: After rollback, re-run post-deployment verification steps.
 
 ## 5. Log & Metric Cribsheet

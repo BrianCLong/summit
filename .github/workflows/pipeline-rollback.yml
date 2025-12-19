@@ -13,18 +13,54 @@ on:
       target_tag:
         description: 'Target Docker tag/SHA to rollback to'
         required: true
+  repository_dispatch:
+    types:
+      - slo-breach
+      - error-budget-alert
 
 jobs:
   rollback:
     name: ⏪ Rollback
     runs-on: ubuntu-latest
+    env:
+      DEFAULT_ENVIRONMENT: production
+    outputs:
+      environment: ${{ steps.resolve.outputs.environment }}
+      target: ${{ steps.resolve.outputs.target }}
     steps:
       - uses: actions/checkout@v4
 
+      - name: Resolve rollback payload
+        id: resolve
+        run: |
+          event_name="${{ github.event_name }}"
+          environment="${DEFAULT_ENVIRONMENT}"
+          target=""
+          trigger_source="manual"
+
+          if [[ "$event_name" == "repository_dispatch" ]]; then
+            environment="${{ github.event.client_payload.environment || 'production' }}"
+            target="${{ github.event.client_payload.rollback_target || github.event.client_payload.deployment_sha }}"
+            trigger_source="${{ github.event.client_payload.triggered_by || github.event.action }}"
+            echo "⚡️ Alert webhook received from $trigger_source"
+          else
+            environment="${{ inputs.environment }}"
+            target="${{ inputs.target_tag }}"
+          fi
+
+          if [[ -z "$target" ]]; then
+            echo "❌ No rollback target provided."
+            exit 1
+          fi
+
+          echo "environment=$environment" >> "$GITHUB_OUTPUT"
+          echo "target=$target" >> "$GITHUB_OUTPUT"
+          echo "trigger_source=$trigger_source" >> "$GITHUB_OUTPUT"
+
       - name: Execute Rollback
         run: |
-          echo "🚨 Initiating Rollback for ${{ inputs.environment }} to version ${{ inputs.target_tag }}"
-          ./scripts/deploy.sh -e ${{ inputs.environment }} -t ${{ inputs.target_tag }}
+          echo "🚨 Initiating Rollback for ${{ steps.resolve.outputs.environment }} to version ${{ steps.resolve.outputs.target }}"
+          ./scripts/deploy.sh -e ${{ steps.resolve.outputs.environment }} -t ${{ steps.resolve.outputs.target }}
 
       - name: Post-Rollback Verification
         run: |

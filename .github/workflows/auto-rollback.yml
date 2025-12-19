@@ -6,7 +6,7 @@ on:
     workflows: ['🚢 Release Captain']
     types: [completed]
   repository_dispatch:
-    types: [slo-breach]
+    types: [slo-breach, error-budget-alert]
   workflow_dispatch: # Allow manual runs during stabilization
   # Disabled scheduled trigger until production environment is configured
   # schedule:
@@ -37,7 +37,7 @@ jobs:
     if: |
       (github.event_name == 'deployment_status' && github.event.deployment_status.state == 'failure') ||
       (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure') ||
-      (github.event_name == 'repository_dispatch' && github.event.action == 'slo-breach')
+      (github.event_name == 'repository_dispatch' && (github.event.action == 'slo-breach' || github.event.action == 'error-budget-alert'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -79,6 +79,9 @@ jobs:
             ENVIRONMENT="${{ github.event.client_payload.environment }}"
             FAILURE_TYPE="slo_breach"
             SLO_CONTEXT="${{ github.event.client_payload.failing_slos }}"
+            if [[ "${{ github.event.action }}" == "error-budget-alert" ]]; then
+              FAILURE_TYPE="alert_webhook"
+            fi
           fi
 
           if [[ -z "$ENVIRONMENT" ]]; then
@@ -270,7 +273,13 @@ jobs:
             FAILURE_KIND="${{ needs.detect-deployment-failure.outputs.failure_type }}"
             SLO_CONTEXT="${{ needs.detect-deployment-failure.outputs.slo_context }}"
 
-            if [[ "$FAILURE_KIND" == "slo_breach" ]]; then
+            if [[ "$FAILURE_KIND" == "alert_webhook" ]]; then
+              if [[ -n "$SLO_CONTEXT" ]]; then
+                ROLLBACK_REASON="Error-budget alert webhook: $SLO_CONTEXT"
+              else
+                ROLLBACK_REASON="Error-budget alert webhook requested rollback"
+              fi
+            elif [[ "$FAILURE_KIND" == "slo_breach" ]]; then
               if [[ -n "$SLO_CONTEXT" ]]; then
                 ROLLBACK_REASON="SLO breach detected: $SLO_CONTEXT"
               else
