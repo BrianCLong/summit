@@ -50,6 +50,7 @@ import ticketLinksRouter from './routes/ticket-links.js';
 import { auroraRouter } from './routes/aurora.js';
 import { oracleRouter } from './routes/oracle.js';
 import { phantomLimbRouter } from './routes/phantom_limb.js';
+import { actionsRouter } from './routes/actions.js';
 import { echelon2Router } from './routes/echelon2.js';
 import { mnemosyneRouter } from './routes/mnemosyne.js';
 import { necromancerRouter } from './routes/necromancer.js';
@@ -269,6 +270,7 @@ export const createApp = async () => {
   app.use('/api/qaf', qafRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
   app.use('/api/maestro', maestroRouter);
+  app.use('/api/actions', actionsRouter);
   app.use('/api/osint', osintRouter);
   app.use('/api/edge', edgeOpsRouter);
   app.use('/api/meta-orchestrator', metaOrchestratorRouter);
