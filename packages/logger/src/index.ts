@@ -12,7 +12,75 @@
  */
 
 import pino, { Logger as PinoLogger, LoggerOptions } from 'pino';
-import { trace, context, SpanContext } from '@opentelemetry/api';
+import { trace } from '@opentelemetry/api';
+
+const DEFAULT_SENSITIVE_FIELDS = [
+  'password',
+  'token',
+  'secret',
+  'apikey',
+  'authorization',
+  'accesstoken',
+  'refreshtoken',
+  'clientsecret',
+  'privatekey',
+  'key',
+  'signingkey',
+];
+
+const BEARER_TOKEN_REGEX = /(bearer\s+)[A-Za-z0-9\-._~+/]+=*/gi;
+const KEY_VALUE_REGEX =
+  /\b(access_token|refresh_token|token|api[-_]?key|secret|authorization)=([^\s&]+)/gi;
+
+function scrubString(value: string): string {
+  const bearerSanitized = value.replace(BEARER_TOKEN_REGEX, '$1[REDACTED]');
+  return bearerSanitized.replace(KEY_VALUE_REGEX, '$1=[REDACTED]');
+}
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    value !== null &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    !(value instanceof Date)
+  );
+}
+
+function scrubValue(value: unknown, sensitiveKeys: Set<string>): unknown {
+  if (typeof value === 'string') {
+    return scrubString(value);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((entry) => scrubValue(entry, sensitiveKeys));
+  }
+
+  if (isPlainObject(value)) {
+    const sanitized: Record<string, unknown> = {};
+    for (const [key, entry] of Object.entries(value)) {
+      if (sensitiveKeys.has(key.toLowerCase())) {
+        sanitized[key] = '[REDACTED]';
+        continue;
+      }
+      sanitized[key] = scrubValue(entry, sensitiveKeys);
+    }
+    return sanitized;
+  }
+
+  return value;
+}
+
+export function scrubLogArgs(
+  args: unknown[],
+  extraSensitiveFields: string[] = [],
+): unknown[] {
+  const sensitiveKeys = new Set(
+    [...DEFAULT_SENSITIVE_FIELDS, ...extraSensitiveFields].map((key) =>
+      key.toLowerCase(),
+    ),
+  );
+  return args.map((arg) => scrubValue(arg, sensitiveKeys));
+}
 
 export interface LoggerConfig {
   serviceName: string;
@@ -38,8 +106,17 @@ export function createLogger(config: LoggerConfig): PinoLogger {
     serviceName,
     level = process.env.LOG_LEVEL || 'info',
     prettyPrint = process.env.NODE_ENV !== 'production',
-    redact = ['password', 'token', 'secret', 'apiKey', 'authorization']
+    redact = ['password', 'token', 'secret', 'apiKey', 'authorization'],
   } = config;
+
+  const redactPaths = Array.from(
+    new Set([
+      ...DEFAULT_SENSITIVE_FIELDS,
+      'headers.authorization',
+      'headers.cookie',
+      ...redact,
+    ]),
+  );
 
   const baseConfig: LoggerOptions = {
     name: serviceName,
@@ -68,7 +145,7 @@ export function createLogger(config: LoggerConfig): PinoLogger {
     },
     // Redact sensitive fields
     redact: {
-      paths: redact,
+      paths: redactPaths,
       remove: true,
     },
     // Serialize errors with stack traces
@@ -77,6 +154,12 @@ export function createLogger(config: LoggerConfig): PinoLogger {
       error: pino.stdSerializers.err,
       req: pino.stdSerializers.req,
       res: pino.stdSerializers.res,
+    },
+    hooks: {
+      logMethod(args, method) {
+        const sanitized = scrubLogArgs(args as unknown[], redactPaths);
+        method.apply(this, sanitized as any);
+      },
     },
   };
 

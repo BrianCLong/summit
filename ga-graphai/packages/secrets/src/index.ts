@@ -14,3 +14,13 @@ export {
   type KmsLikeClient,
 } from './providers/kms.js';
 export { VaultJwtSecretsProvider } from './providers/vault.js';
+export { EnvironmentSecretsProvider } from './providers/env.js';
+export {
+  buildKeyRing,
+  selectSigningKey,
+  signTokenWithKeyRing,
+  verifyTokenWithKeyRing,
+  type KeyRing,
+  type KeyMaterial,
+  type RotatingKeyDefinition,
+} from './keyring.js';
