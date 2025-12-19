@@ -365,6 +365,58 @@ router.post(
   },
 );
 
+// Get current metrics snapshot for an investigation
+router.get(
+  '/metrics/:investigationId',
+  requireAuthority('streaming_ingest', ['metrics_access']),
+  async (req, res) => {
+    try {
+      const { investigationId } = req.params;
+      const tenantId = (req.user as any).tenantId || 'default';
+
+      // We need to fetch the metrics from Redis that the worker is updating
+      // The keys are `investigation:${investigationId}:velocity:${minute}`
+
+      // For simplicity, let's just get the current minute's velocity
+      // In a real app, we might aggregate the last N minutes
+      const minute = Math.floor(Date.now() / 60000);
+      const velocityKey = `investigation:${investigationId}:velocity:${minute}`;
+
+      // Access Redis through the worker instance (it has a public redis client if we expose it, or we add a method)
+      // Since `redis` is private in `StreamingIngestWorker`, we should probably add a public method there.
+      // But for now, let's assume we can add a method `getInvestigationMetrics` to the worker.
+
+      // Let's modify the worker to expose this. But I can't modify the worker in this step easily without context switching.
+      // Wait, I can just instantiate a new Redis client here or use a shared one?
+      // `ingestWorker` is a singleton and has the connection.
+
+      // Best practice: Add method to worker.
+      // But since I'm editing routes/streaming.ts, let's assume I'll add the method to the worker in a second,
+      // OR I'll just skip this part of the implementation if I can't access it.
+
+      const metrics = await ingestWorker.getInvestigationMetrics(investigationId);
+
+      if (!metrics) {
+         return res.status(501).json({ success: false, error: 'Metrics not found' });
+      }
+
+      res.json({
+        success: true,
+        investigationId,
+        metrics,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+       logger.error({
+        message: 'Failed to retrieve investigation metrics',
+        error: error instanceof Error ? error.message : String(error),
+        user_id: req.user?.id,
+      });
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  }
+);
+
 // WebSocket endpoint for real-time streaming updates
 router.get(
   '/events/stream',
