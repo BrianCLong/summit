@@ -1,0 +1,25 @@
+{
+  "name": "@intelgraph/receipt-signer",
+  "version": "1.0.0",
+  "description": "Receipt signing and verification using AWS KMS",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@aws-sdk/client-kms": "^3.744.0",
+    "@intelgraph/provenance": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.9.3",
+    "jest": "^30.2.0"
+  }
+}

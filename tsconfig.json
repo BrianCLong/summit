@@ -6,7 +6,10 @@
       "@app/*": ["src/*"],
       "@ui/*": ["client/src/*"],
       "@server/*": ["server/src/*"],
-      "@client/*": ["client/src/*"]
+      "@client/*": ["client/src/*"],
+      "@intelgraph/provenance": ["packages/provenance/src"],
+      "@intelgraph/receipt-signer": ["services/receipt-signer/src"],
+      "supertest": ["apps/api/node_modules/supertest"]
     }
   },
   "references": [
