@@ -2,11 +2,19 @@ name: validate-grafana-json
 on:
   pull_request:
     paths:
-      - 'observability/grafana/dashboards/**/*.json'
+      - 'grafana/dashboards/**/*.json'
+      - 'summit_observability/**/*.json'
+      - 'grafana/alerts/**/*.yml'
+      - 'grafana/alerts/**/*.yaml'
+      - 'grafana/alerts/**/*.json'
   push:
     branches: [main]
     paths:
-      - 'observability/grafana/dashboards/**/*.json'
+      - 'grafana/dashboards/**/*.json'
+      - 'summit_observability/**/*.json'
+      - 'grafana/alerts/**/*.yml'
+      - 'grafana/alerts/**/*.yaml'
+      - 'grafana/alerts/**/*.json'
 
 jobs:
   lint:
@@ -18,13 +26,19 @@ jobs:
       - name: Validate Grafana Dashboard JSON
         run: |
           echo "🔍 Validating Grafana dashboard JSON files..."
-          find observability/grafana/dashboards -name "*.json" -type f | while read -r file; do
-            echo "Checking: $file"
-            if jq -e . "$file" >/dev/null; then
-              echo "✅ $file is valid JSON"
+          for dir in grafana/dashboards summit_observability; do
+            if [[ -d "$dir" ]]; then
+              find "$dir" -name "*.json" -type f | while read -r file; do
+                echo "Checking: $file"
+                if jq -e . "$file" >/dev/null; then
+                  echo "✅ $file is valid JSON"
+                else
+                  echo "❌ $file has invalid JSON syntax"
+                  exit 1
+                fi
+              done
             else
-              echo "❌ $file has invalid JSON syntax"
-              exit 1
+              echo "ℹ️ Directory $dir not found, skipping."
             fi
           done
           echo "🎉 All Grafana dashboard JSON files are valid!"
@@ -32,7 +46,7 @@ jobs:
       - name: Validate MC v0.3.5 Dashboard Structure
         run: |
           echo "🔍 Validating MC v0.3.5 dashboard structure..."
-          DASH_FILE="observability/grafana/dashboards/mc-v035-tiles.json"
+          DASH_FILE="grafana/dashboards/mc-v035-tiles.json"
           if [[ -f "$DASH_FILE" ]]; then
             # Check for required panels
             PANEL_COUNT=$(jq '.panels | length' "$DASH_FILE")
@@ -55,3 +69,63 @@ jobs:
           else
             echo "⚠️ MC v0.3.5 dashboard not found, skipping structure validation"
           fi
+
+      - name: Validate Alert Rules
+        run: |
+          if [[ ! -d grafana/alerts ]]; then
+            echo "ℹ️ No grafana/alerts directory found, skipping alert validation."
+            exit 0
+          fi
+
+          python - <<'PY'
+import json
+import sys
+from pathlib import Path
+
+try:
+    import yaml  # type: ignore
+except ImportError:  # pragma: no cover - dependency bootstrap
+    import subprocess
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "pyyaml"])
+    import yaml  # type: ignore
+
+alert_dir = Path("grafana/alerts")
+failures = []
+
+for path in alert_dir.rglob("*"):
+    if path.is_dir():
+        continue
+    try:
+        if path.suffix.lower() == ".json":
+            with path.open() as handle:
+                content = json.load(handle)
+        else:
+            with path.open() as handle:
+                content = yaml.safe_load(handle)
+    except Exception as exc:  # pragma: no cover - validation
+        failures.append(f"{path}: parse error ({exc})")
+        continue
+
+    groups = content.get("groups") if isinstance(content, dict) else None
+    if not groups:
+        failures.append(f"{path}: missing 'groups' definition")
+        continue
+
+    for group in groups:
+        rules = group.get("rules") if isinstance(group, dict) else None
+        if not rules:
+            failures.append(f"{path}: group '{group.get('name', 'unknown')}' missing rules")
+            continue
+        for rule in rules:
+            if not rule.get("alert") and not rule.get("title"):
+                failures.append(f"{path}: rule missing alert/title")
+            if not rule.get("expr") and not rule.get("condition"):
+                failures.append(f"{path}: rule missing expr/condition")
+
+if failures:
+    for failure in failures:
+        print(f"❌ {failure}")
+    sys.exit(1)
+
+print(\"✅ Alert rule syntax and structure look good.\")
+PY
