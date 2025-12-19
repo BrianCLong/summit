@@ -1,0 +1,48 @@
+name: E2E Smoke Tests
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/web/**'
+      - 'client/**'
+      - 'server/**'
+      - 'e2e/**'
+      - 'playwright.config.ts'
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.54.2-jammy
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Application
+        run: pnpm build
+
+      - name: Run Smoke Tests (Chromium Only)
+        run: pnpm exec playwright test --project=chromium
+        env:
+          BASE_URL: http://localhost:3000
+          CI: true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-smoke
+          path: playwright-report/
+          retention-days: 7
