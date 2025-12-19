@@ -67,6 +67,10 @@ tags:
     description: AI assistant for query generation and safety
   - name: Admin
     description: Administrative operations (users, tenants, audit)
+  - name: Signer
+    description: Attestation signer lifecycle, keys, and verification
+  - name: Policy
+    description: Policy bundle orchestration, simulation, and rollout
   - name: Health
     description: Health check and monitoring endpoints
   - name: Versioning
@@ -361,6 +365,183 @@ components:
         timestamp:
           type: string
           format: date-time
+
+    SignerKey:
+      type: object
+      required:
+        - id
+        - algorithm
+        - version
+        - notBefore
+        - notAfter
+      properties:
+        id:
+          type: string
+          description: Stable signer identifier
+          example: "mc-platform-signer"
+        algorithm:
+          type: string
+          description: Signing algorithm for the active key
+          example: "ed25519"
+        version:
+          type: string
+          description: Versioned key identifier
+          example: "v3"
+        jwksUri:
+          type: string
+          description: JWKS URL used by verifiers
+          example: "https://keys.intelgraph.example.com/jwks.json"
+        notBefore:
+          type: string
+          format: date-time
+          description: Activation time for the key
+        notAfter:
+          type: string
+          format: date-time
+          description: Expiry time for the key
+
+    AttestationRequest:
+      type: object
+      required:
+        - subject
+        - digest
+      properties:
+        subject:
+          type: string
+          description: Logical subject for the attestation (e.g., bundle name)
+          example: "policy-bundle"
+        digest:
+          type: string
+          description: SHA-256 digest for the artifact to attest
+          example: "b1946ac92492d2347c6235b4d2611184"
+        metadata:
+          type: object
+          description: Arbitrary metadata to include in the attestation payload
+          additionalProperties: true
+
+    AttestationEnvelope:
+      type: object
+      required:
+        - subject
+        - signature
+      properties:
+        subject:
+          type: string
+          description: Subject the attestation covers
+        signature:
+          type: object
+          required:
+            - signerId
+            - keyVersion
+            - algorithm
+            - value
+          properties:
+            signerId:
+              type: string
+              description: Identifier for the signer
+              example: "mc-platform-signer"
+            keyVersion:
+              type: string
+              description: Version of the signing key used
+              example: "v3"
+            algorithm:
+              type: string
+              description: Algorithm used for signing
+              example: "ed25519"
+            value:
+              type: string
+              description: Detached signature in base64 format
+        issuedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the attestation was issued
+        expiry:
+          type: string
+          format: date-time
+          description: Timestamp when the attestation expires
+        nonce:
+          type: string
+          description: Nonce used to avoid replay
+        metadata:
+          type: object
+          description: Arbitrary metadata included at signing time
+          additionalProperties: true
+
+    VerificationResult:
+      type: object
+      required:
+        - ok
+      properties:
+        ok:
+          type: boolean
+          description: Whether the attestation is valid
+        signerId:
+          type: string
+          description: Signer identifier validated for the envelope
+        keyVersion:
+          type: string
+          description: Key version validated for the envelope
+        reason:
+          type: string
+          description: Reason for a failed verification
+        checkedAt:
+          type: string
+          format: date-time
+          description: Timestamp when verification completed
+
+    PolicyBundleRefresh:
+      type: object
+      required:
+        - bundle
+        - digest
+        - source
+      properties:
+        bundle:
+          type: string
+          description: Bundle name
+          example: "maestro-policy-bundle"
+        digest:
+          type: string
+          description: SHA-256 digest of the bundle tarball
+          example: "d4735e3a265e16eee03f59718b9b5d03"
+        source:
+          type: string
+          description: Location where the bundle was published
+          example: "s3://opa-bundles/maestro/v4/maestro-policy-bundle.tgz"
+        signedBy:
+          type: string
+          description: Signer identifier used for the bundle
+          example: "mc-platform-signer"
+        status:
+          type: string
+          enum: [pending, promoted, rejected]
+          description: Promotion status for the bundle
+
+    PolicySimulationResult:
+      type: object
+      required:
+        - ok
+        - decisions
+      properties:
+        ok:
+          type: boolean
+        decisions:
+          type: array
+          description: Decision traces from the simulation harness
+          items:
+            type: object
+            properties:
+              package:
+                type: string
+              decision_id:
+                type: string
+              result:
+                type: string
+        failures:
+          type: array
+          items:
+            type: string
+          description: Any failing scenarios from the regression suite
 
     Error:
       type: object
@@ -2077,3 +2258,175 @@ paths:
                     type: array
                     items:
                       type: string
+
+  # Signing and attestation
+  /signer/keys:
+    get:
+      summary: List active signing keys
+      description: Returns the active and standby signing keys along with their validity windows
+      operationId: listSignerKeys
+      tags:
+        - Signer
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Active signing keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  activeKeyVersion:
+                    type: string
+                  keys:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SignerKey'
+              examples:
+                default:
+                  value:
+                    activeKeyVersion: "v3"
+                    keys:
+                      - id: "mc-platform-signer"
+                        algorithm: "ed25519"
+                        version: "v3"
+                        jwksUri: "https://keys.intelgraph.example.com/jwks.json"
+                        notBefore: "2025-02-01T00:00:00Z"
+                        notAfter: "2025-05-01T00:00:00Z"
+
+  /signer/attestations:
+    post:
+      summary: Issue an attestation for an artifact digest
+      description: Issues a detached signature envelope that callers can attach to artifacts
+      operationId: createAttestation
+      tags:
+        - Signer
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttestationRequest'
+      responses:
+        '201':
+          description: Attestation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttestationEnvelope'
+              examples:
+                default:
+                  value:
+                    subject: "policy-bundle"
+                    signature:
+                      signerId: "mc-platform-signer"
+                      keyVersion: "v3"
+                      algorithm: "ed25519"
+                      value: "MEQCIFRJp..."
+                    issuedAt: "2025-02-12T11:00:00Z"
+                    expiry: "2025-02-19T11:00:00Z"
+                    nonce: "e6f912f6"
+                    metadata:
+                      digest: "b1946ac92492d2347c6235b4d2611184"
+
+  /signer/attestations/verify:
+    post:
+      summary: Verify an attestation envelope
+      description: Validates signatures, key versions, and expiry for an attestation envelope
+      operationId: verifyAttestation
+      tags:
+        - Signer
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttestationEnvelope'
+      responses:
+        '200':
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerificationResult'
+              examples:
+                valid:
+                  value:
+                    ok: true
+                    signerId: "mc-platform-signer"
+                    keyVersion: "v3"
+                    checkedAt: "2025-02-12T11:01:00Z"
+                invalid:
+                  value:
+                    ok: false
+                    signerId: "mc-platform-signer"
+                    keyVersion: "v2"
+                    reason: "signature expired"
+                    checkedAt: "2025-02-12T11:01:00Z"
+
+  # Policy bundles and simulation
+  /policy/bundles/refresh:
+    post:
+      summary: Register a refreshed policy bundle
+      description: Records a new bundle digest and signer metadata before rollout
+      operationId: refreshPolicyBundle
+      tags:
+        - Policy
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PolicyBundleRefresh'
+      responses:
+        '202':
+          description: Bundle refresh recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicyBundleRefresh'
+
+  /policy/bundles/simulate:
+    post:
+      summary: Run simulation harness for a bundle
+      description: Executes regression scenarios against a policy bundle before promotion
+      operationId: simulatePolicyBundle
+      tags:
+        - Policy
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - bundle
+                - scenario
+                - input
+              properties:
+                bundle:
+                  type: string
+                  description: Bundle name to simulate
+                scenario:
+                  type: string
+                  description: Scenario identifier to run
+                input:
+                  type: object
+                  description: Input document forwarded to OPA
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Simulation results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PolicySimulationResult'
