@@ -79,9 +79,16 @@ router.post('/quality/rules', ensureAuthenticated, ensureTenant, async (req, res
 // Run checks for an asset
 router.post('/quality/assets/:id/run-checks', ensureAuthenticated, ensureTenant, async (req, res) => {
     try {
-        const results = await quality.runChecks(req.params.id);
+        // Enforce tenant check via the service
+        const results = await quality.runChecks(req.params.id, req.user.tenantId);
         res.json(results);
     } catch (err: any) {
+        if (err.message.includes('Access denied')) {
+            return res.status(403).json({ error: err.message });
+        }
+        if (err.message.includes('Asset not found')) {
+            return res.status(404).json({ error: err.message });
+        }
         res.status(500).json({ error: err.message });
     }
 });
@@ -120,7 +127,14 @@ router.get('/governance/assets/:id/compliance', ensureAuthenticated, ensureTenan
 
 router.get('/lineage/assets/:id', ensureAuthenticated, ensureTenant, async (req, res) => {
     try {
-        const result = await lineage.getLineage(req.params.id);
+        // Verify tenant ownership of the requested asset first
+        const asset = await catalog.getAsset(req.params.id);
+        if (!asset || asset.tenantId !== req.user.tenantId) {
+            return res.status(404).json({ error: 'Asset not found' });
+        }
+
+        // Pass tenantId to service for filtered graph traversal
+        const result = await lineage.getLineage(req.params.id, req.user.tenantId);
         res.json(result);
     } catch (err: any) {
         res.status(500).json({ error: err.message });

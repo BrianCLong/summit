@@ -56,11 +56,19 @@ export class DataQualityService {
     }));
   }
 
-  async runChecks(assetId: string): Promise<QualityCheckResult[]> {
+  async runChecks(assetId: string, tenantId: string): Promise<QualityCheckResult[]> {
     const asset = await this.catalog.getAsset(assetId);
-    if (!asset) throw new Error(`Asset not found: ${assetId}`);
+    if (!asset) {
+        throw new Error(`Asset not found: ${assetId}`);
+    }
+    if (asset.tenantId !== tenantId) {
+        throw new Error('Access denied: Asset belongs to a different tenant');
+    }
 
-    const rules = await this.getRulesForAsset(assetId);
+    // Filter rules by tenant as well for double safety
+    const allRules = await this.getRulesForAsset(assetId);
+    const rules = allRules.filter(r => r.tenantId === tenantId);
+
     const results: QualityCheckResult[] = [];
     const pool = getPostgresPool();
 

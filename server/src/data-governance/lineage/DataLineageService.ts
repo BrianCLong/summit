@@ -58,33 +58,47 @@ export class DataLineageService {
     return newEdge;
   }
 
-  async getLineage(assetId: string): Promise<{ nodes: LineageNode[], edges: LineageEdge[] }> {
+  async getLineage(assetId: string, tenantId: string): Promise<{ nodes: LineageNode[], edges: LineageEdge[] }> {
     const pool = getPostgresPool();
-    // Simplified lineage: get direct upstream and downstream
-    // A proper recursive CTE is better for full lineage, but this starts us off.
 
-    // Find node for asset
-    const nodeRes = await pool.query('SELECT * FROM lineage_nodes WHERE asset_id = $1', [assetId]);
+    // Find node for asset AND verify tenant
+    const nodeRes = await pool.query(
+        'SELECT * FROM lineage_nodes WHERE asset_id = $1 AND tenant_id = $2',
+        [assetId, tenantId]
+    );
     if (nodeRes.rows.length === 0) return { nodes: [], edges: [] };
     const rootNode = nodeRes.rows[0];
 
     // Find edges connected to this node
+    // Filter by tenant ID to ensure we don't accidentally traverse into another tenant's graph
+    // (though nodes should prevent this, defense in depth)
     const edgesRes = await pool.query(
         `SELECT * FROM lineage_edges
-         WHERE source_node_id = $1 OR target_node_id = $1`,
-        [rootNode.id]
+         WHERE (source_node_id = $1 OR target_node_id = $1)
+         AND tenant_id = $2`,
+        [rootNode.id, tenantId]
     );
 
     const edges = edgesRes.rows.map(this.mapRowToEdge);
+    if (edges.length === 0) {
+         return {
+             nodes: [this.mapRowToNode(rootNode)],
+             edges: []
+         };
+    }
+
     const relatedNodeIds = new Set<string>();
+    // Always include root node
+    relatedNodeIds.add(rootNode.id);
     edges.forEach(e => {
         relatedNodeIds.add(e.sourceNodeId);
         relatedNodeIds.add(e.targetNodeId);
     });
 
+    // Fetch all related nodes, strictly filtering by tenant
     const relatedNodesRes = await pool.query(
-        `SELECT * FROM lineage_nodes WHERE id = ANY($1)`,
-        [[...relatedNodeIds]]
+        `SELECT * FROM lineage_nodes WHERE id = ANY($1) AND tenant_id = $2`,
+        [[...relatedNodeIds], tenantId]
     );
 
     return {
