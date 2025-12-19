@@ -64,6 +64,23 @@ jobs:
           echo "api_url=$api" >> $GITHUB_OUTPUT
           echo "gql_url=${api%/}/graphql" >> $GITHUB_OUTPUT
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install synthetic journey deps
+        run: npm install axios ts-node typescript --no-save
+
+      - name: Run synthetic journey
+        id: synthetic
+        continue-on-error: true
+        env:
+          API_URL: ${{ steps.endpoints.outputs.api_url }}
+          SYNTHETIC_USER_EMAIL: ${{ secrets.SYNTHETIC_USER_EMAIL }}
+          SYNTHETIC_USER_PASSWORD: ${{ secrets.SYNTHETIC_USER_PASSWORD }}
+        run: npx ts-node scripts/synthetic/run-journey.ts
+
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
 
@@ -89,13 +106,113 @@ jobs:
         run: |
           smoke="${{ steps.smoke.outcome }}"
           load="${{ steps.load.outcome }}"
+          synthetic="${{ steps.synthetic.outcome }}"
           status="success"
-          if [ "$smoke" != "success" ] || [ "$load" != "success" ]; then
+          if [ "$smoke" != "success" ] || [ "$load" != "success" ] || [ "$synthetic" != "success" ]; then
             status="failure"
           fi
           echo "smoke=$smoke" >> $GITHUB_OUTPUT
           echo "load=$load" >> $GITHUB_OUTPUT
+          echo "synthetic=$synthetic" >> $GITHUB_OUTPUT
           echo "status=$status" >> $GITHUB_OUTPUT
+
+      - name: Write deploy verification report
+        if: always()
+        env:
+          TARGET_ENV: ${{ steps.target.outputs.target }}
+          UI_URL: ${{ steps.endpoints.outputs.ui_url }}
+          API_URL: ${{ steps.endpoints.outputs.api_url }}
+          SMOKE: ${{ steps.summary.outputs.smoke }}
+          LOAD: ${{ steps.summary.outputs.load }}
+          SYNTHETIC: ${{ steps.summary.outputs.synthetic }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          WORKFLOW_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          timestamp="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          cat > deploy_verification.json <<EOF
+          {
+            "target": "${TARGET_ENV}",
+            "ui_url": "${UI_URL}",
+            "api_url": "${API_URL}",
+            "smoke_outcome": "${SMOKE}",
+            "load_outcome": "${LOAD}",
+            "synthetic_outcome": "${SYNTHETIC}",
+            "workflow_run": "${WORKFLOW_NAME}",
+            "workflow_run_url": "${WORKFLOW_URL}",
+            "verification_run_url": "${RUN_URL}",
+            "timestamp": "${timestamp}"
+          }
+          EOF
+
+      - name: Upload deploy verification artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy_verification-${{ steps.target.outputs.target }}-${{ github.run_id }}
+          path: deploy_verification.json
+          retention-days: 7
+
+      - name: Attach report to release tag
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          TARGET_ENV: ${{ steps.target.outputs.target }}
+          REPORT_PATH: deploy_verification.json
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const { TARGET_ENV, REPORT_PATH } = process.env;
+            const { owner, repo } = context.repo;
+            const headSha = context.payload.workflow_run.head_sha;
+            const headBranch = context.payload.workflow_run.head_branch || '';
+
+            const getCandidateTag = async () => {
+              if (headBranch.startsWith('refs/tags/')) return headBranch.replace('refs/tags/', '');
+              if (/^v\d/.test(headBranch)) return headBranch;
+              const tags = await github.paginate(github.rest.repos.listTags, { owner, repo, per_page: 100 });
+              const match = tags.find((tag) => tag.commit?.sha === headSha);
+              return match ? match.name : null;
+            };
+
+            const tag = await getCandidateTag();
+            if (!tag) {
+              const message = `No release tag found for workflow_run ${context.payload.workflow_run.id}`;
+              if (['prod', 'production'].includes((TARGET_ENV || '').toLowerCase())) {
+                core.setFailed(message);
+              } else {
+                core.info(`${message}; skipping release attachment.`);
+              }
+              return;
+            }
+
+            let release;
+            try {
+              release = await github.rest.repos.getReleaseByTag({ owner, repo, tag });
+            } catch (error) {
+              const message = `Release not found for tag ${tag}`;
+              if (['prod', 'production'].includes((TARGET_ENV || '').toLowerCase())) {
+                core.setFailed(message);
+              } else {
+                core.info(`${message}; skipping release attachment.`);
+              }
+              return;
+            }
+
+            const assetName = `deploy_verification-${context.runId}.json`;
+            await github.rest.repos.uploadReleaseAsset({
+              owner,
+              repo,
+              release_id: release.data.id,
+              name: assetName,
+              headers: {
+                'content-type': 'application/json',
+                'content-length': fs.statSync(REPORT_PATH).size,
+              },
+              data: fs.readFileSync(REPORT_PATH),
+            });
+            core.info(`Attached deploy verification report to release tag ${tag}.`)
 
       - name: Comment results on PR
         if: always() && github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.pull_requests[0]
@@ -110,6 +227,7 @@ jobs:
             }
             const smoke = '${{ steps.summary.outputs.smoke }}';
             const load = '${{ steps.summary.outputs.load }}';
+            const synthetic = '${{ steps.summary.outputs.synthetic }}';
             const target = '${{ steps.target.outputs.target }}';
             const icon = (value) => (value === 'success' ? '✅' : '❌');
             const runUrl = context.payload.workflow_run.html_url;
@@ -117,6 +235,7 @@ jobs:
               `Post-deploy verification for **${target}**`,
               `- Smoke: ${icon(smoke)} (${smoke})`,
               `- Load: ${icon(load)} (${load})`,
+              `- Synthetic: ${icon(synthetic)} (${synthetic})`,
               `- Run: ${runUrl}`,
             ].join('\n');
             await github.rest.issues.createComment({
@@ -129,5 +248,5 @@ jobs:
       - name: Fail if checks failed
         if: steps.summary.outputs.status == 'failure'
         run: |
-          echo "Smoke/load verification failed." >&2
+          echo "Post-deploy verification (smoke/load/synthetic) failed." >&2
           exit 1
