@@ -3,6 +3,7 @@
  * Provides common test utilities and matchers
  */
 
+// @ts-nocheck
 import 'jest-extended';
 import { jest, beforeAll, afterAll, afterEach } from '@jest/globals';
 
