@@ -1,0 +1,48 @@
+{
+  "name": "@intelgraph/adapter-sdk",
+  "version": "0.1.0",
+  "description": "CLI and contract testing harness for IntelGraph adapters",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "adapter-sdk": "dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "lint": "eslint src --ext .ts",
+    "test": "pnpm run test:contract",
+    "test:contract": "pnpm run build && node dist/testing/run-contract-tests.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "adapter:build": "pnpm run build",
+    "adapter:test": "pnpm run test:contract"
+  },
+  "keywords": [
+    "adapters",
+    "cli",
+    "contract-testing",
+    "intelgraph",
+    "sdk"
+  ],
+  "author": "IntelGraph Team",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fs-extra": "^11.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.6",
+    "eslint": "^9.36.0",
+    "rimraf": "^5.0.9",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=18.18.0",
+    "pnpm": ">=9.12.0"
+  }
+}

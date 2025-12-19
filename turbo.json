@@ -64,6 +64,16 @@
       "outputs": [],
       "cache": false
     },
+    "adapter:build": {
+      "dependsOn": ["^adapter:build"],
+      "outputs": ["dist/**"],
+      "inputs": ["src/**", "package.json", "tsconfig.json"]
+    },
+    "adapter:test": {
+      "dependsOn": ["adapter:build"],
+      "outputs": [],
+      "cache": false
+    },
     "dev": {
       "cache": false,
       "persistent": true
