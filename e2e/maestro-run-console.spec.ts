@@ -1,10 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-// TODO: Enable this test once the apps/web environment is stable and can be served locally.
-// Currently skipped due to missing dev dependencies (vite, rxjs) and peer dependency conflicts.
-
 test.describe('Maestro Run Console', () => {
-  test.skip('should execute a run and display results', async ({ page }) => {
+  test('should execute a run and display results', async ({ page }) => {
     // 1. Navigate to the console
     await page.goto('/maestro-run-console');
 
