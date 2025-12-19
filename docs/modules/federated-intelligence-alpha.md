@@ -232,6 +232,55 @@ optimizations:
 
 ---
 
+## 🔐 **PHASE 2 CRYPTOGRAPHY INVENTORY & PILOT SCOPE**
+
+| Component | Implementation Path | Phase 2 Pilot Scope |
+| --- | --- | --- |
+| Homomorphic encryption (HE) query processing | Microsoft SEAL (CKKS/BFV) with parameter sets sized for IoC search; DP budget manager enforcing org-level epsilon caps | Encrypted IoC/indicator lookups between FBI Cyber and EC3; synthetic data only until FTO sign-off |
+| MPC threat correlation | MP-SPDZ (SPDZ2 + honest-majority fallbacks) with authenticated channels; audit logging per protocol round | Cross-org correlation for fraud + APT indicators with 24h time-window guardrails; runbooks for party add/drop |
+| ZK membership proofs | Circom + snarkjs Groth16 verifier; key ceremony + rotation SOP; curve BN254 with plan to migrate to BLS12-381 | Capability-guarded query allowlist checks for pilot participants; prove clearance without revealing capability sets |
+
+---
+
+## 🧭 **IP / PRIOR-ART SWEEP (TARGETED)**
+
+- **Homomorphic Encryption (HE)**
+  - Microsoft SEAL (MIT + MSR patent grant; CKKS/BFV) – **Yellow**: review Microsoft FHE Patent License; no blocking claims surfaced in public patent searches (USPTO/EP), but CKKS-family filings exist (e.g., KR/US applications by Cheon et al.) → counsel review required before commercial use.
+  - PALISADE/OpenFHE (BSD-2-Clause) – **Green**: permissive license; relies on published schemes (BFV/BGV/CKKS) with community patent grants; confirm export-control posture (EAR Cat. 5 Pt. 2) with compliance.
+- **MPC Protocols**
+  - MP-SPDZ (Apache-2.0) implementing SPDZ/Overdrive/MASCOT – **Green**: no active patent assertions identified; Apache patent license included; confirm no proprietary OT extension pulls in encumbered code paths.
+  - Scale-Mamba/EMP-toolkit (varied BSD/Apache) – **Green**: suitable fallback if MP-SPDZ is later constrained.
+- **Zero-Knowledge Verification Flows**
+  - Circom + snarkjs (MIT) using Groth16 – **Green/Yellow**: MIT license; Groth16 prior-art (pairing-based SNARK) widely implemented with no known active patents; ensure pairing library (BN254) remains under permissive LGPL/Apache options.
+  - PLONK/Halo2 (varied Apache/MIT) – **Yellow**: Aztec PLONK patent pledge applies for open use; commercial sublicensing may be needed for proprietary circuits—keep as optional track.
+
+Blocking/encumbered claims: none confirmed, but HE parameter sets and PLONK variants require counsel clearance; continue weekly patent-docket monitoring (US/EP/WO) for HE/ZK filings mentioning CKKS/BFV/Groth16/PLONK keywords.
+
+---
+
+## 🛠️ **DESIGN-AROUNDS & LICENSING PATHS**
+
+- **HE (Yellow)**: If MSR patent terms are insufficient, switch to OpenFHE (BSD) with CKKS parameters matching SEAL benchmarks; narrow scope to BFV-only workloads if CKKS claims raise red flags; document export-control determinations per partner jurisdiction.
+- **ZK (Yellow)**: Default to Groth16 verifier; keep PLONK/Halo2 behind feature flag until patent-counsel approval; migrate to BLS12-381 curves to reduce BN254 embedding-degree concerns and enable modern libraries (arkworks/halo2) with Apache/MIT licensing.
+- **MPC (Green)**: Stay on Apache-2.0 MP-SPDZ; if any party objects, fall back to honest-majority protocols (SPDZ2k/Overdrive) or EMP-toolkit for two-party flows; ensure OT extension code paths remain within Apache/BSD components.
+- **General**: Maintain SBOM + license scan for crypto dependencies; run gitleaks/OSS Review Toolkit before partner data moves beyond synthetic fixtures.
+
+---
+
+## ✅ **GOVERNANCE, RISK, AND PARTNER COMMS**
+
+- **Counsel review**: Deliver FTO packet (library versions, patent notes above, export-control summary) to legal before any partner data ingestion; capture sign-off artifact in `docs/governance/legal/` and link from pilot runbook.
+- **Go/No-Go gate**: Phase 2 pilot start is gated on written FTO sign-off; until then, pilot runs only with synthetic data and test vectors.
+- **Risk register updates**:
+
+  | Risk | Impact | Owner | Mitigation | Status |
+  | --- | --- | --- | --- | --- |
+  | FTO delay for HE/CKKS | Slips pilot start; potential rework of HE stack | Legal + Crypto Eng | Escalate MSR license review; keep OpenFHE BFV fallback ready | Open |
+  | PLONK patent uncertainty | Blocks optional ZK upgrade | Crypto Eng | Keep Groth16 default; engage Aztec for commercial terms if needed | Monitored |
+  | Export-control posture (EAR/FIPS) | Partner onboarding blocked if controls unclear | Compliance | Map cipher suites to EAR; prepare FIPS 140-3 alignment memo | Open |
+
+- **Partner communications**: Send weekly pilot bulletin summarizing IP/FTO status; share design-around plan if gating persists beyond one week; confirm partners acknowledge synthetic-data-only constraint until sign-off.
+
 ## 📊 **FEDERATED INTELLIGENCE METRICS**
 
 ### Privacy Preservation KPIs
