@@ -7,6 +7,7 @@ import { makeExecutableSchema } from '@graphql-tools/schema';
 import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
 import helmet from 'helmet';
+import hpp from 'hpp';
 import pinoHttp from 'pino-http';
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
@@ -125,23 +126,32 @@ export const createApp = async () => {
 
   app.use(
     helmet({
-      contentSecurityPolicy: isProduction
-        ? {
-            directives: {
-              defaultSrc: ["'self'"],
-              objectSrc: ["'none'"],
-              imgSrc: ["'self'", 'data:'],
-              scriptSrc: ["'self'"],
-              styleSrc: ["'self'", "'unsafe-inline'"],
-              connectSrc: ["'self'", ...allowedOrigins],
-            },
-          }
-        : false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          imgSrc: ["'self'", 'data:', 'https:'],
+          scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          connectSrc: ["'self'", ...allowedOrigins],
+          fontSrc: ["'self'", 'https:'],
+          frameSrc: ["'none'"],
+          baseUri: ["'self'"],
+        },
+      },
+      crossOriginOpenerPolicy: { policy: 'same-origin' },
+      crossOriginResourcePolicy: { policy: 'same-site' },
       referrerPolicy: { policy: 'no-referrer' },
-      hsts: isProduction ? undefined : false,
       crossOriginEmbedderPolicy: false,
+      hsts: isProduction
+        ? { maxAge: 31536000, includeSubDomains: true, preload: true }
+        : false,
+      frameguard: { action: 'deny' },
     }),
   );
+
+  // Security Hardening: HTTP Parameter Pollution
+  app.use(hpp());
   app.use(
     cors({
       origin: (origin, callback) => {
@@ -430,15 +440,16 @@ export const createApp = async () => {
   }
 
   const authenticateToken =
-    cfg.NODE_ENV === 'production'
+    cfg.NODE_ENV === 'production' || process.env.ENABLE_DEV_AUTH_BYPASS !== 'true'
       ? productionAuthMiddleware
       : (req: Request, res: Response, next: NextFunction) => {
           // Development mode - relaxed auth for easier testing
+          // ONLY active if ENABLE_DEV_AUTH_BYPASS is explicitly true
           const authHeader = req.headers['authorization'];
           const token = authHeader && authHeader.split(' ')[1];
 
           if (!token) {
-            console.warn('Development: No token provided, allowing request');
+            console.warn('Development: No token provided, allowing request (BYPASS ENABLED)');
             (req as any).user = {
               sub: 'dev-user',
               email: 'dev@intelgraph.local',
@@ -451,7 +462,7 @@ export const createApp = async () => {
   app.use(
     '/graphql',
     express.json(),
-    authenticateToken, // WAR-GAMED SIMULATION - Add authentication middleware here
+    authenticateToken,
     rateLimitMiddleware, // Applied AFTER authentication to enable per-user limits
     expressMiddleware(apollo, { context: getContext }),
   );

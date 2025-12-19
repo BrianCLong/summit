@@ -388,7 +388,7 @@ function scopeSelectQuery(
   // Add WHERE clause or AND condition for tenant_id
   if (lowerQuery.includes('where')) {
     // Add AND tenant_id = $n condition
-    const scopedQuery = query + ` AND tenant_id = $${params.length + 1}`;
+    const scopedQuery = `${query} AND tenant_id = $${params.length + 1}`;
     return {
       query: scopedQuery,
       params: [...params, tenantId],
@@ -396,7 +396,7 @@ function scopeSelectQuery(
     };
   } else {
     // Add WHERE tenant_id = $n condition
-    const scopedQuery = query + ` WHERE tenant_id = $${params.length + 1}`;
+    const scopedQuery = `${query} WHERE tenant_id = $${params.length + 1}`;
     return {
       query: scopedQuery,
       params: [...params, tenantId],
@@ -429,14 +429,14 @@ function scopeUpdateQuery(
 
   // Add WHERE tenant_id condition to UPDATE
   if (lowerQuery.includes('where')) {
-    const scopedQuery = query + ` AND tenant_id = $${params.length + 1}`;
+    const scopedQuery = `${query} AND tenant_id = $${params.length + 1}`;
     return {
       query: scopedQuery,
       params: [...params, tenantId],
       wasScoped: true,
     };
   } else {
-    const scopedQuery = query + ` WHERE tenant_id = $${params.length + 1}`;
+    const scopedQuery = `${query} WHERE tenant_id = $${params.length + 1}`;
     return {
       query: scopedQuery,
       params: [...params, tenantId],
@@ -455,14 +455,14 @@ function scopeDeleteQuery(
 
   // Add WHERE tenant_id condition to DELETE
   if (lowerQuery.includes('where')) {
-    const scopedQuery = query + ` AND tenant_id = $${params.length + 1}`;
+    const scopedQuery = `${query} AND tenant_id = $${params.length + 1}`;
     return {
       query: scopedQuery,
       params: [...params, tenantId],
       wasScoped: true,
     };
   } else {
-    const scopedQuery = query + ` WHERE tenant_id = $${params.length + 1}`;
+    const scopedQuery = `${query} WHERE tenant_id = $${params.length + 1}`;
     return {
       query: scopedQuery,
       params: [...params, tenantId],
