@@ -1,4 +1,54 @@
-slo:
-  p95_ms: 1500
-  error_rate: 0.01
-  saturation: 0.7
+window: 10m
+namespace: "${PROM_NAMESPACE:-preview}"
+services:
+  gateway:
+    description: Gateway ingress and routing
+    prometheus:
+      base_url: "${PROMETHEUS_BASE_URL:-http://localhost:9090}"
+      queries:
+        - name: error_rate
+          query: |
+            sum(rate(http_requests_total{service="gateway",namespace="{{namespace}}",status=~"5.."}[{{window}}]))
+            /
+            sum(rate(http_requests_total{service="gateway",namespace="{{namespace}}"}[{{window}}]))
+          threshold: 0.01
+          comparison: lte
+        - name: latency_p95
+          query: |
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="gateway",namespace="{{namespace}}"}[{{window}}])) by (le))
+          threshold: 0.45
+          comparison: lte
+  api:
+    description: GraphQL API layer
+    prometheus:
+      base_url: "${PROMETHEUS_BASE_URL:-http://localhost:9090}"
+      queries:
+        - name: error_rate
+          query: |
+            sum(rate(http_requests_total{service="api",namespace="{{namespace}}",status=~"5.."}[{{window}}]))
+            /
+            sum(rate(http_requests_total{service="api",namespace="{{namespace}}"}[{{window}}]))
+          threshold: 0.01
+          comparison: lte
+        - name: latency_p95
+          query: |
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service="api",namespace="{{namespace}}"}[{{window}}])) by (le))
+          threshold: 0.55
+          comparison: lte
+  analytics-engine:
+    description: Analytics compute service
+    prometheus:
+      base_url: "${PROMETHEUS_BASE_URL:-http://localhost:9090}"
+      queries:
+        - name: error_rate
+          query: |
+            sum(rate(job_errors_total{service="analytics-engine",namespace="{{namespace}}"}[{{window}}]))
+            /
+            sum(rate(job_executions_total{service="analytics-engine",namespace="{{namespace}}"}[{{window}}]))
+          threshold: 0.02
+          comparison: lte
+        - name: latency_p95
+          query: |
+            histogram_quantile(0.95, sum(rate(job_duration_seconds_bucket{service="analytics-engine",namespace="{{namespace}}"}[{{window}}])) by (le))
+          threshold: 1.2
+          comparison: lte

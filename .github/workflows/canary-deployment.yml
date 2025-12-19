@@ -166,18 +166,30 @@ jobs:
           # Run comprehensive health checks
           ./scripts/rollback-deployment.sh health-check --namespace ${NAMESPACE}
 
-          # CHECK SLOs (Simulated - TEMPLATE)
-          # TODO: Implement real SLO check using Prometheus or similar.
-          # Example: curl -s "http://prometheus/api/v1/query?query=..."
-          # For this template, we simulate success.
-          echo "Checking SLOs for canary..."
-          echo "✅ [TEMPLATE] SLO Check Passed: Error Rate < 1%, p95 Latency < 500ms"
+          export TARGET_ENVIRONMENT=${{ inputs.environment }}
+          export PROM_NAMESPACE=${NAMESPACE}
+          PROMETHEUS_BASE_URL=${{ secrets.PROMETHEUS_BASE_URL }} PROM_NAMESPACE=${NAMESPACE} PR_NUMBER=${{ github.event.number }} ./.ci/scripts/verify_goldens.sh
+
+      - name: Progressive traffic ramp with SLO gates
+        env:
+          PROMETHEUS_BASE_URL: ${{ secrets.PROMETHEUS_BASE_URL }}
+        run: |
+          set -euo pipefail
+          NAMESPACE="${{ needs.validate-inputs.outputs.namespace }}"
+          INGRESS=$(kubectl get ing -n ${NAMESPACE} -o name | grep server)
+          for WEIGHT in 10 50 100; do
+            echo "➡️ Setting canary weight to ${WEIGHT}%"
+            kubectl annotate --overwrite ${INGRESS} nginx.ingress.kubernetes.io/canary-weight="${WEIGHT}" -n ${NAMESPACE}
+            echo "Waiting for steady state..."
+            sleep 30
+            PROM_NAMESPACE=${NAMESPACE} TARGET_ENVIRONMENT=${{ inputs.environment }} PR_NUMBER=${{ github.event.number }} PROMETHEUS_BASE_URL=${PROMETHEUS_BASE_URL} ./.ci/scripts/verify_goldens.sh
+          done
 
       - name: Update deployment status
         run: |
           echo "🚀 Canary deployment successful!"
           echo "Version: ${{ inputs.version }}"
-          echo "Traffic: ${{ inputs.canary_percentage }}%"
+          echo "Traffic: 100%"
           echo "Environment: ${{ inputs.environment }}"
 
   promote-canary:

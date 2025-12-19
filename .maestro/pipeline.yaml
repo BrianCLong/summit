@@ -11,7 +11,7 @@ pipeline:
     - id: sbom-and-scan
       run: just sbom && just trivy
     - id: slo-burn-check
-      run: just slo-check
+      run: ./.ci/scripts/otel_wrap.sh --name slo-burn-check -- just slo-check
       when: event == "push" || event == "pull_request"
     - id: migration-gate
       run: just migration-gate
@@ -20,8 +20,8 @@ pipeline:
       run: just deploy --strategy=canary --weight=10
       when: branch == "main" || tag != ""
     - id: canary-analyze
-      run: just canary-analyze --budget .maestro/ci_budget.json
-      when: step_succeeded("canary-deploy")
+      run: ./.ci/scripts/otel_wrap.sh --name canary-analyze -- just canary-analyze --budget .maestro/ci_budget.json
+      when: step_succeeded("canary-deploy") && step_succeeded("slo-burn-check")
     - id: promote-or-rollback
-      run: just promote || just rollback
+      run: ./.ci/scripts/otel_wrap.sh --name promote-or-rollback -- just promote || just rollback
       when: step_succeeded("canary-analyze")

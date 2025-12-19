@@ -18,6 +18,8 @@ env:
   REGISTRY: ghcr.io
   NAMESPACE_PREFIX: intelgraph-pr
   PREVIEW_TTL_HOURS: 72
+  GRAFANA_ROOT: https://grafana.preview.intelgraph.dev
+  JAEGER_ROOT: https://jaeger.preview.intelgraph.dev
 
 concurrency:
   group: preview-${{ github.event.number }}
@@ -75,7 +77,9 @@ jobs:
     if: github.event.action != 'closed'
     needs: build-images
     runs-on: ubuntu-latest
-    environment: preview
+    environment:
+      name: pr-${{ github.event.number }}
+      url: https://pr-${{ github.event.number }}.preview.intelgraph.dev
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -245,6 +249,8 @@ jobs:
           METRICS_URL="${PREVIEW_URL}/metrics"
           HEALTH_URL="${PREVIEW_URL}/health"
           GRAPHQL_URL="${PREVIEW_URL}/graphql"
+          GRAFANA_URL="${{ env.GRAFANA_ROOT }}/d/slo-overview?var-namespace=${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}"
+          JAEGER_URL="${{ env.JAEGER_ROOT }}/search?service=intelgraph&tags=%7B%22k8s.namespace.name%22%3A%22${{ env.NAMESPACE_PREFIX }}-${{ github.event.number }}%22%7D"
 
           cat > pr-comment.md << EOF
           ## 🚀 Preview Environment Ready
@@ -255,6 +261,8 @@ jobs:
           | **GraphQL Playground** | [${GRAPHQL_URL}](${GRAPHQL_URL}) | ✅ Ready |
           | **Health Check** | [${HEALTH_URL}](${HEALTH_URL}) | ✅ Healthy |
           | **Metrics** | [${METRICS_URL}](${METRICS_URL}) | ✅ Active |
+          | **Grafana SLO Dashboard** | [${GRAFANA_URL}](${GRAFANA_URL}) | ✅ Wired |
+          | **Jaeger Traces** | [${JAEGER_URL}](${JAEGER_URL}) | ✅ Live |
 
           ### 🧪 Test Results
           - ✅ Smoke tests passed
@@ -278,7 +286,8 @@ jobs:
   teardown:
     if: github.event.action == 'closed'
     runs-on: ubuntu-latest
-    environment: preview
+    environment:
+      name: pr-${{ github.event.number }}
     steps:
       - name: Setup kubectl
         uses: azure/setup-kubectl@v3
