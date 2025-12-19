@@ -83,10 +83,17 @@ export class InfluenceOperationsEngine {
     for (const cluster of narrativeClusters) {
         const ampResult = this.narrativeTracker.detectArtificialAmplification(cluster);
         if (ampResult.isAnomalous) {
+            // Map exemplar posts to authors
+            const involvedActors = new Set<string>();
+            cluster.exemplarPosts.forEach(postId => {
+                const post = posts.find(p => p.id === postId);
+                if (post) involvedActors.add(post.authorId);
+            });
+
             campaigns.push({
                 id: `CAMPAIGN_${Date.now()}_${campaigns.length}`,
                 type: CampaignType.ASTROTURFING,
-                actors: cluster.exemplarPosts, // Simplified, should map back to authors
+                actors: Array.from(involvedActors),
                 threatLevel: ThreatLevel.MEDIUM,
                 narrative: cluster.keywords.join(', '),
                 evidence: [ampResult.reason],
