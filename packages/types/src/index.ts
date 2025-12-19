@@ -8,3 +8,5 @@ export interface BaseModel {
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
+
+export * from './zk';
