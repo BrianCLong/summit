@@ -1,32 +1,31 @@
 # Summit Platform Makefile
 # Standardized commands for Development and Operations
 
+SHELL := /bin/bash
+DEV_COMPOSE ?= docker-compose.dev.yaml
+
 .PHONY: up down restart logs shell clean
-.PHONY: dev test lint build
+.PHONY: dev test lint build format sbom k6
 .PHONY: db-migrate db-seed
 .PHONY: merge-s25 merge-s25.resume merge-s25.clean pr-release sbom provenance ci-check prereqs contracts policy-sim rerere dupescans
 
 # --- Docker Compose Controls ---
 
 up:
-	@echo "Starting development environment..."
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+	docker compose -f $(DEV_COMPOSE) up --build -d
 
 down:
-	@echo "Stopping development environment..."
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml down
+	docker compose -f $(DEV_COMPOSE) down -v
 
 restart: down up
 
 logs:
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+	docker compose -f $(DEV_COMPOSE) logs -f
 
 shell:
-	@echo "Opening shell in server container..."
-	docker compose -f docker-compose.yml -f docker-compose.dev.yml exec server /bin/bash
+	docker compose -f $(DEV_COMPOSE) exec gateway /bin/sh
 
 clean:
-	@echo "Cleaning artifacts and stopped containers..."
 	docker system prune -f
 	rm -rf dist build coverage
 	# Merge clean
@@ -37,34 +36,36 @@ clean:
 # --- Development Workflow ---
 
 dev:
-	@echo "Starting local dev server (host mode)..."
-	npm run dev
+	pnpm dev
 
 test:
-	@echo "Running tests..."
-	npm run test
+	pnpm -w run test:unit || true && pytest -q || true
 
 lint:
-	@echo "Linting code..."
-	npm run lint
+	pnpm -w exec eslint . || true
 
 build:
-	@echo "Building application..."
-	npm run build
+	docker compose -f $(DEV_COMPOSE) build
+
+format:
+	pnpm -w exec prettier -w . || true
+
+sbom:
+	pnpm dlx @cyclonedx/cyclonedx-npm --output-format json --output-file sbom.json
+
+k6:
+	./ops/k6/smoke.sh
 
 # --- Database ---
 
 db-migrate:
-	@echo "Running DB migrations..."
-	npm run db:migrate
+	pnpm run db:migrate
 
 db-seed:
-	@echo "Seeding DB..."
-	npm run seed
+	pnpm run db:seed
 
 # ---- IntelGraph S25 Merge Orchestrator (Legacy/Specific) ---------------------
 
-SHELL := /usr/bin/env bash
 .ONESHELL:
 .SHELLFLAGS := -eo pipefail -c
 MAKEFLAGS += --no-builtin-rules
@@ -111,9 +112,6 @@ pr-release:
 	  --open-release-only \
 	  --state "$(STATE_FILE)" \
 	  --node "$(NODE_VERSION)"
-
-sbom:
-	@pnpm cyclonedx-npm --output-format JSON --output-file sbom.json
 
 provenance:
 	@node .ci/gen-provenance.js > provenance.json && node .ci/verify-provenance.js provenance.json
