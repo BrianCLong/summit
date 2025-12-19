@@ -4,13 +4,38 @@ import { Request, Response, NextFunction } from 'express';
 import { jwtRotationManager } from './jwt-rotation.js';
 import logger from '../../config/logger.js';
 
+function parseBool(
+  value: string | boolean | undefined,
+  defaultValue: boolean,
+): boolean {
+  if (value === undefined || value === null) {
+    return defaultValue;
+  }
+
+  if (typeof value === 'boolean') {
+    return value;
+  }
+
+  const normalized = value.toString().trim().toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on'].includes(normalized)) {
+    return true;
+  }
+
+  if (['false', '0', 'no', 'n', 'off'].includes(normalized)) {
+    return false;
+  }
+
+  return defaultValue;
+}
+
 export interface AuthenticatedUser {
+  id: string;
   sub: string;
   email: string;
   name?: string;
   groups?: string[];
   roles?: string[];
-  tenantId?: string;
+  tenantId: string;
   userId: string;
   permissions?: string[];
 }
@@ -44,7 +69,7 @@ class RBACManager {
 
   constructor() {
     this.config = {
-      enabled: process.env.RBAC_ENABLED === 'true' || true,
+      enabled: true,
       rolesClaim: process.env.RBAC_ROLES_CLAIM || 'groups',
       defaultRole: process.env.RBAC_DEFAULT_ROLE || 'viewer',
       roles: {
@@ -112,7 +137,9 @@ class RBACManager {
     };
 
     this.loadConfigFromEnvironment();
+    this.config.enabled = parseBool(process.env.RBAC_ENABLED, this.config.enabled);
     this.buildPermissionCache();
+    this.logStatus();
   }
 
   private loadConfigFromEnvironment(): void {
@@ -149,6 +176,15 @@ class RBACManager {
       roles: Object.keys(this.config.roles),
       enabled: this.config.enabled,
     });
+  }
+
+  private logStatus(): void {
+    if (!this.config.enabled) {
+      logger.info('🔓 RBAC disabled via RBAC_ENABLED; authorization bypass active', {
+        rbacEnabled: this.config.enabled,
+        source: 'environment',
+      });
+    }
   }
 
   getUserRoles(user: AuthenticatedUser): string[] {
@@ -231,8 +267,27 @@ export function authenticateUser(
   req: Request,
   res: Response,
   next: NextFunction,
-): void {
+): Response | void {
   try {
+    if (!rbacManager.getConfig().enabled) {
+      const disabledUser: AuthenticatedUser = {
+        id: 'rbac-disabled',
+        userId: 'rbac-disabled',
+        sub: 'rbac-disabled',
+        email: 'rbac-disabled@system.local',
+        name: 'RBAC Disabled',
+        groups: ['admin'],
+        roles: ['admin'],
+        tenantId: 'default',
+      };
+
+      (req as AuthenticatedRequest).user = disabledUser;
+      logger.debug('🔓 RBAC disabled - bypassing authentication middleware', {
+        userId: disabledUser.userId,
+      });
+      return next();
+    }
+
     let user: AuthenticatedUser | null = null;
 
     // Try OAuth2 Proxy headers first (production)
@@ -247,6 +302,7 @@ export function authenticateUser(
         : [];
 
       user = {
+        id: req.headers['x-auth-request-user'] as string,
         userId: req.headers['x-auth-request-user'] as string,
         sub: req.headers['x-auth-request-user'] as string,
         email: req.headers['x-auth-request-email'] as string,
@@ -265,6 +321,7 @@ export function authenticateUser(
         .then((payload) => {
           if (typeof payload === 'object' && payload.sub) {
             user = {
+              id: payload.sub,
               userId: payload.sub,
               sub: payload.sub,
               email: payload.email || '',
@@ -299,6 +356,7 @@ export function authenticateUser(
       process.env.AUTH_BYPASS === 'true'
     ) {
       user = {
+        id: 'dev-user',
         userId: 'dev-user',
         sub: 'dev-user',
         email: 'dev@intelgraph.io',
@@ -339,8 +397,19 @@ export function authenticateUser(
  * Authorization middleware factory - checks if user has required permission
  */
 export function requirePermission(permission: string) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Response | void => {
     try {
+      if (!rbacManager.getConfig().enabled) {
+        logger.debug('🔓 RBAC disabled - skipping permission check', {
+          permission,
+        });
+        return next();
+      }
+
       const user = (req as AuthenticatedRequest).user;
 
       if (!user) {
@@ -390,8 +459,19 @@ export function requirePermission(permission: string) {
  * Multi-permission authorization middleware
  */
 export function requireAnyPermission(...permissions: string[]) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Response | void => {
     try {
+      if (!rbacManager.getConfig().enabled) {
+        logger.debug('🔓 RBAC disabled - skipping multi-permission check', {
+          permissions,
+        });
+        return next();
+      }
+
       const user = (req as AuthenticatedRequest).user;
 
       if (!user) {
@@ -429,7 +509,7 @@ export function requireAnyPermission(...permissions: string[]) {
 /**
  * Get user information endpoint
  */
-export function getUserInfo(req: Request, res: Response): void {
+export function getUserInfo(req: Request, res: Response): Response | void {
   try {
     const user = (req as AuthenticatedRequest).user;
 

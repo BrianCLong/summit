@@ -1,5 +1,12 @@
 import http from 'http';
 
+if (!process.env.RBAC_ENABLED) {
+  process.env.RBAC_ENABLED = 'false';
+  console.log(
+    'Mock Maestro server: RBAC disabled (RBAC_ENABLED=false) for CI smoke tests',
+  );
+}
+
 const port = Number(process.env.PORT || 3000);
 
 const jsonResponse = (res, body, status = 200) => {
