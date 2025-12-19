@@ -7,6 +7,20 @@
 
 Please follow the **[Onboarding & Quickstart Guide](planning/enablement-pack/onboarding-quickstart.md)**.
 
+### Golden path for local development
+
+1. **Tooling:** Node.js 18.18+, pnpm 9+, Python 3.11+, and Docker Desktop (for optional local services).
+2. **Install:** `pnpm install --frozen-lockfile` (runs `husky install` via `prepare`). If hooks were skipped, run `pnpm exec husky install` once.
+3. **Develop:** `pnpm dev` starts the API and web client together. Use `make up` when you want the Dockerized dependencies.
+4. **Quick validation:** `pnpm run check:local` (lint + typecheck + a fast Jest sweep) keeps feedback quick without running Playwright or integration suites.
+5. **Opt-in heavy checks:** `pnpm run test:e2e` (Playwright) and `pnpm run test:integration` are now manual/CI-only so local commits stay fast.
+
+### Git hooks (lightweight by default)
+
+- **Pre-commit:** runs secret scanning (custom + gitleaks when installed) and `lint-staged` on **staged files only**. Type-checking and screenshot generation were removed from the hook to avoid blocking commits.
+- **Pre-push:** keeps `scripts/pr_guard.sh` for safety and runs the new `test:quick` script; failures are soft on feature branches and strict on protected branches.
+- **Recommended before PRs:** `pnpm run check:local` plus any relevant integration/E2E commands for the area you changed.
+
 ## Common Development Tasks
 
 See **[Daily Developer Workflows](planning/enablement-pack/daily-dev-workflows.md)**.

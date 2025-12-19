@@ -1,8 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+set -euo pipefail
+
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 
 # Strict on protected branches, soft otherwise
 if [ "$BRANCH" = "main" ] || echo "$BRANCH" | grep -Eq '^release/|^hotfix/'; then
-  STRICT=true BASE_REF="origin/main" MAX_FILES=200 MAX_FILE_MB=5     bash scripts/pr_guard.sh --strict || exit 1
+  STRICT=true BASE_REF="origin/main" MAX_FILES=200 MAX_FILE_MB=5 bash scripts/pr_guard.sh --strict || exit 1
 else
   BASE_REF="origin/main" bash scripts/pr_guard.sh || true
 fi
@@ -12,9 +17,17 @@ if command -v git-lfs >/dev/null 2>&1; then
   git lfs pre-push "$@"
 fi
 
-# Fast sanity tests
+run_quick_tests() {
+  if command -v pnpm >/dev/null 2>&1; then
+    pnpm run test:quick
+  else
+    npm run --if-present test:quick
+  fi
+}
+
+# Fast sanity tests (lightweight)
 if [ "$BRANCH" = "main" ] || echo "$BRANCH" | grep -Eq '^release/|^hotfix/'; then
-  npm run test:quick
+  run_quick_tests
 else
-  npm run test:quick || true
+  run_quick_tests || true
 fi

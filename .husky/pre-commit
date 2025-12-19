@@ -8,49 +8,37 @@ log() {
   echo "$1"
 }
 
-log "🔒 Running pre-commit checks..."
+log "🔒 Running pre-commit checks (staged files only)..."
 
-# Run custom secret scanner
-log "🔍 Running custom secret scanner..."
+log "🔍 Running secret scanner..."
 if [ -f "scripts/scan_secrets.py" ]; then
-    python3 scripts/scan_secrets.py || {
-      log "❌ Secrets detected by custom scanner!"
-      exit 1
-    }
+  python3 scripts/scan_secrets.py || {
+    log "❌ Secrets detected by custom scanner!"
+    exit 1
+  }
 fi
 
-# Run gitleaks if available
 if command -v gitleaks >/dev/null 2>&1; then
   log "🔍 Scanning for secrets with gitleaks..."
   gitleaks protect --staged --verbose || {
     log "❌ Secret detected by gitleaks!"
     exit 1
   }
-fi
-
-# Run typecheck
-log "🔍 Running strict typechecks..."
-npm run typecheck || {
-  log "❌ Typecheck failed."
-  exit 1
-}
-
-# Run lint-staged
-log "🔍 Running lint-staged..."
-pnpm exec lint-staged || {
-  log "❌ Lint-staged failed."
-  exit 1
-}
-
-# Run screenshots (robust)
-log "📸 Generating screenshots..."
-CMD="npx tsx server/scripts/generate-screenshots.ts"
-
-# Use timeout if available, otherwise rely on script's internal timeout
-if command -v timeout >/dev/null 2>&1; then
-  timeout 35s $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
 else
-  $CMD >> "$LOG_FILE" 2>&1 || log "⚠️ Screenshot generation failed (check logs)"
+  log "ℹ️  Skipping gitleaks (not installed)"
 fi
 
-log "✅ All checks passed!"
+log "🧹 Running lint-staged..."
+if command -v pnpm >/dev/null 2>&1; then
+  pnpm lint-staged || {
+    log "❌ Lint-staged failed."
+    exit 1
+  }
+else
+  npx lint-staged || {
+    log "❌ Lint-staged failed."
+    exit 1
+  }
+fi
+
+log "✅ Pre-commit checks completed."
