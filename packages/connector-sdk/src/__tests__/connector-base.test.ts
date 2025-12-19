@@ -3,7 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { BaseConnector, ConnectorConfig, ConnectorResult } from '../base';
+import { BaseConnector } from '../base-connector';
+import { ConnectorConfig, ConnectorResult } from '../types';
 import { MockConnectorTestHarness } from '../testing';
 
 // Test connector implementation
@@ -24,6 +25,7 @@ class TestConnector extends BaseConnector {
   }
 
   async search(params: { query: string }): Promise<ConnectorResult> {
+    void params;
     return {
       success: true,
       data: [{ id: '1', name: 'Result 1' }],

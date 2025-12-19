@@ -4,7 +4,6 @@
 
 import { CsvFileConnector } from '../connectors/csv-file-connector';
 import type { ConnectorContext, ConnectorEntity } from '../types';
-import { createWriteStream } from 'fs';
 import { unlink, writeFile } from 'fs/promises';
 import { join } from 'path';
 import { tmpdir } from 'os';

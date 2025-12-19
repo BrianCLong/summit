@@ -215,7 +215,7 @@ export { MyConnector } from './my-connector';
 3. **Use Your Connector**
 
 ```typescript
-import { MyConnector } from '@intelgraph/connector-sdk/connectors';
+import { MyConnector } from '@summit/connector-sdk/connectors';
 
 const connector = new MyConnector();
 
@@ -518,7 +518,7 @@ Check if an export operation is allowed under license policy.
 ### Example 1: CSV Ingestion with PII Redaction
 
 ```typescript
-import { CsvFileConnector } from '@intelgraph/connector-sdk/connectors';
+import { CsvFileConnector } from '@summit/connector-sdk/connectors';
 import { ETLAssistant } from '@intelgraph/etl-assistant';
 import { readFileSync } from 'fs';
 import { parse } from 'csv-parse/sync';
@@ -559,7 +559,7 @@ console.log('Registration:', await response.json());
 ### Example 2: REST API Polling
 
 ```typescript
-import { RestPullConnector } from '@intelgraph/connector-sdk/connectors';
+import { RestPullConnector } from '@summit/connector-sdk/connectors';
 
 const connector = new RestPullConnector();
 
@@ -590,7 +590,7 @@ console.log('Ingested:', result.entitiesProcessed, 'entities');
 ### Example 3: S3 Bucket Ingestion
 
 ```typescript
-import { S3BucketConnector } from '@intelgraph/connector-sdk/connectors';
+import { S3BucketConnector } from '@summit/connector-sdk/connectors';
 
 const connector = new S3BucketConnector();
 

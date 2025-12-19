@@ -1,23 +1,53 @@
 import globals from 'globals';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
-import pluginReactConfig from 'eslint-plugin-react/configs/recommended.js';
-import { fixupConfigAsPlugin } from '@eslint/js/dist/configs/eslint-plugin-react/lib/fixupConfigAsPlugin.js';
+import reactPlugin from 'eslint-plugin-react';
 import importPlugin from 'eslint-plugin-import';
 
 export default [
+  {
+    ignores: [
+      'dist/',
+      'build/',
+      'coverage/',
+      'node_modules/',
+      'public/',
+      '*.min.js',
+      '.github/workflows/compliance-automation.yml',
+      '.vite/',
+      '.next/',
+      '.cache/',
+      '.turbo/',
+      'generated/',
+      'v4/archive/',
+      '.venv/',
+      'venv/',
+      'v24_modules/',
+    ],
+  },
   { languageOptions: { globals: globals.browser } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  fixupConfigAsPlugin(pluginReactConfig),
   {
-    plugins: { import: importPlugin },
+    plugins: { import: importPlugin, react: reactPlugin },
     settings: {
       'import/resolver': {
-        typescript: { project: ['./tsconfig.json', './client/tsconfig.json'] },
+        typescript: {
+          project: [
+            './tsconfig.json',
+            './client/tsconfig.json',
+            './packages/connector-sdk/tsconfig.json',
+            './packages/etl-assistant/tsconfig.json',
+            './services/universal-ingestion/tsconfig.json',
+          ],
+        },
+      },
+      react: {
+        version: 'detect',
       },
     },
     rules: {
+      ...reactPlugin.configs.recommended.rules,
       'import/no-unresolved': 'error',
       '@typescript-eslint/no-explicit-any': 'off',
       'no-unused-expressions': 'off',

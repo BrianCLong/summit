@@ -52,6 +52,7 @@ export class InMemoryEventBus implements IngestEventBus {
   }
 
   async emit(event: IngestEvent): Promise<void> {
+    void event;
     this.events.push(event);
 
     // Simple overflow protection
@@ -61,6 +62,7 @@ export class InMemoryEventBus implements IngestEventBus {
   }
 
   async emitBatch(events: IngestEvent[]): Promise<void> {
+    void events;
     for (const event of events) {
       await this.emit(event);
     }
@@ -107,11 +109,13 @@ export class KafkaEventBus implements IngestEventBus {
   }
 
   async emit(event: IngestEvent): Promise<void> {
+    void event;
     // Serialize and send to Kafka
     throw new Error('Not implemented');
   }
 
   async emitBatch(events: IngestEvent[]): Promise<void> {
+    void events;
     // Batch send to Kafka
     throw new Error('Not implemented');
   }
