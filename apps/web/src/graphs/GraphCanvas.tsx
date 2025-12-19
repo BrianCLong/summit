@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect, useState, forwardRef, useImperativeHandle } from 'react'
 import * as d3 from 'd3'
 // Tree-shaken D3 imports for better bundle size
 import { select } from 'd3-selection'
@@ -20,15 +20,23 @@ import { drag } from 'd3-drag'
 import { cn } from '@/lib/utils'
 import type { Entity, Relationship, GraphLayout } from '@/types'
 
-interface GraphCanvasProps {
+export interface GraphCanvasProps {
   entities: Entity[]
   relationships: Relationship[]
   layout: GraphLayout
   onEntitySelect?: (entity: Entity) => void
+  onNodeDrop?: (type: string, x: number, y: number) => void
+  onLinkCreate?: (sourceId: string, targetId: string) => void
   selectedEntityId?: string
   width?: number
   height?: number
   className?: string
+}
+
+export interface GraphCanvasRef {
+  exportAsPNG: () => Promise<Blob | null>
+  exportAsSVG: () => string | null
+  exportAsJSON: () => string
 }
 
 interface GraphNode extends SimulationNodeDatum {
@@ -47,20 +55,62 @@ interface GraphLink extends SimulationLinkDatum<GraphNode> {
   target: GraphNode
 }
 
-export function GraphCanvas({
+export const GraphCanvas = forwardRef<GraphCanvasRef, GraphCanvasProps>(({
   entities,
   relationships,
   layout,
   onEntitySelect,
+  onNodeDrop,
+  onLinkCreate,
   selectedEntityId,
   className,
-}: GraphCanvasProps) {
+}, ref) => {
   const svgRef = useRef<SVGSVGElement>(null)
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 })
   const [fps, setFps] = useState(0)
   const [debugMode, setDebugMode] = useState(false)
   const frameCountRef = useRef(0)
   const lastTimeRef = useRef(performance.now())
+
+  // Expose export methods via ref
+  useImperativeHandle(ref, () => ({
+    exportAsPNG: async () => {
+      if (!svgRef.current) return null
+
+      const svg = svgRef.current
+      const serializer = new XMLSerializer()
+      const svgStr = serializer.serializeToString(svg)
+
+      const canvas = document.createElement('canvas')
+      canvas.width = dimensions.width
+      canvas.height = dimensions.height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return null
+
+      const img = new Image()
+      const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
+      const url = URL.createObjectURL(svgBlob)
+
+      return new Promise((resolve) => {
+        img.onload = () => {
+          ctx.fillStyle = '#ffffff'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          ctx.drawImage(img, 0, 0)
+          URL.revokeObjectURL(url)
+          canvas.toBlob((blob) => resolve(blob))
+        }
+        img.src = url
+      })
+    },
+    exportAsSVG: () => {
+      if (!svgRef.current) return null
+      const serializer = new XMLSerializer()
+      return serializer.serializeToString(svgRef.current)
+    },
+    exportAsJSON: () => {
+      return JSON.stringify({ entities, relationships, layout }, null, 2)
+    }
+  }))
 
   // Calculate FPS
   useEffect(() => {
@@ -99,7 +149,7 @@ export function GraphCanvas({
   }, [])
 
   useEffect(() => {
-    if (!svgRef.current || entities.length === 0) {return}
+    if (!svgRef.current || entities.length === 0) return
 
     const svg = select(svgRef.current)
     svg.selectAll('*').remove()
@@ -126,12 +176,6 @@ export function GraphCanvas({
       }))
 
     // Create simulation based on layout type
-    let simulation: d3.Simulation<GraphNode, GraphLink>
-
-    switch (layout.type) {
-      case 'force':
-        simulation = d3
-          .forceSimulation(nodes)
     let simulation: Simulation<GraphNode, GraphLink>
 
     switch (layout.type) {
@@ -149,14 +193,6 @@ export function GraphCanvas({
         break
 
       case 'radial':
-        simulation = d3
-          .forceSimulation(nodes)
-          .force('charge', forceManyBody().strength(-300))
-          .force('center', forceCenter(width / 2, height / 2))
-          .force('collision', forceCollide().radius(30))
-        break
-
-      case 'radial':
         simulation = forceSimulation(nodes)
           .force(
             'link',
@@ -164,44 +200,12 @@ export function GraphCanvas({
               .id(d => d.id)
               .distance(80)
           )
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
-          .force('charge', d3.forceManyBody().strength(-200))
-          .force('radial', d3.forceRadial(150, width / 2, height / 2))
           .force('charge', forceManyBody().strength(-200))
           .force('radial', forceRadial(150, width / 2, height / 2))
         break
 
       case 'hierarchic':
         // Simple hierarchical layout - in a real app you'd use dagre or similar
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
-        simulation = d3
-          .forceSimulation(nodes)
         simulation = forceSimulation(nodes)
           .force(
             'link',
@@ -218,8 +222,6 @@ export function GraphCanvas({
         break
 
       default:
-        simulation = d3
-          .forceSimulation(nodes)
         simulation = forceSimulation(nodes)
           .force(
             'link',
@@ -234,6 +236,19 @@ export function GraphCanvas({
     const linksGroup = container.append('g').attr('class', 'links')
     const nodesGroup = container.append('g').attr('class', 'nodes')
 
+    // Temporary link line for drag interaction
+    const dragLine = container.append('line')
+      .attr('class', 'drag-line')
+      .attr('stroke', '#fbbf24')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '5,5')
+      .style('opacity', 0)
+      .style('pointer-events', 'none')
+
+    // Link creation state
+    let isLinking = false
+    let linkSource: GraphNode | null = null
+
     // Add zoom behavior
     const zoomBehavior = zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 4])
@@ -242,6 +257,58 @@ export function GraphCanvas({
       })
 
     svg.call(zoomBehavior)
+
+    // Keyboard navigation for pan/zoom
+    const handleKeyDown = (event: KeyboardEvent) => {
+       const transform = d3.zoomTransform(svg.node()!)
+       const k = transform.k
+       const x = transform.x
+       const y = transform.y
+       const step = 50
+
+       switch(event.key) {
+           case 'ArrowUp':
+               zoomBehavior.translateBy(svg, 0, step / k)
+               break
+           case 'ArrowDown':
+               zoomBehavior.translateBy(svg, 0, -step / k)
+               break
+           case 'ArrowLeft':
+               zoomBehavior.translateBy(svg, step / k, 0)
+               break
+           case 'ArrowRight':
+               zoomBehavior.translateBy(svg, -step / k, 0)
+               break
+           case '+':
+           case '=':
+               zoomBehavior.scaleBy(svg, 1.2)
+               break
+           case '-':
+               zoomBehavior.scaleBy(svg, 0.8)
+               break
+       }
+    }
+
+    // Attach to the container div to capture keys when focused or mouse over
+    // Note: React synthetic events are on the div, but here we are inside useEffect
+    // Ideally we should attach to window or the focused element.
+    // For now, let's attach to the window only when the user is likely interacting with the graph,
+    // but better to rely on the parent component or assume the SVG is focused.
+
+    // Since we can't easily attach to "this" component instance from d3 effect without refs or imperative handles,
+    // and we want global shortcuts when the workbench is active, OR specific focus.
+
+    // Let's attach to the SVG element which is focusable?
+    // We didn't make SVG focusable, but the parent div is.
+
+    // We will assume the parent handles focus or we attach to window but filter?
+    // Let's stick to attaching to the SVG ref if it has focus.
+
+    // Actually, simple approach:
+    select(svgRef.current)
+       .attr('tabindex', 0) // Make SVG focusable
+       .on('keydown', (event) => handleKeyDown(event))
+
 
     // Draw links
     const link = linksGroup
@@ -305,22 +372,85 @@ export function GraphCanvas({
       .enter()
       .append('g')
       .attr('class', 'node')
+      .attr('tabindex', 0)
+      .attr('role', 'button')
+      .attr('aria-label', d => `${d.entity.name} (${d.entity.type})`)
       .style('cursor', 'pointer')
+      .on('keydown', (event, d) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onEntitySelect?.(d.entity)
+        }
+      })
       .call(
         drag<SVGGElement, GraphNode>()
           .on('start', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0.3).restart()}
-            d.fx = d.x
-            d.fy = d.y
+            if (event.sourceEvent.shiftKey && onLinkCreate) {
+              // Start linking mode
+              isLinking = true
+              linkSource = d
+              dragLine
+                .attr('x1', d.x!)
+                .attr('y1', d.y!)
+                .attr('x2', d.x!)
+                .attr('y2', d.y!)
+                .style('opacity', 1)
+            } else {
+              // Standard drag
+              if (!event.active) simulation.alphaTarget(0.3).restart()
+              d.fx = d.x
+              d.fy = d.y
+            }
           })
           .on('drag', (event, d) => {
-            d.fx = event.x
-            d.fy = event.y
+            if (isLinking && linkSource) {
+              // Update drag line
+              // We need to transform mouse coordinates back to SVG space
+              const transform = d3.zoomTransform(svg.node()!)
+              const [mouseX, mouseY] = d3.pointer(event, svg.node())
+              // Invert transform not needed if we use the mouse position relative to container,
+              // but drag event gives us coordinates in the subject's coordinate system usually.
+              // d3.drag behavior on the node gives us event.x/y which are the node's new position.
+
+              // However, since we are dragging the *node*, event.x/y are where the node would be.
+              // If shift is held, we want the mouse position.
+
+              dragLine
+                .attr('x2', event.x)
+                .attr('y2', event.y)
+            } else {
+              d.fx = event.x
+              d.fy = event.y
+            }
           })
           .on('end', (event, d) => {
-            if (!event.active) {simulation.alphaTarget(0)}
-            d.fx = null
-            d.fy = null
+            if (isLinking && linkSource) {
+              isLinking = false
+              dragLine.style('opacity', 0)
+
+              // Check if dropped on another node
+              // We can use document.elementFromPoint or checking distance
+              // But drag end event doesn't give us the target element easily if we are capturing.
+
+              // Let's find the node closest to the cursor
+              // Note: event.x, event.y are in local coordinates
+              const target = nodes.find(n => {
+                if (n === linkSource) return false
+                const dx = n.x! - event.x
+                const dy = n.y! - event.y
+                return Math.sqrt(dx * dx + dy * dy) < 20 // 20px radius
+              })
+
+              if (target && onLinkCreate) {
+                onLinkCreate(linkSource.id, target.id)
+              }
+
+              linkSource = null
+            } else {
+              if (!event.active) simulation.alphaTarget(0)
+              d.fx = null
+              d.fy = null
+            }
           })
       )
 
@@ -438,7 +568,20 @@ export function GraphCanvas({
   ])
 
   return (
-    <div className={cn('relative w-full h-full', className)}>
+    <div
+      className={cn('relative w-full h-full', className)}
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={(e) => {
+        e.preventDefault()
+        const type = e.dataTransfer.getData('application/intelgraph-entity')
+        if (type && onNodeDrop) {
+          const rect = svgRef.current?.getBoundingClientRect()
+          if (rect) {
+            onNodeDrop(type, e.clientX - rect.left, e.clientY - rect.top)
+          }
+        }
+      }}
+    >
       <svg
         ref={svgRef}
         className="w-full h-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800"
@@ -451,22 +594,6 @@ export function GraphCanvas({
       {/* Graph controls overlay */}
       <div className="absolute top-4 right-4 flex flex-col gap-2">
         <div className="bg-background/90 backdrop-blur-sm border rounded-lg p-2 shadow-sm">
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
-          <div className="text-xs font-medium text-muted-foreground mb-1">
-            Graph Info
           <div className="flex justify-between items-center mb-1 gap-2">
             <div className="text-xs font-medium text-muted-foreground">
               Graph Info
@@ -535,4 +662,4 @@ export function GraphCanvas({
       </div>
     </div>
   )
-}
+})
