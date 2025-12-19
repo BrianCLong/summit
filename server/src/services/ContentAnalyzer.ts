@@ -7,6 +7,10 @@
  * @module ContentAnalyzer
  */
 
+// We can optionally use 'sentiment' library if available, but for now strict mode requires clean imports.
+// The review mentioned using 'sentiment' which is in package.json.
+import Sentiment from 'sentiment';
+
 export interface AnalysisResult {
   sentiment: number; // -1.0 to 1.0
   manipulationScore: number; // 0.0 to 1.0
@@ -15,6 +19,12 @@ export interface AnalysisResult {
 }
 
 export class ContentAnalyzer {
+  private sentimentAnalyzer: Sentiment;
+
+  constructor() {
+    this.sentimentAnalyzer = new Sentiment();
+  }
+
   /**
    * Analyzes text content for psychological influence indicators.
    */
@@ -33,27 +43,10 @@ export class ContentAnalyzer {
   }
 
   private calculateSentiment(text: string): number {
-    const positive = [
-      'trust',
-      'verify',
-      'safe',
-      'confirmed',
-      'calm',
-      'solution',
-    ];
-    const negative = ['danger', 'crisis', 'lie', 'fake', 'enemy', 'betrayal'];
-
-    let score = 0;
-    const lower = text.toLowerCase();
-    positive.forEach((w) => {
-      if (lower.includes(w)) score += 0.2;
-    });
-    negative.forEach((w) => {
-      if (lower.includes(w)) score -= 0.2;
-    });
-
-    // Normalize to -1..1 (simplified)
-    return Math.max(-1, Math.min(1, score));
+    // Use the sentiment library for better scoring
+    const result = this.sentimentAnalyzer.analyze(text);
+    // Normalize score approx -5 to 5 range to -1 to 1
+    return Math.max(-1, Math.min(1, result.score / 5));
   }
 
   private detectManipulation(text: string): number {
