@@ -34,6 +34,11 @@ const FLAG_CATALOG: Record<string, FlagDefinition> = {
     defaultValue: 'control',
     variants: ['control', 'insights-v2'],
   },
+  'ui.virtualLists': { type: 'boolean', defaultValue: false },
+  'ui.virtualLists.investigations': { type: 'boolean', defaultValue: false },
+  'ui.virtualLists.incidents': { type: 'boolean', defaultValue: false },
+  'ui.virtualLists.cases': { type: 'boolean', defaultValue: false },
+  'ui.virtualLists.devFixture': { type: 'boolean', defaultValue: false },
 };
 
 const envOverrides = parseOverrides(import.meta.env.VITE_FEATURE_FLAGS, import.meta.env.PROD);

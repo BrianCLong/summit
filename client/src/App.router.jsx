@@ -51,6 +51,7 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import LoginPage from './components/auth/LoginPage.jsx';
 import ErrorBoundary from './components/ErrorBoundary.tsx';
+import PerfFixtureRoute from './routes/PerfFixtureRoute';
 
 // Lazy load heavy components for better initial load performance
 const InteractiveGraphExplorer = React.lazy(() =>
@@ -690,6 +691,9 @@ function MainLayout() {
               <Route path="/access-intel" element={<AccessIntelPage />} />
               <Route path="/geoint" element={<InvestigationsPage />} />
               <Route path="/reports" element={<InvestigationsPage />} />
+              {import.meta.env.DEV && (
+                <Route path="/dev/perf-fixture" element={<PerfFixtureRoute />} />
+              )}
               <Route element={<ProtectedRoute roles={APPROVER_ROLES} />}>
                 <Route path="/approvals" element={<ApprovalsPage />} />
               </Route>

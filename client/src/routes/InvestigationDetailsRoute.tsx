@@ -1,8 +1,12 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { gql, useQuery } from '@apollo/client';
 import ProvenanceFilterPanel from '../components/ProvenanceFilterPanel';
 import ExportAuditBundleButton from '../components/ExportAuditBundleButton';
+import VirtualizedListTable from '../components/common/VirtualizedListTable';
+import { useFeatureFlag } from '../hooks/useFeatureFlag';
+import { useDebouncedValue } from '../hooks/useDebouncedValue';
+import { PerfMarkOverlay, usePerfMarkers } from '../hooks/usePerfMarkers';
 
 const PROV_Q = gql`
   query ProvByInvestigation(
@@ -29,6 +33,7 @@ export default function InvestigationDetailsRoute() {
   const { investigationId = '' } = useParams();
   const [filter, setFilter] = useState<any>(undefined);
   const [groupBy, setGroupBy] = useState<'none' | 'minute' | 'hour'>('none');
+  const [search, setSearch] = useState('');
   const variables = useMemo(
     () => ({ id: investigationId, filter, first: 50, offset: 0 }),
     [investigationId, filter],
@@ -39,10 +44,31 @@ export default function InvestigationDetailsRoute() {
     skip: !investigationId,
   });
 
+  const virtualized =
+    useFeatureFlag('ui.virtualLists') ||
+    useFeatureFlag('ui.virtualLists.investigations');
+  const { mark, overlayState } = usePerfMarkers(
+    'investigation-events',
+    virtualized,
+  );
+  const debouncedSearch = useDebouncedValue(search, 150);
   const events = data?.provenanceByInvestigation ?? [];
 
+  const filteredEvents = useMemo(() => {
+    if (!debouncedSearch) return events;
+    const term = debouncedSearch.toLowerCase();
+    return events.filter((e: any) => {
+      const meta = JSON.stringify(e.metadata ?? {}).toLowerCase();
+      return (
+        e.kind?.toLowerCase().includes(term) ||
+        (e.metadata?.reasonCode || '').toLowerCase().includes(term) ||
+        meta.includes(term)
+      );
+    });
+  }, [debouncedSearch, events]);
+
   const groups = useMemo(() => {
-    if (!events || groupBy === 'none') return null;
+    if (!filteredEvents || groupBy === 'none') return null;
     const fmt = (iso: string) => {
       const d = new Date(iso);
       if (groupBy === 'hour') return d.toISOString().slice(0, 13); // YYYY-MM-DDTHH
@@ -50,13 +76,43 @@ export default function InvestigationDetailsRoute() {
       return d.toISOString().slice(0, 16); // YYYY-MM-DDTHH:MM
     };
     const m = new Map<string, any[]>();
-    for (const e of events) {
+    for (const e of filteredEvents) {
       const k = fmt(e.createdAt || e.created_at);
       if (!m.has(k)) m.set(k, []);
       m.get(k)!.push(e);
     }
     return Array.from(m.entries()).sort(([a], [b]) => (a < b ? 1 : -1));
-  }, [events, groupBy]);
+  }, [filteredEvents, groupBy]);
+
+  useEffect(() => {
+    const done = mark('rows');
+    return done;
+  }, [filteredEvents, groupBy, mark]);
+
+  const columns = useMemo(
+    () => [
+      {
+        key: 'time',
+        label: 'Time',
+        width: '1.4fr',
+        render: (e: any) => new Date(e.createdAt).toLocaleString(),
+      },
+      { key: 'kind', label: 'Kind', width: '1fr', render: (e: any) => e.kind },
+      {
+        key: 'reason',
+        label: 'ReasonCode',
+        width: '1fr',
+        render: (e: any) => e.metadata?.reasonCode || '-',
+      },
+      {
+        key: 'metadata',
+        label: 'Metadata',
+        width: '2fr',
+        render: (e: any) => <MetadataPreview metadata={e.metadata} />,
+      },
+    ],
+    [],
+  );
 
   return (
     <div className="space-y-4">
@@ -89,38 +145,39 @@ export default function InvestigationDetailsRoute() {
           <option value="hour">Hour</option>
         </select>
       </div>
+      <div className="flex items-center gap-2">
+        <label className="text-sm opacity-70" htmlFor="investigation-filter">
+          Filter rows
+        </label>
+        <input
+          id="investigation-filter"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="border px-2 py-1 text-sm rounded"
+          placeholder="Search kind, reason code, or metadata"
+        />
+      </div>
       {loading && <div>Loading provenance…</div>}
       {error && <div className="text-red-600">Error loading provenance</div>}
       {!loading && !error && (
         <div>
           <div className="text-sm opacity-70 mb-2">
-            {events.length} event(s)
+            {filteredEvents.length} event(s)
           </div>
           {groupBy === 'none' ? (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left border-b">
-                  <th className="p-2">Time</th>
-                  <th className="p-2">Kind</th>
-                  <th className="p-2">ReasonCode</th>
-                  <th className="p-2">Metadata</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((e: any) => (
-                  <tr key={e.id} className="border-b">
-                    <td className="p-2">
-                      {new Date(e.createdAt).toLocaleString()}
-                    </td>
-                    <td className="p-2">{e.kind}</td>
-                    <td className="p-2">{e.metadata?.reasonCode || '-'}</td>
-                    <td className="p-2">
-                      <MetadataPreview metadata={e.metadata} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <VirtualizedListTable
+              ariaLabel="Investigation provenance events"
+              items={filteredEvents}
+              columns={columns}
+              height={Math.min(
+                640,
+                Math.max(240, filteredEvents.length * 56),
+              )}
+              rowHeight={56}
+              virtualizationEnabled={virtualized}
+              getRowId={(e: any) => e.id}
+              emptyMessage="No provenance events"
+            />
           ) : (
             <div className="space-y-4">
               {groups!.map(([bucket, items]) => (
@@ -160,6 +217,11 @@ export default function InvestigationDetailsRoute() {
           )}
         </div>
       )}
+      <PerfMarkOverlay
+        label="Investigation events"
+        state={overlayState}
+        show={import.meta.env.DEV && virtualized}
+      />
     </div>
   );
 }
