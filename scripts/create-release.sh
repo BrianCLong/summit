@@ -13,6 +13,31 @@ cp -r maestro/ /tmp/release/maestro
 cp -r .mc/ /tmp/release/.mc
 cp -r services/api-gateway/ /tmp/release/switchboard
 
+# Create the Dockerfile for Maestro Conductor
+echo "Creating Dockerfile for maestro-conductor..."
+cat << EOF > /tmp/release/maestro/Dockerfile
+# Use an official Python runtime as a parent image
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /usr/src/app
+
+# Copy the requirements file into the container at /usr/src/app
+COPY requirements.txt ./
+
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application's code from the host to the container at /usr/src/app
+COPY . .
+
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
+
+# Run app.py when the container launches
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+EOF
+
 # Create the Docker Compose file
 echo "Creating docker-compose.yml..."
 cat << EOF > /tmp/release/docker-compose.yml
@@ -21,7 +46,7 @@ version: "3.9"
 services:
   companyos:
     build:
-      context: ./companyos
+      context: ./companyos/services/companyos-api
     env_file:
       - ./companyos/env.example
     ports:
