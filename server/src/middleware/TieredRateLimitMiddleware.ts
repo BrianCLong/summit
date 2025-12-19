@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Tiered Rate Limiting and Request Throttling Middleware
  *

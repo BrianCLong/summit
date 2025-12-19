@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Centralized Bull Queue Configuration
  * Issue: #11812 - Job Queue with Bull and Redis

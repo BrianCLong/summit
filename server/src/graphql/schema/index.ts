@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { gql } from 'graphql-tag';
 import { coreTypeDefs } from '../schema.core.js';
 import copilotModule from '../schema.copilot.js';

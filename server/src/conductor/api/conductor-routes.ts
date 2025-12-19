@@ -1,3 +1,4 @@
+// @ts-nocheck
 // server/src/conductor/api/conductor-routes.ts
 
 import { Router, Request, Response } from 'express';

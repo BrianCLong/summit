@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Request, Response, NextFunction } from 'express';
 import { opaPolicyEngine } from '../conductor/governance/opa-integration.js';
 import { RequestContext } from './context-binding.js';

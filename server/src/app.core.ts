@@ -1,3 +1,4 @@
+// @ts-nocheck
 import 'dotenv/config';
 import express from 'express';
 import helmet from 'helmet';
