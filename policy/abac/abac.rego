@@ -70,6 +70,22 @@ sufficient_acr {
   input.context.currentAcr == "loa2"
 }
 
+dual_control_action {
+  startswith(lower(input.action), "delete_")
+}
+
+dual_control_action {
+  startswith(lower(input.action), "export_")
+}
+
+dual_control_action {
+  lower(input.action) == "rotate_keys"
+}
+
+dual_control_action {
+  lower(input.action) == "change_policy"
+}
+
 allow {
   tenant_match
   residency_match
@@ -110,6 +126,15 @@ obligations[obligation] {
     "type": "step_up",
     "mechanism": "webauthn",
     "required_acr": "loa2"
+  }
+}
+
+obligations[obligation] {
+  dual_control_action
+  obligation := {
+    "type": "dual_control",
+    "required_approvers": 2,
+    "hint": "distinct_approvers"
   }
 }
 
