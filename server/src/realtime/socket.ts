@@ -30,6 +30,7 @@ import {
   type UserIdentity,
 } from './investigationAccess.js';
 import { registerDashboardHandlers } from './dashboard.js';
+import { intelligenceMonitor } from '../services/IntelligenceMonitorService.js';
 
 const logger = pino();
 
@@ -44,6 +45,7 @@ export function overrideVerifyToken(
 interface UserSocket extends Socket {
   user?: UserIdentity & { email?: string; username?: string };
   tenantId?: string;
+  intelligenceSubscriptions?: Set<string>;
 }
 
 interface InvestigationJoinPayload {
@@ -608,6 +610,15 @@ export function initSocket(httpServer: any): Server {
 
     socket.on('disconnect', async () => {
       logger.info(`Realtime disconnect ${socket.id} for user ${userId}`);
+
+      // Cleanup Intelligence Subscriptions
+      if (socket.intelligenceSubscriptions) {
+        for (const targetId of socket.intelligenceSubscriptions) {
+          intelligenceMonitor.stopMonitoring(targetId);
+        }
+        socket.intelligenceSubscriptions.clear();
+      }
+
       for (const investigationId of joinedInvestigations) {
         try {
           const presence = await removePresence(
@@ -637,6 +648,32 @@ export function initSocket(httpServer: any): Server {
 
   ns.on('connection', (socket: UserSocket) => {
     registerDashboardHandlers(ns as any, socket);
+
+    socket.on('intelligence:subscribe', ({ targetId }: { targetId: string }) => {
+      const room = targetId === 'global' ? 'intelligence:global' : `intelligence:${targetId}`;
+      socket.join(room);
+      logger.info(`User ${socket.id} subscribed to intelligence feed: ${room}`);
+
+      // Track subscription for cleanup
+      if (!socket.intelligenceSubscriptions) {
+        socket.intelligenceSubscriptions = new Set();
+      }
+      socket.intelligenceSubscriptions.add(targetId);
+
+      intelligenceMonitor.startMonitoring(targetId);
+    });
+
+    socket.on('intelligence:unsubscribe', ({ targetId }: { targetId: string }) => {
+      const room = targetId === 'global' ? 'intelligence:global' : `intelligence:${targetId}`;
+      socket.leave(room);
+      logger.info(`User ${socket.id} unsubscribed from intelligence feed: ${room}`);
+
+      if (socket.intelligenceSubscriptions) {
+        socket.intelligenceSubscriptions.delete(targetId);
+      }
+
+      intelligenceMonitor.stopMonitoring(targetId);
+    });
   });
 
   initGraphSync(ns);
