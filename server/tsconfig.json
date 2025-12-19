@@ -16,14 +16,18 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "lib": ["ES2022"],
-    "types": ["node", "jest"]
+    "types": [],
+    "typeRoots": ["./types"]
   },
   "ts-node": {
     "esm": true
   },
-  "include": ["src/**/*", "src/**/__tests__/**/*", "tests/**/*", "health/**/*"],
-  "exclude": [
-    "node_modules",
-    "dist"
+  "files": [
+    "types/shims.d.ts",
+    "src/config/logger.ts",
+    "src/conductor/api/conductor-routes.ts",
+    "src/conductor/web-orchestration/orchestration-service.ts",
+    "src/conductor/premium-routing/premium-model-router.ts",
+    "src/conductor/premium-routing/__tests__/premium-model-router.test.ts"
   ]
 }
