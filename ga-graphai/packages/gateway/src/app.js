@@ -15,6 +15,7 @@ import {
 } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 import { ChaosEngine, ChaosError } from './chaos.js';
+import { registerNlQuerySandbox } from './nlQuerySandbox.js';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -146,6 +147,11 @@ export function createApp(options = {}) {
   app.use(express.json({ limit: '1mb' }));
   app.use(createContextMiddleware(options));
   app.use(chaos.middleware());
+  registerNlQuerySandbox(app, {
+    enableSandbox: options.enableNlQuerySandbox,
+    schema: options.sandboxSchema,
+    maxDepth: options.sandboxMaxDepth,
+  });
 
   if (chaos.safeEnvironment) {
     app.get('/internal/chaos', (req, res) => {

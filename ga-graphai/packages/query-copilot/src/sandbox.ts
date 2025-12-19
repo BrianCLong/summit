@@ -5,6 +5,10 @@ import type {
   SandboxRow,
 } from './types.js';
 import {
+  defaultQueryMonitor,
+  IntelGraphQueryMonitor,
+} from './queryMonitor.js';
+import {
   buildReplayEnvironment,
   createReplayDescriptor,
   hashIdentifier,
@@ -12,7 +16,7 @@ import {
   sanitizePayload,
 } from '@ga-graphai/common-types';
 
-const WRITE_PATTERN = /\b(create|merge|delete|drop|set)\b/i;
+const WRITE_PATTERN = /\b(create|merge|delete|drop|set|detach|remove)\b/i;
 
 const DEFAULT_DATASET: SandboxDataset = {
   nodes: [
@@ -254,7 +258,10 @@ function lookupNeighbor(
   );
 }
 
-export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
+export function sandboxExecute(
+  input: SandboxExecuteInput,
+  monitor: IntelGraphQueryMonitor = defaultQueryMonitor,
+): SandboxResult {
   try {
     const cypher = input.cypher.trim();
     ensureReadOnly(cypher);
@@ -287,10 +294,6 @@ export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
         ),
       );
     }
-    const latencyMs = Math.min(
-      input.timeoutMs ?? 800,
-      60 + rows.length * 8 + (relationship ? 45 : 25),
-    );
     const policyWarnings = evaluatePolicy(input.tenantId, input.policy.purpose);
     const plan = buildPlan(
       primary.label,
@@ -298,14 +301,38 @@ export function sandboxExecute(input: SandboxExecuteInput): SandboxResult {
         ? { type: relationship.type, neighborLabel: relationship.neighborLabel }
         : null,
     );
+    const monitoring = monitor.observe({
+      cypher,
+      plan,
+      rowsReturned: rows.length,
+      latencyMs: Math.min(
+        input.timeoutMs ?? 800,
+        60 + rows.length * 8 + (relationship ? 45 : 25),
+      ),
+      tenantId: input.tenantId,
+      caseId: input.policy?.classification,
+    });
+    const throttled = monitoring.throttled && !input.approvedExecution;
+    const baseLimit = 50;
+    const limitedRows = throttled
+      ? rows.slice(0, 1)
+      : rows.slice(0, Math.min(rows.length, baseLimit));
+    const latencyMs = Math.min(
+      input.timeoutMs ?? 800,
+      60 + limitedRows.length * 8 + (relationship ? 45 : 25),
+    );
+    const truncated = throttled
+      ? rows.length > limitedRows.length
+      : rows.length > baseLimit;
 
     return {
-      rows,
-      columns: rows[0]?.columns ?? [primary.alias],
+      rows: limitedRows,
+      columns: limitedRows[0]?.columns ?? [primary.alias],
       latencyMs,
-      truncated: rows.length > 50,
+      truncated,
       plan,
       policyWarnings,
+      monitoring,
     };
   } catch (error) {
     recordReplayFromError(input, error);
