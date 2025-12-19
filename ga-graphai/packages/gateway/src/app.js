@@ -15,6 +15,10 @@ import {
 } from './metrics.js';
 import { InMemoryLedger, buildEvidencePayload } from 'prov-ledger';
 import { ChaosEngine, ChaosError } from './chaos.js';
+import {
+  AdjudicationQueue,
+  EntityResolutionService,
+} from '@ga-graphai/er-service';
 
 const ALLOWED_PURPOSES = new Set([
   'investigation',
@@ -132,6 +136,14 @@ export function createApp(options = {}) {
     options.policyEngine ?? PolicyEngine.fromFile(policyPath);
   const modelRegistry = options.modelRegistry ?? new ModelRegistry();
   const ledger = options.ledger ?? new InMemoryLedger();
+  const erService =
+    options.erService ?? new EntityResolutionService(options.clock);
+  const adjudicationQueue =
+    options.adjudicationQueue ?? new AdjudicationQueue({ clock: options.clock });
+  const erExplainEnabled =
+    options.erExplainEnabled ??
+    process.env.ER_EXPLAIN === '1' ??
+    false;
   const chaos =
     options.chaos ??
     new ChaosEngine({
@@ -146,6 +158,14 @@ export function createApp(options = {}) {
   app.use(express.json({ limit: '1mb' }));
   app.use(createContextMiddleware(options));
   app.use(chaos.middleware());
+
+  function assertErEnabled(res) {
+    if (!erExplainEnabled) {
+      res.status(404).json({ error: 'ER_EXPLAIN_DISABLED' });
+      return false;
+    }
+    return true;
+  }
 
   if (chaos.safeEnvironment) {
     app.get('/internal/chaos', (req, res) => {
@@ -376,6 +396,97 @@ export function createApp(options = {}) {
       return true;
     });
   }
+
+  app.post('/er/candidates', (req, res) => {
+    if (!assertErEnabled(res)) return;
+    const { tenantId, entity, population, topK, seed } = req.body ?? {};
+    if (!tenantId || !entity || !Array.isArray(population)) {
+      return res.status(400).json({ error: 'INVALID_ER_REQUEST' });
+    }
+    try {
+      const result = erService.candidates({
+        tenantId,
+        entity,
+        population,
+        topK,
+        seed,
+      });
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ error: 'ER_CANDIDATES_FAILED', message: String(error) });
+    }
+  });
+
+  app.post('/er/explain', (req, res) => {
+    if (!assertErEnabled(res)) return;
+    const { tenantId, entity, candidate, seed } = req.body ?? {};
+    if (!tenantId || !entity || !candidate) {
+      return res.status(400).json({ error: 'INVALID_ER_REQUEST' });
+    }
+    try {
+      const explanation = erService.explainPair(entity, candidate, tenantId, seed);
+      res.json(explanation);
+    } catch (error) {
+      res.status(400).json({ error: 'ER_EXPLAIN_FAILED', message: String(error) });
+    }
+  });
+
+  app.post('/er/merge', (req, res) => {
+    if (!assertErEnabled(res)) return;
+    const { merge, entity, candidate, seed } = req.body ?? {};
+    if (!merge || !entity || !candidate) {
+      return res.status(400).json({ error: 'INVALID_ER_REQUEST' });
+    }
+    try {
+      const explanation = erService.explainPair(
+        entity,
+        candidate,
+        merge.tenantId,
+        seed,
+      );
+      const featureSource = {
+        entityId: candidate.id,
+        score: explanation.score,
+        features: explanation.features,
+        rationale: explanation.rationale,
+        contributions: explanation.contributions,
+        seed: explanation.seed,
+      };
+      const record = erService.merge(merge, featureSource);
+      const adjudication = adjudicationQueue.enqueue({
+        tenantId: merge.tenantId,
+        actor: merge.actor,
+        action: 'merge',
+        reason: merge.reason,
+        targetId: record.mergeId,
+        payload: { primaryId: merge.primaryId, duplicateId: merge.duplicateId },
+      });
+      res.json({ merge: record, explanation, adjudication });
+    } catch (error) {
+      res.status(400).json({ error: 'ER_MERGE_FAILED', message: String(error) });
+    }
+  });
+
+  app.post('/er/split', (req, res) => {
+    if (!assertErEnabled(res)) return;
+    const { mergeId, actor, reason } = req.body ?? {};
+    if (!mergeId || !actor || !reason) {
+      return res.status(400).json({ error: 'INVALID_ER_REQUEST' });
+    }
+    try {
+      erService.revertMerge(mergeId, actor, reason);
+      const adjudication = adjudicationQueue.enqueue({
+        tenantId: req.aiContext.tenant,
+        actor,
+        action: 'split',
+        reason,
+        targetId: mergeId,
+      });
+      res.json({ status: 'reverted', mergeId, adjudication });
+    } catch (error) {
+      res.status(400).json({ error: 'ER_SPLIT_FAILED', message: String(error) });
+    }
+  });
 
   app.use(
     '/graphql',

@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import type {
   AuditEntry,
   CandidateRequest,
@@ -8,6 +8,7 @@ import type {
   ExplainResponse,
   MergeRecord,
   MergeRequest,
+  FeatureContribution,
 } from './types.js';
 
 function tokenize(text: string): string[] {
@@ -83,6 +84,7 @@ function propertyOverlap(a: EntityRecord, b: EntityRecord): number {
 function buildCandidateScore(
   entity: EntityRecord,
   candidate: EntityRecord,
+  seed: string,
 ): CandidateScore {
   const nameTokensA = tokenize(entity.name);
   const nameTokensB = tokenize(candidate.name);
@@ -110,6 +112,26 @@ function buildCandidateScore(
     features.semanticSimilarity * 0.2 +
     features.phoneticSimilarity * 0.05 +
     features.editDistance * 0.05;
+  const weightMap: Record<keyof CandidateScore['features'], number> = {
+    nameSimilarity: 0.35,
+    typeMatch: 0.2,
+    propertyOverlap: 0.15,
+    semanticSimilarity: 0.2,
+    phoneticSimilarity: 0.05,
+    editDistance: 0.05,
+  };
+  const contributions: FeatureContribution[] = Object.entries(features)
+    .map(([feature, value]) => ({
+      feature: feature as keyof CandidateScore['features'],
+      weight: weightMap[feature as keyof CandidateScore['features']],
+      value: typeof value === 'boolean' ? (value ? 1 : 0) : value,
+      contribution:
+        weightMap[feature as keyof CandidateScore['features']] *
+        (typeof value === 'boolean' ? (value ? 1 : 0) : value),
+      rank: 0,
+    }))
+    .sort((a, b) => b.contribution - a.contribution)
+    .map((item, index) => ({ ...item, rank: index + 1 }));
   const rationale = [
     `Name similarity ${(features.nameSimilarity * 100).toFixed(1)}%`,
     `Type ${features.typeMatch ? 'matches' : 'differs'}`,
@@ -128,7 +150,16 @@ function buildCandidateScore(
     score: Number(score.toFixed(3)),
     features,
     rationale,
+    contributions,
+    seed,
   };
+}
+
+function stableRequestId(seed: string, entityId: string): string {
+  const hash = createHash('sha256');
+  hash.update(seed);
+  hash.update(entityId);
+  return hash.digest('hex').slice(0, 24);
 }
 
 export class EntityResolutionService {
@@ -148,16 +179,18 @@ export class EntityResolutionService {
 
   candidates(request: CandidateRequest): CandidateResponse {
     const topK = request.topK ?? 5;
+    const seed = request.seed ?? 'er-default-seed';
+    const requestId = stableRequestId(seed, request.entity.id);
     const population = request.population.filter(
       (candidate) => candidate.tenantId === request.tenantId,
     );
     const scored = population
       .filter((candidate) => candidate.id !== request.entity.id)
-      .map((candidate) => buildCandidateScore(request.entity, candidate))
+      .map((candidate) => buildCandidateScore(request.entity, candidate, seed))
       .sort((a, b) => b.score - a.score)
       .slice(0, topK);
     return {
-      requestId: randomUUID(),
+      requestId,
       candidates: scored,
     };
   }
@@ -188,12 +221,15 @@ export class EntityResolutionService {
     this.explanations.set(mergeId, {
       mergeId,
       features: featureSource.features,
+      contributions: featureSource.contributions,
       rationale: [
         ...featureSource.rationale,
         `Final score ${featureSource.score}`,
       ],
       policyTags: request.policyTags,
       createdAt: record.mergedAt,
+      score: featureSource.score,
+      seed: featureSource.seed,
     });
     return record;
   }
@@ -225,6 +261,31 @@ export class EntityResolutionService {
     }
     return explanation;
   }
+
+  explainPair(
+    entity: EntityRecord,
+    candidate: EntityRecord,
+    tenantId: string,
+    seed = 'er-default-seed',
+  ): ExplainResponse {
+    if (entity.tenantId !== tenantId || candidate.tenantId !== tenantId) {
+      throw new Error('Tenant mismatch for explanation');
+    }
+    const candidateScore = buildCandidateScore(entity, candidate, seed);
+    return {
+      mergeId: `${entity.id}:${candidate.id}`,
+      features: candidateScore.features,
+      contributions: candidateScore.contributions,
+      rationale: [
+        ...candidateScore.rationale,
+        `Final score ${candidateScore.score}`,
+      ],
+      policyTags: [],
+      createdAt: this.clock().toISOString(),
+      score: candidateScore.score,
+      seed,
+    };
+  }
 }
 
 export type {
@@ -236,4 +297,10 @@ export type {
   ExplainResponse,
   MergeRecord,
   MergeRequest,
+  FeatureContribution,
+  AdjudicationDecision,
+  AdjudicationDecisionInput,
+  AdjudicationQuery,
 } from './types.js';
+
+export { AdjudicationQueue } from './adjudicationQueue.js';

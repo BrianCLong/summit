@@ -25,6 +25,9 @@ describe('EntityResolutionService', () => {
     });
     expect(candidates[0].entityId).toBe('p-2');
     expect(candidates[0].score).toBeGreaterThan(0.8);
+    expect(candidates[0].seed).toBe('er-default-seed');
+    expect(candidates[0].contributions[0].feature).toBe('nameSimilarity');
+    expect(candidates[0].contributions[0].weight).toBeGreaterThan(0);
   });
 
   it('merges duplicates and supports explain + revert', () => {
@@ -52,6 +55,8 @@ describe('EntityResolutionService', () => {
     const explanation = service.explain(merge.mergeId);
     expect(explanation.features.nameSimilarity).toBeGreaterThan(0.7);
     expect(explanation.policyTags).toContain('er:manual-review');
+    expect(explanation.contributions[0].rank).toBe(1);
+    expect(explanation.seed).toBe(top.seed);
     service.revertMerge(
       merge.mergeId,
       'lead@example.com',
@@ -62,5 +67,30 @@ describe('EntityResolutionService', () => {
     const events = audit.filter((entry) => entry.target === merge.mergeId);
     expect(events).toHaveLength(2);
     expect(events[1].event).toBe('revert');
+  });
+
+  it('returns deterministic explanations for a pair', () => {
+    const service = new EntityResolutionService(
+      () => new Date('2024-03-03T12:00:00Z'),
+    );
+    const alice = fixture.entities[0];
+    const alyce = fixture.entities[1];
+    const explainA = service.explainPair(
+      alice,
+      alyce,
+      fixture.tenantId,
+      'seed-123',
+    );
+    const explainB = service.explainPair(
+      alice,
+      alyce,
+      fixture.tenantId,
+      'seed-123',
+    );
+    expect(explainA.seed).toBe('seed-123');
+    expect(explainA.score).toBeCloseTo(explainB.score);
+    expect(explainA.contributions.map((c) => c.contribution)).toEqual(
+      explainB.contributions.map((c) => c.contribution),
+    );
   });
 });
