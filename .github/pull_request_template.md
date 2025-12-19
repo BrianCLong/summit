@@ -23,13 +23,13 @@
 - [ ] Smoke checks
 - [ ] Golden path e2e: ingest → resolve → runbook → report
 
-## 🧠 Copilot Review Tasks
+## Copilot Review Tasks
 - [ ] `/explain-changes`
 - [ ] `/generate-tests`
 - [ ] `/risk-callouts`
 - [ ] `/summarize-diff`
 
-## ✅ Checklist
+## Checklist
 - [ ] Code compiles & passes CI
 - [ ] Tests added/updated
 - [ ] Documentation updated
