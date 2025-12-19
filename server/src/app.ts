@@ -72,6 +72,7 @@ import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+import { policyRouter } from './routes/policy.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -267,6 +268,7 @@ export const createApp = async () => {
   app.use('/api/zero-day', zeroDayRouter);
   app.use('/api/abyss', abyssRouter);
   app.use('/api/qaf', qafRouter);
+  app.use('/api/policy', policyRouter);
   app.use('/api/siem-platform', siemPlatformRouter);
   app.use('/api/maestro', maestroRouter);
   app.use('/api/osint', osintRouter);
