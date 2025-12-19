@@ -11,7 +11,7 @@ module.exports = {
       },
     ],
   },
-  roots: ['server', 'client', 'packages', 'services', 'tests'],
+  roots: ['server', 'client', 'packages', 'services', 'tests', 'apps/api'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
     '<rootDir>/archive/',

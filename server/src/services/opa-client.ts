@@ -48,11 +48,17 @@ export interface OPARiskAssessment {
   requires_step_up: boolean;
 }
 
+export interface OPAObligation {
+  type: string;
+  [key: string]: any;
+}
+
 export interface OPADecision {
   action: 'allow' | 'deny' | 'review';
   allow: boolean;
   violations: OPAViolation[];
   risk_assessment: OPARiskAssessment;
+  obligations?: OPAObligation[];
   required_approvals: string[];
   appeal_available: boolean;
   next_steps: string[];
@@ -67,6 +73,7 @@ export interface OPAResponse {
     requires_dual_control: boolean;
     requires_step_up: boolean;
     risk_assessment: OPARiskAssessment;
+    obligations?: OPAObligation[];
   };
 }
 
@@ -343,6 +350,7 @@ export class OPAClient {
         'Contact system administrator about policy service availability',
         'Submit appeal for manual review',
       ],
+      obligations: [],
     };
   }
 

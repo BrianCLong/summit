@@ -5,9 +5,30 @@ import pino from 'pino';
 import { opaClient } from '../services/opa-client';
 import { businessMetrics, addSpanAttributes } from '../observability/telemetry';
 import { costGuard } from '../services/cost-guard';
+import {
+  normalizeApprovalActors,
+  validateDualControlRequirement,
+} from '../middleware/dual-control.js';
 
 const router = Router();
 const logger = pino({ name: 'export-api' });
+
+const approvalActorSchema = z.object({
+  user_id: z.string(),
+  role: z
+    .enum([
+      'analyst',
+      'investigator',
+      'admin',
+      'compliance-officer',
+      'security-admin',
+      'auditor',
+    ])
+    .optional(),
+  tenant_id: z.string().optional(),
+  reason: z.string().optional(),
+  attributes: z.record(z.any()).optional(),
+});
 
 // Request schemas
 const exportRequestSchema = z.object({
@@ -52,7 +73,7 @@ const exportRequestSchema = z.object({
     ]),
     export_type: z.enum(['analysis', 'report', 'dataset', 'api']),
     destination: z.string().optional(),
-    approvals: z.array(z.string()).optional(),
+    approvals: z.array(z.union([z.string(), approvalActorSchema])).optional(),
     step_up_verified: z.boolean().optional(),
     pii_export_approved: z.boolean().optional(),
   }),
@@ -90,8 +111,10 @@ interface ExportResponse {
       level: 'low' | 'medium' | 'high';
       factors: string[];
       requires_approval: boolean;
+      requires_dual_control?: boolean;
       requires_step_up: boolean;
     };
+    obligations?: Array<Record<string, any>>;
     redactions: Array<{
       field: string;
       reason: string;
@@ -143,33 +166,42 @@ router.post('/export', async (req, res) => {
   try {
     // Validate request
     const exportRequest = exportRequestSchema.parse(req.body);
+    const approvalActors = normalizeApprovalActors(
+      exportRequest.context.approvals,
+    );
+    const policyContext = {
+      ...exportRequest.context,
+      approvals: approvalActors.map(
+        (approval) => approval.role || approval.user_id,
+      ),
+    };
 
     addSpanAttributes({
-      'export.tenant_id': exportRequest.context.tenant_id,
-      'export.user_id': exportRequest.context.user_id,
-      'export.purpose': exportRequest.context.purpose,
-      'export.type': exportRequest.context.export_type,
+      'export.tenant_id': policyContext.tenant_id,
+      'export.user_id': policyContext.user_id,
+      'export.purpose': policyContext.purpose,
+      'export.type': policyContext.export_type,
       'export.source_count': exportRequest.dataset.sources.length,
     });
 
     logger.info(
       {
         requestId,
-        tenantId: exportRequest.context.tenant_id,
-        userId: exportRequest.context.user_id,
+        tenantId: policyContext.tenant_id,
+        userId: policyContext.user_id,
         sourceCount: exportRequest.dataset.sources.length,
-        purpose: exportRequest.context.purpose,
+        purpose: policyContext.purpose,
       },
       'Export request received',
     );
 
     // Cost check
     const costCheck = await costGuard.checkCostAllowance({
-      tenantId: exportRequest.context.tenant_id,
-      userId: exportRequest.context.user_id,
+      tenantId: policyContext.tenant_id,
+      userId: policyContext.user_id,
       operation: 'export_operation',
       complexity: exportRequest.dataset.sources.length,
-      metadata: { requestId, exportType: exportRequest.context.export_type },
+      metadata: { requestId, exportType: policyContext.export_type },
     });
 
     if (!costCheck.allowed) {
@@ -218,13 +250,23 @@ router.post('/export', async (req, res) => {
     const policyDecision = await opaClient.evaluateExportPolicy({
       action: 'export',
       dataset: exportRequest.dataset,
-      context: exportRequest.context,
+      context: policyContext,
     });
+    const obligations = policyDecision.obligations || [];
+    const dualControlObligation =
+      obligations.find((obligation) => obligation.type === 'dual_control') ||
+      (policyDecision.risk_assessment.requires_dual_control
+        ? {
+            type: 'dual_control',
+            required_approvals: 2,
+            allowed_roles: ['compliance-officer', 'admin'],
+          }
+        : null);
 
     // Generate redactions for sensitive fields
     const redactions = generateRedactions(
       exportRequest.dataset.sources,
-      exportRequest.context,
+      policyContext,
     );
 
     // Create audit trail
@@ -237,27 +279,83 @@ router.post('/export', async (req, res) => {
 
     // Record metrics
     businessMetrics.exportRequests.add(1, {
-      tenant_id: exportRequest.context.tenant_id,
-      export_type: exportRequest.context.export_type,
+      tenant_id: policyContext.tenant_id,
+      export_type: policyContext.export_type,
       decision: policyDecision.action,
     });
 
     if (policyDecision.action === 'deny') {
       businessMetrics.exportBlocks.add(1, {
-        tenant_id: exportRequest.context.tenant_id,
+        tenant_id: policyContext.tenant_id,
         reason: 'policy_violation',
-        export_type: exportRequest.context.export_type,
+        export_type: policyContext.export_type,
       });
     }
 
     // Record actual cost
     await costGuard.recordActualCost({
-      tenantId: exportRequest.context.tenant_id,
-      userId: exportRequest.context.user_id,
+      tenantId: policyContext.tenant_id,
+      userId: policyContext.user_id,
       operation: 'export_operation',
       duration: Date.now() - startTime,
       metadata: { requestId, decision: policyDecision.action },
     });
+
+    if (dualControlObligation) {
+      const validation = await validateDualControlRequirement({
+        requestId,
+        action: 'export',
+        tenantId: policyContext.tenant_id,
+        requesterId: policyContext.user_id,
+        approvals: approvalActors,
+        requiredApprovals: dualControlObligation.required_approvals || 2,
+        requiredRoles: dualControlObligation.allowed_roles,
+        allowedRoles: dualControlObligation.allowed_roles,
+      });
+
+      if (!validation.satisfied) {
+        const violationMessage =
+          validation.violations.join('; ') ||
+          'Dual control approvals are incomplete';
+        const violation = {
+          code: 'DUAL_CONTROL_NOT_SATISFIED',
+          message: violationMessage,
+          appeal_code: 'DUAL001',
+          appeal_url: 'https://compliance.intelgraph.io/appeal/DUAL001',
+          severity: 'blocking' as const,
+        };
+
+        businessMetrics.exportBlocks.add(1, {
+          tenant_id: policyContext.tenant_id,
+          reason: 'dual_control',
+          export_type: policyContext.export_type,
+        });
+
+        return res.status(403).json({
+          decision: {
+            effect: 'review' as const,
+            reasons: [
+              ...policyDecision.violations.map((v) => v.message),
+              violation.message,
+            ],
+            violations: [...policyDecision.violations, violation],
+            risk_assessment: {
+              ...policyDecision.risk_assessment,
+              requires_approval: true,
+              requires_dual_control: true,
+            },
+            redactions,
+            audit_trail: auditTrail,
+            obligations,
+          },
+          cost_estimate: {
+            estimated_cost: costCheck.estimatedCost,
+            budget_remaining: costCheck.budgetRemaining,
+            budget_utilization: costCheck.budgetUtilization,
+          },
+        });
+      }
+    }
 
     const response: ExportResponse = {
       decision: {
@@ -270,6 +368,7 @@ router.post('/export', async (req, res) => {
         reasons: policyDecision.violations.map((v) => v.message),
         violations: policyDecision.violations,
         risk_assessment: policyDecision.risk_assessment,
+        obligations,
         redactions,
         audit_trail: auditTrail,
       },
@@ -327,11 +426,20 @@ router.post('/export/simulate', async (req, res) => {
 
   try {
     const simulateRequest = simulateRequestSchema.parse(req.body);
+    const simulationApprovals = normalizeApprovalActors(
+      simulateRequest.context.approvals,
+    );
+    const baseContext = {
+      ...simulateRequest.context,
+      approvals: simulationApprovals.map(
+        (approval) => approval.role || approval.user_id,
+      ),
+    };
 
     logger.info(
       {
         requestId,
-        tenantId: simulateRequest.context.tenant_id,
+        tenantId: baseContext.tenant_id,
         scenarioCount:
           simulateRequest.simulation.what_if_scenarios?.length || 0,
       },
@@ -342,7 +450,7 @@ router.post('/export/simulate', async (req, res) => {
     const baselineDecision = await opaClient.evaluateExportPolicy({
       action: 'export',
       dataset: simulateRequest.dataset,
-      context: simulateRequest.context,
+      context: baseContext,
     });
 
     const baseline: ExportResponse['decision'] = {
@@ -357,7 +465,7 @@ router.post('/export/simulate', async (req, res) => {
       risk_assessment: baselineDecision.risk_assessment,
       redactions: generateRedactions(
         simulateRequest.dataset.sources,
-        simulateRequest.context,
+        baseContext,
       ),
       audit_trail: {
         decision_id: `${requestId}-baseline`,
@@ -365,15 +473,22 @@ router.post('/export/simulate', async (req, res) => {
         policy_version: 'export-enhanced-1.0',
         evaluator: 'opa-policy-engine',
       },
+      obligations: baselineDecision.obligations || [],
     };
 
     // Run what-if scenarios
     const scenarios = [];
     for (const scenario of simulateRequest.simulation.what_if_scenarios || []) {
       const modifiedContext = {
-        ...simulateRequest.context,
+        ...baseContext,
         ...scenario.changes,
       };
+      const scenarioApprovals = normalizeApprovalActors(
+        (modifiedContext as any).approvals,
+      );
+      modifiedContext.approvals = scenarioApprovals.map(
+        (approval) => approval.role || approval.user_id,
+      );
 
       const scenarioDecision = await opaClient.evaluateExportPolicy({
         action: 'export',
@@ -401,6 +516,7 @@ router.post('/export/simulate', async (req, res) => {
           policy_version: 'export-enhanced-1.0',
           evaluator: 'opa-policy-engine',
         },
+        obligations: scenarioDecision.obligations || [],
       };
 
       scenarios.push({
