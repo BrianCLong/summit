@@ -160,6 +160,17 @@ describe('OrchestrationKnowledgeGraph', () => {
     expect(context?.risk?.score).toBeLessThanOrEqual(1);
   });
 
+  it('provides direct node lookups for GraphQL resolvers', async () => {
+    await graph.refresh();
+
+    const serviceNode = graph.getNode('service:svc-api');
+    const nodes = graph.getNodes(['service:svc-api', 'pipeline:pipeline-a']);
+
+    expect(serviceNode?.type).toBe('service');
+    expect(nodes).toHaveLength(2);
+    expect(nodes.every((node) => node)).toBe(true);
+  });
+
   it('emits structured telemetry for IntelGraph queries', async () => {
     await graph.refresh();
     graph.queryService('svc-api');

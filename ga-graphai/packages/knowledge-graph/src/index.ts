@@ -244,6 +244,16 @@ export class OrchestrationKnowledgeGraph {
     };
   }
 
+  getNode(id: string): GraphNode | undefined {
+    return this.state.nodes.get(id);
+  }
+
+  getNodes(ids: string[]): GraphNode[] {
+    return ids
+      .map((id) => this.state.nodes.get(id))
+      .filter((node): node is GraphNode => Boolean(node));
+  }
+
   queryService(serviceId: string) {
     const startedAt = Date.now();
     const service = this.state.services.get(serviceId);
