@@ -298,6 +298,74 @@ make down
 - [Developer Onboarding Guide](docs/ONBOARDING.md) - 30-minute quickstart for new developers
 - [AI Agent Collaboration Guide](CONTRIBUTING.md) - Guidelines for AI agent contributions
 - [Documentation Index](docs/README.md) - Complete documentation reference
+
+## 📦 Repository Hygiene & Large Files
+
+### Policy
+
+To maintain repository performance and clone speeds, **large binary files (>50MB) are not permitted** in direct commits.
+
+### Enforcement
+
+Our CI pipeline automatically checks all commits for files exceeding 50MB. If large files are detected:
+- ❌ The CI build will fail
+- ⚠️ You'll receive clear error messages indicating which files are too large
+- 📝 Instructions will be provided for remediation
+
+### Using Git LFS for Large Files
+
+If you need to commit large binary files (models, datasets, media assets, etc.), use [Git LFS](https://git-lfs.github.com/):
+
+```bash
+# Install Git LFS (one-time setup)
+git lfs install
+
+# Track specific file types
+git lfs track "*.psd"
+git lfs track "*.zip"
+git lfs track "*.bin"
+git lfs track "*.pkl"
+
+# Or track specific large files
+git lfs track "path/to/large-file.dat"
+
+# Commit the .gitattributes file
+git add .gitattributes
+git commit -m "Configure Git LFS tracking"
+
+# Now add and commit your large files normally
+git add large-file.zip
+git commit -m "Add large dataset"
+git push
+```
+
+### Remediation for Rejected Commits
+
+If your commit was rejected due to large files:
+
+1. **Set up Git LFS** (see above)
+2. **Remove the large file from history:**
+   ```bash
+   git rm --cached path/to/large-file
+   git commit --amend -m "Remove large file"
+   ```
+3. **Track it with LFS and re-add:**
+   ```bash
+   git lfs track "path/to/large-file"
+   git add .gitattributes path/to/large-file
+   git commit -m "Add large file via Git LFS"
+   git push --force-with-lease
+   ```
+
+### Alternative: External Storage
+
+For very large datasets or artifacts, consider:
+- ☁️ Cloud storage (S3, GCS, Azure Blob)
+- 📦 Package registries (npm, PyPI, Docker Hub)
+- 📊 Artifact repositories (Artifactory, Nexus)
+
+Include download scripts or links in the repository instead.
+
 - [CLAUDE.md](CLAUDE.md) - Comprehensive AI assistant guide for the codebase
 - [CLAUDE_CODE.md](CLAUDE_CODE.md) - Guide for using Claude Code CLI with this repository
 
