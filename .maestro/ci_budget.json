@@ -39,5 +39,14 @@
   "alerts": {
     "warning_threshold": 0.8,
     "critical_threshold": 0.95
+  },
+  "security": {
+    "sbomSeverityBudget": {
+      "critical": 0,
+      "high": 3,
+      "medium": 10,
+      "low": 25,
+      "unknown": 0
+    }
   }
 }
