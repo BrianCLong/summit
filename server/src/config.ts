@@ -27,6 +27,9 @@ export const EnvSchema = z
     CACHE_TTL_DEFAULT: z.coerce.number().default(300), // 5 minutes
     L1_CACHE_MAX_BYTES: z.coerce.number().default(1 * 1024 * 1024 * 1024), // 1 GB
     L1_CACHE_FALLBACK_TTL_SECONDS: z.coerce.number().default(300), // 5 minutes
+    SESSION_SECRET: z.string().optional().default(''),
+    VAULT_ADDR: z.string().optional().default(''),
+    VAULT_TOKEN: z.string().optional().default(''),
   });
 
 const Env = EnvSchema.passthrough(); // Allow extra env vars

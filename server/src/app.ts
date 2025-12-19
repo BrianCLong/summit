@@ -5,7 +5,6 @@ import { expressMiddleware } from '@as-integrations/express4';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 import { applyMiddleware } from 'graphql-middleware';
 import cors from 'cors';
-import helmet from 'helmet';
 import pinoHttp from 'pino-http';
 import { logger as appLogger } from './config/logger.js';
 import { telemetry } from './lib/telemetry/comprehensive-telemetry.js';
@@ -71,6 +70,17 @@ import resourceCostsRouter from './routes/resource-costs.js';
 import queryReplayRouter from './routes/query-replay.js';
 import streamRouter from './routes/stream.js'; // Added import
 import searchV1Router from './routes/search-v1.js';
+import sanitizeRequest from './middleware/sanitize.js';
+import { securityHardening } from './middleware/security-hardening.js';
+import { secureSession } from './middleware/secure-session.js';
+import {
+  buildContentSecurityPolicy,
+  cookieParserMiddleware,
+  createCsrfLayer,
+  createUserIpRateLimiter,
+  shouldBypassCsrf,
+} from './security/http-shield.js';
+import { securityIncidentLogger } from './security/incident-response.js';
 
 export const createApp = async () => {
   const __filename = fileURLToPath(import.meta.url);
@@ -81,66 +91,34 @@ export const createApp = async () => {
   // await tracer.initialize();
 
   const app = express();
-  const logger = pino();
+
+  app.disable('x-powered-by');
 
   // Add correlation ID middleware FIRST (before other middleware)
   app.use(correlationIdMiddleware);
+  app.use(cookieParserMiddleware);
+  app.use(secureSession);
+  app.use(buildContentSecurityPolicy());
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        useDefaults: true,
-        directives: {
-          'script-src': [
-            "'self'",
-            "'unsafe-inline'",
-            'https://cdn.jsdelivr.net',
-          ],
-          'connect-src': ["'self'", 'https://api.intelgraph.example'],
-        },
-      },
-      crossOriginOpenerPolicy: { policy: 'same-origin' },
-      crossOriginEmbedderPolicy: { policy: 'require-corp' },
-      crossOriginResourcePolicy: { policy: 'same-origin' },
-      hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-    })
-  );
   const isProduction = cfg.NODE_ENV === 'production';
   const allowedOrigins = cfg.CORS_ORIGIN.split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
+
+  const { middleware: csrfMiddleware, tokenRoute: csrfTokenRoute } = createCsrfLayer(
+    shouldBypassCsrf,
+  );
 
   const safetyState = await resolveSafetyState();
   if (safetyState.killSwitch || safetyState.safeMode) {
     appLogger.warn({ safetyState }, 'Safety gates enabled');
   }
 
-  // Add correlation ID middleware FIRST (before other middleware)
-  app.use(correlationIdMiddleware);
   app.use(featureFlagContextMiddleware);
 
   // Load Shedding / Overload Protection (Second, to reject early)
   app.use(overloadProtection);
 
-  app.use(
-    helmet({
-      contentSecurityPolicy: isProduction
-        ? {
-            directives: {
-              defaultSrc: ["'self'"],
-              objectSrc: ["'none'"],
-              imgSrc: ["'self'", 'data:'],
-              scriptSrc: ["'self'"],
-              styleSrc: ["'self'", "'unsafe-inline'"],
-              connectSrc: ["'self'", ...allowedOrigins],
-            },
-          }
-        : false,
-      referrerPolicy: { policy: 'no-referrer' },
-      hsts: isProduction ? undefined : false,
-      crossOriginEmbedderPolicy: false,
-    }),
-  );
   app.use(
     cors({
       origin: (origin, callback) => {
@@ -176,6 +154,9 @@ export const createApp = async () => {
   );
 
   app.use(express.json({ limit: '1mb' }));
+  app.use(sanitizeRequest);
+  app.use(securityHardening);
+  app.use(csrfMiddleware);
   app.use(safetyModeMiddleware);
   // Standard audit logger for basic request tracking
   app.use(auditLogger);
@@ -229,6 +210,7 @@ export const createApp = async () => {
   // Health endpoints (exempt from rate limiting)
   const healthRouter = (await import('./routes/health.js')).default;
   app.use(healthRouter);
+  app.get('/api/security/csrf-token', csrfTokenRoute);
 
   // Swagger UI
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
@@ -241,8 +223,9 @@ export const createApp = async () => {
   });
 
   // Authentication routes (exempt from global auth middleware)
-  app.use('/auth', authRouter);
-  app.use('/api/auth', authRouter); // Alternative path
+  const authLimiter = createUserIpRateLimiter();
+  app.use('/auth', authLimiter, authRouter);
+  app.use('/api/auth', authLimiter, authRouter); // Alternative path
 
   // Other routes
   app.use('/monitoring', monitoringRouter);
@@ -476,6 +459,9 @@ export const createApp = async () => {
   }
 
   appLogger.info('Anomaly detector activated.');
+
+  // Security incident response logging
+  app.use(securityIncidentLogger);
 
   // Global Error Handler - must be last
   app.use(errorHandler);

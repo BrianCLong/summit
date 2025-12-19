@@ -41,6 +41,7 @@ export function buildContentSecurityPolicy(): RequestHandler {
       includeSubDomains: true,
       preload: true,
     },
+    noSniff: true,
   });
 }
 
