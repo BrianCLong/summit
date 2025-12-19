@@ -369,6 +369,26 @@ caseRouter.post('/:id/export', async (req, res) => {
       return res.status(404).json({ error: 'case_not_found' });
     }
 
+    if (process.env.CASE_BUNDLE_V1 === '1') {
+      const { CaseBundleService } = await import(
+        '../cases/bundles/CaseBundleService.js'
+      );
+      const { FixtureCaseBundleStore } = await import(
+        '../cases/bundles/FixtureCaseBundleStore.js'
+      );
+      const bundleService = new CaseBundleService(new FixtureCaseBundleStore());
+      const bundle = await bundleService.exportCases([caseRecord.id], {
+        include: req.body?.include,
+        format: req.body?.format,
+      });
+      return res.json({
+        ok: true,
+        manifest: bundle.manifest,
+        bundlePath: bundle.bundlePath,
+        archivePath: bundle.archivePath,
+      });
+    }
+
     res.json(caseRecord);
   } catch (error) {
     routeLogger.error({ error: (error as Error).message }, 'Failed to export case');

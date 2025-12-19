@@ -1,10 +1,10 @@
+// @ts-nocheck
 /**
  * Jest Global Setup Configuration
  * Provides common test utilities and matchers
  */
 
 import 'jest-extended';
-import { jest, beforeAll, afterAll, afterEach } from '@jest/globals';
 
 // Mock ioredis globally - using a simple mock implementation since module resolution fails
 jest.mock('ioredis', () => {

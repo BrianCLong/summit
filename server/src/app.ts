@@ -278,6 +278,10 @@ export const createApp = async () => {
   app.use('/api/query-replay', queryReplayRouter);
   app.use('/api/stream', streamRouter); // Register stream route
   app.use('/api/v1/search', searchV1Router); // Register Unified Search API
+  if (process.env.CASE_BUNDLE_V1 === '1') {
+    const caseBundleRouter = (await import('./routes/case-bundles.js')).default;
+    app.use('/api/case-bundles', caseBundleRouter);
+  }
   app.get('/metrics', metricsRoute);
 
   // Initialize SummitInvestigate Platform Routes
