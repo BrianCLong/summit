@@ -26,6 +26,7 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
   // @ts-ignore - req.user is populated by auth middleware
   const user = req.user;
   const tenantId = user?.tenantId;
+  const useV1 = process.env.QUOTAS_V1 === '1';
 
   if (tenantId) {
       let resource = 'api';
@@ -35,15 +36,26 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
           resource = 'ingest';
       }
 
-      const quotaResult = await quotaManager.checkQuota(tenantId, resource);
+      const quotaResult = await quotaManager.checkQuota(
+        tenantId,
+        resource,
+        1,
+        {},
+        { priority: user?.role === 'admin' ? 'vip' : 'standard' }
+      );
 
-      res.set('X-Tenant-Quota-Limit', 'true'); // Indicating quota is active
+      res.set('X-Tenant-Quota-Limit', String(quotaResult.limit || 'true')); // Indicating quota is active
       res.set('X-Tenant-Quota-Remaining', String(quotaResult.remaining));
+      if (quotaResult.retryAfterSeconds) {
+        res.set('Retry-After', String(quotaResult.retryAfterSeconds));
+      }
 
       if (!quotaResult.allowed) {
            res.status(429).json({
               error: 'Tenant quota exceeded',
-              retryAfter: Math.ceil((quotaResult.reset - Date.now()) / 1000)
+              reason: quotaResult.reason || 'quota_exceeded',
+              retryAfter: quotaResult.retryAfterSeconds || Math.ceil((quotaResult.reset - Date.now()) / 1000),
+              saturationLevel: quotaResult.saturationLevel,
            });
            return;
       }
@@ -59,7 +71,7 @@ export const rateLimitMiddleware = async (req: Request, res: Response, next: Nex
     // Dynamic tier-based limit
     // @ts-ignore - tenantId usually available on user or context
     const tenantId = user.tenantId || req.headers['x-tenant-id'];
-    if (tenantId) {
+    if (tenantId && !useV1) {
         const quota = QuotaManager.getQuotaForTenant(tenantId);
         limit = quota.requestsPerMinute; // Assuming window is 1 minute, else adjust
     } else {
