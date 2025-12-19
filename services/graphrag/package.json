@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@intelgraph/knowledge-graph": "workspace:*",
-    "@intelgraph/graph-ai-core": "workspace:*",
+    "@summit/graph-ai-core": "workspace:*",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/sdk-trace-node": "^1.25.0",
     "express": "^5.1.0",
