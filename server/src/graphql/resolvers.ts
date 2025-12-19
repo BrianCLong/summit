@@ -19,7 +19,7 @@ export const resolvers = {
   DateTime: new (require('graphql-iso-date').GraphQLDateTime)(),
   Query: {
     async tenantCoherence(_: any, { tenantId }: any, ctx: any) {
-      const end = gqlDuration.startTimer({ op: 'tenantCoherence' });
+      const end = gqlDuration.startTimer({ operation: 'tenantCoherence' });
       try {
         const user = getUser(ctx);
 
@@ -115,7 +115,7 @@ export const resolvers = {
   },
   Mutation: {
     async publishCoherenceSignal(_: any, { input }: any, ctx: any) {
-      const end = gqlDuration.startTimer({ op: 'publishCoherenceSignal' });
+      const end = gqlDuration.startTimer({ operation: 'publishCoherenceSignal' });
       try {
         const user = getUser(ctx);
         // S4.1 Fine-grained Scopes: Use coherence:write:self if user is publishing for their own tenantId

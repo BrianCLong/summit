@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RevOps Contract Activation Input",
+  "type": "object",
+  "required": ["contract", "tenant"],
+  "properties": {
+    "contract": {
+      "type": "object",
+      "required": ["id", "status", "region"],
+      "properties": {
+        "id": { "type": "string" },
+        "status": { "type": "string" },
+        "region": { "type": "string" },
+        "term_months": { "type": "integer", "minimum": 1 },
+        "mrr": { "type": "number", "minimum": 0 },
+        "signatures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "signed_at"],
+            "properties": {
+              "role": { "type": "string" },
+              "signed_at": { "type": "string", "format": "date-time" }
+            }
+          }
+        },
+        "approvals": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "flags": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "tenant": {
+      "type": "object",
+      "required": ["id"],
+      "properties": { "id": { "type": "string" } }
+    },
+    "context": {
+      "type": "object",
+      "properties": {
+        "requested_at": { "type": "string", "format": "date-time" },
+        "requested_by": { "type": "string" }
+      }
+    }
+  },
+  "additionalProperties": false
+}

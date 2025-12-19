@@ -12,8 +12,11 @@
 
 import { Driver } from 'neo4j-driver';
 import { createHash } from 'crypto';
-import pino from 'pino';
-import * as z from 'zod';
+import { z } from 'zod/v4';
+import logger from '../../utils/logger.js';
+
+const serviceLogger = logger.child({ name: 'STIXTAXIIFusionService' });
+
 import {
   STIXObject,
   STIXObjectSchema,
@@ -23,8 +26,6 @@ import {
   IOCCorrelation,
   GraphNode,
 } from './types.js';
-
-const logger = pino({ name: 'STIXTAXIIFusionService' });
 
 // ============================================================================
 // TAXII 2.1 Client Configuration
@@ -150,7 +151,7 @@ export class STIXTAXIIFusionService {
         TAXIICollectionSchema.parse(c),
       );
     } catch (error) {
-      logger.error({ error }, 'Failed to discover TAXII collections');
+      serviceLogger.error({ error }, 'Failed to discover TAXII collections');
       throw error;
     }
   }

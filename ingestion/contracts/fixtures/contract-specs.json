@@ -1,0 +1,23 @@
+{
+  "baseline": {
+    "id": "dpic-telemetry",
+    "version": "1.0.0",
+    "license": "CC-BY-4.0",
+    "fields": [
+      { "name": "deviceId", "type": "string", "nullable": false, "unit": "slug", "pii": true, "dp": true },
+      { "name": "temperatureC", "type": "number", "nullable": false, "unit": "celsius", "pii": false, "dp": false },
+      { "name": "timestamp", "type": "string", "nullable": false, "unit": "iso-8601", "pii": false, "dp": false }
+    ]
+  },
+  "candidate": {
+    "id": "dpic-telemetry",
+    "version": "1.1.0",
+    "license": "CC-BY-4.0",
+    "fields": [
+      { "name": "deviceId", "type": "string", "nullable": false, "unit": "slug", "pii": true, "dp": true },
+      { "name": "temperatureC", "type": "number", "nullable": false, "unit": "kelvin", "pii": false, "dp": false },
+      { "name": "timestamp", "type": "string", "nullable": false, "unit": "iso-8601", "pii": false, "dp": false },
+      { "name": "errorCode", "type": "string", "nullable": true, "unit": "telemetry-code", "pii": false, "dp": false }
+    ]
+  }
+}
