@@ -31,6 +31,19 @@ export async function currentPricing(): Promise<Record<string, PoolCost>> {
   return m;
 }
 
+export function estimatePoolPrice(
+  cost: PoolCost | undefined,
+  est: { cpuSec?: number; gbSec?: number; egressGb?: number },
+  discount = 1,
+) {
+  if (!cost) return null;
+  const base =
+    (est.cpuSec || 0) * Number(cost.cpu_sec_usd) +
+    (est.gbSec || 0) * Number(cost.gb_sec_usd) +
+    (est.egressGb || 0) * Number(cost.egress_gb_usd);
+  return base * discount;
+}
+
 export function pickCheapestEligible(
   candidates: PoolInfo[],
   costs: Record<string, PoolCost>,
@@ -44,12 +57,8 @@ export function pickCheapestEligible(
       !p.region.toLowerCase().startsWith(residency.toLowerCase())
     )
       continue;
-    const c = costs[p.id];
-    if (!c) continue;
-    const price =
-      (est.cpuSec || 0) * Number(c.cpu_sec_usd) +
-      (est.gbSec || 0) * Number(c.gb_sec_usd) +
-      (est.egressGb || 0) * Number(c.egress_gb_usd);
+    const price = estimatePoolPrice(costs[p.id], est);
+    if (price === null) continue;
     if (!best || price < best.price) best = { id: p.id, price };
   }
   return best;

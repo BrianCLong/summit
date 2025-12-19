@@ -35,6 +35,7 @@ async function loop() {
           });
           const next = it.next().toDate();
           if (next <= now) {
+            const tenant = 'default';
             // Windowed budgets (placeholder): enforce simple per-minute cap via env
             const cap = Number(process.env.SCHEDULER_WINDOW_CAP || 100);
             if (cap > 0) {
@@ -55,10 +56,9 @@ async function loop() {
               est = estimateFromRunbook(s.runbook);
               // Residency from runbook hint (e.g., eu/us prefix) or env default
               const residency = process.env.DEFAULT_RESIDENCY || undefined;
-              choice = await choosePool(est, residency);
+              choice = await choosePool(est, residency, tenant);
             }
             // Fairness: gate per-tenant concurrency (tenant inference TBD)
-            const tenant = 'default';
             if (!acquireTenantSlot(tenant)) continue;
             // Start run: insert and annotate via run_event for chosen pool
             const r = await pool.query(

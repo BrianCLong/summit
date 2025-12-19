@@ -21,6 +21,7 @@ import {
 import { workflowRoutes } from './workflow-routes.js';
 import { workflowExecutor } from '../workflows/workflow-executor.js';
 import logger from '../../config/logger.js';
+import { capacityRoutes } from './capacity-routes.js';
 
 const router = Router();
 
@@ -508,5 +509,8 @@ router.use('/', agentRoutes);
 
 // Mount serving routes
 router.use('/serving', servingRoutes);
+
+// Mount capacity reservation routes
+router.use('/capacity', capacityRoutes);
 
 export { router as conductorRoutes };
