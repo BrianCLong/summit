@@ -46,3 +46,6 @@ export * from './types.js';
 export * from './router.js';
 export * from './errors.js';
 export * from './config.js';
+export * from './policy-store.js';
+export * from './cost-tracker.js';
+export * from './abuse-detector.js';

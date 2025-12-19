@@ -9,17 +9,21 @@ export class OpenAIProvider extends BaseProvider {
     this.capabilities = [
       {
         name: 'gpt-4o',
+        class: 'premium',
         contextWindow: 128000,
         inputCostPer1k: 0.005,
         outputCostPer1k: 0.015,
-        tags: ['smart', 'vision', 'reasoning']
+        tags: ['smart', 'vision', 'reasoning'],
+        avgLatencyMs: 1400
       },
       {
         name: 'gpt-4o-mini',
+        class: 'fast',
         contextWindow: 128000,
         inputCostPer1k: 0.00015,
         outputCostPer1k: 0.0006,
-        tags: ['fast', 'cheap']
+        tags: ['fast', 'cheap'],
+        avgLatencyMs: 800
       }
     ];
   }

@@ -69,6 +69,10 @@ export class LLMCache {
 
   generateKey(request: any): string {
     const relevant = {
+      tenantId: request.tenantId,
+      taskType: request.taskType,
+      modelClass: request.modelClass,
+      sensitivity: request.sensitivity,
       model: request.model,
       messages: request.messages,
       temperature: request.temperature,

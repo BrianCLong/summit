@@ -9,10 +9,12 @@ export class MockProvider extends BaseProvider {
     this.capabilities = [
       {
         name: 'mock-model',
+        class: 'fast',
         contextWindow: 1000,
         inputCostPer1k: 0,
         outputCostPer1k: 0,
-        tags: ['test', 'fast']
+        tags: ['test', 'fast'],
+        avgLatencyMs: 50
       }
     ];
   }

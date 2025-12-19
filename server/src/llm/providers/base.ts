@@ -1,4 +1,10 @@
-import { ProviderAdapter, LLMRequest, LLMResponse, ModelCapability, ProviderType } from '../types.js';
+import {
+  ProviderAdapter,
+  LLMRequest,
+  LLMResponse,
+  ModelCapability,
+  ProviderType,
+} from '../types.js';
 import { randomUUID } from 'crypto';
 
 export abstract class BaseProvider implements ProviderAdapter {
@@ -17,19 +23,18 @@ export abstract class BaseProvider implements ProviderAdapter {
   }
 
   estimateCost(request: LLMRequest): number {
-    // Basic estimation
     const model = request.model || this.capabilities[0].name;
-    const capability = this.capabilities.find(c => c.name === model);
+    const capability = this.capabilities.find((c) => c.name === model);
     if (!capability) return Infinity;
 
-    // Very rough estimate of input tokens
-    const inputLength = request.messages.reduce((acc, m) => acc + m.content.length, 0);
+    const inputLength = request.messages.reduce((acc, m) => acc + (m.content?.length || 0), 0);
     const inputTokens = inputLength / 4;
-
-    // Estimate output tokens (rough guess or use maxTokens)
     const outputTokens = request.maxTokens || 100;
 
-    return (inputTokens / 1000) * capability.inputCostPer1k + (outputTokens / 1000) * capability.outputCostPer1k;
+    return (
+      (inputTokens / 1000) * capability.inputCostPer1k +
+      (outputTokens / 1000) * capability.outputCostPer1k
+    );
   }
 
   getCapabilities(): ModelCapability[] {
@@ -64,7 +69,8 @@ export abstract class BaseProvider implements ProviderAdapter {
         cost
       },
       latencyMs,
-      cached: false
+      cached: false,
+      ok: true
     };
   }
 }
